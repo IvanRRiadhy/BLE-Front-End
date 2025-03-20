@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" id="tool">
+  <g fill="#fff" transform="translate(4.5 -1031.893)">
+    <circle cx="8" cy="1044.393" r="12.5" fill="#ffa40b" fill-rule="evenodd"></circle>
+    <path fill="#ff7712" d="M14.64 24.814a12.5 12.5 0 0 0 1.204-.27 12.5 12.5 0 0 0 1.185-.394 12.5 12.5 0 0 0 1.14-.51 12.5 12.5 0 0 0 1.085-.622 12.5 12.5 0 0 0 1.016-.727 12.5 12.5 0 0 0 .939-.824 12.5 12.5 0 0 0 .852-.914 12.5 12.5 0 0 0 .755-.994 12.5 12.5 0 0 0 .655-1.067 12.5 12.5 0 0 0 .543-1.125 12.5 12.5 0 0 0 .427-1.174 12.5 12.5 0 0 0 .309-1.21 12.5 12.5 0 0 0 .063-.407l-8.575-8.574H8.76l-3.74 6.465.144.25 3.596 6.217 5.88 5.88z" color="#000" font-family="sans-serif" font-weight="400" style="line-height:normal;text-indent:0;text-align:start;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000;text-transform:none;block-progression:tb;isolation:auto;mix-blend-mode:normal" transform="translate(-4.5 1031.893)"></path>
+    <path d="m11.738 1.021-7.478.002L.52 7.488l.144.25 3.596 6.217h7.478l3.74-6.467-3.74-6.467zm-6.902.999h6.326l3.162 5.466-3.162 5.47H4.84L1.678 7.487 4.836 2.02z" color="#000" font-family="sans-serif" font-weight="400" overflow="visible" style="line-height:normal;text-indent:0;text-align:start;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000;text-transform:none;block-progression:tb;isolation:auto;mix-blend-mode:normal" transform="translate(.001 1036.874)"></path>
+  </g>
+</svg>
