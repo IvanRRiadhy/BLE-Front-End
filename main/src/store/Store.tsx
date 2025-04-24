@@ -8,7 +8,7 @@ import TicketReducer from './apps/tickets/TicketSlice';
 import ContactsReducer from './apps/contacts/ContactSlice';
 import UserProfileReducer from './apps/userProfile/UserProfileSlice';
 import GatesReducer from './apps/tracking/GatesSlice';
-import FloorplanReducer from './apps/tracking/FloorPlanSlice';
+import FloorplanReducer2 from './apps/tracking/FloorPlanSlice';
 import BlogReducer from './apps/blog/BlogSlice';
 import applicationReducer from './apps/crud/application';
 import integrationReducer from './apps/crud/integration';
@@ -27,6 +27,10 @@ import visitorReducer from './apps/crud/visitor';
 import blacklistReducer from './apps/crud/blacklist';
 import alarmReducer from './apps/crud/alarmRecordTracking';
 import buildingReducer from './apps/crud/building';
+import FloorplanDeviceReducer from './apps/crud/floorplanDevice';
+import FloorplanReducer from './apps/crud/floorplan';
+import layoutReducer from './apps/monitoring/layout';
+import BleNodeReducer from './apps/crud/bleNode';
 import { combineReducers } from 'redux';
 import {
   useDispatch as useAppDispatch,
@@ -46,7 +50,7 @@ export const store = configureStore({
     userpostsReducer: UserProfileReducer,
     blogReducer: BlogReducer,
     gateReducer: GatesReducer,
-    floorplanReducer: FloorplanReducer,
+    floorplanReducer2: FloorplanReducer2,
     applicationReducer: applicationReducer,
     integrationReducer: integrationReducer,
     CCTVReducer: CCTVReducer,
@@ -64,6 +68,10 @@ export const store = configureStore({
     blacklistReducer: blacklistReducer,
     alarmReducer: alarmReducer,
     buildingReducer: buildingReducer,
+    floorplanDeviceReducer: FloorplanDeviceReducer,
+    layoutReducer: layoutReducer,
+    floorplanReducer: FloorplanReducer,
+    bleNodeReducer: BleNodeReducer,
   },
 });
 
@@ -78,7 +86,7 @@ const rootReducer = combineReducers({
   userpostsReducer: UserProfileReducer,
   blogReducer: BlogReducer,
   gateReducer: GatesReducer,
-  floorplanReducer: FloorplanReducer,
+  floorplanReducer2: FloorplanReducer2,
   applicationReducer: applicationReducer,
   integrationReducer: integrationReducer,
   CCTVReducer: CCTVReducer,
@@ -96,6 +104,10 @@ const rootReducer = combineReducers({
   blacklistReducer: blacklistReducer,
   alarmReducer: alarmReducer,
   buildingReducer: buildingReducer,
+  floorplanDeviceReducer: FloorplanDeviceReducer,
+  layoutReducer: layoutReducer,
+  floorplanReducer: FloorplanReducer,
+  bleNodeReducer: BleNodeReducer,
 });
 
 export type AppState = ReturnType<typeof rootReducer>;

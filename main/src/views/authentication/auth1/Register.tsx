@@ -31,8 +31,9 @@ const Register = () => (
           xs: 12,
           sm: 12,
           lg: 7,
-          xl: 8
-        }}>
+          xl: 8,
+        }}
+      >
         <Box position="relative">
           <Box px={3}>
             <Logo />
@@ -67,16 +68,12 @@ const Register = () => (
           xs: 12,
           sm: 12,
           lg: 5,
-          xl: 4
-        }}>
+          xl: 4,
+        }}
+      >
         <Box p={4}>
           <AuthRegister
-            title="Welcome to Modernize"
-            subtext={
-              <Typography variant="subtitle1" color="textSecondary" mb={1}>
-                Your Admin Dashboard
-              </Typography>
-            }
+            title="Welcome"
             subtitle={
               <Stack direction="row" spacing={1} mt={3}>
                 <Typography color="textSecondary" variant="h6" fontWeight="400">

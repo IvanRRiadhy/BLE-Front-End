@@ -29,7 +29,7 @@ const EditFloorplan = ({ colors, name, color }: Props) => {
     'error' | 'primary' | 'inherit' | 'secondary' | 'success' | 'info' | 'warning'
   >('primary');
   const floor: floorplanType = useSelector(
-    (state) => state.floorplanReducer.floorplans[state.floorplanReducer.floorplanContent - 1],
+    (state) => state.floorplanReducer2.floorplans[state.floorplanReducer2.floorplanContent - 1],
   );
   const [fName, setFName] = React.useState(name);
   const [image, setImage] = React.useState<File | null>(null);

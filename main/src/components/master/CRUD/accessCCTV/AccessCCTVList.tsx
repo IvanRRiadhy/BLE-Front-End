@@ -110,7 +110,7 @@ const AccessCCTVList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"> </Typography>
                     </TableCell>
-                    {['ID', 'Name', 'RTSP', 'Integration ID', 'Application Name'].map((header) => (
+                    {['ID', 'Name', 'RTSP', 'Integration', 'Application Name'].map((header) => (
                       <TableCell key={header}>
                         <Typography variant="h6">{header}</Typography>
                       </TableCell>
@@ -136,7 +136,7 @@ const AccessCCTVList = () => {
                         <TableCell>{cctv.id}</TableCell>
                         <TableCell>{cctv.name}</TableCell>
                         <TableCell>{cctv.rtsp}</TableCell>
-                        <TableCell>{cctv.integrationId}</TableCell>
+                        <TableCell>{cctv.integration.integrationType}</TableCell>
                         <TableCell>{getAppName(cctv.applicationId)}</TableCell>
                         <TableCell
                           sx={{

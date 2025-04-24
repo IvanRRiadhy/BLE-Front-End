@@ -15,11 +15,11 @@ import { gatesType } from 'src/types/tracking/gate';
 const FloorList = () => {
   const dispatch: AppDispatch = useDispatch();
   const activeFloorplan = useSelector((state) =>
-    state.floorplanReducer.floorplanContent.toString(),
+    state.floorplanReducer2.floorplanContent.toString(),
   );
-  const searchTerm = useSelector((state) => state.floorplanReducer.floorplanSearch);
+  const searchTerm = useSelector((state) => state.floorplanReducer2.floorplanSearch);
   const selectedFloorPlan: floorplanType | null = useSelector(
-    (state) => state.floorplanReducer.selectedFloorPlan,
+    (state) => state.floorplanReducer2.selectedFloorPlan,
   );
   const gateways: gatesType[] = useSelector((state) => state.gateReducer.gates);
 
@@ -46,7 +46,7 @@ const FloorList = () => {
   }, [selectedFloorPlan, dispatch]); // Runs when selectedFloorPlan changes
 
   const floors = useSelector((state) =>
-    filterFloors(state.floorplanReducer.floorplans, state.floorplanReducer.floorplanSearch),
+    filterFloors(state.floorplanReducer2.floorplans, state.floorplanReducer2.floorplanSearch),
   );
 
   const handleOnClick = (id: string) => {

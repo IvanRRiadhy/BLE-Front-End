@@ -4,7 +4,7 @@ import { AppDispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = "http://localhost:5034/api/MstApplication";
+const API_URL = "http://192.168.1.116:5000/api/MstApplication/";
 const getToken = () => localStorage.getItem('token');
 const token = getToken();
 
@@ -161,9 +161,10 @@ export const fetchApplications = () => async (dispatch: AppDispatch) => {
   try {
     const response = await axios.get(`${API_URL}`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
+
     dispatch(GetApplications(response.data?.collection?.data || []));
   } catch (err: any) {
     console.error("Error fetching applications:", err);
@@ -177,7 +178,7 @@ export const addApplication = createAsyncThunk(
       const {id, applicationRegistered, applicationExpired, ...filteredAppData} = newApplication
       const response = await axios.post(API_URL, filteredAppData, {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${localStorage.getItem("token")}`
         },
       });
       return response.data;
@@ -196,7 +197,7 @@ export const editApplication = createAsyncThunk(
       const { id, applicationRegistered, applicationExpired, ...filteredAppData } = updateApp;
       const response = await axios.put(`${API_URL}/${id}`, filteredAppData, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
       return response.data;
@@ -213,7 +214,7 @@ export const deleteApplication = createAsyncThunk(
     try {
       await axios.delete(`${API_URL}/${applicationId}`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
       return applicationId; // Return the deleted application's ID to update the state

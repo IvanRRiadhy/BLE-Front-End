@@ -10,11 +10,17 @@ import ZoomControls from 'src/components/shared/ZoomControls';
 const Tracking: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const activeFloorplan = useSelector((state) =>
-    state.floorplanReducer.floorplanContent.toString(),
+    state.floorplanReducer2.floorplanContent.toString(),
   );
   useEffect(() => {
     dispatch(fetchFloorplans());
   }, [dispatch]);
+
+  useEffect(() => {
+    setScale(1);
+    setMinScale(0.5);
+    setTranslate({ x: 0, y: 0 });
+  }, [activeFloorplan]);
 
   const filterFloors = (floors: floorplanType[], fSearch: string) => {
     //console.log(floors);
@@ -26,7 +32,7 @@ const Tracking: React.FC = () => {
   };
 
   const floors = useSelector((state) =>
-    filterFloors(state.floorplanReducer.floorplans, state.floorplanReducer.floorplanSearch),
+    filterFloors(state.floorplanReducer2.floorplans, state.floorplanReducer.floorplanSearch),
   );
   const activeFloorData = floors.find((floor) => floor.id === activeFloorplan);
 

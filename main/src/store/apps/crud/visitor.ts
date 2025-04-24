@@ -4,7 +4,7 @@ import { AppDispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = "http://localhost:5034/api/Visitor";
+const API_URL = "http://192.168.1.116:5000/api/Visitor/";
 
 export interface visitorType {
     id: string, //
@@ -110,7 +110,11 @@ export const {
 
 export const fetchVisitor = () => async (dispatch: AppDispatch) => {
     try {
-        const response = await axios.get(API_URL);
+        const response = await axios.get(API_URL, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         dispatch(GetVisitor(response.data?.collection?.data || []));
     } catch (err) {
         console.log("Error: ", err);
@@ -122,6 +126,7 @@ export const addVisitor = createAsyncThunk("visitor/addVisitor", async (formData
         formData.delete('id');
         const response = await axios.post(API_URL, formData, {
             headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
                 'Content-Type' : 'multipart/form-data',
             }
         });
@@ -136,7 +141,12 @@ export const editVisitor = createAsyncThunk("visitor/editVisitor", async (formDa
     try {
         const id = formData.get('id');
         formData.delete('id');
-        const response = await axios.put(`${API_URL}/${id}`, formData);
+        const response = await axios.put(`${API_URL}/${id}`, formData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                'Content-Type' : 'multipart/form-data',
+            }
+        });
         return response.data;
     } catch (error) {
         console.error("Error editing member:", error);
@@ -146,7 +156,11 @@ export const editVisitor = createAsyncThunk("visitor/editVisitor", async (formDa
 
 export const deleteVisitor = createAsyncThunk("visitor/deleteVisitor", async (visitorId: string) => {
     try {
-        await axios.delete(`${API_URL}/${visitorId}`);
+        await axios.delete(`${API_URL}/${visitorId}`, {
+            headers: {    
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return visitorId; // Return the deleted visitor's ID to update the state
     } catch (error) {
         console.error("Error deleting visitor:", error);

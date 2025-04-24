@@ -4,7 +4,7 @@ import { AppDispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = 'http://localhost:5034/api/FloorplanMaskedArea';
+const API_URL = 'http://192.168.1.116:5000/api/FloorplanMaskedArea/';
 
 export interface MaskedAreaType {
     id: string,
@@ -85,7 +85,11 @@ export const {
 
 export const fetchMaskedAreas = () => async (dispatch: AppDispatch) => {
     try {
-        const response = await axios.get(API_URL);
+        const response = await axios.get(API_URL, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         dispatch(GetMaskedArea(response.data?.collection?.data || []));
     } catch (error) {
         console.log(error);
@@ -95,7 +99,11 @@ export const fetchMaskedAreas = () => async (dispatch: AppDispatch) => {
 export const addMaskedArea = createAsyncThunk("maskedAreas/addMaskedArea", async (maskedArea: MaskedAreaType, { rejectWithValue }) => {
     try {
         const {id, createdBy, createdAt, updatedBy, updatedAt, ...filteredMaskedAreaData} = maskedArea
-        const response = await axios.post(API_URL, filteredMaskedAreaData);
+        const response = await axios.post(API_URL, filteredMaskedAreaData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return response.data;
     } catch (error: any) {
         console.error("Error adding masked area:", error);
@@ -106,7 +114,11 @@ export const addMaskedArea = createAsyncThunk("maskedAreas/addMaskedArea", async
 export const editMaskedArea = createAsyncThunk("maskedAreas/editMaskedArea", async (maskedArea: MaskedAreaType, { rejectWithValue }) => {
     try {
         const { id, createdBy, createdAt, updatedBy, updatedAt, ...filteredMaskedAreaData } = maskedArea;
-        const response = await axios.put(`${API_URL}/${id}`, filteredMaskedAreaData);
+        const response = await axios.put(`${API_URL}/${id}`, filteredMaskedAreaData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return response.data;
     } catch (error: any) {
         console.error("Error editing masked area:", error);
@@ -116,7 +128,11 @@ export const editMaskedArea = createAsyncThunk("maskedAreas/editMaskedArea", asy
 
 export const deleteMaskedArea = createAsyncThunk("maskedAreas/deleteMaskedArea", async (maskedAreaId: string, { rejectWithValue }) => {
     try {
-        await axios.delete(`${API_URL}/${maskedAreaId}`);
+        await axios.delete(`${API_URL}/${maskedAreaId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return maskedAreaId; // Return the deleted masked area's ID to update the state
     } catch (error: any) {
         console.error("Error deleting masked area:", error);

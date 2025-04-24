@@ -15,6 +15,9 @@ interface StateType {
   isLanguage?: string;
   isCardShadow?: boolean;
   borderRadius?: number | any;
+  customizer?: boolean;
+  isMonitor?: boolean;
+  isMonitorSidebar?: boolean;
 }
 
 const initialState: StateType = {
@@ -22,7 +25,7 @@ const initialState: StateType = {
   activeMode: 'light', // This can be light or dark
   activeTheme: 'BLUE_THEME', // BLUE_THEME, GREEN_THEME, BLACK_THEME, PURPLE_THEME, ORANGE_THEME
   SidebarWidth: 270,
-  MiniSidebarWidth: 87,
+  MiniSidebarWidth: 0,
   TopbarHeight: 70,
   isLayout: 'full', // This can be full or boxed
   isCollapse: false, // to make sidebar Mini by default
@@ -32,6 +35,9 @@ const initialState: StateType = {
   isLanguage: 'en',
   isCardShadow: true,
   borderRadius: 7,
+  customizer: true,
+  isMonitor: false,
+  isMonitorSidebar: false,
 };
 
 export const CustomizerSlice = createSlice({
@@ -72,6 +78,15 @@ export const CustomizerSlice = createSlice({
     setBorderRadius: (state: StateType, action) => {
       state.borderRadius = action.payload;
     },
+    setCustomizer: (state: StateType, action) => {
+      state.customizer = action.payload;
+    },
+    setMonitor: (state: StateType, action) => {
+      state.isMonitor = action.payload;
+    },
+    setMonitorSidebar: (state: StateType, action) => {
+      state.isMonitorSidebar = action.payload;
+    },
   },
 });
 
@@ -87,6 +102,9 @@ export const {
   toggleHorizontal,
   setLanguage,
   setCardShadow,
+  setCustomizer,
+  setMonitor,
+  setMonitorSidebar,
 } = CustomizerSlice.actions;
 
 export default CustomizerSlice.reducer;

@@ -4,7 +4,7 @@ import { AppDispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = 'http://localhost:5034/api/MstBuilding';
+const API_URL = 'http://192.168.1.116:5000/api/MstBuilding/';
 
 export interface BuildingType {
     id: string;
@@ -55,7 +55,11 @@ export const {
 
 export const fetchBuildings = () => async (dispatch: AppDispatch) => {
     try{
-        const response = await axios.get(API_URL);
+        const response = await axios.get(API_URL, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         dispatch(GetBuildings(response.data.collection?.data || []));
     } catch (err: any){
         console.error("Failed to Fetch Building: ", err);

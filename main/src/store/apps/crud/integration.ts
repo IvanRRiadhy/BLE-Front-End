@@ -4,7 +4,7 @@ import { AppDispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = "http://localhost:5034/api/MstIntegration";
+const API_URL = "http://192.168.1.116:5000/api/MstIntegration/";
 
 export interface IntegrationType {
     id: string,
@@ -103,7 +103,11 @@ export const {
 
 export const fetchIntegrations = () => async (dispatch: AppDispatch) => {
     try{
-        const response = await axios.get(API_URL);
+        const response = await axios.get(API_URL, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         dispatch(GetIntegrations(response.data?.collection?.data || []));
     } catch (err: any){
         console.error("Error fetching integrations:", err);
@@ -113,7 +117,11 @@ export const fetchIntegrations = () => async (dispatch: AppDispatch) => {
 export const addIntegration = createAsyncThunk("integrations/addIntegration", async (integration: IntegrationType, { rejectWithValue }) => {
     try {
         const {id, createdBy, createdAt, updatedBy, updatedAt, ...filteredIntegrationData} = integration
-        const response = await axios.post(API_URL, filteredIntegrationData);
+        const response = await axios.post(API_URL, filteredIntegrationData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return response.data;
     } catch (error: any) {
         console.error("Error adding integration:", error);
@@ -124,7 +132,11 @@ export const addIntegration = createAsyncThunk("integrations/addIntegration", as
 export const editIntegration = createAsyncThunk("integrations/editIntegration", async (integration: IntegrationType, { rejectWithValue }) => {
     try {
         const { id, createdBy, createdAt, updatedBy, updatedAt, ...filteredIntegrationData } = integration;
-        const response = await axios.put(`${API_URL}/${id}`, filteredIntegrationData);
+        const response = await axios.put(`${API_URL}/${id}`, filteredIntegrationData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return response.data;
     } catch (error: any) {
         console.error("Error editing integration:", error);
@@ -134,7 +146,11 @@ export const editIntegration = createAsyncThunk("integrations/editIntegration", 
 
 export const deleteIntegration = createAsyncThunk("integrations/deleteIntegration", async (integrationId: string, { rejectWithValue }) => {
     try {
-        await axios.delete(`${API_URL}/${integrationId}`);
+        await axios.delete(`${API_URL}/${integrationId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return integrationId; // Return the deleted integration's ID to update the state
     } catch (error: any) {
         console.error("Error deleting integration:", error);

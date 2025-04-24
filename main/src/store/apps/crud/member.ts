@@ -4,7 +4,7 @@ import { AppDispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = "http://localhost:5034/api/MstMember";
+const API_URL = "http://192.168.1.116:5000/api/MstMember/";
 
 export interface memberType {
     id: string,
@@ -98,7 +98,11 @@ export const { GetMember, SelectMember, SearchMember, SetVisibilityFilter } = Me
 
 export const fetchMembers = () => async (dispatch: AppDispatch) => {
     try {
-        const response = await axios.get(API_URL);
+        const response = await axios.get(API_URL, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         dispatch(GetMember(response.data?.collection?.data || []));
     } catch (error) {
         console.log(error);
@@ -110,6 +114,7 @@ export const addMember = createAsyncThunk("member/addMember", async (formData: F
         formData.delete('id');
         const response = await axios.post(API_URL, formData, {
             headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
                 'Content-Type' : 'multipart/form-data',
             }
         });
@@ -125,7 +130,12 @@ export const editMember = createAsyncThunk("member/editMember", async (formData:
     try {
         const id = formData.get('id');
         formData.delete('id');
-        const response = await axios.put(`${API_URL}/${id}`, formData);
+        const response = await axios.put(`${API_URL}/${id}`, formData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                'Content-Type' : 'multipart/form-data',
+            }
+        });
         return response.data;
     } catch (error) {
         console.error("Error editing member:", error);
@@ -135,7 +145,11 @@ export const editMember = createAsyncThunk("member/editMember", async (formData:
 
 export const deleteMember = createAsyncThunk("member/deleteMember", async (memberId: string) => {
     try {
-        await axios.delete(`${API_URL}/${memberId}`);
+        await axios.delete(`${API_URL}/${memberId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return memberId; // Return the deleted member's ID to update the state
     } catch (error) {
         console.error("Error deleting member:", error);

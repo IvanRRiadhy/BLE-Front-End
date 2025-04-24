@@ -98,7 +98,22 @@ const Menuitems: MenuitemsType[] = [
     id: uniqueId(),
     title: 'Monitoring',
     icon: IconDeviceDesktopAnalytics,
-    href: '/dashboards/monitoring',
+    href: '/dashboards/monitoring/',
+    children:[
+      {
+        id: uniqueId(),
+        title: 'Viewer',
+        icon: IconPoint,
+        href: '/dashboards/monitoring/viewer',
+
+    },
+    {
+        id: uniqueId(),
+        title: 'Configuration',
+        icon: IconPoint,
+        href: '/dashboards/monitoring/config',
+    },
+    ]
   },
   // {
   //   id: uniqueId(),
@@ -171,7 +186,7 @@ const Menuitems: MenuitemsType[] = [
     id: uniqueId(),
     title: 'Building',
     icon: IconBuilding,
-    href: '/apps/contacts',
+    href: '/master/building',
   },
 
   {
@@ -315,24 +330,24 @@ const Menuitems: MenuitemsType[] = [
     icon: IconBellExclamation,
     href: '/master/brand'
   },
-  {
-    id: uniqueId(),
-    title: 'Department',
-    icon: IconFile,
-    href: '/master/department'
-  },
-  {
-    id: uniqueId(),
-    title: 'District',
-    icon: IconMap2,
-    href: '/master/district'
-  },
-  {
-    id: uniqueId(),
-    title: 'Organization',
-    icon: IconBuilding,
-    href: '/master/organization'
-  },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Department',
+  //   icon: IconFile,
+  //   href: '/master/department'
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'District',
+  //   icon: IconMap2,
+  //   href: '/master/district'
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Organization',
+  //   icon: IconBuilding,
+  //   href: '/master/organization'
+  // },
   {
             id: uniqueId(),
             title: 'Floorplan Masked Area',

@@ -22,9 +22,9 @@ import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { dispatch } from 'src/store/Store';
 
-const API_URL = 'http://localhost:5034/api/Auth/login';
+const API_URL = 'http://192.168.1.116:5000/api/Auth/login';
 const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
-  const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -39,13 +39,13 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
     axios
       .post(API_URL, credentials)
       .then((res) => {
-        const data = res.data;
-        console.log('Message: ', data.msg);
-        console.log('Username: ', data.collection.data.username);
-        console.log('JWT Token: ', data.collection.data.token);
-        console.log('User Role: ', data.collection.data.groupId);
+        const data = res.data.collection.data;
+        console.log('Data: ', data);
+        console.log('Username: ', data.username);
+        console.log('JWT Token: ', data.token);
+        console.log('User Role: ', data.groupId);
 
-        localStorage.setItem('token', data.collection.data.token);
+        localStorage.setItem('token', data.token);
 
         navigate('/');
       })
@@ -80,12 +80,12 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       <form onSubmit={handleSubmit}>
         <Stack>
           <Box>
-            <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
+            <CustomFormLabel htmlFor="username">Username</CustomFormLabel>
             <CustomTextField
-              id="email"
+              id="username"
               variant="outlined"
               fullWidth
-              value={credentials.email}
+              value={credentials.username}
               onChange={handleChange}
             />
           </Box>

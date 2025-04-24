@@ -160,14 +160,14 @@ const AccessControlList = () => {
                           {index + 1}
                         </TableCell>
                         <TableCell>{accessControl.id}</TableCell>
-                        <TableCell>{getBrandName(accessControl.controllerBrandId)}</TableCell>
+                        <TableCell>{accessControl.brand.name}</TableCell>
                         <TableCell>{accessControl.name}</TableCell>
                         <TableCell>{accessControl.type}</TableCell>
                         <TableCell>{accessControl.description}</TableCell>
                         <TableCell>{accessControl.channel}</TableCell>
                         <TableCell>{accessControl.doorId}</TableCell>
                         <TableCell>{accessControl.raw}</TableCell>
-                        <TableCell>{accessControl.integrationId}</TableCell>
+                        <TableCell>{accessControl.integration.integrationType}</TableCell>
                         <TableCell>{getAppName(accessControl.applicationId)}</TableCell>
 
                         <TableCell

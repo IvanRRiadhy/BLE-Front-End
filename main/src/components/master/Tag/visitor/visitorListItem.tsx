@@ -31,12 +31,12 @@ const VisitorListItem = ({ onTagClick, visitor, active }: Props) => {
   const warningColor = theme.palette.warning.main;
 
   return (
-    <ListItemButton sx={{ mb: 1 }} selected={active}>
+    <ListItemButton sx={{ mb: 1 }} selected={active} onClick={onTagClick}>
       <ListItemAvatar>
         <Avatar alt="User Profile" src={visitor?.faceImage} />
       </ListItemAvatar>
       <ListItemText>
-        <Stack direction="row" gap="10px" alignItems="center" onClick={onTagClick}>
+        <Stack direction="row" gap="10px" alignItems="center">
           <Box mr="auto">
             <Typography variant="subtitle1" noWrap fontWeight={600} sx={{ maxWidth: '200px' }}>
               {visitor?.name}

@@ -4,7 +4,7 @@ import { AppDispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = 'http://localhost:5034/api/VisitorBlacklistArea';
+const API_URL = 'http://192.168.1.116:5000/api/VisitorBlacklistArea/';
 
 export interface blacklistType {
     id: string,
@@ -74,7 +74,11 @@ export const {
 
 export const fetchBlacklist = () => async (dispatch: AppDispatch) => {
     try{
-        const response = await axios.get(API_URL);
+        const response = await axios.get(API_URL, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         dispatch(GetBlaclist(response.data?.collection?.data || []));
     } catch (err){
         console.log("Error: ", err);
@@ -84,7 +88,11 @@ export const fetchBlacklist = () => async (dispatch: AppDispatch) => {
 export const addBlacklist = createAsyncThunk("blacklist/addBlacklist", async (blacklist: blacklistType) => {
     try {
         const {id, ...filteredBlacklistData} = blacklist
-        const response = await axios.post(API_URL, filteredBlacklistData);
+        const response = await axios.post(API_URL, filteredBlacklistData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return response.data;
     } catch (error) {
         console.error("Error adding blacklist:", error);
@@ -95,7 +103,11 @@ export const addBlacklist = createAsyncThunk("blacklist/addBlacklist", async (bl
 export const editBlacklist = createAsyncThunk("blacklist/editBlacklist", async (blacklist: blacklistType) => {
     try {
         const { id, ...filteredBlacklistData } = blacklist;
-        const response = await axios.put(`${API_URL}/${blacklist.id}`, filteredBlacklistData);
+        const response = await axios.put(`${API_URL}/${blacklist.id}`, filteredBlacklistData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            }
+        });
         return response.data;
     } catch (error) {
         console.error("Error editing blacklist:", error);
@@ -105,7 +117,11 @@ export const editBlacklist = createAsyncThunk("blacklist/editBlacklist", async (
 
 export const deleteBlacklist = createAsyncThunk("blacklist/deleteBlacklist", async (blacklistId: string) => {
     try {
-        await axios.delete(`${API_URL}/${blacklistId}`);
+        await axios.delete(`${API_URL}/${blacklistId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            }
+        });
         return blacklistId; // Return the deleted blacklist's ID to update the state
     } catch (error) {
         console.error("Error deleting blacklist:", error);

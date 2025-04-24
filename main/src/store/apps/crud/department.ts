@@ -4,7 +4,7 @@ import { AppDispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = "http://localhost:5034/api/MstDepartment";
+const API_URL = "http://192.168.1.116:5000/api/MstDepartment/";
 
 export interface DepartmentType {
     id: string,
@@ -99,7 +99,11 @@ export const {
 
 export const fetchDepartments = () => async (dispatch: AppDispatch) => {
     try {
-        const response = await axios.get(API_URL);
+        const response = await axios.get(API_URL, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         dispatch(GetDepartments(response.data?.collection?.data || []));
     } catch (err: any) {
         console.log("Error fetching departments:", err);
@@ -109,7 +113,11 @@ export const fetchDepartments = () => async (dispatch: AppDispatch) => {
 export const addDepartment = createAsyncThunk("departments/addDepartment", async (department: DepartmentType, { rejectWithValue }) => {
     try {
         const {id,createdBy, createdAt, updatedBy, updatedAt, ...filteredDepartmentData} = department
-        const response = await axios.post(API_URL, filteredDepartmentData);
+        const response = await axios.post(API_URL, filteredDepartmentData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return response.data;
     } catch (error: any) {
         console.error("Error adding department:", error);
@@ -120,7 +128,11 @@ export const addDepartment = createAsyncThunk("departments/addDepartment", async
 export const editDepartment = createAsyncThunk("departments/editDepartment", async (department: DepartmentType, { rejectWithValue }) => {
     try {
         const { id, createdBy, createdAt, updatedBy, updatedAt, ...filteredDepartmentData } = department;
-        const response = await axios.put(`${API_URL}/${id}`, filteredDepartmentData);
+        const response = await axios.put(`${API_URL}/${id}`, filteredDepartmentData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return response.data;
     } catch (error: any) {
         console.error("Error editing department:", error);
@@ -130,7 +142,11 @@ export const editDepartment = createAsyncThunk("departments/editDepartment", asy
 
 export const deleteDepartment = createAsyncThunk("departments/deleteDepartment", async (departmentId: string, { rejectWithValue }) => {
     try {
-        await axios.delete(`${API_URL}/${departmentId}`);
+        await axios.delete(`${API_URL}/${departmentId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return departmentId; // Return the deleted department's ID to update the state
     } catch (error: any) {
         console.error("Error deleting department:", error);

@@ -10,6 +10,8 @@ import Navigation from '../full/horizontal/navbar/Navigation';
 import HorizontalHeader from '../full/horizontal/header/Header';
 import ScrollToTop from '../../components/shared/ScrollToTop';
 import LoadingBar from '../../LoadingBar';
+import MonitoringHeader from './monitoringLayout/Header';
+import MonitoringSidebar from '../../components/dashboards/monitoring/Sidebar/MonitoringSidebar';
 
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
@@ -20,7 +22,7 @@ const MainWrapper = styled('div')(() => ({
 const PageWrapper = styled('div')(() => ({
   display: 'flex',
   flexGrow: 1,
-  paddingBottom: '60px',
+  // paddingBottom: '60px',
   flexDirection: 'column',
   zIndex: 1,
   width: '100%',
@@ -56,29 +58,38 @@ const FullLayout: FC = () => {
           {/* ------------------------------------------- */}
           {/* Header */}
           {/* ------------------------------------------- */}
-          {customizer.isHorizontal ? <HorizontalHeader /> : <Header />}
+          {customizer.isHorizontal ? <HorizontalHeader /> : <MonitoringHeader />}
+
           {/* PageContent */}
           {customizer.isHorizontal ? <Navigation /> : ''}
-          <Container
+          {/* ------------------------------------------- */}
+          {/* Monitoring Sidebar */}
+          {/* ------------------------------------------- */}
+          <Box
             sx={{
-              pt: '30px',
-              maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',
+              display: 'flex', // Align MonitoringSidebar and content horizontally
+              flexDirection: 'row',
+              width: '100%',
             }}
           >
-            {/* ------------------------------------------- */}
-            {/* PageContent */}
-            {/* ------------------------------------------- */}
-
-            <Box sx={{ minHeight: 'calc(100vh - 170px)' }}>
-              <ScrollToTop>
-                <Outlet />
-              </ScrollToTop>
-            </Box>
-
-            {/* ------------------------------------------- */}
-            {/* End Page */}
-            {/* ------------------------------------------- */}
-          </Container>
+            {/* {customizer.isMonitorSidebar && <MonitoringSidebar />} */}
+            <Container
+              sx={{
+                pt: '0px',
+                maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',
+                flexGrow: 1, // Allow content to take remaining space
+              }}
+            >
+              {/* ------------------------------------------- */}
+              {/* PageContent */}
+              {/* ------------------------------------------- */}
+              <Box sx={{ minHeight: 'calc(100vh - 170px)' }}>
+                <ScrollToTop>
+                  <Outlet />
+                </ScrollToTop>
+              </Box>
+            </Container>
+          </Box>
           <Customizer />
         </PageWrapper>
       </MainWrapper>

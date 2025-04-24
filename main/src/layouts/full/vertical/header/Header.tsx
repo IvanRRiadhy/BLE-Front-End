@@ -15,6 +15,7 @@ import Language from './Language';
 import { AppState } from 'src/store/Store';
 import Navigation from './Navigation';
 import MobileRightSidebar from './MobileRightSidebar';
+import Logo from '../../shared/logo/Logo';
 
 const Header = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
@@ -51,6 +52,9 @@ const Header = () => {
         >
           <IconMenu2 size="20" />
         </IconButton>
+        <Box px={3}>
+          <Logo />
+        </Box>
 
         {/* ------------------------------------------- */}
         {/* Search Dropdown */}

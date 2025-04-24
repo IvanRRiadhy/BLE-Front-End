@@ -9,12 +9,17 @@ import ZoomControls from 'src/components/shared/ZoomControls';
 const Tracking: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const activeFloorplan = useSelector((state) =>
-    state.floorplanReducer.floorplanContent.toString(),
+    state.floorplanReducer2.floorplanContent.toString(),
   );
 
   useEffect(() => {
     dispatch(fetchFloorplans());
   }, [dispatch]);
+  useEffect(() => {
+    setScale(1);
+    setMinScale(0.5);
+    setTranslate({ x: 0, y: 0 });
+  }, [activeFloorplan]);
 
   const filterFloors = (floors: floorplanType[], fSearch: string) => {
     if (fSearch !== '')
@@ -25,7 +30,7 @@ const Tracking: React.FC = () => {
   };
 
   const floors = useSelector((state) =>
-    filterFloors(state.floorplanReducer.floorplans, state.floorplanReducer.floorplanSearch),
+    filterFloors(state.floorplanReducer2.floorplans, state.floorplanReducer.floorplanSearch),
   );
   const activeFloorData = floors.find((floor) => floor.id === activeFloorplan);
   const activeGateways = (activeFloorData as floorplanType | null)?.gateways ?? [];
@@ -109,7 +114,7 @@ const Tracking: React.FC = () => {
 
       const newScale = Math.min(Math.max(scale + delta, minScale), MAX_SCALE);
 
-      console.log('New Scale:', newScale); // Debug new scale
+      //console.log('New Scale:', newScale); // Debug new scale
       const scaledWidth = imgSize.width * newScale;
       const scaledHeight = imgSize.height * newScale;
 
@@ -126,8 +131,8 @@ const Tracking: React.FC = () => {
         x: Math.min(0, Math.max(minX, offsetX)),
         y: Math.min(0, Math.max(minY, offsetY)),
       });
-      console.log('New Scale:', newScale);
-      console.log('New Translate:', translate);
+      //console.log('New Scale:', newScale);
+      //console.log('New Translate:', translate);
     }
   };
 
@@ -191,7 +196,7 @@ const Tracking: React.FC = () => {
       const heightRatio = containerHeight / imgSize.height;
       const minScale = Math.min(widthRatio, heightRatio);
 
-      console.log('Resetting scale to minScale:', minScale); // Debug scale reset
+      //console.log('Resetting scale to minScale:', minScale); // Debug scale reset
       setScale(minScale);
     }
   }, [imgSize]); // Reset scale when imgSize changes

@@ -7,7 +7,7 @@ import { visitorType } from "./visitor";
 import { bleReaderType } from "./bleReader";
 import { MaskedAreaType } from "./maskedArea";
 
-const API_URL = 'http://localhost:5034/api/AlarmRecordTracking';
+const API_URL = 'http://192.168.1.116:5000/api/AlarmRecordTracking/';
 
 export interface AlarmType {
     id: string;
@@ -74,7 +74,11 @@ export const {
 
 export const fetchAlarm = () => async (dispatch: AppDispatch) => {
     try{
-        const response = await axios.get(`${API_URL}`);
+        const response = await axios.get(`${API_URL}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         dispatch(GetAlarms(response.data.collection?.data || []));
     } catch (err: any) {
         console.error("Error fetching Alarm: ", err);

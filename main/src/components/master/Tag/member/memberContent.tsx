@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
   Box,
@@ -12,8 +12,19 @@ import {
   Grid2 as Grid,
   Tooltip,
   useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
 } from '@mui/material';
-import { fetchMembers, memberType, deleteMember, editMember } from 'src/store/apps/crud/member';
+import {
+  fetchMembers,
+  memberType,
+  deleteMember,
+  editMember,
+  SelectMember,
+} from 'src/store/apps/crud/member';
 import AddEditMember from '../../CRUD/member/AddEditMember';
 import { IconTrash } from '@tabler/icons-react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
@@ -23,6 +34,7 @@ import { DistrictType, fetchDistricts } from 'src/store/apps/crud/district';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
 import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
 import { useTranslation } from 'react-i18next';
+import IconClose from 'src/assets/images/frontend-pages/icons/icon-close.svg';
 
 const MemberContent = () => {
   const { t } = useTranslation();
@@ -69,6 +81,28 @@ const MemberContent = () => {
     return app ? app.applicationName : 'Unknown App';
   };
 
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<memberType | null>(null);
+  // Open delete confirmation dialog
+  const handleOpenDeleteDialog = (mem: memberType) => {
+    setSelectedMember(mem);
+    setDeleteDialogOpen(true);
+  };
+
+  // Close delete confirmation dialog
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setSelectedMember(null);
+  };
+
+  // Confirm delete action
+  const handleConfirmDelete = () => {
+    if (selectedMember) {
+      dispatch(deleteMember(selectedMember.id));
+    }
+    handleCloseDeleteDialog();
+  };
+
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
 
@@ -91,8 +125,13 @@ const MemberContent = () => {
                 <AddEditMember member={memberDetail} type="edit" />
               </Tooltip>
               <Tooltip title="Delete">
-                <IconButton onClick={() => dispatch(deleteMember(memberDetail.id))}>
+                <IconButton onClick={() => handleOpenDeleteDialog(memberDetail)}>
                   <IconTrash size="18" stroke={1.3} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Close">
+                <IconButton onClick={() => dispatch(SelectMember(''))}>
+                  <img src={IconClose} alt={IconClose} />
                 </IconButton>
               </Tooltip>
             </Stack>
@@ -188,6 +227,23 @@ const MemberContent = () => {
           </Box>
         </Box>
       )}
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete member <strong>{selectedMember?.name}</strong>?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

@@ -59,22 +59,6 @@ const AuthRegister = ({ title, subtitle, subtext }: registerType) => {
       ) : null}
 
       {subtext}
-      <AuthSocialButtons title="Sign up with" />
-
-      <Box mt={3}>
-        <Divider>
-          <Typography
-            component="span"
-            color="textSecondary"
-            variant="h6"
-            fontWeight="400"
-            position="relative"
-            px={2}
-          >
-            or sign up with
-          </Typography>
-        </Divider>
-      </Box>
 
       <form onSubmit={handleSubmit}>
         <Box>

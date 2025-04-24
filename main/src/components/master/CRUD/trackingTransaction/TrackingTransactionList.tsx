@@ -159,8 +159,8 @@ const TrackingTransactionList = () => {
                         <TableCell>{trackingTrans.id}</TableCell>
                         <TableCell>{formatTime(trackingTrans.transTime)}</TableCell>
                         <TableCell>{getReaderName(trackingTrans.readerId)}</TableCell>
-                        <TableCell>{trackingTrans.cardId}</TableCell>
-                        <TableCell>{getFloorName(trackingTrans.floorplanId)}</TableCell>
+                        <TableCell>{trackingTrans.readerId}</TableCell>
+                        <TableCell>{getFloorName(trackingTrans.floorplanMaskedAreaId)}</TableCell>
                         <TableCell>{trackingTrans.coordinateX}</TableCell>
                         <TableCell>{trackingTrans.coordinateY}</TableCell>
                         <TableCell>{trackingTrans.coordinatePxX}</TableCell>

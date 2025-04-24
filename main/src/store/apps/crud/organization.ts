@@ -4,7 +4,7 @@ import { AppDispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = "http://localhost:5034/api/MstOrganization";
+const API_URL = "http://192.168.1.116:5000/api/MstOrganization/";
 
 export interface OrganizationType {
     id: string,
@@ -92,7 +92,11 @@ export const {
 
 export const fetchOrganizations = () => async (dispatch: AppDispatch) => {
     try {
-        const response = await axios.get(API_URL);
+        const response = await axios.get(API_URL, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         dispatch(GetOrganization(response.data?.collection?.data || []));
     } catch (err: any) {
         console.log("Error fetching organizations:", err);
@@ -102,7 +106,11 @@ export const fetchOrganizations = () => async (dispatch: AppDispatch) => {
 export const addOrganization = createAsyncThunk("organizations/addOrganization", async (organization: OrganizationType) => {
     try {
         const {id, createdBy, createdAt, updatedBy, updatedAt, ...filteredOrganizationData} = organization
-        const response = await axios.post(API_URL, filteredOrganizationData);
+        const response = await axios.post(API_URL, filteredOrganizationData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return response.data;
     } catch (error) {
         console.error("Error adding organization:", error);
@@ -113,7 +121,11 @@ export const addOrganization = createAsyncThunk("organizations/addOrganization",
 export const editOrganization = createAsyncThunk("organizations/editOrganization", async (organization: OrganizationType) => {
     try {
         const { id, createdBy, createdAt, updatedBy, updatedAt, ...filteredOrganizationData } = organization;
-        const response = await axios.put(`${API_URL}/${id}`, filteredOrganizationData);
+        const response = await axios.put(`${API_URL}/${id}`, filteredOrganizationData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return response.data;
     } catch (error) {
         console.error("Error editing organization:", error);
@@ -123,7 +135,11 @@ export const editOrganization = createAsyncThunk("organizations/editOrganization
 
 export const deleteOrganization = createAsyncThunk("organizations/deleteOrganization", async (organizationId: string) => {
     try {
-        await axios.delete(`${API_URL}/${organizationId}`);
+        await axios.delete(`${API_URL}/${organizationId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return organizationId; // Return the deleted organization's ID to update the state
     } catch (error) {
         console.error("Error deleting organization:", error);

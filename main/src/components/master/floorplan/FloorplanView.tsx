@@ -15,7 +15,7 @@ interface colorsType {
 const Tracking: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const activeFloorplan = useSelector((state) =>
-    state.floorplanReducer.floorplanContent.toString(),
+    state.floorplanReducer2.floorplanContent.toString(),
   );
 
   const filterFloors = (floors: floorplanType[], fSearch: string) => {
@@ -27,7 +27,7 @@ const Tracking: React.FC = () => {
   };
 
   const floors = useSelector((state) =>
-    filterFloors(state.floorplanReducer.floorplans, state.floorplanReducer.floorplanSearch),
+    filterFloors(state.floorplanReducer2.floorplans, state.floorplanReducer2.floorplanSearch),
   );
   const activeFloorData = floors.find((floor) => floor.id === activeFloorplan);
 

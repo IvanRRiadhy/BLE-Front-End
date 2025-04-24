@@ -6,6 +6,20 @@ import svgr from '@svgr/rollup';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+    // server: {
+    //     proxy: {
+    //       '/api': {
+    //         target: 'http://192.168.1.116:5000', // Your back-end server
+    //         changeOrigin: true,
+    //         rewrite: (path) => path.replace(/^\/api/, ''), // Optional path rewrite
+    //         configure: (proxy) => {
+    //             proxy.on('proxyReq', (proxyReq, req) => {
+    //               console.log('Proxying request:', req.url);
+    //             });
+    //         },
+    //       },
+    //     },
+    //   },
     resolve: {
         alias: {
             src: resolve(__dirname, 'src'),

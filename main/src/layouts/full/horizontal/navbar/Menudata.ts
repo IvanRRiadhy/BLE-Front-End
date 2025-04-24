@@ -54,7 +54,22 @@ const Menuitems = [
         id: uniqueId(),
         title: 'Monitoring',
         icon: IconDeviceDesktopAnalytics,
-        href: '/dashboards/monitoring',
+        href: '/dashboards/monitoring/viewer',
+        children:[
+          {
+            id: uniqueId(),
+            title: 'Viewer',
+            icon: IconPoint,
+            href: '/dashboards/monitoring/viewer',
+    
+        },
+        {
+            id: uniqueId(),
+            title: 'Configuration',
+            icon: IconPoint,
+            href: '/dashboards/monitoring/config',
+        },
+        ]
       },
     ],
   },
@@ -62,6 +77,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Master',
     icon: IconAppWindow,
+    href: '/master/',
     children: [
   {
     id: uniqueId(),
@@ -104,7 +120,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Masking Area',
     icon: IconDeviceIpadExclamation,
-    href: '/apps/chats',
+    href: '/master/floorplanmaskedarea',
   },
   {
     id: uniqueId(),
@@ -141,7 +157,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Alarm',
     icon: IconBellExclamation,
-    href: '/apps/notes/',
+    href: '/master/alarmrecord',
   },
     {
       id: uniqueId(),
@@ -167,7 +183,7 @@ const Menuitems = [
         id: uniqueId(),
         title: 'Alarm Notification',
         icon: IconBellExclamation,
-        href: '/apps/kanban/',
+        href: '/master/trackingtransaction',
       },
       {
         id: uniqueId(),
@@ -179,114 +195,120 @@ const Menuitems = [
         id: uniqueId(),
         title: 'Blacklist',
         icon: IconBarrierBlock,
-        href: '/apps/followers',
+        href: '/master/blacklist',
       },
       {
         id: uniqueId(),
-        title: 'Area Access',
-        icon: IconMapCheck,
-        href: '/apps/friends',
+        title: 'Login',
+        icon: IconPoint,
+        href: '/auth/login',
       },
-      {
-              id: uniqueId(),
-              title: 'Auth',
-              icon: IconPoint,
-              href: '/400',
-              children: [
-                {
-                  id: uniqueId(),
-                  title: 'Error',
-                  icon: IconAlertCircle,
-                  href: '/400',
-                },
-                {
-                  id: uniqueId(),
-                  title: 'Maintenance',
-                  icon: IconSettings,
-                  href: '/auth/maintenance',
-                },
-                {
-                  id: uniqueId(),
-                  title: 'Login',
-                  icon: IconLogin,
-                  href: '/auth/login',
-                  children: [
-                    {
-                      id: uniqueId(),
-                      title: 'Side Login',
-                      icon: IconPoint,
-                      href: '/auth/login',
-                    },
-                    {
-                      id: uniqueId(),
-                      title: 'Boxed Login',
-                      icon: IconPoint,
-                      href: '/auth/login2',
-                    },
-                  ],
-                },
-                {
-                  id: uniqueId(),
-                  title: 'Register',
-                  icon: IconUserPlus,
-                  href: '/auth/register',
-                  children: [
-                    {
-                      id: uniqueId(),
-                      title: 'Side Register',
-                      icon: IconPoint,
-                      href: '/auth/register',
-                    },
-                    {
-                      id: uniqueId(),
-                      title: 'Boxed Register',
-                      icon: IconPoint,
-                      href: '/auth/register2',
-                    },
-                  ],
-                },
-                {
-                  id: uniqueId(),
-                  title: 'Forgot Password',
-                  icon: IconRotate,
-                  href: '/auth/forgot-password',
-                  children: [
-                    {
-                      id: uniqueId(),
-                      title: 'Side Forgot Password',
-                      icon: IconPoint,
-                      href: '/auth/forgot-password',
-                    },
-                    {
-                      id: uniqueId(),
-                      title: 'Boxed Forgot Password',
-                      icon: IconPoint,
-                      href: '/auth/forgot-password2',
-                    },
-                  ],
-                },
-                {
-                  id: uniqueId(),
-                  title: 'Two Steps',
-                  icon: IconZoomCode,
-                  href: '/auth/two-steps',
-                  children: [
-                    {
-                      id: uniqueId(),
-                      title: 'Side Two Steps',
-                      icon: IconPoint,
-                      href: '/auth/two-steps',
-                    },
-                    {
-                      id: uniqueId(),
-                      title: 'Boxed Two Steps',
-                      icon: IconPoint,
-                      href: '/auth/two-steps2',
-                    },
-                  ],
-                },
-              ],
-            },
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Area Access',
+  //       icon: IconMapCheck,
+  //       href: '/apps/friends',
+  //     },
+  //     {
+  //             id: uniqueId(),
+  //             title: 'Auth',
+  //             icon: IconPoint,
+  //             href: '/400',
+  //             children: [
+  //               {
+  //                 id: uniqueId(),
+  //                 title: 'Error',
+  //                 icon: IconAlertCircle,
+  //                 href: '/400',
+  //               },
+  //               {
+  //                 id: uniqueId(),
+  //                 title: 'Maintenance',
+  //                 icon: IconSettings,
+  //                 href: '/auth/maintenance',
+  //               },
+  //               {
+  //                 id: uniqueId(),
+  //                 title: 'Login',
+  //                 icon: IconLogin,
+  //                 href: '/auth/login',
+  //                 children: [
+  //                   {
+  //                     id: uniqueId(),
+  //                     title: 'Side Login',
+  //                     icon: IconPoint,
+  //                     href: '/auth/login',
+  //                   },
+  //                   {
+  //                     id: uniqueId(),
+  //                     title: 'Boxed Login',
+  //                     icon: IconPoint,
+  //                     href: '/auth/login2',
+  //                   },
+  //                 ],
+  //               },
+  //               {
+  //                 id: uniqueId(),
+  //                 title: 'Register',
+  //                 icon: IconUserPlus,
+  //                 href: '/auth/register',
+  //                 children: [
+  //                   {
+  //                     id: uniqueId(),
+  //                     title: 'Side Register',
+  //                     icon: IconPoint,
+  //                     href: '/auth/register',
+  //                   },
+  //                   {
+  //                     id: uniqueId(),
+  //                     title: 'Boxed Register',
+  //                     icon: IconPoint,
+  //                     href: '/auth/register2',
+  //                   },
+  //                 ],
+  //               },
+  //               {
+  //                 id: uniqueId(),
+  //                 title: 'Forgot Password',
+  //                 icon: IconRotate,
+  //                 href: '/auth/forgot-password',
+  //                 children: [
+  //                   {
+  //                     id: uniqueId(),
+  //                     title: 'Side Forgot Password',
+  //                     icon: IconPoint,
+  //                     href: '/auth/forgot-password',
+  //                   },
+  //                   {
+  //                     id: uniqueId(),
+  //                     title: 'Boxed Forgot Password',
+  //                     icon: IconPoint,
+  //                     href: '/auth/forgot-password2',
+  //                   },
+  //                 ],
+  //               },
+  //               {
+  //                 id: uniqueId(),
+  //                 title: 'Two Steps',
+  //                 icon: IconZoomCode,
+  //                 href: '/auth/two-steps',
+  //                 children: [
+  //                   {
+  //                     id: uniqueId(),
+  //                     title: 'Side Two Steps',
+  //                     icon: IconPoint,
+  //                     href: '/auth/two-steps',
+  //                   },
+  //                   {
+  //                     id: uniqueId(),
+  //                     title: 'Boxed Two Steps',
+  //                     icon: IconPoint,
+  //                     href: '/auth/two-steps2',
+  //                   },
+  //                 ],
+  //               },
+  //             ],
+  //           },
     ],
   },
   {
@@ -324,24 +346,24 @@ const Menuitems = [
           icon: IconBellExclamation,
           href: '/master/brand'
         },
-        {
-          id: uniqueId(),
-          title: 'Department',
-          icon: IconFile,
-          href: '/master/department'
-        },
-        {
-          id: uniqueId(),
-          title: 'District',
-          icon: IconMap2,
-          href: '/master/district'
-        },
-        {
-          id: uniqueId(),
-          title: 'Organization',
-          icon: IconBuilding,
-          href: '/master/organization'
-        },
+        // {
+        //   id: uniqueId(),
+        //   title: 'Department',
+        //   icon: IconFile,
+        //   href: '/master/department'
+        // },
+        // {
+        //   id: uniqueId(),
+        //   title: 'District',
+        //   icon: IconMap2,
+        //   href: '/master/district'
+        // },
+        // {
+        //   id: uniqueId(),
+        //   title: 'Organization',
+        //   icon: IconBuilding,
+        //   href: '/master/organization'
+        // },
         {
           id: uniqueId(),
           title: 'Floorplan Masked Area',
@@ -380,16 +402,22 @@ const Menuitems = [
         },
         {
           id: uniqueId(),
-          title: 'Blacklist',
-          icon: IconLicenseOff,
-          href: '/master/blacklist'
+          title: 'Device',
+          icon: IconAccessibleOffFilled,
+          href: '/master/device'
         },
-        {
-          id: uniqueId(),
-          title: 'Building',
-          icon: IconBuilding,
-          href: '/master/building'
-        }
+        // {
+        //   id: uniqueId(),
+        //   title: 'Blacklist',
+        //   icon: IconLicenseOff,
+        //   href: '/master/blacklist'
+        // },
+        // {
+        //   id: uniqueId(),
+        //   title: 'Building',
+        //   icon: IconBuilding,
+        //   href: '/master/building'
+        // }
     ]
   },
   

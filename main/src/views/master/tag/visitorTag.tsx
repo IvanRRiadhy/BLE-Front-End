@@ -10,6 +10,7 @@ import TagSearch from 'src/components/master/Tag/member/tagSearch';
 import VisitorFilter from 'src/components/master/Tag/visitor/visitorFilter';
 import VisitorList from 'src/components/master/Tag/visitor/visitorList';
 import VisitorContent from 'src/components/master/Tag/visitor/visitorContent';
+import VisitorSearch from 'src/components/master/Tag/visitor/visitorSearch';
 
 const drawerWidth = 240;
 const secdrawerWidth = 320;
@@ -51,8 +52,7 @@ const Tag = () => {
             flexShrink: 0,
           }}
         >
-          {/* <ContactSearch onClick={() => setLeftSidebarOpen(true)} /> */}
-          <TagSearch onClick={() => setLeftSidebarOpen(true)} />
+          <VisitorSearch onClick={() => setLeftSidebarOpen(true)} />
           <VisitorList />
         </Box>
         <Drawer

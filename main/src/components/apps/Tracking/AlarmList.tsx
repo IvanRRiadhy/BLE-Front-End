@@ -128,7 +128,7 @@ const AlarmList: React.FC = () => {
                     }}
                   >
                     {`Visitor ${getReaderName(alarm.readerId)} found passing through ${getFloorName(
-                      alarm.floorplanId,
+                      alarm.floorplanMaskedAreaId,
                     )} which are not allowed to pass.`}
                   </Box>
                   {!alarm.isRead && (

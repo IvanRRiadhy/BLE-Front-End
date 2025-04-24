@@ -4,7 +4,7 @@ import { AppDispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = "http://localhost:5034/api/MstBrand";
+const API_URL = "http://192.168.1.116:5000/api/MstBrand/";
 
 export interface BrandType {
     id: string;
@@ -89,7 +89,11 @@ export const { GetBrands, SelectBrand, SearchBrand } = BrandSlice.actions;
 
 export const fetchBrands = () => async (dispatch: AppDispatch) => {
     try {
-        const response = await axios.get(API_URL);
+        const response = await axios.get(API_URL, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         dispatch(GetBrands(response.data?.collection?.data || []));
     } catch (err: any) {
         console.log("Error fetching brands:", err);
@@ -99,7 +103,11 @@ export const fetchBrands = () => async (dispatch: AppDispatch) => {
 export const addBrand = createAsyncThunk("brands/addBrand", async (brand: BrandType, { rejectWithValue }) => {
     try {
         const {id, ...filteredBrandData} = brand
-        const response = await axios.post(API_URL, filteredBrandData);
+        const response = await axios.post(API_URL, filteredBrandData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return response.data;
     } catch (error: any) {
         console.error("Error adding brand:", error);
@@ -110,7 +118,11 @@ export const addBrand = createAsyncThunk("brands/addBrand", async (brand: BrandT
 export const editBrand = createAsyncThunk("brands/editBrand", async (brand: BrandType, { rejectWithValue }) => {
     try {
         const { id, ...filteredBrandData } = brand;
-        const response = await axios.put(`${API_URL}/${id}`, filteredBrandData);
+        const response = await axios.put(`${API_URL}/${id}`, filteredBrandData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return response.data;
     } catch (error: any) {
         console.error("Error editing brand:", error);
@@ -120,7 +132,11 @@ export const editBrand = createAsyncThunk("brands/editBrand", async (brand: Bran
 
 export const deleteBrand = createAsyncThunk("brands/deleteBrand", async (brandId: string, { rejectWithValue }) => {
     try {
-        await axios.delete(`${API_URL}/${brandId}`);
+        await axios.delete(`${API_URL}/${brandId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         return brandId; // Return the deleted brand's ID to update the state
     } catch (error: any) {
         console.error("Error deleting brand:", error);

@@ -4,7 +4,7 @@ import React, { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 import { truncateSync } from 'fs';
-import { element } from 'prop-types';
+import { element, exact } from 'prop-types';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -13,6 +13,7 @@ const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')))
 /* ****Pages***** */
 const MainMenuDash = Loadable(lazy(() => import('../views/dashboard/Main')));
 const MonitoringDash = Loadable(lazy(() => import('../views/dashboard/Monitoring')));
+const MonitoringConfig = Loadable(lazy(() => import('../views/dashboard/MonitoringConfig')));
 
 /* ***Master**** */
 const Floorplan = Loadable(lazy(() => import('../views/master/floorplan/floorplan')));
@@ -37,6 +38,12 @@ const TrackingTransaction = Loadable(lazy(() => import('../views/master/crud/Tra
 const Visitor = Loadable(lazy(() => import('../views/master/crud/Visitor')));
 const Blacklist = Loadable(lazy(() => import('../views/master/crud/Blacklist')));
 const Building = Loadable(lazy(() => import('../views/master/crud/Building')));
+const FloorplanDevice = Loadable(lazy(() => import('../views/master/crud/FloorplanDevice')));
+const AlarmRecord = Loadable(lazy(() => import('../views/master/crud/AlarmRecord')));
+
+const FloorplanDeviceEdit = Loadable(
+  lazy(() => import('../views/master/crud/FloorplanDeviceEdit')),
+);
 
 /* ****Apps***** */
 // const Blog = Loadable(lazy(() => import('../views/apps/blog/Blog')));
@@ -212,6 +219,8 @@ const Router = [
       { path: '/', element: <Navigate to="/dashboards/mainmenu" /> },
       { path: '/dashboards/mainmenu', exact: true, element: <MainMenuDash /> },
       { path: '/dashboards/monitoring', exact: true, element: <MonitoringDash /> },
+      { path: '/dashboards/monitoring/viewer', exact: true, element: <MonitoringDash /> },
+      { path: '/dashboards/monitoring/config', exact: true, element: <MonitoringConfig /> },
       { path: '/master/floorplan', exact: true, element: <Floorplan /> },
       { path: '/master/gateway', exact: true, element: <GatewayApp /> },
       { path: '/master/membertag', exact: true, element: <MemberTag /> },
@@ -232,8 +241,11 @@ const Router = [
       { path: '/master/visitor', exact: true, element: <Visitor /> },
       { path: '/master/blacklist', exact: true, element: <Blacklist /> },
       { path: '/master/building', exact: true, element: <Building /> },
-
+      { path: '/master/device', exact: true, element: <FloorplanDevice /> },
+      { path: '/master/alarmrecord', exact: true, element: <AlarmRecord /> },
       { path: '/apps/contacts', element: <Contacts /> },
+
+      { path: '/master/device/edit', exact: true, element: <FloorplanDeviceEdit /> },
 
       // { path: '/apps/blog/posts', element: <Blog /> },
       // { path: '/frontend-pages/blog/detail/:id', element: <BlogDetail /> },
