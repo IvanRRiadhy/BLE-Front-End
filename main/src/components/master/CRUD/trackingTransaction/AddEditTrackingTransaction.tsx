@@ -24,6 +24,8 @@ import {
 } from 'src/store/apps/crud/trackingTrans';
 import { AppDispatch, useDispatch } from 'src/store/Store';
 import { alarmStatus } from 'src/types/crud/input';
+import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { bleReaderType } from 'src/store/apps/crud/bleReader';
 
 interface FormType {
   type?: string;
@@ -38,18 +40,22 @@ const AddEditTrackingTransaction = ({ type, trackingTransaction }: FormType) => 
       transTime: '',
       readerId: '',
       cardId: 0,
-      floorplanId: '',
       coordinateX: 0,
       coordinateY: 0,
       coordinatePxX: 0,
       coordinatePxY: 0,
       alarmStatus: '',
       battery: 0,
+      floorplanMaskedAreaId: '',
+      floorplanMaskedArea: {} as MaskedAreaType,
+      reader: {} as bleReaderType,
     },
   );
   const dispatch: AppDispatch = useDispatch();
 
   const handleClickOpen = () => {
+    console.log('Tracking Trans : ', trackingTransaction);
+    console.log('Form Data : ', formData);
     setOpen(true);
   };
 
@@ -124,7 +130,7 @@ const AddEditTrackingTransaction = ({ type, trackingTransaction }: FormType) => 
               <CustomFormLabel htmlFor="card-Id">Card ID</CustomFormLabel>
               <CustomTextField
                 id="cardId"
-                placeholder={formData.cardId}
+                placeholder={formData.readerId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -134,7 +140,7 @@ const AddEditTrackingTransaction = ({ type, trackingTransaction }: FormType) => 
               <CustomFormLabel htmlFor="floorplan-id">Floorplan ID</CustomFormLabel>
               <CustomTextField
                 id="floorplanId"
-                placeholder={formData.floorplanId}
+                placeholder={formData.floorplanMaskedAreaId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"

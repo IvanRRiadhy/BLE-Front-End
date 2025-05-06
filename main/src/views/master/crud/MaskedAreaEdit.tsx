@@ -2,10 +2,11 @@ import { useState } from 'react';
 import PageContainer from 'src/components/container/PageContainer';
 import AppCard from 'src/components/shared/AppCard';
 import { Box } from '@mui/material';
-import AddEditDeviceSidebar from 'src/components/master/CRUD/floorplanDevice/AddEditFloorplanDevice/AddEditDeviceSidebar';
-import EditDeviceFloorView from 'src/components/master/CRUD/floorplanDevice/AddEditFloorplanDevice/Preview/EditDeviceFloorView';
-import DeviceDetailSidebar from 'src/components/master/CRUD/floorplanDevice/AddEditFloorplanDevice/DeviceDetailSidebar';
+import AddEditMaskedAreaSidebar from 'src/components/master/CRUD/maskedArea/AddEditMaskedArea/AddEditMaskAreaSidebar';
+// import EditDeviceFloorView from 'src/components/master/CRUD/floorplanDevice/AddEditFloorplanDevice/Preview/EditDeviceFloorView';
+// import DeviceDetailSidebar from 'src/components/master/CRUD/floorplanDevice/AddEditFloorplanDevice/DeviceDetailSidebar';
 import { RootState, useSelector } from 'src/store/Store';
+import EditAreaFloorView from 'src/components/master/CRUD/maskedArea/AddEditMaskedArea/Preview/EditAreaFloorView';
 
 const FloorplanDeviceEdit = () => {
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(true);
@@ -23,21 +24,21 @@ const FloorplanDeviceEdit = () => {
           minHeight={800}
           sx={{ border: '1px solid', borderColor: 'divider' }}
         >
-          <AddEditDeviceSidebar
+          <AddEditMaskedAreaSidebar
             isMobileSidebarOpen={isMobileSidebarOpen}
             onSidebarClose={() => setMobileSidebarOpen(false)}
           />
         </Box>
-        {editingDevice && (
+        {/* {editingDevice && (
           <Box display="flex" flexDirection="column" minHeight={800}>
             <DeviceDetailSidebar
               isEditingSidebarOpen={isMobileSidebarOpen}
               onEditingSidebarClose={() => setMobileSidebarOpen(false)}
             />
           </Box>
-        )}
+        )}*/}
         <Box flexGrow={1}>
-          <EditDeviceFloorView zoomable />
+          <EditAreaFloorView zoomable />
         </Box>
       </AppCard>
     </PageContainer>

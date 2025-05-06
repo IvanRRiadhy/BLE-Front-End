@@ -15,38 +15,19 @@ import {
 } from '@mui/material';
 
 import { IconTrash, IconPencil } from '@tabler/icons-react';
-
 import AccessDoor from 'src/assets/images/masters/Devices/AccessDoor.png';
-import CCTV from 'src/assets/images/masters/Devices/CCTV.png';
-import Gateway from 'src/assets/images/masters/Devices/Gateway.png';
-import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
-
-import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
-import AddEditDeviceLayout from './AddEditDeviceLayout';
+import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 
 type Props = {
   onListClick: (event: React.MouseEvent<HTMLElement>) => void;
   onEditClick: (event: React.MouseEvent<HTMLElement>) => void;
   onDeleteClick: (event: React.MouseEvent<HTMLElement>) => void;
-  device?: FloorplanDeviceType;
+  area?: MaskedAreaType;
   active: any;
 };
 
-const DeviceListItem = ({ onListClick, onEditClick, onDeleteClick, device, active }: Props) => {
+const AreaListItem = ({ onListClick, onEditClick, onDeleteClick, area, active }: Props) => {
   const customizer = useSelector((state) => state.customizer);
-  const br = `${customizer.borderRadius}px`;
-
-  const theme = useTheme();
-
-  // Map device types to their corresponding icons
-  const iconMap: { [key: string]: string } = {
-    Cctv: CCTV, // Path to CCTV icon
-    BleReader: Gateway, // Path to Gateway icon
-    AccessDoor: AccessDoor, // Path to AccessDoor icon
-  };
-
-  // Get the icon based on the device type
-  const iconDevice = device?.type ? iconMap[device.type] : UnknownDevice;
 
   return (
     <ListItemButton
@@ -61,16 +42,13 @@ const DeviceListItem = ({ onListClick, onEditClick, onDeleteClick, device, activ
       }}
     >
       <ListItemAvatar>
-        <Avatar alt={device?.name || 'Device'} src={iconDevice} />
+        <Avatar alt={area?.name || 'Area'} src={AccessDoor} />
       </ListItemAvatar>
       <ListItemText>
         <Stack direction="row" gap="10px" alignItems="center">
           <Box mr="auto">
             <Typography variant="subtitle1" fontWeight={600} sx={{ maxWidth: '150px' }}>
-              {device?.name}
-            </Typography>
-            <Typography variant="body2" noWrap color="text.secondary">
-              {device?.type}
+              {area?.name}
             </Typography>
           </Box>
         </Stack>
@@ -105,4 +83,4 @@ const DeviceListItem = ({ onListClick, onEditClick, onDeleteClick, device, activ
   );
 };
 
-export default DeviceListItem;
+export default AreaListItem;

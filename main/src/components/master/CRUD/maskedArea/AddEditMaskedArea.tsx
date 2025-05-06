@@ -32,12 +32,13 @@ interface FormType {
 
 const AddEditMaskedArea = ({ type, maskedArea }: FormType) => {
   const [open, setOpen] = React.useState(false);
+
   const [formData, setFormData] = React.useState<MaskedAreaType>(
     maskedArea || {
       id: '',
+      name: '',
       floorplanId: '',
       floorId: '',
-      name: '',
       areaShape: '',
       colorArea: '',
       restrictedStatus: '',
@@ -53,7 +54,16 @@ const AddEditMaskedArea = ({ type, maskedArea }: FormType) => {
   );
   const dispatch: AppDispatch = useDispatch();
 
+  React.useEffect(() => {
+    if (maskedArea) {
+      setFormData(maskedArea);
+    }
+  }, [maskedArea]);
+
   const handleClickOpen = () => {
+    console.log('Masked Area : ', maskedArea);
+    console.log('Form Data : ', formData);
+    console.log('maskedArea', maskedArea);
     setOpen(true);
   };
   const handleClose = () => {

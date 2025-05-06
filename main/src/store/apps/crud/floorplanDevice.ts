@@ -7,6 +7,7 @@ import { bleReaderType } from "./bleReader";
 import { MaskedAreaType } from "./maskedArea";
 import { CCTVType } from "./accessCCTV";
 import { AccessControlType } from "./accessControl";
+import { DeviceType } from "src/types/crud/input";
 
 const API_URL = 'http://192.168.1.116:5000/api/FloorplanDevice/';
 
@@ -81,14 +82,28 @@ export const FloorplanDeviceSlice = createSlice({
             state.unsavedFloorplanDevices.push(action.payload);
           },
         EditUnsavedDevice: (state, action: PayloadAction<FloorplanDeviceType>) => {
-        const index = state.unsavedFloorplanDevices.findIndex(
-            (device) => device.id === action.payload.id
-        );
-        if (index !== -1) {
-            state.unsavedFloorplanDevices[index] = action.payload;
-            state.editingFloorplanDevice = action.payload;
-        //   console.log("Updated device: ", action.payload);
-        }
+            const index = state.unsavedFloorplanDevices.findIndex(
+                (device) => device.id === action.payload.id
+            );
+            if (index !== -1) {
+                state.unsavedFloorplanDevices[index] = action.payload;
+                state.editingFloorplanDevice = action.payload;
+            //   console.log("Updated device: ", action.payload);
+            }
+        },
+        DeleteUnsavedDevice: (state, action: PayloadAction<string>) => {
+            // Find the index of the device to delete
+            const index = state.unsavedFloorplanDevices.findIndex(
+                (device) => device.id === action.payload
+            );
+        
+            // If the device exists, remove it from the list
+            if (index !== -1) {
+                state.unsavedFloorplanDevices.splice(index, 1);
+                console.log(`Device with ID ${action.payload} deleted from unsaved devices.`);
+            } else {
+                console.warn(`Device with ID ${action.payload} not found in unsaved devices.`);
+            }
         },
         RevertDevice: {
             reducer: (state, action: PayloadAction<{ id: string }>) => {
@@ -96,6 +111,19 @@ export const FloorplanDeviceSlice = createSlice({
                     (device) => device.id === action.payload.id
                 );
                 const device = state.floorplanDevices.find((device) => device.id === action.payload.id);
+                if (deviceIndex !== -1) {
+                    const device = state.unsavedFloorplanDevices[deviceIndex];
+        
+                    // Check if the device type is valid
+                    const validDeviceTypes = DeviceType.map((type) => type.value); // Extract valid types from DeviceType
+
+                    if (!validDeviceTypes.includes(device.type) || device.type === "") {
+                        // Remove the device if its type is invalid
+                        state.unsavedFloorplanDevices.splice(deviceIndex, 1);
+                        // console.warn(`Device with ID ${action.payload.id} removed due to invalid type.`);
+                        return;
+                    }
+                }
                 if (device) {
                     if(state.selectedFloorplanDevice?.id === action.payload.id) {
                         state.selectedFloorplanDevice = { ...device };
@@ -103,7 +131,7 @@ export const FloorplanDeviceSlice = createSlice({
                 }
                 if (deviceIndex !== -1 && device) {
                     state.unsavedFloorplanDevices[deviceIndex] = { ...device };
-                    state.editingFloorplanDevice = { ...device };
+                    state.editingFloorplanDevice = null ;
                 }
             },
             prepare: (id: string) => ({
@@ -148,6 +176,7 @@ export const {
     AddUnsavedDevice,
     EditUnsavedDevice,
     SelectEditingFloorplanDevice,
+    DeleteUnsavedDevice,
     RevertDevice,
 } = FloorplanDeviceSlice.actions;
 
@@ -174,6 +203,7 @@ export const addFloorplanDevice = createAsyncThunk(
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
+            console.log("Floorplan device added: ", response.data);
             return response.data;
         } catch (error: any) {
             console.error("Error adding floorplan device: ", error);
@@ -192,6 +222,7 @@ export const editFloorplanDevice = createAsyncThunk(
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
+            console.log("Floorplan device edited: ", response.data);
             return response.data;
         } catch (error: any) {
             console.error("Error editing floorplan device: ", error);
@@ -209,6 +240,7 @@ export const deleteFloorplanDevice = createAsyncThunk(
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
+            console.log("Floorplan device deleted: ", response.data);
             return response.data;
         } catch (error: any) {
             console.error("Error deleting floorplan device: ", error);

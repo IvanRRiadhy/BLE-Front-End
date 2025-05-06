@@ -152,6 +152,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
   const trackTrans: trackingTransType[] = useSelector(
     (state: RootState) => state.trackingTransReducer.trackingTrans,
   );
+  // console.log(trackTrans);
   const alarmRecord: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
   );
@@ -174,7 +175,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
       device: getBleReaderName(item.readerId),
       target: item.reader.name,
       floor: getFloorName(item.floorplanMaskedAreaId),
-      area: item.floorplanMaskedArea.name,
+      area: item.floorplanMaskedAreaId,
       time: item.transTime,
     }));
     const transformedAlarm: ListType[] = alarmRecord.map((item) => ({
@@ -182,7 +183,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
       device: item.reader.name,
       target: item.visitor.name,
       floor: item.floorplanMaskedArea.floorId,
-      area: item.floorplanMaskedArea.name,
+      area: item.floorplanMaskedAreaId,
       alarmType: item.alarmRecordStatus,
       status: item.actionStatus,
       time: item.timestamp,

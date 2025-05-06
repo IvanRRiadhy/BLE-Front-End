@@ -113,17 +113,13 @@ const DepartmentList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {[
-                      'ID',
-                      'Department Code',
-                      'Department Name',
-                      'Department Host',
-                      'Application Name',
-                    ].map((header) => (
-                      <TableCell key={header}>
-                        <Typography variant="h6">{header}</Typography>
-                      </TableCell>
-                    ))}
+                    {['ID', 'Department Code', 'Department Name', 'Department Host'].map(
+                      (header) => (
+                        <TableCell key={header}>
+                          <Typography variant="h6">{header}</Typography>
+                        </TableCell>
+                      ),
+                    )}
                     {/* Right Sticky Empty Column */}
                     <TableCell
                       sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
@@ -146,7 +142,6 @@ const DepartmentList = () => {
                         <TableCell>{department.code}</TableCell>
                         <TableCell>{department.name}</TableCell>
                         <TableCell>{department.departmentHost}</TableCell>
-                        <TableCell>{getAppName(department.applicationId)}</TableCell>
 
                         <TableCell
                           sx={{

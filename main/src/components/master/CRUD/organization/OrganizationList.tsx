@@ -117,17 +117,13 @@ const OrganizationList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {[
-                      'ID',
-                      'Organization Code',
-                      'Organization Name',
-                      'Organization Host',
-                      'Application Name',
-                    ].map((header) => (
-                      <TableCell key={header}>
-                        <Typography variant="h6">{header}</Typography>
-                      </TableCell>
-                    ))}
+                    {['ID', 'Organization Code', 'Organization Name', 'Organization Host'].map(
+                      (header) => (
+                        <TableCell key={header}>
+                          <Typography variant="h6">{header}</Typography>
+                        </TableCell>
+                      ),
+                    )}
                     {/* Right Sticky Empty Column */}
                     <TableCell
                       sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
@@ -150,7 +146,6 @@ const OrganizationList = () => {
                         <TableCell>{organization.code}</TableCell>
                         <TableCell>{organization.name}</TableCell>
                         <TableCell>{organization.organizationHost}</TableCell>
-                        <TableCell>{getAppName(organization.applicationId)}</TableCell>
 
                         <TableCell
                           sx={{

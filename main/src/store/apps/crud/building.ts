@@ -66,4 +66,49 @@ export const fetchBuildings = () => async (dispatch: AppDispatch) => {
     }
 };
 
+export const addBuilding = createAsyncThunk("buildings/addBuilding", async (formData: FormData, { rejectWithValue }) => {
+    try {
+        formData.delete('id');
+        const response = await axios.post(API_URL, formData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+        return response.data;
+    } catch (error: any) {
+        console.error("Error adding building:", error);
+        return rejectWithValue(error.response?.data || "Unknown error");
+    }
+});
+
+export const editBuilding = createAsyncThunk("buildings/editBuilding", async (formData: FormData, { rejectWithValue }) => {
+    try {
+        const id = formData.get('id'); // Extract ID from FormData
+        formData.delete('id');
+        const response = await axios.put(`${API_URL}/${id}`, formData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+        return response.data;
+    } catch (error: any) {
+        console.error("Error editing building:", error);
+        return rejectWithValue(error.response?.data || "Unknown error");
+    }
+});
+
+export const deleteBuilding = createAsyncThunk("buildings/deleteBuilding", async (buildingId: string, { rejectWithValue }) => {
+    try {
+        await axios.delete(`${API_URL}/${buildingId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+        return buildingId; // Return the deleted building's ID to update the state
+    } catch (error: any) {
+        console.error("Error deleting building:", error);
+        return rejectWithValue(error.response?.data || "Unknown error");
+    }
+});
+
 export default BuildingSlice.reducer;

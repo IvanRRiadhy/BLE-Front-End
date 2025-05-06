@@ -1,7 +1,8 @@
 import { Button, Drawer, Theme, Typography, useMediaQuery, useTheme } from '@mui/material';
-import DeviceList from './DeviceList';
+
 import React from 'react';
 import { Box } from '@mui/system';
+import AreaList from './AreaList';
 
 const drawerWidth = 260;
 
@@ -16,7 +17,7 @@ interface Props {
   onSidebarClose: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
-const AddEditDeviceSidebar = ({ isMobileSidebarOpen, onSidebarClose }: Props) => {
+const AddEditMaksedAreaSidebar = ({ isMobileSidebarOpen, onSidebarClose }: Props) => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const theme = useTheme();
   const colorvariation: colorsType[] = [
@@ -74,10 +75,10 @@ const AddEditDeviceSidebar = ({ isMobileSidebarOpen, onSidebarClose }: Props) =>
         onClose={onSidebarClose}
         variant={lgUp ? 'persistent' : 'temporary'}
       >
-        <DeviceList />
+        <AreaList />
       </Drawer>
     </>
   );
 };
 
-export default AddEditDeviceSidebar;
+export default AddEditMaksedAreaSidebar;

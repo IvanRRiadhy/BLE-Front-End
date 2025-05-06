@@ -13,18 +13,10 @@ import { useSelector, useDispatch, AppState } from 'src/store/Store';
 import {
   EditUnsavedDevice,
   FloorplanDeviceType,
+  RevertDevice,
   SelectEditingFloorplanDevice,
+  SelectFloorplanDevice,
 } from 'src/store/apps/crud/floorplanDevice';
-import { SelectFloorplanDevice } from 'src/store/apps/crud/floorplanDevice';
-
-const Devices = [
-  { id: 1, x: 250, y: 50, type: 'CCTV' },
-  { id: 2, x: 20, y: 130, type: 'Reader' },
-  { id: 3, x: 300, y: 300, type: 'CCTV' },
-  { id: 4, x: 10, y: 200, type: 'CCTV' },
-  { id: 5, x: 260, y: 200, type: 'Reader' },
-  { id: 6, x: 150, y: 200, type: 'Door' },
-];
 
 const EditDeviceRenderer: React.FC<{
   width: number;
@@ -33,7 +25,8 @@ const EditDeviceRenderer: React.FC<{
   scale: number;
   devices?: FloorplanDeviceType[];
   activeDevice?: FloorplanDeviceType | null;
-}> = ({ width, height, imageSrc, scale, devices, activeDevice }) => {
+  setIsDragging: (isDragging: string) => void;
+}> = ({ width, height, imageSrc, scale, devices, activeDevice, setIsDragging }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const [scales, setScale] = useState<number>(scale);
@@ -59,6 +52,10 @@ const EditDeviceRenderer: React.FC<{
   //   console.log(`Dragging device ${device.id}:`, { newPosX, newPosY });
   //   dispatch(EditUnsavedDevice({ ...device, posPxX: newPosX, posPxY: newPosY }));
   // };
+  const handleDragStart = (e: string) => {
+    console.log('Drag started:', e); // Log the name of the dragged element
+    setIsDragging(e); // Set dragging state to true
+  };
 
   const handleDragEnd = (e: any, device: FloorplanDeviceType) => {
     const newPosX = (e.target.x() * 4) / scales; // Convert back to original scale
@@ -66,12 +63,13 @@ const EditDeviceRenderer: React.FC<{
 
     // Dispatch an action to update the device's position in the Redux store
     dispatch(EditUnsavedDevice({ ...device, posPxX: newPosX, posPxY: newPosY }));
-
+    setIsDragging(''); // Set dragging state to false
     // console.log(`Device ${device.id} dropped at:`, { newPosX, newPosY });
   };
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [pendingDeviceId, setPendingDeviceId] = useState<string | null>(null);
   const handleConfirmProceed = () => {
+    dispatch(RevertDevice(editingDevice?.id || '')); // Revert the device to its original state
     if (pendingDeviceId) {
       dispatch(SelectFloorplanDevice(pendingDeviceId));
       dispatch(SelectEditingFloorplanDevice(null));
@@ -103,6 +101,7 @@ const EditDeviceRenderer: React.FC<{
       case 'Cctv':
         return (
           <Circle
+            name="Device"
             key={device.id}
             x={(device.posPxX * scales) / 4}
             y={(device.posPxY * scales) / 4}
@@ -113,12 +112,15 @@ const EditDeviceRenderer: React.FC<{
             onClick={handleDeviceClick}
             draggable={isEditing} // Make it draggable only if editing
             // onDragMove={(e) => handleDragMove(e, device)} // Handle drag move
+            onMouseDown={() => handleDragStart(device.id)} // Handle drag start
+            // onDragStart={handleDragStart} // Handle drag start
             onDragEnd={(e) => handleDragEnd(e, device)} // Handle drag end
           />
         );
       case 'BleReader':
         return (
           <Rect
+            name="Device"
             key={device.id}
             x={(device.posPxX * scales) / 4}
             y={(device.posPxY * scales) / 4}
@@ -130,12 +132,14 @@ const EditDeviceRenderer: React.FC<{
             onClick={handleDeviceClick}
             draggable={isEditing} // Make it draggable only if editing
             // onDragMove={(e) => handleDragMove(e, device)} // Handle drag move
+            onMouseDown={() => handleDragStart(device.id)} // Handle drag start
             onDragEnd={(e) => handleDragEnd(e, device)} // Handle drag end
           />
         );
       case 'AccessDoor':
         return (
           <Star
+            name="Device"
             key={device.id}
             x={(device.posPxX * scales) / 4}
             y={(device.posPxY * scales) / 4}
@@ -148,12 +152,14 @@ const EditDeviceRenderer: React.FC<{
             onClick={handleDeviceClick}
             draggable={isEditing} // Make it draggable only if editing
             // onDragMove={(e) => handleDragMove(e, device)} // Handle drag move
+            onMouseDown={() => handleDragStart(device.id)} // Handle drag start
             onDragEnd={(e) => handleDragEnd(e, device)} // Handle drag end
           />
         );
       default:
         return (
           <Rect
+            name="Device"
             key={device.id}
             x={(device.posPxX * scales) / 4}
             y={(device.posPxY * scales) / 4}
@@ -165,6 +171,7 @@ const EditDeviceRenderer: React.FC<{
             onClick={handleDeviceClick}
             draggable={isEditing} // Make it draggable only if editing
             // onDragMove={(e) => handleDragMove(e, device)} // Handle drag move
+            onMouseDown={() => handleDragStart(device.id)} // Handle drag start
             onDragEnd={(e) => handleDragEnd(e, device)} // Handle drag end
           />
         );

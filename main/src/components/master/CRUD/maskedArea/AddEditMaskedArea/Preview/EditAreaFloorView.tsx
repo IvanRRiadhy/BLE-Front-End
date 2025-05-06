@@ -3,54 +3,24 @@ import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store
 import { Box, FormLabel, Typography, useTheme } from '@mui/material';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
-import {
-  fetchFloorplanDevices,
-  FloorplanDeviceType,
-  SelectFloorplanDevice,
-} from 'src/store/apps/crud/floorplanDevice';
 import ZoomControls from 'src/components/shared/ZoomControls';
-import EditDeviceRenderer from './EditDeviceRenderer';
 import FloorplanHouse from 'src/assets/images/masters/Floorplan/Floorplan-House.png';
-import { Layer, Stage, Image as KonvaImage } from 'react-konva';
+import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
+import EditAreaRenderer from './EditAreaRenderer';
 
-const EditDeviceFloorView: React.FC<{
+const EditAreaFloorView: React.FC<{
   zoomable: boolean;
 }> = ({ zoomable }) => {
   const dispatch: AppDispatch = useDispatch();
-  //   const floors = useSelector((state: AppState) => state.floorReducer.floors);
   const activeFloorPlan = useSelector(
     (state: AppState) => state.floorplanReducer.selectedFloorplan,
   );
   const activeFloorData = activeFloorPlan?.floor;
-  const activeDevice = useSelector(
-    (state: AppState) => state.floorplanDeviceReducer.selectedFloorplanDevice,
-  );
-  const unsavedDevices = useSelector(
-    (state: AppState) => state.floorplanDeviceReducer.unsavedFloorplanDevices,
-  );
-  const editingDevice = useSelector(
-    (state: AppState) => state.floorplanDeviceReducer.editingFloorplanDevice,
-  );
-  // const filteredUnsavedDevices = unsavedDevices.filter(
-  //   (device) => device.floorplanId === activeFloorPlan?.id,
-  // );
-
-  const [filteredUnsavedDevices, setFilteredUnsavedDevices] = useState<FloorplanDeviceType[]>([]);
-
-  useEffect(() => {
-    // console.log('Unsaved Devices:', unsavedDevices);
-    // console.log('Active Floor Plan:', activeFloorPlan?.id);
-    const filteredDevices = unsavedDevices.filter(
-      (device: FloorplanDeviceType) => device.floorplanId === activeFloorPlan?.id,
-    );
-    setFilteredUnsavedDevices(filteredDevices);
-  }, [unsavedDevices, activeFloorPlan]);
-
+  const [cursor, setCursor] = useState('grab');
   const containerRef = useRef<HTMLDivElement>(null);
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
   const [scale, setScale] = useState(1); // Initial scale set to 1
   const [image, setImage] = useState<HTMLImageElement | null>(null);
-  //const MIN_SCALE = 1; // Minimum scale to prevent the image from becoming too small
   const MAX_SCALE = 2; // Maximum scale to prevent the image from becoming too large
   const [minScale, setMinScale] = useState(0.5);
   const [translate, setTranslate] = useState({ x: 0, y: 0 });
@@ -106,34 +76,8 @@ const EditDeviceFloorView: React.FC<{
   useEffect(() => {
     dispatch(fetchFloorplan());
     dispatch(fetchFloors());
-    dispatch(fetchFloorplanDevices());
+    dispatch(fetchMaskedAreas());
   }, [dispatch]);
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     if (containerRef.current && imgSize && imgSize.width > 1 && imgSize.height > 1) {
-  //       const containerWidth = containerRef.current.clientWidth;
-  //       const containerHeight = containerRef.current.clientHeight;
-
-  //       const widthRatio = containerWidth / imgSize.width;
-  //       const heightRatio = containerHeight / imgSize.height;
-
-  //       // Calculate minScale based on the larger ratio
-  //       const minScale = Math.min(widthRatio, heightRatio);
-
-  //       // Adjust the current scale if it's below the new minimum scale
-  //       setScale((prevScale) => Math.max(prevScale, minScale));
-  //     }
-  //   };
-
-  //   window.addEventListener('resize', handleResize);
-
-  //   // Only call handleResize if imgSize is valid
-  //   if (imgSize && imgSize.width > 1 && imgSize.height > 1) {
-  //     handleResize();
-  //   }
-
-  //   return () => window.removeEventListener('resize', handleResize);
-  // }, [imgSize]);
 
   const calculateImageDimensions = (
     containerWidth: number,
@@ -234,19 +178,21 @@ const EditDeviceFloorView: React.FC<{
   }, [imgSize]); // Reset scale when imgSize changes
 
   const handleMouseDown = (event: React.MouseEvent) => {
+    if (cursor === 'grab') setCursor('grabbing');
     setIsPanning(true);
     dragStart.current = { x: event.clientX - translate.x, y: event.clientY - translate.y };
 
-    if (containerRef.current) containerRef.current.style.cursor = 'grabbing';
+    // if (containerRef.current) containerRef.current.style.cursor = 'grabbing';
   };
 
   const handleMouseMove = (event: React.MouseEvent) => {
     if (!isPanning || !containerRef.current || !imgSize || !zoomable) return;
     let pannable = true;
 
-    if (editingDevice && isDragging === editingDevice?.id) {
-      pannable = false;
-    }
+    // if (editingDevice && isDragging === editingDevice?.id) {
+    //   pannable = false;
+    // }
+    if (isDragging) pannable = false;
     if (pannable) {
       const containerWidth = containerRef.current.clientWidth;
       const containerHeight = containerRef.current.clientHeight;
@@ -271,7 +217,7 @@ const EditDeviceFloorView: React.FC<{
 
   const handleMouseUp = () => {
     setIsPanning(false);
-    if (containerRef.current) containerRef.current.style.cursor = 'grab'; // Reset cursor
+    if (cursor === 'grabbing') setCursor('grab'); // Reset cursor
   };
 
   return (
@@ -287,12 +233,13 @@ const EditDeviceFloorView: React.FC<{
         justifyContent: 'center',
         alignItems: 'center',
         overflow: 'hidden', // Allow scrolling
-        cursor: isPanning ? 'grabbing' : 'grab',
+        cursor: cursor,
       }}
     >
       {/* Zoomable Content */}
       <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
         {isHovered &&
+          !isPanning &&
           zoomable && ( // Only show ZoomControls when hovered
             <ZoomControls
               scale={scale}
@@ -349,15 +296,15 @@ const EditDeviceFloorView: React.FC<{
             }}
           >
             {/* <Stage
-              width={containerRef.current ? containerRef.current.clientWidth : 800}
-              height={containerRef.current ? containerRef.current.clientHeight : 600}
-              style={{ position: 'absolute', top: 0, left: 0 }}
-            >
-              <Layer> */}
+                        width={containerRef.current ? containerRef.current.clientWidth : 800}
+                        height={containerRef.current ? containerRef.current.clientHeight : 600}
+                        style={{ position: 'absolute', top: 0, left: 0 }}
+                      >
+                        <Layer> */}
             {/* Render the image */}
             {image && imgSize && containerRef.current && (
               <>
-                <EditDeviceRenderer
+                <EditAreaRenderer
                   {...calculateImageDimensions(
                     containerRef.current.clientWidth,
                     containerRef.current.clientHeight,
@@ -366,14 +313,13 @@ const EditDeviceFloorView: React.FC<{
                   )}
                   imageSrc={FloorplanHouse}
                   scale={scale}
-                  devices={filteredUnsavedDevices}
-                  activeDevice={activeDevice}
                   setIsDragging={setIsDragging}
+                  setCursor={setCursor}
                 />
               </>
             )}
             {/* </Layer>
-            </Stage> */}
+                      </Stage> */}
           </Box>
         </Box>
       </Box>
@@ -381,4 +327,4 @@ const EditDeviceFloorView: React.FC<{
   );
 };
 
-export default EditDeviceFloorView;
+export default EditAreaFloorView;

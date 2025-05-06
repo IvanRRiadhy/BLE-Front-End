@@ -436,8 +436,11 @@ const DeviceDetailList = () => {
       <Box
         p={2}
         sx={{
-          position: 'sticky',
-          bottom: 0,
+          position: 'fixed',
+          bottom: '0',
+          left: '10',
+          width: '260px',
+          height: '80px',
           backgroundColor: 'background.paper',
           borderTop: '1px solid',
           borderColor: 'divider',

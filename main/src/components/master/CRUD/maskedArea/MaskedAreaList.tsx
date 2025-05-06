@@ -33,7 +33,7 @@ const MaskedAreaList = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
   // Handle page change
   const handleChangePage = (event: unknown, newPage: number) => {
-    console.log(event);
+    // console.log(event);
     setPage(newPage);
   };
 
@@ -170,7 +170,10 @@ const MaskedAreaList = () => {
                           <IconButton
                             color="error"
                             size="small"
-                            onClick={() => handleOpenDeleteDialog(maskedArea)}
+                            onClick={() => {
+                              console.log('maskedArea', maskedArea);
+                              handleOpenDeleteDialog(maskedArea);
+                            }}
                           >
                             <IconTrash size={20} />
                           </IconButton>

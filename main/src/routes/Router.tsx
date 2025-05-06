@@ -44,6 +44,7 @@ const AlarmRecord = Loadable(lazy(() => import('../views/master/crud/AlarmRecord
 const FloorplanDeviceEdit = Loadable(
   lazy(() => import('../views/master/crud/FloorplanDeviceEdit')),
 );
+const MaskedAreaEdit = Loadable(lazy(() => import('../views/master/crud/MaskedAreaEdit')));
 
 /* ****Apps***** */
 // const Blog = Loadable(lazy(() => import('../views/apps/blog/Blog')));
@@ -246,6 +247,7 @@ const Router = [
       { path: '/apps/contacts', element: <Contacts /> },
 
       { path: '/master/device/edit', exact: true, element: <FloorplanDeviceEdit /> },
+      { path: '/master/floorplanmaskedarea/edit', exact: true, element: <MaskedAreaEdit /> },
 
       // { path: '/apps/blog/posts', element: <Blog /> },
       // { path: '/frontend-pages/blog/detail/:id', element: <BlogDetail /> },

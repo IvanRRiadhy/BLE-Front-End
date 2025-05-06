@@ -8,7 +8,7 @@ import { floorplanType } from 'src/types/tracking/floorplan';
 const FloorDetails = () => {
   const dispatch: AppDispatch = useDispatch();
   const activeFloorplan = useSelector((state) =>
-    state.floorplanReducer.floorplanContent.toString(),
+    state.floorplanReducer2.floorplanContent.toString(),
   );
   const [memberCount, setMemberCount] = useState(0);
   const [visitorCount, setVisitorCount] = useState(0);
@@ -28,7 +28,7 @@ const FloorDetails = () => {
   };
 
   const floors = useSelector((state) =>
-    filterFloors(state.floorplanReducer.floorplans, state.floorplanReducer.floorplanSearch),
+    filterFloors(state.floorplanReducer2.floorplans, state.floorplanReducer.floorplanSearch),
   );
   const activeFloorData = floors.find((floor) => floor.id === activeFloorplan);
 

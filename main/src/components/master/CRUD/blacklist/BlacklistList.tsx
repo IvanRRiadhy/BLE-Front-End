@@ -24,6 +24,7 @@ import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Stor
 import { fetchBlacklist, blacklistType, deleteBlacklist } from 'src/store/apps/crud/blacklist';
 import { fetchVisitor, visitorType } from 'src/store/apps/crud/visitor';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import AddEditBlacklist from './AddEditBlacklist';
 
 const BlacklistList = () => {
@@ -50,6 +51,7 @@ const BlacklistList = () => {
     dispatch(fetchBlacklist());
     dispatch(fetchVisitor());
     dispatch(fetchMaskedAreas());
+    dispatch(fetchFloorplan());
   }, [dispatch]);
 
   //Delete Pop-up
@@ -81,6 +83,7 @@ const BlacklistList = () => {
   };
   const getFloorName = (floorId: string) => {
     const floor = maskedAreaData.find((fl: MaskedAreaType) => fl.id === floorId);
+    console.log('Mask Area: ', floor);
     return floor ? floor.name : 'Unknown Floor';
   };
 
@@ -97,7 +100,7 @@ const BlacklistList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"> Left </Typography>
                     </TableCell>
-                    {['ID', 'Visitor ID', 'Floorplan ID'].map((header) => (
+                    {['ID', 'Blacklisted Visitor', 'Blacklisted Area'].map((header) => (
                       <TableCell key={header}>
                         <Typography variant="h6">{header}</Typography>
                       </TableCell>
@@ -120,8 +123,8 @@ const BlacklistList = () => {
                         ></TableCell>
 
                         <TableCell>{blacklist.id}</TableCell>
-                        <TableCell>{getVisitorName(blacklist.visitorId)}</TableCell>
-                        <TableCell>{getFloorName(blacklist.floorplanId)}</TableCell>
+                        <TableCell>{blacklist.visitor.name}</TableCell>
+                        <TableCell>{blacklist.floorplanMaskedArea.name}</TableCell>
 
                         <TableCell
                           sx={{

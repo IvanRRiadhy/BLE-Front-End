@@ -24,8 +24,6 @@ import {
   AccessControlType,
   deleteAccessControl,
 } from 'src/store/apps/crud/accessControl';
-import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
-import { fetchApplications, ApplicationType } from 'src/store/apps/crud/application';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import AddEditAccessControl from './AddEditAccesControl';
@@ -51,15 +49,9 @@ const AccessControlList = () => {
   const accessControlData: AccessControlType[] = useSelector(
     (state: RootState) => state.accessControlReducer.accessControls,
   );
-  const brandData: BrandType[] = useSelector((state: RootState) => state.brandReducer.brands);
-  const appData: ApplicationType[] = useSelector(
-    (state: RootState) => state.applicationReducer.applications,
-  );
 
   useEffect(() => {
     dispatch(fetchAccessControls());
-    dispatch(fetchBrands());
-    dispatch(fetchApplications());
   }, [dispatch]);
 
   //Delete Pop-up
@@ -85,33 +77,6 @@ const AccessControlList = () => {
     handleCloseDeleteDialog();
   };
 
-  const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
-
-    // Extract the weekday
-    const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
-    const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-
-    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
-      'en-GB',
-      {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      },
-    )}`;
-  };
-
-  const getBrandName = (brandId: string) => {
-    const brand = brandData.find((b: BrandType) => b.id === brandId);
-    return brand ? brand.name : 'Unknown Brand';
-  };
-
-  const getAppName = (appId: string) => {
-    const app = appData.find((a: ApplicationType) => a.id === appId);
-    return app ? app.applicationName : 'Unknown App';
-  };
-
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -135,7 +100,6 @@ const AccessControlList = () => {
                       'Door ID',
                       'Raw',
                       'Integration Name',
-                      'Application Name',
                     ].map((header) => (
                       <TableCell key={header}>
                         <Typography variant="h6">{header}</Typography>
@@ -168,7 +132,6 @@ const AccessControlList = () => {
                         <TableCell>{accessControl.doorId}</TableCell>
                         <TableCell>{accessControl.raw}</TableCell>
                         <TableCell>{accessControl.integration.integrationType}</TableCell>
-                        <TableCell>{getAppName(accessControl.applicationId)}</TableCell>
 
                         <TableCell
                           sx={{

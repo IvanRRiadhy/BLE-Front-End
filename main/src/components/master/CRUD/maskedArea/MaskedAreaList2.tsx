@@ -13,21 +13,23 @@ import {
   TablePagination,
   Dialog,
   DialogTitle,
-  DialogContentText,
   DialogContent,
+  DialogContentText,
   DialogActions,
   Button,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
-import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
-import { fetchDistricts, DistrictType, deleteDistrict } from 'src/store/apps/crud/district';
-import { fetchApplications, ApplicationType } from 'src/store/apps/crud/application';
-import AddEditDistrict from './AddEditDistrict';
+import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { useTranslation } from 'react-i18next';
+import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { fetchFloorplan, SelectFloorplan } from 'src/store/apps/crud/floorplan';
+import { IconEdit } from '@tabler/icons-react';
+import { useNavigate } from 'react-router';
 
-const DistrictList = () => {
+const MaskedAreaList2 = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   // Pagination State
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
@@ -43,61 +45,38 @@ const DistrictList = () => {
     setPage(0);
   };
   const dispatch: AppDispatch = useDispatch();
-  const districtData: DistrictType[] = useSelector(
-    (state: RootState) => state.districtReducer.districts,
-  );
-  const appData: ApplicationType[] = useSelector(
-    (state: RootState) => state.applicationReducer.applications,
-  );
-
+  const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
   useEffect(() => {
-    dispatch(fetchDistricts());
-    dispatch(fetchApplications());
+    dispatch(fetchMaskedAreas());
+    dispatch(fetchFloorplan());
   }, [dispatch]);
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedDist, setSelectedDist] = useState<DistrictType | null>(null);
-  // Open delete confirmation dialog
-  const handleOpenDeleteDialog = (dist: DistrictType) => {
-    setSelectedDist(dist);
+  const [selectedArea, setSelectedArea] = useState<MaskedAreaType | null>(null);
+
+  const handleOpenDeleteDialog = (area: MaskedAreaType) => {
+    setSelectedArea(area);
     setDeleteDialogOpen(true);
   };
 
-  // Close delete confirmation dialog
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
-    setSelectedDist(null);
+    setSelectedArea(null);
   };
 
-  // Confirm delete action
   const handleConfirmDelete = () => {
-    if (selectedDist) {
-      dispatch(deleteDistrict(selectedDist.id));
+    if (selectedArea) {
+      console.log('Device to be deleted:', selectedArea);
+      //dispatch(deleteFloorplanDevice(selectedDevice.id));
+      setDeleteDialogOpen(false);
     }
-    handleCloseDeleteDialog();
   };
 
-  const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
-
-    // Extract the weekday
-    const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
-    const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-
-    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
-      'en-GB',
-      {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      },
-    )}`;
-  };
-
-  const getAppName = (appId: string) => {
-    const app = appData.find((a: ApplicationType) => a.id === appId);
-    return app ? app.applicationName : 'Unknown App';
+  const handleOnClick = (id: string) => {
+    // console.log('id: ', id);
+    dispatch(SelectFloorplan(id));
+    navigate('/master/floorplanmaskedarea/edit');
   };
 
   return (
@@ -111,13 +90,12 @@ const DistrictList = () => {
                   <TableRow>
                     {/* Left Sticky Empty Column */}
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
-                      <Typography variant="h6"></Typography>
+                      <Typography variant="h6">Floorplans</Typography>
                     </TableCell>
-                    {['ID', 'District Code', 'District Name', 'District Host'].map((header) => (
-                      <TableCell key={header}>
-                        <Typography variant="h6">{header}</Typography>
-                      </TableCell>
-                    ))}
+
+                    <TableCell>
+                      <Typography variant="h6">Total Area</Typography>
+                    </TableCell>
                     {/* Right Sticky Empty Column */}
                     <TableCell
                       sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
@@ -127,19 +105,16 @@ const DistrictList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {districtData
+                  {floorplanData
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((district, index) => (
+                    .map((floorplan: any, index) => (
                       <TableRow key={index}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
                         >
-                          {index + 1}
+                          {floorplan.name}
                         </TableCell>
-                        <TableCell>{district.id}</TableCell>
-                        <TableCell>{district.code}</TableCell>
-                        <TableCell>{district.name}</TableCell>
-                        <TableCell>{district.districtHost}</TableCell>
+                        <TableCell>{floorplan.maskedAreas.length}</TableCell>
 
                         <TableCell
                           sx={{
@@ -152,11 +127,17 @@ const DistrictList = () => {
                             alignItems: 'center',
                           }}
                         >
-                          <AddEditDistrict type="edit" district={district} />
+                          <IconButton
+                            color="primary"
+                            size="small"
+                            onClick={() => handleOnClick(floorplan.id)}
+                          >
+                            <IconEdit size={20} />
+                          </IconButton>
                           <IconButton
                             color="error"
                             size="small"
-                            onClick={() => handleOpenDeleteDialog(district)}
+                            onClick={() => handleOpenDeleteDialog(floorplan)}
                           >
                             <IconTrash size={20} />
                           </IconButton>
@@ -166,25 +147,24 @@ const DistrictList = () => {
                 </TableBody>
               </Table>
             </TableContainer>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={floorplanData.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
           </BlankCard>
         </Box>
-        {/* Pagination */}
-        <TablePagination
-          component="div"
-          count={districtData.length}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          onPageChange={handleChangePage}
-          rowsPerPageOptions={[5, 10, 25]}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
       </Grid>
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete the distric <strong>{selectedDist?.name}</strong>?
+            Are you sure you want to delete the Masked Area <strong>{selectedArea?.name}</strong>?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -199,4 +179,5 @@ const DistrictList = () => {
     </Grid>
   );
 };
-export default DistrictList;
+
+export default MaskedAreaList2;

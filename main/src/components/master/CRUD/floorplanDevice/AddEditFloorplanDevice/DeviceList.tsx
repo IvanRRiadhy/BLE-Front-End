@@ -3,10 +3,15 @@ import { useSelector, useDispatch, AppDispatch, AppState } from 'src/store/Store
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import {
+  addFloorplanDevice,
   AddUnsavedDevice,
+  deleteFloorplanDevice,
+  DeleteUnsavedDevice,
+  editFloorplanDevice,
   fetchFloorplanDevices,
   FloorplanDeviceType,
   GetUnsavedFloorplanDevices,
+  RevertDevice,
   SelectEditingFloorplanDevice,
   SelectFloorplanDevice,
 } from 'src/store/apps/crud/floorplanDevice';
@@ -27,11 +32,16 @@ import {
 } from '@mui/material';
 import DeviceListItem from './DeviceListItem';
 import AddEditDeviceLayout from './AddEditDeviceLayout';
+import { useNavigate } from 'react-router';
 
 const DeviceList = () => {
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
   const activeFloorplan = useSelector(
     (state: AppState) => state.floorplanReducer.selectedFloorplan,
+  );
+  const devicesData = useSelector(
+    (state: AppState) => state.floorplanDeviceReducer.floorplanDevices,
   );
   const selectedDevice = useSelector(
     (state: AppState) => state.floorplanDeviceReducer.selectedFloorplanDevice,
@@ -47,7 +57,11 @@ const DeviceList = () => {
   );
 
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState('');
   const [pendingDeviceId, setPendingDeviceId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteDeviceId, setDeleteDeviceId] = useState<string | null>(null);
+  const [cancelEditDialogOpen, setCancelEditDialogOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchFloorplanDevices());
@@ -57,53 +71,65 @@ const DeviceList = () => {
     dispatch(GetUnsavedFloorplanDevices());
   }, []);
 
+  const newDevice: FloorplanDeviceType = {
+    id: `temp-${Date.now()}`, // Generate a temporary unique ID
+    name: 'New Device',
+    type: '', // Default type, can be updated later
+    floorplanId: activeFloorplan?.id || '',
+    accessCctvId: '',
+    readerId: '',
+    accessControlId: '',
+    posX: 100, // Default position
+    posY: 100, // Default position
+    posPxX: 100,
+    posPxY: 100,
+    floorplanMaskedAreaId: '',
+    applicationId: '',
+    deviceStatus: 'active', // Mark as unsaved
+    createdAt: new Date().toISOString(),
+    createdBy: 'admin', // Replace with actual user ID
+    updatedAt: new Date().toISOString(),
+    updatedBy: 'admin', // Replace with actual user ID
+  };
+
   const handleAddDeviceClick = () => {
-    const newDevice: FloorplanDeviceType = {
-      id: `temp-${Date.now()}`, // Generate a temporary unique ID
-      name: 'New Device',
-      type: '', // Default type, can be updated later
-      floorplanId: activeFloorplan?.id || '',
-      accessCctvId: '',
-      readerId: '',
-      accessControlId: '',
-      posX: 100, // Default position
-      posY: 100, // Default position
-      posPxX: 100,
-      posPxY: 100,
-      floorplanMaskedAreaId: '',
-      applicationId: '',
-      deviceStatus: 'unsaved', // Mark as unsaved
-      createdAt: new Date().toISOString(),
-      createdBy: 'admin', // Replace with actual user ID
-      updatedAt: new Date().toISOString(),
-      updatedBy: 'admin', // Replace with actual user ID
-    };
+    if (editingDevice) {
+      setPendingDeviceId(newDevice.id); // Store the device ID for later use
+      setDialogType('add'); // Set the dialog type to 'select'
+      setConfirmDialogOpen(true); // Open the confirmation dialog
+      return;
+    }
     dispatch(AddUnsavedDevice(newDevice)); // Add the new device to the unsaved devices list
     dispatch(SelectFloorplanDevice(newDevice.id));
     dispatch(SelectEditingFloorplanDevice(newDevice.id));
 
-    console.log('New device added:', newDevice);
+    // console.log('New device added:', newDevice);
   };
 
   const handleOnClick = (id: string) => {
-    // console.log('id: ', id);
-    // console.log('editingDevice: ', editingDevice);
-    // console.log('unsavedDevices: ', unsavedDevices);
     if (selectedDevice?.id === id) return; // Prevent re-selecting the same device
-    // console.log('id: ', id);
     if (editingDevice) {
       setPendingDeviceId(id); // Store the device ID for later use
+      setDialogType('select'); // Set the dialog type to 'select'
       setConfirmDialogOpen(true); // Open the confirmation dialog
       return;
     }
     dispatch(SelectFloorplanDevice(id));
-    // console.log('Selected device:', selectedDevice);
   };
   const handleConfirmProceed = () => {
+    dispatch(RevertDevice(editingDevice?.id || '')); // Revert the editing device to its original state
     if (pendingDeviceId) {
-      dispatch(SelectFloorplanDevice(pendingDeviceId));
-      dispatch(SelectEditingFloorplanDevice(null)); // Set the selected device as the editing device
+      if (dialogType === 'add') {
+        dispatch(AddUnsavedDevice(newDevice)); // Add the new device to the unsaved devices list
+        dispatch(SelectFloorplanDevice(newDevice.id));
+        dispatch(SelectEditingFloorplanDevice(newDevice.id));
+      }
+      if (dialogType === 'select') {
+        dispatch(SelectFloorplanDevice(pendingDeviceId)); // Select the pending device
+        dispatch(SelectEditingFloorplanDevice(null));
+      }
     }
+
     setConfirmDialogOpen(false); // Close the dialog
     setPendingDeviceId(null); // Clear the pending device ID
   };
@@ -115,8 +141,72 @@ const DeviceList = () => {
   const handleOnEditClick = (id: string) => {
     dispatch(SelectEditingFloorplanDevice(id));
   };
-  const handleOnDeleteClick = (id: string) => {
-    console.log('Delete device with id:', id);
+  const handleOpenDeleteDialog = (id: string) => {
+    setDeleteDeviceId(id);
+    setDeleteDialogOpen(true);
+  };
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setDeleteDeviceId(null);
+  };
+  const handleConfirmDelete = () => {
+    if (deleteDeviceId) {
+      dispatch(DeleteUnsavedDevice(deleteDeviceId)); // Delete the device from the unsaved devices list
+      dispatch(SelectFloorplanDevice(null)); // Deselect the device
+    }
+    handleCloseDeleteDialog(); // Close the delete dialog
+  };
+
+  const handleOpenCancelEditingDialog = () => {
+    setCancelEditDialogOpen(true);
+  };
+  const handleCloseCancelEditingDialog = () => {
+    setCancelEditDialogOpen(false);
+  };
+  const handleCancelEditing = () => {
+    navigate('/master/device');
+  };
+
+  const handleSaveEdits = async () => {
+    // Get the current state of devices
+    const unsavedDevicesMap = new Map(unsavedDevices.map((device) => [device.id, device]));
+    const floorplanDevicesMap = new Map(devicesData.map((device) => [device.id, device]));
+
+    // 1. Edit devices: Check for devices with different fields
+    const devicesToEdit = unsavedDevices.filter((unsavedDevice) => {
+      const originalDevice = floorplanDevicesMap.get(unsavedDevice.id);
+      return originalDevice && JSON.stringify(originalDevice) !== JSON.stringify(unsavedDevice);
+    });
+    console.log('devicesToEdit', devicesToEdit);
+
+    // Call editFloorplanDevice for each device that needs editing
+    // for (const device of devicesToEdit) {
+    //   await dispatch(editFloorplanDevice(device));
+    // }
+
+    // 2. Add devices: Check for devices in unsavedDevices but not in floorplanDevices
+    const devicesToAdd = unsavedDevices.filter(
+      (unsavedDevice) => !floorplanDevicesMap.has(unsavedDevice.id),
+    );
+    console.log('devicesToAdd', devicesToAdd);
+
+    // Call addFloorplanDevice for each new device
+    // for (const device of devicesToAdd) {
+    //   await dispatch(addFloorplanDevice(device));
+    // }
+
+    // 3. Delete devices: Check for devices in floorplanDevices but not in unsavedDevices
+    const devicesToDelete = devicesData.filter(
+      (floorplanDevice) => !unsavedDevicesMap.has(floorplanDevice.id),
+    );
+    console.log('devicesToDelete', devicesToDelete);
+
+    // Call deleteFloorplanDevice for each device to delete
+    // for (const device of devicesToDelete) {
+    //   await dispatch(deleteFloorplanDevice(device.id));
+    // }
+
+    console.log('Save operation completed.');
   };
 
   return (
@@ -146,7 +236,7 @@ const DeviceList = () => {
                 device={device}
                 onListClick={() => handleOnClick(device.id)}
                 onEditClick={() => handleOnEditClick(device.id)}
-                onDeleteClick={() => handleOnDeleteClick(device.id)}
+                onDeleteClick={() => handleOpenDeleteDialog(device.id)}
                 active={device.id === selectedDevice?.id} // Replace with your logic to determine if the item is active
               />
             ))
@@ -155,7 +245,29 @@ const DeviceList = () => {
           )}
         </Scrollbar>
       </Box>
-
+      <Box
+        p={2}
+        sx={{
+          position: 'fixed',
+          bottom: '0',
+          left: '10',
+          width: '260px',
+          height: '80px',
+          backgroundColor: 'background.paper',
+          borderTop: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Button variant="outlined" onClick={handleOpenCancelEditingDialog}>
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={handleSaveEdits}>
+            Save
+          </Button>
+        </Box>
+      </Box>
+      {/*Confirmation Dialog */}
       <Dialog open={confirmDialogOpen} onClose={handleCancelProceed} maxWidth="xs" fullWidth>
         <DialogTitle>Confirm Action</DialogTitle>
         <DialogContent>
@@ -170,6 +282,40 @@ const DeviceList = () => {
           </Button>
           <Button onClick={handleConfirmProceed} color="error">
             Proceed
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete the Device <strong>{deleteDeviceId}</strong>?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Cancel Editing Confirmation Dialog */}
+      <Dialog open={cancelEditDialogOpen} onClose={handleCloseCancelEditingDialog}>
+        <DialogTitle>Cancel Edit?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to cancel the editing progress? Any unsaved changes will be lost.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseCancelEditingDialog} color="primary">
+            Go Back to Editing
+          </Button>
+          <Button onClick={handleCancelEditing} color="error">
+            Yes, Cancel Editing
           </Button>
         </DialogActions>
       </Dialog>

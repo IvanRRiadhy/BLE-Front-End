@@ -16,6 +16,7 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import MaskedAreaList from 'src/components/master/CRUD/maskedArea/MaskedAreaList';
 import AddEditMaskedArea from 'src/components/master/CRUD/maskedArea/AddEditMaskedArea';
+import MaskedAreaList2 from 'src/components/master/CRUD/maskedArea/MaskedAreaList2';
 
 interface cardType {
   icon?: string;
@@ -85,11 +86,9 @@ const MaskedArea = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard
-            title="Floorplan Masked Area List"
-            codeModel={<AddEditMaskedArea type="add" />}
-          >
+          <ParentCard title="Floorplan Masked Area List">
             <MaskedAreaList />
+            <MaskedAreaList2 />
           </ParentCard>
         </Drawer>
       </AppCard>

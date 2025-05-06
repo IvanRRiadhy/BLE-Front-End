@@ -20,7 +20,6 @@ import {
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { fetchAccessCCTV, CCTVType, deleteCCTV } from 'src/store/apps/crud/accessCCTV';
-import { fetchApplications, ApplicationType } from 'src/store/apps/crud/application';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
 import AddEditAccessCCTV from './AddEditAccessCCTV';
@@ -44,13 +43,9 @@ const AccessCCTVList = () => {
   };
   const dispatch: AppDispatch = useDispatch();
   const CCTVData: CCTVType[] = useSelector((state: RootState) => state.CCTVReducer.cctvs);
-  const AppData: ApplicationType[] = useSelector(
-    (state: RootState) => state.applicationReducer.applications,
-  );
 
   useEffect(() => {
     dispatch(fetchAccessCCTV());
-    dispatch(fetchApplications());
   }, [dispatch]);
 
   //Delete Pop-up
@@ -75,28 +70,6 @@ const AccessCCTVList = () => {
     handleCloseDeleteDialog();
   };
 
-  const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
-
-    // Extract the weekday
-    const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
-    const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-
-    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
-      'en-GB',
-      {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      },
-    )}`;
-  };
-
-  const getAppName = (appId: string) => {
-    const app = AppData.find((a: ApplicationType) => a.id === appId);
-    return app ? app.applicationName : 'Unknown App';
-  };
-
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -110,7 +83,7 @@ const AccessCCTVList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"> </Typography>
                     </TableCell>
-                    {['ID', 'Name', 'RTSP', 'Integration', 'Application Name'].map((header) => (
+                    {['ID', 'Name', 'RTSP', 'Integration'].map((header) => (
                       <TableCell key={header}>
                         <Typography variant="h6">{header}</Typography>
                       </TableCell>
@@ -137,7 +110,6 @@ const AccessCCTVList = () => {
                         <TableCell>{cctv.name}</TableCell>
                         <TableCell>{cctv.rtsp}</TableCell>
                         <TableCell>{cctv.integration.integrationType}</TableCell>
-                        <TableCell>{getAppName(cctv.applicationId)}</TableCell>
                         <TableCell
                           sx={{
                             position: 'sticky',

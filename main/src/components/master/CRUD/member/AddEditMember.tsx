@@ -118,7 +118,7 @@ const AddEditMember = ({ type, member }: FormType) => {
       setOpen(false);
       setPreview(null);
     } catch (error) {
-      console.error('Error saving application:', error);
+      console.error('Error saving Member:', error);
     }
   };
 

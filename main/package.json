@@ -43,6 +43,7 @@
     "chance": "^1.1.11",
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.13",
+    "earcut": "^3.0.1",
     "emoji-picker-react": "^4.12.0",
     "formik": "^2.4.5",
     "formik-mui": "^5.0.0-alpha.0",
@@ -87,6 +88,7 @@
   },
   "devDependencies": {
     "@types/chance": "^1.1.6",
+    "@types/earcut": "^3.0.0",
     "@types/fslightbox-react": "^1.7.8",
     "@types/node": "22.10.1",
     "@types/react": "19.0.1",

@@ -121,7 +121,7 @@ const TrackingTransactionList = () => {
                   <TableRow>
                     {/* Left Sticky Empty Column */}
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
-                      <Typography variant="h6"> Left </Typography>
+                      <Typography variant="h6"> </Typography>
                     </TableCell>
                     {[
                       'id',
@@ -151,11 +151,14 @@ const TrackingTransactionList = () => {
                 <TableBody>
                   {trackingTransData
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((trackingTrans: trackingTransType) => (
+                    .map((trackingTrans: trackingTransType, index) => (
                       <TableRow key={trackingTrans.id}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
-                        ></TableCell>
+                        >
+                          {' '}
+                          {index + 1}{' '}
+                        </TableCell>
                         <TableCell>{trackingTrans.id}</TableCell>
                         <TableCell>{formatTime(trackingTrans.transTime)}</TableCell>
                         <TableCell>{getReaderName(trackingTrans.readerId)}</TableCell>

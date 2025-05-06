@@ -34,7 +34,7 @@ const Floor = () => {
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
-      title: 'Total Floorplans',
+      title: 'Total Floors',
       subtitle: floorList.length.toString(),
       bgcolor: 'success',
     },

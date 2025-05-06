@@ -32,8 +32,8 @@ interface FormType {
 
 const AddEditBlacklist = ({ type, blacklist }: FormType) => {
   const [open, setOpen] = React.useState(false);
-  const [formData, setFormData] = React.useState<blacklistType>(
-    blacklist || { id: '', visitorId: '', floorplanId: '' },
+  const [formData, setFormData] = React.useState(
+    blacklist || { id: '', visitorId: '', floorplanMaskedAreaId: '' },
   );
 
   const visitorData = useSelector((state: RootState) => state.visitorReducer.visitors);
@@ -53,12 +53,24 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
   };
 
   const handleSave = async () => {
+    const data = new FormData();
+
+    Object.entries(formData).forEach(([key, value]) => {
+      if (
+        key !== 'createdBy' &&
+        key !== 'createdAt' &&
+        key !== 'updatedBy' &&
+        key !== 'updatedAt'
+      ) {
+        data.append(key, value.toString());
+      }
+    });
     try {
       if (type === 'edit') {
-        await dispatch(editBlacklist(formData)); // Dispatch update
+        await dispatch(editBlacklist(data)); // Dispatch update
       }
       if (type === 'add') {
-        await dispatch(addBlacklist(formData));
+        await dispatch(addBlacklist(data));
       }
       await dispatch(fetchBlacklist());
       console.log('Saved!');
@@ -125,7 +137,7 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
               <CustomFormLabel htmlFor="floorplan-id">Floorplan ID</CustomFormLabel>
               <CustomTextField
                 id="floorplanId"
-                placeholder={formData.floorplanId}
+                placeholder={formData.floorplanMaskedAreaId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"

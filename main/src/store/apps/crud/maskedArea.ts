@@ -26,14 +26,18 @@ export interface MaskedAreaType {
 
 interface StateType {
     maskedAreas: MaskedAreaType[];
+    unsavedMaskedAreas: MaskedAreaType[];
     maskedAreaSearch: string;
     selectedMaskedArea?: MaskedAreaType | null;
+    editingMaskedArea?: MaskedAreaType | null;
 }
 
 const initialState: StateType = {
     maskedAreas: [],
+    unsavedMaskedAreas: [],
     maskedAreaSearch: "",
     selectedMaskedArea: null,
+    editingMaskedArea: null
 };
 
 export const MaskedAreaSlice = createSlice({
@@ -43,13 +47,57 @@ export const MaskedAreaSlice = createSlice({
         GetMaskedArea: (state, action: PayloadAction<MaskedAreaType[]>) => {
             state.maskedAreas = action.payload;
         },
-        SelectMaskedArea: (state, action: PayloadAction<string>) => {
-            const selected = state.maskedAreas.find((maskedArea: MaskedAreaType) => maskedArea.id === action.payload);
+        GetUnsavedMaskedArea: (state) => {
+            state.unsavedMaskedAreas = state.maskedAreas;
+        },
+        SelectMaskedArea: (state, action) => {
+            const selected = state.unsavedMaskedAreas.find((maskedArea: MaskedAreaType) => maskedArea.id === action.payload);
             state.selectedMaskedArea = selected || null;
+        },
+        SelectEditingMaskedArea: (state, action) => {
+            const selected = state.unsavedMaskedAreas.find((maskedArea: MaskedAreaType) => maskedArea.id === action.payload);
+            state.editingMaskedArea = selected || null;
         },
         SearchMaskedArea: (state, action: PayloadAction<string>) => {
             state.maskedAreaSearch = action.payload;
         },
+        AddUnsavedMaskedArea: (state, action: PayloadAction<MaskedAreaType>) => {
+            state.unsavedMaskedAreas.push(action.payload);
+        },
+        EditUnsavedMaskedArea: (state, action: PayloadAction<MaskedAreaType>) => {
+            const index = state.unsavedMaskedAreas.findIndex((maskedArea) => maskedArea.id === action.payload.id);
+            if (index !== -1) {
+                state.unsavedMaskedAreas[index] = action.payload;
+                state.editingMaskedArea = action.payload;
+            }
+        },
+        DeleteUnsavedMaskedArea: (state, action: PayloadAction<string>) => {
+            const index = state.unsavedMaskedAreas.findIndex((maskedArea) => maskedArea.id === action.payload);
+            if (index !== -1) {
+                state.unsavedMaskedAreas.splice(index, 1);
+                console.log(`Area with ID ${action.payload} deleted from unsaved Area.`);
+            } else {
+                console.warn(`Area with ID ${action.payload} not found in unsaved Area.`);
+            }
+        },
+        RevertMaskedArea: {
+            reducer: (state, action: PayloadAction<{id: string}>) => {
+                const index = state.unsavedMaskedAreas.findIndex((maskedArea) => maskedArea.id === action.payload.id);
+                const area = state.maskedAreas.find((maskedArea) => maskedArea.id === action.payload.id);
+                if(area) {
+                    if(state.selectedMaskedArea?.id === action.payload.id) {
+                        state.selectedMaskedArea = { ...area };
+                    }
+                    if(index !== -1) {
+                        state.unsavedMaskedAreas[index] = { ...area };
+                        state.editingMaskedArea = null;
+                    }
+                }
+            },
+            prepare: (id: string) => ({
+                payload: {id},
+            })
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -81,6 +129,12 @@ export const {
     GetMaskedArea,
     SelectMaskedArea,
     SearchMaskedArea,
+    AddUnsavedMaskedArea,
+    EditUnsavedMaskedArea,
+    DeleteUnsavedMaskedArea,
+    RevertMaskedArea,
+    SelectEditingMaskedArea,
+    GetUnsavedMaskedArea,
 } = MaskedAreaSlice.actions;    
 
 export const fetchMaskedAreas = () => async (dispatch: AppDispatch) => {
@@ -114,6 +168,7 @@ export const addMaskedArea = createAsyncThunk("maskedAreas/addMaskedArea", async
 export const editMaskedArea = createAsyncThunk("maskedAreas/editMaskedArea", async (maskedArea: MaskedAreaType, { rejectWithValue }) => {
     try {
         const { id, createdBy, createdAt, updatedBy, updatedAt, ...filteredMaskedAreaData } = maskedArea;
+        console.log('filteredMaskedAreaData', filteredMaskedAreaData);
         const response = await axios.put(`${API_URL}/${id}`, filteredMaskedAreaData, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,

@@ -91,8 +91,6 @@ const Menuitems: MenuitemsType[] = [
     title: 'Main Menu',
     icon: IconHome,
     href: '/dashboards/mainmenu',
-    //chip: 'New',
-    //chipColor: 'secondary',
   },
   {
     id: uniqueId(),
@@ -188,28 +186,37 @@ const Menuitems: MenuitemsType[] = [
     icon: IconBuilding,
     href: '/master/building',
   },
-
   {
     id: uniqueId(),
-    title: 'Floor Plan',
-    icon: IconPoint,
-    href: '/apps/email/',
+    title: 'Organization',
+    icon: IconMapDown,
     children: [
       {
         id: uniqueId(),
-        title: 'Floor Plan',
-        icon: IconMap2,
-        href: '/master/floorplan',
+        title: 'Organization',
+        icon: IconMap,
+        href: '/master/organization'
       },
       {
         id: uniqueId(),
-        title: 'Masking Area',
-        icon: IconDeviceIpadExclamation,
-        href: '/apps/chats',
+        title: 'Department',
+        icon: IconMap,
+        href: '/master/department',
       },
-    ],
+      {
+        id: uniqueId(),
+        title: 'District',
+        icon: IconMap,
+        href: '/master/district'
+      },
+    ]
   },
-
+  {
+    id: uniqueId(),
+    title: 'Floor Plan',
+    icon: IconMap2,
+    href: '/master/floorplan',
+  },
   {
     id: uniqueId(),
     title: 'Tag',
@@ -232,28 +239,64 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: 'Gateway',
-    icon: IconFlag3,
-    href: '/master/gateway',
+    title: 'Application',
+    icon: IconMap,
+    href: '/master/application',
   },
   {
-    id: uniqueId(),
-    title: 'Role Access',
-    icon: IconAccessible,
-    href: '/frontend-pages/contact',
-  },
-  {
-    id: uniqueId(),
-    title: 'Alarm',
-    icon: IconBellExclamation,
-    href: '/apps/notes/',
-  },
-  {
-    id: uniqueId(),
-    title: 'Guest Permission',
-    icon: IconLicense,
-    href: '/apps/tickets/',
-  },
+      id:uniqueId(),
+      title: 'Integration',
+      icon: IconLicense,
+      href: '/master/integration'
+    },
+    {
+      id: uniqueId(),
+      title: 'Access CCTV',
+      icon: IconAccessible,
+      href: '/master/accesscctv'
+    },
+    {
+      id: uniqueId(),
+      title: 'Access Control',
+      icon: IconAccessible,
+      href: '/master/accesscontrol'
+    },
+    {
+      id: uniqueId(),
+      title: 'Brand',
+      icon: IconBellExclamation,
+      href: '/master/brand'
+    },
+    {
+      id: uniqueId(),
+      title: 'Floorplan Masked Area',
+      icon: IconMapDown,
+      href: '/master/floorplanmaskedarea'
+    },
+    {
+      id: uniqueId(),
+      title: 'Ble Reader',
+      icon: IconLogin,
+      href: '/master/blereader'
+    },
+    {
+      id: uniqueId(),
+      title: 'Floor',
+      icon: IconMap,
+      href: '/master/floor'
+    },
+    {
+      id: uniqueId(),
+      title: 'Tracking Transaction',
+      icon: IconLiveView,
+      href: '/master/trackingtransaction'
+    },
+    {
+      id: uniqueId(),
+      title: 'Device',
+      icon: IconAccessibleOffFilled,
+      href: '/master/device'
+    },
   {
     navlabel:true,
     subheader:'App'
@@ -296,40 +339,40 @@ const Menuitems: MenuitemsType[] = [
       },
     ],
   },
-  {
-    navlabel: true,
-    subheader: "CRUD"
-  },
-  {
-    id: uniqueId(),
-    title: 'Application',
-    icon: IconMap,
-    href: '/master/application',
-  },
-  {
-    id:uniqueId(),
-    title: 'Integration',
-    icon: IconLicense,
-    href: '/master/integration'
-  },
-  {
-    id: uniqueId(),
-    title: 'Access CCTV',
-    icon: IconAccessible,
-    href: '/master/accesscctv'
-  },
-  {
-    id: uniqueId(),
-    title: 'Access Control',
-    icon: IconAccessible,
-    href: '/master/accesscontrol'
-  },
-  {
-    id: uniqueId(),
-    title: 'Brand',
-    icon: IconBellExclamation,
-    href: '/master/brand'
-  },
+  // {
+  //   navlabel: true,
+  //   subheader: "CRUD"
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Application',
+  //   icon: IconMap,
+  //   href: '/master/application',
+  // },
+  // {
+  //   id:uniqueId(),
+  //   title: 'Integration',
+  //   icon: IconLicense,
+  //   href: '/master/integration'
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Access CCTV',
+  //   icon: IconAccessible,
+  //   href: '/master/accesscctv'
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Access Control',
+  //   icon: IconAccessible,
+  //   href: '/master/accesscontrol'
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Brand',
+  //   icon: IconBellExclamation,
+  //   href: '/master/brand'
+  // },
   // {
   //   id: uniqueId(),
   //   title: 'Department',
@@ -348,48 +391,48 @@ const Menuitems: MenuitemsType[] = [
   //   icon: IconBuilding,
   //   href: '/master/organization'
   // },
-  {
-            id: uniqueId(),
-            title: 'Floorplan Masked Area',
-            icon: IconMapDown,
-            href: '/master/floorplanmaskedarea'
-          },
-          {
-            id: uniqueId(),
-            title: 'Ble Reader',
-            icon: IconLogin,
-            href: '/master/blereader'
-          },
-          {
-            id: uniqueId(),
-            title: 'Floor',
-            icon: IconMap,
-            href: '/master/floor'
-          },
-          {
-            id: uniqueId(),
-            title: 'Member',
-            icon: IconAccessibleOff,
-            href: '/master/member'
-          },
-          {
-            id: uniqueId(),
-            title: 'Tracking Transaction',
-            icon: IconLiveView,
-            href: '/master/trackingtransaction'
-          },
-          {
-            id: uniqueId(),
-            title: 'Visitor',
-            icon: IconAccessibleOffFilled,
-            href: '/master/visitor'
-          },
-          {
-            id: uniqueId(),
-            title: 'Blacklist',
-            icon: IconLicenseOff,
-            href: '/master/blacklist'
-          },
+  // {
+  //           id: uniqueId(),
+  //           title: 'Floorplan Masked Area',
+  //           icon: IconMapDown,
+  //           href: '/master/floorplanmaskedarea'
+  //         },
+  //         {
+  //           id: uniqueId(),
+  //           title: 'Ble Reader',
+  //           icon: IconLogin,
+  //           href: '/master/blereader'
+  //         },
+  //         {
+  //           id: uniqueId(),
+  //           title: 'Floor',
+  //           icon: IconMap,
+  //           href: '/master/floor'
+  //         },
+  //         {
+  //           id: uniqueId(),
+  //           title: 'Member',
+  //           icon: IconAccessibleOff,
+  //           href: '/master/member'
+  //         },
+  //         {
+  //           id: uniqueId(),
+  //           title: 'Tracking Transaction',
+  //           icon: IconLiveView,
+  //           href: '/master/trackingtransaction'
+  //         },
+  //         {
+  //           id: uniqueId(),
+  //           title: 'Visitor',
+  //           icon: IconAccessibleOffFilled,
+  //           href: '/master/visitor'
+  //         },
+  //         {
+  //           id: uniqueId(),
+  //           title: 'Blacklist',
+  //           icon: IconLicenseOff,
+  //           href: '/master/blacklist'
+  //         },
   
 
   // {
@@ -510,102 +553,102 @@ const Menuitems: MenuitemsType[] = [
   //     },
   //   ],
   // },
-  {
-    navlabel: true,
-    subheader: 'Forms',
-  },
-  {
-    id: uniqueId(),
-    title: 'Form Elements',
-    icon: IconApps,
-    href: '/forms/form-elements/autocomplete',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'Autocomplete',
-        icon: IconPoint,
-        href: '/forms/form-elements/autocomplete',
-      },
-      {
-        id: uniqueId(),
-        title: 'Button',
-        icon: IconPoint,
-        href: '/forms/form-elements/button',
-      },
-      {
-        id: uniqueId(),
-        title: 'Checkbox',
-        icon: IconPoint,
-        href: '/forms/form-elements/checkbox',
-      },
-      {
-        id: uniqueId(),
-        title: 'Radio',
-        icon: IconPoint,
-        href: '/forms/form-elements/radio',
-      },
-      {
-        id: uniqueId(),
-        title: 'Date Time',
-        icon: IconPoint,
-        href: '/forms/form-elements/date-time',
-      },
-      {
-        id: uniqueId(),
-        title: 'Slider',
-        icon: IconPoint,
-        href: '/forms/form-elements/slider',
-      },
-      {
-        id: uniqueId(),
-        title: 'Switch',
-        icon: IconPoint,
-        href: '/forms/form-elements/switch',
-      },
-    ],
-  },
-  {
-    id: uniqueId(),
-    title: 'Form Layout',
-    icon: IconFileDescription,
-    href: '/forms/form-layouts',
-  },
-  {
-    id: uniqueId(),
-    title: 'Form Horizontal',
-    icon: IconBoxAlignBottom,
-    href: '/forms/form-horizontal',
-  },
-  {
-    id: uniqueId(),
-    title: 'Form Vertical',
-    icon: IconBoxAlignLeft,
-    href: '/forms/form-vertical',
-  },
-  {
-    id: uniqueId(),
-    title: 'Form Custom',
-    icon: IconFileDots,
-    href: '/forms/form-custom',
-  },
-  {
-    id: uniqueId(),
-    title: 'Form Wizard',
-    icon: IconFiles,
-    href: '/forms/form-wizard',
-  },
-  {
-    id: uniqueId(),
-    title: 'Form Validation',
-    icon: IconFiles,
-    href: '/forms/form-validation',
-  },
-  {
-    id: uniqueId(),
-    title: 'Tiptap Editor',
-    icon: IconEdit,
-    href: '/forms/form-tiptap',
-  },
+  // {
+  //   navlabel: true,
+  //   subheader: 'Forms',
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Form Elements',
+  //   icon: IconApps,
+  //   href: '/forms/form-elements/autocomplete',
+  //   children: [
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Autocomplete',
+  //       icon: IconPoint,
+  //       href: '/forms/form-elements/autocomplete',
+  //     },
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Button',
+  //       icon: IconPoint,
+  //       href: '/forms/form-elements/button',
+  //     },
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Checkbox',
+  //       icon: IconPoint,
+  //       href: '/forms/form-elements/checkbox',
+  //     },
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Radio',
+  //       icon: IconPoint,
+  //       href: '/forms/form-elements/radio',
+  //     },
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Date Time',
+  //       icon: IconPoint,
+  //       href: '/forms/form-elements/date-time',
+  //     },
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Slider',
+  //       icon: IconPoint,
+  //       href: '/forms/form-elements/slider',
+  //     },
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Switch',
+  //       icon: IconPoint,
+  //       href: '/forms/form-elements/switch',
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Form Layout',
+  //   icon: IconFileDescription,
+  //   href: '/forms/form-layouts',
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Form Horizontal',
+  //   icon: IconBoxAlignBottom,
+  //   href: '/forms/form-horizontal',
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Form Vertical',
+  //   icon: IconBoxAlignLeft,
+  //   href: '/forms/form-vertical',
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Form Custom',
+  //   icon: IconFileDots,
+  //   href: '/forms/form-custom',
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Form Wizard',
+  //   icon: IconFiles,
+  //   href: '/forms/form-wizard',
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Form Validation',
+  //   icon: IconFiles,
+  //   href: '/forms/form-validation',
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Tiptap Editor',
+  //   icon: IconEdit,
+  //   href: '/forms/form-tiptap',
+  // },
   // {
   //   navlabel: true,
   //   subheader: 'Tables',

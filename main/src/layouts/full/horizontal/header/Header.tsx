@@ -98,7 +98,7 @@ const Header = () => {
               <IconSun size="21" stroke="1.5" onClick={() => dispatch(setDarkMode('light'))} />
             )}
           </IconButton> */}
-          <Notifications />
+          {/* <Notifications /> */}
 
           <Profile />
         </Stack>

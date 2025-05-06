@@ -83,7 +83,7 @@ const Blacklist = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Brand List" codeModel={<AddEditBlacklist type="add" />}>
+          <ParentCard title="Blacklist List" codeModel={<AddEditBlacklist type="add" />}>
             <BlacklistList />
           </ParentCard>
         </Drawer>

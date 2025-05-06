@@ -90,7 +90,7 @@ const FullLayout: FC = () => {
               </Box>
             </Container>
           </Box>
-          <Customizer />
+          {/* <Customizer /> */}
         </PageWrapper>
       </MainWrapper>
     </>

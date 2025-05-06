@@ -116,12 +116,12 @@ const Menuitems = [
     icon: IconMap2,
     href: '/master/floorplan',
   },
-  {
-    id: uniqueId(),
-    title: 'Masking Area',
-    icon: IconDeviceIpadExclamation,
-    href: '/master/floorplanmaskedarea',
-  },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Masking Area',
+  //   icon: IconDeviceIpadExclamation,
+  //   href: '/master/floorplanmaskedarea',
+  // },
   {
     id: uniqueId(),
     title: 'Tag',
@@ -141,30 +141,84 @@ const Menuitems = [
       },
     ]
   },
-  {
-    id: uniqueId(),
-    title: 'Gateway',
-    icon: IconFlag3,
-    href: '/master/gateway',
-  },
-  {
-    id: uniqueId(),
-    title: 'Role Access',
-    icon: IconAccessible,
-    href: '/frontend-pages/contact',
-  },
-  {
-    id: uniqueId(),
-    title: 'Alarm',
-    icon: IconBellExclamation,
-    href: '/master/alarmrecord',
-  },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Gateway',
+  //   icon: IconFlag3,
+  //   href: '/master/gateway',
+  // },
     {
       id: uniqueId(),
-      title: 'Guest Permission',
-      icon: IconLicense,
-      href: '/apps/tickets/',
+      title: 'Application',
+      icon: IconMap,
+      href: '/master/application',
     },
+    {
+        id:uniqueId(),
+        title: 'Integration',
+        icon: IconLicense,
+        href: '/master/integration'
+      },
+      {
+        id: uniqueId(),
+        title: 'Access CCTV',
+        icon: IconAccessible,
+        href: '/master/accesscctv'
+      },
+      {
+        id: uniqueId(),
+        title: 'Access Control',
+        icon: IconAccessible,
+        href: '/master/accesscontrol'
+      },
+      {
+        id: uniqueId(),
+        title: 'Brand',
+        icon: IconBellExclamation,
+        href: '/master/brand'
+      },
+      {
+        id: uniqueId(),
+        title: 'Floorplan Masked Area',
+        icon: IconMapDown,
+        href: '/master/floorplanmaskedarea'
+      },
+      {
+        id: uniqueId(),
+        title: 'Ble Reader',
+        icon: IconLogin,
+        href: '/master/blereader'
+      },
+      {
+        id: uniqueId(),
+        title: 'Floor',
+        icon: IconMap,
+        href: '/master/floor'
+      },
+      // {
+      //   id: uniqueId(),
+      //   title: 'Member',
+      //   icon: IconAccessibleOff,
+      //   href: '/master/member'
+      // },
+      {
+        id: uniqueId(),
+        title: 'Tracking Transaction',
+        icon: IconLiveView,
+        href: '/master/trackingtransaction'
+      },
+      // {
+      //   id: uniqueId(),
+      //   title: 'Visitor',
+      //   icon: IconAccessibleOffFilled,
+      //   href: '/master/visitor'
+      // },
+      {
+        id: uniqueId(),
+        title: 'Device',
+        icon: IconAccessibleOffFilled,
+        href: '/master/device'
+      },
     ],
   },
   {
@@ -311,41 +365,41 @@ const Menuitems = [
   //           },
     ],
   },
-  {
-    id: uniqueId(),
-    title: 'CRUD',
-    icon: IconPoint,
-    children: [
-      {
-        id: uniqueId(),
-        title: 'Application',
-        icon: IconMap,
-        href: '/master/application',
-      },
-      {
-          id:uniqueId(),
-          title: 'Integration',
-          icon: IconLicense,
-          href: '/master/integration'
-        },
-        {
-          id: uniqueId(),
-          title: 'Access CCTV',
-          icon: IconAccessible,
-          href: '/master/accesscctv'
-        },
-        {
-          id: uniqueId(),
-          title: 'Access Control',
-          icon: IconAccessible,
-          href: '/master/accesscontrol'
-        },
-        {
-          id: uniqueId(),
-          title: 'Brand',
-          icon: IconBellExclamation,
-          href: '/master/brand'
-        },
+  // {
+  //   id: uniqueId(),
+  //   title: 'CRUD',
+  //   icon: IconPoint,
+  //   children: [
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Application',
+  //       icon: IconMap,
+  //       href: '/master/application',
+  //     },
+  //     {
+  //         id:uniqueId(),
+  //         title: 'Integration',
+  //         icon: IconLicense,
+  //         href: '/master/integration'
+  //       },
+  //       {
+  //         id: uniqueId(),
+  //         title: 'Access CCTV',
+  //         icon: IconAccessible,
+  //         href: '/master/accesscctv'
+  //       },
+  //       {
+  //         id: uniqueId(),
+  //         title: 'Access Control',
+  //         icon: IconAccessible,
+  //         href: '/master/accesscontrol'
+  //       },
+  //       {
+  //         id: uniqueId(),
+  //         title: 'Brand',
+  //         icon: IconBellExclamation,
+  //         href: '/master/brand'
+  //       },
         // {
         //   id: uniqueId(),
         //   title: 'Department',
@@ -364,48 +418,48 @@ const Menuitems = [
         //   icon: IconBuilding,
         //   href: '/master/organization'
         // },
-        {
-          id: uniqueId(),
-          title: 'Floorplan Masked Area',
-          icon: IconMapDown,
-          href: '/master/floorplanmaskedarea'
-        },
-        {
-          id: uniqueId(),
-          title: 'Ble Reader',
-          icon: IconLogin,
-          href: '/master/blereader'
-        },
-        {
-          id: uniqueId(),
-          title: 'Floor',
-          icon: IconMap,
-          href: '/master/floor'
-        },
-        {
-          id: uniqueId(),
-          title: 'Member',
-          icon: IconAccessibleOff,
-          href: '/master/member'
-        },
-        {
-          id: uniqueId(),
-          title: 'Tracking Transaction',
-          icon: IconLiveView,
-          href: '/master/trackingtransaction'
-        },
-        {
-          id: uniqueId(),
-          title: 'Visitor',
-          icon: IconAccessibleOffFilled,
-          href: '/master/visitor'
-        },
-        {
-          id: uniqueId(),
-          title: 'Device',
-          icon: IconAccessibleOffFilled,
-          href: '/master/device'
-        },
+        // {
+        //   id: uniqueId(),
+        //   title: 'Floorplan Masked Area',
+        //   icon: IconMapDown,
+        //   href: '/master/floorplanmaskedarea'
+        // },
+        // {
+        //   id: uniqueId(),
+        //   title: 'Ble Reader',
+        //   icon: IconLogin,
+        //   href: '/master/blereader'
+        // },
+        // {
+        //   id: uniqueId(),
+        //   title: 'Floor',
+        //   icon: IconMap,
+        //   href: '/master/floor'
+        // },
+        // {
+        //   id: uniqueId(),
+        //   title: 'Member',
+        //   icon: IconAccessibleOff,
+        //   href: '/master/member'
+        // },
+        // {
+        //   id: uniqueId(),
+        //   title: 'Tracking Transaction',
+        //   icon: IconLiveView,
+        //   href: '/master/trackingtransaction'
+        // },
+        // {
+        //   id: uniqueId(),
+        //   title: 'Visitor',
+        //   icon: IconAccessibleOffFilled,
+        //   href: '/master/visitor'
+        // },
+        // {
+        //   id: uniqueId(),
+        //   title: 'Device',
+        //   icon: IconAccessibleOffFilled,
+        //   href: '/master/device'
+        // },
         // {
         //   id: uniqueId(),
         //   title: 'Blacklist',
@@ -418,8 +472,8 @@ const Menuitems = [
         //   icon: IconBuilding,
         //   href: '/master/building'
         // }
-    ]
-  },
+  //   ]
+  // },
   
 
   // {

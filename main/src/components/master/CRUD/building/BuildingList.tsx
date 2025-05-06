@@ -23,6 +23,7 @@ import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
+import AddEditBuilding from './AddEditBuilding';
 
 const BuildingList = () => {
   // Pagination State
@@ -70,7 +71,7 @@ const BuildingList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {['ID', 'Building Name', 'Application Name'].map((header) => (
+                    {['ID', 'Building Name'].map((header) => (
                       <TableCell key={header}>
                         <Typography variant="h6">{header}</Typography>
                       </TableCell>
@@ -95,7 +96,6 @@ const BuildingList = () => {
                         </TableCell>
                         <TableCell>{building.id}</TableCell>
                         <TableCell>{building.name}</TableCell>
-                        <TableCell>{getAppName(building.applicationId)}</TableCell>
 
                         <TableCell
                           sx={{
@@ -108,6 +108,7 @@ const BuildingList = () => {
                             alignItems: 'center',
                           }}
                         >
+                          <AddEditBuilding type="edit" building={building} />
                           <IconButton
                             color="error"
                             size="small"

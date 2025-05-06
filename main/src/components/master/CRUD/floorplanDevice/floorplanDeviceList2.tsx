@@ -23,7 +23,7 @@ import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { useTranslation } from 'react-i18next';
 import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
-import { fetchFloorplan, FloorplanType, SelectFloorplan } from 'src/store/apps/crud/floorplan';
+import { fetchFloorplan, SelectFloorplan } from 'src/store/apps/crud/floorplan';
 import { IconEdit } from '@tabler/icons-react';
 import { useNavigate } from 'react-router';
 
@@ -73,10 +73,6 @@ const FloorplanDeviceList2 = () => {
     }
   };
 
-  const getFloorplanName = (floorplanId: string) => {
-    const floorplan = floorplanData.find((floor: FloorplanType) => floor.id === floorplanId);
-    return floorplan ? floorplan.name : 'Unknown Floorplan';
-  };
   const handleOnClick = (id: string) => {
     // console.log('id: ', id);
     dispatch(SelectFloorplan(id));

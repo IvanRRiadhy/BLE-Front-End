@@ -3,13 +3,17 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { visitorType } from "./visitor";
+import { MaskedAreaType } from "./maskedArea";
 
 const API_URL = 'http://192.168.1.116:5000/api/VisitorBlacklistArea/';
 
 export interface blacklistType {
     id: string,
-    floorplanId: string,
+    floorplanMaskedAreaId: string,
     visitorId: string,
+    visitor: visitorType,
+    floorplanMaskedArea: MaskedAreaType,
 }
 
 interface StateType {
@@ -85,10 +89,10 @@ export const fetchBlacklist = () => async (dispatch: AppDispatch) => {
     }
 };
 
-export const addBlacklist = createAsyncThunk("blacklist/addBlacklist", async (blacklist: blacklistType) => {
+export const addBlacklist = createAsyncThunk("blacklist/addBlacklist", async (formData: FormData) => {
     try {
-        const {id, ...filteredBlacklistData} = blacklist
-        const response = await axios.post(API_URL, filteredBlacklistData, {
+        formData.delete('id');
+        const response = await axios.post(API_URL, formData, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
@@ -100,10 +104,11 @@ export const addBlacklist = createAsyncThunk("blacklist/addBlacklist", async (bl
     }
 });
 
-export const editBlacklist = createAsyncThunk("blacklist/editBlacklist", async (blacklist: blacklistType) => {
+export const editBlacklist = createAsyncThunk("blacklist/editBlacklist", async (formData: FormData) => {
     try {
-        const { id, ...filteredBlacklistData } = blacklist;
-        const response = await axios.put(`${API_URL}/${blacklist.id}`, filteredBlacklistData, {
+        const id = formData.get('id');
+        formData.delete('id');
+        const response = await axios.put(`${API_URL}/${id}`, formData, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             }

@@ -5,9 +5,11 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { floorType } from "./floor";
 import { FloorplanDeviceType } from "./floorplanDevice";
+import { MaskedAreaType } from "./maskedArea";
 
 const Floorplan_API_URL = 'http://192.168.1.116:5000/api/MstFloorplan/';
 const Device_API_URL = 'http://192.168.1.116:5000/api/FloorplanDevice/';
+const Area_API_URL = 'http://192.168.1.116:5000/api/FloorplanMaskedArea/';
 
 export interface FloorplanType {
     id: string,
@@ -20,6 +22,7 @@ export interface FloorplanType {
     updatedBy: string,
     updatedAt: string,
     devices: FloorplanDeviceType[],
+    maskedAreas: MaskedAreaType[]
 }
 
 interface StateType {
@@ -67,14 +70,21 @@ export const fetchFloorplan = () => async (dispatch: AppDispatch) => {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
         });
+        const areaResponse = await axios.get(Area_API_URL, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        })
 
         const floorplans = response.data.collection.data || [];
         const devices = deviceResponse.data.collection.data || [];
+        const areas = areaResponse.data.collection.data || [];
 
         // Enrich floorplans with devices
         const enrichedFloorplans = floorplans.map((floorplan: FloorplanType) => ({
             ...floorplan,
             devices: devices.filter((device: FloorplanDeviceType) => device.floorplanId === floorplan.id),
+            maskedAreas: areas.filter((area: MaskedAreaType) => area.floorplanId === floorplan.id)
         }));
 
         dispatch(GetFloorplan(enrichedFloorplans));

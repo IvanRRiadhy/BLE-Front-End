@@ -15,6 +15,7 @@ import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import BuildingList from 'src/components/master/CRUD/building/BuildingList';
+import AddEditBuilding from 'src/components/master/CRUD/building/AddEditBuilding';
 
 interface cardType {
   icon?: string;
@@ -83,7 +84,7 @@ const Building = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Department List">
+          <ParentCard title="Building List" codeModel={<AddEditBuilding type="add" />}>
             <BuildingList />
           </ParentCard>
         </Drawer>
