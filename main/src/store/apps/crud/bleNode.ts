@@ -5,7 +5,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { bleReaderType } from "./bleReader";
 
-const API_URL = 'http://192.168.1.116:5000/api/BleReaderNode/';
+const API_URL = 'http://192.168.1.173:5000/api/BleReaderNode/';
 
 export interface BleNodeType {
     id: string,

@@ -60,8 +60,9 @@ export const orgType: inputDataType[] = [
   ];
   
   export const restrictedStatus: inputDataType[] = [
-    { label: "Restrict", value: "Restrict" },
-    { label: "Non-Restrict", value: "NonRestrict" },
+    { label: "Please select Status", value: '', disabled: true},
+    { label: "Restrict", value: "restrict" },
+    { label: "Non-Restrict", value: "non-restrict" },
   ];
   
   export const visitorStatus: inputDataType[] = [

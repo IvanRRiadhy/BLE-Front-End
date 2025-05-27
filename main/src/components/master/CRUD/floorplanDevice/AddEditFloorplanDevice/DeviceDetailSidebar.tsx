@@ -13,7 +13,6 @@ interface Props {
 
 const DeviceDetailSidebar = ({ isEditingSidebarOpen, onEditingSidebarClose }: Props) => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
-  const theme = useTheme();
 
   return (
     <>

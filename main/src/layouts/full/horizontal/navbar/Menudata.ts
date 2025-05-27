@@ -227,29 +227,29 @@ const Menuitems = [
     icon: IconApps,
     href: '/apps/',
     children: [
-      {
-        id: uniqueId(),
-        title: 'Live Tracking',
-        icon: IconLiveView,
-        href: '/apps/tracking/',
-      },
+      // {
+      //   id: uniqueId(),
+      //   title: 'Live Tracking',
+      //   icon: IconLiveView,
+      //   href: '/apps/tracking/',
+      // },
       {
         id: uniqueId(),
         title: 'Alarm Notification',
         icon: IconBellExclamation,
-        href: '/master/trackingtransaction',
+        href: '/apps/alarmRecord',
       },
-      {
-        id: uniqueId(),
-        title: 'People Track',
-        icon: IconUserCircle,
-        href: '/user-profile',
-      },
+      // {
+      //   id: uniqueId(),
+      //   title: 'People Track',
+      //   icon: IconUserCircle,
+      //   href: '/user-profile',
+      // },
       {
         id: uniqueId(),
         title: 'Blacklist',
         icon: IconBarrierBlock,
-        href: '/master/blacklist',
+        href: '/apps/blacklist',
       },
       {
         id: uniqueId(),

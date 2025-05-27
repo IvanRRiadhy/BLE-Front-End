@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { styled, Container, Box, useTheme } from '@mui/material';
 import { useSelector } from 'src/store/Store';
 import { Outlet } from 'react-router';
@@ -29,10 +29,21 @@ const PageWrapper = styled('div')(() => ({
   backgroundColor: 'transparent',
 }));
 
+const checkAuthToken = () => {
+  const token = localStorage.getItem('token'); // Check if the token exists in localStorage
+  if (!token) {
+    window.location.href = '/auth/login'; // Redirect to the login page if no token is found
+  }
+};
+
 const FullLayout: FC = () => {
   const customizer = useSelector((state: AppState) => state.customizer);
 
   const theme = useTheme();
+
+  useEffect(() => {
+    checkAuthToken(); // Check for token when the layout is rendered
+  }, []);
 
   return (
     <>

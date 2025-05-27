@@ -7,9 +7,9 @@ import { floorType } from "./floor";
 import { FloorplanDeviceType } from "./floorplanDevice";
 import { MaskedAreaType } from "./maskedArea";
 
-const Floorplan_API_URL = 'http://192.168.1.116:5000/api/MstFloorplan/';
-const Device_API_URL = 'http://192.168.1.116:5000/api/FloorplanDevice/';
-const Area_API_URL = 'http://192.168.1.116:5000/api/FloorplanMaskedArea/';
+const Floorplan_API_URL = 'http://192.168.1.173:5000/api/MstFloorplan/';
+const Device_API_URL = 'http://192.168.1.173:5000/api/FloorplanDevice/';
+const Area_API_URL = 'http://192.168.1.173:5000/api/FloorplanMaskedArea/';
 
 export interface FloorplanType {
     id: string,

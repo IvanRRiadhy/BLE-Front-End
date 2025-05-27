@@ -22,7 +22,7 @@ import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { dispatch } from 'src/store/Store';
 
-const API_URL = 'http://192.168.1.116:5000/api/Auth/login';
+const API_URL = 'http://192.168.1.173:5000/api/Auth/login';
 const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
@@ -43,10 +43,12 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         console.log('Data: ', data);
         console.log('Username: ', data.username);
         console.log('JWT Token: ', data.token);
+        console.log('Refresh Token: ', data.refreshToken);
         console.log('User Role: ', data.groupId);
 
         localStorage.setItem('token', data.token);
-
+        localStorage.setItem('welcomePopupShown', 'false');
+        // localStorage.setItem('refreshToken', data.refreshToken);
         navigate('/');
       })
       .catch((error) => {

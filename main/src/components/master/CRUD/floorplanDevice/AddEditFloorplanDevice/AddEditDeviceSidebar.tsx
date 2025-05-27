@@ -5,12 +5,6 @@ import { Box } from '@mui/system';
 
 const drawerWidth = 260;
 
-interface colorsType {
-  lineColor: string;
-  disp: string | any;
-  id: number;
-}
-
 interface Props {
   isMobileSidebarOpen: boolean;
   onSidebarClose: (event: React.MouseEvent<HTMLElement>) => void;
@@ -18,39 +12,6 @@ interface Props {
 
 const AddEditDeviceSidebar = ({ isMobileSidebarOpen, onSidebarClose }: Props) => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
-  const theme = useTheme();
-  const colorvariation: colorsType[] = [
-    {
-      id: 1,
-      lineColor: theme.palette.primary.main,
-      disp: 'primary',
-    },
-    {
-      id: 2,
-      lineColor: theme.palette.info.main,
-      disp: 'info',
-    },
-    {
-      id: 3,
-      lineColor: theme.palette.error.main,
-      disp: 'error',
-    },
-    {
-      id: 4,
-      lineColor: theme.palette.success.main,
-      disp: 'success',
-    },
-    {
-      id: 5,
-      lineColor: theme.palette.warning.main,
-      disp: 'warning',
-    },
-    {
-      id: 6,
-      lineColor: theme.palette.secondary.main,
-      disp: 'secondary',
-    },
-  ];
 
   return (
     <>

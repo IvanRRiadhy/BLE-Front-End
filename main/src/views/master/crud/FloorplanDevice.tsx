@@ -90,7 +90,7 @@ const FloorplanDevice = () => {
           }}
         >
           <ParentCard title="Floor List">
-            {/* <FloorplanDeviceList /> */}
+            <FloorplanDeviceList />
             <FloorplanDeviceList2 />
           </ParentCard>
           {/* <Box display="flex" flexDirection="row">

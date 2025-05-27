@@ -4,7 +4,7 @@ import { AppDispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = "http://192.168.1.116:5000/api/MstDepartment/";
+const API_URL = "http://192.168.1.173:5000/api/MstDepartment/";
 
 export interface DepartmentType {
     id: string,

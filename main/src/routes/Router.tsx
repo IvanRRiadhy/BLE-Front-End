@@ -45,6 +45,7 @@ const FloorplanDeviceEdit = Loadable(
   lazy(() => import('../views/master/crud/FloorplanDeviceEdit')),
 );
 const MaskedAreaEdit = Loadable(lazy(() => import('../views/master/crud/MaskedAreaEdit')));
+const RulesEdit = Loadable(lazy(() => import('../views/master/rules/rulesEdit')));
 
 /* ****Apps***** */
 // const Blog = Loadable(lazy(() => import('../views/apps/blog/Blog')));
@@ -240,15 +241,15 @@ const Router = [
       { path: '/master/member', exact: true, element: <Member /> },
       { path: '/master/trackingtransaction', exact: true, element: <TrackingTransaction /> },
       { path: '/master/visitor', exact: true, element: <Visitor /> },
-      { path: '/master/blacklist', exact: true, element: <Blacklist /> },
+      { path: '/apps/blacklist', exact: true, element: <Blacklist /> },
       { path: '/master/building', exact: true, element: <Building /> },
       { path: '/master/device', exact: true, element: <FloorplanDevice /> },
-      { path: '/master/alarmrecord', exact: true, element: <AlarmRecord /> },
+      { path: '/apps/alarmrecord', exact: true, element: <AlarmRecord /> },
       { path: '/apps/contacts', element: <Contacts /> },
 
       { path: '/master/device/edit', exact: true, element: <FloorplanDeviceEdit /> },
       { path: '/master/floorplanmaskedarea/edit', exact: true, element: <MaskedAreaEdit /> },
-
+      { path: '/master/rules/edit', exact: true, element: <RulesEdit /> },
       // { path: '/apps/blog/posts', element: <Blog /> },
       // { path: '/frontend-pages/blog/detail/:id', element: <BlogDetail /> },
       { path: '/apps/chats', element: <Chats /> },

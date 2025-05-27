@@ -31,6 +31,8 @@ import FloorplanDeviceReducer from './apps/crud/floorplanDevice';
 import FloorplanReducer from './apps/crud/floorplan';
 import layoutReducer from './apps/monitoring/layout';
 import BleNodeReducer from './apps/crud/bleNode';
+import RulesNodeReducer from './apps/rules/RulesNodes';
+import RulesConnectorReducer from './apps/rules/RulesConnectors';
 import { combineReducers } from 'redux';
 import {
   useDispatch as useAppDispatch,
@@ -72,6 +74,8 @@ export const store = configureStore({
     layoutReducer: layoutReducer,
     floorplanReducer: FloorplanReducer,
     bleNodeReducer: BleNodeReducer,
+    RulesNodeReducer: RulesNodeReducer,
+    RulesConnectorReducer: RulesConnectorReducer,
   },
 });
 
@@ -108,6 +112,8 @@ const rootReducer = combineReducers({
   layoutReducer: layoutReducer,
   floorplanReducer: FloorplanReducer,
   bleNodeReducer: BleNodeReducer,
+  RulesNodeReducer: RulesNodeReducer,
+  RulesConnectorReducer: RulesConnectorReducer,
 });
 
 export type AppState = ReturnType<typeof rootReducer>;

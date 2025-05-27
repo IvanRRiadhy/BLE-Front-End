@@ -104,6 +104,7 @@ const AddEditMember = ({ type, member }: FormType) => {
           data.append(key, value.toString());
         }
       });
+      console.log(data);
       if (image) {
         data.append('faceImage', image);
       }

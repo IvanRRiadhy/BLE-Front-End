@@ -7,12 +7,11 @@ import AddEditMaskedAreaSidebar from 'src/components/master/CRUD/maskedArea/AddE
 // import DeviceDetailSidebar from 'src/components/master/CRUD/floorplanDevice/AddEditFloorplanDevice/DeviceDetailSidebar';
 import { RootState, useSelector } from 'src/store/Store';
 import EditAreaFloorView from 'src/components/master/CRUD/maskedArea/AddEditMaskedArea/Preview/EditAreaFloorView';
+import AreaDetailSidebar from 'src/components/master/CRUD/maskedArea/AddEditMaskedArea/AreaDetailSidebar';
 
 const FloorplanDeviceEdit = () => {
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(true);
-  const editingDevice = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.editingFloorplanDevice,
-  );
+  const editingArea = useSelector((state: RootState) => state.maskedAreaReducer.editingMaskedArea);
 
   return (
     <PageContainer title="Floorplan Device" description="this is floorplan device page">
@@ -37,6 +36,14 @@ const FloorplanDeviceEdit = () => {
             />
           </Box>
         )}*/}
+        {editingArea && (
+          <Box display="flex" flexDirection="column" minHeight={800}>
+            <AreaDetailSidebar
+              isEditingSidebarOpen={isMobileSidebarOpen}
+              onEditingSidebarClose={() => setMobileSidebarOpen(false)}
+            />
+          </Box>
+        )}
         <Box flexGrow={1}>
           <EditAreaFloorView zoomable />
         </Box>

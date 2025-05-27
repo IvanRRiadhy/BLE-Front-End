@@ -6,7 +6,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { visitorType } from "./visitor";
 import { MaskedAreaType } from "./maskedArea";
 
-const API_URL = 'http://192.168.1.116:5000/api/VisitorBlacklistArea/';
+const API_URL = 'http://192.168.1.173:5000/api/VisitorBlacklistArea/';
 
 export interface blacklistType {
     id: string,

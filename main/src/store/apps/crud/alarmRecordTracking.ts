@@ -7,7 +7,7 @@ import { visitorType } from "./visitor";
 import { bleReaderType } from "./bleReader";
 import { MaskedAreaType } from "./maskedArea";
 
-const API_URL = 'http://192.168.1.116:5000/api/AlarmRecordTracking/';
+const API_URL = 'http://192.168.1.173:5000/api/AlarmRecordTracking/';
 
 export interface AlarmType {
     id: string;

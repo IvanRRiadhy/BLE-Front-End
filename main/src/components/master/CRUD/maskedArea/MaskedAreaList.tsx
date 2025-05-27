@@ -93,6 +93,7 @@ const MaskedAreaList = () => {
 
   const getFloorName = (floorId: string) => {
     const floor = floorData.find((fl: floorType) => fl.id === floorId);
+    console.log('Floor ID: ', floorId);
     return floor ? floor.name : 'Unknown Floor';
   };
 
@@ -111,7 +112,7 @@ const MaskedAreaList = () => {
                     </TableCell>
                     {[
                       'id',
-                      'floorplanId',
+                      'Floorplan Name',
                       'Floor Name',
                       'name',
                       'areaShape',
@@ -145,8 +146,8 @@ const MaskedAreaList = () => {
                           {index + 1}
                         </TableCell>
                         <TableCell>{maskedArea.id}</TableCell>
-                        <TableCell>{maskedArea.floorplanId}</TableCell>
-                        <TableCell>{getFloorName(maskedArea.floorId)}</TableCell>
+                        <TableCell>{maskedArea.floorplan?.name}</TableCell>
+                        <TableCell>{maskedArea.floor?.name}</TableCell>
                         <TableCell>{maskedArea.name}</TableCell>
                         <TableCell>{maskedArea.areaShape}</TableCell>
                         <TableCell>{maskedArea.colorArea}</TableCell>

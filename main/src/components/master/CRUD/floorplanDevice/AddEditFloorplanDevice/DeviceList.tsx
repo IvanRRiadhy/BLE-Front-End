@@ -11,6 +11,7 @@ import {
   fetchFloorplanDevices,
   FloorplanDeviceType,
   GetUnsavedFloorplanDevices,
+  ResetState,
   RevertDevice,
   SelectEditingFloorplanDevice,
   SelectFloorplanDevice,
@@ -33,6 +34,9 @@ import {
 import DeviceListItem from './DeviceListItem';
 import AddEditDeviceLayout from './AddEditDeviceLayout';
 import { useNavigate } from 'react-router';
+import { fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
+import { fetchAccessControls } from 'src/store/apps/crud/accessControl';
+import { fetchBleReaders } from 'src/store/apps/crud/bleReader';
 
 const DeviceList = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -55,6 +59,18 @@ const DeviceList = () => {
   const filteredUnsavedDevices = unsavedDevices.filter(
     (device) => device.floorplanId === activeFloorplan?.id,
   );
+  const deletedDevice = useSelector(
+    (state: AppState) => state.floorplanDeviceReducer.deletedFloorplanDevice,
+  );
+  const addedDevice = useSelector(
+    (state: AppState) => state.floorplanDeviceReducer.addedFloorplanDevice,
+  );
+
+  const firstCCTV = useSelector((state: AppState) => state.CCTVReducer.cctvs[0]);
+  const firstAccessControl = useSelector(
+    (state: AppState) => state.accessControlReducer.accessControls[0],
+  );
+  const firstBleReader = useSelector((state: AppState) => state.bleReaderReducer.bleReaders[0]);
 
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState('');
@@ -66,6 +82,9 @@ const DeviceList = () => {
   useEffect(() => {
     dispatch(fetchFloorplanDevices());
     dispatch(fetchFloorplan());
+    dispatch(fetchAccessCCTV());
+    dispatch(fetchAccessControls());
+    dispatch(fetchBleReaders());
   }, [dispatch]);
   useEffect(() => {
     dispatch(GetUnsavedFloorplanDevices());
@@ -76,16 +95,16 @@ const DeviceList = () => {
     name: 'New Device',
     type: '', // Default type, can be updated later
     floorplanId: activeFloorplan?.id || '',
-    accessCctvId: '',
-    readerId: '',
-    accessControlId: '',
+    accessCctvId: firstCCTV?.id || '',
+    readerId: firstBleReader?.id || '',
+    accessControlId: firstAccessControl?.id || '',
     posX: 100, // Default position
     posY: 100, // Default position
     posPxX: 100,
     posPxY: 100,
     floorplanMaskedAreaId: '',
-    applicationId: '',
-    deviceStatus: 'active', // Mark as unsaved
+    applicationId: activeFloorplan?.applicationId || '',
+    deviceStatus: 'Active', // Mark as unsaved
     createdAt: new Date().toISOString(),
     createdBy: 'admin', // Replace with actual user ID
     updatedAt: new Date().toISOString(),
@@ -163,7 +182,8 @@ const DeviceList = () => {
   const handleCloseCancelEditingDialog = () => {
     setCancelEditDialogOpen(false);
   };
-  const handleCancelEditing = () => {
+  const handleCloseEditing = () => {
+    dispatch(ResetState());
     navigate('/master/device');
   };
 
@@ -180,33 +200,29 @@ const DeviceList = () => {
     console.log('devicesToEdit', devicesToEdit);
 
     // Call editFloorplanDevice for each device that needs editing
-    // for (const device of devicesToEdit) {
-    //   await dispatch(editFloorplanDevice(device));
-    // }
+    for (const device of devicesToEdit) {
+      await dispatch(editFloorplanDevice(device));
+    }
 
     // 2. Add devices: Check for devices in unsavedDevices but not in floorplanDevices
-    const devicesToAdd = unsavedDevices.filter(
-      (unsavedDevice) => !floorplanDevicesMap.has(unsavedDevice.id),
-    );
-    console.log('devicesToAdd', devicesToAdd);
-
-    // Call addFloorplanDevice for each new device
-    // for (const device of devicesToAdd) {
-    //   await dispatch(addFloorplanDevice(device));
-    // }
+    if (addedDevice) {
+      console.log('addedDevice', addedDevice);
+      // Call addFloorplanDevice for each new device
+      for (const device of addedDevice) {
+        await dispatch(addFloorplanDevice(device));
+      }
+    }
 
     // 3. Delete devices: Check for devices in floorplanDevices but not in unsavedDevices
-    const devicesToDelete = devicesData.filter(
-      (floorplanDevice) => !unsavedDevicesMap.has(floorplanDevice.id),
-    );
-    console.log('devicesToDelete', devicesToDelete);
-
+    if (deletedDevice) {
+      for (const device of deletedDevice) {
+        await dispatch(deleteFloorplanDevice(device.id));
+      }
+    }
     // Call deleteFloorplanDevice for each device to delete
-    // for (const device of devicesToDelete) {
-    //   await dispatch(deleteFloorplanDevice(device.id));
-    // }
 
     console.log('Save operation completed.');
+    handleCloseEditing(); // Navigate back to the device list
   };
 
   return (
@@ -258,14 +274,16 @@ const DeviceList = () => {
           borderColor: 'divider',
         }}
       >
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Button variant="outlined" onClick={handleOpenCancelEditingDialog}>
-            Cancel
-          </Button>
-          <Button variant="contained" onClick={handleSaveEdits}>
-            Save
-          </Button>
-        </Box>
+        {!editingDevice && (
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Button variant="outlined" onClick={handleOpenCancelEditingDialog}>
+              Cancel
+            </Button>
+            <Button variant="contained" onClick={handleSaveEdits}>
+              Save
+            </Button>
+          </Box>
+        )}
       </Box>
       {/*Confirmation Dialog */}
       <Dialog open={confirmDialogOpen} onClose={handleCancelProceed} maxWidth="xs" fullWidth>
@@ -314,7 +332,7 @@ const DeviceList = () => {
           <Button onClick={handleCloseCancelEditingDialog} color="primary">
             Go Back to Editing
           </Button>
-          <Button onClick={handleCancelEditing} color="error">
+          <Button onClick={handleCloseEditing} color="error">
             Yes, Cancel Editing
           </Button>
         </DialogActions>

@@ -271,7 +271,7 @@ const Menuitems: MenuitemsType[] = [
       id: uniqueId(),
       title: 'Floorplan Masked Area',
       icon: IconMapDown,
-      href: '/master/floorplanmaskedarea'
+      href: '/master/floorplanmaskedarea/'
     },
     {
       id: uniqueId(),
@@ -295,7 +295,7 @@ const Menuitems: MenuitemsType[] = [
       id: uniqueId(),
       title: 'Device',
       icon: IconAccessibleOffFilled,
-      href: '/master/device'
+      href: '/master/device/'
     },
   {
     navlabel:true,
@@ -311,7 +311,7 @@ const Menuitems: MenuitemsType[] = [
     id: uniqueId(),
     title: 'Alarm Notification',
     icon: IconBellExclamation,
-    href: '/apps/kanban/',
+    href: '/apps/alarmRecord',
   },
   {
     id: uniqueId(),
@@ -329,7 +329,7 @@ const Menuitems: MenuitemsType[] = [
         id: uniqueId(),
         title: 'Blacklist',
         icon: IconBarrierBlock,
-        href: '/apps/followers',
+        href: '/apps/blacklist',
       },
       {
         id: uniqueId(),

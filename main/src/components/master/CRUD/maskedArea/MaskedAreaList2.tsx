@@ -11,18 +11,11 @@ import {
   TableRow,
   Typography,
   TablePagination,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { useTranslation } from 'react-i18next';
-import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import { fetchFloorplan, SelectFloorplan } from 'src/store/apps/crud/floorplan';
 import { IconEdit } from '@tabler/icons-react';
 import { useNavigate } from 'react-router';
@@ -50,28 +43,6 @@ const MaskedAreaList2 = () => {
     dispatch(fetchMaskedAreas());
     dispatch(fetchFloorplan());
   }, [dispatch]);
-
-  //Delete Pop-up
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedArea, setSelectedArea] = useState<MaskedAreaType | null>(null);
-
-  const handleOpenDeleteDialog = (area: MaskedAreaType) => {
-    setSelectedArea(area);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleCloseDeleteDialog = () => {
-    setDeleteDialogOpen(false);
-    setSelectedArea(null);
-  };
-
-  const handleConfirmDelete = () => {
-    if (selectedArea) {
-      console.log('Device to be deleted:', selectedArea);
-      //dispatch(deleteFloorplanDevice(selectedDevice.id));
-      setDeleteDialogOpen(false);
-    }
-  };
 
   const handleOnClick = (id: string) => {
     // console.log('id: ', id);
@@ -134,13 +105,6 @@ const MaskedAreaList2 = () => {
                           >
                             <IconEdit size={20} />
                           </IconButton>
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(floorplan)}
-                          >
-                            <IconTrash size={20} />
-                          </IconButton>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -159,23 +123,6 @@ const MaskedAreaList2 = () => {
           </BlankCard>
         </Box>
       </Grid>
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete the Masked Area <strong>{selectedArea?.name}</strong>?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmDelete} color="error">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Grid>
   );
 };

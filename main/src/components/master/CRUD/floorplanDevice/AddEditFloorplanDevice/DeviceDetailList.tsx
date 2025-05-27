@@ -1,34 +1,25 @@
 import {
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Box,
   Grid2 as Grid,
-  IconButton,
   MenuItem,
   SelectChangeEvent,
   Typography,
   Divider,
-  List,
-  ListItem,
-  ListItemText,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
+import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
-  addFloorplanDevice,
-  AddUnsavedDevice,
-  GetUnsavedFloorplanDevices,
   EditUnsavedDevice,
   fetchFloorplanDevices,
   FloorplanDeviceType,
   SelectEditingFloorplanDevice,
   SelectFloorplanDevice,
   RevertDevice,
+  SaveDevice,
 } from 'src/store/apps/crud/floorplanDevice';
 import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import { CCTVType, fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
@@ -38,15 +29,14 @@ import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea
 import { DeviceType } from 'src/types/crud/input';
 import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
 import { BleNodeType, fetchNodes } from 'src/store/apps/crud/bleNode';
-import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
 
 const DeviceDetailList = () => {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const device = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.editingFloorplanDevice,
   );
-  const [formData, setFormData] = React.useState({
+  const [formData, setFormData] = useState({
     id: device?.id || '',
     name: device?.name || '',
     type: device?.type || '',
@@ -92,9 +82,6 @@ const DeviceDetailList = () => {
   }, [device]);
 
   const dispatch: AppDispatch = useDispatch();
-  const appData: ApplicationType[] = useSelector(
-    (state: RootState) => state.applicationReducer.applications,
-  );
   const floorplanData: FloorplanType[] = useSelector(
     (state: RootState) => state.floorplanReducer.floorplans,
   );
@@ -123,7 +110,7 @@ const DeviceDetailList = () => {
   const [otherReader, setOtherReader] = useState<FloorplanDeviceType[]>([]); // State to hold other devices
   const [scales, setScale] = useState<number>(1);
   useEffect(() => {
-    dispatch(fetchFloorplanDevices());
+    // dispatch(fetchFloorplanDevices());
     // dispatch(GetUnsavedFloorplanDevices());
     dispatch(fetchApplications());
     dispatch(fetchAccessCCTV());
@@ -132,7 +119,7 @@ const DeviceDetailList = () => {
     dispatch(fetchMaskedAreas());
     dispatch(fetchFloorplan());
     dispatch(fetchFloors());
-    dispatch(fetchNodes());
+    // dispatch(fetchNodes());
   }, [dispatch]);
 
   useEffect(() => {
@@ -165,6 +152,15 @@ const DeviceDetailList = () => {
   }, [formData.posPxX, formData.posPxY, scales]);
 
   const [unsavedNodes, setUnsavedNodes] = useState<BleNodeType[]>([]);
+  // Define required fields
+  const requiredFields = ['name', 'type', 'floorplanMaskedAreaId'];
+
+  // Validation function
+  const isFormValid = () => {
+    return requiredFields.every(
+      (field) => formData[field as keyof typeof formData]?.toString().trim() !== '',
+    );
+  };
 
   const handleClickOpen = () => {
     console.log('bleNodeData', bleNodeData);
@@ -200,6 +196,7 @@ const DeviceDetailList = () => {
   const handleSave = async () => {
     try {
       await dispatch(EditUnsavedDevice(formData));
+      await dispatch(SaveDevice(formData.id)); // Save the device
 
       if (formData.type === 'BleReader') {
         // Calculate testNodes
@@ -253,15 +250,14 @@ const DeviceDetailList = () => {
           <Divider />
           <Grid container spacing={1}>
             <Grid size={12}>
-              <CustomFormLabel htmlFor="device-name" required>
-                Device Name
-              </CustomFormLabel>
+              <CustomFormLabel htmlFor="device-name">Device Name</CustomFormLabel>
               <CustomTextField
                 id="name"
                 value={formData.name}
                 onChange={handleInputChange}
                 variant="outlined"
                 fullWidth
+                required
               />
             </Grid>
             {/* <Grid size={12}>
@@ -288,6 +284,7 @@ const DeviceDetailList = () => {
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
+                required
               >
                 {maskedAreaData.map((maskedArea) => (
                   <MenuItem key={maskedArea.id} value={maskedArea.id}>
@@ -320,6 +317,7 @@ const DeviceDetailList = () => {
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
+                required
               >
                 {DeviceType.map((device) => (
                   <MenuItem
@@ -450,7 +448,7 @@ const DeviceDetailList = () => {
           <Button variant="outlined" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button variant="contained" onClick={handleSave}>
+          <Button variant="contained" onClick={handleSave} disabled={!isFormValid()}>
             Save
           </Button>
         </Box>

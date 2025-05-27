@@ -5,7 +5,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { IntegrationType } from "src/store/apps/crud/integration";
 
-const API_URL = "http://192.168.1.116:5000/api/MstAccessCctv/";
+const API_URL = "http://192.168.1.173:5000/api/MstAccessCctv/";
 
 export interface CCTVType {
     id: string,

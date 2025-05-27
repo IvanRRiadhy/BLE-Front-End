@@ -9,7 +9,7 @@ import { CCTVType } from "./accessCCTV";
 import { AccessControlType } from "./accessControl";
 import { DeviceType } from "src/types/crud/input";
 
-const API_URL = 'http://192.168.1.116:5000/api/FloorplanDevice/';
+const API_URL = 'http://192.168.1.173:5000/api/FloorplanDevice/';
 
 export interface FloorplanDeviceType {
     id: string,
@@ -42,6 +42,8 @@ interface StateType {
     floorplanDeviceSearch: string;
     selectedFloorplanDevice?: FloorplanDeviceType | null;
     editingFloorplanDevice?: FloorplanDeviceType | null;
+    deletedFloorplanDevice?: FloorplanDeviceType[];
+    addedFloorplanDevice?: FloorplanDeviceType[];
 };
 
 const initialState: StateType = {
@@ -50,6 +52,8 @@ const initialState: StateType = {
     floorplanDeviceSearch: '',
     selectedFloorplanDevice: null,
     editingFloorplanDevice: null,
+    deletedFloorplanDevice: [],
+    addedFloorplanDevice: [],
 };
 
 export const FloorplanDeviceSlice = createSlice({
@@ -86,9 +90,28 @@ export const FloorplanDeviceSlice = createSlice({
                 (device) => device.id === action.payload.id
             );
             if (index !== -1) {
-                state.unsavedFloorplanDevices[index] = action.payload;
-                state.editingFloorplanDevice = action.payload;
-            //   console.log("Updated device: ", action.payload);
+                state.unsavedFloorplanDevices = state.unsavedFloorplanDevices.map((device, i) => 
+                    i === index ? { ...device, ...action.payload } : device
+                );
+                // state.unsavedFloorplanDevices[index] = action.payload;
+                state.editingFloorplanDevice = {
+                    ...state.editingFloorplanDevice,
+                    ...action.payload};
+            }   
+        },
+        SaveDevice: (state, action: PayloadAction<string>) => {
+            const index = state.unsavedFloorplanDevices.findIndex((device) => device.id === action.payload);
+            console.log(index);
+            if(index !== -1 && state.floorplanDevices[index]) {
+                if(state.floorplanDevices[index].id === state.unsavedFloorplanDevices[index].id) {
+                    state.floorplanDevices[index] = state.unsavedFloorplanDevices[index];
+                    console.log(JSON.stringify(state.floorplanDevices[index], null, 2));
+                }
+            }
+            else {
+                console.log("New device added");
+                state.floorplanDevices.push(state.unsavedFloorplanDevices[index]);
+                state.addedFloorplanDevice?.push(state.unsavedFloorplanDevices[index]);
             }
         },
         DeleteUnsavedDevice: (state, action: PayloadAction<string>) => {
@@ -99,6 +122,7 @@ export const FloorplanDeviceSlice = createSlice({
         
             // If the device exists, remove it from the list
             if (index !== -1) {
+                state.deletedFloorplanDevice?.push(state.unsavedFloorplanDevices[index]);
                 state.unsavedFloorplanDevices.splice(index, 1);
                 console.log(`Device with ID ${action.payload} deleted from unsaved devices.`);
             } else {
@@ -112,12 +136,11 @@ export const FloorplanDeviceSlice = createSlice({
                 );
                 const device = state.floorplanDevices.find((device) => device.id === action.payload.id);
                 if (deviceIndex !== -1) {
-                    const device = state.unsavedFloorplanDevices[deviceIndex];
-        
+                    const unsavedDevice = state.unsavedFloorplanDevices[deviceIndex];
                     // Check if the device type is valid
                     const validDeviceTypes = DeviceType.map((type) => type.value); // Extract valid types from DeviceType
-
-                    if (!validDeviceTypes.includes(device.type) || device.type === "") {
+                    console.log(unsavedDevice);
+                    if (unsavedDevice.type === "" || !validDeviceTypes.includes(unsavedDevice.type) ) {
                         // Remove the device if its type is invalid
                         state.unsavedFloorplanDevices.splice(deviceIndex, 1);
                         // console.warn(`Device with ID ${action.payload.id} removed due to invalid type.`);
@@ -126,11 +149,12 @@ export const FloorplanDeviceSlice = createSlice({
                 }
                 if (device) {
                     if(state.selectedFloorplanDevice?.id === action.payload.id) {
-                        state.selectedFloorplanDevice = { ...device };
+                        state.selectedFloorplanDevice = device;
                     }
                 }
                 if (deviceIndex !== -1 && device) {
-                    state.unsavedFloorplanDevices[deviceIndex] = { ...device };
+                    console.log(JSON.stringify(device, null, 2));
+                    state.unsavedFloorplanDevices[deviceIndex] = device;
                     state.editingFloorplanDevice = null ;
                 }
             },
@@ -138,7 +162,13 @@ export const FloorplanDeviceSlice = createSlice({
                 payload: { id },
             }),
 
-        }
+        },
+        ResetState: (state) => {
+            state.deletedFloorplanDevice = [];
+            state.addedFloorplanDevice = [];
+            state.selectedFloorplanDevice = null;
+            state.editingFloorplanDevice = null;
+        },
     },
 
     extraReducers: (builder) => {
@@ -178,6 +208,8 @@ export const {
     SelectEditingFloorplanDevice,
     DeleteUnsavedDevice,
     RevertDevice,
+    SaveDevice,
+    ResetState,
 } = FloorplanDeviceSlice.actions;
 
 export const fetchFloorplanDevices = () => async (dispatch: AppDispatch) => {
@@ -198,6 +230,7 @@ export const addFloorplanDevice = createAsyncThunk(
     async (floorplanDevice: FloorplanDeviceType, { rejectWithValue }) => {
         try {
             const { id, createdAt, createdBy, updatedAt, updatedBy, accessCctv, reader, accessControl, floorplanMaskedArea, ...filteredFloorplanDevice } = floorplanDevice;
+            console.log("Filtered Floorplan Device: ", filteredFloorplanDevice);
             const response = await axios.post(API_URL, filteredFloorplanDevice, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,

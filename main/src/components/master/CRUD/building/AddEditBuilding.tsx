@@ -146,7 +146,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
           <Divider />
           <Grid container spacing={5} mb={3}>
             <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="department-Name">Department Name</CustomFormLabel>
+              <CustomFormLabel htmlFor="department-Name">Building Name</CustomFormLabel>
               <CustomTextField
                 id="name"
                 placeholder={formData.name}

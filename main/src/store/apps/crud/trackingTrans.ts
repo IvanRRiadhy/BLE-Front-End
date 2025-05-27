@@ -6,7 +6,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { MaskedAreaType } from "./maskedArea";
 import { bleReaderType } from "./bleReader";
 
-const API_URL = "http://192.168.1.116:5000/api/TrackingTransaction/";
+const API_URL = "http://192.168.1.173:5000/api/TrackingTransaction/";
 
 export interface trackingTransType {
     id: string,

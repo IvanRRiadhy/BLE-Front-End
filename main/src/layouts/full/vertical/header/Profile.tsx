@@ -137,7 +137,17 @@ const Profile = () => {
           </Box>
         ))}
         <Box mt={2}>
-          <Button to="/auth/login" variant="outlined" color="primary" component={Link} fullWidth>
+          <Button
+            variant="outlined"
+            color="primary"
+            //component={Link}
+            onClick={() => {
+              localStorage.removeItem('token'); // Remove the token from localStorage
+              localStorage.removeItem('welcomePopupShown'); // Reset the welcome popup state
+              window.location.href = '/auth/login'; // Redirect to the login page
+            }}
+            fullWidth
+          >
             Logout
           </Button>
         </Box>

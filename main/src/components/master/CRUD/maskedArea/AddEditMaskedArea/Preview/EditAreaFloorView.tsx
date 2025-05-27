@@ -5,7 +5,7 @@ import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
 import ZoomControls from 'src/components/shared/ZoomControls';
 import FloorplanHouse from 'src/assets/images/masters/Floorplan/Floorplan-House.png';
-import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
+import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import EditAreaRenderer from './EditAreaRenderer';
 
 const EditAreaFloorView: React.FC<{
@@ -16,6 +16,25 @@ const EditAreaFloorView: React.FC<{
     (state: AppState) => state.floorplanReducer.selectedFloorplan,
   );
   const activeFloorData = activeFloorPlan?.floor;
+  const activeMaskedArea = useSelector(
+    (state: AppState) => state.maskedAreaReducer.selectedMaskedArea,
+  );
+  const unsavedMaskedAreas = useSelector(
+    (state: AppState) => state.maskedAreaReducer.unsavedMaskedAreas,
+  );
+  const editingMaskedArea = useSelector(
+    (state: AppState) => state.maskedAreaReducer.editingMaskedArea,
+  );
+
+  const [filteredUnsavedMaskedArea, setFilteredUnsavedMaskedArea] = useState<MaskedAreaType[]>([]);
+
+  useEffect(() => {
+    const filteredMaskedArea = unsavedMaskedAreas.filter(
+      (maskedArea: MaskedAreaType) => maskedArea.floorplanId === activeFloorPlan?.id,
+    );
+    setFilteredUnsavedMaskedArea(filteredMaskedArea);
+  }, [unsavedMaskedAreas, activeFloorPlan]);
+
   const [cursor, setCursor] = useState('grab');
   const containerRef = useRef<HTMLDivElement>(null);
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
@@ -313,6 +332,8 @@ const EditAreaFloorView: React.FC<{
                   )}
                   imageSrc={FloorplanHouse}
                   scale={scale}
+                  maskedAreas={filteredUnsavedMaskedArea}
+                  activeMaskedArea={activeMaskedArea}
                   setIsDragging={setIsDragging}
                   setCursor={setCursor}
                 />

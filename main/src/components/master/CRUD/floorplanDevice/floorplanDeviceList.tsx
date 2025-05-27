@@ -88,6 +88,7 @@ const FloorplanDeviceList = () => {
                     {[
                       'id',
                       'Name',
+                      'Floor Id',
                       'Floorplan Name',
                       'Type',
                       'Device Status',
@@ -126,6 +127,7 @@ const FloorplanDeviceList = () => {
                         </TableCell>
                         <TableCell>{device.id}</TableCell>
                         <TableCell>{device.name}</TableCell>
+                        <TableCell>{device.floorplanMaskedArea?.floor?.id}</TableCell>
                         <TableCell>{device.floorplanId}</TableCell>
                         <TableCell>{device.type}</TableCell>
                         <TableCell>{device.deviceStatus}</TableCell>

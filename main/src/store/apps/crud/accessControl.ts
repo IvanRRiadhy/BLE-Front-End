@@ -6,7 +6,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { IntegrationType } from "./integration";
 import { BrandType } from "./brand";
 
-const API_URL = "http://192.168.1.116:5000/api/MstAccessControl/";
+const API_URL = "http://192.168.1.173:5000/api/MstAccessControl/";
 
 export interface AccessControlType {
     id: string,

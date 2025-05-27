@@ -86,7 +86,10 @@ const MaskedArea = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Floorplan Masked Area List">
+          <ParentCard
+            title="Floorplan Masked Area List"
+            codeModel={<AddEditMaskedArea type="add" />}
+          >
             <MaskedAreaList />
             <MaskedAreaList2 />
           </ParentCard>

@@ -61,8 +61,6 @@ const AddEditMaskedArea = ({ type, maskedArea }: FormType) => {
   }, [maskedArea]);
 
   const handleClickOpen = () => {
-    console.log('Masked Area : ', maskedArea);
-    console.log('Form Data : ', formData);
     console.log('maskedArea', maskedArea);
     setOpen(true);
   };
@@ -72,6 +70,10 @@ const AddEditMaskedArea = ({ type, maskedArea }: FormType) => {
 
   const handleSave = async () => {
     try {
+      console.log('Masked Area : ', maskedArea);
+      console.log('Form Data : ', formData);
+
+      // console.log(data);
       if (type === 'edit') {
         await dispatch(editMaskedArea(formData)); // Dispatch update
       }
