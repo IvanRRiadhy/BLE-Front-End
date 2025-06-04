@@ -94,6 +94,51 @@ export const fetchFloorplan = () => async (dispatch: AppDispatch) => {
     }
 };
 
+export const addFloor = createAsyncThunk("floorplans/addFloorplan", async (formData: FormData, { rejectWithValue }) => {
+    try {
+        const response = await axios.post(Floorplan_API_URL, formData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error: any) {
+        console.error("Error adding floorplan:", error);
+        return rejectWithValue(error.response?.data || "Unknown error");
+    }
+});
+
+export const editFloorplan = createAsyncThunk("floorplans/editFloorplan", async (formData: FormData, { rejectWithValue }) => {
+    try {
+        const id = formData.get('id'); // Extract ID from FormData
+        const response = await axios.put(`${Floorplan_API_URL}/${id}`, formData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error: any) {
+        console.error("Error editing floorplan:", error);
+        return rejectWithValue(error.response?.data || "Unknown error");
+    }
+});
+
+export const deleteFloorplan = createAsyncThunk("floorplans/deleteFloorplan", async (floorplanId: string, { rejectWithValue }) => {
+    try {
+        await axios.delete(`${Floorplan_API_URL}/${floorplanId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+        return floorplanId; // Return the deleted floor's ID to update the state
+    } catch (error: any) {
+        console.error("Error deleting floor:", error);
+        return rejectWithValue(error.response?.data || "Unknown error");
+    }
+});
+
 export default FloorplanSlice.reducer;
 
 

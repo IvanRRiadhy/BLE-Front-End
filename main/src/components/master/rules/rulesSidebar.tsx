@@ -20,15 +20,13 @@ const RulesSidebar = ({ isMobileSidebarOpen, onSidebarClose }: Props) => {
           width: drawerWidth,
           flexShrink: 0,
           zIndex: lgUp ? 0 : 1,
-          display: 'flex',
-          flexDirection: 'column',
           [`& .MuiDrawer-paper`]: {
             position: 'relative',
             display: 'flex',
             flexDirection: 'column',
             height: '100%',
             maxHeight: 'fit-content',
-            overflowY: 'auto',
+            overflowY: 'hidden',
           },
         }}
         open={isMobileSidebarOpen}

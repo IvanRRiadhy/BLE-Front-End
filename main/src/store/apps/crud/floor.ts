@@ -119,6 +119,8 @@ export const addFloor = createAsyncThunk("floors/addFloor", async (formData: For
 export const editFloor = createAsyncThunk("floors/editFloor", async (formData: FormData, { rejectWithValue }) => {
     try {
         const id = formData.get('id'); // Extract ID from FormData
+        console.log(id)
+        formData.delete('id'); // Remove ID from FormData to avoid sending it again
         const response = await axios.put(`${API_URL}/${id}`, formData, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,

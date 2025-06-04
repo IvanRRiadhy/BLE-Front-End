@@ -31,6 +31,7 @@ const PageWrapper = styled('div')(() => ({
 
 const checkAuthToken = () => {
   const token = localStorage.getItem('token'); // Check if the token exists in localStorage
+  console.log('Token:', token);
   if (!token) {
     window.location.href = '/auth/login'; // Redirect to the login page if no token is found
   }

@@ -17,8 +17,11 @@ import {
 import { IconTrash, IconPencil } from '@tabler/icons-react';
 
 import AccessDoor from 'src/assets/images/masters/Devices/AccessDoor.png';
+import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
 import CCTV from 'src/assets/images/masters/Devices/CCTV.png';
+import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
 import Gateway from 'src/assets/images/masters/Devices/Gateway.png';
+import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
 import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
 
 import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
@@ -40,9 +43,9 @@ const DeviceListItem = ({ onListClick, onEditClick, onDeleteClick, device, activ
 
   // Map device types to their corresponding icons
   const iconMap: { [key: string]: string } = {
-    Cctv: CCTV, // Path to CCTV icon
-    BleReader: Gateway, // Path to Gateway icon
-    AccessDoor: AccessDoor, // Path to AccessDoor icon
+    Cctv: CCTVSVG, // Path to CCTV icon
+    BleReader: GatewaySVG, // Path to Gateway icon
+    AccessDoor: FaceRecog, // Path to AccessDoor icon
   };
 
   // Get the icon based on the device type

@@ -12,11 +12,16 @@ import {
   FormControl,
   Typography,
   Divider,
+  Menu,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
+import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { useTheme } from '@mui/material/styles';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import { Box } from '@mui/system';
+import { nodeType } from 'src/store/apps/rules/RulesNodes';
 
 const variables = {
   areas: [
@@ -75,25 +80,77 @@ const variables = {
   ],
 };
 
-const IfDialogPopup: React.FC<{ open: boolean; onClose: () => void; onSave: () => void }> = ({
-  open,
-  onClose,
-  onSave,
-}) => {
+const IfDialogPopup: React.FC<{
+  nodes: nodeType[];
+  open: boolean;
+  onClose: () => void;
+  onSave: () => void;
+}> = ({ nodes, open, onClose, onSave }) => {
   const theme = useTheme();
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [selectedVariable, setSelectedVariable] = React.useState<string>('');
+  const [selectedSubject, setSelectedSubject] = React.useState<string>('');
+  const [selectedCondition, setSelectedCondition] = React.useState<string>('');
+  const [selectedValue, setSelectedValue] = React.useState<string>('');
+  const [addCondition, setAddCondition] = React.useState<boolean>(false);
 
-  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+  //Second Condition
+  const [secondSelectedSubject, setSecondSelectedSubject] = React.useState<string>('');
+  const [secondSelectedCondition, setSecondSelectedCondition] = React.useState<string>('');
+  const [secondSelectedValue, setSecondSelectedValue] = React.useState<string>('');
+
+  const [logicalOperator, setLogicalOperator] = React.useState<string>('AND'); // Default to AND
+
+  const handleLogicalOperatorChange = (
+    event: React.MouseEvent<HTMLElement>,
+    newOperator: string | null,
+  ) => {
+    if (newOperator !== null) {
+      setLogicalOperator(newOperator);
+    }
   };
 
-  const handleCloseMenu = () => {
-    setAnchorEl(null);
+  const handleSubjectChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    setSelectedSubject(event.target.value as string);
+    console.log('Selected Subject:', event.target.value);
+    setSelectedCondition(''); // Reset condition when subject changes
+    setSelectedValue(''); // Reset value when subject changes
   };
-  const handleSelectVariable = (variable: string) => {
-    setSelectedVariable(variable);
-    handleCloseMenu();
+
+  const handleSecondSubjectChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    setSecondSelectedSubject(event.target.value as string);
+    console.log('Selected Second Subject:', event.target.value);
+    setSecondSelectedCondition(''); // Reset condition when subject changes
+    setSecondSelectedValue(''); // Reset value when subject changes
+  };
+
+  const detailsText = (node: nodeType) => {
+    if (node.details.startsWith('Choose a')) {
+      return node.details;
+    }
+    const detailsParts = node.details.split(' - ');
+    const organizations = detailsParts[0]?.split(',').map((o: string) => o.trim()) || [];
+    const departments = detailsParts[1]?.split(',').map((d: string) => d.trim()) || [];
+    const districts = detailsParts[2]?.split(',').map((d: string) => d.trim()) || [];
+    const members = detailsParts[3]?.split(',').map((m: string) => m.trim()) || [];
+
+    const firstOrganization = organizations[0] || '';
+    const extraOrganizations = organizations.length > 1 ? ` +${organizations.length - 1}` : '';
+    const firstDepartment = departments[0] || '';
+    const extraDepartments = departments.length > 1 ? ` +${departments.length - 1}` : '';
+    const firstDistrict = districts[0] || '';
+    const extraDistricts = districts.length > 1 ? ` +${districts.length - 1}` : '';
+    const firstMember = members[0] || '';
+    const extraMembers = members.length > 1 ? ` +${members.length - 1}` : '';
+
+    const formatPart = (first: string, extra: string) => (first ? `${first}${extra}` : '');
+
+    return [
+      formatPart(firstOrganization, extraOrganizations),
+      formatPart(firstDepartment, extraDepartments),
+      formatPart(firstDistrict, extraDistricts),
+      formatPart(firstMember, extraMembers),
+    ]
+      .filter(Boolean)
+      .join(' | ');
   };
 
   return (
@@ -102,39 +159,274 @@ const IfDialogPopup: React.FC<{ open: boolean; onClose: () => void; onSave: () =
         Set Condition(s)
       </DialogTitle>
       <DialogContent sx={{ marginTop: '16px' }}>
-        <Grid container spacing={0}>
-          {/* Custom Text Field for "IF" */}
+        <Grid container spacing={0} justifyContent={'center'} alignItems="center">
           <Box sx={{ width: '100%' }} bgcolor={'#f5f5f5'} p={2} borderRadius={1}>
-            <Grid container spacing={0} alignItems="center" width={'100%'}>
-              <Grid size={{ lg: 1, md: 1, sm: 1 }} sx={{ display: 'flex', alignItems: 'center' }}>
+            <Grid container spacing={2} alignItems="center" sx={{ mb: 1 }}>
+              <Grid size={1} sx={{ display: 'flex', alignItems: 'center' }}>
                 <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
                   IF
                 </Typography>
               </Grid>
-              <Grid size={{ lg: 9, md: 9, sm: 9 }}>
-                <CustomTextField
+              <Grid size={11}>
+                <CustomSelect
                   fullWidth
-                  variant="outlined"
-                  placeholder="Type or select a variable"
-                  value={selectedVariable}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSelectedVariable(e.target.value)
-                  }
-                />
-              </Grid>
-              <Grid size={{ lg: 2, md: 2, sm: 2 }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  fullWidth
-                  sx={{ height: '100%' }}
+                  value={selectedSubject}
+                  onChange={(e: React.ChangeEvent<{ value: unknown }>) => handleSubjectChange(e)}
+                  displayEmpty
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 300,
+                        width: 250,
+                      },
+                    },
+                  }}
                 >
-                  Variable
-                </Button>
+                  <MenuItem value="" disabled>
+                    Select a subject
+                  </MenuItem>
+                  {nodes.map((node) => (
+                    <MenuItem key={node.id} value={node.id}>
+                      Node {node.id} - {detailsText(node)}
+                    </MenuItem>
+                  ))}
+                </CustomSelect>
+              </Grid>
+            </Grid>
+            <Grid container spacing={2} alignItems="center" sx={{ mb: 1 }}>
+              <Grid size={1} sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="body1" sx={{ fontWeight: 'bold' }}></Typography>
+              </Grid>
+              <Grid size={11}>
+                <CustomSelect
+                  fullWidth
+                  value={selectedCondition}
+                  onChange={(e: React.ChangeEvent<{ value: unknown }>) =>
+                    setSelectedCondition(e.target.value as string)
+                  }
+                  displayEmpty
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 300,
+                        width: 250,
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="" disabled>
+                    Select a Condition
+                  </MenuItem>
+                  <MenuItem value="Equal to">Equal to</MenuItem>
+                  <MenuItem value="Not Equal to">Not Equal to</MenuItem>
+                  <MenuItem value="Contains">Contains</MenuItem>
+                  <MenuItem value="Does Not Contain">Does Not Contain</MenuItem>
+                  <MenuItem value="Starts With">Starts With</MenuItem>
+                  <MenuItem value="Ends With">Ends With</MenuItem>
+                  <MenuItem value="Greater Than">Greater Than</MenuItem>
+                  <MenuItem value="Less Than">Less Than</MenuItem>
+                </CustomSelect>
+              </Grid>
+            </Grid>
+            <Grid container spacing={2} alignItems="center" sx={{ mb: 1 }}>
+              <Grid size={1} sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="body1" sx={{ fontWeight: 'bold' }}></Typography>
+              </Grid>
+              <Grid size={11}>
+                <CustomSelect
+                  fullWidth
+                  value={selectedValue || ''} // Ensure value is always a string
+                  onChange={(e: React.ChangeEvent<{ value: unknown }>) =>
+                    setSelectedValue(e.target.value as string)
+                  }
+                  displayEmpty
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 300,
+                        width: 250,
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="" disabled>
+                    Select a variable
+                  </MenuItem>
+                  {nodes.map((node) => (
+                    <MenuItem key={node.id} value={node.id}>
+                      Node {node.id} - {detailsText(node)}
+                    </MenuItem>
+                  ))}
+                </CustomSelect>
               </Grid>
             </Grid>
           </Box>
+          {addCondition ? (
+            <>
+              <Grid container justifyContent="center" alignItems="center" sx={{ margin: 2 }}>
+                <ToggleButtonGroup
+                  value={logicalOperator}
+                  exclusive
+                  onChange={handleLogicalOperatorChange}
+                  aria-label="Logical Operator"
+                  color="primary"
+                >
+                  <ToggleButton
+                    value="AND"
+                    aria-label="AND"
+                    sx={{ fontWeight: 'bold', width: '100px' }}
+                  >
+                    AND
+                  </ToggleButton>
+                  <ToggleButton
+                    value="OR"
+                    aria-label="OR"
+                    sx={{ fontWeight: 'bold', width: '100px' }}
+                  >
+                    OR
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </Grid>
+              <Box sx={{ width: '100%' }} bgcolor={'#f5f5f5'} p={2} borderRadius={1}>
+                <Grid
+                  container
+                  spacing={2}
+                  justifyContent={'center'}
+                  alignItems="center"
+                  sx={{ mb: 1 }}
+                >
+                  <Grid size={1} sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                      IF
+                    </Typography>
+                  </Grid>
+                  <Grid size={11}>
+                    <CustomSelect
+                      fullWidth
+                      value={secondSelectedSubject}
+                      onChange={(e: React.ChangeEvent<{ value: unknown }>) =>
+                        handleSecondSubjectChange(e)
+                      }
+                      displayEmpty
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            maxHeight: 300,
+                            width: 250,
+                          },
+                        },
+                      }}
+                    >
+                      <MenuItem value="" disabled>
+                        Select a subject
+                      </MenuItem>
+                      {nodes.map((node) => (
+                        <MenuItem key={node.id} value={node.id}>
+                          Node {node.id} - {detailsText(node)}
+                        </MenuItem>
+                      ))}
+                    </CustomSelect>
+                  </Grid>
+                </Grid>
+                <Grid container spacing={2} alignItems="center" sx={{ mb: 1 }}>
+                  <Grid size={1} sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}></Typography>
+                  </Grid>
+                  <Grid size={11}>
+                    <CustomSelect
+                      fullWidth
+                      value={secondSelectedCondition}
+                      onChange={(e: React.ChangeEvent<{ value: unknown }>) =>
+                        setSecondSelectedCondition(e.target.value as string)
+                      }
+                      displayEmpty
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            maxHeight: 300,
+                            width: 250,
+                          },
+                        },
+                      }}
+                    >
+                      <MenuItem value="" disabled>
+                        Select a Condition
+                      </MenuItem>
+                      <MenuItem value="Equal to">Equal to</MenuItem>
+                      <MenuItem value="Not Equal to">Not Equal to</MenuItem>
+                      <MenuItem value="Contains">Contains</MenuItem>
+                      <MenuItem value="Does Not Contain">Does Not Contain</MenuItem>
+                      <MenuItem value="Starts With">Starts With</MenuItem>
+                      <MenuItem value="Ends With">Ends With</MenuItem>
+                      <MenuItem value="Greater Than">Greater Than</MenuItem>
+                      <MenuItem value="Less Than">Less Than</MenuItem>
+                    </CustomSelect>
+                  </Grid>
+                </Grid>
+                <Grid container spacing={2} alignItems="center" sx={{ mb: 1 }}>
+                  <Grid size={1} sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}></Typography>
+                  </Grid>
+                  <Grid size={11}>
+                    <CustomSelect
+                      fullWidth
+                      value={secondSelectedValue || ''} // Ensure value is always a string
+                      onChange={(e: React.ChangeEvent<{ value: unknown }>) =>
+                        setSecondSelectedValue(e.target.value as string)
+                      }
+                      displayEmpty
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            maxHeight: 300,
+                            width: 250,
+                          },
+                        },
+                      }}
+                    >
+                      <MenuItem value="" disabled>
+                        Select a variable
+                      </MenuItem>
+                      {nodes.map((node) => (
+                        <MenuItem key={node.id} value={node.id}>
+                          Node {node.id} - {detailsText(node)}
+                        </MenuItem>
+                      ))}
+                    </CustomSelect>
+                  </Grid>
+                </Grid>
+                <Grid container spacing={2} alignItems="center" sx={{ mt: 2 }}>
+                  <Grid size={12}>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={() => {
+                        setSecondSelectedCondition('');
+                        setSecondSelectedValue('');
+                        setSecondSelectedSubject('');
+                        setAddCondition(false);
+                      }}
+                    >
+                      Delete Condition
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Box>
+            </>
+          ) : (
+            <Grid container spacing={2} alignItems="center" sx={{ mt: 2 }}>
+              <Grid size={12}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => setAddCondition(true)}
+                  fullWidth
+                >
+                  + Add Condition
+                </Button>
+              </Grid>
+            </Grid>
+          )}
         </Grid>
       </DialogContent>
       <DialogActions>

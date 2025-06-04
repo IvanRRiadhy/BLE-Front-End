@@ -4,6 +4,7 @@ import { AppDispatch, RootState } from 'src/store/Store';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { uniqueId } from 'lodash';
+import { deleteArrowsByNode } from './RulesConnectors';
 
 export interface nodeType {
   id: string;
@@ -99,5 +100,14 @@ export const {
   setStartNode,
   deleteNode,
 } = NodeSlice.actions;
+
+export const setStartNodeThunk = createAsyncThunk(
+  'nodes/setStartNode',
+  async (nodeId: string, { dispatch, getState }) => {
+    // Clear all connectors going to the node
+    dispatch(deleteArrowsByNode(nodeId));
+    dispatch(setStartNode(nodeId));
+  },
+);
 
 export default NodeSlice.reducer;

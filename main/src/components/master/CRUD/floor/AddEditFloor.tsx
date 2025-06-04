@@ -22,7 +22,7 @@ interface FormType {
   floor?: floorType;
 }
 
-const BASE_URL = 'http://localhost:5034';
+const BASE_URL = "http://192.168.1.173:5000";
 
 const AddEditFloor = ({ type, floor }: FormType) => {
   const [open, setOpen] = React.useState(false);
@@ -78,7 +78,6 @@ const AddEditFloor = ({ type, floor }: FormType) => {
       Object.entries(formData).forEach(([key, value]) => {
         if (
           key !== 'floorImage' &&
-          key !== 'id' &&
           key !== 'createdBy' &&
           key !== 'createdAt' &&
           key !== 'updatedBy' &&
@@ -238,7 +237,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                 />
                 {preview && (
                   <img
-                    src={`${BASE_URL}${preview}`}
+                    src={preview?.startsWith('blob:') ? preview : `${BASE_URL}${preview}`}
                     alt="Floorplan Preview"
                     style={{ width: '100%', marginTop: '10px', borderRadius: '5px' }}
                   />

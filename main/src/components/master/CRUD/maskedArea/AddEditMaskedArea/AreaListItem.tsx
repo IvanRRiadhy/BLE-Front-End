@@ -16,6 +16,11 @@ import {
 
 import { IconTrash, IconPencil } from '@tabler/icons-react';
 import AccessDoor from 'src/assets/images/masters/Devices/AccessDoor.png';
+import Area1 from 'src/assets/images/svgs/area/1.svg';
+import Area2 from 'src/assets/images/svgs/area/2.svg';
+import Area3 from 'src/assets/images/svgs/area/3.svg';
+import Area4 from 'src/assets/images/svgs/area/4.svg';
+import Area5 from 'src/assets/images/svgs/area/5.svg';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 
 type Props = {
@@ -42,7 +47,7 @@ const AreaListItem = ({ onListClick, onEditClick, onDeleteClick, area, active }:
       }}
     >
       <ListItemAvatar>
-        <Avatar alt={area?.name || 'Area'} src={AccessDoor} />
+        <Avatar alt={area?.name || 'Area'} src={Area5} />
       </ListItemAvatar>
       <ListItemText>
         <Stack direction="row" gap="10px" alignItems="center">

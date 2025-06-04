@@ -83,7 +83,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Building',
     icon: IconBuilding,
-    href: '/master/building',
+    href: '/master/building/',
   },
   {
     id: uniqueId(),
@@ -94,19 +94,19 @@ const Menuitems = [
         id: uniqueId(),
         title: 'Organization',
         icon: IconMap,
-        href: '/master/organization'
+        href: '/master/organization/'
       },
       {
         id: uniqueId(),
         title: 'Department',
         icon: IconMap,
-        href: '/master/department',
+        href: '/master/department/',
       },
       {
         id: uniqueId(),
         title: 'District',
         icon: IconMap,
-        href: '/master/district'
+        href: '/master/district/'
       },
     ]
   },
@@ -114,7 +114,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Floor Plan',
     icon: IconMap2,
-    href: '/master/floorplan',
+    href: '/master/floorplan/',
   },
   // {
   //   id: uniqueId(),
@@ -131,13 +131,13 @@ const Menuitems = [
         id:uniqueId(),
         title: 'Member',
         icon: IconAccessible,
-        href: '/master/membertag'
+        href: '/master/membertag/'
       },
       {
         id:uniqueId(),
         title: 'Visitor',
         icon: IconAccessibleOff,
-        href: '/master/visitortag'
+        href: '/master/visitortag/'
       },
     ]
   },
@@ -151,49 +151,49 @@ const Menuitems = [
       id: uniqueId(),
       title: 'Application',
       icon: IconMap,
-      href: '/master/application',
+      href: '/master/application/',
     },
     {
         id:uniqueId(),
         title: 'Integration',
         icon: IconLicense,
-        href: '/master/integration'
+        href: '/master/integration/'
       },
       {
         id: uniqueId(),
         title: 'Access CCTV',
         icon: IconAccessible,
-        href: '/master/accesscctv'
+        href: '/master/accesscctv/'
       },
       {
         id: uniqueId(),
         title: 'Access Control',
         icon: IconAccessible,
-        href: '/master/accesscontrol'
+        href: '/master/accesscontrol/'
       },
       {
         id: uniqueId(),
         title: 'Brand',
         icon: IconBellExclamation,
-        href: '/master/brand'
+        href: '/master/brand/'
       },
       {
         id: uniqueId(),
         title: 'Floorplan Masked Area',
         icon: IconMapDown,
-        href: '/master/floorplanmaskedarea'
+        href: '/master/floorplanmaskedarea/'
       },
       {
         id: uniqueId(),
         title: 'Ble Reader',
         icon: IconLogin,
-        href: '/master/blereader'
+        href: '/master/blereader/'
       },
       {
         id: uniqueId(),
         title: 'Floor',
         icon: IconMap,
-        href: '/master/floor'
+        href: '/master/floor/'
       },
       // {
       //   id: uniqueId(),
@@ -205,7 +205,7 @@ const Menuitems = [
         id: uniqueId(),
         title: 'Tracking Transaction',
         icon: IconLiveView,
-        href: '/master/trackingtransaction'
+        href: '/master/trackingtransaction/'
       },
       // {
       //   id: uniqueId(),
@@ -217,7 +217,7 @@ const Menuitems = [
         id: uniqueId(),
         title: 'Device',
         icon: IconAccessibleOffFilled,
-        href: '/master/device'
+        href: '/master/device/'
       },
     ],
   },
@@ -237,7 +237,7 @@ const Menuitems = [
         id: uniqueId(),
         title: 'Alarm Notification',
         icon: IconBellExclamation,
-        href: '/apps/alarmRecord',
+        href: '/apps/alarmRecord/',
       },
       // {
       //   id: uniqueId(),
@@ -249,13 +249,13 @@ const Menuitems = [
         id: uniqueId(),
         title: 'Blacklist',
         icon: IconBarrierBlock,
-        href: '/apps/blacklist',
+        href: '/apps/blacklist/',
       },
       {
         id: uniqueId(),
         title: 'Login',
         icon: IconPoint,
-        href: '/auth/login',
+        href: '/auth/login/',
       },
   //     {
   //       id: uniqueId(),

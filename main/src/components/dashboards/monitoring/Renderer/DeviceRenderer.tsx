@@ -1,14 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { Stage, Layer, Rect, Circle, Star, Image as KonvaImage } from 'react-konva';
+import {
+  Stage,
+  Layer,
+  Rect,
+  Circle,
+  Star,
+  Image as KonvaImage,
+  RegularPolygon,
+  Shape,
+} from 'react-konva';
 import { useSelector, useDispatch } from 'src/store/Store';
 
+import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
+import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
+import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
+import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
+
 const Devices = [
-  { id: 1, x: 250, y: 50, type: 'CCTV' },
-  { id: 2, x: 20, y: 130, type: 'Reader' },
-  { id: 3, x: 300, y: 300, type: 'CCTV' },
-  { id: 4, x: 10, y: 200, type: 'CCTV' },
-  { id: 5, x: 260, y: 200, type: 'Reader' },
-  { id: 6, x: 150, y: 200, type: 'Door' },
+  { id: 1, x: 250, y: 50, type: 'Cctv' },
+  { id: 2, x: 20, y: 130, type: 'BleReader' },
+  { id: 3, x: 300, y: 300, type: 'Cctv' },
+  { id: 4, x: 10, y: 200, type: 'Cctv' },
+  { id: 5, x: 260, y: 200, type: 'BleReader' },
+  { id: 6, x: 150, y: 200, type: 'AccessDoor' },
+];
+
+const Beacon = [
+  { id: 1, x: 100, y: 100 },
+  { id: 2, x: 200, y: 200 },
 ];
 
 const DeviceRenderer: React.FC<{
@@ -33,44 +52,103 @@ const DeviceRenderer: React.FC<{
     }
   }, [imageSrc]);
 
+  const useDeviceIcon = (src: string) => {
+    const [img, setImg] = useState<HTMLImageElement | null>(null);
+    useEffect(() => {
+      const image = new window.Image();
+      image.src = src;
+      image.onload = () => setImg(image);
+    }, [src]);
+    return img;
+  };
+
+  const iconCCTV = useDeviceIcon(CCTVSVG);
+  const iconGateway = useDeviceIcon(GatewaySVG);
+  const iconFaceRecog = useDeviceIcon(FaceRecog);
+  const iconUnknown = useDeviceIcon(UnknownDevice);
+
   const renderDeviceShape = (device: { id: number; x: number; y: number; type: string }) => {
+    let deviceIcon, width, height;
     switch (device.type) {
-      case 'CCTV':
-        return (
-          <Circle
-            key={device.id}
-            x={device.x * scales}
-            y={device.y * scales}
-            radius={10}
-            fill="blue"
-          />
-        );
-      case 'Reader':
-        return (
-          <Rect
-            key={device.id}
-            x={device.x * scales}
-            y={device.y * scales}
-            width={20}
-            height={20}
-            fill="green"
-          />
-        );
-      case 'Door':
-        return (
-          <Star
-            key={device.id}
-            x={device.x * scales}
-            y={device.y * scales}
-            numPoints={3}
-            innerRadius={10}
-            outerRadius={20}
-            fill="red"
-          />
-        );
+      case 'Cctv':
+        deviceIcon = iconCCTV;
+        width = 36;
+        height = 36;
+        break;
+      case 'BleReader':
+        deviceIcon = iconGateway;
+        width = 40;
+        height = 40;
+        break;
+      case 'AccessDoor':
+        deviceIcon = iconFaceRecog;
+        width = 50;
+        height = 50;
+        break;
+
       default:
-        return null;
+        deviceIcon = iconUnknown;
+        break;
     }
+    const x = device.x * scales;
+    const y = device.y * scales;
+    return (
+      deviceIcon && (
+        <KonvaImage
+          key={device.id}
+          name="Device"
+          image={deviceIcon}
+          x={x} // Center the icon inside the rect
+          y={y}
+          width={width}
+          height={height}
+          listening={false}
+        />
+      )
+    );
+  };
+
+  const renderBeacon = (beacon: { id: number; x: number; y: number }) => {
+    const radius = 9;
+    const triangleHeight = 10;
+    const triangleWidth = 9;
+    const x = beacon.x * scales;
+    const y = beacon.y * scales;
+
+    return (
+      <React.Fragment key={beacon.id}>
+        {/* Circle */}
+        <Circle
+          x={x}
+          y={y - triangleHeight - radius}
+          radius={radius}
+          fill="#1976d2"
+          stroke="#fff"
+          strokeWidth={3}
+          shadowBlur={3}
+        />
+        {/* Downward-pointing triangle */}
+        <Shape
+          x={x}
+          y={y - triangleHeight}
+          sceneFunc={(context, shape) => {
+            context.beginPath();
+            // Start from bottom left
+            context.moveTo(0, triangleHeight);
+            // Line to bottom right
+            context.lineTo(radius * 0.7, 0);
+            // Curved line across the top (matching circle curvature)
+            context.quadraticCurveTo(0, 5, -radius * 0.7, 0);
+            // Close back to bottom point
+            context.closePath();
+            context.fillStrokeShape(shape);
+          }}
+          fill="#1976d2"
+          shadowBlur={2}
+        />
+        {/* Optionally, you can add a placeholder for the photo here */}
+      </React.Fragment>
+    );
   };
 
   return (
@@ -90,6 +168,8 @@ const DeviceRenderer: React.FC<{
         )}
         {/*Render devices*/}
         {Devices.map((device) => renderDeviceShape(device))}
+        {/*Render beacons*/}
+        {Beacon.map((beacon) => renderBeacon(beacon))}
       </Layer>
     </Stage>
   );

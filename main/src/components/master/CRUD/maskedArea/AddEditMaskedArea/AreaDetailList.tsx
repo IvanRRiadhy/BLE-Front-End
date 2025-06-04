@@ -24,6 +24,7 @@ import {
 } from 'src/store/apps/crud/maskedArea';
 import { restrictedStatus } from 'src/types/crud/input';
 import isEqual from 'lodash/isEqual';
+import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 
 const AreaDetailList = () => {
   const [open, setOpen] = useState(false);
@@ -143,119 +144,126 @@ const AreaDetailList = () => {
   return (
     <Box display="flex" flexDirection="column" height="84vh">
       <Box display="flex" flexDirection="column" height="100vh">
-        <Box p={3} flex="1" overflow="auto">
+        <Box p={3} sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
           <Typography variant="h5" fontWeight={700} mb={2}>
             Edit Masked Area Details
           </Typography>
-          <Divider />
-          <Grid container spacing={1}>
-            <Grid size={12}>
-              <CustomFormLabel htmlFor="area-name" required>
-                Area Name
-              </CustomFormLabel>
-              <CustomTextField
-                id="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                variant="outlined"
-                fullWidth
-              />
-            </Grid>
-            <Grid size={12}>
-              <CustomFormLabel htmlFor="area-shape" required>
-                Area Shape
-              </CustomFormLabel>
-              <CustomTextField
-                id="areaShape"
-                value={formData.areaShape}
-                onChange={handleInputChange}
-                variant="outlined"
-                fullWidth
-                disabled
-              />
-            </Grid>
-            <Grid size={12}>
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="area-color" required>
-                  Area Color
-                </CustomFormLabel>
-                <input
-                  type="color"
-                  id="colorArea"
-                  value={formData.colorArea}
-                  onChange={(e) => {
-                    const hexColor = e.target.value; // Get the selected color in hex format
-                    setFormData((prev) => ({ ...prev, colorArea: hexColor })); // Update formData
-                    // console.log(hexColor);
-                  }}
-                  style={{
-                    width: '100%',
-                    height: '40px',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
-                    padding: '5px',
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </Grid>
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="area-restriction">Area Restriction</CustomFormLabel>
-                <CustomSelect
-                  name="restrictedStatus"
-                  value={formData.restrictedStatus || ''}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  required
-                >
-                  {restrictedStatus.map((status) => (
-                    <MenuItem
-                      key={status.value}
-                      value={status.value}
-                      disabled={status.disabled || false}
+        </Box>
+        <Box flex="1" overflow="hidden">
+          <Scrollbar
+            sx={{ height: { lg: 'calc(100vh - 300px)' }, width: '100%', maxHeight: 'fit-content' }}
+          >
+            <Box pl={3} pr={1}>
+              <Grid container spacing={1}>
+                <Grid size={12}>
+                  <CustomFormLabel htmlFor="area-name" required>
+                    Area Name
+                  </CustomFormLabel>
+                  <CustomTextField
+                    id="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    variant="outlined"
+                    fullWidth
+                  />
+                </Grid>
+                <Grid size={12}>
+                  <CustomFormLabel htmlFor="area-shape" required>
+                    Area Shape
+                  </CustomFormLabel>
+                  <CustomTextField
+                    id="areaShape"
+                    value={formData.areaShape}
+                    onChange={handleInputChange}
+                    variant="outlined"
+                    fullWidth
+                    disabled
+                  />
+                </Grid>
+                <Grid size={12}>
+                  <Grid size={12}>
+                    <CustomFormLabel htmlFor="area-color" required>
+                      Area Color
+                    </CustomFormLabel>
+                    <input
+                      type="color"
+                      id="colorArea"
+                      value={formData.colorArea}
+                      onChange={(e) => {
+                        const hexColor = e.target.value; // Get the selected color in hex format
+                        setFormData((prev) => ({ ...prev, colorArea: hexColor })); // Update formData
+                        // console.log(hexColor);
+                      }}
+                      style={{
+                        width: '100%',
+                        height: '40px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        padding: '5px',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </Grid>
+                  <Grid size={12}>
+                    <CustomFormLabel htmlFor="area-restriction">Area Restriction</CustomFormLabel>
+                    <CustomSelect
+                      name="restrictedStatus"
+                      value={formData.restrictedStatus || ''}
+                      onChange={handleInputChange}
+                      fullWidth
+                      variant="outlined"
+                      required
                     >
-                      {status.label}
-                    </MenuItem>
-                  ))}
-                </CustomSelect>
-              </Grid>
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="nodes" required>
-                  Area Nodes
-                </CustomFormLabel>
-                <Box
-                  sx={{
-                    maxHeight: '200px',
-                    overflowY: 'auto',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
-                    padding: '10px',
-                    marginTop: '10px',
-                  }}
-                >
-                  {formData.areaShape && (
-                    <>
-                      {JSON.parse(formData.areaShape).map((node: any, index: number) => (
-                        <Box
-                          key={node.id || index}
-                          sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            padding: '5px 0',
-                            borderBottom: '1px solid #eee',
-                          }}
+                      {restrictedStatus.map((status) => (
+                        <MenuItem
+                          key={status.value}
+                          value={status.value}
+                          disabled={status.disabled || false}
                         >
-                          <Typography variant="body2">
-                            Node {index + 1}: (x: {node.x}, y: {node.y})
-                          </Typography>
-                        </Box>
+                          {status.label}
+                        </MenuItem>
                       ))}
-                    </>
-                  )}
-                </Box>
+                    </CustomSelect>
+                  </Grid>
+                  <Grid size={12}>
+                    <CustomFormLabel htmlFor="nodes" required>
+                      Area Nodes
+                    </CustomFormLabel>
+                    <Box
+                      sx={{
+                        maxHeight: '200px',
+                        overflowY: 'auto',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        padding: '10px',
+                        marginTop: '10px',
+                      }}
+                    >
+                      {formData.areaShape && (
+                        <>
+                          {JSON.parse(formData.areaShape).map((node: any, index: number) => (
+                            <Box
+                              key={node.id || index}
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                padding: '5px 0',
+                                borderBottom: '1px solid #eee',
+                              }}
+                            >
+                              <Typography variant="body2">
+                                Node {index + 1}: (x: {node.x}, y: {node.y})
+                              </Typography>
+                            </Box>
+                          ))}
+                        </>
+                      )}
+                    </Box>
+                  </Grid>
+                </Grid>
               </Grid>
-            </Grid>
-          </Grid>
+            </Box>
+          </Scrollbar>
         </Box>
       </Box>
       <Box

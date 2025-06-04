@@ -16,7 +16,8 @@ const rulesEdit = () => {
         <Box
           display="flex"
           flexDirection="column"
-          minHeight={800}
+          minHeight={'80vh'}
+          maxHeight={715}
           sx={{ border: '1px solid', borderColor: 'divider' }}
         >
           <RulesSidebar
@@ -25,7 +26,6 @@ const rulesEdit = () => {
           />
         </Box>
         <Box flexGrow={1}>
-          {/* <RulesCanvas /> */}
           <Canvas />
         </Box>
       </AppCard>

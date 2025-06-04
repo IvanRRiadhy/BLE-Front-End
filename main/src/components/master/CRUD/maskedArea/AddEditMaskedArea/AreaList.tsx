@@ -224,7 +224,7 @@ const AreaList = () => {
         </Box>
         <Divider />
         <Scrollbar
-          sx={{ height: { lg: 'calc(100vh - 250px)', sm: '100vh' }, maxHeight: 'fit-content' }}
+          sx={{ height: { lg: 'calc(100vh - 370px)', sm: '100vh' }, maxHeight: 'fit-content' }}
         >
           {filteredUnsavedMaksedArea ? (
             filteredUnsavedMaksedArea.map((area: MaskedAreaType) => (

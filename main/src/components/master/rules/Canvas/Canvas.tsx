@@ -74,9 +74,12 @@ const Canvas = () => {
         onClick={(e) => {
           const clickedOnEmptySpace =
             e.target.attrs.name !== 'circle' && e.target.attrs.name !== 'node';
-
+          const stage = e.target.getStage();
           if (arrowDrawing && clickedOnEmptySpace) {
             dispatch(setArrowDrawing(null));
+            if (stage) {
+              stage.container().style.cursor = 'default';
+            }
           }
         }}
         onContextMenu={(e) => {

@@ -20,7 +20,8 @@ const FloorplanDeviceEdit = () => {
         <Box
           display="flex"
           flexDirection="column"
-          minHeight={800}
+          minHeight={'80vh'}
+          maxHeight={715}
           sx={{ border: '1px solid', borderColor: 'divider' }}
         >
           <AddEditDeviceSidebar
@@ -28,17 +29,28 @@ const FloorplanDeviceEdit = () => {
             onSidebarClose={() => setMobileSidebarOpen(false)}
           />
         </Box>
+
+        <Box flexGrow={1}>
+          <EditDeviceFloorView zoomable />
+        </Box>
         {editingDevice && (
-          <Box display="flex" flexDirection="column" minHeight={800}>
+          <Box
+            position="absolute"
+            top={140}
+            left={285}
+            minHeight={'70vh'}
+            maxHeight={710}
+            zIndex={1000}
+            sx={{
+              boxShadow: '-2px 0px 8px rgba(0,0,0,0.15)', // Add shadow for visual separation
+            }}
+          >
             <DeviceDetailSidebar
               isEditingSidebarOpen={isMobileSidebarOpen}
               onEditingSidebarClose={() => setMobileSidebarOpen(false)}
             />
           </Box>
         )}
-        <Box flexGrow={1}>
-          <EditDeviceFloorView zoomable />
-        </Box>
       </AppCard>
     </PageContainer>
   );

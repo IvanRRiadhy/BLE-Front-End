@@ -22,13 +22,17 @@ import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { dispatch } from 'src/store/Store';
 
-const API_URL = 'http://192.168.1.173:5000/api/Auth/login';
+const API_URL = 'http://192.168.1.173:5000/api/Auth/login/';
 const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const [loginError, setLoginError] = useState<string>('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (loginError) {
+      setLoginError('');
+    }
     setCredentials({ ...credentials, [e.target.id]: e.target.value });
   };
 
@@ -48,10 +52,11 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
 
         localStorage.setItem('token', data.token);
         localStorage.setItem('welcomePopupShown', 'false');
-        // localStorage.setItem('refreshToken', data.refreshToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
         navigate('/');
       })
       .catch((error) => {
+        setLoginError('Invalid username or password. Please try again.');
         console.error('error: ', error.response ? error.response.data.collection : error.message);
       });
   };
@@ -79,6 +84,25 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
           </Typography>
         </Divider>
       </Box>
+      {/* Error message display */}
+      {loginError && (
+        <Box mt={2}>
+          <Typography
+            variant="body2"
+            color="error"
+            textAlign="center"
+            sx={{
+              backgroundColor: '#ffebee',
+              padding: '8px 12px',
+              borderRadius: '4px',
+              border: '1px solid #ffcdd2',
+            }}
+          >
+            {loginError}
+          </Typography>
+        </Box>
+      )}
+
       <form onSubmit={handleSubmit}>
         <Stack>
           <Box>

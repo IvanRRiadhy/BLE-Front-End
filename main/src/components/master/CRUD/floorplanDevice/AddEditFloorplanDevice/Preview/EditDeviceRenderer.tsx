@@ -18,6 +18,11 @@ import {
   SelectFloorplanDevice,
 } from 'src/store/apps/crud/floorplanDevice';
 
+import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
+import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
+import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
+import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
+
 const EditDeviceRenderer: React.FC<{
   width: number;
   height: number;
@@ -43,6 +48,19 @@ const EditDeviceRenderer: React.FC<{
       };
     }
   }, [imageSrc]);
+  const useDeviceIcon = (src: string) => {
+    const [img, setImg] = useState<HTMLImageElement | null>(null);
+    useEffect(() => {
+      const image = new window.Image();
+      image.src = src;
+      image.onload = () => setImg(image);
+    }, [src]);
+    return img;
+  };
+  const iconCCTV = useDeviceIcon(CCTVSVG);
+  const iconGateway = useDeviceIcon(GatewaySVG);
+  const iconFaceRecog = useDeviceIcon(FaceRecog);
+  const iconUnknown = useDeviceIcon(UnknownDevice);
 
   // const handleDragMove = (e: any, device: FloorplanDeviceType) => {
   //   const newPosX = (e.target.x() * 4) / scales; // Convert back to original scale
@@ -95,87 +113,173 @@ const EditDeviceRenderer: React.FC<{
       }
       dispatch(SelectFloorplanDevice(device.id));
     };
-    // console.log('device', device.posPxX, device.posPxY);
-    // console.log('scales', scales);
+    let deviceIcon, width, height;
     switch (device.type) {
       case 'Cctv':
-        return (
-          <Circle
-            name="Device"
-            key={device.id}
-            x={(device.posPxX * scales) / 4}
-            y={(device.posPxY * scales) / 4}
-            radius={20}
-            fill="blue"
-            stroke={isActive ? 'lightgreen' : undefined}
-            strokeWidth={isActive ? 5 : 0}
-            onClick={handleDeviceClick}
-            draggable={isEditing} // Make it draggable only if editing
-            // onDragMove={(e) => handleDragMove(e, device)} // Handle drag move
-            onMouseDown={() => handleDragStart(device.id)} // Handle drag start
-            // onDragStart={handleDragStart} // Handle drag start
-            onDragEnd={(e) => handleDragEnd(e, device)} // Handle drag end
-          />
-        );
+        deviceIcon = iconCCTV;
+        width = 36;
+        height = 36;
+        break;
       case 'BleReader':
-        return (
-          <Rect
-            name="Device"
-            key={device.id}
-            x={(device.posPxX * scales) / 4}
-            y={(device.posPxY * scales) / 4}
-            width={40}
-            height={40}
-            fill="green"
-            stroke={isActive ? 'lightgreen' : undefined}
-            strokeWidth={isActive ? 5 : 0}
-            onClick={handleDeviceClick}
-            draggable={isEditing} // Make it draggable only if editing
-            // onDragMove={(e) => handleDragMove(e, device)} // Handle drag move
-            onMouseDown={() => handleDragStart(device.id)} // Handle drag start
-            onDragEnd={(e) => handleDragEnd(e, device)} // Handle drag end
-          />
-        );
+        deviceIcon = iconGateway;
+        width = 40;
+        height = 40;
+        break;
       case 'AccessDoor':
-        return (
-          <Star
-            name="Device"
-            key={device.id}
-            x={(device.posPxX * scales) / 4}
-            y={(device.posPxY * scales) / 4}
-            numPoints={3}
-            innerRadius={15}
-            outerRadius={30}
-            fill="red"
-            stroke={isActive ? 'lightgreen' : undefined}
-            strokeWidth={isActive ? 5 : 0}
-            onClick={handleDeviceClick}
-            draggable={isEditing} // Make it draggable only if editing
-            // onDragMove={(e) => handleDragMove(e, device)} // Handle drag move
-            onMouseDown={() => handleDragStart(device.id)} // Handle drag start
-            onDragEnd={(e) => handleDragEnd(e, device)} // Handle drag end
-          />
-        );
+        deviceIcon = iconFaceRecog;
+        width = 50;
+        height = 50;
+        break;
+
       default:
-        return (
-          <Rect
-            name="Device"
-            key={device.id}
-            x={(device.posPxX * scales) / 4}
-            y={(device.posPxY * scales) / 4}
-            width={40}
-            height={40}
-            fill="gray"
-            stroke={isActive ? 'lightgreen' : undefined}
-            strokeWidth={isActive ? 5 : 0}
-            onClick={handleDeviceClick}
-            draggable={isEditing} // Make it draggable only if editing
-            // onDragMove={(e) => handleDragMove(e, device)} // Handle drag move
-            onMouseDown={() => handleDragStart(device.id)} // Handle drag start
-            onDragEnd={(e) => handleDragEnd(e, device)} // Handle drag end
-          />
-        );
+        deviceIcon = iconUnknown;
+        break;
     }
+    const x = (device.posPxX * scales) / 4;
+    const y = (device.posPxY * scales) / 4;
+    return (
+      deviceIcon && (
+        <KonvaImage
+          key={device.id}
+          name="Device"
+          image={deviceIcon}
+          x={x} // Center the icon inside the rect
+          y={y}
+          width={width}
+          height={height}
+          // listening={false}
+          onClick={handleDeviceClick}
+          draggable={isEditing} // Make it draggable only if editing
+          // onDragMove={(e) => handleDragMove(e, device)} // Handle drag move
+          onMouseDown={() => handleDragStart(device.id)} // Handle drag start
+          // onDragStart={handleDragStart} // Handle drag start
+          onDragEnd={(e) => handleDragEnd(e, device)} // Handle drag end
+          stroke={isActive ? 'lightgreen' : 'transparent'}
+          strokeWidth={isActive ? 5 : 0}
+        />
+      )
+    );
+    // console.log('device', device.posPxX, device.posPxY);
+    // console.log('scales', scales);
+    // switch (device.type) {
+    //   case 'Cctv':
+    //     const icon = useDeviceIcon(CCTVSVG);
+    //     const x = (device.posPxX * scales) / 4;
+    //     const y = (device.posPxY * scales) / 4;
+    //     return (
+    //       <>
+    //         {/* <Circle
+    //           name="Device"
+    //           key={device.id}
+    //           x={x}
+    //           y={y}
+    //           radius={20}
+    //           fill="transparent"
+    //           stroke={isActive ? 'lightgreen' : undefined}
+    //           strokeWidth={isActive ? 5 : 0}
+    //         /> */}
+    //         {icon && (
+    //           <KonvaImage
+    //             image={icon}
+    //             x={x} // Center the icon inside the rect
+    //             y={y}
+    //             width={36}
+    //             height={36}
+    //             // listening={false}
+    //             onClick={handleDeviceClick}
+    //             draggable={isEditing} // Make it draggable only if editing
+    //             // onDragMove={(e) => handleDragMove(e, device)} // Handle drag move
+    //             onMouseDown={() => handleDragStart(device.id)} // Handle drag start
+    //             // onDragStart={handleDragStart} // Handle drag start
+    //             onDragEnd={(e) => handleDragEnd(e, device)} // Handle drag end
+    //             stroke={isActive ? 'lightgreen' : 'transparent'}
+    //             strokeWidth={isActive ? 5 : 0}
+    //           />
+    //         )}
+    //       </>
+    //     );
+    //   case 'BleReader': {
+    //     const icon = useDeviceIcon(GatewaySVG); // Use your SVG or PNG path
+    //     const x = (device.posPxX * scales) / 4;
+    //     const y = (device.posPxY * scales) / 4;
+    //     return (
+    //       <>
+    //         <Rect
+    //           name="Device"
+    //           key={device.id}
+    //           x={x}
+    //           y={y}
+    //           width={40}
+    //           height={40}
+    //           fill="transparent"
+    //           stroke={isActive ? 'lightgreen' : undefined}
+    //           strokeWidth={isActive ? 5 : 0}
+    //           onClick={handleDeviceClick}
+    //           draggable={isEditing}
+    //           onMouseDown={() => handleDragStart(device.id)}
+    //           onDragEnd={(e) => handleDragEnd(e, device)}
+    //         />
+    //         {icon && (
+    //           <KonvaImage
+    //             image={icon}
+    //             x={x} // Center the icon inside the rect
+    //             y={y}
+    //             width={40}
+    //             height={40}
+    //             listening={false}
+    //           />
+    //         )}
+    //       </>
+    //     );
+    //   }
+    //   case 'AccessDoor': {
+    //     const icon = useDeviceIcon(FaceRecog);
+    //     const x = (device.posPxX * scales) / 4;
+    //     const y = (device.posPxY * scales) / 4;
+    //     return (
+    //       <>
+    //         <Star
+    //           name="Device"
+    //           key={device.id}
+    //           x={x}
+    //           y={y}
+    //           numPoints={3}
+    //           innerRadius={15}
+    //           outerRadius={30}
+    //           fill="red"
+    //           stroke={isActive ? 'lightgreen' : undefined}
+    //           strokeWidth={isActive ? 5 : 0}
+    //           onClick={handleDeviceClick}
+    //           draggable={isEditing}
+    //           onMouseDown={() => handleDragStart(device.id)}
+    //           onDragEnd={(e) => handleDragEnd(e, device)}
+    //         />
+    //         {icon && (
+    //           <KonvaImage image={icon} x={x} y={y} width={50} height={50} listening={false} />
+    //         )}
+    //       </>
+    //     );
+    //   }
+    //   default:
+    //     return (
+    //       <Rect
+    //         name="Device"
+    //         key={device.id}
+    //         x={(device.posPxX * scales) / 4}
+    //         y={(device.posPxY * scales) / 4}
+    //         width={40}
+    //         height={40}
+    //         fill="gray"
+    //         stroke={isActive ? 'lightgreen' : undefined}
+    //         strokeWidth={isActive ? 5 : 0}
+    //         onClick={handleDeviceClick}
+    //         draggable={isEditing} // Make it draggable only if editing
+    //         // onDragMove={(e) => handleDragMove(e, device)} // Handle drag move
+    //         onMouseDown={() => handleDragStart(device.id)} // Handle drag start
+    //         onDragEnd={(e) => handleDragEnd(e, device)} // Handle drag end
+    //       />
+    //     );
+    // }
   };
 
   return (

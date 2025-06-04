@@ -7,6 +7,8 @@ import {
   updateNodeDetails,
   deleteNode,
   setStartNode,
+  setStartNodeThunk,
+  nodeType,
 } from 'src/store/apps/rules/RulesNodes';
 import { Html } from 'react-konva-utils';
 import TimeNodePopup from './TimePopup';
@@ -21,14 +23,18 @@ import {
 } from 'src/store/apps/rules/RulesConnectors';
 import { uniqueId } from 'lodash';
 import { IconDotsVertical, IconPencil, IconCopy, IconTrash, IconFlag } from '@tabler/icons-react';
+import { useTheme } from '@mui/material';
 
 const TimeNodes = ({ node }: any) => {
+  const theme = useTheme();
   const dispatch = useDispatch();
   const arrowDrawing = useSelector((state: any) => state.RulesConnectorReducer.arrowDrawing);
   const arrows = useSelector((state: any) => state.RulesConnectorReducer.arrows);
   const [showPopup, setShowPopup] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isButtonHovered, setIsButtonHovered] = useState(false);
 
   const handlePopupClose = () => {
     setShowPopup(false);
@@ -94,7 +100,37 @@ const TimeNodes = ({ node }: any) => {
   };
   const [circleHovered, setCircleHovered] = useState(false);
   const nameWidth = calculateTextWidth(node.name, 16);
-  const detailsWidth = calculateTextWidth(node.details, 12);
+  const detailsText = (node: nodeType) => {
+    if (node.details.startsWith('Choose a')) {
+      return node.details;
+    }
+    const detailsParts = node.details.split(' - ');
+    const organizations = detailsParts[0]?.split(',').map((o: string) => o.trim()) || [];
+    const departments = detailsParts[1]?.split(',').map((d: string) => d.trim()) || [];
+    const districts = detailsParts[2]?.split(',').map((d: string) => d.trim()) || [];
+    const members = detailsParts[3]?.split(',').map((m: string) => m.trim()) || [];
+
+    const firstOrganization = organizations[0] || '';
+    const extraOrganizations = organizations.length > 1 ? ` +${organizations.length - 1}` : '';
+    const firstDepartment = departments[0] || '';
+    const extraDepartments = departments.length > 1 ? ` +${departments.length - 1}` : '';
+    const firstDistrict = districts[0] || '';
+    const extraDistricts = districts.length > 1 ? ` +${districts.length - 1}` : '';
+    const firstMember = members[0] || '';
+    const extraMembers = members.length > 1 ? ` +${members.length - 1}` : '';
+
+    const formatPart = (first: string, extra: string) => (first ? `${first}${extra}` : '');
+
+    return [
+      formatPart(firstOrganization, extraOrganizations),
+      formatPart(firstDepartment, extraDepartments),
+      formatPart(firstDistrict, extraDistricts),
+      formatPart(firstMember, extraMembers),
+    ]
+      .filter(Boolean)
+      .join(' | ');
+  };
+  const detailsWidth = calculateTextWidth(detailsText(node), 12);
   const textWidth = Math.max(nameWidth, detailsWidth); // Approximate text width
   const rectWidth = Math.max(textWidth + 20, 100);
 
@@ -107,7 +143,7 @@ const TimeNodes = ({ node }: any) => {
   };
 
   const handleSetStartNode = (id: string) => {
-    dispatch(setStartNode(id));
+    dispatch(setStartNodeThunk(id));
   };
 
   useEffect(() => {
@@ -129,6 +165,9 @@ const TimeNodes = ({ node }: any) => {
         x={node.posX}
         y={node.posY}
         draggable={!arrowDrawing && !showPopup}
+        onDragStart={(e) => {
+          e.target.moveToTop();
+        }}
         onDragMove={(e) => {
           const newX = e.target.x();
           const newY = e.target.y();
@@ -141,7 +180,7 @@ const TimeNodes = ({ node }: any) => {
           }
         }}
         onClick={(e) => {
-          if (arrowDrawing) {
+          if (arrowDrawing && !node.startNode) {
             if (arrowDrawing.startNodeId === node.id) {
               console.log('An arrow cannot point to the same node it started from.');
               return;
@@ -168,10 +207,11 @@ const TimeNodes = ({ node }: any) => {
         onMouseEnter={(e) => {
           const stage = e.target.getStage();
           if (stage && !arrowDrawing) {
+            setIsHovered(true);
             stage.container().style.cursor = 'move';
           }
           const isAlreadyPointed = arrows.some((arrow: any) => arrow.endNodeId === node.id);
-          if (!isAlreadyPointed && arrowDrawing) {
+          if (!isAlreadyPointed && arrowDrawing && !node.startNode) {
             if (arrowDrawing.startNodeId === node.id) {
               return;
             }
@@ -186,6 +226,7 @@ const TimeNodes = ({ node }: any) => {
         onMouseLeave={(e) => {
           const stage = e.target.getStage();
           if (stage && !arrowDrawing) {
+            setIsHovered(false);
             stage.container().style.cursor = 'default';
           }
           dispatch(setArrowLatch(null));
@@ -202,29 +243,33 @@ const TimeNodes = ({ node }: any) => {
         />
         {/* Three-dotted button */}
         <Html>
-          <div
-            style={{
-              position: 'absolute',
-              top: 9,
-              left: rectWidth - 20,
-              cursor: 'pointer',
-            }}
-            onClick={handleMenuToggle}
-            onMouseEnter={(e) => {
-              const stage = e.currentTarget.closest('.konvajs-content') as HTMLElement | null;
-              if (stage) {
-                stage.style.cursor = 'pointer';
-              }
-            }}
-            onMouseLeave={(e) => {
-              const stage = e.currentTarget.closest('.konvajs-content') as HTMLElement | null;
-              if (stage) {
-                stage.style.cursor = 'default';
-              }
-            }}
-          >
-            <IconDotsVertical size={18} color="gray" />
-          </div>
+          {(isHovered || isButtonHovered) && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 9,
+                left: rectWidth - 20,
+                cursor: 'pointer',
+              }}
+              onClick={handleMenuToggle}
+              onMouseEnter={(e) => {
+                setIsButtonHovered(true);
+                const stage = e.currentTarget.closest('.konvajs-content') as HTMLElement | null;
+                if (stage) {
+                  stage.style.cursor = 'pointer';
+                }
+              }}
+              onMouseLeave={(e) => {
+                setIsButtonHovered(false);
+                const stage = e.currentTarget.closest('.konvajs-content') as HTMLElement | null;
+                if (stage) {
+                  stage.style.cursor = 'default';
+                }
+              }}
+            >
+              <IconDotsVertical size={18} color="gray" />
+            </div>
+          )}
         </Html>
         {/* Text inside the node */}
         <Text
@@ -239,13 +284,20 @@ const TimeNodes = ({ node }: any) => {
           name="node-details"
           x={rectWidth / 2 - detailsWidth / 2} // Center horizontally for details
           y={32} // Position below the name
-          text={node.details}
+          text={detailsText(node)}
           fontSize={12} // Smaller font size for details
           fill="gray"
         />
         {node.startNode && (
           <>
-            <Rect x={0} y={-15} width={rectWidth} height={15} fill="black" cornerRadius={4} />
+            <Rect
+              x={0}
+              y={-15}
+              width={rectWidth}
+              height={15}
+              fill={theme.palette.primary.main}
+              cornerRadius={4}
+            />
             <Text
               x={rectWidth / 2 - calculateTextWidth('Starting Node', 10) / 2}
               y={-12}
@@ -256,6 +308,145 @@ const TimeNodes = ({ node }: any) => {
             />
           </>
         )}
+        {/* Left Circle */}
+        {!node.startNode && (
+          <Circle
+            name="Circle"
+            x={-3} // Position to the left of the Rect
+            y={25} // Center vertically relative to the Rect
+            radius={arrows.some((arrow: any) => arrow.endNodeId === node.id) ? 2 : 4} // Default radius
+            fill={arrows.some((arrow: any) => arrow.endNodeId === node.id) ? '#363636' : 'white'} // Turn black if it already has an arrow
+            stroke={arrows.some((arrow: any) => arrow.endNodeId === node.id) ? '#363636' : 'black'}
+            onClick={(e) => {
+              e.cancelBubble = true; // Prevent the Stage's onClick from firing
+              if (arrowDrawing) {
+                if (arrowDrawing.startNodeId === node.id) {
+                  console.log('An arrow cannot point to the same node it started from.');
+                  return;
+                }
+                const isAlreadyPointed = arrows.some((arrow: any) => arrow.endNodeId === node.id);
+                if (!isAlreadyPointed) {
+                  dispatch(
+                    addArrow({
+                      id: arrowDrawing.id,
+                      startNodeId: arrowDrawing.startNodeId,
+                      endNodeId: node.id,
+                      type: 'Connector',
+                    }),
+                  );
+                  e.target.to({
+                    scaleX: 1,
+                    scaleY: 1,
+                    duration: 0.2,
+                  });
+                  const stage = e.target.getStage();
+                  if (stage) {
+                    stage.container().style.cursor = 'default'; // Reset cursor to default when leaving the Stage
+                  }
+                  dispatch(setArrowDrawing(null));
+                }
+              }
+            }}
+            onMouseEnter={(e) => {
+              const isAlreadyPointed = arrows.some((arrow: any) => arrow.endNodeId === node.id);
+              if (!isAlreadyPointed && arrowDrawing) {
+                if (arrowDrawing.startNodeId === node.id) {
+                  return;
+                }
+                e.target.to({
+                  scaleX: 1.5,
+                  scaleY: 1.5,
+                  duration: 0.2,
+                });
+                dispatch(
+                  setArrowLatch({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + 25 }),
+                );
+                dispatch(
+                  setArrowPreviewEnd({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + 25 }),
+                );
+              }
+            }}
+            onMouseLeave={(e) => {
+              const isAlreadyPointed = arrows.some((arrow: any) => arrow.endNodeId === node.id);
+              if (!isAlreadyPointed) {
+                e.target.to({
+                  scaleX: 1,
+                  scaleY: 1,
+                  duration: 0.2,
+                });
+                dispatch(setArrowLatch(null));
+              }
+            }}
+          />
+        )}
+
+        {/* Right Circle */}
+        <Circle
+          name="Circle"
+          x={rectWidth + 3} // Position to the right of the Rect
+          y={25} // Center vertically relative to the Rect
+          radius={4} // Default radius
+          fill="white"
+          stroke={circleHovered ? 'orange' : 'black'}
+          onClick={(e) => {
+            e.cancelBubble = true; // Prevent the Stage's onClick from firing
+            if (!arrowDrawing && !showPopup) {
+              // Start a new arrow
+              const stage = e.target.getStage();
+              const pointerPosition = stage?.getPointerPosition();
+              const arrow: ArrowType = {
+                id: uniqueId('arrow_'),
+                startNodeId: node.id,
+                endNodeId: '',
+                type: 'Connector',
+                arrowPreviewEnd: {
+                  x: pointerPosition ? pointerPosition.x : 0,
+                  y: pointerPosition ? pointerPosition.y : 0,
+                },
+              };
+              setCircleHovered(false);
+              dispatch(setArrowDrawing(arrow));
+              if (pointerPosition) {
+                dispatch(
+                  setArrowPreviewEnd({
+                    id: arrow.id,
+                    x: pointerPosition.x,
+                    y: pointerPosition.y,
+                  }),
+                );
+              }
+
+              if (stage) {
+                stage.container().style.cursor = 'crosshair';
+              }
+              // console.log(arrow);
+            }
+          }}
+          onMouseEnter={(e) => {
+            const stage = e.target.getStage();
+            if (stage && !arrowDrawing && !showPopup) {
+              setCircleHovered(true);
+              stage.container().style.cursor = 'pointer'; // Change cursor to "pointer" when hovering over the Circle
+              e.target.to({
+                scaleX: 1.5,
+                scaleY: 1.5,
+                duration: 0.2,
+              });
+            }
+          }}
+          onMouseLeave={(e) => {
+            const stage = e.target.getStage();
+            if (stage && !arrowDrawing) {
+              stage.container().style.cursor = 'default'; // Reset cursor to default when leaving the Circle
+            }
+            setCircleHovered(false);
+            e.target.to({
+              scaleX: 1,
+              scaleY: 1,
+              duration: 0.2,
+            });
+          }}
+        />
       </Group>
       {/* Render Popup using HTML */}
       {showPopup && (
@@ -269,142 +460,6 @@ const TimeNodes = ({ node }: any) => {
           />
         </Html>
       )}
-
-      {/* Left Circle */}
-      <Circle
-        name="Circle"
-        x={node.posX - 3} // Position to the left of the Rect
-        y={node.posY + 25} // Center vertically relative to the Rect
-        radius={arrows.some((arrow: any) => arrow.endNodeId === node.id) ? 2 : 4} // Default radius
-        fill={arrows.some((arrow: any) => arrow.endNodeId === node.id) ? '#363636' : 'white'} // Turn black if it already has an arrow
-        stroke={arrows.some((arrow: any) => arrow.endNodeId === node.id) ? '#363636' : 'black'}
-        onClick={(e) => {
-          e.cancelBubble = true; // Prevent the Stage's onClick from firing
-          if (arrowDrawing) {
-            if (arrowDrawing.startNodeId === node.id) {
-              console.log('An arrow cannot point to the same node it started from.');
-              return;
-            }
-            const isAlreadyPointed = arrows.some((arrow: any) => arrow.endNodeId === node.id);
-            if (!isAlreadyPointed) {
-              dispatch(
-                addArrow({
-                  id: arrowDrawing.id,
-                  startNodeId: arrowDrawing.startNodeId,
-                  endNodeId: node.id,
-                  type: 'Connector',
-                }),
-              );
-              e.target.to({
-                scaleX: 1,
-                scaleY: 1,
-                duration: 0.2,
-              });
-              const stage = e.target.getStage();
-              if (stage) {
-                stage.container().style.cursor = 'default'; // Reset cursor to default when leaving the Stage
-              }
-              dispatch(setArrowDrawing(null));
-            }
-          }
-        }}
-        onMouseEnter={(e) => {
-          const isAlreadyPointed = arrows.some((arrow: any) => arrow.endNodeId === node.id);
-          if (!isAlreadyPointed && arrowDrawing) {
-            if (arrowDrawing.startNodeId === node.id) {
-              return;
-            }
-            e.target.to({
-              scaleX: 1.5,
-              scaleY: 1.5,
-              duration: 0.2,
-            });
-            dispatch(setArrowLatch({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + 25 }));
-            dispatch(
-              setArrowPreviewEnd({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + 25 }),
-            );
-          }
-        }}
-        onMouseLeave={(e) => {
-          const isAlreadyPointed = arrows.some((arrow: any) => arrow.endNodeId === node.id);
-          if (!isAlreadyPointed) {
-            e.target.to({
-              scaleX: 1,
-              scaleY: 1,
-              duration: 0.2,
-            });
-            dispatch(setArrowLatch(null));
-          }
-        }}
-      />
-
-      {/* Right Circle */}
-      <Circle
-        name="Circle"
-        x={node.posX + rectWidth + 3} // Position to the right of the Rect
-        y={node.posY + 25} // Center vertically relative to the Rect
-        radius={4} // Default radius
-        fill="white"
-        stroke={circleHovered ? 'orange' : 'black'}
-        onClick={(e) => {
-          e.cancelBubble = true; // Prevent the Stage's onClick from firing
-          if (!arrowDrawing && !showPopup) {
-            // Start a new arrow
-            const stage = e.target.getStage();
-            const pointerPosition = stage?.getPointerPosition();
-            const arrow: ArrowType = {
-              id: uniqueId('arrow_'),
-              startNodeId: node.id,
-              endNodeId: '',
-              type: 'Connector',
-              arrowPreviewEnd: {
-                x: pointerPosition ? pointerPosition.x : 0,
-                y: pointerPosition ? pointerPosition.y : 0,
-              },
-            };
-            setCircleHovered(false);
-            dispatch(setArrowDrawing(arrow));
-            if (pointerPosition) {
-              dispatch(
-                setArrowPreviewEnd({
-                  id: arrow.id,
-                  x: pointerPosition.x,
-                  y: pointerPosition.y,
-                }),
-              );
-            }
-
-            if (stage) {
-              stage.container().style.cursor = 'crosshair';
-            }
-            // console.log(arrow);
-          }
-        }}
-        onMouseEnter={(e) => {
-          const stage = e.target.getStage();
-          if (stage && !arrowDrawing && !showPopup) {
-            setCircleHovered(true);
-            stage.container().style.cursor = 'pointer'; // Change cursor to "pointer" when hovering over the Circle
-            e.target.to({
-              scaleX: 1.5,
-              scaleY: 1.5,
-              duration: 0.2,
-            });
-          }
-        }}
-        onMouseLeave={(e) => {
-          const stage = e.target.getStage();
-          if (stage && !arrowDrawing) {
-            stage.container().style.cursor = 'default'; // Reset cursor to default when leaving the Circle
-          }
-          setCircleHovered(false);
-          e.target.to({
-            scaleX: 1,
-            scaleY: 1,
-            duration: 0.2,
-          });
-        }}
-      />
 
       {showMenu && (
         <Html>
@@ -471,7 +526,7 @@ const TimeNodes = ({ node }: any) => {
                   transition: 'background 0.2s',
                   color: '#e53935',
                 }}
-                onClick={handleMenuClose}
+                onClick={() => handleDeleteNode(node.id)}
                 onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >

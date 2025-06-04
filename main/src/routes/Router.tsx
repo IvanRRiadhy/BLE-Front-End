@@ -40,6 +40,9 @@ const Blacklist = Loadable(lazy(() => import('../views/master/crud/Blacklist')))
 const Building = Loadable(lazy(() => import('../views/master/crud/Building')));
 const FloorplanDevice = Loadable(lazy(() => import('../views/master/crud/FloorplanDevice')));
 const AlarmRecord = Loadable(lazy(() => import('../views/master/crud/AlarmRecord')));
+const FloorplanList = Loadable(
+  lazy(() => import('../components/master/CRUD/floorplan/FloorplanList')),
+);
 
 const FloorplanDeviceEdit = Loadable(
   lazy(() => import('../views/master/crud/FloorplanDeviceEdit')),
@@ -223,7 +226,7 @@ const Router = [
       { path: '/dashboards/monitoring', exact: true, element: <MonitoringDash /> },
       { path: '/dashboards/monitoring/viewer', exact: true, element: <MonitoringDash /> },
       { path: '/dashboards/monitoring/config', exact: true, element: <MonitoringConfig /> },
-      { path: '/master/floorplan', exact: true, element: <Floorplan /> },
+      // { path: '/master/floorplan', exact: true, element: <Floorplan /> },
       { path: '/master/gateway', exact: true, element: <GatewayApp /> },
       { path: '/master/membertag', exact: true, element: <MemberTag /> },
       { path: '/master/visitortag', exact: true, element: <VisitorTag /> },
@@ -245,6 +248,8 @@ const Router = [
       { path: '/master/building', exact: true, element: <Building /> },
       { path: '/master/device', exact: true, element: <FloorplanDevice /> },
       { path: '/apps/alarmrecord', exact: true, element: <AlarmRecord /> },
+      { path: '/master/floorplan', exact: true, element: <FloorplanList /> },
+
       { path: '/apps/contacts', element: <Contacts /> },
 
       { path: '/master/device/edit', exact: true, element: <FloorplanDeviceEdit /> },

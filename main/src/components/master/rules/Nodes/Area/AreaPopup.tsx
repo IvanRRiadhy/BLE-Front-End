@@ -69,38 +69,28 @@ const AreaNodePopup: React.FC<NodePopupProps> = ({
   const popupRef = useRef<HTMLDivElement>(null); // Ref for the popup box
   // Filter areas based on selected building and floorplan
 
-  // Parse node.details to pre-fill formData
-  const parseAreaDetails = (
-    details: string,
-    filteredAreas: { building: string; floorplan: string; area: string }[],
-    extraDetails: string,
-  ): { building: string[]; floorplan: string[]; area: string[]; extraDetails: string } => {
-    if (!details) {
-      return { building: [], floorplan: [], area: [], extraDetails: extraDetails || '' }; // Default values if details are empty
+  // Parse node.details
+  const parseAreaDetails2 = (details: string, extraDetails: string) => {
+    const matchingArea = areas.filter((area) => details.includes(area.area));
+    console.log('Matching Area:', matchingArea);
+    if (matchingArea.length > 0) {
+      return {
+        building: Array.from(new Set(matchingArea.map((area) => area.building))),
+        floorplan: Array.from(new Set(matchingArea.map((area) => area.floorplan))),
+        area: Array.from(new Set(matchingArea.map((area) => area.area))),
+        extraDetails: extraDetails || '',
+      };
     }
-
-    // Split the details string into parts
-    const [buildingPart, floorplanPart, areaPart] = details.split(' - ').map((part) => part.trim());
-
-    // Parse buildings
-    const buildings = buildingPart ? buildingPart.split(',').map((b) => b.trim()) : [];
-
-    // Parse floorplans
-    const floorplans = floorplanPart ? floorplanPart.split(',').map((f) => f.trim()) : [];
-
-    // Parse areas
-    const areas = areaPart ? areaPart.split(',').map((a) => a.trim()) : [];
-
     return {
-      building: buildings,
-      floorplan: floorplans,
-      area: areas,
+      building: [],
+      floorplan: [],
+      area: [],
       extraDetails: extraDetails || '',
     };
   };
 
   const [formData, setFormData] = useState(() =>
-    parseAreaDetails(node.details || '', areas, node.extraDetails || ''),
+    parseAreaDetails2(node.details || '', node.extraDetails || ''),
   );
   const filteredAreas = areas.filter(
     (area) =>
@@ -137,16 +127,6 @@ const AreaNodePopup: React.FC<NodePopupProps> = ({
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     padding: '10px',
     zIndex: 1000,
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<{ name?: string; value: unknown }>) => {
-    const { name, value } = e.target as { name: string; value: string | string[] };
-    setFormData((prev) => ({
-      ...prev,
-      [name]: Array.isArray(value) ? value : [value],
-      ...(name === 'building' && { floorplan: [], area: [] }), // Reset dependent fields
-      ...(name === 'floorplan' && { area: [] }), // Reset dependent fields
-    }));
   };
   // Filter floorplans based on selected building
   const filteredFloorplans = Array.from(

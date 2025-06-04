@@ -78,59 +78,69 @@ const RulesList = () => {
 
   return (
     <>
-      <Box sx={{ width: 240, background: '#f7f7f7', p: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Object
+      <Box p={3} px={2} display="flex" justifyContent="flex-start" alignItems="center">
+        <Typography variant="h5" mb={2} fontWeight={700} textAlign="left">
+          Rules
         </Typography>
-        {blocks
-          .filter((block) => block.type === 'object') // Filter blocks with type "object"
-          .map((block, index) => (
-            <Button
-              key={index}
-              variant="contained"
-              fullWidth
-              onClick={() => handleOnClick(block.name, block.type)}
-              sx={{ mb: 1 }}
-            >
-              {block.name}
-            </Button>
-          ))}
       </Box>
-      <Box sx={{ width: 240, background: '#f7f7f7', p: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Logical
-        </Typography>
-        {blocks
-          .filter((block) => block.type === 'Logic') // Filter blocks with type "Action"
-          .map((block, index) => (
-            <Button
-              key={index}
-              variant="contained"
-              fullWidth
-              onClick={() => handleOnClick(block.name, block.type)}
-              sx={{ mb: 1 }}
-            >
-              {block.name}
-            </Button>
-          ))}
-      </Box>
-      <Box sx={{ width: 240, background: '#f7f7f7', p: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Action
-        </Typography>
-        {blocks
-          .filter((block) => block.type === 'Action') // Filter blocks with type "Action"
-          .map((block, index) => (
-            <Button
-              key={index}
-              variant="contained"
-              fullWidth
-              onClick={() => handleOnClick(block.name, block.type)}
-              sx={{ mb: 1 }}
-            >
-              {block.name}
-            </Button>
-          ))}
+      <Box>
+        <Divider />
+        <Scrollbar sx={{ height: '65vh', maxHeight: 'fit-content' }}>
+          <Box sx={{ width: 260, background: '#f7f7f7', p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Object
+            </Typography>
+            {blocks
+              .filter((block) => block.type === 'object') // Filter blocks with type "object"
+              .map((block, index) => (
+                <Button
+                  key={index}
+                  variant="contained"
+                  fullWidth
+                  onClick={() => handleOnClick(block.name, block.type)}
+                  sx={{ mb: 1 }}
+                >
+                  {block.name}
+                </Button>
+              ))}
+          </Box>
+          <Box sx={{ width: 260, background: '#f7f7f7', p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Logical
+            </Typography>
+            {blocks
+              .filter((block) => block.type === 'Logic') // Filter blocks with type "Action"
+              .map((block, index) => (
+                <Button
+                  key={index}
+                  variant="contained"
+                  fullWidth
+                  onClick={() => handleOnClick(block.name, block.type)}
+                  sx={{ mb: 1 }}
+                >
+                  {block.name}
+                </Button>
+              ))}
+          </Box>
+          <Box sx={{ width: 260, background: '#f7f7f7', p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Action
+            </Typography>
+            {blocks
+              .filter((block) => block.type === 'Action') // Filter blocks with type "Action"
+              .map((block, index) => (
+                <Button
+                  key={index}
+                  variant="contained"
+                  fullWidth
+                  onClick={() => handleOnClick(block.name, block.type)}
+                  sx={{ mb: 1 }}
+                >
+                  {block.name}
+                </Button>
+              ))}
+          </Box>
+        </Scrollbar>
       </Box>
     </>
   );

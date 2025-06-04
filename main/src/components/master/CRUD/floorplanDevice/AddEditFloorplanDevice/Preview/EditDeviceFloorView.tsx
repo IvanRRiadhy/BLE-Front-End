@@ -13,6 +13,7 @@ import EditDeviceRenderer from './EditDeviceRenderer';
 import FloorplanHouse from 'src/assets/images/masters/Floorplan/Floorplan-House.png';
 import { Layer, Stage, Image as KonvaImage } from 'react-konva';
 
+const BASE_URL = 'http://localhost:5173'; // Adjust this to your actual base URL
 const EditDeviceFloorView: React.FC<{
   zoomable: boolean;
 }> = ({ zoomable }) => {
@@ -58,6 +59,11 @@ const EditDeviceFloorView: React.FC<{
   const [isDragging, setIsDragging] = useState('');
   const dragStart = useRef({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false); // State to track mouse hover
+  const floorplanImage = activeFloorData?.floorImage
+    ? activeFloorData.floorImage.startsWith('http') // Check if the URL is already absolute
+      ? activeFloorData.floorImage
+      : `${BASE_URL}${activeFloorData.floorImage}` // Prepend BASE_URL for relative paths
+    : FloorplanHouse; // Fallback to default image if not available
   useEffect(() => {
     if (FloorplanHouse) {
       const img = new Image();
