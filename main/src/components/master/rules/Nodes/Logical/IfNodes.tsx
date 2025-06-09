@@ -34,7 +34,7 @@ const IfNodes = ({ node }: any) => {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
-
+  const [circleHovered, setCircleHovered] = useState(false);
   const handlePopupOpen = () => {
     setShowPopup(true);
   };
@@ -152,7 +152,6 @@ const IfNodes = ({ node }: any) => {
           const stage = e.target.getStage();
 
           if (stage && !arrowDrawing) {
-            setIsHovered(true);
             stage.container().style.cursor = 'move'; // Change cursor to "move" when hovering over the Group
           }
 
@@ -213,6 +212,12 @@ const IfNodes = ({ node }: any) => {
           fill="white"
           stroke="black"
           strokeWidth={2}
+          onMouseEnter={() => {
+            if (!arrowDrawing) {
+              setIsHovered(true);
+            }
+          }}
+          onMouseLeave={() => setIsHovered(false)}
         />
         {/* Text inside the node */}
         <Text
@@ -222,6 +227,12 @@ const IfNodes = ({ node }: any) => {
           text={node.name}
           fontSize={16}
           fill="black"
+          onMouseEnter={() => {
+            if (!arrowDrawing) {
+              setIsHovered(true);
+            }
+          }}
+          onMouseLeave={() => setIsHovered(false)}
         />
         {node.startNode && (
           <>
@@ -317,7 +328,7 @@ const IfNodes = ({ node }: any) => {
           y={25} // Center vertically relative to the Rect
           radius={4} // Default radius
           fill="white"
-          stroke="black"
+          stroke={circleHovered ? 'orange' : 'black'}
           onClick={(e) => {
             e.cancelBubble = true; // Prevent the Stage's onClick from firing
             if (!arrowDrawing && !showPopup) {
@@ -334,6 +345,7 @@ const IfNodes = ({ node }: any) => {
                   y: pointerPosition ? pointerPosition.y : 0,
                 },
               };
+              setCircleHovered(false);
               dispatch(setArrowDrawing(arrow));
               if (pointerPosition) {
                 dispatch(
@@ -354,6 +366,7 @@ const IfNodes = ({ node }: any) => {
           onMouseEnter={(e) => {
             const stage = e.target.getStage();
             if (stage && !arrowDrawing && !showPopup) {
+              setCircleHovered(true);
               stage.container().style.cursor = 'pointer'; // Change cursor to "pointer" when hovering over the Circle
               e.target.to({
                 scaleX: 1.2,
@@ -367,6 +380,7 @@ const IfNodes = ({ node }: any) => {
             if (stage && !arrowDrawing) {
               stage.container().style.cursor = 'default'; // Reset cursor to default when leaving the Circle
             }
+            setCircleHovered(false);
             e.target.to({
               scaleX: 1,
               scaleY: 1,
@@ -394,7 +408,7 @@ const IfNodes = ({ node }: any) => {
             ref={menuRef}
             style={{
               position: 'absolute',
-              top: node.posY - 180,
+              top: node.posY - 140,
               left: node.posX + rectWidth - 25,
               width: '180px',
               background: 'white',
@@ -460,41 +474,6 @@ const IfNodes = ({ node }: any) => {
                 <IconTrash size={18} style={{ marginRight: 10 }} />
                 Delete
               </li>
-              {node.startNode ? (
-                <li
-                  style={{
-                    padding: '8px 12px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    borderRadius: '6px',
-                    transition: 'background 0.2s',
-                  }}
-                  onClick={() => handleSetStartNode('')}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                >
-                  <IconFlag size={18} style={{ marginRight: 10 }} />
-                  Unset Start Node
-                </li>
-              ) : (
-                <li
-                  style={{
-                    padding: '8px 12px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    borderRadius: '6px',
-                    transition: 'background 0.2s',
-                  }}
-                  onClick={() => handleSetStartNode(node.id)}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                >
-                  <IconFlag size={18} style={{ marginRight: 10 }} />
-                  Set Start Node
-                </li>
-              )}
             </ul>
           </div>
         </Html>

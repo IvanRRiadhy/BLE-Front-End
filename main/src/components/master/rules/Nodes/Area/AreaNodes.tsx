@@ -217,7 +217,7 @@ const AreaNodes = ({ node }: any) => {
           const stage = e.target.getStage();
           if (stage && !arrowDrawing) {
             stage.container().style.cursor = 'move';
-            setIsHovered(true);
+
           }
           const isAlreadyPointed = arrows.some((arrow: any) => arrow.endNodeId === node.id);
           if (!isAlreadyPointed && arrowDrawing && !node.startNode) {
@@ -249,6 +249,10 @@ const AreaNodes = ({ node }: any) => {
           fill={rectColor}
           stroke="black"
           strokeWidth={2}
+          onMouseEnter={() => {
+            if (!arrowDrawing) {
+            setIsHovered(true)}}}
+          onMouseLeave={() => setIsHovered(false)}
         />
         {/* Three-dotted button */}
         <Html>
@@ -288,6 +292,10 @@ const AreaNodes = ({ node }: any) => {
           text={node.name}
           fontSize={16}
           fill="black"
+                    onMouseEnter={() => {
+            if (!arrowDrawing) {
+            setIsHovered(true)}}}
+          onMouseLeave={() => setIsHovered(false)}
         />
         <Text
           name="node-details"
@@ -296,6 +304,10 @@ const AreaNodes = ({ node }: any) => {
           text={detailsText(node)}
           fontSize={12} // Smaller font size for details
           fill="gray"
+                    onMouseEnter={() => {
+            if (!arrowDrawing) {
+            setIsHovered(true)}}}
+          onMouseLeave={() => setIsHovered(false)}
         />
         {node.startNode && (
           <>
@@ -306,6 +318,7 @@ const AreaNodes = ({ node }: any) => {
               height={15}
               fill={theme.palette.primary.main} // Black background
               cornerRadius={4} // Rounded corners
+              
             />
             <Text
               x={rectWidth / 2 - calculateTextWidth('Starting Node', 10) / 2} // Center horizontally

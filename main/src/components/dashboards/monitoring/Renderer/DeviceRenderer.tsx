@@ -8,8 +8,10 @@ import {
   Image as KonvaImage,
   RegularPolygon,
   Shape,
+  Text,
 } from 'react-konva';
 import { useSelector, useDispatch } from 'src/store/Store';
+import { fetchBeacon } from 'src/store/apps/tracking/Beacon';
 
 import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
@@ -21,13 +23,14 @@ const Devices = [
   { id: 2, x: 20, y: 130, type: 'BleReader' },
   { id: 3, x: 300, y: 300, type: 'Cctv' },
   { id: 4, x: 10, y: 200, type: 'Cctv' },
-  { id: 5, x: 260, y: 200, type: 'BleReader' },
+  { id: 5, x: 800, y: 50, type: 'BleReader' },
   { id: 6, x: 150, y: 200, type: 'AccessDoor' },
+  { id: 7, x: 560, y: 450, type: 'BleReader' },
 ];
 
 const Beacon = [
-  { id: 1, x: 100, y: 100 },
-  { id: 2, x: 200, y: 200 },
+  { id: '1', x: 100, y: 100 },
+  { id: '2', x: 200, y: 200 },
 ];
 
 const DeviceRenderer: React.FC<{
@@ -39,6 +42,7 @@ const DeviceRenderer: React.FC<{
   const dispatch = useDispatch();
   const [scales, setScale] = useState<number>(scale);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
+  const beaconData = useSelector((state) => state.BeaconReducer.beacons);
   useEffect(() => {
     if (imageSrc) {
       console.log('imageSrc', imageSrc);
@@ -61,6 +65,20 @@ const DeviceRenderer: React.FC<{
     }, [src]);
     return img;
   };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      dispatch(fetchBeacon());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [dispatch]);
+
+  // useEffect(() => {
+  //   if (beaconData && Array.isArray(beaconData)) {
+  //     beaconData.forEach((beacon) => {
+  //       console.log('Beacon points:', beacon.points);
+  //     });
+  //   }
+  // }, [beaconData]);
 
   const iconCCTV = useDeviceIcon(CCTVSVG);
   const iconGateway = useDeviceIcon(GatewaySVG);
@@ -92,6 +110,7 @@ const DeviceRenderer: React.FC<{
     }
     const x = device.x * scales;
     const y = device.y * scales;
+    console.log('Device coordinates:', x, y);
     return (
       deviceIcon && (
         <KonvaImage
@@ -108,16 +127,26 @@ const DeviceRenderer: React.FC<{
     );
   };
 
-  const renderBeacon = (beacon: { id: number; x: number; y: number }) => {
+  const renderBeacon = (beacon: { id: string; x: number; y: number }) => {
     const radius = 9;
     const triangleHeight = 10;
     const triangleWidth = 9;
     const x = beacon.x * scales;
     const y = beacon.y * scales;
-
+    console.log('Beacon coordinates:', x, y);
     return (
       <React.Fragment key={beacon.id}>
         {/* Circle */}
+        <Text
+          x={x - 55}
+          y={y - triangleHeight - radius - 30}
+          text={beacon.id}
+          fontSize={14}
+          fill="#1976d2"
+          fontStyle="bold"
+          width={120}
+          align="center"
+        />
         <Circle
           x={x}
           y={y - triangleHeight - radius}
@@ -169,7 +198,17 @@ const DeviceRenderer: React.FC<{
         {/*Render devices*/}
         {Devices.map((device) => renderDeviceShape(device))}
         {/*Render beacons*/}
-        {Beacon.map((beacon) => renderBeacon(beacon))}
+        {/* {Beacon.map((beacon) => renderBeacon(beacon))} */}
+        {beaconData.map((beacon, index) => {
+          if (beacon.points && Array.isArray(beacon.points) && beacon.points.length > 0) {
+            return renderBeacon({
+              id: beacon.beaconId,
+              x: beacon.points[0].x,
+              y: beacon.points[0].y,
+            });
+          }
+          return null; // Skip rendering if no points are available
+        })}
       </Layer>
     </Stage>
   );

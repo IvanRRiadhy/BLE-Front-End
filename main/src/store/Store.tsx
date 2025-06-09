@@ -33,6 +33,7 @@ import layoutReducer from './apps/monitoring/layout';
 import BleNodeReducer from './apps/crud/bleNode';
 import RulesNodeReducer from './apps/rules/RulesNodes';
 import RulesConnectorReducer from './apps/rules/RulesConnectors';
+import BeaconReducer from './apps/tracking/Beacon';
 import { combineReducers } from 'redux';
 import {
   useDispatch as useAppDispatch,
@@ -76,6 +77,7 @@ export const store = configureStore({
     bleNodeReducer: BleNodeReducer,
     RulesNodeReducer: RulesNodeReducer,
     RulesConnectorReducer: RulesConnectorReducer,
+    BeaconReducer: BeaconReducer,
   },
 });
 
@@ -114,6 +116,7 @@ const rootReducer = combineReducers({
   bleNodeReducer: BleNodeReducer,
   RulesNodeReducer: RulesNodeReducer,
   RulesConnectorReducer: RulesConnectorReducer,
+  BeaconReducer: BeaconReducer,
 });
 
 export type AppState = ReturnType<typeof rootReducer>;
