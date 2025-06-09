@@ -30,9 +30,9 @@ export interface AlarmType {
     waitingBy: string;
     investigatedBy: string;
     investigatedResult: string;
-    visitor: visitorType;
-    reader: bleReaderType;
-    floorplanMaskedArea: MaskedAreaType; 
+    visitor?: visitorType;
+    reader?: bleReaderType;
+    floorplanMaskedArea?: MaskedAreaType; 
 };
 
 interface StateType {

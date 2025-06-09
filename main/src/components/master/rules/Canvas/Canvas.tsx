@@ -32,6 +32,7 @@ const Canvas = () => {
   const nodes = useSelector((state: AppState) => state.RulesNodeReducer.nodes);
   const arrows = useSelector((state: AppState) => state.RulesConnectorReducer.arrows);
   const arrowDrawing = useSelector((state: AppState) => state.RulesConnectorReducer.arrowDrawing);
+  const [ifSelector, setIfSelector] = React.useState(false);
   return (
     <Box
       sx={{
@@ -45,6 +46,7 @@ const Canvas = () => {
         width={window.innerWidth}
         height={window.innerHeight - 150}
         onMouseMove={(e) => {
+          if (ifSelector) return;
           if (arrowDrawing && arrowDrawing.startNodeId) {
             const stage = e.target.getStage();
             const pointerPosition = stage?.getPointerPosition();
@@ -60,12 +62,14 @@ const Canvas = () => {
           }
         }}
         onMouseEnter={(e) => {
+          if (ifSelector) return;
           const stage = e.target.getStage();
           if (stage) {
             stage.container().style.cursor = arrowDrawing ? 'crosshair' : 'default';
           }
         }}
         onMouseLeave={(e) => {
+          if (ifSelector) return;
           const stage = e.target.getStage();
           if (stage) {
             stage.container().style.cursor = 'default';
@@ -76,7 +80,9 @@ const Canvas = () => {
             e.target.attrs.name !== 'circle' && e.target.attrs.name !== 'node';
           const stage = e.target.getStage();
           if (arrowDrawing && clickedOnEmptySpace) {
+            console.log('Reset 5', clickedOnEmptySpace);
             dispatch(setArrowDrawing(null));
+            setIfSelector(false);
             if (stage) {
               stage.container().style.cursor = 'default';
             }
@@ -97,7 +103,14 @@ const Canvas = () => {
             if (!NodeComponent) {
               return <Nodes key={node.id} node={node} />;
             }
-            return <NodeComponent key={node.id} node={node} />;
+            return (
+              <NodeComponent
+                key={node.id}
+                node={node}
+                ifSelector={ifSelector}
+                setIfSelector={setIfSelector}
+              />
+            );
           })}
         </Layer>
       </Stage>

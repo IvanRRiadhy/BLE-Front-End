@@ -21,8 +21,8 @@ export interface FloorplanType {
     createdAt: string,
     updatedBy: string,
     updatedAt: string,
-    devices: FloorplanDeviceType[],
-    maskedAreas: MaskedAreaType[]
+    devices?: FloorplanDeviceType[],
+    maskedAreas?: MaskedAreaType[]
 }
 
 interface StateType {

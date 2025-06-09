@@ -48,6 +48,9 @@ export const ArrowsSlice = createSlice({
       );
     },
     setArrowDrawing: (state, action: PayloadAction<ArrowType | null>) => {
+      if (action.payload === null) {
+        console.log('Arrow drawing reset');
+      }
       state.arrowDrawing = action.payload;
     },
     setArrowStartNodeId: (state, action: PayloadAction<{ id: string; nodeId: string }>) => {

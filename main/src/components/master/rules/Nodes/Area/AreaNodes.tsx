@@ -23,10 +23,10 @@ import {
   setArrowPreviewEnd,
 } from 'src/store/apps/rules/RulesConnectors';
 import { uniqueId } from 'lodash';
-import { useTheme } from '@mui/material';
+import { Box, Button, Grid2 as Grid, Typography, useTheme } from '@mui/material';
 import { IconDotsVertical, IconPencil, IconCopy, IconTrash, IconFlag } from '@tabler/icons-react';
 
-const AreaNodes = ({ node }: any) => {
+const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const arrowDrawing = useSelector((state: any) => state.RulesConnectorReducer.arrowDrawing);
@@ -36,7 +36,8 @@ const AreaNodes = ({ node }: any) => {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
-
+  // const [ifSelector, setIfSelector] = useState(false);
+  const [ifSelectorPos, setIfSelectorPos] = useState<{ x: number; y: number } | null>(null);
   const handlePopupClose = () => {
     setShowPopup(false);
   };
@@ -68,8 +69,9 @@ const AreaNodes = ({ node }: any) => {
         stage.container().style.cursor = 'crosshair';
       }
       handlePopupClose();
-
+      console.log(arrow);
       // Dispatch the arrowDrawing state
+      console.log('Arrow 2', arrow);
       dispatch(setArrowDrawing(arrow));
 
       // Immediately set the arrowPreviewEnd
@@ -170,6 +172,7 @@ const AreaNodes = ({ node }: any) => {
   return (
     <>
       <Group
+        name="node"
         x={node.posX}
         y={node.posY}
         draggable={!arrowDrawing && !showPopup}
@@ -196,28 +199,47 @@ const AreaNodes = ({ node }: any) => {
             }
             const isAlreadyPointed = arrows.some((arrow: any) => arrow.endNodeId === node.id);
             if (!isAlreadyPointed) {
-              dispatch(
-                addArrow({
-                  id: arrowDrawing.id,
-                  startNodeId: arrowDrawing.startNodeId,
-                  endNodeId: node.id,
-                  type: 'Connector',
-                }),
-              );
-              const stage = e.target.getStage();
-              if (stage) {
-                stage.container().style.cursor = 'move'; // Reset cursor to default when leaving the Stage
+              if (arrowDrawing.type === 'IF_Connector') {
+                // Show selector at cursor
+                const stage = e.target.getStage();
+                const pointer = stage?.getPointerPosition();
+                if (pointer) {
+                  setIfSelectorPos({ x: pointer.x, y: pointer.y });
+                }
+                setIfSelector(true);
+                e.target.to({
+                  scaleX: 1,
+                  scaleY: 1,
+                  duration: 0.2,
+                });
+                if (stage) {
+                  stage.container().style.cursor = 'default'; // Reset cursor to default when leaving the Stage
+                }
+                return;
+              } else {
+                dispatch(
+                  addArrow({
+                    id: arrowDrawing.id,
+                    startNodeId: arrowDrawing.startNodeId,
+                    endNodeId: node.id,
+                    type: 'Connector',
+                  }),
+                );
+                const stage = e.target.getStage();
+                if (stage) {
+                  stage.container().style.cursor = 'move'; // Reset cursor to default when leaving the Stage
+                }
+                console.log('Reset');
+                dispatch(setArrowDrawing(null));
               }
-              dispatch(setArrowDrawing(null));
+              return;
             }
-            return;
           }
         }}
         onMouseEnter={(e) => {
           const stage = e.target.getStage();
           if (stage && !arrowDrawing) {
             stage.container().style.cursor = 'move';
-
           }
           const isAlreadyPointed = arrows.some((arrow: any) => arrow.endNodeId === node.id);
           if (!isAlreadyPointed && arrowDrawing && !node.startNode) {
@@ -234,6 +256,9 @@ const AreaNodes = ({ node }: any) => {
         }}
         onMouseLeave={(e) => {
           const stage = e.target.getStage();
+          if (ifSelector) {
+            return;
+          }
           if (stage && !arrowDrawing) {
             stage.container().style.cursor = 'default';
             setIsHovered(false);
@@ -251,7 +276,9 @@ const AreaNodes = ({ node }: any) => {
           strokeWidth={2}
           onMouseEnter={() => {
             if (!arrowDrawing) {
-            setIsHovered(true)}}}
+              setIsHovered(true);
+            }
+          }}
           onMouseLeave={() => setIsHovered(false)}
         />
         {/* Three-dotted button */}
@@ -292,21 +319,25 @@ const AreaNodes = ({ node }: any) => {
           text={node.name}
           fontSize={16}
           fill="black"
-                    onMouseEnter={() => {
+          onMouseEnter={() => {
             if (!arrowDrawing) {
-            setIsHovered(true)}}}
+              setIsHovered(true);
+            }
+          }}
           onMouseLeave={() => setIsHovered(false)}
         />
         <Text
-          name="node-details"
+          name="node"
           x={rectWidth / 2 - detailsWidth / 2} // Center horizontally for details
           y={32} // Position below the name
           text={detailsText(node)}
           fontSize={12} // Smaller font size for details
           fill="gray"
-                    onMouseEnter={() => {
+          onMouseEnter={() => {
             if (!arrowDrawing) {
-            setIsHovered(true)}}}
+              setIsHovered(true);
+            }
+          }}
           onMouseLeave={() => setIsHovered(false)}
         />
         {node.startNode && (
@@ -318,7 +349,6 @@ const AreaNodes = ({ node }: any) => {
               height={15}
               fill={theme.palette.primary.main} // Black background
               cornerRadius={4} // Rounded corners
-              
             />
             <Text
               x={rectWidth / 2 - calculateTextWidth('Starting Node', 10) / 2} // Center horizontally
@@ -333,7 +363,7 @@ const AreaNodes = ({ node }: any) => {
         {/* Left Circle */}
         {!node.startNode && (
           <Circle
-            name="Circle"
+            name="circle"
             x={-3} // Position to the left of the Rect
             y={25} // Center vertically relative to the Rect
             radius={arrows.some((arrow: any) => arrow.endNodeId === node.id) ? 2 : 4} // Default radius
@@ -348,24 +378,44 @@ const AreaNodes = ({ node }: any) => {
                 }
                 const isAlreadyPointed = arrows.some((arrow: any) => arrow.endNodeId === node.id);
                 if (!isAlreadyPointed) {
-                  dispatch(
-                    addArrow({
-                      id: arrowDrawing.id,
-                      startNodeId: arrowDrawing.startNodeId,
-                      endNodeId: node.id,
-                      type: 'Connector',
-                    }),
-                  );
-                  e.target.to({
-                    scaleX: 1,
-                    scaleY: 1,
-                    duration: 0.2,
-                  });
-                  const stage = e.target.getStage();
-                  if (stage) {
-                    stage.container().style.cursor = 'default'; // Reset cursor to default when leaving the Stage
+                  if (arrowDrawing.type === 'IF_Connector') {
+                    // Show selector at cursor
+                    const stage = e.target.getStage();
+                    const pointer = stage?.getPointerPosition();
+                    if (pointer) {
+                      setIfSelectorPos({ x: pointer.x, y: pointer.y });
+                    }
+                    setIfSelector(true);
+                    e.target.to({
+                      scaleX: 1,
+                      scaleY: 1,
+                      duration: 0.2,
+                    });
+                    if (stage) {
+                      stage.container().style.cursor = 'default'; // Reset cursor to default when leaving the Stage
+                    }
+                    return;
+                  } else {
+                    dispatch(
+                      addArrow({
+                        id: arrowDrawing.id,
+                        startNodeId: arrowDrawing.startNodeId,
+                        endNodeId: node.id,
+                        type: 'Connector',
+                      }),
+                    );
+                    const stage = e.target.getStage();
+                    e.target.to({
+                      scaleX: 1,
+                      scaleY: 1,
+                      duration: 0.2,
+                    });
+                    if (stage) {
+                      stage.container().style.cursor = 'default'; // Reset cursor to default when leaving the Stage
+                    }
+                    console.log('Reset2');
+                    dispatch(setArrowDrawing(null));
                   }
-                  dispatch(setArrowDrawing(null));
                 }
               }
             }}
@@ -390,7 +440,7 @@ const AreaNodes = ({ node }: any) => {
             }}
             onMouseLeave={(e) => {
               const isAlreadyPointed = arrows.some((arrow: any) => arrow.endNodeId === node.id);
-              if (!isAlreadyPointed) {
+              if (!isAlreadyPointed || !ifSelector) {
                 e.target.to({
                   scaleX: 1,
                   scaleY: 1,
@@ -403,7 +453,7 @@ const AreaNodes = ({ node }: any) => {
         )}
         {/* Right Circle */}
         <Circle
-          name="Circle"
+          name="circle"
           x={rectWidth + 3} // Position to the right of the Rect
           y={25} // Center vertically relative to the Rect
           radius={4} // Default radius
@@ -480,6 +530,71 @@ const AreaNodes = ({ node }: any) => {
             onDelete={handleDeleteNode}
             onCreateConnection={createConnection}
           />
+        </Html>
+      )}
+
+      {ifSelector && ifSelectorPos && (
+        <Html>
+          <Box
+            sx={{
+              position: 'absolute',
+              left: ifSelectorPos.x,
+              top: ifSelectorPos.y,
+              background: 'white',
+              border: '2px solid #1976d2',
+              borderRadius: 2,
+              boxShadow: 3,
+              p: 2,
+              zIndex: 2000,
+              minWidth: 180,
+            }}
+          >
+            <Typography variant="body1" sx={{ fontWeight: 'bold', mb: 1 }}>
+              Select IF Condition
+            </Typography>
+            <Grid container spacing={2} justifyContent="center" alignItems="center">
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  dispatch(
+                    addArrow({
+                      id: arrowDrawing.id,
+                      startNodeId: arrowDrawing.startNodeId,
+                      endNodeId: node.id,
+                      type: 'IF_True',
+                    }),
+                  );
+                  setIfSelector(false);
+                  setIfSelectorPos(null);
+                  dispatch(setArrowDrawing(null));
+                }}
+              >
+                True
+              </Button>
+              <Button
+                fullWidth
+                variant="contained"
+                color="error"
+                onClick={() => {
+                  dispatch(
+                    addArrow({
+                      id: arrowDrawing.id,
+                      startNodeId: arrowDrawing.startNodeId,
+                      endNodeId: node.id,
+                      type: 'IF_False',
+                    }),
+                  );
+                  setIfSelector(false);
+                  setIfSelectorPos(null);
+                  dispatch(setArrowDrawing(null));
+                }}
+              >
+                False
+              </Button>
+            </Grid>
+          </Box>
         </Html>
       )}
 

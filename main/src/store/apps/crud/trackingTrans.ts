@@ -19,8 +19,8 @@ export interface trackingTransType {
     coordinatePxY: number,
     alarmStatus: string,
     battery: number
-    floorplanMaskedArea: MaskedAreaType,
-    reader: bleReaderType
+    floorplanMaskedArea?: MaskedAreaType,
+    reader?: bleReaderType
 }
 
 interface StateType {

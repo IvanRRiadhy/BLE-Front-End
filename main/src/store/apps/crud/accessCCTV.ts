@@ -17,7 +17,7 @@ export interface CCTVType {
     updatedAt: string,
     integrationId: string,
     applicationId: string,
-    integration: IntegrationType,
+    integration?: IntegrationType,
 }
 
 interface StateType {

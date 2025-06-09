@@ -15,7 +15,7 @@ export interface BleNodeType {
     distancePx: number,
     startPos: string,
     endPos: string,
-    reader: bleReaderType,
+    reader?: bleReaderType,
 }
 
 interface StateType {

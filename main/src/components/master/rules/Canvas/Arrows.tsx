@@ -72,13 +72,20 @@ const Arrows = (arrow: ArrowType) => {
     endNode.posX - 5, // Arrow end position (Arrow Pointer)
     endNode.posY + 25,
   ];
+
+  const arrowColorMap: Record<string, string> = {
+    IF_True: 'lightgreen',
+    IF_False: 'red',
+  };
+  const arrowColor = hoveredArrowIndex === arrow.id ? 'blue' : arrowColorMap[arrow.type] || 'black';
+
   return (
     <>
       {/* Invisible Line for wider right-click area */}
       <Line
         points={points}
         stroke="transparent"
-        strokeWidth={20}
+        strokeWidth={30}
         onContextMenu={(e) => {
           e.evt.preventDefault();
           dispatch(deleteArrow(arrow.id));
@@ -93,11 +100,18 @@ const Arrows = (arrow: ArrowType) => {
       {/* Actual Arrow */}
       <Arrow
         points={points}
-        stroke={hoveredArrowIndex === arrow.id ? 'blue' : 'black'}
-        fill={hoveredArrowIndex === arrow.id ? 'blue' : 'black'}
+        stroke={arrowColor}
+        fill={arrowColor}
         pointerLength={10}
         pointerWidth={10}
-        strokeWidth={2}
+        strokeWidth={2} 
+        onContextMenu={(e) => {
+          e.evt.preventDefault();
+          dispatch(deleteArrow(arrow.id));
+        }}
+        onMouseEnter={() => {
+          dispatch(setHoveredArrowIndex(arrow.id));
+        }}
       />
       {/* Render the preview arrow */}
       {/* {arrowDrawing &&

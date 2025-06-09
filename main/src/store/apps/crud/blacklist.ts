@@ -12,8 +12,8 @@ export interface blacklistType {
     id: string,
     floorplanMaskedAreaId: string,
     visitorId: string,
-    visitor: visitorType,
-    floorplanMaskedArea: MaskedAreaType,
+    visitor?: visitorType,
+    floorplanMaskedArea?: MaskedAreaType,
 }
 
 interface StateType {

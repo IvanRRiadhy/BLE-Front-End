@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Group, Rect, Text, Circle } from 'react-konva';
+import { Box, Grid2 as Grid, Button, Typography, Divider } from '@mui/material';
 import { useDispatch } from 'src/store/Store';
 import {
   updateNodePosition,
@@ -24,7 +25,7 @@ import { Html } from 'react-konva-utils';
 import { IconCopy, IconDotsVertical, IconFlag, IconPencil, IconTrash } from '@tabler/icons-react';
 import { useTheme } from '@mui/material';
 
-const IfNodes = ({ node }: any) => {
+const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const arrowDrawing = useSelector((state: any) => state.RulesConnectorReducer.arrowDrawing);
@@ -35,6 +36,7 @@ const IfNodes = ({ node }: any) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const [circleHovered, setCircleHovered] = useState(false);
+  const [ifSelectorPos, setIfSelectorPos] = useState<{ x: number; y: number } | null>(null);
   const handlePopupOpen = () => {
     setShowPopup(true);
   };
@@ -132,16 +134,34 @@ const IfNodes = ({ node }: any) => {
               console.log('An arrow cannot point to the same node it started from.');
               return;
             }
-
-            dispatch(
-              addArrow({
-                id: arrowDrawing.id,
-                startNodeId: arrowDrawing.startNodeId,
-                endNodeId: node.id,
-                type: 'Connector',
-              }),
-            );
-            dispatch(setArrowDrawing(null));
+            if (arrowDrawing.type === 'IF_Connector') {
+              // Show selector at cursor
+              const stage = e.target.getStage();
+              const pointer = stage?.getPointerPosition();
+              if (pointer) {
+                setIfSelectorPos({ x: pointer.x, y: pointer.y });
+              }
+              setIfSelector(true);
+              e.target.to({
+                scaleX: 1,
+                scaleY: 1,
+                duration: 0.2,
+              });
+              if (stage) {
+                stage.container().style.cursor = 'default'; // Reset cursor to default when leaving the Stage
+              }
+              return;
+            } else {
+              dispatch(
+                addArrow({
+                  id: arrowDrawing.id,
+                  startNodeId: arrowDrawing.startNodeId,
+                  endNodeId: node.id,
+                  type: 'Connector',
+                }),
+              );
+              dispatch(setArrowDrawing(null));
+            }
           } else {
             // Open the popup if no arrow is being drawn
             // dispatch(setSelectedNode(node.id));
@@ -167,6 +187,9 @@ const IfNodes = ({ node }: any) => {
         }}
         onMouseLeave={(e) => {
           const stage = e.target.getStage();
+          if (ifSelector) {
+            return;
+          }
           if (stage && !arrowDrawing) {
             setIsHovered(false);
             stage.container().style.cursor = 'default';
@@ -257,7 +280,7 @@ const IfNodes = ({ node }: any) => {
         {/* Left Circle */}
         {!node.startNode && (
           <Circle
-            name="Circle"
+            name="circle"
             x={-3} // Position to the left of the Rect
             y={25} // Center vertically relative to the Rect
             radius={4} // Fixed radius
@@ -270,25 +293,43 @@ const IfNodes = ({ node }: any) => {
                   console.log('An arrow cannot point to the same node it started from.');
                   return;
                 }
-
-                dispatch(
-                  addArrow({
-                    id: arrowDrawing.id,
-                    startNodeId: arrowDrawing.startNodeId,
-                    endNodeId: node.id,
-                    type: 'Connector',
-                  }),
-                );
-                e.target.to({
-                  scaleX: 1,
-                  scaleY: 1,
-                  duration: 0.2,
-                });
-                const stage = e.target.getStage();
-                if (stage) {
-                  stage.container().style.cursor = 'default'; // Reset cursor to default when leaving the Stage
+                if (arrowDrawing.type === 'IF_Connector') {
+                  // Show selector at cursor
+                  const stage = e.target.getStage();
+                  const pointer = stage?.getPointerPosition();
+                  if (pointer) {
+                    setIfSelectorPos({ x: pointer.x, y: pointer.y });
+                  }
+                  setIfSelector(true);
+                  e.target.to({
+                    scaleX: 1,
+                    scaleY: 1,
+                    duration: 0.2,
+                  });
+                  if (stage) {
+                    stage.container().style.cursor = 'default'; // Reset cursor to default when leaving the Stage
+                  }
+                  return;
+                } else {
+                  dispatch(
+                    addArrow({
+                      id: arrowDrawing.id,
+                      startNodeId: arrowDrawing.startNodeId,
+                      endNodeId: node.id,
+                      type: 'Connector',
+                    }),
+                  );
+                  e.target.to({
+                    scaleX: 1,
+                    scaleY: 1,
+                    duration: 0.2,
+                  });
+                  const stage = e.target.getStage();
+                  if (stage) {
+                    stage.container().style.cursor = 'default'; // Reset cursor to default when leaving the Stage
+                  }
+                  dispatch(setArrowDrawing(null));
                 }
-                dispatch(setArrowDrawing(null));
               }
             }}
             onMouseEnter={(e) => {
@@ -312,6 +353,9 @@ const IfNodes = ({ node }: any) => {
             }}
             onMouseLeave={(e) => {
               const stage = e.target.getStage();
+              if (ifSelector) {
+                return;
+              }
               e.target.to({
                 scaleX: 1,
                 scaleY: 1,
@@ -323,7 +367,7 @@ const IfNodes = ({ node }: any) => {
         )}
         {/* Right Circle */}
         <Circle
-          name="Circle"
+          name="circle"
           x={rectWidth + 3} // Position to the right of the Rect
           y={25} // Center vertically relative to the Rect
           radius={4} // Default radius
@@ -339,7 +383,7 @@ const IfNodes = ({ node }: any) => {
                 id: uniqueId('arrow_'),
                 startNodeId: node.id,
                 endNodeId: '',
-                type: 'Connector',
+                type: 'IF_Connector',
                 arrowPreviewEnd: {
                   x: pointerPosition ? pointerPosition.x : 0,
                   y: pointerPosition ? pointerPosition.y : 0,
@@ -389,7 +433,70 @@ const IfNodes = ({ node }: any) => {
           }}
         />
       </Group>
-
+      {ifSelector && ifSelectorPos && (
+        <Html>
+          <Box
+            sx={{
+              position: 'absolute',
+              left: ifSelectorPos.x,
+              top: ifSelectorPos.y,
+              background: 'white',
+              border: '2px solid #1976d2',
+              borderRadius: 2,
+              boxShadow: 3,
+              p: 2,
+              zIndex: 2000,
+              minWidth: 180,
+            }}
+          >
+            <Typography variant="body1" sx={{ fontWeight: 'bold', mb: 1 }}>
+              Select IF Condition
+            </Typography>
+            <Grid container spacing={2} justifyContent="center" alignItems="center">
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  dispatch(
+                    addArrow({
+                      id: arrowDrawing.id,
+                      startNodeId: arrowDrawing.startNodeId,
+                      endNodeId: node.id,
+                      type: 'IF_True',
+                    }),
+                  );
+                  setIfSelector(false);
+                  setIfSelectorPos(null);
+                  dispatch(setArrowDrawing(null));
+                }}
+              >
+                True
+              </Button>
+              <Button
+                fullWidth
+                variant="contained"
+                color="error"
+                onClick={() => {
+                  dispatch(
+                    addArrow({
+                      id: arrowDrawing.id,
+                      startNodeId: arrowDrawing.startNodeId,
+                      endNodeId: node.id,
+                      type: 'IF_False',
+                    }),
+                  );
+                  setIfSelector(false);
+                  setIfSelectorPos(null);
+                  dispatch(setArrowDrawing(null));
+                }}
+              >
+                False
+              </Button>
+            </Grid>
+          </Box>
+        </Html>
+      )}
       {/* IfDialogPopup */}
       {showPopup && (
         <Html>

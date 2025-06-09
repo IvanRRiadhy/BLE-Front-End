@@ -23,9 +23,9 @@ import {
 } from 'src/store/apps/rules/RulesConnectors';
 import { uniqueId } from 'lodash';
 import { IconDotsVertical, IconPencil, IconCopy, IconTrash, IconFlag } from '@tabler/icons-react';
-import { useTheme } from '@mui/material';
+import { Box, Button, Grid2 as Grid, Typography, useTheme } from '@mui/material';
 
-const TimeNodes = ({ node }: any) => {
+const TimeNodes = ({ node, ifSelector, setIfSelector }: any) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const arrowDrawing = useSelector((state: any) => state.RulesConnectorReducer.arrowDrawing);
@@ -35,7 +35,7 @@ const TimeNodes = ({ node }: any) => {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
-
+  const [ifSelectorPos, setIfSelectorPos] = useState<{ x: number; y: number } | null>(null);
   const handlePopupClose = () => {
     setShowPopup(false);
   };
@@ -187,14 +187,33 @@ const TimeNodes = ({ node }: any) => {
             }
             const isAlreadyPointed = arrows.some((arrow: any) => arrow.endNodeId === node.id);
             if (!isAlreadyPointed) {
-              dispatch(
-                addArrow({
-                  id: arrowDrawing.id,
-                  startNodeId: arrowDrawing.startNodeId,
-                  endNodeId: node.id,
-                  type: 'Connector',
-                }),
-              );
+              if (arrowDrawing.type === 'IF_Connector') {
+                // Show selector at cursor
+                const stage = e.target.getStage();
+                const pointer = stage?.getPointerPosition();
+                if (pointer) {
+                  setIfSelectorPos({ x: pointer.x, y: pointer.y });
+                }
+                setIfSelector(true);
+                e.target.to({
+                  scaleX: 1,
+                  scaleY: 1,
+                  duration: 0.2,
+                });
+                if (stage) {
+                  stage.container().style.cursor = 'default'; // Reset cursor to default when leaving the Stage
+                }
+                return;
+              } else {
+                dispatch(
+                  addArrow({
+                    id: arrowDrawing.id,
+                    startNodeId: arrowDrawing.startNodeId,
+                    endNodeId: node.id,
+                    type: 'Connector',
+                  }),
+                );
+              }
               const stage = e.target.getStage();
               if (stage) {
                 stage.container().style.cursor = 'move'; // Reset cursor to default when leaving the Stage
@@ -239,9 +258,11 @@ const TimeNodes = ({ node }: any) => {
           fill="white"
           stroke="black"
           strokeWidth={2}
-                    onMouseEnter={() => {
+          onMouseEnter={() => {
             if (!arrowDrawing) {
-            setIsHovered(true)}}}
+              setIsHovered(true);
+            }
+          }}
           onMouseLeave={() => setIsHovered(false)}
         />
         {/* Three-dotted button */}
@@ -282,9 +303,11 @@ const TimeNodes = ({ node }: any) => {
           text={node.name}
           fontSize={16}
           fill="black"
-                    onMouseEnter={() => {
+          onMouseEnter={() => {
             if (!arrowDrawing) {
-            setIsHovered(true)}}}
+              setIsHovered(true);
+            }
+          }}
           onMouseLeave={() => setIsHovered(false)}
         />
         <Text
@@ -294,9 +317,11 @@ const TimeNodes = ({ node }: any) => {
           text={detailsText(node)}
           fontSize={12} // Smaller font size for details
           fill="gray"
-                    onMouseEnter={() => {
+          onMouseEnter={() => {
             if (!arrowDrawing) {
-            setIsHovered(true)}}}
+              setIsHovered(true);
+            }
+          }}
           onMouseLeave={() => setIsHovered(false)}
         />
         {node.startNode && (
@@ -337,14 +362,33 @@ const TimeNodes = ({ node }: any) => {
                 }
                 const isAlreadyPointed = arrows.some((arrow: any) => arrow.endNodeId === node.id);
                 if (!isAlreadyPointed) {
-                  dispatch(
-                    addArrow({
-                      id: arrowDrawing.id,
-                      startNodeId: arrowDrawing.startNodeId,
-                      endNodeId: node.id,
-                      type: 'Connector',
-                    }),
-                  );
+                  if (arrowDrawing.type === 'IF_Connector') {
+                    // Show selector at cursor
+                    const stage = e.target.getStage();
+                    const pointer = stage?.getPointerPosition();
+                    if (pointer) {
+                      setIfSelectorPos({ x: pointer.x, y: pointer.y });
+                    }
+                    setIfSelector(true);
+                    e.target.to({
+                      scaleX: 1,
+                      scaleY: 1,
+                      duration: 0.2,
+                    });
+                    if (stage) {
+                      stage.container().style.cursor = 'default'; // Reset cursor to default when leaving the Stage
+                    }
+                    return;
+                  } else {
+                    dispatch(
+                      addArrow({
+                        id: arrowDrawing.id,
+                        startNodeId: arrowDrawing.startNodeId,
+                        endNodeId: node.id,
+                        type: 'Connector',
+                      }),
+                    );
+                  }
                   e.target.to({
                     scaleX: 1,
                     scaleY: 1,
@@ -469,6 +513,70 @@ const TimeNodes = ({ node }: any) => {
             onDelete={handleDeleteNode}
             onCreateConnection={createConnection}
           />
+        </Html>
+      )}
+      {ifSelector && ifSelectorPos && (
+        <Html>
+          <Box
+            sx={{
+              position: 'absolute',
+              left: ifSelectorPos.x,
+              top: ifSelectorPos.y,
+              background: 'white',
+              border: '2px solid #1976d2',
+              borderRadius: 2,
+              boxShadow: 3,
+              p: 2,
+              zIndex: 2000,
+              minWidth: 180,
+            }}
+          >
+            <Typography variant="body1" sx={{ fontWeight: 'bold', mb: 1 }}>
+              Select IF Condition
+            </Typography>
+            <Grid container spacing={2} justifyContent="center" alignItems="center">
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  dispatch(
+                    addArrow({
+                      id: arrowDrawing.id,
+                      startNodeId: arrowDrawing.startNodeId,
+                      endNodeId: node.id,
+                      type: 'IF_True',
+                    }),
+                  );
+                  setIfSelector(false);
+                  setIfSelectorPos(null);
+                  dispatch(setArrowDrawing(null));
+                }}
+              >
+                True
+              </Button>
+              <Button
+                fullWidth
+                variant="contained"
+                color="error"
+                onClick={() => {
+                  dispatch(
+                    addArrow({
+                      id: arrowDrawing.id,
+                      startNodeId: arrowDrawing.startNodeId,
+                      endNodeId: node.id,
+                      type: 'IF_False',
+                    }),
+                  );
+                  setIfSelector(false);
+                  setIfSelectorPos(null);
+                  dispatch(setArrowDrawing(null));
+                }}
+              >
+                False
+              </Button>
+            </Grid>
+          </Box>
         </Html>
       )}
 

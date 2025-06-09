@@ -23,8 +23,8 @@ export interface AccessControlType {
     createdAt: string,
     updatedBy: string,
     updatedAt: string
-    integration: IntegrationType,
-    brand: BrandType,
+    integration?: IntegrationType,
+    brand?: BrandType,
 }   
 
 interface StateType {
