@@ -1,4 +1,4 @@
-import axios from "../../../utils/axios";
+import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
@@ -6,7 +6,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { IntegrationType } from "./integration";
 import { BrandType } from "./brand";
 
-const API_URL = "http://192.168.1.173:5000/api/MstAccessControl/";
+const API_URL = "/api/MstAccessControl/";
 
 export interface AccessControlType {
     id: string,
@@ -104,11 +104,7 @@ export const { GetAccessControls, SelectAccessControl, SearchAccessControl } = A
 
 export const fetchAccessControls = () => async (dispatch: AppDispatch) => {
     try {
-        const response = await axios.get(API_URL, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        const response = await axiosServices.get(API_URL);
         dispatch(GetAccessControls(response.data?.collection?.data || []));
     } catch (err: any) {
         console.log("Error fetching accessControls:",err);
@@ -120,11 +116,7 @@ export const addAccessControl = createAsyncThunk(
     async (newAccessControl: AccessControlType, { rejectWithValue }) => {
         try {
             const {id, createdBy, createdAt, updatedBy, updatedAt, ...filteredAccessControlData} = newAccessControl
-            const response = await axios.post(API_URL, filteredAccessControlData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
+            const response = await axiosServices.post(API_URL, filteredAccessControlData);
             return response.data;
         } catch (error: any) {
             console.error("Error adding accessControl:", error);
@@ -138,11 +130,7 @@ export const editAccessControl = createAsyncThunk(
     async (updateAccessControl: AccessControlType, {rejectWithValue}) => {
         try {
             const { id, createdBy, createdAt, updatedBy, updatedAt, ...filteredAccessControlData } = updateAccessControl;
-            const response = await axios.put(`${API_URL}/${id}`, filteredAccessControlData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
+            const response = await axiosServices.put(`${API_URL}${id}`, filteredAccessControlData);
             return response.data;
         } catch (error: any) {
             console.error("Error editing accessControl:", error);
@@ -155,11 +143,7 @@ export const deleteAccessControl = createAsyncThunk(
     "accessControls/deleteAccessControl",
     async (accessControlId: string, { rejectWithValue }) => {
         try {
-            await axios.delete(`${API_URL}/${accessControlId}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
+            await axiosServices.delete(`${API_URL}${accessControlId}`);
             return accessControlId; // Return the deleted accessControl's ID to update the state
         } catch (error: any) {
             console.error("Error deleting accessControl:", error);

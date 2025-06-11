@@ -71,7 +71,7 @@ const BuildingList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {['ID', 'Building Name'].map((header) => (
+                    {['Building Name'].map((header) => (
                       <TableCell key={header}>
                         <Typography variant="h6">{header}</Typography>
                       </TableCell>
@@ -94,9 +94,7 @@ const BuildingList = () => {
                         >
                           {index + 1}
                         </TableCell>
-                        <TableCell>{building.id}</TableCell>
                         <TableCell>{building.name}</TableCell>
-
                         <TableCell
                           sx={{
                             position: 'sticky',

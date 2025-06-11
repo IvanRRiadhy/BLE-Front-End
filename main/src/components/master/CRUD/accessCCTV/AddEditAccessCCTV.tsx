@@ -36,8 +36,8 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
       createdAt: '',
       updatedBy: '',
       updatedAt: '',
-      integrationId: '',
-      applicationId: '',
+      integrationId: 'A6D795EF-58C9-4CBD-AEF4-34C2A5E3B952',
+      applicationId: '5A32986E-C9B9-4174-82D7-A023EAF519E5',
     },
   );
   const appData: ApplicationType[] = useSelector(
@@ -116,14 +116,14 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
                 fullWidth
                 variant="outlined"
               />
-              <CustomFormLabel htmlFor="integration-id">Integration ID</CustomFormLabel>
+              {/* <CustomFormLabel htmlFor="integration-id">Integration ID</CustomFormLabel>
               <CustomTextField
                 id="integrationId"
                 placeholder={formData.integrationId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
-              />
+              /> */}
             </Grid>
             <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
               <CustomFormLabel htmlFor="cctv-RTSP">RTSP</CustomFormLabel>
@@ -134,7 +134,7 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
                 fullWidth
                 variant="outlined"
               />
-              <CustomFormLabel htmlFor="app-id">Application</CustomFormLabel>
+              {/* <CustomFormLabel htmlFor="app-id">Application</CustomFormLabel>
               <CustomSelect
                 name="applicationId"
                 value={formData.applicationId || ''}
@@ -147,7 +147,7 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
                     {app.applicationName}
                   </MenuItem>
                 ))}
-              </CustomSelect>
+              </CustomSelect> */}
             </Grid>
           </Grid>
         </DialogContent>

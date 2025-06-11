@@ -21,8 +21,9 @@ import AuthSocialButtons from './AuthSocialButtons';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { dispatch } from 'src/store/Store';
+import axiosServices from 'src/utils/axios';
 
-const API_URL = 'http://192.168.1.173:5000/api/Auth/login/';
+const API_URL = '/api/Auth/login/';
 const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState<string>('');
@@ -40,7 +41,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
     e.preventDefault();
     setError('');
     console.log(credentials);
-    axios
+    axiosServices
       .post(API_URL, credentials)
       .then((res) => {
         const data = res.data.collection.data;
@@ -59,6 +60,25 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         setLoginError('Invalid username or password. Please try again.');
         console.error('error: ', error.response ? error.response.data.collection : error.message);
       });
+    // axios
+    //   .post(API_URL, credentials)
+    //   .then((res) => {
+    //     const data = res.data.collection.data;
+    //     console.log('Data: ', data);
+    //     console.log('Username: ', data.username);
+    //     console.log('JWT Token: ', data.token);
+    //     console.log('Refresh Token: ', data.refreshToken);
+    //     console.log('User Role: ', data.groupId);
+
+    //     localStorage.setItem('token', data.token);
+    //     localStorage.setItem('welcomePopupShown', 'false');
+    //     localStorage.setItem('refreshToken', data.refreshToken);
+    //     navigate('/');
+    //   })
+    //   .catch((error) => {
+    //     setLoginError('Invalid username or password. Please try again.');
+    //     console.error('error: ', error.response ? error.response.data.collection : error.message);
+    //   });
   };
   return (
     <>

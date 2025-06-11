@@ -1,4 +1,4 @@
-import axios from "../../../utils/axios";
+import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
@@ -6,7 +6,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { MaskedAreaType } from "./maskedArea";
 import { bleReaderType } from "./bleReader";
 
-const API_URL = "http://192.168.1.173:5000/api/TrackingTransaction/";
+const API_URL = "/api/TrackingTransaction/";
 
 export interface trackingTransType {
     id: string,
@@ -80,11 +80,7 @@ export const { GetTrackingTrans, SelectTrackingTrans, SearchTrackingTrans } = Tr
 
 export const fetchTrackingTrans = () => async (dispatch: AppDispatch) => {
     try {
-        const response = await axios.get(`${API_URL}`,  {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            }
-        });
+        const response = await axiosServices.get(`${API_URL}`);
         dispatch(GetTrackingTrans(response.data?.collection?.data || []));
     } catch (error) {
         console.log(error);
@@ -94,11 +90,7 @@ export const fetchTrackingTrans = () => async (dispatch: AppDispatch) => {
 export const addTrackingTrans = createAsyncThunk("trackingTrans/addTrackingTrans", async (trackingTrans: trackingTransType) => {
     try {
         const {id, ...filteredTrackingTransData} = trackingTrans
-        const response = await axios.post(API_URL, filteredTrackingTransData, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            }
-        });
+        const response = await axiosServices.post(API_URL, filteredTrackingTransData);
         return response.data;
     } catch (error) {
         console.error("Error adding trackingTrans:", error);
@@ -109,11 +101,7 @@ export const addTrackingTrans = createAsyncThunk("trackingTrans/addTrackingTrans
 export const editTrackingTrans = createAsyncThunk("trackingTrans/editTrackingTrans", async (trackingTrans: trackingTransType) => {
     try {
         const { id, ...filteredTrackingTransData } = trackingTrans;
-        const response = await axios.put(`${API_URL}/${id}`, filteredTrackingTransData, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            }
-        });
+        const response = await axiosServices.put(`${API_URL}${id}`, filteredTrackingTransData);
         return response.data;
     } catch (error) {
         console.error("Error editing trackingTrans:", error);
@@ -123,11 +111,7 @@ export const editTrackingTrans = createAsyncThunk("trackingTrans/editTrackingTra
 
 export const deleteTrackingTrans = createAsyncThunk("trackingTrans/deleteTrackingTrans", async (trackingTransId: string) => {
     try {
-        await axios.delete(`${API_URL}/${trackingTransId}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            }
-        });
+        await axiosServices.delete(`${API_URL}${trackingTransId}`);
         return trackingTransId; // Return the deleted trackingTrans's ID to update the state
     } catch (error) {
         console.error("Error deleting trackingTrans:", error);

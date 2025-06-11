@@ -40,7 +40,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
     building || {
       id: '',
       name: '',
-      applicationId: '',
+      applicationId: '5A32986E-C9B9-4174-82D7-A023EAF519E5',
       createdBy: '',
       createdAt: '',
       updatedBy: '',
@@ -76,7 +76,9 @@ const AddEditBuilding = ({ type, building }: FormType) => {
       }
       if (['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
         setImage(file);
+        console.log('Selected file:', file);
         setPreview(URL.createObjectURL(file)); // Preview selected image
+        console.log(image);
       } else {
         alert('Please select a valid image file (PNG, JPG, JPEG)');
       }

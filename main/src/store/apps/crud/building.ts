@@ -1,10 +1,10 @@
-import axios from "../../../utils/axios";
+import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = 'http://192.168.1.173:5000/api/MstBuilding/';
+const API_URL = '/api/MstBuilding/';
 
 export interface BuildingType {
     id: string;
@@ -55,11 +55,7 @@ export const {
 
 export const fetchBuildings = () => async (dispatch: AppDispatch) => {
     try{
-        const response = await axios.get(API_URL, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        const response = await axiosServices.get(API_URL);
         dispatch(GetBuildings(response.data.collection?.data || []));
     } catch (err: any){
         console.error("Failed to Fetch Building: ", err);
@@ -69,11 +65,7 @@ export const fetchBuildings = () => async (dispatch: AppDispatch) => {
 export const addBuilding = createAsyncThunk("buildings/addBuilding", async (formData: FormData, { rejectWithValue }) => {
     try {
         formData.delete('id');
-        const response = await axios.post(API_URL, formData, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        const response = await axiosServices.post(API_URL, formData);
         return response.data;
     } catch (error: any) {
         console.error("Error adding building:", error);
@@ -85,11 +77,7 @@ export const editBuilding = createAsyncThunk("buildings/editBuilding", async (fo
     try {
         const id = formData.get('id'); // Extract ID from FormData
         formData.delete('id');
-        const response = await axios.put(`${API_URL}/${id}`, formData, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        const response = await axiosServices.put(`${API_URL}${id}`, formData);
         return response.data;
     } catch (error: any) {
         console.error("Error editing building:", error);
@@ -99,11 +87,7 @@ export const editBuilding = createAsyncThunk("buildings/editBuilding", async (fo
 
 export const deleteBuilding = createAsyncThunk("buildings/deleteBuilding", async (buildingId: string, { rejectWithValue }) => {
     try {
-        await axios.delete(`${API_URL}/${buildingId}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        await axiosServices.delete(`${API_URL}${buildingId}`);
         return buildingId; // Return the deleted building's ID to update the state
     } catch (error: any) {
         console.error("Error deleting building:", error);

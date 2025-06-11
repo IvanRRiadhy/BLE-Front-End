@@ -181,20 +181,13 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
                 fullWidth
                 variant="outlined"
               />
+
+            </Grid>
+            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
               <CustomFormLabel htmlFor="identity-Id">Identity ID</CustomFormLabel>
               <CustomTextField
                 id="identityId"
                 placeholder={formData.identityId}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="application-id">Application ID</CustomFormLabel>
-              <CustomTextField
-                id="applicationId"
-                placeholder={formData.applicationId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"

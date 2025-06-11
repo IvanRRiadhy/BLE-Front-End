@@ -1,11 +1,11 @@
-import axios from "../../../utils/axios";
+import axiosService from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { bleReaderType } from "./bleReader";
 
-const API_URL = 'http://192.168.1.173:5000/api/BleReaderNode/';
+const API_URL = '/api/BleReaderNode/';
 
 export interface BleNodeType {
     id: string,
@@ -93,11 +93,7 @@ export const { GetBleNode, SelectBleNode, SearchBleNode, SetEditBleNode } = BleN
 
 export const fetchNodes = () =>  async (dispatch: AppDispatch) => {
     try {
-        const response = await axios.get(API_URL, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        const response = await axiosService.get(API_URL);
         dispatch(GetBleNode(response.data?.collection?.data || []));
     } catch (error) {
         console.error("Error fetching nodes:", error);
@@ -109,11 +105,7 @@ export const addBleNode = createAsyncThunk(
     async (newBleNode: BleNodeType, { rejectWithValue }) => {
         try {
             const { id, reader, ...filteredBleNodeData } = newBleNode;
-            const response = await axios.post(API_URL, filteredBleNodeData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
+            const response = await axiosService.post(API_URL, filteredBleNodeData);
             return response.data;
         } catch (error: any) {
             console.error("Error adding bleNode:", error);
@@ -127,11 +119,7 @@ export const editBleNode = createAsyncThunk(
     async (updateBleNode: BleNodeType, { rejectWithValue }) => {
         try {
             const { id, reader, ...filteredBleNodeData } = updateBleNode;
-            const response = await axios.put(`${API_URL}/${id}`, filteredBleNodeData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
+            const response = await axiosService.put(`${API_URL}${id}`, filteredBleNodeData);
             return response.data;
         } catch (error: any) {
             console.error("Error editing bleNode:", error);
@@ -144,11 +132,7 @@ export const deleteBleNode = createAsyncThunk(
     "bleNodes/deleteBleNode",
     async (bleNodeId: string, { rejectWithValue }) => {
         try {
-            await axios.delete(`${API_URL}/${bleNodeId}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
+            await axiosService.delete(`${API_URL}${bleNodeId}`);
         } catch (error: any) {
             console.error("Error deleting bleNode:", error);
             return rejectWithValue(error.response?.data || "Unknown error");

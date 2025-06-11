@@ -1,10 +1,10 @@
-import axios from "../../../utils/axios";
+import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = "http://192.168.1.173:5000/api/MstMember/";
+const API_URL = "/api/MstMember/";
 
 export interface memberType {
     id: string,
@@ -98,11 +98,7 @@ export const { GetMember, SelectMember, SearchMember, SetVisibilityFilter } = Me
 
 export const fetchMembers = () => async (dispatch: AppDispatch) => {
     try {
-        const response = await axios.get(API_URL, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        const response = await axiosServices.get(API_URL);
         dispatch(GetMember(response.data?.collection?.data || []));
     } catch (error) {
         console.log(error);
@@ -112,12 +108,7 @@ export const fetchMembers = () => async (dispatch: AppDispatch) => {
 export const addMember = createAsyncThunk("member/addMember", async (formData: FormData) => {
     try {
         formData.delete('id');
-        const response = await axios.post(API_URL, formData, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-                'Content-Type' : 'multipart/form-data',
-            }
-        });
+        const response = await axiosServices.post(API_URL, formData);
         return response.data;
     } catch (error) {
         console.error("Error adding member:", error);
@@ -130,12 +121,7 @@ export const editMember = createAsyncThunk("member/editMember", async (formData:
     try {
         const id = formData.get('id');
         formData.delete('id');
-        const response = await axios.put(`${API_URL}/${id}`, formData, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-                'Content-Type' : 'multipart/form-data',
-            }
-        });
+        const response = await axiosServices.put(`${API_URL}${id}`, formData);
         return response.data;
     } catch (error) {
         console.error("Error editing member:", error);
@@ -145,11 +131,7 @@ export const editMember = createAsyncThunk("member/editMember", async (formData:
 
 export const deleteMember = createAsyncThunk("member/deleteMember", async (memberId: string) => {
     try {
-        await axios.delete(`${API_URL}/${memberId}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        await axiosServices.delete(`${API_URL}${memberId}`);
         return memberId; // Return the deleted member's ID to update the state
     } catch (error) {
         console.error("Error deleting member:", error);

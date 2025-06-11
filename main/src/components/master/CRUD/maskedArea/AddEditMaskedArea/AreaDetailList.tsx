@@ -66,7 +66,8 @@ const AreaDetailList = () => {
         updatedBy: area.updatedBy || '',
         updatedAt: area.updatedAt || '',
       };
-
+      console.log('Current Form Data:', formData);
+      console.log('New Form Data:', newFormData);
       if (!isEqual(formData, newFormData)) {
         setFormData(newFormData);
       }

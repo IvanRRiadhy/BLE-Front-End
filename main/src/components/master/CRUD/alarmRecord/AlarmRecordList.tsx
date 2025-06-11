@@ -80,13 +80,12 @@ const AlarmRecordList = () => {
                       <Typography variant="h6"></Typography>
                     </TableCell>
                     {[
-                      'ID',
                       'Time',
                       'Visitor Name',
                       'Reader',
                       'Alarm Status',
                       'Action Status',
-                      'Area ID',
+                      'Area Name',
                     ].map((header) => (
                       <TableCell key={header}>
                         <Typography variant="h6">{header}</Typography>
@@ -110,13 +109,12 @@ const AlarmRecordList = () => {
                         >
                           {index + 1}
                         </TableCell>
-                        <TableCell>{alarmRecordData.id}</TableCell>
                         <TableCell>{formatTime(alarmRecordData.timestamp)}</TableCell>
-                        <TableCell>{alarmRecordData.visitor.name}</TableCell>
-                        <TableCell>{alarmRecordData.reader.name}</TableCell>
+                        <TableCell>{alarmRecordData.visitor?.name}</TableCell>
+                        <TableCell>{alarmRecordData.reader?.name}</TableCell>
                         <TableCell>{alarmRecordData.alarmRecordStatus}</TableCell>
                         <TableCell>{alarmRecordData.actionStatus}</TableCell>
-                        <TableCell>{alarmRecordData.floorplanMaskedArea.id}</TableCell>
+                        <TableCell>{alarmRecordData.floorplanMaskedArea?.name}</TableCell>
 
                         <TableCell
                           sx={{

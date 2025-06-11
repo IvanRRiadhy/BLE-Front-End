@@ -117,7 +117,7 @@ const OrganizationList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {['ID', 'Organization Code', 'Organization Name', 'Organization Host'].map(
+                    {['Organization Code', 'Organization Name', 'Organization Host'].map(
                       (header) => (
                         <TableCell key={header}>
                           <Typography variant="h6">{header}</Typography>
@@ -142,11 +142,9 @@ const OrganizationList = () => {
                         >
                           {index + 1}
                         </TableCell>
-                        <TableCell>{organization.id}</TableCell>
                         <TableCell>{organization.code}</TableCell>
                         <TableCell>{organization.name}</TableCell>
                         <TableCell>{organization.organizationHost}</TableCell>
-
                         <TableCell
                           sx={{
                             position: 'sticky',

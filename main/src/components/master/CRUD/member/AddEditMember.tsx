@@ -245,20 +245,6 @@ const AddEditMember = ({ type, member }: FormType) => {
                   </MenuItem>
                 ))}
               </CustomSelect>
-              <CustomFormLabel htmlFor="applicationID">Application ID</CustomFormLabel>
-              <CustomSelect
-                name="applicationId"
-                value={formData.applicationId || ''}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              >
-                {applicationData.map((application) => (
-                  <MenuItem key={application.id} value={application.id}>
-                    {application.applicationName}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
             </Grid>
           </Grid>
           <Typography variant="h6" fontWeight={600} mb={2} mt={2}>

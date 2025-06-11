@@ -1,4 +1,4 @@
-import axios from "../../../utils/axios";
+import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
@@ -9,7 +9,7 @@ import { CCTVType } from "./accessCCTV";
 import { AccessControlType } from "./accessControl";
 import { DeviceType } from "src/types/crud/input";
 
-const API_URL = 'http://192.168.1.173:5000/api/FloorplanDevice/';
+const API_URL = '/api/FloorplanDevice/';
 
 export interface FloorplanDeviceType {
     id: string,
@@ -98,6 +98,24 @@ export const FloorplanDeviceSlice = createSlice({
                     ...state.editingFloorplanDevice,
                     ...action.payload};
             }   
+        },
+        editDevicePosition: (state, action: PayloadAction<FloorplanDeviceType>) => {
+            const index = state.unsavedFloorplanDevices.findIndex((device) => device.id === action.payload.id);
+            if (index !== -1) {
+                state.unsavedFloorplanDevices = state.unsavedFloorplanDevices.map((device, i) =>
+                    i === index ? { ...device, posX: action.payload.posX, posY: action.payload.posY, posPxX: action.payload.posPxX, posPxY: action.payload.posPxY } : device
+                );
+
+                if(state.editingFloorplanDevice){
+                    state.editingFloorplanDevice = {
+                        ...state.editingFloorplanDevice,
+                        posX: action.payload.posX,
+                        posY: action.payload.posY,
+                        posPxX: action.payload.posPxX,
+                        posPxY: action.payload.posPxY
+                    }
+                }
+            }
         },
         SaveDevice: (state, action: PayloadAction<string>) => {
             const index = state.unsavedFloorplanDevices.findIndex((device) => device.id === action.payload);
@@ -210,15 +228,12 @@ export const {
     RevertDevice,
     SaveDevice,
     ResetState,
+    editDevicePosition,
 } = FloorplanDeviceSlice.actions;
 
 export const fetchFloorplanDevices = () => async (dispatch: AppDispatch) => {
     try {
-        const response = await axios.get(API_URL, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        const response = await axiosServices.get(API_URL);
         dispatch(GetFloorplanDevices(response.data?.collection?.data || []));
     } catch (error) {
         console.error("Error fetching floorplan devices: ", error);
@@ -230,12 +245,9 @@ export const addFloorplanDevice = createAsyncThunk(
     async (floorplanDevice: FloorplanDeviceType, { rejectWithValue }) => {
         try {
             const { id, createdAt, createdBy, updatedAt, updatedBy, accessCctv, reader, accessControl, floorplanMaskedArea, ...filteredFloorplanDevice } = floorplanDevice;
+            console.log(filteredFloorplanDevice.applicationId);
             console.log("Filtered Floorplan Device: ", filteredFloorplanDevice);
-            const response = await axios.post(API_URL, filteredFloorplanDevice, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
+            const response = await axiosServices.post(API_URL, filteredFloorplanDevice);
             console.log("Floorplan device added: ", response.data);
             return response.data;
         } catch (error: any) {
@@ -250,11 +262,7 @@ export const editFloorplanDevice = createAsyncThunk(
     async (floorplanDevice: FloorplanDeviceType, { rejectWithValue }) => {
         try {
             const { id, createdAt, createdBy, updatedAt, updatedBy, accessCctv, reader, accessControl, floorplanMaskedArea, ...filteredFloorplanDevice } = floorplanDevice;
-             const response = await axios.put(`${API_URL}${floorplanDevice.id}`, filteredFloorplanDevice, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
+             const response = await axiosServices.put(`${API_URL}${floorplanDevice.id}`, filteredFloorplanDevice);
             console.log("Floorplan device edited: ", response.data);
             return response.data;
         } catch (error: any) {
@@ -268,11 +276,7 @@ export const deleteFloorplanDevice = createAsyncThunk(
     'floorplanDevice/deleteFloorplanDevice',
     async (id: string, { rejectWithValue }) => {
         try {
-            const response = await axios.delete(`${API_URL}${id}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
+            const response = await axiosServices.delete(`${API_URL}${id}`);
             console.log("Floorplan device deleted: ", response.data);
             return response.data;
         } catch (error: any) {

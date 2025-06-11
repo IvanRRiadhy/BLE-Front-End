@@ -31,6 +31,7 @@ import { ApplicationType, fetchApplications } from 'src/store/apps/crud/applicat
 import { BleNodeType, fetchNodes } from 'src/store/apps/crud/bleNode';
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
+import { isEqual } from 'lodash';
 
 const DeviceDetailList = () => {
   const [open, setOpen] = useState(false);
@@ -59,26 +60,32 @@ const DeviceDetailList = () => {
   });
   useEffect(() => {
     // console.log('device', device);
-    setFormData({
-      id: device?.id || '',
-      name: device?.name || '',
-      type: device?.type || '',
-      floorplanId: device?.floorplanId || '',
-      accessCctvId: device?.accessCctvId || '',
-      readerId: device?.readerId || '',
-      accessControlId: device?.accessControlId || '',
+    if(device){
+      const newFormData = {
+            id: device?.id || '',
+      name: formData.name || '',
+      type: formData.type || '',
+      floorplanId: formData.floorplanId || '',
+      accessCctvId: formData.accessCctvId || '',
+      readerId: formData.readerId || '',
+      accessControlId: formData.accessControlId || '',
       posX: device?.posX || 0,
       posY: device?.posY || 0,
       posPxX: device?.posPxX || 0,
       posPxY: device?.posPxY || 0,
-      floorplanMaskedAreaId: device?.floorplanMaskedAreaId || '',
-      applicationId: device?.applicationId || '',
-      deviceStatus: device?.deviceStatus || '',
-      createdBy: device?.createdBy || '',
-      createdAt: device?.createdAt || '',
-      updatedBy: device?.updatedBy || '',
-      updatedAt: device?.updatedAt || '',
-    });
+      floorplanMaskedAreaId: formData.floorplanMaskedAreaId || '',
+      applicationId: formData.applicationId || '',
+      deviceStatus: formData.deviceStatus || '',
+      createdBy: formData.createdBy || '',
+      createdAt: formData.createdAt || '',
+      updatedBy: formData.updatedBy || '',
+      updatedAt: formData.updatedAt || '',
+      }
+      console.log('newFormData', newFormData);
+    if(!isEqual(formData, newFormData)){
+      setFormData(newFormData);
+    }
+        };
     // console.log('formData', formData);
   }, [device]);
 

@@ -40,9 +40,7 @@ const Blacklist = Loadable(lazy(() => import('../views/master/crud/Blacklist')))
 const Building = Loadable(lazy(() => import('../views/master/crud/Building')));
 const FloorplanDevice = Loadable(lazy(() => import('../views/master/crud/FloorplanDevice')));
 const AlarmRecord = Loadable(lazy(() => import('../views/master/crud/AlarmRecord')));
-const FloorplanList = Loadable(
-  lazy(() => import('../components/master/CRUD/floorplan/FloorplanList')),
-);
+const FloorplanList = Loadable(lazy(() => import('../views/master/crud/Floorplan')));
 
 const FloorplanDeviceEdit = Loadable(
   lazy(() => import('../views/master/crud/FloorplanDeviceEdit')),

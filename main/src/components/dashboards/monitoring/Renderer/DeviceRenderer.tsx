@@ -17,15 +17,16 @@ import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
 import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
 import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
+import { uniqueId } from 'lodash';
 
 const Devices = [
   { id: 1, x: 250, y: 50, type: 'Cctv' },
-  { id: 2, x: 20, y: 130, type: 'BleReader' },
+  { id: 2, x: 150, y: 150, type: 'BleReader' },
   { id: 3, x: 300, y: 300, type: 'Cctv' },
   { id: 4, x: 10, y: 200, type: 'Cctv' },
-  { id: 5, x: 800, y: 50, type: 'BleReader' },
+  { id: 5, x: 350, y: 150, type: 'BleReader' },
   { id: 6, x: 150, y: 200, type: 'AccessDoor' },
-  { id: 7, x: 560, y: 450, type: 'BleReader' },
+  { id: 7, x: 550, y: 150, type: 'BleReader' },
 ];
 
 const Beacon = [
@@ -55,7 +56,16 @@ const DeviceRenderer: React.FC<{
       };
     }
   }, [imageSrc]);
-
+  function getLatestBeacons(beacons: any[]) {
+  const latestMap = new Map<string, any>();
+  beacons.forEach((beacon) => {
+    const existing = latestMap.get(beacon.beaconId);
+    if (!existing || new Date(beacon.time) > new Date(existing.time)) {
+      latestMap.set(beacon.beaconId, beacon);
+    }
+  });
+  return Array.from(latestMap.values());
+}
   const useDeviceIcon = (src: string) => {
     const [img, setImg] = useState<HTMLImageElement | null>(null);
     useEffect(() => {
@@ -68,6 +78,8 @@ const DeviceRenderer: React.FC<{
   useEffect(() => {
     const interval = setInterval(() => {
       dispatch(fetchBeacon());
+//       console.log("Fetching beacon data...", beaconData);
+// const latestBeacons = getLatestBeacons(beaconData);
     }, 1000);
     return () => clearInterval(interval);
   }, [dispatch]);
@@ -84,6 +96,8 @@ const DeviceRenderer: React.FC<{
   const iconGateway = useDeviceIcon(GatewaySVG);
   const iconFaceRecog = useDeviceIcon(FaceRecog);
   const iconUnknown = useDeviceIcon(UnknownDevice);
+
+
 
   const renderDeviceShape = (device: { id: number; x: number; y: number; type: string }) => {
     let deviceIcon, width, height;
@@ -110,7 +124,7 @@ const DeviceRenderer: React.FC<{
     }
     const x = device.x * scales;
     const y = device.y * scales;
-    console.log('Device coordinates:', x, y);
+    // console.log('Device coordinates:', x, y);
     return (
       deviceIcon && (
         <KonvaImage
@@ -128,14 +142,16 @@ const DeviceRenderer: React.FC<{
   };
 
   const renderBeacon = (beacon: { id: string; x: number; y: number }) => {
+    // console.log('Rendering beacon:', beacon);
     const radius = 9;
     const triangleHeight = 10;
     const triangleWidth = 9;
     const x = beacon.x * scales;
     const y = beacon.y * scales;
-    console.log('Beacon coordinates:', x, y);
+    const key = `beacon-${beacon.id}-${uniqueId()}`;
+    // console.log('Beacon coordinates:', x, y);
     return (
-      <React.Fragment key={beacon.id}>
+      <React.Fragment key={key}>
         {/* Circle */}
         <Text
           x={x - 55}
@@ -200,11 +216,12 @@ const DeviceRenderer: React.FC<{
         {/*Render beacons*/}
         {/* {Beacon.map((beacon) => renderBeacon(beacon))} */}
         {beaconData.map((beacon, index) => {
-          if (beacon.points && Array.isArray(beacon.points) && beacon.points.length > 0) {
+          // console.log('Beacon data:', beacon.point);
+          if (beacon.point) {
             return renderBeacon({
               id: beacon.beaconId,
-              x: beacon.points[0].x,
-              y: beacon.points[0].y,
+              x: beacon.point.x,
+              y: beacon.point.y,
             });
           }
           return null; // Skip rendering if no points are available

@@ -7,6 +7,7 @@ import {
   Divider,
   Grid2 as Grid,
   IconButton,
+  MenuItem,
   SelectChangeEvent,
   Typography,
 } from '@mui/material';
@@ -14,15 +15,17 @@ import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { AppDispatch, useDispatch } from 'src/store/Store';
+import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import { addFloor, editFloor, fetchFloors, floorType } from 'src/store/apps/crud/floor';
+import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
+import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 
 interface FormType {
   type?: string;
   floor?: floorType;
 }
 
-const BASE_URL = "http://192.168.1.173:5000";
+const BASE_URL = 'http://192.168.1.116:5000';
 
 const AddEditFloor = ({ type, floor }: FormType) => {
   const [open, setOpen] = React.useState(false);
@@ -45,6 +48,12 @@ const AddEditFloor = ({ type, floor }: FormType) => {
     updatedAt: floor?.updatedAt || '',
   });
   const dispatch: AppDispatch = useDispatch();
+  const buildingData: BuildingType[] = useSelector(
+    (state: RootState) => state.buildingReducer.buildings,
+  );
+  React.useEffect(() => {
+    dispatch(fetchBuildings());
+  }, [dispatch]);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -86,10 +95,11 @@ const AddEditFloor = ({ type, floor }: FormType) => {
           data.append(key, value.toString());
         }
       });
-
+      
       // Append the file if selected
       if (image) {
         data.append('floorImage', image); // File goes here
+        console.log('Image file added to form data:', image);
       }
       if (type === 'edit') {
         await dispatch(editFloor(data)); // Dispatch update
@@ -97,6 +107,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
       if (type === 'add') {
         await dispatch(addFloor(data));
       }
+      console.log('data', JSON.stringify(Object.fromEntries(data.entries())));
       await dispatch(fetchFloors());
       console.log('Saved!');
       handleClose();
@@ -122,7 +133,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
         const prepreview = URL.createObjectURL(file);
         console.log(prepreview);
         setPreview(prepreview); // Preview selected image
-        console.log(preview);
+        console.log(image);
       } else {
         alert('Please select a valid image file (PNG, JPG, JPEG)');
       }
@@ -161,13 +172,19 @@ const AddEditFloor = ({ type, floor }: FormType) => {
           <Grid container spacing={5} mb={3}>
             <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
               <CustomFormLabel htmlFor="building-id">Building ID</CustomFormLabel>
-              <CustomTextField
+              <CustomSelect
                 id="buildingId"
                 placeholder={formData.buildingId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
-              />
+              >
+                {buildingData.map((building) => (
+                  <MenuItem key={building.id} value={building.id}>
+                    {building.name}
+                  </MenuItem>
+                ))}
+              </CustomSelect>
               <CustomFormLabel htmlFor="floor-name">name</CustomFormLabel>
               <CustomTextField
                 id="name"

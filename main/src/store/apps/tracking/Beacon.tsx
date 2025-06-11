@@ -4,7 +4,7 @@ import { AppDispatch, RootState } from 'src/store/Store';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-const API_URL = 'http://localhost:3030/api/beacons';
+const API_URL = 'http://192.168.1.165:3000/api/beacons';
 
 export interface BeaconType {
   beaconId: string;
@@ -15,12 +15,11 @@ export interface BeaconType {
   seconDist: number;
   jarakPixel: number;
   jarakMeter: number;
-  points: [
+  point: 
     {
       x: number;
       y: number;
-    },
-  ];
+    };
   firstReaderCoord: {
     id: string;
     x: number;
@@ -48,6 +47,8 @@ export const BeaconSlice = createSlice({
   reducers: {
     GetBeacon: (state, action) => {
       state.beacons = action.payload;
+      // console.log('Beacon data updated:', state.beacons);
+      // You can add additional logic here if needed
     },
   },
 });
@@ -58,6 +59,7 @@ export const fetchBeacon = () => async (dispatch: AppDispatch) => {
   try {
     const response = await axios.get(API_URL);
     dispatch(GetBeacon(response.data));
+    console.log('Beacons fetched successfully:', response.data);
   } catch (error) {
     console.error('Error fetching beacons: ', error);
   }

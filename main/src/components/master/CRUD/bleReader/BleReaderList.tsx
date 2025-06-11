@@ -110,7 +110,6 @@ const BleReaderList = () => {
                       <Typography variant="h6"></Typography>
                     </TableCell>
                     {[
-                      'ID',
                       'Brand Name',
                       'Name',
                       'MAC',
@@ -143,7 +142,6 @@ const BleReaderList = () => {
                         >
                           {index + 1}
                         </TableCell>
-                        <TableCell>{bleReader.id}</TableCell>
                         <TableCell>{getBrandName(bleReader.brandId)}</TableCell>
                         <TableCell>{bleReader.name}</TableCell>
                         <TableCell>{bleReader.mac}</TableCell>

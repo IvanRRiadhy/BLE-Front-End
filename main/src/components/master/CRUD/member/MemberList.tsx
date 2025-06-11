@@ -148,7 +148,6 @@ const MemberList = () => {
                       <Typography variant="h6"></Typography>
                     </TableCell>
                     {[
-                      'id',
                       'personId',
                       'Organization Name',
                       'Department Name',
@@ -192,7 +191,6 @@ const MemberList = () => {
                         >
                           {index + 1}
                         </TableCell>
-                        <TableCell>{member.id}</TableCell>
                         <TableCell>{member.personId}</TableCell>
                         <TableCell>{getOrganizationName(member.organizationId)}</TableCell>
                         <TableCell>{getDepartmentName(member.departmentId)}</TableCell>

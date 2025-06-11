@@ -23,6 +23,7 @@ import {
   fetchAccessControls,
 } from 'src/store/apps/crud/accessControl';
 import { fetchApplications, ApplicationType } from 'src/store/apps/crud/application';
+import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 
 interface FormType {
@@ -42,8 +43,8 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
       channel: '',
       doorId: '',
       raw: '',
-      integrationId: '',
-      applicationId: '',
+      integrationId: 'F3FC00F0-F8FA-4DA1-A8C7-FC8336F24923',
+      applicationId: 'F8297CAE-44D1-4FCF-B549-D23FF994785E',
       createdBy: '',
       createdAt: '',
       updatedBy: '',
@@ -53,9 +54,13 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
   const appData: ApplicationType[] = useSelector(
     (state: RootState) => state.applicationReducer.applications,
   );
+  const brandData: BrandType[] = useSelector(
+    (state: RootState) => state.brandReducer.brands,
+  );
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchApplications());
+    dispatch(fetchBrands());
   }, [dispatch]);
 
   const handleClickOpen = () => {
@@ -122,14 +127,20 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
           <Divider />
           <Grid container spacing={5} mb={3}>
             <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
-              <CustomFormLabel htmlFor="ctrl-brand-id">Controller Brand ID</CustomFormLabel>
-              <CustomTextField
+              <CustomFormLabel htmlFor="ctrl-brand-id">Controller Brand</CustomFormLabel>
+              <CustomSelect
                 id="controllerBrandID"
                 placeholder={formData.controllerBrandId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
-              />
+                >
+              {brandData.map((brand) => (
+                <MenuItem key={brand.id} value={brand.id}>
+                  {brand.name}
+                </MenuItem>
+              ))}
+              </CustomSelect>
               <CustomFormLabel htmlFor="ctrl-type">Controller Type</CustomFormLabel>
               <CustomTextField
                 id="type"
@@ -172,28 +183,14 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
                 fullWidth
                 variant="outlined"
               />
-              <CustomFormLabel htmlFor="integration-id">Integration ID</CustomFormLabel>
+              <CustomFormLabel htmlFor="raw">Raw Data</CustomFormLabel>
               <CustomTextField
-                id="integrationId"
-                placeholder={formData.integrationId}
+                id="raw"
+                placeholder={formData.raw}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
               />
-              <CustomFormLabel htmlFor="app-id">Application</CustomFormLabel>
-              <CustomSelect
-                name="applicationId"
-                value={formData.applicationId || ''}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              >
-                {appData.map((app) => (
-                  <MenuItem key={app.id} value={app.id}>
-                    {app.applicationName}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
             </Grid>
             <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
               <CustomFormLabel htmlFor="ctrl-channel">Channel</CustomFormLabel>
@@ -204,14 +201,7 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
                 fullWidth
                 variant="outlined"
               />
-              <CustomFormLabel htmlFor="raw">Raw Data</CustomFormLabel>
-              <CustomTextField
-                id="raw"
-                placeholder={formData.raw}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
+
             </Grid>
           </Grid>
         </DialogContent>

@@ -22,10 +22,11 @@ import {
   editTrackingTrans,
   fetchTrackingTrans,
 } from 'src/store/apps/crud/trackingTrans';
-import { AppDispatch, useDispatch } from 'src/store/Store';
+import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import { alarmStatus } from 'src/types/crud/input';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { bleReaderType } from 'src/store/apps/crud/bleReader';
+import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 
 interface FormType {
   type?: string;
@@ -52,6 +53,14 @@ const AddEditTrackingTransaction = ({ type, trackingTransaction }: FormType) => 
     },
   );
   const dispatch: AppDispatch = useDispatch();
+    const floorplanData: FloorplanType[] = useSelector(
+    (state: RootState) => state.floorplanReducer.floorplans,
+  );
+  React.useEffect(() => {
+    dispatch(fetchFloorplan());
+    console.log('Tracking Transaction : ', floorplanData);
+  }, [dispatch]);
+
 
   const handleClickOpen = () => {
     console.log('Tracking Trans : ', trackingTransaction);
@@ -137,14 +146,20 @@ const AddEditTrackingTransaction = ({ type, trackingTransaction }: FormType) => 
               />
             </Grid>
             <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="floorplan-id">Floorplan ID</CustomFormLabel>
-              <CustomTextField
+              <CustomFormLabel htmlFor="floorplan-id">Floorplan</CustomFormLabel>
+              <CustomSelect
                 id="floorplanId"
                 placeholder={formData.floorplanMaskedAreaId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
-              />
+              >
+                {floorplanData.map((floorplan) => (
+                  <MenuItem key={floorplan.id} value={floorplan.id}>
+                    {floorplan.name}
+                  </MenuItem>
+                ))}
+              </CustomSelect>
             </Grid>
           </Grid>
           <Typography variant="h6" fontWeight={600} mb={2} mt={2}>

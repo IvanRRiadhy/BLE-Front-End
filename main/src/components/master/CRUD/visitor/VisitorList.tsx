@@ -102,7 +102,6 @@ const VisitorList = () => {
                       <Typography variant="h6"> Left </Typography>
                     </TableCell>
                     {[
-                      'id',
                       'personId',
                       'identityId',
                       'cardNumber',
@@ -156,7 +155,6 @@ const VisitorList = () => {
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
                         ></TableCell>
-                        <TableCell>{visitor.id}</TableCell>
                         <TableCell>{visitor.personId}</TableCell>
                         <TableCell>{visitor.identityId}</TableCell>
                         <TableCell>{visitor.cardNumber}</TableCell>

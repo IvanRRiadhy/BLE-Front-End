@@ -101,7 +101,7 @@ const FloorplanList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {['id', 'floorplan name', 'floor name'].map((header) => (
+                    {['floorplan name', 'floor name'].map((header) => (
                       <TableCell key={header}>
                         <Typography variant="h6">{header}</Typography>
                       </TableCell>
@@ -124,7 +124,6 @@ const FloorplanList = () => {
                         >
                           {index + 1}
                         </TableCell>
-                        <TableCell>{floorplan.id}</TableCell>
                         <TableCell>{floorplan.name}</TableCell>
                         <TableCell>{floorplan.floor.name}</TableCell>
                         <TableCell

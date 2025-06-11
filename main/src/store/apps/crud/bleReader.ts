@@ -1,10 +1,10 @@
-import axios from "../../../utils/axios";
+import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = "http://192.168.1.173:5000/api/MstBleReader/";
+const API_URL = "/api/MstBleReader/";
 
 export interface bleReaderType {
     id: string,
@@ -145,11 +145,7 @@ export const {
 
 export const fetchBleReaders = () => async (dispatch: AppDispatch) => {
     try {
-        const response = await axios.get(API_URL, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        const response = await axiosServices.get(API_URL);
         dispatch(GetBleReader(response.data?.collection?.data || []));
     } catch (error) {
         console.log(error);
@@ -161,11 +157,7 @@ export const addBleReader = createAsyncThunk(
     async (newBleReader: bleReaderType, { rejectWithValue }) => {
         try {
             const {id, createdBy, createdAt, updatedBy, updatedAt, ...filteredBleReaderData} = newBleReader
-            const response = await axios.post(API_URL, filteredBleReaderData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
+            const response = await axiosServices.post(API_URL, filteredBleReaderData);
             return response.data;
         } catch (error: any) {
             console.error("Error adding bleReader:", error);
@@ -179,11 +171,7 @@ export const editBleReader = createAsyncThunk(
     async (updateBleReader: bleReaderType, {rejectWithValue}) => {
         try {
             const { id, createdBy, createdAt, updatedBy, updatedAt, ...filteredBleReaderData } = updateBleReader;
-            const response = await axios.put(`${API_URL}/${id}`, filteredBleReaderData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
+            const response = await axiosServices.put(`${API_URL}${id}`, filteredBleReaderData);
             return response.data;
         } catch (error: any) {
             console.error("Error editing bleReader:", error);
@@ -196,11 +184,7 @@ export const deleteBleReader = createAsyncThunk(
     "bleReaders/deleteBleReader",
     async (bleReaderId: string, { rejectWithValue }) => {
         try {
-            await axios.delete(`${API_URL}/${bleReaderId}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
+            await axiosServices.delete(`${API_URL}${bleReaderId}`);
             return bleReaderId; // Return the deleted bleReader's ID to update the state
         } catch (error: any) {
             console.error("Error deleting bleReader:", error);

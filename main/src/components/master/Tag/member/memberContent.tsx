@@ -186,17 +186,17 @@ const MemberContent = () => {
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="person-id">Person ID</CustomFormLabel>
                 <Typography>{memberDetail.personId}</Typography>
-                <CustomFormLabel htmlFor="department-Id">Department ID</CustomFormLabel>
+                <CustomFormLabel htmlFor="department-Id">Department Name</CustomFormLabel>
                 <Typography>{getDepartmentName(memberDetail.departmentId)}</Typography>
                 <CustomFormLabel htmlFor="identity-Id">Identity ID</CustomFormLabel>
                 <Typography>{memberDetail.identityId}</Typography>
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-                <CustomFormLabel htmlFor="organization-id">Organization ID</CustomFormLabel>
+                <CustomFormLabel htmlFor="organization-id">Organization Name</CustomFormLabel>
                 <Typography>{getOrganizationName(memberDetail.organizationId)}</Typography>
-                <CustomFormLabel htmlFor="district-id">District ID</CustomFormLabel>
+                <CustomFormLabel htmlFor="district-id">District Name</CustomFormLabel>
                 <Typography>{getDistrictName(memberDetail.districtId)}</Typography>
-                <CustomFormLabel htmlFor="applicationID">Application ID</CustomFormLabel>
+                <CustomFormLabel htmlFor="applicationID">Application Name</CustomFormLabel>
                 <Typography>{getAppName(memberDetail.applicationId)}</Typography>
               </Grid>
             </Grid>

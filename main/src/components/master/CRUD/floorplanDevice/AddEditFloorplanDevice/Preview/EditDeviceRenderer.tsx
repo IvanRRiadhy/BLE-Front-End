@@ -16,6 +16,7 @@ import {
   RevertDevice,
   SelectEditingFloorplanDevice,
   SelectFloorplanDevice,
+  editDevicePosition
 } from 'src/store/apps/crud/floorplanDevice';
 
 import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
@@ -80,7 +81,9 @@ const EditDeviceRenderer: React.FC<{
     const newPosY = (e.target.y() * 4) / scales;
 
     // Dispatch an action to update the device's position in the Redux store
-    dispatch(EditUnsavedDevice({ ...device, posPxX: newPosX, posPxY: newPosY }));
+    // dispatch(EditUnsavedDevice({ ...device, posPxX: newPosX, posPxY: newPosY }));
+    const newDevice = { ...device, posPxX: newPosX, posPxY: newPosY };
+    dispatch(editDevicePosition(newDevice)); // Update the device position in the store
     setIsDragging(''); // Set dragging state to false
     // console.log(`Device ${device.id} dropped at:`, { newPosX, newPosY });
   };

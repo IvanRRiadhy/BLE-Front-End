@@ -1,4 +1,4 @@
-import axios from "../../../utils/axios";
+import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
@@ -8,8 +8,7 @@ import { floorType } from "./floor";
 import { restrictedStatus } from "src/types/crud/input";
 import { ResetState } from "./floorplanDevice";
 
-const API_URL = 'http://192.168.1.173:5000/api/FloorplanMaskedArea/';
-const Other_API_URL = 'http://192.168.1.173:5000/api/usergroup/';
+const API_URL = '/api/FloorplanMaskedArea/';
 
 
 type Nodes = {
@@ -116,7 +115,7 @@ export const MaskedAreaSlice = createSlice({
                     i === index ? {...maskedArea, areaShape: action.payload.areaShape, nodes: action.payload.nodes} : maskedArea
                 );
         
-                // Update the editingMaskedArea immutably
+                // Update the editingMaskedArea immutably   
                 if(state.editingMaskedArea) {
                 state.editingMaskedArea = {
                     ...state.editingMaskedArea,
@@ -240,11 +239,7 @@ export const {
 
 export const fetchMaskedAreas = () => async (dispatch: AppDispatch) => {
     try {
-        const response = await axios.get(API_URL, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        const response = await axiosServices.get(API_URL);
         let newAreas: MaskedAreaType[] = [];
         if(response.data.collection.data) {
             newAreas = response.data.collection.data.map((maskedArea: MaskedAreaType) => {
@@ -263,11 +258,7 @@ export const fetchMaskedAreas = () => async (dispatch: AppDispatch) => {
 export const addMaskedArea = createAsyncThunk("maskedAreas/addMaskedArea", async (maskedArea: MaskedAreaType, { rejectWithValue }) => {
     try {
         const {id, createdAt, createdBy, updatedAt, updatedBy, generate, status, ... filteredMaskedAreaData} = maskedArea;
-        const response = await axios.post(API_URL, filteredMaskedAreaData, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        const response = await axiosServices.post(API_URL, filteredMaskedAreaData);
         return response.data;
     } catch (error: any) {
         console.error("Error adding masked area:", error);
@@ -280,7 +271,7 @@ export const editMaskedArea = createAsyncThunk("maskedAreas/editMaskedArea", asy
         const {id, createdAt, createdBy, updatedAt, updatedBy, generate, status, floor, floorplan, ... filteredMaskedAreaData} = maskedArea;
         console.log("Data being sent to the server:", JSON.stringify(filteredMaskedAreaData, null, 2));
 
-        const response = await axios.put(`${API_URL}/${id}`, filteredMaskedAreaData, {
+        const response = await axiosServices.put(`${API_URL}${id}`, filteredMaskedAreaData, {
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -295,11 +286,7 @@ export const editMaskedArea = createAsyncThunk("maskedAreas/editMaskedArea", asy
 
 export const deleteMaskedArea = createAsyncThunk("maskedAreas/deleteMaskedArea", async (maskedAreaId: string, { rejectWithValue }) => {
     try {
-        await axios.delete(`${API_URL}/${maskedAreaId}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        await axiosServices.delete(`${API_URL}${maskedAreaId}`);
         console.log("Masked area deleted:", maskedAreaId);
         return maskedAreaId; // Return the deleted masked area's ID to update the state
     } catch (error: any) {

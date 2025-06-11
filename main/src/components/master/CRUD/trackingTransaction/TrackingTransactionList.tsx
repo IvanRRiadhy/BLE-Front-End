@@ -124,7 +124,6 @@ const TrackingTransactionList = () => {
                       <Typography variant="h6"> </Typography>
                     </TableCell>
                     {[
-                      'id',
                       'transTime',
                       'Reader Name',
                       'cardId',
@@ -159,11 +158,10 @@ const TrackingTransactionList = () => {
                           {' '}
                           {index + 1}{' '}
                         </TableCell>
-                        <TableCell>{trackingTrans.id}</TableCell>
                         <TableCell>{formatTime(trackingTrans.transTime)}</TableCell>
-                        <TableCell>{getReaderName(trackingTrans.readerId)}</TableCell>
+                        <TableCell>{trackingTrans.reader?.name}</TableCell>
                         <TableCell>{trackingTrans.readerId}</TableCell>
-                        <TableCell>{getFloorName(trackingTrans.floorplanMaskedAreaId)}</TableCell>
+                        <TableCell>{trackingTrans.floorplanMaskedArea?.name}</TableCell>
                         <TableCell>{trackingTrans.coordinateX}</TableCell>
                         <TableCell>{trackingTrans.coordinateY}</TableCell>
                         <TableCell>{trackingTrans.coordinatePxX}</TableCell>

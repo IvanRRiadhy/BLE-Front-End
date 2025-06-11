@@ -127,7 +127,6 @@ const IntegrationList = () => {
                       <Typography variant="h6"></Typography>
                     </TableCell>
                     {[
-                      'ID',
                       'Brand Name',
                       'Integration Type',
                       'API Authentication Type',
@@ -159,7 +158,6 @@ const IntegrationList = () => {
                         >
                           {index + 1}
                         </TableCell>
-                        <TableCell>{integration.id}</TableCell>
                         <TableCell>{getBrandName(integration.brandId)}</TableCell>
                         <TableCell>{integration.integrationType}</TableCell>
                         <TableCell>{integration.apiTypeAuth}</TableCell>

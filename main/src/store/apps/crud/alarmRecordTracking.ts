@@ -1,4 +1,4 @@
-import axios from "../../../utils/axios";
+import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
@@ -7,7 +7,7 @@ import { visitorType } from "./visitor";
 import { bleReaderType } from "./bleReader";
 import { MaskedAreaType } from "./maskedArea";
 
-const API_URL = 'http://192.168.1.173:5000/api/AlarmRecordTracking/';
+const API_URL = '/api/AlarmRecordTracking/';
 
 export interface AlarmType {
     id: string;
@@ -74,11 +74,7 @@ export const {
 
 export const fetchAlarm = () => async (dispatch: AppDispatch) => {
     try{
-        const response = await axios.get(`${API_URL}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        const response = await axiosServices.get(`${API_URL}`);
         dispatch(GetAlarms(response.data.collection?.data || []));
     } catch (err: any) {
         console.error("Error fetching Alarm: ", err);

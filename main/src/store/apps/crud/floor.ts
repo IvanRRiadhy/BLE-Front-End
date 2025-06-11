@@ -1,10 +1,10 @@
-import axios from "../../../utils/axios";
+import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = "http://192.168.1.173:5000/api/MstFloor/";
+const API_URL = "/api/MstFloor/";
 
 export interface floorType {
     id: string,
@@ -90,12 +90,9 @@ export const {
 
 export const fetchFloors = () => async (dispatch: AppDispatch) => {
     try {
-        const response = await axios.get(API_URL, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        })
+        const response = await axiosServices.get(API_URL)
         dispatch(GetFloor(response.data?.collection?.data || []));
+        console.log(response.data?.collection?.data || []);
     } catch (error) {
         console.log(error);
     }
@@ -103,12 +100,7 @@ export const fetchFloors = () => async (dispatch: AppDispatch) => {
 
 export const addFloor = createAsyncThunk("floors/addFloor", async (formData: FormData, { rejectWithValue }) => {
     try {
-        const response = await axios.post(API_URL, formData, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-                'Content-Type': 'multipart/form-data',
-            },
-        });
+        const response = await axiosServices.post(API_URL, formData);
         return response.data;
     } catch (error: any) {
         console.error("Error adding floor:", error);
@@ -121,12 +113,7 @@ export const editFloor = createAsyncThunk("floors/editFloor", async (formData: F
         const id = formData.get('id'); // Extract ID from FormData
         console.log(id)
         formData.delete('id'); // Remove ID from FormData to avoid sending it again
-        const response = await axios.put(`${API_URL}/${id}`, formData, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-                'Content-Type': 'multipart/form-data',
-            },
-        });
+        const response = await axiosServices.put(`${API_URL}${id}`, formData);
         return response.data;
     } catch (error: any) {
         console.error("Error editing floor:", error);
@@ -136,11 +123,7 @@ export const editFloor = createAsyncThunk("floors/editFloor", async (formData: F
 
 export const deleteFloor = createAsyncThunk("floors/deleteFloor", async (floorId: string, { rejectWithValue }) => {
     try {
-        await axios.delete(`${API_URL}/${floorId}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        await axiosServices.delete(`${API_URL}${floorId}`);
         return floorId; // Return the deleted floor's ID to update the state
     } catch (error: any) {
         console.error("Error deleting floor:", error);

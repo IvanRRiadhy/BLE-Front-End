@@ -91,7 +91,6 @@ const AccessControlList = () => {
                       <Typography variant="h6"></Typography>
                     </TableCell>
                     {[
-                      'ID',
                       'Brand Name',
                       'Name',
                       'Type',
@@ -123,15 +122,14 @@ const AccessControlList = () => {
                         >
                           {index + 1}
                         </TableCell>
-                        <TableCell>{accessControl.id}</TableCell>
-                        <TableCell>{accessControl.brand.name}</TableCell>
+                        <TableCell>{accessControl.brand?.name}</TableCell>
                         <TableCell>{accessControl.name}</TableCell>
                         <TableCell>{accessControl.type}</TableCell>
                         <TableCell>{accessControl.description}</TableCell>
                         <TableCell>{accessControl.channel}</TableCell>
                         <TableCell>{accessControl.doorId}</TableCell>
                         <TableCell>{accessControl.raw}</TableCell>
-                        <TableCell>{accessControl.integration.integrationType}</TableCell>
+                        <TableCell>{accessControl.integration?.integrationType}</TableCell>
 
                         <TableCell
                           sx={{

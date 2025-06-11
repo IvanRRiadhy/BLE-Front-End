@@ -1,10 +1,10 @@
-import axios from "../../../utils/axios";
+import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = "http://192.168.1.173:5000/api/MstApplication/";
+const API_URL = "/api/MstApplication/";
 const getToken = () => localStorage.getItem('token');
 const token = getToken();
 
@@ -159,11 +159,7 @@ export const { GetApplications, SelectApplication, SearchApplication, UpdateAppl
 
 export const fetchApplications = () => async (dispatch: AppDispatch) => {
   try {
-    const response = await axios.get(`${API_URL}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
+    const response = await axiosServices.get(`${API_URL}`);
 
     dispatch(GetApplications(response.data?.collection?.data || []));
   } catch (err: any) {
@@ -176,11 +172,7 @@ export const addApplication = createAsyncThunk(
   async (newApplication: ApplicationType, { rejectWithValue }) => {
     try {
       const {id, applicationRegistered, applicationExpired, ...filteredAppData} = newApplication
-      const response = await axios.post(API_URL, filteredAppData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        },
-      });
+      const response = await axiosServices.post(API_URL, filteredAppData);
       return response.data;
     } catch (error: any) {
       console.error("Error adding application:", error);
@@ -195,11 +187,7 @@ export const editApplication = createAsyncThunk(
   async (updateApp: ApplicationType, {rejectWithValue}) => {
     try {
       const { id, applicationRegistered, applicationExpired, ...filteredAppData } = updateApp;
-      const response = await axios.put(`${API_URL}/${id}`, filteredAppData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axiosServices.put(`${API_URL}${id}`, filteredAppData);
       return response.data;
     } catch (error: any){
       console.error("Error updating app: ", error);
@@ -212,11 +200,7 @@ export const deleteApplication = createAsyncThunk(
   "applications/deleteApplication",
   async (applicationId: string, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/${applicationId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      await axiosServices.delete(`${API_URL}${applicationId}`);
       return applicationId; // Return the deleted application's ID to update the state
     } catch (error: any) {
       console.error("Error deleting application:", error);

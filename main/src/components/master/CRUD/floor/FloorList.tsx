@@ -22,6 +22,7 @@ import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { deleteFloor, fetchFloors, floorType } from 'src/store/apps/crud/floor';
+import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import AddEditFloor from './AddEditFloor';
 import { useTranslation } from 'react-i18next';
 
@@ -43,9 +44,13 @@ const FloorList = () => {
   };
   const dispatch: AppDispatch = useDispatch();
   const floorData = useSelector((state: RootState) => state.floorReducer.floors);
+  const buildingData: BuildingType[] = useSelector(
+    (state: RootState) => state.buildingReducer.buildings,
+  );
 
   useEffect(() => {
     dispatch(fetchFloors());
+    dispatch(fetchBuildings());
   }, [dispatch]);
 
   //Delete Pop-up
@@ -87,6 +92,10 @@ const FloorList = () => {
       },
     )}`;
   };
+  const getbuildingName = (buildingId: string) => {
+    const building = buildingData.find((b) => b.id === buildingId);
+    return building ? building.name : 'Unknown Building';
+  };
 
   return (
     <Grid container spacing={3}>
@@ -102,9 +111,8 @@ const FloorList = () => {
                       <Typography variant="h6"></Typography>
                     </TableCell>
                     {[
-                      'id',
-                      'buildingId',
-                      'name',
+                      'Building Name',
+                      'Floor Name',
                       'floor Image',
                       'pixelX',
                       'pixelY',
@@ -135,8 +143,7 @@ const FloorList = () => {
                         >
                           {index + 1}
                         </TableCell>
-                        <TableCell>{floor.id}</TableCell>
-                        <TableCell>{floor.buildingId}</TableCell>
+                        <TableCell>{getbuildingName(floor.buildingId)}</TableCell>
                         <TableCell>{floor.name}</TableCell>
                         <TableCell>{floor.floorImage}</TableCell>
                         <TableCell>{floor.pixelX}</TableCell>

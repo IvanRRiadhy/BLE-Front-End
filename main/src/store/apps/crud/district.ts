@@ -1,10 +1,10 @@
-import axios from "../../../utils/axios";
+import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = "http://192.168.1.173:5000/api/MstDistrict/";
+const API_URL = "/api/MstDistrict/";
 
 export interface DistrictType {
     id: string,
@@ -93,11 +93,7 @@ export const { GetDistricts, SelectDistrict, SearchDistrict } = DistrictSlice.ac
 
 export const fetchDistricts = () => async (dispatch: AppDispatch) => {
     try {
-        const response = await axios.get(API_URL, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        const response = await axiosServices.get(API_URL);
         dispatch(GetDistricts(response.data?.collection?.data || []));
     } catch (err: any) {
         console.log("Error fetching districts:", err);
@@ -107,11 +103,7 @@ export const fetchDistricts = () => async (dispatch: AppDispatch) => {
 export const addDistrict = createAsyncThunk("districts/addDistrict", async (district: DistrictType, { rejectWithValue }) => {
     try {
         const {id, createdBy, createdAt, updatedBy, updatedAt, ...filteredDistrictData} = district
-        const response = await axios.post(API_URL, filteredDistrictData, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        const response = await axiosServices.post(API_URL, filteredDistrictData);
         return response.data;
     } catch (error: any) {
         console.error("Error adding district:", error);
@@ -122,11 +114,7 @@ export const addDistrict = createAsyncThunk("districts/addDistrict", async (dist
 export const editDistrict = createAsyncThunk("districts/editDistrict", async (district: DistrictType, { rejectWithValue }) => {
     try {
         const { id, createdBy, createdAt, updatedBy, updatedAt, ...filteredDistrictData } = district;
-        const response = await axios.put(`${API_URL}/${id}`, filteredDistrictData, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        const response = await axiosServices.put(`${API_URL}${id}`, filteredDistrictData);
         return response.data;
     } catch (error: any) {
         console.error("Error editing district:", error);
@@ -136,11 +124,7 @@ export const editDistrict = createAsyncThunk("districts/editDistrict", async (di
 
 export const deleteDistrict = createAsyncThunk("districts/deleteDistrict", async (districtId: string, { rejectWithValue }) => {
     try {
-        await axios.delete(`${API_URL}/${districtId}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        await axiosServices.delete(`${API_URL}${districtId}`);
         return districtId; // Return the deleted district's ID to update the state
     } catch (error: any) {
         console.error("Error deleting district:", error);

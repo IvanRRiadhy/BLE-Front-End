@@ -82,7 +82,7 @@ const BrandList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {['ID', 'Brand Name', 'Brand Tag'].map((header) => (
+                    {[ 'Brand Name', 'Brand Tag'].map((header) => (
                       <TableCell key={header}>
                         <Typography variant="h6">{header}</Typography>
                       </TableCell>
@@ -105,8 +105,6 @@ const BrandList = () => {
                         >
                           {index + 1}
                         </TableCell>
-
-                        <TableCell>{brand.id}</TableCell>
                         <TableCell>{brand.name}</TableCell>
                         <TableCell>{brand.tag}</TableCell>
 

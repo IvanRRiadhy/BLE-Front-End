@@ -83,7 +83,20 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Building',
     icon: IconBuilding,
+    children: [
+        {
+    id: uniqueId(),
+    title: 'Building',
+    icon: IconBuilding,
     href: '/master/building/',
+  },
+        {
+        id: uniqueId(),
+        title: 'Floor',
+        icon: IconMap,
+        href: '/master/floor/'
+      },
+    ]
   },
   {
     id: uniqueId(),
@@ -116,12 +129,7 @@ const Menuitems = [
     icon: IconMap2,
     href: '/master/floorplan/',
   },
-  // {
-  //   id: uniqueId(),
-  //   title: 'Masking Area',
-  //   icon: IconDeviceIpadExclamation,
-  //   href: '/master/floorplanmaskedarea',
-  // },
+
   {
     id: uniqueId(),
     title: 'Tag',
@@ -141,12 +149,7 @@ const Menuitems = [
       },
     ]
   },
-  // {
-  //   id: uniqueId(),
-  //   title: 'Gateway',
-  //   icon: IconFlag3,
-  //   href: '/master/gateway',
-  // },
+
     {
       id: uniqueId(),
       title: 'Application',
@@ -189,30 +192,15 @@ const Menuitems = [
         icon: IconLogin,
         href: '/master/blereader/'
       },
-      {
-        id: uniqueId(),
-        title: 'Floor',
-        icon: IconMap,
-        href: '/master/floor/'
-      },
-      // {
-      //   id: uniqueId(),
-      //   title: 'Member',
-      //   icon: IconAccessibleOff,
-      //   href: '/master/member'
-      // },
+
+
       {
         id: uniqueId(),
         title: 'Tracking Transaction',
         icon: IconLiveView,
         href: '/master/trackingtransaction/'
       },
-      // {
-      //   id: uniqueId(),
-      //   title: 'Visitor',
-      //   icon: IconAccessibleOffFilled,
-      //   href: '/master/visitor'
-      // },
+
       {
         id: uniqueId(),
         title: 'Device',

@@ -83,7 +83,7 @@ const AccessCCTVList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"> </Typography>
                     </TableCell>
-                    {['ID', 'Name', 'RTSP', 'Integration'].map((header) => (
+                    {['Name', 'RTSP', 'Integration'].map((header) => (
                       <TableCell key={header}>
                         <Typography variant="h6">{header}</Typography>
                       </TableCell>
@@ -105,11 +105,9 @@ const AccessCCTVList = () => {
                         >
                           {index + 1}
                         </TableCell>
-
-                        <TableCell>{cctv.id}</TableCell>
                         <TableCell>{cctv.name}</TableCell>
                         <TableCell>{cctv.rtsp}</TableCell>
-                        <TableCell>{cctv.integration.integrationType}</TableCell>
+                        <TableCell>{cctv.integration?.integrationType}</TableCell>
                         <TableCell
                           sx={{
                             position: 'sticky',

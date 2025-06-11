@@ -23,6 +23,7 @@ import {
   editBlacklist,
   fetchBlacklist,
 } from 'src/store/apps/crud/blacklist';
+import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import { fetchVisitor, visitorType } from 'src/store/apps/crud/visitor';
 
 interface FormType {
@@ -37,11 +38,14 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
   );
 
   const visitorData = useSelector((state: RootState) => state.visitorReducer.visitors);
-
+    const floorplanData: FloorplanType[] = useSelector(
+    (state: RootState) => state.floorplanReducer.floorplans,
+  );
   const dispatch: AppDispatch = useDispatch();
 
   useEffect(() => {
     dispatch(fetchVisitor());
+        dispatch(fetchFloorplan());
   }, [dispatch]);
 
   const handleClickOpen = () => {
@@ -134,14 +138,20 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
                   </MenuItem>
                 ))}
               </CustomSelect>
-              <CustomFormLabel htmlFor="floorplan-id">Floorplan ID</CustomFormLabel>
-              <CustomTextField
+              <CustomFormLabel htmlFor="floorplan-id">Floorplan</CustomFormLabel>
+              <CustomSelect
                 id="floorplanId"
                 placeholder={formData.floorplanMaskedAreaId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
-              />
+              >
+                {floorplanData.map((floorplan) => (
+                  <MenuItem key={floorplan.id} value={floorplan.id}>
+                    {floorplan.name}
+                  </MenuItem>
+                ))}
+              </CustomSelect>
             </Grid>
           </Grid>
         </DialogContent>

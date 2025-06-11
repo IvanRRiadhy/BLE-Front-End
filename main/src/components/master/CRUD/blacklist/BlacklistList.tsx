@@ -100,7 +100,7 @@ const BlacklistList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"> Left </Typography>
                     </TableCell>
-                    {['ID', 'Blacklisted Visitor', 'Blacklisted Area'].map((header) => (
+                    {[ 'Blacklisted Visitor', 'Blacklisted Area'].map((header) => (
                       <TableCell key={header}>
                         <Typography variant="h6">{header}</Typography>
                       </TableCell>
@@ -121,10 +121,8 @@ const BlacklistList = () => {
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
                         ></TableCell>
-
-                        <TableCell>{blacklist.id}</TableCell>
-                        <TableCell>{blacklist.visitor.name}</TableCell>
-                        <TableCell>{blacklist.floorplanMaskedArea.name}</TableCell>
+                        <TableCell>{blacklist.visitor?.name}</TableCell>
+                        <TableCell>{blacklist.floorplanMaskedArea?.name}</TableCell>
 
                         <TableCell
                           sx={{

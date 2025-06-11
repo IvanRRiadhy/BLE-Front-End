@@ -25,21 +25,23 @@ interface cardType {
 
 const drawerWidth = 320;
 
-const Floor = () => {
+const Floorplan = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
+  const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(true);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
+
   const floorplanList = useSelector((state: RootState) => state.floorplanReducer.floorplans);
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
-      title: 'Total Floorplans',
+      title: 'Total Floorplan',
       subtitle: floorplanList.length.toString(),
       bgcolor: 'success',
     },
   ];
   return (
-    <PageContainer title="Floorplan" description="This is the Floorplan CRUD Page">
+    <PageContainer title="Floorplan " description="This is the Floorplan CRUD Page">
       <Breadcrumb title="Floorplan Table" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
@@ -84,10 +86,17 @@ const Floor = () => {
           <ParentCard title="Floorplan List">
             <FloorplanList />
           </ParentCard>
+          {/* <Box display="flex" flexDirection="row">
+            <AddEditDeviceSidebar
+              isMobileSidebarOpen={isMobileSidebarOpen}
+              onSidebarClose={() => setMobileSidebarOpen(false)}
+            />
+            <EditDeviceFloorView zoomable />
+          </Box> */}
         </Drawer>
       </AppCard>
     </PageContainer>
   );
 };
 
-export default Floor;
+export default Floorplan;

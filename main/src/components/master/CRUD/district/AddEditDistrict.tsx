@@ -143,20 +143,6 @@ const AddEditDistrict = ({ type, district }: FormType) => {
                 fullWidth
                 variant="outlined"
               />
-              <CustomFormLabel htmlFor="app-id">Application</CustomFormLabel>
-              <CustomSelect
-                name="applicationId"
-                value={formData.applicationId || ''}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              >
-                {appData.map((app) => (
-                  <MenuItem key={app.id} value={app.id}>
-                    {app.applicationName}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
             </Grid>
           </Grid>
         </DialogContent>

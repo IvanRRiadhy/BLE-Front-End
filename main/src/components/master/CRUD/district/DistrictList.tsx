@@ -113,7 +113,7 @@ const DistrictList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {['ID', 'District Code', 'District Name', 'District Host'].map((header) => (
+                    {['District Code', 'District Name', 'District Host'].map((header) => (
                       <TableCell key={header}>
                         <Typography variant="h6">{header}</Typography>
                       </TableCell>
@@ -136,7 +136,6 @@ const DistrictList = () => {
                         >
                           {index + 1}
                         </TableCell>
-                        <TableCell>{district.id}</TableCell>
                         <TableCell>{district.code}</TableCell>
                         <TableCell>{district.name}</TableCell>
                         <TableCell>{district.districtHost}</TableCell>
