@@ -12,7 +12,12 @@ import AreaDetailSidebar from 'src/components/master/CRUD/maskedArea/AddEditMask
 const FloorplanDeviceEdit = () => {
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(true);
   const editingArea = useSelector((state: RootState) => state.maskedAreaReducer.editingMaskedArea);
-
+  const selectedFloorplan = useSelector(
+    (state: RootState) => state.floorplanReducer.selectedFloorplan,
+  );
+  if (!selectedFloorplan) {
+    window.location.href = '/master/floorplanmaskedarea/';
+  }
   return (
     <PageContainer title="Floorplan Device" description="this is floorplan device page">
       {/* <Breadcrumb title="Floorplan Device Edit" subtitle="See the floorplan device" /> */}

@@ -12,7 +12,12 @@ const FloorplanDeviceEdit = () => {
   const editingDevice = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.editingFloorplanDevice,
   );
-
+  const selectedFloorplan = useSelector(
+    (state: RootState) => state.floorplanReducer.selectedFloorplan,
+  );
+  if(!selectedFloorplan) {
+    window.location.href = '/master/device';
+  }
   return (
     <PageContainer title="Floorplan Device" description="this is floorplan device page">
       {/* <Breadcrumb title="Floorplan Device Edit" subtitle="See the floorplan device" /> */}

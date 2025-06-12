@@ -10,7 +10,7 @@ interface MonitoringGridProps {
 type LayoutItem =
   | {
       size: { xs: number; lg?: number };
-      floorIndex: number;
+      floorId: number;
       zoomable: boolean;
       height?: string;
     }
@@ -19,7 +19,7 @@ type LayoutItem =
       isColumn: true;
       children: {
         size: { xs: number; lg?: number };
-        floorIndex: number;
+        floorId: number;
         zoomable: boolean;
         height: string;
       }[];
@@ -27,19 +27,19 @@ type LayoutItem =
 
 // Define layout rules for each grid type
 const layoutConfig = {
-  [1]: [{ size: { xs: 12 }, floorIndex: 0, zoomable: true, height: '80vh' }],
+  [1]: [{ size: { xs: 12 }, floorId: 0, zoomable: true, height: '80vh' }],
   [2]: [
-    { size: { xs: 12, lg: 6 }, floorIndex: 0, zoomable: true, height: '80vh' },
-    { size: { xs: 12, lg: 6 }, floorIndex: 1, zoomable: false, height: '80vh' },
+    { size: { xs: 12, lg: 6 }, floorId: 0, zoomable: true, height: '80vh' },
+    { size: { xs: 12, lg: 6 }, floorId: 1, zoomable: false, height: '80vh' },
   ],
   [3]: [
-    { size: { xs: 12, lg: 6 }, floorIndex: 0, zoomable: true, height: '80vh' },
+    { size: { xs: 12, lg: 6 }, floorId: 0, zoomable: true, height: '80vh' },
     {
       size: { xs: 12, lg: 6 },
       isColumn: true,
       children: [
-        { size: { xs: 12 }, floorIndex: 1, zoomable: false, height: '40vh' },
-        { size: { xs: 12 }, floorIndex: 2, zoomable: false, height: '40vh' },
+        { size: { xs: 12 }, floorId: 1, zoomable: false, height: '40vh' },
+        { size: { xs: 12 }, floorId: 2, zoomable: false, height: '40vh' },
       ],
     },
   ],
@@ -48,16 +48,16 @@ const layoutConfig = {
       size: { xs: 12, lg: 6 },
       isColumn: true,
       children: [
-        { size: { xs: 12 }, floorIndex: 0, zoomable: true, height: '40vh' },
-        { size: { xs: 12 }, floorIndex: 1, zoomable: false, height: '40vh' },
+        { size: { xs: 12 }, floorId: 0, zoomable: true, height: '40vh' },
+        { size: { xs: 12 }, floorId: 1, zoomable: false, height: '40vh' },
       ],
     },
     {
       size: { xs: 12, lg: 6 },
       isColumn: true,
       children: [
-        { size: { xs: 12 }, floorIndex: 2, zoomable: false, height: '40vh' },
-        { size: { xs: 12 }, floorIndex: 3, zoomable: false, height: '40vh' },
+        { size: { xs: 12 }, floorId: 2, zoomable: false, height: '40vh' },
+        { size: { xs: 12 }, floorId: 3, zoomable: false, height: '40vh' },
       ],
     },
   ],
@@ -66,13 +66,13 @@ const layoutConfig = {
       size: { xs: 12, lg: 8 },
       isColumn: true,
       children: [
-        { size: { xs: 12 }, floorIndex: 0, zoomable: true, height: '53vh' },
+        { size: { xs: 12 }, floorId: 0, zoomable: true, height: '53vh' },
         {
           size: { xs: 12 },
           isColumn: false,
           children: [
-            { size: { xs: 12, lg: 6 }, floorIndex: 2, zoomable: false, height: '27vh' },
-            { size: { xs: 12, lg: 6 }, floorIndex: 3, zoomable: false, height: '27vh' },
+            { size: { xs: 12, lg: 6 }, floorId: 2, zoomable: false, height: '27vh' },
+            { size: { xs: 12, lg: 6 }, floorId: 3, zoomable: false, height: '27vh' },
           ],
         },
       ],
@@ -81,8 +81,8 @@ const layoutConfig = {
       size: { xs: 12, lg: 4 },
       isColumn: true,
       children: [
-        { size: { xs: 12 }, floorIndex: 1, zoomable: false, height: '40vh' },
-        { size: { xs: 12 }, floorIndex: 4, zoomable: false, height: '40vh' },
+        { size: { xs: 12 }, floorId: 1, zoomable: false, height: '40vh' },
+        { size: { xs: 12 }, floorId: 4, zoomable: false, height: '40vh' },
       ],
     },
   ],
@@ -91,13 +91,13 @@ const layoutConfig = {
       size: { xs: 12, lg: 8 },
       isColumn: true,
       children: [
-        { size: { xs: 12 }, floorIndex: 0, zoomable: true, height: '53vh' },
+        { size: { xs: 12 }, floorId: 0, zoomable: true, height: '53vh' },
         {
           size: { xs: 12 },
           isColumn: false,
           children: [
-            { size: { xs: 12, lg: 6 }, floorIndex: 3, zoomable: false, height: '27vh' },
-            { size: { xs: 12, lg: 6 }, floorIndex: 4, zoomable: false, height: '27vh' },
+            { size: { xs: 12, lg: 6 }, floorId: 3, zoomable: false, height: '27vh' },
+            { size: { xs: 12, lg: 6 }, floorId: 4, zoomable: false, height: '27vh' },
           ],
         },
       ],
@@ -106,9 +106,9 @@ const layoutConfig = {
       size: { xs: 12, lg: 4 },
       isColumn: true,
       children: [
-        { size: { xs: 12 }, floorIndex: 1, zoomable: false, height: '26.5vh' },
-        { size: { xs: 12 }, floorIndex: 2, zoomable: false, height: '26.5vh' },
-        { size: { xs: 12 }, floorIndex: 5, zoomable: false, height: '27vh' },
+        { size: { xs: 12 }, floorId: 1, zoomable: false, height: '26.5vh' },
+        { size: { xs: 12 }, floorId: 2, zoomable: false, height: '26.5vh' },
+        { size: { xs: 12 }, floorId: 5, zoomable: false, height: '27vh' },
       ],
     },
   ],
@@ -173,7 +173,7 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = ({ grid, floorIds }) => {
                               }}
                             >
                               <FloorView
-                                activeFloor={floorIds[grid][grandChild.floorIndex]}
+                                activeFloorplan={floorIds[grid][grandChild.floorId]}
                                 zoomable={grandChild.zoomable}
                                 containerWidth={gridDimensions.width} // Pass width
                                 containerHeight={gridDimensions.height} // Pass height
@@ -203,7 +203,7 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = ({ grid, floorIds }) => {
                       }}
                     >
                       <FloorView
-                        activeFloor={floorIds[grid][(child as { floorIndex: number }).floorIndex]}
+                        activeFloorplan={floorIds[grid][(child as { floorId: number }).floorId]}
                         zoomable={(child as { zoomable: boolean }).zoomable}
                         containerWidth={gridDimensions.width} // Pass width
                         containerHeight={gridDimensions.height} // Pass height
@@ -234,7 +234,7 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = ({ grid, floorIds }) => {
             }}
           >
             <FloorView
-              activeFloor={floorIds[grid][(item as { floorIndex: number }).floorIndex]}
+              activeFloorplan={floorIds[grid][(item as { floorId: number }).floorId]}
               zoomable={(item as { zoomable: boolean }).zoomable}
               containerWidth={gridDimensions.width} // Pass width
               containerHeight={gridDimensions.height} // Pass height

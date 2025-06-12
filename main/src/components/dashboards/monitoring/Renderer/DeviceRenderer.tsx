@@ -18,6 +18,7 @@ import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
 import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
 import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
 import { uniqueId } from 'lodash';
+import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 
 const Devices = [
   { id: 1, x: 250, y: 50, type: 'Cctv' },
@@ -39,16 +40,17 @@ const DeviceRenderer: React.FC<{
   height: number;
   imageSrc?: string;
   scale: number;
-}> = ({ width, height, imageSrc, scale }) => {
+  devices: FloorplanDeviceType[];
+}> = ({ width, height, imageSrc, scale, devices }) => {
   const dispatch = useDispatch();
   const [scales, setScale] = useState<number>(scale);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const beaconData = useSelector((state) => state.BeaconReducer.beacons);
   useEffect(() => {
     if (imageSrc) {
-      console.log('imageSrc', imageSrc);
-      console.log('Width', width);
-      console.log('Height', height);
+      // console.log('imageSrc', imageSrc);
+      // console.log('Width', width);
+      // console.log('Height', height);
       const img = new window.Image();
       img.src = imageSrc;
       img.onload = () => {
@@ -78,7 +80,7 @@ const DeviceRenderer: React.FC<{
   useEffect(() => {
     const interval = setInterval(() => {
       dispatch(fetchBeacon());
-//       console.log("Fetching beacon data...", beaconData);
+      // console.log("Fetching beacon data...", beaconData);
 // const latestBeacons = getLatestBeacons(beaconData);
     }, 1000);
     return () => clearInterval(interval);
@@ -99,7 +101,8 @@ const DeviceRenderer: React.FC<{
 
 
 
-  const renderDeviceShape = (device: { id: number; x: number; y: number; type: string }) => {
+  const renderDeviceShape = (device: FloorplanDeviceType) => {
+    // console.log('Rendering device:', device);
     let deviceIcon, width, height;
     switch (device.type) {
       case 'Cctv':
@@ -110,7 +113,7 @@ const DeviceRenderer: React.FC<{
       case 'BleReader':
         deviceIcon = iconGateway;
         width = 40;
-        height = 40;
+        height = 40;  
         break;
       case 'AccessDoor':
         deviceIcon = iconFaceRecog;
@@ -120,14 +123,27 @@ const DeviceRenderer: React.FC<{
 
       default:
         deviceIcon = iconUnknown;
+        width = 40;
+        height = 40;
         break;
     }
-    const x = device.x * scales;
-    const y = device.y * scales;
+    const x = device.posPxX - width / 2; // Center the icon inside the rect
+    const y = device.posPxY - height / 2; // Center the icon inside the rect
     // console.log('Device coordinates:', x, y);
     return (
       deviceIcon && (
-        <KonvaImage
+        <React.Fragment key={`device-${device.id}-${uniqueId()}`}>
+                  <Text
+          x={x - 40} // Center the text above the icon
+          y={y - 5} // Position text above the icon
+          text={device.reader?.gmac || device.id}
+          fontSize={9}
+          fill="#1976d2"
+          fontStyle="bold"
+          width={120}
+          align="center"
+        />
+                  <KonvaImage
           key={device.id}
           name="Device"
           image={deviceIcon}
@@ -137,6 +153,7 @@ const DeviceRenderer: React.FC<{
           height={height}
           listening={false}
         />
+        </React.Fragment>
       )
     );
   };
@@ -212,7 +229,7 @@ const DeviceRenderer: React.FC<{
           />
         )}
         {/*Render devices*/}
-        {Devices.map((device) => renderDeviceShape(device))}
+        {devices.map((device) => renderDeviceShape(device))}
         {/*Render beacons*/}
         {/* {Beacon.map((beacon) => renderBeacon(beacon))} */}
         {beaconData.map((beacon, index) => {

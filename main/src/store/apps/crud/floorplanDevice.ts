@@ -38,6 +38,7 @@ export interface FloorplanDeviceType {
 
 interface StateType {
     floorplanDevices: FloorplanDeviceType[];
+    originalFloorplanDevices: FloorplanDeviceType[];
     unsavedFloorplanDevices: FloorplanDeviceType[];
     floorplanDeviceSearch: string;
     selectedFloorplanDevice?: FloorplanDeviceType | null;
@@ -48,6 +49,7 @@ interface StateType {
 
 const initialState: StateType = {
     floorplanDevices: [],
+    originalFloorplanDevices: [],
     unsavedFloorplanDevices: [],
     floorplanDeviceSearch: '',
     selectedFloorplanDevice: null,
@@ -62,6 +64,7 @@ export const FloorplanDeviceSlice = createSlice({
     reducers: {
         GetFloorplanDevices: (state, action) => {
             state.floorplanDevices = action.payload;
+            state.originalFloorplanDevices = action.payload;
         },
         GetUnsavedFloorplanDevices: (state) => {
             state.unsavedFloorplanDevices = state.floorplanDevices;
@@ -103,14 +106,15 @@ export const FloorplanDeviceSlice = createSlice({
             const index = state.unsavedFloorplanDevices.findIndex((device) => device.id === action.payload.id);
             if (index !== -1) {
                 state.unsavedFloorplanDevices = state.unsavedFloorplanDevices.map((device, i) =>
-                    i === index ? { ...device, posX: action.payload.posX, posY: action.payload.posY, posPxX: action.payload.posPxX, posPxY: action.payload.posPxY } : device
+                    i === index ? { ...device,floorplanMaskedAreaId: action.payload.floorplanMaskedAreaId, posX: action.payload.posX, posY: action.payload.posY, posPxX: action.payload.posPxX, posPxY: action.payload.posPxY } : device
                 );
 
                 if(state.editingFloorplanDevice){
                     state.editingFloorplanDevice = {
                         ...state.editingFloorplanDevice,
-                        posX: action.payload.posX,
-                        posY: action.payload.posY,
+                        floorplanMaskedAreaId: action.payload.floorplanMaskedAreaId,
+                        posX: action.payload.posPxX, //ubah
+                        posY: action.payload.posPxY,
                         posPxX: action.payload.posPxX,
                         posPxY: action.payload.posPxY
                     }

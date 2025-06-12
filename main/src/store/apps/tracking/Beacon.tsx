@@ -4,7 +4,7 @@ import { AppDispatch, RootState } from 'src/store/Store';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-const API_URL = 'http://192.168.1.165:3000/api/beacons';
+const API_URL = 'http://192.168.1.165:3300/api/beacons?floorplanId=6a6ad6fa-5630-419a-b756-7685a0401fed';
 
 export interface BeaconType {
   beaconId: string;
@@ -57,6 +57,7 @@ export const { GetBeacon } = BeaconSlice.actions;
 
 export const fetchBeacon = () => async (dispatch: AppDispatch) => {
   try {
+    // console.log('Fetching beacons from API...');
     const response = await axios.get(API_URL);
     dispatch(GetBeacon(response.data));
     console.log('Beacons fetched successfully:', response.data);

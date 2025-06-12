@@ -16,7 +16,7 @@ export interface FloorplanType {
     name: string,
     floorId: string,
     applicationId: string,
-    floor: floorType,
+    floor?: floorType,
     createdBy: string,
     createdAt: string,
     updatedBy: string,
@@ -82,7 +82,7 @@ export const fetchFloorplan = () => async (dispatch: AppDispatch) => {
     }
 };
 
-export const addFloor = createAsyncThunk("floorplans/addFloorplan", async (formData: FormData, { rejectWithValue }) => {
+export const addFloorplan = createAsyncThunk("floorplans/addFloorplan", async (formData: FormData, { rejectWithValue }) => {
     try {
         const response = await axiosServices.post(Floorplan_API_URL, formData);
         return response.data;

@@ -47,6 +47,9 @@ const DeviceList = () => {
   const devicesData = useSelector(
     (state: AppState) => state.floorplanDeviceReducer.floorplanDevices,
   );
+  const originalDevices = useSelector(
+    (state: AppState) => state.floorplanDeviceReducer.originalFloorplanDevices,
+  );
   const selectedDevice = useSelector(
     (state: AppState) => state.floorplanDeviceReducer.selectedFloorplanDevice,
   );
@@ -58,6 +61,9 @@ const DeviceList = () => {
   );
   const filteredUnsavedDevices = unsavedDevices.filter(
     (device) => device.floorplanId === activeFloorplan?.id,
+  );
+  const filteredOriginalDevices = originalDevices.filter(
+    (device: FloorplanDeviceType) => device.floorplanId === activeFloorplan?.id,
   );
   const deletedDevice = useSelector(
     (state: AppState) => state.floorplanDeviceReducer.deletedFloorplanDevice,
@@ -189,13 +195,12 @@ const DeviceList = () => {
 
   const handleSaveEdits = async () => {
     // Get the current state of devices
-    const unsavedDevicesMap = new Map(unsavedDevices.map((device) => [device.id, device]));
-    const floorplanDevicesMap = new Map(devicesData.map((device) => [device.id, device]));
-
+    const unsavedDevicesMap = new Map(filteredUnsavedDevices.map((device) => [device.id, device]));
+    const floorplanDevicesMap = new Map(filteredOriginalDevices.map((device) => [device.id, device]));
     // 1. Edit devices: Check for devices with different fields
-    const devicesToEdit = unsavedDevices.filter((unsavedDevice) => {
+    const devicesToEdit = filteredUnsavedDevices.filter((unsavedDevice) => {
       const originalDevice = floorplanDevicesMap.get(unsavedDevice.id);
-      return originalDevice && JSON.stringify(originalDevice) !== JSON.stringify(unsavedDevice);
+      return originalDevice && JSON.stringify(unsavedDevice) !== JSON.stringify(originalDevice);
     });
     console.log('devicesToEdit', devicesToEdit);
 

@@ -114,6 +114,7 @@ const BleReaderList = () => {
                       'Name',
                       'MAC',
                       'IP',
+                      'GMAC',
                       'locationX',
                       'locationY',
                       'locationPxX',
@@ -146,6 +147,7 @@ const BleReaderList = () => {
                         <TableCell>{bleReader.name}</TableCell>
                         <TableCell>{bleReader.mac}</TableCell>
                         <TableCell>{bleReader.ip}</TableCell>
+                        <TableCell>{bleReader.gmac}</TableCell>
                         <TableCell>{bleReader.locationX}</TableCell>
                         <TableCell>{bleReader.locationY}</TableCell>
                         <TableCell>{bleReader.locationPxX}</TableCell>

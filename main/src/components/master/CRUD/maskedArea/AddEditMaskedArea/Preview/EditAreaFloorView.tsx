@@ -8,6 +8,8 @@ import FloorplanHouse from 'src/assets/images/masters/Floorplan/Floorplan-House.
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import EditAreaRenderer from './EditAreaRenderer';
 
+
+const BASE_URL = 'http://192.168.1.116:5000';
 const EditAreaFloorView: React.FC<{
   zoomable: boolean;
 }> = ({ zoomable }) => {
@@ -47,16 +49,19 @@ const EditAreaFloorView: React.FC<{
   const [isDragging, setIsDragging] = useState('');
   const dragStart = useRef({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false); // State to track mouse hover
+    const floorplanImage = activeFloorData?.floorImage
+      ? activeFloorData.floorImage.startsWith('/Uploads/') // Check if the URL is already absolute
+        ? `${BASE_URL}${activeFloorData.floorImage}`
+        : activeFloorData.floorImage // Prepend BASE_URL for relative paths
+      : FloorplanHouse; // Fallback to default image if not available
   useEffect(() => {
-    if (FloorplanHouse) {
+    if (floorplanImage) {
       const img = new Image();
-      img.src = FloorplanHouse;
-      // console.log('Image Source:', img.src); // Debug image source
-      // console.log('Image width and height:', img.width, img.height); // Debug image object
+      img.src = floorplanImage;
       img.onload = () => {
         setImage(img);
         setImgSize({ width: img.width, height: img.height });
-        // console.log(imgSize);
+
         // Center the image when it is loaded
         if (containerRef.current) {
           const containerWidth = containerRef.current.clientWidth;
@@ -76,18 +81,11 @@ const EditAreaFloorView: React.FC<{
           const offsetX = containerWidth / 4;
           const offsetY = containerHeight / 4;
 
-          // console.log('Container Width:', containerWidth);
-          // console.log('Container Height:', containerHeight);
-          // console.log('Image Width:', img.width);
-          // console.log('Image Height:', img.height);
-          // console.log('Min Scale:', minScale);
-          // console.log('OffsetX:', offsetX);
-          // console.log('OffsetY:', offsetY);
           setTranslate({ x: offsetX, y: offsetY });
         }
       };
       img.onerror = () => {
-        console.error('Failed to load image:', FloorplanHouse);
+        console.error('Failed to load image:', floorplanImage);
       };
     }
   }, [activeFloorData]);
@@ -330,7 +328,7 @@ const EditAreaFloorView: React.FC<{
                     imgSize.width,
                     imgSize.height,
                   )}
-                  imageSrc={FloorplanHouse}
+                  imageSrc={floorplanImage}
                   scale={scale}
                   maskedAreas={filteredUnsavedMaskedArea}
                   activeMaskedArea={activeMaskedArea}

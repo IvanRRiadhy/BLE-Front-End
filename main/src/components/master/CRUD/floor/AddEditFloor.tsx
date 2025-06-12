@@ -57,6 +57,8 @@ const AddEditFloor = ({ type, floor }: FormType) => {
 
   const handleClickOpen = () => {
     setOpen(true);
+    console.log('Floor Data:', formData);
+    // console.log('buildingData:', buildingData);
   };
 
   const handleClose = () => {
@@ -77,6 +79,9 @@ const AddEditFloor = ({ type, floor }: FormType) => {
       updatedBy: floor?.updatedBy || '',
       updatedAt: floor?.updatedAt || '',
     });
+    setImage(null);
+    setPreview(floor?.floorImage || null);
+    console.log('Form reset to initial state');
   };
 
   const handleSave = async () => {
@@ -95,7 +100,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
           data.append(key, value.toString());
         }
       });
-      
+
       // Append the file if selected
       if (image) {
         data.append('floorImage', image); // File goes here
@@ -122,6 +127,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
     const { value, name, id } = e.target as
       | HTMLInputElement
       | { value: string; name: string; id?: string };
+    console.log('Input Change:', { id, name, value });
     setFormData((prev) => ({ ...prev, [id || name]: value }));
   };
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -173,12 +179,16 @@ const AddEditFloor = ({ type, floor }: FormType) => {
             <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
               <CustomFormLabel htmlFor="building-id">Building ID</CustomFormLabel>
               <CustomSelect
+                name="buildingId"
                 id="buildingId"
-                placeholder={formData.buildingId}
+                value={formData.buildingId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
               >
+                <MenuItem value="" disabled>
+                  Select Building
+                </MenuItem>
                 {buildingData.map((building) => (
                   <MenuItem key={building.id} value={building.id}>
                     {building.name}

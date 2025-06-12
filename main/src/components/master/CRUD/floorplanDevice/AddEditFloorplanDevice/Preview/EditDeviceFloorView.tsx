@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
-import { Box, FormLabel, Typography, useTheme } from '@mui/material';
+import { Box, FormLabel, Typography, useTheme, Switch, FormControlLabel } from '@mui/material';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
 import {
@@ -12,8 +12,9 @@ import ZoomControls from 'src/components/shared/ZoomControls';
 import EditDeviceRenderer from './EditDeviceRenderer';
 import FloorplanHouse from 'src/assets/images/masters/Floorplan/Floorplan-House.png';
 import { Layer, Stage, Image as KonvaImage } from 'react-konva';
+import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 
-const BASE_URL = 'http://localhost:5173'; // Adjust this to your actual base URL
+const BASE_URL = 'http://192.168.1.116:5000'; // Adjust this to your actual base URL
 const EditDeviceFloorView: React.FC<{
   zoomable: boolean;
 }> = ({ zoomable }) => {
@@ -32,9 +33,16 @@ const EditDeviceFloorView: React.FC<{
   const editingDevice = useSelector(
     (state: AppState) => state.floorplanDeviceReducer.editingFloorplanDevice,
   );
+    const Areas: MaskedAreaType[] = useSelector(
+      (state: AppState) => state.maskedAreaReducer.maskedAreas,
+    );
+    const filteredArea = Areas.filter(
+    (area) => area.floorplanId === activeFloorPlan?.id,
+  );
   // const filteredUnsavedDevices = unsavedDevices.filter(
   //   (device) => device.floorplanId === activeFloorPlan?.id,
   // );
+  const [showArea, setShowArea] = useState(true);
 
   const [filteredUnsavedDevices, setFilteredUnsavedDevices] = useState<FloorplanDeviceType[]>([]);
 
@@ -45,7 +53,7 @@ const EditDeviceFloorView: React.FC<{
       (device: FloorplanDeviceType) => device.floorplanId === activeFloorPlan?.id,
     );
     setFilteredUnsavedDevices(filteredDevices);
-  }, [unsavedDevices, activeFloorPlan]);
+  }, [unsavedDevices, activeFloorPlan]);  
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
@@ -60,16 +68,14 @@ const EditDeviceFloorView: React.FC<{
   const dragStart = useRef({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false); // State to track mouse hover
   const floorplanImage = activeFloorData?.floorImage
-    ? activeFloorData.floorImage.startsWith('http') // Check if the URL is already absolute
-      ? activeFloorData.floorImage
-      : `${BASE_URL}${activeFloorData.floorImage}` // Prepend BASE_URL for relative paths
+    ? activeFloorData.floorImage.startsWith('/Uploads/') // Check if the URL is already absolute
+      ? `${BASE_URL}${activeFloorData.floorImage}`
+      : activeFloorData.floorImage // Prepend BASE_URL for relative paths
     : FloorplanHouse; // Fallback to default image if not available
   useEffect(() => {
-    if (FloorplanHouse) {
+    if (floorplanImage) {
       const img = new Image();
-      img.src = FloorplanHouse;
-      // console.log('Image Source:', img.src); // Debug image source
-      // console.log('Image width and height:', img.width, img.height); // Debug image object
+      img.src = floorplanImage;
       img.onload = () => {
         setImage(img);
         setImgSize({ width: img.width, height: img.height });
@@ -104,7 +110,7 @@ const EditDeviceFloorView: React.FC<{
         }
       };
       img.onerror = () => {
-        console.error('Failed to load image:', FloorplanHouse);
+        console.error('Failed to load image:', floorplanImage);
       };
     }
   }, [activeFloorData]);
@@ -113,6 +119,7 @@ const EditDeviceFloorView: React.FC<{
     dispatch(fetchFloorplan());
     dispatch(fetchFloors());
     dispatch(fetchFloorplanDevices());
+    dispatch(fetchMaskedAreas());
   }, [dispatch]);
   // useEffect(() => {
   //   const handleResize = () => {
@@ -282,6 +289,7 @@ const EditDeviceFloorView: React.FC<{
 
   return (
     <Box
+      
       onMouseEnter={() => setIsHovered(true)} // Show ZoomControls on mouse enter
       onMouseLeave={() => setIsHovered(false)} // Hide ZoomControls on mouse leave
       sx={{
@@ -296,6 +304,31 @@ const EditDeviceFloorView: React.FC<{
         cursor: isPanning ? 'grabbing' : 'grab',
       }}
     >
+      {/* Sticky Overlay Toggle */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 12,
+          right: 12,
+          zIndex: 10,
+          width: '240px',
+          background: 'rgba(255,255,255,0.9)',
+          borderRadius: 2,
+          boxShadow: 2,
+          p: 1,
+        }}
+      >
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showArea}
+              onChange={() => setShowArea((prev) => !prev)}
+              color="primary"
+            />
+          }
+          label="Show Areas"
+        />
+      </Box>
       {/* Zoomable Content */}
       <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
         {isHovered &&
@@ -370,11 +403,13 @@ const EditDeviceFloorView: React.FC<{
                     imgSize.width,
                     imgSize.height,
                   )}
-                  imageSrc={FloorplanHouse}
+                  imageSrc={floorplanImage}
                   scale={scale}
                   devices={filteredUnsavedDevices}
                   activeDevice={activeDevice}
                   setIsDragging={setIsDragging}
+                  areas = {filteredArea}
+                  showAreas={showArea}
                 />
               </>
             )}

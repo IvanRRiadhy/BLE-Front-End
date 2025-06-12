@@ -1,25 +1,48 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
 import { Box, FormLabel, Typography, useTheme } from '@mui/material';
-import { fetchFloorplans } from 'src/store/apps/tracking/FloorPlanSlice';
+// import { fetchFloorplans } from 'src/store/apps/tracking/FloorPlanSlice';
 import { floorplanType } from 'src/types/tracking/floorplan';
 import { Stage, Layer, Image as KonvaImage } from 'react-konva';
+import FloorplanHouse from 'src/assets/images/masters/Floorplan/Floorplan-House.png';
 import ZoomControls from 'src/components/shared/ZoomControls';
 import DeviceRenderer from './Renderer/DeviceRenderer';
+import { floorType, fetchFloors } from 'src/store/apps/crud/floor';
+import { FloorplanType, fetchFloorplan } from 'src/store/apps/crud/floorplan';
+import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 
+const BASE_URL = 'http://192.168.1.116:5000';
 const FloorView: React.FC<{
-  activeFloor: string;
+  activeFloorplan: string;
   zoomable: boolean;
   containerWidth: number; // New prop
   containerHeight: number; // New prop
-}> = ({ activeFloor, zoomable, containerWidth, containerHeight }) => {
+}> = ({ activeFloorplan, zoomable, containerWidth, containerHeight }) => {
   const dispatch: AppDispatch = useDispatch();
-  const floors = useSelector((state: AppState) => state.floorplanReducer2.floorplans);
-  const activeFloorData = floors.find((floor: floorplanType) => floor.id === activeFloor) as
-    | floorplanType
-    | undefined;
-
+    useEffect(() => {
+    dispatch(fetchFloorplan());
+    dispatch(fetchFloors());
+    dispatch(fetchFloorplanDevices());
+  }, [dispatch]);
+  // console.log('testing', useSelector((state: AppState) => state.floorReducer.floors));
   const containerRef = useRef<HTMLDivElement>(null);
+  const floor = useSelector((state: AppState) => state.floorReducer.floors);
+  const floorplans = useSelector(
+    (state: AppState) => state.floorplanReducer.floorplans,
+  );
+const actFloorplan = floorplans.find(
+  (floorplan: FloorplanType) => floorplan.id === activeFloorplan,
+);
+  const activeFloorData = floor.find(
+    (floor: floorType) => floor.id === actFloorplan?.floorId,
+  );
+
+  useEffect(() => {
+    console.log('FloorChanged:', floor);
+  },[floor]);
+  useEffect(() => {
+    console.log('Active Floorplan:', floorplans);
+  }, [actFloorplan]);
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
   const [scale, setScale] = useState(1); // Initial scale set to 1
   const [image, setImage] = useState<HTMLImageElement | null>(null);
@@ -30,14 +53,35 @@ const FloorView: React.FC<{
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false); // State to track mouse hover
+  const floorplanImage = activeFloorData?.floorImage
+    ? activeFloorData.floorImage.startsWith('/Uploads/') // Check if the URL is already absolute
+      ? `${BASE_URL}${activeFloorData.floorImage}`
+      : activeFloorData.floorImage // Prepend BASE_URL for relative paths
+    : FloorplanHouse; // Fallback to default image if not available
+
+  const devices = useSelector(
+    (state: AppState) => state.floorplanDeviceReducer.floorplanDevices,
+  );
+  const [filteredDevices, setFilteredDevices] = useState<FloorplanDeviceType[]>([]);
   useEffect(() => {
-    if (activeFloorData?.imagesrc) {
+    const filteredDevices = devices.filter(
+      (device: FloorplanDeviceType) => device.floorplanId === activeFloorplan,
+    );
+    setFilteredDevices(filteredDevices);
+    console.log('Filtered Devices:', devices);
+  }, [devices, activeFloorplan]);
+
+  useEffect(() => {
+    console.log('floors:', floor);
+    console.log('activeFloorData:', activeFloorData);
+    console.log('activeFloorplan:', floorplans);
+    if (floorplanImage) {
       const img = new Image();
-      img.src = activeFloorData.imagesrc;
+      img.src = floorplanImage;
       img.onload = () => {
         setImage(img);
         setImgSize({ width: img.width, height: img.height });
-
+        // console.log(imgSize);
         // Center the image when it is loaded
         if (containerRef.current) {
           const containerWidth = containerRef.current.clientWidth;
@@ -57,25 +101,22 @@ const FloorView: React.FC<{
           const offsetX = containerWidth / 4;
           const offsetY = containerHeight / 4;
 
-          console.log('Container Width:', containerWidth);
-          console.log('Container Height:', containerHeight);
-          console.log('Image Width:', img.width);
-          console.log('Image Height:', img.height);
-          console.log('Min Scale:', minScale);
-          console.log('OffsetX:', offsetX);
-          console.log('OffsetY:', offsetY);
+          // console.log('Container Width:', containerWidth);
+          // console.log('Container Height:', containerHeight);
+          // console.log('Image Width:', img.width);
+          // console.log('Image Height:', img.height);
+          // console.log('Min Scale:', minScale);
+          // console.log('OffsetX:', offsetX);
+          // console.log('OffsetY:', offsetY);
           setTranslate({ x: offsetX, y: offsetY });
         }
       };
       img.onerror = () => {
-        console.error('Failed to load image:', activeFloorData.imagesrc);
+        console.error('Failed to load image:', floorplanImage);
       };
     }
-  }, [activeFloorData]);
+  }, [activeFloorData,floor]);
 
-  useEffect(() => {
-    dispatch(fetchFloorplans());
-  }, [dispatch]);
   // useEffect(() => {
   //   const handleResize = () => {
   //     if (containerRef.current && imgSize && imgSize.width > 1 && imgSize.height > 1) {
@@ -105,6 +146,7 @@ const FloorView: React.FC<{
 
   const calculateImageDimensions = (
     containerWidth: number,
+    
     containerHeight: number,
     imageWidth: number,
     imageHeight: number,
@@ -370,7 +412,8 @@ const FloorView: React.FC<{
                   imgSize.width,
                   imgSize.height,
                 )}
-                imageSrc={activeFloorData?.imagesrc}
+                devices={filteredDevices}
+                imageSrc={floorplanImage}
                 scale={scale}
               />
             )}

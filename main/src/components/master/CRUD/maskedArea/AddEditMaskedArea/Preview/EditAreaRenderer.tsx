@@ -203,6 +203,7 @@ const EditAreaRenderer: React.FC<{
         setImage(img);
       };
     }
+        console.log('Width:', width, 'Height:', height, 'Scale:', scale);
   }, [imageSrc]);
 
   const setPointsFromNodes = (nodes: Nodes[]): number[] => {

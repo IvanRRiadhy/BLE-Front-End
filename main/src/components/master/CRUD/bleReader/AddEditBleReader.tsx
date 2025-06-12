@@ -38,6 +38,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
       brandId: '',
       name: '',
       mac: '',
+      gmac: '',
       ip: '',
       locationX: 0,
       locationY: 0,
@@ -142,10 +143,10 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                 fullWidth
                 variant="outlined"
               />
-              <CustomFormLabel htmlFor="ble-name">Name</CustomFormLabel>
+              <CustomFormLabel htmlFor="ble-ip">IP</CustomFormLabel>
               <CustomTextField
-                id="name"
-                placeholder={formData.name}
+                id="ip"
+                placeholder={formData.ip}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -160,10 +161,18 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                 fullWidth
                 variant="outlined"
               />
-              <CustomFormLabel htmlFor="ble-ip">IP</CustomFormLabel>
+              <CustomFormLabel htmlFor="ble-gmac">GMAC</CustomFormLabel>
               <CustomTextField
-                id="ip"
-                placeholder={formData.ip}
+                id="gmac"
+                placeholder={formData.gmac}
+                onChange={handleInputChange}
+                fullWidth
+                variant="outlined"
+              />
+                            <CustomFormLabel htmlFor="ble-name">Name</CustomFormLabel>
+              <CustomTextField
+                id="name"
+                placeholder={formData.name}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"

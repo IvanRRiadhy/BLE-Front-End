@@ -73,7 +73,7 @@ const DeviceDetailList = () => {
       posY: device?.posY || 0,
       posPxX: device?.posPxX || 0,
       posPxY: device?.posPxY || 0,
-      floorplanMaskedAreaId: formData.floorplanMaskedAreaId || '',
+      floorplanMaskedAreaId: device?.floorplanMaskedAreaId || '',
       applicationId: formData.applicationId || '',
       deviceStatus: formData.deviceStatus || '',
       createdBy: formData.createdBy || '',
@@ -298,6 +298,7 @@ const DeviceDetailList = () => {
                   fullWidth
                   variant="outlined"
                   required
+                  disabled
                 >
                   {maskedAreaData.map((maskedArea) => (
                     <MenuItem key={maskedArea.id} value={maskedArea.id}>

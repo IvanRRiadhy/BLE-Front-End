@@ -1,5 +1,6 @@
 import {
   Button,
+  darken,
   Dialog,
   DialogActions,
   DialogContent,
@@ -8,7 +9,7 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { Stage, Layer, Rect, Circle, Star, Image as KonvaImage } from 'react-konva';
+import { Stage, Layer, Rect, Circle, Star, Image as KonvaImage, Line } from 'react-konva';
 import { useSelector, useDispatch, AppState } from 'src/store/Store';
 import {
   EditUnsavedDevice,
@@ -16,13 +17,24 @@ import {
   RevertDevice,
   SelectEditingFloorplanDevice,
   SelectFloorplanDevice,
-  editDevicePosition
+  editDevicePosition,
 } from 'src/store/apps/crud/floorplanDevice';
 
 import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
+import borderFaceRecog from 'src/assets/images/svgs/devices/FACE READER ICON.png';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
 import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
+import borderGateway from 'src/assets/images/svgs/devices/BLE GATEWAY ICON.png';
 import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
+import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+
+type Nodes = {
+  id: string;
+  x: number;
+  y: number;
+  x_px: number;
+  y_px: number;
+};
 
 const EditDeviceRenderer: React.FC<{
   width: number;
@@ -32,7 +44,19 @@ const EditDeviceRenderer: React.FC<{
   devices?: FloorplanDeviceType[];
   activeDevice?: FloorplanDeviceType | null;
   setIsDragging: (isDragging: string) => void;
-}> = ({ width, height, imageSrc, scale, devices, activeDevice, setIsDragging }) => {
+  areas: MaskedAreaType[];
+  showAreas: boolean;
+}> = ({
+  width,
+  height,
+  imageSrc,
+  scale,
+  devices,
+  activeDevice,
+  setIsDragging,
+  areas,
+  showAreas,
+}) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const [scales, setScale] = useState<number>(scale);
@@ -48,6 +72,7 @@ const EditDeviceRenderer: React.FC<{
         setImage(img);
       };
     }
+    console.log('Width:', width, 'Height:', height, 'Scale:', scale);
   }, [imageSrc]);
   const useDeviceIcon = (src: string) => {
     const [img, setImg] = useState<HTMLImageElement | null>(null);
@@ -59,10 +84,12 @@ const EditDeviceRenderer: React.FC<{
     return img;
   };
   const iconCCTV = useDeviceIcon(CCTVSVG);
-  const iconGateway = useDeviceIcon(GatewaySVG);
-  const iconFaceRecog = useDeviceIcon(FaceRecog);
+  const iconGateway = useDeviceIcon(borderGateway);
+  const iconFaceRecog = useDeviceIcon(borderFaceRecog);
   const iconUnknown = useDeviceIcon(UnknownDevice);
-
+  const setPointsFromNodes = (nodes: Nodes[]): number[] => {
+    return nodes.flatMap((node) => [node.x, node.y]); // Flatten x and y into a single array
+  };
   // const handleDragMove = (e: any, device: FloorplanDeviceType) => {
   //   const newPosX = (e.target.x() * 4) / scales; // Convert back to original scale
   //   const newPosY = (e.target.y() * 4) / scales;
@@ -71,18 +98,41 @@ const EditDeviceRenderer: React.FC<{
   //   console.log(`Dragging device ${device.id}:`, { newPosX, newPosY });
   //   dispatch(EditUnsavedDevice({ ...device, posPxX: newPosX, posPxY: newPosY }));
   // };
+  function isPointInPolygon(point: { x: number; y: number }, polygon: Nodes[]): boolean {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const xi = polygon[i].x,
+        yi = polygon[i].y;
+      const xj = polygon[j].x,
+        yj = polygon[j].y;
+      const intersect =
+        yi > point.y !== yj > point.y &&
+        point.x < ((xj - xi) * (point.y - yi)) / (yj - yi + 0.00001) + xi;
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
   const handleDragStart = (e: string) => {
     console.log('Drag started:', e); // Log the name of the dragged element
     setIsDragging(e); // Set dragging state to true
   };
 
   const handleDragEnd = (e: any, device: FloorplanDeviceType) => {
-    const newPosX = (e.target.x() * 4) / scales; // Convert back to original scale
-    const newPosY = (e.target.y() * 4) / scales;
+    const newPosX = e.target.x() + 18; // Convert back to original scale
+    const newPosY = e.target.y() + 18;
 
+    // Check if the device is inside any area
+    const devicePoint = { x: newPosX, y: newPosY };
+      let detectedAreaId = device.floorplanMaskedAreaId || ''; // Initialize with existing area ID or empty string
+    areas.forEach((area) => {
+      if (area.nodes && isPointInPolygon(devicePoint, area.nodes)) {
+        console.log(`Device ${device.id} is inside area ${area.name}`);
+      detectedAreaId = area.id;
+      }
+    });
     // Dispatch an action to update the device's position in the Redux store
     // dispatch(EditUnsavedDevice({ ...device, posPxX: newPosX, posPxY: newPosY }));
-    const newDevice = { ...device, posPxX: newPosX, posPxY: newPosY };
+    const newDevice = { ...device, floorplanMaskedAreaId: detectedAreaId, posPxX: newPosX, posPxY: newPosY };
     dispatch(editDevicePosition(newDevice)); // Update the device position in the store
     setIsDragging(''); // Set dragging state to false
     // console.log(`Device ${device.id} dropped at:`, { newPosX, newPosY });
@@ -125,21 +175,23 @@ const EditDeviceRenderer: React.FC<{
         break;
       case 'BleReader':
         deviceIcon = iconGateway;
-        width = 40;
-        height = 40;
+        width = 36;
+        height = 36;
         break;
       case 'AccessDoor':
         deviceIcon = iconFaceRecog;
-        width = 50;
-        height = 50;
+        width = 36;
+        height = 36;
         break;
 
       default:
         deviceIcon = iconUnknown;
+        width = 36;
+        height = 36;
         break;
     }
-    const x = (device.posPxX * scales) / 4;
-    const y = (device.posPxY * scales) / 4;
+    const x = device.posPxX - width / 2; // Center the icon inside the rect
+    const y = device.posPxY - height / 2; // Center the icon inside the rect
     return (
       deviceIcon && (
         <KonvaImage
@@ -301,6 +353,21 @@ const EditDeviceRenderer: React.FC<{
               right={0}
             />
           )}
+          {/* Render areas if showAreas is true */}
+          {showAreas &&
+            areas.map((area) => (
+              <Line
+                key={area.id}
+                points={area.nodes ? setPointsFromNodes(area.nodes) : []}
+                stroke={darken(area.colorArea, 0.5)}
+                strokeWidth={5}
+                lineJoin="round"
+                lineCap="round"
+                closed
+                fill={area.colorArea}
+                opacity={0.5}
+              />
+            ))}
           {/*Render devices*/}
           {devices && devices.map((device) => renderDeviceShape(device))}
         </Layer>

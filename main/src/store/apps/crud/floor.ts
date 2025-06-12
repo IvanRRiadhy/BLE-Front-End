@@ -42,6 +42,7 @@ export const FloorSlice = createSlice({
     reducers: {
         GetFloor: (state, action: PayloadAction<floorType[]>) => {
             state.floors = action.payload;
+            // console.log('Floors fetched:', JSON.stringify(state.floors, null, 2));
         },
         SelectFloor: (state, action: PayloadAction<string>) => {
             const selected = state.floors.find((floor: floorType) => floor.id === action.payload);
@@ -92,7 +93,7 @@ export const fetchFloors = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL)
         dispatch(GetFloor(response.data?.collection?.data || []));
-        console.log(response.data?.collection?.data || []);
+        // console.log("Fetch Floors",response.data?.collection?.data || []);
     } catch (error) {
         console.log(error);
     }
@@ -100,7 +101,14 @@ export const fetchFloors = () => async (dispatch: AppDispatch) => {
 
 export const addFloor = createAsyncThunk("floors/addFloor", async (formData: FormData, { rejectWithValue }) => {
     try {
-        const response = await axiosServices.post(API_URL, formData);
+        for (const [key, value] of formData.entries()) {
+  console.log(`${key}:`, value);
+}
+        const response = await axiosServices.post(API_URL, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
         return response.data;
     } catch (error: any) {
         console.error("Error adding floor:", error);
@@ -113,7 +121,11 @@ export const editFloor = createAsyncThunk("floors/editFloor", async (formData: F
         const id = formData.get('id'); // Extract ID from FormData
         console.log(id)
         formData.delete('id'); // Remove ID from FormData to avoid sending it again
-        const response = await axiosServices.put(`${API_URL}${id}`, formData);
+        const response = await axiosServices.put(`${API_URL}${id}`, formData,{
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
         return response.data;
     } catch (error: any) {
         console.error("Error editing floor:", error);

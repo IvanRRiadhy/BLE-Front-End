@@ -24,6 +24,7 @@ import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Stor
 import { fetchFloorplan, FloorplanType, deleteFloorplan } from 'src/store/apps/crud/floorplan';
 import { useTranslation } from 'react-i18next';
 import { floorplanType } from 'src/types/tracking/floorplan';
+import AddEditFloorplan from './AddEditFloorplan';
 
 const FloorplanList = () => {
   const { t } = useTranslation();
@@ -40,6 +41,7 @@ const FloorplanList = () => {
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+    console.log(floorplanData);
   };
   const dispatch: AppDispatch = useDispatch();
   const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
@@ -125,7 +127,7 @@ const FloorplanList = () => {
                           {index + 1}
                         </TableCell>
                         <TableCell>{floorplan.name}</TableCell>
-                        <TableCell>{floorplan.floor.name}</TableCell>
+                        <TableCell>{floorplan.floor?.name}</TableCell>
                         <TableCell
                           sx={{
                             position: 'sticky',
@@ -137,7 +139,7 @@ const FloorplanList = () => {
                             alignItems: 'center',
                           }}
                         >
-                          {/* <AddEditFloor type="edit" floor={floor} /> */}
+                          <AddEditFloorplan type="edit" floorplan={floorplan} />
                           <IconButton
                             color="error"
                             size="small"
@@ -147,7 +149,8 @@ const FloorplanList = () => {
                           </IconButton>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ))
+                    }
                 </TableBody>
               </Table>
             </TableContainer>

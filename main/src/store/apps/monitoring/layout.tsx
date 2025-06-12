@@ -11,7 +11,7 @@ const initialState: Statetype = {
   grid: 1,
   floorplanId: [
     [],
-    ['5'],
+    ['6a6ad6fa-5630-419a-b756-7685a0401fed'],
     ['1', '2'],
     ['1', '2', '3'],
     ['1', '2', '3', '4'],

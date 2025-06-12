@@ -11,6 +11,7 @@ export interface bleReaderType {
     brandId: string,
     name: string,
     mac: string,
+    gmac: string,
     ip: string,
     locationX: number,
     locationY: number,
