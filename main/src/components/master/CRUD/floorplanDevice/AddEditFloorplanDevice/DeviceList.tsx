@@ -104,10 +104,10 @@ const DeviceList = () => {
     accessCctvId: firstCCTV?.id || '',
     readerId: firstBleReader?.id || '',
     accessControlId: firstAccessControl?.id || '',
-    posX: 100, // Default position
-    posY: 100, // Default position
-    posPxX: 100,
-    posPxY: 100,
+    posX: 10, // Default position
+    posY: 10, // Default position
+    posPxX: 10,
+    posPxY: 10,
     floorplanMaskedAreaId: '',
     applicationId: activeFloorplan?.applicationId || '',
     deviceStatus: 'Active', // Mark as unsaved
@@ -196,7 +196,9 @@ const DeviceList = () => {
   const handleSaveEdits = async () => {
     // Get the current state of devices
     const unsavedDevicesMap = new Map(filteredUnsavedDevices.map((device) => [device.id, device]));
-    const floorplanDevicesMap = new Map(filteredOriginalDevices.map((device) => [device.id, device]));
+    const floorplanDevicesMap = new Map(
+      filteredOriginalDevices.map((device) => [device.id, device]),
+    );
     // 1. Edit devices: Check for devices with different fields
     const devicesToEdit = filteredUnsavedDevices.filter((unsavedDevice) => {
       const originalDevice = floorplanDevicesMap.get(unsavedDevice.id);

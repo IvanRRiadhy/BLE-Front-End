@@ -110,12 +110,16 @@ const EditAreaFloorView: React.FC<{
       return {
         width: containerWidth,
         height: containerWidth / imageRatio,
+        originalWidth: imageWidth,
+        originalHeight: imageHeight,
       };
     } else {
       // Image is taller than the container
       return {
         width: containerHeight * imageRatio,
         height: containerHeight,
+        originalWidth: imageWidth,
+        originalHeight: imageHeight,
       };
     }
   };

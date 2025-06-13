@@ -39,9 +39,6 @@ const EditDeviceFloorView: React.FC<{
     const filteredArea = Areas.filter(
     (area) => area.floorplanId === activeFloorPlan?.id,
   );
-  // const filteredUnsavedDevices = unsavedDevices.filter(
-  //   (device) => device.floorplanId === activeFloorPlan?.id,
-  // );
   const [showArea, setShowArea] = useState(true);
 
   const [filteredUnsavedDevices, setFilteredUnsavedDevices] = useState<FloorplanDeviceType[]>([]);
@@ -162,12 +159,16 @@ const EditDeviceFloorView: React.FC<{
       return {
         width: containerWidth,
         height: containerWidth / imageRatio,
+        originalWidth: imageWidth,
+        originalHeight: imageHeight,
       };
     } else {
       // Image is taller than the container
       return {
         width: containerHeight * imageRatio,
         height: containerHeight,
+        originalWidth: imageWidth,
+        originalHeight: imageHeight,
       };
     }
   };

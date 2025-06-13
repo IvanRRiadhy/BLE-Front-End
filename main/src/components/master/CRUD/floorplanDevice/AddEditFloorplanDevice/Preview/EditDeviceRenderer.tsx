@@ -34,11 +34,14 @@ type Nodes = {
   y: number;
   x_px: number;
   y_px: number;
+
 };
 
 const EditDeviceRenderer: React.FC<{
   width: number;
   height: number;
+  originalWidth: number;
+  originalHeight: number;
   imageSrc?: string;
   scale: number;
   devices?: FloorplanDeviceType[];
@@ -49,6 +52,8 @@ const EditDeviceRenderer: React.FC<{
 }> = ({
   width,
   height,
+  originalWidth,
+  originalHeight,
   imageSrc,
   scale,
   devices,
@@ -87,8 +92,9 @@ const EditDeviceRenderer: React.FC<{
   const iconGateway = useDeviceIcon(borderGateway);
   const iconFaceRecog = useDeviceIcon(borderFaceRecog);
   const iconUnknown = useDeviceIcon(UnknownDevice);
-  const setPointsFromNodes = (nodes: Nodes[]): number[] => {
-    return nodes.flatMap((node) => [node.x, node.y]); // Flatten x and y into a single array
+    const setPointsFromNodes = (nodes: Nodes[]): number[] => {
+      // console.log('Setting nodes: ', nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]))
+    return nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]); // Flatten x and y into a single array
   };
   // const handleDragMove = (e: any, device: FloorplanDeviceType) => {
   //   const newPosX = (e.target.x() * 4) / scales; // Convert back to original scale
@@ -118,8 +124,8 @@ const EditDeviceRenderer: React.FC<{
   };
 
   const handleDragEnd = (e: any, device: FloorplanDeviceType) => {
-    const newPosX = e.target.x() + 18; // Convert back to original scale
-    const newPosY = e.target.y() + 18;
+    const newPosX = ((e.target.x()+ 18)/width * originalWidth) ; // Convert back to original scale
+    const newPosY = ((e.target.y()+ 18)/height * originalHeight) ;
 
     // Check if the device is inside any area
     const devicePoint = { x: newPosX, y: newPosY };
@@ -166,32 +172,33 @@ const EditDeviceRenderer: React.FC<{
       }
       dispatch(SelectFloorplanDevice(device.id));
     };
-    let deviceIcon, width, height;
+    let deviceIcon, iconWidth, iconHeight;
     switch (device.type) {
       case 'Cctv':
         deviceIcon = iconCCTV;
-        width = 36;
-        height = 36;
+        iconWidth = 36;
+        iconHeight = 36;
         break;
       case 'BleReader':
         deviceIcon = iconGateway;
-        width = 36;
-        height = 36;
+        iconWidth = 36;
+        iconHeight = 36;
         break;
       case 'AccessDoor':
         deviceIcon = iconFaceRecog;
-        width = 36;
-        height = 36;
+        iconWidth = 36;
+        iconHeight = 36;
         break;
 
       default:
         deviceIcon = iconUnknown;
-        width = 36;
-        height = 36;
+        iconWidth = 36;
+        iconHeight = 36;
         break;
     }
-    const x = device.posPxX - width / 2; // Center the icon inside the rect
-    const y = device.posPxY - height / 2; // Center the icon inside the rect
+    const x = (device.posPxX / originalWidth * width) - iconWidth / 2; // Center the icon inside the rect
+    const y = (device.posPxY / originalHeight * height) - iconHeight / 2; // Center the icon inside the rect
+
     return (
       deviceIcon && (
         <KonvaImage
@@ -200,8 +207,8 @@ const EditDeviceRenderer: React.FC<{
           image={deviceIcon}
           x={x} // Center the icon inside the rect
           y={y}
-          width={width}
-          height={height}
+          width={iconWidth}
+          height={iconHeight}
           // listening={false}
           onClick={handleDeviceClick}
           draggable={isEditing} // Make it draggable only if editing

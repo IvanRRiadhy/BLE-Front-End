@@ -1,6 +1,6 @@
 import React, { use, useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
-import { Box, FormLabel, Typography, useTheme } from '@mui/material';
+import { Box, FormControlLabel, FormLabel, Switch, Typography, useTheme } from '@mui/material';
 // import { fetchFloorplans } from 'src/store/apps/tracking/FloorPlanSlice';
 import { floorplanType } from 'src/types/tracking/floorplan';
 import { Stage, Layer, Image as KonvaImage } from 'react-konva';
@@ -10,6 +10,8 @@ import DeviceRenderer from './Renderer/DeviceRenderer';
 import { floorType, fetchFloors } from 'src/store/apps/crud/floor';
 import { FloorplanType, fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
+import { original } from '@reduxjs/toolkit';
+import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 
 const BASE_URL = 'http://192.168.1.116:5000';
 const FloorView: React.FC<{
@@ -23,6 +25,7 @@ const FloorView: React.FC<{
     dispatch(fetchFloorplan());
     dispatch(fetchFloors());
     dispatch(fetchFloorplanDevices());
+    dispatch(fetchMaskedAreas());
   }, [dispatch]);
   // console.log('testing', useSelector((state: AppState) => state.floorReducer.floors));
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,11 +40,19 @@ const actFloorplan = floorplans.find(
     (floor: floorType) => floor.id === actFloorplan?.floorId,
   );
 
+      const Areas: MaskedAreaType[] = useSelector(
+        (state: AppState) => state.maskedAreaReducer.maskedAreas,
+      );
+      const filteredArea = Areas.filter(
+      (area) => area.floorplanId === activeFloorplan,
+    );
+    const [showArea, setShowArea] = useState(true);
+
   useEffect(() => {
-    console.log('FloorChanged:', floor);
+    // console.log('FloorChanged:', floor);
   },[floor]);
   useEffect(() => {
-    console.log('Active Floorplan:', floorplans);
+    // console.log('Active Floorplan:', floorplans);
   }, [actFloorplan]);
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
   const [scale, setScale] = useState(1); // Initial scale set to 1
@@ -68,13 +79,13 @@ const actFloorplan = floorplans.find(
       (device: FloorplanDeviceType) => device.floorplanId === activeFloorplan,
     );
     setFilteredDevices(filteredDevices);
-    console.log('Filtered Devices:', devices);
+    // console.log('Filtered Devices:', devices);
   }, [devices, activeFloorplan]);
 
   useEffect(() => {
-    console.log('floors:', floor);
-    console.log('activeFloorData:', activeFloorData);
-    console.log('activeFloorplan:', floorplans);
+    // console.log('floors:', floor);
+    // console.log('activeFloorData:', activeFloorData);
+    // console.log('activeFloorplan:', floorplans);
     if (floorplanImage) {
       const img = new Image();
       img.src = floorplanImage;
@@ -146,25 +157,32 @@ const actFloorplan = floorplans.find(
 
   const calculateImageDimensions = (
     containerWidth: number,
-    
     containerHeight: number,
     imageWidth: number,
     imageHeight: number,
   ) => {
     const containerRatio = containerWidth / containerHeight;
     const imageRatio = imageWidth / imageHeight;
-
+    // console.log('image original size:', imageWidth, imageHeight);
     if (imageRatio > containerRatio) {
       // Image is wider than the container
       return {
         width: containerWidth,
         height: containerWidth / imageRatio,
+        scaleX: imageWidth / containerWidth,
+        scaleY: imageHeight / (containerWidth / imageRatio),
+        originalWidth: imageWidth,
+        originalHeight: imageHeight,
       };
     } else {
       // Image is taller than the container
       return {
         width: containerHeight * imageRatio,
         height: containerHeight,
+        scaleX: imageWidth / (containerHeight * imageRatio),
+        scaleY: imageHeight / containerHeight,
+        originalWidth: imageWidth,
+        originalHeight: imageHeight,
       };
     }
   };
@@ -330,6 +348,31 @@ const actFloorplan = floorplans.find(
         // cursor: isDragging ? 'grabbing' : 'grab',
       }}
     >
+            {/* Sticky Overlay Toggle */}
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                zIndex: 10,
+                width: '240px',
+                background: 'rgba(255,255,255,0.9)',
+                borderRadius: 2,
+                boxShadow: 2,
+                p: 1,
+              }}
+            >
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={showArea}
+                    onChange={() => setShowArea((prev) => !prev)}
+                    color="primary"
+                  />
+                }
+                label="Show Areas"
+              />
+            </Box>
       {/* Zoomable Content */}
       <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
         {isHovered &&
@@ -415,6 +458,9 @@ const actFloorplan = floorplans.find(
                 devices={filteredDevices}
                 imageSrc={floorplanImage}
                 scale={scale}
+                                  areas = {filteredArea}
+                  showAreas={showArea}
+                  topic={activeFloorplan.toUpperCase()}
               />
             )}
             {/* </Layer>

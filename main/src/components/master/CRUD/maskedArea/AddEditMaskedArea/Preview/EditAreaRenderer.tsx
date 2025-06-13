@@ -104,6 +104,8 @@ const Areas: AreaType[] = [
 const EditAreaRenderer: React.FC<{
   width: number;
   height: number;
+  originalWidth: number;
+  originalHeight: number;
   imageSrc?: string;
   scale: number;
   maskedAreas: MaskedAreaType[];
@@ -113,6 +115,8 @@ const EditAreaRenderer: React.FC<{
 }> = ({
   width,
   height,
+  originalWidth,
+  originalHeight,
   imageSrc,
   scale,
   maskedAreas,
@@ -124,9 +128,10 @@ const EditAreaRenderer: React.FC<{
   const stageRef = React.useRef<Konva.Stage>(null);
 
   const dispatch = useDispatch();
-  const [scales, setScale] = useState<number>(scale);
+  // const [scales, setScale] = useState<number>(scale);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
-
+  const scaleX = originalWidth / width;
+  const scaleY = originalHeight / height;
   const [activeArea, setActiveArea] = useState(activeMaskedArea?.name || '');
   const [areaDragging, setAreaDragging] = useState(false);
   const [originalPositions, setOriginalPositions] = useState<
@@ -206,8 +211,9 @@ const EditAreaRenderer: React.FC<{
         console.log('Width:', width, 'Height:', height, 'Scale:', scale);
   }, [imageSrc]);
 
-  const setPointsFromNodes = (nodes: Nodes[]): number[] => {
-    return nodes.flatMap((node) => [node.x, node.y]); // Flatten x and y into a single array
+    const setPointsFromNodes = (nodes: Nodes[]): number[] => {
+      // console.log('Setting nodes: ', nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]))
+    return nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]); // Flatten x and y into a single array
   };
 
   // Function to check if two polygons intersect
@@ -537,10 +543,10 @@ const EditAreaRenderer: React.FC<{
     const { x, y } = pointerPosition;
     const newNode = {
       id: uniqueId(),
-      x: x,
-      y: y,
-      x_px: x,
-      y_px: y,
+      x: x * scaleX,
+      y: y * scaleX,
+      x_px: x * scaleX,
+      y_px: y * scaleY,
     };
 
     setDrawingNodes((prevNodes) => {
@@ -658,7 +664,9 @@ const EditAreaRenderer: React.FC<{
     setIsColliding(false);
   };
   const handleDragMove = (areaName: string, dx: number, dy: number) => {
-    setDragOffset({ dx, dy });
+    const dPxX = dx;
+    const dPxY = dy;
+    setDragOffset({ dx: dPxX, dy: dPxY });
   };
 
   const handleDragEnd = async (areaName: string) => {
@@ -807,19 +815,21 @@ const EditAreaRenderer: React.FC<{
   };
   const handleCornerDragMove = (areaName: string, cornerIndex: number, x: number, y: number) => {
     // Just store the proposed position, don't check yet
-
+    const dPxX = x;
+    const dPxY = y;
     // Still check for collisions with other areas during drag
-    const collision = checkCornerDragCollision(areaName, cornerIndex, x, y);
+    const collision = checkCornerDragCollision(areaName, cornerIndex, dPxX, dPxY);
     setIsColliding(collision);
   };
 
   const handleCornerDragEnd = (areaName: string, cornerIndex: number, x: number, y: number) => {
     const area = filteredUnsavedArea.find((a) => a.name === areaName);
     if (!area) return;
-
+    const dPxX = x ;
+    const dPxY = y;
     // Create the proposed new polygon
     const proposedNodes = area.nodes ? [...area.nodes] : [];
-    proposedNodes[cornerIndex] = { ...proposedNodes[cornerIndex], x, y };
+    proposedNodes[cornerIndex] = { ...proposedNodes[cornerIndex], x: dPxX, y: dPxY };
 
     // Check for both collisions and self-intersections
     const hasCollision = filteredUnsavedArea.some((otherArea) => {
@@ -844,7 +854,7 @@ const EditAreaRenderer: React.FC<{
       }
     } else {
       // Apply the change
-      handleDragCorner(areaName, cornerIndex, x, y);
+      handleDragCorner(areaName, cornerIndex, dPxX, dPxY);
       // handleSaveArea();
     }
 
@@ -1003,6 +1013,7 @@ const EditAreaRenderer: React.FC<{
             />
           )}
           {filteredUnsavedArea.map((area: MaskedAreaType) => (
+            console.log('area', area.nodes),
             <React.Fragment key={area.id}>
               {/* Render the area */}
               <Line
@@ -1040,7 +1051,7 @@ const EditAreaRenderer: React.FC<{
 
                     if (isShiftPressed && mousePos) {
                       e.evt.preventDefault();
-                      handleInsertCorner(area.name, mousePos.x, mousePos.y);
+                      handleInsertCorner(area.name, mousePos.x * scaleX, mousePos.y * scaleY);
                     }
                   }
                 }}
@@ -1050,14 +1061,14 @@ const EditAreaRenderer: React.FC<{
                   if (editingMaskedArea?.id == area.id) {
                     if (mousePos) {
                       e.evt.preventDefault();
-                      handleInsertCorner(area.name, mousePos.x, mousePos.y);
+                      handleInsertCorner(area.name, mousePos.x * scaleX, mousePos.y * scaleY);
                     }
                   }
                 }}
                 onMouseUp={handleMouseUp}
                 onDragStart={() => setAreaDragging(true)}
                 onDragMove={(e) => {
-                  handleDragMove(area.name, e.target.x(), e.target.y());
+                  handleDragMove(area.name, e.target.x() * scaleX , e.target.y() * scaleY);
                 }}
                 onDragEnd={(e) => {
                   handleDragEnd(area.name);
@@ -1072,8 +1083,8 @@ const EditAreaRenderer: React.FC<{
                 area.nodes?.map((node: any, index: any) => (
                   <Circle
                     key={node.id}
-                    x={node.x}
-                    y={node.y}
+                    x={node.x / scaleX}
+                    y={node.y / scaleY}
                     radius={7}
                     fill="red"
                     draggable
@@ -1100,13 +1111,13 @@ const EditAreaRenderer: React.FC<{
                     }}
                     onDragStart={() => handleCornerDragStart(area.name, index)}
                     onDragMove={(e) => {
-                      handleDragCorner(area.name, index, e.target.x(), e.target.y());
-                      handleCornerDragMove(area.name, index, e.target.x(), e.target.y());
+                      handleDragCorner(area.name, index, e.target.x() * scaleX, e.target.y() * scaleY);
+                      handleCornerDragMove(area.name, index, e.target.x() * scaleX, e.target.y() * scaleY);
                     }}
                     onMouseDown={() => handleDragStart(area.name)}
                     onMouseUp={handleMouseUp}
                     onDragEnd={(e) => {
-                      handleCornerDragEnd(area.name, index, e.target.x(), e.target.y());
+                      handleCornerDragEnd(area.name, index, e.target.x() * scaleX, e.target.y() * scaleY);
                       handleDragEnd(area.name); // Pass the area name
                     }}
                     onContextMenu={(e) => {
@@ -1121,8 +1132,8 @@ const EditAreaRenderer: React.FC<{
           {drawingNodes.map((node) => (
             <Circle
               key={node.id}
-              x={node.x}
-              y={node.y}
+              x={node.x / scaleX}
+              y={node.y / scaleY}
               radius={7}
               fill="blue" // Color for the drawing nodes
               draggable={false} // Disable dragging for these circles
@@ -1136,7 +1147,7 @@ const EditAreaRenderer: React.FC<{
               {drawingNodes.map((node) => (
                 <Line
                   key={`line-to-cursor-${node.id}`}
-                  points={[node.x, node.y, cursorPosition.x, cursorPosition.y]} // Connect each node to the cursor
+                  points={[node.x / scaleX, node.y / scaleX, cursorPosition.x, cursorPosition.y]} // Connect each node to the cursor
                   stroke="blue"
                   strokeWidth={2}
                   dash={[10, 5]} // Dashed line pattern
@@ -1150,7 +1161,7 @@ const EditAreaRenderer: React.FC<{
                   return (
                     <Line
                       key={`line-to-next-${node.id}`}
-                      points={[node.x, node.y, nextNode.x, nextNode.y]} // Connect each node to the next node
+                      points={[node.x/ scaleX, node.y/ scaleY , nextNode.x / scaleX, nextNode.y / scaleY ]} // Connect each node to the next node
                       stroke="blue"
                       strokeWidth={2}
                       dash={[10, 5]} // Dashed line pattern

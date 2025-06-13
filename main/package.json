@@ -56,6 +56,7 @@
     "lodash": "^4.17.21",
     "main-vite-ts": "file:",
     "moment": "^2.29.4",
+    "mqtt": "^5.13.1",
     "mui-tiptap": "^1.13.0",
     "prop-types": "^15.7.2",
     "react": "19.0.0-rc-02c0e824-20241028",
