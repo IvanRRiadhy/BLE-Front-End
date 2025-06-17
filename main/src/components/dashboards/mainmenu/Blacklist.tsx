@@ -16,10 +16,16 @@ import {
 import { Box } from '@mui/system';
 import DashboardCard from 'src/components/shared/DashboardCard';
 import { useTranslation } from 'react-i18next';
+import { blacklistType } from 'src/store/apps/crud/blacklist';
 
 const blacklist = BlacklistData;
+interface BlacklistTableProps {
+  blacklistData: blacklistType[];
+}
 
-const BlacklistTable = () => {
+const BlacklistTable: React.FC<BlacklistTableProps> = ({ blacklistData }) => {
+  // ...rest of your code...
+
   //Pagination
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -42,15 +48,20 @@ const BlacklistTable = () => {
     setOrderBy(property);
   };
 
-  const sortedData = [...blacklist].sort((a, b) => {
-    if (orderBy === 'name') {
-      return order === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
-    }
-    if (orderBy === 'dateAsigned') {
-      return order === 'asc'
-        ? a.dateAsigned.localeCompare(b.dateAsigned)
-        : b.dateAsigned.localeCompare(a.dateAsigned);
-    }
+  const sortedData = [...blacklistData].sort((a, b) => {
+  if (orderBy === 'name') {
+    const nameA = a.visitor?.name ?? '';
+    const nameB = b.visitor?.name ?? '';
+    return order === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+  }
+  if (orderBy === 'maskedArea') {
+    const areaA = a.floorplanMaskedArea?.name ?? '';
+    const areaB = b.floorplanMaskedArea?.name ?? '';
+    return order === 'asc'
+      ? areaA.localeCompare(areaB)
+      : areaB.localeCompare(areaA);
+  }
+
     return 0;
   });
 
@@ -80,27 +91,27 @@ const BlacklistTable = () => {
               {/* Date Asigned Column */}
               <TableCell>
                 <TableSortLabel
-                  active={orderBy === 'dateAsigned'}
-                  direction={orderBy === 'dateAsigned' ? order : 'asc'}
-                  onClick={() => handleSort('dateAsigned')}
+                  active={orderBy === 'maskedArea'}
+                  direction={orderBy === 'maskedArea' ? order : 'asc'}
+                  onClick={() => handleSort('maskedArea')}
                 >
                   <Typography variant="subtitle2" fontWeight={600}>
-                    {t('Date Assigned')}
+                    {t('Area')}
                   </Typography>
                 </TableSortLabel>
               </TableCell>
               {/* Duration Column */}
-              <TableCell>
+              {/* <TableCell>
                 <Typography variant="subtitle2" fontWeight={600}>
                   {t('Duration')}
                 </Typography>
-              </TableCell>
+              </TableCell> */}
               {/* Information Column */}
-              <TableCell>
+              {/* <TableCell>
                 <Typography variant="subtitle2" fontWeight={600}>
                   {t('Information')}
                 </Typography>
-              </TableCell>
+              </TableCell> */}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -110,29 +121,29 @@ const BlacklistTable = () => {
                   <Stack direction="row" spacing={2}>
                     <Box>
                       <Typography variant="subtitle2" fontWeight={600}>
-                        {basic.name}
+                        {basic.visitor?.name || 'Unknown Visitor'}
                       </Typography>
                       <Typography color="textSecondary" fontSize="12px" variant="subtitle2">
-                        {basic.cardID}
+                        {basic.visitor?.cardNumber || 'No Card Number'}
                       </Typography>
                     </Box>
                   </Stack>
                 </TableCell>
                 <TableCell>
                   <Typography color="textSecondary" fontWeight={400} variant="subtitle2">
-                    {basic.dateAsigned}
+                    {basic.floorplanMaskedArea?.name || 'Unknown Area'}
                   </Typography>
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <Typography color="textSecondary" fontWeight={400} variant="subtitle2">
                     {basic.duration}
                   </Typography>
-                </TableCell>
-                <TableCell>
+                </TableCell> */}
+                {/* <TableCell>
                   <Typography color="textSecondary" fontWeight={400} variant="subtitle2">
                     {basic.keterangan}
                   </Typography>
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             ))}
           </TableBody>

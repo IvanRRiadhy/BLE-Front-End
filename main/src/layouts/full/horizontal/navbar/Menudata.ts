@@ -32,6 +32,17 @@ import {
   IconUserCircle,
   IconBarrierBlock,
   IconMapCheck,
+  IconMapPin,
+  IconDeviceIpad,
+  IconDeviceCctv,
+  IconIdBadge,
+  IconDevices,
+  IconAffiliate,
+  IconAffiliateFilled,
+  IconSquare,
+  IconMarquee,
+  IconCropLandscape,
+  IconBadgeTm,
 } from '@tabler/icons-react';
 import { uniqueId } from 'lodash';
 
@@ -101,24 +112,24 @@ const Menuitems = [
   {
     id: uniqueId(),
     title: 'Organization',
-    icon: IconMapDown,
+    icon: IconAffiliate,
     children: [
       {
         id: uniqueId(),
         title: 'Organization',
-        icon: IconMap,
+        icon: IconAffiliate,
         href: '/master/organization/'
       },
       {
         id: uniqueId(),
         title: 'Department',
-        icon: IconMap,
+        icon: IconAffiliate,
         href: '/master/department/',
       },
       {
         id: uniqueId(),
         title: 'District',
-        icon: IconMap,
+        icon: IconAffiliate,
         href: '/master/district/'
       },
     ]
@@ -126,27 +137,73 @@ const Menuitems = [
   {
     id: uniqueId(),
     title: 'Floor Plan',
-    icon: IconMap2,
+    icon: IconMap,
     href: '/master/floorplan/',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'Floor Plan',
+        icon: IconMap,
+        href: '/master/floorplan/'
+      },
+      {
+        id: uniqueId(),
+        title: 'Floor Plan Masked Area',
+        icon: IconCropLandscape,
+        href: '/master/floorplanmaskedarea/'
+      },
+            {
+        id: uniqueId(),
+        title: 'Floor Plan Devices',
+        icon: IconDevices,
+        href: '/master/device/'
+      },
+    ]
+  },
+  {
+    id: uniqueId(),
+    title: 'Devices',
+    icon: IconDevices,
+    children: [
+      {
+        id: uniqueId(),
+        title: 'Access CCTV',
+        icon: IconDeviceCctv,
+        href: '/master/accesscctv/'
+      },
+      {
+        id: uniqueId(),
+        title: 'Access Control',
+        icon: IconIdBadge,
+        href: '/master/accesscontrol/'
+      },
+            {
+        id: uniqueId(),
+        title: 'Ble Reader',
+        icon: IconDeviceIpad,
+        href: '/master/blereader/'
+      },
+    ]
   },
 
   {
     id: uniqueId(),
     title: 'Tag',
-    icon: IconMap,
+    icon: IconMapPin,
     children: [
       {
         id:uniqueId(),
         title: 'Member',
-        icon: IconAccessible,
+        icon: IconMapPin,
         href: '/master/membertag/'
       },
       {
         id:uniqueId(),
         title: 'Visitor',
-        icon: IconAccessibleOff,
+        icon: IconMapPin,
         href: '/master/visitortag/'
       },
+
     ]
   },
 
@@ -162,38 +219,19 @@ const Menuitems = [
         icon: IconLicense,
         href: '/master/integration/'
       },
-      {
-        id: uniqueId(),
-        title: 'Access CCTV',
-        icon: IconAccessible,
-        href: '/master/accesscctv/'
-      },
-      {
-        id: uniqueId(),
-        title: 'Access Control',
-        icon: IconAccessible,
-        href: '/master/accesscontrol/'
-      },
+
       {
         id: uniqueId(),
         title: 'Brand',
-        icon: IconBellExclamation,
+        icon: IconBadgeTm,
         href: '/master/brand/'
       },
-      {
-        id: uniqueId(),
-        title: 'Floorplan Masked Area',
-        icon: IconMapDown,
-        href: '/master/floorplanmaskedarea/'
-      },
-      {
-        id: uniqueId(),
-        title: 'Ble Reader',
-        icon: IconLogin,
-        href: '/master/blereader/'
-      },
-
-
+      // {
+      //   id: uniqueId(),
+      //   title: 'Floorplan Masked Area',
+      //   icon: IconCropLandscape,
+      //   href: '/master/floorplanmaskedarea/'
+      // },
       {
         id: uniqueId(),
         title: 'Tracking Transaction',
@@ -201,12 +239,7 @@ const Menuitems = [
         href: '/master/trackingtransaction/'
       },
 
-      {
-        id: uniqueId(),
-        title: 'Device',
-        icon: IconAccessibleOffFilled,
-        href: '/master/device/'
-      },
+
     ],
   },
   {

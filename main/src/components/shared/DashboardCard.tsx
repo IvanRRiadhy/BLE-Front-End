@@ -48,14 +48,14 @@ const DashboardCard = ({
           </Typography>
         </CardContent>
       ) : (
-        <CardContent sx={{ p: "30px" }}>
+        <CardContent sx={{ p: "20px" }}>
           {title ? (
             <Stack
               direction="row"
-              spacing={2}
+              spacing={1}
               justifyContent="space-between"
               alignItems={'center'}
-              mb={3}
+              mb={2}
             >
               <Box>
                 {title ? <Typography variant="h5">{title}</Typography> : ''}

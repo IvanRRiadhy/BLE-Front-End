@@ -248,7 +248,6 @@ export const fetchMaskedAreas = () => async (dispatch: AppDispatch) => {
                 return maskedArea;
             })
         }
-        console.log("fetching...");
         dispatch(GetMaskedArea(newAreas || []));
     } catch (error) {
         console.log(error);

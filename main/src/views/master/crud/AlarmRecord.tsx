@@ -85,7 +85,7 @@ const AlarmRecord = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Access Control List">
+          <ParentCard title="Alarm Record List">
             <AlarmRecordList />
           </ParentCard>
         </Drawer>

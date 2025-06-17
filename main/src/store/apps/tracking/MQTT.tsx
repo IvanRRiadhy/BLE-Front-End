@@ -1,12 +1,12 @@
 import mqtt from 'mqtt';
 
 // const Topic = "D2D3032D-77C9-4DAE-91B2-CC3770668D01";
-const Broker_URL = "ws://192.168.1.165:9001";
+const Broker_URL = "ws://192.168.1.116:9001";
 
 const options = {
   clientId: "Klien1",
-  username: "test1",
-  password: "test1",
+  username: "bio_mqtt",
+  password: "P@ssw0rd",
 };
 
 let client: mqtt.MqttClient | null = null;

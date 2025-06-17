@@ -89,7 +89,7 @@ const FloorplanDevice = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Floor List">
+          <ParentCard title="Floorplan List">
             {/* <FloorplanDeviceList /> */}
             <FloorplanDeviceList2 />
           </ParentCard>

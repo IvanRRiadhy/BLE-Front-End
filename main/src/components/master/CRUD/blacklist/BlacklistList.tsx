@@ -98,7 +98,7 @@ const BlacklistList = () => {
                   <TableRow>
                     {/* Left Sticky Empty Column */}
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
-                      <Typography variant="h6"> Left </Typography>
+                      <Typography variant="h6"> </Typography>
                     </TableCell>
                     {[ 'Blacklisted Visitor', 'Blacklisted Area'].map((header) => (
                       <TableCell key={header}>
@@ -116,11 +116,11 @@ const BlacklistList = () => {
                 <TableBody>
                   {blaclistData
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((blacklist) => (
+                    .map((blacklist,index) => (
                       <TableRow key={blacklist.id}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
-                        ></TableCell>
+                        > {index + 1}</TableCell>
                         <TableCell>{blacklist.visitor?.name}</TableCell>
                         <TableCell>{blacklist.floorplanMaskedArea?.name}</TableCell>
 

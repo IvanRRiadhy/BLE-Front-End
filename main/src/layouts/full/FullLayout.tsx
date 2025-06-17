@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { styled, Container, Box, useTheme } from '@mui/material';
 import { useSelector } from 'src/store/Store';
 import { Outlet } from 'react-router';
@@ -12,6 +12,8 @@ import ScrollToTop from '../../components/shared/ScrollToTop';
 import LoadingBar from '../../LoadingBar';
 import MonitoringHeader from './monitoringLayout/Header';
 import MonitoringSidebar from '../../components/dashboards/monitoring/Sidebar/MonitoringSidebar';
+import { setSessionExpiredHandler } from 'src/utils/axios';
+import SessionExp from './shared/SessionExp';
 
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
@@ -29,25 +31,24 @@ const PageWrapper = styled('div')(() => ({
   backgroundColor: 'transparent',
 }));
 
-const checkAuthToken = () => {
-  const token = localStorage.getItem('token'); // Check if the token exists in localStorage
-  console.log('Token:', token);
-  if (!token) {
-    window.location.href = '/auth/login'; // Redirect to the login page if no token is found
-  }
-};
+
 
 const FullLayout: FC = () => {
   const customizer = useSelector((state: AppState) => state.customizer);
 
   const theme = useTheme();
 
+  const [sessionExpired, setSessionExpired] = useState(false);
+
   useEffect(() => {
-    checkAuthToken(); // Check for token when the layout is rendered
+    setSessionExpiredHandler(() => setSessionExpired(true));
+    console.log(sessionExpired)
+    return () => setSessionExpiredHandler(() => {});
   }, []);
 
   return (
     <>
+    <SessionExp open={sessionExpired} />
       <LoadingBar />
       <MainWrapper
         className={customizer.activeMode === 'dark' ? 'darkbg mainwrapper' : 'mainwrapper'}

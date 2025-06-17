@@ -54,9 +54,13 @@ const topcards: cardType[] = [
   },
 ];
 
-const TopCards = () => {
+interface TopCardsProps {
+  data: string[];
+}
+
+const TopCards: React.FC<TopCardsProps> = ({ data }) => {
   const { t } = useTranslation();
-  const [data, setData] = useState(['100', '50', '25', '15', '25', '20', '15']);
+  // const [data, setData] = useState(['100', '50', '25', '15', '25', '20', '15']);
 
   return (
     <Grid container spacing={3}>

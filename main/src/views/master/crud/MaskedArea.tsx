@@ -87,7 +87,7 @@ const MaskedArea = () => {
           }}
         >
           <ParentCard
-            title="Floorplan Masked Area List"
+            title="Floorplan List"
             codeModel={<AddEditMaskedArea type="add" />}
           >
             {/* <MaskedAreaList /> */}

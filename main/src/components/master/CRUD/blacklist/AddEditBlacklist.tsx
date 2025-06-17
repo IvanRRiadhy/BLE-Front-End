@@ -24,6 +24,7 @@ import {
   fetchBlacklist,
 } from 'src/store/apps/crud/blacklist';
 import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
+import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import { fetchVisitor, visitorType } from 'src/store/apps/crud/visitor';
 
 interface FormType {
@@ -41,11 +42,15 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
     const floorplanData: FloorplanType[] = useSelector(
     (state: RootState) => state.floorplanReducer.floorplans,
   );
+  const maskedAreaData = useSelector(
+    (state: RootState) => state.maskedAreaReducer.maskedAreas,
+  );
   const dispatch: AppDispatch = useDispatch();
 
   useEffect(() => {
     dispatch(fetchVisitor());
         dispatch(fetchFloorplan());
+        dispatch(fetchMaskedAreas());
   }, [dispatch]);
 
   const handleClickOpen = () => {
@@ -138,17 +143,18 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
                   </MenuItem>
                 ))}
               </CustomSelect>
-              <CustomFormLabel htmlFor="floorplan-id">Floorplan</CustomFormLabel>
+              <CustomFormLabel htmlFor="floorplanMaskedArea-id">Area</CustomFormLabel>
               <CustomSelect
-                id="floorplanId"
-                placeholder={formData.floorplanMaskedAreaId}
+                id="floorplanMaskedAreaId"
+                name='floorplanMaskedAreaId'
+                value={formData.floorplanMaskedAreaId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
               >
-                {floorplanData.map((floorplan) => (
-                  <MenuItem key={floorplan.id} value={floorplan.id}>
-                    {floorplan.name}
+                {maskedAreaData.map((maskedArea) => (
+                  <MenuItem key={maskedArea.id} value={maskedArea.id}>
+                    {maskedArea.name}
                   </MenuItem>
                 ))}
               </CustomSelect>

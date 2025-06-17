@@ -26,6 +26,8 @@ import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import AddEditFloor from './AddEditFloor';
 import { useTranslation } from 'react-i18next';
 
+const BASE_URL = 'http://192.168.1.116:5000';
+
 const FloorList = () => {
   const { t } = useTranslation();
   // Pagination State
@@ -145,7 +147,17 @@ const FloorList = () => {
                         </TableCell>
                         <TableCell>{getbuildingName(floor.buildingId)}</TableCell>
                         <TableCell>{floor.name}</TableCell>
-                        <TableCell>{floor.floorImage}</TableCell>
+                        <TableCell>
+                          {floor.floorImage ? (
+                            <img
+                              src={`${BASE_URL}${floor.floorImage}`}
+                              alt="Floor"
+                              style={{ width: 80, height: 80, objectFit: 'cover' }}
+                            />
+                          ) : (
+                            'No Image'
+                          )}
+                        </TableCell>
                         <TableCell>{floor.pixelX}</TableCell>
                         <TableCell>{floor.pixelY}</TableCell>
                         <TableCell>{floor.floorX}</TableCell>

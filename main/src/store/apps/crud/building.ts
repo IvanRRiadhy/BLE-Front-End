@@ -65,7 +65,11 @@ export const fetchBuildings = () => async (dispatch: AppDispatch) => {
 export const addBuilding = createAsyncThunk("buildings/addBuilding", async (formData: FormData, { rejectWithValue }) => {
     try {
         formData.delete('id');
-        const response = await axiosServices.post(API_URL, formData);
+        const response = await axiosServices.post(API_URL, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
         return response.data;
     } catch (error: any) {
         console.error("Error adding building:", error);
@@ -77,7 +81,11 @@ export const editBuilding = createAsyncThunk("buildings/editBuilding", async (fo
     try {
         const id = formData.get('id'); // Extract ID from FormData
         formData.delete('id');
-        const response = await axiosServices.put(`${API_URL}${id}`, formData);
+        const response = await axiosServices.put(`${API_URL}${id}`, formData,{
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
         return response.data;
     } catch (error: any) {
         console.error("Error editing building:", error);

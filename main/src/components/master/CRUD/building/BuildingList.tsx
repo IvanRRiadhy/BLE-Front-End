@@ -25,6 +25,8 @@ import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
 import AddEditBuilding from './AddEditBuilding';
 
+const BASE_URL = 'http://192.168.1.116:5000';
+
 const BuildingList = () => {
   // Pagination State
   const [page, setPage] = useState(0);
@@ -71,7 +73,7 @@ const BuildingList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {['Building Name'].map((header) => (
+                    {['Building Name', 'Building Image'].map((header) => (
                       <TableCell key={header}>
                         <Typography variant="h6">{header}</Typography>
                       </TableCell>
@@ -95,6 +97,17 @@ const BuildingList = () => {
                           {index + 1}
                         </TableCell>
                         <TableCell>{building.name}</TableCell>
+                        <TableCell>
+                          {building.image ? (
+                            <img
+                              src={`${BASE_URL}${building.image}`}
+                              alt="Building"
+                              style={{ width: 80, height: 80, objectFit: 'cover' }}
+                            />
+                          ) : (
+                            'No Image'
+                          )}
+                        </TableCell>
                         <TableCell
                           sx={{
                             position: 'sticky',

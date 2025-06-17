@@ -34,6 +34,7 @@ import BleNodeReducer from './apps/crud/bleNode';
 import RulesNodeReducer from './apps/rules/RulesNodes';
 import RulesConnectorReducer from './apps/rules/RulesConnectors';
 import BeaconReducer from './apps/tracking/Beacon';
+import SessionReducer from './apps/session';
 import { combineReducers } from 'redux';
 import {
   useDispatch as useAppDispatch,
@@ -78,6 +79,7 @@ export const store = configureStore({
     RulesNodeReducer: RulesNodeReducer,
     RulesConnectorReducer: RulesConnectorReducer,
     BeaconReducer: BeaconReducer,
+    sessionReducer: SessionReducer,
   },
 });
 
@@ -117,6 +119,7 @@ const rootReducer = combineReducers({
   RulesNodeReducer: RulesNodeReducer,
   RulesConnectorReducer: RulesConnectorReducer,
   BeaconReducer: BeaconReducer,
+  sessionReducer: SessionReducer,
 });
 
 export type AppState = ReturnType<typeof rootReducer>;

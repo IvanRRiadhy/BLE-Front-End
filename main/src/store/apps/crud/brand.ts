@@ -92,6 +92,7 @@ export const fetchBrands = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
         dispatch(GetBrands(response.data?.collection?.data || []));
+        // console.log("Brands fetched successfully:", response);
     } catch (err: any) {
         console.log("Error fetching brands:", err);
     }
