@@ -34,7 +34,6 @@ type Nodes = {
   y: number;
   x_px: number;
   y_px: number;
-
 };
 
 const EditDeviceRenderer: React.FC<{
@@ -92,9 +91,12 @@ const EditDeviceRenderer: React.FC<{
   const iconGateway = useDeviceIcon(borderGateway);
   const iconFaceRecog = useDeviceIcon(borderFaceRecog);
   const iconUnknown = useDeviceIcon(UnknownDevice);
-    const setPointsFromNodes = (nodes: Nodes[]): number[] => {
-      // console.log('Setting nodes: ', nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]))
-    return nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]); // Flatten x and y into a single array
+  const setPointsFromNodes = (nodes: Nodes[]): number[] => {
+    // console.log('Setting nodes: ', nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]))
+    return nodes.flatMap((node) => [
+      (node.x / originalWidth) * width,
+      (node.y / originalHeight) * height,
+    ]); // Flatten x and y into a single array
   };
   // const handleDragMove = (e: any, device: FloorplanDeviceType) => {
   //   const newPosX = (e.target.x() * 4) / scales; // Convert back to original scale
@@ -118,27 +120,32 @@ const EditDeviceRenderer: React.FC<{
     }
     return inside;
   }
+
+  
   const handleDragStart = (e: string) => {
     console.log('Drag started:', e); // Log the name of the dragged element
     setIsDragging(e); // Set dragging state to true
   };
 
   const handleDragEnd = (e: any, device: FloorplanDeviceType) => {
-    const newPosX = ((e.target.x()+ 18)/width * originalWidth) ; // Convert back to original scale
-    const newPosY = ((e.target.y()+ 18)/height * originalHeight) ;
+    const newPosX = ((e.target.x() + 18) / width) * originalWidth; // Convert back to original scale
+    const newPosY = ((e.target.y() + 18) / height) * originalHeight;
 
     // Check if the device is inside any area
     const devicePoint = { x: newPosX, y: newPosY };
-      let detectedAreaId = device.floorplanMaskedAreaId || ''; // Initialize with existing area ID or empty string
-    areas.forEach((area) => {
-      if (area.nodes && isPointInPolygon(devicePoint, area.nodes)) {
-        console.log(`Device ${device.id} is inside area ${area.name}`);
-      detectedAreaId = area.id;
-      }
-    });
+    // let detectedAreaId = device.floorplanMaskedAreaId || ''; // Initialize with existing area ID or empty string
+    const intersectedArea = areas.find(
+      (area) => area.nodes && isPointInPolygon(devicePoint, area.nodes),
+    );
+    const detectedAreaId = intersectedArea ? intersectedArea.id : '';
     // Dispatch an action to update the device's position in the Redux store
     // dispatch(EditUnsavedDevice({ ...device, posPxX: newPosX, posPxY: newPosY }));
-    const newDevice = { ...device, floorplanMaskedAreaId: detectedAreaId, posPxX: newPosX, posPxY: newPosY };
+    const newDevice = {
+      ...device,
+      floorplanMaskedAreaId: detectedAreaId,
+      posPxX: newPosX,
+      posPxY: newPosY,
+    };
     dispatch(editDevicePosition(newDevice)); // Update the device position in the store
     setIsDragging(''); // Set dragging state to false
     // console.log(`Device ${device.id} dropped at:`, { newPosX, newPosY });
@@ -196,8 +203,8 @@ const EditDeviceRenderer: React.FC<{
         iconHeight = 36;
         break;
     }
-    const x = (device.posPxX / originalWidth * width) - iconWidth / 2; // Center the icon inside the rect
-    const y = (device.posPxY / originalHeight * height) - iconHeight / 2; // Center the icon inside the rect
+    const x = (device.posPxX / originalWidth) * width - iconWidth / 2; // Center the icon inside the rect
+    const y = (device.posPxY / originalHeight) * height - iconHeight / 2; // Center the icon inside the rect
 
     return (
       deviceIcon && (

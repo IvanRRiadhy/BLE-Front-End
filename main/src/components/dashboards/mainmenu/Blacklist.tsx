@@ -23,7 +23,7 @@ interface BlacklistTableProps {
   blacklistData: blacklistType[];
 }
 
-const BlacklistTable: React.FC<BlacklistTableProps> = ({ blacklistData }) => {
+const BlacklistTable: React.FC<BlacklistTableProps> = ({ blacklistData = [] }) => {
   // ...rest of your code...
 
   //Pagination
@@ -49,18 +49,16 @@ const BlacklistTable: React.FC<BlacklistTableProps> = ({ blacklistData }) => {
   };
 
   const sortedData = [...blacklistData].sort((a, b) => {
-  if (orderBy === 'name') {
-    const nameA = a.visitor?.name ?? '';
-    const nameB = b.visitor?.name ?? '';
-    return order === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
-  }
-  if (orderBy === 'maskedArea') {
-    const areaA = a.floorplanMaskedArea?.name ?? '';
-    const areaB = b.floorplanMaskedArea?.name ?? '';
-    return order === 'asc'
-      ? areaA.localeCompare(areaB)
-      : areaB.localeCompare(areaA);
-  }
+    if (orderBy === 'name') {
+      const nameA = a.visitor?.name ?? '';
+      const nameB = b.visitor?.name ?? '';
+      return order === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+    }
+    if (orderBy === 'maskedArea') {
+      const areaA = a.floorplanMaskedArea?.name ?? '';
+      const areaB = b.floorplanMaskedArea?.name ?? '';
+      return order === 'asc' ? areaA.localeCompare(areaB) : areaB.localeCompare(areaA);
+    }
 
     return 0;
   });
@@ -146,6 +144,13 @@ const BlacklistTable: React.FC<BlacklistTableProps> = ({ blacklistData }) => {
                 </TableCell> */}
               </TableRow>
             ))}
+            {Array.from({
+              length: rowsPerPage - Math.min(rowsPerPage, sortedData.length - page * rowsPerPage),
+            }).map((_, idx) => (
+              <TableRow key={`empty-row-${idx}`} style={{ height: 63 }}>
+                <TableCell colSpan={4} />
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
@@ -153,7 +158,7 @@ const BlacklistTable: React.FC<BlacklistTableProps> = ({ blacklistData }) => {
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={blacklist.length}
+        count={blacklistData.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handlePageChange}

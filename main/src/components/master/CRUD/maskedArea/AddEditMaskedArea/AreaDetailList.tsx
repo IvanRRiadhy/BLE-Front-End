@@ -34,7 +34,9 @@ const AreaDetailList = () => {
     name: area?.name || '',
     colorArea: area?.colorArea || '',
     areaShape: area?.areaShape || '',
-    restrictedStatus: area?.restrictedStatus || '',
+    restrictedStatus:
+      restrictedStatus.find((s) => s.value === (area?.restrictedStatus || '').toLowerCase())
+        ?.value || '',
     wideArea: area?.wideArea || 0,
     positionPxX: area?.positionPxX || 0,
     positionPxY: area?.positionPxY || 0,
@@ -49,6 +51,7 @@ const AreaDetailList = () => {
 
   useEffect(() => {
     if (area) {
+      console.log('Area data changed:', area);
       const newFormData = {
         id: area.id || '',
         name: formData.name || '',
@@ -208,6 +211,7 @@ const AreaDetailList = () => {
                   <Grid size={12}>
                     <CustomFormLabel htmlFor="area-restriction">Area Restriction</CustomFormLabel>
                     <CustomSelect
+                      id="restrictedStatus"
                       name="restrictedStatus"
                       value={formData.restrictedStatus || ''}
                       onChange={handleInputChange}
@@ -215,15 +219,20 @@ const AreaDetailList = () => {
                       variant="outlined"
                       required
                     >
-                      {restrictedStatus.map((status) => (
-                        <MenuItem
-                          key={status.value}
-                          value={status.value}
-                          disabled={status.disabled || false}
-                        >
-                          {status.label}
-                        </MenuItem>
-                      ))}
+                      {restrictedStatus.map(
+                        (status) => (
+                          console.log(status),
+                          (
+                            <MenuItem
+                              key={status.value}
+                              value={status.value}
+                              disabled={status.disabled || false}
+                            >
+                              {status.label}
+                            </MenuItem>
+                          )
+                        ),
+                      )}
                     </CustomSelect>
                   </Grid>
                   <Grid size={12}>

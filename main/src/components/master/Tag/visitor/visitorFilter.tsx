@@ -10,7 +10,7 @@ import {
   Box,
 } from '@mui/material';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import { IconMail, IconSend, IconBucket, IconFolder, IconFold } from '@tabler/icons-react';
+import { IconMail, IconSend, IconBucket, IconFolder, IconFold, IconGenderMale, IconGenderFemale } from '@tabler/icons-react';
 import { gender, visitorStatus } from 'src/types/crud/input';
 import AddEditVisitor from '../../CRUD/visitor/AddEditVisitor';
 import { SetVisibilityFilter } from 'src/store/apps/crud/visitor';

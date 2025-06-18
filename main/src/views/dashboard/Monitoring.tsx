@@ -6,7 +6,7 @@ import MonitoringSidebar from 'src/components/dashboards/monitoring/Sidebar/Moni
 import MonitoringFooter from 'src/components/dashboards/monitoring/Footer/MonitoringFooter';
 import FloorView from 'src/components/dashboards/monitoring/FloorView';
 import ToolbarMonitor from 'src/layouts/full/monitoringLayout/Toolbar';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   toggleHorizontal,
   setMonitorSidebar,
@@ -14,11 +14,15 @@ import {
 } from 'src/store/customizer/CustomizerSlice';
 import MonitoringGrid from 'src/views/dashboard/MonitoringGrid.tsx';
 
+type FloorIdsType = string[][];
+
+
 const Monitoring = () => {
   const dispatch = useDispatch();
   const theme = useTheme();
   const grid = useSelector((state: AppState) => state.layoutReducer.grid); // Get the current grid value
   const floorIds = useSelector((state: AppState) => state.layoutReducer.floorplanId); // Get the current floor IDs
+  const memoizedFloorIds = useMemo(() => floorIds, [floorIds]);
 
   const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
     width: '100%',
@@ -282,7 +286,7 @@ const Monitoring = () => {
               }),
             }}
           >
-            <MonitoringGrid grid={grid} floorIds={floorIds} />
+            <MonitoringGrid grid={grid} floorIds={memoizedFloorIds} />
             {/* {renderLayout()} */}
           </Box>
         </Box>

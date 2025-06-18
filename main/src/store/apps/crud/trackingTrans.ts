@@ -13,6 +13,7 @@ export interface trackingTransType {
     transTime: string,
     floorplanMaskedAreaId: string,
     readerId: string,
+    cardId: string,
     coordinateX: number,
     coordinateY: number,
     coordinatePxX: number,
@@ -82,6 +83,7 @@ export const fetchTrackingTrans = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(`${API_URL}`);
         dispatch(GetTrackingTrans(response.data?.collection?.data || []));
+        // console.log("Tracking transactions fetched successfully: ", response.data);
     } catch (error) {
         console.log(error);
     }

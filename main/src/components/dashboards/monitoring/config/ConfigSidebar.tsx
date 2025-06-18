@@ -17,9 +17,12 @@ import { useTheme } from '@mui/material';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import React, { useEffect, useState } from 'react';
-import { floorplanType } from 'src/types/tracking/floorplan';
-import { fetchFloorplans } from 'src/store/apps/tracking/FloorPlanSlice';
+// import { floorplanType } from 'src/types/tracking/floorplan';
+// import { fetchFloorplans } from 'src/store/apps/tracking/FloorPlanSlice';
 import { setFloorplan } from 'src/store/apps/monitoring/layout';
+import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
+import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
+import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
 
 interface configSidebarProps {
   setSelectedGrid: (grid: string) => void;
@@ -35,22 +38,35 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
   const theme = useTheme();
   const dispatch = useDispatch();
   const grid = useSelector((state: AppState) => state.layoutReducer.grid); // Get the current grid value
-  const floorLists: floorplanType[] = useSelector(
+  const floorplanLists: FloorplanType[] = useSelector(
     (state: AppState) => state.floorplanReducer.floorplans,
-  ); // Get the current floor IDs
+  );
+  const buildingLists: BuildingType[] = useSelector(
+    (state: AppState) => state.buildingReducer.buildings,
+  );
+  const floorLists: floorType[] = useSelector(
+    (state: AppState) => state.floorReducer.floors,
+  );
   const customizer = useSelector((state: AppState) => state.customizer);
-  const [buildingList, setBuildingList] = useState([
-    { id: '1', name: 'Building 1' },
-    { id: '2', name: 'Building 2' },
-    { id: '3', name: 'Building 3' },
-    { id: '4', name: 'Building 4' },
-    { id: '5', name: 'Building 5' },
-  ]);
+  // const [buildingList, setBuildingList] = useState([
+  //   { id: '1', name: 'Building 1' },
+  //   { id: '2', name: 'Building 2' },
+  //   { id: '3', name: 'Building 3' },
+  //   { id: '4', name: 'Building 4' },
+  //   { id: '5', name: 'Building 5' },
+  // ]);
 
   const [gridType, setGridType] = useState('1');
   const [selectedScreen, setSelectedScreen] = useState(previewSelectedScreen || '');
   const [selectedBuilding, setSelectedBuilding] = useState('');
   const [selectedFloor, setSelectedFloor] = useState('');
+  const [selectedFloorplan, setSelectedFloorplan] = useState('');
+  const filteredFloorplan = floorplanLists.filter(
+    (floor) => floor.floorId === selectedFloor,
+  );
+  const filteredFloor = floorLists.filter(
+    (floor) => floor.buildingId === selectedBuilding,
+  );
 
   const handleChange = (event: SelectChangeEvent<string>) => {
     setGridType(event.target.value); // Dispatch the selected grid value
@@ -59,6 +75,7 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
     setSelectedScreen('');
     setSelectedBuilding('');
     setSelectedFloor('');
+    setSelectedFloorplan('');
   };
 
   const handleScreenChange = (event: SelectChangeEvent<string>) => {
@@ -66,21 +83,27 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
     setSelectedScreens(event.target.value);
     setSelectedBuilding('');
     setSelectedFloor('');
+    setSelectedFloorplan('');
   };
   const handleBuildingChange = (event: SelectChangeEvent<string>) => {
     setSelectedBuilding(event.target.value); // Dispatch the selected building value
     setSelectedFloor('');
+    setSelectedFloorplan('');
   };
   const handleFloorChange = (event: SelectChangeEvent<string>) => {
     setSelectedFloor(event.target.value); // Dispatch the selected floor value
+    setSelectedFloorplan('');
+  };
+  const handleFloorplanChange = (event: SelectChangeEvent<string>) => {
+    setSelectedFloorplan(event.target.value); // Dispatch the selected floor value
   };
 
   const handleSave = () => {
-    dispatch(setFloorplan(parseInt(gridType), parseInt(selectedScreen), selectedFloor));
+    dispatch(setFloorplan(parseInt(gridType), parseInt(selectedScreen), selectedFloorplan));
     setSelectedScreens('');
     setSelectedScreen('');
     setSelectedBuilding('');
-    setSelectedFloor('');
+    setSelectedFloorplan('');
   };
 
   useEffect(() => {
@@ -88,7 +111,9 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
   }, [previewSelectedScreen]);
 
   useEffect(() => {
-    dispatch(fetchFloorplans());
+    dispatch(fetchFloorplan());
+    dispatch(fetchBuildings());
+    dispatch(fetchFloors());
   }, [dispatch]);
 
   return (
@@ -148,7 +173,7 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
                 </CustomSelect>
                 {gridType !== '' && (
                   <>
-                    <CustomFormLabel htmlFor="grid-type">Screen</CustomFormLabel>
+                    <CustomFormLabel htmlFor="screen">Screen</CustomFormLabel>
                     <CustomSelect
                       name="screen"
                       value={selectedScreen}
@@ -169,7 +194,7 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
                 )}
                 {selectedScreen !== '' && (
                   <>
-                    <CustomFormLabel htmlFor="grid-type">Building</CustomFormLabel>
+                    <CustomFormLabel htmlFor="building">Building</CustomFormLabel>
                     <CustomSelect
                       name="building"
                       value={selectedBuilding}
@@ -180,7 +205,7 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
                       <MenuItem value="" disabled>
                         -- Select Building --
                       </MenuItem>
-                      {buildingList.map((building) => (
+                      {buildingLists.map((building) => (
                         <MenuItem key={building.id} value={building.id}>
                           {building.name}
                         </MenuItem>
@@ -190,7 +215,7 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
                 )}
                 {selectedBuilding !== '' && (
                   <>
-                    <CustomFormLabel htmlFor="grid-type">Floor</CustomFormLabel>
+                    <CustomFormLabel htmlFor="floor">Floor</CustomFormLabel>
                     <CustomSelect
                       name="floor"
                       value={selectedFloor}
@@ -201,9 +226,30 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
                       <MenuItem value="" disabled>
                         -- Select Floor --
                       </MenuItem>
-                      {floorLists.map((floor) => (
+                      {filteredFloor.map((floor) => (
                         <MenuItem key={floor.id} value={floor.id}>
                           {floor.name}
+                        </MenuItem>
+                      ))}
+                    </CustomSelect>
+                  </>
+                )}
+                {selectedFloor !== '' && (
+                  <>
+                    <CustomFormLabel htmlFor="floor-plan">Floor Plan</CustomFormLabel>
+                    <CustomSelect
+                      name="floorplan"
+                      value={selectedFloorplan}
+                      onChange={handleFloorplanChange}
+                      fullWidth
+                      variant="outlined"
+                    >
+                      <MenuItem value="" disabled>
+                        -- Select Floor --
+                      </MenuItem>
+                      {filteredFloorplan.map((floorplan) => (
+                        <MenuItem key={floorplan.id} value={floorplan.id}>
+                          {floorplan.name}
                         </MenuItem>
                       ))}
                     </CustomSelect>
@@ -211,7 +257,7 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
                       onClick={handleSave}
                       variant="contained"
                       sx={{ fontSize: '1rem', py: 1, px: 3, mt: 2 }}
-                      disabled={selectedFloor === ''}
+                      disabled={selectedFloorplan === ''}
                     >
                       Save
                     </Button>

@@ -46,6 +46,7 @@ const AlarmRecordList = () => {
   );
 
   useEffect(() => {
+    console.log('Fetching alarm records...');
     dispatch(fetchAlarm());
   }, [dispatch]);
 

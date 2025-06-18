@@ -1,4 +1,5 @@
 import { Grid2 as Grid, Typography } from '@mui/material';
+import React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import FloorView from 'src/components/dashboards/monitoring/FloorView';
 
@@ -114,7 +115,12 @@ const layoutConfig = {
   ],
 } as const;
 
-const MonitoringGrid: React.FC<MonitoringGridProps> = ({ grid, floorIds }) => {
+interface MonitoringGridProps {
+  grid: number;
+  floorIds: Record<number, string[]>;
+}
+
+const MonitoringGrid = React.memo(({ grid, floorIds }: MonitoringGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const [gridDimensions, setGridDimensions] = useState({ width: 0, height: 0 });
 
@@ -244,6 +250,6 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = ({ grid, floorIds }) => {
       })}
     </Grid>
   );
-};
+});
 
 export default MonitoringGrid;

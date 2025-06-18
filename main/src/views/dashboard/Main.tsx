@@ -5,7 +5,7 @@ import { Box, Grid2 as Grid } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 
 import TopCards from 'src/components/dashboards/mainmenu/TopCards';
-import RevenueUpdates from 'src/components/dashboards/mainmenu/Tracking';
+import TrackingGraph from 'src/components/dashboards/mainmenu/Tracking';
 import AlarmWarning from 'src/components/dashboards/mainmenu/AlarmWarning';
 import BlacklistTable from 'src/components/dashboards/mainmenu/Blacklist';
 import WelcomePopup from 'src/components/dashboards/mainmenu/WelcomePopup';
@@ -14,6 +14,7 @@ import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea
 import { fetchBleReaders, bleReaderType } from 'src/store/apps/crud/bleReader';
 import { fetchAlarm, AlarmType } from 'src/store/apps/crud/alarmRecordTracking';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
+import { fetchTrackingTrans } from 'src/store/apps/crud/trackingTrans';
 
 const Modern = () => {
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
@@ -33,11 +34,13 @@ const Modern = () => {
   const dispatch = useDispatch();
   useEffect(() => {
     // Fetch initial data for the dashboard
+    dispatch(fetchTrackingTrans());
     dispatch(fetchBlacklist());
     dispatch(fetchMaskedAreas());
     dispatch(fetchBleReaders());
     dispatch(fetchAlarm());
   }, [dispatch]);
+  const trackingData = useSelector((state: RootState) => state.trackingTransReducer.trackingTrans);
   const blacklistData = useSelector((state: RootState) => state.blacklistReducer.blacklists);
   const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreas);
   const bleReaderData = useSelector((state: RootState) => state.bleReaderReducer.bleReaders);
@@ -71,7 +74,7 @@ const Modern = () => {
               lg: 4,
             }}
           >
-            <RevenueUpdates />
+            <TrackingGraph alarmData={alarmData} trackingData={trackingData} />
           </Grid>
           {/* column */}
           <Grid
@@ -80,7 +83,7 @@ const Modern = () => {
               lg: 4,
             }}
           >
-            <AlarmWarning />
+            <AlarmWarning alarmData={alarmData} />
           </Grid>
           {/* column */}
           <Grid

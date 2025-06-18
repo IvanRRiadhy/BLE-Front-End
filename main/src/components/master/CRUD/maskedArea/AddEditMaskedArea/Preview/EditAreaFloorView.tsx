@@ -7,7 +7,10 @@ import ZoomControls from 'src/components/shared/ZoomControls';
 import FloorplanHouse from 'src/assets/images/masters/Floorplan/Floorplan-House.png';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import EditAreaRenderer from './EditAreaRenderer';
-
+import MouseDoubleClickIcon from 'src/assets/images/svgs/mouse-double-click-icon.svg';
+import MouseLeftClickIcon from 'src/assets/images/svgs/mouse-left-click-icon.svg';
+import MouseRightClickIcon from 'src/assets/images/svgs/mouse-right-click-icon.svg';
+import ShiftButtonIcon from 'src/assets/images/svgs/shift-button-icon.svg';
 
 const BASE_URL = 'http://192.168.1.116:5000';
 const EditAreaFloorView: React.FC<{
@@ -49,11 +52,11 @@ const EditAreaFloorView: React.FC<{
   const [isDragging, setIsDragging] = useState('');
   const dragStart = useRef({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false); // State to track mouse hover
-    const floorplanImage = activeFloorData?.floorImage
-      ? activeFloorData.floorImage.startsWith('/Uploads/') // Check if the URL is already absolute
-        ? `${BASE_URL}${activeFloorData.floorImage}`
-        : activeFloorData.floorImage // Prepend BASE_URL for relative paths
-      : FloorplanHouse; // Fallback to default image if not available
+  const floorplanImage = activeFloorData?.floorImage
+    ? activeFloorData.floorImage.startsWith('/Uploads/') // Check if the URL is already absolute
+      ? `${BASE_URL}${activeFloorData.floorImage}`
+      : activeFloorData.floorImage // Prepend BASE_URL for relative paths
+    : FloorplanHouse; // Fallback to default image if not available
   useEffect(() => {
     if (floorplanImage) {
       const img = new Image();
@@ -257,6 +260,125 @@ const EditAreaFloorView: React.FC<{
         cursor: cursor,
       }}
     >
+      {editingMaskedArea && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            zIndex: 10,
+            width: '280px',
+            background: 'rgba(37, 31, 31, 0.77)',
+            opacity: 0.7,
+            borderRadius: 2,
+            boxShadow: 2,
+            p: 1,
+          }}
+        >
+          <Box display="flex" alignItems="center" gap={1}>
+            <Box>
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  bgcolor: 'white',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mr: 1,
+                  mb: 2,
+                  ml: 4.25,
+                }}
+              >
+                <img
+                  src={MouseDoubleClickIcon}
+                  alt="Double Click"
+                  style={{ width: 36, height: 36 }}
+                />
+              </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    bgcolor: 'white',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mr: 1,
+                  }}
+                >
+                  <img src={ShiftButtonIcon} alt="Shift Button" style={{ width: 36, height: 36 }} />
+                </Box>
+                <FormLabel
+                  sx={{
+                    color: 'white',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    paddingRight: 1,
+                  }}
+                >
+                  +
+                </FormLabel>
+                <Box
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    bgcolor: 'white',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mr: 1,
+                  }}
+                >
+                  <img
+                    src={MouseLeftClickIcon}
+                    alt="Left Click"
+                    style={{ width: 36, height: 36 }}
+                  />
+                </Box>
+              </Box>
+            </Box>
+
+            <FormLabel sx={{ color: 'white', fontSize: '0.875rem', fontWeight: 600 }}>
+              Create new Node
+            </FormLabel>
+          </Box>
+          <Box mt={5} display="flex" alignItems="center" gap={1}>
+                          <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  bgcolor: 'white',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mr: 4.75,
+                  ml: 4.25,
+                }}
+              >
+                <img
+                  src={MouseRightClickIcon}
+                  alt="Right Click"
+                  style={{ width: 36, height: 36 }}
+                />
+              </Box>
+              <FormLabel sx={{ color: 'white', fontSize: '0.875rem', fontWeight: 600 }}>
+              Delete Node
+            </FormLabel>
+          </Box>
+        </Box>
+      )}
       {/* Zoomable Content */}
       <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
         {isHovered &&

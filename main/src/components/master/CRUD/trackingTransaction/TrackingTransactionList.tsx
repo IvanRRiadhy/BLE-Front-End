@@ -160,7 +160,7 @@ const TrackingTransactionList = () => {
                         </TableCell>
                         <TableCell>{formatTime(trackingTrans.transTime)}</TableCell>
                         <TableCell>{trackingTrans.reader?.name}</TableCell>
-                        <TableCell>{trackingTrans.readerId}</TableCell>
+                        <TableCell>{trackingTrans.cardId}</TableCell>
                         <TableCell>{trackingTrans.floorplanMaskedArea?.name}</TableCell>
                         <TableCell>{trackingTrans.coordinateX}</TableCell>
                         <TableCell>{trackingTrans.coordinateY}</TableCell>

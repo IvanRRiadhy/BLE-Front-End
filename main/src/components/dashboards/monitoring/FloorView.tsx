@@ -1,6 +1,6 @@
 import React, { use, useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
-import { Box, FormControlLabel, FormLabel, Switch, Typography, useTheme } from '@mui/material';
+import { Box, FormControlLabel, FormLabel, Grid2 as Grid, Switch, Typography, useTheme } from '@mui/material';
 // import { fetchFloorplans } from 'src/store/apps/tracking/FloorPlanSlice';
 import { floorplanType } from 'src/types/tracking/floorplan';
 import { Stage, Layer, Image as KonvaImage } from 'react-konva';
@@ -54,6 +54,7 @@ const actFloorplan = floorplans.find(
   useEffect(() => {
     // console.log('Active Floorplan:', floorplans);
   }, [actFloorplan]);
+  
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
   const [scale, setScale] = useState(1); // Initial scale set to 1
   const [image, setImage] = useState<HTMLImageElement | null>(null);
@@ -68,7 +69,9 @@ const actFloorplan = floorplans.find(
     ? activeFloorData.floorImage.startsWith('/Uploads/') // Check if the URL is already absolute
       ? `${BASE_URL}${activeFloorData.floorImage}`
       : activeFloorData.floorImage // Prepend BASE_URL for relative paths
-    : FloorplanHouse; // Fallback to default image if not available
+    : "No Active Floorplan"; // Fallback to default image if not available
+
+
 
   const devices = useSelector(
     (state: AppState) => state.floorplanDeviceReducer.floorplanDevices,
@@ -331,6 +334,31 @@ const actFloorplan = floorplans.find(
     setIsDragging(false);
     if (containerRef.current) containerRef.current.style.cursor = 'grab'; // Reset cursor
   };
+
+if (floorplanImage === "No Active Floorplan") {
+  return (
+    <Grid 
+      container 
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        textAlign: 'center'
+      }}
+    >
+      <Grid size={{ xs: 12 }}>
+        <Typography variant="h4" fontStyle="bold" fontWeight={900} mt={0.5}>
+          Monitoring Dashboard
+        </Typography>
+        <Typography variant="h6" fontStyle="bold" fontWeight={900} mt={0.5}>
+          Please select a Grid
+        </Typography>
+      </Grid>
+    </Grid>
+  );
+}
 
   return (
     <Box

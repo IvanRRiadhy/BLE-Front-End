@@ -1013,7 +1013,7 @@ const EditAreaRenderer: React.FC<{
             />
           )}
           {filteredUnsavedArea.map((area: MaskedAreaType) => (
-            console.log('area', area.nodes),
+            // console.log('area', area.nodes),
             <React.Fragment key={area.id}>
               {/* Render the area */}
               <Line

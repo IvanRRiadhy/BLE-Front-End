@@ -76,6 +76,7 @@ export const fetchAlarm = () => async (dispatch: AppDispatch) => {
     try{
         const response = await axiosServices.get(`${API_URL}`);
         dispatch(GetAlarms(response.data.collection?.data || []));
+        console.log("Alarm records fetched successfully: ", response.data);
     } catch (err: any) {
         console.error("Error fetching Alarm: ", err);
     }

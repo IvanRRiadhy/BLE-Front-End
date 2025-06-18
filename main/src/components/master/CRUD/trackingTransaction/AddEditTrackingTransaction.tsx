@@ -11,7 +11,7 @@ import {
   SelectChangeEvent,
   Typography,
 } from '@mui/material';
-import { IconPencil, IconPlus } from '@tabler/icons-react';
+import { IconPencil, IconPlus,   } from '@tabler/icons-react';
 import React from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
@@ -40,7 +40,7 @@ const AddEditTrackingTransaction = ({ type, trackingTransaction }: FormType) => 
       id: '',
       transTime: '',
       readerId: '',
-      cardId: 0,
+      cardId: "",
       coordinateX: 0,
       coordinateY: 0,
       coordinatePxX: 0,

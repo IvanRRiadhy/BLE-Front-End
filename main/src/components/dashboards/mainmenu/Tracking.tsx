@@ -9,16 +9,66 @@ import DashboardCard from '../../shared/DashboardCard';
 import CustomSelect from '../../forms/theme-elements/CustomSelect';
 import { Props } from 'react-apexcharts';
 import { useTranslation } from 'react-i18next';
+import { trackingTransType } from 'src/store/apps/crud/trackingTrans';
+import { AlarmType } from 'src/store/apps/crud/alarmRecordTracking';
 
-const Revenues = () => {
-  const [month, setMonth] = React.useState('1');
-  const [allowedVisitor, setAllowedVisitor] = React.useState([10, 13, 12, 8, 15, 10, 11]);
-  const [unAllowedVisitor, setUnAllowedVisitor] = React.useState([1, 1, 2, 1, -0, 3, 5]);
+interface TrackingGraphProps {
+  trackingData: trackingTransType[];
+  alarmData: AlarmType[];
+}
+
+const TrackingGraph: React.FC<TrackingGraphProps> = ({ trackingData = [], alarmData = [] }) => {
+
+  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+  function getCountsByDay(data: any[], dateField: string) {
+    const counts = Array(7).fill(0);
+    data.forEach((item) => {
+      const date = new Date(item[dateField]);
+      // getDay: 0=Sunday, 1=Monday, ..., 6=Saturday
+      let dayIndex = date.getDay();
+      // Adjust so that Monday=0, ..., Sunday=6
+      dayIndex = (dayIndex + 6) % 7;
+      counts[dayIndex]++;
+    });
+    return counts;
+  }
+
+  const allowedVisitor = getCountsByDay(trackingData, 'transTime');
+  const unAllowedVisitor = getCountsByDay(alarmData, 'timestamp');
   const { t } = useTranslation();
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMonth(event.target.value);
   };
 
+  const getMonthYear = (dateStr: string) => {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return null;
+    const month = date.toLocaleString('default', { month: 'long' });
+    const year = date.getFullYear();
+    // Use ISO format for value, readable for label
+    return { value: `${year}-${date.getMonth() + 1}`, label: `${month} ${year}` };
+  };
+  const today = new Date();
+const todayMonth = {
+  value: `${today.getFullYear()}-${today.getMonth() + 1}`,
+  label: today.toLocaleString('default', { month: 'long' }) + ' ' + today.getFullYear(),
+};
+
+  const allMonths = [
+    ...trackingData.map((d) => getMonthYear(d.transTime)),
+    ...alarmData.map((d) => getMonthYear(d.timestamp)),
+    todayMonth,
+  ].filter(Boolean);
+
+  const uniqueMonthsMap = new Map();
+  allMonths.forEach((m) => {
+    if (m) uniqueMonthsMap.set(m.value, m.label);
+  });
+  const uniqueMonths = Array.from(uniqueMonthsMap, ([value, label]) => ({ value, label })).sort(
+    (a, b) => a.value.localeCompare(b.value),
+  );
+    const [month, setMonth] = React.useState(todayMonth.value);
   // chart color
   const theme = useTheme();
   const primary = theme.palette.primary.main;
@@ -41,7 +91,7 @@ const Revenues = () => {
       bar: {
         horizontal: false,
         barHeight: '60%',
-        columnWidth: '15%',
+        columnWidth: '35%',
         borderRadius: [6],
         borderRadiusApplication: 'end',
         borderRadiusWhenStacked: 'all',
@@ -105,9 +155,11 @@ const Revenues = () => {
           value={month}
           onChange={handleChange}
         >
-          <MenuItem value={1}>March 2023</MenuItem>
-          <MenuItem value={2}>April 2023</MenuItem>
-          <MenuItem value={3}>May 2023</MenuItem>
+          {uniqueMonths.map(({ value, label }) => (
+            <MenuItem key={value} value={value}>
+              {label}
+            </MenuItem>
+          ))}
         </CustomSelect>
       }
     >
@@ -193,4 +245,4 @@ const Revenues = () => {
   );
 };
 
-export default Revenues;
+export default TrackingGraph;

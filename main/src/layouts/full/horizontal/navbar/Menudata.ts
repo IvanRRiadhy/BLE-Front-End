@@ -232,12 +232,7 @@ const Menuitems = [
       //   icon: IconCropLandscape,
       //   href: '/master/floorplanmaskedarea/'
       // },
-      {
-        id: uniqueId(),
-        title: 'Tracking Transaction',
-        icon: IconLiveView,
-        href: '/master/trackingtransaction/'
-      },
+
 
 
     ],
@@ -254,6 +249,12 @@ const Menuitems = [
       //   icon: IconLiveView,
       //   href: '/apps/tracking/',
       // },
+            {
+        id: uniqueId(),
+        title: 'Tracking Transaction',
+        icon: IconLiveView,
+        href: '/master/trackingtransaction/'
+      },
       {
         id: uniqueId(),
         title: 'Alarm Notification',

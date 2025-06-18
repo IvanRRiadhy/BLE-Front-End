@@ -21,12 +21,15 @@ import {
 } from '@mui/material';
 import AlarmWarningData from './AlarmWarningData';
 import { useTranslation } from 'react-i18next';
+import { AlarmType } from 'src/store/apps/crud/alarmRecordTracking';
 
 const performers = AlarmWarningData;
+interface AlarmTableProps {
+  alarmData: AlarmType[];
+}
 
-const AlarmWarning = () => {
+const AlarmWarning: React.FC<AlarmTableProps> = ({ alarmData = [] }) => {
   // for select
-  const [month, setMonth] = React.useState('1');
   const { t } = useTranslation();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,6 +48,51 @@ const AlarmWarning = () => {
     setPage(0); // Reset to first page when changing rows per page
   };
 
+  const formatTime = (isoString: string) => {
+    const date = new Date(isoString);
+
+    // Extract the weekday
+    const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
+    const month = t(date.toLocaleString('en-GB', { month: 'short' }));
+
+    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
+      'en-GB',
+      {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      },
+    )}`;
+  };
+
+    const getMonthYear = (dateStr: string) => {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return null;
+      const month = date.toLocaleString('default', { month: 'long' });
+      const year = date.getFullYear();
+      // Use ISO format for value, readable for label
+      return { value: `${year}-${date.getMonth() + 1}`, label: `${month} ${year}` };
+    };
+    const today = new Date();
+  const todayMonth = {
+    value: `${today.getFullYear()}-${today.getMonth() + 1}`,
+    label: today.toLocaleString('default', { month: 'long' }) + ' ' + today.getFullYear(),
+  };
+  
+    const allMonths = [
+      ...alarmData.map((d) => getMonthYear(d.timestamp)),
+      todayMonth,
+    ].filter(Boolean);
+  
+    const uniqueMonthsMap = new Map();
+    allMonths.forEach((m) => {
+      if (m) uniqueMonthsMap.set(m.value, m.label);
+    });
+    const uniqueMonths = Array.from(uniqueMonthsMap, ([value, label]) => ({ value, label })).sort(
+      (a, b) => a.value.localeCompare(b.value),
+    );
+      const [month, setMonth] = React.useState(todayMonth.value);
+
   //Sorting
   const [order, setOrder] = React.useState<'asc' | 'desc'>('asc');
   const [orderBy, setOrderBy] = React.useState<string>('name');
@@ -54,30 +102,33 @@ const AlarmWarning = () => {
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
+  const filteredAlarmData = alarmData.filter((alarm) => {
+  if (!alarm.timestamp) return false;
+  const date = new Date(alarm.timestamp);
+  const alarmMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
+  return alarmMonth === month;
+});
 
-  const sortedData = [...performers].sort((a, b) => {
-    const priorityOrder: Record<'High' | 'Medium' | 'Low', number> = {
-      High: 3,
-      Medium: 2,
-      Low: 1,
-    };
+  const sortedData = [...filteredAlarmData].sort((a, b) => {
+    // const priorityOrder: Record<'High' | 'Medium' | 'Low', number> = {
+    //   High: 3,
+    //   Medium: 2,
+    //   Low: 1,
+    // };
     if (orderBy === 'name') {
-      return order === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+      const nameA = a.visitor?.name ?? '';
+      const nameB = b.visitor?.name ?? '';
+      return order === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
     }
-    if (orderBy === 'area') {
-      return order === 'asc' ? a.area.localeCompare(b.area) : b.area.localeCompare(a.area);
+    if (orderBy === 'maskedArea') {
+      const areaA = a.floorplanMaskedArea?.name ?? '';
+      const areaB = b.floorplanMaskedArea?.name ?? '';
+      return order === 'asc' ? areaA.localeCompare(areaB) : areaB.localeCompare(areaA);
     }
-    if (orderBy === 'priority') {
-      return order === 'asc'
-        ? priorityOrder[a.status as 'High' | 'Medium' | 'Low'] -
-            priorityOrder[b.status as 'High' | 'Medium' | 'Low']
-        : priorityOrder[b.status as 'High' | 'Medium' | 'Low'] -
-            priorityOrder[a.status as 'High' | 'Medium' | 'Low'];
-    }
-    if (orderBy === 'triggerTime') {
-      return order === 'asc'
-        ? a.triggerTime.localeCompare(b.triggerTime)
-        : b.triggerTime.localeCompare(a.triggerTime);
+    if (orderBy === 'timeStamp') {
+      const areaA = a.timestamp ?? '';
+      const areaB = b.timestamp ?? '';
+      return order === 'asc' ? areaA.localeCompare(areaB) : areaB.localeCompare(areaA);
     }
     return 0;
   });
@@ -93,9 +144,11 @@ const AlarmWarning = () => {
           value={month}
           onChange={handleChange}
         >
-          <MenuItem value={1}>March 2023</MenuItem>
-          <MenuItem value={2}>April 2023</MenuItem>
-          <MenuItem value={3}>May 2023</MenuItem>
+          {uniqueMonths.map(({ value, label }) => (
+            <MenuItem key={value} value={value}>
+              {label}
+            </MenuItem>
+          ))}
         </CustomSelect>
       }
     >
@@ -135,12 +188,12 @@ const AlarmWarning = () => {
               {/* Priority Column */}
               <TableCell>
                 <TableSortLabel
-                  active={orderBy === 'priority'}
-                  direction={orderBy === 'priority' ? order : 'asc'}
-                  onClick={() => handleSort('priority')}
+                  active={orderBy === 'Actioin Status'}
+                  direction={orderBy === 'Actioin Status' ? order : 'asc'}
+                  onClick={() => handleSort('Actioin Status')}
                 >
                   <Typography variant="subtitle2" fontWeight={600}>
-                    {t('Priority')}
+                    {t('Actioin Status')}
                   </Typography>
                 </TableSortLabel>
               </TableCell>
@@ -159,57 +212,73 @@ const AlarmWarning = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((basic) => (
-              <TableRow key={basic.id}>
+            {sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((alarm) => (
+              <TableRow key={alarm.id}>
                 <TableCell>
                   <Stack direction="row" spacing={2}>
-                    <Avatar src={basic.imgsrc} alt={basic.imgsrc} sx={{ width: 40, height: 40 }} />
+                    <Avatar
+                      src={alarm.visitor?.faceImage}
+                      alt={alarm.visitor?.faceImage}
+                      sx={{ width: 40, height: 40 }}
+                    />
                     <Box>
                       <Typography variant="subtitle2" fontWeight={600}>
-                        {basic.name}
+                        {alarm.visitor?.name || 'Unknown Visitor'}
                       </Typography>
                       <Typography color="textSecondary" fontSize="12px" variant="subtitle2">
-                        {basic.post}
+                        {alarm.visitor?.cardNumber || 'No Card Number'}
                       </Typography>
                     </Box>
                   </Stack>
                 </TableCell>
                 <TableCell>
                   <Typography color="textSecondary" variant="subtitle2" fontWeight={400}>
-                    {t('Room') + ' ' + basic.area}
+                    {alarm.floorplanMaskedArea?.name || 'Unknown Area'}
                   </Typography>
                 </TableCell>
-                <TableCell>
-                  {/* <Chip chipcolor={basic.status == 'Active' ? 'success' : basic.status == 'Pending' ? 'warning' : basic.status == 'Completed' ? 'primary' : basic.status == 'Cancel' ? 'error' : 'secondary'} */}
+                {/* <TableCell>
                   <Chip
                     sx={{
                       bgcolor:
-                        basic.status === 'High'
+                        alarm.status === 'High'
                           ? (theme) => theme.palette.error.light
-                          : basic.status === 'Medium'
+                          : alarm.status === 'Medium'
                           ? (theme) => theme.palette.warning.light
-                          : basic.status === 'Low'
+                          : alarm.status === 'Low'
                           ? (theme) => theme.palette.success.light
                           : (theme) => theme.palette.secondary.light,
                       color:
-                        basic.status === 'High'
+                        alarm.status === 'High'
                           ? (theme) => theme.palette.error.main
-                          : basic.status === 'Medium'
+                          : alarm.status === 'Medium'
                           ? (theme) => theme.palette.warning.main
-                          : basic.status === 'Low'
+                          : alarm.status === 'Low'
                           ? (theme) => theme.palette.success.main
                           : (theme) => theme.palette.secondary.main,
                       borderRadius: '8px',
                     }}
                     size="small"
-                    label={t(`${basic.status}`)}
+                    label={t(`${alarm.status}`)}
                   />
-                </TableCell>
+                </TableCell> */}
                 <TableCell>
                   <Typography color="textSecondary" variant="subtitle2" fontWeight={400}>
-                    {basic.triggerTime}
+                    {alarm.actionStatus || ''}
                   </Typography>
                 </TableCell>
+
+                <TableCell>
+                  <Typography color="textSecondary" variant="subtitle2" fontWeight={400}>
+                    {alarm.timestamp ? formatTime(alarm.timestamp) : 'Unknown Time'}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ))}
+            {Array.from({
+              length: rowsPerPage - Math.min(rowsPerPage, sortedData.length - page * rowsPerPage),
+            }).map((_, idx) => (
+              <TableRow key={`empty-row-${idx}`} style={{ height: 63 }}>
+                <TableCell colSpan={4} />
               </TableRow>
             ))}
           </TableBody>
@@ -220,7 +289,7 @@ const AlarmWarning = () => {
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={performers.length}
+        count={alarmData.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handlePageChange}

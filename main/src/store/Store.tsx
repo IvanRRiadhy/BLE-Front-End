@@ -1,4 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { persistStore, persistReducer } from 'redux-persist';
+import { PersistPartial } from 'redux-persist/es/persistReducer';
+import storage from 'redux-persist/lib/storage';
 import CustomizerReducer from './customizer/CustomizerSlice';
 import EcommerceReducer from './apps/eCommerce/ECommerceSlice';
 import ChatsReducer from './apps/chat/ChatSlice';
@@ -42,47 +45,6 @@ import {
   TypedUseSelectorHook,
 } from 'react-redux';
 
-export const store = configureStore({
-  reducer: {
-    customizer: CustomizerReducer,
-    ecommerceReducer: EcommerceReducer,
-    chatReducer: ChatsReducer,
-    emailReducer: EmailReducer,
-    notesReducer: NotesReducer,
-    contactsReducer: ContactsReducer,
-    ticketReducer: TicketReducer,
-    userpostsReducer: UserProfileReducer,
-    blogReducer: BlogReducer,
-    gateReducer: GatesReducer,
-    floorplanReducer2: FloorplanReducer2,
-    applicationReducer: applicationReducer,
-    integrationReducer: integrationReducer,
-    CCTVReducer: CCTVReducer,
-    accessControlReducer: accessControlReducer,
-    brandReducer: brandReducer,
-    departmentReducer: DepartmentReducer,
-    districtReducer: DistrictReduce,
-    organizationReducer: organizationReducer,
-    maskedAreaReducer: maskedAreaReducer,
-    bleReaderReducer: bleReaderReducer,
-    floorReducer: floorReducer,
-    memberReducer: memberReducer,
-    trackingTransReducer: trackingTransReducer,
-    visitorReducer: visitorReducer,
-    blacklistReducer: blacklistReducer,
-    alarmReducer: alarmReducer,
-    buildingReducer: buildingReducer,
-    floorplanDeviceReducer: FloorplanDeviceReducer,
-    layoutReducer: layoutReducer,
-    floorplanReducer: FloorplanReducer,
-    bleNodeReducer: BleNodeReducer,
-    RulesNodeReducer: RulesNodeReducer,
-    RulesConnectorReducer: RulesConnectorReducer,
-    BeaconReducer: BeaconReducer,
-    sessionReducer: SessionReducer,
-  },
-});
-
 const rootReducer = combineReducers({
   customizer: CustomizerReducer,
   ecommerceReducer: EcommerceReducer,
@@ -122,7 +84,69 @@ const rootReducer = combineReducers({
   sessionReducer: SessionReducer,
 });
 
-export type AppState = ReturnType<typeof rootReducer>;
+const persistConfig = {
+  key: 'root',
+  storage,
+  whitelist: ['layoutReducer'], // Only persist layout state
+};
+
+// Create persisted root reducer
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+export const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+      },
+    }),
+});
+// export const store = configureStore({
+//   reducer: {
+//     customizer: CustomizerReducer,
+//     ecommerceReducer: EcommerceReducer,
+//     chatReducer: ChatsReducer,
+//     emailReducer: EmailReducer,
+//     notesReducer: NotesReducer,
+//     contactsReducer: ContactsReducer,
+//     ticketReducer: TicketReducer,
+//     userpostsReducer: UserProfileReducer,
+//     blogReducer: BlogReducer,
+//     gateReducer: GatesReducer,
+//     floorplanReducer2: FloorplanReducer2,
+//     applicationReducer: applicationReducer,
+//     integrationReducer: integrationReducer,
+//     CCTVReducer: CCTVReducer,
+//     accessControlReducer: accessControlReducer,
+//     brandReducer: brandReducer,
+//     departmentReducer: DepartmentReducer,
+//     districtReducer: DistrictReduce,
+//     organizationReducer: organizationReducer,
+//     maskedAreaReducer: maskedAreaReducer,
+//     bleReaderReducer: bleReaderReducer,
+//     floorReducer: floorReducer,
+//     memberReducer: memberReducer,
+//     trackingTransReducer: trackingTransReducer,
+//     visitorReducer: visitorReducer,
+//     blacklistReducer: blacklistReducer,
+//     alarmReducer: alarmReducer,
+//     buildingReducer: buildingReducer,
+//     floorplanDeviceReducer: FloorplanDeviceReducer,
+//     layoutReducer: layoutReducer,
+//     floorplanReducer: FloorplanReducer,
+//     bleNodeReducer: BleNodeReducer,
+//     RulesNodeReducer: RulesNodeReducer,
+//     RulesConnectorReducer: RulesConnectorReducer,
+//     BeaconReducer: BeaconReducer,
+//     sessionReducer: SessionReducer,
+//   },
+// });
+
+export const persistor = persistStore(store);
+
+
+export type AppState = ReturnType<typeof rootReducer> & PersistPartial;
 export type AppDispatch = typeof store.dispatch;
 export const { dispatch } = store;
 export const useDispatch = () => useAppDispatch<AppDispatch>();
