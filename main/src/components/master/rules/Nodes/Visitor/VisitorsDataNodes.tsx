@@ -10,6 +10,7 @@ import {
   setStartNode,
   setStartNodeThunk,
   nodeType,
+  setNodeDimensions,
 } from 'src/store/apps/rules/RulesNodes';
 import { Html } from 'react-konva-utils';
 import VisitorNodePopup from './VisitorPopup';
@@ -66,7 +67,7 @@ const VisitorsDataNodes = ({ node, ifSelector, setIfSelector }: any) => {
         type: 'Connector',
         arrowPreviewEnd: {
           x: pointerPosition ? pointerPosition.x : node.posX + rectWidth + 3,
-          y: pointerPosition ? pointerPosition.y : node.posY + 25,
+          y: pointerPosition ? pointerPosition.y : node.posY + node.dimensions.height / 2,
         },
       };
       // Change the cursor to crosshair
@@ -139,7 +140,9 @@ const detailsText = (node: nodeType) => {
   const detailsWidth = calculateTextWidth(detailsText(node), 12);
   const textWidth = Math.max(nameWidth, detailsWidth); // Approximate text width
   const rectWidth = Math.max(textWidth + 20, 100);
-
+    useEffect(() => {
+      dispatch(setNodeDimensions({ id: node.id, dimensions: { width: rectWidth, height: node.dimensions.height } }));
+    },[rectWidth])
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -230,9 +233,9 @@ const detailsText = (node: nodeType) => {
             if (arrowDrawing.startNodeId === node.id) {
               return;
             }
-            dispatch(setArrowLatch({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + 25 }));
+            dispatch(setArrowLatch({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + node.dimensions.height / 2 }));
             dispatch(
-              setArrowPreviewEnd({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + 25 }),
+              setArrowPreviewEnd({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + node.dimensions.height / 2}),
             );
 
             return;
@@ -256,13 +259,13 @@ const detailsText = (node: nodeType) => {
             <Rect
               x={0} // Align with the main rectangle
               y={-15} // Position above the main rectangle
-              width={rectWidth}
+              width={node.dimensions.width}
               height={15}
               fill={theme.palette.primary.main} // Black background
               cornerRadius={4} // Rounded corners
             />
             <Text
-              x={rectWidth / 2 - calculateTextWidth('Starting Node', 10) / 2} // Center horizontally
+              x={node.dimensions.width / 2 - calculateTextWidth('Starting Node', 10) / 2} // Center horizontally
               y={-12} // Position inside the black rectangle
               text="Starting Node"
               fontSize={10}
@@ -274,7 +277,7 @@ const detailsText = (node: nodeType) => {
         {/* Rectangle for the node */}
         <Rect
           name="node"
-          width={rectWidth}
+          width={node.dimensions.width}
           height={50}
           fill="white"
           stroke="black"
@@ -293,7 +296,7 @@ const detailsText = (node: nodeType) => {
               style={{
                 position: 'absolute',
                 top: 9, // Adjust position relative to the node
-                left: rectWidth - 20, // Align near the right edge of the rectangle
+                left: node.dimensions.width - 20, // Align near the right edge of the rectangle
                 cursor: 'pointer',
               }}
               onClick={handleMenuToggle} // Toggle the menu on click
@@ -319,7 +322,7 @@ const detailsText = (node: nodeType) => {
         {/* Text inside the node */}
         <Text
           name="node"
-          x={rectWidth / 2 - nameWidth / 2} // Padding inside the Rect
+          x={node.dimensions.width / 2 - nameWidth / 2} // Padding inside the Rect
           y={12} // Center the text vertically
           text={node.name}
           fontSize={16}
@@ -333,7 +336,7 @@ const detailsText = (node: nodeType) => {
         />
         <Text
           name="node"
-          x={rectWidth / 2 - detailsWidth / 2} // Center horizontally for details
+          x={node.dimensions.width / 2 - detailsWidth / 2} // Center horizontally for details
           y={32} // Position below the name
           text={detailsText(node)}
           fontSize={12} // Smaller font size for details
@@ -350,7 +353,7 @@ const detailsText = (node: nodeType) => {
           <Circle
             name="circle"
             x={-3} // Position to the left of the Rect
-            y={25} // Center vertically relative to the Rect
+            y={node.dimensions.height / 2} // Center vertically relative to the Rect
             radius={arrows.some((arrow: any) => arrow.endNodeId === node.id) ? 2 : 4} // Default radius
             fill={arrows.some((arrow: any) => arrow.endNodeId === node.id) ? '#363636' : 'white'} // Turn black if it already has an arrow
             stroke={arrows.some((arrow: any) => arrow.endNodeId === node.id) ? '#363636' : 'black'}
@@ -415,10 +418,10 @@ const detailsText = (node: nodeType) => {
                   duration: 0.2,
                 });
                 dispatch(
-                  setArrowLatch({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + 25 }),
+                  setArrowLatch({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + node.dimensions.height / 2 }),
                 );
                 dispatch(
-                  setArrowPreviewEnd({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + 25 }),
+                  setArrowPreviewEnd({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + node.dimensions.height / 2  }),
                 );
               }
             }}
@@ -439,8 +442,8 @@ const detailsText = (node: nodeType) => {
         {/* Right Circle */}
         <Circle
           name="circle"
-          x={rectWidth + 3} // Position to the right of the Rect
-          y={25} // Center vertically relative to the Rect
+          x={node.dimensions.width + 3} // Position to the right of the Rect
+          y={node.dimensions.height / 2} // Center vertically relative to the Rect
           radius={4} // Default radius
           fill="white"
           stroke={circleHovered ? 'orange' : 'black'}
@@ -587,7 +590,7 @@ const detailsText = (node: nodeType) => {
             style={{
               position: 'absolute',
               top: node.posY - 180,
-              left: node.posX + rectWidth - 25,
+              left: node.posX + node.dimensions.width - 25,
               width: '180px',
               background: 'white',
               border: '1px solid #ccc',

@@ -251,7 +251,10 @@ const AreaNodePopup: React.FC<NodePopupProps> = ({
         }}
         onMouseDown={handleMouseDown}
       >
-        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+        <Typography
+          variant="subtitle1"
+          sx={{ fontWeight: 'bold', userSelect: 'none', pointerEvents: 'none' }}
+        >
           Node Details
         </Typography>
       </Box>

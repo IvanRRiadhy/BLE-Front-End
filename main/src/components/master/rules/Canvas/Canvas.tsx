@@ -4,9 +4,11 @@ import { Stage, Layer } from 'react-konva';
 import Nodes from './Nodes';
 import Arrows from './Arrows';
 import MembersDataNodes from '../Nodes/Member/MembersDataNodes';
+import MemberEntityNode from '../Nodes/Member/MemberEntityNode';
 import AreaNodes from '../Nodes/Area/AreaNodes';
 import TimeNodes from '../Nodes/Time/TimeNodes';
 import VisitorDataNodes from '../Nodes/Visitor/VisitorsDataNodes';
+import VisitorEntityNode from '../Nodes/Visitor/VisitorEntityNode';
 import AndNodes from '../Nodes/Logical/AndNodes';
 import OrNodes from '../Nodes/Logical/OrNodes';
 import IfNodes from '../Nodes/Logical/IfNodes';
@@ -16,11 +18,14 @@ import {
   ArrowType,
   setArrowDrawing,
   setArrowPreviewEnd,
+  setHoveredArrowIndex,
 } from 'src/store/apps/rules/RulesConnectors';
 
 const nodeComponentMapping: { [key: string]: React.FC<any> } = {
   MembersData: MembersDataNodes,
+  Member: MemberEntityNode,
   VisitorsData: VisitorDataNodes,
+  Visitor: VisitorEntityNode,
   Area: AreaNodes,
   Time: TimeNodes,
   and: AndNodes,
@@ -59,6 +64,10 @@ const Canvas = () => {
                 }),
               );
             }
+          }
+          const isOverDetector = e.target.attrs.name === 'detectorLine';
+          if(!isOverDetector){
+            dispatch(setHoveredArrowIndex(""));
           }
         }}
         onMouseEnter={(e) => {

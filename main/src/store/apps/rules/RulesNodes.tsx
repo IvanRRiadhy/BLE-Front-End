@@ -13,6 +13,7 @@ export interface nodeType {
   details: string;
   posX: number;
   posY: number;
+  dimensions: { width: number; height: number };
   extraDetails: string;
   startNode: boolean;
 }
@@ -46,6 +47,7 @@ export const NodeSlice = createSlice({
         details: `Choose a ${name}`,
         posX: 100,
         posY: 100,
+        dimensions: { width: 100, height: 50 },
         extraDetails: '',
         startNode: false,
       };
@@ -77,6 +79,14 @@ export const NodeSlice = createSlice({
       });
     },
 
+    setNodeDimensions: (state, action: PayloadAction<{ id: string; dimensions: { width: number; height: number } }>) => {
+      const { id, dimensions } = action.payload;
+      const node = state.nodes.find((node) => node.id === id);
+      if (node) {
+        node.dimensions = dimensions;
+      }
+    },
+
     addExtraDetails: (state, action: PayloadAction<{ id: string; extraDetails: string }>) => {
       const { id, extraDetails } = action.payload;
       const node = state.nodes.find((node) => node.id === id);
@@ -98,6 +108,7 @@ export const {
   updateNodeDetails,
   addExtraDetails,
   setStartNode,
+  setNodeDimensions,
   deleteNode,
 } = NodeSlice.actions;
 

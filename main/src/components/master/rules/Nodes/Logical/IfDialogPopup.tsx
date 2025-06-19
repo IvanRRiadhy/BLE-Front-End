@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -92,6 +92,9 @@ interface NodeDetails {
   department?: string[];
   district?: string[];
   member?: string[];
+  monthlyRange?: string;
+  weeklyRange?: string[];
+  timeRange?: string;
 }
 
 interface Condition {
@@ -112,7 +115,7 @@ const IfDialogPopup: React.FC<{
     { subject: '', condition: '', value: '', operator: 'AND' },
   ]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
       const nonStartNodes = nodes.filter((node) => !node.startNode);
       const allConditions: Condition[] = [];
@@ -203,6 +206,44 @@ const IfDialogPopup: React.FC<{
               operator: 'AND',
             });
           }
+          if (details.monthlyRange) {
+            const [startDate, endDate] = details.monthlyRange.split(' - ');
+            allConditions.push({
+              subject: ' ',
+              condition: 'Greater Than',
+              value: JSON.stringify([startDate]),
+              operator: 'AND',
+            });
+            allConditions.push({
+              subject: ' ',
+              condition: 'Less Than',
+              value: JSON.stringify([endDate]),
+              operator: 'AND',
+            });
+          }
+          if (details.weeklyRange?.length) {
+            allConditions.push({
+              subject: ' ',
+              condition: 'Equal to',
+              value: JSON.stringify(details.weeklyRange),
+              operator: 'AND',
+            });
+          }
+          if (details.timeRange) {
+            const [startTime, endTime] = details.timeRange.split(' - ');
+            allConditions.push({
+              subject: ' ',
+              condition: 'Greater Than',
+              value: JSON.stringify([startTime]),
+              operator: 'AND',
+            });
+            allConditions.push({
+              subject: ' ',
+              condition: 'Less Than',
+              value: JSON.stringify([endTime]),
+              operator: 'AND',
+            });
+          }
         } catch (error) {
           console.error('Error parsing node details:', error);
         }
@@ -273,11 +314,11 @@ const IfDialogPopup: React.FC<{
         Set Condition(s)
       </DialogTitle>
       <DialogContent sx={{ marginTop: '16px' }}>
-        <Grid container spacing={2} direction="column">
+        <Grid container spacing={2} direction="column" sx={{ width: '100%', margin: 0 }}>
           {conditions.map((condition, index) => (
             <React.Fragment key={index}>
               {index > 0 && (
-                <Grid>
+                <Grid sx={{ width: '100%', padding: '8px 0' }}>
                   <Grid container justifyContent="center" alignItems="center">
                     <ToggleButtonGroup
                       value={condition.operator}
@@ -296,9 +337,27 @@ const IfDialogPopup: React.FC<{
                   </Grid>
                 </Grid>
               )}
-              <Grid>
-                <Box sx={{ width: '100%' }} bgcolor={'#f5f5f5'} p={2} borderRadius={1}>
-                  <Grid container spacing={2}>
+              <Grid sx={{ width: '100%' }}>
+                <Box
+                  sx={{
+                    width: '100%',
+                    bgcolor: '#f5f5f5',
+                    p: 2,
+                    borderRadius: 1,
+                    '& .MuiGrid-container': {
+                      margin: 0,
+                      width: '100%',
+                    },
+                  }}
+                >
+                  <Grid
+                    container
+                    spacing={2}
+                    sx={{
+                      width: '100%',
+                      margin: 0,
+                    }}
+                  >
                     <Grid size={1}>
                       <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
                         {`IF#${index + 1}`}
@@ -385,7 +444,7 @@ const IfDialogPopup: React.FC<{
               </Grid>
             </React.Fragment>
           ))}
-          <Grid>
+          <Grid sx={{ width: '100%', padding: '8px 0' }}>
             <Button variant="outlined" color="primary" onClick={addCondition} fullWidth>
               + Add Condition
             </Button>

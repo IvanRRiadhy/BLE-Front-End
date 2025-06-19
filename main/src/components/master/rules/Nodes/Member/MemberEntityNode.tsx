@@ -1,19 +1,18 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Group, Rect, Text, Circle } from 'react-konva';
+import { IconPencil, IconCopy, IconTrash, IconFlag, IconDotsVertical } from '@tabler/icons-react';
 import { useDispatch } from 'src/store/Store';
 import {
   updateNodePosition,
   setSelectedNode,
   updateNodeDetails,
   deleteNode,
-  addExtraDetails,
   setStartNode,
   setStartNodeThunk,
   nodeType,
   setNodeDimensions,
 } from 'src/store/apps/rules/RulesNodes';
 import { Html } from 'react-konva-utils';
-import AreaNodePopup from './AreaPopup';
 import { useSelector } from 'react-redux';
 import {
   addArrow,
@@ -25,26 +24,31 @@ import {
 } from 'src/store/apps/rules/RulesConnectors';
 import { uniqueId } from 'lodash';
 import { Box, Button, Grid2 as Grid, Typography, useTheme } from '@mui/material';
-import { IconDotsVertical, IconPencil, IconCopy, IconTrash, IconFlag } from '@tabler/icons-react';
 
-const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
+const MemberEntityNodes = ({ node, ifSelector, setIfSelector }: any) => {
   const theme = useTheme();
   const dispatch = useDispatch();
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null); // Ref for the menu
+  const [isHovered, setIsHovered] = useState(false);
+  const [isButtonHovered, setIsButtonHovered] = useState(false);
+  const [ifSelectorPos, setIfSelectorPos] = useState<{ x: number; y: number } | null>(null);
+  const handleMenuToggle = () => {
+    setShowMenu((prev) => !prev); // Toggle the menu visibility
+  };
+
+  const handleMenuClose = () => {
+    setShowMenu(false); // Close the menu
+  };
   const arrowDrawing = useSelector((state: any) => state.RulesConnectorReducer.arrowDrawing);
   const arrows = useSelector((state: any) => state.RulesConnectorReducer.arrows);
   const [showPopup, setShowPopup] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-  const menuRef = useRef<HTMLDivElement | null>(null);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isButtonHovered, setIsButtonHovered] = useState(false);
-  // const [ifSelector, setIfSelector] = useState(false);
-  const [ifSelectorPos, setIfSelectorPos] = useState<{ x: number; y: number } | null>(null);
+
   const handlePopupClose = () => {
     setShowPopup(false);
   };
-  const handleEditNode = (nodeId: string, details: string, extraDetails: string) => {
+  const handleEditNode = (nodeId: string, details: string) => {
     dispatch(updateNodeDetails({ id: nodeId, details }));
-    dispatch(addExtraDetails({ id: nodeId, extraDetails }));
     setShowPopup(false);
   };
   const handleDeleteNode = (nodeId: string) => {
@@ -70,9 +74,8 @@ const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
         stage.container().style.cursor = 'crosshair';
       }
       handlePopupClose();
-      console.log(arrow);
+
       // Dispatch the arrowDrawing state
-      console.log('Arrow 2', arrow);
       dispatch(setArrowDrawing(arrow));
 
       // Immediately set the arrowPreviewEnd
@@ -90,31 +93,6 @@ const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
   const handlePopupOpen = () => {
     setShowPopup(true);
   };
-  const handleMenuToggle = () => {
-    setShowMenu((prev) => !prev);
-  };
-
-  const handleMenuClose = () => {
-    setShowMenu(false);
-  };
-
-  const handleSetStartNode = (id: string) => {
-    dispatch(setStartNodeThunk(id));
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowMenu(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
   const calculateTextWidth = (
     text: string,
     fontSize: number = 16,
@@ -147,9 +125,10 @@ const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
 
       // Combine all sections
       const formattedParts = [
-        formatSection(details.building),
-        formatSection(details.floorplan),
-        formatSection(details.area),
+        formatSection(details.organization),
+        formatSection(details.department),
+        formatSection(details.district),
+        formatSection(details.member),
       ].filter(Boolean);
 
       return formattedParts.join(' | ');
@@ -161,37 +140,44 @@ const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
   const detailsWidth = calculateTextWidth(detailsText(node), 12);
   const textWidth = Math.max(nameWidth, detailsWidth); // Approximate text width
   const rectWidth = Math.max(textWidth + 20, 100);
-  const rectColor =
-    node.extraDetails === 'Allow'
-      ? theme.palette.success.light // Use success color for "Allow"
-      : node.extraDetails === 'Restrict'
-      ? theme.palette.error.light // Use error color for "Restrict"
-      : 'white'; // Default color if no extraDetails
     useEffect(() => {
       dispatch(setNodeDimensions({ id: node.id, dimensions: { width: rectWidth, height: node.dimensions.height } }));
     },[rectWidth])
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false); // Close the menu
+      }
+    };
 
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  const handleSetStartNode = (id: string) => {
+    dispatch(setStartNodeThunk(id));
+  };
   return (
     <>
       <Group
-        name="node"
         x={node.posX}
         y={node.posY}
         draggable={!arrowDrawing && !showPopup}
         onDragStart={(e) => {
-          e.target.moveToTop(); // Bring the node to the top when dragging starts
+          e.target.moveToTop();
         }}
         onDragMove={(e) => {
           const newX = e.target.x();
           const newY = e.target.y();
           dispatch(updateNodePosition({ id: node.id, posX: newX, posY: newY }));
         }}
-        onDblClick={() => {
-          if (!arrowDrawing) {
-            dispatch(setSelectedNode(node.id));
-            handlePopupOpen();
-          }
-        }}
+        // onDblClick={() => {
+        //   if (!arrowDrawing) {
+        //     dispatch(setSelectedNode(node.id));
+        //     handlePopupOpen();
+        //   }
+        // }}
         onClick={(e) => {
           dispatch(setSelectedNode(node.id));
           if (arrowDrawing && !node.startNode) {
@@ -227,15 +213,14 @@ const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
                     type: 'Connector',
                   }),
                 );
-                const stage = e.target.getStage();
-                if (stage) {
-                  stage.container().style.cursor = 'move'; // Reset cursor to default when leaving the Stage
-                }
-                console.log('Reset');
-                dispatch(setArrowDrawing(null));
               }
-              return;
+              const stage = e.target.getStage();
+              if (stage) {
+                stage.container().style.cursor = 'move'; // Reset cursor to default when leaving the Stage
+              }
+              dispatch(setArrowDrawing(null));
             }
+            return;
           }
         }}
         onMouseEnter={(e) => {
@@ -268,12 +253,33 @@ const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
           dispatch(setArrowLatch(null));
         }}
       >
+        {/* "Starting Node" Label */}
+        {node.startNode && (
+          <>
+            <Rect
+              x={0} // Align with the main rectangle
+              y={-15} // Position above the main rectangle
+              width={node.dimensions.width}
+              height={15}
+              fill={theme.palette.primary.main} // Black background
+              cornerRadius={4} // Rounded corners
+            />
+            <Text
+              x={node.dimensions.width / 2 - calculateTextWidth('Starting Node', 10) / 2} // Center horizontally
+              y={-12} // Position inside the black rectangle
+              text="Starting Node"
+              fontSize={10}
+              fill="white" // White text
+              align="center"
+            />
+          </>
+        )}
         {/* Rectangle for the node */}
         <Rect
           name="node"
           width={node.dimensions.width}
           height={node.dimensions.height}
-          fill={rectColor}
+          fill="white"
           stroke="black"
           strokeWidth={2}
           onMouseEnter={() => {
@@ -328,7 +334,7 @@ const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
           }}
           onMouseLeave={() => setIsHovered(false)}
         />
-        <Text
+        {/* <Text
           name="node"
           x={node.dimensions.width / 2 - detailsWidth / 2} // Center horizontally for details
           y={32} // Position below the name
@@ -341,27 +347,7 @@ const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
             }
           }}
           onMouseLeave={() => setIsHovered(false)}
-        />
-        {node.startNode && (
-          <>
-            <Rect
-              x={0} // Align with the main rectangle
-              y={-15} // Position above the main rectangle
-              width={rectWidth}
-              height={15}
-              fill={theme.palette.primary.main} // Black background
-              cornerRadius={4} // Rounded corners
-            />
-            <Text
-              x={rectWidth / 2 - calculateTextWidth('Starting Node', 10) / 2} // Center horizontally
-              y={-12} // Position inside the black rectangle
-              text="Starting Node"
-              fontSize={10}
-              fill="white" // White text
-              align="center"
-            />
-          </>
-        )}
+        /> */}
         {/* Left Circle */}
         {!node.startNode && (
           <Circle
@@ -406,16 +392,15 @@ const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
                         type: 'Connector',
                       }),
                     );
-                    const stage = e.target.getStage();
                     e.target.to({
                       scaleX: 1,
                       scaleY: 1,
                       duration: 0.2,
                     });
+                    const stage = e.target.getStage();
                     if (stage) {
                       stage.container().style.cursor = 'default'; // Reset cursor to default when leaving the Stage
                     }
-                    console.log('Reset2');
                     dispatch(setArrowDrawing(null));
                   }
                 }
@@ -453,6 +438,7 @@ const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
             }}
           />
         )}
+
         {/* Right Circle */}
         <Circle
           name="circle"
@@ -497,7 +483,6 @@ const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
           }}
           onMouseEnter={(e) => {
             const stage = e.target.getStage();
-
             if (stage && !arrowDrawing && !showPopup) {
               setCircleHovered(true);
               stage.container().style.cursor = 'pointer'; // Change cursor to "pointer" when hovering over the Circle
@@ -522,19 +507,6 @@ const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
           }}
         />
       </Group>
-      {/* Render Popup using HTML */}
-      {showPopup && (
-        <Html>
-          <AreaNodePopup
-            node={node}
-            onClose={handlePopupClose}
-            onEdit={handleEditNode}
-            onDelete={handleDeleteNode}
-            onCreateConnection={createConnection}
-          />
-        </Html>
-      )}
-
       {ifSelector && ifSelectorPos && (
         <Html>
           <Box
@@ -599,8 +571,6 @@ const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
           </Box>
         </Html>
       )}
-
-      {/* Menu Items */}
       {showMenu && (
         <Html>
           <div
@@ -629,7 +599,7 @@ const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
                   transition: 'background 0.2s',
                 }}
                 onClick={(e) => {
-                  e.stopPropagation();
+                  e.stopPropagation(); // Prevent the click from propagating to the Group
                   dispatch(setSelectedNode(node.id));
                   handlePopupOpen();
                   handleMenuClose();
@@ -716,4 +686,4 @@ const AreaNodes = ({ node, ifSelector, setIfSelector }: any) => {
   );
 };
 
-export default AreaNodes;
+export default MemberEntityNodes;

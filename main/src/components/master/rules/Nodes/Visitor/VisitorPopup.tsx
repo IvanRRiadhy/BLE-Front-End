@@ -186,7 +186,10 @@ const VisitorNodePopup: React.FC<NodePopupProps> = ({
         }}
         onMouseDown={handleMouseDown}
       >
-        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+        <Typography
+          variant="subtitle1"
+          sx={{ fontWeight: 'bold', userSelect: 'none', pointerEvents: 'none' }}
+        >
           Visitor Node Details
         </Typography>
       </Box>

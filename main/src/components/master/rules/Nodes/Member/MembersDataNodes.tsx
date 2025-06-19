@@ -10,6 +10,7 @@ import {
   setStartNode,
   setStartNodeThunk,
   nodeType,
+  setNodeDimensions,
 } from 'src/store/apps/rules/RulesNodes';
 import { Html } from 'react-konva-utils';
 import MemberNodePopup from './MemberPopup';
@@ -25,7 +26,7 @@ import {
 import { uniqueId } from 'lodash';
 import { Box, Button, Grid2 as Grid, Typography, useTheme } from '@mui/material';
 
-const MemberNodes = ({ node, ifSelector, setIfSelector }: any) => {
+const MembersDataNodes = ({ node, ifSelector, setIfSelector }: any) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const [showMenu, setShowMenu] = useState(false);
@@ -140,7 +141,9 @@ const MemberNodes = ({ node, ifSelector, setIfSelector }: any) => {
   const detailsWidth = calculateTextWidth(detailsText(node), 12);
   const textWidth = Math.max(nameWidth, detailsWidth); // Approximate text width
   const rectWidth = Math.max(textWidth + 20, 100);
-
+    useEffect(() => {
+      dispatch(setNodeDimensions({ id: node.id, dimensions: { width: rectWidth, height: node.dimensions.height } }));
+    },[rectWidth])
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -257,13 +260,13 @@ const MemberNodes = ({ node, ifSelector, setIfSelector }: any) => {
             <Rect
               x={0} // Align with the main rectangle
               y={-15} // Position above the main rectangle
-              width={rectWidth}
+              width={node.dimensions.width}
               height={15}
               fill={theme.palette.primary.main} // Black background
               cornerRadius={4} // Rounded corners
             />
             <Text
-              x={rectWidth / 2 - calculateTextWidth('Starting Node', 10) / 2} // Center horizontally
+              x={node.dimensions.width / 2 - calculateTextWidth('Starting Node', 10) / 2} // Center horizontally
               y={-12} // Position inside the black rectangle
               text="Starting Node"
               fontSize={10}
@@ -275,8 +278,8 @@ const MemberNodes = ({ node, ifSelector, setIfSelector }: any) => {
         {/* Rectangle for the node */}
         <Rect
           name="node"
-          width={rectWidth}
-          height={50}
+          width={node.dimensions.width}
+          height={node.dimensions.height}
           fill="white"
           stroke="black"
           strokeWidth={2}
@@ -294,7 +297,7 @@ const MemberNodes = ({ node, ifSelector, setIfSelector }: any) => {
               style={{
                 position: 'absolute',
                 top: 9, // Adjust position relative to the node
-                left: rectWidth - 20, // Align near the right edge of the rectangle
+                left: node.dimensions.width - 20, // Align near the right edge of the rectangle
                 cursor: 'pointer',
               }}
               onClick={handleMenuToggle} // Toggle the menu on click
@@ -320,7 +323,7 @@ const MemberNodes = ({ node, ifSelector, setIfSelector }: any) => {
         {/* Text inside the node */}
         <Text
           name="node"
-          x={rectWidth / 2 - nameWidth / 2} // Padding inside the Rect
+          x={node.dimensions.width / 2 - nameWidth / 2} // Padding inside the Rect
           y={12} // Center the text vertically
           text={node.name}
           fontSize={16}
@@ -334,7 +337,7 @@ const MemberNodes = ({ node, ifSelector, setIfSelector }: any) => {
         />
         <Text
           name="node"
-          x={rectWidth / 2 - detailsWidth / 2} // Center horizontally for details
+          x={node.dimensions.width / 2 - detailsWidth / 2} // Center horizontally for details
           y={32} // Position below the name
           text={detailsText(node)}
           fontSize={12} // Smaller font size for details
@@ -351,7 +354,7 @@ const MemberNodes = ({ node, ifSelector, setIfSelector }: any) => {
           <Circle
             name="circle"
             x={-3} // Position to the left of the Rect
-            y={25} // Center vertically relative to the Rect
+            y={node.dimensions.height / 2} // Center vertically relative to the Rect
             radius={arrows.some((arrow: any) => arrow.endNodeId === node.id) ? 2 : 4} // Default radius
             fill={arrows.some((arrow: any) => arrow.endNodeId === node.id) ? '#363636' : 'white'} // Turn black if it already has an arrow
             stroke={arrows.some((arrow: any) => arrow.endNodeId === node.id) ? '#363636' : 'black'}
@@ -440,8 +443,8 @@ const MemberNodes = ({ node, ifSelector, setIfSelector }: any) => {
         {/* Right Circle */}
         <Circle
           name="circle"
-          x={rectWidth + 3} // Position to the right of the Rect
-          y={25} // Center vertically relative to the Rect
+          x={node.dimensions.width + 3} // Position to the right of the Rect
+          y={node.dimensions.height / 2} // Center vertically relative to the Rect
           radius={4} // Default radius
           fill="white"
           stroke={circleHovered ? 'orange' : 'black'}
@@ -588,7 +591,7 @@ const MemberNodes = ({ node, ifSelector, setIfSelector }: any) => {
             style={{
               position: 'absolute',
               top: node.posY - 180,
-              left: node.posX + rectWidth - 25,
+              left: node.posX + node.dimensions.width - 25,
               width: '180px',
               background: 'white',
               border: '1px solid #ccc',
@@ -696,4 +699,4 @@ const MemberNodes = ({ node, ifSelector, setIfSelector }: any) => {
   );
 };
 
-export default MemberNodes;
+export default MembersDataNodes;

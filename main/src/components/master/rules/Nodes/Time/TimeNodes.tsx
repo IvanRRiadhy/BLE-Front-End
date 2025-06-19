@@ -9,6 +9,7 @@ import {
   setStartNode,
   setStartNodeThunk,
   nodeType,
+  setNodeDimensions,
 } from 'src/store/apps/rules/RulesNodes';
 import { Html } from 'react-konva-utils';
 import TimeNodePopup from './TimePopup';
@@ -40,6 +41,7 @@ const TimeNodes = ({ node, ifSelector, setIfSelector }: any) => {
     setShowPopup(false);
   };
   const handleEditNode = (nodeId: string, details: string) => {
+    console.log('Editing node:', nodeId, details);
     dispatch(updateNodeDetails({ id: nodeId, details }));
     setShowPopup(false);
   };
@@ -58,7 +60,7 @@ const TimeNodes = ({ node, ifSelector, setIfSelector }: any) => {
         type: 'Connector',
         arrowPreviewEnd: {
           x: pointerPosition ? pointerPosition.x : node.posX + rectWidth + 3,
-          y: pointerPosition ? pointerPosition.y : node.posY + 25,
+          y: pointerPosition ? pointerPosition.y : node.posY + node.dimensions.height/2,
         },
       };
       // Change the cursor to crosshair
@@ -104,36 +106,43 @@ const TimeNodes = ({ node, ifSelector, setIfSelector }: any) => {
     if (node.details.startsWith('Choose a')) {
       return node.details;
     }
-    const detailsParts = node.details.split(' - ');
-    const organizations = detailsParts[0]?.split(',').map((o: string) => o.trim()) || [];
-    const departments = detailsParts[1]?.split(',').map((d: string) => d.trim()) || [];
-    const districts = detailsParts[2]?.split(',').map((d: string) => d.trim()) || [];
-    const members = detailsParts[3]?.split(',').map((m: string) => m.trim()) || [];
+    try {
+      const details = JSON.parse(node.details);
+      const parts: string[] = [];
 
-    const firstOrganization = organizations[0] || '';
-    const extraOrganizations = organizations.length > 1 ? ` +${organizations.length - 1}` : '';
-    const firstDepartment = departments[0] || '';
-    const extraDepartments = departments.length > 1 ? ` +${departments.length - 1}` : '';
-    const firstDistrict = districts[0] || '';
-    const extraDistricts = districts.length > 1 ? ` +${districts.length - 1}` : '';
-    const firstMember = members[0] || '';
-    const extraMembers = members.length > 1 ? ` +${members.length - 1}` : '';
+      // Add Monthly Range if exists
+      if (details.monthlyRange) {
+        const [startDate, endDate] = details.monthlyRange.split(' - ');
+        parts.push(`${startDate.slice(0, 5)} - ${endDate.slice(0, 5)}`);
+      }
 
-    const formatPart = (first: string, extra: string) => (first ? `${first}${extra}` : '');
+      // Add Weekly Range if exists
+      if (details.weeklyRange && details.weeklyRange.length > 0) {
+        const shortDays = details.weeklyRange.map((day: string) => day.slice(0, 2));
+        if (shortDays.length === 7) {
+          parts.push('Weekly: All Days');
+        } else {
+          parts.push(`${shortDays.join(', ')}`);
+        }
+      }
 
-    return [
-      formatPart(firstOrganization, extraOrganizations),
-      formatPart(firstDepartment, extraDepartments),
-      formatPart(firstDistrict, extraDistricts),
-      formatPart(firstMember, extraMembers),
-    ]
-      .filter(Boolean)
-      .join(' | ');
+      // Add Time Range if exists
+      if (details.timeRange) {
+        parts.push(`${details.timeRange}`);
+      }
+
+      return parts.join(' | ');
+    } catch {
+      // If parsing fails, return the original details
+      return node.details;
+    }
   };
   const detailsWidth = calculateTextWidth(detailsText(node), 12);
   const textWidth = Math.max(nameWidth, detailsWidth); // Approximate text width
   const rectWidth = Math.max(textWidth + 20, 100);
-
+    useEffect(() => {
+      dispatch(setNodeDimensions({ id: node.id, dimensions: { width: rectWidth, height: node.dimensions.height } }));
+    },[rectWidth])
   const handleMenuToggle = () => {
     setShowMenu((prev) => !prev);
   };
@@ -233,9 +242,9 @@ const TimeNodes = ({ node, ifSelector, setIfSelector }: any) => {
             if (arrowDrawing.startNodeId === node.id) {
               return;
             }
-            dispatch(setArrowLatch({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + 25 }));
+            dispatch(setArrowLatch({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + node.dimensions.height/2 }));
             dispatch(
-              setArrowPreviewEnd({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + 25 }),
+              setArrowPreviewEnd({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + node.dimensions.height/2 }),
             );
 
             return;
@@ -253,8 +262,8 @@ const TimeNodes = ({ node, ifSelector, setIfSelector }: any) => {
         {/* Rectangle for the node */}
         <Rect
           name="node"
-          width={rectWidth}
-          height={50}
+          width={node.dimensions.width}
+          height={node.dimensions.height}
           fill="white"
           stroke="black"
           strokeWidth={2}
@@ -272,7 +281,7 @@ const TimeNodes = ({ node, ifSelector, setIfSelector }: any) => {
               style={{
                 position: 'absolute',
                 top: 9,
-                left: rectWidth - 20,
+                left: node.dimensions.width - 20,
                 cursor: 'pointer',
               }}
               onClick={handleMenuToggle}
@@ -298,7 +307,7 @@ const TimeNodes = ({ node, ifSelector, setIfSelector }: any) => {
         {/* Text inside the node */}
         <Text
           name="node"
-          x={rectWidth / 2 - nameWidth / 2} // Padding inside the Rect
+          x={node.dimensions.width / 2 - nameWidth / 2} // Padding inside the Rect
           y={12} // Center the text vertically
           text={node.name}
           fontSize={16}
@@ -312,7 +321,7 @@ const TimeNodes = ({ node, ifSelector, setIfSelector }: any) => {
         />
         <Text
           name="node-details"
-          x={rectWidth / 2 - detailsWidth / 2} // Center horizontally for details
+          x={node.dimensions.width / 2 - detailsWidth / 2} // Center horizontally for details
           y={32} // Position below the name
           text={detailsText(node)}
           fontSize={12} // Smaller font size for details
@@ -329,13 +338,13 @@ const TimeNodes = ({ node, ifSelector, setIfSelector }: any) => {
             <Rect
               x={0}
               y={-15}
-              width={rectWidth}
+              width={node.dimensions.width}
               height={15}
               fill={theme.palette.primary.main}
               cornerRadius={4}
             />
             <Text
-              x={rectWidth / 2 - calculateTextWidth('Starting Node', 10) / 2}
+              x={node.dimensions.width / 2 - calculateTextWidth('Starting Node', 10) / 2}
               y={-12}
               text="Starting Node"
               fontSize={10}
@@ -414,10 +423,10 @@ const TimeNodes = ({ node, ifSelector, setIfSelector }: any) => {
                   duration: 0.2,
                 });
                 dispatch(
-                  setArrowLatch({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + 25 }),
+                  setArrowLatch({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + node.dimensions.height/2 }),
                 );
                 dispatch(
-                  setArrowPreviewEnd({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + 25 }),
+                  setArrowPreviewEnd({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + node.dimensions.height/2 }),
                 );
               }
             }}
@@ -438,8 +447,8 @@ const TimeNodes = ({ node, ifSelector, setIfSelector }: any) => {
         {/* Right Circle */}
         <Circle
           name="Circle"
-          x={rectWidth + 3} // Position to the right of the Rect
-          y={25} // Center vertically relative to the Rect
+          x={node.dimensions.width + 3} // Position to the right of the Rect
+          y={node.dimensions.height/2} // Center vertically relative to the Rect
           radius={4} // Default radius
           fill="white"
           stroke={circleHovered ? 'orange' : 'black'}
@@ -587,7 +596,7 @@ const TimeNodes = ({ node, ifSelector, setIfSelector }: any) => {
             style={{
               position: 'absolute',
               top: node.posY - 180,
-              left: node.posX + rectWidth - 25,
+              left: node.posX + node.dimensions.width - 25,
               width: '180px',
               background: 'white',
               border: '1px solid #ccc',
