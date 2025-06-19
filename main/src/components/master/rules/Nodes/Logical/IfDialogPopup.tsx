@@ -80,6 +80,27 @@ const variables = {
   ],
 };
 
+interface NodeDetails {
+  building?: string[];
+  floorplan?: string[];
+  area?: string[];
+  access?: string;
+  status?: string[];
+  type?: string[];
+  visitor?: string[];
+  organization?: string[];
+  department?: string[];
+  district?: string[];
+  member?: string[];
+}
+
+interface Condition {
+  subject: string;
+  condition: string;
+  value: string;
+  operator: string;
+}
+
 const IfDialogPopup: React.FC<{
   nodes: nodeType[];
   open: boolean;
@@ -87,70 +108,163 @@ const IfDialogPopup: React.FC<{
   onSave: () => void;
 }> = ({ nodes, open, onClose, onSave }) => {
   const theme = useTheme();
-  const [selectedSubject, setSelectedSubject] = React.useState<string>('');
-  const [selectedCondition, setSelectedCondition] = React.useState<string>('');
-  const [selectedValue, setSelectedValue] = React.useState<string>('');
-  const [addCondition, setAddCondition] = React.useState<boolean>(false);
+  const [conditions, setConditions] = React.useState<Condition[]>([
+    { subject: '', condition: '', value: '', operator: 'AND' },
+  ]);
 
-  //Second Condition
-  const [secondSelectedSubject, setSecondSelectedSubject] = React.useState<string>('');
-  const [secondSelectedCondition, setSecondSelectedCondition] = React.useState<string>('');
-  const [secondSelectedValue, setSecondSelectedValue] = React.useState<string>('');
+  React.useEffect(() => {
+    if (open) {
+      const nonStartNodes = nodes.filter((node) => !node.startNode);
+      const allConditions: Condition[] = [];
 
-  const [logicalOperator, setLogicalOperator] = React.useState<string>('AND'); // Default to AND
+      nonStartNodes.forEach((node) => {
+        try {
+          const details: NodeDetails = JSON.parse(node.details);
 
-  const handleLogicalOperatorChange = (
-    event: React.MouseEvent<HTMLElement>,
-    newOperator: string | null,
-  ) => {
-    if (newOperator !== null) {
-      setLogicalOperator(newOperator);
+          // Handle organization-related details
+          if (details.organization?.length) {
+            allConditions.push({
+              subject: ' ',
+              condition: 'Equal to',
+              value: JSON.stringify(details.organization), // Convert array to string
+              operator: 'AND',
+            });
+          }
+          if (details.department?.length) {
+            allConditions.push({
+              subject: ' ',
+              condition: 'Equal to',
+              value: JSON.stringify(details.department), // Convert array to string
+              operator: 'AND',
+            });
+          }
+          // ... do the same for other fields ...
+          if (details.district?.length) {
+            allConditions.push({
+              subject: ' ',
+              condition: 'Equal to',
+              value: JSON.stringify(details.district),
+              operator: 'AND',
+            });
+          }
+          if (details.member?.length) {
+            allConditions.push({
+              subject: ' ',
+              condition: 'Equal to',
+              value: JSON.stringify(details.member),
+              operator: 'AND',
+            });
+          }
+          if (details.building?.length) {
+            allConditions.push({
+              subject: ' ',
+              condition: 'Equal to',
+              value: JSON.stringify(details.building),
+              operator: 'AND',
+            });
+          }
+          if (details.floorplan?.length) {
+            allConditions.push({
+              subject: ' ',
+              condition: 'Equal to',
+              value: JSON.stringify(details.floorplan),
+              operator: 'AND',
+            });
+          }
+          if (details.area?.length) {
+            allConditions.push({
+              subject: ' ',
+              condition: 'Equal to',
+              value: JSON.stringify(details.area),
+              operator: 'AND',
+            });
+          }
+          if (details.status?.length) {
+            allConditions.push({
+              subject: ' ',
+              condition: 'Equal to',
+              value: JSON.stringify(details.status),
+              operator: 'AND',
+            });
+          }
+          if (details.type?.length) {
+            allConditions.push({
+              subject: ' ',
+              condition: 'Equal to',
+              value: JSON.stringify(details.type),
+              operator: 'AND',
+            });
+          }
+          if (details.visitor?.length) {
+            allConditions.push({
+              subject: ' ',
+              condition: 'Equal to',
+              value: JSON.stringify(details.visitor),
+              operator: 'AND',
+            });
+          }
+        } catch (error) {
+          console.error('Error parsing node details:', error);
+        }
+      });
+
+      if (allConditions.length > 0) {
+        setConditions(allConditions);
+      }
     }
+  }, [open, nodes]);
+
+  const handleSubjectChange = (index: number, value: string) => {
+    const newConditions = [...conditions];
+    newConditions[index] = { ...newConditions[index], subject: value };
+    setConditions(newConditions);
   };
 
-  const handleSubjectChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setSelectedSubject(event.target.value as string);
-    console.log('Selected Subject:', event.target.value);
-    setSelectedCondition(''); // Reset condition when subject changes
-    setSelectedValue(''); // Reset value when subject changes
+  const handleConditionChange = (index: number, value: string) => {
+    const newConditions = [...conditions];
+    newConditions[index] = { ...newConditions[index], condition: value };
+    setConditions(newConditions);
   };
 
-  const handleSecondSubjectChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setSecondSelectedSubject(event.target.value as string);
-    console.log('Selected Second Subject:', event.target.value);
-    setSecondSelectedCondition(''); // Reset condition when subject changes
-    setSecondSelectedValue(''); // Reset value when subject changes
+  const handleValueChange = (index: number, value: string) => {
+    const newConditions = [...conditions];
+    newConditions[index] = { ...newConditions[index], value: value };
+    setConditions(newConditions);
+  };
+
+  const handleOperatorChange = (index: number, value: string) => {
+    const newConditions = [...conditions];
+    newConditions[index] = { ...newConditions[index], operator: value };
+    setConditions(newConditions);
+  };
+
+  const addCondition = () => {
+    setConditions([...conditions, { subject: ' ', condition: '', value: '', operator: 'AND' }]);
+  };
+
+  const removeCondition = (index: number) => {
+    setConditions(conditions.filter((_, i) => i !== index));
   };
 
   const detailsText = (node: nodeType) => {
-    if (node.details.startsWith('Choose a')) {
+    try {
+      const details: NodeDetails = JSON.parse(node.details);
+      const parts: string[] = [];
+
+      if (details.building?.length) {
+        parts.push(`Building: ${details.building.join(', ')}`);
+      }
+      if (details.floorplan?.length) {
+        parts.push(`Floor: ${details.floorplan.join(', ')}`);
+      }
+      if (details.area?.length) {
+        parts.push(`Area: ${details.area.join(', ')}`);
+      }
+
+      return parts.join(' | ');
+    } catch {
       return node.details;
     }
-    const detailsParts = node.details.split(' - ');
-    const organizations = detailsParts[0]?.split(',').map((o: string) => o.trim()) || [];
-    const departments = detailsParts[1]?.split(',').map((d: string) => d.trim()) || [];
-    const districts = detailsParts[2]?.split(',').map((d: string) => d.trim()) || [];
-    const members = detailsParts[3]?.split(',').map((m: string) => m.trim()) || [];
-
-    const firstOrganization = organizations[0] || '';
-    const extraOrganizations = organizations.length > 1 ? ` +${organizations.length - 1}` : '';
-    const firstDepartment = departments[0] || '';
-    const extraDepartments = departments.length > 1 ? ` +${departments.length - 1}` : '';
-    const firstDistrict = districts[0] || '';
-    const extraDistricts = districts.length > 1 ? ` +${districts.length - 1}` : '';
-    const firstMember = members[0] || '';
-    const extraMembers = members.length > 1 ? ` +${members.length - 1}` : '';
-
-    const formatPart = (first: string, extra: string) => (first ? `${first}${extra}` : '');
-
-    return [
-      formatPart(firstOrganization, extraOrganizations),
-      formatPart(firstDepartment, extraDepartments),
-      formatPart(firstDistrict, extraDistricts),
-      formatPart(firstMember, extraMembers),
-    ]
-      .filter(Boolean)
-      .join(' | ');
   };
 
   return (
@@ -159,274 +273,123 @@ const IfDialogPopup: React.FC<{
         Set Condition(s)
       </DialogTitle>
       <DialogContent sx={{ marginTop: '16px' }}>
-        <Grid container spacing={0} justifyContent={'center'} alignItems="center">
-          <Box sx={{ width: '100%' }} bgcolor={'#f5f5f5'} p={2} borderRadius={1}>
-            <Grid container spacing={2} alignItems="center" sx={{ mb: 1 }}>
-              <Grid size={1} sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                  IF
-                </Typography>
-              </Grid>
-              <Grid size={11}>
-                <CustomSelect
-                  fullWidth
-                  value={selectedSubject}
-                  onChange={(e: React.ChangeEvent<{ value: unknown }>) => handleSubjectChange(e)}
-                  displayEmpty
-                  MenuProps={{
-                    PaperProps: {
-                      style: {
-                        maxHeight: 300,
-                        width: 250,
-                      },
-                    },
-                  }}
-                >
-                  <MenuItem value="" disabled>
-                    Select a subject
-                  </MenuItem>
-                  {nodes.map((node) => (
-                    <MenuItem key={node.id} value={node.id}>
-                      Node {node.id} - {detailsText(node)}
-                    </MenuItem>
-                  ))}
-                </CustomSelect>
-              </Grid>
-            </Grid>
-            <Grid container spacing={2} alignItems="center" sx={{ mb: 1 }}>
-              <Grid size={1} sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="body1" sx={{ fontWeight: 'bold' }}></Typography>
-              </Grid>
-              <Grid size={11}>
-                <CustomSelect
-                  fullWidth
-                  value={selectedCondition}
-                  onChange={(e: React.ChangeEvent<{ value: unknown }>) =>
-                    setSelectedCondition(e.target.value as string)
-                  }
-                  displayEmpty
-                  MenuProps={{
-                    PaperProps: {
-                      style: {
-                        maxHeight: 300,
-                        width: 250,
-                      },
-                    },
-                  }}
-                >
-                  <MenuItem value="" disabled>
-                    Select a Condition
-                  </MenuItem>
-                  <MenuItem value="Equal to">Equal to</MenuItem>
-                  <MenuItem value="Not Equal to">Not Equal to</MenuItem>
-                  <MenuItem value="Contains">Contains</MenuItem>
-                  <MenuItem value="Does Not Contain">Does Not Contain</MenuItem>
-                  <MenuItem value="Starts With">Starts With</MenuItem>
-                  <MenuItem value="Ends With">Ends With</MenuItem>
-                  <MenuItem value="Greater Than">Greater Than</MenuItem>
-                  <MenuItem value="Less Than">Less Than</MenuItem>
-                </CustomSelect>
-              </Grid>
-            </Grid>
-            <Grid container spacing={2} alignItems="center" sx={{ mb: 1 }}>
-              <Grid size={1} sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="body1" sx={{ fontWeight: 'bold' }}></Typography>
-              </Grid>
-              <Grid size={11}>
-                <CustomSelect
-                  fullWidth
-                  value={selectedValue || ''} // Ensure value is always a string
-                  onChange={(e: React.ChangeEvent<{ value: unknown }>) =>
-                    setSelectedValue(e.target.value as string)
-                  }
-                  displayEmpty
-                  MenuProps={{
-                    PaperProps: {
-                      style: {
-                        maxHeight: 300,
-                        width: 250,
-                      },
-                    },
-                  }}
-                >
-                  <MenuItem value="" disabled>
-                    Select a variable
-                  </MenuItem>
-                  {nodes.map((node) => (
-                    <MenuItem key={node.id} value={node.id}>
-                      Node {node.id} - {detailsText(node)}
-                    </MenuItem>
-                  ))}
-                </CustomSelect>
-              </Grid>
-            </Grid>
-          </Box>
-          {addCondition ? (
-            <>
-              <Grid container justifyContent="center" alignItems="center" sx={{ margin: 2 }}>
-                <ToggleButtonGroup
-                  value={logicalOperator}
-                  exclusive
-                  onChange={handleLogicalOperatorChange}
-                  aria-label="Logical Operator"
-                  color="primary"
-                >
-                  <ToggleButton
-                    value="AND"
-                    aria-label="AND"
-                    sx={{ fontWeight: 'bold', width: '100px' }}
-                  >
-                    AND
-                  </ToggleButton>
-                  <ToggleButton
-                    value="OR"
-                    aria-label="OR"
-                    sx={{ fontWeight: 'bold', width: '100px' }}
-                  >
-                    OR
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              </Grid>
-              <Box sx={{ width: '100%' }} bgcolor={'#f5f5f5'} p={2} borderRadius={1}>
-                <Grid
-                  container
-                  spacing={2}
-                  justifyContent={'center'}
-                  alignItems="center"
-                  sx={{ mb: 1 }}
-                >
-                  <Grid size={1} sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                      IF
-                    </Typography>
-                  </Grid>
-                  <Grid size={11}>
-                    <CustomSelect
-                      fullWidth
-                      value={secondSelectedSubject}
-                      onChange={(e: React.ChangeEvent<{ value: unknown }>) =>
-                        handleSecondSubjectChange(e)
-                      }
-                      displayEmpty
-                      MenuProps={{
-                        PaperProps: {
-                          style: {
-                            maxHeight: 300,
-                            width: 250,
-                          },
-                        },
-                      }}
+        <Grid container spacing={2} direction="column">
+          {conditions.map((condition, index) => (
+            <React.Fragment key={index}>
+              {index > 0 && (
+                <Grid>
+                  <Grid container justifyContent="center" alignItems="center">
+                    <ToggleButtonGroup
+                      value={condition.operator}
+                      exclusive
+                      onChange={(_, value) => value && handleOperatorChange(index, value)}
+                      aria-label="Logical Operator"
+                      color="primary"
                     >
-                      <MenuItem value="" disabled>
-                        Select a subject
-                      </MenuItem>
-                      {nodes.map((node) => (
-                        <MenuItem key={node.id} value={node.id}>
-                          Node {node.id} - {detailsText(node)}
+                      <ToggleButton value="AND" sx={{ fontWeight: 'bold', width: '100px' }}>
+                        AND
+                      </ToggleButton>
+                      <ToggleButton value="OR" sx={{ fontWeight: 'bold', width: '100px' }}>
+                        OR
+                      </ToggleButton>
+                    </ToggleButtonGroup>
+                  </Grid>
+                </Grid>
+              )}
+              <Grid>
+                <Box sx={{ width: '100%' }} bgcolor={'#f5f5f5'} p={2} borderRadius={1}>
+                  <Grid container spacing={2}>
+                    <Grid size={1}>
+                      <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                        {`IF#${index + 1}`}
+                      </Typography>
+                    </Grid>
+                    <Grid size={11}>
+                      <CustomSelect
+                        fullWidth
+                        value={condition.subject}
+                        onChange={(e: React.ChangeEvent<{ value: unknown }>) =>
+                          handleSubjectChange(index, e.target.value as string)
+                        }
+                        displayEmpty
+                      >
+                        <MenuItem value=" " disabled>
+                          Select a subject
                         </MenuItem>
-                      ))}
-                    </CustomSelect>
-                  </Grid>
-                </Grid>
-                <Grid container spacing={2} alignItems="center" sx={{ mb: 1 }}>
-                  <Grid size={1} sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}></Typography>
-                  </Grid>
-                  <Grid size={11}>
-                    <CustomSelect
-                      fullWidth
-                      value={secondSelectedCondition}
-                      onChange={(e: React.ChangeEvent<{ value: unknown }>) =>
-                        setSecondSelectedCondition(e.target.value as string)
-                      }
-                      displayEmpty
-                      MenuProps={{
-                        PaperProps: {
-                          style: {
-                            maxHeight: 300,
-                            width: 250,
-                          },
-                        },
-                      }}
-                    >
-                      <MenuItem value="" disabled>
-                        Select a Condition
-                      </MenuItem>
-                      <MenuItem value="Equal to">Equal to</MenuItem>
-                      <MenuItem value="Not Equal to">Not Equal to</MenuItem>
-                      <MenuItem value="Contains">Contains</MenuItem>
-                      <MenuItem value="Does Not Contain">Does Not Contain</MenuItem>
-                      <MenuItem value="Starts With">Starts With</MenuItem>
-                      <MenuItem value="Ends With">Ends With</MenuItem>
-                      <MenuItem value="Greater Than">Greater Than</MenuItem>
-                      <MenuItem value="Less Than">Less Than</MenuItem>
-                    </CustomSelect>
-                  </Grid>
-                </Grid>
-                <Grid container spacing={2} alignItems="center" sx={{ mb: 1 }}>
-                  <Grid size={1} sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}></Typography>
-                  </Grid>
-                  <Grid size={11}>
-                    <CustomSelect
-                      fullWidth
-                      value={secondSelectedValue || ''} // Ensure value is always a string
-                      onChange={(e: React.ChangeEvent<{ value: unknown }>) =>
-                        setSecondSelectedValue(e.target.value as string)
-                      }
-                      displayEmpty
-                      MenuProps={{
-                        PaperProps: {
-                          style: {
-                            maxHeight: 300,
-                            width: 250,
-                          },
-                        },
-                      }}
-                    >
-                      <MenuItem value="" disabled>
-                        Select a variable
-                      </MenuItem>
-                      {nodes.map((node) => (
-                        <MenuItem key={node.id} value={node.id}>
-                          Node {node.id} - {detailsText(node)}
+                        {nodes
+                          .filter((node) => node.startNode === true)
+                          .map((node: nodeType) => (
+                            <MenuItem key={node.id} value={node.id}>
+                              Node {node.id} - {detailsText(node)}
+                            </MenuItem>
+                          ))}
+                      </CustomSelect>
+                    </Grid>
+                    <Grid size={1} />
+                    <Grid size={11}>
+                      <CustomSelect
+                        fullWidth
+                        value={condition.condition}
+                        onChange={(e: React.ChangeEvent<{ value: unknown }>) =>
+                          handleConditionChange(index, e.target.value as string)
+                        }
+                        displayEmpty
+                      >
+                        <MenuItem value="" disabled>
+                          Select a Condition
                         </MenuItem>
-                      ))}
-                    </CustomSelect>
+                        <MenuItem value="Equal to">Equal to</MenuItem>
+                        <MenuItem value="Not Equal to">Not Equal to</MenuItem>
+                        <MenuItem value="Contains">Contains</MenuItem>
+                        <MenuItem value="Does Not Contain">Does Not Contain</MenuItem>
+                        <MenuItem value="Starts With">Starts With</MenuItem>
+                        <MenuItem value="Ends With">Ends With</MenuItem>
+                        <MenuItem value="Greater Than">Greater Than</MenuItem>
+                        <MenuItem value="Less Than">Less Than</MenuItem>
+                      </CustomSelect>
+                    </Grid>
+                    <Grid size={1} />
+                    <Grid size={11}>
+                      <CustomSelect
+                        fullWidth
+                        value={condition.value}
+                        onChange={(e: React.ChangeEvent<{ value: unknown }>) =>
+                          handleValueChange(index, e.target.value as string)
+                        }
+                        displayEmpty
+                        disabled={condition.value.startsWith('[')}
+                      >
+                        <MenuItem value="" disabled>
+                          Select a variable
+                        </MenuItem>
+                        {condition.value && condition.value.startsWith('[') && (
+                          <MenuItem value={condition.value}>
+                            {JSON.parse(condition.value).join(', ')}
+                          </MenuItem>
+                        )}
+                      </CustomSelect>
+                    </Grid>
+                    {index > 0 && (
+                      <Grid size={12}>
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          onClick={() => removeCondition(index)}
+                        >
+                          Delete Condition
+                        </Button>
+                      </Grid>
+                    )}
                   </Grid>
-                </Grid>
-                <Grid container spacing={2} alignItems="center" sx={{ mt: 2 }}>
-                  <Grid size={12}>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={() => {
-                        setSecondSelectedCondition('');
-                        setSecondSelectedValue('');
-                        setSecondSelectedSubject('');
-                        setAddCondition(false);
-                      }}
-                    >
-                      Delete Condition
-                    </Button>
-                  </Grid>
-                </Grid>
-              </Box>
-            </>
-          ) : (
-            <Grid container spacing={2} alignItems="center" sx={{ mt: 2 }}>
-              <Grid size={12}>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={() => setAddCondition(true)}
-                  fullWidth
-                >
-                  + Add Condition
-                </Button>
+                </Box>
               </Grid>
-            </Grid>
-          )}
+            </React.Fragment>
+          ))}
+          <Grid>
+            <Button variant="outlined" color="primary" onClick={addCondition} fullWidth>
+              + Add Condition
+            </Button>
+          </Grid>
         </Grid>
       </DialogContent>
       <DialogActions>

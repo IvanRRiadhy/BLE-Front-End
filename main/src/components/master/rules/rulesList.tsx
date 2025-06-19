@@ -22,10 +22,18 @@ import { nodeType, AddNode } from 'src/store/apps/rules/RulesNodes';
 const blocks = [
   {
     name: 'Member',
-    type: 'object',
+    type: 'entity',
   },
   {
     name: 'Visitor',
+    type: 'entity',
+  },
+  {
+    name: 'Members Data',
+    type: 'object',
+  },
+  {
+    name: 'Visitors Data',
     type: 'object',
   },
   {
@@ -35,14 +43,6 @@ const blocks = [
   {
     name: 'Time',
     type: 'object',
-  },
-  {
-    name: 'and',
-    type: 'Logic',
-  },
-  {
-    name: 'or',
-    type: 'Logic',
   },
   {
     name: 'if',
@@ -86,6 +86,24 @@ const RulesList = () => {
       <Box>
         <Divider />
         <Scrollbar sx={{ height: '65vh', maxHeight: 'fit-content' }}>
+                    <Box sx={{ width: 260, background: '#f7f7f7', p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Entity
+            </Typography>
+            {blocks
+              .filter((block) => block.type === 'entity') // Filter blocks with type "object"
+              .map((block, index) => (
+                <Button
+                  key={index}
+                  variant="contained"
+                  fullWidth
+                  onClick={() => handleOnClick(block.name, block.type)}
+                  sx={{ mb: 1 }}
+                >
+                  {block.name}
+                </Button>
+              ))}
+          </Box>
           <Box sx={{ width: 260, background: '#f7f7f7', p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Object

@@ -3,10 +3,10 @@ import { Box } from '@mui/material';
 import { Stage, Layer } from 'react-konva';
 import Nodes from './Nodes';
 import Arrows from './Arrows';
-import MemberNodes from '../Nodes/Member/MemberNodes';
+import MembersDataNodes from '../Nodes/Member/MembersDataNodes';
 import AreaNodes from '../Nodes/Area/AreaNodes';
 import TimeNodes from '../Nodes/Time/TimeNodes';
-import VisitorNodes from '../Nodes/Visitor/VisitorNodes';
+import VisitorDataNodes from '../Nodes/Visitor/VisitorsDataNodes';
 import AndNodes from '../Nodes/Logical/AndNodes';
 import OrNodes from '../Nodes/Logical/OrNodes';
 import IfNodes from '../Nodes/Logical/IfNodes';
@@ -19,8 +19,8 @@ import {
 } from 'src/store/apps/rules/RulesConnectors';
 
 const nodeComponentMapping: { [key: string]: React.FC<any> } = {
-  Member: MemberNodes,
-  Visitor: VisitorNodes,
+  MembersData: MembersDataNodes,
+  VisitorsData: VisitorDataNodes,
   Area: AreaNodes,
   Time: TimeNodes,
   and: AndNodes,
@@ -99,7 +99,8 @@ const Canvas = () => {
           ))}
           <PreviewArrow />
           {nodes.map((node: any) => {
-            const NodeComponent = nodeComponentMapping[node.name]; // Get the correct component
+            const nameWithoutSpaces = node.name.replace(/\s+/g, '');
+            const NodeComponent = nodeComponentMapping[nameWithoutSpaces]; // Get the correct component
             if (!NodeComponent) {
               return <Nodes key={node.id} node={node} />;
             }

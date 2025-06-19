@@ -66,28 +66,52 @@ const AreaNodePopup: React.FC<NodePopupProps> = ({
   if (!node || !node.id || !node.name || node.posX === undefined || node.posY === undefined) {
     return null;
   }
-  const popupRef = useRef<HTMLDivElement>(null); // Ref for the popup box
-  // Filter areas based on selected building and floorplan
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
+  const popupRef = useRef<HTMLDivElement>(null); // Ref for the popup box
+
+  const [popupDimensions, setPopupDimensions] = useState({ width: 200, height: 150 });
   // Parse node.details
   const parseAreaDetails2 = (details: string, extraDetails: string) => {
-    const matchingArea = areas.filter((area) => details.includes(area.area));
-    console.log('Matching Area:', matchingArea);
-    if (matchingArea.length > 0) {
+    if (!details || details.startsWith('Choose a')) {
       return {
-        building: Array.from(new Set(matchingArea.map((area) => area.building))),
-        floorplan: Array.from(new Set(matchingArea.map((area) => area.floorplan))),
-        area: Array.from(new Set(matchingArea.map((area) => area.area))),
-        extraDetails: extraDetails || '',
+        building: [],
+        floorplan: [],
+        area: [],
+        extraDetails: '',
       };
     }
-    return {
-      building: [],
-      floorplan: [],
-      area: [],
-      extraDetails: extraDetails || '',
-    };
+
+    try {
+      // Parse the JSON string
+      const parsedDetails = JSON.parse(details);
+      return {
+        building: parsedDetails.building || [],
+        floorplan: parsedDetails.floorplan || [],
+        area: parsedDetails.area || [],
+        extraDetails: parsedDetails.access || extraDetails || '',
+      };
+    } catch (error) {
+      console.error('Error parsing details:', error);
+      return {
+        building: [],
+        floorplan: [],
+        area: [],
+        extraDetails: '',
+      };
+    }
   };
+
+  useEffect(() => {
+    // Dynamically calculate popup dimensions after rendering
+    if (popupRef.current) {
+      const rect = popupRef.current.getBoundingClientRect();
+      setPopupDimensions({ width: rect.width, height: rect.height });
+      console.log('Popup dimensions:', rect.width, rect.height);
+    }
+  }, [popupRef]);
 
   const [formData, setFormData] = useState(() =>
     parseAreaDetails2(node.details || '', node.extraDetails || ''),
@@ -99,6 +123,7 @@ const AreaNodePopup: React.FC<NodePopupProps> = ({
         formData.building.includes(area.building)) &&
       (formData.floorplan.length === 0 || formData.floorplan.includes(area.floorplan)),
   );
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -116,17 +141,85 @@ const AreaNodePopup: React.FC<NodePopupProps> = ({
     };
   }, [onClose]);
 
+  const canvas = document.querySelector('.konvajs-content') as HTMLElement;
+  const canvasWidth = canvas?.offsetWidth - 315 || 800; // Default to 800 if canvas is not found
+  const canvasHeight = canvas?.offsetHeight || 600; // Default to 600 if canvas is not found
+  // Calculate popup position
+  let top = Math.max(node.posY + 60, 15); // Position below the node
+  let left = Math.max(node.posX + 20, 15); // Position slightly to the right of the node
+
+  // Adjust if the popup goes beyond the canvas bounds
+  if (top + popupDimensions.height > canvasHeight) {
+    top = canvasHeight - popupDimensions.height - 10; // Adjust to stay within the bottom edge
+  }
+  if (left + popupDimensions.width > canvasWidth) {
+    left = canvasWidth - popupDimensions.width - 10; // Adjust to stay within the right edge
+  }
+  // Calculate initial popup position
+  useEffect(() => {
+    let initialTop = Math.max(node.posY + 60, 15);
+    let initialLeft = Math.max(node.posX + 20, 15);
+
+    if (initialTop + popupDimensions.height > canvasHeight) {
+      initialTop = canvasHeight - popupDimensions.height - 10;
+    }
+    if (initialLeft + popupDimensions.width > canvasWidth) {
+      initialLeft = canvasWidth - popupDimensions.width - 10;
+    }
+
+    setPosition({ x: initialLeft, y: initialTop });
+  }, [node.posX, node.posY, canvasHeight, canvasWidth, popupDimensions]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).classList.contains('drag-handle')) {
+      setIsDragging(true);
+      setDragStart({
+        x: e.clientX - position.x,
+        y: e.clientY - position.y,
+      });
+    }
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isDragging) {
+      let newX = e.clientX - dragStart.x;
+      let newY = e.clientY - dragStart.y;
+
+      // Constrain to canvas bounds
+      newX = Math.max(0, Math.min(newX, canvasWidth - popupDimensions.width));
+      newY = Math.max(0, Math.min(newY, canvasHeight - popupDimensions.height));
+
+      setPosition({ x: newX, y: newY });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
   const popupStyle = {
     position: 'absolute' as const,
     width: '600px',
-    top: node.posY + 60, // Position below the node
-    left: node.posX + 20, // Position slightly to the right of the node
+    top: position.y, // Position below the node
+    left: position.x, // Position slightly to the right of the node
     background: 'white',
     border: '1px solid #ccc',
     borderRadius: '8px',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     padding: '10px',
     zIndex: 1000,
+    cursor: isDragging ? 'grabbing' : 'default',
   };
   // Filter floorplans based on selected building
   const filteredFloorplans = Array.from(
@@ -141,9 +234,27 @@ const AreaNodePopup: React.FC<NodePopupProps> = ({
 
   return (
     <Box ref={popupRef} sx={popupStyle} onMouseDown={(e: any) => e.stopPropagation()}>
-      <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-        Node Details
-      </Typography>
+      <Box
+        className="drag-handle"
+        sx={{
+          height: '30px',
+          marginBottom: '10px',
+          cursor: 'grab',
+          backgroundColor: '#f5f5f5',
+          borderRadius: '8px 8px 0 0',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 10px',
+          '&:active': {
+            cursor: 'grabbing',
+          },
+        }}
+        onMouseDown={handleMouseDown}
+      >
+        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+          Node Details
+        </Typography>
+      </Box>
       <Divider />
       <Grid container spacing={1} mb={0}>
         <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
@@ -160,8 +271,8 @@ const AreaNodePopup: React.FC<NodePopupProps> = ({
                     formData.building.length === allBuildings.length
                       ? [] // Clear selection if all are already selected
                       : allBuildings, // Select all buildings
-                  floorplan: [], // Reset dependent fields
-                  area: [], // Reset dependent fields
+                  // floorplan: [], // Reset dependent fields
+                  // area: [], // Reset dependent fields
                 }));
                 return;
               }
@@ -219,9 +330,9 @@ const AreaNodePopup: React.FC<NodePopupProps> = ({
                   setFormData((prev) => ({
                     ...prev,
                     floorplan:
-                      formData.floorplan.length === filteredFloorplans.length
+                      formData.floorplan.length === allFloorplans.length
                         ? [] // Clear selection if all are already selected
-                        : filteredFloorplans, // Select all floorplans
+                        : allFloorplans, // Select all floorplans
                     area: [], // Reset dependent fields
                   }));
                   return;
@@ -248,16 +359,16 @@ const AreaNodePopup: React.FC<NodePopupProps> = ({
               <MenuItem value="all">
                 <ListItemIcon>
                   <Checkbox
-                    checked={formData.floorplan.length === filteredFloorplans.length}
+                    checked={formData.floorplan.length === allFloorplans.length}
                     indeterminate={
                       formData.floorplan.length > 0 &&
-                      formData.floorplan.length < filteredFloorplans.length
+                      formData.floorplan.length < allFloorplans.length
                     }
                   />
                 </ListItemIcon>
                 <ListItemText primary="Select All" />
               </MenuItem>
-              {filteredFloorplans.map((floorplan, index) => (
+              {allFloorplans.map((floorplan, index) => (
                 <MenuItem key={index} value={floorplan}>
                   <ListItemIcon>
                     <Checkbox checked={formData.floorplan.includes(floorplan)} />
@@ -372,27 +483,14 @@ const AreaNodePopup: React.FC<NodePopupProps> = ({
           size="small"
           onClick={() => {
             const { building, floorplan, area, extraDetails } = formData;
-
-            if (area.length === 0) {
-              onEdit(
-                node.id,
-                `${building.join(', ')} - ${floorplan.join(', ')} - No Area Selected`,
-                extraDetails,
-              );
-            } else {
-              onEdit(
-                node.id,
-                `${building.join(', ')} - ${floorplan.join(', ')} - ${area.join(', ')}`,
-                extraDetails,
-              );
-              console.log(
-                `Edited Node ${node.id}: Building - ${building.join(
-                  ', ',
-                )}, Floorplan - ${floorplan.join(', ')}, Area - ${area.join(
-                  ', ',
-                )}, Access - ${extraDetails}`,
-              );
-            }
+            const detailsJson = JSON.stringify({
+              building,
+              floorplan,
+              area,
+              access: extraDetails,
+            });
+            onEdit(node.id, detailsJson, extraDetails);
+            console.log(`Edited Node ${node.id}:`, detailsJson);
           }}
         >
           Save

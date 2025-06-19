@@ -69,25 +69,44 @@ const MemberNodePopup: React.FC<NodePopupProps> = ({
     return null;
   }
 
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
   const popupRef = useRef<HTMLDivElement>(null); // Ref for the popup box
 
+  const [popupDimensions, setPopupDimensions] = useState({ width: 200, height: 150 });
   // Update parseMemberDetails to handle multiple selections
   const parseMemberDetails = (details: string) => {
-    const matchingMembers = members.filter((member) => details.includes(member.name));
-    if (matchingMembers.length > 0) {
-      return {
-        organization: Array.from(new Set(matchingMembers.map((member) => member.organization))),
-        department: Array.from(new Set(matchingMembers.map((member) => member.department))),
-        district: Array.from(new Set(matchingMembers.map((member) => member.district))),
-        member: matchingMembers.map((member) => member.name),
-      };
+    if (!details || details.startsWith('Choose a')) {
+      return { organization: [], department: [], district: [], member: [] };
     }
-    return { organization: [], department: [], district: [], member: [] }; // Default values if not found
+
+    try {
+      // Parse the JSON string
+      const parsedDetails = JSON.parse(details);
+      return {
+        organization: parsedDetails.organization || [],
+        department: parsedDetails.department || [],
+        district: parsedDetails.district || [],
+        member: parsedDetails.member || [],
+      };
+    } catch (error) {
+      console.error('Error parsing details:', error);
+      return { organization: [], department: [], district: [], member: [] };
+    }
   };
 
   // Initialize formData with the updated parseMemberDetails
   const [formData, setFormData] = useState(() => parseMemberDetails(node.details || ''));
-
+  useEffect(() => {
+    // Dynamically calculate popup dimensions after rendering
+    if (popupRef.current) {
+      const rect = popupRef.current.getBoundingClientRect();
+      setPopupDimensions({ width: rect.width, height: rect.height });
+      console.log('Popup dimensions:', rect.width, rect.height);
+    }
+  }, [popupRef]);
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -105,17 +124,85 @@ const MemberNodePopup: React.FC<NodePopupProps> = ({
     };
   }, [onClose]);
 
+  const canvas = document.querySelector('.konvajs-content') as HTMLElement;
+  const canvasWidth = canvas?.offsetWidth - 315 || 800; // Default to 800 if canvas is not found
+  const canvasHeight = canvas?.offsetHeight || 600; // Default to 600 if canvas is not found
+  // Calculate popup position
+  let top = Math.max(node.posY + 60, 15); // Position below the node
+  let left = Math.max(node.posX + 20, 15); // Position slightly to the right of the node
+
+  // Adjust if the popup goes beyond the canvas bounds
+  if (top + popupDimensions.height > canvasHeight) {
+    top = canvasHeight - popupDimensions.height - 10; // Adjust to stay within the bottom edge
+  }
+  if (left + popupDimensions.width > canvasWidth) {
+    left = canvasWidth - popupDimensions.width - 10; // Adjust to stay within the right edge
+  }
+  // Calculate initial popup position
+  useEffect(() => {
+    let initialTop = Math.max(node.posY + 60, 15);
+    let initialLeft = Math.max(node.posX + 20, 15);
+
+    if (initialTop + popupDimensions.height > canvasHeight) {
+      initialTop = canvasHeight - popupDimensions.height - 10;
+    }
+    if (initialLeft + popupDimensions.width > canvasWidth) {
+      initialLeft = canvasWidth - popupDimensions.width - 10;
+    }
+
+    setPosition({ x: initialLeft, y: initialTop });
+  }, [node.posX, node.posY, canvasHeight, canvasWidth, popupDimensions]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).classList.contains('drag-handle')) {
+      setIsDragging(true);
+      setDragStart({
+        x: e.clientX - position.x,
+        y: e.clientY - position.y,
+      });
+    }
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isDragging) {
+      let newX = e.clientX - dragStart.x;
+      let newY = e.clientY - dragStart.y;
+
+      // Constrain to canvas bounds
+      newX = Math.max(0, Math.min(newX, canvasWidth - popupDimensions.width));
+      newY = Math.max(0, Math.min(newY, canvasHeight - popupDimensions.height));
+
+      setPosition({ x: newX, y: newY });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
   const popupStyle = {
     position: 'absolute' as const,
     width: '600px',
-    top: node.posY + 60, // Position below the node
-    left: node.posX + 20, // Position slightly to the right of the node
+    top: position.y, // Position below the node
+    left: position.x, // Position slightly to the right of the node
     background: 'white',
     border: '1px solid #ccc',
     borderRadius: '8px',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     padding: '10px',
     zIndex: 1000,
+    cursor: isDragging ? 'grabbing' : 'default',
   };
 
   // Filter departments based on selected organization
@@ -155,9 +242,27 @@ const MemberNodePopup: React.FC<NodePopupProps> = ({
 
   return (
     <Box ref={popupRef} sx={popupStyle}>
-      <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-        Node Details
-      </Typography>
+      <Box
+        className="drag-handle"
+        sx={{
+          height: '30px',
+          marginBottom: '10px',
+          cursor: 'grab',
+          backgroundColor: '#f5f5f5',
+          borderRadius: '8px 8px 0 0',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 10px',
+          '&:active': {
+            cursor: 'grabbing',
+          },
+        }}
+        onMouseDown={handleMouseDown}
+      >
+        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+          Node Details
+        </Typography>
+      </Box>
       <Divider />
       <Grid container spacing={1} mb={0}>
         <Grid size={{ lg: 4, md: 12, sm: 12 }} direction={'column'}>
@@ -235,11 +340,11 @@ const MemberNodePopup: React.FC<NodePopupProps> = ({
                 setFormData((prev) => ({
                   ...prev,
                   department:
-                    formData.department.length === filteredDepartments.length
+                    formData.department.length === departments.length
                       ? [] // Clear selection if all are already selected
-                      : filteredDepartments.map((dpt) => dpt.name), // Select all departments
-                  district: [], // Reset dependent fields
-                  member: [], // Reset dependent fields
+                      : departments.map((dpt) => dpt.name), // Select all departments
+                  // district: [], // Reset dependent fields
+                  // member: [], // Reset dependent fields
                 }));
                 return;
               }
@@ -266,16 +371,16 @@ const MemberNodePopup: React.FC<NodePopupProps> = ({
             <MenuItem value="all">
               <ListItemIcon>
                 <Checkbox
-                  checked={formData.department.length === filteredDepartments.length}
+                  checked={formData.department.length === departments.length}
                   indeterminate={
                     formData.department.length > 0 &&
-                    formData.department.length < filteredDepartments.length
+                    formData.department.length < departments.length
                   }
                 />
               </ListItemIcon>
               <ListItemText primary="Select All" />
             </MenuItem>
-            {filteredDepartments.map((dpt, index) => (
+            {departments.map((dpt, index) => (
               <MenuItem key={index} value={dpt.name}>
                 <ListItemIcon>
                   <Checkbox checked={formData.department.includes(dpt.name)} />
@@ -297,10 +402,10 @@ const MemberNodePopup: React.FC<NodePopupProps> = ({
                 setFormData((prev) => ({
                   ...prev,
                   district:
-                    formData.district.length === filteredDistricts.length
+                    formData.district.length === districts.length
                       ? [] // Clear selection if all are already selected
-                      : filteredDistricts.map((dist) => dist.name), // Select all districts
-                  member: [], // Reset dependent fields
+                      : districts.map((dist) => dist.name), // Select all districts
+                  // member: [], // Reset dependent fields
                 }));
                 return;
               }
@@ -326,16 +431,15 @@ const MemberNodePopup: React.FC<NodePopupProps> = ({
             <MenuItem value="all">
               <ListItemIcon>
                 <Checkbox
-                  checked={formData.district.length === filteredDistricts.length}
+                  checked={formData.district.length === districts.length}
                   indeterminate={
-                    formData.district.length > 0 &&
-                    formData.district.length < filteredDistricts.length
+                    formData.district.length > 0 && formData.district.length < districts.length
                   }
                 />
               </ListItemIcon>
               <ListItemText primary="Select All" />
             </MenuItem>
-            {filteredDistricts.map((dist, index) => (
+            {districts.map((dist, index) => (
               <MenuItem key={index} value={dist.name}>
                 <ListItemIcon>
                   <Checkbox checked={formData.district.includes(dist.name)} />
@@ -412,31 +516,17 @@ const MemberNodePopup: React.FC<NodePopupProps> = ({
         <Button
           variant="contained"
           size="small"
+          // In the Button onClick handler
           onClick={() => {
             const { organization, department, district, member } = formData;
-
-            if (member.length === 0) {
-              onEdit(
-                node.id,
-                `${organization.join(', ')} - ${department.join(', ')} - ${district.join(
-                  ', ',
-                )} - No Member Selected`,
-              );
-            } else {
-              onEdit(
-                node.id,
-                `${organization.join(', ')} - ${department.join(', ')} - ${district.join(
-                  ', ',
-                )} - ${member.join(', ')}`,
-              );
-              console.log(
-                `Edited Node ${node.id}: Organization - ${organization.join(
-                  ', ',
-                )}, Department - ${department.join(', ')}, District - ${district.join(
-                  ', ',
-                )}, Member - ${member.join(', ')}`,
-              );
-            }
+            const detailsJson = JSON.stringify({
+              organization,
+              department,
+              district,
+              member,
+            });
+            onEdit(node.id, detailsJson);
+            console.log(`Updated Node ${node.id}:`, detailsJson);
           }}
         >
           Save

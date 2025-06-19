@@ -112,31 +112,30 @@ const MemberNodes = ({ node, ifSelector, setIfSelector }: any) => {
     if (node.details.startsWith('Choose a')) {
       return node.details;
     }
-    const detailsParts = node.details.split(' - ');
-    const organizations = detailsParts[0]?.split(',').map((o: string) => o.trim()) || [];
-    const departments = detailsParts[1]?.split(',').map((d: string) => d.trim()) || [];
-    const districts = detailsParts[2]?.split(',').map((d: string) => d.trim()) || [];
-    const members = detailsParts[3]?.split(',').map((m: string) => m.trim()) || [];
 
-    const firstOrganization = organizations[0] || '';
-    const extraOrganizations = organizations.length > 1 ? ` +${organizations.length - 1}` : '';
-    const firstDepartment = departments[0] || '';
-    const extraDepartments = departments.length > 1 ? ` +${departments.length - 1}` : '';
-    const firstDistrict = districts[0] || '';
-    const extraDistricts = districts.length > 1 ? ` +${districts.length - 1}` : '';
-    const firstMember = members[0] || '';
-    const extraMembers = members.length > 1 ? ` +${members.length - 1}` : '';
+    try {
+      // Parse the JSON string
+      const details = JSON.parse(node.details);
 
-    const formatPart = (first: string, extra: string) => (first ? `${first}${extra}` : '');
+      // Format each section
+      const formatSection = (items: string[]) => {
+        if (!items || items.length === 0) return '';
+        return `${items[0]}${items.length > 1 ? ` +${items.length - 1}` : ''}`;
+      };
 
-    return [
-      formatPart(firstOrganization, extraOrganizations),
-      formatPart(firstDepartment, extraDepartments),
-      formatPart(firstDistrict, extraDistricts),
-      formatPart(firstMember, extraMembers),
-    ]
-      .filter(Boolean)
-      .join(' | ');
+      // Combine all sections
+      const formattedParts = [
+        formatSection(details.organization),
+        formatSection(details.department),
+        formatSection(details.district),
+        formatSection(details.member),
+      ].filter(Boolean);
+
+      return formattedParts.join(' | ');
+    } catch (error) {
+      console.error('Error parsing details:', error);
+      return 'Invalid details format';
+    }
   };
   const detailsWidth = calculateTextWidth(detailsText(node), 12);
   const textWidth = Math.max(nameWidth, detailsWidth); // Approximate text width
