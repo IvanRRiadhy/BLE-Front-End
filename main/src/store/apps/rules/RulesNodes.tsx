@@ -90,7 +90,7 @@ export const NodeSlice = createSlice({
     addExtraDetails: (state, action: PayloadAction<{ id: string; extraDetails: string }>) => {
       const { id, extraDetails } = action.payload;
       const node = state.nodes.find((node) => node.id === id);
-      if (node) {
+      if (node) { 
         node.extraDetails = extraDetails;
       }
     },

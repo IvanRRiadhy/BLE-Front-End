@@ -253,7 +253,7 @@ const Menuitems = [
         id: uniqueId(),
         title: 'Tracking Transaction',
         icon: IconLiveView,
-        href: '/master/trackingtransaction/'
+        href: '/apps/trackingtransaction/'
       },
       {
         id: uniqueId(),

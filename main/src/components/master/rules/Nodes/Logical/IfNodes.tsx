@@ -9,6 +9,7 @@ import {
   deleteNode,
   setStartNode,
   setStartNodeThunk,
+  setNodeDimensions,
 } from 'src/store/apps/rules/RulesNodes';
 import { useSelector } from 'react-redux';
 import {
@@ -96,7 +97,9 @@ const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
   };
   const textWidth = calculateTextWidth(node.name, 16); // Approximate text width
   const rectWidth = Math.max(textWidth + 20, 100);
-
+    useEffect(() => {
+      dispatch(setNodeDimensions({ id: node.id, dimensions: { width: rectWidth, height: node.dimensions.height } }));
+    },[rectWidth])
   const allNodes = useSelector((state: any) => state.RulesNodeReducer.nodes);
 
   const incomingNodeIds = arrows
@@ -179,9 +182,9 @@ const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
             if (arrowDrawing.startNodeId === node.id) {
               return;
             }
-            dispatch(setArrowLatch({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + 25 }));
+            dispatch(setArrowLatch({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + node.dimensions.height / 2 }));
             dispatch(
-              setArrowPreviewEnd({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + 25 }),
+              setArrowPreviewEnd({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + node.dimensions.height / 2 }),
             );
           }
         }}
@@ -204,7 +207,7 @@ const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
               style={{
                 position: 'absolute',
                 top: 9, // Adjust position relative to the node
-                left: rectWidth - 20, // Align near the right edge of the rectangle
+                left: node.dimensions.width - 20, // Align near the right edge of the rectangle
                 cursor: 'pointer',
               }}
               onClick={handleMenuToggle} // Toggle the menu on click
@@ -230,7 +233,7 @@ const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
         {/* Rectangle for the node */}
         <Rect
           name="node"
-          width={rectWidth}
+          width={node.dimensions.width}
           height={50}
           fill="white"
           stroke="black"
@@ -245,7 +248,7 @@ const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
         {/* Text inside the node */}
         <Text
           name="node"
-          x={rectWidth / 2 - textWidth / 2} // Padding inside the Rect
+          x={node.dimensions.width / 2 - textWidth / 2} // Padding inside the Rect
           y={12} // Center the text vertically
           text={node.name}
           fontSize={16}
@@ -262,13 +265,13 @@ const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
             <Rect
               x={0} // Align with the main rectangle
               y={-15} // Position above the main rectangle
-              width={rectWidth}
+              width={node.dimensions.width}
               height={15}
               fill={theme.palette.primary.main} // Black background
               cornerRadius={4} // Rounded corners
             />
             <Text
-              x={rectWidth / 2 - calculateTextWidth('Starting Node', 10) / 2} // Center horizontally
+              x={node.dimensions.width / 2 - calculateTextWidth('Starting Node', 10) / 2} // Center horizontally
               y={-12} // Position inside the black rectangle
               text="Starting Node"
               fontSize={10}
@@ -282,7 +285,7 @@ const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
           <Circle
             name="circle"
             x={-3} // Position to the left of the Rect
-            y={25} // Center vertically relative to the Rect
+            y={node.dimensions.height / 2} // Center vertically relative to the Rect
             radius={4} // Fixed radius
             fill="white"
             stroke="black"
@@ -344,10 +347,10 @@ const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
                   duration: 0.2,
                 });
                 dispatch(
-                  setArrowLatch({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + 25 }),
+                  setArrowLatch({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + node.dimensions.height / 2 }),
                 );
                 dispatch(
-                  setArrowPreviewEnd({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + 25 }),
+                  setArrowPreviewEnd({ id: arrowDrawing.id, x: node.posX - 3, y: node.posY + node.dimensions.height / 2 }),
                 );
               }
             }}
@@ -359,7 +362,7 @@ const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
               e.target.to({
                 scaleX: 1,
                 scaleY: 1,
-                duration: 0.2,
+                duration: 0.2,    
               });
               dispatch(setArrowLatch(null));
             }}
@@ -368,8 +371,8 @@ const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
         {/* Right Circle */}
         <Circle
           name="circle"
-          x={rectWidth + 3} // Position to the right of the Rect
-          y={25} // Center vertically relative to the Rect
+          x={node.dimensions.width + 3} // Position to the right of the Rect
+          y={node.dimensions.height / 2} // Center vertically relative to the Rect
           radius={4} // Default radius
           fill="white"
           stroke={circleHovered ? 'orange' : 'black'}
@@ -516,7 +519,7 @@ const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
             style={{
               position: 'absolute',
               top: node.posY - 140,
-              left: node.posX + rectWidth - 25,
+              left: node.posX + node.dimensions.width - node.dimensions.height / 2,
               width: '180px',
               background: 'white',
               border: '1px solid #ccc',

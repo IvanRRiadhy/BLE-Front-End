@@ -240,7 +240,7 @@ const Router = [
       { path: '/master/blereader', exact: true, element: <BleReader /> },
       { path: '/master/floor', exact: true, element: <Floor /> },
       { path: '/master/member', exact: true, element: <Member /> },
-      { path: '/master/trackingtransaction', exact: true, element: <TrackingTransaction /> },
+      { path: '/apps/trackingtransaction', exact: true, element: <TrackingTransaction /> },
       { path: '/master/visitor', exact: true, element: <Visitor /> },
       { path: '/apps/blacklist', exact: true, element: <Blacklist /> },
       { path: '/master/building', exact: true, element: <Building /> },
