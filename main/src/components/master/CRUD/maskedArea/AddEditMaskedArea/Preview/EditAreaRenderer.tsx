@@ -208,12 +208,15 @@ const EditAreaRenderer: React.FC<{
         setImage(img);
       };
     }
-        console.log('Width:', width, 'Height:', height, 'Scale:', scale);
+    console.log('Width:', width, 'Height:', height, 'Scale:', scale);
   }, [imageSrc]);
 
-    const setPointsFromNodes = (nodes: Nodes[]): number[] => {
-      // console.log('Setting nodes: ', nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]))
-    return nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]); // Flatten x and y into a single array
+  const setPointsFromNodes = (nodes: Nodes[]): number[] => {
+    // console.log('Setting nodes: ', nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]))
+    return nodes.flatMap((node) => [
+      (node.x / originalWidth) * width,
+      (node.y / originalHeight) * height,
+    ]); // Flatten x and y into a single array
   };
 
   // Function to check if two polygons intersect
@@ -394,8 +397,10 @@ const EditAreaRenderer: React.FC<{
       nodes: currentArea.nodes
         ? currentArea.nodes.map((node) => ({
             ...node,
-            x: node.x + dx,
-            y: node.y + dy,
+            x: node.x + dx * scale,
+            y: node.y + dy * scale,
+            x_px: node.x_px + dx,
+            y_px: node.y_px + dy,
           }))
         : [],
     };
@@ -802,7 +807,13 @@ const EditAreaRenderer: React.FC<{
     const updatedAreas = filteredUnsavedArea.map((area) => {
       if (area.name === areaName) {
         const newNodes = [...(area.nodes || [])];
-        newNodes[cornerIndex] = { ...newNodes[cornerIndex], x, y }; // Update the corner's position
+        newNodes[cornerIndex] = {
+          ...newNodes[cornerIndex],
+          x: x * scale,
+          y: y * scale,
+          x_px: x,
+          y_px: y,
+        }; // Update the corner's position
         return { ...area, nodes: newNodes, areaShape: JSON.stringify(newNodes) };
       }
       return area;
@@ -825,7 +836,7 @@ const EditAreaRenderer: React.FC<{
   const handleCornerDragEnd = (areaName: string, cornerIndex: number, x: number, y: number) => {
     const area = filteredUnsavedArea.find((a) => a.name === areaName);
     if (!area) return;
-    const dPxX = x ;
+    const dPxX = x;
     const dPxY = y;
     // Create the proposed new polygon
     const proposedNodes = area.nodes ? [...area.nodes] : [];
@@ -888,14 +899,18 @@ const EditAreaRenderer: React.FC<{
             ...area,
             nodes: area.nodes?.map((node) => ({
               ...node,
-              x: node.x + dx,
-              y: node.y + dy,
+              x: node.x + dx * scale,
+              y: node.y + dy * scale,
+              x_px: node.x_px + dx,
+              y_px: node.y_px + dy,
             })),
             areaShape: JSON.stringify(
               area.nodes?.map((node) => ({
                 ...node,
-                x: node.x + dx,
-                y: node.y + dy,
+                x: node.x + dx * scale,
+                y: node.y + dy * scale,
+                x_px: node.x_px + dx,
+                y_px: node.y_px + dy,
               })),
             ),
           }
@@ -938,8 +953,8 @@ const EditAreaRenderer: React.FC<{
       const newNodes = [...(nodes || [])];
       newNodes.splice(insertIndex, 0, {
         id: uniqueId(),
-        x: clickX,
-        y: clickY,
+        x: clickX * scale,
+        y: clickY * scale,
         x_px: clickX,
         y_px: clickY,
       });
@@ -1068,7 +1083,7 @@ const EditAreaRenderer: React.FC<{
                 onMouseUp={handleMouseUp}
                 onDragStart={() => setAreaDragging(true)}
                 onDragMove={(e) => {
-                  handleDragMove(area.name, e.target.x() * scaleX , e.target.y() * scaleY);
+                  handleDragMove(area.name, e.target.x() * scaleX, e.target.y() * scaleY);
                 }}
                 onDragEnd={(e) => {
                   handleDragEnd(area.name);
@@ -1083,8 +1098,8 @@ const EditAreaRenderer: React.FC<{
                 area.nodes?.map((node: any, index: any) => (
                   <Circle
                     key={node.id}
-                    x={node.x / scaleX}
-                    y={node.y / scaleY}
+                    x={node.x_px / scaleX}
+                    y={node.y_px / scaleY}
                     radius={7}
                     fill="red"
                     draggable
@@ -1111,13 +1126,28 @@ const EditAreaRenderer: React.FC<{
                     }}
                     onDragStart={() => handleCornerDragStart(area.name, index)}
                     onDragMove={(e) => {
-                      handleDragCorner(area.name, index, e.target.x() * scaleX, e.target.y() * scaleY);
-                      handleCornerDragMove(area.name, index, e.target.x() * scaleX, e.target.y() * scaleY);
+                      handleDragCorner(
+                        area.name,
+                        index,
+                        e.target.x() * scaleX,
+                        e.target.y() * scaleY,
+                      );
+                      handleCornerDragMove(
+                        area.name,
+                        index,
+                        e.target.x() * scaleX,
+                        e.target.y() * scaleY,
+                      );
                     }}
                     onMouseDown={() => handleDragStart(area.name)}
                     onMouseUp={handleMouseUp}
                     onDragEnd={(e) => {
-                      handleCornerDragEnd(area.name, index, e.target.x() * scaleX, e.target.y() * scaleY);
+                      handleCornerDragEnd(
+                        area.name,
+                        index,
+                        e.target.x() * scaleX,
+                        e.target.y() * scaleY,
+                      );
                       handleDragEnd(area.name); // Pass the area name
                     }}
                     onContextMenu={(e) => {
@@ -1132,8 +1162,8 @@ const EditAreaRenderer: React.FC<{
           {drawingNodes.map((node) => (
             <Circle
               key={node.id}
-              x={node.x / scaleX}
-              y={node.y / scaleY}
+              x={node.x_px / scaleX}
+              y={node.y_px / scaleY}
               radius={7}
               fill="blue" // Color for the drawing nodes
               draggable={false} // Disable dragging for these circles
@@ -1161,7 +1191,12 @@ const EditAreaRenderer: React.FC<{
                   return (
                     <Line
                       key={`line-to-next-${node.id}`}
-                      points={[node.x/ scaleX, node.y/ scaleY , nextNode.x / scaleX, nextNode.y / scaleY ]} // Connect each node to the next node
+                      points={[
+                        node.x_px / scaleX,
+                        node.y_px / scaleY,
+                        nextNode.x_px / scaleX,
+                        nextNode.y_px / scaleY,
+                      ]} // Connect each node to the next node
                       stroke="blue"
                       strokeWidth={2}
                       dash={[10, 5]} // Dashed line pattern

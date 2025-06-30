@@ -455,7 +455,7 @@ const EditAreaFloorView: React.FC<{
                     imgSize.height,
                   )}
                   imageSrc={floorplanImage}
-                  scale={scale}
+                  scale={activeFloorData?.meterPerPx || 1}
                   maskedAreas={filteredUnsavedMaskedArea}
                   activeMaskedArea={activeMaskedArea}
                   setIsDragging={setIsDragging}
