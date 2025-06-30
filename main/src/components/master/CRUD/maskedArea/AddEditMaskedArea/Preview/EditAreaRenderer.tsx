@@ -807,6 +807,8 @@ const EditAreaRenderer: React.FC<{
     const updatedAreas = filteredUnsavedArea.map((area) => {
       if (area.name === areaName) {
         const newNodes = [...(area.nodes || [])];
+        console.log("x,y : ", newNodes[cornerIndex].x, newNodes[cornerIndex].y);
+        console.log("pxX,pxY : ", newNodes[cornerIndex].x_px, newNodes[cornerIndex].y_px);
         newNodes[cornerIndex] = {
           ...newNodes[cornerIndex],
           x: x * scale,
@@ -814,6 +816,7 @@ const EditAreaRenderer: React.FC<{
           x_px: x,
           y_px: y,
         }; // Update the corner's position
+        console.log("newNodes[cornerIndex] : ", newNodes[cornerIndex]);
         return { ...area, nodes: newNodes, areaShape: JSON.stringify(newNodes) };
       }
       return area;

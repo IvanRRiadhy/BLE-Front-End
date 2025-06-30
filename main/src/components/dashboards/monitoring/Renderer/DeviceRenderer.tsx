@@ -84,11 +84,11 @@ const DeviceRenderer: React.FC<{
   const setPointsFromNodes = (nodes: Nodes[]): number[] => {
     // console.log('Setting nodes: ', nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]))
     return nodes.flatMap((node) => [
-      (node.x / originalWidth) * width,
-      (node.y / originalHeight) * height,
+      (node.x_px / originalWidth) * width,
+      (node.y_px / originalHeight) * height,
     ]); // Flatten x and y into a single array
   };
-  
+
   const beaconData = useSelector((state) => state.BeaconReducer.beaconsByTopic[topic]);
   useEffect(() => {
     if (imageSrc) {
@@ -134,12 +134,12 @@ const DeviceRenderer: React.FC<{
   //   return () => clearInterval(interval);
   // }, [dispatch]);
 
-useEffect(() => {
-  const unsubscribe = dispatch(fetchBeacon(topic));
-  return () => {
-    if (typeof unsubscribe === 'function') unsubscribe();
-  };
-}, [dispatch, topic]);
+  useEffect(() => {
+    const unsubscribe = dispatch(fetchBeacon(topic));
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, [dispatch, topic]);
 
   // useEffect(() => {
   //   if (beaconData && Array.isArray(beaconData)) {
@@ -299,9 +299,8 @@ useEffect(() => {
     });
   }, [beaconData]);
 
-
   useEffect(() => {
-    console.log("FloorplanID : ",topic,"Beacons : ", beaconData);
+    console.log('FloorplanID : ', topic, 'Beacons : ', beaconData);
     Object.entries(lastSeenBeacons).forEach(([beaconId, beacon]) => {
       const point = { x: beacon.x, y: beacon.y };
       const prev = animatedBeacons[beaconId] || { x: point.x, y: point.y };
