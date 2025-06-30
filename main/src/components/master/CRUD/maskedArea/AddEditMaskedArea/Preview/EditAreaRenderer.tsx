@@ -214,8 +214,8 @@ const EditAreaRenderer: React.FC<{
   const setPointsFromNodes = (nodes: Nodes[]): number[] => {
     // console.log('Setting nodes: ', nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]))
     return nodes.flatMap((node) => [
-      (node.x / originalWidth) * width,
-      (node.y / originalHeight) * height,
+      (node.x_px / originalWidth) * width,
+      (node.y_px / originalHeight) * height,
     ]); // Flatten x and y into a single array
   };
 

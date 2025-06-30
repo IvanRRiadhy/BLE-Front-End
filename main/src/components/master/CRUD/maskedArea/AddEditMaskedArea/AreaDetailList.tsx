@@ -35,7 +35,7 @@ const AreaDetailList = () => {
     colorArea: area?.colorArea || '',
     areaShape: area?.areaShape || '',
     restrictedStatus:
-      restrictedStatus.find((s) => s.value === (area?.restrictedStatus || '').toLowerCase())
+      restrictedStatus.find((s) => s.value === (area?.restrictedStatus || ''))
         ?.value || '',
     wideArea: area?.wideArea || 0,
     positionPxX: area?.positionPxX || 0,
