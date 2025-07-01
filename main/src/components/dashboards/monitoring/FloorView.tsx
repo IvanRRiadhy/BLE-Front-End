@@ -317,9 +317,9 @@ const actFloorplan = floorplans.find(
     const scaledHeight = imgSize.height * scale;
 
     const minX = Math.min(-scaledWidth, containerWidth - scaledWidth); // Left boundary
-    const maxX = scaledWidth; // Right boundary
+    const maxX = containerWidth; // Right boundary
     const minY = Math.min(-scaledHeight, containerHeight - scaledHeight); // Top boundary
-    const maxY = scaledHeight; // Bottom boundary
+    const maxY = containerHeight; // Bottom boundary
 
     const newX = event.clientX - dragStart.current.x;
     const newY = event.clientY - dragStart.current.y;
