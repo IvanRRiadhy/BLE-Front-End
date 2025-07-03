@@ -23,7 +23,7 @@ const Monitoring = () => {
   const grid = useSelector((state: AppState) => state.layoutReducer.grid); // Get the current grid value
   const floorIds = useSelector((state: AppState) => state.layoutReducer.floorplanId); // Get the current floor IDs
   const memoizedFloorIds = useMemo(() => floorIds, [floorIds]);
-
+  const screenSettings = useSelector((state: AppState) => state.layoutReducer.screenSettings);
   const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
     width: '100%',
     color: theme.palette.text.secondary,
@@ -286,7 +286,7 @@ const Monitoring = () => {
               }),
             }}
           >
-            <MonitoringGrid grid={grid} floorIds={memoizedFloorIds} />
+            <MonitoringGrid grid={grid} floorIds={memoizedFloorIds} screenSettings={screenSettings} />
             {/* {renderLayout()} */}
           </Box>
         </Box>

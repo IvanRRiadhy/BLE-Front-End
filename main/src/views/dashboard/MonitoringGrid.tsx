@@ -2,6 +2,7 @@ import { Grid2 as Grid, Typography } from '@mui/material';
 import React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import FloorView from 'src/components/dashboards/monitoring/FloorView';
+import { screenSettings } from 'src/store/apps/monitoring/layout';
 
 interface MonitoringGridProps {
   grid: number;
@@ -118,9 +119,10 @@ const layoutConfig = {
 interface MonitoringGridProps {
   grid: number;
   floorIds: Record<number, string[]>;
+  screenSettings: screenSettings[][];
 }
 
-const MonitoringGrid = React.memo(({ grid, floorIds }: MonitoringGridProps) => {
+const MonitoringGrid = React.memo(({ grid, floorIds, screenSettings }: MonitoringGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const [gridDimensions, setGridDimensions] = useState({ width: 0, height: 0 });
 
@@ -183,6 +185,7 @@ const MonitoringGrid = React.memo(({ grid, floorIds }: MonitoringGridProps) => {
                                 zoomable={grandChild.zoomable}
                                 containerWidth={gridDimensions.width} // Pass width
                                 containerHeight={gridDimensions.height} // Pass height
+                                screenSettings={screenSettings[grid][grandChild.floorId]}
                               />
                             </Grid>
                           ))}
@@ -213,6 +216,7 @@ const MonitoringGrid = React.memo(({ grid, floorIds }: MonitoringGridProps) => {
                         zoomable={(child as { zoomable: boolean }).zoomable}
                         containerWidth={gridDimensions.width} // Pass width
                         containerHeight={gridDimensions.height} // Pass height
+                        screenSettings={screenSettings[grid][(child as { floorId: number }).floorId]}
                       />
                     </Grid>
                   );
@@ -244,6 +248,7 @@ const MonitoringGrid = React.memo(({ grid, floorIds }: MonitoringGridProps) => {
               zoomable={(item as { zoomable: boolean }).zoomable}
               containerWidth={gridDimensions.width} // Pass width
               containerHeight={gridDimensions.height} // Pass height
+              screenSettings={screenSettings[grid][(item as { floorId: number }).floorId]}
             />
           </Grid>
         );

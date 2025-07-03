@@ -19,7 +19,7 @@ import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import React, { useEffect, useState } from 'react';
 // import { floorplanType } from 'src/types/tracking/floorplan';
 // import { fetchFloorplans } from 'src/store/apps/tracking/FloorPlanSlice';
-import { setFloorplan } from 'src/store/apps/monitoring/layout';
+import { setFloorplan, setScreenSettings } from 'src/store/apps/monitoring/layout';
 import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
@@ -28,12 +28,14 @@ interface configSidebarProps {
   setSelectedGrid: (grid: string) => void;
   setSelectedScreens: (screen: string) => void;
   previewSelectedScreen: string;
+    screenSettings?: { scale: number; translateX: number; translateY: number };
 }
 
 const ConfigSidebar: React.FC<configSidebarProps> = ({
   setSelectedGrid,
   setSelectedScreens,
   previewSelectedScreen,
+  screenSettings,
 }: configSidebarProps) => {
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -48,6 +50,9 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
     (state: AppState) => state.floorReducer.floors,
   );
   const customizer = useSelector((state: AppState) => state.customizer);
+  const floorplanId = useSelector(
+    (state: AppState) => state.layoutReducer.floorplanId,
+  );
   // const [buildingList, setBuildingList] = useState([
   //   { id: '1', name: 'Building 1' },
   //   { id: '2', name: 'Building 2' },
@@ -81,9 +86,13 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
   const handleScreenChange = (event: SelectChangeEvent<string>) => {
     setSelectedScreen(event.target.value); // Dispatch the selected screen value
     setSelectedScreens(event.target.value);
+    if(floorplanId[parseInt(gridType)][parseInt(event.target.value) - 1] !== '') {
+      setSelectedFloorplan(floorplanId[parseInt(gridType)][parseInt(event.target.value) - 1]);
+    } else {
     setSelectedBuilding('');
     setSelectedFloor('');
     setSelectedFloorplan('');
+    }
   };
   const handleBuildingChange = (event: SelectChangeEvent<string>) => {
     setSelectedBuilding(event.target.value); // Dispatch the selected building value
@@ -100,9 +109,15 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
 
   const handleSave = () => {
     dispatch(setFloorplan(parseInt(gridType), parseInt(selectedScreen), selectedFloorplan));
+    dispatch(setScreenSettings(parseInt(gridType), parseInt(selectedScreen), {
+      scale: screenSettings?.scale || 1,
+      translateX: screenSettings?.translateX || 0,
+      translateY: screenSettings?.translateY || 0,
+    }));
     setSelectedScreens('');
     setSelectedScreen('');
     setSelectedBuilding('');
+    setSelectedFloor('');
     setSelectedFloorplan('');
   };
 
@@ -115,6 +130,35 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
     dispatch(fetchBuildings());
     dispatch(fetchFloors());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (selectedScreen !== '') {
+      setSelectedFloorplan(
+        floorplanId[parseInt(gridType)]?.[parseInt(selectedScreen) - 1],
+      );
+    }
+  }, [selectedScreen, gridType, floorplanId]);
+
+  useEffect(() => {
+    if(selectedFloorplan !== ''){
+      const floorplan = floorplanLists.find(
+        (floorplan) => floorplan.id === selectedFloorplan,
+      );
+      if(floorplan){
+        setSelectedFloor(floorplan.floorId);
+      }
+    }
+  },[selectedFloorplan, floorplanLists]);
+  useEffect(() => {
+    if(selectedFloor !== ''){
+      const floor = floorLists.find(
+        (floor) => floor.id === selectedFloor,
+      );
+      if(floor){
+        setSelectedBuilding(floor.buildingId);
+      }
+    }
+  },[selectedFloor, floorLists]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%' }}>

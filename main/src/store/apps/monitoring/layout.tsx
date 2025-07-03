@@ -5,7 +5,19 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 interface Statetype {
   grid: number;
   floorplanId: string[][];
+  screenSettings: screenSettings[][];
 }
+export type screenSettings = {
+  scale: number;
+  translateX: number;
+  translateY: number;
+};
+
+const initialScreen: screenSettings = {
+  scale: 1,
+  translateX: 0,
+  translateY: 0,
+};
 
 const initialState: Statetype = {
   grid: 1,
@@ -17,6 +29,15 @@ const initialState: Statetype = {
     ['', '', '', ''],
     ['', '', '', '', ''],
     ['', '', '', '', '', ''],
+  ],
+  screenSettings: [
+    [],
+    [{ scale: 1, translateX: 0, translateY: 0 }],
+    [{ scale: 1, translateX: 0, translateY: 0 }, { scale: 1, translateX: 0, translateY: 0 }],
+    [{ scale: 1, translateX: 0, translateY: 0 }, { scale: 1, translateX: 0, translateY: 0 }, { scale: 1, translateX: 0, translateY: 0 }],
+    [{ scale: 1, translateX: 0, translateY: 0 }, { scale: 1, translateX: 0, translateY: 0 }, { scale: 1, translateX: 0, translateY: 0 }, { scale: 1, translateX: 0, translateY: 0 }],
+    [{ scale: 1, translateX: 0, translateY: 0 }, { scale: 1, translateX: 0, translateY: 0 }, { scale: 1, translateX: 0, translateY: 0 }, { scale: 1, translateX: 0, translateY: 0 }, { scale: 1, translateX: 0, translateY: 0 }],
+    [{ scale: 1, translateX: 0, translateY: 0 }, { scale: 1, translateX: 0, translateY: 0 }, { scale: 1, translateX: 0, translateY: 0 }, { scale: 1, translateX: 0, translateY: 0 }, { scale: 1, translateX: 0, translateY: 0 }, { scale: 1, translateX: 0, translateY: 0 }],
   ],
 };
 
@@ -40,9 +61,25 @@ export const LayoutSlice = createSlice({
         return { payload: { gridNumber, screenNumber, id } };
       },
     },
+    setScreenSettings: {
+      reducer: (state: Statetype, action: PayloadAction<any>) => {
+        const { gridNumber, screenNumber, settings } = action.payload;
+        console.log('setScreenSettings: ', action.payload);
+
+        if (!state.screenSettings[gridNumber]) {
+          state.screenSettings[gridNumber] = [];
+        }
+        state.screenSettings[gridNumber][screenNumber - 1] = settings;
+                console.log('layout: ', JSON.stringify(state.screenSettings));
+      },
+      
+      prepare: (gridNumber: number, screenNumber: number, settings: screenSettings) => {
+        return { payload: { gridNumber, screenNumber, settings } };
+      },
+    },
   },
 });
 
-export const { setGrid, setFloorplan } = LayoutSlice.actions;
+export const { setGrid, setFloorplan, setScreenSettings } = LayoutSlice.actions;
 
 export default LayoutSlice.reducer;

@@ -14,7 +14,7 @@ import { floorplanType } from 'src/types/tracking/floorplan';
 import { Stage, Layer, Image as KonvaImage } from 'react-konva';
 import FloorplanHouse from 'src/assets/images/masters/Floorplan/Floorplan-House.png';
 import ZoomControls from 'src/components/shared/ZoomControls';
-import DeviceRenderer from './Renderer/DeviceRenderer';
+import DeviceRenderer from '../Renderer/ConfigDeviceRenderer';
 import { floorType, fetchFloors } from 'src/store/apps/crud/floor';
 import { FloorplanType, fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
@@ -22,13 +22,21 @@ import { original } from '@reduxjs/toolkit';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 
 const BASE_URL = 'http://192.168.1.116:5000';
-const FloorView: React.FC<{
+const ConfigFloorView: React.FC<{
   activeFloorplan: string;
   zoomable: boolean;
   containerWidth: number; // New prop
   containerHeight: number; // New prop
-    screenSettings: { scale: number; translateX: number; translateY: number };
-}> = ({ activeFloorplan, zoomable, containerWidth, containerHeight, screenSettings }) => {
+  screenSettings?: { scale: number; translateX: number; translateY: number };
+  setScreenSettings?: (settings: { scale: number; translateX: number; translateY: number }) => void;
+}> = ({
+  activeFloorplan,
+  zoomable,
+  containerWidth,
+  containerHeight,
+  screenSettings,
+  setScreenSettings,
+}) => {
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchFloorplan());
@@ -59,15 +67,15 @@ const FloorView: React.FC<{
   }, [actFloorplan]);
 
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
-  const [scale, setScale] = useState(screenSettings.scale); // Initial scale set to 1
+  const [scale, setScale] = useState(screenSettings?.scale || 1); // Initial scale set to 1
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   //const MIN_SCALE = 1; // Minimum scale to prevent the image from becoming too small
   const MAX_SCALE = 2; // Maximum scale to prevent the image from becoming too large
   const [minScale, setMinScale] = useState(0.5);
   const [translate, setTranslate] = useState({
-    x: screenSettings.translateX,
-    y: screenSettings.translateY,
-  });
+    x: screenSettings?.translateX || 0,
+    y: screenSettings?.translateY || 0,
+  }); // Initial translate values
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false); // State to track mouse hover
@@ -124,11 +132,17 @@ const FloorView: React.FC<{
           // console.log('Min Scale:', minScale);
           // console.log('OffsetX:', offsetX);
           // console.log('OffsetY:', offsetY);
-                    setTranslate({
+          setTranslate({
             x: screenSettings?.translateX || offsetX,
             y: screenSettings?.translateY || offsetY,
           });
           console.log(screenSettings);
+          // if (screenSettings?.translateX === 0) {
+          //   setTranslate({ x: offsetX, y: screenSettings?.translateY });
+          // }
+          // if (screenSettings?.translateY === 0) {
+          //   setTranslate({ x: screenSettings?.translateX, y: offsetY });
+          // }
           // setTranslate({ x: offsetX, y: offsetY });
         }
       };
@@ -212,28 +226,27 @@ const FloorView: React.FC<{
       const containerWidth = containerRef.current.clientWidth;
       const containerHeight = containerRef.current.clientHeight;
       // setMinScale(Math.min(widthRatio, heightRatio));
-        const centerX = containerWidth / 2;
-  const centerY = containerHeight / 2;
-    const dx = mouseX - centerX;
-  const dy = mouseY - centerY;
-  
+      const centerX = containerWidth / 2;
+      const centerY = containerHeight / 2;
+      const dx = mouseX - centerX;
+      const dy = mouseY - centerY;
 
       const newScale = Math.min(Math.max(scale + delta, minScale), MAX_SCALE);
-  const scaleRatio = newScale / scale;
+      const scaleRatio = newScale / scale;
       //console.log('New Scale:', newScale); // Debug new scale
       const scaledWidth = imgSize.width * newScale;
       const scaledHeight = imgSize.height * newScale;
-  const newTranslateX = translate.x - dx * (scaleRatio - 1);
-  const newTranslateY = translate.y - dy * (scaleRatio - 1);
+      const newTranslateX = translate.x - dx * (scaleRatio - 1);
+      const newTranslateY = translate.y - dy * (scaleRatio - 1);
 
       // Calculate translation to keep zoom centered at mouse position
       const offsetX = mouseX - (mouseX - translate.x) * (newScale / scale);
       const offsetY = mouseY - (mouseY - translate.y) * (newScale / scale);
       console.log('MouseX:', mouseX);
       console.log('MouseY:', mouseY);
-      console.log("translate:", translate);
-      console.log("Scale: ", newScale, scale);
-      
+      console.log('translate:', translate);
+      console.log('Scale: ', newScale, scale);
+
       const minX = Math.min(0, containerWidth - scaledWidth);
       const minY = Math.min(0, containerHeight - scaledHeight);
 
@@ -312,12 +325,22 @@ const FloorView: React.FC<{
       // setMinScale(Math.min(widthRatio, heightRatio));
 
       //console.log('Resetting scale to minScale:', minScale); // Debug scale reset
-      if(screenSettings.scale === 1) {
+      if (screenSettings?.scale === 1) {
         setScale(minScale);
-        
       }
     }
   }, [imgSize]); // Reset scale when imgSize changes
+
+  useEffect(() => {
+    console.log('Translate : ', translate);
+    if (setScreenSettings) {
+      setScreenSettings({
+        scale,
+        translateX: translate.x,
+        translateY: translate.y,
+      });
+    }
+  }, [scale, translate, setScreenSettings]);
 
   const handleMouseDown = (event: React.MouseEvent) => {
     setIsDragging(true);
@@ -514,4 +537,4 @@ const FloorView: React.FC<{
   );
 };
 
-export default FloorView;
+export default ConfigFloorView;

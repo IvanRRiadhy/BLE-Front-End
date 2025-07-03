@@ -170,7 +170,6 @@ const FloorList = () => {
                             right: 0,
                             background: 'white',
                             zIndex: 2,
-                            display: 'flex',
                             gap: 1,
                             alignItems: 'center',
                           }}
