@@ -127,7 +127,14 @@ interface MonitoringGridProps {
 }
 
 const ConfigGrid = React.memo(
-  ({ grid, floorIds, selectedScreen, setSelectedScreen, screenSettings, setScreenSettings }: MonitoringGridProps) => {
+  ({
+    grid,
+    floorIds,
+    selectedScreen,
+    setSelectedScreen,
+    screenSettings,
+    setScreenSettings,
+  }: MonitoringGridProps) => {
     const gridRef = useRef<HTMLDivElement>(null);
     const [gridDimensions, setGridDimensions] = useState({ width: 0, height: 0 });
     const theme = useTheme();
@@ -201,7 +208,7 @@ const ConfigGrid = React.memo(
           return i + 1; // 1-based screen number
         }
       }
-      return null;
+      return 0;
     }
 
     function toRoman(num: number) {
@@ -274,23 +281,38 @@ const ConfigGrid = React.memo(
                                       },
                                     }}
                                   >
-                                    <Typography
-                                      variant="h1"
-                                      className="hover-typography"
-                                      sx={{
-                                        fontSize: '5rem',
-                                        fontFamily: 'Georgia',
-                                        color:
-                                          screenNum === selectedScreen
-                                            ? theme.palette.success.dark
-                                            : 'black',
-                                        transition: 'color 0.1s',
-                                      }}
-                                      fontStyle="bold"
-                                      fontWeight={900}
-                                    >
-                                      {screenNum ? `${toRoman(screenNum)}` : ''}
-                                    </Typography>
+                                    {floorIds[grid][(grandChild as { floorId: number }).floorId] ? (
+                                      <ConfigFloorView
+                                        activeFloorplan={floorIds[grid][screenNum - 1]}
+                                        zoomable={selectedScreen === screenNum}
+                                        containerWidth={gridDimensions.width} // Pass width
+                                        containerHeight={gridDimensions.height} // Pass height
+                                        screenSettings={
+                                          screenSettings && screenNum
+                                            ? screenSettings[grid][screenNum - 1]
+                                            : undefined
+                                        }
+                                        setScreenSettings={setScreenSettings}
+                                      />
+                                    ) : (
+                                      <Typography
+                                        variant="h1"
+                                        className="hover-typography"
+                                        sx={{
+                                          fontSize: '5rem',
+                                          fontFamily: 'Georgia',
+                                          color:
+                                            screenNum === selectedScreen
+                                              ? theme.palette.success.dark
+                                              : 'black',
+                                          transition: 'color 0.1s',
+                                        }}
+                                        fontStyle="bold"
+                                        fontWeight={900}
+                                      >
+                                        {screenNum ? `${toRoman(screenNum)}` : ''}
+                                      </Typography>
+                                    )}
                                   </Grid>
                                 );
                               })}
@@ -328,22 +350,41 @@ const ConfigGrid = React.memo(
                             },
                           }}
                         >
-                          <Typography
-                            variant="h1"
-                            className="hover-typography"
-                            sx={{
-                              fontSize: '5rem',
-                              fontFamily: 'Georgia',
-                              color: `${
-                                selectedScreen === screenNum ? theme.palette.success.dark : 'black'
-                              }`,
-                              transition: 'color 0.1s',
-                            }}
-                            fontStyle="bold"
-                            fontWeight={900}
-                          >
-                            {screenNum ? `${toRoman(screenNum)}` : ''}
-                          </Typography>
+                          {floorIds[grid][(child as { floorId: number }).floorId] ? (
+                            <ConfigFloorView
+                              activeFloorplan={
+                                floorIds[grid][screenNum - 1]
+                              }
+                              zoomable={selectedScreen === screenNum}
+                              containerWidth={gridDimensions.width} // Pass width
+                              containerHeight={gridDimensions.height} // Pass height
+                              screenSettings={
+                                screenSettings && screenNum
+                                  ? screenSettings[grid][screenNum - 1]
+                                  : undefined
+                              }
+                              setScreenSettings={setScreenSettings}
+                            />
+                          ) : (
+                            <Typography
+                              variant="h1"
+                              className="hover-typography"
+                              sx={{
+                                fontSize: '5rem',
+                                fontFamily: 'Georgia',
+                                color: `${
+                                  selectedScreen === screenNum
+                                    ? theme.palette.success.dark
+                                    : 'black'
+                                }`,
+                                transition: 'color 0.1s',
+                              }}
+                              fontStyle="bold"
+                              fontWeight={900}
+                            >
+                              {screenNum ? `${toRoman(screenNum)}` : ''}
+                            </Typography>
+                          )}
                         </Grid>
                       );
                     })}
@@ -385,11 +426,13 @@ const ConfigGrid = React.memo(
               >
                 {floorIds[grid][(item as { floorId: number }).floorId] ? (
                   <ConfigFloorView
-                    activeFloorplan={floorIds[grid][(item as { floorId: number }).floorId]}
-                    zoomable = {selectedScreen === screenNum}
+                    activeFloorplan={floorIds[grid][screenNum - 1]}
+                    zoomable={selectedScreen === screenNum}
                     containerWidth={gridDimensions.width} // Pass width
                     containerHeight={gridDimensions.height} // Pass height
-                    screenSettings={screenSettings && screenNum ? screenSettings[grid][screenNum - 1] : undefined}
+                    screenSettings={
+                      screenSettings && screenNum ? screenSettings[grid][screenNum - 1] : undefined
+                    }
                     setScreenSettings={setScreenSettings}
                   />
                 ) : (

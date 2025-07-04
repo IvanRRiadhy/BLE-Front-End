@@ -151,6 +151,54 @@ const MonitoringGrid = React.memo(({ grid, floorIds, screenSettings }: Monitorin
 
   if (!(grid in layoutConfig)) return null;
   const layout = layoutConfig[grid as keyof typeof layoutConfig];
+
+  const screenOrderMap: { [grid: number]: Array<[number, number?, number?]> } = {
+    1: [[0]],
+    2: [[0], [1]],
+    3: [[0], [1, 0], [1, 1]],
+    4: [
+      [0, 0],
+      [1, 0],
+      [0, 1],
+      [1, 1],
+    ],
+    5: [
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [0, 1, 0],
+      [0, 1, 1],
+    ],
+    6: [
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [0, 1, 0],
+      [0, 1, 1],
+      [1, 2],
+    ],
+  };
+
+  function getScreenNumber(
+    grid: number,
+    index: number,
+    childIndex?: number,
+    grandChildIndex?: number,
+  ) {
+    const order = screenOrderMap[grid] || [];
+    for (let i = 0; i < order.length; i++) {
+      const [idx, cIdx, gIdx] = order[i];
+      if (
+        index === idx &&
+        (typeof cIdx === 'undefined' || childIndex === cIdx) &&
+        (typeof gIdx === 'undefined' || grandChildIndex === gIdx)
+      ) {
+        return i + 1; // 1-based screen number
+      }
+    }
+    return 0;
+  }
+
   return (
     <Grid container>
       {layout.map((item, index) => {
@@ -164,36 +212,44 @@ const MonitoringGrid = React.memo(({ grid, floorIds, screenSettings }: Monitorin
                     return (
                       <Grid key={childIndex} size={child.size}>
                         <Grid container>
-                          {child.children.map((grandChild, grandChildIndex) => (
-                            <Grid
-                              key={grandChildIndex}
-                              size={grandChild.size}
-                              ref={gridRef}
-                              sx={{
-                                height: grandChild.height || 'auto',
-                                overflow: 'hidden',
-                                border: '2.5px solid black',
-                                transition: 'border-color 0.3s ease, border-width 0.1s ease',
-                                '&:hover': {
-                                  borderColor: 'success.dark',
-                                  borderWidth: '5px',
-                                },
-                              }}
-                            >
-                              <FloorView
-                                activeFloorplan={floorIds[grid][grandChild.floorId]}
-                                zoomable={grandChild.zoomable}
-                                containerWidth={gridDimensions.width} // Pass width
-                                containerHeight={gridDimensions.height} // Pass height
-                                screenSettings={screenSettings[grid][grandChild.floorId]}
-                              />
-                            </Grid>
-                          ))}
+                          {child.children.map((grandChild, grandChildIndex) => {
+                            const screenNum = getScreenNumber(
+                              grid,
+                              index,
+                              childIndex,
+                              grandChildIndex,
+                            );
+                            return (
+                              <Grid
+                                key={grandChildIndex}
+                                size={grandChild.size}
+                                ref={gridRef}
+                                sx={{
+                                  height: grandChild.height || 'auto',
+                                  overflow: 'hidden',
+                                  border: '2.5px solid black',
+                                  transition: 'border-color 0.3s ease, border-width 0.1s ease',
+                                  '&:hover': {
+                                    borderColor: 'success.dark',
+                                    borderWidth: '5px',
+                                  },
+                                }}
+                              >
+                                <FloorView
+                                  activeFloorplan={floorIds[grid][screenNum - 1]}
+                                  zoomable={grandChild.zoomable}
+                                  containerWidth={gridDimensions.width} // Pass width
+                                  containerHeight={gridDimensions.height} // Pass height
+                                  screenSettings={screenSettings[grid][screenNum - 1]}
+                                />
+                              </Grid>
+                            );
+                          })}
                         </Grid>
                       </Grid>
                     );
                   }
-
+                  const screenNum = getScreenNumber(grid, index, childIndex);
                   // Normal child
                   return (
                     <Grid
@@ -212,11 +268,11 @@ const MonitoringGrid = React.memo(({ grid, floorIds, screenSettings }: Monitorin
                       }}
                     >
                       <FloorView
-                        activeFloorplan={floorIds[grid][(child as { floorId: number }).floorId]}
+                        activeFloorplan={floorIds[grid][screenNum - 1]}
                         zoomable={(child as { zoomable: boolean }).zoomable}
                         containerWidth={gridDimensions.width} // Pass width
                         containerHeight={gridDimensions.height} // Pass height
-                        screenSettings={screenSettings[grid][(child as { floorId: number }).floorId]}
+                        screenSettings={screenSettings[grid][screenNum - 1]}
                       />
                     </Grid>
                   );
@@ -225,7 +281,7 @@ const MonitoringGrid = React.memo(({ grid, floorIds, screenSettings }: Monitorin
             </Grid>
           );
         }
-
+        const screenNum = getScreenNumber(grid, index);
         // Standard top-level item
         return (
           <Grid
@@ -244,11 +300,11 @@ const MonitoringGrid = React.memo(({ grid, floorIds, screenSettings }: Monitorin
             }}
           >
             <FloorView
-              activeFloorplan={floorIds[grid][(item as { floorId: number }).floorId]}
+              activeFloorplan={floorIds[grid][screenNum - 1]}
               zoomable={(item as { zoomable: boolean }).zoomable}
               containerWidth={gridDimensions.width} // Pass width
               containerHeight={gridDimensions.height} // Pass height
-              screenSettings={screenSettings[grid][(item as { floorId: number }).floorId]}
+              screenSettings={screenSettings[grid][screenNum - 1]}
             />
           </Grid>
         );

@@ -27,7 +27,7 @@ const FloorView: React.FC<{
   zoomable: boolean;
   containerWidth: number; // New prop
   containerHeight: number; // New prop
-    screenSettings: { scale: number; translateX: number; translateY: number };
+  screenSettings: { scale: number; translateX: number; translateY: number };
 }> = ({ activeFloorplan, zoomable, containerWidth, containerHeight, screenSettings }) => {
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
@@ -62,7 +62,7 @@ const FloorView: React.FC<{
   const [scale, setScale] = useState(screenSettings.scale); // Initial scale set to 1
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   //const MIN_SCALE = 1; // Minimum scale to prevent the image from becoming too small
-  const MAX_SCALE = 2; // Maximum scale to prevent the image from becoming too large
+  const MAX_SCALE = 4; // Maximum scale to prevent the image from becoming too large
   const [minScale, setMinScale] = useState(0.5);
   const [translate, setTranslate] = useState({
     x: screenSettings.translateX,
@@ -124,7 +124,7 @@ const FloorView: React.FC<{
           // console.log('Min Scale:', minScale);
           // console.log('OffsetX:', offsetX);
           // console.log('OffsetY:', offsetY);
-                    setTranslate({
+          setTranslate({
             x: screenSettings?.translateX || offsetX,
             y: screenSettings?.translateY || offsetY,
           });
@@ -212,28 +212,27 @@ const FloorView: React.FC<{
       const containerWidth = containerRef.current.clientWidth;
       const containerHeight = containerRef.current.clientHeight;
       // setMinScale(Math.min(widthRatio, heightRatio));
-        const centerX = containerWidth / 2;
-  const centerY = containerHeight / 2;
-    const dx = mouseX - centerX;
-  const dy = mouseY - centerY;
-  
+      const centerX = containerWidth / 2;
+      const centerY = containerHeight / 2;
+      const dx = mouseX - centerX;
+      const dy = mouseY - centerY;
 
       const newScale = Math.min(Math.max(scale + delta, minScale), MAX_SCALE);
-  const scaleRatio = newScale / scale;
+      const scaleRatio = newScale / scale;
       //console.log('New Scale:', newScale); // Debug new scale
       const scaledWidth = imgSize.width * newScale;
       const scaledHeight = imgSize.height * newScale;
-  const newTranslateX = translate.x - dx * (scaleRatio - 1);
-  const newTranslateY = translate.y - dy * (scaleRatio - 1);
+      const newTranslateX = translate.x - dx * (scaleRatio - 1);
+      const newTranslateY = translate.y - dy * (scaleRatio - 1);
 
       // Calculate translation to keep zoom centered at mouse position
       const offsetX = mouseX - (mouseX - translate.x) * (newScale / scale);
       const offsetY = mouseY - (mouseY - translate.y) * (newScale / scale);
       console.log('MouseX:', mouseX);
       console.log('MouseY:', mouseY);
-      console.log("translate:", translate);
-      console.log("Scale: ", newScale, scale);
-      
+      console.log('translate:', translate);
+      console.log('Scale: ', newScale, scale);
+
       const minX = Math.min(0, containerWidth - scaledWidth);
       const minY = Math.min(0, containerHeight - scaledHeight);
 
@@ -312,9 +311,8 @@ const FloorView: React.FC<{
       // setMinScale(Math.min(widthRatio, heightRatio));
 
       //console.log('Resetting scale to minScale:', minScale); // Debug scale reset
-      if(screenSettings.scale === 1) {
+      if (screenSettings.scale === 1) {
         setScale(minScale);
-        
       }
     }
   }, [imgSize]); // Reset scale when imgSize changes
@@ -396,33 +394,36 @@ const FloorView: React.FC<{
       }}
     >
       {/* Sticky Overlay Toggle */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 12,
-          right: 12,
-          zIndex: 10,
-          width: '240px',
-          background: 'rgba(255,255,255,0.9)',
-          borderRadius: 2,
-          boxShadow: 2,
-          p: 1,
-        }}
-      >
-        <FormControlLabel
-          control={
-            <Switch
-              checked={showArea}
-              onChange={() => setShowArea((prev) => !prev)}
-              color="primary"
-            />
-          }
-          label="Show Areas"
-        />
-      </Box>
+      {isHovered && !isDragging && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            zIndex: 10,
+            width: 'fit-content',
+            background: 'rgba(255,255,255,0.9)',
+            borderRadius: 2,
+            boxShadow: 2,
+            p: 1,
+          }}
+        >
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showArea}
+                onChange={() => setShowArea((prev) => !prev)}
+                color="primary"
+              />
+            }
+            label="Show Areas"
+          />
+        </Box>
+      )}
       {/* Zoomable Content */}
       <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
         {isHovered &&
+          !isDragging &&
           zoomable && ( // Only show ZoomControls when hovered
             <ZoomControls
               scale={scale}

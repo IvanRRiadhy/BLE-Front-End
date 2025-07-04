@@ -333,6 +333,7 @@ const EditDeviceFloorView: React.FC<{
       {/* Zoomable Content */}
       <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
         {isHovered &&
+        !isPanning &&
           zoomable && ( // Only show ZoomControls when hovered
             <ZoomControls
               scale={scale}

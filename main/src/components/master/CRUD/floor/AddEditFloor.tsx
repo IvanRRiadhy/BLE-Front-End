@@ -140,6 +140,26 @@ const AddEditFloor = ({ type, floor }: FormType) => {
         console.log(prepreview);
         setPreview(prepreview); // Preview selected image
         console.log(image);
+        // Calculate image dimensions
+        const img = new window.Image();
+        img.onload = () => {
+          const pixelX = img.width;
+          const pixelY = img.height;
+          // Calculate meterPerPx if floorX and floorY are set
+          const floorX = Number(formData.floorX) || 0;
+          const floorY = Number(formData.floorY) || 0;
+          let meterPerPx = 0;
+          if (pixelX && pixelY && floorX && floorY) {
+            meterPerPx = (floorX / pixelX + floorY / pixelY) / 2;
+          }
+          setFormData((prev) => ({
+            ...prev,
+            pixelX,
+            pixelY,
+            meterPerPx,
+          }));
+        };
+        img.src = prepreview;
       } else {
         alert('Please select a valid image file (PNG, JPG, JPEG)');
       }
@@ -210,6 +230,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
+                disabled
               />
               <CustomFormLabel htmlFor="floorX">Floor X</CustomFormLabel>
               <CustomTextField
@@ -236,6 +257,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
+                disabled
               />
               <CustomFormLabel htmlFor="floor-pixelY">Pixel Y</CustomFormLabel>
               <CustomTextField
@@ -244,6 +266,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
+                disabled
               />
               <CustomFormLabel htmlFor="floorY">Floor Y</CustomFormLabel>
               <CustomTextField

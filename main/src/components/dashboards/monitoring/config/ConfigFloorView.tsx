@@ -70,12 +70,13 @@ const ConfigFloorView: React.FC<{
   const [scale, setScale] = useState(screenSettings?.scale || 1); // Initial scale set to 1
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   //const MIN_SCALE = 1; // Minimum scale to prevent the image from becoming too small
-  const MAX_SCALE = 2; // Maximum scale to prevent the image from becoming too large
-  const [minScale, setMinScale] = useState(0.5);
+  const MAX_SCALE = 4; // Maximum scale to prevent the image from becoming too large
+  const [minScale, setMinScale] = useState(0.2);
   const [translate, setTranslate] = useState({
     x: screenSettings?.translateX || 0,
     y: screenSettings?.translateY || 0,
   }); // Initial translate values
+  const [isPanning, setIsPanning] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false); // State to track mouse hover
@@ -359,9 +360,9 @@ const ConfigFloorView: React.FC<{
     const scaledHeight = imgSize.height * scale;
 
     const minX = Math.min(-scaledWidth, containerWidth - scaledWidth); // Left boundary
-    const maxX = containerWidth; // Right boundary
+    const maxX = scaledWidth; // Right boundary
     const minY = Math.min(-scaledHeight, containerHeight - scaledHeight); // Top boundary
-    const maxY = containerHeight; // Bottom boundary
+    const maxY = scaledHeight; // Bottom boundary
 
     const newX = event.clientX - dragStart.current.x;
     const newY = event.clientY - dragStart.current.y;
@@ -419,33 +420,36 @@ const ConfigFloorView: React.FC<{
       }}
     >
       {/* Sticky Overlay Toggle */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 12,
-          right: 12,
-          zIndex: 10,
-          width: '240px',
-          background: 'rgba(255,255,255,0.9)',
-          borderRadius: 2,
-          boxShadow: 2,
-          p: 1,
-        }}
-      >
-        <FormControlLabel
-          control={
-            <Switch
-              checked={showArea}
-              onChange={() => setShowArea((prev) => !prev)}
-              color="primary"
-            />
-          }
-          label="Show Areas"
-        />
-      </Box>
+      {isHovered && !isDragging && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            zIndex: 10,
+            width: '240px',
+            background: 'rgba(255,255,255,0.9)',
+            borderRadius: 2,
+            boxShadow: 2,
+            p: 1,
+          }}
+        >
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showArea}
+                onChange={() => setShowArea((prev) => !prev)}
+                color="primary"
+              />
+            }
+            label="Show Areas"
+          />
+        </Box>
+      )}
       {/* Zoomable Content */}
       <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
         {isHovered &&
+          !isDragging &&
           zoomable && ( // Only show ZoomControls when hovered
             <ZoomControls
               scale={scale}
