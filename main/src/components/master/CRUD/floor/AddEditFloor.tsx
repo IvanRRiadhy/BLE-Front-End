@@ -83,6 +83,27 @@ const AddEditFloor = ({ type, floor }: FormType) => {
     setPreview(floor?.floorImage || null);
     console.log('Form reset to initial state');
   };
+  React.useEffect(() => {
+    // Only run for edit mode and if floorImage is a string path
+    if (type === 'edit' && floor?.floorImage && typeof floor.floorImage === 'string') {
+      // Fetch the image from the server
+      fetch(`${BASE_URL}${floor.floorImage}`)
+        .then((res) => res.blob())
+        .then((blob) => {
+          // Create a File object from the Blob
+          const file = new File([blob], floor.floorImage.split('/').pop() || 'floorplan.jpg', {
+            type: blob.type,
+          });
+          setImage(file);
+          // Optionally set preview as well
+          setPreview(URL.createObjectURL(file));
+        })
+        .catch((err) => {
+          console.error('Failed to fetch floor image:', err);
+        });
+    }
+    // eslint-disable-next-line
+  }, [open]);
 
   const handleSave = async () => {
     try {
@@ -106,13 +127,14 @@ const AddEditFloor = ({ type, floor }: FormType) => {
         data.append('floorImage', image); // File goes here
         console.log('Image file added to form data:', image);
       }
+      console.log('data', JSON.stringify(Object.fromEntries(data.entries())));
       if (type === 'edit') {
         await dispatch(editFloor(data)); // Dispatch update
       }
       if (type === 'add') {
         await dispatch(addFloor(data));
       }
-      console.log('data', JSON.stringify(Object.fromEntries(data.entries())));
+
       await dispatch(fetchFloors());
       console.log('Saved!');
       handleClose();
@@ -127,8 +149,32 @@ const AddEditFloor = ({ type, floor }: FormType) => {
     const { value, name, id } = e.target as
       | HTMLInputElement
       | { value: string; name: string; id?: string };
-    console.log('Input Change:', { id, name, value });
-    setFormData((prev) => ({ ...prev, [id || name]: value }));
+    const key = id || name;
+
+    // Prepare new value for the field being changed
+    const newValue = value;
+
+    setFormData((prev) => {
+      // Prepare updated values for calculation
+      const updated = { ...prev, [key]: newValue };
+
+      // Only recalculate if floorX, floorY, pixelX, and pixelY are available
+      let meterPerPx = prev.meterPerPx;
+      if (key === 'floorX' || key === 'floorY') {
+        const floorX = Number(key === 'floorX' ? newValue : updated.floorX) || 0;
+        const floorY = Number(key === 'floorY' ? newValue : updated.floorY) || 0;
+        const pixelX = Number(updated.pixelX) || 0;
+        const pixelY = Number(updated.pixelY) || 0;
+        if (pixelX && pixelY && floorX && floorY) {
+          meterPerPx = (floorX / pixelX + floorY / pixelY) / 2;
+        }
+      }
+
+      return {
+        ...updated,
+        meterPerPx,
+      };
+    });
   };
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -239,6 +285,8 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
+                type="number"
+                inputProps={{ step: 'any' }}
               />
             </Grid>
             <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
@@ -275,6 +323,8 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
+                type="number"
+                inputProps={{ step: 'any' }}
               />
             </Grid>
             <Grid size={{ lg: 12, md: 12, sm: 12 }} direction={'column'}>

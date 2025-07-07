@@ -10,8 +10,12 @@ import {
   Box,
 } from '@mui/material';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import { IconMail, IconSend, IconBucket, IconFolder, IconFold, IconGenderMale, IconGenderFemale } from '@tabler/icons-react';
-import { gender, visitorStatus } from 'src/types/crud/input';
+import {
+  IconMail,
+  IconFolder,
+  IconCircleX,
+} from '@tabler/icons-react';
+import { gender, genderIconMap, visitorStatus, visitorStatusIconMap } from 'src/types/crud/input';
 import AddEditVisitor from '../../CRUD/visitor/AddEditVisitor';
 import { SetVisibilityFilter } from 'src/store/apps/crud/visitor';
 
@@ -37,7 +41,7 @@ const VisitorFilter = () => {
       id: gender.value,
       name: gender.label,
       sort: gender.value,
-      icon: IconFolder,
+      icon: genderIconMap[gender.value] || IconCircleX,
     }));
 
   const statusFilters: DataType[] = visitorStatus
@@ -46,7 +50,7 @@ const VisitorFilter = () => {
       id: status.value,
       name: status.label,
       sort: status.value,
-      icon: IconFolder,
+      icon: visitorStatusIconMap[status.value] || IconCircleX,
     }));
 
   const filterData: DataType[] = [

@@ -27,7 +27,6 @@ import {
   IconMapDown,
   IconAccessibleOff,
   IconLiveView,
-  IconAccessibleOffFilled,
   IconLicenseOff,
   IconUserCircle,
   IconBarrierBlock,
@@ -226,12 +225,6 @@ const Menuitems = [
         icon: IconBadgeTm,
         href: '/master/brand/'
       },
-      // {
-      //   id: uniqueId(),
-      //   title: 'Floorplan Masked Area',
-      //   icon: IconCropLandscape,
-      //   href: '/master/floorplanmaskedarea/'
-      // },
 
 
 
@@ -243,12 +236,6 @@ const Menuitems = [
     icon: IconApps,
     href: '/apps/',
     children: [
-      // {
-      //   id: uniqueId(),
-      //   title: 'Live Tracking',
-      //   icon: IconLiveView,
-      //   href: '/apps/tracking/',
-      // },
             {
         id: uniqueId(),
         title: 'Tracking Transaction',
@@ -261,12 +248,6 @@ const Menuitems = [
         icon: IconBellExclamation,
         href: '/apps/alarmRecord/',
       },
-      // {
-      //   id: uniqueId(),
-      //   title: 'People Track',
-      //   icon: IconUserCircle,
-      //   href: '/user-profile',
-      // },
       {
         id: uniqueId(),
         title: 'Blacklist',

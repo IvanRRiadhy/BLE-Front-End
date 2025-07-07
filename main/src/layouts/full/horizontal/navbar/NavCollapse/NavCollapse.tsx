@@ -78,9 +78,7 @@ const NavCollapse = ({
     },
     '&:hover > .SubNav': {
       display: 'grid',
-      gridTemplateRows: 'repeat(3, 1fr)',
-      gridAutoFlow: 'column',
-      gridAutoColumns: 'min-content',
+      gridAutoFlow: 'row',
       gap: '1em',
     },
   }));
@@ -91,7 +89,7 @@ const NavCollapse = ({
     top: level > 1 ? `0px` : '100%',
     left: level > 1 ? `100%` : '0px',
     padding: '10px',
-    maxHeight: '15em',
+    maxHeight: '75em',
     color: theme.palette.text.primary,
     boxShadow: theme.shadows[8],
     backgroundColor: theme.palette.background.paper,

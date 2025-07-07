@@ -367,19 +367,19 @@ const EditAreaRenderer: React.FC<{
     const n = nodes.length;
 
     for (let i = 0; i < n; i++) {
-      const x1 = nodes[i].x;
-      const y1 = nodes[i].y;
-      const x2 = nodes[(i + 1) % n].x;
-      const y2 = nodes[(i + 1) % n].y;
+      const x1 = nodes[i].x_px;
+      const y1 = nodes[i].y_px;
+      const x2 = nodes[(i + 1) % n].x_px;
+      const y2 = nodes[(i + 1) % n].y_px;
 
       for (let j = i + 2; j < n; j++) {
         // Skip adjacent edges
         if (j === i || (j + 1) % n === i) continue;
 
-        const x3 = nodes[j].x;
-        const y3 = nodes[j].y;
-        const x4 = nodes[(j + 1) % n].x;
-        const y4 = nodes[(j + 1) % n].y;
+        const x3 = nodes[j].x_px;
+        const y3 = nodes[j].y_px;
+        const x4 = nodes[(j + 1) % n].x_px;
+        const y4 = nodes[(j + 1) % n].y_px;
 
         if (doLineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4)) {
           return true; // Self-intersection detected
@@ -437,29 +437,29 @@ const EditAreaRenderer: React.FC<{
   };
 
   // Function to check if a polygon has self-intersections
-  const hasSelfIntersections = (x: number[], y: number[]): boolean => {
-    const n = x.length;
-    if (n < 4) return false; // A polygon with less than 4 points can't self-intersect
+  // const hasSelfIntersections = (x: number[], y: number[]): boolean => {
+  //   const n = x.length;
+  //   if (n < 4) return false; // A polygon with less than 4 points can't self-intersect
 
-    // Check all pairs of non-adjacent edges
-    for (let i = 0; i < n; i++) {
-      const nextI = (i + 1) % n;
-      for (let j = i + 2; j < n; j++) {
-        const nextJ = (j + 1) % n;
+  //   // Check all pairs of non-adjacent edges
+  //   for (let i = 0; i < n; i++) {
+  //     const nextI = (i + 1) % n;
+  //     for (let j = i + 2; j < n; j++) {
+  //       const nextJ = (j + 1) % n;
 
-        // Skip adjacent edges
-        if (nextI === j || nextJ === i) continue;
+  //       // Skip adjacent edges
+  //       if (nextI === j || nextJ === i) continue;
 
-        // Check if edges (i, nextI) and (j, nextJ) intersect
-        if (
-          doLineSegmentsIntersect(x[i], y[i], x[nextI], y[nextI], x[j], y[j], x[nextJ], y[nextJ])
-        ) {
-          return true;
-        }
-      }
-    }
-    return false;
-  };
+  //       // Check if edges (i, nextI) and (j, nextJ) intersect
+  //       if (
+  //         doLineSegmentsIntersect(x[i], y[i], x[nextI], y[nextI], x[j], y[j], x[nextJ], y[nextJ])
+  //       ) {
+  //         return true;
+  //       }
+  //     }
+  //   }
+  //   return false;
+  // };
 
   // Function to check if two line segments intersect
   const doLineSegmentsIntersect = (
@@ -941,10 +941,10 @@ const EditAreaRenderer: React.FC<{
         const distance = pointToSegmentDistance(
           clickX,
           clickY,
-          nodes[i].x,
-          nodes[i].y,
-          nodes[nextIndex].x,
-          nodes[nextIndex].y,
+          nodes[i].x_px,
+          nodes[i].y_px,
+          nodes[nextIndex].x_px,
+          nodes[nextIndex].y_px,
         );
 
         if (distance < minDistance) {

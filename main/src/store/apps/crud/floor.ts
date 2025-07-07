@@ -119,7 +119,7 @@ export const addFloor = createAsyncThunk("floors/addFloor", async (formData: For
 export const editFloor = createAsyncThunk("floors/editFloor", async (formData: FormData, { rejectWithValue }) => {
     try {
         const id = formData.get('id'); // Extract ID from FormData
-        console.log(id)
+        console.log("Form Data", JSON.stringify(Object.fromEntries(formData.entries())));
         formData.delete('id'); // Remove ID from FormData to avoid sending it again
         const response = await axiosServices.put(`${API_URL}${id}`, formData,{
             headers: {

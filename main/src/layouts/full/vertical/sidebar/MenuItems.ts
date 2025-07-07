@@ -76,8 +76,13 @@ import {
   IconFile,
   IconAccessibleOff,
   IconMapDown,
-  IconAccessibleOffFilled,
   IconLicenseOff,
+  IconCropLandscape,
+  IconDevices,
+  IconDeviceCctv,
+  IconIdBadge,
+  IconDeviceIpad,
+  IconBadgeTm,
 } from '@tabler/icons-react';
 
 const Menuitems: MenuitemsType[] = [
@@ -184,7 +189,20 @@ const Menuitems: MenuitemsType[] = [
     id: uniqueId(),
     title: 'Building',
     icon: IconBuilding,
-    href: '/master/building',
+    children: [
+        {
+    id: uniqueId(),
+    title: 'Building',
+    icon: IconBuilding,
+    href: '/master/building/',
+  },
+        {
+        id: uniqueId(),
+        title: 'Floor',
+        icon: IconMap,
+        href: '/master/floor/'
+      },
+    ]
   },
   {
     id: uniqueId(),
@@ -214,9 +232,54 @@ const Menuitems: MenuitemsType[] = [
   {
     id: uniqueId(),
     title: 'Floor Plan',
-    icon: IconMap2,
-    href: '/master/floorplan',
+    icon: IconMap,
+    href: '/master/floorplan/',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'Floor Plan',
+        icon: IconMap,
+        href: '/master/floorplan/'
+      },
+      {
+        id: uniqueId(),
+        title: 'Floor Plan Masked Area',
+        icon: IconCropLandscape,
+        href: '/master/floorplanmaskedarea/'
+      },
+            {
+        id: uniqueId(), 
+        title: 'Floor Plan Devices',
+        icon: IconDevices,
+        href: '/master/device/'
+      },
+    ]
   },
+    {
+      id: uniqueId(),
+      title: 'Devices',
+      icon: IconDevices,
+      children: [
+        {
+          id: uniqueId(),
+          title: 'Access CCTV',
+          icon: IconDeviceCctv,
+          href: '/master/accesscctv/'
+        },
+        {
+          id: uniqueId(),
+          title: 'Access Control',
+          icon: IconIdBadge,
+          href: '/master/accesscontrol/'
+        },
+              {
+          id: uniqueId(),
+          title: 'Ble Reader',
+          icon: IconDeviceIpad,
+          href: '/master/blereader/'
+        },
+      ]
+    },
   {
     id: uniqueId(),
     title: 'Tag',
@@ -237,108 +300,47 @@ const Menuitems: MenuitemsType[] = [
       },
     ]
   },
-  {
-    id: uniqueId(),
-    title: 'Application',
-    icon: IconMap,
-    href: '/master/application',
-  },
-  {
-      id:uniqueId(),
-      title: 'Integration',
-      icon: IconLicense,
-      href: '/master/integration'
-    },
     {
       id: uniqueId(),
-      title: 'Access CCTV',
-      icon: IconAccessible,
-      href: '/master/accesscctv'
-    },
-    {
-      id: uniqueId(),
-      title: 'Access Control',
-      icon: IconAccessible,
-      href: '/master/accesscontrol'
-    },
-    {
-      id: uniqueId(),
-      title: 'Brand',
-      icon: IconBellExclamation,
-      href: '/master/brand'
-    },
-    {
-      id: uniqueId(),
-      title: 'Floorplan Masked Area',
-      icon: IconMapDown,
-      href: '/master/floorplanmaskedarea/'
-    },
-    {
-      id: uniqueId(),
-      title: 'Ble Reader',
-      icon: IconLogin,
-      href: '/master/blereader'
-    },
-    {
-      id: uniqueId(),
-      title: 'Floor',
+      title: 'Application',
       icon: IconMap,
-      href: '/master/floor'
+      href: '/master/application/',
     },
     {
-      id: uniqueId(),
-      title: 'Tracking Transaction',
-      icon: IconLiveView,
-      href: '/master/trackingtransaction'
-    },
-    {
-      id: uniqueId(),
-      title: 'Device',
-      icon: IconAccessibleOffFilled,
-      href: '/master/device/'
-    },
+        id:uniqueId(),
+        title: 'Integration',
+        icon: IconLicense,
+        href: '/master/integration/'
+      },
+
+      {
+        id: uniqueId(),
+        title: 'Brand',
+        icon: IconBadgeTm,
+        href: '/master/brand/'
+      },
   {
     navlabel:true,
     subheader:'App'
   },
-  {
-    id: uniqueId(),
-    title: 'Live Tracking',
-    icon: IconLiveView,
-    href: '/apps/tracking/',
-  },
-  {
-    id: uniqueId(),
-    title: 'Alarm Notification',
-    icon: IconBellExclamation,
-    href: '/apps/alarmRecord',
-  },
-  {
-    id: uniqueId(),
-    title: 'Report',
-    icon: IconUserExclamation,
-    href: '/user-profile',
-    children: [
+             {
+        id: uniqueId(),
+        title: 'Tracking Transaction',
+        icon: IconLiveView,
+        href: '/apps/trackingtransaction/'
+      },
       {
         id: uniqueId(),
-        title: 'People Track',
-        icon: IconUserCircle,
-        href: '/user-profile',
+        title: 'Alarm Notification',
+        icon: IconBellExclamation,
+        href: '/apps/alarmRecord/',
       },
       {
         id: uniqueId(),
         title: 'Blacklist',
         icon: IconBarrierBlock,
-        href: '/apps/blacklist',
+        href: '/apps/blacklist/',
       },
-      {
-        id: uniqueId(),
-        title: 'Area Access',
-        icon: IconMapCheck,
-        href: '/apps/friends',
-      },
-    ],
-  },
   // {
   //   navlabel: true,
   //   subheader: "CRUD"
@@ -998,92 +1000,92 @@ const Menuitems: MenuitemsType[] = [
   //   icon: IconChartRadar,
   //   href: '/charts/radialbar-chart',
   // },
-  {
-    navlabel: true,
-    subheader: 'Auth',
-  },
+  // {
+  //   navlabel: true,
+  //   subheader: 'Auth',
+  // },
 
-  {
-    id: uniqueId(),
-    title: 'Login',
-    icon: IconLogin,
-    href: '/auth/login',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'Side Login',
-        icon: IconPoint,
-        href: '/auth/login',
-      },
-      {
-        id: uniqueId(),
-        title: 'Boxed Login',
-        icon: IconPoint,
-        href: '/auth/login2',
-      },
-    ],
-  },
-  {
-    id: uniqueId(),
-    title: 'Register',
-    icon: IconUserPlus,
-    href: '/auth/register',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'Side Register',
-        icon: IconPoint,
-        href: '/auth/register',
-      },
-      {
-        id: uniqueId(),
-        title: 'Boxed Register',
-        icon: IconPoint,
-        href: '/auth/register2',
-      },
-    ],
-  },
-  {
-    id: uniqueId(),
-    title: 'Forgot Password',
-    icon: IconRotate,
-    href: '/auth/forgot-password',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'Side Forgot Password',
-        icon: IconPoint,
-        href: '/auth/forgot-password',
-      },
-      {
-        id: uniqueId(),
-        title: 'Boxed Forgot Password',
-        icon: IconPoint,
-        href: '/auth/forgot-password2',
-      },
-    ],
-  },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Login',
+  //   icon: IconLogin,
+  //   href: '/auth/login',
+  //   children: [
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Side Login',
+  //       icon: IconPoint,
+  //       href: '/auth/login',
+  //     },
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Boxed Login',
+  //       icon: IconPoint,
+  //       href: '/auth/login2',
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Register',
+  //   icon: IconUserPlus,
+  //   href: '/auth/register',
+  //   children: [
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Side Register',
+  //       icon: IconPoint,
+  //       href: '/auth/register',
+  //     },
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Boxed Register',
+  //       icon: IconPoint,
+  //       href: '/auth/register2',
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Forgot Password',
+  //   icon: IconRotate,
+  //   href: '/auth/forgot-password',
+  //   children: [
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Side Forgot Password',
+  //       icon: IconPoint,
+  //       href: '/auth/forgot-password',
+  //     },
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Boxed Forgot Password',
+  //       icon: IconPoint,
+  //       href: '/auth/forgot-password2',
+  //     },
+  //   ],
+  // },
 
-  {
-    id: uniqueId(),
-    title: 'Two Steps',
-    icon: IconZoomCode,
-    href: '/auth/two-steps',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'Side Two Steps',
-        icon: IconPoint,
-        href: '/auth/two-steps',
-      },
-      {
-        id: uniqueId(),
-        title: 'Boxed Two Steps',
-        icon: IconPoint,
-        href: '/auth/two-steps2',
-      },
-    ],
-  },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Two Steps',
+  //   icon: IconZoomCode,
+  //   href: '/auth/two-steps',
+  //   children: [
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Side Two Steps',
+  //       icon: IconPoint,
+  //       href: '/auth/two-steps',
+  //     },
+  //     {
+  //       id: uniqueId(),
+  //       title: 'Boxed Two Steps',
+  //       icon: IconPoint,
+  //       href: '/auth/two-steps2',
+  //     },
+  //   ],
+  // },
   // {
   //   id: uniqueId(),
   //   title: 'Error',

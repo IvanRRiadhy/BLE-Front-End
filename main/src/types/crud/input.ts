@@ -1,3 +1,5 @@
+import { IconCircleDashedCheck, IconCircleDashedX, IconCircleX, IconClockCheck, IconClockRecord, IconForbid2, IconGenderFemale, IconGenderMale, IconLogin, IconLogout } from "@tabler/icons-react";
+
 interface inputDataType {
     value: string,
     label: string,
@@ -49,8 +51,13 @@ export const orgType: inputDataType[] = [
     { label: "Please select Gender", value: '', disabled: true},
     { label: "Male", value: "Male" },
     { label: "Female", value: "Female" },
-    { label: "Other", value: "Other" },
+    { label: "Rather not say", value: "Other" },
   ];
+  export const genderIconMap: Record<string, any> = {
+  Male: IconGenderMale,
+  Female: IconGenderFemale,
+  Other: IconCircleX, // or any icon you want for "Rather not say"
+};
   
   export const statusEmployee: inputDataType[] = [
     { label: "Please select Status", value: '', disabled: true},
@@ -75,6 +82,15 @@ export const orgType: inputDataType[] = [
     { label: "Pre-Check-in", value: "PreCheckin" },
     { label: "Pre-Register", value: "Preregist" },
   ];
+  export const visitorStatusIconMap: Record<string, any> = {
+    Waiting: IconClockRecord,
+    Checkin: IconLogin,
+    Checkout: IconLogout,
+    Denied: IconCircleDashedX,
+    Block: IconForbid2,
+    PreCheckin: IconClockCheck,
+    Preregist: IconCircleDashedCheck,
+  }
   
   export const alarmStatus: inputDataType[] = [
     { label: "Please select Status", value: '', disabled: true},
