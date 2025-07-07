@@ -406,7 +406,7 @@ const EditDeviceFloorView: React.FC<{
                     imgSize.height,
                   )}
                   imageSrc={floorplanImage}
-                  scale={scale}
+                  scale={activeFloorData?.meterPerPx || 1}
                   devices={filteredUnsavedDevices}
                   activeDevice={activeDevice}
                   setIsDragging={setIsDragging}

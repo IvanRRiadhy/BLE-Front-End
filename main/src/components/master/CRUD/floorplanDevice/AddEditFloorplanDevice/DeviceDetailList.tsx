@@ -60,32 +60,32 @@ const DeviceDetailList = () => {
   });
   useEffect(() => {
     // console.log('device', device);
-    if(device){
+    if (device) {
       const newFormData = {
-            id: device?.id || '',
-      name: formData.name || '',
-      type: formData.type || '',
-      floorplanId: formData.floorplanId || '',
-      accessCctvId: formData.accessCctvId || '',
-      readerId: formData.readerId || '',
-      accessControlId: formData.accessControlId || '',
-      posX: device?.posX || 0,
-      posY: device?.posY || 0,
-      posPxX: device?.posPxX || 0,
-      posPxY: device?.posPxY || 0,
-      floorplanMaskedAreaId: device?.floorplanMaskedAreaId || '',
-      applicationId: formData.applicationId || '',
-      deviceStatus: formData.deviceStatus || '',
-      createdBy: formData.createdBy || '',
-      createdAt: formData.createdAt || '',
-      updatedBy: formData.updatedBy || '',
-      updatedAt: formData.updatedAt || '',
-      }
+        id: device?.id || '',
+        name: formData.name || '',
+        type: formData.type || '',
+        floorplanId: formData.floorplanId || '',
+        accessCctvId: formData.accessCctvId || '',
+        readerId: formData.readerId || '',
+        accessControlId: formData.accessControlId || '',
+        posX: device?.posX || 0,
+        posY: device?.posY || 0,
+        posPxX: device?.posPxX || 0,
+        posPxY: device?.posPxY || 0,
+        floorplanMaskedAreaId: device?.floorplanMaskedAreaId || '',
+        applicationId: formData.applicationId || '',
+        deviceStatus: formData.deviceStatus || '',
+        createdBy: formData.createdBy || '',
+        createdAt: formData.createdAt || '',
+        updatedBy: formData.updatedBy || '',
+        updatedAt: formData.updatedAt || '',
+      };
       console.log('newFormData', newFormData);
-    if(!isEqual(formData, newFormData)){
-      setFormData(newFormData);
+      if (!isEqual(formData, newFormData)) {
+        setFormData(newFormData);
+      }
     }
-        };
     // console.log('formData', formData);
   }, [device]);
 
@@ -261,19 +261,19 @@ const DeviceDetailList = () => {
             sx={{ height: { lg: 'calc(100vh - 300px)' }, width: '100%', maxHeight: 'fit-content' }}
           >
             <Box pl={3} pr={1}>
-            <Grid container spacing={1}>
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="device-name">Device Name</CustomFormLabel>
-                <CustomTextField
-                  id="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  variant="outlined"
-                  fullWidth
-                  required
-                />
-              </Grid>
-              {/* <Grid size={12}>
+              <Grid container spacing={1}>
+                <Grid size={12}>
+                  <CustomFormLabel htmlFor="device-name">Device Name</CustomFormLabel>
+                  <CustomTextField
+                    id="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    variant="outlined"
+                    fullWidth
+                    required
+                  />
+                </Grid>
+                {/* <Grid size={12}>
               <CustomFormLabel htmlFor="floorplan-id">Floor Plan</CustomFormLabel>
               <CustomSelect
                 name="floorplanId"
@@ -289,25 +289,25 @@ const DeviceDetailList = () => {
                 ))}
               </CustomSelect>
             </Grid> */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="masked-area-id">Masked Area</CustomFormLabel>
-                <CustomSelect
-                  name="floorplanMaskedAreaId"
-                  value={formData.floorplanMaskedAreaId || ''}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  required
-                  disabled
-                >
-                  {maskedAreaData.map((maskedArea) => (
-                    <MenuItem key={maskedArea.id} value={maskedArea.id}>
-                      {maskedArea.name}
-                    </MenuItem>
-                  ))}
-                </CustomSelect>
-              </Grid>
-              {/* <Grid size={12}>
+                <Grid size={12}>
+                  <CustomFormLabel htmlFor="masked-area-id">Masked Area</CustomFormLabel>
+                  <CustomSelect
+                    name="floorplanMaskedAreaId"
+                    value={formData.floorplanMaskedAreaId || ''}
+                    onChange={handleInputChange}
+                    fullWidth
+                    variant="outlined"
+                    required
+                    disabled
+                  >
+                    {maskedAreaData.map((maskedArea) => (
+                      <MenuItem key={maskedArea.id} value={maskedArea.id}>
+                        {maskedArea.name}
+                      </MenuItem>
+                    ))}
+                  </CustomSelect>
+                </Grid>
+                {/* <Grid size={12}>
               <CustomFormLabel htmlFor="app-id">Application</CustomFormLabel>
               <CustomSelect
                 name="applicationId"
@@ -323,126 +323,126 @@ const DeviceDetailList = () => {
                 ))}
               </CustomSelect>
             </Grid> */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="device-type">Device Type</CustomFormLabel>
-                <CustomSelect
-                  name="type"
-                  value={formData.type || ''}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  required
-                >
-                  {DeviceType.map((device) => (
-                    <MenuItem
-                      key={device.value}
-                      value={device.value}
-                      disabled={device.disabled || false}
+                <Grid size={12}>
+                  <CustomFormLabel htmlFor="device-type">Device Type</CustomFormLabel>
+                  <CustomSelect
+                    name="type"
+                    value={formData.type || ''}
+                    onChange={handleInputChange}
+                    fullWidth
+                    variant="outlined"
+                    required
+                  >
+                    {DeviceType.map((device) => (
+                      <MenuItem
+                        key={device.value}
+                        value={device.value}
+                        disabled={device.disabled || false}
+                      >
+                        {device.label}
+                      </MenuItem>
+                    ))}
+                  </CustomSelect>
+                </Grid>
+                {formData.type === 'Cctv' && (
+                  <Grid size={12}>
+                    <CustomFormLabel htmlFor="access-cctv-id">Access CCTV</CustomFormLabel>
+                    <CustomSelect
+                      name="accessCctvId"
+                      value={formData.accessCctvId || ''}
+                      onChange={handleInputChange}
+                      fullWidth
+                      variant="outlined"
                     >
-                      {device.label}
-                    </MenuItem>
-                  ))}
-                </CustomSelect>
-              </Grid>
-              {formData.type === 'Cctv' && (
-                <Grid size={12}>
-                  <CustomFormLabel htmlFor="access-cctv-id">Access CCTV</CustomFormLabel>
-                  <CustomSelect
-                    name="accessCctvId"
-                    value={formData.accessCctvId || ''}
-                    onChange={handleInputChange}
-                    fullWidth
+                      {CCTVData.map((cctv) => (
+                        <MenuItem key={cctv.id} value={cctv.id}>
+                          {cctv.name}
+                        </MenuItem>
+                      ))}
+                    </CustomSelect>
+                  </Grid>
+                )}
+                {formData.type === 'AccessDoor' && (
+                  <Grid size={12}>
+                    <CustomFormLabel htmlFor="access-control-id">Access Control</CustomFormLabel>
+                    <CustomSelect
+                      name="accessControlId"
+                      value={formData.accessControlId || ''}
+                      onChange={handleInputChange}
+                      fullWidth
+                      variant="outlined"
+                    >
+                      {accessControlData.map((accessControl) => (
+                        <MenuItem key={accessControl.id} value={accessControl.id}>
+                          {accessControl.name}
+                        </MenuItem>
+                      ))}
+                    </CustomSelect>
+                  </Grid>
+                )}
+                {formData.type === 'BleReader' && (
+                  <Grid size={12}>
+                    <CustomFormLabel htmlFor="reader-id">BLE Reader</CustomFormLabel>
+                    <CustomSelect
+                      name="readerId"
+                      value={formData.readerId || ''}
+                      onChange={handleInputChange}
+                      fullWidth
+                      variant="outlined"
+                    >
+                      {bleReaderData.map((bleReader) => (
+                        <MenuItem key={bleReader.id} value={bleReader.id}>
+                          {bleReader.name}
+                        </MenuItem>
+                      ))}
+                    </CustomSelect>
+                  </Grid>
+                )}
+                <Grid size={6}>
+                  <CustomFormLabel htmlFor="pos-x">Position X</CustomFormLabel>
+                  <CustomTextField
+                    id="posX"
+                    value={formData.posX}
+                    // onChange={handleInputChange}
                     variant="outlined"
-                  >
-                    {CCTVData.map((cctv) => (
-                      <MenuItem key={cctv.id} value={cctv.id}>
-                        {cctv.name}
-                      </MenuItem>
-                    ))}
-                  </CustomSelect>
-                </Grid>
-              )}
-              {formData.type === 'AccessDoor' && (
-                <Grid size={12}>
-                  <CustomFormLabel htmlFor="access-control-id">Access Control</CustomFormLabel>
-                  <CustomSelect
-                    name="accessControlId"
-                    value={formData.accessControlId || ''}
-                    onChange={handleInputChange}
                     fullWidth
-                    variant="outlined"
-                  >
-                    {accessControlData.map((accessControl) => (
-                      <MenuItem key={accessControl.id} value={accessControl.id}>
-                        {accessControl.name}
-                      </MenuItem>
-                    ))}
-                  </CustomSelect>
+                    disabled
+                  />
                 </Grid>
-              )}
-              {formData.type === 'BleReader' && (
-                <Grid size={12}>
-                  <CustomFormLabel htmlFor="reader-id">BLE Reader</CustomFormLabel>
-                  <CustomSelect
-                    name="readerId"
-                    value={formData.readerId || ''}
-                    onChange={handleInputChange}
+                <Grid size={6}>
+                  <CustomFormLabel htmlFor="pos-y">Position Y</CustomFormLabel>
+                  <CustomTextField
+                    id="posY"
+                    value={formData.posY}
+                    // onChange={handleInputChange}
+                    variant="outlined"
                     fullWidth
-                    variant="outlined"
-                  >
-                    {bleReaderData.map((bleReader) => (
-                      <MenuItem key={bleReader.id} value={bleReader.id}>
-                        {bleReader.name}
-                      </MenuItem>
-                    ))}
-                  </CustomSelect>
+                    disabled
+                  />
                 </Grid>
-              )}
-              <Grid size={6}>
-                <CustomFormLabel htmlFor="pos-x">Position X</CustomFormLabel>
-                <CustomTextField
-                  id="posX"
-                  value={formData.posX}
-                  onChange={handleInputChange}
-                  variant="outlined"
-                  fullWidth
-                  disabled
-                />
+                <Grid size={6}>
+                  <CustomFormLabel htmlFor="pos-px-x">Pos Pixel X</CustomFormLabel>
+                  <CustomTextField
+                    id="posPxX"
+                    placeholder={formData.posPxX}
+                    // onChange={handleInputChange}
+                    variant="outlined"
+                    fullWidth
+                    disabled
+                  />
+                </Grid>
+                <Grid size={6}>
+                  <CustomFormLabel htmlFor="pos-px-y">Pos Pixel Y</CustomFormLabel>
+                  <CustomTextField
+                    id="posPxY"
+                    placeholder={formData.posPxY}
+                    // onChange={handleInputChange}
+                    variant="outlined"
+                    fullWidth
+                    disabled
+                  />
+                </Grid>
               </Grid>
-              <Grid size={6}>
-                <CustomFormLabel htmlFor="pos-y">Position Y</CustomFormLabel>
-                <CustomTextField
-                  id="posY"
-                  value={formData.posY}
-                  onChange={handleInputChange}
-                  variant="outlined"
-                  fullWidth
-                  disabled
-                />
-              </Grid>
-              <Grid size={6}>
-                <CustomFormLabel htmlFor="pos-px-x">Pos Pixel X</CustomFormLabel>
-                <CustomTextField
-                  id="posPxX"
-                  placeholder={formData.posPxX}
-                  onChange={handleInputChange}
-                  variant="outlined"
-                  fullWidth
-                  disabled
-                />
-              </Grid>
-              <Grid size={6}>
-                <CustomFormLabel htmlFor="pos-px-y">Pos Pixel Y</CustomFormLabel>
-                <CustomTextField
-                  id="posPxY"
-                  placeholder={formData.posPxY}
-                  onChange={handleInputChange}
-                  variant="outlined"
-                  fullWidth
-                  disabled
-                />
-              </Grid>
-            </Grid>
             </Box>
           </Scrollbar>
         </Box>

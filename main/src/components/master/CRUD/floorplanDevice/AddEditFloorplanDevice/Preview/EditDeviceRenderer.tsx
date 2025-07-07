@@ -94,8 +94,8 @@ const EditDeviceRenderer: React.FC<{
   const setPointsFromNodes = (nodes: Nodes[]): number[] => {
     // console.log('Setting nodes: ', nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]))
     return nodes.flatMap((node) => [
-      (node.x / originalWidth) * width,
-      (node.y / originalHeight) * height,
+      (node.x_px / originalWidth) * width,
+      (node.y_px / originalHeight) * height,
     ]); // Flatten x and y into a single array
   };
   // const handleDragMove = (e: any, device: FloorplanDeviceType) => {
@@ -109,10 +109,10 @@ const EditDeviceRenderer: React.FC<{
   function isPointInPolygon(point: { x: number; y: number }, polygon: Nodes[]): boolean {
     let inside = false;
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      const xi = polygon[i].x,
-        yi = polygon[i].y;
-      const xj = polygon[j].x,
-        yj = polygon[j].y;
+      const xi = polygon[i].x_px,
+        yi = polygon[i].y_px;
+      const xj = polygon[j].x_px,
+        yj = polygon[j].y_px;
       const intersect =
         yi > point.y !== yj > point.y &&
         point.x < ((xj - xi) * (point.y - yi)) / (yj - yi + 0.00001) + xi;
@@ -143,9 +143,12 @@ const EditDeviceRenderer: React.FC<{
     const newDevice = {
       ...device,
       floorplanMaskedAreaId: detectedAreaId,
+      posX: newPosX * scales,
+      posY: newPosY * scales,
       posPxX: newPosX,
       posPxY: newPosY,
     };
+    console.log(newDevice);
     dispatch(editDevicePosition(newDevice)); // Update the device position in the store
     setIsDragging(''); // Set dragging state to false
     // console.log(`Device ${device.id} dropped at:`, { newPosX, newPosY });

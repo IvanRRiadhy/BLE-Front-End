@@ -113,8 +113,8 @@ export const FloorplanDeviceSlice = createSlice({
                     state.editingFloorplanDevice = {
                         ...state.editingFloorplanDevice,
                         floorplanMaskedAreaId: action.payload.floorplanMaskedAreaId,
-                        posX: action.payload.posPxX, //ubah
-                        posY: action.payload.posPxY,
+                        posX: action.payload.posX, //ubah
+                        posY: action.payload.posY,
                         posPxX: action.payload.posPxX,
                         posPxY: action.payload.posPxY
                     }
