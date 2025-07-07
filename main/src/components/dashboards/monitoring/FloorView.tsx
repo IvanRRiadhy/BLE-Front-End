@@ -20,6 +20,7 @@ import { FloorplanType, fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { original } from '@reduxjs/toolkit';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { RefreshTrigger } from 'src/store/apps/tracking/Beacon';
 
 const BASE_URL = 'http://192.168.1.116:5000';
 const FloorView: React.FC<{
@@ -50,7 +51,7 @@ const FloorView: React.FC<{
   );
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorplan);
   const [showArea, setShowArea] = useState(true);
-
+  const [showGates, setShowGates] = useState(true);
   useEffect(() => {
     // console.log('FloorChanged:', floor);
   }, [floor]);
@@ -88,6 +89,7 @@ const FloorView: React.FC<{
   }, [devices, activeFloorplan]);
 
   useEffect(() => {
+    dispatch(RefreshTrigger());
     // console.log('floors:', floor);
     // console.log('activeFloorData:', activeFloorData);
     // console.log('activeFloorplan:', floorplans);
@@ -406,6 +408,9 @@ const FloorView: React.FC<{
             borderRadius: 2,
             boxShadow: 2,
             p: 1,
+            display: 'flex',
+            flexDirection: 'column', // Stack children vertically
+            gap: 1,
           }}
         >
           <FormControlLabel
@@ -417,6 +422,16 @@ const FloorView: React.FC<{
               />
             }
             label="Show Areas"
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showGates}
+                onChange={() => setShowGates((prev) => !prev)}
+                color="primary"
+              />
+            }
+            label="Show Gateways"
           />
         </Box>
       )}
@@ -502,6 +517,7 @@ const FloorView: React.FC<{
                     scale={scale}
                     areas={filteredArea}
                     showAreas={showArea}
+                    showGates={showGates}
                     topic={activeFloorplan.toUpperCase()}
                   />
                 </Box>

@@ -36,14 +36,16 @@ export interface BeaconType {
 
 interface StateType {
   beacons: BeaconType[];
-    beaconsByTopic: {
+  beaconsByTopic: {
     [topic: string]: BeaconType[];
   };
+  refreshTrigger: boolean;
 }
 
 const initialState: StateType = {
   beacons: [],
-    beaconsByTopic: {},
+  beaconsByTopic: {},
+  refreshTrigger: false
 };
 
 export const BeaconSlice = createSlice({
@@ -57,10 +59,18 @@ GetBeacon: (state, action) => {
     (beacon: any) => beacon.floorplanId === topic
   );
 },
+  RefreshTrigger: (state) => {
+    state.refreshTrigger = true;
+  },
+  RefreshBeaconState: (state) => {
+    state.beacons = [];
+    state.beaconsByTopic = {};
+    state.refreshTrigger = false;
+  }
   },
 });
 
-export const { GetBeacon } = BeaconSlice.actions;
+export const { GetBeacon, RefreshTrigger, RefreshBeaconState } = BeaconSlice.actions;
 
 export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
   let lastDispatch = 0;

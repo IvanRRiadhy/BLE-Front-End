@@ -12,7 +12,7 @@ import {
   Line,
 } from 'react-konva';
 import { useSelector, useDispatch } from 'src/store/Store';
-import { fetchBeacon } from 'src/store/apps/tracking/Beacon';
+import { fetchBeacon, RefreshBeaconState } from 'src/store/apps/tracking/Beacon';
 
 import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
@@ -57,6 +57,7 @@ const DeviceRenderer: React.FC<{
   devices: FloorplanDeviceType[];
   areas: MaskedAreaType[];
   showAreas: boolean;
+  showGates: boolean;
   topic: string;
 }> = ({
   width,
@@ -70,6 +71,7 @@ const DeviceRenderer: React.FC<{
   devices,
   areas,
   showAreas,
+  showGates,
   topic,
 }) => {
   const dispatch = useDispatch();
@@ -78,6 +80,10 @@ const DeviceRenderer: React.FC<{
   const [animatedBeacons, setAnimatedBeacons] = useState<{
     [id: string]: { x: number; y: number };
   }>({});
+  const refreshTrigger = useSelector((state) => state.BeaconReducer.refreshTrigger);
+  const refreshBeacons = React.useCallback(() => {
+    dispatch(RefreshBeaconState());
+  }, [dispatch]);
   const [lastSeenBeacons, setLastSeenBeacons] = useState<{
     [id: string]: { x: number; y: number; lastSeen: number };
   }>({});
@@ -287,7 +293,6 @@ const DeviceRenderer: React.FC<{
           };
         }
       });
-
       // Remove beacons not seen for more than 10 seconds
       Object.keys(updated).forEach((id) => {
         if (now - updated[id].lastSeen > 10000) {
@@ -337,6 +342,15 @@ const DeviceRenderer: React.FC<{
     });
   }, [lastSeenBeacons]);
 
+  useEffect(() => {
+    if (refreshTrigger) {
+      refreshBeacons();
+      setLastSeenBeacons({});
+      setAnimatedBeacons({});
+      console.log(beaconData);
+    }
+  }, [refreshTrigger, refreshBeacons]);
+
   return (
     <Stage width={width} height={height} style={{ position: 'absolute', top: 0, left: 0 }}>
       <Layer>
@@ -368,7 +382,8 @@ const DeviceRenderer: React.FC<{
             />
           ))}
         {/*Render devices*/}
-        {devices.map((device) => renderDeviceShape(device))}
+        {showGates &&
+        devices.map((device) => renderDeviceShape(device))}
         {/*Render beacons*/}
         {/* {Beacon.map((beacon) => renderBeacon(beacon))} */}
         {Object.entries(lastSeenBeacons).map(([beaconId, beacon]) => {

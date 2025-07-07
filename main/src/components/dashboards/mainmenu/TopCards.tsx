@@ -30,7 +30,7 @@ const topcards: cardType[] = [
   },
   {
     icon: icon4,
-    title: 'Room',
+    title: 'Area',
     digits: '356',
     bgcolor: 'primary',
   },
