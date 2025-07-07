@@ -23,12 +23,13 @@ import { setFloorplan, setScreenSettings } from 'src/store/apps/monitoring/layou
 import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
+import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 
 interface configSidebarProps {
   setSelectedGrid: (grid: string) => void;
   setSelectedScreens: (screen: string) => void;
   previewSelectedScreen: string;
-    screenSettings?: { scale: number; translateX: number; translateY: number };
+  screenSettings?: { scale: number; translateX: number; translateY: number };
 }
 
 const ConfigSidebar: React.FC<configSidebarProps> = ({
@@ -46,13 +47,12 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
   const buildingLists: BuildingType[] = useSelector(
     (state: AppState) => state.buildingReducer.buildings,
   );
-  const floorLists: floorType[] = useSelector(
-    (state: AppState) => state.floorReducer.floors,
+  const floorLists: floorType[] = useSelector((state: AppState) => state.floorReducer.floors);
+  const areaLists: MaskedAreaType[] = useSelector(
+    (state: AppState) => state.maskedAreaReducer.maskedAreas,
   );
   const customizer = useSelector((state: AppState) => state.customizer);
-  const floorplanId = useSelector(
-    (state: AppState) => state.layoutReducer.floorplanId,
-  );
+  const floorplanId = useSelector((state: AppState) => state.layoutReducer.floorplanId);
   // const [buildingList, setBuildingList] = useState([
   //   { id: '1', name: 'Building 1' },
   //   { id: '2', name: 'Building 2' },
@@ -66,13 +66,12 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
   const [selectedBuilding, setSelectedBuilding] = useState('');
   const [selectedFloor, setSelectedFloor] = useState('');
   const [selectedFloorplan, setSelectedFloorplan] = useState('');
+  const [selectedMaskedArea, setSelectedMaskedArea] = useState('');
   const filteredFloorplan = floorplanLists.filter(
-    (floor) => floor.floorId === selectedFloor,
+    (floorplan) => floorplan.floorId === selectedFloor,
   );
-  const filteredFloor = floorLists.filter(
-    (floor) => floor.buildingId === selectedBuilding,
-  );
-
+  const filteredFloor = floorLists.filter((floor) => floor.buildingId === selectedBuilding);
+  const filteredMaskedArea = areaLists.filter((area) => area.floorplanId === selectedFloorplan);
   const handleChange = (event: SelectChangeEvent<string>) => {
     setGridType(event.target.value); // Dispatch the selected grid value
     setSelectedGrid(event.target.value);
@@ -86,12 +85,12 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
   const handleScreenChange = (event: SelectChangeEvent<string>) => {
     setSelectedScreen(event.target.value); // Dispatch the selected screen value
     setSelectedScreens(event.target.value);
-    if(floorplanId[parseInt(gridType)][parseInt(event.target.value) - 1] !== '') {
+    if (floorplanId[parseInt(gridType)][parseInt(event.target.value) - 1] !== '') {
       setSelectedFloorplan(floorplanId[parseInt(gridType)][parseInt(event.target.value) - 1]);
     } else {
-    setSelectedBuilding('');
-    setSelectedFloor('');
-    setSelectedFloorplan('');
+      setSelectedBuilding('');
+      setSelectedFloor('');
+      setSelectedFloorplan('');
     }
   };
   const handleBuildingChange = (event: SelectChangeEvent<string>) => {
@@ -106,14 +105,19 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
   const handleFloorplanChange = (event: SelectChangeEvent<string>) => {
     setSelectedFloorplan(event.target.value); // Dispatch the selected floor value
   };
+  const handleMaskedAreaChange = (event: SelectChangeEvent<string>) => {
+    setSelectedMaskedArea(event.target.value);
+  };
 
   const handleSave = () => {
     dispatch(setFloorplan(parseInt(gridType), parseInt(selectedScreen), selectedFloorplan));
-    dispatch(setScreenSettings(parseInt(gridType), parseInt(selectedScreen), {
-      scale: screenSettings?.scale || 1,
-      translateX: screenSettings?.translateX || 0,
-      translateY: screenSettings?.translateY || 0,
-    }));
+    dispatch(
+      setScreenSettings(parseInt(gridType), parseInt(selectedScreen), {
+        scale: screenSettings?.scale || 1,
+        translateX: screenSettings?.translateX || 0,
+        translateY: screenSettings?.translateY || 0,
+      }),
+    );
     setSelectedScreens('');
     setSelectedScreen('');
     setSelectedBuilding('');
@@ -133,32 +137,26 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
 
   useEffect(() => {
     if (selectedScreen !== '') {
-      setSelectedFloorplan(
-        floorplanId[parseInt(gridType)]?.[parseInt(selectedScreen) - 1],
-      );
+      setSelectedFloorplan(floorplanId[parseInt(gridType)]?.[parseInt(selectedScreen) - 1]);
     }
   }, [selectedScreen, gridType, floorplanId]);
 
   useEffect(() => {
-    if(selectedFloorplan !== ''){
-      const floorplan = floorplanLists.find(
-        (floorplan) => floorplan.id === selectedFloorplan,
-      );
-      if(floorplan){
+    if (selectedFloorplan !== '') {
+      const floorplan = floorplanLists.find((floorplan) => floorplan.id === selectedFloorplan);
+      if (floorplan) {
         setSelectedFloor(floorplan.floorId);
       }
     }
-  },[selectedFloorplan, floorplanLists]);
+  }, [selectedFloorplan, floorplanLists]);
   useEffect(() => {
-    if(selectedFloor !== ''){
-      const floor = floorLists.find(
-        (floor) => floor.id === selectedFloor,
-      );
-      if(floor){
+    if (selectedFloor !== '') {
+      const floor = floorLists.find((floor) => floor.id === selectedFloor);
+      if (floor) {
         setSelectedBuilding(floor.buildingId);
       }
     }
-  },[selectedFloor, floorLists]);
+  }, [selectedFloor, floorLists]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
@@ -197,7 +195,9 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
             <Divider />
             <Grid container mb={2} sx={{ padding: 2, paddingTop: 0 }}>
               <Grid size={{ lg: 12, md: 12, sm: 12 }} direction={'column'}>
-                <CustomFormLabel htmlFor="grid-type">Grid Type</CustomFormLabel>
+                <CustomFormLabel htmlFor="grid-type">
+                  Grid Type {<span style={{ color: 'red' }}>*</span>}
+                </CustomFormLabel>
                 <CustomSelect
                   name="gridType"
                   value={gridType}
@@ -217,7 +217,9 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
                 </CustomSelect>
                 {gridType !== '' && (
                   <>
-                    <CustomFormLabel htmlFor="screen">Screen</CustomFormLabel>
+                    <CustomFormLabel htmlFor="screen">
+                      Screen {<span style={{ color: 'red' }}>*</span>}
+                    </CustomFormLabel>
                     <CustomSelect
                       name="screen"
                       value={selectedScreen}
@@ -238,7 +240,9 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
                 )}
                 {selectedScreen !== '' && (
                   <>
-                    <CustomFormLabel htmlFor="building">Building</CustomFormLabel>
+                    <CustomFormLabel htmlFor="building">
+                      Building {<span style={{ color: 'red' }}>*</span>}
+                    </CustomFormLabel>
                     <CustomSelect
                       name="building"
                       value={selectedBuilding}
@@ -259,7 +263,9 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
                 )}
                 {selectedBuilding !== '' && (
                   <>
-                    <CustomFormLabel htmlFor="floor">Floor</CustomFormLabel>
+                    <CustomFormLabel htmlFor="floor">
+                      Floor {<span style={{ color: 'red' }}>*</span>}
+                    </CustomFormLabel>
                     <CustomSelect
                       name="floor"
                       value={selectedFloor}
@@ -280,7 +286,9 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
                 )}
                 {selectedFloor !== '' && (
                   <>
-                    <CustomFormLabel htmlFor="floor-plan">Floor Plan</CustomFormLabel>
+                    <CustomFormLabel htmlFor="floor-plan">
+                      Floor Plan {<span style={{ color: 'red' }}>*</span>}
+                    </CustomFormLabel>
                     <CustomSelect
                       name="floorplan"
                       value={selectedFloorplan}
@@ -297,6 +305,28 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
                         </MenuItem>
                       ))}
                     </CustomSelect>
+                    {selectedFloorplan !== '' && (
+                      <>
+                        <CustomFormLabel htmlFor="masked-area">Masked Area</CustomFormLabel>
+                        <CustomSelect
+                          name="masked-area"
+                          value={selectedMaskedArea}
+                          onChange={handleMaskedAreaChange}
+                          fullWidth
+                          variant="outlined"
+                        >
+                          <MenuItem value="" disabled>
+                            -- Select Masked Area --
+                          </MenuItem>
+                          <MenuItem value="None">None</MenuItem>
+                          {filteredMaskedArea.map((maskedArea) => (
+                            <MenuItem key={maskedArea.id} value={maskedArea.id}>
+                              {maskedArea.name}
+                            </MenuItem>
+                          ))}
+                        </CustomSelect>
+                      </>
+                    )}
                     <Button
                       onClick={handleSave}
                       variant="contained"

@@ -518,7 +518,7 @@ const FloorView: React.FC<{
                     areas={filteredArea}
                     showAreas={showArea}
                     showGates={showGates}
-                    topic={activeFloorplan.toUpperCase()}
+                    topic={`topic/${activeFloorplan.toUpperCase()}`}
                   />
                 </Box>
               );

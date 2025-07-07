@@ -107,7 +107,6 @@ const DeviceRenderer: React.FC<{
         setImage(img);
       };
     }
-    // console.log('topic', topic);
   }, [imageSrc]);
   function getLatestBeacons(beacons: any[]) {
     const latestMap = new Map<string, any>();

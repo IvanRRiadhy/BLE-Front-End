@@ -32,6 +32,8 @@ export interface BeaconType {
     y: number;
   };
   time: string;
+  floorplanId: string;
+  inRestrictedArea: boolean;
 }
 
 interface StateType {
@@ -56,7 +58,7 @@ GetBeacon: (state, action) => {
   const { topic, beacons } = action.payload;
   // Only keep beacons with matching floorplanId
   state.beaconsByTopic[topic] = (beacons || []).filter(
-    (beacon: any) => beacon.floorplanId === topic
+    (beacon: any) => (`topic/${beacon.floorplanId}`) === topic
   );
 },
   RefreshTrigger: (state) => {
