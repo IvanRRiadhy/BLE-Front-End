@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import BlacklistData from './BlaclistData';
 import { property, set } from 'lodash';
 import {
@@ -16,7 +16,8 @@ import {
 import { Box } from '@mui/system';
 import DashboardCard from 'src/components/shared/DashboardCard';
 import { useTranslation } from 'react-i18next';
-import { blacklistType } from 'src/store/apps/crud/blacklist';
+import { blacklistType, fetchBlacklist } from 'src/store/apps/crud/blacklist';
+import { AppState, useDispatch, useSelector } from 'src/store/Store';
 
 const blacklist = BlacklistData;
 interface BlacklistTableProps {
@@ -24,7 +25,7 @@ interface BlacklistTableProps {
 }
 
 const BlacklistTable: React.FC<BlacklistTableProps> = ({ blacklistData = [] }) => {
-  // ...rest of your code...
+  const dispatch = useDispatch();
 
   //Pagination
   const [page, setPage] = React.useState(0);
@@ -37,6 +38,7 @@ const BlacklistTable: React.FC<BlacklistTableProps> = ({ blacklistData = [] }) =
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0); // Reset to first page when changing rows per page
   };
+  const blacklistList: blacklistType[] = useSelector((state: AppState) => state.blacklistReducer.blacklists);
 
   //Sorting
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
@@ -48,7 +50,7 @@ const BlacklistTable: React.FC<BlacklistTableProps> = ({ blacklistData = [] }) =
     setOrderBy(property);
   };
 
-  const sortedData = [...blacklistData].sort((a, b) => {
+  const sortedData = [...blacklistList].sort((a, b) => {
     if (orderBy === 'name') {
       const nameA = a.visitor?.name ?? '';
       const nameB = b.visitor?.name ?? '';
@@ -62,6 +64,10 @@ const BlacklistTable: React.FC<BlacklistTableProps> = ({ blacklistData = [] }) =
 
     return 0;
   });
+
+  useEffect(() => {
+    dispatch(fetchBlacklist());
+  }, [dispatch]);
 
   return (
     <DashboardCard title="Blacklist">
@@ -113,23 +119,23 @@ const BlacklistTable: React.FC<BlacklistTableProps> = ({ blacklistData = [] }) =
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((basic) => (
-              <TableRow key={basic.id}>
+            {sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((blacklist) => (
+              <TableRow key={blacklist.id}>
                 <TableCell>
                   <Stack direction="row" spacing={2}>
                     <Box>
                       <Typography variant="subtitle2" fontWeight={600}>
-                        {basic.visitor?.name || 'Unknown Visitor'}
+                        {blacklist.visitor?.name || 'Unknown Visitor'}
                       </Typography>
                       <Typography color="textSecondary" fontSize="12px" variant="subtitle2">
-                        {basic.visitor?.cardNumber || 'No Card Number'}
+                        {blacklist.visitor?.cardNumber || 'No Card Number'}
                       </Typography>
                     </Box>
                   </Stack>
                 </TableCell>
                 <TableCell>
                   <Typography color="textSecondary" fontWeight={400} variant="subtitle2">
-                    {basic.floorplanMaskedArea?.name || 'Unknown Area'}
+                    {blacklist.floorplanMaskedArea?.name || 'Unknown Area'}
                   </Typography>
                 </TableCell>
                 {/* <TableCell>

@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React from 'react';
+import React, { useEffect } from 'react';
 import DashboardCard from '../../shared/DashboardCard';
 import CustomSelect from '../../forms/theme-elements/CustomSelect';
 import {
@@ -21,7 +21,8 @@ import {
 } from '@mui/material';
 import AlarmWarningData from './AlarmWarningData';
 import { useTranslation } from 'react-i18next';
-import { AlarmType } from 'src/store/apps/crud/alarmRecordTracking';
+import { AlarmType, fetchAlarm } from 'src/store/apps/crud/alarmRecordTracking';
+import { useDispatch, useSelector, AppState } from 'src/store/Store';
 
 const performers = AlarmWarningData;
 interface AlarmTableProps {
@@ -29,9 +30,9 @@ interface AlarmTableProps {
 }
 
 const AlarmWarning: React.FC<AlarmTableProps> = ({ alarmData = [] }) => {
-  // for select
   const { t } = useTranslation();
-
+    const dispatch = useDispatch();
+  
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMonth(event.target.value);
   };
@@ -47,6 +48,7 @@ const AlarmWarning: React.FC<AlarmTableProps> = ({ alarmData = [] }) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0); // Reset to first page when changing rows per page
   };
+  const alarmList: AlarmType[] = useSelector((state: AppState) => state.alarmReducer.alarmRecordTrackings);
 
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
@@ -80,7 +82,7 @@ const AlarmWarning: React.FC<AlarmTableProps> = ({ alarmData = [] }) => {
   };
   
     const allMonths = [
-      ...alarmData.map((d) => getMonthYear(d.timestamp)),
+      ...alarmList.map((d) => getMonthYear(d.timestamp)),
       todayMonth,
     ].filter(Boolean);
   
@@ -102,7 +104,7 @@ const AlarmWarning: React.FC<AlarmTableProps> = ({ alarmData = [] }) => {
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
-  const filteredAlarmData = alarmData.filter((alarm) => {
+  const filteredAlarmData = alarmList.filter((alarm) => {
   if (!alarm.timestamp) return false;
   const date = new Date(alarm.timestamp);
   const alarmMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
@@ -132,6 +134,10 @@ const AlarmWarning: React.FC<AlarmTableProps> = ({ alarmData = [] }) => {
     }
     return 0;
   });
+
+  useEffect(() => {
+    dispatch(fetchAlarm());
+  },[dispatch]);
 
   return (
     <DashboardCard

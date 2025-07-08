@@ -26,6 +26,7 @@ export function startMQTTclient(messagecallback: any, topic: string) {
     client = mqtt.connect(Broker_URL, options);
 
     client.on("connect", () => {
+      // console.log("Connected to MQTT broker", topic);
       // Subscribe to all topics that have callbacks
       Object.keys(messageCallbacks).forEach((t) => {
         if (!subscribedTopics.has(t)) {
