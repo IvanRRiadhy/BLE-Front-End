@@ -25,6 +25,8 @@ import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel
 import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
 import { useTranslation } from 'react-i18next';
 
+const BASE_URL = 'http://192.168.1.116:5000';
+
 const VisitorContent = () => {
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -90,6 +92,7 @@ const VisitorContent = () => {
       },
     )}`;
   };
+  console.log(`${BASE_URL}${visitorDetail?.faceImage}`);
   return (
     <>
       {visitorDetail ? (
@@ -114,10 +117,12 @@ const VisitorContent = () => {
           <Box sx={{ overflow: 'auto' }} p={5}>
             <Box display="flex" alignItems="center">
               <Avatar
-                alt="Member Profile"
-                src={visitorDetail.faceImage}
+                alt="Visitor Face"
+                src={visitorDetail.faceImage ? `${BASE_URL}${visitorDetail.faceImage}` : undefined}
                 sx={{ width: '72px', height: '72px' }}
-              />
+              >
+                {/* {visitorDetail.name?.charAt(0) || '?'} */}
+              </Avatar>
               <Box sx={{ ml: 2 }}>
                 <Typography variant="h6" mb={0.5}>
                   {visitorDetail.name}

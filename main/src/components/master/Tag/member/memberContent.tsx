@@ -36,6 +36,8 @@ import { ApplicationType, fetchApplications } from 'src/store/apps/crud/applicat
 import { useTranslation } from 'react-i18next';
 import IconClose from 'src/assets/images/frontend-pages/icons/icon-close.svg';
 
+const BASE_URL = 'http://192.168.1.116:5000';
+
 const MemberContent = () => {
   const { t } = useTranslation();
   const memberDetail: memberType | undefined = useSelector(
@@ -143,7 +145,7 @@ const MemberContent = () => {
             <Box display="flex" alignItems="center">
               <Avatar
                 alt="Member Profile"
-                src={memberDetail.faceImage}
+                src={`${BASE_URL}${memberDetail.faceImage}`}
                 sx={{ width: '72px', height: '72px' }}
               />
               <Box sx={{ ml: 2 }}>

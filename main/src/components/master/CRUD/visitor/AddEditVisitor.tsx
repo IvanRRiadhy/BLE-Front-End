@@ -19,7 +19,7 @@ import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, useDispatch } from 'src/store/Store';
 import { visitorStatus, gender } from 'src/types/crud/input';
-import { addVisitor, editVisitor, visitorType } from 'src/store/apps/crud/visitor';
+import { addVisitor, editVisitor, fetchVisitor, visitorType } from 'src/store/apps/crud/visitor';
 
 interface FormType {
   type?: string;
@@ -70,6 +70,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = () => {
     setOpen(true);
+    console.log("visitor Data: ", visitor);
   };
 
   const handleClose = () => {
@@ -100,16 +101,17 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
         data.append('faceImage', image);
       }
       if (type === 'edit') {
+        console.log("Form Data :", JSON.stringify(Object.fromEntries(data.entries())));
         await dispatch(editVisitor(data)); // Dispatch update
       }
       if (type === 'add') {
         await dispatch(addVisitor(data));
       }
-      await dispatch(fetchVisitors());
+      await dispatch(fetchVisitor());
       console.log('Saved!');
       setOpen(false);
     } catch (error) {
-      console.error('Error saving application:', error);
+      console.error('Error saving visitor:', error);
     }
   };
 
@@ -463,6 +465,6 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
 };
 
 export default AddEditVisitor;
-function fetchVisitors(): any {
-  throw new Error('Function not implemented.');
-}
+// function fetchVisitors(): any {
+//   throw new Error('Function not implemented.');
+// }

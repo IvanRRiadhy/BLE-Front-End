@@ -23,6 +23,7 @@ import { fetchDistricts, DistrictType } from 'src/store/apps/crud/district';
 import { fetchDepartments, DepartmentType } from 'src/store/apps/crud/department';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
 import { fetchApplications, ApplicationType } from 'src/store/apps/crud/application';
+
 import { gender, statusEmployee } from 'src/types/crud/input';
 
 interface FormType {
@@ -112,6 +113,7 @@ const AddEditMember = ({ type, member }: FormType) => {
         await dispatch(editMember(data)); // Dispatch update
       }
       if (type === 'add') {
+        console.log("Form Data :",data);
         await dispatch(addMember(data));
       }
       await dispatch(fetchMembers());

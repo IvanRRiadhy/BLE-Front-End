@@ -151,13 +151,13 @@ const DeviceDetailList = () => {
     }
   }, [formData.floorplanId]);
 
-  useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      posX: formData.posPxX * scales,
-      posY: formData.posPxY * scales,
-    }));
-  }, [formData.posPxX, formData.posPxY, scales]);
+  // useEffect(() => {
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     posX: formData.posPxX * scales,
+  //     posY: formData.posPxY * scales,
+  //   }));
+  // }, [formData.posPxX, formData.posPxY, scales]);
 
   const [unsavedNodes, setUnsavedNodes] = useState<BleNodeType[]>([]);
   // Define required fields

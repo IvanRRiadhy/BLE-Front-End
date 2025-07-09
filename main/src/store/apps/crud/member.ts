@@ -108,7 +108,11 @@ export const fetchMembers = () => async (dispatch: AppDispatch) => {
 export const addMember = createAsyncThunk("member/addMember", async (formData: FormData) => {
     try {
         formData.delete('id');
-        const response = await axiosServices.post(API_URL, formData);
+        const response = await axiosServices.post(API_URL, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
         return response.data;
     } catch (error) {
         console.error("Error adding member:", error);
@@ -121,7 +125,11 @@ export const editMember = createAsyncThunk("member/editMember", async (formData:
     try {
         const id = formData.get('id');
         formData.delete('id');
-        const response = await axiosServices.put(`${API_URL}${id}`, formData);
+        const response = await axiosServices.put(`${API_URL}${id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
         return response.data;
     } catch (error) {
         console.error("Error editing member:", error);

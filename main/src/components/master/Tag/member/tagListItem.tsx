@@ -15,6 +15,8 @@ import {
 
 import { memberType } from 'src/store/apps/crud/member';
 
+const BASE_URL = 'http://192.168.1.116:5000';
+
 type Props = {
   onTagClick: (event: React.MouseEvent<HTMLElement>) => void;
   member?: memberType;
@@ -56,7 +58,7 @@ const TagListItem = ({
   return (
     <ListItemButton sx={{ mb: 1 }} selected={active} onClick={onTagClick}>
       <ListItemAvatar>
-        <Avatar alt="User Profile" src={member?.faceImage} />
+        <Avatar alt="Member Face" src={`${BASE_URL}${member?.faceImage}`} />
       </ListItemAvatar>
       <ListItemText>
         <Stack direction="row" gap="10px" alignItems="center">

@@ -13,7 +13,7 @@ import {
 } from 'react-konva';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { fetchBeacon, RefreshBeaconState } from 'src/store/apps/tracking/Beacon';
-
+import BeaconRenderer from './BeaconRenderer';
 import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
 import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
@@ -219,60 +219,60 @@ const DeviceRenderer: React.FC<{
     );
   };
 
-  const renderBeacon = (beacon: { id: string; x: number; y: number }) => {
-    // console.log('Rendering beacon:', beacon);
-    const radius = 9;
-    const triangleHeight = 10;
-    const triangleWidth = 9;
-    const x = beacon.x; // Scale the x coordinate
-    const y = beacon.y;
-    const key = `beacon-${beacon.id}-${uniqueId()}`;
-    // console.log('Beacon coordinates:', x, y);
-    return (
-      <React.Fragment key={key}>
-        {/* Circle */}
-        <Text
-          x={x - 55}
-          y={y - triangleHeight - radius - 30}
-          text={beacon.id}
-          fontSize={14}
-          fill="#1976d2"
-          fontStyle="bold"
-          width={120}
-          align="center"
-        />
-        <Circle
-          x={x}
-          y={y - triangleHeight - radius}
-          radius={radius}
-          fill="#1976d2"
-          stroke="#fff"
-          strokeWidth={3}
-          shadowBlur={3}
-        />
-        {/* Downward-pointing triangle */}
-        <Shape
-          x={x}
-          y={y - triangleHeight}
-          sceneFunc={(context, shape) => {
-            context.beginPath();
-            // Start from bottom left
-            context.moveTo(0, triangleHeight);
-            // Line to bottom right
-            context.lineTo(radius * 0.7, 0);
-            // Curved line across the top (matching circle curvature)
-            context.quadraticCurveTo(0, 5, -radius * 0.7, 0);
-            // Close back to bottom point
-            context.closePath();
-            context.fillStrokeShape(shape);
-          }}
-          fill="#1976d2"
-          shadowBlur={2}
-        />
-        {/* Optionally, you can add a placeholder for the photo here */}
-      </React.Fragment>
-    );
-  };
+  // const renderBeacon = (beacon: { id: string; x: number; y: number }) => {
+  //   // console.log('Rendering beacon:', beacon);
+  //   const radius = 9;
+  //   const triangleHeight = 10;
+  //   const triangleWidth = 9;
+  //   const x = beacon.x; // Scale the x coordinate
+  //   const y = beacon.y;
+  //   const key = `beacon-${beacon.id}-${uniqueId()}`;
+  //   // console.log('Beacon coordinates:', x, y);
+  //   return (
+  //     <React.Fragment key={key}>
+  //       {/* Circle */}
+  //       <Text
+  //         x={x - 55}
+  //         y={y - triangleHeight - radius - 30}
+  //         text={beacon.id}
+  //         fontSize={14}
+  //         fill="#1976d2"
+  //         fontStyle="bold"
+  //         width={120}
+  //         align="center"
+  //       />
+  //       <Circle
+  //         x={x}
+  //         y={y - triangleHeight - radius}
+  //         radius={radius}
+  //         fill="#1976d2"
+  //         stroke="#fff"
+  //         strokeWidth={3}
+  //         shadowBlur={3}
+  //       />
+  //       {/* Downward-pointing triangle */}
+  //       <Shape
+  //         x={x}
+  //         y={y - triangleHeight}
+  //         sceneFunc={(context, shape) => {
+  //           context.beginPath();
+  //           // Start from bottom left
+  //           context.moveTo(0, triangleHeight);
+  //           // Line to bottom right
+  //           context.lineTo(radius * 0.7, 0);
+  //           // Curved line across the top (matching circle curvature)
+  //           context.quadraticCurveTo(0, 5, -radius * 0.7, 0);
+  //           // Close back to bottom point
+  //           context.closePath();
+  //           context.fillStrokeShape(shape);
+  //         }}
+  //         fill="#1976d2"
+  //         shadowBlur={2}
+  //       />
+  //       {/* Optionally, you can add a placeholder for the photo here */}
+  //     </React.Fragment>
+  //   );
+  // };
 
   // Update lastSeenBeacons whenever beaconData changes
   useEffect(() => {
@@ -381,17 +381,19 @@ const DeviceRenderer: React.FC<{
             />
           ))}
         {/*Render devices*/}
-        {showGates &&
-        devices.map((device) => renderDeviceShape(device))}
+        {showGates && devices.map((device) => renderDeviceShape(device))}
         {/*Render beacons*/}
         {/* {Beacon.map((beacon) => renderBeacon(beacon))} */}
         {Object.entries(lastSeenBeacons).map(([beaconId, beacon]) => {
           const anim = animatedBeacons[beaconId] || beacon;
-          return renderBeacon({
-            id: beaconId,
-            x: (anim.x / originalWidth) * width,
-            y: (anim.y / originalHeight) * height,
-          });
+          return (
+            <BeaconRenderer
+              key={`beacon-${beaconId}`}
+              id={beaconId}
+              x={(anim.x / originalWidth) * width}
+              y={(anim.y / originalHeight) * height}
+            />
+          );
         })}
       </Layer>
     </Stage>

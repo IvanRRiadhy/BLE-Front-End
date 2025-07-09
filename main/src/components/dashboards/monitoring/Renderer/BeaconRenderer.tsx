@@ -1,55 +1,147 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Stage,
-  Layer,
-  Rect,
-  Circle,
-  Star,
-  Image as KonvaImage,
-  RegularPolygon,
-  Shape,
-  Text,
-  Line,
-} from 'react-konva';
-import { useSelector, useDispatch } from 'src/store/Store';
-import mqtt from 'mqtt';
+import { Text, Circle, Shape, Group, Rect } from 'react-konva';
+import { fetchMembers, memberType } from 'src/store/apps/crud/member';
+import { fetchVisitor, visitorType } from 'src/store/apps/crud/visitor';
+import { RootState, useDispatch, useSelector } from 'src/store/Store';
+import { Box, Typography, Paper } from '@mui/material';
+import { Html } from 'react-konva-utils';
 
-const Topic = "6A6AD6FA-5630-419A-B756-7685A0401FED";
-const Broker_URL = "ws://192.168.1.165:9001";
-
-const options = {
-  clientId: "Klien1",
-  username: "test1",
-  password: "test1",
+type BeaconRendererProps = {
+  id: string;
+  x: number;
+  y: number;
 };
 
-export function startMQTTclient(messagecallback: any){
-            const client = mqtt.connect(Broker_URL, options);
-  client.on("connect", mqtt_connect);
-  client.on("error", mqtt_error);
-  client.on("message", mqtt_messageReceived);
-      function mqtt_connect() {
-    client.subscribe(Topic, mqtt_subscribe);    
-  }
+const BASE_URL = 'http://192.168.1.116:5000';
 
+const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y }) => {
+  const dispatch = useDispatch();
+  const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null);
+  const [showBox, setShowBox] = useState(false);
 
-  function mqtt_subscribe(err: any, granted: any) {
-    console.log("Subscribed to " + Topic, granted);
-    if (err) {
-      console.log(err);
+  useEffect(() => {
+    dispatch(fetchMembers());
+    dispatch(fetchVisitor());
+  }, [dispatch]);
+
+  const membersData = useSelector(
+    (state: RootState) => state.memberReducer.members,
+  ) as memberType[];
+  const visitorsData = useSelector(
+    (state: RootState) => state.visitorReducer.visitors,
+  ) as visitorType[];
+
+  const radius = 9;
+  const triangleHeight = 10;
+
+  const person = [...membersData, ...visitorsData].find((p) => p.bleCardNumber === id);
+  const label = person?.name || id;
+  const imageUrl = person?.faceImage ? `${BASE_URL}${person.faceImage}` : '';
+
+  useEffect(() => {
+    if (imageUrl) {
+      const img = new window.Image();
+      img.crossOrigin = 'anonymous';
+      img.src = imageUrl;
+      img.onload = () => setImageObj(img);
     }
-  }
+  }, [imageUrl]);
 
-  function mqtt_error(err: any) {
-    console.log("MQTT error:", err);
-  }
-  function mqtt_messageReceived(topic: any, message: any, packet: any) {
-    // console.log("Message received: ", JSON.stringify(message), JSON.stringify(packet));
-     const message_str = message.toString();
-     const data = JSON.parse(message_str);
-     console.log(data);
-    
-    
+  const handleClick = () => {
+    setShowBox((prev) => !prev);
+  };
+
+  return (
+    <>
+      <Group onClick={handleClick}>
+        <Text
+          x={x - 55}
+          y={y - triangleHeight - radius - 30}
+          text={label}
+          fontSize={14}
+          fill="#1976d2"
+          fontStyle="bold"
+          width={120}
+          align="center"
+        />
+
+        {/* Background circle */}
+        <Circle
+          x={x}
+          y={y - triangleHeight - radius}
+          radius={radius + 2}
+          fill="#1976d2"
+          stroke="#fff"
+          strokeWidth={3}
+          shadowBlur={3}
+        />
+
+        {/* Face Image */}
+        {imageObj && (
+          <Shape
+            sceneFunc={(ctx, shape) => {
+              ctx.beginPath();
+              ctx.arc(radius, radius, radius, 0, Math.PI * 2, false);
+              ctx.closePath();
+              ctx.clip();
+              ctx.drawImage(imageObj, 0, 0, radius * 2, radius * 2);
+              // Circular border
+            }}
+            x={x - radius}
+            y={y - triangleHeight - radius * 2}
+            width={radius * 2}
+            height={radius * 2}
+            shadowBlur={3}
+          />
+        )}
+
+        {/* Triangle pointer */}
+        <Shape
+          x={x}
+          y={y - triangleHeight}
+          sceneFunc={(context, shape) => {
+            context.beginPath();
+            context.moveTo(0, triangleHeight);
+            context.lineTo(radius * 0.7, 0);
+            context.quadraticCurveTo(0, 5, -radius * 0.7, 0);
+            context.closePath();
+            context.fillStrokeShape(shape);
+          }}
+          fill="#1976d2"
+          shadowBlur={2}
+        />
+      </Group>
+
+      {/* Tooltip Box */}
+      {showBox && (
+        <Html>
+          <div
+            style={{
+              position: 'absolute',
+              top: y - triangleHeight - radius * 2 - 60,
+              left: x + radius + 10,
+              background: 'white',
+              border: '1px solid #ccc',
+              borderRadius: 8,
+              padding: '10px 14px',
+              fontSize: 13,
+              boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+              color: '#333',
+              zIndex: 1000,
+              pointerEvents: 'auto',
+            }}
+          >
+            <div>
+              <strong>Name:</strong> {person?.name || '-'}
+            </div>
+            <div>
+              <strong>BLE:</strong> {person?.bleCardNumber || '-'}
+            </div>
+          </div>
+        </Html>
+      )}
+    </>
+  );
 };
 
-}
+export default BeaconRenderer;

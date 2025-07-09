@@ -59,7 +59,7 @@ GetBeacon: (state, action) => {
   // console.log('Beacons:', beacons);
   // Only keep beacons with matching floorplanId
   state.beaconsByTopic[topic] = (beacons || []).filter(
-    (beacon: any) => (`topic/${beacon.floorplanId}`) === topic
+    (beacon: any) => (`tracking/${beacon.floorplanId}`) === topic
   );
 },
   RefreshTrigger: (state) => {

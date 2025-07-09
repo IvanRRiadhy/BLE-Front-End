@@ -19,6 +19,8 @@ type Props = {
   active: any;
 };
 
+const BASE_URL = 'http://192.168.1.116:5000';
+
 const VisitorListItem = ({ onTagClick, visitor, active }: Props) => {
   const customizer = useSelector((state) => state.customizer);
 
@@ -33,7 +35,7 @@ const VisitorListItem = ({ onTagClick, visitor, active }: Props) => {
   return (
     <ListItemButton sx={{ mb: 1 }} selected={active} onClick={onTagClick}>
       <ListItemAvatar>
-        <Avatar alt="User Profile" src={visitor?.faceImage} />
+        <Avatar alt="Visitor Face" src={`${BASE_URL}${visitor?.faceImage}`} />
       </ListItemAvatar>
       <ListItemText>
         <Stack direction="row" gap="10px" alignItems="center">

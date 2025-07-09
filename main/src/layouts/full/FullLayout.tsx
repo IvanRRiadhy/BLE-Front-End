@@ -14,6 +14,7 @@ import MonitoringHeader from './monitoringLayout/Header';
 import MonitoringSidebar from '../../components/dashboards/monitoring/Sidebar/MonitoringSidebar';
 import { setSessionExpiredHandler } from 'src/utils/axios';
 import SessionExp from './shared/SessionExp';
+import AlarmPopup from './AlarmPopup';
 
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
@@ -48,6 +49,7 @@ const FullLayout: FC = () => {
 
   return (
     <>
+    <AlarmPopup />
     <SessionExp open={sessionExpired} />
       <LoadingBar />
       <MainWrapper
