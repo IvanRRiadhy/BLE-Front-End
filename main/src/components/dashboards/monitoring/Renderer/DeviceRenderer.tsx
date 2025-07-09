@@ -85,7 +85,7 @@ const DeviceRenderer: React.FC<{
     dispatch(RefreshBeaconState());
   }, [dispatch]);
   const [lastSeenBeacons, setLastSeenBeacons] = useState<{
-    [id: string]: { x: number; y: number; lastSeen: number };
+    [id: string]: { x: number; y: number; lastSeen: number, area:string, floorplan:string };
   }>({});
   const setPointsFromNodes = (nodes: Nodes[]): number[] => {
     // console.log('Setting nodes: ', nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]))
@@ -285,10 +285,13 @@ const DeviceRenderer: React.FC<{
       // Mark all beacons from backend as seen now
       beaconData.forEach((beacon) => {
         if (beacon.point) {
+          // console.log("beaconData : ", beacon);
           updated[beacon.beaconId] = {
             x: beacon.point.x,
             y: beacon.point.y,
             lastSeen: now,
+            area: beacon.maskedAreaName,
+            floorplan: beacon.floorplanName
           };
         }
       });
@@ -298,13 +301,13 @@ const DeviceRenderer: React.FC<{
           delete updated[id];
         }
       });
-
+      // console.log("Beacon :", updated);
       return updated;
     });
   }, [beaconData]);
 
   useEffect(() => {
-    console.log('FloorplanID : ', topic, 'Beacons : ', beaconData);
+    // console.log('FloorplanID : ', topic, 'Beacons : ', beaconData);
     Object.entries(lastSeenBeacons).forEach(([beaconId, beacon]) => {
       const point = { x: beacon.x, y: beacon.y };
       const prev = animatedBeacons[beaconId] || { x: point.x, y: point.y };
@@ -392,6 +395,8 @@ const DeviceRenderer: React.FC<{
               id={beaconId}
               x={(anim.x / originalWidth) * width}
               y={(anim.y / originalHeight) * height}
+              area={beacon.area}
+              floorplan={beacon.floorplan}
             />
           );
         })}

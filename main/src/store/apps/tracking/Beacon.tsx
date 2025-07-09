@@ -34,6 +34,9 @@ export interface BeaconType {
   time: string;
   floorplanId: string;
   inRestrictedArea: boolean;
+  is_Active: string;
+  floorplanName: string;
+  maskedAreaName: string;
 }
 
 interface StateType {

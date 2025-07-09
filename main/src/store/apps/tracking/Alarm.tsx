@@ -6,7 +6,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { startMQTTclient } from './MQTT';
 
 export interface AlarmType {
-      beaconId: string;
+  beaconId: string;
   pair: string;
   first: string;
   second: string;
@@ -14,11 +14,10 @@ export interface AlarmType {
   seconDist: number;
   jarakPixel: number;
   jarakMeter: number;
-  point: 
-    {
-      x: number;
-      y: number;
-    };
+  point: {
+    x: number;
+    y: number;
+  };
   firstReaderCoord: {
     id: string;
     x: number;
@@ -32,56 +31,61 @@ export interface AlarmType {
   time: string;
   floorplanId: string;
   inRestrictedArea: boolean;
+  is_Active: boolean;
+  floorplanName: string;
+  maskedAreaName: string;
 }
 
 interface StateType {
-    alarms: AlarmType[];
-    // alarmByTopic: {
-    //     [topis: string]: AlarmType[];
-    // };
-    refreshTrigger: boolean;
+  alarms: AlarmType[];
+  // alarmByTopic: {
+  //     [topis: string]: AlarmType[];
+  // };
+  refreshTrigger: boolean;
 }
 
 const initialState: StateType = {
-    alarms: [],
-    // alarmByTopic: {},
-    refreshTrigger: false
+  alarms: [],
+  // alarmByTopic: {},
+  refreshTrigger: false,
 };
 
 export const AlarmSlice = createSlice({
-    name: 'alarm',
-    initialState,
-    reducers: {
-        GetAlarm: (state, action) => {
-            const {topic, alarms} = action.payload;
-            state.alarms = alarms;
-        },
-        RefreshTrigger: (state) => {
-            state.refreshTrigger = true;
-        },
-        RefreshAlarmState: (state) => {
-            state.alarms = [];
-            // state.alarmByTopic = {};
-            state.refreshTrigger = false;
-        },
+  name: 'alarm',
+  initialState,
+  reducers: {
+    GetAlarm: (state, action) => {
+      const { topic, alarms } = action.payload;
+      state.alarms = alarms;
     },
+    RefreshTrigger: (state) => {
+      state.refreshTrigger = true;
+    },
+    RefreshAlarmState: (state) => {
+      state.alarms = [];
+      // state.alarmByTopic = {};
+      state.refreshTrigger = false;
+    },
+  },
 });
 
 export const { GetAlarm, RefreshTrigger, RefreshAlarmState } = AlarmSlice.actions;
 
 export const fetchAlarm = (topic: string) => (dispatch: AppDispatch) => {
-    let lastDispatch = 0;
-    const unsubscribe = startMQTTclient((data: any) => {
-        const now = Date.now();
-        if (now - lastDispatch > 200) {
-            lastDispatch = now;
-            dispatch(GetAlarm({
-                topic,
-                alarm: Array.isArray(data) ? data : [data],
-            }));
-        }
-    }, topic)
-    return unsubscribe;
+  let lastDispatch = 0;
+  const unsubscribe = startMQTTclient((data: any) => {
+    const now = Date.now();
+    if (now - lastDispatch > 200) {
+      lastDispatch = now;
+      dispatch(
+        GetAlarm({
+          topic,
+          alarm: Array.isArray(data) ? data : [data],
+        }),
+      );
+    }
+  }, topic);
+  return unsubscribe;
 };
 
 export default AlarmSlice.reducer;
