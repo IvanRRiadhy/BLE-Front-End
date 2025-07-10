@@ -85,23 +85,6 @@ const MemberList = () => {
     handleCloseDeleteDialog();
   };
 
-  const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
-
-    // Extract the weekday
-    const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
-    const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-
-    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
-      'en-GB',
-      {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      },
-    )}`;
-  };
-
   const getDepartmentName = (departmentId: string) => {
     const department = departmentData.find((dpt: DepartmentType) => dpt.id === departmentId);
     return department ? department.name : 'Unknown Department';

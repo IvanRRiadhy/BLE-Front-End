@@ -24,10 +24,10 @@ import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Stor
 import { fetchBleReaders, bleReaderType, deleteBleReader } from 'src/store/apps/crud/bleReader';
 import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
 import AddEditBleReader from './AddEditBleReader';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 
 const BleReaderList = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   // Pagination State
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
@@ -72,23 +72,6 @@ const BleReaderList = () => {
       dispatch(deleteBleReader(selectedBle.id));
     }
     handleCloseDeleteDialog();
-  };
-
-  const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
-
-    // Extract the weekday
-    const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
-    const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-
-    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
-      'en-GB',
-      {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      },
-    )}`;
   };
 
   const getBrandName = (brandID: string) => {

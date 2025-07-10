@@ -6,7 +6,6 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { FloorplanType } from "./floorplan";
 import { floorType } from "./floor";
 import { restrictedStatus } from "src/types/crud/input";
-import { ResetState } from "./floorplanDevice";
 
 const API_URL = '/api/FloorplanMaskedArea/';
 

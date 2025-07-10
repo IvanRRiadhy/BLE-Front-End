@@ -27,10 +27,10 @@ import {
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import AddEditAccessControl from './AddEditAccesControl';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 
 const AccessControlList = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   // Pagination State
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page

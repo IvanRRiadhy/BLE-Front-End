@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, IconButton, Menu, MenuItem, Select, SelectChangeEvent } from '@mui/material';
+import { Box, IconButton,MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import { MoreHorizOutlined } from '@mui/icons-material';
 
 type SidebarFilterProps = {

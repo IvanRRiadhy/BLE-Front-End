@@ -19,8 +19,6 @@ interface TrackingGraphProps {
 
 const TrackingGraph: React.FC<TrackingGraphProps> = ({ trackingData = [], alarmData = [] }) => {
 
-  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
   function getCountsByDay(data: any[], dateField: string) {
     const counts = Array(7).fill(0);
     data.forEach((item) => {

@@ -5,7 +5,6 @@ import {
   MenuItem,
   SelectChangeEvent,
   Typography,
-  Divider,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
@@ -14,7 +13,7 @@ import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
   EditUnsavedDevice,
-  fetchFloorplanDevices,
+  // fetchFloorplanDevices,
   FloorplanDeviceType,
   SelectEditingFloorplanDevice,
   SelectFloorplanDevice,
@@ -27,14 +26,14 @@ import { fetchAccessControls, AccessControlType } from 'src/store/apps/crud/acce
 import { fetchBleReaders, bleReaderType } from 'src/store/apps/crud/bleReader';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { DeviceType } from 'src/types/crud/input';
-import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
-import { BleNodeType, fetchNodes } from 'src/store/apps/crud/bleNode';
-import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
+// import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
+// import { BleNodeType, fetchNodes } from 'src/store/apps/crud/bleNode';
+import { fetchFloors } from 'src/store/apps/crud/floor';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import { isEqual } from 'lodash';
 
 const DeviceDetailList = () => {
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
   const device = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.editingFloorplanDevice,
   );
@@ -107,20 +106,20 @@ const DeviceDetailList = () => {
   const bleReaderData: bleReaderType[] = useSelector(
     (state: RootState) => state.bleReaderReducer.bleReaders,
   );
-  const bleNodeData = useSelector((state: RootState) => state.bleNodeReducer.bleNodes);
-  const [testNode, setTestNode] = useState<BleNodeType[]>([]);
-  const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
-  const [selectedFloor, setSelectedFloor] = useState<floorType>();
-  const [selectedFloorPlan, setSelectedFloorPlan] = useState<FloorplanType>();
+  // const bleNodeData = useSelector((state: RootState) => state.bleNodeReducer.bleNodes);
+  // const [testNode, setTestNode] = useState<BleNodeType[]>([]);
+  // const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
+  // const [selectedFloor, setSelectedFloor] = useState<floorType>();
+  // const [selectedFloorPlan, setSelectedFloorPlan] = useState<FloorplanType>();
   const unsavedDevices = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.unsavedFloorplanDevices,
   );
   const [otherReader, setOtherReader] = useState<FloorplanDeviceType[]>([]); // State to hold other devices
-  const [scales, setScale] = useState<number>(1);
+  // const [scales, setScale] = useState<number>(1);
   useEffect(() => {
     // dispatch(fetchFloorplanDevices());
     // dispatch(GetUnsavedFloorplanDevices());
-    dispatch(fetchApplications());
+    // dispatch(fetchApplications());
     dispatch(fetchAccessCCTV());
     dispatch(fetchAccessControls());
     dispatch(fetchBleReaders());
@@ -134,12 +133,12 @@ const DeviceDetailList = () => {
     const selectedFloorplanData = floorplanData.find(
       (floorplan) => floorplan.id === formData.floorplanId,
     );
-    const selectedFloorData = floorData.find((floor) => floor.id === selectedFloorPlan?.floorId);
-    setSelectedFloor(selectedFloorData);
-    setSelectedFloorPlan(selectedFloorplanData);
-    if (selectedFloorData) {
-      setScale(selectedFloorData.meterPerPx || 1); // Set the scale based on the selected floor's scale
-    }
+    // const selectedFloorData = floorData.find((floor) => floor.id === selectedFloorPlan?.floorId);
+    // setSelectedFloor(selectedFloorData);
+    // setSelectedFloorPlan(selectedFloorplanData);
+    // if (selectedFloorData) {
+    //   setScale(selectedFloorData.meterPerPx || 1); // Set the scale based on the selected floor's scale
+    // }
     if (selectedFloorplanData) {
       const otherReaderData = unsavedDevices.filter(
         (reader) =>
@@ -159,7 +158,7 @@ const DeviceDetailList = () => {
   //   }));
   // }, [formData.posPxX, formData.posPxY, scales]);
 
-  const [unsavedNodes, setUnsavedNodes] = useState<BleNodeType[]>([]);
+  // const [unsavedNodes, setUnsavedNodes] = useState<BleNodeType[]>([]);
   // Define required fields
   const requiredFields = ['name', 'type', 'floorplanMaskedAreaId'];
 
@@ -170,13 +169,13 @@ const DeviceDetailList = () => {
     );
   };
 
-  const handleClickOpen = () => {
-    console.log('bleNodeData', bleNodeData);
-    setOpen(true);
-  };
+  // const handleClickOpen = () => {
+  //   console.log('bleNodeData', bleNodeData);
+  //   setOpen(true);
+  // };
 
   const handleClose = () => {
-    setOpen(false);
+    // setOpen(false);
     setFormData({
       id: device?.id || '',
       name: device?.name || '',
@@ -225,7 +224,7 @@ const DeviceDetailList = () => {
           }
         });
 
-        setTestNode(newTestNodes); // Update the testNode state
+        // setTestNode(newTestNodes); // Update the testNode state
         console.log('Test nodes created:', newTestNodes);
       }
       console.log('Device saved successfully');

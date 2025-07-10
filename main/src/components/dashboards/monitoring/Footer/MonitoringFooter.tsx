@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Box, Typography } from '@mui/material';
 import { AppState, useSelector } from 'src/store/Store';
 import TrackingRecord from './TrackingRecord';

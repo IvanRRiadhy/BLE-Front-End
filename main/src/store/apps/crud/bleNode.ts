@@ -64,7 +64,7 @@ export const BleNodeSlice = createSlice({
             state.unsavedNodes.push(action.payload);
         })
         .addCase(addBleNode.rejected, (state, action) => {
-            console.error("Error adding bleNode:", action.payload);
+            console.error("Error adding bleNode:", action.payload, state);
         })
         .addCase(editBleNode.fulfilled, (state, action) => {
             const index = state.bleNodes.findIndex((bleNode) => bleNode.id === action.payload.id);
@@ -74,7 +74,7 @@ export const BleNodeSlice = createSlice({
             }
         })
         .addCase(editBleNode.rejected, (state, action) => {
-            console.error("Error editing bleNode:", action.payload);
+            console.error("Error editing bleNode:", action.payload, state);
         })
         .addCase(deleteBleNode.fulfilled, (state, action) => {
             state.bleNodes = state.bleNodes.filter((bleNode) => bleNode.id !== action.payload);
@@ -84,7 +84,7 @@ export const BleNodeSlice = createSlice({
             }
         })
         .addCase(deleteBleNode.rejected, (state, action) => {
-            console.error("Error deleting bleNode:", action.payload);
+            console.error("Error deleting bleNode:", action.payload, state);
         })
     },
 });

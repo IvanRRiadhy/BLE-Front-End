@@ -1,10 +1,9 @@
-import { Box, Grid2 as Grid, Typography, Toolbar, styled } from '@mui/material';
+import { Box, Toolbar, styled } from '@mui/material';
 import { AppState, useDispatch, useSelector } from 'src/store/Store';
 import PageContainer from 'src/components/container/PageContainer';
 import { useTheme } from '@mui/material';
 import MonitoringSidebar from 'src/components/dashboards/monitoring/Sidebar/MonitoringSidebar';
 import MonitoringFooter from 'src/components/dashboards/monitoring/Footer/MonitoringFooter';
-import FloorView from 'src/components/dashboards/monitoring/FloorView';
 import ToolbarMonitor from 'src/layouts/full/monitoringLayout/Toolbar';
 import { useEffect, useMemo } from 'react';
 import {
@@ -13,9 +12,6 @@ import {
   toggleSidebar,
 } from 'src/store/customizer/CustomizerSlice';
 import MonitoringGrid from 'src/views/dashboard/MonitoringGrid.tsx';
-
-type FloorIdsType = string[][];
-
 
 const Monitoring = () => {
   const dispatch = useDispatch();

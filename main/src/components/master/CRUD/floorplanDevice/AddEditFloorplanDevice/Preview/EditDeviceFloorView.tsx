@@ -1,17 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
-import { Box, FormLabel, Typography, useTheme, Switch, FormControlLabel } from '@mui/material';
+import { Box, Switch, FormControlLabel } from '@mui/material';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
-import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
+import { fetchFloors } from 'src/store/apps/crud/floor';
 import {
   fetchFloorplanDevices,
   FloorplanDeviceType,
-  SelectFloorplanDevice,
 } from 'src/store/apps/crud/floorplanDevice';
 import ZoomControls from 'src/components/shared/ZoomControls';
 import EditDeviceRenderer from './EditDeviceRenderer';
 import FloorplanHouse from 'src/assets/images/masters/Floorplan/Floorplan-House.png';
-import { Layer, Stage, Image as KonvaImage } from 'react-konva';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 
 const BASE_URL = 'http://192.168.1.116:5000'; // Adjust this to your actual base URL
@@ -58,7 +56,7 @@ const EditDeviceFloorView: React.FC<{
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   //const MIN_SCALE = 1; // Minimum scale to prevent the image from becoming too small
   const MAX_SCALE = 2; // Maximum scale to prevent the image from becoming too large
-  const [minScale, setMinScale] = useState(0.5);
+  const [minScale] = useState(0.5);
   const [translate, setTranslate] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [isDragging, setIsDragging] = useState('');
@@ -83,12 +81,6 @@ const EditDeviceFloorView: React.FC<{
           const containerHeight = containerRef.current.clientHeight;
 
           // Dynamically calculate the scale to fit the image within the container
-          const widthRatio = containerWidth / img.width;
-          const heightRatio = containerHeight / img.height;
-          const calculatedScale = Math.min(widthRatio, heightRatio);
-
-          // Ensure the scale doesn't make the image smaller than the container
-          const finalScale = Math.max(calculatedScale, 1); // Use 1 as the minimum scale
 
           // setScale(finalScale); // Set the initial scale
 

@@ -2,9 +2,7 @@ import { useState } from 'react';
 import PageContainer from 'src/components/container/PageContainer';
 import AppCard from 'src/components/shared/AppCard';
 import { Box } from '@mui/material';
-import { RootState, useSelector } from 'src/store/Store';
 import RulesSidebar from 'src/components/master/rules/rulesSidebar';
-import RulesCanvas from 'src/components/master/rules/rulesCanvas';
 import Canvas from 'src/components/master/rules/Canvas/Canvas';
 
 const rulesEdit = () => {

@@ -7,78 +7,14 @@ import {
   Button,
   Grid2 as Grid, // Using Grid2 directly
   MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
   Typography,
-  Divider,
-  Menu,
   ToggleButtonGroup,
   ToggleButton,
 } from '@mui/material';
-import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { useTheme } from '@mui/material/styles';
-import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import { Box } from '@mui/system';
 import { nodeType } from 'src/store/apps/rules/RulesNodes';
-
-const variables = {
-  areas: [
-    { building: 'Alpha Tower', floorplan: 'Ground Floor', area: 'Lobby' },
-    { building: 'Alpha Tower', floorplan: 'Ground Floor', area: 'Reception' },
-    { building: 'Alpha Tower', floorplan: '1st Floor', area: 'Conference Room A' },
-    { building: 'Alpha Tower', floorplan: '1st Floor', area: 'Office 101' },
-    { building: 'Alpha Tower', floorplan: '2nd Floor', area: 'Break Room' },
-    { building: 'Alpha Tower', floorplan: '2nd Floor', area: 'Storage Room' },
-    { building: 'Alpha Tower', floorplan: '3rd Floor', area: 'Office 301' },
-    { building: 'Alpha Tower', floorplan: '3rd Floor', area: 'Meeting Room 3B' },
-    { building: 'Alpha Tower', floorplan: '3rd Floor', area: 'Open Workspace' },
-    { building: 'Alpha Tower', floorplan: '3rd Floor', area: 'Server Closet' },
-    { building: 'Beta Complex', floorplan: 'Main Floor', area: 'Help Desk' },
-    { building: 'Beta Complex', floorplan: 'Main Floor', area: 'Waiting Area' },
-    { building: 'Beta Complex', floorplan: 'Mezzanine', area: 'Security Room' },
-    { building: 'Beta Complex', floorplan: 'Mezzanine', area: 'Pantry' },
-    { building: 'Beta Complex', floorplan: 'East Wing', area: 'IT Lab' },
-    { building: 'Beta Complex', floorplan: 'East Wing', area: 'Tech Storage' },
-    { building: 'Beta Complex', floorplan: 'West Wing', area: 'HR Office' },
-    { building: 'Beta Complex', floorplan: 'West Wing', area: 'Recruitment Room' },
-    { building: 'Beta Complex', floorplan: 'West Wing', area: 'Training Hall' },
-    { building: 'Beta Complex', floorplan: 'West Wing', area: 'Quiet Room' },
-  ],
-  members: [
-    { name: 'John Doe', organization: 'ABC Corp', department: 'Engineering', district: 'North' },
-    { name: 'Emma Wilson', organization: 'ABC Corp', department: 'Engineering', district: 'North' },
-    { name: 'Liam Brooks', organization: 'ABC Corp', department: 'Marketing', district: 'South' },
-    { name: 'Olivia Harris', organization: 'ABC Corp', department: 'Marketing', district: 'South' },
-    {
-      name: 'Sophia Bennett',
-      organization: 'ABC Corp',
-      department: 'Operations',
-      district: 'East',
-    },
-    { name: 'Lucas Gray', organization: 'ABC Corp', department: 'Finance', district: 'West' },
-    { name: 'Nora Parker', organization: 'ABC Corp', department: 'Finance', district: 'West' },
-    { name: 'Ethan Lee', organization: 'ABC Corp', department: 'Engineering', district: 'East' },
-    { name: 'Amelia Reed', organization: 'ABC Corp', department: 'Operations', district: 'North' },
-    {
-      name: 'Charlie Davis',
-      organization: 'ABC Corp',
-      department: 'Operations',
-      district: 'North',
-    },
-    { name: 'Alice Johnson', organization: 'XYZ Inc', department: 'Sales', district: 'East' },
-    { name: 'Bob Brown', organization: 'XYZ Inc', department: 'HR', district: 'South' },
-    { name: 'Mia Rogers', organization: 'XYZ Inc', department: 'Legal', district: 'Central' },
-    { name: 'Noah Evans', organization: 'XYZ Inc', department: 'Legal', district: 'Central' },
-    { name: 'Grace Miller', organization: 'XYZ Inc', department: 'IT', district: 'East' },
-    { name: 'Henry Walker', organization: 'XYZ Inc', department: 'Sales', district: 'West' },
-    { name: 'Isla Thomas', organization: 'XYZ Inc', department: 'HR', district: 'South' },
-    { name: 'Chloe Adams', organization: 'XYZ Inc', department: 'IT', district: 'East' },
-    { name: 'James Scott', organization: 'XYZ Inc', department: 'Sales', district: 'East' },
-    { name: 'Ethan Cooper', organization: 'XYZ Inc', department: 'HR', district: 'Central' },
-  ],
-};
 
 interface NodeDetails {
   building?: string[];

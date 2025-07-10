@@ -14,7 +14,7 @@ import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea
 import { fetchBleReaders, bleReaderType } from 'src/store/apps/crud/bleReader';
 import { fetchAlarm, AlarmType } from 'src/store/apps/crud/alarmRecordTracking';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
-import { fetchTrackingTrans } from 'src/store/apps/crud/trackingTrans';
+import { fetchTrackingTrans, trackingTransType } from 'src/store/apps/crud/trackingTrans';
 
 const Modern = () => {
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
@@ -40,11 +40,11 @@ const Modern = () => {
     dispatch(fetchBleReaders());
     dispatch(fetchAlarm());
   }, [dispatch]);
-  const trackingData = useSelector((state: RootState) => state.trackingTransReducer.trackingTrans);
-  const blacklistData = useSelector((state: RootState) => state.blacklistReducer.blacklists);
-  const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreas);
-  const bleReaderData = useSelector((state: RootState) => state.bleReaderReducer.bleReaders);
-  const alarmData = useSelector((state: RootState) => state.alarmReducer.alarmRecordTrackings);
+  const trackingData: trackingTransType[] = useSelector((state: RootState) => state.trackingTransReducer.trackingTrans);
+  const blacklistData: blacklistType[] = useSelector((state: RootState) => state.blacklistReducer.blacklists);
+  const maskedAreaData: MaskedAreaType[] = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreas);
+  const bleReaderData: bleReaderType[] = useSelector((state: RootState) => state.bleReaderReducer.bleReaders);
+  const alarmData: AlarmType[] = useSelector((state: RootState) => state.alarmReducer.alarmRecordTrackings);
   return (
     <PageContainer title="Dashboard" description="this is Dashboard page">
       <Box>

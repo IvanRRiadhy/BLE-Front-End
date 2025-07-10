@@ -15,7 +15,6 @@ import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import AlarmRecordList from 'src/components/master/CRUD/alarmRecord/AlarmRecordList';
-import AddEditAlarmRecord from 'src/components/master/CRUD/alarmRecord/AddEditAlarmRecord';
 
 interface cardType {
   icon?: string;

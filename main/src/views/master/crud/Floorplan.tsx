@@ -28,7 +28,6 @@ const drawerWidth = 320;
 
 const Floorplan = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
-  const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(true);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 

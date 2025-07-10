@@ -8,17 +8,14 @@ import {
   Grid2 as Grid,
   IconButton,
   Typography,
-  MenuItem,
   SelectChangeEvent,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
-import React, { useEffect } from 'react';
+import React from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
+import { AppDispatch, useDispatch } from 'src/store/Store';
 import { CCTVType, editCCTV, addCCTV, fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
-import { fetchApplications, ApplicationType } from 'src/store/apps/crud/application';
-import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 
 interface FormType {
   type?: string;
@@ -40,13 +37,7 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
       applicationId: '5A32986E-C9B9-4174-82D7-A023EAF519E5',
     },
   );
-  const appData: ApplicationType[] = useSelector(
-    (state: RootState) => state.applicationReducer.applications,
-  );
   const dispatch: AppDispatch = useDispatch();
-  useEffect(() => {
-    dispatch(fetchApplications());
-  }, [dispatch]);
 
   const handleClickOpen = () => {
     setOpen(true);

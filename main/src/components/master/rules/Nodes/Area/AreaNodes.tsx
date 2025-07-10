@@ -7,7 +7,6 @@ import {
   updateNodeDetails,
   deleteNode,
   addExtraDetails,
-  setStartNode,
   setStartNodeThunk,
   nodeType,
   setNodeDimensions,

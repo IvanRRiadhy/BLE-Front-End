@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import  { useEffect } from 'react';
 import { List } from '@mui/material';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import { fetchVisitor, visitorType, SelectVisitor } from 'src/store/apps/crud/visitor';

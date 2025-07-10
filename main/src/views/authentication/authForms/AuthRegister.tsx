@@ -1,14 +1,13 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React, { useState } from 'react';
-import { Box, Typography, Button, Divider, Stack } from '@mui/material';
-import { Link, useNavigate } from 'react-router';
+import { Box, Typography, Button,Stack } from '@mui/material';
+import { useNavigate } from 'react-router';
 import axios from 'axios';
 
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
 import CustomFormLabel from '../../../components/forms/theme-elements/CustomFormLabel';
 import { registerType } from 'src/types/auth/auth';
-import AuthSocialButtons from './AuthSocialButtons';
 
 const AuthRegister = ({ title, subtitle, subtext }: registerType) => {
   const [formData, setFormData] = useState({

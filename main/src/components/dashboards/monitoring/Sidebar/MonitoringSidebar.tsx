@@ -1,8 +1,6 @@
 import { useMediaQuery, Box, Drawer, useTheme } from '@mui/material';
-import { useSelector, useDispatch } from 'src/store/Store';
-import Scrollbar from 'src/components/custom-scroll/Scrollbar';
+import { useSelector } from 'src/store/Store';
 import { AppState } from 'src/store/Store';
-import AlarmList from 'src/components/apps/Tracking/AlarmList';
 import SidebarList from './SidebarList';
 import { useState } from 'react';
 import SidebarFilter from './SidebarFilter';
@@ -10,7 +8,6 @@ import SidebarFilter from './SidebarFilter';
 const MonitoringSidebar = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const customizer = useSelector((state: AppState) => state.customizer);
-  const dispatch = useDispatch();
   const theme = useTheme();
   const toggleWidth = customizer.isMonitorSidebar
     ? customizer.SidebarWidth

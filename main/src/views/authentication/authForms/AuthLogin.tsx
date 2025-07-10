@@ -16,11 +16,6 @@ import { loginType } from 'src/types/auth/auth';
 import CustomCheckbox from '../../../components/forms/theme-elements/CustomCheckbox';
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
 import CustomFormLabel from '../../../components/forms/theme-elements/CustomFormLabel';
-
-import AuthSocialButtons from './AuthSocialButtons';
-import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
-import { dispatch } from 'src/store/Store';
 import axiosServices from 'src/utils/axios';
 
 const API_URL = '/api/Auth/login/';

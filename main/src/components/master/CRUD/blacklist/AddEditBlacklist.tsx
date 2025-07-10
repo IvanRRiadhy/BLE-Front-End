@@ -15,7 +15,6 @@ import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
-import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
   blacklistType,
@@ -23,9 +22,8 @@ import {
   editBlacklist,
   fetchBlacklist,
 } from 'src/store/apps/crud/blacklist';
-import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
-import { fetchVisitor, visitorType } from 'src/store/apps/crud/visitor';
+import { fetchVisitor } from 'src/store/apps/crud/visitor';
 
 interface FormType {
   type?: string;
@@ -39,9 +37,6 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
   );
 
   const visitorData = useSelector((state: RootState) => state.visitorReducer.visitors);
-    const floorplanData: FloorplanType[] = useSelector(
-    (state: RootState) => state.floorplanReducer.floorplans,
-  );
   const maskedAreaData = useSelector(
     (state: RootState) => state.maskedAreaReducer.maskedAreas,
   );
@@ -49,7 +44,6 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
 
   useEffect(() => {
     dispatch(fetchVisitor());
-        dispatch(fetchFloorplan());
         dispatch(fetchMaskedAreas());
   }, [dispatch]);
 

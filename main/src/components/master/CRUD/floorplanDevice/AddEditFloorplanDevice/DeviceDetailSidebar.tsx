@@ -1,7 +1,5 @@
-import { Drawer, Theme, Typography, useMediaQuery, useTheme } from '@mui/material';
-import DeviceList from './DeviceList';
+import { Drawer, Theme, useMediaQuery } from '@mui/material';
 import React from 'react';
-import { Box } from '@mui/system';
 import DeviceDetailList from './DeviceDetailList';
 
 const drawerWidth = 260;

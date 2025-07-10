@@ -1,11 +1,9 @@
-import axios from '../../../utils/axios';
+
 import { createSlice } from '@reduxjs/toolkit';
-import { AppDispatch, RootState } from 'src/store/Store';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { AppDispatch } from 'src/store/Store';
 import { startMQTTclient } from './MQTT';
 
-const API_URL = 'http://192.168.1.165:3300/api/beacons?floorplanId=6a6ad6fa-5630-419a-b756-7685a0401fed';
+// const API_URL = 'http://192.168.1.165:3300/api/beacons?floorplanId=6a6ad6fa-5630-419a-b756-7685a0401fed';
 
 export interface BeaconType {
   beaconId: string;

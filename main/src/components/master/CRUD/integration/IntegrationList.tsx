@@ -29,11 +29,11 @@ import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch } from 'src/store/Store';
 import AddEditIntegration from './AddEditIntegration';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
 
 const IntegrationList = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   // Pagination State
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
@@ -86,22 +86,6 @@ const IntegrationList = () => {
     handleCloseDeleteDialog();
   };
 
-  const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
-
-    // Extract the weekday
-    const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
-    const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-
-    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
-      'en-GB',
-      {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      },
-    )}`;
-  };
 
   const getBrandName = (brandId: string) => {
     const brand = brandData.find((b: BrandType) => b.id === brandId);

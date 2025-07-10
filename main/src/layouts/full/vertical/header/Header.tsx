@@ -4,16 +4,11 @@ import { useSelector, useDispatch } from 'src/store/Store';
 import {
   toggleSidebar,
   toggleMobileSidebar,
-  setDarkMode,
 } from 'src/store/customizer/CustomizerSlice';
-import { IconMenu2, IconMoon, IconSun } from '@tabler/icons-react';
-import Notifications from './Notification';
+import { IconMenu2} from '@tabler/icons-react';
 import Profile from './Profile';
-import Cart from './Cart';
-import Search from './Search';
 import Language from './Language';
 import { AppState } from 'src/store/Store';
-import Navigation from './Navigation';
 import MobileRightSidebar from './MobileRightSidebar';
 import Logo from '../../shared/logo/Logo';
 

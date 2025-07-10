@@ -26,8 +26,6 @@ import {
   fetchTrackingTrans,
   trackingTransType,
 } from 'src/store/apps/crud/trackingTrans';
-import { fetchBleReaders, bleReaderType } from 'src/store/apps/crud/bleReader';
-import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import AddEditTrackingTransaction from './AddEditTrackingTransaction';
 import { useTranslation } from 'react-i18next';
 
@@ -51,13 +49,9 @@ const TrackingTransactionList = () => {
   const trackingTransData = useSelector(
     (state: RootState) => state.trackingTransReducer.trackingTrans,
   );
-  const readerData = useSelector((state: RootState) => state.bleReaderReducer.bleReaders);
-  const floorplanData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreas);
 
   useEffect(() => {
     dispatch(fetchTrackingTrans());
-    dispatch(fetchBleReaders());
-    dispatch(fetchMaskedAreas());
   }, [dispatch]);
 
   //Delete Pop-up
@@ -98,16 +92,6 @@ const TrackingTransactionList = () => {
         hour12: false,
       },
     )}`;
-  };
-
-  const getReaderName = (readerId: string) => {
-    const reader = readerData.find((rd: bleReaderType) => rd.id === readerId);
-    return reader ? reader.name : 'Unknown Reader';
-  };
-
-  const getFloorName = (floorId: string) => {
-    const floor = floorplanData.find((fl: MaskedAreaType) => fl.id === floorId);
-    return floor ? floor.name : 'Unknown Floor';
   };
 
   return (

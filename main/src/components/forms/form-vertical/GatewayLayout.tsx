@@ -1,38 +1,24 @@
 'use client';
 import {
   Grid2 as Grid,
-  Button,
   Typography,
   IconButton,
-  SelectChangeEvent,
-  MenuItem,
   Box,
 } from '@mui/material';
 import CustomFormLabel from '../theme-elements/CustomFormLabel';
 import CustomTextField from '../theme-elements/CustomTextField';
 import { useSelector, useDispatch, AppDispatch } from 'src/store/Store';
-import { gatesType } from 'src/types/tracking/gate';
 import {
   fetchGates,
-  UpdateGate,
-  SelectGate,
-  SetEditGate,
-  SaveGate,
-  RevertGate,
 } from 'src/store/apps/tracking/GatesSlice';
 import {
   bleReaderType,
   fetchBleReaders,
-  UpdateBleReader,
-  SetEditBleReader,
-  RevertBleReader,
   SelectBleReader,
 } from 'src/store/apps/crud/bleReader';
 import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
-import React, { useEffect, useState } from 'react';
-import AddGateway from 'src/components/master/gateway/AddGateway';
+import { useEffect, useState } from 'react';
 import IconClose from 'src/assets/images/frontend-pages/icons/icon-close.svg';
-import CustomSelect from '../theme-elements/CustomSelect';
 import AddEditBleReader from 'src/components/master/CRUD/bleReader/AddEditBleReader';
 
 const GatewayLayout = () => {
@@ -41,25 +27,7 @@ const GatewayLayout = () => {
     (state) => state.bleReaderReducer.selectedBleReader,
   );
   const brandData: BrandType[] = useSelector((state) => state.brandReducer.brands);
-  const [formData, setFormData] = React.useState<bleReaderType>(
-    bleReaderDetails || {
-      id: '',
-      brandId: '',
-      name: '',
-      mac: '',
-      ip: '',
-      locationX: 0,
-      locationY: 0,
-      locationPxX: 0,
-      locationPxY: 0,
-      engineReaderId: '',
-      createdBy: '',
-      createdAt: '',
-      updatedBy: '',
-      updatedAt: '',
-    },
-  );
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing] = useState(false);
 
   useEffect(() => {
     dispatch(fetchGates());
@@ -69,24 +37,6 @@ const GatewayLayout = () => {
 
   useEffect(() => {
     if (bleReaderDetails) {
-      setFormData(
-        bleReaderDetails || {
-          id: '',
-          brandId: '',
-          name: '',
-          mac: '',
-          ip: '',
-          locationX: 0,
-          locationY: 0,
-          locationPxX: 0,
-          locationPxY: 0,
-          engineReaderId: '',
-          createdBy: '',
-          createdAt: '',
-          updatedBy: '',
-          updatedAt: '',
-        },
-      );
     }
   }, [bleReaderDetails]);
 
@@ -105,16 +55,6 @@ const GatewayLayout = () => {
       </div>
     ); // or some other loading indicator
   }
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
-  ) => {
-    const { value, name, id } = e.target as
-      | HTMLInputElement
-      | { value: string; name: string; id?: string };
-    setFormData((prev) => ({ ...prev, [id || name]: value }));
-  };
-
   // const handleSave = () => {
   //   console.log('formValues: ', formValues);
   //   dispatch(SaveGate());

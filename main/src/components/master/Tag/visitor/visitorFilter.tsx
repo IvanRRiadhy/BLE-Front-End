@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { RootState, useDispatch, useSelector } from 'src/store/Store';
+
+import {  useDispatch, useSelector } from 'src/store/Store';
 import {
   ListItemText,
   ListItemButton,
@@ -12,7 +12,6 @@ import {
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import {
   IconMail,
-  IconFolder,
   IconCircleX,
 } from '@tabler/icons-react';
 import { gender, genderIconMap, visitorStatus, visitorStatusIconMap } from 'src/types/crud/input';

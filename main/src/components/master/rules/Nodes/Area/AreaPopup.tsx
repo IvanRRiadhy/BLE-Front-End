@@ -222,15 +222,6 @@ const AreaNodePopup: React.FC<NodePopupProps> = ({
     cursor: isDragging ? 'grabbing' : 'default',
   };
   // Filter floorplans based on selected building
-  const filteredFloorplans = Array.from(
-    new Set(
-      areas
-        .filter(
-          (area) => formData.building.length === 0 || formData.building.includes(area.building),
-        )
-        .map((area) => area.floorplan),
-    ),
-  );
 
   return (
     <Box ref={popupRef} sx={popupStyle} onMouseDown={(e: any) => e.stopPropagation()}>

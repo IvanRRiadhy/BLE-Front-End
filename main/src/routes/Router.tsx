@@ -3,8 +3,6 @@
 import React, { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
-import { truncateSync } from 'fs';
-import { element, exact } from 'prop-types';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -16,7 +14,6 @@ const MonitoringDash = Loadable(lazy(() => import('../views/dashboard/Monitoring
 const MonitoringConfig = Loadable(lazy(() => import('../views/dashboard/MonitoringConfig')));
 
 /* ***Master**** */
-const Floorplan = Loadable(lazy(() => import('../views/master/floorplan/floorplan')));
 const GatewayApp = Loadable(lazy(() => import('../views/master/gateway/gateway')));
 const MemberTag = Loadable(lazy(() => import('../views/master/tag/memberTag')));
 const VisitorTag = Loadable(lazy(() => import('../views/master/tag/visitorTag')));

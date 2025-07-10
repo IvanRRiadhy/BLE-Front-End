@@ -1,7 +1,6 @@
 import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch, RootState } from "src/store/Store";
-import type { PayloadAction } from "@reduxjs/toolkit";
+import { AppDispatch } from "src/store/Store";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { floorType } from "./floor";
 import { FloorplanDeviceType } from "./floorplanDevice";

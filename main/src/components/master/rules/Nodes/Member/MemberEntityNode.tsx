@@ -5,9 +5,7 @@ import { useDispatch } from 'src/store/Store';
 import {
   updateNodePosition,
   setSelectedNode,
-  updateNodeDetails,
   deleteNode,
-  setStartNode,
   setStartNodeThunk,
   nodeType,
   setNodeDimensions,
@@ -44,51 +42,10 @@ const MemberEntityNodes = ({ node, ifSelector, setIfSelector }: any) => {
   const arrows = useSelector((state: any) => state.RulesConnectorReducer.arrows);
   const [showPopup, setShowPopup] = useState(false);
 
-  const handlePopupClose = () => {
-    setShowPopup(false);
-  };
-  const handleEditNode = (nodeId: string, details: string) => {
-    dispatch(updateNodeDetails({ id: nodeId, details }));
-    setShowPopup(false);
-  };
   const handleDeleteNode = (nodeId: string) => {
     dispatch(deleteNode(nodeId));
     dispatch(deleteArrowsByNode(nodeId));
     setShowPopup(false);
-  };
-  const createConnection = (nodeId: string, stage: any) => {
-    const pointerPosition = stage?.getPointerPosition();
-    if (!arrowDrawing && showPopup) {
-      const arrow: ArrowType = {
-        id: uniqueId('arrow_'),
-        startNodeId: nodeId,
-        endNodeId: '',
-        type: 'Connector',
-        arrowPreviewEnd: {
-          x: pointerPosition ? pointerPosition.x : node.posX + rectWidth + 3,
-          y: pointerPosition ? pointerPosition.y : node.posY + 25,
-        },
-      };
-      // Change the cursor to crosshair
-      if (stage) {
-        stage.container().style.cursor = 'crosshair';
-      }
-      handlePopupClose();
-
-      // Dispatch the arrowDrawing state
-      dispatch(setArrowDrawing(arrow));
-
-      // Immediately set the arrowPreviewEnd
-      if (pointerPosition) {
-        dispatch(
-          setArrowPreviewEnd({
-            id: arrow.id,
-            x: pointerPosition.x,
-            y: pointerPosition.y,
-          }),
-        );
-      }
-    }
   };
   const handlePopupOpen = () => {
     setShowPopup(true);

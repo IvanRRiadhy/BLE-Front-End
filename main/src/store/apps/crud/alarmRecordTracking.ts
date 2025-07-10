@@ -1,8 +1,7 @@
 import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch, RootState } from "src/store/Store";
+import { AppDispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { createAsyncThunk } from "@reduxjs/toolkit";
 import { visitorType } from "./visitor";
 import { bleReaderType } from "./bleReader";
 import { MaskedAreaType } from "./maskedArea";

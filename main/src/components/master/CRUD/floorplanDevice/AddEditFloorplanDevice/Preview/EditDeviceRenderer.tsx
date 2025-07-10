@@ -6,13 +6,12 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  useTheme,
+  // useTheme,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { Stage, Layer, Rect, Circle, Star, Image as KonvaImage, Line } from 'react-konva';
+import { Stage, Layer,  Image as KonvaImage, Line } from 'react-konva';
 import { useSelector, useDispatch, AppState } from 'src/store/Store';
 import {
-  EditUnsavedDevice,
   FloorplanDeviceType,
   RevertDevice,
   SelectEditingFloorplanDevice,
@@ -20,10 +19,8 @@ import {
   editDevicePosition,
 } from 'src/store/apps/crud/floorplanDevice';
 
-import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
 import borderFaceRecog from 'src/assets/images/svgs/devices/FACE READER ICON.png';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
-import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
 import borderGateway from 'src/assets/images/svgs/devices/BLE GATEWAY ICON.png';
 import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
@@ -61,9 +58,9 @@ const EditDeviceRenderer: React.FC<{
   areas,
   showAreas,
 }) => {
-  const theme = useTheme();
+  // const theme = useTheme();
   const dispatch = useDispatch();
-  const [scales, setScale] = useState<number>(scale);
+  const [scales] = useState<number>(scale);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const editingDevice = useSelector(
     (state: AppState) => state.floorplanDeviceReducer.editingFloorplanDevice,

@@ -2,8 +2,6 @@ import {
   Box,
   Grid2 as Grid,
   Typography,
-  Toolbar,
-  styled,
   Drawer,
   SelectChangeEvent,
   MenuItem,
@@ -12,7 +10,6 @@ import {
 } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { AppState, useDispatch } from 'src/store/Store';
-import PageContainer from 'src/components/container/PageContainer';
 import { useTheme } from '@mui/material';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
@@ -40,7 +37,6 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
 }: configSidebarProps) => {
   const theme = useTheme();
   const dispatch = useDispatch();
-  const grid = useSelector((state: AppState) => state.layoutReducer.grid); // Get the current grid value
   const floorplanLists: FloorplanType[] = useSelector(
     (state: AppState) => state.floorplanReducer.floorplans,
   );

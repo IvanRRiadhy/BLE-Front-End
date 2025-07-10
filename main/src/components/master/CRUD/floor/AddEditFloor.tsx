@@ -178,7 +178,6 @@ const AddEditFloor = ({ type, floor }: FormType) => {
   };
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    const maxSize = 1024 * 1024;
     if (file) {
       if (['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
         setImage(file);

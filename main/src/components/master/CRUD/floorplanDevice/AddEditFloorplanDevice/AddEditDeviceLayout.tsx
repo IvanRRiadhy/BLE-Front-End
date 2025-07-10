@@ -17,9 +17,7 @@ import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
-  addFloorplanDevice,
   AddUnsavedDevice,
-  GetUnsavedFloorplanDevices,
   EditUnsavedDevice,
   fetchFloorplanDevices,
   FloorplanDeviceType,
@@ -31,7 +29,7 @@ import { fetchBleReaders, bleReaderType } from 'src/store/apps/crud/bleReader';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { DeviceType } from 'src/types/crud/input';
 import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
-import { BleNodeType, fetchNodes } from 'src/store/apps/crud/bleNode';
+// import { BleNodeType, fetchNodes } from 'src/store/apps/crud/bleNode';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
 
@@ -84,9 +82,9 @@ const AddEditDeviceLayout = ({ type, device }: FormType) => {
     (state: RootState) => state.bleReaderReducer.bleReaders,
   );
   const bleNodeData = useSelector((state: RootState) => state.bleNodeReducer.bleNodes);
-  const [testNode, setTestNode] = useState<BleNodeType[]>([]);
+  // const [testNode, setTestNode] = useState<BleNodeType[]>([]);
   const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
-  const [selectedFloor, setSelectedFloor] = useState<floorType>();
+  // const [selectedFloor, setSelectedFloor] = useState<floorType>();
   const [selectedFloorPlan, setSelectedFloorPlan] = useState<FloorplanType>();
   const unsavedDevices = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.unsavedFloorplanDevices,
@@ -103,7 +101,7 @@ const AddEditDeviceLayout = ({ type, device }: FormType) => {
     dispatch(fetchMaskedAreas());
     dispatch(fetchFloorplan());
     dispatch(fetchFloors());
-    dispatch(fetchNodes());
+    // dispatch(fetchNodes());
   }, [dispatch]);
 
   useEffect(() => {
@@ -111,7 +109,7 @@ const AddEditDeviceLayout = ({ type, device }: FormType) => {
       (floorplan) => floorplan.id === formData.floorplanId,
     );
     const selectedFloorData = floorData.find((floor) => floor.id === selectedFloorPlan?.floorId);
-    setSelectedFloor(selectedFloorData);
+    // setSelectedFloor(selectedFloorData);
     setSelectedFloorPlan(selectedFloorplanData);
     if (selectedFloorData) {
       setScale(selectedFloorData.meterPerPx || 1); // Set the scale based on the selected floor's scale
@@ -135,7 +133,7 @@ const AddEditDeviceLayout = ({ type, device }: FormType) => {
     }));
   }, [formData.posX, formData.posY, scales]);
 
-  const [unsavedNodes, setUnsavedNodes] = useState<BleNodeType[]>([]);
+  // const [unsavedNodes, setUnsavedNodes] = useState<BleNodeType[]>([]);
 
   const handleClickOpen = () => {
     console.log('bleNodeData', bleNodeData);
@@ -193,7 +191,7 @@ const AddEditDeviceLayout = ({ type, device }: FormType) => {
           }
         });
 
-        setTestNode(newTestNodes); // Update the testNode state
+        // setTestNode(newTestNodes); // Update the testNode state
         console.log('Test nodes created:', newTestNodes);
       }
       console.log('Device saved successfully');

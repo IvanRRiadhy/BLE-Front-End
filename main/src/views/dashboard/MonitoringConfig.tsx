@@ -1,17 +1,16 @@
-import { Box, Grid2 as Grid, Typography, Toolbar, styled, Drawer } from '@mui/material';
+
 import { useSelector } from 'react-redux';
 import { AppState, useDispatch } from 'src/store/Store';
 import PageContainer from 'src/components/container/PageContainer';
-import { useTheme } from '@mui/material';
+// import { useTheme } from '@mui/material';
 import ConfigSidebar from 'src/components/dashboards/monitoring/config/ConfigSidebar';
-import ConfigPreview from 'src/components/dashboards/monitoring/config/ConfigPreview';
 import { useEffect, useMemo, useState } from 'react';
 import { toggleHorizontal, toggleSidebar } from 'src/store/customizer/CustomizerSlice';
 import ConfigGrid from 'src/components/dashboards/monitoring/config/ConfigGrid';
 
 const Config = () => {
   const dispatch = useDispatch();
-  const theme = useTheme();
+  // const theme = useTheme();
   const [selectedGrid, setSelectedGrid] = useState('1');
   const [selectedScreen, setSelectedScreen] = useState('');
   const [screenSettings, setScreenSettings] = useState<{ scale: number; translateX: number; translateY: number }>({
@@ -19,10 +18,7 @@ const Config = () => {
   translateX: 0,
   translateY: 0,
 });
-  const grid = useSelector((state: AppState) => state.layoutReducer.grid); // Get the current grid value
-  const floorLists = useSelector((state: AppState) => state.floorplanReducer.floorplans); // Get the current floor IDs
     const floorIds = useSelector((state: AppState) => state.layoutReducer.floorplanId);
-  const customizer = useSelector((state: AppState) => state.customizer);
     const memoizedFloorIds = useMemo(() => floorIds, [floorIds]);
     const screenSettingsState = useSelector((state: AppState) => state.layoutReducer.screenSettings);
     const wholeState = useSelector((state: AppState) => state.layoutReducer);

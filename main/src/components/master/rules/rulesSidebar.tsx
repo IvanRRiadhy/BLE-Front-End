@@ -1,6 +1,5 @@
-import { Button, Drawer, Theme, Typography, useMediaQuery, useTheme } from '@mui/material';
+import {  Drawer, Theme, useMediaQuery} from '@mui/material';
 import React from 'react';
-import { Box } from '@mui/system';
 import RulesList from './rulesList';
 
 const drawerWidth = 260;

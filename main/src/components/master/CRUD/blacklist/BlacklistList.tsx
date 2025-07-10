@@ -22,9 +22,9 @@ import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { fetchBlacklist, blacklistType, deleteBlacklist } from 'src/store/apps/crud/blacklist';
-import { fetchVisitor, visitorType } from 'src/store/apps/crud/visitor';
-import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
+import { fetchVisitor } from 'src/store/apps/crud/visitor';
+import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
+import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import AddEditBlacklist from './AddEditBlacklist';
 
 const BlacklistList = () => {
@@ -44,8 +44,6 @@ const BlacklistList = () => {
   };
   const dispatch: AppDispatch = useDispatch();
   const blaclistData = useSelector((state: RootState) => state.blacklistReducer.blacklists);
-  const visitorData = useSelector((state: RootState) => state.visitorReducer.visitors);
-  const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreas);
 
   useEffect(() => {
     dispatch(fetchBlacklist());
@@ -75,16 +73,6 @@ const BlacklistList = () => {
       dispatch(deleteBlacklist(selectedBList.id));
     }
     handleCloseDeleteDialog();
-  };
-
-  const getVisitorName = (visitorId: string) => {
-    const visitor = visitorData.find((vis: visitorType) => vis.id === visitorId);
-    return visitor ? visitor.name : 'Unknown Visitor';
-  };
-  const getFloorName = (floorId: string) => {
-    const floor = maskedAreaData.find((fl: MaskedAreaType) => fl.id === floorId);
-    console.log('Mask Area: ', floor);
-    return floor ? floor.name : 'Unknown Floor';
   };
 
   return (

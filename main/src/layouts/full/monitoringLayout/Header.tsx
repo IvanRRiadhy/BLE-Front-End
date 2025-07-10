@@ -11,7 +11,6 @@ import {
 
 import { useSelector, useDispatch } from 'src/store/Store';
 import {
-  toggleSidebar,
   toggleMobileSidebar,
   hoverSidebar,
 } from 'src/store/customizer/CustomizerSlice';
@@ -20,7 +19,6 @@ import Profile from '../vertical/header/Profile';
 import { AppState } from 'src/store/Store';
 import Logo from '../shared/logo/Logo';
 import NavListing from './Navigation/NavListing';
-import ToolbarMonitor from './Toolbar';
 import { useEffect, useState } from 'react';
 
 const Header = () => {

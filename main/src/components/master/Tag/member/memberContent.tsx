@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
   Box,
   Button,
-  TextField,
   Typography,
   Avatar,
   Divider,
@@ -11,7 +10,6 @@ import {
   Stack,
   Grid2 as Grid,
   Tooltip,
-  useTheme,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -19,16 +17,13 @@ import {
   DialogContentText,
 } from '@mui/material';
 import {
-  fetchMembers,
   memberType,
   deleteMember,
-  editMember,
   SelectMember,
 } from 'src/store/apps/crud/member';
 import AddEditMember from '../../CRUD/member/AddEditMember';
 import { IconTrash } from '@tabler/icons-react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
-import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { DepartmentType, fetchDepartments } from 'src/store/apps/crud/department';
 import { DistrictType, fetchDistricts } from 'src/store/apps/crud/district';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
@@ -51,9 +46,7 @@ const MemberContent = () => {
   const applicationData = useSelector((state: RootState) => state.applicationReducer.applications);
 
   const dispatch = useDispatch();
-  const theme = useTheme();
-
-  const warningColor = theme.palette.warning.main;
+  // const theme = useTheme();
 
   useEffect(() => {
     dispatch(fetchDistricts());

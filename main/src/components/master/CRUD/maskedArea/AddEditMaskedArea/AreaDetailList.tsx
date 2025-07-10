@@ -5,7 +5,6 @@ import {
   MenuItem,
   SelectChangeEvent,
   Typography,
-  Divider,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
@@ -14,20 +13,17 @@ import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
   EditUnsavedMaskedArea,
-  fetchMaskedAreas,
-  MaskedAreaType,
   SelectEditingMaskedArea,
   SelectMaskedArea,
   RevertMaskedArea,
   SaveMaskedArea,
-  GetUnsavedMaskedArea,
 } from 'src/store/apps/crud/maskedArea';
 import { restrictedStatus } from 'src/types/crud/input';
 import isEqual from 'lodash/isEqual';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 
 const AreaDetailList = () => {
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
   const area = useSelector((state: RootState) => state.maskedAreaReducer.editingMaskedArea);
   const [formData, setFormData] = useState({
     id: area?.id || '',
@@ -85,7 +81,7 @@ const AreaDetailList = () => {
   }, [dispatch]);
 
   const handleClose = () => {
-    setOpen(false);
+    // setOpen(false);
     setFormData({
       id: area?.id || '',
       name: area?.name || '',

@@ -5,10 +5,8 @@ import { NavLink } from 'react-router';
 
 // mui imports
 import {
-  ListItemIcon,
   List,
   styled,
-  ListItemText,
   useTheme,
   ListItemButton,
   Typography,

@@ -14,14 +14,14 @@ import {
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import { fetchFloorplan, SelectFloorplan } from 'src/store/apps/crud/floorplan';
 import { IconEdit } from '@tabler/icons-react';
 import { useNavigate } from 'react-router';
 
 const MaskedAreaList2 = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const navigate = useNavigate();
   // Pagination State
   const [page, setPage] = useState(0);

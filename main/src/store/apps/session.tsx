@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { AppDispatch, RootState } from 'src/store/Store';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 interface SessionState {

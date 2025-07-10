@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, Typography, Toolbar, styled } from '@mui/material';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { useTheme } from '@mui/material';
 import { AppState, useSelector } from 'src/store/Store';
 

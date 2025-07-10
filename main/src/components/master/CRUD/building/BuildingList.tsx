@@ -11,18 +11,11 @@ import {
   TableRow,
   Typography,
   TablePagination,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  DialogContentText,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
-import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
 import AddEditBuilding from './AddEditBuilding';
 
 const BASE_URL = 'http://192.168.1.116:5000';
@@ -46,19 +39,10 @@ const BuildingList = () => {
   const buildingData: BuildingType[] = useSelector(
     (state: RootState) => state.buildingReducer.buildings,
   );
-  const appData: ApplicationType[] = useSelector(
-    (state: RootState) => state.applicationReducer.applications,
-  );
 
   useEffect(() => {
     dispatch(fetchBuildings());
-    dispatch(fetchApplications());
   }, [dispatch]);
-
-  const getAppName = (appId: string) => {
-    const app = appData.find((a: ApplicationType) => a.id === appId);
-    return app ? app.applicationName : 'Unknown App';
-  };
 
   return (
     <Grid container spacing={3}>

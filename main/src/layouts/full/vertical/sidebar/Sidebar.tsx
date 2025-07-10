@@ -1,6 +1,5 @@
 import { useMediaQuery, Box, Drawer, useTheme } from '@mui/material';
 import SidebarItems from './SidebarItems';
-import Logo from '../../shared/logo/Logo';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { hoverSidebar, toggleMobileSidebar } from 'src/store/customizer/CustomizerSlice';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';

@@ -1,6 +1,5 @@
-import axios from '../../../utils/axios';
+
 import { createSlice } from '@reduxjs/toolkit';
-import { AppDispatch, RootState } from 'src/store/Store';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { uniqueId } from 'lodash';
@@ -114,7 +113,7 @@ export const {
 
 export const setStartNodeThunk = createAsyncThunk(
   'nodes/setStartNode',
-  async (nodeId: string, { dispatch, getState }) => {
+  async (nodeId: string, { dispatch }) => {
     // Clear all connectors going to the node
     dispatch(deleteArrowsByNode(nodeId));
     dispatch(setStartNode(nodeId));

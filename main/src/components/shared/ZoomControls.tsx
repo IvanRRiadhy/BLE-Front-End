@@ -32,7 +32,6 @@ interface ZoomControlsProps {
 
 const ZoomControls = ({
   scale,
-  setScale,
   applyZoom,
   minScale = 0.5,
   maxScale = 2,

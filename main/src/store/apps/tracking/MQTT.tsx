@@ -30,7 +30,7 @@ export function startMQTTclient(messagecallback: any, topic: string) {
       // Subscribe to all topics that have callbacks
       Object.keys(messageCallbacks).forEach((t) => {
         if (!subscribedTopics.has(t)) {
-          client!.subscribe(t, (err, granted) => {
+          client!.subscribe(t, (err) => {
             if (!err) subscribedTopics.add(t);
           });
         }
@@ -41,7 +41,7 @@ export function startMQTTclient(messagecallback: any, topic: string) {
       console.log("MQTT error:", err);
     });
 
-    client.on("message", (msgTopic, message, packet) => {
+    client.on("message", (msgTopic, message) => {
       const message_str = message.toString();
       let data: unknown;
       try {
@@ -56,7 +56,7 @@ export function startMQTTclient(messagecallback: any, topic: string) {
     // If already connected, subscribe to new topic if needed
     if (!subscribedTopics.has(topic)) {
         console.log(subscribedTopics, topic);
-      client.subscribe(topic, (err, granted) => {
+      client.subscribe(topic, (err) => {
         if (!err) subscribedTopics.add(topic);
       });
     }

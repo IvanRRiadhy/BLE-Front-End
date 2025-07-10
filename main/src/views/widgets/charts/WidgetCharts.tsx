@@ -7,11 +7,6 @@ import PageContainer from 'src/components/container/PageContainer';
 import YearlyBreakup from '../../../components/dashboards/mainmenu/YearlyBreakup';
 import Projects from '../../../components/dashboards/mainmenu/Projects';
 import Customers from '../../../components/dashboards/mainmenu/Customers';
-import SalesTwo from '../../../components/dashboards/monitoring/SalesTwo';
-import MonthlyEarnings from '../../../components/dashboards/monitoring/MonthlyEarnings';
-import SalesOverview from '../../../components/dashboards/monitoring/SalesOverview';
-import RevenueUpdates from '../../../components/dashboards/monitoring/RevenueUpdates';
-import YearlySales from '../../../components/dashboards/monitoring/YearlySales';
 import MostVisited from '../../../components/widgets/charts/MostVisited';
 import PageImpressions from '../../../components/widgets/charts/PageImpressions';
 import Followers from '../../../components/widgets/charts/Followers';
@@ -66,7 +61,6 @@ const WidgetCharts = () => {
             sm: 3,
           }}
         >
-          <SalesTwo />
         </Grid>
         <Grid size={12}>
           <CurrentValue />
@@ -82,9 +76,6 @@ const WidgetCharts = () => {
               <YearlyBreakup />
             </Grid>
             <Grid size={12}>
-              <MonthlyEarnings />
-            </Grid>
-            <Grid size={12}>
               <MostVisited />
             </Grid>
           </Grid>
@@ -96,9 +87,6 @@ const WidgetCharts = () => {
           }}
         >
           <Grid container spacing={3}>
-            <Grid size={12}>
-              <YearlySales />
-            </Grid>
             <Grid size={12}>
               <PageImpressions />
             </Grid>
@@ -127,12 +115,6 @@ const WidgetCharts = () => {
           }}
         >
           <Grid container spacing={3}>
-            <Grid size={12}>
-              <RevenueUpdates />
-            </Grid>
-            <Grid size={12}>
-              <SalesOverview />
-            </Grid>
           </Grid>
         </Grid>
       </Grid>

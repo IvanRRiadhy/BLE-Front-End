@@ -1,9 +1,6 @@
-import axios from '../../../utils/axios';
+
 import { createSlice } from '@reduxjs/toolkit';
-import { AppDispatch, RootState } from 'src/store/Store';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import { uniqueId } from 'lodash';
 
 export interface ArrowType {
   id: string;

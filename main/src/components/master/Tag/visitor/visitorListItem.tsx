@@ -9,7 +9,7 @@ import {
   Typography,
   Stack,
   ListItemAvatar,
-  useTheme,
+  // useTheme,
 } from '@mui/material';
 import { visitorType } from 'src/store/apps/crud/visitor';
 
@@ -28,9 +28,7 @@ const VisitorListItem = ({ onTagClick, visitor, active }: Props) => {
   // @ts-ignore
   const br = `${customizer.borderRadius}px`;
 
-  const theme = useTheme();
-
-  const warningColor = theme.palette.warning.main;
+  // const theme = useTheme();
 
   return (
     <ListItemButton sx={{ mb: 1 }} selected={active} onClick={onTagClick}>

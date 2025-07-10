@@ -8,7 +8,6 @@ import * as dropdownData from './data';
 import { IconMail } from '@tabler/icons-react';
 
 import ProfileImg from 'src/assets/images/profile/user-1.jpg';
-import unlimitedImg from 'src/assets/images/backgrounds/unlimited-bg.png';
 
 const Profile = () => {
   const [anchorEl2, setAnchorEl2] = useState(null);

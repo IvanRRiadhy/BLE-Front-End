@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch, AppDispatch, AppState } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
+import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import {
   fetchMaskedAreas,
   MaskedAreaType,
@@ -9,8 +9,6 @@ import {
   deleteMaskedArea,
   editMaskedArea,
   DeleteUnsavedMaskedArea,
-  AddUnsavedMaskedArea,
-  EditUnsavedMaskedArea,
   RevertMaskedArea,
   SelectMaskedArea,
   SelectEditingMaskedArea,
@@ -23,7 +21,6 @@ import { Box } from '@mui/system';
 import {
   Alert,
   Divider,
-  TextField,
   Typography,
   Button,
   Dialog,
@@ -174,7 +171,7 @@ const AreaList = () => {
   };
 
   const handleSaveEdits = async () => {
-    const unsavedArea = new Map(filteredMaskedArea.map((area) => [area.id, area]));
+    // const unsavedArea = new Map(filteredMaskedArea.map((area) => [area.id, area]));
     const originArea = new Map(filteredOriginalAreas.map((area) => [area.id, area]));
 
     const areasToEdit = filteredMaskedArea.filter((unsavedArea) => {

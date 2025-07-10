@@ -22,7 +22,6 @@ import {
   addAccessControl,
   fetchAccessControls,
 } from 'src/store/apps/crud/accessControl';
-import { fetchApplications, ApplicationType } from 'src/store/apps/crud/application';
 import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 
@@ -51,15 +50,11 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
       updatedAt: '',
     },
   );
-  const appData: ApplicationType[] = useSelector(
-    (state: RootState) => state.applicationReducer.applications,
-  );
   const brandData: BrandType[] = useSelector(
     (state: RootState) => state.brandReducer.brands,
   );
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
-    dispatch(fetchApplications());
     dispatch(fetchBrands());
   }, [dispatch]);
 

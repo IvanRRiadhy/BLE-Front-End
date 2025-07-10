@@ -1,23 +1,14 @@
-import { useEffect, useState } from 'react';
-import { useSelector, useDispatch, AppDispatch, AppState } from 'src/store/Store';
+
+import {  useDispatch, AppDispatch } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import AddIcon from '@mui/icons-material/Add';
 import { Box } from '@mui/system';
 import {
-  Alert,
   Divider,
-  TextField,
   Typography,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  DialogContentText,
-  IconButton,
 } from '@mui/material';
-import { useNavigate } from 'react-router';
-import { nodeType, AddNode } from 'src/store/apps/rules/RulesNodes';
+
+import {  AddNode } from 'src/store/apps/rules/RulesNodes';
 
 const blocks = [
   {

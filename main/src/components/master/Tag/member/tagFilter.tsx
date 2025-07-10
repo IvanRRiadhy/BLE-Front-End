@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import  { useEffect } from 'react';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
   ListItemText,
@@ -10,7 +10,7 @@ import {
   Box,
 } from '@mui/material';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import { IconMail, IconSend, IconBucket, IconFolder } from '@tabler/icons-react';
+import { IconMail,  IconFolder } from '@tabler/icons-react';
 import { SetVisibilityFilter } from 'src/store/apps/crud/member';
 import { fetchDepartments, DepartmentType } from 'src/store/apps/crud/department';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';

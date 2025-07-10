@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import BlacklistData from './BlaclistData';
-import { property, set } from 'lodash';
 import {
   Table,
   TableBody,
@@ -19,7 +17,6 @@ import { useTranslation } from 'react-i18next';
 import { blacklistType, fetchBlacklist } from 'src/store/apps/crud/blacklist';
 import { AppState, useDispatch, useSelector } from 'src/store/Store';
 
-const blacklist = BlacklistData;
 interface BlacklistTableProps {
   blacklistData: blacklistType[];
 }

@@ -10,7 +10,6 @@ import {
   Stack,
   ListItemAvatar,
   useTheme,
-  Checkbox,
 } from '@mui/material';
 import { MoreVertRounded } from '@mui/icons-material';
 import { IconLiveView, IconBell } from '@tabler/icons-react';

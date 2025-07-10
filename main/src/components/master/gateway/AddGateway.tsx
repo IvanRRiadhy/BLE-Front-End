@@ -19,7 +19,7 @@ const AddGateway = () => {
   const [open, setOpen] = React.useState(false);
   const [gcolor, setGcolor] = React.useState<string>('primary');
   const id = useSelector((state) => state.gateReducer.gates.length + 1);
-  const floor = useSelector((state) => state.floorplanReducer.floorplanContent);
+  const floor = useSelector((state) => state.floorplanReducer.floorplans);
   const [name, setName] = React.useState('');
   const [posX, setPosX] = React.useState(0);
   const [posY, setPosY] = React.useState(0);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Stage, Layer, Rect, Arrow, Line, Image as KonvaImage } from 'react-konva';
+import { Stage, Layer, Rect, Arrow, Image as KonvaImage } from 'react-konva';
 import { useSelector, useDispatch } from 'src/store/Store';
-import { fetchGates, SelectGate } from '../../../store/apps/tracking/GatesSlice';
+import { fetchGates } from '../../../store/apps/tracking/GatesSlice';
 import { gatesType } from 'src/types/tracking/gate';
 
 const Initial_Size = 50;
@@ -11,7 +11,7 @@ const Squares: React.FC<{
   height: number;
   imageSrc?: string;
   setIsDragging?: (dragging: boolean) => void;
-}> = ({ width, height, imageSrc, setIsDragging }) => {
+}> = ({ width, height, imageSrc }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -31,8 +31,6 @@ const Squares: React.FC<{
   const gateway = useSelector((state) =>
     filterGates(state.gateReducer.unsavedGates, state.gateReducer.gateSearch),
   );
-
-  const gridSize = 50;
 
   // useEffect(() => {
   //   const updateSize = () => {

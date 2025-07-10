@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useSelector } from 'src/store/Store';
+// import { useSelector } from 'src/store/Store';
 import {
   ListItemText,
   Box,
@@ -9,23 +9,18 @@ import {
   Typography,
   Stack,
   ListItemAvatar,
-  useTheme,
-  Checkbox,
+  // useTheme,
   IconButton,
 } from '@mui/material';
 
 import { IconTrash, IconPencil } from '@tabler/icons-react';
 
-import AccessDoor from 'src/assets/images/masters/Devices/AccessDoor.png';
 import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
-import CCTV from 'src/assets/images/masters/Devices/CCTV.png';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
-import Gateway from 'src/assets/images/masters/Devices/Gateway.png';
 import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
 import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
 
 import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
-import AddEditDeviceLayout from './AddEditDeviceLayout';
 
 type Props = {
   onListClick: (event: React.MouseEvent<HTMLElement>) => void;
@@ -36,10 +31,10 @@ type Props = {
 };
 
 const DeviceListItem = ({ onListClick, onEditClick, onDeleteClick, device, active }: Props) => {
-  const customizer = useSelector((state) => state.customizer);
-  const br = `${customizer.borderRadius}px`;
+  // const customizer = useSelector((state) => state.customizer);
+  // const br = `${customizer.borderRadius}px`;
 
-  const theme = useTheme();
+  // const theme = useTheme();
 
   // Map device types to their corresponding icons
   const iconMap: { [key: string]: string } = {

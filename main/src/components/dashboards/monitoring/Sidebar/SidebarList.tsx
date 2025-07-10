@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
-  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   Divider,
   List,
@@ -17,9 +15,6 @@ import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import SidebarListItem from './SidebarListItem';
 import { fetchTrackingTrans, trackingTransType } from 'src/store/apps/crud/trackingTrans';
 import { fetchAlarm, AlarmType } from 'src/store/apps/crud/alarmRecordTracking';
-import { fetchBleReaders, bleReaderType } from 'src/store/apps/crud/bleReader';
-import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
 import { useTranslation } from 'react-i18next';
 
 interface SidebarListProps {
@@ -43,110 +38,6 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
   const dispatch = useDispatch();
   const [openModal, setOpenModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ListType | null>(null);
-  const Alarm = [
-    {
-      id: 'A1',
-      device: 'Camera 1',
-      target: 'Person 1',
-      floor: 'Floor 1',
-      area: 'Area 1',
-      alarmType: 'Wrong Access',
-      time: '2025-01-15T15:00:00Z',
-      status: 'Cleared',
-    },
-    {
-      id: 'A2',
-      device: 'Gate 1',
-      target: 'Person 2',
-      floor: 'Floor 1',
-      area: 'Area 2',
-      alarmType: 'Wrong Room',
-      time: '2025-01-15T15:00:30Z',
-      status: 'Cleared',
-    },
-    {
-      id: 'A3',
-      device: 'Gate 2',
-      target: 'Person 1',
-      floor: 'Floor 2',
-      area: 'Area 1',
-      alarmType: 'Wrong Room',
-      time: '2025-01-15T15:10:20Z',
-      status: 'Pending',
-    },
-    {
-      id: 'A4',
-      device: 'Gate 3',
-      target: 'Person 3',
-      floor: 'Floor 2',
-      area: 'Area 4',
-      alarmType: 'Blacklist Person',
-      time: '2025-01-15T15:40:12Z',
-      status: 'Dispatched',
-    },
-    {
-      id: 'A5',
-      device: 'Gate 3',
-      target: 'Person 2',
-      floor: 'Floor 1',
-      area: 'Area 3',
-      alarmType: 'Wrong Access',
-      time: '2025-01-15T15:42:33Z',
-      status: 'Active',
-    },
-    {
-      id: 'A6',
-      device: 'Camera 3',
-      target: 'Person 4',
-      floor: 'Floor 3',
-      area: 'Area 3',
-      alarmType: 'Unidentified Person',
-      time: '2025-01-15T15:47:53Z',
-      status: 'Active',
-    },
-  ];
-  const TrackingList = [
-    {
-      id: 'T1',
-      device: 'Camera 1',
-      target: 'Person 1',
-      floor: 'Floor 1',
-      area: 'Area 3',
-      time: '2025-01-15T15:00:00Z',
-    },
-    {
-      id: 'T2',
-      device: 'Camera 2',
-      target: 'Person 2',
-      floor: 'Floor 2',
-      area: 'Area 1',
-      time: '2025-01-15T15:15:00Z',
-    },
-    {
-      id: 'T3',
-      device: 'Reader 2',
-      target: 'Person 1',
-      floor: 'Floor 1',
-      area: 'Area 3',
-      time: '2025-01-15T15:15:30Z',
-    },
-    {
-      id: 'T4',
-      device: 'Reader 4',
-      target: 'Person 5',
-      floor: 'Floor 3',
-      area: 'Area 1',
-      time: '2025-01-15T15:35:00Z',
-    },
-    {
-      id: 'T5',
-      device: 'Camera 4',
-      target: 'Person 5',
-      floor: 'Floor 3',
-      area: 'Area 2',
-      time: '2025-01-15T15:38:21Z',
-    },
-  ];
   const [list, setList] = useState<ListType[]>([]);
 
   const trackTrans: trackingTransType[] = useSelector(
@@ -157,32 +48,24 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
   );
 
-  const bleReaders: bleReaderType[] = useSelector(
-    (state: RootState) => state.bleReaderReducer.bleReaders,
-  );
-  const floorplanData: MaskedAreaType[] = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreas,
-  );
-
   useEffect(() => {
     dispatch(fetchTrackingTrans());
     dispatch(fetchAlarm());
-    dispatch(fetchBleReaders());
   }, [dispatch]);
   useEffect(() => {
     const transformedTrackTrans: ListType[] = trackTrans.map((item) => ({
       id: item.id,
-      device: getBleReaderName(item.readerId),
-      target: item.reader.name,
-      floor: getFloorName(item.floorplanMaskedAreaId),
+      device: item.reader?.name ?? 'Unknown Device',
+      target: item.cardId,
+      floor: item.floorplanMaskedArea?.floorId ?? 'Unknown Floor',
       area: item.floorplanMaskedAreaId,
       time: item.transTime,
     }));
     const transformedAlarm: ListType[] = alarmRecord.map((item) => ({
       id: item.id,
-      device: item.reader.name,
-      target: item.visitor.name,
-      floor: item.floorplanMaskedArea.floorId,
+      device: item.reader?.name ?? 'Unknown Device', // Provide a default value
+      target: item.visitor?.name ?? 'Unknown Visitor', // Provide a default value
+      floor: item.floorplanMaskedArea?.floorId ?? 'Unknown Floor', // Provide a default value
       area: item.floorplanMaskedAreaId,
       alarmType: item.alarmRecordStatus,
       status: item.actionStatus,
@@ -206,15 +89,6 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
   const handleItemClick = (item: ListType) => {
     setSelectedItem(item);
     setOpenModal(true);
-  };
-
-  const getBleReaderName = (readerId: string) => {
-    const bleReader = bleReaders.find((ble: bleReaderType) => ble.id === readerId);
-    return bleReader ? bleReader.name : 'Unknown Department';
-  };
-  const getFloorName = (floorId: string) => {
-    const floor = floorplanData.find((fl: MaskedAreaType) => fl.id === floorId);
-    return floor ? floor.name : 'Unknown Floor';
   };
 
   const formatTime = (isoString: string) => {

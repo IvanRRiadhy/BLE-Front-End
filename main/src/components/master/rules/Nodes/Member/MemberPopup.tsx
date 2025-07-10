@@ -204,27 +204,6 @@ const MemberNodePopup: React.FC<NodePopupProps> = ({
     zIndex: 1000,
     cursor: isDragging ? 'grabbing' : 'default',
   };
-
-  // Filter departments based on selected organization
-  const filteredDepartments = departments.filter((dpt) =>
-    formData.organization && formData.organization.length > 0
-      ? members.some(
-          (m) => formData.organization.includes(m.organization) && m.department === dpt.name,
-        )
-      : true,
-  );
-
-  // Filter districts based on selected organization and department
-  const filteredDistricts = districts.filter((dist) =>
-    formData.organization && formData.department
-      ? members.some(
-          (m) =>
-            formData.organization.includes(m.organization) &&
-            formData.department.includes(m.department) &&
-            m.district === dist.name,
-        )
-      : true,
-  );
   // Filter members based on selected organization, department, and district
   const filteredMembers = members.filter((member) => {
     return (

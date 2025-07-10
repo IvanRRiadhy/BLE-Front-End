@@ -1,6 +1,4 @@
  import axios from 'axios';
-import { setSession, setTokenAvailable } from 'src/store/apps/session';
-import { useDispatch } from 'src/store/Store';
 
 let onSessionExpired: (() => void) | null = null;
 export const setSessionExpiredHandler = (handler: () => void) => {
@@ -54,7 +52,7 @@ axiosServices.interceptors.response.use(
         const res = response.data.collection.data; // Extract the collection from the response.
         const { token } = response.data.collection.data; // Extract the new access and refresh tokens from the response.
         // console.log('New access token:', response);
-        // console.log("res: ", res);
+        console.log("res: ", res);
         // Store the new access and refresh tokens.
         localStorage.setItem('token', token);
         // localStorage.setItem('refreshToken', newRefreshToken);

@@ -14,12 +14,8 @@ import AppCard from 'src/components/shared/AppCard';
 import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
-import FloorplanDeviceList from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceList';
 // import AddEditDevice from 'src/components/master/CRUD/floorplanDevice/addEditDevice';
 import FloorplanDeviceList2 from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceList2';
-import AddEditDeviceSidebar from 'src/components/master/CRUD/floorplanDevice/AddEditFloorplanDevice/AddEditDeviceSidebar';
-import EditDeviceFloorView from 'src/components/master/CRUD/floorplanDevice/AddEditFloorplanDevice/Preview/EditDeviceFloorView';
-
 interface cardType {
   icon?: string;
   title: string;
@@ -31,7 +27,6 @@ const drawerWidth = 320;
 
 const FloorplanDevice = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
-  const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(true);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 

@@ -6,7 +6,6 @@ import icon3 from '../../../assets/images/svgs/icon-antena.svg';
 import icon4 from '../../../assets/images/svgs/icon-box2.svg';
 import icon5 from '../../../assets/images/svgs/icon-block.svg';
 import icon6 from '../../../assets/images/svgs/icon-exclamation.svg';
-import { useState } from 'react';
 
 interface cardType {
   icon: string;

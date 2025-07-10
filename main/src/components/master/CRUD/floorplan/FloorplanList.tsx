@@ -22,12 +22,11 @@ import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { fetchFloorplan, FloorplanType, deleteFloorplan } from 'src/store/apps/crud/floorplan';
-import { useTranslation } from 'react-i18next';
-import { floorplanType } from 'src/types/tracking/floorplan';
+// import { useTranslation } from 'react-i18next';
 import AddEditFloorplan from './AddEditFloorplan';
 
 const FloorplanList = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   // Pagination State
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
@@ -71,23 +70,6 @@ const FloorplanList = () => {
       dispatch(deleteFloorplan(selectedFloorplan.id));
     }
     handleCloseDeleteDialog();
-  };
-
-  const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
-
-    // Extract the weekday
-    const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
-    const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-
-    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
-      'en-GB',
-      {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      },
-    )}`;
   };
 
   return (

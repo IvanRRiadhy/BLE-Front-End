@@ -22,12 +22,11 @@ import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
 import { fetchDistricts, DistrictType, deleteDistrict } from 'src/store/apps/crud/district';
-import { fetchApplications, ApplicationType } from 'src/store/apps/crud/application';
 import AddEditDistrict from './AddEditDistrict';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 
 const DistrictList = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   // Pagination State
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
@@ -46,13 +45,9 @@ const DistrictList = () => {
   const districtData: DistrictType[] = useSelector(
     (state: RootState) => state.districtReducer.districts,
   );
-  const appData: ApplicationType[] = useSelector(
-    (state: RootState) => state.applicationReducer.applications,
-  );
 
   useEffect(() => {
     dispatch(fetchDistricts());
-    dispatch(fetchApplications());
   }, [dispatch]);
 
   //Delete Pop-up
@@ -76,28 +71,6 @@ const DistrictList = () => {
       dispatch(deleteDistrict(selectedDist.id));
     }
     handleCloseDeleteDialog();
-  };
-
-  const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
-
-    // Extract the weekday
-    const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
-    const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-
-    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
-      'en-GB',
-      {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      },
-    )}`;
-  };
-
-  const getAppName = (appId: string) => {
-    const app = appData.find((a: ApplicationType) => a.id === appId);
-    return app ? app.applicationName : 'Unknown App';
   };
 
   return (

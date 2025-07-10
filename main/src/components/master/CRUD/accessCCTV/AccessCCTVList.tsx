@@ -23,10 +23,10 @@ import { fetchAccessCCTV, CCTVType, deleteCCTV } from 'src/store/apps/crud/acces
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
 import AddEditAccessCCTV from './AddEditAccessCCTV';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 
 const AccessCCTVList = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   // Pagination State
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page

@@ -5,8 +5,6 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 const API_URL = "/api/MstApplication/";
-const getToken = () => localStorage.getItem('token');
-const token = getToken();
 
 // Define the TypeScript type
 export interface ApplicationType {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Typography, Box, useMediaQuery, Theme, FormLabel, Chip } from '@mui/material';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import { useSelector, useDispatch, AppDispatch, RootState } from 'src/store/Store';
-import { alpha, useTheme } from '@mui/material/styles';
+// import { useTheme } from '@mui/material/styles';
 import { fetchTrackingTrans, trackingTransType } from 'src/store/apps/crud/trackingTrans';
 import { fetchBleReaders, bleReaderType } from 'src/store/apps/crud/bleReader';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
@@ -14,7 +14,7 @@ const drawerWidth = 260;
 
 const AlarmList: React.FC = () => {
   const { t } = useTranslation();
-  const theme = useTheme();
+  // const theme = useTheme();
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const alarmData: trackingTransType[] = useSelector(
     (state: RootState) => state.trackingTransReducer.trackingTrans,

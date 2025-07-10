@@ -1,6 +1,6 @@
 import { Divider, Grid2 as Grid, Typography } from '@mui/material';
 import { useSelector, useDispatch, AppDispatch } from 'src/store/Store';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { fetchFloorplans } from 'src/store/apps/tracking/FloorPlanSlice';
 import { floorplanType } from 'src/types/tracking/floorplan';
@@ -10,9 +10,9 @@ const FloorDetails = () => {
   const activeFloorplan = useSelector((state) =>
     state.floorplanReducer2.floorplanContent.toString(),
   );
-  const [memberCount, setMemberCount] = useState(0);
-  const [visitorCount, setVisitorCount] = useState(0);
-  const [gatewayCount, setGatewayCount] = useState(0);
+  const [memberCount] = useState(0);
+  const [visitorCount] = useState(0);
+  const [gatewayCount] = useState(0);
 
   useEffect(() => {
     dispatch(fetchFloorplans());

@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, Button, Typography } from '@mui/material';
 import { startMQTTclient } from 'src/store/apps/tracking/MQTT';
-import axiosServices from 'src/utils/axios';
-import { data } from 'react-router';
 import { AlarmType } from 'src/store/apps/tracking/Alarm';
 import axios from 'axios';
 

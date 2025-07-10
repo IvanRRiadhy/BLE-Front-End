@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { AppDispatch, RootState } from 'src/store/Store';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 interface Statetype {
@@ -13,11 +12,6 @@ export type screenSettings = {
   translateY: number;
 };
 
-const initialScreen: screenSettings = {
-  scale: 1,
-  translateX: 0,
-  translateY: 0,
-};
 
 const initialState: Statetype = {
   grid: 1,

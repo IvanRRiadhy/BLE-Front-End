@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch, AppDispatch, AppState } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
+import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import {
   addFloorplanDevice,
   AddUnsavedDevice,
@@ -21,7 +21,6 @@ import { Box } from '@mui/system';
 import {
   Alert,
   Divider,
-  TextField,
   Typography,
   Button,
   Dialog,
@@ -32,7 +31,6 @@ import {
   IconButton,
 } from '@mui/material';
 import DeviceListItem from './DeviceListItem';
-import AddEditDeviceLayout from './AddEditDeviceLayout';
 import { useNavigate } from 'react-router';
 import { fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
 import { fetchAccessControls } from 'src/store/apps/crud/accessControl';
@@ -43,9 +41,6 @@ const DeviceList = () => {
   const navigate = useNavigate();
   const activeFloorplan = useSelector(
     (state: AppState) => state.floorplanReducer.selectedFloorplan,
-  );
-  const devicesData = useSelector(
-    (state: AppState) => state.floorplanDeviceReducer.floorplanDevices,
   );
   const originalDevices = useSelector(
     (state: AppState) => state.floorplanDeviceReducer.originalFloorplanDevices,
@@ -195,7 +190,7 @@ const DeviceList = () => {
 
   const handleSaveEdits = async () => {
     // Get the current state of devices
-    const unsavedDevicesMap = new Map(filteredUnsavedDevices.map((device) => [device.id, device]));
+    // const unsavedDevicesMap = new Map(filteredUnsavedDevices.map((device) => [device.id, device]));
     const floorplanDevicesMap = new Map(
       filteredOriginalDevices.map((device) => [device.id, device]),
     );

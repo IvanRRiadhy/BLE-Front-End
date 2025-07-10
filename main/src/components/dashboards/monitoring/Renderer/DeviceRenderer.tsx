@@ -2,12 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Stage,
   Layer,
-  Rect,
-  Circle,
-  Star,
   Image as KonvaImage,
-  RegularPolygon,
-  Shape,
   Text,
   Line,
 } from 'react-konva';
@@ -23,20 +18,6 @@ import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { darken } from '@mui/material';
 
-const Devices = [
-  { id: 1, x: 250, y: 50, type: 'Cctv' },
-  { id: 2, x: 150, y: 150, type: 'BleReader' },
-  { id: 3, x: 300, y: 300, type: 'Cctv' },
-  { id: 4, x: 10, y: 200, type: 'Cctv' },
-  { id: 5, x: 350, y: 150, type: 'BleReader' },
-  { id: 6, x: 150, y: 200, type: 'AccessDoor' },
-  { id: 7, x: 550, y: 150, type: 'BleReader' },
-];
-
-const Beacon = [
-  { id: '1', x: 100, y: 100 },
-  { id: '2', x: 200, y: 200 },
-];
 type Nodes = {
   id: string;
   x: number;
@@ -62,12 +43,9 @@ const DeviceRenderer: React.FC<{
 }> = ({
   width,
   height,
-  scaleX,
-  scaleY,
   originalWidth,
   originalHeight,
   imageSrc,
-  scale,
   devices,
   areas,
   showAreas,
@@ -75,7 +53,7 @@ const DeviceRenderer: React.FC<{
   topic,
 }) => {
   const dispatch = useDispatch();
-  const [scales, setScale] = useState<number>(scale);
+  // const [scales, setScale] = useState<number>(scale);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const [animatedBeacons, setAnimatedBeacons] = useState<{
     [id: string]: { x: number; y: number };
@@ -108,16 +86,16 @@ const DeviceRenderer: React.FC<{
       };
     }
   }, [imageSrc]);
-  function getLatestBeacons(beacons: any[]) {
-    const latestMap = new Map<string, any>();
-    beacons.forEach((beacon) => {
-      const existing = latestMap.get(beacon.beaconId);
-      if (!existing || new Date(beacon.time) > new Date(existing.time)) {
-        latestMap.set(beacon.beaconId, beacon);
-      }
-    });
-    return Array.from(latestMap.values());
-  }
+  // function getLatestBeacons(beacons: any[]) {
+  //   const latestMap = new Map<string, any>();
+  //   beacons.forEach((beacon) => {
+  //     const existing = latestMap.get(beacon.beaconId);
+  //     if (!existing || new Date(beacon.time) > new Date(existing.time)) {
+  //       latestMap.set(beacon.beaconId, beacon);
+  //     }
+  //   });
+  //   return Array.from(latestMap.values());
+  // }
   const useDeviceIcon = (src: string) => {
     const [img, setImg] = useState<HTMLImageElement | null>(null);
     useEffect(() => {

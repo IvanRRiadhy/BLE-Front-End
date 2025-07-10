@@ -1,9 +1,6 @@
 import axios from '../../../utils/axios';
-import { createSlice, current } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 import { AppDispatch } from 'src/store/Store';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { isEdit } from '../contacts/ContactSlice';
-import { setVisibilityFilter } from '../email/EmailSlice';
 
 const API_URL = 'api/data/tracking/TagData';
 

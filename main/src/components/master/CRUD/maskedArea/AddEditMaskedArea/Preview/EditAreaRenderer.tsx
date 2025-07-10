@@ -5,15 +5,13 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  useTheme,
+  // useTheme,
 } from '@mui/material';
 import Konva from 'konva';
 import React, { useEffect, useState } from 'react';
-import { Stage, Layer, Rect, Circle, Star, Image as KonvaImage, Line } from 'react-konva';
+import { Stage, Layer, Circle, Image as KonvaImage, Line } from 'react-konva';
 import { useSelector, useDispatch, AppState } from 'src/store/Store';
 import {
-  EditUnsavedMaskedArea,
-  fetchMaskedAreas,
   MaskedAreaType,
   RevertMaskedArea,
   SelectEditingMaskedArea,
@@ -25,7 +23,6 @@ import {
 import earcut from 'earcut';
 import { uniqueId } from 'lodash';
 import { darken } from '@mui/material';
-import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 
 type Nodes = {
   id: string;
@@ -34,50 +31,50 @@ type Nodes = {
   x_px: number;
   y_px: number;
 };
-type AreaType = {
-  id: string;
-  name: string;
-  color: string;
-  nodes: Nodes[];
-};
+// type AreaType = {
+//   id: string;
+//   name: string;
+//   color: string;
+//   nodes: Nodes[];
+// };
 
-const Areas: AreaType[] = [
-  {
-    id: '1',
-    name: 'Area1',
-    color: '#f55549',
-    nodes: [
-      { id: uniqueId(), x: 100, y: 50, x_px: 100, y_px: 50 },
-      { id: uniqueId(), x: 350, y: 50, x_px: 350, y_px: 50 },
-      { id: uniqueId(), x: 400, y: 100, x_px: 400, y_px: 100 },
-      { id: uniqueId(), x: 350, y: 250, x_px: 350, y_px: 250 },
-      { id: uniqueId(), x: 100, y: 250, x_px: 100, y_px: 250 },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Area2',
-    color: '#5cf740',
-    nodes: [
-      { id: uniqueId(), x: 150, y: 450, x_px: 150, y_px: 450 },
-      { id: uniqueId(), x: 250, y: 450, x_px: 250, y_px: 450 },
-      { id: uniqueId(), x: 250, y: 550, x_px: 250, y_px: 550 },
-      { id: uniqueId(), x: 150, y: 550, x_px: 150, y_px: 550 },
-    ],
-  },
-  {
-    id: '3',
-    name: 'Area3',
-    color: '#3be8f5',
-    nodes: [
-      { id: uniqueId(), x: 500, y: 50, x_px: 500, y_px: 50 },
-      { id: uniqueId(), x: 550, y: 50, x_px: 550, y_px: 50 },
-      { id: uniqueId(), x: 550, y: 200, x_px: 550, y_px: 200 },
-      { id: uniqueId(), x: 525, y: 350, x_px: 525, y_px: 350 },
-      { id: uniqueId(), x: 500, y: 200, x_px: 500, y_px: 200 },
-    ],
-  },
-];
+// const Areas: AreaType[] = [
+//   {
+//     id: '1',
+//     name: 'Area1',
+//     color: '#f55549',
+//     nodes: [
+//       { id: uniqueId(), x: 100, y: 50, x_px: 100, y_px: 50 },
+//       { id: uniqueId(), x: 350, y: 50, x_px: 350, y_px: 50 },
+//       { id: uniqueId(), x: 400, y: 100, x_px: 400, y_px: 100 },
+//       { id: uniqueId(), x: 350, y: 250, x_px: 350, y_px: 250 },
+//       { id: uniqueId(), x: 100, y: 250, x_px: 100, y_px: 250 },
+//     ],
+//   },
+//   {
+//     id: '2',
+//     name: 'Area2',
+//     color: '#5cf740',
+//     nodes: [
+//       { id: uniqueId(), x: 150, y: 450, x_px: 150, y_px: 450 },
+//       { id: uniqueId(), x: 250, y: 450, x_px: 250, y_px: 450 },
+//       { id: uniqueId(), x: 250, y: 550, x_px: 250, y_px: 550 },
+//       { id: uniqueId(), x: 150, y: 550, x_px: 150, y_px: 550 },
+//     ],
+//   },
+//   {
+//     id: '3',
+//     name: 'Area3',
+//     color: '#3be8f5',
+//     nodes: [
+//       { id: uniqueId(), x: 500, y: 50, x_px: 500, y_px: 50 },
+//       { id: uniqueId(), x: 550, y: 50, x_px: 550, y_px: 50 },
+//       { id: uniqueId(), x: 550, y: 200, x_px: 550, y_px: 200 },
+//       { id: uniqueId(), x: 525, y: 350, x_px: 525, y_px: 350 },
+//       { id: uniqueId(), x: 500, y: 200, x_px: 500, y_px: 200 },
+//     ],
+//   },
+// ];
 
 // const Areas = [
 //   {
@@ -124,7 +121,7 @@ const EditAreaRenderer: React.FC<{
   setIsDragging,
   setCursor,
 }) => {
-  const theme = useTheme();
+  // const theme = useTheme();
   const stageRef = React.useRef<Konva.Stage>(null);
 
   const dispatch = useDispatch();
@@ -134,9 +131,6 @@ const EditAreaRenderer: React.FC<{
   const scaleY = originalHeight / height;
   const [activeArea, setActiveArea] = useState(activeMaskedArea?.name || '');
   const [areaDragging, setAreaDragging] = useState(false);
-  const [originalPositions, setOriginalPositions] = useState<
-    Record<string, { x: number[]; y: number[] }>
-  >({});
   const [dragOffset, setDragOffset] = useState({ dx: 0, dy: 0 });
   const [isColliding, setIsColliding] = useState(false);
   const editingMaskedArea = useSelector(
@@ -513,32 +507,32 @@ const EditAreaRenderer: React.FC<{
     return false;
   };
 
-  const handleSaveArea = () => {
-    if (!editingArea) return;
+  // const handleSaveArea = () => {
+  //   if (!editingArea) return;
 
-    // Find the area being edited
-    const area = filteredUnsavedArea.find((a) => a.name === editingArea);
-    if (!area) return;
+  //   // Find the area being edited
+  //   const area = filteredUnsavedArea.find((a) => a.name === editingArea);
+  //   if (!area) return;
 
-    // Convert the updated nodes to a JSON string
-    const updatedAreaShape = JSON.stringify(area.nodes);
-    console.log('updatedAreaShape', area);
-    // Dispatch the EditUnsavedMaskedArea action
-    dispatch(
-      EditMaskedAreaPosition({
-        ...(editingMaskedArea as MaskedAreaType),
-        areaShape: updatedAreaShape,
-        nodes: area.nodes,
-      }),
-      // EditUnsavedMaskedArea({
-      //   ...(editingMaskedArea as MaskedAreaType),
-      //   areaShape: updatedAreaShape,
-      //   nodes: area.nodes,
-      // }),
-    );
-  };
+  //   // Convert the updated nodes to a JSON string
+  //   const updatedAreaShape = JSON.stringify(area.nodes);
+  //   console.log('updatedAreaShape', area);
+  //   // Dispatch the EditUnsavedMaskedArea action
+  //   dispatch(
+  //     EditMaskedAreaPosition({
+  //       ...(editingMaskedArea as MaskedAreaType),
+  //       areaShape: updatedAreaShape,
+  //       nodes: area.nodes,
+  //     }),
+  //     // EditUnsavedMaskedArea({
+  //     //   ...(editingMaskedArea as MaskedAreaType),
+  //     //   areaShape: updatedAreaShape,
+  //     //   nodes: area.nodes,
+  //     // }),
+  //   );
+  // };
 
-  const handleCanvasClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
+  const handleCanvasClick = () => {
     if (!drawingMaskedArea) return; // Only allow drawing if the drawing mode is active
     const stage = stageRef.current;
     if (!stage) return;
@@ -668,7 +662,7 @@ const EditAreaRenderer: React.FC<{
     setDragOffset({ dx: 0, dy: 0 });
     setIsColliding(false);
   };
-  const handleDragMove = (areaName: string, dx: number, dy: number) => {
+  const handleDragMove = (dx: number, dy: number) => {
     const dPxX = dx;
     const dPxY = dy;
     setDragOffset({ dx: dPxX, dy: dPxY });
@@ -807,8 +801,8 @@ const EditAreaRenderer: React.FC<{
     const updatedAreas = filteredUnsavedArea.map((area) => {
       if (area.name === areaName) {
         const newNodes = [...(area.nodes || [])];
-        console.log("x,y : ", newNodes[cornerIndex].x, newNodes[cornerIndex].y);
-        console.log("pxX,pxY : ", newNodes[cornerIndex].x_px, newNodes[cornerIndex].y_px);
+        console.log('x,y : ', newNodes[cornerIndex].x, newNodes[cornerIndex].y);
+        console.log('pxX,pxY : ', newNodes[cornerIndex].x_px, newNodes[cornerIndex].y_px);
         newNodes[cornerIndex] = {
           ...newNodes[cornerIndex],
           x: x * scale,
@@ -816,7 +810,7 @@ const EditAreaRenderer: React.FC<{
           x_px: x,
           y_px: y,
         }; // Update the corner's position
-        console.log("newNodes[cornerIndex] : ", newNodes[cornerIndex]);
+        console.log('newNodes[cornerIndex] : ', newNodes[cornerIndex]);
         return { ...area, nodes: newNodes, areaShape: JSON.stringify(newNodes) };
       }
       return area;
@@ -1044,7 +1038,7 @@ const EditAreaRenderer: React.FC<{
                 fill={area.name === activeArea ? area.colorArea : undefined}
                 opacity={0.7}
                 draggable={editingArea === area.name}
-                onMouseEnter={(e) => {
+                onMouseEnter={() => {
                   if (editingArea === area.name) {
                     if (!drawingMaskedArea) {
                       setCursor('move');
@@ -1055,7 +1049,7 @@ const EditAreaRenderer: React.FC<{
                     }
                   }
                 }}
-                onMouseLeave={(e) => {
+                onMouseLeave={() => {
                   if (!drawingMaskedArea) {
                     setCursor('grab');
                   }
@@ -1086,7 +1080,7 @@ const EditAreaRenderer: React.FC<{
                 onMouseUp={handleMouseUp}
                 onDragStart={() => setAreaDragging(true)}
                 onDragMove={(e) => {
-                  handleDragMove(area.name, e.target.x() * scaleX, e.target.y() * scaleY);
+                  handleDragMove(e.target.x() * scaleX, e.target.y() * scaleY);
                 }}
                 onDragEnd={(e) => {
                   handleDragEnd(area.name);

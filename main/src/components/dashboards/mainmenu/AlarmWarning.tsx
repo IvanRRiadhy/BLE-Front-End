@@ -13,18 +13,14 @@ import {
   TableHead,
   TableRow,
   Avatar,
-  Chip,
   TableContainer,
   Stack,
   TablePagination,
   TableSortLabel,
 } from '@mui/material';
-import AlarmWarningData from './AlarmWarningData';
 import { useTranslation } from 'react-i18next';
 import { AlarmType, fetchAlarm } from 'src/store/apps/crud/alarmRecordTracking';
 import { useDispatch, useSelector, AppState } from 'src/store/Store';
-
-const performers = AlarmWarningData;
 interface AlarmTableProps {
   alarmData: AlarmType[];
 }

@@ -12,7 +12,6 @@ const Toolbar = () => {
   const handleChange = (event: SelectChangeEvent<string>) => {
     dispatch(setGrid(parseInt(event.target.value.charAt(0)))); // Dispatch the selected grid value
   };
-  const grid = useSelector((state: AppState) => state.layoutReducer.grid); // Get the current grid value from the store
   const toggleFullscreen = (isMax: boolean) => {
     const element = document.documentElement; // Target the entire document for fullscreen
     if (isMax && !document.fullscreenElement) {

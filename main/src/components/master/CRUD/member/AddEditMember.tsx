@@ -17,12 +17,11 @@ import React, { useEffect } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { AppDispatch, dispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
+import {  dispatch, RootState,  useSelector } from 'src/store/Store';
 import { addMember, editMember, fetchMembers, memberType } from 'src/store/apps/crud/member';
 import { fetchDistricts, DistrictType } from 'src/store/apps/crud/district';
 import { fetchDepartments, DepartmentType } from 'src/store/apps/crud/department';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
-import { fetchApplications, ApplicationType } from 'src/store/apps/crud/application';
 
 import { gender, statusEmployee } from 'src/types/crud/input';
 
@@ -66,19 +65,16 @@ const AddEditMember = ({ type, member }: FormType) => {
     updatedAt: member?.updatedAt || '',
   });
 
-  const districtData = useSelector((state: RootState) => state.districtReducer.districts);
-  const departmentData = useSelector((state: RootState) => state.departmentReducer.departments);
-  const organizationData = useSelector(
+  const districtData: DistrictType[] = useSelector((state: RootState) => state.districtReducer.districts);
+  const departmentData: DepartmentType[] = useSelector((state: RootState) => state.departmentReducer.departments);
+  const organizationData: OrganizationType[] = useSelector(
     (state: RootState) => state.organizationReducer.organizations,
   );
-  const applicationData = useSelector((state: RootState) => state.applicationReducer.applications);
-
   useEffect(() => {
     dispatch(fetchMembers());
     dispatch(fetchDistricts());
     dispatch(fetchDepartments());
     dispatch(fetchOrganizations());
-    dispatch(fetchApplications());
   }, [dispatch]);
 
   const handleClickOpen = () => {

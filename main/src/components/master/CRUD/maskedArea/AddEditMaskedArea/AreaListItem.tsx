@@ -1,6 +1,4 @@
 import React from 'react';
-
-import { useSelector } from 'src/store/Store';
 import {
   ListItemText,
   Box,
@@ -9,17 +7,10 @@ import {
   Typography,
   Stack,
   ListItemAvatar,
-  useTheme,
-  Checkbox,
   IconButton,
 } from '@mui/material';
 
 import { IconTrash, IconPencil } from '@tabler/icons-react';
-import AccessDoor from 'src/assets/images/masters/Devices/AccessDoor.png';
-import Area1 from 'src/assets/images/svgs/area/1.svg';
-import Area2 from 'src/assets/images/svgs/area/2.svg';
-import Area3 from 'src/assets/images/svgs/area/3.svg';
-import Area4 from 'src/assets/images/svgs/area/4.svg';
 import Area5 from 'src/assets/images/svgs/area/5.svg';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 
@@ -32,7 +23,6 @@ type Props = {
 };
 
 const AreaListItem = ({ onListClick, onEditClick, onDeleteClick, area, active }: Props) => {
-  const customizer = useSelector((state) => state.customizer);
 
   return (
     <ListItemButton

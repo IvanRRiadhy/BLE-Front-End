@@ -22,18 +22,17 @@ import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { deleteMaskedArea, fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
 import AddEditMaskedArea from './AddEditMaskedArea';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 
 const MaskedAreaList = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   // Pagination State
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
   // Handle page change
   const handleChangePage = (event: unknown, newPage: number) => {
-    // console.log(event);
+    console.log(event);
     setPage(newPage);
   };
 
@@ -44,11 +43,9 @@ const MaskedAreaList = () => {
   };
   const dispatch: AppDispatch = useDispatch();
   const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreas);
-  const floorData = useSelector((state: RootState) => state.floorReducer.floors);
 
   useEffect(() => {
     dispatch(fetchMaskedAreas());
-    dispatch(fetchFloors);
   }, [dispatch]);
 
   //Delete Pop-up
@@ -72,29 +69,6 @@ const MaskedAreaList = () => {
       dispatch(deleteMaskedArea(selectedMask.id));
     }
     handleCloseDeleteDialog();
-  };
-
-  const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
-
-    // Extract the weekday
-    const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
-    const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-
-    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
-      'en-GB',
-      {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      },
-    )}`;
-  };
-
-  const getFloorName = (floorId: string) => {
-    const floor = floorData.find((fl: floorType) => fl.id === floorId);
-    console.log('Floor ID: ', floorId);
-    return floor ? floor.name : 'Unknown Floor';
   };
 
   return (

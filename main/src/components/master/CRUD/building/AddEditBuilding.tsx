@@ -7,23 +7,20 @@ import {
   Divider,
   Grid2 as Grid,
   IconButton,
-  MenuItem,
   SelectChangeEvent,
   Typography,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
-import React, { useEffect } from 'react';
+import React from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
+import { AppDispatch,  useDispatch } from 'src/store/Store';
 import {
   addBuilding,
   BuildingType,
   editBuilding,
   fetchBuildings,
 } from 'src/store/apps/crud/building';
-
-import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 
 interface FormType {
   type?: string;

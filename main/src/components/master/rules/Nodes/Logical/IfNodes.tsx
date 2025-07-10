@@ -1,14 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Group, Rect, Text, Circle } from 'react-konva';
-import { Box, Grid2 as Grid, Button, Typography, Divider } from '@mui/material';
+import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
 import { useDispatch } from 'src/store/Store';
 import {
   updateNodePosition,
   setSelectedNode,
-  updateNodeDetails,
   deleteNode,
-  setStartNode,
-  setStartNodeThunk,
   setNodeDimensions,
 } from 'src/store/apps/rules/RulesNodes';
 import { useSelector } from 'react-redux';
@@ -23,7 +20,7 @@ import {
 import { uniqueId } from 'lodash';
 import IfDialogPopup from './IfDialogPopup';
 import { Html } from 'react-konva-utils';
-import { IconCopy, IconDotsVertical, IconFlag, IconPencil, IconTrash } from '@tabler/icons-react';
+import { IconCopy, IconDotsVertical, IconPencil, IconTrash } from '@tabler/icons-react';
 import { useTheme } from '@mui/material';
 
 const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
@@ -49,10 +46,6 @@ const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
     setShowMenu(false);
   };
 
-  const handleSetStartNode = (id: string) => {
-    dispatch(setStartNodeThunk(id));
-  };
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -70,10 +63,6 @@ const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
   };
   const handleSave = () => {
     console.log('Condition saved');
-    setShowPopup(false);
-  };
-  const handleEditNode = (nodeId: string, details: string) => {
-    dispatch(updateNodeDetails({ id: nodeId, details }));
     setShowPopup(false);
   };
   const handleDeleteNode = (nodeId: string) => {
@@ -336,7 +325,6 @@ const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
               }
             }}
             onMouseEnter={(e) => {
-              const stage = e.target.getStage();
               if (arrowDrawing) {
                 if (arrowDrawing.startNodeId === node.id) {
                   return;
@@ -355,7 +343,6 @@ const IfNodes = ({ node, ifSelector, setIfSelector }: any) => {
               }
             }}
             onMouseLeave={(e) => {
-              const stage = e.target.getStage();
               if (ifSelector) {
                 return;
               }

@@ -24,12 +24,12 @@ import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Stor
 import { deleteFloor, fetchFloors, floorType } from 'src/store/apps/crud/floor';
 import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import AddEditFloor from './AddEditFloor';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 
 const BASE_URL = 'http://192.168.1.116:5000';
 
 const FloorList = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   // Pagination State
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
@@ -78,22 +78,6 @@ const FloorList = () => {
     handleCloseDeleteDialog();
   };
 
-  const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
-
-    // Extract the weekday
-    const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
-    const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-
-    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
-      'en-GB',
-      {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      },
-    )}`;
-  };
   const getbuildingName = (buildingId: string) => {
     const building = buildingData.find((b) => b.id === buildingId);
     return building ? building.name : 'Unknown Building';

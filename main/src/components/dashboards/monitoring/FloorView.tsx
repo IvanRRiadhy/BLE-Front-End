@@ -1,24 +1,18 @@
-import React, { use, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
 import {
   Box,
   FormControlLabel,
-  FormLabel,
   Grid2 as Grid,
   Switch,
   Typography,
-  useTheme,
 } from '@mui/material';
 // import { fetchFloorplans } from 'src/store/apps/tracking/FloorPlanSlice';
-import { floorplanType } from 'src/types/tracking/floorplan';
-import { Stage, Layer, Image as KonvaImage } from 'react-konva';
-import FloorplanHouse from 'src/assets/images/masters/Floorplan/Floorplan-House.png';
 import ZoomControls from 'src/components/shared/ZoomControls';
 import DeviceRenderer from './Renderer/DeviceRenderer';
 import { floorType, fetchFloors } from 'src/store/apps/crud/floor';
 import { FloorplanType, fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
-import { original } from '@reduxjs/toolkit';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { RefreshTrigger } from 'src/store/apps/tracking/Beacon';
 
@@ -29,7 +23,7 @@ const FloorView: React.FC<{
   containerWidth: number; // New prop
   containerHeight: number; // New prop
   screenSettings: { scale: number; translateX: number; translateY: number };
-}> = ({ activeFloorplan, zoomable, containerWidth, containerHeight, screenSettings }) => {
+}> = ({ activeFloorplan, zoomable, screenSettings }) => {
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchFloorplan());
@@ -64,7 +58,7 @@ const FloorView: React.FC<{
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   //const MIN_SCALE = 1; // Minimum scale to prevent the image from becoming too small
   const MAX_SCALE = 4; // Maximum scale to prevent the image from becoming too large
-  const [minScale, setMinScale] = useState(0.5);
+  const [minScale] = useState(0.5);
   const [translate, setTranslate] = useState({
     x: screenSettings.translateX,
     y: screenSettings.translateY,
@@ -106,12 +100,8 @@ const FloorView: React.FC<{
           const containerHeight = containerRef.current.clientHeight;
 
           // Dynamically calculate the scale to fit the image within the container
-          const widthRatio = containerWidth / img.width;
-          const heightRatio = containerHeight / img.height;
-          const calculatedScale = Math.min(widthRatio, heightRatio);
 
           // Ensure the scale doesn't make the image smaller than the container
-          const finalScale = Math.max(calculatedScale, 1); // Use 1 as the minimum scale
 
           // setScale(finalScale); // Set the initial scale
 
@@ -249,42 +239,38 @@ const FloorView: React.FC<{
     }
   };
 
-  const applyZoom = (newScale: number) => {
-    if (!containerRef.current || !imgSize) return;
+  // const applyZoom = (newScale: number) => {
+  //   if (!containerRef.current || !imgSize) return;
 
-    const container = containerRef.current;
-    const containerWidth = container.clientWidth;
-    const containerHeight = container.clientHeight;
+  //   const container = containerRef.current;
+  //   const containerWidth = container.clientWidth;
+  //   const containerHeight = container.clientHeight;
 
-    const widthRatio = containerWidth / imgSize.width;
-    const heightRatio = containerHeight / imgSize.height;
-    // setMinScale(Math.min(widthRatio, heightRatio));
+  //   // setMinScale(Math.min(widthRatio, heightRatio));
 
-    const scaleChangeFactor = newScale / scale;
+  //   const scaleChangeFactor = newScale / scale;
 
-    // Calculate center positions
-    const imgCenterX = imgSize.width / 2;
-    const imgCenterY = imgSize.height / 2;
-    const centerX = containerWidth * scale + translate.x;
-    const centerY = containerHeight * scale + translate.y;
+  //   // Calculate center positions
+  //   const centerX = containerWidth * scale + translate.x;
+  //   const centerY = containerHeight * scale + translate.y;
 
-    // Calculate translate values to keep zoom centered
-    const offsetX = centerX - (centerX - translate.x) * scaleChangeFactor;
-    const offsetY = centerY - (centerY - translate.y) * scaleChangeFactor;
+  //   // Calculate translate values to keep zoom centered
+  //   const offsetX = centerX - (centerX - translate.x) * scaleChangeFactor;
+  //   const offsetY = centerY - (centerY - translate.y) * scaleChangeFactor;
 
-    const scaledWidth = imgSize.width * newScale;
-    const scaledHeight = imgSize.height * newScale;
+  //   const scaledWidth = imgSize.width * newScale;
+  //   const scaledHeight = imgSize.height * newScale;
 
-    const minX = Math.min(0, containerWidth - scaledWidth);
-    const minY = Math.min(0, containerHeight - scaledHeight);
-    console.log('OffsetX:', offsetX);
-    console.log('OffsetY:', offsetY);
-    setScale(newScale);
-    setTranslate({
-      x: Math.max(minX, offsetX),
-      y: Math.max(minY, offsetY),
-    });
-  };
+  //   const minX = Math.min(0, containerWidth - scaledWidth);
+  //   const minY = Math.min(0, containerHeight - scaledHeight);
+  //   console.log('OffsetX:', offsetX);
+  //   console.log('OffsetY:', offsetY);
+  //   setScale(newScale);
+  //   setTranslate({
+  //     x: Math.max(minX, offsetX),
+  //     y: Math.max(minY, offsetY),
+  //   });
+  // };
 
   useEffect(() => {
     const container = containerRef.current;
@@ -303,21 +289,21 @@ const FloorView: React.FC<{
     };
   }, [handleZoom]);
 
-  useEffect(() => {
-    if (containerRef.current && imgSize && imgSize.width > 1 && imgSize.height > 1) {
-      const containerWidth = containerRef.current.clientWidth;
-      const containerHeight = containerRef.current.clientHeight;
+  // useEffect(() => {
+  //   if (containerRef.current && imgSize && imgSize.width > 1 && imgSize.height > 1) {
+  //     const containerWidth = containerRef.current.clientWidth;
+  //     const containerHeight = containerRef.current.clientHeight;
 
-      const widthRatio = containerWidth / imgSize.width;
-      const heightRatio = containerHeight / imgSize.height;
-      // setMinScale(Math.min(widthRatio, heightRatio));
+  //     const widthRatio = containerWidth / imgSize.width;
+  //     const heightRatio = containerHeight / imgSize.height;
+  //     // setMinScale(Math.min(widthRatio, heightRatio));
 
-      //console.log('Resetting scale to minScale:', minScale); // Debug scale reset
-      if (screenSettings.scale === 1) {
-        setScale(minScale);
-      }
-    }
-  }, [imgSize]); // Reset scale when imgSize changes
+  //     //console.log('Resetting scale to minScale:', minScale); // Debug scale reset
+  //     if (screenSettings.scale === 1) {
+  //       setScale(minScale);
+  //     }
+  //   }
+  // }, [imgSize]); // Reset scale when imgSize changes
 
   const handleMouseDown = (event: React.MouseEvent) => {
     setIsDragging(true);

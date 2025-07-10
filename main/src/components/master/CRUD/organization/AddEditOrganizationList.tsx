@@ -7,23 +7,20 @@ import {
   Divider,
   Grid2 as Grid,
   IconButton,
-  MenuItem,
   SelectChangeEvent,
   Typography,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
-import React, { useEffect } from 'react';
+import React from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
-import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
+import { AppDispatch, useDispatch } from 'src/store/Store';
 import {
   addOrganization,
   editOrganization,
   fetchOrganizations,
   OrganizationType,
 } from 'src/store/apps/crud/organization';
-import { fetchApplications, ApplicationType } from 'src/store/apps/crud/application';
 
 interface FormType {
   type?: string;
@@ -45,13 +42,7 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
       updatedAt: '',
     },
   );
-  const appData: ApplicationType[] = useSelector(
-    (state: RootState) => state.applicationReducer.applications,
-  );
   const dispatch: AppDispatch = useDispatch();
-  useEffect(() => {
-    dispatch(fetchApplications());
-  }, [dispatch]);
   const handleClickOpen = () => {
     setOpen(true);
   };

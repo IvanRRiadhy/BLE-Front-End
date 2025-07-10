@@ -9,23 +9,23 @@ interface MonitoringGridProps {
   floorIds: Record<number, string[]>;
 }
 
-type LayoutItem =
-  | {
-      size: { xs: number; lg?: number };
-      floorId: number;
-      zoomable: boolean;
-      height?: string;
-    }
-  | {
-      size: { xs: number; lg?: number };
-      isColumn: true;
-      children: {
-        size: { xs: number; lg?: number };
-        floorId: number;
-        zoomable: boolean;
-        height: string;
-      }[];
-    };
+// type LayoutItem =
+//   | {
+//       size: { xs: number; lg?: number };
+//       floorId: number;
+//       zoomable: boolean;
+//       height?: string;
+//     }
+//   | {
+//       size: { xs: number; lg?: number };
+//       isColumn: true;
+//       children: {
+//         size: { xs: number; lg?: number };
+//         floorId: number;
+//         zoomable: boolean;
+//         height: string;
+//       }[];
+//     };
 
 // Define layout rules for each grid type
 const layoutConfig = {
@@ -146,8 +146,6 @@ const MonitoringGrid = React.memo(({ grid, floorIds, screenSettings }: Monitorin
       </Grid>
     );
   }
-
-  const gridKey = grid as keyof typeof layoutConfig;
 
   if (!(grid in layoutConfig)) return null;
   const layout = layoutConfig[grid as keyof typeof layoutConfig];

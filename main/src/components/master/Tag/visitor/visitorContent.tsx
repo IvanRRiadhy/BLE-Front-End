@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import{ useEffect, useState } from 'react';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
   Box,
   Button,
-  TextField,
   Typography,
   Avatar,
   Divider,
@@ -11,14 +10,14 @@ import {
   Stack,
   Grid2 as Grid,
   Tooltip,
-  useTheme,
+  // useTheme,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
   DialogActions,
 } from '@mui/material';
-import { fetchVisitor, visitorType, deleteVisitor } from 'src/store/apps/crud/visitor';
+import { visitorType, deleteVisitor } from 'src/store/apps/crud/visitor';
 import AddEditVisitor from '../../CRUD/visitor/AddEditVisitor';
 import { IconTrash } from '@tabler/icons-react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
@@ -36,9 +35,8 @@ const VisitorContent = () => {
   const applicationData = useSelector((state: RootState) => state.applicationReducer.applications);
 
   const dispatch = useDispatch();
-  const theme = useTheme();
+  // const theme = useTheme();
 
-  const warningColor = theme.palette.warning.main;
   useEffect(() => {
     dispatch(fetchApplications());
   }, [dispatch]);

@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import  { Suspense } from 'react';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom/client';
 import { PersistGate } from 'redux-persist/integration/react';

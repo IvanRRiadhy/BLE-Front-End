@@ -143,10 +143,6 @@ const Tracking: React.FC = () => {
     const containerWidth = container.clientWidth;
     const containerHeight = container.clientHeight;
 
-    const widthRatio = containerWidth / imgSize.width;
-    const heightRatio = containerHeight / imgSize.height;
-    const minScale = Math.min(widthRatio, heightRatio);
-
     const scaleChangeFactor = newScale / scale;
 
     // Calculate center positions

@@ -2,17 +2,10 @@ import React, { useEffect, useState } from 'react';
 import {
   Stage,
   Layer,
-  Rect,
-  Circle,
-  Star,
   Image as KonvaImage,
-  RegularPolygon,
-  Shape,
   Text,
   Line,
 } from 'react-konva';
-import { useSelector, useDispatch } from 'src/store/Store';
-import { fetchBeacon } from 'src/store/apps/tracking/Beacon';
 
 import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
@@ -23,20 +16,6 @@ import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { darken } from '@mui/material';
 
-const Devices = [
-  { id: 1, x: 250, y: 50, type: 'Cctv' },
-  { id: 2, x: 150, y: 150, type: 'BleReader' },
-  { id: 3, x: 300, y: 300, type: 'Cctv' },
-  { id: 4, x: 10, y: 200, type: 'Cctv' },
-  { id: 5, x: 350, y: 150, type: 'BleReader' },
-  { id: 6, x: 150, y: 200, type: 'AccessDoor' },
-  { id: 7, x: 550, y: 150, type: 'BleReader' },
-];
-
-const Beacon = [
-  { id: '1', x: 100, y: 100 },
-  { id: '2', x: 200, y: 200 },
-];
 type Nodes = {
   id: string;
   x: number;
@@ -61,26 +40,14 @@ const DeviceRenderer: React.FC<{
 }> = ({
   width,
   height,
-  scaleX,
-  scaleY,
   originalWidth,
   originalHeight,
   imageSrc,
-  scale,
   devices,
   areas,
   showAreas,
-  topic,
 }) => {
-  const dispatch = useDispatch();
-  const [scales, setScale] = useState<number>(scale);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
-  const [animatedBeacons, setAnimatedBeacons] = useState<{
-    [id: string]: { x: number; y: number };
-  }>({});
-  const [lastSeenBeacons, setLastSeenBeacons] = useState<{
-    [id: string]: { x: number; y: number; lastSeen: number };
-  }>({});
   const setPointsFromNodes = (nodes: Nodes[]): number[] => {
     // console.log('Setting nodes: ', nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]))
     return nodes.flatMap((node) => [
@@ -89,7 +56,6 @@ const DeviceRenderer: React.FC<{
     ]); // Flatten x and y into a single array
   };
 
-  const beaconData = useSelector((state) => state.BeaconReducer.beaconsByTopic[topic]);
   useEffect(() => {
     if (imageSrc) {
       // console.log('imageSrc', imageSrc);
@@ -103,16 +69,6 @@ const DeviceRenderer: React.FC<{
     }
     // console.log('topic', topic);
   }, [imageSrc]);
-  function getLatestBeacons(beacons: any[]) {
-    const latestMap = new Map<string, any>();
-    beacons.forEach((beacon) => {
-      const existing = latestMap.get(beacon.beaconId);
-      if (!existing || new Date(beacon.time) > new Date(existing.time)) {
-        latestMap.set(beacon.beaconId, beacon);
-      }
-    });
-    return Array.from(latestMap.values());
-  }
   const useDeviceIcon = (src: string) => {
     const [img, setImg] = useState<HTMLImageElement | null>(null);
     useEffect(() => {
@@ -133,13 +89,6 @@ const DeviceRenderer: React.FC<{
   //   }, 1000);
   //   return () => clearInterval(interval);
   // }, [dispatch]);
-
-  useEffect(() => {
-    const unsubscribe = dispatch(fetchBeacon(topic));
-    return () => {
-      if (typeof unsubscribe === 'function') unsubscribe();
-    };
-  }, [dispatch, topic]);
 
   // useEffect(() => {
   //   if (beaconData && Array.isArray(beaconData)) {

@@ -9,7 +9,7 @@ import {
   Typography,
   Stack,
   ListItemAvatar,
-  useTheme,
+  // useTheme,
   Checkbox,
 } from '@mui/material';
 
@@ -40,9 +40,8 @@ const TagListItem = ({
   // @ts-ignore
   const br = `${customizer.borderRadius}px`;
 
-  const theme = useTheme();
+  // const theme = useTheme();
 
-  const warningColor = theme.palette.warning.main;
   const isChecked = manySelectMembers.some((m) => m.id === member?.id);
 
   const handleCheckboxChange = () => {

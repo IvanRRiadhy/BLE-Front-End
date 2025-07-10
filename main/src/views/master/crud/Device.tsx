@@ -14,7 +14,6 @@ import AppCard from 'src/components/shared/AppCard';
 import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
-import FloorplanDeviceList from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceList';
 // import AddEditDevice from 'src/components/master/CRUD/floorplanDevice/addEditDevice';
 import FloorplanDeviceList2 from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceList2';
 

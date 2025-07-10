@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector } from 'src/store/Store';
-import { Box, FormLabel, Grid2 as Grid, IconButton, Typography } from '@mui/material';
+import { Box, FormLabel, Typography } from '@mui/material';
 import Squares from './Squares';
 import { fetchFloorplans } from 'src/store/apps/tracking/FloorPlanSlice';
 import { floorplanType } from 'src/types/tracking/floorplan';
@@ -56,7 +56,7 @@ const Tracking: React.FC = () => {
   const [minScale, setMinScale] = useState(0.5);
   const [translate, setTranslate] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [isGateDragging, setIsGateDragging] = useState(false); // Track gate dragging
+  const [isGateDragging] = useState(false); // Track gate dragging
   const dragStart = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -140,10 +140,6 @@ const Tracking: React.FC = () => {
     const containerWidth = container.clientWidth;
     const containerHeight = container.clientHeight;
 
-    const widthRatio = containerWidth / imgSize.width;
-    const heightRatio = containerHeight / imgSize.height;
-    const minScale = Math.min(widthRatio, heightRatio);
-
     const scaleChangeFactor = newScale / scale;
 
     // Calculate center positions
@@ -198,24 +194,9 @@ const Tracking: React.FC = () => {
     }
   }, [imgSize]); // Reset scale when imgSize changes
 
-  //Full-Screen
-  const [isFullScreen, setIsFullScreen] = useState(false);
-
-  const toggleFullScreen = () => {
-    const element = containerRef.current;
-
-    if (!document.fullscreenElement) {
-      if (element) {
-        element.requestFullscreen().then(() => setIsFullScreen(true));
-      }
-    } else {
-      document.exitFullscreen().then(() => setIsFullScreen(false));
-    }
-  };
 
   useEffect(() => {
     const handleFullScreenChange = () => {
-      setIsFullScreen(!!document.fullscreenElement);
     };
 
     document.addEventListener('fullscreenchange', handleFullScreenChange);

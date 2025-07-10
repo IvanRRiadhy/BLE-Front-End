@@ -1,8 +1,6 @@
-import axios from '../../../utils/axios';
+
 import { createSlice } from '@reduxjs/toolkit';
-import { AppDispatch, RootState } from 'src/store/Store';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { AppDispatch } from 'src/store/Store';
 import { startMQTTclient } from './MQTT';
 
 export interface AlarmType {
@@ -55,7 +53,7 @@ export const AlarmSlice = createSlice({
   initialState,
   reducers: {
     GetAlarm: (state, action) => {
-      const { topic, alarms } = action.payload;
+      const { alarms } = action.payload;
       state.alarms = alarms;
     },
     RefreshTrigger: (state) => {
@@ -79,7 +77,6 @@ export const fetchAlarm = (topic: string) => (dispatch: AppDispatch) => {
       lastDispatch = now;
       dispatch(
         GetAlarm({
-          topic,
           alarm: Array.isArray(data) ? data : [data],
         }),
       );

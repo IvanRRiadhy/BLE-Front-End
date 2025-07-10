@@ -1,12 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button, Box, Drawer, useMediaQuery, Theme } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import AppCard from 'src/components/shared/AppCard';
-import TagFilter from '../../../components/master/Tag/member/tagFilter';
-import TagList from 'src/components/master/Tag/member/tagList';
-import MemberContent from 'src/components/master/Tag/member/memberContent';
-import TagSearch from 'src/components/master/Tag/member/tagSearch';
 import VisitorFilter from 'src/components/master/Tag/visitor/visitorFilter';
 import VisitorList from 'src/components/master/Tag/visitor/visitorList';
 import VisitorContent from 'src/components/master/Tag/visitor/visitorContent';

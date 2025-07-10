@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Text, Circle, Shape, Group, Rect } from 'react-konva';
+import { Text, Circle, Shape, Group } from 'react-konva';
 import { fetchMembers, memberType } from 'src/store/apps/crud/member';
 import { fetchVisitor, visitorType } from 'src/store/apps/crud/visitor';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
-import { Box, Typography, Paper } from '@mui/material';
 import { Html } from 'react-konva-utils';
 import BeaconDetailPopup from '../Popup/BeaconDetailPopup';
 
@@ -125,7 +124,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorpl
         {/* Face Image */}
         {imageObj && (
           <Shape
-            sceneFunc={(ctx, shape) => {
+            sceneFunc={(ctx) => {
               ctx.beginPath();
               ctx.arc(radius, radius, radius, 0, Math.PI * 2, false);
               ctx.closePath();

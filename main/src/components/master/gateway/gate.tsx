@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Stage, Layer, Rect, Line, Image as KonvaImage } from 'react-konva';
 import { useSelector, useDispatch } from 'src/store/Store';
-import { fetchGates, SelectGate, UpdateGate } from '../../../store/apps/tracking/GatesSlice';
+import { fetchGates } from '../../../store/apps/tracking/GatesSlice';
 import {
   fetchBleReaders,
   SelectBleReader,
