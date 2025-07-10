@@ -47,13 +47,12 @@ const AlarmPopup: React.FC = () => {
 
   const handleClose = async () => {
     console.log(deactivateAlarm, alarm?.beaconId);
-
+    setOpen(false);
     try {
-      const response = await axios.post(deactivateAlarm,{
+      const response = await axios.post(deactivateAlarm, {
         dmac: alarm?.beaconId,
       });
       console.log(response.data);
-          setOpen(false);
     } catch (error) {
       console.log(error);
       throw error;
@@ -65,7 +64,8 @@ const AlarmPopup: React.FC = () => {
       <DialogTitle>Alarm Triggered!</DialogTitle>
       <DialogContent>
         <Typography variant="body1">
-          ALERT! Beacon {alarm?.beaconId} is in area {alarm?.maskedAreaName} on {alarm?.floorplanName}.
+          ALERT! Beacon {alarm?.beaconId} is in area {alarm?.maskedAreaName} on{' '}
+          {alarm?.floorplanName}.
         </Typography>
         <pre>{JSON.stringify(alarm, null, 2)}</pre>
         <Button onClick={handleClose}>Close</Button>

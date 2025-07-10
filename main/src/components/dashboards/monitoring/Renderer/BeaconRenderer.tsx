@@ -5,7 +5,7 @@ import { fetchVisitor, visitorType } from 'src/store/apps/crud/visitor';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import { Box, Typography, Paper } from '@mui/material';
 import { Html } from 'react-konva-utils';
-import { width } from '@mui/system';
+import BeaconDetailPopup from '../Popup/BeaconDetailPopup';
 
 type BeaconRendererProps = {
   id: string;
@@ -13,17 +13,18 @@ type BeaconRendererProps = {
   y: number;
   area: string;
   floorplan: string;
+  time: string;
 };
 
 const BASE_URL = 'http://192.168.1.116:5000';
 
-const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorplan }) => {
+const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorplan, time }) => {
   const groupRef = useRef<any>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const dispatch = useDispatch();
   const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null);
-  const [showBox, setShowBox] = useState(false);
+  const [detailDialogOpen, setdetailDialogOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchMembers());
@@ -37,8 +38,8 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorpl
     (state: RootState) => state.visitorReducer.visitors,
   ) as visitorType[];
 
-  const radius = 15;
-  const triangleHeight = 12;
+  const radius = 7.5;
+  const triangleHeight = 8;
 
   const person = [...membersData, ...visitorsData].find((p) => p.bleCardNumber === id);
   const isVisitor = visitorsData.some((v) => v.bleCardNumber === id);
@@ -56,35 +57,37 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorpl
   }, [imageUrl]);
 
   const handleClick = () => {
-    setShowBox((prev) => !prev);
+    setdetailDialogOpen((prev) => !prev);
   };
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const stage = groupRef.current?.getStage?.();
-      const clickedOnCanvas = stage?.content?.contains(event.target as Node);
-      const clickedOnTooltip = tooltipRef.current?.contains(event.target as Node);
-
-      if (!clickedOnCanvas || !groupRef.current?.getClientRect().width) return;
-
-      const shape = groupRef.current;
+      const tooltipEl = tooltipRef.current;
+      const groupNode = groupRef.current;
+      const stage = groupNode?.getStage();
       const pointer = stage?.getPointerPosition();
-      const shapeBox = shape.getClientRect();
 
-      const isInside =
-        pointer &&
-        pointer.x >= shapeBox.x &&
-        pointer.x <= shapeBox.x + shapeBox.width &&
-        pointer.y >= shapeBox.y &&
-        pointer.y <= shapeBox.y + shapeBox.height;
+      const isClickInsideGroup = (() => {
+        if (!pointer || !groupNode) return false;
+        const box = groupNode.getClientRect();
+        return (
+          pointer.x >= box.x &&
+          pointer.x <= box.x + box.width &&
+          pointer.y >= box.y &&
+          pointer.y <= box.y + box.height
+        );
+      })();
 
-      if (!isInside && !clickedOnTooltip) {
-        setShowBox(false);
+      const clickedTooltip = tooltipEl?.contains(event.target as Node);
+
+      // Close if click is NOT on group AND NOT on tooltip
+      if (!isClickInsideGroup && !clickedTooltip) {
+        setdetailDialogOpen(false);
       }
     };
 
-    window.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      window.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -99,9 +102,9 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorpl
       >
         <Text
           x={x - 55}
-          y={y - triangleHeight - radius - 35}
+          y={y - triangleHeight - radius - 25}
           text={label}
-          fontSize={14}
+          fontSize={10}
           fill={isMember ? '#1976d2' : '#f50057'}
           fontStyle="bold"
           width={120}
@@ -115,7 +118,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorpl
           radius={radius + 2}
           fill={isMember ? '#1976d2' : '#f50057'}
           stroke="#fff"
-          strokeWidth={3}
+          strokeWidth={1}
           shadowBlur={3}
         />
 
@@ -156,9 +159,18 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorpl
       </Group>
 
       {/* Tooltip Box */}
-      {showBox && (
+      {detailDialogOpen && (
         <Html>
-          <Box
+          <BeaconDetailPopup
+            memberDetail={isMember ? person as memberType : undefined}
+            visitorDetail={isVisitor ? person as visitorType : undefined}
+            detailDialogOpen={detailDialogOpen}
+            setDetailDialogOpen={setdetailDialogOpen}
+            area={area}
+            floorplan={floorplan}
+            time={time}
+          />
+          {/* <Box
             style={{
               width: 300,
               position: 'absolute',
@@ -182,10 +194,11 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorpl
             <Typography fontWeight={600}>BLE :</Typography>
             <Typography mb={2}>{person?.bleCardNumber || '-'}</Typography>
             <Typography fontWeight={600}>Area :</Typography>
-            <Typography mb={2}>{area || '-'} | {floorplan || '-'}</Typography>
-            {/* <Typography fontWeight={600}>Floor :</Typography>
-            <Typography mb={2}>{floorplan || '-'}</Typography> */}
-          </Box>
+            <Typography mb={2}>
+              {area || '-'} | {floorplan || '-'}
+            </Typography>
+
+          </Box> */}
         </Html>
       )}
     </>

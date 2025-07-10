@@ -85,7 +85,7 @@ const DeviceRenderer: React.FC<{
     dispatch(RefreshBeaconState());
   }, [dispatch]);
   const [lastSeenBeacons, setLastSeenBeacons] = useState<{
-    [id: string]: { x: number; y: number; lastSeen: number, area:string, floorplan:string };
+    [id: string]: { x: number; y: number; lastSeen: number, area:string, floorplan:string, time:string };
   }>({});
   const setPointsFromNodes = (nodes: Nodes[]): number[] => {
     // console.log('Setting nodes: ', nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]))
@@ -291,7 +291,8 @@ const DeviceRenderer: React.FC<{
             y: beacon.point.y,
             lastSeen: now,
             area: beacon.maskedAreaName,
-            floorplan: beacon.floorplanName
+            floorplan: beacon.floorplanName,
+            time: beacon.time
           };
         }
       });
@@ -397,6 +398,7 @@ const DeviceRenderer: React.FC<{
               y={(anim.y / originalHeight) * height}
               area={beacon.area}
               floorplan={beacon.floorplan}
+              time={beacon.time}
             />
           );
         })}

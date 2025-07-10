@@ -132,11 +132,11 @@ const AlarmList = ({ isNew }: Props) => {
                         </TableCell>
                         <TableCell>{alarmRecordData.id}</TableCell>
                         <TableCell>{formatTime(alarmRecordData.timestamp)}</TableCell>
-                        <TableCell>{alarmRecordData.visitor.name}</TableCell>
-                        <TableCell>{alarmRecordData.reader.name}</TableCell>
+                        <TableCell>{alarmRecordData.visitor?.name}</TableCell>
+                        <TableCell>{alarmRecordData.reader?.name}</TableCell>
                         <TableCell>{alarmRecordData.alarmRecordStatus}</TableCell>
                         <TableCell>{alarmRecordData.actionStatus}</TableCell>
-                        <TableCell>{alarmRecordData.floorplanMaskedArea.id}</TableCell>
+                        <TableCell>{alarmRecordData.floorplanMaskedArea?.name}</TableCell>
                       </TableRow>
                     ))}
                 </TableBody>
@@ -145,7 +145,7 @@ const AlarmList = ({ isNew }: Props) => {
             <Divider />
             {!isNew && (
               <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
+                rowsPerPageOptions={[]}
                 component="div"
                 count={alarmRecordList.length}
                 rowsPerPage={rowsPerPage}

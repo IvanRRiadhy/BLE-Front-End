@@ -58,6 +58,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
   }, [dispatch]);
 
   const handleClickOpen = () => {
+    console.log('Form Data : ', formData);  
     setOpen(true);
   };
 
