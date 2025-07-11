@@ -1,7 +1,9 @@
 import {
   Avatar,
   Box,
+  Button,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
@@ -70,7 +72,7 @@ const BeaconDetailPopup = ({
     const department = departmentData.find((dpt: DepartmentType) => dpt.id === departmentId);
     return department ? department.name : 'Unknown Department';
   };
-
+  console.log(memberDetail, area, floorplan, time);
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
 
@@ -301,6 +303,51 @@ const BeaconDetailPopup = ({
           </Grid>
         </Grid>
       </DialogContent>
+      <DialogActions
+        sx={{
+          position: 'sticky',
+          bottom: 0,
+          bgcolor: 'background.paper',
+          borderTop: '1px solid #e0e0e0',
+          display: 'flex',
+          justifyContent: 'space-between',
+          px: 0,
+          py: 0,
+          zIndex: 1,
+        }}
+      >
+        <Box sx={{ flex: 1 }}>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleClose}
+            sx={{
+              width: '100%',
+              height: '64px',
+              borderRadius: 0,
+            }}
+          >
+            Tracking Details
+          </Button>
+        </Box>
+
+        <Box sx={{ flex: 1 }}>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => {
+              console.log('Go to profile');
+            }}
+            sx={{
+              width: '100%',
+              height: '64px',
+              borderRadius: 0,
+            }}
+          >
+            Go to Profile
+          </Button>
+        </Box>
+      </DialogActions>
     </Dialog>
   );
 };

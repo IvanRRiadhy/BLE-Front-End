@@ -2,6 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
 import {
   Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControlLabel,
   Grid2 as Grid,
   Switch,
@@ -15,8 +20,13 @@ import { FloorplanType, fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { RefreshTrigger } from 'src/store/apps/tracking/Beacon';
+import axiosServices from 'src/utils/axios';
+import { AlarmType } from 'src/store/apps/tracking/Alarm';
+import { fetchMembers } from 'src/store/apps/crud/member';
+import { fetchVisitor } from 'src/store/apps/crud/visitor';
 
 const BASE_URL = 'http://192.168.1.116:5000';
+const ALARM_URL = 'http://192.168.1.116:3300';
 const FloorView: React.FC<{
   activeFloorplan: string;
   zoomable: boolean;
@@ -30,7 +40,15 @@ const FloorView: React.FC<{
     dispatch(fetchFloors());
     dispatch(fetchFloorplanDevices());
     dispatch(fetchMaskedAreas());
+    dispatch(fetchMembers());
+    dispatch(fetchVisitor());
   }, [dispatch]);
+
+  //DUMMY
+  const [dummyAlarm, setDummyAlarm] = useState<AlarmType>();
+  const memberList = useSelector((state: AppState) => state.memberReducer.members);
+  const visitorList = useSelector((state: AppState) => state.visitorReducer.visitors);
+
   // console.log('testing', useSelector((state: AppState) => state.floorReducer.floors));
   const containerRef = useRef<HTMLDivElement>(null);
   const floor = useSelector((state: AppState) => state.floorReducer.floors);
@@ -365,6 +383,33 @@ const FloorView: React.FC<{
     );
   }
 
+  const [open, setOpen] = useState(false);
+
+  const handleFetchDummyBeacon = async () => {
+    try {
+      const response = await axiosServices.get(`${ALARM_URL}/dummy-beacon`);
+      console.log('Dummy Beacon Data:', response.data);
+      setDummyAlarm(response.data);
+      setOpen(true);
+    } catch (error) {
+      console.error('Error fetching dummy beacon:', error);
+    }
+  };
+
+  const getName = (bleNuber: string) => {
+    let name = '';
+    name =
+      memberList.find((member) => member.bleCardNumber === bleNuber)?.name ??
+      visitorList.find((visitor) => visitor.bleCardNumber === bleNuber)?.name ??
+      'Unknown Person';
+    return name;
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setDummyAlarm(undefined);
+  };
+
   return (
     <Box
       onMouseEnter={() => setIsHovered(true)} // Show ZoomControls on mouse enter
@@ -419,6 +464,9 @@ const FloorView: React.FC<{
             }
             label="Show Gateways"
           />
+          <Button variant="contained" color="primary" onClick={handleFetchDummyBeacon}>
+            Alarm Trigger
+          </Button>
         </Box>
       )}
       {/* Zoomable Content */}
@@ -513,6 +561,97 @@ const FloorView: React.FC<{
             </Stage> */}
         </Box>
       </Box>
+      {dummyAlarm && (
+        <Dialog
+          open={open}
+          onClose={handleClose}
+          PaperProps={{
+            sx: {
+              backgroundColor: 'transparent', // transparent outer shell
+              boxShadow: 'none',
+              overflow: 'visible',
+            },
+          }}
+        >
+          <Box
+            sx={{
+              background: 'linear-gradient(to bottom, #c62828, #b71c1c)',
+              color: 'white',
+              borderRadius: 4,
+              px: 4,
+              pt: 3,
+              pb: 6, // space above the button
+              minWidth: 380,
+              textAlign: 'center',
+              position: 'relative',
+            }}
+          >
+            {/* Optional Icon */}
+            {/* <VolumeUpIcon sx={{ fontSize: 32, mb: 1 }} /> */}
+
+            <Typography variant="h5" fontWeight="bold" mb={1}>
+              Alarm triggered
+            </Typography>
+
+            <Box
+              sx={{
+                backgroundColor: 'rgba(255,255,255,0.15)',
+                display: 'inline-block',
+                px: 2,
+                py: 0.5,
+                borderRadius: '20px',
+                mb: 1.5,
+                fontSize: '0.875rem',
+              }}
+            >
+              🔔 Triggered by <strong>{getName(dummyAlarm?.beaconId)}</strong>
+              <Box component="span" fontWeight="bold"></Box>
+            </Box>
+
+            <Typography variant="body2" mb={1}>
+              card ID: <strong>{dummyAlarm?.beaconId}</strong>
+            </Typography>
+            <Typography variant="body2" mb={2}>
+              Area: <strong>{dummyAlarm?.maskedAreaName}</strong> |{' '}
+              <strong>{dummyAlarm?.floorplanName}</strong>
+            </Typography>
+
+            {/* White pill-shaped button bar */}
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: '-20px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                backgroundColor: 'white',
+                borderRadius: '40px',
+                px: 4,
+                py: 1,
+                boxShadow: 2,
+              }}
+            >
+              <Button
+                onClick={handleClose}
+                variant="text"
+                sx={{
+                  backgroundColor: '#fff',
+                  color: 'red',
+                  fontWeight: 'bold',
+                  fontSize: '1rem',
+                  textTransform: 'none',
+                  borderRadius: '20px',
+                  px: 4,
+                  '&:hover': {
+                    backgroundColor: '#b71c1c',
+                  },
+                }}
+              >
+                Disarm
+              </Button>
+            </Box>
+          </Box>
+        </Dialog>
+      )}
     </Box>
   );
 };

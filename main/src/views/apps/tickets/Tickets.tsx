@@ -8,51 +8,51 @@ import {
   Typography,
 } from '@mui/material';
 import { Box } from '@mui/system';
-import React, { useState } from 'react';
-import * as XSLX from 'xlsx';
+import { useState } from 'react';
+// import * as XSLX from 'xlsx';
 
 const ExcelViewer = () => {
-  const [data, setData] = useState<any[]>([]);
+  const [data] = useState<any[]>([]);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  // const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files?.[0];
+  //   if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const arrayBuffer = e.target?.result;
-      const workbook = XSLX.read(arrayBuffer, { type: 'array' });
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-      const jsonData: string[][] = XSLX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+  //   const reader = new FileReader();
+  //   reader.onload = (e) => {
+  //     const arrayBuffer = e.target?.result;
+  //     const workbook = XSLX.read(arrayBuffer, { type: 'array' });
+  //     const sheetName = workbook.SheetNames[0];
+  //     const sheet = workbook.Sheets[sheetName];
+  //     const jsonData: string[][] = XSLX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
 
-      const maxColumns = Math.max(...jsonData.map((row) => row.length));
-      const formattedData = jsonData.map((row) => {
-        while (row.length < maxColumns) row.push('');
-        return row;
-      });
-      setData(formattedData);
-    };
-    reader.readAsArrayBuffer(file);
-  };
+  //     const maxColumns = Math.max(...jsonData.map((row) => row.length));
+  //     const formattedData = jsonData.map((row) => {
+  //       while (row.length < maxColumns) row.push('');
+  //       return row;
+  //     });
+  //     setData(formattedData);
+  //   };
+  //   reader.readAsArrayBuffer(file);
+  // };
 
-  const handleDownload = () => {
-    const worksheet = XSLX.utils.aoa_to_sheet(data);
-    const workbook = XSLX.utils.book_new();
-    XSLX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+  // const handleDownload = () => {
+  //   const worksheet = XSLX.utils.aoa_to_sheet(data);
+  //   const workbook = XSLX.utils.book_new();
+  //   XSLX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
 
-    XSLX.writeFile(workbook, 'download.xslx');
-  };
+  //   XSLX.writeFile(workbook, 'download.xslx');
+  // };
   return (
     <Box sx={{ p: 3, textAlign: 'center' }}>
       <Typography variant="h4" mb={2}>
         Excel/CSV View
       </Typography>
-      <input type="file" accept=".xlsx, .xls, .csv" onChange={handleFileUpload} />
+      <input type="file" accept=".xlsx, .xls, .csv"  />
 
       {data.length > 0 && (
         <>
-          <Button variant="contained" color="primary" onClick={handleDownload} sx={{ mt: 2 }}>
+          <Button variant="contained" color="primary"  sx={{ mt: 2 }}>
             Download
           </Button>
           <Box sx={{ overflowX: 'auto', mt: 3 }}>

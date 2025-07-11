@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, Button, Typography } from '@mui/material';
 import { startMQTTclient } from 'src/store/apps/tracking/MQTT';
-import { AlarmType } from 'src/store/apps/tracking/Alarm';
+import { AlarmType, RefreshAlarmState } from 'src/store/apps/tracking/Alarm';
 import axios from 'axios';
+import { dispatch, useSelector } from 'src/store/Store';
 
 const ALARM_TOPIC = 'alarm/topic';
 const deactivateAlarm = 'http://192.168.1.107:3300/deactivate-alarm';
@@ -43,18 +44,29 @@ const AlarmPopup: React.FC = () => {
     };
   }, []);
 
+  const dummyAlarm = useSelector((state: any) => state.alarmReducer.alarms);
+
+  useEffect(() => {
+    if (dummyAlarm !== undefined) {
+      setOpen(true);
+      setAlarm(dummyAlarm);
+      console.log('dummyAlarm : ', dummyAlarm);
+    }
+  }, [dummyAlarm]);
+
   const handleClose = async () => {
     console.log(deactivateAlarm, alarm?.beaconId);
     setOpen(false);
-    try {
-      const response = await axios.post(deactivateAlarm, {
-        dmac: alarm?.beaconId,
-      });
-      console.log(response.data);
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
+    dispatch(RefreshAlarmState());
+    // try {
+    //   const response = await axios.post(deactivateAlarm, {
+    //     dmac: alarm?.beaconId,
+    //   });
+    //   console.log(response.data);
+    // } catch (error) {
+    //   console.log(error);
+    //   throw error;
+    // }
   };
 
   return (

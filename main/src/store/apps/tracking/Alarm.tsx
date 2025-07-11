@@ -1,7 +1,9 @@
-
 import { createSlice } from '@reduxjs/toolkit';
 import { AppDispatch } from 'src/store/Store';
 import { startMQTTclient } from './MQTT';
+import axiosServices from 'src/utils/axios';
+
+const ALARM_URL = 'http://192.168.1.116:3300';
 
 export interface AlarmType {
   beaconId: string;
@@ -53,8 +55,10 @@ export const AlarmSlice = createSlice({
   initialState,
   reducers: {
     GetAlarm: (state, action) => {
+      console.log(action.payload)
       const { alarms } = action.payload;
       state.alarms = alarms;
+      console.log(state.alarms);
     },
     RefreshTrigger: (state) => {
       state.refreshTrigger = true;
@@ -77,12 +81,22 @@ export const fetchAlarm = (topic: string) => (dispatch: AppDispatch) => {
       lastDispatch = now;
       dispatch(
         GetAlarm({
-          alarm: Array.isArray(data) ? data : [data],
+          alarms: Array.isArray(data) ? data : [data],
         }),
       );
     }
   }, topic);
   return unsubscribe;
+};
+
+export const handleFetchDummyBeacon = () => async (dispatch: AppDispatch) => {
+  try {
+    const response = await axiosServices.get(`${ALARM_URL}/dummy-beacon`);
+    console.log('Dummy Beacon Data:', response.data);
+    dispatch(GetAlarm(response.data || []));
+  } catch (error) {
+    console.error('Error fetching dummy beacon:', error);
+  }
 };
 
 export default AlarmSlice.reducer;
