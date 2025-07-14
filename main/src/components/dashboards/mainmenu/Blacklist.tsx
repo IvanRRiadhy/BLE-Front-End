@@ -64,6 +64,7 @@ const BlacklistTable: React.FC<BlacklistTableProps> = ({ blacklistData = [] }) =
 
   useEffect(() => {
     dispatch(fetchBlacklist());
+    console.log(blacklistList);
   }, [dispatch]);
 
   return (

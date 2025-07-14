@@ -33,6 +33,7 @@ export const BlacklistSlice = createSlice({
     initialState,
     reducers: {
         GetBlaclist(state, action: PayloadAction<blacklistType[]>) {
+            console.log(action.payload);
             state.blacklists = action.payload;
         },
         SelectBlacklist(state, action: PayloadAction<string>){

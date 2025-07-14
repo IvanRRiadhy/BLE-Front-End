@@ -5,6 +5,7 @@ import { fetchVisitor, visitorType } from 'src/store/apps/crud/visitor';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import { Html } from 'react-konva-utils';
 import BeaconDetailPopup from '../Popup/BeaconDetailPopup';
+import TrackingDetailPopup from '../Popup/TrackingDetailPopup';
 
 type BeaconRendererProps = {
   id: string;
@@ -24,6 +25,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorpl
   const dispatch = useDispatch();
   const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null);
   const [detailDialogOpen, setdetailDialogOpen] = useState(false);
+  const [openTrackDetail, setOpenTrackDetail] = useState(false);
 
   useEffect(() => {
     dispatch(fetchMembers());
@@ -161,13 +163,22 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorpl
       {detailDialogOpen && (
         <Html>
           <BeaconDetailPopup
+          bleNumber={id}
             memberDetail={isMember ? person as memberType : undefined}
             visitorDetail={isVisitor ? person as visitorType : undefined}
             detailDialogOpen={detailDialogOpen}
             setDetailDialogOpen={setdetailDialogOpen}
+            setOpenTrackDetail={setOpenTrackDetail}
             area={area}
             floorplan={floorplan}
             time={time}
+          />
+          <TrackingDetailPopup
+            bleNumber={id}
+            person={isMember ? person as memberType : person as visitorType}
+            personId={person?.id || ''}
+            openTrackDetail={openTrackDetail}
+            setOpenTrackDetail={setOpenTrackDetail}
           />
           {/* <Box
             style={{

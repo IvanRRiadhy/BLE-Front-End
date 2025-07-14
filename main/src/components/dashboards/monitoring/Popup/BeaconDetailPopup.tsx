@@ -10,7 +10,7 @@ import {
   Grid2 as Grid,
   Typography,
 } from '@mui/material';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DepartmentType, fetchDepartments } from 'src/store/apps/crud/department';
 import { DistrictType, fetchDistricts } from 'src/store/apps/crud/district';
@@ -20,6 +20,7 @@ import { visitorType } from 'src/store/apps/crud/visitor';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 
 type BeaconDetailPopupProps = {
+  bleNumber: string;
   memberDetail?: memberType;
   visitorDetail?: visitorType;
   area: string;
@@ -27,11 +28,13 @@ type BeaconDetailPopupProps = {
   time: string;
   detailDialogOpen: boolean;
   setDetailDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setOpenTrackDetail: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const BASE_URL = 'http://192.168.1.116:5000';
 
 const BeaconDetailPopup = ({
+  bleNumber,
   memberDetail,
   visitorDetail,
   area,
@@ -39,10 +42,10 @@ const BeaconDetailPopup = ({
   time,
   detailDialogOpen,
   setDetailDialogOpen,
+  setOpenTrackDetail,
 }: BeaconDetailPopupProps) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  //   const [open, setOpen] = useState(false);
   const handleClose = () => {
     setDetailDialogOpen(false);
   };
@@ -72,7 +75,7 @@ const BeaconDetailPopup = ({
     const department = departmentData.find((dpt: DepartmentType) => dpt.id === departmentId);
     return department ? department.name : 'Unknown Department';
   };
-  console.log(memberDetail, area, floorplan, time);
+  // console.log(memberDetail, area, floorplan, time);
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
 
@@ -292,11 +295,7 @@ const BeaconDetailPopup = ({
               <Typography component="div" variant="h6" fontWeight={700}>
                 <Box component="span">BLE Card Number :</Box>{' '}
                 <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                  {memberDetail
-                    ? memberDetail.bleCardNumber
-                    : visitorDetail
-                    ? visitorDetail.bleCardNumber
-                    : 'Unknown Person'}
+                  {bleNumber}
                 </Box>
               </Typography>
             </Grid>
@@ -320,7 +319,7 @@ const BeaconDetailPopup = ({
           <Button
             variant="contained"
             color="secondary"
-            onClick={handleClose}
+            onClick={() => setOpenTrackDetail(true)}
             sx={{
               width: '100%',
               height: '64px',
@@ -334,17 +333,15 @@ const BeaconDetailPopup = ({
         <Box sx={{ flex: 1 }}>
           <Button
             variant="outlined"
-            color="primary"
-            onClick={() => {
-              console.log('Go to profile');
-            }}
+            color="error"
+            onClick={handleClose}
             sx={{
               width: '100%',
               height: '64px',
               borderRadius: 0,
             }}
           >
-            Go to Profile
+            Close
           </Button>
         </Box>
       </DialogActions>

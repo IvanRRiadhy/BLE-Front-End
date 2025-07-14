@@ -48,6 +48,7 @@ const FloorView: React.FC<{
   const [dummyAlarm, setDummyAlarm] = useState<AlarmType>();
   const memberList = useSelector((state: AppState) => state.memberReducer.members);
   const visitorList = useSelector((state: AppState) => state.visitorReducer.visitors);
+  const [open, setOpen] = useState(false);
 
   // console.log('testing', useSelector((state: AppState) => state.floorReducer.floors));
   const containerRef = useRef<HTMLDivElement>(null);
@@ -382,8 +383,6 @@ const FloorView: React.FC<{
       </Grid>
     );
   }
-
-  const [open, setOpen] = useState(false);
 
   const handleFetchDummyBeacon = async () => {
     try {
