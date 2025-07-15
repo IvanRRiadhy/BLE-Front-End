@@ -64,7 +64,8 @@ const Config = () => {
         /> */}
         <ConfigGrid
           grid={parseInt(selectedGrid)}
-          floorIds={memoizedFloorIds2}
+          floorIds={memoizedFloorIds}
+          screenDisplay={memoizedFloorIds2}
           screenType={memoizedScreenType}
           selectedScreen={parseInt(selectedScreen)}
           setSelectedScreen={setSelectedScreen}

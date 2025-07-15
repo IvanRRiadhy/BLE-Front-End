@@ -1,12 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
-import {
-  Box,
-  FormControlLabel,
-  Grid2 as Grid,
-  Switch,
-  Typography,
-} from '@mui/material';
+import { Box, FormControlLabel, Grid2 as Grid, Switch, Typography } from '@mui/material';
 // import { fetchFloorplans } from 'src/store/apps/tracking/FloorPlanSlice';
 import ZoomControls from 'src/components/shared/ZoomControls';
 import DeviceRenderer from '../Renderer/ConfigDeviceRenderer';
@@ -21,14 +15,10 @@ const ConfigFloorView: React.FC<{
   zoomable: boolean;
   containerWidth: number; // New prop
   containerHeight: number; // New prop
+  activeMaskedArea?: string;
   screenSettings?: { scale: number; translateX: number; translateY: number };
   setScreenSettings?: (settings: { scale: number; translateX: number; translateY: number }) => void;
-}> = ({
-  activeFloorplan,
-  zoomable,
-  screenSettings,
-  setScreenSettings,
-}) => {
+}> = ({ activeFloorplan, zoomable, activeMaskedArea, screenSettings, setScreenSettings }) => {
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchFloorplan());
@@ -50,6 +40,14 @@ const ConfigFloorView: React.FC<{
   );
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorplan);
   const [showArea, setShowArea] = useState(true);
+  const [focusArea, setFocusArea] = useState<{
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+    centerX: number;
+    centerY: number;
+  } | null>(null);
 
   useEffect(() => {
     // console.log('FloorChanged:', floor);
@@ -106,8 +104,26 @@ const ConfigFloorView: React.FC<{
           // setScale(finalScale); // Set the initial scale
 
           // Calculate the initial translate values to center the image
-          const offsetX = containerWidth / 4;
-          const offsetY = containerHeight / 4;
+          if (focusArea) {
+            const scaleX = containerWidth / (focusArea.maxX - focusArea.minX);
+            const scaleY = containerHeight / (focusArea.maxY - focusArea.minY);
+            const targetScale = Math.min(scaleX, scaleY);
+            const offsetX = containerWidth / 2 - focusArea.centerX * targetScale;
+            const offsetY = containerHeight / 2 - focusArea.centerY * targetScale;
+
+            setScale(targetScale);
+            setTranslate({
+              x: screenSettings?.translateX || offsetX,
+              y: screenSettings?.translateY || offsetY,
+            });
+          } else {
+            const offsetX = containerWidth / 2;
+            const offsetY = containerHeight / 2;
+            setTranslate({
+              x: screenSettings?.translateX || offsetX,
+              y: screenSettings?.translateY || offsetY,
+            });
+          }
 
           // console.log('Container Width:', containerWidth);
           // console.log('Container Height:', containerHeight);
@@ -116,10 +132,7 @@ const ConfigFloorView: React.FC<{
           // console.log('Min Scale:', minScale);
           // console.log('OffsetX:', offsetX);
           // console.log('OffsetY:', offsetY);
-          setTranslate({
-            x: screenSettings?.translateX || offsetX,
-            y: screenSettings?.translateY || offsetY,
-          });
+
           // console.log(screenSettings);
           // if (screenSettings?.translateX === 0) {
           //   setTranslate({ x: offsetX, y: screenSettings?.translateY });
@@ -245,6 +258,22 @@ const ConfigFloorView: React.FC<{
     }
   };
 
+  const getClipPathFromFocusArea = (
+    focusArea: { minX: number; maxX: number; minY: number; maxY: number } | null,
+    imgWidth: number,
+    imgHeight: number,
+    padding = 15,
+  ) => {
+    if (!focusArea) return undefined;
+    console.log('Focus Area:', focusArea);
+    const top = Math.max(focusArea.minY - padding, 0);
+    const left = Math.max(focusArea.minX - padding, 0);
+    const bottom = Math.max(imgHeight - (focusArea.maxY + padding), 0);
+    const right = Math.max(imgWidth - (focusArea.maxX + padding), 0);
+    console.log('top:', top, 'left:', left, 'bottom:', bottom, 'right:', right);
+    return `inset(${top}px ${right}px ${bottom}px ${left}px)`;
+  };
+
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -281,6 +310,44 @@ const ConfigFloorView: React.FC<{
       });
     }
   }, [scale, translate, setScreenSettings]);
+
+  useEffect(() => {
+    if (!activeMaskedArea) return;
+
+    const targetArea = filteredArea.find((a) => a.id === activeMaskedArea);
+    if (!targetArea || !targetArea.areaShape) return;
+
+    try {
+      const shape: { x_px: number; y_px: number }[] = JSON.parse(targetArea.areaShape);
+      if (!shape.length) return;
+
+      const xList = shape.map((p) => p.x_px);
+      const yList = shape.map((p) => p.y_px);
+
+      const minX = Math.min(...xList);
+      const maxX = Math.max(...xList);
+      const minY = Math.min(...yList);
+      const maxY = Math.max(...yList);
+      const centerX = (minX + maxX) / 2;
+      const centerY = (minY + maxY) / 2;
+
+      const newFocus = { minX, maxX, minY, maxY, centerX, centerY };
+
+      // Hindari setState jika data tidak berubah
+      const isSame =
+        focusArea &&
+        focusArea.minX === newFocus.minX &&
+        focusArea.maxX === newFocus.maxX &&
+        focusArea.minY === newFocus.minY &&
+        focusArea.maxY === newFocus.maxY &&
+        focusArea.centerX === newFocus.centerX &&
+        focusArea.centerY === newFocus.centerY;
+
+      if (!isSame) setFocusArea(newFocus);
+    } catch (err) {
+      console.error('Invalid areaShape JSON:', targetArea.areaShape);
+    }
+  }, [activeMaskedArea, filteredArea, focusArea]);
 
   const handleMouseDown = (event: React.MouseEvent) => {
     setIsDragging(true);
@@ -438,6 +505,7 @@ const ConfigFloorView: React.FC<{
                 imgSize.width,
                 imgSize.height,
               );
+              const clipPath = getClipPathFromFocusArea(focusArea, imgSize.width, imgSize.height);
 
               return (
                 <Box
@@ -458,6 +526,11 @@ const ConfigFloorView: React.FC<{
                     height: dims.height,
                     transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
                     transformOrigin: 'center center',
+                    overflow: 'hidden',
+                    ...(clipPath && {
+                      clipPath,
+                      WebkitClipPath: clipPath, // Safari support
+                    }),
                   }}
                 >
                   <DeviceRenderer

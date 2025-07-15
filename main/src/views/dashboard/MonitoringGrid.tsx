@@ -2,7 +2,7 @@ import { Grid2 as Grid, Typography } from '@mui/material';
 import React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import FloorView from 'src/components/dashboards/monitoring/FloorView';
-import { screenSettings } from 'src/store/apps/monitoring/layout';
+import { screenOrderMap, screenSettings } from 'src/store/apps/monitoring/layout';
 
 interface MonitoringGridProps {
   grid: number;
@@ -150,32 +150,32 @@ const MonitoringGrid = React.memo(({ grid, floorIds, screenSettings }: Monitorin
   if (!(grid in layoutConfig)) return null;
   const layout = layoutConfig[grid as keyof typeof layoutConfig];
 
-  const screenOrderMap: { [grid: number]: Array<[number, number?, number?]> } = {
-    1: [[0]],
-    2: [[0], [1]],
-    3: [[0], [1, 0], [1, 1]],
-    4: [
-      [0, 0],
-      [1, 0],
-      [0, 1],
-      [1, 1],
-    ],
-    5: [
-      [0, 0],
-      [1, 0],
-      [1, 1],
-      [0, 1, 0],
-      [0, 1, 1],
-    ],
-    6: [
-      [0, 0],
-      [1, 0],
-      [1, 1],
-      [0, 1, 0],
-      [0, 1, 1],
-      [1, 2],
-    ],
-  };
+  // const screenOrderMap: { [grid: number]: Array<[number, number?, number?]> } = {
+  //   1: [[0]],
+  //   2: [[0], [1]],
+  //   3: [[0], [1, 0], [1, 1]],
+  //   4: [
+  //     [0, 0],
+  //     [1, 0],
+  //     [0, 1],
+  //     [1, 1],
+  //   ],
+  //   5: [
+  //     [0, 0],
+  //     [1, 0],
+  //     [0, 1, 0],
+  //     [0, 1, 1],
+  //     [1, 1],
+  //   ],
+  //   6: [
+  //     [0, 0],
+  //     [1, 0],
+  //     [1, 1],
+  //     [0, 1, 0],
+  //     [0, 1, 1],
+  //     [1, 2],
+  //   ],
+  // };
 
   function getScreenNumber(
     grid: number,

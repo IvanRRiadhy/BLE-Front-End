@@ -120,6 +120,7 @@ const layoutConfig = {
 interface MonitoringGridProps {
   grid: number;
   floorIds: Record<number, string[]>;
+  screenDisplay: Record<number, string[]>;
   screenType: Record<number, number[]>;
   selectedScreen?: number;
   setSelectedScreen: (selectedScreen: string) => void;
@@ -131,6 +132,7 @@ const ConfigGrid = React.memo(
   ({
     grid,
     floorIds,
+    screenDisplay,
     screenType,
     selectedScreen,
     setSelectedScreen,
@@ -298,6 +300,21 @@ const ConfigGrid = React.memo(
                                           }
                                           setScreenSettings={setScreenSettings}
                                         />
+                                      ) : screenType[grid][
+                                          (grandChild as { floorId: number }).floorId
+                                        ] === 1 ? (
+                                        <ConfigFloorView
+                                          activeFloorplan={floorIds[grid][screenNum - 1]}
+                                          zoomable={selectedScreen === screenNum}
+                                          containerWidth={gridDimensions.width} // Pass width
+                                          containerHeight={gridDimensions.height} // Pass height
+                                          screenSettings={
+                                            screenSettings && screenNum
+                                              ? screenSettings[grid][screenNum - 1]
+                                              : undefined
+                                          }
+                                          setScreenSettings={setScreenSettings}
+                                        />
                                       ) : (
                                         <Typography
                                           variant="h1"
@@ -314,7 +331,12 @@ const ConfigGrid = React.memo(
                                           fontStyle="bold"
                                           fontWeight={900}
                                         >
-                                          Camera Here
+                                          Camera Here{' '}
+                                          {
+                                            screenDisplay[grid][
+                                              (grandChild as { floorId: number }).floorId
+                                            ]
+                                          }
                                         </Typography>
                                       )
                                     ) : (
@@ -375,19 +397,25 @@ const ConfigGrid = React.memo(
                         >
                           {floorIds[grid][(child as { floorId: number }).floorId] ? (
                             screenType[grid][(child as { floorId: number }).floorId] === 0 ? (
-                              console.log('Floor ID:', floorIds[grid][(child as { floorId: number }).floorId], screenNum),
-                              <ConfigFloorView
-                              activeFloorplan={floorIds[grid][screenNum - 1]}
-                              zoomable={selectedScreen === screenNum}
-                              containerWidth={gridDimensions.width} // Pass width
-                              containerHeight={gridDimensions.height} // Pass height
-                              screenSettings={
-                                screenSettings && screenNum
-                                  ? screenSettings[grid][screenNum - 1]
-                                  : undefined
-                              }
-                              setScreenSettings={setScreenSettings}
-                            />
+                              (console.log(
+                                'Floor ID:',
+                                floorIds[grid][(child as { floorId: number }).floorId],
+                                screenNum,
+                              ),
+                              (
+                                <ConfigFloorView
+                                  activeFloorplan={floorIds[grid][screenNum - 1]}
+                                  zoomable={selectedScreen === screenNum}
+                                  containerWidth={gridDimensions.width} // Pass width
+                                  containerHeight={gridDimensions.height} // Pass height
+                                  screenSettings={
+                                    screenSettings && screenNum
+                                      ? screenSettings[grid][screenNum - 1]
+                                      : undefined
+                                  }
+                                  setScreenSettings={setScreenSettings}
+                                />
+                              ))
                             ) : (
                               <Typography
                                 variant="h1"
@@ -405,10 +433,10 @@ const ConfigGrid = React.memo(
                                 fontStyle="bold"
                                 fontWeight={900}
                               >
-                                Camera Here {floorIds[grid][(child as { floorId: number }).floorId]}
+                                Camera Here{' '}
+                                {screenDisplay[grid][(child as { floorId: number }).floorId]}
                               </Typography>
                             )
-                            
                           ) : (
                             <Typography
                               variant="h1"
@@ -482,6 +510,20 @@ const ConfigGrid = React.memo(
                       }
                       setScreenSettings={setScreenSettings}
                     />
+                  ) : screenType[grid][(item as { floorId: number }).floorId] === 1 ? (
+                    <ConfigFloorView
+                      activeFloorplan={floorIds[grid][screenNum - 1]}
+                      zoomable={selectedScreen === screenNum}
+                      containerWidth={gridDimensions.width} // Pass width
+                      containerHeight={gridDimensions.height} // Pass height
+                      screenSettings={
+                        screenSettings && screenNum
+                          ? screenSettings[grid][screenNum - 1]
+                          : undefined
+                      }
+                      activeMaskedArea={screenDisplay[grid][(item as { floorId: number }).floorId]}
+                      setScreenSettings={setScreenSettings}
+                    />
                   ) : (
                     <Typography
                       variant="h1"
@@ -495,7 +537,7 @@ const ConfigGrid = React.memo(
                       fontStyle="bold"
                       fontWeight={900}
                     >
-                      Camera Here {floorIds[grid][(item as { floorId: number }).floorId]}
+                      Camera Here {screenDisplay[grid][(item as { floorId: number }).floorId]}
                     </Typography>
                   )
                 ) : (

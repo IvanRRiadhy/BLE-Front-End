@@ -17,6 +17,7 @@ import React, { useEffect, useState } from 'react';
 // import { floorplanType } from 'src/types/tracking/floorplan';
 // import { fetchFloorplans } from 'src/store/apps/tracking/FloorPlanSlice';
 import {
+  resetScreen,
   setFloorplan,
   setScreenDisplay,
   setScreenSettings,
@@ -59,6 +60,7 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
   );
   const customizer = useSelector((state: AppState) => state.customizer);
   const floorplanId = useSelector((state: AppState) => state.layoutReducer.floorplanId);
+  const screenDisplay = useSelector((state: AppState) => state.layoutReducer.screenDisplay);
   // const [buildingList, setBuildingList] = useState([
   //   { id: '1', name: 'Building 1' },
   //   { id: '2', name: 'Building 2' },
@@ -102,8 +104,25 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
   const handleScreenChange = (event: SelectChangeEvent<string>) => {
     setSelectedScreen(event.target.value); // Dispatch the selected screen value
     setSelectedScreens(event.target.value);
+    console.log('APPOOKS');
     if (floorplanId[parseInt(gridType)][parseInt(event.target.value) - 1] !== '') {
-      setSelectedFloorplan(floorplanId[parseInt(gridType)][parseInt(event.target.value) - 1]);
+      console.log(
+        'ASDQEW',
+        screenDisplay[parseInt(gridType)][parseInt(event.target.value) - 1].displayType,
+      );
+      if (screenDisplay[parseInt(gridType)][parseInt(event.target.value) - 1].displayType === 0) {
+        setSelectedFloorplan(floorplanId[parseInt(gridType)][parseInt(event.target.value) - 1]);
+      }
+      if (screenDisplay[parseInt(gridType)][parseInt(event.target.value) - 1].displayType === 1) {
+        setSelectedMaskedArea(
+          screenDisplay[parseInt(gridType)][parseInt(event.target.value) - 1].displayOutput,
+        );
+      }
+      if (screenDisplay[parseInt(gridType)][parseInt(event.target.value) - 1].displayType === 2) {
+        setSelectedCCTV(
+          screenDisplay[parseInt(gridType)][parseInt(event.target.value) - 1].displayOutput,
+        );
+      }
     } else {
       setSelectedBuilding('');
       setSelectedFloor('');
@@ -178,6 +197,7 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
     setSelectedFloor('');
     setSelectedFloorplan('');
     setSelectedMaskedArea('');
+    setSelectedCCTV('');
   };
 
   useEffect(() => {
@@ -194,9 +214,59 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
 
   useEffect(() => {
     if (selectedScreen !== '') {
-      setSelectedFloorplan(floorplanId[parseInt(gridType)]?.[parseInt(selectedScreen) - 1]);
+      console.log(
+        'AAA',
+        screenDisplay[parseInt(gridType)][parseInt(selectedScreen) - 1].displayType,
+      );
+      if (screenDisplay[parseInt(gridType)][parseInt(selectedScreen) - 1].displayType === 0) {
+        setSelectedFloorplan(floorplanId[parseInt(gridType)]?.[parseInt(selectedScreen) - 1]);
+        setSelectedMaskedArea('');
+        setSelectedCCTV('');
+      } else if (
+        screenDisplay[parseInt(gridType)][parseInt(selectedScreen) - 1].displayType === 1
+      ) {
+        console.log('AAA');
+        setSelectedMaskedArea(
+          screenDisplay[parseInt(gridType)][parseInt(selectedScreen) - 1].displayOutput,
+        );
+        setSelectedCCTV('');
+      } else if (
+        screenDisplay[parseInt(gridType)][parseInt(selectedScreen) - 1].displayType === 2
+      ) {
+        console.log('BBBBB');
+        setSelectedCCTV(
+          screenDisplay[parseInt(gridType)][parseInt(selectedScreen) - 1].displayOutput,
+        );
+      } else {
+        setSelectedBuilding('');
+        setSelectedFloor('');
+        setSelectedFloorplan('');
+        setSelectedMaskedArea('');
+        setSelectedCCTV('');
+      }
     }
   }, [selectedScreen, gridType, floorplanId]);
+
+  useEffect(() => {
+    if (selectedCCTV !== '') {
+      const cctv = floorplanDeviceLists.find(
+        (device) => device.type === 'Cctv' && device.accessCctvId === selectedCCTV,
+      );
+      // console.log('selectedCCTV', selectedCCTV, cctv);
+      if (cctv) {
+        setSelectedMaskedArea(cctv.floorplanMaskedAreaId);
+      }
+    }
+  }, [selectedCCTV, cctvLists]);
+
+  useEffect(() => {
+    if (selectedMaskedArea !== '') {
+      const maskedArea = areaLists.find((maskedArea) => maskedArea.id === selectedMaskedArea);
+      if (maskedArea) {
+        setSelectedFloorplan(maskedArea.floorplanId);
+      }
+    }
+  }, [selectedMaskedArea, areaLists]);
 
   useEffect(() => {
     if (selectedFloorplan !== '') {
@@ -206,6 +276,7 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
       }
     }
   }, [selectedFloorplan, floorplanLists]);
+
   useEffect(() => {
     if (selectedFloor !== '') {
       const floor = floorLists.find((floor) => floor.id === selectedFloor);
@@ -402,7 +473,7 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
                           </MenuItem>
                           <MenuItem value="None">None</MenuItem>
                           {filteredCCTV.map((cctv) => (
-                            <MenuItem key={cctv.id} value={cctv.rtsp}>
+                            <MenuItem key={cctv.id} value={cctv.id}>
                               {cctv.name}
                             </MenuItem>
                           ))}
@@ -417,16 +488,37 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
                         zIndex: 2,
                         padding: 2,
                         borderTop: `1px solid ${theme.palette.divider}`,
+                        display: 'flex',
+                        gap: 1,
                       }}
                     >
                       <Button
                         onClick={handleSave}
                         variant="contained"
-                        sx={{ fontSize: '1rem', py: 1, px: 3 }}
+                        sx={{ fontSize: '1rem', py: 1, px: 3, flex: 1 }}
                         disabled={selectedFloorplan === ''}
-                        fullWidth
                       >
                         Save
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          dispatch(resetScreen(parseInt(gridType), parseInt(selectedScreen)));
+
+                          // Reset local state as well
+                          setSelectedScreens('');
+                          setSelectedScreen('');
+                          setSelectedBuilding('');
+                          setSelectedFloor('');
+                          setSelectedFloorplan('');
+                          setSelectedMaskedArea('');
+                          setSelectedCCTV('');
+                        }}
+                        variant="outlined"
+                        color="error"
+                        sx={{ fontSize: '1rem', py: 1, px: 3, flex: 1 }}
+                        disabled={selectedScreen === ''}
+                      >
+                        Remove
                       </Button>
                     </Box>
                   </>

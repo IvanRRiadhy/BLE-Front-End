@@ -14,9 +14,27 @@ export const screenOrderMap: { [grid: number]: Array<[number, number?, number?]>
   1: [[0]],
   2: [[0], [1]],
   3: [[0], [1, 0], [1, 1]],
-  4: [[0, 0], [1, 0], [0, 1], [1, 1]],
-  5: [[0, 0], [1, 0], [0, 1, 0], [0, 1, 1], [1, 1]],
-  6: [[0, 0], [1, 0], [1, 1], [0, 1, 0], [0, 1, 1], [1, 2]],
+  4: [
+    [0, 0],
+    [1, 0],
+    [0, 1],
+    [1, 1],
+  ],
+  5: [
+    [0, 0],
+    [1, 0],
+    [0, 1, 0],
+    [0, 1, 1],
+    [1, 1],
+  ],
+  6: [
+    [0, 0],
+    [1, 0],
+    [1, 1],
+    [0, 1, 0],
+    [0, 1, 1],
+    [1, 2],
+  ],
 };
 
 interface Statetype {
@@ -161,9 +179,41 @@ export const LayoutSlice = createSlice({
         return { payload: { gridNumber, screenNumber, settings } };
       },
     },
+    resetScreen: {
+      reducer: (state: Statetype, action: PayloadAction<any>) => {
+        const { gridNumber, screenNumber } = action.payload;
+
+        // Reset floorplan
+        if (state.floorplanId[gridNumber]) {
+          state.floorplanId[gridNumber][screenNumber - 1] = '';
+        }
+
+        // Reset screen display
+        if (state.screenDisplay[gridNumber]) {
+          state.screenDisplay[gridNumber][screenNumber - 1] = {
+            displayType: 0,
+            displayOutput: '',
+          };
+        }
+
+        // Reset screen settings
+        if (state.screenSettings[gridNumber]) {
+          state.screenSettings[gridNumber][screenNumber - 1] = {
+            scale: 1,
+            translateX: 0,
+            translateY: 0,
+          };
+        }
+
+        console.log(`Screen [${gridNumber}][${screenNumber}] has been reset`);
+      },
+      prepare: (gridNumber: number, screenNumber: number) => {
+        return { payload: { gridNumber, screenNumber } };
+      },
+    },
   },
 });
 
-export const { setGrid, setFloorplan, setScreenDisplay, setScreenSettings } = LayoutSlice.actions;
+export const { setGrid, setFloorplan, setScreenDisplay, setScreenSettings, resetScreen } = LayoutSlice.actions;
 
 export default LayoutSlice.reducer;
