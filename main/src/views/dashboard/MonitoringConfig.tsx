@@ -1,4 +1,3 @@
-
 import { useSelector } from 'react-redux';
 import { AppState, useDispatch } from 'src/store/Store';
 import PageContainer from 'src/components/container/PageContainer';
@@ -13,22 +12,35 @@ const Config = () => {
   // const theme = useTheme();
   const [selectedGrid, setSelectedGrid] = useState('1');
   const [selectedScreen, setSelectedScreen] = useState('');
-  const [screenSettings, setScreenSettings] = useState<{ scale: number; translateX: number; translateY: number }>({
-  scale: 1,
-  translateX: 0,
-  translateY: 0,
-});
-    const floorIds = useSelector((state: AppState) => state.layoutReducer.floorplanId);
-    const memoizedFloorIds = useMemo(() => floorIds, [floorIds]);
-    const screenSettingsState = useSelector((state: AppState) => state.layoutReducer.screenSettings);
-    const wholeState = useSelector((state: AppState) => state.layoutReducer);
+  const [screenSettings, setScreenSettings] = useState<{
+    scale: number;
+    translateX: number;
+    translateY: number;
+  }>({
+    scale: 1,
+    translateX: 0,
+    translateY: 0,
+  });
+  const floorIds = useSelector((state: AppState) => state.layoutReducer.floorplanId);
+  const screenDisplay = useSelector((state: AppState) => state.layoutReducer.screenDisplay);
+  // console.log(screenDisplay);
+  const floorIds2 = screenDisplay?.map((row) => row.map((item) => item.displayOutput)) ?? [];
+  const screenType = screenDisplay?.map((row) => row.map((item) => item.displayType)) ?? [];
+
+  const memoizedFloorIds = useMemo(() => floorIds, [floorIds]);
+  const memoizedFloorIds2 = useMemo(() => floorIds2, [floorIds2]);
+  const memoizedScreenType = useMemo(() => screenType, [screenType]);
+  const screenSettingsState = useSelector((state: AppState) => state.layoutReducer.screenSettings);
+  const wholeState = useSelector((state: AppState) => state.layoutReducer);
   useEffect(() => {
     // Dispatch actions when the component is mounted
     dispatch(toggleHorizontal(false)); // Enable horizontal layout
     dispatch(toggleSidebar()); // Disable sidebar
-    console.log("Screen Settings: ", screenSettingsState);
-    console.log("Floor IDs: ", floorIds);
-    console.log("Whole State: ", wholeState);
+    console.log('Screen Settings: ', screenSettingsState);
+    console.log('Floor IDs: ', floorIds);
+    console.log('Whole State: ', wholeState);
+    console.log('Screen Display: ', floorIds2);
+    console.log('Screen Type: ', screenType);
     // Optionally, clean up when the component is unmounted
     return () => {
       dispatch(toggleHorizontal(true)); // Reset horizontal layout
@@ -52,7 +64,8 @@ const Config = () => {
         /> */}
         <ConfigGrid
           grid={parseInt(selectedGrid)}
-          floorIds={memoizedFloorIds}
+          floorIds={memoizedFloorIds2}
+          screenType={memoizedScreenType}
           selectedScreen={parseInt(selectedScreen)}
           setSelectedScreen={setSelectedScreen}
           screenSettings={screenSettingsState}

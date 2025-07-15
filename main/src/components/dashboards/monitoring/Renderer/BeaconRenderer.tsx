@@ -14,11 +14,12 @@ type BeaconRendererProps = {
   area: string;
   floorplan: string;
   time: string;
+  clickable: boolean;
 };
 
 const BASE_URL = 'http://192.168.1.116:5000';
 
-const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorplan, time }) => {
+const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorplan, time, clickable }) => {
   const groupRef = useRef<any>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
@@ -58,6 +59,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorpl
   }, [imageUrl]);
 
   const handleClick = () => {
+    console.log("clicked", person);
     setdetailDialogOpen((prev) => !prev);
   };
   useEffect(() => {
@@ -97,6 +99,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorpl
       <Group
         ref={groupRef}
         onClick={(e) => {
+          if(!clickable) return
           e.cancelBubble = true; // Prevent propagation
           handleClick();
         }}

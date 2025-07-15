@@ -919,7 +919,7 @@ const ConfigPreview: React.FC<ConfigPreviewProps> = ({
                 Monitoring Dashboard
               </Typography>
               <Typography variant="h6" fontStyle="bold" fontWeight={900} mt={0.5}>
-                Please select a Grid
+                AASSDD
               </Typography>
             </Grid>
           </Grid>

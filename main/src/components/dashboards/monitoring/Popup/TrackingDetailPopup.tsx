@@ -7,10 +7,20 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  Grid2 as Grid,
+  Grid,
+  TextField,
   Typography,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Paper,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Stage, Layer, Image as KonvaImage } from 'react-konva';
+import { useEffect, useRef, useState } from 'react';
+import dayjs from 'dayjs'; // make sure to install dayjs
 import { useTranslation } from 'react-i18next';
 import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
@@ -19,75 +29,2374 @@ import { memberType } from 'src/store/apps/crud/member';
 import { fetchTrackingTrans, trackingTransType } from 'src/store/apps/crud/trackingTrans';
 import { visitorType } from 'src/store/apps/crud/visitor';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
+import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
+import BeaconRenderer from '../Renderer/BeaconRenderer';
+import { IconPlayerPlayFilled, IconPlayerPauseFilled } from '@tabler/icons-react';
 
 type TrackingDetailPopupProps = {
   bleNumber: string;
-  person: memberType | visitorType,
+  person: memberType | visitorType;
   personId: string;
   openTrackDetail: boolean;
-  setOpenTrackDetail: React.Dispatch<React.SetStateAction<boolean>>
-}
+  setOpenTrackDetail: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+const dummyTrackingData = [
+  {
+    id: '{F074F333-2574-4F22-A9B5-00CA4EE6EE91}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 897,
+    pos_y: 187,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:46.983000',
+    created_at: '2025-07-14 02:55:48.187000',
+  },
+  {
+    id: '{24D10BD3-269C-493D-9EB4-0562189A0711}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 911,
+    pos_y: 197,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.90449986679797,
+    timestamp: '2025-07-14 02:55:53.057000',
+    created_at: '2025-07-14 02:55:57.940000',
+  },
+  {
+    id: '{F0D3CE21-DFED-4E63-A9F3-06A5E8F5431D}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 163,
+    pos_y: 208,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38FAC9FF8',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 2.69017663642876,
+    second_distance: 9.54509481198306,
+    timestamp: '2025-07-14 02:55:16.887000',
+    created_at: '2025-07-14 02:55:21.143000',
+  },
+  {
+    id: '{3D4ECBBA-C0C0-4E1B-A71D-08016A500241}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 897,
+    pos_y: 187,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:19.997000',
+    created_at: '2025-07-14 02:55:24.470000',
+  },
+  {
+    id: '{D0B44E94-27CC-45F5-B368-090449B0DD3D}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 141,
+    pos_y: 217,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.536761671482774,
+    second_distance: 1.69738748837783,
+    timestamp: '2025-07-14 02:55:43.810000',
+    created_at: '2025-07-14 02:55:48.173000',
+  },
+  {
+    id: '{DB3950BE-84B7-46B7-938A-09EA50FCBDE7}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 344,
+    pos_y: 179,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:37.727000',
+    created_at: '2025-07-14 02:55:40.920000',
+  },
+  {
+    id: '{00741877-7C16-40F1-9E28-0B80798A909A}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 120,
+    pos_y: 215,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.213688867109809,
+    second_distance: 1.20165873190079,
+    timestamp: '2025-07-14 02:55:31.733000',
+    created_at: '2025-07-14 02:55:37.680000',
+  },
+  {
+    id: '{4A1E3CBE-6EB4-40E0-8617-0E253ED309ED}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 482,
+    pos_y: 176,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38F691898',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.379998293791689,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:28.663000',
+    created_at: '2025-07-14 02:55:34.377000',
+  },
+  {
+    id: '{42DE1E17-C450-4DB1-9D4D-0E981CFBC3D5}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 332,
+    pos_y: 182,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 1.90449986679797,
+    timestamp: '2025-07-14 02:55:40.993000',
+    created_at: '2025-07-14 02:55:41.707000',
+  },
+  {
+    id: '{6DC82994-5AEA-4465-B059-0EACFCFA54D4}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 177,
+    pos_y: 204,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38FAC9FF8',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 2.69017663642876,
+    second_distance: 8.50707568516671,
+    timestamp: '2025-07-14 02:55:01.677000',
+    created_at: '2025-07-14 02:55:07.330000',
+  },
+  {
+    id: '{B87B6561-AEB1-4965-87BD-0F83F1B07A11}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 344,
+    pos_y: 179,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.379998293791689,
+    second_distance: 2.13688375074559,
+    timestamp: '2025-07-14 02:55:13.537000',
+    created_at: '2025-07-14 02:55:14.707000',
+  },
+  {
+    id: '{DB45F792-E3F3-4378-8CB0-14BA7F9C791E}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 124,
+    pos_y: 215,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.301843443407666,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:37.730000',
+    created_at: '2025-07-14 02:55:41.697000',
+  },
+  {
+    id: '{73EECCF1-212E-44BC-96D4-14D33F7002AC}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 221,
+    pos_y: 188,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38FAC9FF8',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 3.7999741881604,
+    second_distance: 8.50707568516671,
+    timestamp: '2025-07-14 02:55:41.997000',
+    created_at: '2025-07-14 02:55:41.707000',
+  },
+  {
+    id: '{583B8472-3260-4767-B39E-14DAD932764E}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 890,
+    pos_y: 182,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.758195751612826,
+    second_distance: 1.69738748837783,
+    timestamp: '2025-07-14 02:55:07.817000',
+    created_at: '2025-07-14 02:55:13.760000',
+  },
+  {
+    id: '{B647573C-D6BB-4040-822D-14F38DBB7B60}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 940,
+    pos_y: 107,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 2.69017663642876,
+    timestamp: '2025-07-14 02:55:37.713000',
+    created_at: '2025-07-14 02:55:41.690000',
+  },
+  {
+    id: '{C14E7453-D60D-4FE5-84FC-167DF0D4F608}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 146,
+    pos_y: 218,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.338673874822256,
+    second_distance: 0.954511679035743,
+    timestamp: '2025-07-14 02:55:16.467000',
+    created_at: '2025-07-14 02:55:21.133000',
+  },
+  {
+    id: '{6DA35B91-D3C9-4714-A926-19FA8E566DA2}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 994,
+    pos_y: 95,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.338673874822256,
+    second_distance: 2.69017663642876,
+    timestamp: '2025-07-14 02:55:43.720000',
+    created_at: '2025-07-14 02:55:48.170000',
+  },
+  {
+    id: '{E7AB3604-3BFC-4981-B82D-1A7D6AAFD3E5}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 911,
+    pos_y: 197,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.90449986679797,
+    timestamp: '2025-07-14 02:55:46.983000',
+    created_at: '2025-07-14 02:55:51.460000',
+  },
+  {
+    id: '{2250187F-7DED-443D-AF1B-1EBF32D7426A}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 359,
+    pos_y: 175,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.269018283078413,
+    second_distance: 2.13688375074559,
+    timestamp: '2025-07-14 02:55:34.677000',
+    created_at: '2025-07-14 02:55:40.920000',
+  },
+  {
+    id: '{BD60E652-B099-4380-BBBD-1F27D2427CB8}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 332,
+    pos_y: 182,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 1.90449986679797,
+    timestamp: '2025-07-14 02:55:19.600000',
+    created_at: '2025-07-14 02:55:21.140000',
+  },
+  {
+    id: '{60EC497B-1328-4830-A51B-20AB65DA4AA6}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 918,
+    pos_y: 202,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 2.13688375074559,
+    timestamp: '2025-07-14 02:55:23.043000',
+    created_at: '2025-07-14 02:55:27.707000',
+  },
+  {
+    id: '{3B3BBAB1-A911-45B8-9075-23F4FB3E50C4}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 935,
+    pos_y: 213,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 3.01842748389643,
+    timestamp: '2025-07-14 02:55:40.920000',
+    created_at: '2025-07-14 02:55:44.890000',
+  },
+  {
+    id: '{3E270884-0F03-42B3-8232-25A33088BF58}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 114,
+    pos_y: 214,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.213688867109809,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:22.650000',
+    created_at: '2025-07-14 02:55:27.697000',
+  },
+  {
+    id: '{CABFE960-4354-4B72-8CDF-2ABD6839ACE9}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 338,
+    pos_y: 180,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 2.13688375074559,
+    timestamp: '2025-07-14 02:55:22.640000',
+    created_at: '2025-07-14 02:55:27.700000',
+  },
+  {
+    id: '{953DCB92-EA4B-4233-83D7-2B627FEA3445}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 177,
+    pos_y: 204,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38FAC9FF8',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 2.69017663642876,
+    second_distance: 8.50707568516671,
+    timestamp: '2025-07-14 02:55:31.973000',
+    created_at: '2025-07-14 02:55:34.383000',
+  },
+  {
+    id: '{6EE47023-A2A4-479D-B559-2C9B6F2BBFB5}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 474,
+    pos_y: 175,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38F691898',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.379998293791689,
+    second_distance: 2.69017663642876,
+    timestamp: '2025-07-14 02:55:07.527000',
+    created_at: '2025-07-14 02:55:10.583000',
+  },
+  {
+    id: '{DE0AEA88-94E5-4DCD-90A2-34109FE2A1D6}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 953,
+    pos_y: 104,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.478389398339761,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:40.717000',
+    created_at: '2025-07-14 02:55:41.693000',
+  },
+  {
+    id: '{0687E25C-ADF9-430F-8853-3505AC50B039}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 114,
+    pos_y: 214,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.301843443407666,
+    second_distance: 2.13688375074559,
+    timestamp: '2025-07-14 02:55:49.897000',
+    created_at: '2025-07-14 02:55:51.450000',
+  },
+  {
+    id: '{20F8746C-FA47-4BF5-9239-37E005470AB8}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 344,
+    pos_y: 179,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.338673874822256,
+    second_distance: 1.90449986679797,
+    timestamp: '2025-07-14 02:55:44.030000',
+    created_at: '2025-07-14 02:55:48.180000',
+  },
+  {
+    id: '{47E726B6-0CD0-4E5D-B023-39514FC35142}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 157,
+    pos_y: 220,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.478389398339761,
+    second_distance: 1.07097959542401,
+    timestamp: '2025-07-14 02:55:46.843000',
+    created_at: '2025-07-14 02:55:48.177000',
+  },
+  {
+    id: '{BCCD3C5A-CADD-4FDE-B077-39BD2BAE385B}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 120,
+    pos_y: 215,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.338673874822256,
+    second_distance: 1.90449986679797,
+    timestamp: '2025-07-14 02:55:34.790000',
+    created_at: '2025-07-14 02:55:37.683000',
+  },
+  {
+    id: '{6D1F33BC-A937-4BB9-ADFC-3B273426C455}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 253,
+    pos_y: 256,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38FAC9FF8',
+    second_gateway_id: '4CA38F691898',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 1.90449986679797,
+    second_distance: 6.02255044886129,
+    timestamp: '2025-07-14 02:55:50.097000',
+    created_at: '2025-07-14 02:55:51.457000',
+  },
+  {
+    id: '{558998B8-82D2-4016-ABF4-3B7F43BEAE31}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 191,
+    pos_y: 199,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38FAC9FF8',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 1.69738748837783,
+    second_distance: 4.78388296810935,
+    timestamp: '2025-07-14 02:55:53.103000',
+    created_at: '2025-07-14 02:55:54.657000',
+  },
+  {
+    id: '{B8EEC745-AA93-4814-B6EA-3BABE678324A}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 965,
+    pos_y: 102,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.536761671482774,
+    second_distance: 3.01842748389643,
+    timestamp: '2025-07-14 02:55:16.453000',
+    created_at: '2025-07-14 02:55:21.127000',
+  },
+  {
+    id: '{2B2D97A7-5F83-4C5D-B234-3C8F198EC8C2}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 949,
+    pos_y: 223,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.536761671482774,
+    second_distance: 3.7999741881604,
+    timestamp: '2025-07-14 02:55:50.030000',
+    created_at: '2025-07-14 02:55:54.660000',
+  },
+  {
+    id: '{4BC218FF-4666-499F-924E-3DA377018B4A}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 354,
+    pos_y: 176,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.338673874822256,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:13.537000',
+    created_at: '2025-07-14 02:55:17.947000',
+  },
+  {
+    id: '{C93FB4B6-D4F0-4E71-BE2E-3E3515D0DA5A}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 975,
+    pos_y: 99,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 2.69017663642876,
+    timestamp: '2025-07-14 02:55:19.467000',
+    created_at: '2025-07-14 02:55:21.130000',
+  },
+  {
+    id: '{5D121C16-07AA-4BF3-B76F-3E70F3A35534}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 897,
+    pos_y: 187,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:37.860000',
+    created_at: '2025-07-14 02:55:40.927000',
+  },
+  {
+    id: '{9CE09819-1FE0-421F-B079-439D87E483A2}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 985,
+    pos_y: 97,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.338673874822256,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:28.673000',
+    created_at: '2025-07-14 02:55:34.370000',
+  },
+  {
+    id: '{270264B1-EC5D-48C5-8701-44E9812D5C54}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 905,
+    pos_y: 192,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.69738748837783,
+    timestamp: '2025-07-14 02:55:10.847000',
+    created_at: '2025-07-14 02:55:14.707000',
+  },
+  {
+    id: '{B7EFA21C-BFFC-4173-A41E-48424EA85925}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 354,
+    pos_y: 176,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.338673874822256,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:40.993000',
+    created_at: '2025-07-14 02:55:44.883000',
+  },
+  {
+    id: '{D56D6149-91BA-4927-94E1-4B8348019B81}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 157,
+    pos_y: 220,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.34828311773925,
+    timestamp: '2025-07-14 02:55:19.613000',
+    created_at: '2025-07-14 02:55:21.133000',
+  },
+  {
+    id: '{842B324A-880B-4D8B-8F7A-4E069016B411}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 905,
+    pos_y: 192,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.69738748837783,
+    timestamp: '2025-07-14 02:55:37.860000',
+    created_at: '2025-07-14 02:55:41.710000',
+  },
+  {
+    id: '{0F2184F8-E737-444E-9890-4F521D34E881}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 338,
+    pos_y: 180,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 2.13688375074559,
+    timestamp: '2025-07-14 02:55:07.527000',
+    created_at: '2025-07-14 02:55:13.753000',
+  },
+  {
+    id: '{57C9DA99-579D-4938-BE7C-4F564ECE874F}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 177,
+    pos_y: 203,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38FAC9FF8',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 2.69017663642876,
+    second_distance: 8.50707568516671,
+    timestamp: '2025-07-14 02:55:25.697000',
+    created_at: '2025-07-14 02:55:31.027000',
+  },
+  {
+    id: '{901E927B-21AE-43E2-B106-5239FAC18C7F}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 359,
+    pos_y: 175,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.269018283078413,
+    second_distance: 2.13688375074559,
+    timestamp: '2025-07-14 02:55:37.727000',
+    created_at: '2025-07-14 02:55:41.703000',
+  },
+  {
+    id: '{EE4D15E7-8B57-48B1-9458-53E8D29F3A4A}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 504,
+    pos_y: 254,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 2.39762272699857,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:56.107000',
+    created_at: '2025-07-14 02:55:57.937000',
+  },
+  {
+    id: '{2C633C99-9612-459B-9999-597A37AA6877}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 221,
+    pos_y: 188,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38FAC9FF8',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 1.69738748837783,
+    second_distance: 3.7999741881604,
+    timestamp: '2025-07-14 02:55:04.517000',
+    created_at: '2025-07-14 02:55:07.333000',
+  },
+  {
+    id: '{4A535B20-ED20-4B41-9E29-5A3B5F81A8CC}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 1010,
+    pos_y: 92,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 4.26364067411827,
+    timestamp: '2025-07-14 02:55:13.447000',
+    created_at: '2025-07-14 02:55:17.940000',
+  },
+  {
+    id: '{F56FF5FC-CE18-43C5-B95D-5FB407426DA4}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 911,
+    pos_y: 197,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.90449986679797,
+    timestamp: '2025-07-14 02:55:53.057000',
+    created_at: '2025-07-14 02:55:54.663000',
+  },
+  {
+    id: '{EE12E427-A922-4CC0-A084-60A4C3EB3CC8}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 151,
+    pos_y: 213,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38FAC9FF8',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 2.39762272699857,
+    second_distance: 9.54509481198306,
+    timestamp: '2025-07-14 02:55:56.003000',
+    created_at: '2025-07-14 02:55:57.943000',
+  },
+  {
+    id: '{DCC9B9EB-04A1-4503-BBB3-698CC5DCFECB}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 989,
+    pos_y: 89,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A2657F078',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.379998293791689,
+    second_distance: 3.7999741881604,
+    timestamp: '2025-07-14 02:55:31.687000',
+    created_at: '2025-07-14 02:55:37.673000',
+  },
+  {
+    id: '{2D960592-C376-4BEB-A114-6B77D10597C1}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 146,
+    pos_y: 218,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.536761671482774,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:02.093000',
+    created_at: '2025-07-14 02:55:07.327000',
+  },
+  {
+    id: '{3882AC77-C110-4775-A9A6-6B7C7AB5AB2C}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 965,
+    pos_y: 102,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:08.047000',
+    created_at: '2025-07-14 02:55:13.747000',
+  },
+  {
+    id: '{E59415A4-0855-4BFD-9AF8-6BE193B635A2}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 911,
+    pos_y: 197,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.536761671482774,
+    second_distance: 1.69738748837783,
+    timestamp: '2025-07-14 02:55:43.963000',
+    created_at: '2025-07-14 02:55:48.183000',
+  },
+  {
+    id: '{B4F42081-5928-4906-8C23-6E12CA877674}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 354,
+    pos_y: 176,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.338673874822256,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:28.663000',
+    created_at: '2025-07-14 02:55:31.023000',
+  },
+  {
+    id: '{5D997974-DE37-4596-8C2A-700F9E52A428}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 965,
+    pos_y: 102,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.478389398339761,
+    second_distance: 2.69017663642876,
+    timestamp: '2025-07-14 02:55:46.737000',
+    created_at: '2025-07-14 02:55:51.440000',
+  },
+  {
+    id: '{BCAE3E71-4A6E-4E59-A585-75DA41DC5372}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 117,
+    pos_y: 214,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.536761671482774,
+    second_distance: 3.38673094999298,
+    timestamp: '2025-07-14 02:55:31.733000',
+    created_at: '2025-07-14 02:55:34.377000',
+  },
+  {
+    id: '{AB42C969-0517-49AB-A55B-7970C956BE75}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 114,
+    pos_y: 214,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.213688867109809,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:16.467000',
+    created_at: '2025-07-14 02:55:17.943000',
+  },
+  {
+    id: '{93C74AAC-02B9-4A19-9D49-7A835D1BAD46}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 120,
+    pos_y: 215,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.338673874822256,
+    second_distance: 1.90449986679797,
+    timestamp: '2025-07-14 02:55:19.613000',
+    created_at: '2025-07-14 02:55:24.460000',
+  },
+  {
+    id: '{F6E6E19D-2E62-4195-B5C1-7BF597BA0E1D}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 930,
+    pos_y: 210,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.379998293791689,
+    second_distance: 1.69738748837783,
+    timestamp: '2025-07-14 02:55:04.740000',
+    created_at: '2025-07-14 02:55:07.340000',
+  },
+  {
+    id: '{917519B4-D0B0-4652-8796-7D200906CC15}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 344,
+    pos_y: 179,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.338673874822256,
+    second_distance: 1.90449986679797,
+    timestamp: '2025-07-14 02:55:16.597000',
+    created_at: '2025-07-14 02:55:21.137000',
+  },
+  {
+    id: '{4A6FA033-401B-4103-ADB1-7D32D1EBE918}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 332,
+    pos_y: 182,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 1.90449986679797,
+    timestamp: '2025-07-14 02:55:25.660000',
+    created_at: '2025-07-14 02:55:31.020000',
+  },
+  {
+    id: '{85D9A1E6-390D-4ECB-B986-80ACD0569C44}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 964,
+    pos_y: 102,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.478389398339761,
+    second_distance: 2.69017663642876,
+    timestamp: '2025-07-14 02:55:49.740000',
+    created_at: '2025-07-14 02:55:54.640000',
+  },
+  {
+    id: '{10B9D84C-9AB5-4F35-AB4D-84CE5BD0425F}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 117,
+    pos_y: 214,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.213688867109809,
+    second_distance: 1.34828311773925,
+    timestamp: '2025-07-14 02:55:43.810000',
+    created_at: '2025-07-14 02:55:44.880000',
+  },
+  {
+    id: '{7117CF4D-9EB3-4643-8ABA-86A1E087FED7}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 924,
+    pos_y: 206,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.379998293791689,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:13.887000',
+    created_at: '2025-07-14 02:55:17.953000',
+  },
+  {
+    id: '{B5BE193C-32DA-49A8-BBC2-8A6CC4ECF2E4}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 985,
+    pos_y: 97,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 3.01842748389643,
+    timestamp: '2025-07-14 02:55:43.720000',
+    created_at: '2025-07-14 02:55:44.877000',
+  },
+  {
+    id: '{26015043-C72D-4DBD-A12F-8D5B668B0F5B}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 461,
+    pos_y: 173,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38F691898',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.269018283078413,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:47.043000',
+    created_at: '2025-07-14 02:55:51.453000',
+  },
+  {
+    id: '{00A0B620-961D-45CC-A6C1-90A6DF371881}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 114,
+    pos_y: 214,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.213688867109809,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:25.680000',
+    created_at: '2025-07-14 02:55:27.700000',
+  },
+  {
+    id: '{35FB5454-EA04-4E33-9D85-931254171330}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 905,
+    pos_y: 192,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.536761671482774,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:01.737000',
+    created_at: '2025-07-14 02:55:07.337000',
+  },
+  {
+    id: '{8FBE0641-136F-42AF-B0FA-977F23D22C64}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 163,
+    pos_y: 220,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.20165873190079,
+    timestamp: '2025-07-14 02:55:25.680000',
+    created_at: '2025-07-14 02:55:31.017000',
+  },
+  {
+    id: '{3E72C70F-E031-4253-B451-987B27995954}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 108,
+    pos_y: 213,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.213688867109809,
+    second_distance: 1.90449986679797,
+    timestamp: '2025-07-14 02:55:40.777000',
+    created_at: '2025-07-14 02:55:44.880000',
+  },
+  {
+    id: '{657051D0-F546-44C8-B622-992ADE006064}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 905,
+    pos_y: 192,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.69738748837783,
+    timestamp: '2025-07-14 02:55:26.090000',
+    created_at: '2025-07-14 02:55:31.023000',
+  },
+  {
+    id: '{9844C474-F244-49E8-B9EE-9C01AEC4A1E0}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 490,
+    pos_y: 177,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38F691898',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:53.103000',
+    created_at: '2025-07-14 02:55:57.933000',
+  },
+  {
+    id: '{C2A4181B-9159-4220-8722-9F94833A59A1}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 374,
+    pos_y: 171,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.301843443407666,
+    second_distance: 3.7999741881604,
+    timestamp: '2025-07-14 02:55:19.600000',
+    created_at: '2025-07-14 02:55:24.463000',
+  },
+  {
+    id: '{BF62613C-F3AA-4855-A486-A1CF22B8997A}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 146,
+    pos_y: 218,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.338673874822256,
+    second_distance: 0.954511679035743,
+    timestamp: '2025-07-14 02:55:28.713000',
+    created_at: '2025-07-14 02:55:34.373000',
+  },
+  {
+    id: '{137E669A-781F-4893-B784-A2086BCE667D}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 490,
+    pos_y: 177,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38F691898',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:31.677000',
+    created_at: '2025-07-14 02:55:37.687000',
+  },
+  {
+    id: '{A42BF4F4-8B77-4609-ABDF-A4468983A46E}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 897,
+    pos_y: 187,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:40.920000',
+    created_at: '2025-07-14 02:55:41.713000',
+  },
+  {
+    id: '{2808EEB1-9D2A-4F28-87CE-A5AF0CCA1708}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 911,
+    pos_y: 197,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.536761671482774,
+    second_distance: 1.69738748837783,
+    timestamp: '2025-07-14 02:55:29.123000',
+    created_at: '2025-07-14 02:55:34.383000',
+  },
+  {
+    id: '{0D08717A-52E8-4958-9DCD-A6D4F3524CB9}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 344,
+    pos_y: 179,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:31.677000',
+    created_at: '2025-07-14 02:55:34.380000',
+  },
+  {
+    id: '{F1B2C12E-40F0-480F-A900-ADE8D6286449}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 904,
+    pos_y: 193,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.69738748837783,
+    timestamp: '2025-07-14 02:55:32.160000',
+    created_at: '2025-07-14 02:55:37.690000',
+  },
+  {
+    id: '{230A1AD3-66E4-4916-A001-AE1AC15C100E}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 124,
+    pos_y: 215,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.213688867109809,
+    second_distance: 1.07097959542401,
+    timestamp: '2025-07-14 02:55:52.913000',
+    created_at: '2025-07-14 02:55:54.650000',
+  },
+  {
+    id: '{BCF25FFD-86F7-4D8F-9740-B18DD8BFBFBF}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 905,
+    pos_y: 192,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.69738748837783,
+    timestamp: '2025-07-14 02:55:04.740000',
+    created_at: '2025-07-14 02:55:10.587000',
+  },
+  {
+    id: '{6B444947-75CC-4025-A166-B2C81D8FECD8}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 897,
+    pos_y: 187,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:07.817000',
+    created_at: '2025-07-14 02:55:10.587000',
+  },
+  {
+    id: '{C03308AB-3C6D-4A76-919B-B418C52D5586}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 975,
+    pos_y: 99,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.379998293791689,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:22.650000',
+    created_at: '2025-07-14 02:55:27.693000',
+  },
+  {
+    id: '{92CDDEF5-6801-4745-8E12-B4676FB07579}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 332,
+    pos_y: 182,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 1.90449986679797,
+    timestamp: '2025-07-14 02:55:04.517000',
+    created_at: '2025-07-14 02:55:10.580000',
+  },
+  {
+    id: '{12976687-448E-4F5C-846E-B523F9A0F882}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 141,
+    pos_y: 217,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.478389398339761,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:13.447000',
+    created_at: '2025-07-14 02:55:17.943000',
+  },
+  {
+    id: '{74874A14-78BE-4083-9620-B6FCFA2A514B}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 1010,
+    pos_y: 92,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.301843443407666,
+    second_distance: 3.01842748389643,
+    timestamp: '2025-07-14 02:55:52.743000',
+    created_at: '2025-07-14 02:55:54.647000',
+  },
+  {
+    id: '{BE707B44-D31C-4AD7-ADFA-B994EA87D9D0}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 124,
+    pos_y: 215,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.338673874822256,
+    second_distance: 1.69738748837783,
+    timestamp: '2025-07-14 02:55:40.777000',
+    created_at: '2025-07-14 02:55:41.700000',
+  },
+  {
+    id: '{FE8F486D-D584-42DE-AD44-B9EAE5F0FA46}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 237,
+    pos_y: 182,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38FAC9FF8',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 2.13688375074559,
+    second_distance: 4.26364067411827,
+    timestamp: '2025-07-14 02:55:25.660000',
+    created_at: '2025-07-14 02:55:27.703000',
+  },
+  {
+    id: '{D089E832-E92F-47D3-A251-BACFBB5BDDF8}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 117,
+    pos_y: 214,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.338673874822256,
+    second_distance: 2.13688375074559,
+    timestamp: '2025-07-14 02:55:22.650000',
+    created_at: '2025-07-14 02:55:24.460000',
+  },
+  {
+    id: '{7F6371D8-F0B9-47BE-AB6C-BE938E43BA19}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 904,
+    pos_y: 192,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.69738748837783,
+    timestamp: '2025-07-14 02:55:13.887000',
+    created_at: '2025-07-14 02:55:14.710000',
+  },
+  {
+    id: '{E903645F-4CE9-4302-877F-BF928A0706E8}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 332,
+    pos_y: 182,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 1.90449986679797,
+    timestamp: '2025-07-14 02:55:16.597000',
+    created_at: '2025-07-14 02:55:17.950000',
+  },
+  {
+    id: '{71D88B9A-89CB-4CA4-ADD5-BFDB79840CBF}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 965,
+    pos_y: 102,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.478389398339761,
+    second_distance: 2.69017663642876,
+    timestamp: '2025-07-14 02:55:49.740000',
+    created_at: '2025-07-14 02:55:51.447000',
+  },
+  {
+    id: '{DA94E610-1E34-4BAD-ADBE-BFFB96ED6D9E}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 953,
+    pos_y: 104,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 2.13688375074559,
+    timestamp: '2025-07-14 02:55:02.033000',
+    created_at: '2025-07-14 02:55:07.320000',
+  },
+  {
+    id: '{4FB16546-AB11-4B72-93C4-C2A5BF70768B}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 111,
+    pos_y: 214,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.213688867109809,
+    second_distance: 1.69738748837783,
+    timestamp: '2025-07-14 02:55:49.897000',
+    created_at: '2025-07-14 02:55:54.650000',
+  },
+  {
+    id: '{949DA47F-2ED8-4662-AD56-C4EB5001D67E}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 918,
+    pos_y: 202,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 2.13688375074559,
+    timestamp: '2025-07-14 02:55:50.030000',
+    created_at: '2025-07-14 02:55:51.460000',
+  },
+  {
+    id: '{6E7C542B-B221-443C-A583-C648BB333098}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 944,
+    pos_y: 220,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.379998293791689,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:34.827000',
+    created_at: '2025-07-14 02:55:40.923000',
+  },
+  {
+    id: '{1CD67151-A26A-4FE3-BF7E-CA55CEA79D97}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 989,
+    pos_y: 89,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A2657F078',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.478389398339761,
+    second_distance: 4.78388296810935,
+    timestamp: '2025-07-14 02:55:55.753000',
+    created_at: '2025-07-14 02:55:57.927000',
+  },
+  {
+    id: '{A7AFDB4D-7887-4D69-9826-CC0C1900C644}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 132,
+    pos_y: 216,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.338673874822256,
+    second_distance: 1.34828311773925,
+    timestamp: '2025-07-14 02:55:46.843000',
+    created_at: '2025-07-14 02:55:51.450000',
+  },
+  {
+    id: '{CECEBAD1-6752-4ECC-BDF4-CC9074E42D2C}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 560,
+    pos_y: 253,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 2.13688375074559,
+    second_distance: 2.69017663642876,
+    timestamp: '2025-07-14 02:55:44.030000',
+    created_at: '2025-07-14 02:55:44.887000',
+  },
+  {
+    id: '{0B910E90-AF58-48B8-84C7-CE08C3A3E694}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 319,
+    pos_y: 256,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38FAC9FF8',
+    second_gateway_id: '4CA38F691898',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 2.39762272699857,
+    second_distance: 5.36760435547245,
+    timestamp: '2025-07-14 02:55:47.043000',
+    created_at: '2025-07-14 02:55:48.183000',
+  },
+  {
+    id: '{1EBD8AB4-FDCA-42D1-9F20-CE15718CC34A}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 325,
+    pos_y: 183,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:34.677000',
+    created_at: '2025-07-14 02:55:37.687000',
+  },
+  {
+    id: '{79BD34F8-004C-4D02-ABE6-CF5A73CCFAD5}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 924,
+    pos_y: 206,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.379998293791689,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:56.107000',
+    created_at: '2025-07-14 02:55:57.940000',
+  },
+  {
+    id: '{7BA67D3A-5716-4D32-A010-D10DF4B251C3}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 350,
+    pos_y: 177,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.338673874822256,
+    second_distance: 2.13688375074559,
+    timestamp: '2025-07-14 02:55:10.537000',
+    created_at: '2025-07-14 02:55:13.757000',
+  },
+  {
+    id: '{0CE737FC-A029-4A95-8DAD-D263D1C2232E}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 290,
+    pos_y: 164,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38FAC9FF8',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 2.39762272699857,
+    second_distance: 3.38673094999298,
+    timestamp: '2025-07-14 02:55:22.640000',
+    created_at: '2025-07-14 02:55:24.467000',
+  },
+  {
+    id: '{6D1F1EDD-7EED-4819-9ED4-D2D53A7E8656}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 994,
+    pos_y: 95,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.379998293791689,
+    second_distance: 3.01842748389643,
+    timestamp: '2025-07-14 02:55:19.467000',
+    created_at: '2025-07-14 02:55:24.453000',
+  },
+  {
+    id: '{B7749B0B-E7E3-4452-BC20-D4E555C5B7CE}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 897,
+    pos_y: 187,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:43.963000',
+    created_at: '2025-07-14 02:55:44.890000',
+  },
+  {
+    id: '{71CD23EC-0B61-44B1-9AB9-D553560E8CD8}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 953,
+    pos_y: 104,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.478389398339761,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:52.743000',
+    created_at: '2025-07-14 02:55:57.923000',
+  },
+  {
+    id: '{250C8779-70D2-45DC-A7FD-DAF1B9D9BD76}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 120,
+    pos_y: 215,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.213688867109809,
+    second_distance: 1.20165873190079,
+    timestamp: '2025-07-14 02:55:07.677000',
+    created_at: '2025-07-14 02:55:13.750000',
+  },
+  {
+    id: '{749B8592-9CF0-4CF4-B3DF-DDC1827B8874}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 964,
+    pos_y: 102,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.379998293791689,
+    second_distance: 2.13688375074559,
+    timestamp: '2025-07-14 02:55:25.670000',
+    created_at: '2025-07-14 02:55:31.013000',
+  },
+  {
+    id: '{17C444A7-2EF5-460A-9D90-DEA8D1946EDE}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 985,
+    pos_y: 97,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 3.01842748389643,
+    timestamp: '2025-07-14 02:55:05.043000',
+    created_at: '2025-07-14 02:55:10.573000',
+  },
+  {
+    id: '{4EF801F8-4929-41C2-BA20-DFF0DDE851C3}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 975,
+    pos_y: 99,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.379998293791689,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:11.157000',
+    created_at: '2025-07-14 02:55:14.697000',
+  },
+  {
+    id: '{4744BC97-75A3-46B5-AAFB-E37CA64CD532}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 897,
+    pos_y: 187,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:16.950000',
+    created_at: '2025-07-14 02:55:21.143000',
+  },
+  {
+    id: '{4816ABD5-2F98-44C5-8072-E7F10EAFD427}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 221,
+    pos_y: 188,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38FAC9FF8',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 3.7999741881604,
+    second_distance: 8.50707568516671,
+    timestamp: '2025-07-14 02:55:10.690000',
+    created_at: '2025-07-14 02:55:14.713000',
+  },
+  {
+    id: '{37E76ED4-E980-45CE-B003-E97F15AB990D}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 338,
+    pos_y: 180,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 2.13688375074559,
+    timestamp: '2025-07-14 02:55:10.537000',
+    created_at: '2025-07-14 02:55:14.703000',
+  },
+  {
+    id: '{C93C55AA-9997-40F7-8192-E9E5A4794749}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 965,
+    pos_y: 102,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 2.39762272699857,
+    timestamp: '2025-07-14 02:55:35',
+    created_at: '2025-07-14 02:55:40.910000',
+  },
+  {
+    id: '{1E72AB82-DDBD-48B1-8F61-ECFDDBE62841}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 151,
+    pos_y: 213,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38FAC9FF8',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 2.69017663642876,
+    second_distance: 10.7097712941013,
+    timestamp: '2025-07-14 02:55:13.750000',
+    created_at: '2025-07-14 02:55:14.717000',
+  },
+  {
+    id: '{6E281788-206B-40B3-90B1-EDF2685DFB11}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 519,
+    pos_y: 182,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38F691898',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 1.69738748837783,
+    timestamp: '2025-07-14 02:55:50.097000',
+    created_at: '2025-07-14 02:55:54.653000',
+  },
+  {
+    id: '{93336526-C102-4219-80AD-EE6F62909BE9}',
+    beacon_id: 'BC572913EA73',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 905,
+    pos_y: 192,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F691898',
+    second_gateway_id: '4CA38F691FBC',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.536761671482774,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:10.847000',
+    created_at: '2025-07-14 02:55:13.760000',
+  },
+  {
+    id: '{DE58CD3A-2154-4CB9-A735-EE8095535D56}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 965,
+    pos_y: 102,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.478389398339761,
+    second_distance: 2.69017663642876,
+    timestamp: '2025-07-14 02:55:40.717000',
+    created_at: '2025-07-14 02:55:44.870000',
+  },
+  {
+    id: '{5AA7930F-A336-4798-89A1-F0BF6775C20B}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 157,
+    pos_y: 219,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.60225643162844,
+    second_distance: 1.34828311773925,
+    timestamp: '2025-07-14 02:55:34.790000',
+    created_at: '2025-07-14 02:55:40.917000',
+  },
+  {
+    id: '{411FEFE2-8394-4654-ABE4-F3960DB99A20}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 975,
+    pos_y: 99,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.478389398339761,
+    second_distance: 3.01842748389643,
+    timestamp: '2025-07-14 02:55:46.737000',
+    created_at: '2025-07-14 02:55:48.170000',
+  },
+  {
+    id: '{14CB919B-37BB-430E-9717-F3D22E173EAD}',
+    beacon_id: 'BC572913EA8A',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 975,
+    pos_y: 99,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F130',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.478389398339761,
+    second_distance: 3.01842748389643,
+    timestamp: '2025-07-14 02:55:35',
+    created_at: '2025-07-14 02:55:37.677000',
+  },
+  {
+    id: '{7CF9B308-CE75-4657-90E0-F720C2A790EC}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 117,
+    pos_y: 214,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.338673874822256,
+    second_distance: 2.13688375074559,
+    timestamp: '2025-07-14 02:55:10.803000',
+    created_at: '2025-07-14 02:55:14.700000',
+  },
+  {
+    id: '{2E30F69E-F85F-4F2E-B865-F98CDD216952}',
+    beacon_id: 'BC572913EA8B',
+    floorplan_id: '{22CCC200-84D2-4302-8B2C-48B7F3791F12}',
+    pos_x: 318,
+    pos_y: 185,
+    is_in_restricted_area: 0,
+    first_gateway_id: '4CA38F6920AC',
+    second_gateway_id: '4CA38FAC9FF8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.426365049150539,
+    second_distance: 1.51279836556022,
+    timestamp: '2025-07-14 02:55:01.473000',
+    created_at: '2025-07-14 02:55:07.330000',
+  },
+  {
+    id: '{383C39F7-3D8D-43E9-925C-F9A90ED5B943}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 128,
+    pos_y: 216,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.213688867109809,
+    second_distance: 0.954511679035743,
+    timestamp: '2025-07-14 02:55:04.617000',
+    created_at: '2025-07-14 02:55:10.577000',
+  },
+  {
+    id: '{D855E232-411C-4F08-908E-FDB072FE48BB}',
+    beacon_id: 'BC572905DB85',
+    floorplan_id: '{7A53A90D-A4A4-4BC1-A914-C5A74328156D}',
+    pos_x: 120,
+    pos_y: 215,
+    is_in_restricted_area: 0,
+    first_gateway_id: '304A2657F078',
+    second_gateway_id: '304A265766D8',
+    area: 'c4f15480-0f7d-4e16-8c73-01e884f9b68d',
+    first_distance: 0.379998293791689,
+    second_distance: 2.13688375074559,
+    timestamp: '2025-07-14 02:55:52.913000',
+    created_at: '2025-07-14 02:55:57.930000',
+  },
+];
 
 const BASE_URL = 'http://192.168.1.116:5000';
 
-const TrackingDetailPopup = (
-  {
-    bleNumber,
-    person,
-    personId,
-    openTrackDetail,
-    setOpenTrackDetail,
-  }: TrackingDetailPopupProps
-) => {
+const TrackingDetailPopup = ({
+  bleNumber,
+  person,
+  personId,
+  openTrackDetail,
+  setOpenTrackDetail,
+}: TrackingDetailPopupProps) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
+  const [activeFloorImage, setActiveFloorImage] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState(dayjs().startOf('day').format('YYYY-MM-DDTHH:mm'));
+  const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DDTHH:mm'));
+  const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null);
+  const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const playbackInterval = useRef<NodeJS.Timeout | null>(null);
+  const playbackTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const [animatedPosition, setAnimatedPosition] = useState<{ x: number; y: number } | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+
   useEffect(() => {
     dispatch(fetchTrackingTrans());
-    dispatch(fetchFloors());
+    // dispatch(fetchFloors());
     dispatch(fetchMaskedAreas());
     dispatch(fetchBuildings());
+    dispatch(fetchFloorplan());
   }, [dispatch]);
 
-  const trackingData : trackingTransType[] = useSelector((state: RootState) => state.trackingTransReducer.trackingTrans);
-  const maskedAreaData : MaskedAreaType[] = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreas);
-  const floorData : floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
-  const buildingData: BuildingType[] = useSelector((state: RootState) => state.buildingReducer.buildings);
-  const trackingList : trackingTransType[] = trackingData.filter((track: trackingTransType) => track.cardId === bleNumber);
-  const maskedAreaList : MaskedAreaType[] = trackingList.flatMap((track) => track.floorplanMaskedArea||[]);
-  const floorList: floorType[] = maskedAreaList.flatMap((area) => area.floor||[]);
-  const buildingList: BuildingType[] = buildingData.filter((building) => floorList.some((floor) => floor.buildingId === building.id));
-  const activeTrack: trackingTransType | undefined | null = useSelector((state: RootState) => state.trackingTransReducer.selectedTrackingTrans);
-  const [activeArea, setActiveArea] = useState<MaskedAreaType | null>(null);
-  const [activeFloor, setActiveFloor] = useState<floorType | null>(null);
-  const [activeBuilding, setActiveBuilding] = useState<BuildingType | null>(null);
-  const [floorImage, setFloorImage] = useState<string>('');
+  const trackingData: trackingTransType[] = useSelector(
+    (state: RootState) => state.trackingTransReducer.trackingTrans,
+  );
+  const maskedAreaData: MaskedAreaType[] = useSelector(
+    (state: RootState) => state.maskedAreaReducer.maskedAreas,
+  );
+  const floorplanData: FloorplanType[] = useSelector(
+    (state: RootState) => state.floorplanReducer.floorplans,
+  );
+  const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
+  const buildingData: BuildingType[] = useSelector(
+    (state: RootState) => state.buildingReducer.buildings,
+  );
+
+  const filteredTracking = dummyTrackingData
+    .filter((track) => track.beacon_id === bleNumber)
+    .filter((track) => {
+      const trackTime = dayjs(track.timestamp); // or track.time if that's what you use
+      return trackTime.isAfter(dayjs(startDate)) && trackTime.isBefore(dayjs(endDate));
+    })
+    .sort((a, b) => dayjs(b.timestamp).valueOf() - dayjs(a.timestamp).valueOf());
+
+  const handleRowClick = (id: string) => {
+    setSelectedRowId(id);
+    const track = filteredTracking.find((t) => t.id === id);
+    if (!track) return;
+    const floorplan = floorplanData.find(
+      (f) => f.id.toLowerCase() === track.floorplan_id.replace(/[{}]/g, '').toLowerCase(),
+    );
+    const floorImage = floorplan?.floor?.floorImage ?? null;
+    setActiveFloorImage(floorImage);
+
+    const pos = { x: track.pos_x * scale, y: track.pos_y * scale };
+    setAnimatedPosition(pos);
+  };
+  useEffect(() => {
+    if (!selectedRowId) return;
+
+    const track = filteredTracking.find((t) => t.id === selectedRowId);
+    if (!track) return;
+
+    const floorplan = floorplanData.find(
+      (f) => f.id.toLowerCase() === track.floorplan_id.replace(/[{}]/g, '').toLowerCase(),
+    );
+
+    const floorImage = floorplan?.floor?.floorImage ?? null;
+    setActiveFloorImage(floorImage);
+  }, [selectedRowId, filteredTracking, floorplanData]);
 
   useEffect(() => {
-    if (activeTrack) {
-      const activeArea = activeTrack.floorplanMaskedArea;
-      const floor = activeArea?.floor;
-      const building = buildingList.find((b) => b.id === floor?.buildingId);
-      setActiveArea(activeArea || null);
-      setActiveFloor(floor || null);
-      setActiveBuilding(building || null);
-      setFloorImage(floor?.floorImage || '');
+    if (activeFloorImage) {
+      const img = new window.Image();
+      img.crossOrigin = 'anonymous';
+      img.src = `${BASE_URL}${activeFloorImage}`;
+      img.onload = () => {
+        setImageObj(img);
+        setImageDimensions({ width: img.width, height: img.height });
+      };
     }
-  }, [activeTrack, maskedAreaData, floorData]);
-  
+  }, [activeFloorImage]);
+
+  useEffect(() => {
+    if (filteredTracking.length > 0) {
+      const id = filteredTracking[0].id;
+      handleRowClick(id);
+    }
+  }, []);
+
+  const maxWidth = 900;
+  const maxHeight = 500;
+
+  const scale = Math.min(maxWidth / imageDimensions.width, maxHeight / imageDimensions.height);
+
+  const stageWidth = imageDimensions.width * scale;
+  const stageHeight = imageDimensions.height * scale;
+
+  // useEffect(() => {
+  //   if (isPlaying && filteredTracking.length > 0) {
+  //     const currentIndex = filteredTracking.findIndex((t) => t.id === selectedRowId);
+
+  //     playbackInterval.current = setInterval(() => {
+  //       setSelectedRowId((prevId) => {
+  //         const currentIdx = filteredTracking.findIndex((t) => t.id === prevId);
+  //         const nextIdx = currentIdx - 1;
+
+  //         // If already at the last (newest), stop
+  //         if (nextIdx < 0) {
+  //           setIsPlaying(false);
+  //           clearInterval(playbackInterval.current!);
+  //           return prevId;
+  //         }
+
+  //         return filteredTracking[nextIdx].id;
+  //       });
+  //     }, 800); // adjust speed here
+  //   }
+
+  //   return () => {
+  //     if (playbackInterval.current) {
+  //       clearInterval(playbackInterval.current);
+  //     }
+  //   };
+  // }, [isPlaying]);
+
+  const MIN_DELAY = 500;
+
+  const animateToPosition = (
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number,
+    duration: number,
+    onComplete: () => void,
+  ) => {
+    const startTime = performance.now();
+
+    const step = (now: number) => {
+      if (!isPlaying) return; // ✅ Exit early if playback is paused
+
+      const elapsed = now - startTime;
+      const t = Math.min(1, elapsed / duration);
+      const x = startX + (endX - startX) * t;
+      const y = startY + (endY - startY) * t;
+
+      setAnimatedPosition({ x, y });
+
+      if (t < 1) {
+        animationFrameRef.current = requestAnimationFrame(step);
+      } else {
+        onComplete();
+      }
+    };
+
+    animationFrameRef.current = requestAnimationFrame(step);
+  };
+
+  const startPlayback = (currentId?: string) => {
+    if (!isPlaying) return; // ✅ stop immediately if paused
+
+    const currentIdx = filteredTracking.findIndex((t) => t.id === (currentId ?? selectedRowId));
+    const nextIdx = currentIdx - 1;
+
+    if (nextIdx < 0) {
+      setIsPlaying(false);
+      return;
+    }
+
+    const currentTrack = filteredTracking[currentIdx];
+    const nextTrack = filteredTracking[nextIdx];
+
+    const durationMs = Math.max(
+      dayjs(nextTrack.timestamp).diff(dayjs(currentTrack.timestamp), 'millisecond'),
+      MIN_DELAY,
+    );
+
+    const startX = currentTrack.pos_x * scale;
+    const startY = currentTrack.pos_y * scale;
+    const endX = nextTrack.pos_x * scale;
+    const endY = nextTrack.pos_y * scale;
+
+    animateToPosition(startX, startY, endX, endY, durationMs, () => {
+      setSelectedRowId(nextTrack.id);
+      startPlayback(nextTrack.id); // proceed to next
+    });
+  };
+
+  useEffect(() => {
+    if (isPlaying && filteredTracking.length > 0) {
+      const startId =
+        selectedRowId === filteredTracking[0].id ? filteredTracking.at(-1)!.id : selectedRowId;
+
+      const startTrack = filteredTracking.find((t) => t.id === startId)!;
+      setSelectedRowId(startTrack.id);
+      setAnimatedPosition({
+        x: startTrack.pos_x * scale,
+        y: startTrack.pos_y * scale,
+      });
+
+      startPlayback(startId as string);
+    }
+
+    return () => {
+      // just clear the timeout if playing was interrupted (e.g. via pause)
+      if (playbackTimeout.current) {
+        clearTimeout(playbackTimeout.current);
+      }
+    };
+  }, [isPlaying]);
+
+  const handlePause = () => {
+    setIsPlaying(false);
+    if (playbackTimeout.current) {
+      clearTimeout(playbackTimeout.current);
+      playbackTimeout.current = null;
+    }
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+  };
+
   return (
     <Dialog
       open={openTrackDetail}
-      onClose={() => {setOpenTrackDetail(false)}}
-      aria-labelledby="alert-dialog-title"
-      aria-describedby="alert-dialog-description"
+      onClose={() => setOpenTrackDetail(false)}
       maxWidth="xl"
       fullWidth
     >
-      <DialogTitle id="alert-dialog-title">{person.name}</DialogTitle>
+      <DialogTitle>
+        <Typography fontWeight={600}>{person.name} - Tracking Detail</Typography>
+      </DialogTitle>
+
+      <DialogContent
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: 'calc(100vh - 200px)', // total height (adjust as needed)
+          p: 0, // optional: remove extra padding
+        }}
+      >
+        {/* Floor Image Section (Static) */}
+        <Box
+          sx={{
+            border: '2px solid #000',
+            height: stageHeight,
+            mb: 2,
+            overflow: 'hidden',
+            flexShrink: 0,
+          }}
+        >
+          <Stage width={stageWidth} height={stageHeight}>
+            <Layer>
+              {imageObj && <KonvaImage image={imageObj} width={stageWidth} height={stageHeight} />}
+
+              {/* Render beacons here */}
+              {selectedRowId &&
+                (() => {
+                  const track = filteredTracking.find((t) => t.id === selectedRowId);
+                  if (!track) return null;
+                  const floorplan = floorplanData.find(
+                    (f) =>
+                      f.id.toLowerCase() === track.floorplan_id.replace(/[{}]/g, '').toLowerCase(),
+                  );
+                  return (
+                    <BeaconRenderer
+                      key={track.id}
+                      id={track.beacon_id}
+                      x={animatedPosition?.x || track.pos_x * scale}
+                      y={animatedPosition?.y || track.pos_y * scale}
+                      area={track.area || '-'}
+                      floorplan={floorplan?.name || '-'}
+                      time={track.timestamp}
+                      clickable={false}
+                    />
+                  );
+                })()}
+            </Layer>
+          </Stage>
+        </Box>
+
+        {/* Filter Section (Static) */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 2,
+            mb: 2,
+            px: 2,
+            flexShrink: 0,
+          }}
+        >
+          {/* Left: Play + Pause Buttons */}
+          <Box display="flex" gap={1}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                // If already at newest (top), reset to oldest before playing
+                if (selectedRowId === filteredTracking[0].id) {
+                  setSelectedRowId(filteredTracking.at(-1)!.id); // last item
+                }
+                setIsPlaying(true);
+              }}
+              startIcon={<IconPlayerPlayFilled size={18} />}
+              disabled={
+                isPlaying ||
+                filteredTracking.length === 0 ||
+                selectedRowId === filteredTracking[0].id
+              }
+            >
+              Play
+            </Button>
+
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handlePause}
+              startIcon={<IconPlayerPauseFilled size={18} />}
+              disabled={!isPlaying}
+            >
+              Pause
+            </Button>
+          </Box>
+
+          {/* Right: Date Filters */}
+          <Box display="flex" gap={2}>
+            <TextField
+              label="Date Start"
+              type="datetime-local"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              label="Date End"
+              type="datetime-local"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Box>
+        </Box>
+
+        {/* Table Section (Scrollable) */}
+        <Box sx={{ flexGrow: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <TableContainer
+            component={Paper}
+            sx={{
+              flexGrow: 1, // ✅ this makes it fill remaining space
+              overflow: 'auto',
+              border: '1px solid #000',
+            }}
+          >
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow>
+                  <TableCell>
+                    <strong>Floorplan</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Floor</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Building</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Restricted?</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Time</strong>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredTracking.map((track) => {
+                  const floorplan = floorplanData.find(
+                    (f) =>
+                      f.id.toLowerCase() === track.floorplan_id.replace(/[{}]/g, '').toLowerCase(),
+                  );
+                  const floor = floorplan?.floor;
+                  const building = buildingData.find((b) => b.id === floor?.buildingId);
+
+                  return (
+                    <TableRow
+                      key={track.id}
+                      onClick={() => handleRowClick(track.id)}
+                      hover
+                      selected={selectedRowId === track.id}
+                      sx={{
+                        cursor: 'pointer',
+                        backgroundColor:
+                          selectedRowId === track.id
+                            ? isPlaying
+                              ? '#e8f5e9	'
+                              : '#e3f2fd'
+                            : 'inherit',
+                      }}
+                    >
+                      <TableCell>{floorplan?.name || '-'}</TableCell>
+                      <TableCell>{floor?.name || '-'}</TableCell>
+                      <TableCell>{building?.name || '-'}</TableCell>
+                      <TableCell>{track.is_in_restricted_area ? 'Yes' : 'No'}</TableCell>
+                      <TableCell>{dayjs(track.timestamp).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      </DialogContent>
+
+      <DialogActions>
+        <Button onClick={() => setOpenTrackDetail(false)} variant="outlined">
+          Close
+        </Button>
+      </DialogActions>
     </Dialog>
   );
-
 };
-
 
 export default TrackingDetailPopup;

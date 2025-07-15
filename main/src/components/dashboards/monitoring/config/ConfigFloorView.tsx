@@ -120,7 +120,7 @@ const ConfigFloorView: React.FC<{
             x: screenSettings?.translateX || offsetX,
             y: screenSettings?.translateY || offsetY,
           });
-          console.log(screenSettings);
+          // console.log(screenSettings);
           // if (screenSettings?.translateX === 0) {
           //   setTranslate({ x: offsetX, y: screenSettings?.translateY });
           // }
@@ -272,7 +272,7 @@ const ConfigFloorView: React.FC<{
   }, [imgSize]); // Reset scale when imgSize changes
 
   useEffect(() => {
-    console.log('Translate : ', translate);
+    // console.log('Translate : ', translate);
     if (setScreenSettings) {
       setScreenSettings({
         scale,

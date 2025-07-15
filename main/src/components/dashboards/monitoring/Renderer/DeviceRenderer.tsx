@@ -377,6 +377,7 @@ const DeviceRenderer: React.FC<{
               area={beacon.area}
               floorplan={beacon.floorplan}
               time={beacon.time}
+              clickable
             />
           );
         })}

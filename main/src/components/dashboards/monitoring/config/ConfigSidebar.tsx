@@ -16,11 +16,17 @@ import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import React, { useEffect, useState } from 'react';
 // import { floorplanType } from 'src/types/tracking/floorplan';
 // import { fetchFloorplans } from 'src/store/apps/tracking/FloorPlanSlice';
-import { setFloorplan, setScreenSettings } from 'src/store/apps/monitoring/layout';
+import {
+  setFloorplan,
+  setScreenDisplay,
+  setScreenSettings,
+} from 'src/store/apps/monitoring/layout';
 import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
-import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
+import { CCTVType, fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
 
 interface configSidebarProps {
   setSelectedGrid: (grid: string) => void;
@@ -47,6 +53,10 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
   const areaLists: MaskedAreaType[] = useSelector(
     (state: AppState) => state.maskedAreaReducer.maskedAreas,
   );
+  const cctvLists: CCTVType[] = useSelector((state: AppState) => state.CCTVReducer.cctvs);
+  const floorplanDeviceLists: FloorplanDeviceType[] = useSelector(
+    (state: AppState) => state.floorplanDeviceReducer.floorplanDevices,
+  );
   const customizer = useSelector((state: AppState) => state.customizer);
   const floorplanId = useSelector((state: AppState) => state.layoutReducer.floorplanId);
   // const [buildingList, setBuildingList] = useState([
@@ -63,11 +73,20 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
   const [selectedFloor, setSelectedFloor] = useState('');
   const [selectedFloorplan, setSelectedFloorplan] = useState('');
   const [selectedMaskedArea, setSelectedMaskedArea] = useState('');
+  const [selectedCCTV, setSelectedCCTV] = useState('');
   const filteredFloorplan = floorplanLists.filter(
     (floorplan) => floorplan.floorId === selectedFloor,
   );
   const filteredFloor = floorLists.filter((floor) => floor.buildingId === selectedBuilding);
   const filteredMaskedArea = areaLists.filter((area) => area.floorplanId === selectedFloorplan);
+  const filteredFloorplanDevice = floorplanDeviceLists.filter(
+    (device) => device.floorplanMaskedAreaId === selectedMaskedArea,
+  );
+  const filteredCCTV = cctvLists.filter((cctv) =>
+    filteredFloorplanDevice
+      .map((device) => device.type === 'Cctv' && device.accessCctvId)
+      .includes(cctv.id),
+  );
   const handleChange = (event: SelectChangeEvent<string>) => {
     setGridType(event.target.value); // Dispatch the selected grid value
     setSelectedGrid(event.target.value);
@@ -76,6 +95,8 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
     setSelectedBuilding('');
     setSelectedFloor('');
     setSelectedFloorplan('');
+    setSelectedMaskedArea('');
+    setSelectedCCTV('');
   };
 
   const handleScreenChange = (event: SelectChangeEvent<string>) => {
@@ -87,22 +108,34 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
       setSelectedBuilding('');
       setSelectedFloor('');
       setSelectedFloorplan('');
+      setSelectedMaskedArea('');
+      setSelectedCCTV('');
     }
   };
   const handleBuildingChange = (event: SelectChangeEvent<string>) => {
     setSelectedBuilding(event.target.value); // Dispatch the selected building value
     setSelectedFloor('');
     setSelectedFloorplan('');
+    setSelectedMaskedArea('');
+    setSelectedCCTV('');
   };
   const handleFloorChange = (event: SelectChangeEvent<string>) => {
     setSelectedFloor(event.target.value); // Dispatch the selected floor value
     setSelectedFloorplan('');
+    setSelectedMaskedArea('');
+    setSelectedCCTV('');
   };
   const handleFloorplanChange = (event: SelectChangeEvent<string>) => {
     setSelectedFloorplan(event.target.value); // Dispatch the selected floor value
+    setSelectedMaskedArea('');
+    setSelectedCCTV('');
   };
   const handleMaskedAreaChange = (event: SelectChangeEvent<string>) => {
     setSelectedMaskedArea(event.target.value);
+    setSelectedCCTV('');
+  };
+  const handleCCTVChange = (event: SelectChangeEvent<string>) => {
+    setSelectedCCTV(event.target.value);
   };
 
   const handleSave = () => {
@@ -114,11 +147,37 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
         translateY: screenSettings?.translateY || 0,
       }),
     );
+    if (selectedMaskedArea !== '' && selectedMaskedArea !== 'None') {
+      if (selectedCCTV !== '' && selectedCCTV !== 'None') {
+        dispatch(
+          setScreenDisplay(parseInt(gridType), parseInt(selectedScreen), {
+            displayType: 2,
+            displayOutput: selectedCCTV,
+          }),
+        );
+      } else {
+        dispatch(
+          setScreenDisplay(parseInt(gridType), parseInt(selectedScreen), {
+            displayType: 1,
+            displayOutput: selectedMaskedArea,
+          }),
+        );
+      }
+    } else {
+      dispatch(
+        setScreenDisplay(parseInt(gridType), parseInt(selectedScreen), {
+          displayType: 0,
+          displayOutput: selectedFloorplan,
+        }),
+      );
+    }
+    dispatch(setFloorplan(parseInt(gridType), parseInt(selectedScreen), selectedFloorplan));
     setSelectedScreens('');
     setSelectedScreen('');
     setSelectedBuilding('');
     setSelectedFloor('');
     setSelectedFloorplan('');
+    setSelectedMaskedArea('');
   };
 
   useEffect(() => {
@@ -129,6 +188,8 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
     dispatch(fetchFloorplan());
     dispatch(fetchBuildings());
     dispatch(fetchFloors());
+    dispatch(fetchMaskedAreas());
+    dispatch(fetchAccessCCTV());
   }, [dispatch]);
 
   useEffect(() => {
@@ -180,14 +241,15 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
             },
           }}
         >
+          <Typography variant="h4" color="primary" fontWeight={'bold'} sx={{ padding: 4 }}>
+            Grid Configuration
+          </Typography>
           <Box
             sx={{
-              height: `calc(100% - ${customizer.TopbarHeight}px)`,
+              height: `calc(90% - ${customizer.TopbarHeight}px)`,
+              overflowY: 'auto',
             }}
           >
-            <Typography variant="h4" color="primary" fontWeight={'bold'} sx={{ padding: 4 }}>
-              Grid Configuration
-            </Typography>
             <Divider />
             <Grid container mb={2} sx={{ padding: 2, paddingTop: 0 }}>
               <Grid size={{ lg: 12, md: 12, sm: 12 }} direction={'column'}>
@@ -303,7 +365,9 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
                     </CustomSelect>
                     {selectedFloorplan !== '' && (
                       <>
-                        <CustomFormLabel htmlFor="masked-area">Masked Area</CustomFormLabel>
+                        <CustomFormLabel htmlFor="masked-area">
+                          Masked Area (optional)
+                        </CustomFormLabel>
                         <CustomSelect
                           name="masked-area"
                           value={selectedMaskedArea}
@@ -323,14 +387,48 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
                         </CustomSelect>
                       </>
                     )}
-                    <Button
-                      onClick={handleSave}
-                      variant="contained"
-                      sx={{ fontSize: '1rem', py: 1, px: 3, mt: 2 }}
-                      disabled={selectedFloorplan === ''}
+                    {selectedMaskedArea !== '' && selectedMaskedArea !== 'None' && (
+                      <>
+                        <CustomFormLabel htmlFor="masked-area">CCTV (optional)</CustomFormLabel>
+                        <CustomSelect
+                          name="masked-area"
+                          value={selectedCCTV}
+                          onChange={handleCCTVChange}
+                          fullWidth
+                          variant="outlined"
+                        >
+                          <MenuItem value="" disabled>
+                            -- Select CCTV --
+                          </MenuItem>
+                          <MenuItem value="None">None</MenuItem>
+                          {filteredCCTV.map((cctv) => (
+                            <MenuItem key={cctv.id} value={cctv.rtsp}>
+                              {cctv.name}
+                            </MenuItem>
+                          ))}
+                        </CustomSelect>
+                      </>
+                    )}
+                    <Box
+                      sx={{
+                        position: 'sticky',
+                        bottom: 0,
+                        backgroundColor: theme.palette.background.paper,
+                        zIndex: 2,
+                        padding: 2,
+                        borderTop: `1px solid ${theme.palette.divider}`,
+                      }}
                     >
-                      Save
-                    </Button>
+                      <Button
+                        onClick={handleSave}
+                        variant="contained"
+                        sx={{ fontSize: '1rem', py: 1, px: 3 }}
+                        disabled={selectedFloorplan === ''}
+                        fullWidth
+                      >
+                        Save
+                      </Button>
+                    </Box>
                   </>
                 )}
               </Grid>

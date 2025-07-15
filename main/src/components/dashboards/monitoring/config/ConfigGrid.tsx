@@ -3,7 +3,7 @@ import React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { AppState, useSelector } from 'src/store/Store';
 import ConfigFloorView from './ConfigFloorView';
-import { screenSettings } from 'src/store/apps/monitoring/layout';
+import { screenSettings, screenOrderMap } from 'src/store/apps/monitoring/layout';
 
 interface MonitoringGridProps {
   grid: number;
@@ -52,14 +52,14 @@ const layoutConfig = {
       isColumn: true,
       children: [
         { size: { xs: 12 }, floorId: 0, zoomable: true, height: '40vh' },
-        { size: { xs: 12 }, floorId: 1, zoomable: false, height: '40vh' },
+        { size: { xs: 12 }, floorId: 2, zoomable: false, height: '40vh' },
       ],
     },
     {
       size: { xs: 12, lg: 6 },
       isColumn: true,
       children: [
-        { size: { xs: 12 }, floorId: 2, zoomable: false, height: '40vh' },
+        { size: { xs: 12 }, floorId: 1, zoomable: false, height: '40vh' },
         { size: { xs: 12 }, floorId: 3, zoomable: false, height: '40vh' },
       ],
     },
@@ -120,6 +120,7 @@ const layoutConfig = {
 interface MonitoringGridProps {
   grid: number;
   floorIds: Record<number, string[]>;
+  screenType: Record<number, number[]>;
   selectedScreen?: number;
   setSelectedScreen: (selectedScreen: string) => void;
   screenSettings?: screenSettings[][];
@@ -130,6 +131,7 @@ const ConfigGrid = React.memo(
   ({
     grid,
     floorIds,
+    screenType,
     selectedScreen,
     setSelectedScreen,
     screenSettings,
@@ -146,6 +148,7 @@ const ConfigGrid = React.memo(
       }
     }, [grid]);
     if (!floorIds[grid] || floorIds[grid].length === 0) {
+      console.log('No floor IDs found for grid', floorIds[grid]);
       return (
         <Grid container>
           <Grid size={{ xs: 12 }}>
@@ -153,7 +156,7 @@ const ConfigGrid = React.memo(
               Monitoring Dashboard
             </Typography>
             <Typography variant="h6" fontStyle="bold" fontWeight={900} mt={0.5}>
-              Please select a Grid
+              {floorIds[grid]}
             </Typography>
           </Grid>
         </Grid>
@@ -162,32 +165,32 @@ const ConfigGrid = React.memo(
 
     if (!(grid in layoutConfig)) return null;
     const layout = layoutConfig[grid as keyof typeof layoutConfig];
-    const screenOrderMap: { [grid: number]: Array<[number, number?, number?]> } = {
-      1: [[0]],
-      2: [[0], [1]],
-      3: [[0], [1, 0], [1, 1]],
-      4: [
-        [0, 0],
-        [1, 0],
-        [0, 1],
-        [1, 1],
-      ],
-      5: [
-        [0, 0],
-        [1, 0],
-        [1, 1],
-        [0, 1, 0],
-        [0, 1, 1],
-      ],
-      6: [
-        [0, 0],
-        [1, 0],
-        [1, 1],
-        [0, 1, 0],
-        [0, 1, 1],
-        [1, 2],
-      ],
-    };
+    // const screenOrderMap: { [grid: number]: Array<[number, number?, number?]> } = {
+    //   1: [[0]],
+    //   2: [[0], [1]],
+    //   3: [[0], [1, 0], [1, 1]],
+    //   4: [
+    //     [0, 0],
+    //     [1, 0],
+    //     [0, 1],
+    //     [1, 1],
+    //   ],
+    //   5: [
+    //     [0, 0],
+    //     [1, 0],
+    //     [1, 1],
+    //     [0, 1, 0],
+    //     [0, 1, 1],
+    //   ],
+    //   6: [
+    //     [0, 0],
+    //     [1, 0],
+    //     [1, 1],
+    //     [0, 1, 0],
+    //     [0, 1, 1],
+    //     [1, 2],
+    //   ],
+    // };
 
     function getScreenNumber(
       grid: number,
@@ -280,18 +283,40 @@ const ConfigGrid = React.memo(
                                     }}
                                   >
                                     {floorIds[grid][(grandChild as { floorId: number }).floorId] ? (
-                                      <ConfigFloorView
-                                        activeFloorplan={floorIds[grid][screenNum - 1]}
-                                        zoomable={selectedScreen === screenNum}
-                                        containerWidth={gridDimensions.width} // Pass width
-                                        containerHeight={gridDimensions.height} // Pass height
-                                        screenSettings={
-                                          screenSettings && screenNum
-                                            ? screenSettings[grid][screenNum - 1]
-                                            : undefined
-                                        }
-                                        setScreenSettings={setScreenSettings}
-                                      />
+                                      screenType[grid][
+                                        (grandChild as { floorId: number }).floorId
+                                      ] === 0 ? (
+                                        <ConfigFloorView
+                                          activeFloorplan={floorIds[grid][screenNum - 1]}
+                                          zoomable={selectedScreen === screenNum}
+                                          containerWidth={gridDimensions.width} // Pass width
+                                          containerHeight={gridDimensions.height} // Pass height
+                                          screenSettings={
+                                            screenSettings && screenNum
+                                              ? screenSettings[grid][screenNum - 1]
+                                              : undefined
+                                          }
+                                          setScreenSettings={setScreenSettings}
+                                        />
+                                      ) : (
+                                        <Typography
+                                          variant="h1"
+                                          className="hover-typography"
+                                          sx={{
+                                            fontSize: '5rem',
+                                            fontFamily: 'Georgia',
+                                            color:
+                                              screenNum === selectedScreen
+                                                ? theme.palette.success.dark
+                                                : 'black',
+                                            transition: 'color 0.1s',
+                                          }}
+                                          fontStyle="bold"
+                                          fontWeight={900}
+                                        >
+                                          Camera Here
+                                        </Typography>
+                                      )
                                     ) : (
                                       <Typography
                                         variant="h1"
@@ -349,10 +374,10 @@ const ConfigGrid = React.memo(
                           }}
                         >
                           {floorIds[grid][(child as { floorId: number }).floorId] ? (
-                            <ConfigFloorView
-                              activeFloorplan={
-                                floorIds[grid][screenNum - 1]
-                              }
+                            screenType[grid][(child as { floorId: number }).floorId] === 0 ? (
+                              console.log('Floor ID:', floorIds[grid][(child as { floorId: number }).floorId], screenNum),
+                              <ConfigFloorView
+                              activeFloorplan={floorIds[grid][screenNum - 1]}
                               zoomable={selectedScreen === screenNum}
                               containerWidth={gridDimensions.width} // Pass width
                               containerHeight={gridDimensions.height} // Pass height
@@ -363,6 +388,27 @@ const ConfigGrid = React.memo(
                               }
                               setScreenSettings={setScreenSettings}
                             />
+                            ) : (
+                              <Typography
+                                variant="h1"
+                                className="hover-typography"
+                                sx={{
+                                  fontSize: '2rem',
+                                  fontFamily: 'Georgia',
+                                  color: `${
+                                    selectedScreen === screenNum
+                                      ? theme.palette.success.dark
+                                      : 'black'
+                                  }`,
+                                  transition: 'color 0.1s',
+                                }}
+                                fontStyle="bold"
+                                fontWeight={900}
+                              >
+                                Camera Here {floorIds[grid][(child as { floorId: number }).floorId]}
+                              </Typography>
+                            )
+                            
                           ) : (
                             <Typography
                               variant="h1"
@@ -423,16 +469,35 @@ const ConfigGrid = React.memo(
                 }}
               >
                 {floorIds[grid][(item as { floorId: number }).floorId] ? (
-                  <ConfigFloorView
-                    activeFloorplan={floorIds[grid][screenNum - 1]}
-                    zoomable={selectedScreen === screenNum}
-                    containerWidth={gridDimensions.width} // Pass width
-                    containerHeight={gridDimensions.height} // Pass height
-                    screenSettings={
-                      screenSettings && screenNum ? screenSettings[grid][screenNum - 1] : undefined
-                    }
-                    setScreenSettings={setScreenSettings}
-                  />
+                  screenType[grid][(item as { floorId: number }).floorId] === 0 ? (
+                    <ConfigFloorView
+                      activeFloorplan={floorIds[grid][screenNum - 1]}
+                      zoomable={selectedScreen === screenNum}
+                      containerWidth={gridDimensions.width} // Pass width
+                      containerHeight={gridDimensions.height} // Pass height
+                      screenSettings={
+                        screenSettings && screenNum
+                          ? screenSettings[grid][screenNum - 1]
+                          : undefined
+                      }
+                      setScreenSettings={setScreenSettings}
+                    />
+                  ) : (
+                    <Typography
+                      variant="h1"
+                      className="hover-typography"
+                      sx={{
+                        fontSize: '2rem',
+                        fontFamily: 'Georgia',
+                        color: screenNum === selectedScreen ? theme.palette.success.dark : 'black',
+                        transition: 'color 0.1s',
+                      }}
+                      fontStyle="bold"
+                      fontWeight={900}
+                    >
+                      Camera Here {floorIds[grid][(item as { floorId: number }).floorId]}
+                    </Typography>
+                  )
                 ) : (
                   <Typography
                     variant="h1"
