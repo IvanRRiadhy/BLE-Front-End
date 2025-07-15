@@ -158,6 +158,7 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
   };
 
   const handleSave = () => {
+    dispatch(resetScreen(parseInt(gridType), parseInt(selectedScreen)));
     dispatch(setFloorplan(parseInt(gridType), parseInt(selectedScreen), selectedFloorplan));
     dispatch(
       setScreenSettings(parseInt(gridType), parseInt(selectedScreen), {

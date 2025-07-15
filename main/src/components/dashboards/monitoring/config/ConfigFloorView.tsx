@@ -312,7 +312,10 @@ const ConfigFloorView: React.FC<{
   }, [scale, translate, setScreenSettings]);
 
   useEffect(() => {
-    if (!activeMaskedArea) return;
+    if (!activeMaskedArea) {
+        setFocusArea(null);
+        return;
+      }
 
     const targetArea = filteredArea.find((a) => a.id === activeMaskedArea);
     if (!targetArea || !targetArea.areaShape) return;
