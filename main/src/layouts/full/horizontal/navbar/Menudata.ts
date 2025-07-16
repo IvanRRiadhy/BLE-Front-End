@@ -208,39 +208,39 @@ const Menuitems = [
   },
   {
     id: uniqueId(),
-    title: 'Apps',
+    title: 'Report',
     icon: IconApps,
-    href: '/apps/',
+    href: '/report/',
     children: [
             {
         id: uniqueId(),
         title: 'Tracking Transaction',
         icon: IconLiveView,
-        href: '/apps/trackingtransaction/'
+        href: '/report/trackingtransaction/'
       },
       {
         id: uniqueId(),
         title: 'Alarm Notification',
         icon: IconBellExclamation,
-        href: '/apps/alarmRecord/',
+        href: '/report/alarmRecord/',
       },
       {
         id: uniqueId(),
         title: 'Blacklist',
         icon: IconBarrierBlock,
-        href: '/apps/blacklist/',
+        href: '/report/blacklist/',
       },
-      {
-        id: uniqueId(),
-        title: 'Login',
-        icon: IconPoint,
-        href: '/auth/login/',
-      },
+      // {
+      //   id: uniqueId(),
+      //   title: 'Login',
+      //   icon: IconPoint,
+      //   href: '/auth/login/',
+      // },
   //     {
   //       id: uniqueId(),
   //       title: 'Area Access',
   //       icon: IconMapCheck,
-  //       href: '/apps/friends',
+  //       href: '/report/friends',
   //     },
   //     {
   //             id: uniqueId(),

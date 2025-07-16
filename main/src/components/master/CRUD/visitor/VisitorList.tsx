@@ -22,7 +22,7 @@ import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { useTranslation } from 'react-i18next';
-import { deleteVisitor, fetchVisitor, visitorType } from 'src/store/apps/crud/visitor';
+import { deleteVisitor, fetchVisitor, masterVisitorType } from 'src/store/apps/crud/visitor';
 import AddEditVisitor from './AddEditVisitor';
 
 const VisitorList = () => {
@@ -50,9 +50,9 @@ const VisitorList = () => {
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedVisitor, setSelectedVisitor] = useState<visitorType | null>(null);
+  const [selectedVisitor, setSelectedVisitor] = useState<masterVisitorType | null>(null);
   // Open delete confirmation dialog
-  const handleOpenDeleteDialog = (vis: visitorType) => {
+  const handleOpenDeleteDialog = (vis: masterVisitorType) => {
     setSelectedVisitor(vis);
     setDeleteDialogOpen(true);
   };
@@ -150,7 +150,7 @@ const VisitorList = () => {
                 <TableBody>
                   {visitorData
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((visitor: visitorType) => (
+                    .map((visitor: masterVisitorType) => (
                       <TableRow key={visitor.id}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}

@@ -11,11 +11,11 @@ import {
   ListItemAvatar,
   // useTheme,
 } from '@mui/material';
-import { visitorType } from 'src/store/apps/crud/visitor';
+import { masterVisitorType } from 'src/store/apps/crud/visitor';
 
 type Props = {
   onTagClick: (event: React.MouseEvent<HTMLElement>) => void;
-  visitor?: visitorType;
+  visitor?: masterVisitorType;
   active: any;
 };
 

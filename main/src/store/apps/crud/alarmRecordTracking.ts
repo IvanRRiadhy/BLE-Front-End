@@ -2,7 +2,7 @@ import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { visitorType } from "./visitor";
+import { masterVisitorType } from "./visitor";
 import { bleReaderType } from "./bleReader";
 import { MaskedAreaType } from "./maskedArea";
 
@@ -29,7 +29,7 @@ export interface AlarmType {
     waitingBy: string;
     investigatedBy: string;
     investigatedResult: string;
-    visitor?: visitorType;
+    visitor?: masterVisitorType;
     reader?: bleReaderType;
     floorplanMaskedArea?: MaskedAreaType; 
 };

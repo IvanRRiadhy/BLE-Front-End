@@ -92,10 +92,13 @@ export const FloorplanDeviceSlice = createSlice({
             const index = state.unsavedFloorplanDevices.findIndex(
                 (device) => device.id === action.payload.id
             );
+            console.log("Index: ", index);
             if (index !== -1) {
                 state.unsavedFloorplanDevices = state.unsavedFloorplanDevices.map((device, i) => 
                     i === index ? { ...device, ...action.payload } : device
+
                 );
+                                console.log("Editing Device", action.payload);
                 // state.unsavedFloorplanDevices[index] = action.payload;
                 state.editingFloorplanDevice = {
                     ...state.editingFloorplanDevice,
@@ -161,8 +164,8 @@ export const FloorplanDeviceSlice = createSlice({
                     const unsavedDevice = state.unsavedFloorplanDevices[deviceIndex];
                     // Check if the device type is valid
                     const validDeviceTypes = DeviceType.map((type) => type.value); // Extract valid types from DeviceType
-                    console.log(unsavedDevice);
-                    if (unsavedDevice.type === "" || !validDeviceTypes.includes(unsavedDevice.type) ) {
+                    console.log("Unsaved Device: ", JSON.stringify(unsavedDevice));
+                    if (unsavedDevice.type === "" || !validDeviceTypes.includes(unsavedDevice.type) || unsavedDevice.floorplanMaskedAreaId === "") {
                         // Remove the device if its type is invalid
                         state.unsavedFloorplanDevices.splice(deviceIndex, 1);
                         // console.warn(`Device with ID ${action.payload.id} removed due to invalid type.`);

@@ -1,7 +1,7 @@
-import  { useEffect } from 'react';
+import { useEffect } from 'react';
 import { List } from '@mui/material';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
-import { fetchVisitor, visitorType, SelectVisitor } from 'src/store/apps/crud/visitor';
+import { fetchVisitor, masterVisitorType, SelectVisitor } from 'src/store/apps/crud/visitor';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import VisitorListItem from './visitorListItem';
 
@@ -11,7 +11,7 @@ const VisitorList = () => {
     dispatch(fetchVisitor());
   }, [dispatch]);
 
-  const getVisibilityTags = (visitor: visitorType[], filter: string, search: string) => {
+  const getVisibilityTags = (visitor: masterVisitorType[], filter: string, search: string) => {
     if (filter === 'show_all') {
       return visitor.filter(
         (vis) =>

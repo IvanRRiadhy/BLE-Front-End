@@ -6,7 +6,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 
 const API_URL = "/api/Visitor/";
 
-export interface visitorType {
+export interface masterVisitorType {
     id: string, //
     personId: string,
     identityId: string,
@@ -42,10 +42,30 @@ export interface visitorType {
     status: string
 }
 
+export type visitorType = {
+    id: string,
+    visitor_type: string;
+    name: string,
+    email: string,
+    gender: string,
+    phone: string,
+    faceImage: string,
+    bleCardNumber:string,
+    organization_id:string,
+    district_id: string,
+    department_id: string,
+    is_vip: boolean,
+    is_email_verified: boolean,
+    email_verification_send_at: string,
+    email_verification_token: string,
+    visitor_period_start: string,
+    visitor_period_end: string,
+}
+
 interface StateType {
-    visitors: visitorType[];
+    visitors: masterVisitorType[];
     visitorSearch: string;
-    selectedVisitor?: visitorType;
+    selectedVisitor?: masterVisitorType;
     currentFilter: string,
 }
 
@@ -60,11 +80,11 @@ export const VisitorSlice = createSlice({
     name: "visitor",
     initialState,
     reducers: {
-      GetVisitor(state, action: PayloadAction<visitorType[]>)  {
+      GetVisitor(state, action: PayloadAction<masterVisitorType[]>)  {
         state.visitors = action.payload;
       },
       SelectVisitor(state, action: PayloadAction<string>) {
-        const selected = state.visitors.find((visitor: visitorType) => visitor.id === action.payload);
+        const selected = state.visitors.find((visitor: masterVisitorType) => visitor.id === action.payload);
         state.selectedVisitor = selected || undefined;
       },
       SearchVisitor(state, action: PayloadAction<string>) {
@@ -83,7 +103,7 @@ export const VisitorSlice = createSlice({
             console.error("Add failed: ", action.payload);
         })
         .addCase(editVisitor.fulfilled, (state, action) => {
-            const index = state.visitors.findIndex((visitor: visitorType) => visitor.id === action.payload.id);
+            const index = state.visitors.findIndex((visitor: masterVisitorType) => visitor.id === action.payload.id);
             if (index !== -1) {
                 state.visitors[index] = action.payload;
             }
@@ -92,7 +112,7 @@ export const VisitorSlice = createSlice({
             console.error("Update failed: ", action.payload);
         })
         .addCase(deleteVisitor.fulfilled, (state, action) => {
-            state.visitors = state.visitors.filter((visitor: visitorType) => visitor.id !== action.payload);
+            state.visitors = state.visitors.filter((visitor: masterVisitorType) => visitor.id !== action.payload);
         })
         .addCase(deleteVisitor.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);

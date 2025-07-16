@@ -85,7 +85,7 @@ const FloorplanList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {['floorplan name', 'floor name'].map((header) => (
+                    {['Floorplan Name', 'Floor Name'].map((header) => (
                       <TableCell key={header}>
                         <Typography variant="h6">{header}</Typography>
                       </TableCell>

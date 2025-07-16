@@ -271,25 +271,25 @@ const Menuitems: MenuitemsType[] = [
       },
   {
     navlabel:true,
-    subheader:'App'
+    subheader:'Report'
   },
              {
         id: uniqueId(),
         title: 'Tracking Transaction',
         icon: IconLiveView,
-        href: '/apps/trackingtransaction/'
+        href: '/report/trackingtransaction/'
       },
       {
         id: uniqueId(),
         title: 'Alarm Notification',
         icon: IconBellExclamation,
-        href: '/apps/alarmRecord/',
+        href: '/report/alarmRecord/',
       },
       {
         id: uniqueId(),
         title: 'Blacklist',
         icon: IconBarrierBlock,
-        href: '/apps/blacklist/',
+        href: '/report/blacklist/',
       },
   // {
   //   navlabel: true,

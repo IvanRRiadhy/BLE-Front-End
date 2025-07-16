@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { visitorType } from "./visitor";
+import { masterVisitorType } from "./visitor";
 import { MaskedAreaType } from "./maskedArea";
 
 const API_URL = '/api/VisitorBlacklistArea/';
@@ -12,7 +12,7 @@ export interface blacklistType {
     id: string,
     floorplanMaskedAreaId: string,
     visitorId: string,
-    visitor?: visitorType,
+    visitor?: masterVisitorType,
     floorplanMaskedArea?: MaskedAreaType,
 }
 

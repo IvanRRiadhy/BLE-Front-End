@@ -99,13 +99,9 @@ const FloorList = () => {
                     {[
                       'Building Name',
                       'Floor Name',
-                      'floor Image',
-                      'pixelX',
-                      'pixelY',
-                      'floorX',
-                      'floorY',
-                      'meterPerPx',
-                      'engineFloorId',
+                      'Floor Image',
+                      'Floor Dimension (meter)',
+                      'Engine Floor',
                     ].map((header) => (
                       <TableCell key={header}>
                         <Typography variant="h6">{header}</Typography>
@@ -142,11 +138,7 @@ const FloorList = () => {
                             'No Image'
                           )}
                         </TableCell>
-                        <TableCell>{floor.pixelX}</TableCell>
-                        <TableCell>{floor.pixelY}</TableCell>
-                        <TableCell>{floor.floorX}</TableCell>
-                        <TableCell>{floor.floorY}</TableCell>
-                        <TableCell>{floor.meterPerPx}</TableCell>
+                        <TableCell>{`(${floor.floorX}, ${floor.floorY})`}</TableCell>
                         <TableCell>{floor.engineFloorId}</TableCell>
                         <TableCell
                           sx={{

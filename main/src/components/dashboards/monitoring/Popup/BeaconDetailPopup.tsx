@@ -16,13 +16,13 @@ import { DepartmentType, fetchDepartments } from 'src/store/apps/crud/department
 import { DistrictType, fetchDistricts } from 'src/store/apps/crud/district';
 import { memberType } from 'src/store/apps/crud/member';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
-import { visitorType } from 'src/store/apps/crud/visitor';
+import { masterVisitorType } from 'src/store/apps/crud/visitor';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 
 type BeaconDetailPopupProps = {
   bleNumber: string;
   memberDetail?: memberType;
-  visitorDetail?: visitorType;
+  visitorDetail?: masterVisitorType;
   area: string;
   floorplan: string;
   time: string;

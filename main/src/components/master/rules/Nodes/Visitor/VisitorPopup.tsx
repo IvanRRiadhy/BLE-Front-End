@@ -39,7 +39,7 @@ const visitors = [
   { name: 'Ethan Woods', type: 'Maintenance', status: 'waiting' },
 ];
 
-const visitorTypes = ['Guest', 'VIP', 'Delivery', 'Supplier', 'Maintenance'];
+const masterVisitorTypes = ['Guest', 'VIP', 'Delivery', 'Supplier', 'Maintenance'];
 const visitorStatuses = ['waiting', 'checkin', 'checkout', 'denied', 'block'];
 
 const parseVisitorDetails = (details: string) => {
@@ -260,9 +260,9 @@ const VisitorNodePopup: React.FC<NodePopupProps> = ({
                 setFormData((prev) => ({
                   ...prev,
                   type:
-                    formData.type.length === visitorTypes.length
+                    formData.type.length === masterVisitorTypes.length
                       ? []
-                      : visitorTypes.map((type) => type),
+                      : masterVisitorTypes.map((type) => type),
                   visitor: [],
                 }));
                 return;
@@ -285,15 +285,15 @@ const VisitorNodePopup: React.FC<NodePopupProps> = ({
             <MenuItem value="all">
               <ListItemIcon>
                 <Checkbox
-                  checked={formData.type.length === visitorTypes.length}
+                  checked={formData.type.length === masterVisitorTypes.length}
                   indeterminate={
-                    formData.type.length > 0 && formData.type.length < visitorTypes.length
+                    formData.type.length > 0 && formData.type.length < masterVisitorTypes.length
                   }
                 />
               </ListItemIcon>
               <ListItemText primary="Select All" />
             </MenuItem>
-            {visitorTypes.map((type, index) => (
+            {masterVisitorTypes.map((type, index) => (
               <MenuItem key={index} value={type}>
                 <ListItemIcon>
                   <Checkbox checked={formData.type.includes(type)} />

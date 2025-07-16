@@ -1,11 +1,4 @@
-import {
-  Button,
-  Box,
-  Grid2 as Grid,
-  MenuItem,
-  SelectChangeEvent,
-  Typography,
-} from '@mui/material';
+import { Button, Box, Grid2 as Grid, MenuItem, SelectChangeEvent, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
@@ -327,7 +320,11 @@ const DeviceDetailList = () => {
                   <CustomSelect
                     name="type"
                     value={formData.type || ''}
-                    onChange={handleInputChange}
+                    onChange={(e: SelectChangeEvent) => {
+                      dispatch(EditUnsavedDevice({ ...formData, type: e.target.value }));
+                      console.log('A', e);
+                      handleInputChange(e);
+                    }}
                     fullWidth
                     variant="outlined"
                     required

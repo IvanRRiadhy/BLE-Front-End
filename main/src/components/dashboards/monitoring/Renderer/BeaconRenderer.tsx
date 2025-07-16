@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Text, Circle, Shape, Group } from 'react-konva';
 import { fetchMembers, memberType } from 'src/store/apps/crud/member';
-import { fetchVisitor, visitorType } from 'src/store/apps/crud/visitor';
+import { fetchVisitor, masterVisitorType } from 'src/store/apps/crud/visitor';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import { Html } from 'react-konva-utils';
 import BeaconDetailPopup from '../Popup/BeaconDetailPopup';
@@ -19,7 +19,15 @@ type BeaconRendererProps = {
 
 const BASE_URL = 'http://192.168.1.116:5000';
 
-const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorplan, time, clickable }) => {
+const BeaconRenderer: React.FC<BeaconRendererProps> = ({
+  id,
+  x,
+  y,
+  area,
+  floorplan,
+  time,
+  clickable,
+}) => {
   const groupRef = useRef<any>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
@@ -38,7 +46,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorpl
   ) as memberType[];
   const visitorsData = useSelector(
     (state: RootState) => state.visitorReducer.visitors,
-  ) as visitorType[];
+  ) as masterVisitorType[];
 
   const radius = 7.5;
   const triangleHeight = 8;
@@ -59,7 +67,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorpl
   }, [imageUrl]);
 
   const handleClick = () => {
-    console.log("clicked", person);
+    console.log('clicked', person);
     setdetailDialogOpen((prev) => !prev);
   };
   useEffect(() => {
@@ -99,7 +107,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorpl
       <Group
         ref={groupRef}
         onClick={(e) => {
-          if(!clickable) return
+          if (!clickable) return;
           e.cancelBubble = true; // Prevent propagation
           handleClick();
         }}
@@ -166,9 +174,9 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorpl
       {detailDialogOpen && (
         <Html>
           <BeaconDetailPopup
-          bleNumber={id}
-            memberDetail={isMember ? person as memberType : undefined}
-            visitorDetail={isVisitor ? person as visitorType : undefined}
+            bleNumber={id}
+            memberDetail={isMember ? (person as memberType) : undefined}
+            visitorDetail={isVisitor ? (person as masterVisitorType) : undefined}
             detailDialogOpen={detailDialogOpen}
             setDetailDialogOpen={setdetailDialogOpen}
             setOpenTrackDetail={setOpenTrackDetail}
@@ -178,7 +186,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({ id, x, y, area, floorpl
           />
           <TrackingDetailPopup
             bleNumber={id}
-            person={isMember ? person as memberType : person as visitorType}
+            person={isMember ? (person as memberType) : (person as masterVisitorType)}
             personId={person?.id || ''}
             openTrackDetail={openTrackDetail}
             setOpenTrackDetail={setOpenTrackDetail}

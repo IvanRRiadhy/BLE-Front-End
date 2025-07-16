@@ -104,26 +104,26 @@ const ConfigFloorView: React.FC<{
           // setScale(finalScale); // Set the initial scale
 
           // Calculate the initial translate values to center the image
-          if (focusArea !== null) {
-            const scaleX = containerWidth / (focusArea.maxX - focusArea.minX);
-            const scaleY = containerHeight / (focusArea.maxY - focusArea.minY);
-            const targetScale = Math.min(scaleX, scaleY);
-            const offsetX = containerWidth / 2 - focusArea.centerX * targetScale;
-            const offsetY = containerHeight / 2 - focusArea.centerY * targetScale;
+          // if (focusArea !== null) {
+          //   const scaleX = containerWidth / (focusArea.maxX - focusArea.minX);
+          //   const scaleY = containerHeight / (focusArea.maxY - focusArea.minY);
+          //   const targetScale = Math.min(scaleX, scaleY);
+          //   const offsetX = containerWidth / 2 - focusArea.centerX * targetScale;
+          //   const offsetY = containerHeight / 2 - focusArea.centerY * targetScale;
 
-            setScale(targetScale);
-            setTranslate({
-              x: screenSettings?.translateX || offsetX,
-              y: screenSettings?.translateY || offsetY,
-            });
-          } else {
-            const offsetX = containerWidth / 2;
-            const offsetY = containerHeight / 2;
-            setTranslate({
-              x: screenSettings?.translateX || offsetX,
-              y: screenSettings?.translateY || offsetY,
-            });
-          }
+          //   setScale(targetScale);
+          //   setTranslate({
+          //     x: screenSettings?.translateX || offsetX,
+          //     y: screenSettings?.translateY || offsetY,
+          //   });
+          // } else {
+          const offsetX = containerWidth / 2;
+          const offsetY = containerHeight / 2;
+          setTranslate({
+            x: screenSettings?.translateX || offsetX,
+            y: screenSettings?.translateY || offsetY,
+          });
+          // }
 
           // console.log('Container Width:', containerWidth);
           // console.log('Container Height:', containerHeight);
@@ -264,7 +264,7 @@ const ConfigFloorView: React.FC<{
     imgHeight: number,
     originalWidth: number,
     originalHeight: number,
-    padding = 5,
+    padding = 15,
   ) => {
     if (!focusArea) return undefined;
     const scaleX = originalWidth / imgWidth;
@@ -273,8 +273,8 @@ const ConfigFloorView: React.FC<{
     // console.log('Image Size:', imgWidth, imgHeight, scaleX, scaleY);
     const top = Math.max(focusArea.minY / scaleY - padding, 0);
     const left = Math.max(focusArea.minX / scaleX - padding, 0);
-    const bottom = Math.max( imgHeight - (focusArea.maxY / scaleY + padding), 0);
-    const right = Math.max( imgWidth -  (focusArea.maxX / scaleX + padding), 0);
+    const bottom = Math.max(imgHeight - (focusArea.maxY / scaleY + padding), 0);
+    const right = Math.max(imgWidth - (focusArea.maxX / scaleX + padding), 0);
     // console.log('top:', top, 'left:', left, 'bottom:', bottom, 'right:', right);
     return `inset(${top}px ${right}px ${bottom}px ${left}px)`;
   };
@@ -318,9 +318,9 @@ const ConfigFloorView: React.FC<{
 
   useEffect(() => {
     if (!activeMaskedArea) {
-        setFocusArea(null);
-        return;
-      }
+      setFocusArea(null);
+      return;
+    }
 
     const targetArea = filteredArea.find((a) => a.id === activeMaskedArea);
     if (!targetArea || !targetArea.areaShape) return;
@@ -417,7 +417,6 @@ const ConfigFloorView: React.FC<{
       </Grid>
     );
   }
-  
 
   return (
     <Box
@@ -515,7 +514,13 @@ const ConfigFloorView: React.FC<{
                 imgSize.width,
                 imgSize.height,
               );
-              const clipPath = getClipPathFromFocusArea(focusArea, dims.width, dims.height, dims.originalWidth, dims.originalHeight);
+              const clipPath = getClipPathFromFocusArea(
+                focusArea,
+                dims.width,
+                dims.height,
+                dims.originalWidth,
+                dims.originalHeight,
+              );
 
               return (
                 <Box

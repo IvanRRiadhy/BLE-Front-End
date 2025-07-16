@@ -1,4 +1,4 @@
-import{ useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
   Box,
@@ -17,7 +17,7 @@ import {
   DialogContentText,
   DialogActions,
 } from '@mui/material';
-import { visitorType, deleteVisitor } from 'src/store/apps/crud/visitor';
+import { masterVisitorType, deleteVisitor } from 'src/store/apps/crud/visitor';
 import AddEditVisitor from '../../CRUD/visitor/AddEditVisitor';
 import { IconTrash } from '@tabler/icons-react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
@@ -29,7 +29,7 @@ const BASE_URL = 'http://192.168.1.116:5000';
 const VisitorContent = () => {
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const visitorDetail: visitorType | undefined = useSelector(
+  const visitorDetail: masterVisitorType | undefined = useSelector(
     (state: RootState) => state.visitorReducer.selectedVisitor,
   );
   const applicationData = useSelector((state: RootState) => state.applicationReducer.applications);
@@ -45,8 +45,8 @@ const VisitorContent = () => {
     const app = applicationData.find((a: ApplicationType) => a.id === appId);
     return app ? app.applicationName : 'Unknown App';
   };
-  const [selectedVisitor, setSelectedVisitor] = useState<visitorType | null>(null);
-  const handleOpenDeleteDialog = (vis: visitorType) => {
+  const [selectedVisitor, setSelectedVisitor] = useState<masterVisitorType | null>(null);
+  const handleOpenDeleteDialog = (vis: masterVisitorType) => {
     setSelectedVisitor(vis);
     setDeleteDialogOpen(true);
   };

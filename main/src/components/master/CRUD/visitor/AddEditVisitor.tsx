@@ -19,11 +19,16 @@ import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, useDispatch } from 'src/store/Store';
 import { visitorStatus, gender } from 'src/types/crud/input';
-import { addVisitor, editVisitor, fetchVisitor, visitorType } from 'src/store/apps/crud/visitor';
+import {
+  addVisitor,
+  editVisitor,
+  fetchVisitor,
+  masterVisitorType,
+} from 'src/store/apps/crud/visitor';
 
 interface FormType {
   type?: string;
-  visitor?: visitorType;
+  visitor?: masterVisitorType;
 }
 
 const BASE_URL = 'http://localhost:5034';
@@ -70,7 +75,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = () => {
     setOpen(true);
-    console.log("visitor Data: ", visitor);
+    console.log('visitor Data: ', visitor);
   };
 
   const handleClose = () => {
@@ -101,7 +106,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
         data.append('faceImage', image);
       }
       if (type === 'edit') {
-        console.log("Form Data :", JSON.stringify(Object.fromEntries(data.entries())));
+        console.log('Form Data :', JSON.stringify(Object.fromEntries(data.entries())));
         await dispatch(editVisitor(data)); // Dispatch update
       }
       if (type === 'add') {
@@ -183,7 +188,6 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
                 fullWidth
                 variant="outlined"
               />
-
             </Grid>
             <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
               <CustomFormLabel htmlFor="identity-Id">Identity ID</CustomFormLabel>
