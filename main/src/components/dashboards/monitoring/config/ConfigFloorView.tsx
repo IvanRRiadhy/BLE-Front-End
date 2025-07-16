@@ -104,7 +104,7 @@ const ConfigFloorView: React.FC<{
           // setScale(finalScale); // Set the initial scale
 
           // Calculate the initial translate values to center the image
-          if (focusArea) {
+          if (focusArea !== null) {
             const scaleX = containerWidth / (focusArea.maxX - focusArea.minX);
             const scaleY = containerHeight / (focusArea.maxY - focusArea.minY);
             const targetScale = Math.min(scaleX, scaleY);
@@ -262,15 +262,20 @@ const ConfigFloorView: React.FC<{
     focusArea: { minX: number; maxX: number; minY: number; maxY: number } | null,
     imgWidth: number,
     imgHeight: number,
-    padding = 15,
+    originalWidth: number,
+    originalHeight: number,
+    padding = 5,
   ) => {
     if (!focusArea) return undefined;
-    console.log('Focus Area:', focusArea);
-    const top = Math.max(focusArea.minY - padding, 0);
-    const left = Math.max(focusArea.minX - padding, 0);
-    const bottom = Math.max(imgHeight - (focusArea.maxY + padding), 0);
-    const right = Math.max(imgWidth - (focusArea.maxX + padding), 0);
-    console.log('top:', top, 'left:', left, 'bottom:', bottom, 'right:', right);
+    const scaleX = originalWidth / imgWidth;
+    const scaleY = originalHeight / imgHeight;
+    // console.log('Focus Area:', focusArea);
+    // console.log('Image Size:', imgWidth, imgHeight, scaleX, scaleY);
+    const top = Math.max(focusArea.minY / scaleY - padding, 0);
+    const left = Math.max(focusArea.minX / scaleX - padding, 0);
+    const bottom = Math.max( imgHeight - (focusArea.maxY / scaleY + padding), 0);
+    const right = Math.max( imgWidth -  (focusArea.maxX / scaleX + padding), 0);
+    // console.log('top:', top, 'left:', left, 'bottom:', bottom, 'right:', right);
     return `inset(${top}px ${right}px ${bottom}px ${left}px)`;
   };
 
@@ -333,7 +338,8 @@ const ConfigFloorView: React.FC<{
       const maxY = Math.max(...yList);
       const centerX = (minX + maxX) / 2;
       const centerY = (minY + maxY) / 2;
-
+      // console.log("Area Shape: ", targetArea.areaShape);
+      // console.log('Focus Area:', { minX, maxX, minY, maxY, centerX, centerY });
       const newFocus = { minX, maxX, minY, maxY, centerX, centerY };
 
       // Hindari setState jika data tidak berubah
@@ -411,6 +417,7 @@ const ConfigFloorView: React.FC<{
       </Grid>
     );
   }
+  
 
   return (
     <Box
@@ -508,7 +515,7 @@ const ConfigFloorView: React.FC<{
                 imgSize.width,
                 imgSize.height,
               );
-              const clipPath = getClipPathFromFocusArea(focusArea, imgSize.width, imgSize.height);
+              const clipPath = getClipPathFromFocusArea(focusArea, dims.width, dims.height, dims.originalWidth, dims.originalHeight);
 
               return (
                 <Box
@@ -538,6 +545,7 @@ const ConfigFloorView: React.FC<{
                 >
                   <DeviceRenderer
                     {...dims}
+                    focusArea={focusArea}
                     devices={filteredDevices}
                     imageSrc={floorplanImage}
                     scale={scale}

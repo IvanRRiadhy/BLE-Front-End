@@ -20,9 +20,17 @@ const VideoPlayer: React.FC<Props> = ({ options }) => {
 
   useEffect(() => {
     if (!playerRef.current && videoRef.current) {
-      playerRef.current = videojs(videoRef.current, options, () => {
+      const player = videojs(videoRef.current, options, () => {
         console.log('Video.js ready');
+
+        // ✅ Disable pause functionality
+        player.on('pause', () => {
+          player.play();
+        });
+
       });
+
+      playerRef.current = player;
     } else if (playerRef.current) {
       playerRef.current.src(options.sources!);
     }

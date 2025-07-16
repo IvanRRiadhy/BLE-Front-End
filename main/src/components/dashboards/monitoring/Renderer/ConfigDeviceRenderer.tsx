@@ -37,6 +37,7 @@ const DeviceRenderer: React.FC<{
   areas: MaskedAreaType[];
   showAreas: boolean;
   topic: string;
+  focusArea?: { minX: number; maxX: number; minY: number; maxY: number } | null;
 }> = ({
   width,
   height,
@@ -46,6 +47,7 @@ const DeviceRenderer: React.FC<{
   devices,
   areas,
   showAreas,
+  focusArea,
 }) => {
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const setPointsFromNodes = (nodes: Nodes[]): number[] => {
@@ -102,6 +104,16 @@ const DeviceRenderer: React.FC<{
   const iconGateway = useDeviceIcon(GatewaySVG);
   const iconFaceRecog = useDeviceIcon(FaceRecog);
   const iconUnknown = useDeviceIcon(UnknownDevice);
+  
+  const focusAreaDot = (focusArea: { minX: number; maxX: number; minY: number; maxY: number } | null) => {
+    console.log("focus Area: ",focusArea);
+    <Line
+    key={`focus-area-${uniqueId()}`}
+      points={[focusArea?.minX || 0, focusArea?.minY || 0, focusArea?.maxX || 0, focusArea?.maxY || 0]}
+      stroke="red"
+      strokeWidth={2}
+    />
+  }
 
   const renderDeviceShape = (device: FloorplanDeviceType) => {
     // console.log('Rendering device:', device);
@@ -135,6 +147,7 @@ const DeviceRenderer: React.FC<{
     // console.log('Device coordinates:', x, y, scaleX, scaleY);
     // console.log('Device Position:', device.posPxX, device.posPxY);
     // console.log('image dimensions:', width, height);
+    
     return (
       deviceIcon && (
         <React.Fragment key={`device-${device.id}-${uniqueId()}`}>
@@ -176,6 +189,11 @@ const DeviceRenderer: React.FC<{
             left={0}
             bottom={0}
             right={0}
+            onClick={(e) => {
+              console.log(e.target?.getStage()?.getPointerPosition())
+              console.log("dims : ", width, height);
+              console.log("Focus Area: ", focusArea);
+            }}
           />
         )}
         {/* Render areas if showAreas is true */}
@@ -195,6 +213,7 @@ const DeviceRenderer: React.FC<{
           ))}
         {/*Render devices*/}
         {devices.map((device) => renderDeviceShape(device))}
+        {focusArea && focusAreaDot(focusArea)}
       </Layer>
     </Stage>
   );

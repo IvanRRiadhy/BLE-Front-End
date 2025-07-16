@@ -87,7 +87,7 @@ const MaskedArea = () => {
         >
           <ParentCard
             title="Floorplan List"
-            codeModel={<AddEditMaskedArea type="add" />}
+            // codeModel={<AddEditMaskedArea type="add" />}
           >
             {/* <MaskedAreaList /> */}
             <MaskedAreaList2 />
