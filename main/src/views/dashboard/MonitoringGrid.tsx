@@ -120,195 +120,202 @@ interface MonitoringGridProps {
   grid: number;
   floorIds: Record<number, string[]>;
   screenSettings: screenSettings[][];
+  screenDisplay: Record<number, string[]>;
+  screenType: Record<number, number[]>;
 }
 
-const MonitoringGrid = React.memo(({ grid, floorIds, screenSettings }: MonitoringGridProps) => {
-  const gridRef = useRef<HTMLDivElement>(null);
-  const [gridDimensions, setGridDimensions] = useState({ width: 0, height: 0 });
+const MonitoringGrid = React.memo(
+  ({ grid, floorIds, screenSettings, screenDisplay, screenType }: MonitoringGridProps) => {
+    const gridRef = useRef<HTMLDivElement>(null);
+    const [gridDimensions, setGridDimensions] = useState({ width: 0, height: 0 });
 
-  useEffect(() => {
-    if (gridRef.current) {
-      const { clientWidth, clientHeight } = gridRef.current;
-      setGridDimensions({ width: clientWidth, height: clientHeight });
+    useEffect(() => {
+      if (gridRef.current) {
+        const { clientWidth, clientHeight } = gridRef.current;
+        setGridDimensions({ width: clientWidth, height: clientHeight });
+      }
+    }, [grid]);
+    if (!floorIds[grid] || floorIds[grid].length === 0) {
+      return (
+        <Grid container>
+          <Grid size={{ xs: 12 }}>
+            <Typography variant="h4" fontStyle="bold" fontWeight={900} mt={0.5}>
+              Monitoring Dashboard
+            </Typography>
+            <Typography variant="h6" fontStyle="bold" fontWeight={900} mt={0.5}>
+              Please select a Grid
+            </Typography>
+          </Grid>
+        </Grid>
+      );
     }
-  }, [grid]);
-  if (!floorIds[grid] || floorIds[grid].length === 0) {
+
+    if (!(grid in layoutConfig)) return null;
+    const layout = layoutConfig[grid as keyof typeof layoutConfig];
+
+    // const screenOrderMap: { [grid: number]: Array<[number, number?, number?]> } = {
+    //   1: [[0]],
+    //   2: [[0], [1]],
+    //   3: [[0], [1, 0], [1, 1]],
+    //   4: [
+    //     [0, 0],
+    //     [1, 0],
+    //     [0, 1],
+    //     [1, 1],
+    //   ],
+    //   5: [
+    //     [0, 0],
+    //     [1, 0],
+    //     [0, 1, 0],
+    //     [0, 1, 1],
+    //     [1, 1],
+    //   ],
+    //   6: [
+    //     [0, 0],
+    //     [1, 0],
+    //     [1, 1],
+    //     [0, 1, 0],
+    //     [0, 1, 1],
+    //     [1, 2],
+    //   ],
+    // };
+
+    function getScreenNumber(
+      grid: number,
+      index: number,
+      childIndex?: number,
+      grandChildIndex?: number,
+    ) {
+      const order = screenOrderMap[grid] || [];
+      for (let i = 0; i < order.length; i++) {
+        const [idx, cIdx, gIdx] = order[i];
+        if (
+          index === idx &&
+          (typeof cIdx === 'undefined' || childIndex === cIdx) &&
+          (typeof gIdx === 'undefined' || grandChildIndex === gIdx)
+        ) {
+          return i + 1; // 1-based screen number
+        }
+      }
+      return 0;
+    }
+
     return (
       <Grid container>
-        <Grid size={{ xs: 12 }}>
-          <Typography variant="h4" fontStyle="bold" fontWeight={900} mt={0.5}>
-            Monitoring Dashboard
-          </Typography>
-          <Typography variant="h6" fontStyle="bold" fontWeight={900} mt={0.5}>
-            Please select a Grid
-          </Typography>
-        </Grid>
-      </Grid>
-    );
-  }
-
-  if (!(grid in layoutConfig)) return null;
-  const layout = layoutConfig[grid as keyof typeof layoutConfig];
-
-  // const screenOrderMap: { [grid: number]: Array<[number, number?, number?]> } = {
-  //   1: [[0]],
-  //   2: [[0], [1]],
-  //   3: [[0], [1, 0], [1, 1]],
-  //   4: [
-  //     [0, 0],
-  //     [1, 0],
-  //     [0, 1],
-  //     [1, 1],
-  //   ],
-  //   5: [
-  //     [0, 0],
-  //     [1, 0],
-  //     [0, 1, 0],
-  //     [0, 1, 1],
-  //     [1, 1],
-  //   ],
-  //   6: [
-  //     [0, 0],
-  //     [1, 0],
-  //     [1, 1],
-  //     [0, 1, 0],
-  //     [0, 1, 1],
-  //     [1, 2],
-  //   ],
-  // };
-
-  function getScreenNumber(
-    grid: number,
-    index: number,
-    childIndex?: number,
-    grandChildIndex?: number,
-  ) {
-    const order = screenOrderMap[grid] || [];
-    for (let i = 0; i < order.length; i++) {
-      const [idx, cIdx, gIdx] = order[i];
-      if (
-        index === idx &&
-        (typeof cIdx === 'undefined' || childIndex === cIdx) &&
-        (typeof gIdx === 'undefined' || grandChildIndex === gIdx)
-      ) {
-        return i + 1; // 1-based screen number
-      }
-    }
-    return 0;
-  }
-
-  return (
-    <Grid container>
-      {layout.map((item, index) => {
-        if ('isColumn' in item && item.isColumn) {
-          return (
-            <Grid key={index} size={item.size}>
-              <Grid container direction="column">
-                {item.children.map((child, childIndex) => {
-                  // Check if child also has children
-                  if ('children' in child && Array.isArray(child.children)) {
-                    return (
-                      <Grid key={childIndex} size={child.size}>
-                        <Grid container>
-                          {child.children.map((grandChild, grandChildIndex) => {
-                            const screenNum = getScreenNumber(
-                              grid,
-                              index,
-                              childIndex,
-                              grandChildIndex,
-                            );
-                            return (
-                              <Grid
-                                key={grandChildIndex}
-                                size={grandChild.size}
-                                ref={gridRef}
-                                sx={{
-                                  height: grandChild.height || 'auto',
-                                  overflow: 'hidden',
-                                  border: '2.5px solid black',
-                                  transition: 'border-color 0.3s ease, border-width 0.1s ease',
-                                  '&:hover': {
-                                    borderColor: 'success.dark',
-                                    borderWidth: '5px',
-                                  },
-                                }}
-                              >
-                                <FloorView
-                                  activeFloorplan={floorIds[grid][screenNum - 1]}
-                                  zoomable={grandChild.zoomable}
-                                  containerWidth={gridDimensions.width} // Pass width
-                                  containerHeight={gridDimensions.height} // Pass height
-                                  screenSettings={screenSettings[grid][screenNum - 1]}
-                                />
-                              </Grid>
-                            );
-                          })}
+        {layout.map((item, index) => {
+          if ('isColumn' in item && item.isColumn) {
+            return (
+              <Grid key={index} size={item.size}>
+                <Grid container direction="column">
+                  {item.children.map((child, childIndex) => {
+                    // Check if child also has children
+                    if ('children' in child && Array.isArray(child.children)) {
+                      return (
+                        <Grid key={childIndex} size={child.size}>
+                          <Grid container>
+                            {child.children.map((grandChild, grandChildIndex) => {
+                              const screenNum = getScreenNumber(
+                                grid,
+                                index,
+                                childIndex,
+                                grandChildIndex,
+                              );
+                              return (
+                                <Grid
+                                  key={grandChildIndex}
+                                  size={grandChild.size}
+                                  ref={gridRef}
+                                  sx={{
+                                    height: grandChild.height || 'auto',
+                                    overflow: 'hidden',
+                                    border: '2.5px solid black',
+                                    transition: 'border-color 0.3s ease, border-width 0.1s ease',
+                                    '&:hover': {
+                                      borderColor: 'success.dark',
+                                      borderWidth: '5px',
+                                    },
+                                  }}
+                                >
+                                  <FloorView
+                                    activeFloorplan={floorIds[grid][screenNum - 1]}
+                                    zoomable={grandChild.zoomable}
+                                    containerWidth={gridDimensions.width} // Pass width
+                                    containerHeight={gridDimensions.height} // Pass height
+                                    screenSettings={screenSettings[grid][screenNum - 1]}
+                                    activeMaskedArea={screenDisplay[grid][(grandChild as { floorId: number }).floorId]}
+                                  />
+                                </Grid>
+                              );
+                            })}
+                          </Grid>
                         </Grid>
+                      );
+                    }
+                    const screenNum = getScreenNumber(grid, index, childIndex);
+                    // Normal child
+                    return (
+                      <Grid
+                        key={childIndex}
+                        size={child.size}
+                        ref={gridRef}
+                        sx={{
+                          height: (child as { height: string }).height || 'auto',
+                          overflow: 'hidden',
+                          border: '2.5px solid black',
+                          transition: 'border-color 0.3s ease, border-width 0.1s ease',
+                          '&:hover': {
+                            borderColor: 'success.dark',
+                            borderWidth: '5px',
+                          },
+                        }}
+                      >
+                        <FloorView
+                          activeFloorplan={floorIds[grid][screenNum - 1]}
+                          zoomable={(child as { zoomable: boolean }).zoomable}
+                          containerWidth={gridDimensions.width} // Pass width
+                          containerHeight={gridDimensions.height} // Pass height
+                          screenSettings={screenSettings[grid][screenNum - 1]}
+                          activeMaskedArea={screenDisplay[grid][(child as { floorId: number }).floorId]}
+                        />
                       </Grid>
                     );
-                  }
-                  const screenNum = getScreenNumber(grid, index, childIndex);
-                  // Normal child
-                  return (
-                    <Grid
-                      key={childIndex}
-                      size={child.size}
-                      ref={gridRef}
-                      sx={{
-                        height: (child as { height: string }).height || 'auto',
-                        overflow: 'hidden',
-                        border: '2.5px solid black',
-                        transition: 'border-color 0.3s ease, border-width 0.1s ease',
-                        '&:hover': {
-                          borderColor: 'success.dark',
-                          borderWidth: '5px',
-                        },
-                      }}
-                    >
-                      <FloorView
-                        activeFloorplan={floorIds[grid][screenNum - 1]}
-                        zoomable={(child as { zoomable: boolean }).zoomable}
-                        containerWidth={gridDimensions.width} // Pass width
-                        containerHeight={gridDimensions.height} // Pass height
-                        screenSettings={screenSettings[grid][screenNum - 1]}
-                      />
-                    </Grid>
-                  );
-                })}
+                  })}
+                </Grid>
               </Grid>
+            );
+          }
+          const screenNum = getScreenNumber(grid, index);
+          // Standard top-level item
+          return (
+            <Grid
+              key={index}
+              size={item.size}
+              ref={gridRef}
+              sx={{
+                height: (item as { height: string }).height || 'auto',
+                overflow: 'hidden',
+                border: '2.5px solid black',
+                transition: 'border-color 0.3s ease, border-width 0.1s ease',
+                '&:hover': {
+                  borderColor: 'success.dark',
+                  borderWidth: '5px',
+                },
+              }}
+            >
+              <FloorView
+                activeFloorplan={floorIds[grid][screenNum - 1]}
+                zoomable={(item as { zoomable: boolean }).zoomable}
+                containerWidth={gridDimensions.width} // Pass width
+                containerHeight={gridDimensions.height} // Pass height
+                screenSettings={screenSettings[grid][screenNum - 1]}
+                activeMaskedArea={screenDisplay[grid][(item as { floorId: number }).floorId]}
+              />
             </Grid>
           );
-        }
-        const screenNum = getScreenNumber(grid, index);
-        // Standard top-level item
-        return (
-          <Grid
-            key={index}
-            size={item.size}
-            ref={gridRef}
-            sx={{
-              height: (item as { height: string }).height || 'auto',
-              overflow: 'hidden',
-              border: '2.5px solid black',
-              transition: 'border-color 0.3s ease, border-width 0.1s ease',
-              '&:hover': {
-                borderColor: 'success.dark',
-                borderWidth: '5px',
-              },
-            }}
-          >
-            <FloorView
-              activeFloorplan={floorIds[grid][screenNum - 1]}
-              zoomable={(item as { zoomable: boolean }).zoomable}
-              containerWidth={gridDimensions.width} // Pass width
-              containerHeight={gridDimensions.height} // Pass height
-              screenSettings={screenSettings[grid][screenNum - 1]}
-            />
-          </Grid>
-        );
-      })}
-    </Grid>
-  );
-});
+        })}
+      </Grid>
+    );
+  },
+);
 
 export default MonitoringGrid;

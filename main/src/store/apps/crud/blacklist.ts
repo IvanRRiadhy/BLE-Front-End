@@ -81,6 +81,7 @@ export const fetchBlacklist = () => async (dispatch: AppDispatch) => {
     try{
         const response = await axiosServices.get(API_URL);
         dispatch(GetBlaclist(response.data?.collection?.data || []));
+        console.log("Blaclist :", response);
     } catch (err){
         console.log("Error: ", err);
     }

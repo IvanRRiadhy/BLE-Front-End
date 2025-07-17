@@ -32,8 +32,9 @@ const FloorView: React.FC<{
   zoomable: boolean;
   containerWidth: number; // New prop
   containerHeight: number; // New prop
+  activeMaskedArea?: string;
   screenSettings: { scale: number; translateX: number; translateY: number };
-}> = ({ activeFloorplan, zoomable, screenSettings }) => {
+}> = ({ activeFloorplan, activeMaskedArea, zoomable, screenSettings }) => {
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchFloorplan());
@@ -65,6 +66,14 @@ const FloorView: React.FC<{
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorplan);
   const [showArea, setShowArea] = useState(true);
   const [showGates, setShowGates] = useState(true);
+  const [focusArea, setFocusArea] = useState<{
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+    centerX: number;
+    centerY: number;
+  } | null>(null);
   useEffect(() => {
     // console.log('FloorChanged:', floor);
   }, [floor]);
@@ -125,8 +134,8 @@ const FloorView: React.FC<{
           // setScale(finalScale); // Set the initial scale
 
           // Calculate the initial translate values to center the image
-          const offsetX = containerWidth / 4;
-          const offsetY = containerHeight / 4;
+          const offsetX = containerWidth / 2;
+          const offsetY = containerHeight / 2;
 
           // console.log('Container Width:', containerWidth);
           // console.log('Container Height:', containerHeight);
@@ -258,38 +267,26 @@ const FloorView: React.FC<{
     }
   };
 
-  // const applyZoom = (newScale: number) => {
-  //   if (!containerRef.current || !imgSize) return;
-
-  //   const container = containerRef.current;
-  //   const containerWidth = container.clientWidth;
-  //   const containerHeight = container.clientHeight;
-
-  //   // setMinScale(Math.min(widthRatio, heightRatio));
-
-  //   const scaleChangeFactor = newScale / scale;
-
-  //   // Calculate center positions
-  //   const centerX = containerWidth * scale + translate.x;
-  //   const centerY = containerHeight * scale + translate.y;
-
-  //   // Calculate translate values to keep zoom centered
-  //   const offsetX = centerX - (centerX - translate.x) * scaleChangeFactor;
-  //   const offsetY = centerY - (centerY - translate.y) * scaleChangeFactor;
-
-  //   const scaledWidth = imgSize.width * newScale;
-  //   const scaledHeight = imgSize.height * newScale;
-
-  //   const minX = Math.min(0, containerWidth - scaledWidth);
-  //   const minY = Math.min(0, containerHeight - scaledHeight);
-  //   console.log('OffsetX:', offsetX);
-  //   console.log('OffsetY:', offsetY);
-  //   setScale(newScale);
-  //   setTranslate({
-  //     x: Math.max(minX, offsetX),
-  //     y: Math.max(minY, offsetY),
-  //   });
-  // };
+  const getClipPathFromFocusArea = (
+    focusArea: { minX: number; maxX: number; minY: number; maxY: number } | null,
+    imgWidth: number,
+    imgHeight: number,
+    originalWidth: number,
+    originalHeight: number,
+    padding = 15,
+  ) => {
+    if (!focusArea) return undefined;
+    const scaleX = originalWidth / imgWidth;
+    const scaleY = originalHeight / imgHeight;
+    // console.log('Focus Area:', focusArea);
+    // console.log('Image Size:', imgWidth, imgHeight, scaleX, scaleY);
+    const top = Math.max(focusArea.minY / scaleY - padding, 0);
+    const left = Math.max(focusArea.minX / scaleX - padding, 0);
+    const bottom = Math.max(imgHeight - (focusArea.maxY / scaleY + padding), 0);
+    const right = Math.max(imgWidth - (focusArea.maxX / scaleX + padding), 0);
+    // console.log('top:', top, 'left:', left, 'bottom:', bottom, 'right:', right);
+    return `inset(${top}px ${right}px ${bottom}px ${left}px)`;
+  };
 
   useEffect(() => {
     const container = containerRef.current;
@@ -323,6 +320,48 @@ const FloorView: React.FC<{
   //     }
   //   }
   // }, [imgSize]); // Reset scale when imgSize changes
+
+  useEffect(() => {
+    if (!activeMaskedArea) {
+      setFocusArea(null);
+      return;
+    }
+
+    const targetArea = filteredArea.find((a) => a.id === activeMaskedArea);
+    if (!targetArea || !targetArea.areaShape) return;
+
+    try {
+      const shape: { x_px: number; y_px: number }[] = JSON.parse(targetArea.areaShape);
+      if (!shape.length) return;
+
+      const xList = shape.map((p) => p.x_px);
+      const yList = shape.map((p) => p.y_px);
+
+      const minX = Math.min(...xList);
+      const maxX = Math.max(...xList);
+      const minY = Math.min(...yList);
+      const maxY = Math.max(...yList);
+      const centerX = (minX + maxX) / 2;
+      const centerY = (minY + maxY) / 2;
+      // console.log("Area Shape: ", targetArea.areaShape);
+      // console.log('Focus Area:', { minX, maxX, minY, maxY, centerX, centerY });
+      const newFocus = { minX, maxX, minY, maxY, centerX, centerY };
+
+      // Hindari setState jika data tidak berubah
+      const isSame =
+        focusArea &&
+        focusArea.minX === newFocus.minX &&
+        focusArea.maxX === newFocus.maxX &&
+        focusArea.minY === newFocus.minY &&
+        focusArea.maxY === newFocus.maxY &&
+        focusArea.centerX === newFocus.centerX &&
+        focusArea.centerY === newFocus.centerY;
+
+      if (!isSame) setFocusArea(newFocus);
+    } catch (err) {
+      console.error('Invalid areaShape JSON:', targetArea.areaShape);
+    }
+  }, [activeMaskedArea, filteredArea, focusArea]);
 
   const handleMouseDown = (event: React.MouseEvent) => {
     setIsDragging(true);
@@ -521,6 +560,13 @@ const FloorView: React.FC<{
                 imgSize.width,
                 imgSize.height,
               );
+              const clipPath = getClipPathFromFocusArea(
+                focusArea,
+                dims.width,
+                dims.height,
+                dims.originalWidth,
+                dims.originalHeight,
+              );
 
               return (
                 <Box
@@ -541,6 +587,11 @@ const FloorView: React.FC<{
                     height: dims.height,
                     transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
                     transformOrigin: 'center center',
+                    overflow: 'hidden',
+                    ...(clipPath && {
+                      clipPath,
+                      WebkitClipPath: clipPath, // Safari support
+                    }),
                   }}
                 >
                   <DeviceRenderer

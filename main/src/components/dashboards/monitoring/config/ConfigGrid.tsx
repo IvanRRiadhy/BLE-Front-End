@@ -333,6 +333,7 @@ const ConfigGrid = React.memo(
                                               ? screenSettings[grid][screenNum - 1]
                                               : undefined
                                           }
+                                          activeMaskedArea={screenDisplay[grid][(grandChild as { floorId: number }).floorId]}
                                           setScreenSettings={setScreenSettings}
                                         />
                                       ) : (
@@ -434,6 +435,7 @@ const ConfigGrid = React.memo(
                                       ? screenSettings[grid][screenNum - 1]
                                       : undefined
                                   }
+                                  activeMaskedArea={screenDisplay[grid][(child as { floorId: number }).floorId]}
                                   setScreenSettings={setScreenSettings}
                                 />
                               ))

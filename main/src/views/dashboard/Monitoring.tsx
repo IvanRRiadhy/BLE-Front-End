@@ -19,9 +19,12 @@ const Monitoring = () => {
   const grid = useSelector((state: AppState) => state.layoutReducer.grid); // Get the current grid value
   const floorIds = useSelector((state: AppState) => state.layoutReducer.floorplanId); // Get the current floor IDs
   const screenDisplay = useSelector((state: AppState) => state.layoutReducer.screenDisplay);
-  const floorIds2  = screenDisplay.flatMap(row => row.map(item => item.displayOutput));
-  
+  const floorIds2 = screenDisplay?.map((row) => row.map((item) => item.displayOutput)) ?? [];
+  const screenType = screenDisplay?.map((row) => row.map((item) => item.displayType)) ?? [];
+
   const memoizedFloorIds = useMemo(() => floorIds, [floorIds]);
+  const memoizedFloorIds2 = useMemo(() => floorIds2, [floorIds2]);
+  const memoizedScreenType = useMemo(() => screenType, [screenType]);
   const screenSettings = useSelector((state: AppState) => state.layoutReducer.screenSettings);
   const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
     width: '100%',
@@ -285,7 +288,13 @@ const Monitoring = () => {
               }),
             }}
           >
-            <MonitoringGrid grid={grid} floorIds={memoizedFloorIds} screenSettings={screenSettings} />
+            <MonitoringGrid
+              grid={grid}
+              floorIds={memoizedFloorIds}
+              screenSettings={screenSettings}
+              screenDisplay={memoizedFloorIds2}
+              screenType={memoizedScreenType}
+            />
             {/* {renderLayout()} */}
           </Box>
         </Box>

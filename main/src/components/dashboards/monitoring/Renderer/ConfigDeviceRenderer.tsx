@@ -36,6 +36,7 @@ const DeviceRenderer: React.FC<{
   devices: FloorplanDeviceType[];
   areas: MaskedAreaType[];
   showAreas: boolean;
+    showGates: boolean;
   topic: string;
   focusArea?: { minX: number; maxX: number; minY: number; maxY: number } | null;
 }> = ({
@@ -47,6 +48,7 @@ const DeviceRenderer: React.FC<{
   devices,
   areas,
   showAreas,
+    showGates,
   focusArea,
 }) => {
   const [image, setImage] = useState<HTMLImageElement | null>(null);
@@ -212,7 +214,7 @@ const DeviceRenderer: React.FC<{
             />
           ))}
         {/*Render devices*/}
-        {devices.map((device) => renderDeviceShape(device))}
+        {showGates && devices.map((device) => renderDeviceShape(device))}
         {focusArea && focusAreaDot(focusArea)}
       </Layer>
     </Stage>

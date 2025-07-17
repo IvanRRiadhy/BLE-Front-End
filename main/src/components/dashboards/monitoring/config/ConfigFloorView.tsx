@@ -40,6 +40,7 @@ const ConfigFloorView: React.FC<{
   );
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorplan);
   const [showArea, setShowArea] = useState(true);
+  const [showGates, setShowGates] = useState(true);
   const [focusArea, setFocusArea] = useState<{
     minX: number;
     minY: number;
@@ -48,7 +49,6 @@ const ConfigFloorView: React.FC<{
     centerX: number;
     centerY: number;
   } | null>(null);
-
   useEffect(() => {
     // console.log('FloorChanged:', floor);
   }, [floor]);
@@ -459,6 +459,16 @@ const ConfigFloorView: React.FC<{
             }
             label="Show Areas"
           />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showGates}
+                onChange={() => setShowGates((prev) => !prev)}
+                color="primary"
+              />
+            }
+            label="Show Gateways"
+          />
         </Box>
       )}
       {/* Zoomable Content */}
@@ -556,6 +566,7 @@ const ConfigFloorView: React.FC<{
                     scale={scale}
                     areas={filteredArea}
                     showAreas={showArea}
+                    showGates={showGates}
                     topic={activeFloorplan.toUpperCase()}
                   />
                 </Box>
