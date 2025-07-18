@@ -1,13 +1,10 @@
 import {
-  Avatar,
   Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
-  Grid,
   TextField,
   Typography,
   TableContainer,
@@ -22,12 +19,12 @@ import {
 import { Stage, Layer, Image as KonvaImage } from 'react-konva';
 import { useEffect, useRef, useState } from 'react';
 import dayjs from 'dayjs'; // make sure to install dayjs
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
-import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
-import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+// import { floorType } from 'src/store/apps/crud/floor';
+// import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { memberType } from 'src/store/apps/crud/member';
-import { fetchTrackingTrans, trackingTransType } from 'src/store/apps/crud/trackingTrans';
+// import { fetchTrackingTrans, trackingTransType } from 'src/store/apps/crud/trackingTrans';
 import { masterVisitorType } from 'src/store/apps/crud/visitor';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
@@ -69,40 +66,40 @@ const TrackingDetailPopup = ({
   setOpenTrackDetail,
 }: TrackingDetailPopupProps) => {
   const dispatch = useDispatch();
-  const theme = useTheme();
-  const { t } = useTranslation();
+  // const theme = useTheme();
+  // const { t } = useTranslation();
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
   const [activeFloorImage, setActiveFloorImage] = useState<string | null>(null);
   const [startDate, setStartDate] = useState(dayjs().startOf('day').format('YYYY-MM-DDTHH:mm'));
   const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DDTHH:mm'));
   const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null);
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
-
+console.log(personId);
   const [isPlaying, setIsPlaying] = useState(false);
-  const playbackInterval = useRef<NodeJS.Timeout | null>(null);
+  // const playbackInterval = useRef<NodeJS.Timeout | null>(null);
   const playbackTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const [animatedPosition, setAnimatedPosition] = useState<{ x: number; y: number } | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
-    dispatch(fetchTrackingTrans());
+    // dispatch(fetchTrackingTrans());
     // dispatch(fetchFloors());
-    dispatch(fetchMaskedAreas());
+    // dispatch(fetchMaskedAreas());
     dispatch(fetchBuildings());
     dispatch(fetchFloorplan());
   }, [dispatch]);
 
-  const trackingData: trackingTransType[] = useSelector(
-    (state: RootState) => state.trackingTransReducer.trackingTrans,
-  );
-  const maskedAreaData: MaskedAreaType[] = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreas,
-  );
+  // const trackingData: trackingTransType[] = useSelector(
+  //   (state: RootState) => state.trackingTransReducer.trackingTrans,
+  // );
+  // const maskedAreaData: MaskedAreaType[] = useSelector(
+  //   (state: RootState) => state.maskedAreaReducer.maskedAreas,
+  // );
   const floorplanData: FloorplanType[] = useSelector(
     (state: RootState) => state.floorplanReducer.floorplans,
   );
-  const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
+  // const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
   const buildingData: BuildingType[] = useSelector(
     (state: RootState) => state.buildingReducer.buildings,
   );

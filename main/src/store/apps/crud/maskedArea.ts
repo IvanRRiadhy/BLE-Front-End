@@ -1,6 +1,6 @@
 import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch } from "src/store/Store";
+import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { FloorplanType } from "./floorplan";
@@ -8,7 +8,33 @@ import { floorType } from "./floor";
 import { restrictedStatus } from "src/types/crud/input";
 
 const API_URL = '/api/FloorplanMaskedArea/';
+const API_DT_URL = '/api/FloorplanMaskedArea/filter/';
 
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    searchValue: string,
+}
+
+
+export type GetMaskedAreaResponse = {
+    RecordsTotal : number;
+    RecordsFiltered : number;
+    Draw : number;
+    status : string;
+    status_code : number;
+    title : string;
+    msg : string;
+    collection : {
+        data : MaskedAreaType[];
+        draw : number;
+        recordsTotal : number;
+        recordsFiltered : number;
+    };
+};
 
 type Nodes = {
     id: string;
@@ -51,6 +77,9 @@ interface StateType {
     deletedMaskedArea?: MaskedAreaType[];
     addedMaskedArea?: MaskedAreaType[];
     drawingMaskedArea?: string;
+    maskedAreaTotalCount: number;
+    maskedAreaFilteredCount: number;
+    maskedAreaFilter: GetFilter;
 }
 
 const initialState: StateType = {
@@ -63,6 +92,16 @@ const initialState: StateType = {
     deletedMaskedArea: [],
     addedMaskedArea: [],
     drawingMaskedArea: "",
+    maskedAreaTotalCount: 0,
+    maskedAreaFilteredCount: 0,
+    maskedAreaFilter: {
+        Draw: 1,
+        Start: 0,
+        Length: 5,
+        SortColumn: "updatedAt",
+        SortDir: "asc",
+        searchValue: "",
+    }
 };
 
 export const MaskedAreaSlice = createSlice({
@@ -195,6 +234,9 @@ export const MaskedAreaSlice = createSlice({
             state.drawingMaskedArea = action.payload;
             console.log("Drawing Masked Area: ", action.payload);
         },
+        UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
+          state.maskedAreaFilter = { ...state.maskedAreaFilter, ...action.payload };
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -218,7 +260,11 @@ export const MaskedAreaSlice = createSlice({
             })
             .addCase(deleteMaskedArea.rejected, (_state, action) => {
                 console.error("Delete failed: ", action.payload);
-            });
+            })
+            .addCase(fetchMaskedAreaDT.fulfilled, (state, action) => {
+                state.maskedAreaTotalCount = action.payload.recordsTotal;
+                state.maskedAreaFilteredCount = action.payload.recordsFiltered;
+            })
     },
 });
 
@@ -236,6 +282,7 @@ export const {
     DrawingMaskedArea,
     ResetAreaState,
     EditMaskedAreaPosition,
+    UpdateFilter,
 } = MaskedAreaSlice.actions;    
 
 export const fetchMaskedAreas = () => async (dispatch: AppDispatch) => {
@@ -254,6 +301,21 @@ export const fetchMaskedAreas = () => async (dispatch: AppDispatch) => {
         console.log(error);
     }
 }
+
+export const fetchMaskedAreaDT = createAsyncThunk(
+    "maskedAreas/fetchMaskedAreaDT", 
+    async (filter: any, { rejectWithValue }) => {
+        try {
+            const response = await axiosServices.get(`${API_DT_URL}`, filter);
+            dispatch(GetMaskedArea([response.data.collection.data]));
+            console.log("Fetch masked areas", response.data.collection);
+            return response.data;
+        } catch (error: any) {
+            console.error("Error fetching masked area:", error);
+            return rejectWithValue(error.response?.data || "Unknown error");
+        }
+    }
+)
 
 export const addMaskedArea = createAsyncThunk("maskedAreas/addMaskedArea", async (maskedArea: MaskedAreaType, { rejectWithValue }) => {
     try {

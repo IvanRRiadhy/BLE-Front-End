@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'src/store/Store';
 import { toggleMobileSidebar } from 'src/store/customizer/CustomizerSlice';
 import SidebarItems from '../../vertical/sidebar/SidebarItems';
 import { AppState } from 'src/store/Store';
+import TimeAndFilter from './TimeAndFilter';
 
 const Navigation = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
@@ -32,7 +33,10 @@ const Navigation = () => {
             maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',
           }}
         >
-          <NavListing />
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <NavListing />
+            <TimeAndFilter />
+          </Box>
         </Container>
       </Box>
     );

@@ -1,10 +1,37 @@
 import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch, RootState } from "src/store/Store";
+import { AppDispatch, dispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 const API_URL = "/api/MstOrganization/";
+const API_DT_URL = "/api/MstOrganization/filter/";
+
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    searchValue: string,
+}
+
+
+export type GetOrganizationResponse = {
+    RecordsTotal : number;
+    RecordsFiltered : number;
+    Draw : number;
+    status : string;
+    status_code : number;
+    title : string;
+    msg : string;
+    collection : {
+        data : OrganizationType[];
+        draw : number;
+        recordsTotal : number;
+        recordsFiltered : number;
+    };
+};
 
 export interface OrganizationType {
     id: string,
@@ -19,15 +46,28 @@ export interface OrganizationType {
 }
 
 interface StateType {
-    organizations: OrganizationType[],
-    organizationSearch: string,
-    selectedOrganization?: OrganizationType | null
+    organizations: OrganizationType[];
+    organizationSearch: string;
+    selectedOrganization?: OrganizationType | null;
+    organizationTotalCount: number;
+    organizationFilteredCount: number;
+    organizationFilter: GetFilter;
 }
 
 const initialState: StateType = {
     organizations: [],
     organizationSearch: "",
-    selectedOrganization: null
+    selectedOrganization: null,
+    organizationTotalCount: 0,
+    organizationFilteredCount: 0,
+    organizationFilter: {
+        Draw: 1,
+        Start: 0,
+        Length: 5,
+        SortColumn: "updatedAt",
+        SortDir: "desc",
+        searchValue: "",
+    }
 };
 
 export const OrganizationSlice = createSlice({
@@ -45,6 +85,9 @@ export const OrganizationSlice = createSlice({
         SearchOrganization: (state, action: PayloadAction<string>) => {
             state.organizationSearch = action.payload;
         },
+        UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
+          state.organizationFilter = { ...state.organizationFilter, ...action.payload };
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -68,6 +111,10 @@ export const OrganizationSlice = createSlice({
             })
             .addCase(deleteOrganization.rejected, (_state, action) => {
                 console.error("Delete failed: ", action.payload);
+            })
+            .addCase(fetchOrganizationDT.fulfilled, (state, action) => {
+                state.organizationTotalCount = action.payload.recordsTotal;
+                state.organizationFilteredCount = action.payload.recordsFiltered;
             });
     }
 });
@@ -87,7 +134,8 @@ export const selectOrganization = (organizationID: string) => async (dispatch: A
 export const {
     GetOrganization,
     SelectOrganization, 
-    SearchOrganization
+    SearchOrganization,
+    UpdateFilter
 } = OrganizationSlice.actions;
 
 export const fetchOrganizations = () => async (dispatch: AppDispatch) => {
@@ -98,6 +146,21 @@ export const fetchOrganizations = () => async (dispatch: AppDispatch) => {
         console.log("Error fetching organizations:", err);
     }
 };
+
+export const fetchOrganizationDT = createAsyncThunk(
+    "organizations/fetchOrganizationDT",
+    async (filter: any, { rejectWithValue }) => {
+        try {
+            const response = await axiosServices.post(API_DT_URL, filter);
+            dispatch(GetOrganization(response.data.collection.data || []));
+            console.log("Fetch organizations", response.data.collection);
+            return response.data.collection;
+        } catch (error: any) {
+            console.error("Error fetching organizations:", error);
+            return rejectWithValue(error.response?.data || "Unknown error");
+        }
+    }
+)
 
 export const addOrganization = createAsyncThunk("organizations/addOrganization", async (organization: OrganizationType) => {
     try {

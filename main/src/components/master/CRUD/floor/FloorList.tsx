@@ -17,41 +17,66 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  TableSortLabel,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import { deleteFloor, fetchFloors, floorType } from 'src/store/apps/crud/floor';
+import { deleteFloor, fetchFloorDT,  floorType, UpdateFilter } from 'src/store/apps/crud/floor';
 import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import AddEditFloor from './AddEditFloor';
 // import { useTranslation } from 'react-i18next';
 
 const BASE_URL = 'http://192.168.1.116:5000';
 
+const columns = [
+  { label: 'Building Name', field: 'Building.Name', sortAble: true },
+  { label: 'Floor Name', field: 'name', sortAble: true },
+  { label: 'Floor Image', field: '', sortAble: false },
+  { label: 'Floor Dimension (meter)', field: '', sortAble: false },
+  { label: 'Engine Floor', field: 'engineFloorId', sortAble: true },
+];
+
 const FloorList = () => {
+    const dispatch: AppDispatch = useDispatch();
+  const floorData = useSelector((state: RootState) => state.floorReducer.floors);
+  // const floorTotalCount = useSelector((state: RootState) => state.floorReducer.floorTotalCount);
+  const floorFilteredCount = useSelector(
+    (state: RootState) => state.floorReducer.floorFilteredCount,
+  );
+  const floorFilter = useSelector((state: RootState) => state.floorReducer.floorFilter);
   // const { t } = useTranslation();
   // Pagination State
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
-  // Handle page change
-  const handleChangePage = (event: unknown, newPage: number) => {
-    console.log(event);
-    setPage(newPage);
-  };
+  const page = Math.floor(floorFilter.Start / floorFilter.Length);
+const rowsPerPage = floorFilter.Length;
+const orderBy = floorFilter.SortColumn;
+const order = floorFilter.SortDir;
 
-  // Handle rows per page change
+const handleChangePage = (_: unknown, newPage: number) => {
+  dispatch(UpdateFilter({ Start: newPage * floorFilter.Length }));
+};
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-  const dispatch: AppDispatch = useDispatch();
-  const floorData = useSelector((state: RootState) => state.floorReducer.floors);
+  const newLength = parseInt(event.target.value, 10);
+  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+};
+  const handleSort = (column: string) => {
+  const isAsc = floorFilter.SortColumn === column && floorFilter.SortDir === 'asc';
+  dispatch(UpdateFilter({
+    SortColumn: column,
+    SortDir: isAsc ? 'desc' : 'asc',
+    Start: 0,
+  }));
+};
+
+  useEffect(() => {
+    dispatch(fetchFloorDT(floorFilter));
+  }, [floorFilter, dispatch]);
+
   const buildingData: BuildingType[] = useSelector(
     (state: RootState) => state.buildingReducer.buildings,
   );
 
   useEffect(() => {
-    dispatch(fetchFloors());
     dispatch(fetchBuildings());
   }, [dispatch]);
 
@@ -96,15 +121,20 @@ const FloorList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {[
-                      'Building Name',
-                      'Floor Name',
-                      'Floor Image',
-                      'Floor Dimension (meter)',
-                      'Engine Floor',
-                    ].map((header) => (
-                      <TableCell key={header}>
-                        <Typography variant="h6">{header}</Typography>
+                    {/* Main Table Header */}
+                    {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
+                          >
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
                       </TableCell>
                     ))}
                     {/* Right Sticky Empty Column */}
@@ -116,58 +146,56 @@ const FloorList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {floorData
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((floor: floorType, index) => (
-                      <TableRow key={index}>
-                        <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                  {floorData.map((floor: floorType, index) => (
+                    <TableRow key={index}>
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                      >
+                        {index + 1 + page * rowsPerPage}
+                      </TableCell>
+                      <TableCell>{getbuildingName(floor.buildingId)}</TableCell>
+                      <TableCell>{floor.name}</TableCell>
+                      <TableCell>
+                        {floor.floorImage ? (
+                          <img
+                            src={`${BASE_URL}${floor.floorImage}`}
+                            alt="Floor"
+                            style={{ width: 80, height: 80, objectFit: 'cover' }}
+                          />
+                        ) : (
+                          'No Image'
+                        )}
+                      </TableCell>
+                      <TableCell>{`(${floor.floorX}, ${floor.floorY})`}</TableCell>
+                      <TableCell>{floor.engineFloorId}</TableCell>
+                      <TableCell
+                        sx={{
+                          position: 'sticky',
+                          right: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          gap: 1,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <AddEditFloor type="edit" floor={floor} />
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleOpenDeleteDialog(floor)}
                         >
-                          {index + 1}
-                        </TableCell>
-                        <TableCell>{getbuildingName(floor.buildingId)}</TableCell>
-                        <TableCell>{floor.name}</TableCell>
-                        <TableCell>
-                          {floor.floorImage ? (
-                            <img
-                              src={`${BASE_URL}${floor.floorImage}`}
-                              alt="Floor"
-                              style={{ width: 80, height: 80, objectFit: 'cover' }}
-                            />
-                          ) : (
-                            'No Image'
-                          )}
-                        </TableCell>
-                        <TableCell>{`(${floor.floorX}, ${floor.floorY})`}</TableCell>
-                        <TableCell>{floor.engineFloorId}</TableCell>
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            gap: 1,
-                            alignItems: 'center',
-                          }}
-                        >
-                          <AddEditFloor type="edit" floor={floor} />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(floor)}
-                          >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          <IconTrash size={20} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={floorData.length}
+              count={floorFilteredCount}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

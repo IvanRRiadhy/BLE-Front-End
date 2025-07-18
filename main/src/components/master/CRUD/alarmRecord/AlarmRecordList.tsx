@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   Grid2 as Grid,
@@ -11,38 +11,54 @@ import {
   TableRow,
   Typography,
   TablePagination,
+  TableSortLabel,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { useTranslation } from 'react-i18next';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import { fetchAlarm, AlarmType } from 'src/store/apps/crud/alarmRecordTracking';
+import { AlarmType, fetchAlarmDT, UpdateFilter } from 'src/store/apps/crud/alarmRecordTracking';
+
+const columns = [
+  { label: 'Time', field: 'time', sortAble: true },
+  { label: 'Visitor Name', field: 'Visitor.Name', sortAble: true },
+  { label: 'Reader', field: 'reader', sortAble: true }, 
+    { label: 'Alarm Status', field: 'alarmStatus', sortAble: true },
+  { label: 'Action Status', field: 'actionStatus', sortAble: true },
+  { label: 'Area Name', field: 'Area.Name', sortAble: true }, 
+];
 
 const AlarmRecordList = () => {
-  const { t } = useTranslation();
-  // Pagination State
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
-  // Handle page change
-  const handleChangePage = (event: unknown, newPage: number) => {
-    console.log(event);
-    setPage(newPage);
-  };
-
-  // Handle rows per page change
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-  const dispatch: AppDispatch = useDispatch();
+    const dispatch: AppDispatch = useDispatch();
   const alarmRecordData: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
   );
+  // const alarmRecordTotalCount: number = useSelector(
+  //   (state: RootState) => state.alarmReducer.alarmRecordTotalCount,
+  // );
+  const AlarmRecordFilteredCount: number = useSelector(
+    (state: RootState) => state.alarmReducer.alarmRecordFilteredCount,
+  );
+  const AlarmRecordFilter = useSelector((state: RootState) => state.alarmReducer.alarmRecordFilter);
+  const { t } = useTranslation();
+  // Pagination State
+  const page = Math.floor(AlarmRecordFilter.Start / AlarmRecordFilter.Length);
+const rowsPerPage = AlarmRecordFilter.Length;
+const orderBy = AlarmRecordFilter.SortColumn;
+const order = AlarmRecordFilter.SortDir;
+
+const handleChangePage = (_: unknown, newPage: number) => {
+  dispatch(UpdateFilter({ Start: newPage * AlarmRecordFilter.Length }));
+};
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const newLength = parseInt(event.target.value, 10);
+  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+};
 
   useEffect(() => {
-    console.log('Fetching alarm records...');
-    dispatch(fetchAlarm());
-  }, [dispatch]);
+    dispatch(fetchAlarmDT(AlarmRecordFilter));
+  }, [AlarmRecordFilter, dispatch]);
+
 
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
@@ -61,6 +77,15 @@ const AlarmRecordList = () => {
     )}`;
   };
 
+  const handleSort = (column: string) => {
+  const isAsc = AlarmRecordFilter.SortColumn === column && AlarmRecordFilter.SortDir === 'asc';
+  dispatch(UpdateFilter({
+    SortColumn: column,
+    SortDir: isAsc ? 'desc' : 'asc',
+    Start: 0,
+  }));
+};
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -74,16 +99,19 @@ const AlarmRecordList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {[
-                      'Time',
-                      'Visitor Name',
-                      'Reader',
-                      'Alarm Status',
-                      'Action Status',
-                      'Area Name',
-                    ].map((header) => (
-                      <TableCell key={header}>
-                        <Typography variant="h6">{header}</Typography>
+                    {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
+                          >
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
                       </TableCell>
                     ))}
                     {/* Right Sticky Empty Column */}
@@ -96,13 +124,12 @@ const AlarmRecordList = () => {
                 </TableHead>
                 <TableBody>
                   {alarmRecordData
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((alarmRecordData, index) => (
                       <TableRow key={index}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
                         >
-                          {index + 1}
+                          {index + 1 + page * rowsPerPage}
                         </TableCell>
                         <TableCell>{formatTime(alarmRecordData.timestamp)}</TableCell>
                         <TableCell>{alarmRecordData.visitor?.name}</TableCell>
@@ -141,7 +168,7 @@ const AlarmRecordList = () => {
         {/* Pagination */}
         <TablePagination
           component="div"
-          count={alarmRecordData.length}
+          count={AlarmRecordFilteredCount}
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}

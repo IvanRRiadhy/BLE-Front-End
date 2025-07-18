@@ -17,39 +17,64 @@ import {
   DialogContentText,
   Button,
   DialogActions,
+  TableSortLabel,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import { fetchBleReaders, bleReaderType, deleteBleReader } from 'src/store/apps/crud/bleReader';
+import {
+  bleReaderType,
+  deleteBleReader,
+  fetchBleReaderDT,
+  UpdateFilter,
+} from 'src/store/apps/crud/bleReader';
 import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
 import AddEditBleReader from './AddEditBleReader';
 // import { useTranslation } from 'react-i18next';
 
-const BleReaderList = () => {
-  // const { t } = useTranslation();
-  // Pagination State
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
-  // Handle page change
-  const handleChangePage = (event: unknown, newPage: number) => {
-    console.log(event);
-    setPage(newPage);
-  };
+const columns = [
+  { label: 'Brand Name', field: 'Brand.Name', sortAble: true },
+  { label: 'Name', field: 'name', sortAble: true },
+  { label: 'IP', field: 'ip', sortAble: true },
+  { label: 'GMAC', field: 'gmac', sortAble: true },
+  { label: 'Engine Reader', field: 'engineFloorId', sortAble: true },
+];
 
-  // Handle rows per page change
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-  const dispatch: AppDispatch = useDispatch();
+const BleReaderList = () => {
+    const dispatch: AppDispatch = useDispatch();
   const bleReaderData = useSelector((state: RootState) => state.bleReaderReducer.bleReaders);
+  const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
   const brandData = useSelector((state: RootState) => state.brandReducer.brands);
+  // const bleReaderTotalCount = useSelector(
+  //   (state: RootState) => state.bleReaderReducer.bleReaderTotalCount,
+  // );
+  const bleReaderFilterCount = useSelector(
+    (state: RootState) => state.bleReaderReducer.bleReaderFilterCount,
+  );
+  // const { t } = useTranslation();
+
+  // Pagination State
+  const page = Math.floor(bleReaderFilter.Start / bleReaderFilter.Length);
+const rowsPerPage = bleReaderFilter.Length;
+const orderBy = bleReaderFilter.SortColumn;
+const order = bleReaderFilter.SortDir;
+
+const handleChangePage = (_: unknown, newPage: number) => {
+  dispatch(UpdateFilter({ Start: newPage * bleReaderFilter.Length }));
+};
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const newLength = parseInt(event.target.value, 10);
+  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+};
 
   useEffect(() => {
-    dispatch(fetchBleReaders());
+    // dispatch(fetchBleReaders());
     dispatch(fetchBrands());
   }, [dispatch]);
+
+  useEffect(() => {
+  dispatch(fetchBleReaderDT(bleReaderFilter));
+}, [bleReaderFilter, dispatch]);
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -74,6 +99,21 @@ const BleReaderList = () => {
     handleCloseDeleteDialog();
   };
 
+  // const handleSort = (column: string) => {
+  //   const isAsc = orderBy === column && order === 'asc';
+  //   setOrder(isAsc ? 'desc' : 'asc');
+  //   setOrderBy(column);
+  // };
+  const handleSort = (column: string) => {
+  const isAsc = bleReaderFilter.SortColumn === column && bleReaderFilter.SortDir === 'asc';
+  dispatch(UpdateFilter({
+    SortColumn: column,
+    SortDir: isAsc ? 'desc' : 'asc',
+    Start: 0,
+  }));
+};
+
+
   const getBrandName = (brandID: string) => {
     const brand = brandData.find((b: BrandType) => b.id === brandID);
     return brand ? brand.name : 'Unknown Brand';
@@ -92,20 +132,20 @@ const BleReaderList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {[
-                      'Brand Name',
-                      'Name',
-                      'MAC',
-                      'IP',
-                      'GMAC',
-                      'locationX',
-                      'locationY',
-                      'locationPxX',
-                      'locationPxY',
-                      'engineReaderId',
-                    ].map((header) => (
-                      <TableCell key={header}>
-                        <Typography variant="h6">{header}</Typography>
+                    {/* Main Table Header */}
+                    {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
+                          >
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
                       </TableCell>
                     ))}
                     {/* Right Sticky Empty Column */}
@@ -117,54 +157,47 @@ const BleReaderList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {bleReaderData
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((bleReader: bleReaderType, index) => (
-                      <TableRow key={index}>
-                        <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                  {bleReaderData.map((bleReader: bleReaderType, index) => (
+                    <TableRow key={index}>
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                      >
+                        {index + 1 + page * rowsPerPage}
+                      </TableCell>
+                      <TableCell>{getBrandName(bleReader.brandId)}</TableCell>
+                      <TableCell>{bleReader.name}</TableCell>
+                      <TableCell>{bleReader.ip}</TableCell>
+                      <TableCell>{bleReader.gmac}</TableCell>
+                      <TableCell>{bleReader.engineReaderId}</TableCell>
+                      <TableCell
+                        sx={{
+                          position: 'sticky',
+                          right: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          display: 'flex',
+                          gap: 1,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <AddEditBleReader type="edit" bleReader={bleReader} />
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleOpenDeleteDialog(bleReader)}
                         >
-                          {index + 1}
-                        </TableCell>
-                        <TableCell>{getBrandName(bleReader.brandId)}</TableCell>
-                        <TableCell>{bleReader.name}</TableCell>
-                        <TableCell>{bleReader.mac}</TableCell>
-                        <TableCell>{bleReader.ip}</TableCell>
-                        <TableCell>{bleReader.gmac}</TableCell>
-                        <TableCell>{bleReader.locationX}</TableCell>
-                        <TableCell>{bleReader.locationY}</TableCell>
-                        <TableCell>{bleReader.locationPxX}</TableCell>
-                        <TableCell>{bleReader.locationPxY}</TableCell>
-                        <TableCell>{bleReader.engineReaderId}</TableCell>
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            display: 'flex',
-                            gap: 1,
-                            alignItems: 'center',
-                          }}
-                        >
-                          <AddEditBleReader type="edit" bleReader={bleReader} />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(bleReader)}
-                          >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          <IconTrash size={20} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={bleReaderData.length}
+              count={bleReaderFilterCount}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

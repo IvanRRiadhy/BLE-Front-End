@@ -26,7 +26,7 @@ import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
+import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { CCTVType, fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
 
 interface configSidebarProps {

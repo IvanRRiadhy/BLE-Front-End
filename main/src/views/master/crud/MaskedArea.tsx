@@ -14,7 +14,7 @@ import AppCard from 'src/components/shared/AppCard';
 import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
-import AddEditMaskedArea from 'src/components/master/CRUD/maskedArea/AddEditMaskedArea';
+// import AddEditMaskedArea from 'src/components/master/CRUD/maskedArea/AddEditMaskedArea';
 import MaskedAreaList2 from 'src/components/master/CRUD/maskedArea/MaskedAreaList2';
 
 interface cardType {

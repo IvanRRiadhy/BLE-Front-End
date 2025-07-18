@@ -1,10 +1,37 @@
 import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch, RootState } from "src/store/Store";
+import { AppDispatch, dispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 const API_URL = "/api/MstIntegration/";
+const API_DT_URL = "/api/MstIntegration/filter/";
+
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    searchValue: string,
+}
+
+
+export type GetIntegrationResponse = {
+    RecordsTotal : number;
+    RecordsFiltered : number;
+    Draw : number;
+    status : string;
+    status_code : number;
+    title : string;
+    msg : string;
+    collection : {
+        data : IntegrationType[];
+        draw : number;
+        recordsTotal : number;
+        recordsFiltered : number;
+    };
+};
 
 export interface IntegrationType {
     id: string,
@@ -27,12 +54,25 @@ interface StateType {
     integrations: IntegrationType[];
     integrationSearch: string;
     selectedIntegration?: IntegrationType | null;
+    IntegrationTotalCount: number;
+    IntegrationFilteredCount: number;
+    IntegrationFilter: GetFilter;
 }
 
 const initialState: StateType = {
     integrations: [],
     integrationSearch: "",
     selectedIntegration: null,
+    IntegrationTotalCount: 0,
+    IntegrationFilteredCount: 0,
+    IntegrationFilter: {
+        Draw: 1,
+        Start: 0,
+        Length: 5,
+        SortColumn: "updatedAt",
+        SortDir: "desc",
+        searchValue: "",
+    },
 };
 
 export const IntegrationSlice = createSlice({
@@ -50,6 +90,9 @@ export const IntegrationSlice = createSlice({
             const selected = state.integrations.find((integration: IntegrationType) => integration.id === action.payload);
             state.selectedIntegration = selected || null;
         },
+        UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
+          state.IntegrationFilter = { ...state.IntegrationFilter, ...action.payload };
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -78,6 +121,13 @@ export const IntegrationSlice = createSlice({
             .addCase(deleteIntegration.rejected, (_state, action) => {
                 console.error("Delete failed: ", action.payload);
             })
+            .addCase(fetchIntegrationDT.fulfilled, (state, action) => {
+                state.IntegrationTotalCount = action.payload.recordsTotal;
+                state.IntegrationFilteredCount = action.payload.recordsFiltered;
+            })
+            .addCase(fetchIntegrationDT.rejected, (_state, action) => {
+                console.error("Fetch failed: ", action.payload);
+            });
         }
 });
 
@@ -99,6 +149,7 @@ export const {
     GetIntegrations,
     SearchIntegration,
     SelectIntegration,
+    UpdateFilter
 } = IntegrationSlice.actions;
 
 export const fetchIntegrations = () => async (dispatch: AppDispatch) => {
@@ -109,6 +160,21 @@ export const fetchIntegrations = () => async (dispatch: AppDispatch) => {
         console.error("Error fetching integrations:", err);
     }
 };
+
+export const fetchIntegrationDT = createAsyncThunk(
+    "integrations/fetchIntegrationDT",
+    async (filter: any, { rejectWithValue }) => {
+        try {
+            const response = await axiosServices.post(API_DT_URL, filter);
+            dispatch(GetIntegrations(response.data.collection.data || []));
+            console.log("Fetch integrations", response.data.collection);
+            return response.data.collection;
+        } catch (error: any) {
+            console.error("Error fetching integrations:", error);
+            return rejectWithValue(error.response?.data || "Unknown error");
+        }
+    }
+)
 
 export const addIntegration = createAsyncThunk("integrations/addIntegration", async (integration: IntegrationType, { rejectWithValue }) => {
     try {

@@ -7,6 +7,33 @@ import { MaskedAreaType } from "./maskedArea";
 import { bleReaderType } from "./bleReader";
 
 const API_URL = "/api/TrackingTransaction/";
+const API_DT_URL = "/api/TrackingTransaction/filter/";
+
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    searchValue: string,
+}
+
+
+export type GetTrackingTransResponse = {
+    RecordsTotal : number;
+    RecordsFiltered : number;
+    Draw : number;
+    status : string;
+    status_code : number;
+    title : string;
+    msg : string;
+    collection : {
+        data : trackingTransType[];
+        draw : number;
+        recordsTotal : number;
+        recordsFiltered : number;
+    };
+};
 
 export interface trackingTransType {
     id: string,
@@ -28,12 +55,16 @@ interface StateType {
     trackingTrans: trackingTransType[];
     trackingTransSearch: string;
     selectedTrackingTrans?: trackingTransType | null;
+    trackingTransTotalCount: number;
+    trackingTransFilteredCount: number;
 }
 
 const initialState: StateType = {
     trackingTrans: [],
     trackingTransSearch: "",
     selectedTrackingTrans: null,
+    trackingTransTotalCount: 0,
+    trackingTransFilteredCount: 0,
 };
 
 export const TrackingTransSlice = createSlice({
@@ -74,6 +105,10 @@ export const TrackingTransSlice = createSlice({
         .addCase(deleteTrackingTrans.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
         })
+        .addCase(fetchTrackingTransDT.fulfilled, (state, action) => {
+            state.trackingTransTotalCount = action.payload.recordsTotal;
+            state.trackingTransFilteredCount = action.payload.recordsFiltered;
+        })
     },
 });
 
@@ -88,6 +123,20 @@ export const fetchTrackingTrans = () => async (dispatch: AppDispatch) => {
         console.log(error);
     }
 };
+
+export const fetchTrackingTransDT = createAsyncThunk(
+    "trackingTrans/fetchTrackingTransDT", 
+    async (filter: any, { rejectWithValue }) => {
+        try {
+            const response = await axiosServices.post(API_DT_URL, filter);
+            console.log("Fetch trackingTrans", response.data.collection);
+            return response.data.collection;
+        } catch (error: any) {
+            console.error("Error fetching trackingTrans:", error);
+            return rejectWithValue(error.response?.data || "Unknown error");
+        }
+    }
+)
 
 export const addTrackingTrans = createAsyncThunk("trackingTrans/addTrackingTrans", async (trackingTrans: trackingTransType) => {
     try {

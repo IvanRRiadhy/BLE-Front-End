@@ -18,50 +18,77 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  TableSortLabel,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import {
   IntegrationType,
+  UpdateFilter,
   deleteIntegration,
-  fetchIntegrations,
+  fetchIntegrationDT,
 } from 'src/store/apps/crud/integration';
 import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch } from 'src/store/Store';
 import AddEditIntegration from './AddEditIntegration';
 // import { useTranslation } from 'react-i18next';
-import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
+
+
+
+const columns = [
+  { label: 'Brand Name', field: 'Brand.Name', sortAble: true },
+  { label: 'Integration Type', field: 'integrationType', sortAble: true },
+    { label: 'API Authentication Type', field: 'apiTypeAuth', sortAble: true },
+      { label: 'API URL', field: 'Brand.Name', sortAble: true },
+];
 
 const IntegrationList = () => {
-  // const { t } = useTranslation();
-  // Pagination State
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
-  // Handle page change
-  const handleChangePage = (event: unknown, newPage: number) => {
-    console.log(event);
-    setPage(newPage);
-  };
-
-  // Handle rows per page change
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-  const dispatch: AppDispatch = useDispatch();
+    const dispatch: AppDispatch = useDispatch();
   const IntegrationData: IntegrationType[] = useSelector(
     (state: RootState) => state.integrationReducer.integrations,
   );
-  const brandData: BrandType[] = useSelector((state: RootState) => state.brandReducer.brands);
-  const appData: ApplicationType[] = useSelector(
-    (state: RootState) => state.applicationReducer.applications,
+  // const IntegrationTotalCount = useSelector(
+  //   (state: RootState) => state.integrationReducer.IntegrationTotalCount,
+  // );
+  const IntegrationFilteredCount = useSelector(
+    (state: RootState) => state.integrationReducer.IntegrationFilteredCount,
   );
+  const IntegrationFilter = useSelector(
+    (state: RootState) => state.integrationReducer.IntegrationFilter,
+  )
+  // const { t } = useTranslation();
+  // Pagination State
+  const page = Math.floor(IntegrationFilter.Start / IntegrationFilter.Length);
+const rowsPerPage = IntegrationFilter.Length;
+const orderBy = IntegrationFilter.SortColumn;
+const order = IntegrationFilter.SortDir;
+
+const handleChangePage = (_: unknown, newPage: number) => {
+  dispatch(UpdateFilter({ Start: newPage * IntegrationFilter.Length }));
+};
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const newLength = parseInt(event.target.value, 10);
+  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+};
+  const handleSort = (column: string) => {
+  const isAsc = IntegrationFilter.SortColumn === column && IntegrationFilter.SortDir === 'asc';
+  dispatch(UpdateFilter({
+    SortColumn: column,
+    SortDir: isAsc ? 'desc' : 'asc',
+    Start: 0,
+  }));
+};
 
   useEffect(() => {
-    dispatch(fetchIntegrations());
+    dispatch(fetchIntegrationDT(IntegrationFilter));
+  }, [IntegrationFilter, dispatch]);
+
+  const brandData: BrandType[] = useSelector((state: RootState) => state.brandReducer.brands);
+
+  useEffect(() => {
     dispatch(fetchBrands());
-    dispatch(fetchApplications());
   }, [dispatch]);
+
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -86,15 +113,9 @@ const IntegrationList = () => {
     handleCloseDeleteDialog();
   };
 
-
   const getBrandName = (brandId: string) => {
     const brand = brandData.find((b: BrandType) => b.id === brandId);
     return brand ? brand.name : 'Unknown Brand';
-  };
-
-  const getAppName = (appId: string) => {
-    const app = appData.find((a: ApplicationType) => a.id === appId);
-    return app ? app.applicationName : 'Unknown App';
   };
 
   return (
@@ -110,19 +131,19 @@ const IntegrationList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {[
-                      'Brand Name',
-                      'Integration Type',
-                      'API Authentication Type',
-                      'API URL',
-                      'API Authentication Username',
-                      'API Authentication Password',
-                      'API Key Field',
-                      'API Key Value',
-                      'Application Name',
-                    ].map((header) => (
-                      <TableCell key={header}>
-                        <Typography variant="h6">{header}</Typography>
+                     {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
+                          >
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
                       </TableCell>
                     ))}
                     {/* Right Sticky Empty Column */}
@@ -134,23 +155,18 @@ const IntegrationList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {IntegrationData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(
+                  {IntegrationData.map(
                     (integration, index) => (
                       <TableRow key={index}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
                         >
-                          {index + 1}
+                          {index + 1 + page * rowsPerPage}
                         </TableCell>
                         <TableCell>{getBrandName(integration.brandId)}</TableCell>
                         <TableCell>{integration.integrationType}</TableCell>
                         <TableCell>{integration.apiTypeAuth}</TableCell>
                         <TableCell>{integration.apiUrl}</TableCell>
-                        <TableCell>{integration.apiAuthUsername}</TableCell>
-                        <TableCell>{integration.apiAuthPasswd}</TableCell>
-                        <TableCell>{integration.apiKeyField}</TableCell>
-                        <TableCell>{integration.apiKeyValue}</TableCell>
-                        <TableCell>{getAppName(integration.applicationId)}</TableCell>
 
                         <TableCell
                           sx={{
@@ -183,7 +199,7 @@ const IntegrationList = () => {
         {/* Pagination */}
         <TablePagination
           component="div"
-          count={IntegrationData.length}
+          count={IntegrationFilteredCount}
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}

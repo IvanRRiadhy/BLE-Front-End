@@ -1,8 +1,8 @@
-import React, { use, useEffect, useState } from 'react';
+import React, {  useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, Button, Typography } from '@mui/material';
 import { startMQTTclient } from 'src/store/apps/tracking/MQTT';
 import { AlarmType, RefreshAlarmState } from 'src/store/apps/tracking/Alarm';
-import axios from 'axios';
+// import axios from 'axios';
 import { dispatch, useSelector } from 'src/store/Store';
 
 const ALARM_TOPIC = 'alarm/topic';
@@ -30,29 +30,29 @@ const AlarmPopup: React.FC = () => {
   });
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    // Subscribe to the MQTT topic
-    const unsubscribe = startMQTTclient((data: AlarmType | AlarmType[]) => {
-      const parsed = Array.isArray(data) ? data[0] : data;
-      setAlarm(parsed);
-      setOpen(true);
-      // console.log('parsed : ', parsed);
-    }, ALARM_TOPIC);
-    // Cleanup on unmount
-    return () => {
-      if (typeof unsubscribe === 'function') unsubscribe();
-    };
-  }, []);
+  // useEffect(() => {
+  //   // Subscribe to the MQTT topic
+  //   const unsubscribe = startMQTTclient((data: AlarmType | AlarmType[]) => {
+  //     const parsed = Array.isArray(data) ? data[0] : data;
+  //     setAlarm(parsed);
+  //     setOpen(true);
+  //     // console.log('parsed : ', parsed);
+  //   }, ALARM_TOPIC);
+  //   // Cleanup on unmount
+  //   return () => {
+  //     if (typeof unsubscribe === 'function') unsubscribe();
+  //   };
+  // }, []);
 
-  const dummyAlarm = useSelector((state: any) => state.alarmReducer.alarms);
+  // const dummyAlarm = useSelector((state: any) => state.alarmReducer.alarms);
 
-  useEffect(() => {
-    if (dummyAlarm !== undefined) {
-      setOpen(true);
-      setAlarm(dummyAlarm);
-      console.log('dummyAlarm : ', dummyAlarm);
-    }
-  }, [dummyAlarm]);
+  // useEffect(() => {
+  //   if (dummyAlarm !== undefined) {
+  //     setOpen(true);
+  //     setAlarm(dummyAlarm);
+  //     console.log('dummyAlarm : ', dummyAlarm);
+  //   }
+  // }, [dummyAlarm]);
 
   const handleClose = async () => {
     console.log(deactivateAlarm, alarm?.beaconId);

@@ -1,12 +1,39 @@
 import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch } from "src/store/Store";
+import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { masterVisitorType } from "./visitor";
 import { MaskedAreaType } from "./maskedArea";
 
 const API_URL = '/api/VisitorBlacklistArea/';
+const API_DT_URL = '/api/VisitorBlacklistArea/filter/';
+
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    searchValue: string,
+}
+
+
+export type GetBlacklistResponse = {
+    RecordsTotal : number;
+    RecordsFiltered : number;
+    Draw : number;
+    status : string;
+    status_code : number;
+    title : string;
+    msg : string;
+    collection : {
+        data : blacklistType[];
+        draw : number;
+        recordsTotal : number;
+        recordsFiltered : number;
+    };
+};
 
 export interface blacklistType {
     id: string,
@@ -14,18 +41,35 @@ export interface blacklistType {
     visitorId: string,
     visitor?: masterVisitorType,
     floorplanMaskedArea?: MaskedAreaType,
+        createdBy: string,
+    createdAt: string,
+    updatedBy: string,
+    updatedAt: string,
 }
 
 interface StateType {
     blacklists: blacklistType[];
     blacklistSearch: string;
     selectedBlacklist?: blacklistType | null;
+    blacklistTotalCount: number;
+    blacklistFilteredCount: number;
+    blacklistFilter: GetFilter;
 }
 
 const initialState: StateType = {
     blacklists: [],
     blacklistSearch: "",
     selectedBlacklist: null,
+    blacklistTotalCount: 0,
+    blacklistFilteredCount: 0,
+    blacklistFilter: {
+        Draw: 1,
+        Start: 0,
+        Length: 5,
+        SortColumn: "updatedAt",
+        SortDir: "desc",
+        searchValue: "",
+    },
 };
 
 export const BlacklistSlice = createSlice({
@@ -43,6 +87,9 @@ export const BlacklistSlice = createSlice({
         SearchBlacklist(state, action: PayloadAction<string>){
             state.blacklistSearch = action.payload;
         },
+        UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
+          state.blacklistFilter = { ...state.blacklistFilter, ...action.payload };
+        }
 
     },
     extraReducers: (builder) => {
@@ -67,6 +114,10 @@ export const BlacklistSlice = createSlice({
         })
         .addCase(deleteBlacklist.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
+        })
+        .addCase(fetchBlacklistDT.fulfilled, (state, action) => {
+            state.blacklistTotalCount = action.payload.recordsTotal;
+            state.blacklistFilteredCount = action.payload.recordsFiltered;
         });
     },
 });
@@ -75,6 +126,7 @@ export const {
     GetBlaclist,
     SelectBlacklist,
     SearchBlacklist,
+    UpdateFilter,
 } = BlacklistSlice.actions;
 
 export const fetchBlacklist = () => async (dispatch: AppDispatch) => {
@@ -86,6 +138,21 @@ export const fetchBlacklist = () => async (dispatch: AppDispatch) => {
         console.log("Error: ", err);
     }
 };
+
+export const fetchBlacklistDT = createAsyncThunk(
+    "blacklist/fetchBlacklistDT",
+    async (filter: any, { rejectWithValue }) => {
+        try {
+            const response = await axiosServices.post(API_DT_URL, filter);
+            dispatch(GetBlaclist(response.data.collection.data || []));
+            console.log("Fetch blacklists", response.data.collection);
+            return response.data.collection;
+        } catch (error: any) {
+            console.error("Error fetching blacklists:", error);
+            return rejectWithValue(error.response?.data || "Unknown error");
+        }
+    }
+)
 
 export const addBlacklist = createAsyncThunk("blacklist/addBlacklist", async (formData: FormData) => {
     try {

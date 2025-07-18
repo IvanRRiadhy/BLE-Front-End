@@ -1,22 +1,45 @@
 import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch } from "src/store/Store";
+import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
+
 const API_URL = "/api/MstBleReader/";
+const API_DT_URL = "/api/MstBleReader/filter/";
+
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    searchValue: string,
+}
+
+
+export type GetBleReaderResponse = {
+    RecordsTotal : number;
+    RecordsFiltered : number;
+    Draw : number;
+    status : string;
+    status_code : number;
+    title : string;
+    msg : string;
+    collection : {
+        data : bleReaderType[];
+        draw : number;
+        recordsTotal : number;
+        recordsFiltered : number;
+    };
+};
 
 export interface bleReaderType {
     id: string,
     brandId: string,
     name: string,
-    mac: string,
     gmac: string,
     ip: string,
-    locationX: number,
-    locationY: number,
-    locationPxX: number,
-    locationPxY: number,
     engineReaderId: string,
     createdBy: string,
     createdAt: string,
@@ -30,6 +53,9 @@ interface StateType {
     bleReaderSearch: string;
     selectedBleReader?: bleReaderType | null;
     editedBleReader?: string;
+    bleReaderTotalCount: number;
+    bleReaderFilterCount: number;
+    bleReaderFilter: GetFilter
 }
 
 const initialState: StateType = {
@@ -38,6 +64,16 @@ const initialState: StateType = {
     bleReaderSearch: "",
     selectedBleReader: null,
     editedBleReader: "",
+    bleReaderTotalCount: 0,
+    bleReaderFilterCount: 0,
+    bleReaderFilter: { 
+        Draw: 1, 
+        Start: 0, 
+        Length: 5, 
+        SortColumn: "updatedAt", 
+        SortDir: "desc", 
+        searchValue: "" 
+    },
 };
 
 export const BleReaderSlice = createSlice({
@@ -48,7 +84,10 @@ export const BleReaderSlice = createSlice({
             state.bleReaders = action.payload;
             state.unsavedReaders = action.payload;
         },
-
+        // SetBleReaderCount: (state, action: PayloadAction<number[]>) => {
+        //     state.bleReaderTotalCount = action.payload[0];
+        //     state.bleReaderFilterCount = action.payload[1];
+        // },
         SelectBleReader: (state, action: PayloadAction<string>) => {
             const selected = state.bleReaders.find((bleReader: bleReaderType) => bleReader.id === action.payload);
             state.selectedBleReader = selected || null;
@@ -100,6 +139,9 @@ export const BleReaderSlice = createSlice({
                 payload: {id},
             }),
         },
+UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
+  state.bleReaderFilter = { ...state.bleReaderFilter, ...action.payload };
+}
 
     },
     extraReducers: (builder) => {
@@ -129,6 +171,11 @@ export const BleReaderSlice = createSlice({
         .addCase(deleteBleReader.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
         })
+        .addCase(fetchBleReaderDT.fulfilled, (state, action) => {
+            // console.log("Ble reader DT: ", action.payload.recordsTotal);
+    state.bleReaderTotalCount = action.payload.recordsTotal;
+    state.bleReaderFilterCount = action.payload.recordsFiltered;
+  })
     },
 });
 
@@ -142,16 +189,36 @@ export const {
     SetEditBleReader,
     UpdateBleReader,
     RevertBleReader,
+    UpdateFilter,
 } = BleReaderSlice.actions;
 
 export const fetchBleReaders = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
         dispatch(GetBleReader(response.data?.collection?.data || []));
+
+        console.log("Ble reader: ", response.data?.collection?.data || []);
     } catch (error) {
         console.log(error);
     }
 }
+
+export const fetchBleReaderDT = createAsyncThunk(
+  "bleReaders/fetchBleReaderDT",
+  async (filter: any, { rejectWithValue }) => {
+    try {
+      const response = await axiosServices.post(API_DT_URL, filter);
+        console.log("Ble reader DT: ", response.data);
+        dispatch(GetBleReader(response.data?.collection?.data || []));
+      // Return only the serializable data
+      return response.data.collection; // or just response.data if needed
+    } catch (error: any) {
+      console.error("Error fetching bleReaders:", error);
+      return rejectWithValue(error.response?.data || "Unknown error");
+    }
+  }
+);
+
 
 export const addBleReader = createAsyncThunk(
     "bleReaders/addBleReader",

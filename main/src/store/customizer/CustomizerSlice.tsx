@@ -18,6 +18,7 @@ interface StateType {
   customizer?: boolean;
   isMonitor?: boolean;
   isMonitorSidebar?: boolean;
+  isMainMenu?: boolean;
 }
 
 const initialState: StateType = {
@@ -38,6 +39,7 @@ const initialState: StateType = {
   customizer: true,
   isMonitor: false,
   isMonitorSidebar: false,
+  isMainMenu: false,
 };
 
 export const CustomizerSlice = createSlice({
@@ -87,6 +89,9 @@ export const CustomizerSlice = createSlice({
     setMonitorSidebar: (state: StateType, action) => {
       state.isMonitorSidebar = action.payload;
     },
+    setMainMenu: (state: StateType, action) => {
+      state.isMainMenu = action.payload;
+    },
   },
 });
 
@@ -105,6 +110,7 @@ export const {
   setCustomizer,
   setMonitor,
   setMonitorSidebar,
+  setMainMenu,
 } = CustomizerSlice.actions;
 
 export default CustomizerSlice.reducer;

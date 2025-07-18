@@ -1,10 +1,37 @@
 import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch } from "src/store/Store";
+import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 const API_URL = "/api/MstFloor/";
+const API_DT_URL = "/api/MstFloor/filter/";
+
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    searchValue: string,
+}
+
+
+export type GetFloorResponse = {
+    RecordsTotal : number;
+    RecordsFiltered : number;
+    Draw : number;
+    status : string;
+    status_code : number;
+    title : string;
+    msg : string;
+    collection : {
+        data : floorType[];
+        draw : number;
+        recordsTotal : number;
+        recordsFiltered : number;
+    };
+};
 
 export interface floorType {
     id: string,
@@ -27,12 +54,25 @@ interface StateType {
     floors: floorType[];
     floorSearch: string;
     selectedFloor?: floorType | null;
+    floorTotalCount: number;
+    floorFilteredCount: number;
+    floorFilter: GetFilter;
 }
 
 const initialState: StateType = {
     floors: [],
     floorSearch: "",
     selectedFloor: null,
+    floorTotalCount: 0,
+    floorFilteredCount: 0,
+    floorFilter: {
+        Draw: 1,
+        Start: 0,
+        Length: 5,
+        SortColumn: "updatedAt",
+        SortDir: "desc",
+        searchValue: "",
+    }
 };
 
 export const FloorSlice = createSlice({
@@ -51,6 +91,9 @@ export const FloorSlice = createSlice({
         SearchFloor: (state, action: PayloadAction<string>) => {
             state.floorSearch = action.payload;
         },
+        UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
+          state.floorFilter = { ...state.floorFilter, ...action.payload };
+        }
     },
 
     extraReducers: (builder) => {
@@ -80,6 +123,10 @@ export const FloorSlice = createSlice({
             .addCase(deleteFloor.rejected, (_state, action) => {
                 console.error("Delete failed: ", action.payload);
             })
+            .addCase(fetchFloorDT.fulfilled, (state, action) => {
+                state.floorTotalCount = action.payload.recordsTotal;
+                state.floorFilteredCount = action.payload.recordsFiltered;
+            })
         }
 });
 
@@ -87,6 +134,7 @@ export const {
     GetFloor,
     SelectFloor,
     SearchFloor,
+    UpdateFilter
 } = FloorSlice.actions;
 
 export const fetchFloors = () => async (dispatch: AppDispatch) => {
@@ -98,6 +146,21 @@ export const fetchFloors = () => async (dispatch: AppDispatch) => {
         console.log(error);
     }
 }
+
+export const fetchFloorDT = createAsyncThunk(
+    "floors/fetchFloorDT",
+    async (filter: any, { rejectWithValue }) => {
+        try {
+            const response = await axiosServices.post(API_DT_URL, filter);
+            dispatch(GetFloor(response.data.collection.data || []));
+            console.log("Fetch floors", response.data.collection);
+            return response.data.collection;
+        } catch (error: any) {
+            console.error("Error fetching floors:", error);
+            return rejectWithValue(error.response?.data || "Unknown error");
+        }
+    }
+)
 
 export const addFloor = createAsyncThunk("floors/addFloor", async (formData: FormData, { rejectWithValue }) => {
     try {

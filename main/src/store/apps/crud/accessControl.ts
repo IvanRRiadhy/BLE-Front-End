@@ -1,12 +1,38 @@
 import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch, RootState } from "src/store/Store";
+import { AppDispatch, dispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { IntegrationType } from "./integration";
 import { BrandType } from "./brand";
 
 const API_URL = "/api/MstAccessControl/";
+const API_DT_URL = "/api/MstAccessControl/filter/";
+
+export type GetAccessControlResponse = {
+    RecordsTotal : number;
+    RecordsFiltered : number;
+    Draw : number;
+    status : string;
+    status_code : number;
+    title : string;
+    msg : string;
+    collection : {
+        data : AccessControlType[];
+        draw : number;
+        recordsTotal : number;
+        recordsFiltered : number;
+    };
+};
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    searchValue: string,
+}
+
 
 export interface AccessControlType {
     id: string,
@@ -31,12 +57,25 @@ interface StateType {
     accessControls: AccessControlType[];
     accessControlSearch: string;
     selectedAccessControl?: AccessControlType | null;
+    accessControlTotalCount: number;
+    accessControlFilteredCount: number;
+    accessControlFilter: GetFilter
 }
 
 const initialState: StateType = {
     accessControls: [],
     accessControlSearch: "",
     selectedAccessControl: null,
+    accessControlTotalCount: 0,
+    accessControlFilteredCount: 0,
+    accessControlFilter: {
+        Draw: 1,
+        Start: 0,
+        Length: 5,
+        SortColumn: "updatedAt",
+        SortDir: "desc",
+        searchValue: "",
+    }
 };
 
 export const AccessControlSlice = createSlice({
@@ -56,6 +95,9 @@ export const AccessControlSlice = createSlice({
         SearchAccessControl: (state, action: PayloadAction<string>) => {
             state.accessControlSearch = action.payload;
         },
+        UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
+          state.accessControlFilter = { ...state.accessControlFilter, ...action.payload };
+        }
     },
 
     extraReducers: (builder) => {
@@ -84,7 +126,11 @@ export const AccessControlSlice = createSlice({
         })
         .addCase(deleteAccessControl.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
-        });
+        })
+        .addCase(fetchAccessControlsDT.fulfilled, (state, action) => {
+            state.accessControlTotalCount = action.payload.recordsTotal;
+            state.accessControlFilteredCount = action.payload.recordsFiltered;
+        })
     }
 });
 
@@ -100,7 +146,7 @@ export const selectAccessControl = (accessControlID: string) =>
     }
 }
     
-export const { GetAccessControls, SelectAccessControl, SearchAccessControl } = AccessControlSlice.actions;
+export const { GetAccessControls, SelectAccessControl, SearchAccessControl, UpdateFilter } = AccessControlSlice.actions;
 
 export const fetchAccessControls = () => async (dispatch: AppDispatch) => {
     try {
@@ -110,6 +156,21 @@ export const fetchAccessControls = () => async (dispatch: AppDispatch) => {
         console.log("Error fetching accessControls:",err);
     }
 }
+
+export const fetchAccessControlsDT = createAsyncThunk(
+    "accessControls/fetchAccessControlsDT",
+    async (filter: any, { rejectWithValue }) => {
+        try {
+            const response = await axiosServices.post(API_DT_URL, filter);
+            dispatch(GetAccessControls(response.data?.collection?.data || []));
+            console.log("Fetch accessControls", response.data.collection);
+            return response.data.collection; // or just response.data if needed
+        } catch (error: any) {
+            console.error("Error fetching accessControls:", error);
+            return rejectWithValue(error.response?.data || "Unknown error");
+        }
+    }
+)
 
 export const addAccessControl = createAsyncThunk(
     "accessControls/addAccessControl",

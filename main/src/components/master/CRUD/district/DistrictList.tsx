@@ -17,38 +17,55 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  TableSortLabel,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
-import { fetchDistricts, DistrictType, deleteDistrict } from 'src/store/apps/crud/district';
+import {  DistrictType, UpdateFilter, deleteDistrict, fetchDistrictDT } from 'src/store/apps/crud/district';
 import AddEditDistrict from './AddEditDistrict';
 // import { useTranslation } from 'react-i18next';
 
-const DistrictList = () => {
-  // const { t } = useTranslation();
-  // Pagination State
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
-  // Handle page change
-  const handleChangePage = (event: unknown, newPage: number) => {
-    console.log(event);
-    setPage(newPage);
-  };
+const columns = [
+  { label: 'District Code', field: '', sortAble: false },
+  { label: 'District Name', field: 'name', sortAble: true },
+    { label: 'District Host', field: 'districtHost', sortAble: true },
+];
 
-  // Handle rows per page change
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-  const dispatch: AppDispatch = useDispatch();
+const DistrictList = () => {
+    const dispatch: AppDispatch = useDispatch();
   const districtData: DistrictType[] = useSelector(
     (state: RootState) => state.districtReducer.districts,
   );
+  // const districtTotalCount = useSelector((state: RootState) => state.districtReducer.districtTotalCount);
+  const districtFilteredCount = useSelector((state: RootState) => state.districtReducer.districtFilteredCount);
+  const districtFilter = useSelector((state: RootState) => state.districtReducer.districtFilter);
+  // const { t } = useTranslation();
+  // Pagination State
+  const page = Math.floor(districtFilter.Start / districtFilter.Length);
+const rowsPerPage = districtFilter.Length;
+const orderBy = districtFilter.SortColumn;
+const order = districtFilter.SortDir;
+
+const handleChangePage = (_: unknown, newPage: number) => {
+  dispatch(UpdateFilter({ Start: newPage * districtFilter.Length }));
+};
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const newLength = parseInt(event.target.value, 10);
+  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+};
+  const handleSort = (column: string) => {
+  const isAsc = districtFilter.SortColumn === column && districtFilter.SortDir === 'asc';
+  dispatch(UpdateFilter({
+    SortColumn: column,
+    SortDir: isAsc ? 'desc' : 'asc',
+    Start: 0,
+  }));
+};
 
   useEffect(() => {
-    dispatch(fetchDistricts());
-  }, [dispatch]);
+    dispatch(fetchDistrictDT(districtFilter));
+  }, [districtFilter, dispatch]);
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -73,6 +90,7 @@ const DistrictList = () => {
     handleCloseDeleteDialog();
   };
 
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -86,9 +104,19 @@ const DistrictList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {['District Code', 'District Name', 'District Host'].map((header) => (
-                      <TableCell key={header}>
-                        <Typography variant="h6">{header}</Typography>
+                     {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
+                          >
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
                       </TableCell>
                     ))}
                     {/* Right Sticky Empty Column */}
@@ -101,13 +129,12 @@ const DistrictList = () => {
                 </TableHead>
                 <TableBody>
                   {districtData
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((district, index) => (
                       <TableRow key={index}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
                         >
-                          {index + 1}
+                          {index + 1 + page * rowsPerPage}
                         </TableCell>
                         <TableCell>{district.code}</TableCell>
                         <TableCell>{district.name}</TableCell>
@@ -143,7 +170,7 @@ const DistrictList = () => {
         {/* Pagination */}
         <TablePagination
           component="div"
-          count={districtData.length}
+          count={districtFilteredCount}
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}

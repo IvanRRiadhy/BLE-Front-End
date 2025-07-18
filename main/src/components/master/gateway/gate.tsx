@@ -6,7 +6,6 @@ import {
   fetchBleReaders,
   SelectBleReader,
   bleReaderType,
-  UpdateBleReader,
   RevertBleReader,
 } from 'src/store/apps/crud/bleReader';
 import { gatesType } from 'src/types/tracking/gate';
@@ -81,7 +80,7 @@ const Gates: React.FC<Props> = ({ width, height, imageSrc, setIsDragging, active
       y: snappedY,
       duration: 0.1, // Smooth snap
     });
-    dispatch(UpdateBleReader(id, { locationPxX: snappedX, locationPxY: snappedY }));
+    // dispatch(UpdateBleReader(id, { locationPxX: snappedX, locationPxY: snappedY }));
     //console.log('Drag End');
     if (!isColliding(snappedX, snappedY, id, bleReader, Initial_Size)) {
       e.target.to({
@@ -89,7 +88,7 @@ const Gates: React.FC<Props> = ({ width, height, imageSrc, setIsDragging, active
         y: snappedY,
         duration: 0.1, // Smooth snap
       });
-      dispatch(UpdateBleReader(id, { locationPxX: snappedX, locationPxY: snappedY }));
+      // dispatch(UpdateBleReader(id, { locationPxX: snappedX, locationPxY: snappedY }));
       //dispatch(UpdateGate(id, { posX: snappedX, posY: snappedY }));
     } else {
       const newPosition = findNonCollidingPosition(snappedX, snappedY, id, bleReader, gridSize);
@@ -102,14 +101,12 @@ const Gates: React.FC<Props> = ({ width, height, imageSrc, setIsDragging, active
   };
 
   const isColliding = (x: number, y: number, id: string, gates: bleReaderType[], size: number) => {
+    console.log(size, x, y)
     return gates.some((gate) => {
       if (gate.id === id) return false; // Ignore self
       return !(
         (
-          x + size <= gate.locationPxX || // Left of existing gate
-          x >= gate.locationPxX + size || // Right of existing gate
-          y + size <= gate.locationPxY || // Above existing gate
-          y >= gate.locationPxY + size
+          0
         ) // Below existing gate
       );
     });
@@ -186,8 +183,8 @@ const Gates: React.FC<Props> = ({ width, height, imageSrc, setIsDragging, active
         {bleReader.map((reader: bleReaderType) => (
           <Rect
             key={reader.id}
-            x={reader.locationPxX}
-            y={reader.locationPxY}
+            x={0}
+            y={0}
             width={Initial_Size}
             height={Initial_Size}
             fill={'red'}

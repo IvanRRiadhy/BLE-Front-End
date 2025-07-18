@@ -1,14 +1,41 @@
 import axiosServices from "../../../utils/axios";
-import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch } from "src/store/Store";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AppDispatch, dispatch } from "src/store/Store";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { floorType } from "./floor";
 import { FloorplanDeviceType } from "./floorplanDevice";
 import { MaskedAreaType } from "./maskedArea";
 
 const Floorplan_API_URL = '/api/MstFloorplan/';
+const Floorplan_DT_URL = '/api/MstFloorplan/filter/';
 const Device_API_URL = '/api/FloorplanDevice/';
 const Area_API_URL = '/api/FloorplanMaskedArea/';
+
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    searchValue: string,
+}
+
+
+export type GetFloorplanResponse = {
+    RecordsTotal : number;
+    RecordsFiltered : number;
+    Draw : number;
+    status : string;
+    status_code : number;
+    title : string;
+    msg : string;
+    collection : {
+        data : FloorplanType[];
+        draw : number;
+        recordsTotal : number;
+        recordsFiltered : number;
+    };
+};
 
 export interface FloorplanType {
     id: string,
@@ -28,12 +55,25 @@ interface StateType {
     floorplans: FloorplanType[];
     floorplanSearch: string;
     selectedFloorplan?: FloorplanType | null;
+    floorplanTotalCount: number;
+    floorplanFilteredCount: number;
+    floorplanFilter: GetFilter;
 };
 
 const initialState: StateType = {
     floorplans: [],
     floorplanSearch: '',
-    selectedFloorplan: null
+    selectedFloorplan: null,
+    floorplanTotalCount: 0,
+    floorplanFilteredCount: 0,
+    floorplanFilter: {
+        Draw: 1,
+        Start: 0,
+        Length: 5,
+        SortColumn: "updatedAt",
+        SortDir: "desc",
+        searchValue: ""
+    }
 };
 
 export const FloorplanSlice = createSlice({
@@ -52,10 +92,20 @@ export const FloorplanSlice = createSlice({
         SearchFloorplan: (state, action) => {
             state.floorplanSearch = action.payload;
         },
+        UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
+          state.floorplanFilter = { ...state.floorplanFilter, ...action.payload };
+        }
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchFloorplanDT.fulfilled, (state, action) => {
+                state.floorplanTotalCount = action.payload.recordsTotal;
+                state.floorplanFilteredCount = action.payload.recordsFiltered;
+            });
     },
 });
 
-export const { GetFloorplan, SelectFloorplan, SearchFloorplan } = FloorplanSlice.actions;
+export const { GetFloorplan, SelectFloorplan, SearchFloorplan, UpdateFilter } = FloorplanSlice.actions;
 
 export const fetchFloorplan = () => async (dispatch: AppDispatch) => {
     try {
@@ -81,9 +131,25 @@ export const fetchFloorplan = () => async (dispatch: AppDispatch) => {
     }
 };
 
+export const fetchFloorplanDT = createAsyncThunk(
+    "floorplans/fetchFloorplanDT",
+    async (filter: any, { rejectWithValue }) => {
+        try {
+            const response = await axiosServices.post(Floorplan_DT_URL, filter);
+            dispatch(GetFloorplan(response.data.collection.data || []));
+            console.log("Fetch floorplans", response.data.collection);
+            return response.data.collection;
+        } catch (error: any) {
+            console.error("Error fetching floorplans:", error);
+            return rejectWithValue(error.response?.data || "Unknown error");
+        }
+    }
+)
+
 export const addFloorplan = createAsyncThunk("floorplans/addFloorplan", async (formData: FormData, { rejectWithValue }) => {
     try {
         const response = await axiosServices.post(Floorplan_API_URL, formData);
+        console.log("Floorplan added: ", response.data);
         return response.data;
     } catch (error: any) {
         console.error("Error adding floorplan:", error);

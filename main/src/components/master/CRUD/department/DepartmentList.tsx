@@ -17,38 +17,55 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  TableSortLabel,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
-import { fetchDepartments, DepartmentType, deleteDepartment } from 'src/store/apps/crud/department';
+import {  DepartmentType, UpdateFilter, deleteDepartment, fetchDepartmentDT } from 'src/store/apps/crud/department';
 import AddEditDepartment from './AddEditDepartment';
 // import { useTranslation } from 'react-i18next';
 
-const DepartmentList = () => {
-  // const { t } = useTranslation();
-  // Pagination State
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
-  // Handle page change
-  const handleChangePage = (event: unknown, newPage: number) => {
-    console.log(event);
-    setPage(newPage);
-  };
+const columns = [
+  { label: 'Department Code', field: '', sortAble: false },
+  { label: 'Department Name', field: 'name', sortAble: true },
+    { label: 'Department Host', field: 'departmentHost', sortAble: true },
+];
 
-  // Handle rows per page change
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-  const dispatch: AppDispatch = useDispatch();
+const DepartmentList = () => {
+    const dispatch: AppDispatch = useDispatch();
   const departmentData: DepartmentType[] = useSelector(
     (state: RootState) => state.departmentReducer.departments,
   );
+  // const departmentTotalCount = useSelector((state: RootState) => state.departmentReducer.departmentTotalCount);
+  const departmentFilteredCount = useSelector((state: RootState) => state.departmentReducer.departmentFilteredCount);
+  const departmentFilter = useSelector((state: RootState) => state.departmentReducer.departmentFilter);
+  // const { t } = useTranslation();
+  // Pagination State
+  const page = Math.floor(departmentFilter.Start / departmentFilter.Length);
+const rowsPerPage = departmentFilter.Length;
+const orderBy = departmentFilter.SortColumn;
+const order = departmentFilter.SortDir;
+
+const handleChangePage = (_: unknown, newPage: number) => {
+  dispatch(UpdateFilter({ Start: newPage * departmentFilter.Length }));
+};
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const newLength = parseInt(event.target.value, 10);
+  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+};
+  const handleSort = (column: string) => {
+  const isAsc = departmentFilter.SortColumn === column && departmentFilter.SortDir === 'asc';
+  dispatch(UpdateFilter({
+    SortColumn: column,
+    SortDir: isAsc ? 'desc' : 'asc',
+    Start: 0,
+  }));
+};
 
   useEffect(() => {
-    dispatch(fetchDepartments());
-  }, [dispatch]);
+    dispatch(fetchDepartmentDT(departmentFilter));
+  }, [departmentFilter, dispatch]);
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -86,13 +103,21 @@ const DepartmentList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {['Department Code', 'Department Name', 'Department Host'].map(
-                      (header) => (
-                        <TableCell key={header}>
-                          <Typography variant="h6">{header}</Typography>
-                        </TableCell>
-                      ),
-                    )}
+                     {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
+                          >
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
+                      </TableCell>
+                    ))}
                     {/* Right Sticky Empty Column */}
                     <TableCell
                       sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
@@ -103,13 +128,12 @@ const DepartmentList = () => {
                 </TableHead>
                 <TableBody>
                   {departmentData
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((department, index) => (
                       <TableRow key={index}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
                         >
-                          {index + 1}
+                          {index + 1 + page * rowsPerPage}
                         </TableCell>
                         <TableCell>{department.code}</TableCell>
                         <TableCell>{department.name}</TableCell>
@@ -145,7 +169,7 @@ const DepartmentList = () => {
         {/* Pagination */}
         <TablePagination
           component="div"
-          count={departmentData.length}
+          count={departmentFilteredCount}
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}

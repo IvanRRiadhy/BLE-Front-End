@@ -34,6 +34,14 @@ const TrackingTransactionList = () => {
   // Pagination State
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
+  // const filter = {
+  //   Draw: 1,
+  //   Start: 0,
+  //   Length: rowsPerPage,
+  //   SortColumn: '',
+  //   SortDir: 'asc',
+  //   searchValue: '',
+  // };
   // Handle page change
   const handleChangePage = (event: unknown, newPage: number) => {
     console.log(event);
@@ -49,6 +57,12 @@ const TrackingTransactionList = () => {
   const trackingTransData = useSelector(
     (state: RootState) => state.trackingTransReducer.trackingTrans,
   );
+  // const trackingTransTotalCount = useSelector(
+  //   (state: RootState) => state.trackingTransReducer.trackingTransTotalCount,
+  // );
+  // const trackingTransFilteredCount = useSelector(
+  //   (state: RootState) => state.trackingTransReducer.trackingTransFilteredCount,
+  // );
 
   useEffect(() => {
     dispatch(fetchTrackingTrans());
@@ -133,14 +147,13 @@ const TrackingTransactionList = () => {
                 </TableHead>
                 <TableBody>
                   {trackingTransData
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((trackingTrans: trackingTransType, index) => (
                       <TableRow key={trackingTrans.id}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
                         >
                           {' '}
-                          {index + 1}{' '}
+                          {index + 1 + page * rowsPerPage}{' '}
                         </TableCell>
                         <TableCell>{formatTime(trackingTrans.transTime)}</TableCell>
                         <TableCell>{trackingTrans.reader?.name}</TableCell>

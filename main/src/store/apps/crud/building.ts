@@ -1,10 +1,38 @@
 import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch } from "src/store/Store";
+import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 const API_URL = '/api/MstBuilding/';
+const API_DT_URL = '/api/MstBuilding/filter/';
+
+
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    searchValue: string,
+}
+
+
+export type GetBuildingResponse = {
+    RecordsTotal : number;
+    RecordsFiltered : number;
+    Draw : number;
+    status : string;
+    status_code : number;
+    title : string;
+    msg : string;
+    collection : {
+        data : BuildingType[];
+        draw : number;
+        recordsTotal : number;
+        recordsFiltered : number;
+    };
+};
 
 export interface BuildingType {
     id: string;
@@ -21,12 +49,25 @@ interface StateType {
     buildings: BuildingType[];
     buildingSearch: string;
     selectedBuilding?: BuildingType | null;
+    buildingTotalCount: number;
+    buildingFilteredCount: number;
+    buildingFilter: GetFilter;
 }
 
 const initialState: StateType = {
     buildings: [],
     buildingSearch: "",
     selectedBuilding: null,
+    buildingTotalCount: 0,
+    buildingFilteredCount: 0,
+    buildingFilter: {
+        Draw: 1,
+        Start: 0,
+        Length: 5,
+        SortColumn: "updatedAt",
+        SortDir: "desc",
+        searchValue: "",
+    }
 };
 
 export const BuildingSlice = createSlice({
@@ -44,13 +85,24 @@ export const BuildingSlice = createSlice({
         SearchBuilding: (state, action: PayloadAction<string>) => {
             state.buildingSearch = action.payload;
         },
+        UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
+          state.buildingFilter = { ...state.buildingFilter, ...action.payload };
+        }
     },
+    extraReducers: (builder) => {
+        builder
+        .addCase(fetchBuildingDT.fulfilled, (state, action) => {
+            state.buildingTotalCount = action.payload.recordsTotal;
+            state.buildingFilteredCount = action.payload.recordsFiltered;
+        });
+    }
 });
 
 export const {
     GetBuildings,
     SelectBuilding,
     SearchBuilding,
+    UpdateFilter
 } = BuildingSlice.actions;
 
 export const fetchBuildings = () => async (dispatch: AppDispatch) => {
@@ -61,6 +113,21 @@ export const fetchBuildings = () => async (dispatch: AppDispatch) => {
         console.error("Failed to Fetch Building: ", err);
     }
 };
+
+export const fetchBuildingDT = createAsyncThunk(
+    "buildings/fetchBuildingDT",
+    async (filter: any, { rejectWithValue }) => {
+        try {
+            const response = await axiosServices.post(API_DT_URL, filter);
+            dispatch(GetBuildings(response.data.collection.data || []));
+            console.log("Fetch buildings", response.data.collection);
+            return response.data.collection;
+        } catch (error: any) {
+            console.error("Error fetching buildings:", error);
+            return rejectWithValue(error.response?.data || "Unknown error");
+        }
+    }
+)
 
 export const addBuilding = createAsyncThunk("buildings/addBuilding", async (formData: FormData, { rejectWithValue }) => {
     try {

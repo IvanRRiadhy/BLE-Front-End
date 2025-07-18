@@ -17,36 +17,52 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  TableSortLabel,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { fetchAccessCCTV, CCTVType, deleteCCTV } from 'src/store/apps/crud/accessCCTV';
+import {
+  CCTVType,
+  deleteCCTV,
+  fetchAccessCCTVDT,
+  UpdateFilter,
+} from 'src/store/apps/crud/accessCCTV';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
 import AddEditAccessCCTV from './AddEditAccessCCTV';
 // import { useTranslation } from 'react-i18next';
 
+
+const columns = [
+  { label: 'Name', field: 'name', sortAble: true },
+  { label: 'RTSP', field: 'rtsp', sortAble: false },
+  { label: 'Integration', field: 'integrationType', sortAble: false }, 
+];
+
 const AccessCCTVList = () => {
+    const dispatch: AppDispatch = useDispatch();
+  const CCTVData: CCTVType[] = useSelector((state: RootState) => state.CCTVReducer.cctvs);
+  // const CCTVTotalCount = useSelector((state: RootState) => state.CCTVReducer.cctvTotalCount);
+  const CCTVFilteredCount = useSelector((state: RootState) => state.CCTVReducer.cctvFilteredCount);
+  const CCTVFilter = useSelector((state: RootState) => state.CCTVReducer.cctvFilter);
   // const { t } = useTranslation();
   // Pagination State
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
-  // Handle page change
-  const handleChangePage = (event: unknown, newPage: number) => {
-    console.log(event);
-    setPage(newPage);
-  };
+  const page = Math.floor(CCTVFilter.Start / CCTVFilter.Length);
+const rowsPerPage = CCTVFilter.Length;
+const orderBy = CCTVFilter.SortColumn;
+const order = CCTVFilter.SortDir;
 
-  // Handle rows per page change
+const handleChangePage = (_: unknown, newPage: number) => {
+  dispatch(UpdateFilter({ Start: newPage * CCTVFilter.Length }));
+};
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-  const dispatch: AppDispatch = useDispatch();
-  const CCTVData: CCTVType[] = useSelector((state: RootState) => state.CCTVReducer.cctvs);
+  const newLength = parseInt(event.target.value, 10);
+  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+};
 
   useEffect(() => {
-    dispatch(fetchAccessCCTV());
-  }, [dispatch]);
+    dispatch(fetchAccessCCTVDT(CCTVFilter));
+  }, [CCTVFilter, dispatch]);
+
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -70,6 +86,15 @@ const AccessCCTVList = () => {
     handleCloseDeleteDialog();
   };
 
+  const handleSort = (column: string) => {
+  const isAsc = CCTVFilter.SortColumn === column && CCTVFilter.SortDir === 'asc';
+  dispatch(UpdateFilter({
+    SortColumn: column,
+    SortDir: isAsc ? 'desc' : 'asc',
+    Start: 0,
+  }));
+};
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -83,9 +108,20 @@ const AccessCCTVList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"> </Typography>
                     </TableCell>
-                    {['Name', 'RTSP', 'Integration'].map((header) => (
-                      <TableCell key={header}>
-                        <Typography variant="h6">{header}</Typography>
+                    {/* Main Table Header */}
+                    {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
+                          >
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
                       </TableCell>
                     ))}
                     {/* Right Sticky Empty Column */}
@@ -97,40 +133,38 @@ const AccessCCTVList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {CCTVData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(
-                    (cctv, index) => (
-                      <TableRow key={index}>
-                        <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                  {CCTVData.map((cctv, index) => (
+                    <TableRow key={index}>
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                      >
+                        {index + 1 + page * rowsPerPage}
+                      </TableCell>
+                      <TableCell>{cctv.name}</TableCell>
+                      <TableCell>{cctv.rtsp}</TableCell>
+                      <TableCell>{cctv.integration?.integrationType}</TableCell>
+                      <TableCell
+                        sx={{
+                          position: 'sticky',
+                          right: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          display: 'flex',
+                          gap: 1,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <AddEditAccessCCTV type="edit" cctv={cctv} />
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleOpenDeleteDialog(cctv)}
                         >
-                          {index + 1}
-                        </TableCell>
-                        <TableCell>{cctv.name}</TableCell>
-                        <TableCell>{cctv.rtsp}</TableCell>
-                        <TableCell>{cctv.integration?.integrationType}</TableCell>
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            display: 'flex',
-                            gap: 1,
-                            alignItems: 'center',
-                          }}
-                        >
-                          <AddEditAccessCCTV type="edit" cctv={cctv} />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(cctv)}
-                          >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ),
-                  )}
+                          <IconTrash size={20} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -139,7 +173,7 @@ const AccessCCTVList = () => {
         {/* Pagination */}
         <TablePagination
           component="div"
-          count={CCTVData.length}
+          count={CCTVFilteredCount}
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}

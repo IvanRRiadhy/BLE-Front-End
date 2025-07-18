@@ -33,6 +33,14 @@ const FloorplanDeviceList2 = () => {
   // Pagination State
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
+  // const filter = {
+  //   Draw: 1,
+  //   Start: 0,
+  //   Length: rowsPerPage,
+  //   SortColumn: '',
+  //   SortDir: 'asc',
+  //   searchValue: '',
+  // };
   // Handle page change
   const handleChangePage = (event: unknown, newPage: number) => {
     console.log(event);

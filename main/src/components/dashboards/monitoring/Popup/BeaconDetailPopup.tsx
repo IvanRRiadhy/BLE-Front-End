@@ -10,7 +10,7 @@ import {
   Grid2 as Grid,
   Typography,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DepartmentType, fetchDepartments } from 'src/store/apps/crud/department';
 import { DistrictType, fetchDistricts } from 'src/store/apps/crud/district';

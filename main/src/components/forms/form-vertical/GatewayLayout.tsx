@@ -160,16 +160,6 @@ const GatewayLayout = () => {
               Ble Reader Mac
             </CustomFormLabel>
           </Grid>
-          <Grid size={12}>
-            <CustomTextField
-              id="mac"
-              value={bleReaderDetails.mac}
-              //placeholder={bleReaderDetails.mac}
-              //onChange={handleInputChange}
-              fullWidth
-              disabled={!isEditing}
-            />
-          </Grid>
           {/* 3 */}
           <Grid display="flex" alignItems="center" size={12}>
             <CustomFormLabel htmlFor="ble-ip" sx={{ mt: 1 }}>
@@ -201,39 +191,6 @@ const GatewayLayout = () => {
               disabled={!isEditing}
             />
             {/* 2 */}
-            <Grid container alignItems="center" spacing={1}>
-              <Grid size={12}>
-                <CustomFormLabel sx={{ mr: 2, mb: 0 }}>Position</CustomFormLabel>
-              </Grid>
-              <Grid>
-                {/* X-axis Field */}
-                <Typography sx={{ mr: 0 }} align="center">
-                  X
-                </Typography>
-                <CustomTextField
-                  id="locationPxX"
-                  value={bleReaderDetails.locationPxX}
-                  //placeholder={String(bleReaderDetails.locationPxX)}
-                  //onChange={handleInputChange}
-                  sx={{ width: '80px' }} // Adjust width as needed
-                  disabled={!isEditing}
-                />
-              </Grid>
-              <Grid>
-                {/* Y-axis Field */}
-                <Typography sx={{ mr: 0 }} align="center">
-                  Y
-                </Typography>
-                <CustomTextField
-                  id="locationPxY"
-                  value={bleReaderDetails.locationPxY}
-                  //placeholder={String(bleReaderDetails.locationPxY)}
-                  //onChange={handleInputChange}
-                  sx={{ width: '80px' }} // Adjust width as needed
-                  disabled={!isEditing}
-                />
-              </Grid>
-            </Grid>
           </Grid>
           {/* Buttons */}
         </Grid>

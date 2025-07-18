@@ -132,9 +132,9 @@ const videoJsOptions = {
   autoplay: true,
   controls: true,
   responsive: true,
-  fluid: false, // pastikan false
-  width: 2300,
-  height: 2500,
+  fluid: true, // pastikan false
+  // width: 2300,
+  // height: 2500,
   sources: [
     {
       src: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
@@ -286,11 +286,14 @@ const ConfigGrid = React.memo(
                                           ? theme.palette.success.dark
                                           : 'black'
                                       }`,
-                                      backgroundColor: `${
-                                        selectedScreen === screenNum
+                                      backgroundColor:
+                                        screenType[grid][
+                                          (grandChild as { floorId: number }).floorId
+                                        ] === 2
+                                          ? 'black'
+                                          : selectedScreen === screenNum
                                           ? theme.palette.success.light
-                                          : 'white'
-                                      }`,
+                                          : 'white',
                                       transition: 'border-color 0.3s, background-color 0.3s',
                                       display: 'flex',
                                       justifyContent: 'center',
@@ -333,33 +336,15 @@ const ConfigGrid = React.memo(
                                               ? screenSettings[grid][screenNum - 1]
                                               : undefined
                                           }
-                                          activeMaskedArea={screenDisplay[grid][(grandChild as { floorId: number }).floorId]}
+                                          activeMaskedArea={
+                                            screenDisplay[grid][
+                                              (grandChild as { floorId: number }).floorId
+                                            ]
+                                          }
                                           setScreenSettings={setScreenSettings}
                                         />
                                       ) : (
-                                        // <Typography
-                                        //   variant="h1"
-                                        //   className="hover-typography"
-                                        //   sx={{
-                                        //     fontSize: '5rem',
-                                        //     fontFamily: 'Georgia',
-                                        //     color:
-                                        //       screenNum === selectedScreen
-                                        //         ? theme.palette.success.dark
-                                        //         : 'black',
-                                        //     transition: 'color 0.1s',
-                                        //   }}
-                                        //   fontStyle="bold"
-                                        //   fontWeight={900}
-                                        // >
-                                        //   Camera Here{' '}
-                                        //   {
-                                        //     screenDisplay[grid][
-                                        //       (grandChild as { floorId: number }).floorId
-                                        //     ]
-                                        //   }
-                                        // </Typography>
-                                                            <VideoPlayer options={videoJsOptions} />
+                                        <VideoPlayer options={videoJsOptions} />
                                       )
                                     ) : (
                                       <Typography
@@ -401,9 +386,12 @@ const ConfigGrid = React.memo(
                             border: `${selectedScreen === screenNum ? '5px' : '2.5px'} solid ${
                               selectedScreen === screenNum ? theme.palette.success.dark : 'black'
                             }`,
-                            backgroundColor: `${
-                              selectedScreen === screenNum ? theme.palette.success.light : 'white'
-                            }`,
+                            backgroundColor:
+                              screenType[grid][(child as { floorId: number }).floorId] === 2
+                                ? 'black'
+                                : selectedScreen === screenNum
+                                ? theme.palette.success.light
+                                : 'white',
                             transition: 'border-color 0.3s, background-color 0.3s',
                             display: 'flex',
                             justifyContent: 'center',
@@ -435,31 +423,14 @@ const ConfigGrid = React.memo(
                                       ? screenSettings[grid][screenNum - 1]
                                       : undefined
                                   }
-                                  activeMaskedArea={screenDisplay[grid][(child as { floorId: number }).floorId]}
+                                  activeMaskedArea={
+                                    screenDisplay[grid][(child as { floorId: number }).floorId]
+                                  }
                                   setScreenSettings={setScreenSettings}
                                 />
                               ))
                             ) : (
-                              // <Typography
-                              //   variant="h1"
-                              //   className="hover-typography"
-                              //   sx={{
-                              //     fontSize: '2rem',
-                              //     fontFamily: 'Georgia',
-                              //     color: `${
-                              //       selectedScreen === screenNum
-                              //         ? theme.palette.success.dark
-                              //         : 'black'
-                              //     }`,
-                              //     transition: 'color 0.1s',
-                              //   }}
-                              //   fontStyle="bold"
-                              //   fontWeight={900}
-                              // >
-                              //   Camera Here{' '}
-                              //   {screenDisplay[grid][(child as { floorId: number }).floorId]}
-                              // </Typography>
-                                                  <VideoPlayer options={videoJsOptions} />
+                              <VideoPlayer options={videoJsOptions} />
                             )
                           ) : (
                             <Typography
@@ -504,9 +475,12 @@ const ConfigGrid = React.memo(
                   border: `${selectedScreen === screenNum ? '5px' : '2.5px'} solid ${
                     selectedScreen === screenNum ? theme.palette.success.dark : 'black'
                   }`,
-                  backgroundColor: `${
-                    selectedScreen === screenNum ? theme.palette.success.light : 'white'
-                  }`,
+                  backgroundColor:
+                    screenType[grid][(item as { floorId: number }).floorId] === 2
+                      ? 'black'
+                      : selectedScreen === screenNum
+                      ? theme.palette.success.light
+                      : 'white',
                   transition: 'border-color 0.3s, background-color 0.3s',
                   display: 'flex',
                   justifyContent: 'center',
@@ -549,20 +523,6 @@ const ConfigGrid = React.memo(
                       setScreenSettings={setScreenSettings}
                     />
                   ) : (
-                    // <Typography
-                    //   variant="h1"
-                    //   className="hover-typography"
-                    //   sx={{
-                    //     fontSize: '2rem',
-                    //     fontFamily: 'Georgia',
-                    //     color: screenNum === selectedScreen ? theme.palette.success.dark : 'black',
-                    //     transition: 'color 0.1s',
-                    //   }}
-                    //   fontStyle="bold"
-                    //   fontWeight={900}
-                    // >
-                    //   Camera Here {screenDisplay[grid][(item as { floorId: number }).floorId]}
-                    // </Typography>
                     <VideoPlayer options={videoJsOptions} />
                   )
                 ) : (

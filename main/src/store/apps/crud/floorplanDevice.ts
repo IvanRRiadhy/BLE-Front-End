@@ -1,6 +1,6 @@
 import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch } from "src/store/Store";
+import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { bleReaderType } from "./bleReader";
@@ -10,6 +10,33 @@ import { AccessControlType } from "./accessControl";
 import { DeviceType } from "src/types/crud/input";
 
 const API_URL = '/api/FloorplanDevice/';
+const API_DT_URL = '/api/FloorplanDevice/filter/';
+
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    searchValue: string,
+}
+
+
+export type GetFloorplanDeviceResponse = {
+    RecordsTotal : number;
+    RecordsFiltered : number;
+    Draw : number;
+    status : string;
+    status_code : number;
+    title : string;
+    msg : string;
+    collection : {
+        data : FloorplanDeviceType[];
+        draw : number;
+        recordsTotal : number;
+        recordsFiltered : number;
+    };
+};
 
 export interface FloorplanDeviceType {
     id: string,
@@ -45,6 +72,9 @@ interface StateType {
     editingFloorplanDevice?: FloorplanDeviceType | null;
     deletedFloorplanDevice?: FloorplanDeviceType[];
     addedFloorplanDevice?: FloorplanDeviceType[];
+    floorplanDeviceTotalCount: number;
+    floorplanDeviceFilteredCount: number;
+    floorplanDeviceFilter: GetFilter;
 };
 
 const initialState: StateType = {
@@ -56,6 +86,16 @@ const initialState: StateType = {
     editingFloorplanDevice: null,
     deletedFloorplanDevice: [],
     addedFloorplanDevice: [],
+    floorplanDeviceTotalCount: 0,
+    floorplanDeviceFilteredCount: 0,
+    floorplanDeviceFilter: {
+        Draw: 1,
+        Start: 0,
+        Length: 5,
+        SortColumn: "updatedAt",
+        SortDir: "desc",
+        searchValue: ""
+    }
 };
 
 export const FloorplanDeviceSlice = createSlice({
@@ -218,6 +258,13 @@ export const FloorplanDeviceSlice = createSlice({
             })
             .addCase(deleteFloorplanDevice.rejected, (_state, action) => {
                 console.error("Delete floorplan device failed: ", action.payload);
+            })
+            .addCase(fetchFloorplanDeviceDT.fulfilled, (state, action) => {
+                state.floorplanDeviceTotalCount = action.payload.recordsTotal;
+                state.floorplanDeviceFilteredCount = action.payload.recordsFiltered;
+            })
+            .addCase(fetchFloorplanDeviceDT.rejected, (_state, action) => {
+                console.error("Fetch floorplan device DT failed: ", action.payload);
             });
     },
 });
@@ -246,6 +293,21 @@ export const fetchFloorplanDevices = () => async (dispatch: AppDispatch) => {
         console.error("Error fetching floorplan devices: ", error);
     }    
 };
+
+export const fetchFloorplanDeviceDT = createAsyncThunk(
+    'floorplanDevice/fetchFloorplanDeviceDT',
+    async (filter: any, { rejectWithValue }) => {
+        try {
+            const response = await axiosServices.post(API_DT_URL, filter);
+            dispatch(GetFloorplanDevices(response.data.collection.data || []));
+            console.log("Fetch floorplan devices", response.data.collection);
+            return response.data.collection;
+        } catch (error: any) {
+            console.error("Error fetching floorplan devices:", error);
+            return rejectWithValue(error.response?.data || "Unknown error");
+        }
+    }
+)
 
 export const addFloorplanDevice = createAsyncThunk(
     'floorplanDevice/addFloorplanDevice',

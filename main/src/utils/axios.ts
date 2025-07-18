@@ -76,6 +76,11 @@ axiosServices.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
+        // 🚨 Handle 403 Forbidden by redirecting to Main Menu
+    // if (error.response?.status === 403) {
+    //   window.location.href = '/'; // Adjust route as needed
+    //   return Promise.reject(error); // still reject in case you want to catch it
+    // }
     return Promise.reject(error); // For all other errors, return the error as is.
   }
 );

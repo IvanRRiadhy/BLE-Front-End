@@ -11,38 +11,93 @@ import {
   TableRow,
   Typography,
   TablePagination,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+  TableSortLabel,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
+import {
+  BuildingType,
+  fetchBuildingDT,
+  deleteBuilding,
+  UpdateFilter,
+} from 'src/store/apps/crud/building';
 import AddEditBuilding from './AddEditBuilding';
 
 const BASE_URL = 'http://192.168.1.116:5000';
 
-const BuildingList = () => {
-  // Pagination State
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
-  // Handle page change
-  const handleChangePage = (event: unknown, newPage: number) => {
-    console.log(event);
-    setPage(newPage);
-  };
+const columns = [
+  { label: 'Building Name', field: 'name', sortAble: true },
+  { label: 'Building Image', field: '', sortAble: false },
+];
 
-  // Handle rows per page change
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-  const dispatch: AppDispatch = useDispatch();
+const BuildingList = () => {
+    const dispatch: AppDispatch = useDispatch();
   const buildingData: BuildingType[] = useSelector(
     (state: RootState) => state.buildingReducer.buildings,
   );
+  // const buildingTotalCount = useSelector(
+  //   (state: RootState) => state.buildingReducer.buildingTotalCount,
+  // );
+  const buildingFilteredCount = useSelector(
+    (state: RootState) => state.buildingReducer.buildingFilteredCount,
+  );
+  const buildingFilter = useSelector((state: RootState) => state.buildingReducer.buildingFilter);
+  // Pagination State
+  const page = Math.floor(buildingFilter.Start / buildingFilter.Length);
+const rowsPerPage = buildingFilter.Length;
+const orderBy = buildingFilter.SortColumn;
+const order = buildingFilter.SortDir;
+
+const handleChangePage = (_: unknown, newPage: number) => {
+  dispatch(UpdateFilter({ Start: newPage * buildingFilter.Length }));
+};
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const newLength = parseInt(event.target.value, 10);
+  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+};
+  const handleSort = (column: string) => {
+  const isAsc = buildingFilter.SortColumn === column && buildingFilter.SortDir === 'asc';
+  dispatch(UpdateFilter({
+    SortColumn: column,
+    SortDir: isAsc ? 'desc' : 'asc',
+    Start: 0,
+  }));
+};
 
   useEffect(() => {
-    dispatch(fetchBuildings());
-  }, [dispatch]);
+    dispatch(fetchBuildingDT(buildingFilter));
+  }, [buildingFilter, dispatch]);
+
+  //Delete Pop-up
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedBuilding, setSelectedBuilding] = useState<BuildingType | null>(null);
+  // Open delete confirmation dialog
+  const handleOpenDeleteDialog = (building: BuildingType) => {
+    setSelectedBuilding(building);
+    setDeleteDialogOpen(true);
+  };
+
+  // Close delete confirmation dialog
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setSelectedBuilding(null);
+  };
+
+  // Confirm delete action
+  const handleConfirmDelete = () => {
+    if (selectedBuilding) {
+      dispatch(deleteBuilding(selectedBuilding.id));
+    }
+    handleCloseDeleteDialog();
+  };
+
 
   return (
     <Grid container spacing={3}>
@@ -57,9 +112,19 @@ const BuildingList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {['Building Name', 'Building Image'].map((header) => (
-                      <TableCell key={header}>
-                        <Typography variant="h6">{header}</Typography>
+                    {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
+                          >
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
                       </TableCell>
                     ))}
                     {/* Right Sticky Empty Column */}
@@ -71,49 +136,47 @@ const BuildingList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {buildingData
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((building, index) => (
-                      <TableRow key={index}>
-                        <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                  {buildingData.map((building, index) => (
+                    <TableRow key={index}>
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                      >
+                        {index + 1 + page * rowsPerPage}
+                      </TableCell>
+                      <TableCell>{building.name}</TableCell>
+                      <TableCell>
+                        {building.image ? (
+                          <img
+                            src={`${BASE_URL}${building.image}`}
+                            alt="Building"
+                            style={{ width: 80, height: 80, objectFit: 'cover' }}
+                          />
+                        ) : (
+                          'No Image'
+                        )}
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          position: 'sticky',
+                          right: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          display: 'flex',
+                          gap: 1,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <AddEditBuilding type="edit" building={building} />
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleOpenDeleteDialog(building)}
                         >
-                          {index + 1}
-                        </TableCell>
-                        <TableCell>{building.name}</TableCell>
-                        <TableCell>
-                          {building.image ? (
-                            <img
-                              src={`${BASE_URL}${building.image}`}
-                              alt="Building"
-                              style={{ width: 80, height: 80, objectFit: 'cover' }}
-                            />
-                          ) : (
-                            'No Image'
-                          )}
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            display: 'flex',
-                            gap: 1,
-                            alignItems: 'center',
-                          }}
-                        >
-                          <AddEditBuilding type="edit" building={building} />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => console.log(`building ${building.name} deleted`)}
-                          >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          <IconTrash size={20} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -122,7 +185,7 @@ const BuildingList = () => {
         {/* Pagination */}
         <TablePagination
           component="div"
-          count={buildingData.length}
+          count={buildingFilteredCount}
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}
@@ -130,6 +193,23 @@ const BuildingList = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Grid>
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete the building <strong>{selectedBuilding?.name}</strong>?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 };

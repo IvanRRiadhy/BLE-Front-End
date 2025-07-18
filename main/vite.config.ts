@@ -57,5 +57,21 @@ export default defineConfig({
     //   exportAsDefault: true
     // })],
 
-    plugins: [svgr(), react()],
+plugins: [
+  {
+    name: 'remove-object-freeze',
+    transform(code, id) {
+      if (id.endsWith('.svg') && code.includes('Object.freeze')) {
+        return {
+          code: code.replace(/Object\.freeze\((.*?)\)/g, '$1'),
+          map: null,
+        };
+      }
+    },
+  },
+svgr({
+  exclude: ['**/area/*.svg', '**/devices/*.svg'],
+}),
+  react()
+]
 });

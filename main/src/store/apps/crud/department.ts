@@ -1,10 +1,38 @@
 import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch, RootState } from "src/store/Store";
+import { AppDispatch, dispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 const API_URL = "/api/MstDepartment/";
+const API_DT_URL = "/api/MstDepartment/filter/";
+
+
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    searchValue: string,
+}
+
+
+export type GetDepartmentResponse = {
+    RecordsTotal : number;
+    RecordsFiltered : number;
+    Draw : number;
+    status : string;
+    status_code : number;
+    title : string;
+    msg : string;
+    collection : {
+        data : DepartmentType[];
+        draw : number;
+        recordsTotal : number;
+        recordsFiltered : number;
+    };
+};
 
 export interface DepartmentType {
     id: string,
@@ -22,12 +50,25 @@ interface StateType {
     departments: DepartmentType[];
     departmentSearch: string;
     selectedDepartment?: DepartmentType | null;
+    departmentTotalCount: number;
+    departmentFilteredCount: number;
+    departmentFilter: GetFilter;
 }
 
 const initialState: StateType = {
     departments: [],
     departmentSearch: "",
     selectedDepartment: null,
+    departmentTotalCount: 0,
+    departmentFilteredCount: 0,
+    departmentFilter: {
+        Draw: 1,
+        Start: 0,
+        Length: 5,
+        SortColumn: "updatedAt",
+        SortDir: "asc",
+        searchValue: "",
+    }
 };
 
 export const DepartmentSlice = createSlice({
@@ -45,6 +86,9 @@ export const DepartmentSlice = createSlice({
         SearchDepartment: (state, action: PayloadAction<string>) => {
             state.departmentSearch = action.payload;
         },
+        UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
+          state.departmentFilter = { ...state.departmentFilter, ...action.payload };
+        }
     },
 
     extraReducers: (builder) => {
@@ -74,6 +118,10 @@ export const DepartmentSlice = createSlice({
         .addCase(deleteDepartment.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
         })
+        .addCase(fetchDepartmentDT.fulfilled, (state, action) => {
+            state.departmentTotalCount = action.payload.recordsTotal;
+            state.departmentFilteredCount = action.payload.recordsFiltered;
+        })
     }
 });
 
@@ -94,7 +142,8 @@ export const selectDepartment = (departmentID : string) =>
 export const {
     GetDepartments,
     SelectDepartment,
-    SearchDepartment
+    SearchDepartment,
+    UpdateFilter
 } = DepartmentSlice.actions;
 
 export const fetchDepartments = () => async (dispatch: AppDispatch) => {
@@ -105,6 +154,21 @@ export const fetchDepartments = () => async (dispatch: AppDispatch) => {
         console.log("Error fetching departments:", err);
     }
 };
+
+export const fetchDepartmentDT = createAsyncThunk(
+    "departments/fetchDepartmentDT",
+    async (filter: any, { rejectWithValue }) => {
+        try {
+            const response = await axiosServices.post(API_DT_URL, filter);
+            dispatch(GetDepartments(response.data.collection.data || []));
+            console.log("Fetch departments", response.data.collection);
+            return response.data.collection;
+        } catch (error: any) {
+            console.error("Error fetching departments:", error);
+            return rejectWithValue(error.response?.data || "Unknown error");
+        }
+    }
+)
 
 export const addDepartment = createAsyncThunk("departments/addDepartment", async (department: DepartmentType, { rejectWithValue }) => {
     try {

@@ -22,7 +22,7 @@ import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { useTranslation } from 'react-i18next';
-import { deleteVisitor, fetchVisitor, masterVisitorType } from 'src/store/apps/crud/visitor';
+import { deleteVisitor, fetchVisitorDT, masterVisitorType } from 'src/store/apps/crud/visitor';
 import AddEditVisitor from './AddEditVisitor';
 
 const VisitorList = () => {
@@ -30,6 +30,14 @@ const VisitorList = () => {
   // Pagination State
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
+  const filter = {
+    Draw: 1,
+    Start: 0,
+    Length: rowsPerPage,
+    SortColumn: '',
+    SortDir: 'asc',
+    searchValue: '',
+  };
   // Handle page change
   const handleChangePage = (event: unknown, newPage: number) => {
     console.log(event);
@@ -43,10 +51,15 @@ const VisitorList = () => {
   };
   const dispatch: AppDispatch = useDispatch();
   const visitorData = useSelector((state: RootState) => state.visitorReducer.visitors);
+  const visitorTotalCount = useSelector((state: RootState) => state.visitorReducer.visitorTotalCount);
+  const visitorFilteredCount = useSelector((state: RootState) => state.visitorReducer.visitorFilteredCount);
 
   useEffect(() => {
-    dispatch(fetchVisitor());
-  }, [dispatch]);
+    const newFilter = { ...filter, Start: page * rowsPerPage, Length: rowsPerPage };
+    const visitorDT = dispatch(fetchVisitorDT(newFilter));
+    console.log("BLE Reader DT: ", visitorDT);
+    console.log('Visitor Count: ', visitorTotalCount, visitorFilteredCount);
+  }, [page, rowsPerPage, dispatch]);
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -149,7 +162,6 @@ const VisitorList = () => {
                 </TableHead>
                 <TableBody>
                   {visitorData
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((visitor: masterVisitorType) => (
                       <TableRow key={visitor.id}>
                         <TableCell
@@ -215,7 +227,7 @@ const VisitorList = () => {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={visitorData.length}
+              count={visitorFilteredCount}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

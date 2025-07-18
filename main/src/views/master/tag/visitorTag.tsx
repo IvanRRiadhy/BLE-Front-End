@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button, Box, Drawer, useMediaQuery, Theme } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
-import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
+// import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import AppCard from 'src/components/shared/AppCard';
 import VisitorFilter from 'src/components/master/Tag/visitor/visitorFilter';
 import VisitorList from 'src/components/master/Tag/visitor/visitorList';
@@ -19,7 +19,6 @@ const Tag = () => {
 
   return (
     <PageContainer title="Visitor" description="this is Visitor Page">
-      <Breadcrumb title="Visitor" subtitle="List of all Visitor"></Breadcrumb>
       <AppCard>
         {/* ------------------------------------------- */}
         {/* Left Part */}

@@ -6,6 +6,16 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 
 const API_URL = "/api/MstApplication/";
 
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    searchValue: string,
+}
+
+
 // Define the TypeScript type
 export interface ApplicationType {
   id: string;

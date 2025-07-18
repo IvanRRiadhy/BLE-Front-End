@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   IconButton,
   Box,
@@ -8,7 +8,7 @@ import {
   useMediaQuery,
   Toolbar,
   styled,
-  Stack,
+  Stack,  
   Theme,
 } from '@mui/material';
 
@@ -26,6 +26,8 @@ const Header = () => {
   // drawer
   const customizer = useSelector((state: AppState) => state.customizer);
   const dispatch = useDispatch();
+
+
 
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
     background: theme.palette.background.paper,
@@ -77,6 +79,7 @@ const Header = () => {
         ) : null} */}
         <Box flexGrow={1} />
         <Stack spacing={1} direction="row" alignItems="center">
+          
           <Language />
           {/* ------------------------------------------- */}
           {/* Ecommerce Dropdown */}

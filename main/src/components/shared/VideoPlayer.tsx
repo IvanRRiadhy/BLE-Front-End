@@ -17,7 +17,7 @@ interface Props {
 const VideoPlayer: React.FC<Props> = ({ options }) => {
   const videoRef = useRef(null);
   const playerRef = useRef<VideoJsPlayer | null>(null);
-
+  console.log("options: ",options);
   useEffect(() => {
     if (!playerRef.current && videoRef.current) {
       const player = videojs(videoRef.current, options, () => {

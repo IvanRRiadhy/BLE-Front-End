@@ -105,6 +105,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "latest",
     "eslint-config-next": "latest",
+    "rollup": "^3.29.4",
     "typescript": "5.7.2",
     "vite": "^6.3.5"
   }

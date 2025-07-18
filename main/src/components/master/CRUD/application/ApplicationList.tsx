@@ -109,6 +109,7 @@ const ApplicationList = () => {
                       <Typography variant="h6"> Left </Typography>
                     </TableCell>
                     {[
+                      'Application Id',
                       'Application Name',
                       'Organization Type',
                       'Organization Address',
@@ -145,6 +146,7 @@ const ApplicationList = () => {
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
                         ></TableCell>
+                        <TableCell>{app.id}</TableCell>
                         <TableCell>{app.applicationName}</TableCell>
                         <TableCell>{app.organizationType}</TableCell>
                         <TableCell>{app.organizationAddress}</TableCell>

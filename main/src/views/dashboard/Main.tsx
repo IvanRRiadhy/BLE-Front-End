@@ -3,22 +3,31 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Grid2 as Grid } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
-
 import TopCards from 'src/components/dashboards/mainmenu/TopCards';
 import TrackingGraph from 'src/components/dashboards/mainmenu/Tracking';
 import AlarmWarning from 'src/components/dashboards/mainmenu/AlarmWarning';
 import BlacklistTable from 'src/components/dashboards/mainmenu/Blacklist';
 import WelcomePopup from 'src/components/dashboards/mainmenu/WelcomePopup';
-import { fetchBlacklist, blacklistType } from 'src/store/apps/crud/blacklist';
-import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import { fetchBleReaders, bleReaderType } from 'src/store/apps/crud/bleReader';
-import { fetchAlarm, AlarmType } from 'src/store/apps/crud/alarmRecordTracking';
+import { blacklistType, fetchBlacklistDT } from 'src/store/apps/crud/blacklist';
+import { fetchMaskedAreaDT } from 'src/store/apps/crud/maskedArea';
+import {  fetchBleReaderDT } from 'src/store/apps/crud/bleReader';
+import { AlarmType, fetchAlarmDT } from 'src/store/apps/crud/alarmRecordTracking';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
-import { fetchTrackingTrans, trackingTransType } from 'src/store/apps/crud/trackingTrans';
+import { fetchTrackingTransDT, trackingTransType } from 'src/store/apps/crud/trackingTrans';
+import { setMainMenu } from 'src/store/customizer/CustomizerSlice';
+
+const filter = {
+  Draw: 1,
+  Start: 0,
+  Length: 0,
+  SortColumn: null,
+  SortDir: '',
+  searchValue: '',
+};
 
 const Modern = () => {
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
-
+  const dispatch = useDispatch();
   useEffect(() => {
     // Check if the welcome popup has already been shown
     const popupShown = localStorage.getItem('welcomePopupShown');
@@ -26,25 +35,60 @@ const Modern = () => {
       setShowWelcomePopup(true); // Show the popup
       localStorage.setItem('welcomePopupShown', 'true'); // Set the flag in localStorage
     }
+    dispatch(setMainMenu(true));
+  }, []);
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      dispatch(setMainMenu(false));
+      e.preventDefault();
+      // e.returnValue = ''; // Triggers browser's native dialog
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
   const handleClosePopup = () => {
     setShowWelcomePopup(false); // Close the popup
   };
-  const dispatch = useDispatch();
+
   useEffect(() => {
     // Fetch initial data for the dashboard
-    dispatch(fetchTrackingTrans());
-    dispatch(fetchBlacklist());
-    dispatch(fetchMaskedAreas());
-    dispatch(fetchBleReaders());
-    dispatch(fetchAlarm());
+    dispatch(fetchTrackingTransDT(filter));
+    dispatch(fetchBlacklistDT(filter));
+    dispatch(fetchMaskedAreaDT(filter));
+    dispatch(fetchBleReaderDT(filter));
+    dispatch(fetchAlarmDT(filter));
   }, [dispatch]);
-  const trackingData: trackingTransType[] = useSelector((state: RootState) => state.trackingTransReducer.trackingTrans);
-  const blacklistData: blacklistType[] = useSelector((state: RootState) => state.blacklistReducer.blacklists);
-  const maskedAreaData: MaskedAreaType[] = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreas);
-  const bleReaderData: bleReaderType[] = useSelector((state: RootState) => state.bleReaderReducer.bleReaders);
-  const alarmData: AlarmType[] = useSelector((state: RootState) => state.alarmReducer.alarmRecordTrackings);
+  // const trackingTotalCount: number = useSelector(
+  //   (state: RootState) => state.trackingTransReducer.trackingTransTotalCount ?? 0,
+  // );
+  const blacklistTotalCount: number = useSelector(
+    (state: RootState) => state.blacklistReducer.blacklistTotalCount ?? 0,
+  );
+  const maskedAreaTotalCount: number = useSelector(
+    (state: RootState) => state.maskedAreaReducer.maskedAreaTotalCount ?? 0,
+  );
+  const bleReaderTotalCount: number = useSelector(
+    (state: RootState) => state.bleReaderReducer.bleReaderTotalCount ?? 0,
+  );
+  const alarmTotalCount: number = useSelector(
+    (state: RootState) => state.alarmReducer.alarmRecordTotalCount ?? 0,
+  );
+  const trackingData: trackingTransType[] = useSelector(
+    (state: RootState) => state.trackingTransReducer.trackingTrans,
+  );
+  const blacklistData: blacklistType[] = useSelector(
+    (state: RootState) => state.blacklistReducer.blacklists,
+  );
+  // const maskedAreaData: MaskedAreaType[] = useSelector(
+  //   (state: RootState) => state.maskedAreaReducer.maskedAreas,
+  // );
+  // const bleReaderData: bleReaderType[] = useSelector(
+  //   (state: RootState) => state.bleReaderReducer.bleReaders,
+  // );
+  const alarmData: AlarmType[] = useSelector(
+    (state: RootState) => state.alarmReducer.alarmRecordTrackings,
+  );
   return (
     <PageContainer title="Dashboard" description="this is Dashboard page">
       <Box>
@@ -59,10 +103,10 @@ const Modern = () => {
             <TopCards
               data={[
                 '100', // dummy for first
-                bleReaderData.length.toString(),
-                maskedAreaData.length.toString(),
-                blacklistData.length.toString(),
-                alarmData.length.toString(),
+                bleReaderTotalCount.toString(),
+                maskedAreaTotalCount.toString(),
+                blacklistTotalCount.toString(),
+                alarmTotalCount.toString(),
                 '20', // dummy for last
               ]}
             />

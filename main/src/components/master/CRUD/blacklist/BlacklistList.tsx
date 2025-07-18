@@ -17,36 +17,56 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  TableSortLabel,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import { fetchBlacklist, blacklistType, deleteBlacklist } from 'src/store/apps/crud/blacklist';
+import {  blacklistType, deleteBlacklist, fetchBlacklistDT, UpdateFilter } from 'src/store/apps/crud/blacklist';
 import { fetchVisitor } from 'src/store/apps/crud/visitor';
 import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import AddEditBlacklist from './AddEditBlacklist';
 
-const BlacklistList = () => {
-  // Pagination State
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
-  // Handle page change
-  const handleChangePage = (event: unknown, newPage: number) => {
-    console.log(event);
-    setPage(newPage);
-  };
+const columns = [
+  { label: 'Blacklisted Visitor', field: 'Visitor.Name', sortAble: true },
+  { label: 'Blacklisted Area', field: 'MaskedArea.Name', sortAble: true },
+];
 
-  // Handle rows per page change
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-  const dispatch: AppDispatch = useDispatch();
+
+const BlacklistList = () => {
+    const dispatch: AppDispatch = useDispatch();
   const blaclistData = useSelector((state: RootState) => state.blacklistReducer.blacklists);
+  // const blacklistTotalCount = useSelector((state: RootState) => state.blacklistReducer.blacklistTotalCount);
+  const blacklistFilteredCount = useSelector((state: RootState) => state.blacklistReducer.blacklistFilteredCount);
+const blacklistFilter = useSelector((state: RootState) => state.blacklistReducer.blacklistFilter);
+  // Pagination State
+  const page = Math.floor(blacklistFilter.Start / blacklistFilter.Length);
+const rowsPerPage = blacklistFilter.Length;
+const orderBy = blacklistFilter.SortColumn;
+const order = blacklistFilter.SortDir;
+
+const handleChangePage = (_: unknown, newPage: number) => {
+  dispatch(UpdateFilter({ Start: newPage * blacklistFilter.Length }));
+};
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const newLength = parseInt(event.target.value, 10);
+  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+};
+  const handleSort = (column: string) => {
+  const isAsc = blacklistFilter.SortColumn === column && blacklistFilter.SortDir === 'asc';
+  dispatch(UpdateFilter({
+    SortColumn: column,
+    SortDir: isAsc ? 'desc' : 'asc',
+    Start: 0,
+  }));
+};
 
   useEffect(() => {
-    dispatch(fetchBlacklist());
+    dispatch(fetchBlacklistDT(blacklistFilter));
+  }, [blacklistFilter, dispatch]);
+
+  useEffect(() => {
     dispatch(fetchVisitor());
     dispatch(fetchMaskedAreas());
     dispatch(fetchFloorplan());
@@ -88,9 +108,19 @@ const BlacklistList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"> </Typography>
                     </TableCell>
-                    {[ 'Blacklisted Visitor', 'Blacklisted Area'].map((header) => (
-                      <TableCell key={header}>
-                        <Typography variant="h6">{header}</Typography>
+                     {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
+                          >
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
                       </TableCell>
                     ))}
                     {/* Right Sticky Empty Column */}
@@ -103,12 +133,14 @@ const BlacklistList = () => {
                 </TableHead>
                 <TableBody>
                   {blaclistData
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((blacklist,index) => (
+                    .map((blacklist, index) => (
                       <TableRow key={blacklist.id}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
-                        > {index + 1}</TableCell>
+                        >
+                          {' '}
+                          {index + 1 + page * rowsPerPage}
+                        </TableCell>
                         <TableCell>{blacklist.visitor?.name}</TableCell>
                         <TableCell>{blacklist.floorplanMaskedArea?.name}</TableCell>
 
@@ -142,7 +174,7 @@ const BlacklistList = () => {
         {/* Pagination */}
         <TablePagination
           component="div"
-          count={blaclistData.length}
+          count={blacklistFilteredCount}
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}

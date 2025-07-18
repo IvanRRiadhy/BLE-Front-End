@@ -1,11 +1,37 @@
 import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch, RootState } from "src/store/Store";
+import { AppDispatch, dispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { IntegrationType } from "src/store/apps/crud/integration";
 
 const API_URL = "/api/MstAccessCctv/";
+const API_DT_URL = "/api/MstAccessCctv/filter/";
+
+export type GetCCTVResponse = {
+    RecordsTotal : number;
+    RecordsFiltered : number;
+    Draw : number;
+    status : string;
+    status_code : number;
+    title : string;
+    msg : string;
+    collection : {
+        data : CCTVType[];
+        draw : number;
+        recordsTotal : number;
+        recordsFiltered : number;
+    };
+};
+
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    searchValue: string,
+}
 
 export interface CCTVType {
     id: string,
@@ -24,12 +50,25 @@ interface StateType {
     cctvs: CCTVType[];
     cctvSearch: string;
     selectedCCTV?: CCTVType | null;
+    cctvTotalCount: number;
+    cctvFilteredCount: number;
+    cctvFilter: GetFilter;
 }
 
 const initialState: StateType = {
     cctvs: [],
     cctvSearch: "",
     selectedCCTV: null,
+    cctvTotalCount: 0,
+    cctvFilteredCount: 0,
+    cctvFilter: {
+        Draw: 1,
+        Start: 0,
+        Length: 5,
+        SortColumn: "updatedAt",
+        SortDir: "desc",
+        searchValue: "",
+    }
 };
 
 export const CCTVSlice = createSlice({
@@ -49,6 +88,9 @@ export const CCTVSlice = createSlice({
         SearchAccessCCTV: (state, action: PayloadAction<string>) => {
             state.cctvSearch = action.payload;
         },
+        UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
+          state.cctvFilter = { ...state.cctvFilter, ...action.payload };
+        }
     },
 
     extraReducers: (builder) => {
@@ -77,7 +119,11 @@ export const CCTVSlice = createSlice({
         })
         .addCase(deleteCCTV.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
-        });
+        })
+        .addCase(fetchAccessCCTVDT.fulfilled, (state, action) => {
+            state.cctvTotalCount = action.payload.recordsTotal;
+            state.cctvFilteredCount = action.payload.recordsFiltered;
+        })
     }
 
 });
@@ -99,6 +145,7 @@ export const selectAccessCCTV =
         GetAccessCCTV,
         SelectAccessCCTV,
         SearchAccessCCTV,
+        UpdateFilter,
     } = CCTVSlice.actions;
 
 
@@ -110,6 +157,21 @@ export const selectAccessCCTV =
             console.log(error);
         }
     };
+
+    export const fetchAccessCCTVDT = createAsyncThunk(
+        "cctvs/fetchAccessCCTVDT",
+        async (filter: any, { rejectWithValue }) => {
+            try {
+                const response = await axiosServices.post(API_DT_URL, filter);
+                dispatch(GetAccessCCTV(response.data?.collection?.data || []));
+                console.log("Fetch cctvs", response.data.collection);
+                return response.data.collection;
+            } catch (error: any) {
+                console.error("Error fetching cctvs:", error);
+                return rejectWithValue(error.response?.data || "Unknown error");
+            }
+        }
+    )
 
     export const addCCTV = createAsyncThunk(
         "cctvs/addCCTV",

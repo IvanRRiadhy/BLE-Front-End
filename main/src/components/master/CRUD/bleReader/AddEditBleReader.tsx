@@ -37,13 +37,8 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
       id: '',
       brandId: '',
       name: '',
-      mac: '',
       gmac: '',
       ip: '',
-      locationX: 0,
-      locationY: 0,
-      locationPxX: 0,
-      locationPxY: 0,
       engineReaderId: '',
       createdBy: '',
       createdAt: '',
@@ -58,7 +53,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
   }, [dispatch]);
 
   const handleClickOpen = () => {
-    console.log('Form Data : ', formData);  
+    console.log('Form Data : ', formData);
     setOpen(true);
   };
 
@@ -77,6 +72,18 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
       await dispatch(fetchBleReaders());
       console.log('Saved!');
       setOpen(false);
+      setFormData({
+        id: '',
+        brandId: '',
+        name: '',
+        gmac: '',
+        ip: '',
+        engineReaderId: '',
+        createdBy: '',
+        createdAt: '',
+        updatedBy: '',
+        updatedAt: '',
+      });
     } catch (error) {
       console.error('Error saving application:', error);
     }
@@ -136,10 +143,10 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                   </MenuItem>
                 ))}
               </CustomSelect>
-              <CustomFormLabel htmlFor="ble-mac">Mac</CustomFormLabel>
+              <CustomFormLabel htmlFor="ble-name">Name</CustomFormLabel>
               <CustomTextField
-                id="mac"
-                placeholder={formData.mac}
+                id="name"
+                placeholder={formData.name}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -166,57 +173,6 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
               <CustomTextField
                 id="gmac"
                 placeholder={formData.gmac}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-                            <CustomFormLabel htmlFor="ble-name">Name</CustomFormLabel>
-              <CustomTextField
-                id="name"
-                placeholder={formData.name}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-          </Grid>
-          <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-            Position
-          </Typography>
-          <Divider />
-          <Grid container spacing={5} mb={3}>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="location-x">Location on meter X</CustomFormLabel>
-              <CustomTextField
-                id="locationx"
-                placeholder={formData.locationX}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-
-              <CustomFormLabel htmlFor="location-px-x">Location on Pixel X</CustomFormLabel>
-              <CustomTextField
-                id="locationPxX"
-                placeholder={formData.locationPxX}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="location-y">Location on meter Y</CustomFormLabel>
-              <CustomTextField
-                id="locationy"
-                placeholder={formData.locationY}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-              <CustomFormLabel htmlFor="location-px-y">Location on Pixel Y</CustomFormLabel>
-              <CustomTextField
-                id="locationPxY"
-                placeholder={formData.locationPxY}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"

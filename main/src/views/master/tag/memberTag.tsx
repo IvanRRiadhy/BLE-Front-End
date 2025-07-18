@@ -1,7 +1,7 @@
 import  { useState } from 'react';
 import { Button, Box, Drawer, useMediaQuery, Theme } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
-import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
+// import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import AppCard from 'src/components/shared/AppCard';
 import TagFilter from '../../../components/master/Tag/member/tagFilter';
 import TagList from 'src/components/master/Tag/member/tagList';
@@ -19,7 +19,6 @@ const MemberTag = () => {
 
   return (
     <PageContainer title="Member" description="this is Member Page">
-      <Breadcrumb title="Member" subtitle="List of all member"></Breadcrumb>
       <AppCard>
         {/* ------------------------------------------- */}
         {/* Left Part */}

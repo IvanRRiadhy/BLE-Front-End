@@ -17,42 +17,61 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  TableSortLabel,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
 import {
-  fetchOrganizations,
   OrganizationType,
+  UpdateFilter,
   deleteOrganization,
+  fetchOrganizationDT,
 } from 'src/store/apps/crud/organization';
 import AddEditOrganization from './AddEditOrganizationList';
 // import { useTranslation } from 'react-i18next';
 
-const OrganizationList = () => {
-  // const { t } = useTranslation();
-  // Pagination State
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
-  // Handle page change
-  const handleChangePage = (event: unknown, newPage: number) => {
-    console.log(event);
-    setPage(newPage);
-  };
+const columns = [
+  { label: 'Organization Code', field: '', sortAble: false },
+  { label: 'Organization Name', field: 'name', sortAble: true },
+    { label: 'Organization Host', field: 'organizationHost', sortAble: true },
+];
 
-  // Handle rows per page change
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-  const dispatch: AppDispatch = useDispatch();
+
+const OrganizationList = () => {
+    const dispatch: AppDispatch = useDispatch();
   const organizationData: OrganizationType[] = useSelector(
     (state: RootState) => state.organizationReducer.organizations,
   );
+  // const organizationTotalCount = useSelector((state: RootState) => state.organizationReducer.organizationTotalCount);
+  const organizationFilteredCount = useSelector((state: RootState) => state.organizationReducer.organizationFilteredCount);
+  const organizationFilter = useSelector((state: RootState) => state.organizationReducer.organizationFilter);
+  // const { t } = useTranslation();
+  // Pagination State
+  const page = Math.floor(organizationFilter.Start / organizationFilter.Length);
+const rowsPerPage = organizationFilter.Length;
+const orderBy = organizationFilter.SortColumn;
+const order = organizationFilter.SortDir;
+
+const handleChangePage = (_: unknown, newPage: number) => {
+  dispatch(UpdateFilter({ Start: newPage * organizationFilter.Length }));
+};
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const newLength = parseInt(event.target.value, 10);
+  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+};
+  const handleSort = (column: string) => {
+  const isAsc = organizationFilter.SortColumn === column && organizationFilter.SortDir === 'asc';
+  dispatch(UpdateFilter({
+    SortColumn: column,
+    SortDir: isAsc ? 'desc' : 'asc',
+    Start: 0,
+  }));
+};
 
   useEffect(() => {
-    dispatch(fetchOrganizations());
-  }, [dispatch]);
+    dispatch(fetchOrganizationDT(organizationFilter));
+  }, [organizationFilter, dispatch]);
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -77,6 +96,7 @@ const OrganizationList = () => {
     handleCloseDeleteDialog();
   };
 
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -90,13 +110,21 @@ const OrganizationList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {['Organization Code', 'Organization Name', 'Organization Host'].map(
-                      (header) => (
-                        <TableCell key={header}>
-                          <Typography variant="h6">{header}</Typography>
-                        </TableCell>
-                      ),
-                    )}
+                     {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
+                          >
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
+                      </TableCell>
+                    ))}
                     {/* Right Sticky Empty Column */}
                     <TableCell
                       sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
@@ -107,13 +135,12 @@ const OrganizationList = () => {
                 </TableHead>
                 <TableBody>
                   {organizationData
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((organization, index) => (
                       <TableRow key={index}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
                         >
-                          {index + 1}
+                          {index + 1 + page * rowsPerPage}
                         </TableCell>
                         <TableCell>{organization.code}</TableCell>
                         <TableCell>{organization.name}</TableCell>
@@ -148,7 +175,7 @@ const OrganizationList = () => {
         {/* Pagination */}
         <TablePagination
           component="div"
-          count={organizationData.length}
+          count={organizationFilteredCount}
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}

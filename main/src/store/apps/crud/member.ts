@@ -1,10 +1,37 @@
 import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch } from "src/store/Store";
+import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 const API_URL = "/api/MstMember/";
+const API_DT_URL = "/api/MstMember/filter/";
+
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    searchValue: string,
+}
+
+
+export type GetMemberResponse = {
+    RecordsTotal : number;
+    RecordsFiltered : number;
+    Draw : number;
+    status : string;
+    status_code : number;
+    title : string;
+    msg : string;
+    collection : {
+        data : memberType[];
+        draw : number;
+        recordsTotal : number;
+        recordsFiltered : number;
+    };
+};
 
 export interface memberType {
     id: string,
@@ -41,6 +68,9 @@ interface StateType {
     memberSearch: string;
     selectedMember?: memberType;
     curentFilter: string;
+    memberTotalCount: number;
+    memberFilteredCount: number;
+    memberFilter: GetFilter;
 }
 
 const initialState: StateType = {
@@ -48,6 +78,16 @@ const initialState: StateType = {
     memberSearch: "",
     selectedMember: undefined,
     curentFilter: "show_all",
+    memberTotalCount: 0,
+    memberFilteredCount: 0,
+    memberFilter: {
+        Draw: 1,
+        Start: 0,
+        Length: 5,
+        SortColumn: "name",
+        SortDir: "asc",
+        searchValue: "",
+    }
 };
 
 export const MemberSlice = createSlice({
@@ -67,6 +107,9 @@ export const MemberSlice = createSlice({
         SetVisibilityFilter(state: StateType, action: PayloadAction<string>) {
             state.curentFilter = action.payload;
         },
+        UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
+          state.memberFilter = { ...state.memberFilter, ...action.payload };
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -90,11 +133,15 @@ export const MemberSlice = createSlice({
             })
             .addCase(deleteMember.rejected, (_state, action) => {
                 console.error("Delete failed: ", action.payload);
-            });
+            })
+            .addCase(fetchMemberDT.fulfilled, (state, action) => {
+                state.memberTotalCount = action.payload.recordsTotal;
+                state.memberFilteredCount = action.payload.recordsFiltered;
+            })
     },
 });
 
-export const { GetMember, SelectMember, SearchMember, SetVisibilityFilter } = MemberSlice.actions;
+export const { GetMember, SelectMember, SearchMember, SetVisibilityFilter, UpdateFilter } = MemberSlice.actions;
 
 export const fetchMembers = () => async (dispatch: AppDispatch) => {
     try {
@@ -104,6 +151,21 @@ export const fetchMembers = () => async (dispatch: AppDispatch) => {
         console.log(error);
     }
 };
+
+export const fetchMemberDT = createAsyncThunk(
+    "members/fetchMemberDT",
+    async (filter: any, { rejectWithValue }) => {
+        try {
+            const response = await axiosServices.post(API_DT_URL, filter);
+            dispatch(GetMember(response.data.collection.data || []));
+            console.log("Fetch members", response.data.collection);
+            return response.data.collection;
+        } catch (error: any) {
+            console.error("Error fetching members:", error);
+            return rejectWithValue(error.response?.data || "Unknown error");
+        }
+    }
+)
 
 export const addMember = createAsyncThunk("member/addMember", async (formData: FormData) => {
     try {

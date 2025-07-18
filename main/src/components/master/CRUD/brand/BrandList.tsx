@@ -17,34 +17,53 @@ import {
   DialogActions,
   Button,
   DialogContentText,
+  TableSortLabel,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import { fetchBrands, BrandType, deleteBrand } from 'src/store/apps/crud/brand';
+import {  BrandType, deleteBrand, fetchBrandDT, UpdateFilter } from 'src/store/apps/crud/brand';
 import AddEditBrand from './AddEditBrand';
 
-const BrandList = () => {
-  // Pagination State
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
-  // Handle page change
-  const handleChangePage = (event: unknown, newPage: number) => {
-    console.log(event);
-    setPage(newPage);
-  };
+const columns = [
+  { label: 'Brand Name', field: 'name', sortAble: true },
+  { label: 'Tag', field: 'tag', sortAble: true },
+];
 
-  // Handle rows per page change
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-  const dispatch: AppDispatch = useDispatch();
+const BrandList = () => {
+    const dispatch: AppDispatch = useDispatch();
   const brandData: BrandType[] = useSelector((state: RootState) => state.brandReducer.brands);
+  // const brandTotalCount = useSelector((state: RootState) => state.brandReducer.brandTotalCount);
+  const brandFilteredCount = useSelector(
+    (state: RootState) => state.brandReducer.brandFilteredCount,
+  );
+  const brandFilter = useSelector((state: RootState) => state.brandReducer.brandFilter);
+  // Pagination State
+  const page = Math.floor(brandFilter.Start / brandFilter.Length);
+const rowsPerPage = brandFilter.Length;
+const orderBy = brandFilter.SortColumn;
+const order = brandFilter.SortDir;
+
+const handleChangePage = (_: unknown, newPage: number) => {
+  dispatch(UpdateFilter({ Start: newPage * brandFilter.Length }));
+};
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const newLength = parseInt(event.target.value, 10);
+  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+};
+  const handleSort = (column: string) => {
+  const isAsc = brandFilter.SortColumn === column && brandFilter.SortDir === 'asc';
+  dispatch(UpdateFilter({
+    SortColumn: column,
+    SortDir: isAsc ? 'desc' : 'asc',
+    Start: 0,
+  }));
+};
 
   useEffect(() => {
-    dispatch(fetchBrands());
-  }, [dispatch]);
+    dispatch(fetchBrandDT(brandFilter));
+  }, [brandFilter, dispatch]);
+
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -69,6 +88,7 @@ const BrandList = () => {
     handleCloseDeleteDialog();
   };
 
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -82,9 +102,19 @@ const BrandList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                    {[ 'Brand Name', 'Brand Tag'].map((header) => (
-                      <TableCell key={header}>
-                        <Typography variant="h6">{header}</Typography>
+                    {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
+                          >
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
                       </TableCell>
                     ))}
                     {/* Right Sticky Empty Column */}
@@ -96,40 +126,38 @@ const BrandList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {brandData
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((brand, index) => (
-                      <TableRow key={index}>
-                        <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
-                        >
-                          {index + 1}
-                        </TableCell>
-                        <TableCell>{brand.name}</TableCell>
-                        <TableCell>{brand.tag}</TableCell>
+                  {brandData.map((brand, index) => (
+                    <TableRow key={index}>
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                      >
+                        {index + 1 + page * rowsPerPage}
+                      </TableCell>
+                      <TableCell>{brand.name}</TableCell>
+                      <TableCell>{brand.tag}</TableCell>
 
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            display: 'flex',
-                            gap: 1,
-                            alignItems: 'center',
-                          }}
+                      <TableCell
+                        sx={{
+                          position: 'sticky',
+                          right: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          display: 'flex',
+                          gap: 1,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <AddEditBrand type="edit" brand={brand} />
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleOpenDeleteDialog(brand)}
                         >
-                          <AddEditBrand type="edit" brand={brand} />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(brand)}
-                          >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          <IconTrash size={20} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -138,7 +166,7 @@ const BrandList = () => {
         {/* Pagination */}
         <TablePagination
           component="div"
-          count={brandData.length}
+          count={brandFilteredCount}
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}
