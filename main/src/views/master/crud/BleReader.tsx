@@ -16,6 +16,7 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import BleReaderList from 'src/components/master/CRUD/bleReader/BleReaderList';
 import AddEditBleReader from 'src/components/master/CRUD/bleReader/AddEditBleReader';
+import BleReaderFilter from 'src/components/master/CRUD/bleReader/BleReaderFilter';
 
 interface cardType {
   icon?: string;
@@ -82,7 +83,10 @@ const BleReader = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Ble Reader List" codeModel={<AddEditBleReader type="add" />}>
+          <ParentCard title="Ble Reader List" codeModel={[
+            <BleReaderFilter key="filter" />,
+            <AddEditBleReader key="add" type="add" />
+            ]}>
             <BleReaderList />
           </ParentCard>
         </Drawer>

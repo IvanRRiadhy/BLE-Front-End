@@ -16,6 +16,9 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import AccessCCTVList from 'src/components/master/CRUD/accessCCTV/AccessCCTVList';
 import AddEditAccessCCTV from 'src/components/master/CRUD/accessCCTV/AddEditAccessCCTV';
+import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
+import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
+import AccessCCTVFilter from 'src/components/master/CRUD/accessCCTV/AccessCCTVFilter';
 
 interface cardType {
   icon?: string;
@@ -82,7 +85,10 @@ const AccessCCTV = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Access CCTV List" codeModel={<AddEditAccessCCTV type="add" />}>
+          <ParentCard title="Access CCTV List" codeModel={[
+            <AccessCCTVFilter />,
+            <AddEditAccessCCTV type="add" />
+          ]}>
             <AccessCCTVList />
           </ParentCard>
         </Drawer>
@@ -92,3 +98,4 @@ const AccessCCTV = () => {
 };
 
 export default AccessCCTV;
+

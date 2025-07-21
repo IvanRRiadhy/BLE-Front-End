@@ -15,6 +15,10 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     searchValue: string,
+    filters: {
+        BrandId?: string,
+        EngineReaderId?: string,
+    }
 }
 
 
@@ -72,7 +76,8 @@ const initialState: StateType = {
         Length: 5, 
         SortColumn: "updatedAt", 
         SortDir: "desc", 
-        searchValue: "" 
+        searchValue: "",
+        filters: {} 
     },
 };
 
@@ -140,6 +145,7 @@ export const BleReaderSlice = createSlice({
             }),
         },
 UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
+    console.log("UpdateFilter: ", action.payload);
   state.bleReaderFilter = { ...state.bleReaderFilter, ...action.payload };
 }
 

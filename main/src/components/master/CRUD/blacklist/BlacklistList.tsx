@@ -33,7 +33,6 @@ const columns = [
   { label: 'Blacklisted Area', field: 'MaskedArea.Name', sortAble: true },
 ];
 
-
 const BlacklistList = () => {
     const dispatch: AppDispatch = useDispatch();
   const blaclistData = useSelector((state: RootState) => state.blacklistReducer.blacklists);

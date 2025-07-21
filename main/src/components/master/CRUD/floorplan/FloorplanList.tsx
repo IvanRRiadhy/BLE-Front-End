@@ -29,7 +29,6 @@ import AddEditFloorplan from './AddEditFloorplan';
 const columns = [
     { label: 'Floorplan Name', field: 'name', sortAble: true },
   { label: 'Floor Name', field: 'Floor.Name', sortAble: true },
-
 ];
 
 const FloorplanList = () => {
@@ -60,6 +59,10 @@ const handleChangePage = (_: unknown, newPage: number) => {
     Start: 0,
   }));
 };
+
+// useEffect(() => {
+//   console.log("Floorplan Data:", floorplanData);
+// }, [floorplanData]);
 
   useEffect(() => {
     dispatch(fetchFloorplanDT(floorplanFilter));

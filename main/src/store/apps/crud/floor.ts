@@ -14,6 +14,9 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     searchValue: string,
+    filters: {
+        BuildingId?: string,
+    }
 }
 
 
@@ -72,6 +75,7 @@ const initialState: StateType = {
         SortColumn: "updatedAt",
         SortDir: "desc",
         searchValue: "",
+        filters: {},
     }
 };
 

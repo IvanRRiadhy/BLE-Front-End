@@ -1,0 +1,128 @@
+import { Box, Button, Drawer, Grid2 as Grid, MenuItem, Typography } from '@mui/material';
+import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
+import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
+import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
+import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
+import { UpdateFilter } from 'src/store/apps/crud/bleReader';
+import { fetchBrands } from 'src/store/apps/crud/brand';
+import { RootState, useDispatch, useSelector } from 'src/store/Store';
+
+const BleReaderFilter = () => {
+  const dispatch = useDispatch();
+  const [open, setOpen] = useState(false);
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const brandList = useSelector((state: RootState) => state.brandReducer.brands);
+  const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
+  const [appliedFilter, setAppliedFilter] = useState(bleReaderFilter.filters);
+  useEffect(() => {
+    dispatch(fetchBrands());
+    // setAppliedFilter(bleReaderFilter.filters);
+  }, [dispatch]);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: string }>,
+  ) => {
+    console.log("e.target.name", e.target.name);
+    const { name, value } = e.target;
+    if (name) {
+        setAppliedFilter({ ...appliedFilter, [name]: value });
+    //   dispatch(UpdateFilter({ filters: { ...bleReaderFilter.filters, BrandId: value } }));
+    }
+  };
+
+    const handleApplyFilter = () => {
+      dispatch(UpdateFilter({ filters: appliedFilter }));
+    };
+
+  return (
+    <>
+      <Button
+        onClick={handleClickOpen}
+        size="medium"
+        variant="outlined"
+        startIcon={<IconAdjustmentsHorizontal />}
+        color="info"
+        sx={{ height: 36, mx: 2 }}
+      >
+        <Typography variant="caption" fontSize={'0.7rem'}>
+          Filter
+        </Typography>
+      </Button>
+      {/* Right-side sliding Drawer (non-modal) */}
+      <Drawer
+        anchor="right"
+        open={open}
+        onClose={handleClose}
+        PaperProps={{
+          sx: {
+            width: 320,
+            padding: 3,
+            backgroundColor: 'background.paper',
+          },
+        }}
+      >
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ my: 4, borderBottom: 5, borderColor: 'primary.main' }}
+        >
+          BLE Reader Filter
+        </Typography>
+
+        <Grid container spacing={3}>
+          <Grid size={12}>
+            <CustomFormLabel htmlFor="brandName">
+              <Typography variant="caption">Brand Name :</Typography>
+            </CustomFormLabel>
+            <CustomSelect
+              name="BrandId"
+              value={appliedFilter.BrandId || ''}
+              onChange={handleInputChange}
+              fullWidth
+              variant="outlined"
+            >
+              {brandList.map((brand: any) => (
+                <MenuItem key={brand.id} value={brand.id}>
+                  {brand.name}
+                </MenuItem>
+              ))}
+            </CustomSelect>
+          </Grid>
+          <Grid size={12}>
+            <CustomFormLabel htmlFor="engineReader">
+              <Typography variant="caption">Engine Reader :</Typography>
+            </CustomFormLabel>
+            <CustomTextField
+              InputProps={{
+                sx: {
+                  fontSize: '0.7rem',
+                },
+              }}
+              id="engineReader"
+              fullWidth
+              variant="outlined"
+              disabled
+            />
+          </Grid>
+        </Grid>
+
+        <Box mt={3}>
+          <Button variant="contained" fullWidth onClick={() => {
+            handleApplyFilter();
+            handleClose();
+            }}>
+            Apply Filter
+          </Button>
+        </Box>
+      </Drawer>
+    </>
+  );
+};
+
+export default BleReaderFilter;

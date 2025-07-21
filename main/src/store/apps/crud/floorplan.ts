@@ -9,7 +9,9 @@ import { MaskedAreaType } from "./maskedArea";
 const Floorplan_API_URL = '/api/MstFloorplan/';
 const Floorplan_DT_URL = '/api/MstFloorplan/filter/';
 const Device_API_URL = '/api/FloorplanDevice/';
+const Device_DT_URL = '/api/FloorplanDevice/filter/';
 const Area_API_URL = '/api/FloorplanMaskedArea/';
+const Area_DT_URL = '/api/FloorplanMaskedArea/filter/';
 
 export type GetFilter = {
         Draw: number,
@@ -18,6 +20,9 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     searchValue: string,
+    filters: {
+        FloorId?: string,
+    }
 }
 
 
@@ -48,7 +53,9 @@ export interface FloorplanType {
     updatedBy: string,
     updatedAt: string,
     devices?: FloorplanDeviceType[],
-    maskedAreas?: MaskedAreaType[]
+    deviceCount?: number,
+    maskedAreas?: MaskedAreaType[],
+    maskedAreaCount?: number
 }
 
 interface StateType {
@@ -72,7 +79,8 @@ const initialState: StateType = {
         Length: 5,
         SortColumn: "updatedAt",
         SortDir: "desc",
-        searchValue: ""
+        searchValue: "",
+        filters:{},
     }
 };
 
@@ -82,6 +90,7 @@ export const FloorplanSlice = createSlice({
     reducers: {
         GetFloorplan: (state, action) => {
             state.floorplans = action.payload;
+            console.log('Floorplans fetched:', JSON.stringify(state.floorplans, null, 2));
         },
         SelectFloorplan: (state, action) => {
             const selected = state.floorplans.find(
@@ -136,9 +145,39 @@ export const fetchFloorplanDT = createAsyncThunk(
     async (filter: any, { rejectWithValue }) => {
         try {
             const response = await axiosServices.post(Floorplan_DT_URL, filter);
-            dispatch(GetFloorplan(response.data.collection.data || []));
-            console.log("Fetch floorplans", response.data.collection);
-            return response.data.collection;
+
+            const ids = response.data.collection.data.map((floorplan: FloorplanType) => floorplan.id);
+            const floorplans = response.data.collection.data || [];
+            console.log(floorplans);
+            const enrichedFloorplans: FloorplanType[] = await Promise.all(
+        floorplans.map(async (floorplan: FloorplanType) => {
+          const floorplanFilter = {
+            Draw: 1,
+            Start: 0,
+            Length: 1,
+            SortColumn: "",
+            SortDir: "",
+            searchValue: "",
+            filters: { FloorplanId: floorplan.id },
+          };
+
+          const [deviceResponse, areaResponse] = await Promise.all([
+            axiosServices.post(Device_DT_URL, floorplanFilter),
+            axiosServices.post(Area_DT_URL, floorplanFilter),
+          ]);
+
+          return {
+            ...floorplan,
+            deviceCount: deviceResponse.data.collection.recordsFiltered || 0,
+            maskedAreaCount: areaResponse.data.collection.recordsFiltered || 0,
+          };
+        })
+      );
+      console.log("Enriched Floorplans: ", enrichedFloorplans);
+      // Dispatch after all data is enriched
+      dispatch(GetFloorplan(enrichedFloorplans));
+
+      return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching floorplans:", error);
             return rejectWithValue(error.response?.data || "Unknown error");

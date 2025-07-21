@@ -16,6 +16,7 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import FloorplanList from 'src/components/master/CRUD/floorplan/FloorplanList';
 import AddEditFloorplan from 'src/components/master/CRUD/floorplan/AddEditFloorplan';
+import FloorplanFilter from 'src/components/master/CRUD/floorplan/FloorplanFilter';
 
 interface cardType {
   icon?: string;
@@ -83,7 +84,10 @@ const Floorplan = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Floorplan List" codeModel={<AddEditFloorplan type="add" />}>
+          <ParentCard title="Floorplan List" codeModel={[
+            <FloorplanFilter key="filter" />,
+            <AddEditFloorplan key="add" type="add" />
+            ]}>
             <FloorplanList />
           </ParentCard>
           {/* <Box display="flex" flexDirection="row">
