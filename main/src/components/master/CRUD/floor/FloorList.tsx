@@ -22,7 +22,7 @@ import {
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import { deleteFloor, fetchFloorDT,  floorType, UpdateFilter } from 'src/store/apps/crud/floor';
+import { deleteFloor, fetchFloorDT, floorType, UpdateFilter } from 'src/store/apps/crud/floor';
 import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import AddEditFloor from './AddEditFloor';
 // import { useTranslation } from 'react-i18next';
@@ -38,7 +38,7 @@ const columns = [
 ];
 
 const FloorList = () => {
-    const dispatch: AppDispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const floorData = useSelector((state: RootState) => state.floorReducer.floors);
   // const floorTotalCount = useSelector((state: RootState) => state.floorReducer.floorTotalCount);
   const floorFilteredCount = useSelector(
@@ -48,36 +48,41 @@ const FloorList = () => {
   // const { t } = useTranslation();
   // Pagination State
   const page = Math.floor(floorFilter.Start / floorFilter.Length);
-const rowsPerPage = floorFilter.Length;
-const orderBy = floorFilter.SortColumn;
-const order = floorFilter.SortDir;
+  const rowsPerPage = floorFilter.Length;
+  const orderBy = floorFilter.SortColumn;
+  const order = floorFilter.SortDir;
 
-const handleChangePage = (_: unknown, newPage: number) => {
-  dispatch(UpdateFilter({ Start: newPage * floorFilter.Length }));
-};
+  const handleChangePage = (_: unknown, newPage: number) => {
+    dispatch(UpdateFilter({ Start: newPage * floorFilter.Length }));
+  };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const newLength = parseInt(event.target.value, 10);
-  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
-};
+    const newLength = parseInt(event.target.value, 10);
+    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+  };
   const handleSort = (column: string) => {
-  const isAsc = floorFilter.SortColumn === column && floorFilter.SortDir === 'asc';
-  dispatch(UpdateFilter({
-    SortColumn: column,
-    SortDir: isAsc ? 'desc' : 'asc',
-    Start: 0,
-  }));
-};
+    const isAsc = floorFilter.SortColumn === column && floorFilter.SortDir === 'asc';
+    dispatch(
+      UpdateFilter({
+        SortColumn: column,
+        SortDir: isAsc ? 'desc' : 'asc',
+        Start: 0,
+      }),
+    );
+  };
 
   useEffect(() => {
     dispatch(fetchFloorDT(floorFilter));
+    console.log("FetchDT");
   }, [floorFilter, dispatch]);
 
   const buildingData: BuildingType[] = useSelector(
-    (state: RootState) => state.buildingReducer.buildings,
+    (state: RootState) => state.buildingReducer.buildingAll,
   );
 
   useEffect(() => {
     dispatch(fetchBuildings());
+    dispatch(fetchFloorDT(floorFilter));
+    console.log("Fetch Buildings and Floors");
   }, [dispatch]);
 
   //Delete Pop-up

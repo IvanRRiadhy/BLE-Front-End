@@ -8,6 +8,7 @@ import { MaskedAreaType } from "./maskedArea";
 import { CCTVType } from "./accessCCTV";
 import { AccessControlType } from "./accessControl";
 import { DeviceType } from "src/types/crud/input";
+import { GetAllFloorplan } from "./floorplan";
 
 const API_URL = '/api/FloorplanDevice/';
 const API_DT_URL = '/api/FloorplanDevice/filter/';
@@ -68,6 +69,7 @@ export interface FloorplanDeviceType {
 
 interface StateType {
     floorplanDevices: FloorplanDeviceType[];
+    floorplanDeviceAll: FloorplanDeviceType[];
     originalFloorplanDevices: FloorplanDeviceType[];
     unsavedFloorplanDevices: FloorplanDeviceType[];
     floorplanDeviceSearch: string;
@@ -82,6 +84,7 @@ interface StateType {
 
 const initialState: StateType = {
     floorplanDevices: [],
+    floorplanDeviceAll: [],
     originalFloorplanDevices: [],
     unsavedFloorplanDevices: [],
     floorplanDeviceSearch: '',
@@ -108,10 +111,15 @@ export const FloorplanDeviceSlice = createSlice({
     reducers: {
         GetFloorplanDevices: (state, action) => {
             state.floorplanDevices = action.payload;
-            state.originalFloorplanDevices = action.payload;
+
+        },
+        GetAllFloorplanDevices: (state, action) => {
+            console.log("GetAllFloorplanDevices: ", action.payload);
+            state.floorplanDeviceAll = action.payload;
+                        state.originalFloorplanDevices = action.payload;
         },
         GetUnsavedFloorplanDevices: (state) => {
-            state.unsavedFloorplanDevices = state.floorplanDevices;
+            state.unsavedFloorplanDevices = state.floorplanDeviceAll;
         },
         SelectFloorplanDevice: (state, action) => {
             const selected = state.unsavedFloorplanDevices.find(
@@ -171,15 +179,15 @@ export const FloorplanDeviceSlice = createSlice({
         SaveDevice: (state, action: PayloadAction<string>) => {
             const index = state.unsavedFloorplanDevices.findIndex((device) => device.id === action.payload);
             console.log(index);
-            if(index !== -1 && state.floorplanDevices[index]) {
-                if(state.floorplanDevices[index].id === state.unsavedFloorplanDevices[index].id) {
-                    state.floorplanDevices[index] = state.unsavedFloorplanDevices[index];
-                    console.log(JSON.stringify(state.floorplanDevices[index], null, 2));
+            if(index !== -1 && state.floorplanDeviceAll[index]) {
+                if(state.floorplanDeviceAll[index].id === state.unsavedFloorplanDevices[index].id) {
+                    state.floorplanDeviceAll[index] = state.unsavedFloorplanDevices[index];
+                    console.log(JSON.stringify(state.floorplanDeviceAll[index], null, 2));
                 }
             }
             else {
                 console.log("New device added");
-                state.floorplanDevices.push(state.unsavedFloorplanDevices[index]);
+                state.floorplanDeviceAll.push(state.unsavedFloorplanDevices[index]);
                 state.addedFloorplanDevice?.push(state.unsavedFloorplanDevices[index]);
             }
         },
@@ -203,7 +211,7 @@ export const FloorplanDeviceSlice = createSlice({
                 const deviceIndex = state.unsavedFloorplanDevices.findIndex(
                     (device) => device.id === action.payload.id
                 );
-                const device = state.floorplanDevices.find((device) => device.id === action.payload.id);
+                const device = state.floorplanDeviceAll.find((device) => device.id === action.payload.id);
                 if (deviceIndex !== -1) {
                     const unsavedDevice = state.unsavedFloorplanDevices[deviceIndex];
                     // Check if the device type is valid
@@ -243,22 +251,22 @@ export const FloorplanDeviceSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(addFloorplanDevice.fulfilled, (state, action) => {
-                state.floorplanDevices.push(action.payload);
+                state.floorplanDeviceAll.push(action.payload);
             })
             .addCase(addFloorplanDevice.rejected, (_state, action) => {
                 console.error("Add floorplan device failed: ", action.payload);
             })
             .addCase(editFloorplanDevice.fulfilled, (state, action) => {
-                const index = state.floorplanDevices.findIndex((device) => device.id === action.payload.id);
+                const index = state.floorplanDeviceAll.findIndex((device) => device.id === action.payload.id);
                 if (index !== -1) {
-                    state.floorplanDevices[index] = action.payload;
+                    state.floorplanDeviceAll[index] = action.payload;
                 }
             })
             .addCase(editFloorplanDevice.rejected, (_state, action) => {
                 console.error("Edit floorplan device failed: ", action.payload);
             })
             .addCase(deleteFloorplanDevice.fulfilled, (state, action) => {
-                state.floorplanDevices = state.floorplanDevices.filter((device) => device.id !== action.payload.id);
+                state.floorplanDeviceAll = state.floorplanDeviceAll.filter((device) => device.id !== action.payload.id);
             })
             .addCase(deleteFloorplanDevice.rejected, (_state, action) => {
                 console.error("Delete floorplan device failed: ", action.payload);
@@ -276,6 +284,7 @@ export const FloorplanDeviceSlice = createSlice({
 
 export const {
     GetFloorplanDevices,
+    GetAllFloorplanDevices,
     GetUnsavedFloorplanDevices,
     SelectFloorplanDevice,
     SearchFloorplanDevice,
@@ -292,7 +301,8 @@ export const {
 export const fetchFloorplanDevices = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
-        dispatch(GetFloorplanDevices(response.data?.collection?.data || []));
+        console.log("Floorplan devices fetched: ", response.data);
+        dispatch(GetAllFloorplanDevices(response.data?.collection?.data || []));
     } catch (error) {
         console.error("Error fetching floorplan devices: ", error);
     }    

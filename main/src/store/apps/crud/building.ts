@@ -47,6 +47,7 @@ export interface BuildingType {
 
 interface StateType {
     buildings: BuildingType[];
+    buildingAll: BuildingType[];
     buildingSearch: string;
     selectedBuilding?: BuildingType | null;
     buildingTotalCount: number;
@@ -56,6 +57,7 @@ interface StateType {
 
 const initialState: StateType = {
     buildings: [],
+    buildingAll: [],
     buildingSearch: "",
     selectedBuilding: null,
     buildingTotalCount: 0,
@@ -77,6 +79,9 @@ export const BuildingSlice = createSlice({
     reducers: {
         GetBuildings: (state, action: PayloadAction<BuildingType[]>) => {
             state.buildings = action.payload;
+        },
+        GetAllBuildings: (state, action: PayloadAction<BuildingType[]>) => {
+            state.buildingAll = action.payload;
         },
         SelectBuilding: (state, action: PayloadAction<string>) => {
             const selected = state.buildings.find((building: BuildingType) => building.id === action.payload);
@@ -100,6 +105,7 @@ export const BuildingSlice = createSlice({
 
 export const {
     GetBuildings,
+    GetAllBuildings,
     SelectBuilding,
     SearchBuilding,
     UpdateFilter
@@ -108,7 +114,7 @@ export const {
 export const fetchBuildings = () => async (dispatch: AppDispatch) => {
     try{
         const response = await axiosServices.get(API_URL);
-        dispatch(GetBuildings(response.data.collection?.data || []));
+        dispatch(GetAllBuildings(response.data.collection?.data || []));
     } catch (err: any){
         console.error("Failed to Fetch Building: ", err);
     }

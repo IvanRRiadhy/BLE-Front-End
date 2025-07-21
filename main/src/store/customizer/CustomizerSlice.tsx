@@ -19,6 +19,12 @@ interface StateType {
   isMonitor?: boolean;
   isMonitorSidebar?: boolean;
   isMainMenu?: boolean;
+  dashboardFilter?:{
+    buildingId: string;
+    floorId: string;
+    floorplanId: string;
+    maskedAreaId: string;
+  }
 }
 
 const initialState: StateType = {

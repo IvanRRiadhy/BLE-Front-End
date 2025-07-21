@@ -36,7 +36,7 @@ const ConfigFloorView: React.FC<{
   const activeFloorData = floor.find((floor: floorType) => floor.id === actFloorplan?.floorId);
 
   const Areas: MaskedAreaType[] = useSelector(
-    (state: AppState) => state.maskedAreaReducer.maskedAreas,
+    (state: AppState) => state.maskedAreaReducer.maskedAreaAll,
   );
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorplan);
   const [showArea, setShowArea] = useState(true);

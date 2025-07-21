@@ -17,6 +17,7 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  TableSortLabel,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
@@ -29,12 +30,13 @@ import { useNavigate } from 'react-router';
 
 const columns = [
     { label: 'Floorplan Name', field: 'name', sortAble: true },
-  { label: 'Total Device', field: '', sortAble: false },
+  { label: 'Total Device', field: 'DeviceCount', sortAble: true },
 ];
 
 const FloorplanDeviceList2 = () => {
     const dispatch: AppDispatch = useDispatch();
   const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
+      const floorplanFilteredCount = useSelector((state: RootState) => state.floorplanReducer.floorplanFilteredCount);
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   // const { t } = useTranslation();
   const navigate = useNavigate();
@@ -119,13 +121,21 @@ const handleChangePage = (_: unknown, newPage: number) => {
                 <TableHead>
                   <TableRow>
                     {/* Left Sticky Empty Column */}
-                    <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
-                      <Typography variant="h6">Floorplans</Typography>
-                    </TableCell>
-
-                    <TableCell>
-                      <Typography variant="h6">Total Device</Typography>
-                    </TableCell>
+                    {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
+                          >
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
+                      </TableCell>
+                    ))}
                     {/* Right Sticky Empty Column */}
                     <TableCell
                       sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
@@ -136,7 +146,6 @@ const handleChangePage = (_: unknown, newPage: number) => {
                 </TableHead>
                 <TableBody>
                   {floorplanData
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((floorplan: FloorplanType, index) => (
                       <TableRow key={index}>
                         <TableCell
@@ -180,7 +189,7 @@ const handleChangePage = (_: unknown, newPage: number) => {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={floorplanData.length}
+              count={floorplanFilteredCount}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

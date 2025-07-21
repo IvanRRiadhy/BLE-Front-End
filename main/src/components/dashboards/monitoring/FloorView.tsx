@@ -50,15 +50,15 @@ const FloorView: React.FC<{
 
   // console.log('testing', useSelector((state: AppState) => state.floorReducer.floors));
   const containerRef = useRef<HTMLDivElement>(null);
-  const floor = useSelector((state: AppState) => state.floorReducer.floors);
-  const floorplans = useSelector((state: AppState) => state.floorplanReducer.floorplans);
+  const floor = useSelector((state: AppState) => state.floorReducer.floorAll);
+  const floorplans = useSelector((state: AppState) => state.floorplanReducer.floorplanAll);
   const actFloorplan = floorplans.find(
     (floorplan: FloorplanType) => floorplan.id === activeFloorplan,
   );
   const activeFloorData = floor.find((floor: floorType) => floor.id === actFloorplan?.floorId);
 
   const Areas: MaskedAreaType[] = useSelector(
-    (state: AppState) => state.maskedAreaReducer.maskedAreas,
+    (state: AppState) => state.maskedAreaReducer.maskedAreaAll,
   );
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorplan);
   const [showArea, setShowArea] = useState(true);
@@ -97,7 +97,7 @@ const FloorView: React.FC<{
       : activeFloorData.floorImage // Prepend BASE_URL for relative paths
     : 'No Active Floorplan'; // Fallback to default image if not available
 
-  const devices = useSelector((state: AppState) => state.floorplanDeviceReducer.floorplanDevices);
+  const devices = useSelector((state: AppState) => state.floorplanDeviceReducer.floorplanDeviceAll);
   const [filteredDevices, setFilteredDevices] = useState<FloorplanDeviceType[]>([]);
   useEffect(() => {
     const filteredDevices = devices.filter(

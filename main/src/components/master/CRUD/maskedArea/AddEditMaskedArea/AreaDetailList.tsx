@@ -118,7 +118,7 @@ const AreaDetailList = () => {
       await dispatch(EditUnsavedMaskedArea(formData));
       await dispatch(SaveMaskedArea(formData.id));
       console.log(formData);
-      console.log('Masked Area saved successfully!');
+      console.log('Masked Area saved successfully!', formData);
       // await dispatch(GetUnsavedMaskedArea());
       handleClose();
     } catch (error) {

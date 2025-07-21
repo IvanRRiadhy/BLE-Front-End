@@ -17,11 +17,11 @@ import { fetchTrackingTransDT, trackingTransType } from 'src/store/apps/crud/tra
 import { setMainMenu } from 'src/store/customizer/CustomizerSlice';
 
 const filter = {
-  Draw: 1,
-  Start: 0,
-  Length: 0,
-  SortColumn: null,
-  SortDir: '',
+  draw: 1,
+  start: 0,
+  length: 1,
+  sortColumn: '',
+  sortDir: 'asc',
   searchValue: '',
 };
 
@@ -53,7 +53,10 @@ const Modern = () => {
 
   useEffect(() => {
     // Fetch initial data for the dashboard
-    dispatch(fetchTrackingTransDT(filter));
+    dispatch(fetchTrackingTransDT({
+      ...filter,
+      length: 99,
+    }));
     dispatch(fetchBlacklistDT(filter));
     dispatch(fetchMaskedAreaDT(filter));
     dispatch(fetchBleReaderDT(filter));
@@ -66,7 +69,7 @@ const Modern = () => {
     (state: RootState) => state.blacklistReducer.blacklistTotalCount ?? 0,
   );
   const maskedAreaTotalCount: number = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreaTotalCount ?? 0,
+    (state: RootState) => state.maskedAreaReducer.maskedAreaFilteredCount ?? 0,
   );
   const bleReaderTotalCount: number = useSelector(
     (state: RootState) => state.bleReaderReducer.bleReaderTotalCount ?? 0,

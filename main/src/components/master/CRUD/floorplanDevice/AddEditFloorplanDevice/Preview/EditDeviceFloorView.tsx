@@ -32,7 +32,7 @@ const EditDeviceFloorView: React.FC<{
     (state: AppState) => state.floorplanDeviceReducer.editingFloorplanDevice,
   );
     const Areas: MaskedAreaType[] = useSelector(
-      (state: AppState) => state.maskedAreaReducer.maskedAreas,
+      (state: AppState) => state.maskedAreaReducer.maskedAreaAll,
     );
     const filteredArea = Areas.filter(
     (area) => area.floorplanId === activeFloorPlan?.id,

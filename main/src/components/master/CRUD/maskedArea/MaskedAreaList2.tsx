@@ -11,46 +11,53 @@ import {
   TableRow,
   Typography,
   TablePagination,
+  TableSortLabel,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 // import { useTranslation } from 'react-i18next';
 import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
-import { fetchFloorplan, SelectFloorplan } from 'src/store/apps/crud/floorplan';
+import { fetchFloorplan, fetchFloorplanDT, SelectFloorplan, UpdateFilter } from 'src/store/apps/crud/floorplan';
 import { IconEdit } from '@tabler/icons-react';
 import { useNavigate } from 'react-router';
 
+const columns = [
+  { label: 'Floorplan', field: 'name', sortAble: true },
+  { label: 'Total Area', field: 'MaskedAreaCount', sortAble: true },
+];
+
 const MaskedAreaList2 = () => {
+    const dispatch: AppDispatch = useDispatch();
+  const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
+    const floorplanFilteredCount = useSelector((state: RootState) => state.floorplanReducer.floorplanFilteredCount);
+  const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   // const { t } = useTranslation();
   const navigate = useNavigate();
   // Pagination State
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
-  // const filter = {
-  //   Draw: 1,
-  //   Start: 0,
-  //   Length: rowsPerPage,
-  //   SortColumn: '',
-  //   SortDir: 'asc',
-  //   searchValue: '',
-  // };
-  // Handle page change
-  const handleChangePage = (event: unknown, newPage: number) => {
-    console.log(event);
-    setPage(newPage);
-  };
+  const page = Math.floor(floorplanFilter.Start / floorplanFilter.Length);
+const rowsPerPage = floorplanFilter.Length;
+const orderBy = floorplanFilter.SortColumn;
+const order = floorplanFilter.SortDir;
 
-  // Handle rows per page change
+const handleChangePage = (_: unknown, newPage: number) => {
+  dispatch(UpdateFilter({ Start: newPage * floorplanFilter.Length }));
+};
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-  const dispatch: AppDispatch = useDispatch();
-  const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
+  const newLength = parseInt(event.target.value, 10);
+  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+};
+  const handleSort = (column: string) => {
+  const isAsc = floorplanFilter.SortColumn === column && floorplanFilter.SortDir === 'asc';
+  dispatch(UpdateFilter({
+    SortColumn: column,
+    SortDir: isAsc ? 'desc' : 'asc',
+    Start: 0,
+  }));
+};
+
   useEffect(() => {
-    dispatch(fetchMaskedAreas());
-    dispatch(fetchFloorplan());
-  }, [dispatch]);
+    dispatch(fetchFloorplanDT(floorplanFilter));
+  }, [dispatch, floorplanFilter]);
 
   const handleOnClick = (id: string) => {
     // console.log('id: ', id);
@@ -68,13 +75,21 @@ const MaskedAreaList2 = () => {
                 <TableHead>
                   <TableRow>
                     {/* Left Sticky Empty Column */}
-                    <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
-                      <Typography variant="h6">Floorplans</Typography>
-                    </TableCell>
-
-                    <TableCell>
-                      <Typography variant="h6">Total Area</Typography>
-                    </TableCell>
+                    {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
+                          >
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
+                      </TableCell>
+                    ))}
                     {/* Right Sticky Empty Column */}
                     <TableCell
                       sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
@@ -85,7 +100,6 @@ const MaskedAreaList2 = () => {
                 </TableHead>
                 <TableBody>
                   {floorplanData
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((floorplan: any, index) => (
                       <TableRow key={index}>
                         <TableCell
@@ -93,7 +107,7 @@ const MaskedAreaList2 = () => {
                         >
                           {floorplan.name}
                         </TableCell>
-                        <TableCell>{floorplan.maskedAreas.length}</TableCell>
+                        <TableCell>{floorplan.maskedAreaCount}</TableCell>
 
                         <TableCell
                           sx={{
@@ -122,7 +136,7 @@ const MaskedAreaList2 = () => {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={floorplanData.length}
+              count={ floorplanFilteredCount}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

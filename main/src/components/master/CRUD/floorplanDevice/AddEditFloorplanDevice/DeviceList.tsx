@@ -89,7 +89,9 @@ const DeviceList = () => {
   }, [dispatch]);
   useEffect(() => {
     dispatch(GetUnsavedFloorplanDevices());
-  }, []);
+    console.log('Unsaved devices fetched:', unsavedDevices);
+    console.log('Original devices fetched:', originalDevices);
+  }, [originalDevices]);
 
   const newDevice: FloorplanDeviceType = {
     id: `temp-${Date.now()}`, // Generate a temporary unique ID

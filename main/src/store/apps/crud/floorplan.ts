@@ -21,7 +21,7 @@ export type GetFilter = {
     SortDir: 'asc' | 'desc',
     searchValue: string,
     filters: {
-        FloorId?: string,
+        FloorId: string[],
     }
 }
 
@@ -60,6 +60,7 @@ export interface FloorplanType {
 
 interface StateType {
     floorplans: FloorplanType[];
+    floorplanAll: FloorplanType[];
     floorplanSearch: string;
     selectedFloorplan?: FloorplanType | null;
     floorplanTotalCount: number;
@@ -69,6 +70,7 @@ interface StateType {
 
 const initialState: StateType = {
     floorplans: [],
+    floorplanAll: [],
     floorplanSearch: '',
     selectedFloorplan: null,
     floorplanTotalCount: 0,
@@ -80,7 +82,9 @@ const initialState: StateType = {
         SortColumn: "updatedAt",
         SortDir: "desc",
         searchValue: "",
-        filters:{},
+        filters:{
+            FloorId: [],
+        },
     }
 };
 
@@ -90,7 +94,10 @@ export const FloorplanSlice = createSlice({
     reducers: {
         GetFloorplan: (state, action) => {
             state.floorplans = action.payload;
-            console.log('Floorplans fetched:', JSON.stringify(state.floorplans, null, 2));
+            // console.log('Floorplans fetched:', JSON.stringify(state.floorplans, null, 2));
+        },
+        GetAllFloorplan: (state, action) => {
+            state.floorplanAll = action.payload;
         },
         SelectFloorplan: (state, action) => {
             const selected = state.floorplans.find(
@@ -114,26 +121,14 @@ export const FloorplanSlice = createSlice({
     },
 });
 
-export const { GetFloorplan, SelectFloorplan, SearchFloorplan, UpdateFilter } = FloorplanSlice.actions;
+export const { GetFloorplan, GetAllFloorplan, SelectFloorplan, SearchFloorplan, UpdateFilter } = FloorplanSlice.actions;
 
 export const fetchFloorplan = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(Floorplan_API_URL);
-        const deviceResponse = await axiosServices.get(Device_API_URL);
-        const areaResponse = await axiosServices.get(Area_API_URL)
-
         const floorplans = response.data.collection.data || [];
-        const devices = deviceResponse.data.collection.data || [];
-        const areas = areaResponse.data.collection.data || [];
 
-        // Enrich floorplans with devices
-        const enrichedFloorplans = floorplans.map((floorplan: FloorplanType) => ({
-            ...floorplan,
-            devices: devices.filter((device: FloorplanDeviceType) => device.floorplanId === floorplan.id),
-            maskedAreas: areas.filter((area: MaskedAreaType) => area.floorplanId === floorplan.id)
-        }));
-
-        dispatch(GetFloorplan(enrichedFloorplans));
+        dispatch(GetAllFloorplan(floorplans));
 
     } catch (error) {
         console.error('Error fetching floorplans:', error);
@@ -144,38 +139,16 @@ export const fetchFloorplanDT = createAsyncThunk(
     "floorplans/fetchFloorplanDT",
     async (filter: any, { rejectWithValue }) => {
         try {
+            console.log("Fetch Floorplan DT: ", filter);
             const response = await axiosServices.post(Floorplan_DT_URL, filter);
-
-            const ids = response.data.collection.data.map((floorplan: FloorplanType) => floorplan.id);
             const floorplans = response.data.collection.data || [];
-            console.log(floorplans);
-            const enrichedFloorplans: FloorplanType[] = await Promise.all(
-        floorplans.map(async (floorplan: FloorplanType) => {
-          const floorplanFilter = {
-            Draw: 1,
-            Start: 0,
-            Length: 1,
-            SortColumn: "",
-            SortDir: "",
-            searchValue: "",
-            filters: { FloorplanId: floorplan.id },
-          };
-
-          const [deviceResponse, areaResponse] = await Promise.all([
-            axiosServices.post(Device_DT_URL, floorplanFilter),
-            axiosServices.post(Area_DT_URL, floorplanFilter),
-          ]);
-
-          return {
-            ...floorplan,
-            deviceCount: deviceResponse.data.collection.recordsFiltered || 0,
-            maskedAreaCount: areaResponse.data.collection.recordsFiltered || 0,
-          };
-        })
-      );
-      console.log("Enriched Floorplans: ", enrichedFloorplans);
+            // console.log("FLOOR :", response.data.collection.data || []);
+            response.data.collection.data.forEach((floorplan: FloorplanType) => {
+                console.log("Floorplan: ", floorplan);
+            });
+            dispatch(GetFloorplan(floorplans));
       // Dispatch after all data is enriched
-      dispatch(GetFloorplan(enrichedFloorplans));
+    //   dispatch(GetFloorplan(enrichedFloorplans));
 
       return response.data.collection;
         } catch (error: any) {

@@ -16,7 +16,7 @@ import React from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
-import { addFloor, editFloor, fetchFloors, floorType } from 'src/store/apps/crud/floor';
+import { addFloor, editFloor, fetchFloorDT, fetchFloors, floorType } from 'src/store/apps/crud/floor';
 import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 
@@ -49,8 +49,9 @@ const AddEditFloor = ({ type, floor }: FormType) => {
   });
   const dispatch: AppDispatch = useDispatch();
   const buildingData: BuildingType[] = useSelector(
-    (state: RootState) => state.buildingReducer.buildings,
+    (state: RootState) => state.buildingReducer.buildingAll,
   );
+    const floorFilter = useSelector((state: RootState) => state.floorReducer.floorFilter);
   React.useEffect(() => {
     dispatch(fetchBuildings());
   }, [dispatch]);
@@ -135,7 +136,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
         await dispatch(addFloor(data));
       }
 
-      await dispatch(fetchFloors());
+      await dispatch(fetchFloorDT(floorFilter));
       console.log('Saved!');
       handleClose();
     } catch (error) {

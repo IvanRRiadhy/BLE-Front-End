@@ -3,7 +3,7 @@ import { Typography } from '@mui/material';
 import { useSelector } from 'src/store/Store';
 // import { useTranslation } from 'react-i18next';
 
-const TimeAndFilter = () => {
+const TimeDisplay = () => {
     const [currentDateTime, setCurrentDateTime] = useState<string>('');
     //   const { t } = useTranslation();
     const language = useSelector((state) => state.customizer.isLanguage);
@@ -52,4 +52,4 @@ const TimeAndFilter = () => {
   );
 };
 
-export default TimeAndFilter;
+export default TimeDisplay;

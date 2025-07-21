@@ -55,6 +55,7 @@ export interface floorType {
 
 interface StateType {
     floors: floorType[];
+    floorAll: floorType[];
     floorSearch: string;
     selectedFloor?: floorType | null;
     floorTotalCount: number;
@@ -64,6 +65,7 @@ interface StateType {
 
 const initialState: StateType = {
     floors: [],
+    floorAll: [],
     floorSearch: "",
     selectedFloor: null,
     floorTotalCount: 0,
@@ -87,6 +89,9 @@ export const FloorSlice = createSlice({
         GetFloor: (state, action: PayloadAction<floorType[]>) => {
             state.floors = action.payload;
             // console.log('Floors fetched:', JSON.stringify(state.floors, null, 2));
+        },
+        GetAllFloor: (state, action: PayloadAction<floorType[]>) => {
+            state.floorAll = action.payload;
         },
         SelectFloor: (state, action: PayloadAction<string>) => {
             const selected = state.floors.find((floor: floorType) => floor.id === action.payload);
@@ -136,6 +141,7 @@ export const FloorSlice = createSlice({
 
 export const {
     GetFloor,
+    GetAllFloor,
     SelectFloor,
     SearchFloor,
     UpdateFilter
@@ -144,7 +150,7 @@ export const {
 export const fetchFloors = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL)
-        dispatch(GetFloor(response.data?.collection?.data || []));
+        dispatch(GetAllFloor(response.data?.collection?.data || []));
         // console.log("Fetch Floors",response.data?.collection?.data || []);
     } catch (error) {
         console.log(error);

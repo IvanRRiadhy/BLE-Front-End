@@ -22,10 +22,10 @@ import {
   setScreenDisplay,
   setScreenSettings,
 } from 'src/store/apps/monitoring/layout';
-import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
-import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
-import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
-import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { fetchFloorplan, fetchFloorplanDT, FloorplanType } from 'src/store/apps/crud/floorplan';
+import { fetchBuildings, BuildingType, fetchBuildingDT } from 'src/store/apps/crud/building';
+import { fetchFloorDT, fetchFloors, floorType } from 'src/store/apps/crud/floor';
+import { fetchMaskedAreaDT, fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { CCTVType, fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
 
@@ -35,6 +35,15 @@ interface configSidebarProps {
   previewSelectedScreen: string;
   screenSettings?: { scale: number; translateX: number; translateY: number };
 }
+
+const filter = {
+  draw: 1,
+  start: 0,
+  length: 99,
+  sortColumn: '',
+  sortDir: 'asc',
+  searchValue: '',
+};
 
 const ConfigSidebar: React.FC<configSidebarProps> = ({
   setSelectedGrid,
@@ -206,10 +215,26 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
   }, [previewSelectedScreen]);
 
   useEffect(() => {
-    dispatch(fetchFloorplan());
-    dispatch(fetchBuildings());
-    dispatch(fetchFloors());
-    dispatch(fetchMaskedAreas());
+    dispatch(fetchFloorplanDT({
+      ...filter,
+      filter:{
+        FloorId: selectedFloor
+      }
+    }));
+    dispatch(fetchBuildingDT(filter));
+    dispatch(fetchFloorDT({
+      ...filter,
+      filter:{
+        BuildingId: selectedBuilding
+      }
+    }));
+    dispatch(fetchMaskedAreaDT({
+      ...filter,
+      filter:{
+        FloorId: selectedFloor,
+        FloorplanId: selectedFloorplan
+      }
+    }));
     dispatch(fetchAccessCCTV());
   }, [dispatch]);
 

@@ -17,6 +17,10 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     searchValue: string,
+    filter : {
+        FloorplanId: string[],
+        FloorId: string[],
+    }
 }
 
 
@@ -69,6 +73,7 @@ export interface MaskedAreaType {
 
 interface StateType {
     maskedAreas: MaskedAreaType[];
+    maskedAreaAll: MaskedAreaType[];
     originalMaskedAreas: MaskedAreaType[];
     unsavedMaskedAreas: MaskedAreaType[];
     maskedAreaSearch: string;
@@ -84,6 +89,7 @@ interface StateType {
 
 const initialState: StateType = {
     maskedAreas: [],
+    maskedAreaAll: [],
     originalMaskedAreas: [],
     unsavedMaskedAreas: [],
     maskedAreaSearch: "",
@@ -101,6 +107,10 @@ const initialState: StateType = {
         SortColumn: "updatedAt",
         SortDir: "asc",
         searchValue: "",
+        filter: {
+            FloorplanId: [],
+            FloorId: [],
+        }
     }
 };
 
@@ -110,17 +120,22 @@ export const MaskedAreaSlice = createSlice({
     reducers: {
         GetMaskedArea: (state, action: PayloadAction<MaskedAreaType[]>) => {
             state.maskedAreas = action.payload;
-            state.originalMaskedAreas = action.payload;
+
+        },
+        GetAllMaskedArea: (state, action: PayloadAction<MaskedAreaType[]>) => {
+            state.maskedAreaAll = action.payload;
+                        state.originalMaskedAreas = action.payload;
+            // console.log("All Masked Areas: ", JSON.stringify(state.maskedAreaAll, null, 2));
         },
         GetUnsavedMaskedArea: (state) => {
-            state.unsavedMaskedAreas = state.maskedAreas;
+            state.unsavedMaskedAreas = state.maskedAreaAll;
         },
         SelectMaskedArea: (state, action) => {
-            const selected = state.unsavedMaskedAreas.find((maskedArea: MaskedAreaType) => maskedArea.id === action.payload);
+            const selected = state.unsavedMaskedAreas.find((maskedAreaAll: MaskedAreaType) => maskedAreaAll.id === action.payload);
             state.selectedMaskedArea = selected || null;
         },
         SelectEditingMaskedArea: (state, action) => {
-            const selected = state.unsavedMaskedAreas.find((maskedArea: MaskedAreaType) => maskedArea.id === action.payload);
+            const selected = state.unsavedMaskedAreas.find((maskedAreaAll: MaskedAreaType) => maskedAreaAll.id === action.payload);
             console.log("Selected Masked Area: ", action.payload);
             state.editingMaskedArea = selected || null;
         },
@@ -131,11 +146,11 @@ export const MaskedAreaSlice = createSlice({
             state.unsavedMaskedAreas.push(action.payload);
         },
         EditUnsavedMaskedArea: (state, action: PayloadAction<MaskedAreaType>) => {
-            const index = state.unsavedMaskedAreas.findIndex((maskedArea) => maskedArea.id === action.payload.id);
+            const index = state.unsavedMaskedAreas.findIndex((maskedAreaAll) => maskedAreaAll.id === action.payload.id);
             if (index !== -1) {
                 // Create a new array with the updated area
-                state.unsavedMaskedAreas = state.unsavedMaskedAreas.map((maskedArea, i) =>
-                    i === index ? {...maskedArea, ...action.payload} : maskedArea
+                state.unsavedMaskedAreas = state.unsavedMaskedAreas.map((maskedAreaAll, i) =>
+                    i === index ? {...maskedAreaAll, ...action.payload} : maskedAreaAll
                 );
         
                 // Update the editingMaskedArea immutably
@@ -146,11 +161,11 @@ export const MaskedAreaSlice = createSlice({
             }
         },
         EditMaskedAreaPosition: (state, action: PayloadAction<MaskedAreaType>) => {
-            const index = state.unsavedMaskedAreas.findIndex((maskedArea) => maskedArea.id === action.payload.id);
+            const index = state.unsavedMaskedAreas.findIndex((maskedAreaAll) => maskedAreaAll.id === action.payload.id);
             if (index !== -1) {
                 // Create a new array with the updated area
-                state.unsavedMaskedAreas = state.unsavedMaskedAreas.map((maskedArea, i) =>
-                    i === index ? {...maskedArea, areaShape: action.payload.areaShape, nodes: action.payload.nodes} : maskedArea
+                state.unsavedMaskedAreas = state.unsavedMaskedAreas.map((maskedAreaAll, i) =>
+                    i === index ? {...maskedAreaAll, areaShape: action.payload.areaShape, nodes: action.payload.nodes} : maskedAreaAll
                 );
         
                 // Update the editingMaskedArea immutably   
@@ -164,24 +179,24 @@ export const MaskedAreaSlice = createSlice({
             }
         },
         SaveMaskedArea: (state, action: PayloadAction<string>) => {
-            const index = state.unsavedMaskedAreas.findIndex((maskedArea) => maskedArea.id === action.payload);
+            const index = state.unsavedMaskedAreas.findIndex((maskedAreaAll) => maskedAreaAll.id === action.payload);
             console.log(index);
-            if (index !== -1 && state.maskedAreas[index]) {
-                if(state.maskedAreas[index].id === state.unsavedMaskedAreas[index].id) {
-                    state.maskedAreas[index] = state.unsavedMaskedAreas[index];
+            if (index !== -1 && state.maskedAreaAll[index]) {
+                if(state.maskedAreaAll[index].id === state.unsavedMaskedAreas[index].id) {
+                    state.maskedAreaAll[index] = state.unsavedMaskedAreas[index];
                 }
-                console.log("Saved Masked Area: ", JSON.stringify(state.maskedAreas[index].areaShape, null, 2));
+                console.log("Saved Masked Area: ", JSON.stringify(state.maskedAreaAll[index].areaShape, null, 2));
             }
             else {
                 console.log("Masked Area added");
-                state.maskedAreas.push(state.unsavedMaskedAreas[index]);
+                state.maskedAreaAll.push(state.unsavedMaskedAreas[index]);
                 state.addedMaskedArea?.push(state.unsavedMaskedAreas[index]);
             }
 
             // GetUnsavedMaskedArea();
         },
         DeleteUnsavedMaskedArea: (state, action: PayloadAction<string>) => {
-            const index = state.unsavedMaskedAreas.findIndex((maskedArea) => maskedArea.id === action.payload);
+            const index = state.unsavedMaskedAreas.findIndex((maskedAreaAll) => maskedAreaAll.id === action.payload);
             if (index !== -1) {
                 state.deletedMaskedArea?.push(state.unsavedMaskedAreas[index]);
                 state.unsavedMaskedAreas.splice(index, 1);
@@ -194,8 +209,8 @@ export const MaskedAreaSlice = createSlice({
         RevertMaskedArea: {
             reducer: (state, action: PayloadAction<{id: string}>) => {
                 console.log(action.payload);
-                const index = state.unsavedMaskedAreas.findIndex((maskedArea) => maskedArea.id === action.payload.id);
-                const area = state.maskedAreas.find((maskedArea) => maskedArea.id === action.payload.id);
+                const index = state.unsavedMaskedAreas.findIndex((maskedAreaAll) => maskedAreaAll.id === action.payload.id);
+                const area = state.maskedAreas.find((maskedAreaAll) => maskedAreaAll.id === action.payload.id);
                 if(index !== -1) {
                     const area = state.unsavedMaskedAreas[index];
                     //Check if status is valid
@@ -262,6 +277,8 @@ export const MaskedAreaSlice = createSlice({
                 console.error("Delete failed: ", action.payload);
             })
             .addCase(fetchMaskedAreaDT.fulfilled, (state, action) => {
+                console.log("Masked Area Records Total: ", action.payload.recordsTotal);
+                console.log("Masked Area Records Filtered: ", action.payload.recordsFiltered);
                 state.maskedAreaTotalCount = action.payload.recordsTotal;
                 state.maskedAreaFilteredCount = action.payload.recordsFiltered;
             })
@@ -270,6 +287,7 @@ export const MaskedAreaSlice = createSlice({
 
 export const {
     GetMaskedArea,
+    GetAllMaskedArea,
     SelectMaskedArea,
     SearchMaskedArea,
     AddUnsavedMaskedArea,
@@ -296,7 +314,7 @@ export const fetchMaskedAreas = () => async (dispatch: AppDispatch) => {
                 return maskedArea;
             })
         }
-        dispatch(GetMaskedArea(newAreas || []));
+        dispatch(GetAllMaskedArea(newAreas || []));
     } catch (error) {
         console.log(error);
     }
@@ -306,10 +324,11 @@ export const fetchMaskedAreaDT = createAsyncThunk(
     "maskedAreas/fetchMaskedAreaDT", 
     async (filter: any, { rejectWithValue }) => {
         try {
-            const response = await axiosServices.get(`${API_DT_URL}`, filter);
+            console.log("Fetch Masked Area DT: ", filter);
+            const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetMaskedArea([response.data.collection.data]));
             console.log("Fetch masked areas", response.data.collection);
-            return response.data;
+            return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching masked area:", error);
             return rejectWithValue(error.response?.data || "Unknown error");

@@ -1,6 +1,6 @@
 import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch } from "src/store/Store";
+import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { MaskedAreaType } from "./maskedArea";
@@ -130,6 +130,7 @@ export const fetchTrackingTransDT = createAsyncThunk(
         try {
             const response = await axiosServices.post(API_DT_URL, filter);
             console.log("Fetch trackingTrans", response.data.collection);
+            dispatch(GetTrackingTrans(response.data.collection.data || []));
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching trackingTrans:", error);

@@ -89,7 +89,7 @@ const DeviceDetailList = () => {
   //   state.maskedAreaReducer.maskedAreas.filter((area) => area.floorplanId === formData.floorplanId),
   // );
   const maskedAreaData: MaskedAreaType[] = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreas,
+    (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
   );
 
   const CCTVData: CCTVType[] = useSelector((state: RootState) => state.CCTVReducer.cctvs);

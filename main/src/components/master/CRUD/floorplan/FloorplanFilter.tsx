@@ -1,4 +1,4 @@
-import { Box, Button, Drawer, Grid2 as Grid, MenuItem, Typography } from '@mui/material';
+import { Box, Button, Checkbox, Drawer, Grid2 as Grid, ListItem, ListItemIcon, ListItemText, MenuItem, Typography } from '@mui/material';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
@@ -17,7 +17,7 @@ const FloorplanFilter = () => {
     setOpen(false);
   };
 
-  const floorList = useSelector((state: RootState) => state.floorReducer.floors);
+  const floorList = useSelector((state: RootState) => state.floorReducer.floorAll);
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   const [appliedFilter, setAppliedFilter] = useState(floorplanFilter.filters);
   useEffect(() => {
@@ -29,6 +29,13 @@ const FloorplanFilter = () => {
     e: React.ChangeEvent<HTMLInputElement | { name?: string; value: string }>,
   ) => {
     const { name, value } = e.target;
+    if(value.includes('all')){
+      setAppliedFilter((prev) => ({
+        ...prev,
+        FloorId: appliedFilter.FloorId?.length ? [] : floorList.map((floor) => floor.id),
+      }))
+      return;
+    }
     if (name) {
       setAppliedFilter({ ...appliedFilter, [name]: value });
       //   dispatch(UpdateFilter({ filters: { ...floorplanFilter.filters, FloorId: value } }));
@@ -81,13 +88,41 @@ const FloorplanFilter = () => {
             </CustomFormLabel>
             <CustomSelect
               name="FloorId"
-              value={appliedFilter.FloorId || ''}
+              value={appliedFilter.FloorId}
               onChange={handleInputChange}
               fullWidth
               variant="outlined"
+              multiple
+              renderValue={(selected: string[]) => {
+                if (selected.length === 0) return 'All Floors';
+                return floorList
+                  .filter((floor) => selected.includes(floor.id))
+                  .map((floor) => floor.name)
+                  .join(', ');
+              }}
+                            MenuProps={{
+                PaperProps: {
+                  style: {
+                    maxHeight: 200, // Set the maximum height of the dropdown menu
+                    width: 100, // Adjust the width of the dropdown menu
+                  },
+                },
+              }}
             >
+              <MenuItem value="all">
+                <ListItemIcon>
+                  <Checkbox 
+                  checked={appliedFilter.FloorId?.length === floorList.length} 
+                  indeterminate={appliedFilter.FloorId.length > 0 && appliedFilter.FloorId.length < floorList.length}
+                  />
+                </ListItemIcon>
+                <ListItemText primary="All Floors" />
+              </MenuItem>
               {floorList.map((floor) => (
                 <MenuItem key={floor.id} value={floor.id}>
+                  <ListItemIcon>
+                    <Checkbox checked={appliedFilter.FloorId?.includes(floor.id)} />
+                  </ListItemIcon>
                   {floor.name}
                 </MenuItem>
               ))}

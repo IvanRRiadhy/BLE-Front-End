@@ -34,6 +34,15 @@ import AreaListItem from './AreaListItem';
 import { useNavigate } from 'react-router';
 import { uniqueId } from 'lodash';
 
+const filter = {
+  draw: 1,
+  start: 0,
+  length: 99,
+  sortColumn: '',
+  sortDir: 'asc',
+  searchValue: '',
+};
+
 const AreaList = () => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
@@ -41,7 +50,7 @@ const AreaList = () => {
   const activeFloorplan = useSelector(
     (state: AppState) => state.floorplanReducer.selectedFloorplan,
   );
-  const maskedAreasData = useSelector((state: AppState) => state.maskedAreaReducer.maskedAreas);
+  const maskedAreasData = useSelector((state: AppState) => state.maskedAreaReducer.maskedAreaAll);
   const originalAreas = useSelector(
     (state: AppState) => state.maskedAreaReducer.originalMaskedAreas,
   );
@@ -79,7 +88,13 @@ const AreaList = () => {
   }, [dispatch]);
   useEffect(() => {
     dispatch(GetUnsavedMaskedArea());
-  }, []);
+  }, [maskedAreasData]);
+
+  // useEffect(() => {
+  //   console.log('Masked Area Data:', maskedAreasData);
+  //   console.log('Filtered Masked Area:', filteredMaskedArea);
+  //   console.log('Filtered Unsaved Masked Area:', filteredUnsavedMaksedArea);
+  // }, [maskedAreasData, filteredMaskedArea, filteredUnsavedMaksedArea]);
 
   const newArea = {
     id: uniqueId('maskedArea_'),
@@ -173,11 +188,13 @@ const AreaList = () => {
   const handleSaveEdits = async () => {
     // const unsavedArea = new Map(filteredMaskedArea.map((area) => [area.id, area]));
     const originArea = new Map(filteredOriginalAreas.map((area) => [area.id, area]));
-
+    // console.log('Origin Areas:', originArea);
+    // console.log('Filtered Masked Area:', filteredMaskedArea);
     const areasToEdit = filteredMaskedArea.filter((unsavedArea) => {
       const originalArea = originArea.get(unsavedArea.id);
-      // console.log('Original Area:', originalArea);
-      // console.log('Unsaved Area:', unsavedArea);
+      console.log('Original Area:', originalArea);
+      console.log('Unsaved Area:', unsavedArea);
+      console.log('Is Area Edited:', originalArea && JSON.stringify(unsavedArea) !== JSON.stringify(originalArea));
       return originalArea && JSON.stringify(unsavedArea) !== JSON.stringify(originalArea);
     });
     console.log('Areas to Edit:', areasToEdit);

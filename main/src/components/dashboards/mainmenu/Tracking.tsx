@@ -31,6 +31,7 @@ const TrackingGraph: React.FC<TrackingGraphProps> = ({ trackingData = [], alarmD
     });
     return counts;
   }
+  console.log(trackingData, alarmData);
 
   const allowedVisitor = getCountsByDay(trackingData, 'transTime');
   const unAllowedVisitor = getCountsByDay(alarmData, 'timestamp');

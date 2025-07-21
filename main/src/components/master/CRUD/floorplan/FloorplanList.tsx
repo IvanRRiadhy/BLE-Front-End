@@ -130,7 +130,7 @@ const handleChangePage = (_: unknown, newPage: number) => {
                 </TableHead>
                 <TableBody>
                   {floorplanData
-                    .map((floorplan: FloorplanType, index) => (
+                    .map((floorplan: FloorplanType, index: number) => (
                       <TableRow key={index}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}

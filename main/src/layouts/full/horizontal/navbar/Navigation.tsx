@@ -5,12 +5,14 @@ import { useSelector, useDispatch } from 'src/store/Store';
 import { toggleMobileSidebar } from 'src/store/customizer/CustomizerSlice';
 import SidebarItems from '../../vertical/sidebar/SidebarItems';
 import { AppState } from 'src/store/Store';
-import TimeAndFilter from './TimeAndFilter';
+import TimeDisplay from './TimeDisplay';
+import DashboardFilter from './DashboardFilter';
 
 const Navigation = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const customizer = useSelector((state: AppState) => state.customizer);
   const dispatch = useDispatch();
+  const isMain = useSelector((state: AppState) => state.customizer.isMainMenu);
 
   if (lgUp) {
     return (
@@ -35,7 +37,10 @@ const Navigation = () => {
         >
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <NavListing />
-            <TimeAndFilter />
+            <Box display="flex" alignItems="center" sx={{ gap: '5px' }}>
+              {isMain && <DashboardFilter />}
+              <TimeDisplay />
+            </Box>
           </Box>
         </Container>
       </Box>
