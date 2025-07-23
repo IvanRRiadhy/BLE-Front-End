@@ -77,13 +77,23 @@ const handleChangePage = (_: unknown, newPage: number) => {
     )}`;
   };
 
-  const handleSort = (column: string) => {
+const handleSort = (column: string) => {
   const isAsc = AlarmRecordFilter.SortColumn === column && AlarmRecordFilter.SortDir === 'asc';
-  dispatch(UpdateFilter({
-    SortColumn: column,
-    SortDir: isAsc ? 'desc' : 'asc',
-    Start: 0,
-  }));
+  const isDesc = AlarmRecordFilter.SortColumn === column && AlarmRecordFilter.SortDir === 'desc';
+
+  if (isDesc) {
+    dispatch(UpdateFilter({
+      SortColumn: '',
+      SortDir: 'asc',
+      Start: 0,
+    }));
+  } else {
+    dispatch(UpdateFilter({
+      SortColumn: column,
+      SortDir: isAsc ? 'desc' : 'asc',
+      Start: 0,
+    }));
+  }
 };
 
   return (

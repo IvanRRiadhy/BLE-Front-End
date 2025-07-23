@@ -98,13 +98,23 @@ const handleChangePage = (_: unknown, newPage: number) => {
     }
     handleCloseDeleteDialog();
   };
-  const handleSort = (column: string) => {
+const handleSort = (column: string) => {
   const isAsc = accessControlFilter.SortColumn === column && accessControlFilter.SortDir === 'asc';
-  dispatch(UpdateFilter({
-    SortColumn: column,
-    SortDir: isAsc ? 'desc' : 'asc',
-    Start: 0,
-  }));
+  const isDesc = accessControlFilter.SortColumn === column && accessControlFilter.SortDir === 'desc';
+
+  if (isDesc) {
+    dispatch(UpdateFilter({
+      SortColumn: '',
+      SortDir: 'asc',
+      Start: 0,
+    }));
+  } else {
+    dispatch(UpdateFilter({
+      SortColumn: column,
+      SortDir: isAsc ? 'desc' : 'asc',
+      Start: 0,
+    }));
+  }
 };
 
   return (

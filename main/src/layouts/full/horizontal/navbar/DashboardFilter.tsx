@@ -18,12 +18,13 @@ import { BuildingType, fetchBuildingDT, fetchBuildings } from 'src/store/apps/cr
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
 import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
+import { setDashboardFilter } from 'src/store/customizer/CustomizerSlice';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 type FilterState = {
-  buildingId: string[];
-  floorId: string[];
-  floorplanId: string[];
-  maskedAreaId: string[];
+  BuildingId: string[];
+  FloorId: string[];
+  FloorplanId: string[];
+  MaskedAreaId: string[];
 };
 
 const DashboardFilter = () => {
@@ -35,28 +36,29 @@ const DashboardFilter = () => {
   const handleClose = () => {
     setOpen(false);
   };
+
   const buildingList = useSelector((state: RootState) => state.buildingReducer.buildingAll);
   const floorList = useSelector((state: RootState) => state.floorReducer.floorAll);
   const floorplanList = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
   const maskedAreaList = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
   const dashboardFilter = useSelector((state: RootState) => state.customizer.dashboardFilter);
   const [appliedFilter, setAppliedFilter] = useState<FilterState>({
-    buildingId: [],
-    floorId: [],
-    floorplanId: [],
-    maskedAreaId: [],
+    BuildingId: [],
+    FloorId: [],
+    FloorplanId: [],
+    MaskedAreaId: [],
   });
   const filteredFloors = useMemo(() => {
-    return floorList.filter((floor: any) => appliedFilter.buildingId.includes(floor.buildingId));
-  }, [appliedFilter.buildingId, floorList]);
+    return floorList.filter((floor: any) => appliedFilter.BuildingId.includes(floor.buildingId));
+  }, [appliedFilter.BuildingId, floorList]);
 
   const filteredFloorplans = useMemo(() => {
-    return floorplanList.filter((fp: any) => appliedFilter.floorId.includes(fp.floorId));
-  }, [appliedFilter.floorId, floorplanList]);
+    return floorplanList.filter((fp: any) => appliedFilter.FloorId.includes(fp.floorId));
+  }, [appliedFilter.FloorId, floorplanList]);
 
   const filteredMaskedAreas = useMemo(() => {
-    return maskedAreaList.filter((m: any) => appliedFilter.floorplanId.includes(m.floorplanId));
-  }, [appliedFilter.floorplanId, maskedAreaList]);
+    return maskedAreaList.filter((m: any) => appliedFilter.FloorplanId.includes(m.floorplanId));
+  }, [appliedFilter.FloorplanId, maskedAreaList]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | { name?: string; value: string }>,
@@ -86,6 +88,51 @@ const DashboardFilter = () => {
   useEffect(() => {
     console.log('Masked Area List:', maskedAreaList);
   }, [maskedAreaList]);
+
+  const handleApplyFilter = () => {
+     // Step 1: Derive each level based on the current appliedFilter
+     let floors = [];
+     let floorplans = [];
+     let maskedAreas = [];
+     if (appliedFilter.FloorId.length === 0) {
+      floors = floorList.filter((floor: any) => appliedFilter.BuildingId.includes(floor.buildingId)) ?? ["none"];
+    }
+    else {
+      floors = floorList.filter((floor: any) => appliedFilter.FloorId.includes(floor.id));
+    }
+    if(appliedFilter.FloorplanId.length === 0) {
+      floorplans = floorplanList.filter((fp: any) => floors.map((f) => f.id).includes(fp.floorId)) ?? ["none"];
+    } else {
+      floorplans = floorplanList.filter((fp: any) => appliedFilter.FloorplanId.includes(fp.id));    
+    }
+    if(appliedFilter.MaskedAreaId.length === 0) {
+      maskedAreas = maskedAreaList.filter((m: any) => floorplans.map((fp) => fp.id).includes(m.floorplanId)) ?? ["none"];
+    } else {
+      maskedAreas = maskedAreaList.filter((m: any) => appliedFilter.MaskedAreaId.includes(m.id));
+    }
+
+    // Step 2: Update appliedFilter ONCE
+    setAppliedFilter((prev) => ({
+      ...prev,
+      floorId: floors.map((f: any) => f.id) ?? [null],
+      floorplanId: floorplans.map((fp: any) => fp.id) ?? [null],
+      maskedAreaId: maskedAreas.map((m: any) => m.id) ?? [null],
+    }));
+    
+    console.log('Filtered Floors:', floors);
+    console.log('Filtered Floorplans:', floorplans);
+    console.log('Filtered Masked Areas:', maskedAreas);
+    // Step 3: Dispatch the final filter state
+    dispatch(
+      setDashboardFilter({
+        BuildingId: appliedFilter.BuildingId,
+        FloorId: floors.map((f: any) => f.id).length === 0 ? null : floors.map((f: any) => f.id),
+        FloorplanId: floorplans.map((fp: any) => fp.id).length === 0 ? null : floorplans.map((fp: any) => fp.id),
+        FloorplanMaskedAreaId: maskedAreas.map((m: any) => m.id).length === 0 ? null : maskedAreas.map((m: any) => m.id),
+      }),
+    );
+    handleClose();
+  };
 
   return (
     <>
@@ -121,7 +168,7 @@ const DashboardFilter = () => {
         >
           Filter
         </Typography>
-        <Typography variant="body2" gutterBottom sx={{ mb: 2 }} color='error.dark'>
+        <Typography variant="body2" gutterBottom sx={{ mb: 2 }} color="error.dark">
           *Leave empty to skip filter
         </Typography>
         <Grid container spacing={2}>
@@ -131,29 +178,30 @@ const DashboardFilter = () => {
               <Typography variant="caption">Building(s)</Typography>
             </CustomFormLabel>
             <CustomSelect
-              name="buildingId"
-              value={appliedFilter.buildingId || []}
+              id="BuildingId"
+              name="BuildingId"
+              value={appliedFilter.BuildingId || []}
               onChange={(e: any) => {
                 const value = e.target.value;
                 if (value.includes('all')) {
                   setAppliedFilter({
                     ...appliedFilter,
-                    buildingId:
-                      appliedFilter.buildingId.length === buildingList.length
+                    BuildingId:
+                      appliedFilter.BuildingId.length === buildingList.length
                         ? []
                         : buildingList.map((b: any) => b.id),
-                    floorId: [],
-                    floorplanId: [],
-                    maskedAreaId: [],
+                    FloorId: [],
+                    FloorplanId: [],
+                    MaskedAreaId: [],
                   });
                   return;
                 }
                 setAppliedFilter({
                   ...appliedFilter,
-                  buildingId: value,
-                  floorId: [],
-                  floorplanId: [],
-                  maskedAreaId: [],
+                  BuildingId: value,
+                  FloorId: [],
+                  FloorplanId: [],
+                  MaskedAreaId: [],
                 });
 
                 console.log('Selected Buildings:', value);
@@ -171,7 +219,7 @@ const DashboardFilter = () => {
               variant="outlined"
               multiple
               renderValue={(selected: string[]) => {
-                if (selected.length === 0) return 'Select Building';
+                if (selected.length === 0) return 'All Building';
                 if (selected.length === buildingList.length) return 'All Buildings';
                 return selected
                   .map((id: string) => buildingList.find((b: any) => b.id === id)?.name)
@@ -182,10 +230,10 @@ const DashboardFilter = () => {
               <MenuItem value="all">
                 <ListItemIcon>
                   <Checkbox
-                    checked={appliedFilter.buildingId?.length === buildingList.length}
+                    checked={appliedFilter.BuildingId?.length === buildingList.length}
                     indeterminate={
-                      appliedFilter.buildingId?.length > 0 &&
-                      appliedFilter.buildingId?.length < buildingList.length
+                      appliedFilter.BuildingId?.length > 0 &&
+                      appliedFilter.BuildingId?.length < buildingList.length
                     }
                   />
                 </ListItemIcon>
@@ -194,7 +242,7 @@ const DashboardFilter = () => {
               {buildingList.map((building: BuildingType) => (
                 <MenuItem key={building.id} value={building.id}>
                   <ListItemIcon>
-                    <Checkbox checked={appliedFilter.buildingId?.includes(building.id)} />
+                    <Checkbox checked={appliedFilter.BuildingId?.includes(building.id)} />
                   </ListItemIcon>
                   {building.name}
                 </MenuItem>
@@ -203,33 +251,34 @@ const DashboardFilter = () => {
           </Grid>
 
           {/* Floor Filter */}
-          {appliedFilter.buildingId?.length > 0 && (
+          {appliedFilter.BuildingId?.length > 0 && (
             <Grid size={12}>
               <CustomFormLabel htmlFor="floor">
                 <Typography variant="caption">Floor(s)</Typography>
               </CustomFormLabel>
               <CustomSelect
-                name="floorId"
-                value={appliedFilter.floorId || []}
+                id="FloorId"
+                name="FloorId"
+                value={appliedFilter.FloorId || []}
                 onChange={(e: any) => {
                   const value = e.target.value;
                   if (value.includes('all')) {
                     setAppliedFilter({
                       ...appliedFilter,
-                      floorId:
-                        appliedFilter.floorId.length === filteredFloors.length
+                      FloorId:
+                        appliedFilter.FloorId.length === filteredFloors.length
                           ? []
                           : filteredFloors.map((f: any) => f.id),
-                      floorplanId: [],
-                      maskedAreaId: [],
+                      FloorplanId: [],
+                      MaskedAreaId: [],
                     });
                     return;
                   }
                   setAppliedFilter({
                     ...appliedFilter,
-                    floorId: value,
-                    floorplanId: [],
-                    maskedAreaId: [],
+                    FloorId: value,
+                    FloorplanId: [],
+                    MaskedAreaId: [],
                   });
                   console.log('Selected Floors:', value);
                   console.log('All Floorplans:', floorplanList);
@@ -239,6 +288,8 @@ const DashboardFilter = () => {
                 variant="outlined"
                 multiple
                 renderValue={(selected: string[]) => {
+                  if(selected.length === 0) return 'All Floors';
+                  if (selected.length === filteredFloors.length) return 'All Floors';
                   const filtered = filteredFloors.filter((f: any) => selected.includes(f.id));
                   if (selected.length === 0) return 'Select Floor';
                   return filtered.map((f: any) => f.name).join(', ');
@@ -248,16 +299,16 @@ const DashboardFilter = () => {
                   <ListItemIcon>
                     <Checkbox
                       checked={
-                        appliedFilter.floorId?.length ===
+                        appliedFilter.FloorId?.length ===
                         filteredFloors.filter((f: any) =>
-                          appliedFilter.buildingId.includes(f.buildingId),
+                          appliedFilter.BuildingId.includes(f.buildingId),
                         ).length
                       }
                       indeterminate={
-                        appliedFilter.floorId?.length > 0 &&
-                        appliedFilter.floorId?.length <
+                        appliedFilter.FloorId?.length > 0 &&
+                        appliedFilter.FloorId?.length <
                           filteredFloors.filter((f: any) =>
-                            appliedFilter.buildingId.includes(f.buildingId),
+                            appliedFilter.BuildingId.includes(f.buildingId),
                           ).length
                       }
                     />
@@ -267,7 +318,7 @@ const DashboardFilter = () => {
                 {filteredFloors.map((floor: floorType) => (
                   <MenuItem key={floor.id} value={floor.id}>
                     <ListItemIcon>
-                      <Checkbox checked={appliedFilter.floorId.includes(floor.id)} />
+                      <Checkbox checked={appliedFilter.FloorId.includes(floor.id)} />
                     </ListItemIcon>
                     {floor.name}
                   </MenuItem>
@@ -277,31 +328,34 @@ const DashboardFilter = () => {
           )}
 
           {/* Floorplan Filter */}
-          {appliedFilter.floorId?.length > 0 && (
+          {appliedFilter.FloorId?.length > 0 && (
             <Grid size={12}>
               <CustomFormLabel htmlFor="floorplan">
                 <Typography variant="caption">Floorplan(s)</Typography>
               </CustomFormLabel>
               <CustomSelect
-                name="floorplanId"
-                value={appliedFilter.floorplanId || []}
+                id="FloorplanId"
+                name="FloorplanId"
+                value={appliedFilter.FloorplanId || []}
                 onChange={(e: any) => {
                   const value = e.target.value;
                   const selected = value.includes('all')
                     ? filteredFloorplans
-                        .filter((fp: any) => appliedFilter.floorId.includes(fp.floorId))
+                        .filter((fp: any) => appliedFilter.FloorId.includes(fp.floorId))
                         .map((fp: any) => fp.id)
                     : value;
                   setAppliedFilter({
                     ...appliedFilter,
-                    floorplanId: selected,
-                    maskedAreaId: [],
+                    FloorplanId: selected,
+                    MaskedAreaId: [],
                   });
                 }}
                 fullWidth
                 variant="outlined"
                 multiple
                 renderValue={(selected: string[]) => {
+                  if(selected.length === 0) return 'All Floorplans';
+                  if (selected.length === filteredFloorplans.length) return 'All Floorplans';
                   const filtered = filteredFloorplans.filter((fp: any) => selected.includes(fp.id));
                   if (selected.length === 0) return 'Select Floorplan';
                   return filtered.map((f: any) => f.name).join(', ');
@@ -311,16 +365,16 @@ const DashboardFilter = () => {
                   <ListItemIcon>
                     <Checkbox
                       checked={
-                        appliedFilter.floorplanId?.length ===
+                        appliedFilter.FloorplanId?.length ===
                         filteredFloorplans.filter((f: FloorplanType) =>
-                          appliedFilter.floorId.includes(f.floorId),
+                          appliedFilter.FloorId.includes(f.floorId),
                         ).length
                       }
                       indeterminate={
-                        appliedFilter.floorplanId?.length > 0 &&
-                        appliedFilter.floorplanId?.length <
+                        appliedFilter.FloorplanId?.length > 0 &&
+                        appliedFilter.FloorplanId?.length <
                           filteredFloorplans.filter((f: FloorplanType) =>
-                            appliedFilter.floorId.includes(f.floorId),
+                            appliedFilter.FloorId.includes(f.floorId),
                           ).length
                       }
                     />
@@ -330,7 +384,7 @@ const DashboardFilter = () => {
                 {filteredFloorplans.map((fp: any) => (
                   <MenuItem key={fp.id} value={fp.id}>
                     <ListItemIcon>
-                      <Checkbox checked={appliedFilter.floorplanId.includes(fp.id)} />
+                      <Checkbox checked={appliedFilter.FloorplanId.includes(fp.id)} />
                     </ListItemIcon>
                     {fp.name}
                   </MenuItem>
@@ -340,30 +394,33 @@ const DashboardFilter = () => {
           )}
 
           {/* Masked Area Filter */}
-          {appliedFilter.floorplanId?.length > 0 && (
+          {appliedFilter.FloorplanId?.length > 0 && (
             <Grid size={12}>
               <CustomFormLabel htmlFor="maskedArea">
                 <Typography variant="caption">Masked Area(s)</Typography>
               </CustomFormLabel>
               <CustomSelect
-                name="maskedAreaId"
-                value={appliedFilter.maskedAreaId || []}
+                id="MaskedAreaId"
+                name="MaskedAreaId"
+                value={appliedFilter.MaskedAreaId || []}
                 onChange={(e: any) => {
                   const value = e.target.value;
                   const selected = value.includes('all')
                     ? maskedAreaList
-                        .filter((m: any) => appliedFilter.floorplanId.includes(m.floorplanId))
+                        .filter((m: any) => appliedFilter.FloorplanId.includes(m.floorplanId))
                         .map((m: any) => m.id)
                     : value;
                   setAppliedFilter({
                     ...appliedFilter,
-                    maskedAreaId: selected,
+                    MaskedAreaId: selected,
                   });
                 }}
                 fullWidth
                 variant="outlined"
                 multiple
                 renderValue={(selected: string[]) => {
+                  if(selected.length === 0) return 'All Masked Areas';
+                  if (selected.length === filteredMaskedAreas.length) return 'All Masked Areas';
                   const filtered = maskedAreaList.filter((m: any) => selected.includes(m.id));
                   if (selected.length === 0) return 'Select Masked Area';
                   return filtered.map((m: any) => m.name).join(', ');
@@ -373,16 +430,16 @@ const DashboardFilter = () => {
                   <ListItemIcon>
                     <Checkbox
                       checked={
-                        appliedFilter.maskedAreaId?.length ===
+                        appliedFilter.MaskedAreaId?.length ===
                         filteredMaskedAreas.filter((m: any) =>
-                          appliedFilter.floorplanId.includes(m.floorplanId),
+                          appliedFilter.FloorplanId.includes(m.floorplanId),
                         ).length
                       }
                       indeterminate={
-                        appliedFilter.maskedAreaId?.length > 0 &&
-                        appliedFilter.maskedAreaId?.length <
+                        appliedFilter.MaskedAreaId?.length > 0 &&
+                        appliedFilter.MaskedAreaId?.length <
                           filteredMaskedAreas.filter((m: any) =>
-                            appliedFilter.floorplanId.includes(m.floorplanId),
+                            appliedFilter.FloorplanId.includes(m.floorplanId),
                           ).length
                       }
                     />
@@ -392,7 +449,7 @@ const DashboardFilter = () => {
                 {filteredMaskedAreas.map((m: any) => (
                   <MenuItem key={m.id} value={m.id}>
                     <ListItemIcon>
-                      <Checkbox checked={appliedFilter.maskedAreaId.includes(m.id)} />
+                      <Checkbox checked={appliedFilter.MaskedAreaId.includes(m.id)} />
                     </ListItemIcon>
                     {m.name}
                   </MenuItem>
@@ -408,7 +465,7 @@ const DashboardFilter = () => {
             onClick={() => {
               //   handleApplyFilter();
               console.log('Applied Filters:', appliedFilter);
-              handleClose();
+              handleApplyFilter();
             }}
           >
             Apply Filter

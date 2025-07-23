@@ -21,101 +21,82 @@ import {
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
-import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import {
-  BuildingType,
-  fetchBuildingDT,
-  deleteBuilding,
-  UpdateFilter,
-} from 'src/store/apps/crud/building';
-import AddEditBuilding from './AddEditBuilding';
-
-const BASE_URL = 'http://192.168.1.116:5000';
+import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
+import { VisitorCardType, UpdateFilter, fetchVisitorCard } from 'src/store/apps/crud/visitorCard';
 
 const columns = [
-  { label: 'Building Name', field: 'name', sortAble: true },
-  { label: 'Building Image', field: '', sortAble: false },
+  { label: 'Name', field: 'name', sortAble: true },
+  { label: 'Mac Address', field: 'mac', sortAble: false },
+  { label: 'Card Type', field: 'cardType', sortAble: true },
+  { label: 'Card Number', field: 'number', sortAble: true },
+  { label: 'Check-in Status', field: 'checkinStatus', sortAble: true },
+  { label: 'Sites', field: 'siteId', sortAble: false },
+  { label: 'Is Member', field: 'isMember', sortAble: true },
 ];
 
-const BuildingList = () => {
-    const dispatch: AppDispatch = useDispatch();
-  const buildingData: BuildingType[] = useSelector(
-    (state: RootState) => state.buildingReducer.buildings,
+const VisitorCardList = () => {
+  const dispatch: AppDispatch = useDispatch();
+  const visitorCardData: VisitorCardType[] = useSelector(
+    (state: RootState) => state.VisitorCardReducer.visitorCardAll,
   );
-  // const buildingTotalCount = useSelector(
-  //   (state: RootState) => state.buildingReducer.buildingTotalCount,
-  // );
-  const buildingFilteredCount = useSelector(
-    (state: RootState) => state.buildingReducer.buildingFilteredCount,
+  const visitorCardFilteredCount = useSelector(
+    (state: RootState) => state.VisitorCardReducer.visitorCardFilteredCount,
   );
-  const buildingFilter = useSelector((state: RootState) => state.buildingReducer.buildingFilter);
+  const visitorCardFilter = useSelector(
+    (state: RootState) => state.VisitorCardReducer.visitorCardFilter,
+  );
   // Pagination State
-  const page = Math.floor(buildingFilter.Start / buildingFilter.Length);
-const rowsPerPage = buildingFilter.Length;
-const orderBy = buildingFilter.SortColumn;
-const order = buildingFilter.SortDir;
-
-const handleChangePage = (_: unknown, newPage: number) => {
-  dispatch(UpdateFilter({ Start: newPage * buildingFilter.Length }));
-};
+  const page = Math.floor(visitorCardFilter.Start / visitorCardFilter.Length);
+  const rowsPerPage = visitorCardFilter.Length;
+  const orderBy = visitorCardFilter.SortColumn;
+  const order = visitorCardFilter.SortDir;
+  const handleChangePage = (_: unknown, newPage: number) => {
+    dispatch(UpdateFilter({ Start: newPage * visitorCardFilter.Length }));
+  };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const newLength = parseInt(event.target.value, 10);
-  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
-};
-const handleSort = (column: string) => {
-  const isAsc = buildingFilter.SortColumn === column && buildingFilter.SortDir === 'asc';
-  const isDesc = buildingFilter.SortColumn === column && buildingFilter.SortDir === 'desc';
-
-  if (isDesc) {
-    dispatch(UpdateFilter({
-      SortColumn: '',
-      SortDir: 'asc',
-      Start: 0,
-    }));
-  } else {
-    dispatch(UpdateFilter({
-      SortColumn: column,
-      SortDir: isAsc ? 'desc' : 'asc',
-      Start: 0,
-    }));
-  }
-};
+    const newLength = parseInt(event.target.value, 10);
+    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+  };
+  const handleSort = (column: string) => {
+    const isAsc = visitorCardFilter.SortColumn === column && visitorCardFilter.SortDir === 'asc';
+    dispatch(
+      UpdateFilter({
+        SortColumn: column,
+        SortDir: isAsc ? 'desc' : 'asc',
+        Start: 0,
+      }),
+    );
+  };
 
   useEffect(() => {
-    dispatch(fetchBuildingDT(buildingFilter));
-  }, [buildingFilter, dispatch]);
+    dispatch(fetchVisitorCard());
+  }, [visitorCardFilter, dispatch]);
 
-  //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedBuilding, setSelectedBuilding] = useState<BuildingType | null>(null);
-  // Open delete confirmation dialog
-  const handleOpenDeleteDialog = (building: BuildingType) => {
-    setSelectedBuilding(building);
+  const [selectedVisitorCard, setSelectedVisitorCard] = useState<VisitorCardType | null>(null);
+
+  const handleOpenDeleteDialog = (card: VisitorCardType) => {
+    setSelectedVisitorCard(card);
     setDeleteDialogOpen(true);
   };
 
-  // Close delete confirmation dialog
   const handleCloseDeleteDialog = () => {
+    setSelectedVisitorCard(null);
     setDeleteDialogOpen(false);
-    setSelectedBuilding(null);
   };
-
-  // Confirm delete action
   const handleConfirmDelete = () => {
-    if (selectedBuilding) {
-      dispatch(deleteBuilding(selectedBuilding.id));
+    if (selectedVisitorCard) {
+      // dispatch(deleteOrganization(selectedVisitorCard.id));
     }
     handleCloseDeleteDialog();
   };
-
-
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
           <BlankCard>
             <TableContainer>
-              <Table aria-label="simple-table" sx={{ whiteSpace: 'nowrap' }}>
+              <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
                 <TableHead>
                   <TableRow>
                     {/* Left Sticky Empty Column */}
@@ -146,42 +127,30 @@ const handleSort = (column: string) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {buildingData.map((building, index) => (
-                    <TableRow key={index}>
+                  {visitorCardData.map((visitorCard, index) => (
+                    <TableRow key={visitorCard.id}>
                       <TableCell
                         sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
                       >
                         {index + 1 + page * rowsPerPage}
                       </TableCell>
-                      <TableCell>{building.name}</TableCell>
-                      <TableCell>
-                        {building.image ? (
-                          <img
-                            src={`${BASE_URL}${building.image}`}
-                            alt="Building"
-                            style={{ width: 80, height: 80, objectFit: 'cover' }}
-                          />
-                        ) : (
-                          'No Image'
-                        )}
-                      </TableCell>
+                      <TableCell>{visitorCard.name}</TableCell>
+                      <TableCell>{visitorCard.mac}</TableCell>
+                      <TableCell>{visitorCard.cardType}</TableCell>
+                      <TableCell>{visitorCard.number}</TableCell>
+                      <TableCell>{visitorCard.checkinStatus}</TableCell>
+                      <TableCell>{visitorCard.siteId || 'N/A'}</TableCell>
+                      <TableCell>{visitorCard.isMember ? 'Yes' : 'No'}</TableCell>
+
                       <TableCell
-                        sx={{
-                          position: 'sticky',
-                          right: 0,
-                          background: 'white',
-                          zIndex: 2,
-                          gap: 1,
-                          alignItems: 'center',
-                        }}
+                        sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 1 }}
                       >
-                        <AddEditBuilding type="edit" building={building} />
                         <IconButton
                           color="error"
+                          onClick={() => handleOpenDeleteDialog(visitorCard)}
                           size="small"
-                          onClick={() => handleOpenDeleteDialog(building)}
                         >
-                          <IconTrash size={20} />
+                          <IconTrash />
                         </IconButton>
                       </TableCell>
                     </TableRow>
@@ -194,7 +163,7 @@ const handleSort = (column: string) => {
         {/* Pagination */}
         <TablePagination
           component="div"
-          count={buildingFilteredCount}
+          count={visitorCardFilteredCount}
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}
@@ -207,7 +176,7 @@ const handleSort = (column: string) => {
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete the building <strong>{selectedBuilding?.name}</strong>?
+            Are you sure you want to delete the Visitor Card <strong>{selectedVisitorCard?.name}</strong>?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -223,4 +192,4 @@ const handleSort = (column: string) => {
   );
 };
 
-export default BuildingList;
+export default VisitorCardList;

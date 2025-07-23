@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Stage,
-  Layer,
-  Image as KonvaImage,
-  Text,
-  Line,
-} from 'react-konva';
+import { Stage, Layer, Image as KonvaImage, Text, Line } from 'react-konva';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { fetchBeacon, RefreshBeaconState } from 'src/store/apps/tracking/Beacon';
 import BeaconRenderer from './BeaconRenderer';
@@ -40,6 +34,13 @@ const DeviceRenderer: React.FC<{
   showAreas: boolean;
   showGates: boolean;
   topic: string;
+  detailDialogOpen: boolean;
+  setDetailDialogOpen: (open: boolean) => void;
+  openTrackDetail: boolean;
+  setOpenTrackDetail: (open: boolean) => void;
+  selectedBeaconId: string | null;
+
+  onSelectBeacon: (info: { id: string; area: string; floorplan: string; time: string }) => void;
 }> = ({
   width,
   height,
@@ -51,6 +52,11 @@ const DeviceRenderer: React.FC<{
   showAreas,
   showGates,
   topic,
+  detailDialogOpen,
+  setDetailDialogOpen,
+  openTrackDetail,
+  setOpenTrackDetail,
+  onSelectBeacon,
 }) => {
   const dispatch = useDispatch();
   // const [scales, setScale] = useState<number>(scale);
@@ -63,7 +69,14 @@ const DeviceRenderer: React.FC<{
     dispatch(RefreshBeaconState());
   }, [dispatch]);
   const [lastSeenBeacons, setLastSeenBeacons] = useState<{
-    [id: string]: { x: number; y: number; lastSeen: number, area:string, floorplan:string, time:string };
+    [id: string]: {
+      x: number;
+      y: number;
+      lastSeen: number;
+      area: string;
+      floorplan: string;
+      time: string;
+    };
   }>({});
   const setPointsFromNodes = (nodes: Nodes[]): number[] => {
     // console.log('Setting nodes: ', nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]))
@@ -270,7 +283,7 @@ const DeviceRenderer: React.FC<{
             lastSeen: now,
             area: beacon.maskedAreaName,
             floorplan: beacon.floorplanName,
-            time: beacon.time
+            time: beacon.time,
           };
         }
       });
@@ -378,6 +391,18 @@ const DeviceRenderer: React.FC<{
               floorplan={beacon.floorplan}
               time={beacon.time}
               clickable
+              detailDialogOpen={detailDialogOpen}
+              setDetailDialogOpen={setDetailDialogOpen}
+              openTrackDetail={openTrackDetail}
+              setOpenTrackDetail={setOpenTrackDetail}
+              onClick={() =>
+                onSelectBeacon({
+                  id: beaconId,
+                  area: beacon.area,
+                  floorplan: beacon.floorplan,
+                  time: beacon.time,
+                })
+              }
             />
           );
         })}

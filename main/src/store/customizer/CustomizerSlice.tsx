@@ -20,10 +20,10 @@ interface StateType {
   isMonitorSidebar?: boolean;
   isMainMenu?: boolean;
   dashboardFilter?:{
-    buildingId: string;
-    floorId: string;
-    floorplanId: string;
-    maskedAreaId: string;
+    BuildingId: string;
+    FloorId: string;
+    FloorplanId: string;
+    FloorplanMaskedAreaId: string;
   }
 }
 
@@ -98,6 +98,10 @@ export const CustomizerSlice = createSlice({
     setMainMenu: (state: StateType, action) => {
       state.isMainMenu = action.payload;
     },
+    setDashboardFilter: (state: StateType, action) => {
+      state.dashboardFilter = action.payload;
+      console.log('Dashboard Filter Set:', state.dashboardFilter);
+    },
   },
 });
 
@@ -117,6 +121,7 @@ export const {
   setMonitor,
   setMonitorSidebar,
   setMainMenu,
+  setDashboardFilter,
 } = CustomizerSlice.actions;
 
 export default CustomizerSlice.reducer;

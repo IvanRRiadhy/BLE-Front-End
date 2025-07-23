@@ -32,6 +32,8 @@ import alarmReducer from './apps/crud/alarmRecordTracking';
 import buildingReducer from './apps/crud/building';
 import FloorplanDeviceReducer from './apps/crud/floorplanDevice';
 import FloorplanReducer from './apps/crud/floorplan';
+import CardReducer from './apps/crud/card';
+import VisitorCardReducer from './apps/crud/visitorCard';
 import layoutReducer from './apps/monitoring/layout';
 import BleNodeReducer from './apps/crud/bleNode';
 import RulesNodeReducer from './apps/rules/RulesNodes';
@@ -77,6 +79,8 @@ const rootReducer = combineReducers({
   floorplanDeviceReducer: FloorplanDeviceReducer,
   layoutReducer: layoutReducer,
   floorplanReducer: FloorplanReducer,
+  CardReducer: CardReducer,
+  VisitorCardReducer: VisitorCardReducer,
   bleNodeReducer: BleNodeReducer,
   RulesNodeReducer: RulesNodeReducer,
   RulesConnectorReducer: RulesConnectorReducer,

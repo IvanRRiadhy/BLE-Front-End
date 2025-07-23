@@ -16,6 +16,8 @@ import SidebarListItem from './SidebarListItem';
 import { fetchTrackingTrans, trackingTransType } from 'src/store/apps/crud/trackingTrans';
 import { fetchAlarm, AlarmType } from 'src/store/apps/crud/alarmRecordTracking';
 import { useTranslation } from 'react-i18next';
+import { fetchMemberDT, memberType } from 'src/store/apps/crud/member';
+import { fetchVisitorDT, VisitorType } from 'src/store/apps/crud/visitor';
 
 interface SidebarListProps {
   filterType: string;
@@ -32,6 +34,14 @@ type ListType = {
   status?: string;
   type?: string;
 };
+const filter = {
+  draw: 1,
+  start: 0,
+  length: 999,
+  sortColumn: '',
+  sortDir: 'asc',
+  searchValue: '',
+}
 
 const SidebarList = ({ filterType }: SidebarListProps) => {
   const { t } = useTranslation();
@@ -47,26 +57,46 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
   const alarmRecord: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
   );
+  const memberList: memberType[] = useSelector(
+    (state: RootState) => state.memberReducer.members,
+  );
+  const visitorList: VisitorType[] = useSelector(
+    (state: RootState) => state.visitorReducer.visitors,
+  );
+
+  const getName = (bleNumber: string) => {
+    const member = memberList.find((member) => member.bleCardNumber === bleNumber);
+    if (member) {
+      return member.name;
+    }
+    const visitor = visitorList.find((visitor) => visitor.bleCardNumber === bleNumber);
+    if (visitor) {
+      return visitor.name;
+    }
+    return 'Unknown';
+  }
 
   useEffect(() => {
     dispatch(fetchTrackingTrans());
     dispatch(fetchAlarm());
+    dispatch(fetchVisitorDT(filter));
+    dispatch(fetchMemberDT(filter));
   }, [dispatch]);
   useEffect(() => {
     const transformedTrackTrans: ListType[] = trackTrans.map((item) => ({
       id: item.id,
       device: item.reader?.name ?? 'Unknown Device',
       target: item.cardId,
-      floor: item.floorplanMaskedArea?.floorId ?? 'Unknown Floor',
-      area: item.floorplanMaskedAreaId,
+      floor: item.floorplanMaskedArea?.floor?.name ?? 'Floor 2',
+      area: item.floorplanMaskedArea?.name ?? 'Unknown Area',
       time: item.transTime,
     }));
     const transformedAlarm: ListType[] = alarmRecord.map((item) => ({
       id: item.id,
       device: item.reader?.name ?? 'Unknown Device', // Provide a default value
       target: item.visitor?.name ?? 'Unknown Visitor', // Provide a default value
-      floor: item.floorplanMaskedArea?.floorId ?? 'Unknown Floor', // Provide a default value
-      area: item.floorplanMaskedAreaId,
+      floor: item.floorplanMaskedArea?.floor?.name ?? 'Floor 2', // Provide a default value
+      area: item.floorplanMaskedArea?.name ?? 'Unknown Area', // Provide a default value
       alarmType: item.alarmRecordStatus,
       status: item.actionStatus,
       time: item.timestamp,

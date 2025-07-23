@@ -1,11 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Text, Circle, Shape, Group } from 'react-konva';
 import { fetchMembers, memberType } from 'src/store/apps/crud/member';
-import { fetchVisitor, masterVisitorType } from 'src/store/apps/crud/visitor';
+import { fetchVisitor, masterVisitorType, VisitorType } from 'src/store/apps/crud/visitor';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import { Html } from 'react-konva-utils';
-import BeaconDetailPopup from '../Popup/BeaconDetailPopup';
-import TrackingDetailPopup from '../Popup/TrackingDetailPopup';
 
 type BeaconRendererProps = {
   id: string;
@@ -15,6 +13,11 @@ type BeaconRendererProps = {
   floorplan: string;
   time: string;
   clickable: boolean;
+  detailDialogOpen?: boolean;
+  setDetailDialogOpen?: (open: boolean) => void;
+  openTrackDetail?: boolean;
+  setOpenTrackDetail?: (open: boolean) => void;
+  onClick?: () => void;
 };
 
 const BASE_URL = 'http://192.168.1.116:5000';
@@ -27,14 +30,20 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   floorplan,
   time,
   clickable,
+  detailDialogOpen,
+  setDetailDialogOpen,
+  openTrackDetail,
+  setOpenTrackDetail,
+  onClick = () => {},
 }) => {
   const groupRef = useRef<any>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const dispatch = useDispatch();
   const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null);
-  const [detailDialogOpen, setdetailDialogOpen] = useState(false);
-  const [openTrackDetail, setOpenTrackDetail] = useState(false);
+  useEffect(() => {
+    console.log('openTrackDetail', openTrackDetail);
+  }, [openTrackDetail]);
 
   useEffect(() => {
     dispatch(fetchMembers());
@@ -46,7 +55,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   ) as memberType[];
   const visitorsData = useSelector(
     (state: RootState) => state.visitorReducer.visitors,
-  ) as masterVisitorType[];
+  ) as VisitorType[];
 
   const radius = 7.5;
   const triangleHeight = 8;
@@ -68,7 +77,9 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
 
   const handleClick = () => {
     console.log('clicked', person);
-    setdetailDialogOpen((prev) => !prev);
+    if (setDetailDialogOpen) {
+      setDetailDialogOpen(!detailDialogOpen);
+    }
   };
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -91,9 +102,11 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
       const clickedTooltip = tooltipEl?.contains(event.target as Node);
 
       // Close if click is NOT on group AND NOT on tooltip
-      if (!isClickInsideGroup && !clickedTooltip) {
-        setdetailDialogOpen(false);
-      }
+      // if (!isClickInsideGroup && !clickedTooltip) {
+      //   if (setDetailDialogOpen) {
+      //     setDetailDialogOpen(!detailDialogOpen);
+      //   }
+      // }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -109,7 +122,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
         onClick={(e) => {
           if (!clickable) return;
           e.cancelBubble = true; // Prevent propagation
-          handleClick();
+          if (onClick) onClick();
         }}
       >
         <Text
@@ -169,59 +182,6 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
           shadowBlur={2}
         />
       </Group>
-
-      {/* Tooltip Box */}
-      {detailDialogOpen && (
-        <Html>
-          <BeaconDetailPopup
-            bleNumber={id}
-            memberDetail={isMember ? (person as memberType) : undefined}
-            visitorDetail={isVisitor ? (person as masterVisitorType) : undefined}
-            detailDialogOpen={detailDialogOpen}
-            setDetailDialogOpen={setdetailDialogOpen}
-            setOpenTrackDetail={setOpenTrackDetail}
-            area={area}
-            floorplan={floorplan}
-            time={time}
-          />
-          <TrackingDetailPopup
-            bleNumber={id}
-            person={isMember ? (person as memberType) : (person as masterVisitorType)}
-            personId={person?.id || ''}
-            openTrackDetail={openTrackDetail}
-            setOpenTrackDetail={setOpenTrackDetail}
-          />
-          {/* <Box
-            style={{
-              width: 300,
-              position: 'absolute',
-              top: y - triangleHeight - radius * 2 - 60,
-              left: x + radius + 10,
-              background: 'white',
-              border: '1px solid #ccc',
-              borderRadius: 8,
-              padding: '10px 12px',
-              fontSize: 13,
-              boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-              color: '#333',
-              zIndex: 1000,
-              pointerEvents: 'auto',
-            }}
-          >
-            <Typography mt={1} fontWeight={600}>
-              Name :
-            </Typography>
-            <Typography mb={2}>{person?.name || '-'}</Typography>
-            <Typography fontWeight={600}>BLE :</Typography>
-            <Typography mb={2}>{person?.bleCardNumber || '-'}</Typography>
-            <Typography fontWeight={600}>Area :</Typography>
-            <Typography mb={2}>
-              {area || '-'} | {floorplan || '-'}
-            </Typography>
-
-          </Box> */}
-        </Html>
-      )}
     </>
   );
 };

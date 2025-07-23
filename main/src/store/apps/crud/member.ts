@@ -147,6 +147,7 @@ export const fetchMembers = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
         dispatch(GetMember(response.data?.collection?.data || []));
+                    console.log("Fetch members", response.data.collection);
     } catch (error) {
         console.log(error);
     }
@@ -187,6 +188,9 @@ export const editMember = createAsyncThunk("member/editMember", async (formData:
     try {
         const id = formData.get('id');
         formData.delete('id');
+        for (const [key, value] of formData.entries()) {
+  console.log(`${key}:`, value);
+}
         const response = await axiosServices.put(`${API_URL}${id}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',

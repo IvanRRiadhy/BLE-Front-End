@@ -53,6 +53,7 @@ export interface trackingTransType {
 
 interface StateType {
     trackingTrans: trackingTransType[];
+    trackingTransAll: trackingTransType[];
     trackingTransSearch: string;
     selectedTrackingTrans?: trackingTransType | null;
     trackingTransTotalCount: number;
@@ -61,6 +62,7 @@ interface StateType {
 
 const initialState: StateType = {
     trackingTrans: [],
+    trackingTransAll: [],
     trackingTransSearch: "",
     selectedTrackingTrans: null,
     trackingTransTotalCount: 0,
@@ -73,6 +75,9 @@ export const TrackingTransSlice = createSlice({
     reducers: {
         GetTrackingTrans: (state, action: PayloadAction<trackingTransType[]>) => {
             state.trackingTrans = action.payload;
+        },
+        GetAllTrackingTrans: (state, action: PayloadAction<trackingTransType[]>) => {
+            state.trackingTransAll = action.payload;
         },
         SelectTrackingTrans: (state, action: PayloadAction<trackingTransType>) => {
             const selected = state.trackingTrans.find((trackingTrans: trackingTransType) => trackingTrans.id === action.payload.id);
@@ -112,12 +117,12 @@ export const TrackingTransSlice = createSlice({
     },
 });
 
-export const { GetTrackingTrans, SelectTrackingTrans, SearchTrackingTrans } = TrackingTransSlice.actions;
+export const { GetTrackingTrans, GetAllTrackingTrans, SelectTrackingTrans, SearchTrackingTrans } = TrackingTransSlice.actions;
 
 export const fetchTrackingTrans = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(`${API_URL}`);
-        dispatch(GetTrackingTrans(response.data?.collection?.data || []));
+        dispatch(GetAllTrackingTrans(response.data?.collection?.data || []));
         // console.log("Tracking transactions fetched successfully: ", response.data);
     } catch (error) {
         console.log(error);

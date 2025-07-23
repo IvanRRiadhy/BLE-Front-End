@@ -17,10 +17,12 @@ import {
   Stack,
   TablePagination,
   TableSortLabel,
+  Chip,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { AlarmType, fetchAlarm } from 'src/store/apps/crud/alarmRecordTracking';
 import { useDispatch, useSelector, AppState } from 'src/store/Store';
+import { alarmRecordStatusColormap } from 'src/types/crud/input';
 interface AlarmTableProps {
   alarmData: AlarmType[];
 }
@@ -138,21 +140,21 @@ const AlarmWarning: React.FC<AlarmTableProps> = ({ alarmData = [] }) => {
   return (
     <DashboardCard
       title={t('Alarm Warning')}
-      action={
-        <CustomSelect
-          labelId="month-dd"
-          id="month-dd"
-          size="small"
-          value={month}
-          onChange={handleChange}
-        >
-          {uniqueMonths.map(({ value, label }) => (
-            <MenuItem key={value} value={value}>
-              {label}
-            </MenuItem>
-          ))}
-        </CustomSelect>
-      }
+      // action={
+      //   <CustomSelect
+      //     labelId="month-dd"
+      //     id="month-dd"
+      //     size="small"
+      //     value={month}
+      //     onChange={handleChange}
+      //   >
+      //     {uniqueMonths.map(({ value, label }) => (
+      //       <MenuItem key={value} value={value}>
+      //         {label}
+      //       </MenuItem>
+      //     ))}
+      //   </CustomSelect>
+      // }
     >
       <TableContainer>
         <Table
@@ -190,12 +192,12 @@ const AlarmWarning: React.FC<AlarmTableProps> = ({ alarmData = [] }) => {
               {/* Priority Column */}
               <TableCell>
                 <TableSortLabel
-                  active={orderBy === 'Actioin Status'}
-                  direction={orderBy === 'Actioin Status' ? order : 'asc'}
-                  onClick={() => handleSort('Actioin Status')}
+                  active={orderBy === 'Alarm Type'}
+                  direction={orderBy === 'Alarm Type' ? order : 'asc'}
+                  onClick={() => handleSort('Alarm Type')}
                 >
                   <Typography variant="subtitle2" fontWeight={600}>
-                    {t('Actioin Status')}
+                    {t('Alarm Type')}
                   </Typography>
                 </TableSortLabel>
               </TableCell>
@@ -264,9 +266,15 @@ const AlarmWarning: React.FC<AlarmTableProps> = ({ alarmData = [] }) => {
                   />
                 </TableCell> */}
                 <TableCell>
-                  <Typography color="textSecondary" variant="subtitle2" fontWeight={400}>
-                    {alarm.actionStatus || ''}
-                  </Typography>
+                  <Chip
+                    sx={{
+                      bgcolor: alarmRecordStatusColormap[alarm.alarmRecordStatus] || 'secondary.light',
+                      color: 'white',
+                      borderRadius: '8px',
+                    }}
+                    size="small"
+                    label={t(`${alarm.alarmRecordStatus}`)}
+                  />
                 </TableCell>
 
                 <TableCell>

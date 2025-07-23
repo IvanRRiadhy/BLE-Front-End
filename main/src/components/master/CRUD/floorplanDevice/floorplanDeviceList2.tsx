@@ -53,13 +53,23 @@ const handleChangePage = (_: unknown, newPage: number) => {
   const newLength = parseInt(event.target.value, 10);
   dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
 };
-  const handleSort = (column: string) => {
+const handleSort = (column: string) => {
   const isAsc = floorplanFilter.SortColumn === column && floorplanFilter.SortDir === 'asc';
-  dispatch(UpdateFilter({
-    SortColumn: column,
-    SortDir: isAsc ? 'desc' : 'asc',
-    Start: 0,
-  }));
+  const isDesc = floorplanFilter.SortColumn === column && floorplanFilter.SortDir === 'desc';
+
+  if (isDesc) {
+    dispatch(UpdateFilter({
+      SortColumn: '',
+      SortDir: 'asc',
+      Start: 0,
+    }));
+  } else {
+    dispatch(UpdateFilter({
+      SortColumn: column,
+      SortDir: isAsc ? 'desc' : 'asc',
+      Start: 0,
+    }));
+  }
 };
 
 // useEffect(() => {

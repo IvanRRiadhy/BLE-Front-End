@@ -16,13 +16,13 @@ import { DepartmentType, fetchDepartments } from 'src/store/apps/crud/department
 import { DistrictType, fetchDistricts } from 'src/store/apps/crud/district';
 import { memberType } from 'src/store/apps/crud/member';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
-import { masterVisitorType } from 'src/store/apps/crud/visitor';
+import { masterVisitorType, VisitorType } from 'src/store/apps/crud/visitor';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 
 type BeaconDetailPopupProps = {
   bleNumber: string;
   memberDetail?: memberType;
-  visitorDetail?: masterVisitorType;
+  visitorDetail?: VisitorType;
   area: string;
   floorplan: string;
   time: string;
@@ -188,7 +188,7 @@ const BeaconDetailPopup = ({
                   <Typography variant="h6" fontWeight={700} component="div">
                     <Box component="span">Status :</Box>{' '}
                     <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                      {visitorDetail.status}
+                      {visitorDetail.isVip ? 'VIP' : 'Regular'}
                     </Box>
                   </Typography>
                 </Box>
@@ -221,7 +221,7 @@ const BeaconDetailPopup = ({
                   <Typography variant="h6" fontWeight={700} component="div">
                     <Box component="span">Visit Arrival :</Box>{' '}
                     <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                      {visitorDetail.visitorArrival}
+                      {visitorDetail.visitorPeriodStart}
                     </Box>
                   </Typography>
                 </>
@@ -253,7 +253,7 @@ const BeaconDetailPopup = ({
                   <Typography variant="h6" fontWeight={700} component="div">
                     <Box component="span">Visit End :</Box>{' '}
                     <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                      {visitorDetail.visitorEnd}
+                      {visitorDetail.visitorPeriodEnd}
                     </Box>
                   </Typography>
                 </>

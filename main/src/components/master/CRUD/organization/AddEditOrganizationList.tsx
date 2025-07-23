@@ -11,7 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, useDispatch } from 'src/store/Store';
@@ -42,6 +42,11 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
       updatedAt: '',
     },
   );
+  useEffect(() => {
+    if (organization) {
+      console.log('Organization Data:', organization);
+    }
+  }, [formData, organization]);
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = () => {
     setOpen(true);

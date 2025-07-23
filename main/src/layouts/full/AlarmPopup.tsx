@@ -70,7 +70,7 @@ const AlarmPopup: React.FC = () => {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose}>
+    <Dialog open={open} onClose={handleClose} >
       <DialogTitle>Alarm Triggered!</DialogTitle>
       <DialogContent>
         <Typography variant="body1">

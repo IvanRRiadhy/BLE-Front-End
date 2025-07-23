@@ -32,6 +32,20 @@ export const orgType: inputDataType[] = [
     { label: "Perpetual", value: "Perpetual" },
     { label: "Annual", value: "Annual" },
   ];
+
+  export const visitorType: inputDataType[] = [
+    { label: "Please select Type", value: '', disabled: true },
+    { label: "Active", value: "Active" },
+    { label: "Expired", value: "Expired" },
+    { label: "Cancelled", value: "Cancelled" },
+  ];
+
+  export const cardType: inputDataType[] = [
+    { label: "Please select Type", value: '', disabled: true },
+    { label: "Rfid", value: "Rfid" },
+    { label: "BLE", value: "Ble" },
+    { label: "RfidBLE", value: "RfidBle" },
+  ];
   
   export const integrationType: inputDataType[] = [
     { label: "Please select Type", value: '', disabled: true },
@@ -107,6 +121,14 @@ export const orgType: inputDataType[] = [
     { label: "Lost", value: 'Lost'},
   ];
 
+  export const alarmRecordStatusColormap: Record<string, string> = {
+    Block: 'black',
+    Help: 'success.main',
+    WrongZone: 'error.dark',
+    Expired: 'warning.main',
+    Lost: 'primary.main',
+  };
+
   export const actionStatus: inputDataType[] = [
     { label: "Please select Status", value: '', disabled: true},
     { label: "Idle", value: 'Idle'},
@@ -121,9 +143,9 @@ export const orgType: inputDataType[] = [
 
   export const DeviceType: inputDataType[] = [
     { label: "Please select Type", value: '', disabled: true},
-    { label: "CCTV", value: 'Cctv'},
-    { label: "Access Control", value: 'AccessDoor'},
-    { label: "Ble Reader", value: 'BleReader'},
+    { label: "CCTV", value: 'Cctv'}, //0
+    { label: "Access Control", value: 'AccessDoor'}, //1
+    { label: "Ble Reader", value: 'BleReader'}, //2
   ];
 
   export const DeviceStatus: inputDataType[] = [
@@ -135,5 +157,10 @@ export const orgType: inputDataType[] = [
     { label: "Open", value: 'Open'},
     { label: "Monitor", value: 'Monitor'},
     { label: "Alarm", value: 'Alarm'},
-  ]
+  ];
   
+  export const ServiceStatus: inputDataType[] = [
+    { label: "Please select Status", value: '', disabled: true},
+    { label: "Start", value: 'Start'},
+    { label: "Stop", value: 'Stop'},
+  ];

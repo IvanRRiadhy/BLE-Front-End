@@ -59,17 +59,24 @@ const FloorList = () => {
     const newLength = parseInt(event.target.value, 10);
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
-  const handleSort = (column: string) => {
-    const isAsc = floorFilter.SortColumn === column && floorFilter.SortDir === 'asc';
-    dispatch(
-      UpdateFilter({
-        SortColumn: column,
-        SortDir: isAsc ? 'desc' : 'asc',
-        Start: 0,
-      }),
-    );
-  };
+const handleSort = (column: string) => {
+  const isAsc = floorFilter.SortColumn === column && floorFilter.SortDir === 'asc';
+  const isDesc = floorFilter.SortColumn === column && floorFilter.SortDir === 'desc';
 
+  if (isDesc) {
+    dispatch(UpdateFilter({
+      SortColumn: '',
+      SortDir: 'asc',
+      Start: 0,
+    }));
+  } else {
+    dispatch(UpdateFilter({
+      SortColumn: column,
+      SortDir: isAsc ? 'desc' : 'asc',
+      Start: 0,
+    }));
+  }
+};
   useEffect(() => {
     dispatch(fetchFloorDT(floorFilter));
     console.log("FetchDT");

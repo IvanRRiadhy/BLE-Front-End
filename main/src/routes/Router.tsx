@@ -3,6 +3,8 @@
 import React, { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
+import Card from 'src/views/master/tag/card';
+import VisitorCard from 'src/views/master/tag/VisitorCard';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -244,6 +246,8 @@ const Router = [
       { path: '/master/device', exact: true, element: <FloorplanDevice /> },
       { path: '/report/alarmrecord', exact: true, element: <AlarmRecord /> },
       { path: '/master/floorplan', exact: true, element: <FloorplanList /> },
+      { path: '/master/card', exact: true, element: <Card /> },
+      { path: '/master/visitorcard', exact: true, element: <VisitorCard /> },
 
       { path: '/apps/contacts', element: <Contacts /> },
 

@@ -3,6 +3,9 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { OrganizationType } from "./organization";
+import { DistrictType } from "./district";
+import { DepartmentType } from "./department";
 
 const API_URL = "/api/Visitor/";
 const API_DT_URL = "/api/Visitor/filter/";
@@ -77,6 +80,7 @@ export type VisitorType = {
     gender: string,
     phone: string,
     faceImage: string,
+        cardNumber: string,
     bleCardNumber:string,
     organizationId:string,
     districtId: string,
@@ -87,18 +91,21 @@ export type VisitorType = {
     emailVerificationToken: string,
     visitorPeriodStart: string,
     visitorPeriodEnd: string,
-    adress:string,
+    address:string,
     applicationId: string,
-    cardNumber: string,
+    organization?: OrganizationType,
+    district?: DistrictType,
+    department?: DepartmentType,
     identityId: string,
-    isEmployee: string,
+    isEmployee: boolean,
     personId: string,
 }
 
 interface StateType {
-    visitors: masterVisitorType[];
+    // visitors: masterVisitorType[];
+    visitors: VisitorType[];
     visitorSearch: string;
-    selectedVisitor?: masterVisitorType;
+    selectedVisitor?: VisitorType;
     currentFilter: string,
     visitorTotalCount: number,
     visitorFilteredCount: number,
@@ -106,6 +113,7 @@ interface StateType {
 }
 
 const initialState: StateType = {
+    // visitors: [],
     visitors: [],
     visitorSearch: "",
     selectedVisitor: undefined,
@@ -126,11 +134,15 @@ export const VisitorSlice = createSlice({
     name: "visitor",
     initialState,
     reducers: {
-      GetVisitor(state, action: PayloadAction<masterVisitorType[]>)  {
+      GetVisitor(state, action: PayloadAction<VisitorType[]>)  {
         state.visitors = action.payload;
       },
+    //   GetVisitors(state, action: PayloadAction<VisitorType[]>) {
+    //     state.newVisitor = action.payload;
+    //     console.log("Get Visitors", JSON.stringify(state.newVisitor, null, 2));
+    // },
       SelectVisitor(state, action: PayloadAction<string>) {
-        const selected = state.visitors.find((visitor: masterVisitorType) => visitor.id === action.payload);
+        const selected = state.visitors.find((visitor: VisitorType) => visitor.id === action.payload);
         state.selectedVisitor = selected || undefined;
       },
       SearchVisitor(state, action: PayloadAction<string>) {
@@ -153,7 +165,7 @@ UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
             console.error("Add failed: ", action.payload);
         })
         .addCase(editVisitor.fulfilled, (state, action) => {
-            const index = state.visitors.findIndex((visitor: masterVisitorType) => visitor.id === action.payload.id);
+            const index = state.visitors.findIndex((visitor: VisitorType) => visitor.id === action.payload.id);
             if (index !== -1) {
                 state.visitors[index] = action.payload;
             }
@@ -162,7 +174,7 @@ UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
             console.error("Update failed: ", action.payload);
         })
         .addCase(deleteVisitor.fulfilled, (state, action) => {
-            state.visitors = state.visitors.filter((visitor: masterVisitorType) => visitor.id !== action.payload);
+            state.visitors = state.visitors.filter((visitor: VisitorType) => visitor.id !== action.payload);
         })
         .addCase(deleteVisitor.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
@@ -177,6 +189,7 @@ UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
 
 export const {
     GetVisitor,
+    // GetVisitors,
     SelectVisitor,
     SearchVisitor,
     SetVisibilityFilter,
@@ -199,7 +212,7 @@ export const fetchVisitorDT = createAsyncThunk(
         try {
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetVisitor(response.data.collection.data || []));
-            console.log("Fetch Visitors", response.data.collection);
+            // console.log("Fetch Visitors", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching members:", error);

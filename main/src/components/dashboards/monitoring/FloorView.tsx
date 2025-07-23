@@ -21,6 +21,8 @@ import axiosServices from 'src/utils/axios';
 import { AlarmType } from 'src/store/apps/tracking/Alarm';
 import { fetchMembers } from 'src/store/apps/crud/member';
 import { fetchVisitor } from 'src/store/apps/crud/visitor';
+import BeaconDetailPopup from './Popup/BeaconDetailPopup';
+import TrackingDetailPopup from './Popup/TrackingDetailPopup';
 
 const BASE_URL = 'http://192.168.1.116:5000';
 const ALARM_URL = 'http://192.168.1.116:3300';
@@ -99,6 +101,27 @@ const FloorView: React.FC<{
 
   const devices = useSelector((state: AppState) => state.floorplanDeviceReducer.floorplanDeviceAll);
   const [filteredDevices, setFilteredDevices] = useState<FloorplanDeviceType[]>([]);
+
+  //Popup State
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [openTrackDetail, setOpenTrackDetail] = useState(false);
+  const [selectedBeacon, setSelectedBeacon] = useState<{
+    id: string;
+    area: string;
+    floorplan: string;
+    time: string;
+  } | null>(null);
+
+  const handleSelectBeacon = (info: {
+    id: string;
+    area: string;
+    floorplan: string;
+    time: string;
+  }) => {
+    setSelectedBeacon(info);
+    setDetailDialogOpen(true);
+  };
+
   useEffect(() => {
     const filteredDevices = devices.filter(
       (device: FloorplanDeviceType) => device.floorplanId === activeFloorplan,
@@ -600,6 +623,12 @@ const FloorView: React.FC<{
                     showAreas={showArea}
                     showGates={showGates}
                     topic={`tracking/${activeFloorplan.toUpperCase()}`}
+                    onSelectBeacon={handleSelectBeacon}
+                    detailDialogOpen={detailDialogOpen}
+                    setDetailDialogOpen={setDetailDialogOpen}
+                    openTrackDetail={openTrackDetail}
+                    setOpenTrackDetail={setOpenTrackDetail}
+                    selectedBeaconId={selectedBeacon?.id ?? null}
                   />
                 </Box>
               );
@@ -625,10 +654,11 @@ const FloorView: React.FC<{
               background: 'linear-gradient(to bottom, #c62828, #b71c1c)',
               color: 'white',
               borderRadius: 4,
-              px: 4,
-              pt: 3,
-              pb: 6, // space above the button
-              minWidth: 380,
+              px: 6, // lebih lebar horizontal padding
+              pt: 4,
+              pb: 8,
+              minWidth: { xs: '90vw', sm: 480, md: 600 }, // responsive minWidth
+              maxWidth: '90vw',
               textAlign: 'center',
               position: 'relative',
             }}
@@ -636,44 +666,56 @@ const FloorView: React.FC<{
             {/* Optional Icon */}
             {/* <VolumeUpIcon sx={{ fontSize: 32, mb: 1 }} /> */}
 
-            <Typography variant="h5" fontWeight="bold" mb={1}>
-              Alarm triggered
+            <Typography variant="h2" fontWeight="bold" letterSpacing={3} mb={2}>
+              ALARM TRIGGERED
             </Typography>
 
             <Box
               sx={{
                 backgroundColor: 'rgba(255,255,255,0.15)',
                 display: 'inline-block',
-                px: 2,
-                py: 0.5,
-                borderRadius: '20px',
-                mb: 1.5,
-                fontSize: '0.875rem',
+                px: 3,
+                py: 1,
+                borderRadius: '24px',
+                mb: 2,
+                fontSize: '1rem',
+                fontWeight: 'bold',
               }}
             >
-              🔔 Triggered by <strong>{getName(dummyAlarm?.beaconId)}</strong>
-              <Box component="span" fontWeight="bold"></Box>
+              🔔 Triggered by{' '}
+              <Box component="span" fontWeight="bold" fontSize="1.125rem">
+                {getName(dummyAlarm?.beaconId)}
+              </Box>
             </Box>
 
-            <Typography variant="body2" mb={1}>
-              card ID: <strong>{dummyAlarm?.beaconId}</strong>
-            </Typography>
-            <Typography variant="body2" mb={2}>
-              Area: <strong>{dummyAlarm?.maskedAreaName}</strong> |{' '}
-              <strong>{dummyAlarm?.floorplanName}</strong>
-            </Typography>
+      <Typography variant="h6" mb={3}>
+        Card ID:{' '}
+        <Box component="span" fontWeight="bold" fontSize="1.1rem">
+          {dummyAlarm?.beaconId}
+        </Box>
+      </Typography>
+      <Typography variant="h6" mb={3}>
+        Area:{' '}
+        <Box component="span" fontWeight="bold" fontSize="1.1rem">
+          {dummyAlarm?.maskedAreaName}
+        </Box>{' '}
+        |{' '}
+        <Box component="span" fontWeight="bold" fontSize="1.1rem">
+          {dummyAlarm?.floorplanName}
+        </Box>
+      </Typography>
 
             {/* White pill-shaped button bar */}
             <Box
               sx={{
                 position: 'absolute',
-                bottom: '-20px',
+                bottom: '-24px',
                 left: '50%',
                 transform: 'translateX(-50%)',
                 backgroundColor: 'white',
                 borderRadius: '40px',
-                px: 4,
-                py: 1,
+                px: 5,
+                py: 1.5,
                 boxShadow: 2,
               }}
             >
@@ -684,12 +726,13 @@ const FloorView: React.FC<{
                   backgroundColor: '#fff',
                   color: 'red',
                   fontWeight: 'bold',
-                  fontSize: '1rem',
+                  fontSize: '1.2rem',
                   textTransform: 'none',
                   borderRadius: '20px',
-                  px: 4,
+                  px: 5,
                   '&:hover': {
                     backgroundColor: '#b71c1c',
+                    color: 'white',
                   },
                 }}
               >
@@ -699,6 +742,37 @@ const FloorView: React.FC<{
           </Box>
         </Dialog>
       )}
+      {selectedBeacon &&
+        (() => {
+          const member = memberList.find((m) => m.bleCardNumber === selectedBeacon.id);
+          const visitor = visitorList.find((v) => v.bleCardNumber === selectedBeacon.id);
+          const person = member || visitor;
+
+          return (
+            <>
+              <BeaconDetailPopup
+                bleNumber={selectedBeacon.id}
+                memberDetail={member}
+                visitorDetail={visitor}
+                detailDialogOpen={detailDialogOpen}
+                setDetailDialogOpen={setDetailDialogOpen}
+                setOpenTrackDetail={setOpenTrackDetail}
+                area={selectedBeacon.area}
+                floorplan={selectedBeacon.floorplan}
+                time={selectedBeacon.time}
+              />
+              {person && (
+                <TrackingDetailPopup
+                  bleNumber={selectedBeacon.id}
+                  person={person}
+                  personId={person.id}
+                  openTrackDetail={openTrackDetail}
+                  setOpenTrackDetail={setOpenTrackDetail}
+                />
+              )}
+            </>
+          );
+        })()}
     </Box>
   );
 };

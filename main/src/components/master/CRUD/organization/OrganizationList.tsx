@@ -60,13 +60,23 @@ const handleChangePage = (_: unknown, newPage: number) => {
   const newLength = parseInt(event.target.value, 10);
   dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
 };
-  const handleSort = (column: string) => {
+const handleSort = (column: string) => {
   const isAsc = organizationFilter.SortColumn === column && organizationFilter.SortDir === 'asc';
-  dispatch(UpdateFilter({
-    SortColumn: column,
-    SortDir: isAsc ? 'desc' : 'asc',
-    Start: 0,
-  }));
+  const isDesc = organizationFilter.SortColumn === column && organizationFilter.SortDir === 'desc';
+
+  if (isDesc) {
+    dispatch(UpdateFilter({
+      SortColumn: '',
+      SortDir: 'asc',
+      Start: 0,
+    }));
+  } else {
+    dispatch(UpdateFilter({
+      SortColumn: column,
+      SortDir: isAsc ? 'desc' : 'asc',
+      Start: 0,
+    }));
+  }
 };
 
   useEffect(() => {
@@ -136,7 +146,7 @@ const handleChangePage = (_: unknown, newPage: number) => {
                 <TableBody>
                   {organizationData
                     .map((organization, index) => (
-                      <TableRow key={index}>
+                      <TableRow key={organization.id}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
                         >

@@ -17,7 +17,7 @@ import React, { useEffect } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import {  dispatch, RootState,  useSelector } from 'src/store/Store';
+import { dispatch, RootState, useSelector } from 'src/store/Store';
 import { addMember, editMember, fetchMembers, memberType } from 'src/store/apps/crud/member';
 import { fetchDistricts, DistrictType } from 'src/store/apps/crud/district';
 import { fetchDepartments, DepartmentType } from 'src/store/apps/crud/department';
@@ -65,8 +65,12 @@ const AddEditMember = ({ type, member }: FormType) => {
     updatedAt: member?.updatedAt || '',
   });
 
-  const districtData: DistrictType[] = useSelector((state: RootState) => state.districtReducer.districts);
-  const departmentData: DepartmentType[] = useSelector((state: RootState) => state.departmentReducer.departments);
+  const districtData: DistrictType[] = useSelector(
+    (state: RootState) => state.districtReducer.districts,
+  );
+  const departmentData: DepartmentType[] = useSelector(
+    (state: RootState) => state.departmentReducer.departments,
+  );
   const organizationData: OrganizationType[] = useSelector(
     (state: RootState) => state.organizationReducer.organizations,
   );
@@ -78,12 +82,42 @@ const AddEditMember = ({ type, member }: FormType) => {
   }, [dispatch]);
 
   const handleClickOpen = () => {
+    console.log('OPen', member);
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
+    setFormData({
+      id: '',
+      personId: '',
+      organizationId: '',
+      departmentId: '',
+      districtId: '',
+      identityId: '',
+      cardNumber: '',
+      bleCardNumber: '',
+      name: '',
+      phone: '',
+      email: '',
+      gender: '',
+      address: '',
+      uploadFr: 0,
+      uploadFrError: '',
+      birthDate: '',
+      joinDate: '',
+      exitDate: '',
+      headMember1: '',
+      headMember2: '',
+      applicationId: '',
+      statusEmployee: '',
+      createdBy: '',
+      createdAt: '',
+      updatedBy: '',
+      updatedAt: '',
+    });
     setPreview(member?.faceImage || null);
+    setImage(null);
   };
 
   const handleSave = async () => {
@@ -101,20 +135,21 @@ const AddEditMember = ({ type, member }: FormType) => {
           data.append(key, value.toString());
         }
       });
-      console.log(data);
+      console.log(JSON.stringify(data, null, 2));
       if (image) {
         data.append('faceImage', image);
       }
       if (type === 'edit') {
+        console.log('Form Data :', JSON.stringify(data));
         await dispatch(editMember(data)); // Dispatch update
       }
       if (type === 'add') {
-        console.log("Form Data :",data);
+        console.log('Form Data :', data);
         await dispatch(addMember(data));
       }
       await dispatch(fetchMembers());
       console.log('Saved!');
-      setOpen(false);
+      handleClose();
       setPreview(null);
     } catch (error) {
       console.error('Error saving Member:', error);
@@ -146,6 +181,38 @@ const AddEditMember = ({ type, member }: FormType) => {
       }
     }
   };
+  useEffect(() => {
+    if (member) {
+      setFormData({
+        id: member.id,
+        personId: member.personId,
+        organizationId: member.organizationId,
+        departmentId: member.departmentId,
+        districtId: member.districtId,
+        identityId: member.identityId,
+        cardNumber: member.cardNumber,
+        bleCardNumber: member.bleCardNumber,
+        name: member.name,
+        phone: member.phone,
+        email: member.email,
+        gender: member.gender,
+        address: member.address,
+        uploadFr: member.uploadFr,
+        uploadFrError: member.uploadFrError,
+        birthDate: member.birthDate,
+        joinDate: member.joinDate,
+        exitDate: member.exitDate,
+        headMember1: member.headMember1,
+        headMember2: member.headMember2,
+        applicationId: member.applicationId,
+        statusEmployee: member.statusEmployee,
+        createdBy: member.createdBy,
+        createdAt: member.createdAt,
+        updatedBy: member.updatedBy,
+        updatedAt: member.updatedAt,
+      });
+    }
+  }, [member]);
 
   return (
     <>
@@ -295,7 +362,7 @@ const AddEditMember = ({ type, member }: FormType) => {
               />
               <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
               <CustomTextField
-                id="addess"
+                id="address"
                 placeholder={formData.address}
                 onChange={handleInputChange}
                 fullWidth

@@ -15,6 +15,7 @@ import { AlarmType, fetchAlarmDT } from 'src/store/apps/crud/alarmRecordTracking
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import { fetchTrackingTransDT, trackingTransType } from 'src/store/apps/crud/trackingTrans';
 import { setMainMenu } from 'src/store/customizer/CustomizerSlice';
+import { fetchFloorplanDeviceDT } from 'src/store/apps/crud/floorplanDevice';
 
 const filter = {
   draw: 1,
@@ -26,6 +27,11 @@ const filter = {
 };
 
 const Modern = () => {
+  const dashboardFilter = useSelector((state: RootState) => state.customizer.dashboardFilter);
+  // const [filters, setFilters] = useState({
+  //   ...filter,
+  //   filter: dashboardFilter,
+  // });
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const dispatch = useDispatch();
   useEffect(() => {
@@ -51,31 +57,64 @@ const Modern = () => {
     setShowWelcomePopup(false); // Close the popup
   };
 
+  // useEffect(() => {
+  //   setFilters({
+  //     ...filters,
+  //     filter: dashboardFilter,
+  //   });
+  // }, [dashboardFilter]);
+
   useEffect(() => {
     // Fetch initial data for the dashboard
     dispatch(fetchTrackingTransDT({
       ...filter,
       length: 99,
+      filters: {
+        FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || '',
+      },
     }));
-    dispatch(fetchBlacklistDT(filter));
-    dispatch(fetchMaskedAreaDT(filter));
-    dispatch(fetchBleReaderDT(filter));
-    dispatch(fetchAlarmDT(filter));
-  }, [dispatch]);
+    dispatch(fetchBlacklistDT({
+      ...filter,
+      filters: {
+        FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || '',
+      },
+    }));
+    dispatch(fetchMaskedAreaDT({
+      ...filter,
+      filters:{
+        FloorId: dashboardFilter?.FloorId || [],
+        FloorplanId: dashboardFilter?.FloorplanId || [],
+      }
+    }));
+    dispatch(fetchFloorplanDeviceDT({
+      ...filter,
+      filters: {
+        FloorplanId: dashboardFilter?.FloorplanId || [],
+        Type: 0,
+      },
+    }));
+    dispatch(fetchAlarmDT({
+      ...filter,
+      filters: {
+        FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || '',
+      }
+    }));
+    
+  }, [dispatch, dashboardFilter]);
   // const trackingTotalCount: number = useSelector(
   //   (state: RootState) => state.trackingTransReducer.trackingTransTotalCount ?? 0,
   // );
   const blacklistTotalCount: number = useSelector(
-    (state: RootState) => state.blacklistReducer.blacklistTotalCount ?? 0,
+    (state: RootState) => state.blacklistReducer.blacklistFilteredCount ?? 0,
   );
   const maskedAreaTotalCount: number = useSelector(
     (state: RootState) => state.maskedAreaReducer.maskedAreaFilteredCount ?? 0,
   );
   const bleReaderTotalCount: number = useSelector(
-    (state: RootState) => state.bleReaderReducer.bleReaderTotalCount ?? 0,
+    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceFilteredCount ?? 0,
   );
   const alarmTotalCount: number = useSelector(
-    (state: RootState) => state.alarmReducer.alarmRecordTotalCount ?? 0,
+    (state: RootState) => state.alarmReducer.alarmRecordFilteredCount ?? 0,
   );
   const trackingData: trackingTransType[] = useSelector(
     (state: RootState) => state.trackingTransReducer.trackingTrans,

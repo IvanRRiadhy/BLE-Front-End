@@ -25,7 +25,7 @@ import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
 // import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { memberType } from 'src/store/apps/crud/member';
 // import { fetchTrackingTrans, trackingTransType } from 'src/store/apps/crud/trackingTrans';
-import { masterVisitorType } from 'src/store/apps/crud/visitor';
+import { masterVisitorType, VisitorType } from 'src/store/apps/crud/visitor';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import BeaconRenderer from '../Renderer/BeaconRenderer';
@@ -34,7 +34,7 @@ import { dummyTrackingData } from './DummyTrackingData';
 
 type TrackingDetailPopupProps = {
   bleNumber: string;
-  person: memberType | masterVisitorType;
+  person: memberType | VisitorType;
   personId: string;
   openTrackDetail: boolean;
   setOpenTrackDetail: React.Dispatch<React.SetStateAction<boolean>>;
@@ -74,7 +74,7 @@ const TrackingDetailPopup = ({
   const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DDTHH:mm'));
   const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null);
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
-console.log(personId);
+// console.log(personId);
   const [isPlaying, setIsPlaying] = useState(false);
   // const playbackInterval = useRef<NodeJS.Timeout | null>(null);
   const playbackTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -97,11 +97,11 @@ console.log(personId);
   //   (state: RootState) => state.maskedAreaReducer.maskedAreas,
   // );
   const floorplanData: FloorplanType[] = useSelector(
-    (state: RootState) => state.floorplanReducer.floorplans,
+    (state: RootState) => state.floorplanReducer.floorplanAll,
   );
   // const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
   const buildingData: BuildingType[] = useSelector(
-    (state: RootState) => state.buildingReducer.buildings,
+    (state: RootState) => state.buildingReducer.buildingAll,
   );
 
   const filteredTracking = dummyTrackingData
