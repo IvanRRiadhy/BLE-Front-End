@@ -131,6 +131,11 @@ export const AccessControlSlice = createSlice({
             state.accessControlTotalCount = action.payload.recordsTotal;
             state.accessControlFilteredCount = action.payload.recordsFiltered;
         })
+        .addCase(fetchAccessControlsDT.rejected, (_state, action) => {
+            console.error("Fetch failed: ", action.payload);
+            // _state.accessControlTotalCount = 0;
+            _state.accessControlFilteredCount = 0;
+        });
     }
 });
 
@@ -161,6 +166,18 @@ export const fetchAccessControlsDT = createAsyncThunk(
     "accessControls/fetchAccessControlsDT",
     async (filter: any, { rejectWithValue }) => {
         try {
+                                if (
+            filter?.filters &&
+            Object.values(filter.filters).some(
+                (arr: any) => Array.isArray(arr) && arr.includes("Empty")
+            )
+        ) {
+            console.log("Filter contains 'Empty', skipping request");
+            // Option 1: just return null (success, no data)
+            // return null;
+            // Option 2: reject, if you want to treat as error
+            return rejectWithValue("Filter contains 'Empty', skipping request");
+        }
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetAccessControls(response.data?.collection?.data || []));
             console.log("Fetch accessControls", response.data.collection);

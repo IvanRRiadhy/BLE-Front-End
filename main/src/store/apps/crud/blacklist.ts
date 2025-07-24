@@ -16,6 +16,10 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     searchValue: string,
+    filters: {
+        FloorplanMaskedAreaId: string[],
+        VisitorId: string[],
+    }
 }
 
 
@@ -41,7 +45,7 @@ export interface blacklistType {
     visitorId: string,
     visitor?: masterVisitorType,
     floorplanMaskedArea?: MaskedAreaType,
-        createdBy: string,
+    createdBy: string,
     createdAt: string,
     updatedBy: string,
     updatedAt: string,
@@ -69,6 +73,10 @@ const initialState: StateType = {
         SortColumn: "updatedAt",
         SortDir: "desc",
         searchValue: "",
+        filters: {
+            FloorplanMaskedAreaId: [],
+            VisitorId: [],
+        }
     },
 };
 
@@ -118,6 +126,11 @@ export const BlacklistSlice = createSlice({
         .addCase(fetchBlacklistDT.fulfilled, (state, action) => {
             state.blacklistTotalCount = action.payload.recordsTotal;
             state.blacklistFilteredCount = action.payload.recordsFiltered;
+        })
+        .addCase(fetchBlacklistDT.rejected, (_state, action) => {
+            console.error("Error fetching blacklists: ", action.payload);
+            // _state.blacklistTotalCount = 0;
+            _state.blacklistFilteredCount = 0;
         });
     },
 });
@@ -143,6 +156,18 @@ export const fetchBlacklistDT = createAsyncThunk(
     "blacklist/fetchBlacklistDT",
     async (filter: any, { rejectWithValue }) => {
         try {
+                                if (
+            filter?.filters &&
+            Object.values(filter.filters).some(
+                (arr: any) => Array.isArray(arr) && arr.includes("Empty")
+            )
+        ) {
+            console.log("Filter contains 'Empty', skipping request");
+            // Option 1: just return null (success, no data)
+            // return null;
+            // Option 2: reject, if you want to treat as error
+            return rejectWithValue("Filter contains 'Empty', skipping request");
+        }
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetBlaclist(response.data.collection.data || []));
             console.log("Fetch blacklists", response.data.collection);

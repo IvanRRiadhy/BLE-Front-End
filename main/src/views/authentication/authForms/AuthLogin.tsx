@@ -49,6 +49,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         localStorage.setItem('token', data.token);
         localStorage.setItem('welcomePopupShown', 'false');
         localStorage.setItem('refreshToken', data.refreshToken);
+        localStorage.setItem('applicationId', data.applicationId);
         navigate('/');
       })
       .catch((error) => {

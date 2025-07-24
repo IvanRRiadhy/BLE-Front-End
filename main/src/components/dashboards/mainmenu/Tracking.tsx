@@ -2,6 +2,7 @@
 // @ts-ignore
 import React from 'react';
 import Chart from 'react-apexcharts';
+import { ApexOptions } from 'apexcharts';
 import { useTheme } from '@mui/material/styles';
 import { MenuItem, Grid2 as Grid, Stack, Typography, Button, Avatar, Box } from '@mui/material';
 import { IconGridDots } from '@tabler/icons-react';
@@ -31,7 +32,7 @@ const TrackingGraph: React.FC<TrackingGraphProps> = ({ trackingData = [], alarmD
     });
     return counts;
   }
-  console.log(trackingData, alarmData);
+  // console.log(trackingData, alarmData);
 
   const allowedVisitor = getCountsByDay(trackingData, 'transTime');
   const unAllowedVisitor = getCountsByDay(alarmData, 'timestamp');
@@ -72,76 +73,192 @@ const todayMonth = {
   const theme = useTheme();
   const primary = theme.palette.primary.main;
   const secondary = theme.palette.secondary.main;
+  const error = theme.palette.error.dark;
+
+  function buildContinuousSeriesByDay(records: any[], dateField: string, start: string, end: string) {
+  // records: your raw data
+  // dateField: "transTime" or "timestamp"
+  // start/end: ISO date string "YYYY-MM-DD"
+  const counts: Record<string, number> = {};
+  records.forEach((item) => {
+    const d = new Date(item[dateField]);
+    const dateStr = d.toISOString().slice(0, 10); // "YYYY-MM-DD"
+    counts[dateStr] = (counts[dateStr] || 0) + 1;
+  });
+
+  const result = [];
+  let d = new Date(start);
+  const endDate = new Date(end);
+  while (d <= endDate) {
+    const dateStr = d.toISOString().slice(0, 10);
+    result.push({ x: dateStr, y: counts[dateStr] || 0 });
+    d.setDate(d.getDate() + 1);
+  }
+  return result;
+}
+
+function getCountsByHour(data: any[], dateField: string) {
+  const counts: Record<string, number> = {};
+  data.forEach((item) => {
+    const d = new Date(item[dateField]);
+    // ISO string with hour precision (yyyy-mm-ddTHH:00:00)
+    const hourStr = new Date(
+      d.getFullYear(),
+      d.getMonth(),
+      d.getDate(),
+      d.getHours()
+    ).toISOString().slice(0, 13) + ":00:00";
+    counts[hourStr] = (counts[hourStr] || 0) + 1;
+  });
+  return counts;
+}
+// Find the date range for the selected month
+const monthParts = month.split("-");
+const selectedYear = Number(monthParts[0]);
+const selectedMonth = Number(monthParts[1]);
+
+// Get all days in the selected month
+const firstDay = new Date(selectedYear, selectedMonth - 1, 1);
+const lastDay = new Date(selectedYear, selectedMonth, 0); // last day of month
+const firstDayStr = firstDay.toISOString().slice(0, 10);
+const lastDayStr = lastDay.toISOString().slice(0, 10);
+
+// Build continuous day series for each type
+const allowedSeries = buildContinuousSeriesByDay(trackingData, "transTime", firstDayStr, lastDayStr);
+const unAllowedSeries = buildContinuousSeriesByDay(alarmData, "timestamp", firstDayStr, lastDayStr);
+
+// Combine x points (dates) from both series, so both series use all dates in month
+const allDatesSet = new Set([...allowedSeries.map(s => s.x), ...unAllowedSeries.map(s => s.x)]);
+const allDates = Array.from(allDatesSet).sort();
+
+// Map to final chart data
+const allowedAreaSeries = allDates.map(date => ({
+  x: date,
+  y: allowedSeries.find(s => s.x === date)?.y || 0
+}));
+const unAllowedAreaSeries = allDates.map(date => ({
+  x: date,
+  y: unAllowedSeries.find(s => s.x === date)?.y || 0
+}));
+
+  const allowedVisitorMonthTotal = trackingData.filter((item) => {
+  const d = new Date(item.transTime);
+  return (
+    d.getFullYear() === selectedYear &&
+    d.getMonth() + 1 === selectedMonth
+  );
+}).length;
+const unAllowedVisitorMonthTotal = alarmData.filter((item) => {
+  const d = new Date(item.timestamp);
+  return (
+    d.getFullYear() === selectedYear &&
+    d.getMonth() + 1 === selectedMonth
+  );
+}).length;
 
   // chart
-  const optionscolumnchart: Props = {
-    chart: {
-      type: 'bar',
-      fontFamily: "'Plus Jakarta Sans', sans-serif;",
-      foreColor: '#adb0bb',
-      toolbar: {
-        show: true,
-      },
-      height: 370,
-      stacked: true,
-    },
-    colors: [primary, secondary],
-    plotOptions: {
-      bar: {
-        horizontal: false,
-        barHeight: '60%',
-        columnWidth: '35%',
-        borderRadius: [6],
-        borderRadiusApplication: 'end',
-        borderRadiusWhenStacked: 'all',
-      },
-    },
+const seriescolumnchart = [
+  {
+    name: t("Area accessed with permission"),
+    data: allowedAreaSeries,
+  },
+  {
+    name: t("Area accessed without permission"),
+    data: unAllowedAreaSeries,
+  },
+];
 
-    stroke: {
-      show: false,
+const optionscolumnchart: ApexOptions = {
+  chart: {
+    type: "area",
+    height: 300,
+    foreColor: "#999",
+    stacked: false,
+    dropShadow: {
+      enabled: true,
+      enabledOnSeries: [0],
+      top: -2,
+      left: 2,
+      blur: 5,
+      opacity: 0.06,
     },
-    dataLabels: {
-      enabled: false,
-    },
-    legend: {
-      show: false,
-    },
-    grid: {
-      borderColor: 'rgba(0,0,0,0.1)',
-      strokeDashArray: 3,
-      xaxis: {
-        lines: {
-          show: false,
-        },
+    fontFamily: "'Plus Jakarta Sans', sans-serif;",
+    toolbar: { show: true,
+      tools: {
+        reset:true,
+        download: true,
+        selection: true,
+        zoom: true,
+        zoomin: true,
+        zoomout: true,
+        pan: true,
       },
-    },
-    yaxis: {
-      min: Math.max(...unAllowedVisitor) * -1 - 5,
-      max: Math.max(...allowedVisitor) + 5,
-      tickAmount: 4,
-    },
-    xaxis: {
-      categories: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-      axisBorder: {
-        show: false,
+     }
+  },
+  colors: [primary, error],
+  stroke: { curve: "smooth", width: 3 },
+  dataLabels: { enabled: false },
+  markers: {
+    size: 0,
+    strokeColors: "#fff",
+    strokeWidth: 3,
+    strokeOpacity: 1,
+    fillOpacity: 1,
+    hover: { size: 6 },
+  },
+  xaxis: {
+    type: "datetime",
+    axisBorder: { show: false },
+    axisTicks: { show: false },
+    labels: {
+      datetimeFormatter: {
+        year: "yyyy",
+        month: "MMM yyyy",
+        day: "dd MMM",
+        hour: "HH:mm",   // this will show hour when zoomed-in
       },
+      style: { colors: "#999" },
     },
-    tooltip: {
-      theme: theme.palette.mode === 'dark' ? 'dark' : 'light',
-      fillSeriesColor: false,
+  },
+  yaxis: {
+    labels: {
+      offsetX: 14,
+      offsetY: -5,
     },
-  };
-  const seriescolumnchart = [
-    {
-      name: 'Area accessed with with permission',
-      data: allowedVisitor,
-    },
-    {
-      name: 'Area accessed without permission',
-      data: unAllowedVisitor.map((item) => item * -1),
-    },
-  ];
+    tickAmount: 4,
+  //   tooltip: { enabled: true },
+  },
+  grid: {
+    padding: { left: -5, right: 5 },
+  },
+  tooltip: {
+    x: { format: "dd MMM yyyy" },
+  },
+  legend: {
+    show: false,
+  },
+  fill: {
+    type: "solid",
+    opacity: 0.7,
+  },
+};
+const options = {
+  chart: { type: "area" as const },
+  xaxis: { type: "datetime" as const }
+};
+const series = [
+  {
+    name: "Allowed",
+    data: [
+      { x: "2025-07-01", y: 0 },
+      { x: "2025-07-02", y: 1 },
+      { x: "2025-07-03", y: 0 }
+    ]
+  }
+];
 
+// console.log(JSON.stringify(seriescolumnchart, null, 2));
+// console.log(JSON.stringify(optionscolumnchart, null, 2));
   return (
     <DashboardCard
       title={t('Tracking Graphic')}
@@ -167,23 +284,24 @@ const todayMonth = {
         <Grid
           size={{
             xs: 12,
-            sm: 8,
+            sm: 9,
           }}
         >
           <Box className="rounded-bars">
             <Chart
               options={optionscolumnchart}
               series={seriescolumnchart}
-              type="bar"
-              height="370px"
+              // type="bar"
+              height="415px"
             />
+            {/* <Chart options={options} series={seriescolumnchart} type="area" height={300} /> */}
           </Box>
         </Grid>
         {/* column */}
         <Grid
           size={{
             xs: 12,
-            sm: 4,
+            sm: 3,
           }}
         >
           <Stack spacing={3} mt={3}>
@@ -196,16 +314,16 @@ const todayMonth = {
                 alignItems="center"
                 justifyContent="center"
               >
-                <Typography color="primary" variant="h6" display="flex">
-                  <IconGridDots width={21} />
+                <Typography color="primary" variant="body2" display="flex">
+                  <IconGridDots width={15} />
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="h3" fontWeight="700">
-                  {allowedVisitor.reduce((a, b) => a + b, 0) +
-                    unAllowedVisitor.reduce((a, b) => a + b, 0)}
+                <Typography variant="h6" fontWeight="700">
+                  {allowedVisitorMonthTotal +
+                    unAllowedVisitorMonthTotal}
                 </Typography>
-                <Typography variant="subtitle2" color="textSecondary">
+                <Typography variant="body1" color="textSecondary">
                   {t('Accessed Area')}
                 </Typography>
               </Box>
@@ -217,21 +335,21 @@ const todayMonth = {
                 sx={{ width: 9, mt: 1, height: 9, bgcolor: primary, svg: { display: 'none' } }}
               ></Avatar>
               <Box>
-                <Typography variant="subtitle1" color="textSecondary">
+                <Typography variant="body2" color="textSecondary">
                   {t('Area accessed with permission')}
                 </Typography>
-                <Typography variant="h5">{allowedVisitor.reduce((a, b) => a + b, 0)}</Typography>
+                <Typography variant="h5">{allowedVisitorMonthTotal}</Typography>
               </Box>
             </Stack>
             <Stack direction="row" spacing={2}>
               <Avatar
-                sx={{ width: 9, mt: 1, height: 9, bgcolor: secondary, svg: { display: 'none' } }}
+                sx={{ width: 9, mt: 1, height: 9, bgcolor: error, svg: { display: 'none' } }}
               ></Avatar>
               <Box>
-                <Typography variant="subtitle1" color="textSecondary">
+                <Typography variant="body2" color="textSecondary">
                   {t('Area accessed without permission')}
                 </Typography>
-                <Typography variant="h5">{unAllowedVisitor.reduce((a, b) => a + b, 0)}</Typography>
+                <Typography variant="h5">{unAllowedVisitorMonthTotal}</Typography>
               </Box>
             </Stack>
           </Stack>

@@ -15,6 +15,7 @@ import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import CardList from 'src/components/master/Tag/card/CardList';
+import AddEditCard from 'src/components/master/Tag/card/AddEditCard';
 
 interface cardType {
   icon?: string;
@@ -82,7 +83,9 @@ const Card = () => {
               [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
             }}
           >
-            <ParentCard title="Card List">
+            <ParentCard title="Card List" codeModel={
+              <AddEditCard key={'add'} type='add' />
+              }>
               <CardList />
             </ParentCard>
           </Drawer>

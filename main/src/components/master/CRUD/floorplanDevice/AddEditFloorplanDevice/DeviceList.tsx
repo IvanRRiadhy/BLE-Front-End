@@ -106,7 +106,7 @@ const DeviceList = () => {
     posPxX: 10,
     posPxY: 10,
     floorplanMaskedAreaId: '',
-    applicationId: activeFloorplan?.applicationId || '',
+    applicationId: activeFloorplan?.applicationId || localStorage.getItem('applicationId') || '',
     deviceStatus: 'Active', // Mark as unsaved
     createdAt: new Date().toISOString(),
     createdBy: 'admin', // Replace with actual user ID

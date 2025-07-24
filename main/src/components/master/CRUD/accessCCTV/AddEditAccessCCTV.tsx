@@ -34,7 +34,7 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
       updatedBy: '',
       updatedAt: '',
       integrationId: 'A6D795EF-58C9-4CBD-AEF4-34C2A5E3B952',
-      applicationId: '5A32986E-C9B9-4174-82D7-A023EAF519E5',
+      applicationId: localStorage.getItem('applicationId') || '',
     },
   );
   const dispatch: AppDispatch = useDispatch();

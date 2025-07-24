@@ -23,6 +23,7 @@ import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
 import { CardType, UpdateFilter, fetchCard } from 'src/store/apps/crud/card';
+import AddEditCard from './AddEditCard';
 
 const columns = [
   { label: 'Name', field: 'name', sortAble: true },
@@ -52,16 +53,24 @@ const CardList = () => {
     const newLength = parseInt(event.target.value, 10);
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
-  const handleSort = (column: string) => {
-    const isAsc = cardFilter.SortColumn === column && cardFilter.SortDir === 'asc';
-    dispatch(
-      UpdateFilter({
-        SortColumn: column,
-        SortDir: isAsc ? 'desc' : 'asc',
-        Start: 0,
-      }),
-    );
-  };
+const handleSort = (column: string) => {
+  const isAsc = cardFilter.SortColumn === column && cardFilter.SortDir === 'asc';
+  const isDesc = cardFilter.SortColumn === column && cardFilter.SortDir === 'desc';
+
+  if (isDesc) {
+    dispatch(UpdateFilter({
+      SortColumn: '',
+      SortDir: 'asc',
+      Start: 0,
+    }));
+  } else {
+    dispatch(UpdateFilter({
+      SortColumn: column,
+      SortDir: isAsc ? 'desc' : 'asc',
+      Start: 0,
+    }));
+  }
+};
 
   useEffect(() => {
     dispatch(fetchCard());
@@ -135,15 +144,20 @@ const CardList = () => {
                         {index + 1 + page * rowsPerPage}
                       </TableCell>
                       <TableCell>{card.name}</TableCell>
-                      <TableCell>{card.remarks}</TableCell>
+                      <TableCell
+                        sx={{ whiteSpace: 'normal', wordBreak: 'break-word', maxWidth: 240 }}
+                      >
+                        {card.remarks}
+                      </TableCell>
                       <TableCell>{card.cardType}</TableCell>
                       <TableCell>{card.cardNumber}</TableCell>
-                      <TableCell>{card.registeredSite}</TableCell>
+                      <TableCell>{card.registeredArea}</TableCell>
                       <TableCell>{card.isUsed ? 'Yes' : 'No'}</TableCell>
                       <TableCell>{card.lastUsed || 'N/A'}</TableCell>
                       <TableCell
                         sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 1 }}
                       >
+                        <AddEditCard type="edit" card={card} />
                         <IconButton
                           color="error"
                           onClick={() => handleOpenDeleteDialog(card)}
@@ -170,23 +184,23 @@ const CardList = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Grid>
-            {/* Delete Confirmation Dialog */}
-            <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-              <DialogTitle>Confirm Deletion</DialogTitle>
-              <DialogContent>
-                <DialogContentText>
-                  Are you sure you want to delete the Card <strong>{selectedCard?.name}</strong>?
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseDeleteDialog} color="primary">
-                  Cancel
-                </Button>
-                <Button onClick={handleConfirmDelete} color="error">
-                  Delete
-                </Button>
-              </DialogActions>
-            </Dialog>
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete the Card <strong>{selectedCard?.name}</strong>?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 };

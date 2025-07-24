@@ -22,7 +22,7 @@ import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { useTranslation } from 'react-i18next';
-import { deleteVisitor, fetchVisitorDT, masterVisitorType } from 'src/store/apps/crud/visitor';
+import { deleteVisitor, fetchVisitorDT, masterVisitorType, VisitorType } from 'src/store/apps/crud/visitor';
 import AddEditVisitor from './AddEditVisitor';
 
 const VisitorList = () => {
@@ -63,9 +63,9 @@ const VisitorList = () => {
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedVisitor, setSelectedVisitor] = useState<masterVisitorType | null>(null);
+  const [selectedVisitor, setSelectedVisitor] = useState<VisitorType | null>(null);
   // Open delete confirmation dialog
-  const handleOpenDeleteDialog = (vis: masterVisitorType) => {
+  const handleOpenDeleteDialog = (vis: VisitorType) => {
     setSelectedVisitor(vis);
     setDeleteDialogOpen(true);
   };
@@ -162,7 +162,7 @@ const VisitorList = () => {
                 </TableHead>
                 <TableBody>
                   {visitorData
-                    .map((visitor: masterVisitorType) => (
+                    .map((visitor: VisitorType) => (
                       <TableRow key={visitor.id}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
@@ -177,28 +177,6 @@ const VisitorList = () => {
                         <TableCell>{visitor.gender}</TableCell>
                         <TableCell>{visitor.address}</TableCell>
                         <TableCell>{visitor.faceImage}</TableCell>
-                        <TableCell>{visitor.uploadFr}</TableCell>
-                        <TableCell>{visitor.uploadFrError}</TableCell>
-                        <TableCell>{visitor.applicationId}</TableCell>
-                        <TableCell>{formatTime(visitor.registeredDate)}</TableCell>
-                        <TableCell>{formatTime(visitor.visitorArrival)}</TableCell>
-                        <TableCell>{formatTime(visitor.visitorEnd)}</TableCell>
-                        <TableCell>{visitor.portalKey}</TableCell>
-                        <TableCell>{formatTime(visitor.timestampPreRegistration)}</TableCell>
-                        <TableCell>{formatTime(visitor.timestampCheckedIn)}</TableCell>
-                        <TableCell>{formatTime(visitor.timestampCheckedOut)}</TableCell>
-                        <TableCell>{formatTime(visitor.timestampDeny)}</TableCell>
-                        <TableCell>{formatTime(visitor.timestampBlocked)}</TableCell>
-                        <TableCell>{formatTime(visitor.timestampUnblocked)}</TableCell>
-                        <TableCell>{visitor.checkinBy}</TableCell>
-                        <TableCell>{visitor.checkoutBy}</TableCell>
-                        <TableCell>{visitor.denyBy}</TableCell>
-                        <TableCell>{visitor.blockBy}</TableCell>
-                        <TableCell>{visitor.unblockBy}</TableCell>
-                        <TableCell>{visitor.reasonDeny}</TableCell>
-                        <TableCell>{visitor.reasonBlock}</TableCell>
-                        <TableCell>{visitor.reasonUnblock}</TableCell>
-                        <TableCell>{visitor.status}</TableCell>
                         <TableCell
                           sx={{
                             position: 'sticky',

@@ -17,36 +17,63 @@ import {
   DialogContentText,
   DialogActions,
 } from '@mui/material';
-import { masterVisitorType, deleteVisitor } from 'src/store/apps/crud/visitor';
+import { masterVisitorType, deleteVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import AddEditVisitor from '../../CRUD/visitor/AddEditVisitor';
 import { IconTrash } from '@tabler/icons-react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
 import { useTranslation } from 'react-i18next';
+import { DepartmentType, fetchDepartments } from 'src/store/apps/crud/department';
+import { DistrictType, fetchDistricts } from 'src/store/apps/crud/district';
+import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
 
 const BASE_URL = 'http://192.168.1.116:5000';
 
 const VisitorContent = () => {
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const visitorDetail: masterVisitorType | undefined = useSelector(
+  const visitorDetail: VisitorType | undefined = useSelector(
     (state: RootState) => state.visitorReducer.selectedVisitor,
   );
   const applicationData = useSelector((state: RootState) => state.applicationReducer.applications);
-
+  const districtData = useSelector((state: RootState) => state.districtReducer.districts);
+  const departmentData = useSelector((state: RootState) => state.departmentReducer.departments);
+  const organizationData = useSelector(
+    (state: RootState) => state.organizationReducer.organizations,
+  );
   const dispatch = useDispatch();
   // const theme = useTheme();
 
   useEffect(() => {
     dispatch(fetchApplications());
+    dispatch(fetchDistricts());
+    dispatch(fetchDepartments());
+    dispatch(fetchOrganizations());
   }, [dispatch]);
 
   const getAppName = (appId: string) => {
     const app = applicationData.find((a: ApplicationType) => a.id === appId);
     return app ? app.applicationName : 'Unknown App';
   };
-  const [selectedVisitor, setSelectedVisitor] = useState<masterVisitorType | null>(null);
-  const handleOpenDeleteDialog = (vis: masterVisitorType) => {
+
+  const getDepartmentName = (departmentId: string) => {
+    const department = departmentData.find((dpt: DepartmentType) => dpt.id === departmentId);
+    return department ? department.name : 'Unknown Department';
+  };
+
+  const getDistrictName = (districtId: string) => {
+    const district = districtData.find((dst: DistrictType) => dst.id === districtId);
+    return district ? district.name : 'Unknown District';
+  };
+
+  const getOrganizationName = (organizationId: string) => {
+    const organization = organizationData.find(
+      (org: OrganizationType) => org.id === organizationId,
+    );
+    return organization ? organization.name : 'Unknown Organization';
+  };
+  const [selectedVisitor, setSelectedVisitor] = useState<VisitorType | null>(null);
+  const handleOpenDeleteDialog = (vis: VisitorType) => {
     setSelectedVisitor(vis);
     setDeleteDialogOpen(true);
   };
@@ -133,14 +160,20 @@ const VisitorContent = () => {
                 <Typography>{visitorDetail.email}</Typography>
                 <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
                 <Typography>{visitorDetail.address}</Typography>
-                <CustomFormLabel htmlFor="status">Status</CustomFormLabel>
-                <Typography>{visitorDetail.status}</Typography>
+                <CustomFormLabel htmlFor="organization">Organization Name</CustomFormLabel>
+                <Typography>{getOrganizationName(visitorDetail.organizationId)}</Typography>
+                <CustomFormLabel htmlFor="department">Department Name</CustomFormLabel>
+                <Typography>{getDepartmentName(visitorDetail.departmentId)}</Typography>
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="phone">Phone</CustomFormLabel>
                 <Typography>{visitorDetail.phone}</Typography>
                 <CustomFormLabel htmlFor="gender">Gender</CustomFormLabel>
                 <Typography>{visitorDetail.gender}</Typography>
+                <CustomFormLabel htmlFor="status">Status</CustomFormLabel>
+                <Typography>{visitorDetail.isVip ? 'VIP' : 'Normal'}</Typography>
+                <CustomFormLabel htmlFor="district">District Name</CustomFormLabel>
+                <Typography>{getDistrictName(visitorDetail.districtId)}</Typography>
               </Grid>
             </Grid>
             <Typography variant="h5" fontWeight={600} mb={2} mt={2}>
@@ -150,13 +183,13 @@ const VisitorContent = () => {
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="arrival">Arrival</CustomFormLabel>
-                <Typography>{formatTime(visitorDetail.visitorArrival)}</Typography>
+                <Typography>{formatTime(visitorDetail.visitorPeriodStart)}</Typography>
                 <CustomFormLabel htmlFor="end">End</CustomFormLabel>
-                <Typography>{formatTime(visitorDetail.visitorEnd)}</Typography>
+                <Typography>{formatTime(visitorDetail.visitorPeriodEnd)}</Typography>
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-                <CustomFormLabel htmlFor="regis-date">Registration Date</CustomFormLabel>
-                <Typography>{formatDate(visitorDetail.registeredDate)}</Typography>
+                <CustomFormLabel htmlFor="regis-date">Verified</CustomFormLabel>
+                <Typography>{visitorDetail.isEmailVerified ? 'Yes' : 'No'}</Typography>
               </Grid>
             </Grid>
             <Typography variant="h5" fontWeight={600} mb={2} mt={2}>
@@ -188,53 +221,6 @@ const VisitorContent = () => {
                 <CustomFormLabel htmlFor="ble-card-number">Ble Card Number</CustomFormLabel>
                 <Typography>{visitorDetail.bleCardNumber}</Typography>
               </Grid>
-            </Grid>
-            <Typography variant="h5" fontWeight={600} mb={2} mt={2}>
-              Visits Details
-            </Typography>
-            <Divider />
-            <Grid container spacing={5} mb={3}>
-              {visitorDetail.status === 'Denied' || visitorDetail.status === 'Block' ? (
-                <>
-                  <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-                    <CustomFormLabel
-                      htmlFor={visitorDetail.status === 'Denied' ? 'deny-by' : 'block-by'}
-                    >
-                      {visitorDetail.status === 'Denied' ? 'Denied By' : 'Block By'}
-                    </CustomFormLabel>
-                    <Typography>
-                      {visitorDetail.status === 'Denied'
-                        ? visitorDetail.denyBy
-                        : visitorDetail.blockBy}
-                    </Typography>
-                  </Grid>
-                  <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-                    <CustomFormLabel
-                      htmlFor={visitorDetail.status === 'Denied' ? 'deny-reason' : 'block-reason'}
-                    >
-                      {visitorDetail.status === 'Denied' ? 'Denied Reason' : 'Block Reason'}
-                    </CustomFormLabel>
-                    <Typography>
-                      {visitorDetail.status === 'Denied'
-                        ? visitorDetail.reasonDeny
-                        : visitorDetail.reasonBlock}
-                    </Typography>
-                  </Grid>
-                </>
-              ) : (
-                <>
-                  <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-                    <CustomFormLabel htmlFor="check-in">Check-in By</CustomFormLabel>
-                    <Typography>{visitorDetail.checkinBy}</Typography>
-                    <CustomFormLabel htmlFor="portal-key">Portal Key</CustomFormLabel>
-                    <Typography>{visitorDetail.portalKey}</Typography>
-                  </Grid>
-                  <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-                    <CustomFormLabel htmlFor="check-out">Check-out By</CustomFormLabel>
-                    <Typography>{visitorDetail.checkoutBy}</Typography>
-                  </Grid>
-                </>
-              )}
             </Grid>
           </Box>
         </>

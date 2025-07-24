@@ -31,7 +31,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
     id: floorplan?.id || '',
     name: floorplan?.name || '',
     floorId: floorplan?.floorId || '',
-    applicationId: floorplan?.applicationId || '2a47c8b3-61e9-44bb-ad45-80fe81c08856',
+    applicationId: floorplan?.applicationId || localStorage.getItem('applicationId') || '',
     createdBy: floorplan?.createdBy || '',
     createdAt: floorplan?.createdAt || '',
     updatedBy: floorplan?.updatedBy || '',

@@ -20,10 +20,10 @@ interface StateType {
   isMonitorSidebar?: boolean;
   isMainMenu?: boolean;
   dashboardFilter?:{
-    BuildingId: string;
-    FloorId: string;
-    FloorplanId: string;
-    FloorplanMaskedAreaId: string;
+    BuildingId: string[];
+    FloorId: string[];
+    FloorplanId: string[];
+    FloorplanMaskedAreaId: string[];
   }
 }
 

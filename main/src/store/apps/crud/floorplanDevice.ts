@@ -8,7 +8,6 @@ import { MaskedAreaType } from "./maskedArea";
 import { CCTVType } from "./accessCCTV";
 import { AccessControlType } from "./accessControl";
 import { DeviceType } from "src/types/crud/input";
-import { GetAllFloorplan } from "./floorplan";
 
 const API_URL = '/api/FloorplanDevice/';
 const API_DT_URL = '/api/FloorplanDevice/filter/';
@@ -283,7 +282,10 @@ export const FloorplanDeviceSlice = createSlice({
             })
             .addCase(fetchFloorplanDeviceDT.rejected, (_state, action) => {
                 console.error("Fetch floorplan device DT failed: ", action.payload);
-            });
+                // _state.floorplanDeviceTotalCount = 0;
+                _state.floorplanDeviceFilteredCount = 0;
+            })
+            
     },
 });
 
@@ -318,6 +320,18 @@ export const fetchFloorplanDeviceDT = createAsyncThunk(
     'floorplanDevice/fetchFloorplanDeviceDT',
     async (filter: any, { rejectWithValue }) => {
         try {
+                    if (
+            filter?.filters &&
+            Object.values(filter.filters).some(
+                (arr: any) => Array.isArray(arr) && arr.includes("Empty")
+            )
+        ) {
+            console.log("Filter contains 'Empty', skipping request");
+            // Option 1: just return null (success, no data)
+            // return null;
+            // Option 2: reject, if you want to treat as error
+            return rejectWithValue("Filter contains 'Empty', skipping request");
+        }
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetFloorplanDevices(response.data.collection.data || []));
             console.log("Fetch floorplan devices", response.data.collection);

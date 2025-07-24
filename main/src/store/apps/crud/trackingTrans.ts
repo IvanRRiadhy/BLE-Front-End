@@ -16,6 +16,10 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     searchValue: string,
+    filters: {
+        FloorplanMaskedAreaId: string[],
+        ReaderId: string[],
+    }
 }
 
 
@@ -58,6 +62,7 @@ interface StateType {
     selectedTrackingTrans?: trackingTransType | null;
     trackingTransTotalCount: number;
     trackingTransFilteredCount: number;
+    trackingTransFilter: GetFilter;
 }
 
 const initialState: StateType = {
@@ -67,6 +72,18 @@ const initialState: StateType = {
     selectedTrackingTrans: null,
     trackingTransTotalCount: 0,
     trackingTransFilteredCount: 0,
+    trackingTransFilter: {
+        Draw: 1,
+        Start: 0,
+        Length: 5,
+        SortColumn: "transTime",
+        SortDir: "desc",
+        searchValue: "",
+        filters: {
+            FloorplanMaskedAreaId: [],
+            ReaderId: [],
+        }
+    }
 };
 
 export const TrackingTransSlice = createSlice({
@@ -114,6 +131,12 @@ export const TrackingTransSlice = createSlice({
             state.trackingTransTotalCount = action.payload.recordsTotal;
             state.trackingTransFilteredCount = action.payload.recordsFiltered;
         })
+        .addCase(fetchTrackingTransDT.rejected, (_state, action) => {
+            console.error("Error fetching tracking transactions: ", action.payload);
+            _state.trackingTrans = [];
+            _state.trackingTransTotalCount = 0;
+            _state.trackingTransFilteredCount = 0;
+        });
     },
 });
 
@@ -133,6 +156,18 @@ export const fetchTrackingTransDT = createAsyncThunk(
     "trackingTrans/fetchTrackingTransDT", 
     async (filter: any, { rejectWithValue }) => {
         try {
+            if (
+                filter?.filters &&
+                Object.values(filter.filters).some(
+                    (arr: any) => Array.isArray(arr) && arr.includes("Empty")
+                )   
+        ) {
+            console.log("Filter contains 'Empty', skipping request");
+            // Option 1: just return null (success, no data)
+            // return null;
+            // Option 2: reject, if you want to treat as error
+            return rejectWithValue("Filter contains 'Empty', skipping request");
+        }
             const response = await axiosServices.post(API_DT_URL, filter);
             console.log("Fetch trackingTrans", response.data.collection);
             dispatch(GetTrackingTrans(response.data.collection.data || []));

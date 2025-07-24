@@ -37,7 +37,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
     building || {
       id: '',
       name: '',
-      applicationId: '5A32986E-C9B9-4174-82D7-A023EAF519E5',
+      applicationId: localStorage.getItem('applicationId') || '',
       createdBy: '',
       createdAt: '',
       updatedBy: '',

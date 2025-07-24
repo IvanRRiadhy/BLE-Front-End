@@ -184,12 +184,12 @@ const Menuitems = [
         icon: IconMapPin,
         href: '/master/card/',
       },
-            {
-        id: uniqueId(),
-        title: 'Visitor Card',
-        icon: IconMapPin,
-        href: '/master/visitorcard/',
-      },
+      //       {
+      //   id: uniqueId(),
+      //   title: 'Visitor Card',
+      //   icon: IconMapPin,
+      //   href: '/master/visitorcard/',
+      // },
     ]
   },
 

@@ -3,6 +3,9 @@ import { createSlice } from "@reduxjs/toolkit";
 import { dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { memberType } from "./member";
+import { VisitorType } from "./visitor";
+import { CardType } from "./card";
 
 const API_URL = "/api/VisitorCard/";
 const API_DT_URL = "/api/VisitorCard/filter/";
@@ -41,9 +44,14 @@ export type VisitorCardType = {
     mac: string,
     checkinStatus: number,
     enableStatus: number,
-    status: number,
     siteId: string,
-    isMember: number,
+    visitorId: string,
+    memberId: string,
+    cardId: string,
+    isVisitor: number,
+    member?: memberType,
+    visitor?: VisitorType,
+    card?: CardType,
     applicationId: string,
 };
 

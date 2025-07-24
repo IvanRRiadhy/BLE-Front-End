@@ -1,176 +1,201 @@
 import React, { useEffect, useState } from 'react';
 import {
+  Box,
+  Grid2 as Grid,
+  IconButton,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TableSortLabel,
   Typography,
-  Stack,
   TablePagination,
+  TableSortLabel,
 } from '@mui/material';
-import { Box } from '@mui/system';
+import BlankCard from 'src/components/shared/BlankCard';
+import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
+import { fetchBlacklistDT, UpdateFilter } from 'src/store/apps/crud/blacklist';
+import { fetchVisitor } from 'src/store/apps/crud/visitor';
+import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
+import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import DashboardCard from 'src/components/shared/DashboardCard';
-import { useTranslation } from 'react-i18next';
-import { blacklistType, fetchBlacklist } from 'src/store/apps/crud/blacklist';
-import { AppState, useDispatch, useSelector } from 'src/store/Store';
+import isEqual from 'lodash/isEqual';
+
+
+const columns = [
+  { label: 'Blacklisted Visitor', field: 'Visitor.Name', sortAble: true },
+  { label: 'Blacklisted Area', field: 'MaskedArea.Name', sortAble: true },
+];
 
 interface BlacklistTableProps {
-  blacklistData: blacklistType[];
+  filterFloorplanId: string[];
 }
 
-const BlacklistTable: React.FC<BlacklistTableProps> = ({ blacklistData = [] }) => {
-  const dispatch = useDispatch();
+const Blacklist: React.FC<BlacklistTableProps> = ({ filterFloorplanId }) => {
+  const dispatch: AppDispatch = useDispatch();
+  const blaclistData = useSelector((state: RootState) => state.blacklistReducer.blacklists);
+  // const blacklistTotalCount = useSelector((state: RootState) => state.blacklistReducer.blacklistTotalCount);
+  const blacklistFilteredCount = useSelector(
+    (state: RootState) => state.blacklistReducer.blacklistFilteredCount,
+  );
+  const blacklistFilter = useSelector((state: RootState) => state.blacklistReducer.blacklistFilter);
+  // Pagination State
+  const page = Math.floor(blacklistFilter.Start / blacklistFilter.Length);
+  const rowsPerPage = blacklistFilter.Length;
+  const orderBy = blacklistFilter.SortColumn;
+  const order = blacklistFilter.SortDir;
 
-  //Pagination
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const { t } = useTranslation();
-  const handlePageChange = (_event: unknown, newPage: number) => {
-    setPage(newPage);
+  const handleChangePage = (_: unknown, newPage: number) => {
+    dispatch(UpdateFilter({ Start: newPage * blacklistFilter.Length }));
   };
-  const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Reset to first page when changing rows per page
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newLength = parseInt(event.target.value, 10);
+    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
-  const blacklistList: blacklistType[] = useSelector((state: AppState) => state.blacklistReducer.blacklists);
+  const handleSort = (column: string) => {
+    const isAsc = blacklistFilter.SortColumn === column && blacklistFilter.SortDir === 'asc';
+    const isDesc = blacklistFilter.SortColumn === column && blacklistFilter.SortDir === 'desc';
 
-  //Sorting
-  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
-  const [orderBy, setOrderBy] = useState<string>('name');
-
-  const handleSort = (property: string) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
-
-  const sortedData = [...blacklistList].sort((a, b) => {
-    if (orderBy === 'name') {
-      const nameA = a.visitor?.name ?? '';
-      const nameB = b.visitor?.name ?? '';
-      return order === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+    if (isDesc) {
+      dispatch(
+        UpdateFilter({
+          SortColumn: '',
+          SortDir: 'asc',
+          Start: 0,
+        }),
+      );
+    } else {
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
     }
-    if (orderBy === 'maskedArea') {
-      const areaA = a.floorplanMaskedArea?.name ?? '';
-      const areaB = b.floorplanMaskedArea?.name ?? '';
-      return order === 'asc' ? areaA.localeCompare(areaB) : areaB.localeCompare(areaA);
-    }
-
-    return 0;
-  });
+  };
+useEffect(() => {
+  const currentFloorplanId = blacklistFilter.filters?.FloorplanMaskedAreaId || [];
+  console.log("filter changed", filterFloorplanId);
+  // Only update if different
+  if (!isEqual(currentFloorplanId, filterFloorplanId)) {
+    dispatch(
+      UpdateFilter({
+        filters: { ...blacklistFilter.filters, FloorplanMaskedAreaId: filterFloorplanId },
+      }),
+    );
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [filterFloorplanId, blacklistFilter.filters]);
 
   useEffect(() => {
-    dispatch(fetchBlacklist());
-    console.log(blacklistList);
+    dispatch(fetchBlacklistDT(blacklistFilter));
+  }, [blacklistFilter, dispatch]);
+
+  useEffect(() => {
+    dispatch(fetchVisitor());
+    dispatch(fetchMaskedAreas());
+    dispatch(fetchFloorplan());
   }, [dispatch]);
 
   return (
     <DashboardCard title="Blacklist">
-      <TableContainer>
-        <Table
-          aria-label="simple table"
-          sx={{
-            whiteSpace: 'nowrap',
-          }}
-        >
-          <TableHead>
-            <TableRow>
-              {/* Name Column */}
-              <TableCell>
-                <TableSortLabel
-                  active={orderBy === 'name'}
-                  direction={orderBy === 'name' ? order : 'asc'}
-                  onClick={() => handleSort('name')}
-                >
-                  <Typography variant="subtitle2" fontWeight={600}>
-                    {t('Visitor')}
-                  </Typography>
-                </TableSortLabel>
-              </TableCell>
-              {/* Date Asigned Column */}
-              <TableCell>
-                <TableSortLabel
-                  active={orderBy === 'maskedArea'}
-                  direction={orderBy === 'maskedArea' ? order : 'asc'}
-                  onClick={() => handleSort('maskedArea')}
-                >
-                  <Typography variant="subtitle2" fontWeight={600}>
-                    {t('Area')}
-                  </Typography>
-                </TableSortLabel>
-              </TableCell>
-              {/* Duration Column */}
-              {/* <TableCell>
-                <Typography variant="subtitle2" fontWeight={600}>
-                  {t('Duration')}
-                </Typography>
-              </TableCell> */}
-              {/* Information Column */}
-              {/* <TableCell>
-                <Typography variant="subtitle2" fontWeight={600}>
-                  {t('Information')}
-                </Typography>
-              </TableCell> */}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((blacklist) => (
-              <TableRow key={blacklist.id}>
-                <TableCell>
-                  <Stack direction="row" spacing={2}>
-                    <Box>
-                      <Typography variant="subtitle2" fontWeight={600}>
-                        {blacklist.visitor?.name || 'Unknown Visitor'}
-                      </Typography>
-                      <Typography color="textSecondary" fontSize="12px" variant="subtitle2">
-                        {blacklist.visitor?.cardNumber || 'No Card Number'}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </TableCell>
-                <TableCell>
-                  <Typography color="textSecondary" fontWeight={400} variant="subtitle2">
-                    {blacklist.floorplanMaskedArea?.name || 'Unknown Area'}
-                  </Typography>
-                </TableCell>
-                {/* <TableCell>
-                  <Typography color="textSecondary" fontWeight={400} variant="subtitle2">
-                    {basic.duration}
-                  </Typography>
-                </TableCell> */}
-                {/* <TableCell>
-                  <Typography color="textSecondary" fontWeight={400} variant="subtitle2">
-                    {basic.keterangan}
-                  </Typography>
-                </TableCell> */}
-              </TableRow>
-            ))}
-            {Array.from({
-              length: rowsPerPage - Math.min(rowsPerPage, sortedData.length - page * rowsPerPage),
-            }).map((_, idx) => (
-              <TableRow key={`empty-row-${idx}`} style={{ height: 63 }}>
-                <TableCell colSpan={4} />
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {/* Pagination Component */}
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={blacklistData.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handlePageChange}
-        onRowsPerPageChange={handleRowsPerPageChange}
-        labelRowsPerPage={t('Rows Per Page')}
-      />
+      <Grid container spacing={3}>
+        <Grid size={12}>
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: 400,
+              maxHeight: 400,
+              overflow: 'auto',
+              maxWidth: '100%',
+            }}
+          >
+            <BlankCard>
+              <TableContainer>
+                <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
+                  <TableHead>
+                    <TableRow>
+                      {/* Left Sticky Empty Column */}
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}
+                      >
+                        <Typography variant="h6"> </Typography>
+                      </TableCell>
+                      {columns.map((col) => (
+                        <TableCell key={col.label}>
+                          {col.sortAble && col.field ? (
+                            <TableSortLabel
+                              active={orderBy === col.field}
+                              direction={orderBy === col.field ? order : 'asc'}
+                              onClick={() => handleSort(col.field)}
+                            >
+                              <Typography variant="h6">{col.label}</Typography>
+                            </TableSortLabel>
+                          ) : (
+                            <Typography variant="h6">{col.label}</Typography>
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {blaclistData.map((blacklist, index) => (
+                      <TableRow key={blacklist.id}>
+                        <TableCell
+                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                        >
+                          {' '}
+                          {index + 1 + page * rowsPerPage}
+                        </TableCell>
+                        <TableCell>
+                          <Box>
+                            <Typography variant="subtitle2" fontWeight={600}>
+                              {blacklist.visitor?.name || 'Unknown Visitor'}
+                            </Typography>
+                            <Typography color="textSecondary" fontSize="12px" variant="subtitle2">
+                              {blacklist.visitor?.cardNumber || 'No Card Number'}
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Typography color="textSecondary" variant="subtitle2" fontWeight={400}>
+                            {blacklist.floorplanMaskedArea?.name || 'Unknown Area'}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {Array.from({
+                      length:
+                        rowsPerPage -
+                        Math.min(rowsPerPage, blaclistData.length - page * rowsPerPage),
+                    }).map((_, idx) => (
+                      <TableRow key={`empty-row-${idx}`} style={{ height: 63 }}>
+                        <TableCell colSpan={4} />
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </BlankCard>
+          </Box>
+          {/* Pagination */}
+          <TablePagination
+            component="div"
+            count={blacklistFilteredCount}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            onPageChange={handleChangePage}
+            rowsPerPageOptions={[5, 10, 25]}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Grid>
+      </Grid>
     </DashboardCard>
   );
 };
 
-export default BlacklistTable;
+export default Blacklist;

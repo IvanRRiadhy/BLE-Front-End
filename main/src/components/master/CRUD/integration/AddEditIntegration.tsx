@@ -44,7 +44,7 @@ const AddEditIntegration = ({ type, integration }: FormType) => {
       apiAuthPasswd: '',
       apiKeyField: '',
       apiKeyValue: '',
-      applicationId: '',
+      applicationId: localStorage.getItem('applicationId') || '',
       createdBy: '',
       createdAt: '',
       updatedBy: '',

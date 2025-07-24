@@ -69,18 +69,25 @@ const TrackingDetailPopup = ({
   // const theme = useTheme();
   // const { t } = useTranslation();
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
+  const [floorplanName, setFloorplanName] = useState<string>('');
   const [activeFloorImage, setActiveFloorImage] = useState<string | null>(null);
   const [startDate, setStartDate] = useState(dayjs().startOf('day').format('YYYY-MM-DDTHH:mm'));
   const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DDTHH:mm'));
   const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null);
-  const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
-// console.log(personId);
+  const [imageDimensions, setImageDimensions] = useState({ width: 1, height: 1 });
+  // console.log(personId);
   const [isPlaying, setIsPlaying] = useState(false);
   // const playbackInterval = useRef<NodeJS.Timeout | null>(null);
   const playbackTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const [animatedPosition, setAnimatedPosition] = useState<{ x: number; y: number } | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const [camera, setCamera] = useState({
+    x: 0,
+    y: 0,
+    scale: 1,
+  });
+  const cameraAnimRef = useRef<number | null>(null);
 
   useEffect(() => {
     // dispatch(fetchTrackingTrans());
@@ -119,9 +126,11 @@ const TrackingDetailPopup = ({
     const floorplan = floorplanData.find(
       (f) => f.id.toLowerCase() === track.floorplan_id.replace(/[{}]/g, '').toLowerCase(),
     );
+    // console.log(floorplan);
     const floorImage = floorplan?.floor?.floorImage ?? null;
+    // console.log(floorImage);
     setActiveFloorImage(floorImage);
-
+    setFloorplanName(floorplan?.name ?? '');
     const pos = { x: track.pos_x * scale, y: track.pos_y * scale };
     setAnimatedPosition(pos);
   };
@@ -141,14 +150,15 @@ const TrackingDetailPopup = ({
 
   useEffect(() => {
     if (activeFloorImage) {
-      console.log('activeFloorImage', activeFloorImage);
+      // console.log('activeFloorImage', activeFloorImage);
       const img = new window.Image();
-      img.crossOrigin = 'anonymous';
+      // img.crossOrigin = 'anonymous';
       img.src = `${BASE_URL}${activeFloorImage}`;
-      console.log('Image', img);
+      // console.log('Image', img);
       img.onload = () => {
         setImageObj(img);
         setImageDimensions({ width: img.width, height: img.height });
+        // console.log("Image Dimensions: ",imageDimensions)
       };
     }
   }, [activeFloorImage]);
@@ -162,10 +172,10 @@ const TrackingDetailPopup = ({
 
   const maxWidth = 900;
   const maxHeight = 500;
-  const minHeight = 200;
+  const minHeight = 400;
 
   const scale = Math.min(maxWidth / imageDimensions.width, maxHeight / imageDimensions.height);
-
+  // console.log("Scale: ",scale, " = ", maxWidth, " / ", imageDimensions.width, " = ", maxHeight, " / ", imageDimensions.height);
   const stageWidth = imageDimensions.width * scale;
   const stageHeight = imageDimensions.height * scale;
 
@@ -327,8 +337,8 @@ const TrackingDetailPopup = ({
         sx={{
           cursor: 'pointer',
           backgroundColor: track.is_in_restricted_area
-          ? theme.palette.error.light
-          : isSelected
+            ? theme.palette.error.light
+            : isSelected
             ? isPlaying
               ? `${theme.palette.success.light} !important`
               : `${theme.palette.primary.light} !important`
@@ -352,7 +362,9 @@ const TrackingDetailPopup = ({
       fullWidth
     >
       <DialogTitle>
-        <Typography fontWeight={600}>{person.name} - Tracking Detail</Typography>
+        <Typography fontWeight={600}>
+          {person.name} - Tracking Detail - {floorplanName}
+        </Typography>
       </DialogTitle>
 
       <DialogContent
@@ -371,41 +383,48 @@ const TrackingDetailPopup = ({
             mb: 2,
             overflow: 'hidden',
             flexShrink: 0,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
           <Stage
             width={stageWidth > 0 ? stageWidth : maxWidth}
             height={stageHeight > 0 ? stageHeight : minHeight}
+            x={(stageWidth/2-(animatedPosition?.x || 0)*1.5)}
+            y={(stageHeight/2-(animatedPosition?.y || 0)*1.5)}
+            scaleX={1.5}
+            scaleY={1.5}
           >
             <Layer>
-              {imageObj && (
-                <KonvaImage
-                  image={imageObj}
-                  width={stageWidth > 0 ? stageWidth : maxWidth}
-                  height={stageHeight > 0 ? stageHeight : minHeight}
-                />
-              )}
-
               {/* Render beacons here */}
               {selectedRowId &&
                 (() => {
                   const track = filteredTracking.find((t) => t.id === selectedRowId);
                   if (!track) return null;
+                  if (!imageObj) return null;
                   const floorplan = floorplanData.find(
                     (f) =>
                       f.id.toLowerCase() === track.floorplan_id.replace(/[{}]/g, '').toLowerCase(),
                   );
                   return (
-                    <BeaconRenderer
-                      key={track.id}
-                      id={track.beacon_id}
-                      x={animatedPosition?.x || track.pos_x * scale}
-                      y={animatedPosition?.y || track.pos_y * scale}
-                      area={track.area || '-'}
-                      floorplan={floorplan?.name || '-'}
-                      time={track.timestamp}
-                      clickable={false}
-                    />
+                    <>
+                      <KonvaImage
+                        image={imageObj}
+                        width={stageWidth > 0 ? stageWidth : maxWidth}
+                        height={stageHeight > 0 ? stageHeight : minHeight}
+                      />
+                      <BeaconRenderer
+                        key={track.id}
+                        id={track.beacon_id}
+                        x={animatedPosition?.x || track.pos_x * scale}
+                        y={animatedPosition?.y || track.pos_y * scale}
+                        area={track.area || '-'}
+                        floorplan={floorplan?.name || '-'}
+                        time={track.timestamp}
+                        clickable={false}
+                      />
+                    </>
                   );
                 })()}
             </Layer>

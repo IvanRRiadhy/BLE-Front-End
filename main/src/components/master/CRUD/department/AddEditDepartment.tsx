@@ -35,7 +35,7 @@ const AddEditDepartment = ({ type, department }: FormType) => {
       code: '',
       name: '',
       departmentHost: '',
-      applicationId: '',
+      applicationId: localStorage.getItem('applicationId') || '',
       createdBy: '',
       createdAt: '',
       updatedBy: '',

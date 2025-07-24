@@ -35,7 +35,7 @@ const AddEditDistrict = ({ type, district }: FormType) => {
       code: '',
       name: '',
       districtHost: '',
-      applicationId: '',
+      applicationId: localStorage.getItem('applicationId') || '',
       createdBy: '',
       createdAt: '',
       updatedBy: '',

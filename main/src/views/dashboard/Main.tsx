@@ -10,12 +10,14 @@ import BlacklistTable from 'src/components/dashboards/mainmenu/Blacklist';
 import WelcomePopup from 'src/components/dashboards/mainmenu/WelcomePopup';
 import { blacklistType, fetchBlacklistDT } from 'src/store/apps/crud/blacklist';
 import { fetchMaskedAreaDT } from 'src/store/apps/crud/maskedArea';
-import {  fetchBleReaderDT } from 'src/store/apps/crud/bleReader';
+import { fetchBleReaderDT } from 'src/store/apps/crud/bleReader';
 import { AlarmType, fetchAlarmDT } from 'src/store/apps/crud/alarmRecordTracking';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import { fetchTrackingTransDT, trackingTransType } from 'src/store/apps/crud/trackingTrans';
 import { setMainMenu } from 'src/store/customizer/CustomizerSlice';
 import { fetchFloorplanDeviceDT } from 'src/store/apps/crud/floorplanDevice';
+import BlacklistList from 'src/components/master/CRUD/blacklist/BlacklistList';
+import HeatmapFloorplan from 'src/components/dashboards/mainmenu/Heatmap';
 
 const filter = {
   draw: 1,
@@ -28,6 +30,10 @@ const filter = {
 
 const Modern = () => {
   const dashboardFilter = useSelector((state: RootState) => state.customizer.dashboardFilter);
+  const [alarmPage, setAlarmPage] = useState(0);
+  const [alarmRowsPerPage, setAlarmRowsPerPage] = useState(5);
+  const [blacklistPage, setBlacklistPage] = useState(0);
+  const [blacklistRowsPerPage, setBlacklistRowsPerPage] = useState(5);
   // const [filters, setFilters] = useState({
   //   ...filter,
   //   filter: dashboardFilter,
@@ -66,40 +72,52 @@ const Modern = () => {
 
   useEffect(() => {
     // Fetch initial data for the dashboard
-    dispatch(fetchTrackingTransDT({
-      ...filter,
-      length: 99,
-      filters: {
-        FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || '',
-      },
-    }));
-    dispatch(fetchBlacklistDT({
-      ...filter,
-      filters: {
-        FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || '',
-      },
-    }));
-    dispatch(fetchMaskedAreaDT({
-      ...filter,
-      filters:{
-        FloorId: dashboardFilter?.FloorId || [],
-        FloorplanId: dashboardFilter?.FloorplanId || [],
-      }
-    }));
-    dispatch(fetchFloorplanDeviceDT({
-      ...filter,
-      filters: {
-        FloorplanId: dashboardFilter?.FloorplanId || [],
-        Type: 0,
-      },
-    }));
-    dispatch(fetchAlarmDT({
-      ...filter,
-      filters: {
-        FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || '',
-      }
-    }));
-    
+    dispatch(
+      fetchTrackingTransDT({
+        ...filter,
+        length: 999,
+        filters: {
+          FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || [],
+          ReaderId: [],
+        },
+      }),
+    );
+    dispatch(
+      fetchBlacklistDT({
+        ...filter,
+        filters: {
+          FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || [],
+        },
+      }),
+    );
+    dispatch(
+      fetchMaskedAreaDT({
+        ...filter,
+        filters: {
+          FloorId: dashboardFilter?.FloorId || [],
+          FloorplanId: dashboardFilter?.FloorplanId || [],
+        },
+      }),
+    );
+    dispatch(
+      fetchFloorplanDeviceDT({
+        ...filter,
+        filters: {
+          FloorplanId: dashboardFilter?.FloorplanId || [],
+          Type: 0,
+        },
+      }),
+    );
+    dispatch(
+      fetchAlarmDT({
+        ...filter,
+        Length: alarmRowsPerPage,
+        Start: alarmPage * alarmRowsPerPage,
+        filters: {
+          FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || [],
+        },
+      }),
+    );
   }, [dispatch, dashboardFilter]);
   // const trackingTotalCount: number = useSelector(
   //   (state: RootState) => state.trackingTransReducer.trackingTransTotalCount ?? 0,
@@ -113,7 +131,7 @@ const Modern = () => {
   const bleReaderTotalCount: number = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceFilteredCount ?? 0,
   );
-  const alarmTotalCount: number = useSelector(
+  const alarmFilteredCount: number = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordFilteredCount ?? 0,
   );
   const trackingData: trackingTransType[] = useSelector(
@@ -148,37 +166,35 @@ const Modern = () => {
                 bleReaderTotalCount.toString(),
                 maskedAreaTotalCount.toString(),
                 blacklistTotalCount.toString(),
-                alarmTotalCount.toString(),
+                alarmFilteredCount.toString(),
                 '20', // dummy for last
               ]}
             />
           </Grid>
           {/* column */}
-          <Grid
-            size={{
-              xs: 4,
-              lg: 4,
-            }}
-          >
-            <TrackingGraph alarmData={alarmData} trackingData={trackingData} />
-          </Grid>
-          {/* column */}
-          <Grid
-            size={{
-              xs: 4,
-              lg: 4,
-            }}
-          >
-            <AlarmWarning alarmData={alarmData} />
-          </Grid>
-          {/* column */}
-          <Grid
-            size={{
-              xs: 4,
-              lg: 4,
-            }}
-          >
-            <BlacklistTable blacklistData={blacklistData} />
+          <Grid container spacing={3} alignItems={'stretch'}>
+            {/* Tracking Graphic */}
+            <Grid size={{ xs: 12, lg: 8 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+              <TrackingGraph alarmData={alarmData} trackingData={trackingData} />
+            </Grid>
+
+            {/* Alarm Warning */}
+            <Grid size={{ xs: 12, lg: 4 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+              <AlarmWarning />
+            </Grid>
+
+            {/* Blacklist */}
+            <Grid size={{ xs: 12, lg: 4 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+              <BlacklistTable filterFloorplanId={dashboardFilter?.FloorplanId ?? []} />
+            </Grid>
+            <Grid size={{ xs: 12, lg: 8 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+              <HeatmapFloorplan
+                TrackingList={trackingData}
+                floorImageUrl={'/Uploads/FloorImages/112e32ae-f02d-43ff-9574-9b2b24c93b0d.jpg'}
+                imageWidth={800}
+                imageHeight={200}
+              />
+            </Grid>
           </Grid>
         </Grid>
       </Box>

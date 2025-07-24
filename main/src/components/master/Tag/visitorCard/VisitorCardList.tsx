@@ -23,6 +23,7 @@ import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
 import { VisitorCardType, UpdateFilter, fetchVisitorCard } from 'src/store/apps/crud/visitorCard';
+import AddEditVisitorCard from './AddEditVisitorCard';
 
 const columns = [
   { label: 'Name', field: 'name', sortAble: true },
@@ -57,16 +58,24 @@ const VisitorCardList = () => {
     const newLength = parseInt(event.target.value, 10);
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
-  const handleSort = (column: string) => {
-    const isAsc = visitorCardFilter.SortColumn === column && visitorCardFilter.SortDir === 'asc';
-    dispatch(
-      UpdateFilter({
-        SortColumn: column,
-        SortDir: isAsc ? 'desc' : 'asc',
-        Start: 0,
-      }),
-    );
-  };
+const handleSort = (column: string) => {
+  const isAsc = visitorCardFilter.SortColumn === column && visitorCardFilter.SortDir === 'asc';
+  const isDesc = visitorCardFilter.SortColumn === column && visitorCardFilter.SortDir === 'desc';
+
+  if (isDesc) {
+    dispatch(UpdateFilter({
+      SortColumn: '',
+      SortDir: 'asc',
+      Start: 0,
+    }));
+  } else {
+    dispatch(UpdateFilter({
+      SortColumn: column,
+      SortDir: isAsc ? 'desc' : 'asc',
+      Start: 0,
+    }));
+  }
+};
 
   useEffect(() => {
     dispatch(fetchVisitorCard());
@@ -140,11 +149,12 @@ const VisitorCardList = () => {
                       <TableCell>{visitorCard.number}</TableCell>
                       <TableCell>{visitorCard.checkinStatus}</TableCell>
                       <TableCell>{visitorCard.siteId || 'N/A'}</TableCell>
-                      <TableCell>{visitorCard.isMember ? 'Yes' : 'No'}</TableCell>
+                      <TableCell>{visitorCard.isVisitor ? 'Yes' : 'No'}</TableCell>
 
                       <TableCell
                         sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 1 }}
                       >
+                        <AddEditVisitorCard type='edit' visitorCard={visitorCard} />
                         <IconButton
                           color="error"
                           onClick={() => handleOpenDeleteDialog(visitorCard)}

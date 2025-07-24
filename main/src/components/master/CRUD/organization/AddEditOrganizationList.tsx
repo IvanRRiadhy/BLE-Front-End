@@ -35,7 +35,7 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
       code: '',
       name: '',
       organizationHost: '',
-      applicationId: '',
+      applicationId: localStorage.getItem('applicationId') || '',
       createdBy: '',
       createdAt: '',
       updatedBy: '',
@@ -53,6 +53,7 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
   };
 
   const handleClose = () => {
+    setFormData({} as OrganizationType);
     setOpen(false);
   };
 

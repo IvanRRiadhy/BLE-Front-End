@@ -43,7 +43,7 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
       doorId: '',
       raw: '',
       integrationId: 'F3FC00F0-F8FA-4DA1-A8C7-FC8336F24923',
-      applicationId: 'F8297CAE-44D1-4FCF-B549-D23FF994785E',
+      applicationId: localStorage.getItem('applicationId') || '',
       createdBy: '',
       createdAt: '',
       updatedBy: '',

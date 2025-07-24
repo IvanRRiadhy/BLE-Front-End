@@ -124,6 +124,11 @@ export const CCTVSlice = createSlice({
             state.cctvTotalCount = action.payload.recordsTotal;
             state.cctvFilteredCount = action.payload.recordsFiltered;
         })
+        .addCase(fetchAccessCCTVDT.rejected, (_state, action) => {
+            console.error("Fetch failed: ", action.payload);
+            // _state.cctvTotalCount = 0;
+            _state.cctvFilteredCount = 0;
+        });
     }
 
 });
@@ -162,6 +167,18 @@ export const selectAccessCCTV =
         "cctvs/fetchAccessCCTVDT",
         async (filter: any, { rejectWithValue }) => {
             try {
+                                    if (
+            filter?.filters &&
+            Object.values(filter.filters).some(
+                (arr: any) => Array.isArray(arr) && arr.includes("Empty")
+            )
+        ) {
+            console.log("Filter contains 'Empty', skipping request");
+            // Option 1: just return null (success, no data)
+            // return null;
+            // Option 2: reject, if you want to treat as error
+            return rejectWithValue("Filter contains 'Empty', skipping request");
+        }
                 const response = await axiosServices.post(API_DT_URL, filter);
                 dispatch(GetAccessCCTV(response.data?.collection?.data || []));
                 console.log("Fetch cctvs", response.data.collection);

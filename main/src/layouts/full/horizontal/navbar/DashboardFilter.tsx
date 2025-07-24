@@ -17,7 +17,7 @@ import CustomTextField from 'src/components/forms/theme-elements/CustomTextField
 import { BuildingType, fetchBuildingDT, fetchBuildings } from 'src/store/apps/crud/building';
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
 import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
-import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
+import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { setDashboardFilter } from 'src/store/customizer/CustomizerSlice';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 type FilterState = {
@@ -26,6 +26,7 @@ type FilterState = {
   FloorplanId: string[];
   MaskedAreaId: string[];
 };
+type FilterResult<T> = { data: T[]; empty: boolean };
 
 const DashboardFilter = () => {
   const dispatch = useDispatch();
@@ -89,46 +90,79 @@ const DashboardFilter = () => {
     console.log('Masked Area List:', maskedAreaList);
   }, [maskedAreaList]);
 
-  const handleApplyFilter = () => {
-     // Step 1: Derive each level based on the current appliedFilter
-     let floors = [];
-     let floorplans = [];
-     let maskedAreas = [];
-     if (appliedFilter.FloorId.length === 0) {
-      floors = floorList.filter((floor: any) => appliedFilter.BuildingId.includes(floor.buildingId)) ?? ["none"];
-    }
-    else {
-      floors = floorList.filter((floor: any) => appliedFilter.FloorId.includes(floor.id));
-    }
-    if(appliedFilter.FloorplanId.length === 0) {
-      floorplans = floorplanList.filter((fp: any) => floors.map((f) => f.id).includes(fp.floorId)) ?? ["none"];
+  function filterData<T>(
+    list: T[],
+    filterIds: string[],
+    getId: (item: T) => string,
+  ): { data: T[]; empty: boolean } {
+    let data: T[];
+    if (filterIds.length === 0) {
+      data = list;
     } else {
-      floorplans = floorplanList.filter((fp: any) => appliedFilter.FloorplanId.includes(fp.id));    
+      data = list.filter((item) => filterIds.includes(getId(item)));
     }
-    if(appliedFilter.MaskedAreaId.length === 0) {
-      maskedAreas = maskedAreaList.filter((m: any) => floorplans.map((fp) => fp.id).includes(m.floorplanId)) ?? ["none"];
-    } else {
-      maskedAreas = maskedAreaList.filter((m: any) => appliedFilter.MaskedAreaId.includes(m.id));
-    }
+    return { data, empty: data.length === 0 };
+  }
 
-    // Step 2: Update appliedFilter ONCE
-    setAppliedFilter((prev) => ({
-      ...prev,
-      floorId: floors.map((f: any) => f.id) ?? [null],
-      floorplanId: floorplans.map((fp: any) => fp.id) ?? [null],
-      maskedAreaId: maskedAreas.map((m: any) => m.id) ?? [null],
-    }));
-    
-    console.log('Filtered Floors:', floors);
-    console.log('Filtered Floorplans:', floorplans);
-    console.log('Filtered Masked Areas:', maskedAreas);
+  const handleApplyFilter = () => {
+    // Step 1: Derive each level based on the current appliedFilter
+    // 1. Filter Floors
+    const floorsResult = filterData(
+      floorList.filter((floor) =>
+        appliedFilter.BuildingId.length === 0
+          ? true
+          : appliedFilter.BuildingId.includes(floor.buildingId),
+      ), // filter by building first
+      appliedFilter.FloorId,
+      (f) => f.id,
+    );
+    // floorsResult: { data: floorType[], empty: boolean }
+
+    // 2. Filter Floorplans (only from filtered floors)
+    let floorplansResult: FilterResult<FloorplanType> = { data: [], empty: true };
+    if (!floorsResult.empty) {
+      const floorIds = floorsResult.data.map((f) => f.id);
+      floorplansResult = filterData(
+        floorplanList.filter((fp) => floorIds.includes(fp.floorId)),
+        appliedFilter.FloorplanId,
+        (fp) => fp.id,
+      );
+    }
+    // floorplansResult: { data: FloorplanType[], empty: boolean }
+
+    // 3. Filter MaskedAreas (only from filtered floorplans)
+    let maskedAreasResult: FilterResult<MaskedAreaType> = { data: [], empty: true };
+    if (!floorplansResult.empty) {
+      const floorplanIds = floorplansResult.data.map((fp) => fp.id);
+      maskedAreasResult = filterData(
+        maskedAreaList.filter((m) => floorplanIds.includes(m.floorplanId)),
+        appliedFilter.MaskedAreaId,
+        (m) => m.id,
+      );
+    }
+    // maskedAreasResult: { data: MaskedAreaType[], empty: boolean }
+
+    // // Step 2: Update appliedFilter ONCE
+    // setAppliedFilter((prev) => ({
+    //   ...prev,
+    //   floorId: floors.map((f: any) => f.id),
+    //   floorplanId: floorplans.map((fp: any) => fp.id),
+    //   maskedAreaId: maskedAreas.map((m: any) => m.id),
+    // }));
+    console.log('Filtered Floors:', floorsResult);
+    console.log('Filtered Floorplans:', floorplansResult);
+    console.log('Filtered Masked Areas:', maskedAreasResult);
     // Step 3: Dispatch the final filter state
     dispatch(
       setDashboardFilter({
         BuildingId: appliedFilter.BuildingId,
-        FloorId: floors.map((f: any) => f.id).length === 0 ? null : floors.map((f: any) => f.id),
-        FloorplanId: floorplans.map((fp: any) => fp.id).length === 0 ? null : floorplans.map((fp: any) => fp.id),
-        FloorplanMaskedAreaId: maskedAreas.map((m: any) => m.id).length === 0 ? null : maskedAreas.map((m: any) => m.id),
+        FloorId: floorsResult.empty ? ['Empty'] : floorsResult.data.map((f: any) => f.id),
+        FloorplanId: floorplansResult.empty
+          ? ['Empty']
+          : floorplansResult.data.map((fp: any) => fp.id),
+        FloorplanMaskedAreaId: maskedAreasResult.empty
+          ? ['Empty']
+          : maskedAreasResult.data.map((m: any) => m.id),
       }),
     );
     handleClose();
@@ -288,7 +322,7 @@ const DashboardFilter = () => {
                 variant="outlined"
                 multiple
                 renderValue={(selected: string[]) => {
-                  if(selected.length === 0) return 'All Floors';
+                  if (selected.length === 0) return 'All Floors';
                   if (selected.length === filteredFloors.length) return 'All Floors';
                   const filtered = filteredFloors.filter((f: any) => selected.includes(f.id));
                   if (selected.length === 0) return 'Select Floor';
@@ -354,7 +388,7 @@ const DashboardFilter = () => {
                 variant="outlined"
                 multiple
                 renderValue={(selected: string[]) => {
-                  if(selected.length === 0) return 'All Floorplans';
+                  if (selected.length === 0) return 'All Floorplans';
                   if (selected.length === filteredFloorplans.length) return 'All Floorplans';
                   const filtered = filteredFloorplans.filter((fp: any) => selected.includes(fp.id));
                   if (selected.length === 0) return 'Select Floorplan';
@@ -419,7 +453,7 @@ const DashboardFilter = () => {
                 variant="outlined"
                 multiple
                 renderValue={(selected: string[]) => {
-                  if(selected.length === 0) return 'All Masked Areas';
+                  if (selected.length === 0) return 'All Masked Areas';
                   if (selected.length === filteredMaskedAreas.length) return 'All Masked Areas';
                   const filtered = maskedAreaList.filter((m: any) => selected.includes(m.id));
                   if (selected.length === 0) return 'Select Masked Area';

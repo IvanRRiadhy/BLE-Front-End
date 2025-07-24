@@ -17,7 +17,7 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     searchValue: string,
-    filter : {
+    filters : {
         FloorplanId: string[],
         FloorId: string[],
     }
@@ -107,7 +107,7 @@ const initialState: StateType = {
         SortColumn: "updatedAt",
         SortDir: "asc",
         searchValue: "",
-        filter: {
+        filters: {
             FloorplanId: [],
             FloorId: [],
         }
@@ -282,6 +282,11 @@ export const MaskedAreaSlice = createSlice({
                 state.maskedAreaTotalCount = action.payload.recordsTotal;
                 state.maskedAreaFilteredCount = action.payload.recordsFiltered;
             })
+            .addCase(fetchMaskedAreaDT.rejected, (_state, action) => {
+                console.error("Fetch failed: ", action.payload);
+                // _state.maskedAreaTotalCount = 0;
+                _state.maskedAreaFilteredCount = 0;
+            });
     },
 });
 
@@ -324,6 +329,18 @@ export const fetchMaskedAreaDT = createAsyncThunk(
     "maskedAreas/fetchMaskedAreaDT", 
     async (filter: any, { rejectWithValue }) => {
         try {
+                    if (
+            filter?.filters &&
+            Object.values(filter.filters).some(
+                (arr: any) => Array.isArray(arr) && arr.includes("Empty")
+            )
+        ) {
+            console.log("Filter contains 'Empty', skipping request");
+            // Option 1: just return null (success, no data)
+            // return null;
+            // Option 2: reject, if you want to treat as error
+            return rejectWithValue("Filter contains 'Empty', skipping request");
+        }
             console.log("Fetch Masked Area DT: ", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetMaskedArea([response.data.collection.data]));
