@@ -19,7 +19,6 @@ interface TrackingGraphProps {
 }
 
 const TrackingGraph: React.FC<TrackingGraphProps> = ({ trackingData = [], alarmData = [] }) => {
-
   function getCountsByDay(data: any[], dateField: string) {
     const counts = Array(7).fill(0);
     data.forEach((item) => {
@@ -50,10 +49,10 @@ const TrackingGraph: React.FC<TrackingGraphProps> = ({ trackingData = [], alarmD
     return { value: `${year}-${date.getMonth() + 1}`, label: `${month} ${year}` };
   };
   const today = new Date();
-const todayMonth = {
-  value: `${today.getFullYear()}-${today.getMonth() + 1}`,
-  label: today.toLocaleString('default', { month: 'long' }) + ' ' + today.getFullYear(),
-};
+  const todayMonth = {
+    value: `${today.getFullYear()}-${today.getMonth() + 1}`,
+    label: today.toLocaleString('default', { month: 'long' }) + ' ' + today.getFullYear(),
+  };
 
   const allMonths = [
     ...trackingData.map((d) => getMonthYear(d.transTime)),
@@ -68,197 +67,204 @@ const todayMonth = {
   const uniqueMonths = Array.from(uniqueMonthsMap, ([value, label]) => ({ value, label })).sort(
     (a, b) => a.value.localeCompare(b.value),
   );
-    const [month, setMonth] = React.useState(todayMonth.value);
+  const [month, setMonth] = React.useState(todayMonth.value);
   // chart color
   const theme = useTheme();
   const primary = theme.palette.primary.main;
   const secondary = theme.palette.secondary.main;
   const error = theme.palette.error.dark;
 
-  function buildContinuousSeriesByDay(records: any[], dateField: string, start: string, end: string) {
-  // records: your raw data
-  // dateField: "transTime" or "timestamp"
-  // start/end: ISO date string "YYYY-MM-DD"
-  const counts: Record<string, number> = {};
-  records.forEach((item) => {
-    const d = new Date(item[dateField]);
-    const dateStr = d.toISOString().slice(0, 10); // "YYYY-MM-DD"
-    counts[dateStr] = (counts[dateStr] || 0) + 1;
-  });
+  function buildContinuousSeriesByDay(
+    records: any[],
+    dateField: string,
+    start: string,
+    end: string,
+  ) {
+    // records: your raw data
+    // dateField: "transTime" or "timestamp"
+    // start/end: ISO date string "YYYY-MM-DD"
+    const counts: Record<string, number> = {};
+    records.forEach((item) => {
+      const d = new Date(item[dateField]);
+      const dateStr = d.toISOString().slice(0, 10); // "YYYY-MM-DD"
+      counts[dateStr] = (counts[dateStr] || 0) + 1;
+    });
 
-  const result = [];
-  let d = new Date(start);
-  const endDate = new Date(end);
-  while (d <= endDate) {
-    const dateStr = d.toISOString().slice(0, 10);
-    result.push({ x: dateStr, y: counts[dateStr] || 0 });
-    d.setDate(d.getDate() + 1);
+    const result = [];
+    let d = new Date(start);
+    const endDate = new Date(end);
+    while (d <= endDate) {
+      const dateStr = d.toISOString().slice(0, 10);
+      result.push({ x: dateStr, y: counts[dateStr] || 0 });
+      d.setDate(d.getDate() + 1);
+    }
+    return result;
   }
-  return result;
-}
 
-function getCountsByHour(data: any[], dateField: string) {
-  const counts: Record<string, number> = {};
-  data.forEach((item) => {
-    const d = new Date(item[dateField]);
-    // ISO string with hour precision (yyyy-mm-ddTHH:00:00)
-    const hourStr = new Date(
-      d.getFullYear(),
-      d.getMonth(),
-      d.getDate(),
-      d.getHours()
-    ).toISOString().slice(0, 13) + ":00:00";
-    counts[hourStr] = (counts[hourStr] || 0) + 1;
-  });
-  return counts;
-}
-// Find the date range for the selected month
-const monthParts = month.split("-");
-const selectedYear = Number(monthParts[0]);
-const selectedMonth = Number(monthParts[1]);
+  function getCountsByHour(data: any[], dateField: string) {
+    const counts: Record<string, number> = {};
+    data.forEach((item) => {
+      const d = new Date(item[dateField]);
+      // ISO string with hour precision (yyyy-mm-ddTHH:00:00)
+      const hourStr =
+        new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours())
+          .toISOString()
+          .slice(0, 13) + ':00:00';
+      counts[hourStr] = (counts[hourStr] || 0) + 1;
+    });
+    return counts;
+  }
+  // Find the date range for the selected month
+  const monthParts = month.split('-');
+  const selectedYear = Number(monthParts[0]);
+  const selectedMonth = Number(monthParts[1]);
 
-// Get all days in the selected month
-const firstDay = new Date(selectedYear, selectedMonth - 1, 1);
-const lastDay = new Date(selectedYear, selectedMonth, 0); // last day of month
-const firstDayStr = firstDay.toISOString().slice(0, 10);
-const lastDayStr = lastDay.toISOString().slice(0, 10);
+  // Get all days in the selected month
+  const firstDay = new Date(selectedYear, selectedMonth - 1, 1);
+  const lastDay = new Date(selectedYear, selectedMonth, 0); // last day of month
+  const firstDayStr = firstDay.toISOString().slice(0, 10);
+  const lastDayStr = lastDay.toISOString().slice(0, 10);
 
-// Build continuous day series for each type
-const allowedSeries = buildContinuousSeriesByDay(trackingData, "transTime", firstDayStr, lastDayStr);
-const unAllowedSeries = buildContinuousSeriesByDay(alarmData, "timestamp", firstDayStr, lastDayStr);
+  // Build continuous day series for each type
+  const allowedSeries = buildContinuousSeriesByDay(
+    trackingData,
+    'transTime',
+    firstDayStr,
+    lastDayStr,
+  );
+  const unAllowedSeries = buildContinuousSeriesByDay(
+    alarmData,
+    'timestamp',
+    firstDayStr,
+    lastDayStr,
+  );
 
-// Combine x points (dates) from both series, so both series use all dates in month
-const allDatesSet = new Set([...allowedSeries.map(s => s.x), ...unAllowedSeries.map(s => s.x)]);
-const allDates = Array.from(allDatesSet).sort();
+  // Combine x points (dates) from both series, so both series use all dates in month
+  const allDatesSet = new Set([
+    ...allowedSeries.map((s) => s.x),
+    ...unAllowedSeries.map((s) => s.x),
+  ]);
+  const allDates = Array.from(allDatesSet).sort();
 
-// Map to final chart data
-const allowedAreaSeries = allDates.map(date => ({
-  x: date,
-  y: allowedSeries.find(s => s.x === date)?.y || 0
-}));
-const unAllowedAreaSeries = allDates.map(date => ({
-  x: date,
-  y: unAllowedSeries.find(s => s.x === date)?.y || 0
-}));
+  // Map to final chart data
+  const allowedAreaSeries = allDates.map((date) => ({
+    x: date,
+    y: allowedSeries.find((s) => s.x === date)?.y || 0,
+  }));
+  const unAllowedAreaSeries = allDates.map((date) => ({
+    x: date,
+    y: unAllowedSeries.find((s) => s.x === date)?.y || 0,
+  }));
 
   const allowedVisitorMonthTotal = trackingData.filter((item) => {
-  const d = new Date(item.transTime);
-  return (
-    d.getFullYear() === selectedYear &&
-    d.getMonth() + 1 === selectedMonth
-  );
-}).length;
-const unAllowedVisitorMonthTotal = alarmData.filter((item) => {
-  const d = new Date(item.timestamp);
-  return (
-    d.getFullYear() === selectedYear &&
-    d.getMonth() + 1 === selectedMonth
-  );
-}).length;
+    const d = new Date(item.transTime);
+    return d.getFullYear() === selectedYear && d.getMonth() + 1 === selectedMonth;
+  }).length;
+  const unAllowedVisitorMonthTotal = alarmData.filter((item) => {
+    const d = new Date(item.timestamp);
+    return d.getFullYear() === selectedYear && d.getMonth() + 1 === selectedMonth;
+  }).length;
 
   // chart
-const seriescolumnchart = [
-  {
-    name: t("Area accessed with permission"),
-    data: allowedAreaSeries,
-  },
-  {
-    name: t("Area accessed without permission"),
-    data: unAllowedAreaSeries,
-  },
-];
+  const seriescolumnchart = [
+    {
+      name: t('Area accessed with permission'),
+      data: allowedAreaSeries,
+    },
+    {
+      name: t('Area accessed without permission'),
+      data: unAllowedAreaSeries,
+    },
+  ];
 
-const optionscolumnchart: ApexOptions = {
-  chart: {
-    type: "area",
-    height: 300,
-    foreColor: "#999",
-    stacked: false,
-    dropShadow: {
+  const optionscolumnchart: ApexOptions = {
+    chart: {
+      type: 'bar',
+      height: 350,
+      stacked: true,
+      toolbar: {
+        show: true,
+      },
+      zoom: {
+        enabled: true,
+      },
+      fontFamily: "'Plus Jakarta Sans', sans-serif",
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        borderRadius: 8,
+        borderRadiusApplication: 'end', // only round the top
+        borderRadiusWhenStacked: 'last', // round only top of stack
+        columnWidth: '50%',
+        dataLabels: {
+          total: {
+            enabled: true,
+            style: {
+              fontSize: '13px',
+              fontWeight: 900,
+            },
+          },
+        },
+      },
+    },
+    dataLabels: {
       enabled: true,
-      enabledOnSeries: [0],
-      top: -2,
-      left: 2,
-      blur: 5,
-      opacity: 0.06,
-    },
-    fontFamily: "'Plus Jakarta Sans', sans-serif;",
-    toolbar: { show: true,
-      tools: {
-        reset:true,
-        download: true,
-        selection: true,
-        zoom: true,
-        zoomin: true,
-        zoomout: true,
-        pan: true,
+      style: {
+        colors: ['#fff'], // White text inside colored bars
+        fontWeight: 700,
       },
-     }
-  },
-  colors: [primary, error],
-  stroke: { curve: "smooth", width: 3 },
-  dataLabels: { enabled: false },
-  markers: {
-    size: 0,
-    strokeColors: "#fff",
-    strokeWidth: 3,
-    strokeOpacity: 1,
-    fillOpacity: 1,
-    hover: { size: 6 },
-  },
-  xaxis: {
-    type: "datetime",
-    axisBorder: { show: false },
-    axisTicks: { show: false },
-    labels: {
-      datetimeFormatter: {
-        year: "yyyy",
-        month: "MMM yyyy",
-        day: "dd MMM",
-        hour: "HH:mm",   // this will show hour when zoomed-in
+      offsetY: 0,
+      dropShadow: {
+        enabled: false,
       },
-      style: { colors: "#999" },
     },
-  },
-  yaxis: {
-    labels: {
-      offsetX: 14,
-      offsetY: -5,
+    xaxis: {
+      type: 'datetime',
+      labels: {
+        style: { colors: '#999' },
+      },
     },
-    tickAmount: 4,
-  //   tooltip: { enabled: true },
-  },
-  grid: {
-    padding: { left: -5, right: 5 },
-  },
-  tooltip: {
-    x: { format: "dd MMM yyyy" },
-  },
-  legend: {
-    show: false,
-  },
-  fill: {
-    type: "solid",
-    opacity: 0.7,
-  },
-};
-const options = {
-  chart: { type: "area" as const },
-  xaxis: { type: "datetime" as const }
-};
-const series = [
-  {
-    name: "Allowed",
-    data: [
-      { x: "2025-07-01", y: 0 },
-      { x: "2025-07-02", y: 1 },
-      { x: "2025-07-03", y: 0 }
-    ]
-  }
-];
+    yaxis: {
+      labels: {
+        formatter: (val) => Math.abs(val).toString(), // display positive even if using -y
+        style: { colors: '#999' },
+      },
+    },
+    fill: {
+      opacity: 1,
+    },
+    tooltip: {
+      y: {
+        formatter: (val) => Math.abs(val).toString(),
+      },
+      x: { format: 'dd MMM yyyy' },
+    },
+    legend: {
+      position: 'bottom',
+      horizontalAlign: 'center',
+      offsetY: 40,
+    },
+    colors: [primary, error],
+  };
 
-// console.log(JSON.stringify(seriescolumnchart, null, 2));
-// console.log(JSON.stringify(optionscolumnchart, null, 2));
+  const options = {
+    chart: { type: 'area' as const },
+    xaxis: { type: 'datetime' as const },
+  };
+  const series = [
+    {
+      name: 'Allowed',
+      data: [
+        { x: '2025-07-01', y: 0 },
+        { x: '2025-07-02', y: 1 },
+        { x: '2025-07-03', y: 0 },
+      ],
+    },
+  ];
+
+  // console.log(JSON.stringify(seriescolumnchart, null, 2));
+  // console.log(JSON.stringify(optionscolumnchart, null, 2));
   return (
     <DashboardCard
       title={t('Tracking Graphic')}
@@ -287,11 +293,11 @@ const series = [
             sm: 9,
           }}
         >
-          <Box className="rounded-bars">
+          <Box>
             <Chart
               options={optionscolumnchart}
               series={seriescolumnchart}
-              // type="bar"
+              type="bar"
               height="415px"
             />
             {/* <Chart options={options} series={seriescolumnchart} type="area" height={300} /> */}
@@ -320,8 +326,7 @@ const series = [
               </Box>
               <Box>
                 <Typography variant="h6" fontWeight="700">
-                  {allowedVisitorMonthTotal +
-                    unAllowedVisitorMonthTotal}
+                  {allowedVisitorMonthTotal + unAllowedVisitorMonthTotal}
                 </Typography>
                 <Typography variant="body1" color="textSecondary">
                   {t('Accessed Area')}

@@ -216,4 +216,54 @@ export const deleteFloor = createAsyncThunk("floors/deleteFloor", async (floorId
     }
 });
 
+export const ImportFloor = createAsyncThunk(
+    "floors/importFloor",
+    async (formData: FormData, { rejectWithValue }) => {
+        try {
+            const response = await axiosServices.post(`${API_URL}import`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data;
+        } catch (error: any) {
+            console.error("Error importing floor:", error);
+            return rejectWithValue(error.response?.data || "Unknown error");
+        }
+    }
+);
+
+export const ExportFloor = createAsyncThunk(
+    "floors/exportFloor",
+    async (filter: "pdf" | "excel", { rejectWithValue }) => {
+        const url = `${API_URL}export/${filter}`;
+        const accessToken = localStorage.getItem("token");
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers:{
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+          'X-API-KEY-TRACKING-PEOPLE':
+            'FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK',
+        },
+            });
+            if(!response.ok) throw new Error('Export failed');
+                  const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = filter === 'pdf' ? 'floors.pdf' : 'floors.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+      return true; // Indicate success
+        }catch (error: any) {
+      console.error("Error exporting floors:", error);
+      return rejectWithValue(error.message || "Unknown error");
+    }
+    }
+);
+
 export default FloorSlice.reducer;

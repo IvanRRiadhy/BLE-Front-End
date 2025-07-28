@@ -9,20 +9,20 @@ import AlarmWarning from 'src/components/dashboards/mainmenu/AlarmWarning';
 import BlacklistTable from 'src/components/dashboards/mainmenu/Blacklist';
 import WelcomePopup from 'src/components/dashboards/mainmenu/WelcomePopup';
 import { blacklistType, fetchBlacklistDT } from 'src/store/apps/crud/blacklist';
-import { fetchMaskedAreaDT } from 'src/store/apps/crud/maskedArea';
+import { fetchMaskedAreaDT, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { fetchBleReaderDT } from 'src/store/apps/crud/bleReader';
 import { AlarmType, fetchAlarmDT } from 'src/store/apps/crud/alarmRecordTracking';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import { fetchTrackingTransDT, trackingTransType } from 'src/store/apps/crud/trackingTrans';
 import { setMainMenu } from 'src/store/customizer/CustomizerSlice';
-import { fetchFloorplanDeviceDT } from 'src/store/apps/crud/floorplanDevice';
+import { fetchFloorplanDeviceDT, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import BlacklistList from 'src/components/master/CRUD/blacklist/BlacklistList';
 import HeatmapFloorplan from 'src/components/dashboards/mainmenu/Heatmap';
 
 const filter = {
   draw: 1,
   start: 0,
-  length: 1,
+  length: 3,
   sortColumn: '',
   sortDir: 'asc',
   searchValue: '',
@@ -104,7 +104,7 @@ const Modern = () => {
         ...filter,
         filters: {
           FloorplanId: dashboardFilter?.FloorplanId || [],
-          Type: 0,
+          Type: 2,
         },
       }),
     );
@@ -119,27 +119,37 @@ const Modern = () => {
       }),
     );
   }, [dispatch, dashboardFilter]);
-  // const trackingTotalCount: number = useSelector(
-  //   (state: RootState) => state.trackingTransReducer.trackingTransTotalCount ?? 0,
-  // );
+  const trackingTotalCount: number = useSelector(
+    (state: RootState) => state.trackingTransReducer.trackingTransTotalCount ?? 0,
+  );
   const blacklistTotalCount: number = useSelector(
     (state: RootState) => state.blacklistReducer.blacklistFilteredCount ?? 0,
-  );
-  const maskedAreaTotalCount: number = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreaFilteredCount ?? 0,
-  );
-  const bleReaderTotalCount: number = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceFilteredCount ?? 0,
-  );
-  const alarmFilteredCount: number = useSelector(
-    (state: RootState) => state.alarmReducer.alarmRecordFilteredCount ?? 0,
-  );
-  const trackingData: trackingTransType[] = useSelector(
-    (state: RootState) => state.trackingTransReducer.trackingTrans,
   );
   const blacklistData: blacklistType[] = useSelector(
     (state: RootState) => state.blacklistReducer.blacklists,
   );
+  const maskedAreaTotalCount: number = useSelector(
+    (state: RootState) => state.maskedAreaReducer.maskedAreaFilteredCount ?? 0,
+  );
+  const maskedAreaData: MaskedAreaType[] = useSelector(
+    (state: RootState) => state.maskedAreaReducer.maskedAreas,
+  )
+  const bleReaderTotalCount: number = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceFilteredCount ?? 0,
+  );
+  const bleReaderData: FloorplanDeviceType[] = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.floorplanDevices,
+  )
+  const alarmFilteredCount: number = useSelector(
+    (state: RootState) => state.alarmReducer.alarmRecordFilteredCount ?? 0,
+  );
+  const alarmFilteredData: AlarmType[] = useSelector(
+    (state: RootState) => state.alarmReducer.alarmRecordTrackings,
+  )
+  const trackingData: trackingTransType[] = useSelector(
+    (state: RootState) => state.trackingTransReducer.trackingTrans,
+  );
+
   // const maskedAreaData: MaskedAreaType[] = useSelector(
   //   (state: RootState) => state.maskedAreaReducer.maskedAreas,
   // );
@@ -149,6 +159,7 @@ const Modern = () => {
   const alarmData: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
   );
+  console.log("MaskedArea Data: ", maskedAreaData.flat().map((item) => item.name));
   return (
     <PageContainer title="Dashboard" description="this is Dashboard page">
       <Box>
@@ -161,30 +172,34 @@ const Modern = () => {
             }}
           >
             <TopCards
-              data={[
-                '100', // dummy for first
-                bleReaderTotalCount.toString(),
-                maskedAreaTotalCount.toString(),
-                blacklistTotalCount.toString(),
-                alarmFilteredCount.toString(),
-                '20', // dummy for last
-              ]}
+              ActiveBeaconCount={100}
+              ActiveGatewayCount={bleReaderTotalCount}
+              AreaCount={maskedAreaTotalCount}
+              BlacklistCount={blacklistTotalCount}
+              AlarmCount={alarmFilteredCount}
+              NonActiveBeaconCount={20}
+              FirstActiveBeacon={[]}
+              FirstActiveGateway={bleReaderData.flat().map((item) => item.name)}
+              FirstArea={maskedAreaData.flat().map((item) => item.name)}
+              FirstBlacklist={blacklistData.flat().map((item) => item.visitor?.name ?? 'Unknown Visitor')}
+              FirstAlarm={alarmFilteredData.flat().map((item) => item.visitor?.name ?? 'Unknown Visitor')}
+              FirstNonActiveBeacon={[]}
             />
           </Grid>
           {/* column */}
           <Grid container spacing={3} alignItems={'stretch'}>
             {/* Tracking Graphic */}
-            <Grid size={{ xs: 12, lg: 8 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
               <TrackingGraph alarmData={alarmData} trackingData={trackingData} />
             </Grid>
 
             {/* Alarm Warning */}
-            <Grid size={{ xs: 12, lg: 4 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Grid size={{ xs: 12, lg: 3 }} sx={{ display: 'flex', flexDirection: 'column' }}>
               <AlarmWarning />
             </Grid>
 
             {/* Blacklist */}
-            <Grid size={{ xs: 12, lg: 4 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Grid size={{ xs: 12, lg: 3 }} sx={{ display: 'flex', flexDirection: 'column' }}>
               <BlacklistTable filterFloorplanId={dashboardFilter?.FloorplanId ?? []} />
             </Grid>
             <Grid size={{ xs: 12, lg: 8 }} sx={{ display: 'flex', flexDirection: 'column' }}>

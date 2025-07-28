@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import FloorList from 'src/components/master/CRUD/floor/FloorList';
 import AddEditFloor from 'src/components/master/CRUD/floor/AddEditFloor';
 import FloorFilter from 'src/components/master/CRUD/floor/FloorFilter';
+import FloorImport from 'src/components/master/CRUD/floor/FloorImport';
 
 interface cardType {
   icon?: string;
@@ -84,6 +85,7 @@ const Floor = () => {
           }}
         >
           <ParentCard title="Floor List" codeModel={[
+            <FloorImport key="import" />,
             <FloorFilter key="filter" />,
             <AddEditFloor key="add" type="add" />
             ]}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
 import {
   Box,
@@ -16,7 +16,7 @@ import { floorType, fetchFloors } from 'src/store/apps/crud/floor';
 import { FloorplanType, fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import { RefreshTrigger } from 'src/store/apps/tracking/Beacon';
+import { RefreshTrigger, SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
 import axiosServices from 'src/utils/axios';
 import { AlarmType } from 'src/store/apps/tracking/Alarm';
 import { fetchMembers } from 'src/store/apps/crud/member';
@@ -105,12 +105,8 @@ const FloorView: React.FC<{
   //Popup State
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [openTrackDetail, setOpenTrackDetail] = useState(false);
-  const [selectedBeacon, setSelectedBeacon] = useState<{
-    id: string;
-    area: string;
-    floorplan: string;
-    time: string;
-  } | null>(null);
+  const trackingBeacon = useSelector((state: AppState) => state.BeaconReducer.trackingBeacon);
+  const selectedBeacon = useSelector((state: AppState) => state.BeaconReducer.selectedBeacon);
 
   const handleSelectBeacon = (info: {
     id: string;
@@ -118,9 +114,14 @@ const FloorView: React.FC<{
     floorplan: string;
     time: string;
   }) => {
-    setSelectedBeacon(info);
-    setDetailDialogOpen(true);
+    dispatch(SetSelectedBeacon({active: true, ...info}));
+    // setDetailDialogOpen(true);
   };
+  useEffect(() => {
+    if(selectedBeacon.active){
+      setDetailDialogOpen(true);
+    }
+  },[selectedBeacon])
 
   useEffect(() => {
     const filteredDevices = devices.filter(

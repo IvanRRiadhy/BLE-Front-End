@@ -17,6 +17,7 @@ import { DistrictType, fetchDistricts } from 'src/store/apps/crud/district';
 import { memberType } from 'src/store/apps/crud/member';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
 import { masterVisitorType, VisitorType } from 'src/store/apps/crud/visitor';
+import { SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 
 type BeaconDetailPopupProps = {
@@ -48,6 +49,7 @@ const BeaconDetailPopup = ({
   const { t } = useTranslation();
   const handleClose = () => {
     setDetailDialogOpen(false);
+    dispatch(SetSelectedBeacon({ active: false }));
   };
   const organizationData = useSelector(
     (state: RootState) => state.organizationReducer.organizations,

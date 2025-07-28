@@ -1,4 +1,3 @@
-
 import { createSlice } from '@reduxjs/toolkit';
 import { AppDispatch } from 'src/store/Store';
 import { startMQTTclient } from './MQTT';
@@ -14,11 +13,10 @@ export interface BeaconType {
   seconDist: number;
   jarakPixel: number;
   jarakMeter: number;
-  point: 
-    {
-      x: number;
-      y: number;
-    };
+  point: {
+    x: number;
+    y: number;
+  };
   firstReaderCoord: {
     id: string;
     x: number;
@@ -43,38 +41,60 @@ interface StateType {
     [topic: string]: BeaconType[];
   };
   refreshTrigger: boolean;
+  trackingBeacon: string;
+  selectedBeacon: {
+    active: boolean;
+    id: string;
+    area: string;
+    floorplan: string;
+    time: string;
+  };
 }
 
 const initialState: StateType = {
   beacons: [],
   beaconsByTopic: {},
-  refreshTrigger: false
+  refreshTrigger: false,
+  trackingBeacon: '',
+  selectedBeacon: {
+    active: false,
+    id: '',
+    area: '',
+    floorplan: '',
+    time: '',
+  },
 };
 
 export const BeaconSlice = createSlice({
   name: 'beacon',
   initialState,
   reducers: {
-GetBeacon: (state, action) => {
-  const { topic, beacons } = action.payload;
-  // console.log('Beacons:', beacons);
-  // Only keep beacons with matching floorplanId
-  state.beaconsByTopic[topic] = (beacons || []).filter(
-    (beacon: any) => (`tracking/${beacon.floorplanId}`) === topic
-  );
-},
-  RefreshTrigger: (state) => {
-    state.refreshTrigger = true;
-  },
-  RefreshBeaconState: (state) => {
-    state.beacons = [];
-    state.beaconsByTopic = {};
-    state.refreshTrigger = false;
-  }
+    GetBeacon: (state, action) => {
+      const { topic, beacons } = action.payload;
+      // console.log('Beacons:', beacons);
+      // Only keep beacons with matching floorplanId
+      state.beaconsByTopic[topic] = (beacons || []).filter(
+        (beacon: any) => `tracking/${beacon.floorplanId}` === topic,
+      );
+    },
+    RefreshTrigger: (state) => {
+      state.refreshTrigger = true;
+    },
+    RefreshBeaconState: (state) => {
+      state.beacons = [];
+      state.beaconsByTopic = {};
+      state.refreshTrigger = false;
+    },
+    SetTrackingBeacon: (state, action) => {
+      state.trackingBeacon = action.payload;
+    },
+    SetSelectedBeacon: (state, action) => {
+      state.selectedBeacon = action.payload;
+    }
   },
 });
 
-export const { GetBeacon, RefreshTrigger, RefreshBeaconState } = BeaconSlice.actions;
+export const { GetBeacon, RefreshTrigger, RefreshBeaconState, SetTrackingBeacon, SetSelectedBeacon } = BeaconSlice.actions;
 
 export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
   let lastDispatch = 0;
@@ -82,14 +102,15 @@ export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
     const now = Date.now();
     if (now - lastDispatch > 200) {
       lastDispatch = now;
-      dispatch(GetBeacon({
-        topic,
-        beacons: Array.isArray(data) ? data : [data],
-      }));
+      dispatch(
+        GetBeacon({
+          topic,
+          beacons: Array.isArray(data) ? data : [data],
+        }),
+      );
     }
   }, topic);
   return unsubscribe; // <-- return the unsubscribe function
 };
-
 
 export default BeaconSlice.reducer;

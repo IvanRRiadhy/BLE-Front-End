@@ -39,7 +39,8 @@ const Blacklist = Loadable(lazy(() => import('../views/master/crud/Blacklist')))
 const Building = Loadable(lazy(() => import('../views/master/crud/Building')));
 const FloorplanDevice = Loadable(lazy(() => import('../views/master/crud/FloorplanDevice')));
 const AlarmRecord = Loadable(lazy(() => import('../views/master/crud/AlarmRecord')));
-const FloorplanList = Loadable(lazy(() => import('../views/master/crud/Floorplan')));
+const Floorplan = Loadable(lazy(() => import('../views/master/crud/Floorplan')));
+const User = Loadable(lazy(() => import('../views/master/user/User')));
 
 const FloorplanDeviceEdit = Loadable(
   lazy(() => import('../views/master/crud/FloorplanDeviceEdit')),
@@ -78,6 +79,11 @@ const InvoiceDetail = Loadable(lazy(() => import('../views/apps/invoice/Detail')
 const InvoiceEdit = Loadable(lazy(() => import('../views/apps/invoice/Edit')));
 const Kanban = Loadable(lazy(() => import('../views/apps/kanban/Kanban')));
 const Tracking = Loadable(lazy(() => import('../views/apps/Tracking/Tracking')));
+
+// Evacuation
+const EvacuationDashboard = Loadable(
+  lazy(() => import('../views/dashboard/Evacuation/Evacuation')),
+)
 
 // ui components
 const MuiAlert = Loadable(lazy(() => import('../views/ui-components/MuiAlert')));
@@ -245,9 +251,15 @@ const Router = [
       { path: '/master/building', exact: true, element: <Building /> },
       { path: '/master/device', exact: true, element: <FloorplanDevice /> },
       { path: '/report/alarmrecord', exact: true, element: <AlarmRecord /> },
-      { path: '/master/floorplan', exact: true, element: <FloorplanList /> },
+      { path: '/master/floorplan', exact: true, element: <Floorplan /> },
       { path: '/master/card', exact: true, element: <Card /> },
       { path: '/master/visitorcard', exact: true, element: <VisitorCard /> },
+
+      //Dashboard Evacuation
+      { path: '/dashboards/evacuation', exact: true, element: <EvacuationDashboard /> },
+
+
+      { path: '/master/user', exact: true, element: <User /> },
 
       { path: '/apps/contacts', element: <Contacts /> },
 

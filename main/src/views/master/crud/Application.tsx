@@ -18,6 +18,7 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import AddEditApplication from 'src/components/master/CRUD/application/AddEditApplication';
 import ApplicationList from 'src/components/master/CRUD/application/ApplicationList';
+import AboutPage from 'src/components/application/AboutPage';
 
 interface cardType {
   icon?: string;
@@ -33,6 +34,7 @@ const Contacts = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const appList = useSelector((state: RootState) => state.applicationReducer.applications);
+  const userRole = localStorage.getItem('userRole');
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
@@ -45,7 +47,7 @@ const Contacts = () => {
   return (
     <PageContainer title="Application" description="This is the Application CRUD Page">
       <Breadcrumb title="Application Table" />
-      <Grid container spacing={3} mb={3}>
+      {/* <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>
             <Box bgcolor={topcard.bgcolor + '.light'} textAlign="center">
@@ -71,7 +73,7 @@ const Contacts = () => {
             </Box>
           </Grid>
         ))}
-      </Grid>
+      </Grid> */}
       <AppCard>
         <Drawer
           anchor="right"
@@ -85,9 +87,13 @@ const Contacts = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Application List" codeModel={<AddEditApplication type="add" />}>
-            <ApplicationList />
-          </ParentCard>
+          {/* {userRole === 'system' ? ( */}
+            <ParentCard title="Application List" codeModel={<AddEditApplication type="add" />}>
+              <ApplicationList />
+            </ParentCard>
+          {/* ) : (
+            <AboutPage />
+          )} */}
         </Drawer>
       </AppCard>
     </PageContainer>

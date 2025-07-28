@@ -51,6 +51,7 @@ const FullLayout: FC = () => {
       <LoadingBar />
       <MainWrapper
         className={customizer.activeMode === 'dark' ? 'darkbg mainwrapper' : 'mainwrapper'}
+        
       >
         {/* ------------------------------------------- */}
         {/* Sidebar */}

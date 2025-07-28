@@ -39,6 +39,7 @@ import BleNodeReducer from './apps/crud/bleNode';
 import RulesNodeReducer from './apps/rules/RulesNodes';
 import RulesConnectorReducer from './apps/rules/RulesConnectors';
 import BeaconReducer from './apps/tracking/Beacon';
+import UserReducer from './apps/crud/users';
 import SessionReducer from './apps/session';
 import { combineReducers } from 'redux';
 import {
@@ -85,6 +86,7 @@ const rootReducer = combineReducers({
   RulesNodeReducer: RulesNodeReducer,
   RulesConnectorReducer: RulesConnectorReducer,
   BeaconReducer: BeaconReducer,
+  userReducer: UserReducer,
   sessionReducer: SessionReducer,
 });
 

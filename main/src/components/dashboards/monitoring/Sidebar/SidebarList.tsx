@@ -18,6 +18,7 @@ import { fetchAlarm, AlarmType } from 'src/store/apps/crud/alarmRecordTracking';
 import { useTranslation } from 'react-i18next';
 import { fetchMemberDT, memberType } from 'src/store/apps/crud/member';
 import { fetchVisitorDT, VisitorType } from 'src/store/apps/crud/visitor';
+import { SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
 
 interface SidebarListProps {
   filterType: string;
@@ -120,6 +121,15 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
     setSelectedItem(item);
     setOpenModal(true);
   };
+  const handleOpenDetails = (
+    cardNumber: string,
+    area: string,
+    floorplan: string,
+    time: string
+  ) => {
+    dispatch(SetSelectedBeacon({ active: true, id: cardNumber, area, floorplan, time }));
+    setOpenModal(false);
+  }
 
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
@@ -186,7 +196,20 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
             </DialogContent>
 
             <DialogActions sx={{ padding: '8px 16px' }}>
-              <Button onClick={() => setOpenModal(false)} size="small" variant="outlined">
+              <Button 
+              onClick= {() => 
+                handleOpenDetails(
+                  "BC572913EA8B",
+                  selectedItem.area,
+                  selectedItem.floor,
+                  selectedItem.time
+                )
+              }
+              size='small' 
+              variant='contained'>
+                Person Details
+              </Button>
+              <Button color='error' onClick={() => setOpenModal(false)} size="small" variant="outlined">
                 Close
               </Button>
             </DialogActions>

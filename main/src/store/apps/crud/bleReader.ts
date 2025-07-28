@@ -267,4 +267,37 @@ export const deleteBleReader = createAsyncThunk(
     },
 );
 
+export const ExportBleReader = createAsyncThunk(
+  "bleReaders/ExportBleReader",
+  async (filter: 'pdf' | 'excel', { rejectWithValue }) => {
+    const url = `${API_URL}export/${filter}`;
+    const accessToken = localStorage.getItem('token');
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+          'X-API-KEY-TRACKING-PEOPLE':
+            'FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK',
+        },
+      });
+      if (!response.ok) throw new Error('Export failed');
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = filter === 'pdf' ? 'bleReader.pdf' : 'bleReader.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+      return true; // Indicate success
+    } catch (error: any) {
+      console.error("Error exporting bleReader:", error);
+      return rejectWithValue(error.message || "Unknown error");
+    }
+  }
+);
+
 export default BleReaderSlice.reducer;

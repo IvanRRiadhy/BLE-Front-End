@@ -75,6 +75,7 @@ const HeatmapFloorplan: React.FC<HeatmapFloorplanProps> = ({
       >
           <TransformWrapper
             initialScale={1}
+            
             minScale={0.5}
             maxScale={4}
             wheel={{ step: 0.1 }}

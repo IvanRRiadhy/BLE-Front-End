@@ -212,7 +212,12 @@ const Menuitems = [
         icon: IconBadgeTm,
         href: '/master/brand/'
       },
-
+      {
+        id: uniqueId(),
+        title: 'Users',
+        icon: IconMapPin,
+        href: '/master/user/'
+      },
 
 
     ],

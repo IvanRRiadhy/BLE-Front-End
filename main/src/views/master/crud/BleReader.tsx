@@ -18,6 +18,7 @@ import BleReaderList from 'src/components/master/CRUD/bleReader/BleReaderList';
 import AddEditBleReader from 'src/components/master/CRUD/bleReader/AddEditBleReader';
 import BleReaderFilter from 'src/components/master/CRUD/bleReader/BleReaderFilter';
 import BleReaderExport from 'src/components/master/CRUD/bleReader/BleReaderExport';
+import BleReaderImport from 'src/components/master/CRUD/bleReader/BleReaderImport';
 
 interface cardType {
   icon?: string;
@@ -85,6 +86,7 @@ const BleReader = () => {
           }}
         >
           <ParentCard title="Ble Reader List" codeModel={[
+            <BleReaderImport key="import" />,
               <BleReaderExport key="export" />,
             <BleReaderFilter key="filter" />,
             <AddEditBleReader key="add" type="add" />
