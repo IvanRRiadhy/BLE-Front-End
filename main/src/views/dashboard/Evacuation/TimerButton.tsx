@@ -18,7 +18,13 @@ import {
   TableCell,
   TableHead,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
+import { AppDispatch, useDispatch } from 'src/store/Store';
+import { setEvacuationState } from 'src/store/customizer/CustomizerSlice';
 
 const STORAGE_KEY = 'evac-timer-state';
 
@@ -115,6 +121,7 @@ const evacuatedVisitors = [
 ];
 
 const formatTime = (ms: number) => {
+
   const totalSeconds = Math.floor(ms / 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const mins = Math.floor((totalSeconds % 3600) / 60);
@@ -123,23 +130,23 @@ const formatTime = (ms: number) => {
 
   if (hours > 0) {
     // HH:MM:SS:MS (always 2 digit)
-    return `${hours.toString().padStart(2, '0')}:${mins
-      .toString()
-      .padStart(2, '0')}:${secs.toString().padStart(2, '0')}:${centis
-      .toString()
-      .padStart(2, '0')}`;
-  } else {
-    // MM:SS:MS (always 2 digit)
-    return `${mins.toString().padStart(2, '0')}:${secs
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs
       .toString()
       .padStart(2, '0')}:${centis.toString().padStart(2, '0')}`;
+  } else {
+    // MM:SS:MS (always 2 digit)
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:${centis
+      .toString()
+      .padStart(2, '0')}`;
   }
 };
 
 const TimerButton: React.FC = () => {
+    const dispatch: AppDispatch = useDispatch();
   const [evacState, setEvacState] = useState<EvacState>('idle');
   const [ms, setMs] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
+  const [openConfirm, setOpenConfirm] = useState(false);
 
   // Restore from localStorage
   useEffect(() => {
@@ -194,22 +201,31 @@ const TimerButton: React.FC = () => {
 
   const handleButtonClick = () => {
     if (evacState === 'idle') {
-      const now = Date.now();
-      setStartTime(now);
-      setMs(0);
-      setEvacState('running');
+      setOpenConfirm(true);
     } else if (evacState === 'running') {
-      // When finished, save ms and clear startTime
       setMs(startTime ? Date.now() - startTime : ms);
       setStartTime(null);
       setEvacState('finished');
+      dispatch(setEvacuationState('finished'));
     }
+  };
+  const handleConfirmEvacuate = () => {
+    const now = Date.now();
+    setStartTime(now);
+    setMs(0);
+    setEvacState('running');
+    setOpenConfirm(false);
+      dispatch(setEvacuationState('running'));
+  };
+  const handleCancelEvacuate = () => {
+    setOpenConfirm(false);
   };
 
   const handleReset = () => {
     setEvacState('idle');
     setMs(0);
     setStartTime(null);
+
     localStorage.removeItem(STORAGE_KEY);
   };
 
@@ -218,6 +234,7 @@ const TimerButton: React.FC = () => {
       sx={{
         minWidth: 340,
         minHeight: '80vh',
+        maxWidth: '80vh',
         p: 3,
         borderRadius: 4,
         boxShadow: 8,
@@ -295,6 +312,23 @@ const TimerButton: React.FC = () => {
           )}
         </Stack>
       </CardContent>
+      {/* Warning Dialog */}
+      <Dialog open={openConfirm} onClose={handleCancelEvacuate}>
+        <DialogTitle>Start Evacuation?</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure to set <b>EVACUATION</b> Alarm on?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelEvacuate} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmEvacuate} color="error" variant="contained">
+            Yes, Start Evacuation
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Box sx={{ mt: 4, width: '100%' }}>
         <List disablePadding sx={{ width: '100%', border: '1px solid #ccc', borderRadius: 2 }}>
           <Box sx={{ mt: 2, width: '100%' }}>

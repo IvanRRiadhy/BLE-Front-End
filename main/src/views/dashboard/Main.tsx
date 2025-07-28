@@ -18,6 +18,7 @@ import { setMainMenu } from 'src/store/customizer/CustomizerSlice';
 import { fetchFloorplanDeviceDT, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import BlacklistList from 'src/components/master/CRUD/blacklist/BlacklistList';
 import HeatmapFloorplan from 'src/components/dashboards/mainmenu/Heatmap';
+import { fetchFloorDT, floorType } from 'src/store/apps/crud/floor';
 
 const filter = {
   draw: 1,
@@ -91,6 +92,14 @@ const Modern = () => {
       }),
     );
     dispatch(
+      fetchFloorDT({
+        ...filter,
+        filters: {
+          BuildingId: dashboardFilter?.BuildingId || [],
+        },
+      })
+    )
+    dispatch(
       fetchMaskedAreaDT({
         ...filter,
         filters: {
@@ -128,6 +137,9 @@ const Modern = () => {
   const blacklistData: blacklistType[] = useSelector(
     (state: RootState) => state.blacklistReducer.blacklists,
   );
+  const floorData: floorType[] = useSelector(
+    (state: RootState) => state.floorReducer.floors,
+  )
   const maskedAreaTotalCount: number = useSelector(
     (state: RootState) => state.maskedAreaReducer.maskedAreaFilteredCount ?? 0,
   );
@@ -202,10 +214,12 @@ const Modern = () => {
             <Grid size={{ xs: 12, lg: 3 }} sx={{ display: 'flex', flexDirection: 'column' }}>
               <BlacklistTable filterFloorplanId={dashboardFilter?.FloorplanId ?? []} />
             </Grid>
-            <Grid size={{ xs: 12, lg: 8 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
               <HeatmapFloorplan
                 TrackingList={trackingData}
-                floorImageUrl={'/Uploads/FloorImages/112e32ae-f02d-43ff-9574-9b2b24c93b0d.jpg'}
+                Floorlist={floorData}
+                maskedAreaList={maskedAreaData}
+                floorImageUrl={'/Uploads/FloorImages/0d2f3336-7689-4f38-9c0e-79cbab4d2e66.png'}
                 imageWidth={800}
                 imageHeight={200}
               />

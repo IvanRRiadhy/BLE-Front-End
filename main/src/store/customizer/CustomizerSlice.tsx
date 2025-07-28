@@ -25,6 +25,7 @@ interface StateType {
     FloorplanId: string[];
     FloorplanMaskedAreaId: string[];
   }
+    evacState?: 'idle' | 'running' | 'finished';
 }
 
 const initialState: StateType = {
@@ -46,6 +47,7 @@ const initialState: StateType = {
   isMonitor: false,
   isMonitorSidebar: false,
   isMainMenu: false,
+    evacState: 'idle',
 };
 
 export const CustomizerSlice = createSlice({
@@ -102,6 +104,14 @@ export const CustomizerSlice = createSlice({
       state.dashboardFilter = action.payload;
       console.log('Dashboard Filter Set:', state.dashboardFilter);
     },
+        setEvacuationState: (state: StateType, action) => {
+      state.evacState = action.payload;
+    // Save to localStorage for persistence
+    localStorage.setItem('evacState', JSON.stringify(action.payload));
+  },
+  hydrateEvacState: (state: StateType, action) => {
+    state.evacState = action.payload;
+  },
   },
 });
 
@@ -122,6 +132,8 @@ export const {
   setMonitorSidebar,
   setMainMenu,
   setDashboardFilter,
+    setEvacuationState,
+      hydrateEvacState,
 } = CustomizerSlice.actions;
 
 export default CustomizerSlice.reducer;

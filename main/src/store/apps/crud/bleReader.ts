@@ -267,6 +267,23 @@ export const deleteBleReader = createAsyncThunk(
     },
 );
 
+export const ImportBleReader = createAsyncThunk(
+    "bleReaders/importBleReader",
+    async (formData: FormData, { rejectWithValue }) => {
+        try {
+            const response = await axiosServices.post(`${API_URL}import`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data
+        } catch (error: any) {
+            console.error("Error importing bleReader:", error);
+            return rejectWithValue(error.response?.data || "Unknown error");
+        }
+    }
+)
+
 export const ExportBleReader = createAsyncThunk(
   "bleReaders/ExportBleReader",
   async (filter: 'pdf' | 'excel', { rejectWithValue }) => {

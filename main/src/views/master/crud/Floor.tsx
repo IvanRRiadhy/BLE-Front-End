@@ -18,6 +18,7 @@ import FloorList from 'src/components/master/CRUD/floor/FloorList';
 import AddEditFloor from 'src/components/master/CRUD/floor/AddEditFloor';
 import FloorFilter from 'src/components/master/CRUD/floor/FloorFilter';
 import FloorImport from 'src/components/master/CRUD/floor/FloorImport';
+import FloorExport from 'src/components/master/CRUD/floor/FloorExport';
 
 interface cardType {
   icon?: string;
@@ -86,6 +87,7 @@ const Floor = () => {
         >
           <ParentCard title="Floor List" codeModel={[
             <FloorImport key="import" />,
+            <FloorExport key="export" />,
             <FloorFilter key="filter" />,
             <AddEditFloor key="add" type="add" />
             ]}>
