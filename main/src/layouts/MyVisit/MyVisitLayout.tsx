@@ -3,16 +3,15 @@ import { styled, Container, Box, useTheme } from '@mui/material';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { Outlet } from 'react-router';
 import { AppState } from 'src/store/Store';
-import Sidebar from './vertical/sidebar/Sidebar';
-import Navigation from '../full/horizontal/navbar/Navigation';
-import HorizontalHeader from '../full/horizontal/header/Header';
+import Sidebar from './sidebar copy/Sidebar';
+import Navigation from 'src/layouts/full/horizontal/navbar/Navigation';
+import HorizontalHeader from 'src/layouts/full/horizontal/header/Header';
 import ScrollToTop from '../../components/shared/ScrollToTop';
 import LoadingBar from '../../LoadingBar';
-import MonitoringHeader from './monitoringLayout/Header';
 import { setSessionExpiredHandler } from 'src/utils/axios';
-import SessionExp from './shared/SessionExp';
-import AlarmPopup from './AlarmPopup';
+import SessionExp from 'src/layouts/full/shared/SessionExp';
 import { hydrateEvacState } from 'src/store/customizer/CustomizerSlice';
+import Header from './Header/Header';
 
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
@@ -30,14 +29,13 @@ const PageWrapper = styled('div')(() => ({
   backgroundColor: 'transparent',
 }));
 
-const FullLayout: FC = () => {
+const MyVisitLayout: FC = () => {
   const dispatch = useDispatch();
   const customizer = useSelector((state: AppState) => state.customizer);
   const evacState = useSelector((state: AppState) => state.customizer.evacState);
   const theme = useTheme();
 
   const [sessionExpired, setSessionExpired] = useState(false);
-
   useEffect(() => {
     setSessionExpiredHandler(() => setSessionExpired(true));
     // Hydrate evacState from localStorage
@@ -47,10 +45,8 @@ const FullLayout: FC = () => {
     }
     return () => setSessionExpiredHandler(() => {});
   }, []);
-
   return (
     <>
-      <AlarmPopup />
       <SessionExp open={sessionExpired} />
       <LoadingBar />
       <MainWrapper
@@ -80,11 +76,11 @@ const FullLayout: FC = () => {
             }}
           />
         )}
-
         {/* ------------------------------------------- */}
         {/* Sidebar */}
         {/* ------------------------------------------- */}
-        {customizer.isHorizontal ? '' : <Sidebar />}
+        <Sidebar />
+
         {/* ------------------------------------------- */}
         {/* Main Wrapper */}
         {/* ------------------------------------------- */}
@@ -99,21 +95,15 @@ const FullLayout: FC = () => {
           {/* ------------------------------------------- */}
           {/* Header */}
           {/* ------------------------------------------- */}
-          {customizer.isHorizontal ? <HorizontalHeader /> : <MonitoringHeader />}
+          <Header />
 
-          {/* PageContent */}
-          {customizer.isHorizontal ? <Navigation /> : ''}
-          {/* ------------------------------------------- */}
-          {/* Monitoring Sidebar */}
-          {/* ------------------------------------------- */}
           <Box
             sx={{
-              display: 'flex', // Align MonitoringSidebar and content horizontally
-              flexDirection: 'row',
+              display: 'flex',
+              flexDirection: 'column',
               width: '100%',
             }}
           >
-            {/* {customizer.isMonitorSidebar && <MonitoringSidebar />} */}
             <Container
               sx={{
                 pt: '0px',
@@ -131,11 +121,10 @@ const FullLayout: FC = () => {
               </Box>
             </Container>
           </Box>
-          {/* <Customizer /> */}
         </PageWrapper>
       </MainWrapper>
     </>
   );
 };
 
-export default FullLayout;
+export default MyVisitLayout;
