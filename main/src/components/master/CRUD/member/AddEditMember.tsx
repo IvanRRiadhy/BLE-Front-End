@@ -82,7 +82,13 @@ const AddEditMember = ({ type, member }: FormType) => {
   }, [dispatch]);
 
   const handleClickOpen = () => {
-    console.log('OPen', member);
+        if (type === 'edit' && member) {
+          setFormData(member);
+        } else {
+          setFormData({
+            applicationId: localStorage.getItem('applicationId') || '',
+          } as memberType);
+        }
     setOpen(true);
   };
 

@@ -48,14 +48,23 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
       console.log('Organization Data:', organization);
     }
   }, [formData, organization]);
-    const organizationFilter = useSelector((state: RootState) => state.organizationReducer.organizationFilter);
+  const organizationFilter = useSelector(
+    (state: RootState) => state.organizationReducer.organizationFilter,
+  );
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = () => {
+    if (type === 'edit' && organization) {
+      setFormData(organization);
+    } else {
+      setFormData({
+        applicationId: localStorage.getItem('applicationId') || '',
+      } as OrganizationType);
+    }
     setOpen(true);
   };
 
   const handleClose = () => {
-    setFormData({} as OrganizationType);
+    // setFormData({} as OrganizationType);
     setOpen(false);
   };
 

@@ -68,6 +68,13 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
   const visitorFilter = useSelector((state: RootState) => state.visitorReducer.visitorFilter);
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = () => {
+            if (type === 'edit' && visitor) {
+              setFormData(visitor);
+            } else {
+              setFormData({
+                applicationId: localStorage.getItem('applicationId') || '',
+              } as VisitorType);
+            }
     setOpen(true);
     console.log('visitor Data: ', visitor);
   };

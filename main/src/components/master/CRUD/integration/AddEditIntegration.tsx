@@ -64,6 +64,11 @@ const AddEditIntegration = ({ type, integration }: FormType) => {
   }, [dispatch]);
 
   const handleClickOpen = () => {
+        if (type === 'edit' && integration) {
+          setFormData(integration);
+        } else {
+          setFormData({applicationId: localStorage.getItem('applicationId') || ''} as IntegrationType);
+        }
     setOpen(true);
   };
   const handleClose = () => {

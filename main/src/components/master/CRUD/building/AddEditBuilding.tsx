@@ -52,7 +52,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
             if (type === 'edit' && building) {
               setFormData(building);
             } else {
-              setFormData({} as BuildingType);
+              setFormData({applicationId: localStorage.getItem('applicationId') || ''} as BuildingType);
             }
     setOpen(true);
   };

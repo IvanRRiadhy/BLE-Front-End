@@ -7,7 +7,7 @@ import {
   Divider,
   Grid2 as Grid,
   IconButton,
-    MenuItem,
+  MenuItem,
   SelectChangeEvent,
   Typography,
 } from '@mui/material';
@@ -18,7 +18,13 @@ import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
-import { FloorplanType, fetchFloorplan, addFloorplan, editFloorplan, fetchFloorplanDT } from 'src/store/apps/crud/floorplan';
+import {
+  FloorplanType,
+  fetchFloorplan,
+  addFloorplan,
+  editFloorplan,
+  fetchFloorplanDT,
+} from 'src/store/apps/crud/floorplan';
 
 interface FormType {
   type?: string;
@@ -36,17 +42,22 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
     createdAt: floorplan?.createdAt || '',
     updatedBy: floorplan?.updatedBy || '',
     updatedAt: floorplan?.updatedAt || '',
-  })
+  });
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchFloors());
     console.log(formData);
-  },[dispatch]);
+  }, [dispatch]);
 
   const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floorAll);
 
   const handleClickOpen = () => {
+    if (type === 'edit' && floorplan) {
+      setFormData(floorplan);
+    } else {
+      setFormData({applicationId: localStorage.getItem('applicationId') || ''} as FloorplanType);
+    }
     setOpen(true);
   };
 
@@ -55,27 +66,26 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
     console.log(floorData);
   };
 
-const handleSave = async () => {
-  try {
-    const data = new FormData();
-Object.keys(formData).forEach((key: string) => {
-  data.append(key, formData[key as keyof typeof formData]);
-});
+  const handleSave = async () => {
+    try {
+      const data = new FormData();
+      Object.keys(formData).forEach((key: string) => {
+        data.append(key, formData[key as keyof typeof formData]);
+      });
 
-
-    if (type === 'edit') {
-      await dispatch(editFloorplan(data)); // Dispatch update
+      if (type === 'edit') {
+        await dispatch(editFloorplan(data)); // Dispatch update
+      }
+      if (type === 'add') {
+        await dispatch(addFloorplan(data));
+      }
+      await dispatch(fetchFloorplanDT(floorplanFilter));
+      console.log('Saved!');
+      setOpen(false);
+    } catch (error) {
+      console.error('Error saving application:', error);
     }
-    if (type === 'add') {
-      await dispatch(addFloorplan(data));
-    }
-    await dispatch(fetchFloorplanDT(floorplanFilter));
-    console.log('Saved!');
-    setOpen(false);
-  } catch (error) {
-    console.error('Error saving application:', error);
-  }
-};
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
@@ -86,8 +96,6 @@ Object.keys(formData).forEach((key: string) => {
     console.log('Input Change:', { id, name, value });
     setFormData((prev) => ({ ...prev, [id || name]: value }));
   };
-
-
 
   return (
     <>
@@ -128,7 +136,7 @@ Object.keys(formData).forEach((key: string) => {
                 fullWidth
                 variant="outlined"
               />
-                            <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel>
+              <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel>
               <CustomSelect
                 name="floorId"
                 id="floorId"

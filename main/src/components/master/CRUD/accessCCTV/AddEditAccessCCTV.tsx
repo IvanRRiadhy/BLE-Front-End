@@ -51,7 +51,7 @@ const handleClickOpen = () => {
   if (type === 'edit' && cctv) {
     setFormData(cctv);
   } else {
-    setFormData({} as CCTVType);
+    setFormData({applicationId: localStorage.getItem('applicationId') || ''} as CCTVType);
   }
   setOpen(true);
 };

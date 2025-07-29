@@ -67,7 +67,7 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
       if (type === 'edit' && accessControl) {
         setFormData(accessControl);
       } else {
-        setFormData({} as AccessControlType);
+        setFormData({applicationId: localStorage.getItem('applicationId') || ''} as AccessControlType);
       }
       console.log(formData.controllerBrandId);
     setOpen(true);

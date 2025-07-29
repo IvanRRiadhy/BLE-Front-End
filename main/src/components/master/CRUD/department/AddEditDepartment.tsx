@@ -52,7 +52,7 @@ const AddEditDepartment = ({ type, department }: FormType) => {
     if (type === 'edit' && department) {
       setFormData(department);
     } else {
-      setFormData({} as DepartmentType);
+      setFormData({applicationId: localStorage.getItem('applicationId') || ''} as DepartmentType);
     }
     setOpen(true);
   };

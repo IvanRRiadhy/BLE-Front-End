@@ -50,7 +50,7 @@ const AddEditDistrict = ({ type, district }: FormType) => {
                 if (type === 'edit' && district) {
                   setFormData(district);
                 } else {
-                  setFormData({} as DistrictType);
+                  setFormData({applicationId: localStorage.getItem('applicationId') || ''} as DistrictType);
                 }
     setOpen(true);
   };

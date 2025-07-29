@@ -39,7 +39,7 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
 const blacklistFilter = useSelector((state: RootState) => state.blacklistReducer.blacklistFilter);
   const visitorData = useSelector((state: RootState) => state.visitorReducer.visitors);
   const maskedAreaData = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreas,
+    (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
   );
   const dispatch: AppDispatch = useDispatch();
 
