@@ -211,7 +211,7 @@ export const ImportFloorplan = createAsyncThunk(
 export const ExportFloorplan = createAsyncThunk(
     "floorplans/exportFloorplan",
     async (filter: "pdf" | "excel", { rejectWithValue }) => {
-        const url = `${Floorplan_API_URL}export/${filter}`;
+        const url = `http://192.168.1.116:5000${Floorplan_API_URL}export/${filter}`;
         const accessToken = localStorage.getItem("token");
         try {
             const response = await fetch(url, {

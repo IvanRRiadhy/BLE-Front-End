@@ -237,19 +237,20 @@ export const ImportFloor = createAsyncThunk(
 export const ExportFloor = createAsyncThunk(
     "floors/exportFloor",
     async (filter: "pdf" | "excel", { rejectWithValue }) => {
-        const url = `${API_URL}export/${filter}`;
+        const url = `http://192.168.1.116:5000${API_URL}export/${filter}`;
         const accessToken = localStorage.getItem("token");
         try {
             const response = await fetch(url, {
                 method: 'GET',
                 headers:{
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`,
           'X-API-KEY-TRACKING-PEOPLE':
             'FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK',
         },
             });
             if(!response.ok) throw new Error('Export failed');
+            console.log('Response content-type:', response.headers.get('content-type'));
+
                   const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');

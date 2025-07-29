@@ -197,7 +197,7 @@ export const ImportBuilding = createAsyncThunk(
 export const ExportBuilding = createAsyncThunk(
     "buildings/exportBuilding",
     async (filter: "pdf" | "excel", { rejectWithValue }) => {
-    const url = `${API_URL}export/${filter}`;
+    const url = `http://192.168.1.116:5000${API_URL}export/${filter}`;
     const accessToken = localStorage.getItem('token');
     try {
       const response = await fetch(url, {
