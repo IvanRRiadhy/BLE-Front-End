@@ -19,6 +19,7 @@ import { fetchFloorplanDeviceDT, FloorplanDeviceType } from 'src/store/apps/crud
 import BlacklistList from 'src/components/master/CRUD/blacklist/BlacklistList';
 import HeatmapFloorplan from 'src/components/dashboards/mainmenu/Heatmap';
 import { fetchFloorDT, floorType } from 'src/store/apps/crud/floor';
+import BeaconDistribution from 'src/components/dashboards/mainmenu/BeaconDistribution';
 
 const filter = {
   draw: 1,
@@ -175,7 +176,7 @@ const Modern = () => {
   return (
     <PageContainer title="Dashboard" description="this is Dashboard page">
       <Box>
-        <Grid container spacing={3}>
+        <Grid container spacing={3} mb={3}>
           {/* column */}
           <Grid
             size={{
@@ -223,6 +224,9 @@ const Modern = () => {
                 imageWidth={800}
                 imageHeight={200}
               />
+            </Grid>
+            <Grid size={{xs: 12, lg: 3}} sx={{display: 'flex', flexDirection: 'column'}}>
+              <BeaconDistribution />
             </Grid>
           </Grid>
         </Grid>

@@ -3,7 +3,7 @@ import simpleheat from 'simpleheat';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { trackingTransType } from 'src/store/apps/crud/trackingTrans';
 import DashboardCard from 'src/components/shared/DashboardCard';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { floorType } from 'src/store/apps/crud/floor';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { Select, MenuItem, FormControl, InputLabel, Stack } from '@mui/material';
@@ -122,7 +122,7 @@ const HeatmapFloorplan: React.FC<HeatmapFloorplanProps> = ({
             position: 'relative',
             flex: 1,
             borderRadius: 1,
-            height: 500,
+            height: 400,
             overflow: 'hidden',
             alignItems: 'flex-start', // ⬅️ align image top if using flex inside
             display: 'flex',
@@ -137,12 +137,28 @@ const HeatmapFloorplan: React.FC<HeatmapFloorplanProps> = ({
             panning={{ disabled: false }}
             limitToBounds={true}
           >
-            <TransformComponent>
-              <Box
+            <TransformComponent
+              wrapperStyle={{
+                height: '100%', // force TransformComponent wrapper to full height
+                width: '100%',
+                display: 'flex',
+                alignItems: 'flex-start', // top-align short images
+                justifyContent: 'flex-start',
+                overflow: 'hidden',
+              }}
+              contentStyle={{
+                height: 'auto',
+                width: 'auto',
+                position: 'relative',
+              }}
+            >
+              {selectedFloor && (
+                              <Box
                 sx={{
                   position: 'relative',
                   width: 'fit-content',
                   minHeight: '100%', // 👈 keeps short images top-aligned
+                  height: '100%',
                 }}
               >
                 <img
@@ -159,8 +175,8 @@ const HeatmapFloorplan: React.FC<HeatmapFloorplanProps> = ({
 
                 <canvas
                   ref={canvasRef}
-                  width={imageWidth * 2}
-                  height={imageHeight * 2}
+                  width={imageWidth}
+                  height={imageHeight}
                   style={{
                     position: 'absolute',
                     top: 0,
@@ -172,13 +188,15 @@ const HeatmapFloorplan: React.FC<HeatmapFloorplanProps> = ({
                   }}
                 />
               </Box>
+              )}
             </TransformComponent>
           </TransformWrapper>
         </Box>
 
         {/* === Filter Panel === */}
+
         <Stack
-          spacing={2}
+          spacing={5}
           sx={{
             width: 240,
             flexShrink: 0,
@@ -186,9 +204,12 @@ const HeatmapFloorplan: React.FC<HeatmapFloorplanProps> = ({
             py: 2,
             borderLeft: '1px solid #e0e0e0',
             bgcolor: '#fafafa',
-            height: '100%',
+            height: '400',
           }}
         >
+          <Typography variant="h6" align="center">
+            Filter
+          </Typography>
           <FormControl size="small" fullWidth>
             <InputLabel>Building</InputLabel>
             <Select
@@ -226,24 +247,40 @@ const HeatmapFloorplan: React.FC<HeatmapFloorplanProps> = ({
             </Select>
           </FormControl>
 
-          <FormControl size="small" fullWidth disabled={!selectedFloor}>
-            <InputLabel>Masked Area</InputLabel>
-            <Select
-              label="Masked Area"
-              value={selectedMaskedArea ?? ''}
-              onChange={(e) => setSelectedMaskedArea(e.target.value)}
-              displayEmpty
-            >
-              <MenuItem value="">
-                <em>All Areas</em>
-              </MenuItem>
-              {maskedAreaOptions.map((m) => (
-                <MenuItem key={m.id} value={m.id}>
-                  {m.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+<FormControl
+  size="small"
+  fullWidth
+  variant="outlined"
+  disabled={!selectedFloor}
+>
+  <InputLabel id="masked-area-label">Masked Area</InputLabel>
+  <Select
+    labelId="masked-area-label"
+    id="masked-area"
+    label="Masked Area"
+    value={selectedMaskedArea ?? ''}
+    onChange={(e) => setSelectedMaskedArea(e.target.value)}
+    displayEmpty
+    renderValue={(selected) => {
+      // if (!selected) {
+      //   return <em>All Areas</em>;
+      // }
+      const match = maskedAreaOptions.find((m) => m.id === selected);
+      return match ? match.name : '';
+    }}
+  >
+    <MenuItem value="">
+      <em>All Areas</em>
+    </MenuItem>
+    {maskedAreaOptions.map((m) => (
+      <MenuItem key={m.id} value={m.id}>
+        {m.name}
+      </MenuItem>
+    ))}
+  </Select>
+</FormControl>
+
+
         </Stack>
       </Box>
     </DashboardCard>
