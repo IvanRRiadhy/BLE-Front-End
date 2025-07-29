@@ -1,3 +1,4 @@
+import { BASE_URL } from 'src/utils/axios';
 import {
   Avatar,
   Box,
@@ -32,7 +33,6 @@ type BeaconDetailPopupProps = {
   setOpenTrackDetail: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const BASE_URL = 'http://192.168.1.116:5000';
 
 const BeaconDetailPopup = ({
   bleNumber,

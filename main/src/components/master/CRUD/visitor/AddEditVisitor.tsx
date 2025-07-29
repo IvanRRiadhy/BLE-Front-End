@@ -1,3 +1,4 @@
+import { BASE_URL } from 'src/utils/axios';
 import {
   Button,
   Dialog,
@@ -31,8 +32,6 @@ interface FormType {
   type?: string;
   visitor?: VisitorType;
 }
-
-const BASE_URL = 'http://localhost:5034';
 
 const AddEditVisitor = ({ type, visitor }: FormType) => {
   const [open, setOpen] = React.useState(false);

@@ -1,3 +1,4 @@
+import { BASE_URL } from 'src/utils/axios';
 import React, { useEffect, useState } from 'react';
 import {
   Box,
@@ -26,8 +27,6 @@ import { deleteFloor, fetchFloorDT, floorType, UpdateFilter } from 'src/store/ap
 import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import AddEditFloor from './AddEditFloor';
 // import { useTranslation } from 'react-i18next';
-
-const BASE_URL = 'http://192.168.1.116:5000';
 
 const columns = [
   { label: 'Building Name', field: 'Building.Name', sortAble: true },

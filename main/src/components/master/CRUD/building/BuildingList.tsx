@@ -1,3 +1,4 @@
+import { BASE_URL } from 'src/utils/axios';
 import React, { useEffect, useState } from 'react';
 import {
   Box,
@@ -29,8 +30,6 @@ import {
   UpdateFilter,
 } from 'src/store/apps/crud/building';
 import AddEditBuilding from './AddEditBuilding';
-
-const BASE_URL = 'http://192.168.1.116:5000';
 
 const columns = [
   { label: 'Building Name', field: 'name', sortAble: true },

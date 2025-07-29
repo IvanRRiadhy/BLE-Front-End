@@ -1,3 +1,4 @@
+import { BASE_URL } from 'src/utils/axios';
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
@@ -30,8 +31,6 @@ import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organi
 import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
 import { useTranslation } from 'react-i18next';
 import IconClose from 'src/assets/images/frontend-pages/icons/icon-close.svg';
-
-const BASE_URL = 'http://192.168.1.116:5000';
 
 const MemberContent = () => {
   const { t } = useTranslation();

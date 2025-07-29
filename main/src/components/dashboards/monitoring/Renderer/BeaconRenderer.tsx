@@ -1,3 +1,4 @@
+import { BASE_URL } from 'src/utils/axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { Text, Circle, Shape, Group } from 'react-konva';
 import { fetchMembers, memberType } from 'src/store/apps/crud/member';
@@ -20,7 +21,6 @@ type BeaconRendererProps = {
   onClick?: () => void;
 };
 
-const BASE_URL = 'http://192.168.1.116:5000';
 
 const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   id,

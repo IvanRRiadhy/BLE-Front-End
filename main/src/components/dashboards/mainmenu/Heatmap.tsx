@@ -1,3 +1,4 @@
+import { BASE_URL } from 'src/utils/axios';
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import simpleheat from 'simpleheat';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
@@ -17,7 +18,6 @@ interface HeatmapFloorplanProps {
   imageHeight: number;
 }
 
-const BASE_URL = 'http://192.168.1.116:5000';
 
 const buildAggregatedHeatmapData = (TrackingList: trackingTransType[]) => {
   const map = new Map<string, { x: number; y: number; value: number }>();

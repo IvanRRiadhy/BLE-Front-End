@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { BASE_URL } from 'src/utils/axios';
 import { useSelector } from 'src/store/Store';
 import {
   ListItemText,
@@ -15,7 +15,6 @@ import {
 
 import { memberType } from 'src/store/apps/crud/member';
 
-const BASE_URL = 'http://192.168.1.116:5000';
 
 type Props = {
   onTagClick: (event: React.MouseEvent<HTMLElement>) => void;

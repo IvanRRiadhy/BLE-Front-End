@@ -1,3 +1,4 @@
+import { BASE_URL } from 'src/utils/axios';
 import React, { use, useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
 import {
@@ -24,7 +25,6 @@ import { fetchVisitor } from 'src/store/apps/crud/visitor';
 import BeaconDetailPopup from './Popup/BeaconDetailPopup';
 import TrackingDetailPopup from './Popup/TrackingDetailPopup';
 
-const BASE_URL = 'http://192.168.1.116:5000';
 const ALARM_URL = 'http://192.168.1.116:3300';
 const FloorView: React.FC<{
   activeFloorplan: string;

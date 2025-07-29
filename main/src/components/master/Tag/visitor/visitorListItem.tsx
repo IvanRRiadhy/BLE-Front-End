@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { BASE_URL } from 'src/utils/axios';
 import { useSelector } from 'src/store/Store';
 import {
   ListItemText,
@@ -19,7 +19,6 @@ type Props = {
   active: any;
 };
 
-const BASE_URL = 'http://192.168.1.116:5000';
 
 const VisitorListItem = ({ onTagClick, visitor, active }: Props) => {
   const customizer = useSelector((state) => state.customizer);

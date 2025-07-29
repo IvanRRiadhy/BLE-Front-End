@@ -1,3 +1,4 @@
+import { BASE_URL } from 'src/utils/axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
 import { Box, FormLabel } from '@mui/material';
@@ -12,7 +13,6 @@ import MouseLeftClickIcon from 'src/assets/images/svgs/mouse-left-click-icon.svg
 import MouseRightClickIcon from 'src/assets/images/svgs/mouse-right-click-icon.svg';
 import ShiftButtonIcon from 'src/assets/images/svgs/shift-button-icon.svg';
 
-const BASE_URL = 'http://192.168.1.116:5000';
 const EditAreaFloorView: React.FC<{
   zoomable: boolean;
 }> = ({ zoomable }) => {

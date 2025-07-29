@@ -1,3 +1,4 @@
+import { BASE_URL } from 'src/utils/axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
 import { Box, Switch, FormControlLabel } from '@mui/material';
@@ -12,7 +13,6 @@ import EditDeviceRenderer from './EditDeviceRenderer';
 import FloorplanHouse from 'src/assets/images/masters/Floorplan/Floorplan-House.png';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 
-const BASE_URL = 'http://192.168.1.116:5000'; // Adjust this to your actual base URL
 const EditDeviceFloorView: React.FC<{
   zoomable: boolean;
 }> = ({ zoomable }) => {

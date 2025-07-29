@@ -1,3 +1,4 @@
+import { BASE_URL } from 'src/utils/axios';
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
@@ -27,7 +28,6 @@ import { DepartmentType, fetchDepartments } from 'src/store/apps/crud/department
 import { DistrictType, fetchDistricts } from 'src/store/apps/crud/district';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
 
-const BASE_URL = 'http://192.168.1.116:5000';
 
 const VisitorContent = () => {
   const { t } = useTranslation();

@@ -1,3 +1,4 @@
+import { BASE_URL } from 'src/utils/axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
 import { Box, FormControlLabel, Grid2 as Grid, Switch, Typography } from '@mui/material';
@@ -9,7 +10,6 @@ import { FloorplanType, fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 
-const BASE_URL = 'http://192.168.1.116:5000';
 const ConfigFloorView: React.FC<{
   activeFloorplan: string;
   zoomable: boolean;

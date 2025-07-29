@@ -1,5 +1,7 @@
  import axios from 'axios';
 
+ export const BASE_URL = 'http://192.168.1.116:5000';
+
 let onSessionExpired: (() => void) | null = null;
 export const setSessionExpiredHandler = (handler: () => void) => {
   onSessionExpired = handler;

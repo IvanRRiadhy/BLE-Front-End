@@ -1,3 +1,4 @@
+import { BASE_URL } from 'src/utils/axios';
 import {
   Button,
   Dialog,
@@ -24,8 +25,6 @@ interface FormType {
   type?: string;
   floor?: floorType;
 }
-
-const BASE_URL = 'http://192.168.1.116:5000';
 
 const AddEditFloor = ({ type, floor }: FormType) => {
   const [open, setOpen] = React.useState(false);
