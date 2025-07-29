@@ -34,14 +34,14 @@ import AddEditBleReader from './AddEditBleReader';
 
 const columns = [
   { label: 'Brand Name', field: 'Brand.Name', sortAble: true },
-  { label: 'Name', field: 'name', sortAble: true },
-  { label: 'IP', field: 'ip', sortAble: true },
-  { label: 'GMAC', field: 'gmac', sortAble: true },
-  { label: 'Engine Reader', field: 'engineFloorId', sortAble: true },
+  { label: 'Name', field: 'Name', sortAble: true },
+  { label: 'IP', field: 'Ip', sortAble: true },
+  { label: 'GMAC', field: 'Gmac', sortAble: true },
+  { label: 'Engine Reader', field: 'EngineFloorId', sortAble: true },
 ];
 
 const BleReaderList = () => {
-    const dispatch: AppDispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const bleReaderData = useSelector((state: RootState) => state.bleReaderReducer.bleReaders);
   const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
   const brandData = useSelector((state: RootState) => state.brandReducer.brands);
@@ -55,17 +55,17 @@ const BleReaderList = () => {
 
   // Pagination State
   const page = Math.floor(bleReaderFilter.Start / bleReaderFilter.Length);
-const rowsPerPage = bleReaderFilter.Length;
-const orderBy = bleReaderFilter.SortColumn;
-const order = bleReaderFilter.SortDir;
+  const rowsPerPage = bleReaderFilter.Length;
+  const orderBy = bleReaderFilter.SortColumn;
+  const order = bleReaderFilter.SortDir;
 
-const handleChangePage = (_: unknown, newPage: number) => {
-  dispatch(UpdateFilter({ Start: newPage * bleReaderFilter.Length }));
-};
+  const handleChangePage = (_: unknown, newPage: number) => {
+    dispatch(UpdateFilter({ Start: newPage * bleReaderFilter.Length }));
+  };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const newLength = parseInt(event.target.value, 10);
-  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
-};
+    const newLength = parseInt(event.target.value, 10);
+    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+  };
 
   useEffect(() => {
     // dispatch(fetchBleReaders());
@@ -73,8 +73,8 @@ const handleChangePage = (_: unknown, newPage: number) => {
   }, [dispatch]);
 
   useEffect(() => {
-  dispatch(fetchBleReaderDT(bleReaderFilter));
-}, [bleReaderFilter, dispatch]);
+    dispatch(fetchBleReaderDT(bleReaderFilter));
+  }, [bleReaderFilter, dispatch]);
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -104,25 +104,28 @@ const handleChangePage = (_: unknown, newPage: number) => {
   //   setOrder(isAsc ? 'desc' : 'asc');
   //   setOrderBy(column);
   // };
-const handleSort = (column: string) => {
-  const isAsc = bleReaderFilter.SortColumn === column && bleReaderFilter.SortDir === 'asc';
-  const isDesc = bleReaderFilter.SortColumn === column && bleReaderFilter.SortDir === 'desc';
+  const handleSort = (column: string) => {
+    const isAsc = bleReaderFilter.SortColumn === column && bleReaderFilter.SortDir === 'asc';
+    const isDesc = bleReaderFilter.SortColumn === column && bleReaderFilter.SortDir === 'desc';
 
-  if (isDesc) {
-    dispatch(UpdateFilter({
-      SortColumn: '',
-      SortDir: 'asc',
-      Start: 0,
-    }));
-  } else {
-    dispatch(UpdateFilter({
-      SortColumn: column,
-      SortDir: isAsc ? 'desc' : 'asc',
-      Start: 0,
-    }));
-  }
-};
-
+    if (isDesc) {
+      dispatch(
+        UpdateFilter({
+          SortColumn: 'UpdatedAt',
+          SortDir: 'desc',
+          Start: 0,
+        }),
+      );
+    } else {
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
+    }
+  };
 
   const getBrandName = (brandID: string) => {
     const brand = brandData.find((b: BrandType) => b.id === brandID);

@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Button, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
 import { Download, TableChart, Upload } from '@mui/icons-material';
+import { AppDispatch, useDispatch } from 'src/store/Store';
+import { ImportBleReader } from 'src/store/apps/crud/bleReader';
 
 const BleReaderImport = () => {
+    const dispatch: AppDispatch = useDispatch();
+    const fileInputRef = useRef<HTMLInputElement>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -15,9 +19,21 @@ const BleReaderImport = () => {
   };
 
   const handleImport = (type: 'pdf' | 'xls') => {
-    console.log(`Import as ${type.toUpperCase()}`);
-    // TODO: Call export API here
+    if (type === 'xls' && fileInputRef.current) {
+      fileInputRef.current.click();
+    }
     handleClose();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('file', file);
+
+    await dispatch(ImportBleReader(formData));
+
+    event.target.value = ''; // Reset input
   };
 
   return (
@@ -39,6 +55,13 @@ const BleReaderImport = () => {
           <ListItemText>XLS</ListItemText>
         </MenuItem>
       </Menu>
+            <input
+        ref={fileInputRef}
+        type="file"
+        accept=".xls,.xlsx"
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+      />
     </>
   );
 };

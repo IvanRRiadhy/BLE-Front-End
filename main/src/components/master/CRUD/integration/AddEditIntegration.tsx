@@ -21,6 +21,7 @@ import { integrationType, apiTypeAuth } from 'src/types/crud/input';
 import {
   addIntegration,
   editIntegration,
+  fetchIntegrationDT,
   fetchIntegrations,
   IntegrationType,
 } from 'src/store/apps/crud/integration';
@@ -54,6 +55,9 @@ const AddEditIntegration = ({ type, integration }: FormType) => {
   const appData: ApplicationType[] = useSelector(
     (state: RootState) => state.applicationReducer.applications,
   );
+    const IntegrationFilter = useSelector(
+      (state: RootState) => state.integrationReducer.IntegrationFilter,
+    )
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchApplications());
@@ -73,7 +77,7 @@ const AddEditIntegration = ({ type, integration }: FormType) => {
       if (type === 'add') {
         await dispatch(addIntegration(formData));
       }
-      await dispatch(fetchIntegrations());
+      await dispatch(fetchIntegrationDT(IntegrationFilter));
       console.log('Saved!');
       setOpen(false);
     } catch (error) {

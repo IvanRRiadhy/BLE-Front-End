@@ -30,14 +30,14 @@ const TrackingTrans = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const trackingTransList = useSelector(
-    (state: RootState) => state.trackingTransReducer.trackingTrans,
+  const trackingTransCount = useSelector(
+    (state: RootState) => state.trackingTransReducer.trackingTransFilteredCount,
   );
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
       title: 'Total Tracking Transactions',
-      subtitle: trackingTransList.length.toString(),
+      subtitle: trackingTransCount.toString(),
       bgcolor: 'success',
     },
   ];
@@ -89,7 +89,7 @@ const TrackingTrans = () => {
         >
           <ParentCard
             title="Tracking Transaction List"
-            codeModel={<AddEditTrackingTransaction type="add" />}
+            // codeModel={<AddEditTrackingTransaction type="add" />}
           >
             <TrackingTransactionList />
           </ParentCard>

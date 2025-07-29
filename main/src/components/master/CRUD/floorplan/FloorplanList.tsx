@@ -22,57 +22,68 @@ import {
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import {  FloorplanType, UpdateFilter, deleteFloorplan, fetchFloorplanDT } from 'src/store/apps/crud/floorplan';
+import {
+  FloorplanType,
+  UpdateFilter,
+  deleteFloorplan,
+  fetchFloorplanDT,
+} from 'src/store/apps/crud/floorplan';
 // import { useTranslation } from 'react-i18next';
 import AddEditFloorplan from './AddEditFloorplan';
 
 const columns = [
-    { label: 'Floorplan Name', field: 'name', sortAble: true },
+  { label: 'Floorplan Name', field: 'Name', sortAble: true },
   { label: 'Floor Name', field: 'Floor.Name', sortAble: true },
 ];
 
 const FloorplanList = () => {
-    const dispatch: AppDispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
   // const floorplanTotalCount = useSelector((state: RootState) => state.floorplanReducer.floorplanTotalCount);
-  const floorplanFilteredCount = useSelector((state: RootState) => state.floorplanReducer.floorplanFilteredCount);
-const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
+  const floorplanFilteredCount = useSelector(
+    (state: RootState) => state.floorplanReducer.floorplanFilteredCount,
+  );
+  const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   // const { t } = useTranslation();
   // Pagination State
   const page = Math.floor(floorplanFilter.Start / floorplanFilter.Length);
-const rowsPerPage = floorplanFilter.Length;
-const orderBy = floorplanFilter.SortColumn;
-const order = floorplanFilter.SortDir;
+  const rowsPerPage = floorplanFilter.Length;
+  const orderBy = floorplanFilter.SortColumn;
+  const order = floorplanFilter.SortDir;
 
-const handleChangePage = (_: unknown, newPage: number) => {
-  dispatch(UpdateFilter({ Start: newPage * floorplanFilter.Length }));
-};
+  const handleChangePage = (_: unknown, newPage: number) => {
+    dispatch(UpdateFilter({ Start: newPage * floorplanFilter.Length }));
+  };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const newLength = parseInt(event.target.value, 10);
-  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
-};
-const handleSort = (column: string) => {
-  const isAsc = floorplanFilter.SortColumn === column && floorplanFilter.SortDir === 'asc';
-  const isDesc = floorplanFilter.SortColumn === column && floorplanFilter.SortDir === 'desc';
+    const newLength = parseInt(event.target.value, 10);
+    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+  };
+  const handleSort = (column: string) => {
+    const isAsc = floorplanFilter.SortColumn === column && floorplanFilter.SortDir === 'asc';
+    const isDesc = floorplanFilter.SortColumn === column && floorplanFilter.SortDir === 'desc';
 
-  if (isDesc) {
-    dispatch(UpdateFilter({
-      SortColumn: '',
-      SortDir: 'asc',
-      Start: 0,
-    }));
-  } else {
-    dispatch(UpdateFilter({
-      SortColumn: column,
-      SortDir: isAsc ? 'desc' : 'asc',
-      Start: 0,
-    }));
-  }
-};
+    if (isDesc) {
+      dispatch(
+        UpdateFilter({
+          SortColumn: 'UpdatedAt',
+          SortDir: 'desc',
+          Start: 0,
+        }),
+      );
+    } else {
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
+    }
+  };
 
-// useEffect(() => {
-//   console.log("Floorplan Data:", floorplanData);
-// }, [floorplanData]);
+  // useEffect(() => {
+  //   console.log("Floorplan Data:", floorplanData);
+  // }, [floorplanData]);
 
   useEffect(() => {
     dispatch(fetchFloorplanDT(floorplanFilter));
@@ -100,7 +111,6 @@ const handleSort = (column: string) => {
     }
     handleCloseDeleteDialog();
   };
-
 
   return (
     <Grid container spacing={3}>
@@ -139,38 +149,37 @@ const handleSort = (column: string) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {floorplanData
-                    .map((floorplan: FloorplanType, index: number) => (
-                      <TableRow key={index}>
-                        <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                  {floorplanData.map((floorplan: FloorplanType, index: number) => (
+                    <TableRow key={index}>
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                      >
+                        {index + 1 + page * rowsPerPage}
+                      </TableCell>
+                      <TableCell>{floorplan.name}</TableCell>
+                      <TableCell>{floorplan.floor?.name}</TableCell>
+                      <TableCell
+                        sx={{
+                          position: 'sticky',
+                          right: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          display: 'flex',
+                          gap: 1,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <AddEditFloorplan type="edit" floorplan={floorplan} />
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleOpenDeleteDialog(floorplan)}
                         >
-                          {index + 1 + page * rowsPerPage}
-                        </TableCell>
-                        <TableCell>{floorplan.name}</TableCell>
-                        <TableCell>{floorplan.floor?.name}</TableCell>
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            display: 'flex',
-                            gap: 1,
-                            alignItems: 'center',
-                          }}
-                        >
-                          <AddEditFloorplan type="edit" floorplan={floorplan} />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(floorplan)}
-                          >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          <IconTrash size={20} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>

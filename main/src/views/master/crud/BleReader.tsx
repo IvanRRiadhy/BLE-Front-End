@@ -33,12 +33,12 @@ const BleReader = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const bleReaderList = useSelector((state: RootState) => state.bleReaderReducer.bleReaders);
+  const bleReaderCount = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilterCount);
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
       title: 'Total BLE Readers',
-      subtitle: bleReaderList.length.toString(),
+      subtitle: bleReaderCount.toString(),
       bgcolor: 'success',
     },
   ];

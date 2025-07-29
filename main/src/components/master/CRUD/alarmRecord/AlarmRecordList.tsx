@@ -20,11 +20,11 @@ import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Stor
 import { AlarmType, fetchAlarmDT, UpdateFilter } from 'src/store/apps/crud/alarmRecordTracking';
 
 const columns = [
-  { label: 'Time', field: 'time', sortAble: true },
+  { label: 'Time', field: 'Time', sortAble: true },
   { label: 'Visitor Name', field: 'Visitor.Name', sortAble: true },
-  { label: 'Reader', field: 'reader', sortAble: true }, 
-    { label: 'Alarm Status', field: 'alarmStatus', sortAble: true },
-  { label: 'Action Status', field: 'actionStatus', sortAble: true },
+  { label: 'Reader', field: 'Reader', sortAble: true }, 
+    { label: 'Alarm Status', field: 'AlarmStatus', sortAble: true },
+  { label: 'Action Status', field: 'ActionStatus', sortAble: true },
   { label: 'Area Name', field: 'Area.Name', sortAble: true }, 
 ];
 
@@ -83,8 +83,8 @@ const handleSort = (column: string) => {
 
   if (isDesc) {
     dispatch(UpdateFilter({
-      SortColumn: '',
-      SortDir: 'asc',
+      SortColumn: 'UpdatedAt',
+      SortDir: 'desc',
       Start: 0,
     }));
   } else {

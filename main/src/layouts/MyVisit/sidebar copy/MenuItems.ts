@@ -44,7 +44,7 @@ const Menuitems: MenuitemsType[] = [
         id: uniqueId(),
         title: 'Home',
         icon: IconHome,
-        href: '/myvisit/myvisit',
+        href: '/my-visit',
     },
 
     {

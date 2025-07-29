@@ -26,13 +26,13 @@ import { VisitorCardType, UpdateFilter, fetchVisitorCard } from 'src/store/apps/
 import AddEditVisitorCard from './AddEditVisitorCard';
 
 const columns = [
-  { label: 'Name', field: 'name', sortAble: true },
-  { label: 'Mac Address', field: 'mac', sortAble: false },
-  { label: 'Card Type', field: 'cardType', sortAble: true },
-  { label: 'Card Number', field: 'number', sortAble: true },
-  { label: 'Check-in Status', field: 'checkinStatus', sortAble: true },
-  { label: 'Sites', field: 'siteId', sortAble: false },
-  { label: 'Is Member', field: 'isMember', sortAble: true },
+  { label: 'Name', field: 'Name', sortAble: true },
+  { label: 'Mac Address', field: 'Mac', sortAble: false },
+  { label: 'Card Type', field: 'CardType', sortAble: true },
+  { label: 'Card Number', field: 'Number', sortAble: true },
+  { label: 'Check-in Status', field: 'CheckinStatus', sortAble: true },
+  { label: 'Sites', field: 'SiteId', sortAble: false },
+  { label: 'Is Member', field: 'IsMember', sortAble: true },
 ];
 
 const VisitorCardList = () => {
@@ -58,24 +58,28 @@ const VisitorCardList = () => {
     const newLength = parseInt(event.target.value, 10);
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
-const handleSort = (column: string) => {
-  const isAsc = visitorCardFilter.SortColumn === column && visitorCardFilter.SortDir === 'asc';
-  const isDesc = visitorCardFilter.SortColumn === column && visitorCardFilter.SortDir === 'desc';
+  const handleSort = (column: string) => {
+    const isAsc = visitorCardFilter.SortColumn === column && visitorCardFilter.SortDir === 'asc';
+    const isDesc = visitorCardFilter.SortColumn === column && visitorCardFilter.SortDir === 'desc';
 
-  if (isDesc) {
-    dispatch(UpdateFilter({
-      SortColumn: '',
-      SortDir: 'asc',
-      Start: 0,
-    }));
-  } else {
-    dispatch(UpdateFilter({
-      SortColumn: column,
-      SortDir: isAsc ? 'desc' : 'asc',
-      Start: 0,
-    }));
-  }
-};
+    if (isDesc) {
+      dispatch(
+        UpdateFilter({
+          SortColumn: 'updatedAt',
+          SortDir: 'desc',
+          Start: 0,
+        }),
+      );
+    } else {
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchVisitorCard());
@@ -154,7 +158,7 @@ const handleSort = (column: string) => {
                       <TableCell
                         sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 1 }}
                       >
-                        <AddEditVisitorCard type='edit' visitorCard={visitorCard} />
+                        <AddEditVisitorCard type="edit" visitorCard={visitorCard} />
                         <IconButton
                           color="error"
                           onClick={() => handleOpenDeleteDialog(visitorCard)}
@@ -186,7 +190,8 @@ const handleSort = (column: string) => {
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete the Visitor Card <strong>{selectedVisitorCard?.name}</strong>?
+            Are you sure you want to delete the Visitor Card{' '}
+            <strong>{selectedVisitorCard?.name}</strong>?
           </DialogContentText>
         </DialogContent>
         <DialogActions>

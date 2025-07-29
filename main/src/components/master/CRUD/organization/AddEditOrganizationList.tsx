@@ -14,10 +14,11 @@ import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { AppDispatch, useDispatch } from 'src/store/Store';
+import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
   addOrganization,
   editOrganization,
+  fetchOrganizationDT,
   fetchOrganizations,
   OrganizationType,
 } from 'src/store/apps/crud/organization';
@@ -47,6 +48,7 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
       console.log('Organization Data:', organization);
     }
   }, [formData, organization]);
+    const organizationFilter = useSelector((state: RootState) => state.organizationReducer.organizationFilter);
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = () => {
     setOpen(true);
@@ -65,7 +67,7 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
       if (type === 'add') {
         await dispatch(addOrganization(formData));
       }
-      await dispatch(fetchOrganizations());
+      await dispatch(fetchOrganizationDT(organizationFilter));
       console.log('Saved!');
       setOpen(false);
     } catch (error) {

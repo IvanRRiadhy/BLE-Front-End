@@ -19,7 +19,7 @@ import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { dispatch, RootState, useSelector } from 'src/store/Store';
-import { addMember, editMember, fetchMembers, memberType } from 'src/store/apps/crud/member';
+import { addMember, editMember, fetchMemberDT, fetchMembers, memberType } from 'src/store/apps/crud/member';
 import { fetchDistricts, DistrictType } from 'src/store/apps/crud/district';
 import { fetchDepartments, DepartmentType } from 'src/store/apps/crud/department';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
@@ -73,6 +73,7 @@ const AddEditMember = ({ type, member }: FormType) => {
   const organizationData: OrganizationType[] = useSelector(
     (state: RootState) => state.organizationReducer.organizations,
   );
+  const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
   useEffect(() => {
     dispatch(fetchMembers());
     dispatch(fetchDistricts());
@@ -146,7 +147,7 @@ const AddEditMember = ({ type, member }: FormType) => {
         console.log('Form Data :', data);
         await dispatch(addMember(data));
       }
-      await dispatch(fetchMembers());
+      await dispatch(fetchMemberDT(memberFilter));
       console.log('Saved!');
       handleClose();
       setPreview(null);

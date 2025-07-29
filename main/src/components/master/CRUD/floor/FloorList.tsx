@@ -30,10 +30,10 @@ import AddEditFloor from './AddEditFloor';
 
 const columns = [
   { label: 'Building Name', field: 'Building.Name', sortAble: true },
-  { label: 'Floor Name', field: 'name', sortAble: true },
+  { label: 'Floor Name', field: 'Name', sortAble: true },
   { label: 'Floor Image', field: '', sortAble: false },
   { label: 'Floor Dimension (meter)', field: '', sortAble: false },
-  { label: 'Engine Floor', field: 'engineFloorId', sortAble: true },
+  { label: 'Engine Floor', field: 'EngineFloorId', sortAble: true },
 ];
 
 const FloorList = () => {
@@ -58,27 +58,31 @@ const FloorList = () => {
     const newLength = parseInt(event.target.value, 10);
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
-const handleSort = (column: string) => {
-  const isAsc = floorFilter.SortColumn === column && floorFilter.SortDir === 'asc';
-  const isDesc = floorFilter.SortColumn === column && floorFilter.SortDir === 'desc';
+  const handleSort = (column: string) => {
+    const isAsc = floorFilter.SortColumn === column && floorFilter.SortDir === 'asc';
+    const isDesc = floorFilter.SortColumn === column && floorFilter.SortDir === 'desc';
 
-  if (isDesc) {
-    dispatch(UpdateFilter({
-      SortColumn: '',
-      SortDir: 'asc',
-      Start: 0,
-    }));
-  } else {
-    dispatch(UpdateFilter({
-      SortColumn: column,
-      SortDir: isAsc ? 'desc' : 'asc',
-      Start: 0,
-    }));
-  }
-};
+    if (isDesc) {
+      dispatch(
+        UpdateFilter({
+          SortColumn: 'UpdatedAt',
+          SortDir: 'desc',
+          Start: 0,
+        }),
+      );
+    } else {
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
+    }
+  };
   useEffect(() => {
     dispatch(fetchFloorDT(floorFilter));
-    console.log("FetchDT");
+    console.log('FetchDT');
   }, [floorFilter, dispatch]);
 
   const buildingData: BuildingType[] = useSelector(
@@ -88,7 +92,7 @@ const handleSort = (column: string) => {
   useEffect(() => {
     dispatch(fetchBuildings());
     dispatch(fetchFloorDT(floorFilter));
-    console.log("Fetch Buildings and Floors");
+    console.log('Fetch Buildings and Floors');
   }, [dispatch]);
 
   //Delete Pop-up

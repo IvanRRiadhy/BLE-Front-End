@@ -22,16 +22,16 @@ import {
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import {  BrandType, deleteBrand, fetchBrandDT, UpdateFilter } from 'src/store/apps/crud/brand';
+import { BrandType, deleteBrand, fetchBrandDT, UpdateFilter } from 'src/store/apps/crud/brand';
 import AddEditBrand from './AddEditBrand';
 
 const columns = [
-  { label: 'Brand Name', field: 'name', sortAble: true },
-  { label: 'Tag', field: 'tag', sortAble: true },
+  { label: 'Brand Name', field: 'Name', sortAble: true },
+  { label: 'Tag', field: 'Tag', sortAble: true },
 ];
 
 const BrandList = () => {
-    const dispatch: AppDispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const brandData: BrandType[] = useSelector((state: RootState) => state.brandReducer.brands);
   // const brandTotalCount = useSelector((state: RootState) => state.brandReducer.brandTotalCount);
   const brandFilteredCount = useSelector(
@@ -40,40 +40,43 @@ const BrandList = () => {
   const brandFilter = useSelector((state: RootState) => state.brandReducer.brandFilter);
   // Pagination State
   const page = Math.floor(brandFilter.Start / brandFilter.Length);
-const rowsPerPage = brandFilter.Length;
-const orderBy = brandFilter.SortColumn;
-const order = brandFilter.SortDir;
+  const rowsPerPage = brandFilter.Length;
+  const orderBy = brandFilter.SortColumn;
+  const order = brandFilter.SortDir;
 
-const handleChangePage = (_: unknown, newPage: number) => {
-  dispatch(UpdateFilter({ Start: newPage * brandFilter.Length }));
-};
+  const handleChangePage = (_: unknown, newPage: number) => {
+    dispatch(UpdateFilter({ Start: newPage * brandFilter.Length }));
+  };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const newLength = parseInt(event.target.value, 10);
-  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
-};
-const handleSort = (column: string) => {
-  const isAsc = brandFilter.SortColumn === column && brandFilter.SortDir === 'asc';
-  const isDesc = brandFilter.SortColumn === column && brandFilter.SortDir === 'desc';
+    const newLength = parseInt(event.target.value, 10);
+    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+  };
+  const handleSort = (column: string) => {
+    const isAsc = brandFilter.SortColumn === column && brandFilter.SortDir === 'asc';
+    const isDesc = brandFilter.SortColumn === column && brandFilter.SortDir === 'desc';
 
-  if (isDesc) {
-    dispatch(UpdateFilter({
-      SortColumn: '',
-      SortDir: 'asc',
-      Start: 0,
-    }));
-  } else {
-    dispatch(UpdateFilter({
-      SortColumn: column,
-      SortDir: isAsc ? 'desc' : 'asc',
-      Start: 0,
-    }));
-  }
-};
+    if (isDesc) {
+      dispatch(
+        UpdateFilter({
+          SortColumn: 'UpdatedAt',
+          SortDir: 'desc',
+          Start: 0,
+        }),
+      );
+    } else {
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchBrandDT(brandFilter));
   }, [brandFilter, dispatch]);
-
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -97,7 +100,6 @@ const handleSort = (column: string) => {
     }
     handleCloseDeleteDialog();
   };
-
 
   return (
     <Grid container spacing={3}>

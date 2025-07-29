@@ -20,6 +20,7 @@ import BlacklistList from 'src/components/master/CRUD/blacklist/BlacklistList';
 import HeatmapFloorplan from 'src/components/dashboards/mainmenu/Heatmap';
 import { fetchFloorDT, floorType } from 'src/store/apps/crud/floor';
 import BeaconDistribution from 'src/components/dashboards/mainmenu/BeaconDistribution';
+import AreaDistribution from 'src/components/dashboards/mainmenu/AreaDistribution';
 
 const filter = {
   draw: 1,
@@ -98,8 +99,8 @@ const Modern = () => {
         filters: {
           BuildingId: dashboardFilter?.BuildingId || [],
         },
-      })
-    )
+      }),
+    );
     dispatch(
       fetchMaskedAreaDT({
         ...filter,
@@ -138,27 +139,25 @@ const Modern = () => {
   const blacklistData: blacklistType[] = useSelector(
     (state: RootState) => state.blacklistReducer.blacklists,
   );
-  const floorData: floorType[] = useSelector(
-    (state: RootState) => state.floorReducer.floors,
-  )
+  const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
   const maskedAreaTotalCount: number = useSelector(
     (state: RootState) => state.maskedAreaReducer.maskedAreaFilteredCount ?? 0,
   );
   const maskedAreaData: MaskedAreaType[] = useSelector(
     (state: RootState) => state.maskedAreaReducer.maskedAreas,
-  )
+  );
   const bleReaderTotalCount: number = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceFilteredCount ?? 0,
   );
   const bleReaderData: FloorplanDeviceType[] = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.floorplanDevices,
-  )
+  );
   const alarmFilteredCount: number = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordFilteredCount ?? 0,
   );
   const alarmFilteredData: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
-  )
+  );
   const trackingData: trackingTransType[] = useSelector(
     (state: RootState) => state.trackingTransReducer.trackingTrans,
   );
@@ -172,7 +171,10 @@ const Modern = () => {
   const alarmData: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
   );
-  console.log("MaskedArea Data: ", maskedAreaData.flat().map((item) => item.name));
+  console.log(
+    'MaskedArea Data: ',
+    maskedAreaData.flat().map((item) => item.name),
+  );
   return (
     <PageContainer title="Dashboard" description="this is Dashboard page">
       <Box>
@@ -194,8 +196,12 @@ const Modern = () => {
               FirstActiveBeacon={[]}
               FirstActiveGateway={bleReaderData.flat().map((item) => item.name)}
               FirstArea={maskedAreaData.flat().map((item) => item.name)}
-              FirstBlacklist={blacklistData.flat().map((item) => item.visitor?.name ?? 'Unknown Visitor')}
-              FirstAlarm={alarmFilteredData.flat().map((item) => item.visitor?.name ?? 'Unknown Visitor')}
+              FirstBlacklist={blacklistData
+                .flat()
+                .map((item) => item.visitor?.name ?? 'Unknown Visitor')}
+              FirstAlarm={alarmFilteredData
+                .flat()
+                .map((item) => item.visitor?.name ?? 'Unknown Visitor')}
               FirstNonActiveBeacon={[]}
             />
           </Grid>
@@ -225,8 +231,11 @@ const Modern = () => {
                 imageHeight={200}
               />
             </Grid>
-            <Grid size={{xs: 12, lg: 3}} sx={{display: 'flex', flexDirection: 'column'}}>
+            <Grid size={{ xs: 12, lg: 3 }} sx={{ display: 'flex', flexDirection: 'column' }}>
               <BeaconDistribution />
+            </Grid>
+            <Grid size={{ xs: 12, lg: 3 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+              <AreaDistribution />
             </Grid>
           </Grid>
         </Grid>

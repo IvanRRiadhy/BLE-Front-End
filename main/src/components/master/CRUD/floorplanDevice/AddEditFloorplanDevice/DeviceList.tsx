@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSelector, useDispatch, AppDispatch, AppState } from 'src/store/Store';
+import { useSelector, useDispatch, AppDispatch, AppState, RootState } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import {
@@ -35,6 +35,7 @@ import { useNavigate } from 'react-router';
 import { fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
 import { fetchAccessControls } from 'src/store/apps/crud/accessControl';
 import { fetchBleReaders } from 'src/store/apps/crud/bleReader';
+import { fetchFloorDT } from 'src/store/apps/crud/floor';
 
 const DeviceList = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -72,7 +73,7 @@ const DeviceList = () => {
     (state: AppState) => state.accessControlReducer.accessControls[0],
   );
   const firstBleReader = useSelector((state: AppState) => state.bleReaderReducer.bleReaders[0]);
-
+  const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState('');
   const [pendingDeviceId, setPendingDeviceId] = useState<string | null>(null);
@@ -224,7 +225,7 @@ const DeviceList = () => {
       }
     }
     // Call deleteFloorplanDevice for each device to delete
-
+    dispatch(fetchFloorDT(floorplanFilter));
     console.log('Save operation completed.');
     handleCloseEditing(); // Navigate back to the device list
   };

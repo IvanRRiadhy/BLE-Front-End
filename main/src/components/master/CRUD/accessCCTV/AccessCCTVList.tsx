@@ -31,15 +31,14 @@ import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Stor
 import AddEditAccessCCTV from './AddEditAccessCCTV';
 // import { useTranslation } from 'react-i18next';
 
-
 const columns = [
-  { label: 'Name', field: 'name', sortAble: true },
-  { label: 'RTSP', field: 'rtsp', sortAble: false },
-  { label: 'Integration', field: 'integrationType', sortAble: false }, 
+  { label: 'Name', field: 'Name', sortAble: true },
+  { label: 'RTSP', field: 'Rtsp', sortAble: false },
+  { label: 'Integration', field: 'IntegrationType', sortAble: false },
 ];
 
 const AccessCCTVList = () => {
-    const dispatch: AppDispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const CCTVData: CCTVType[] = useSelector((state: RootState) => state.CCTVReducer.cctvs);
   // const CCTVTotalCount = useSelector((state: RootState) => state.CCTVReducer.cctvTotalCount);
   const CCTVFilteredCount = useSelector((state: RootState) => state.CCTVReducer.cctvFilteredCount);
@@ -47,22 +46,21 @@ const AccessCCTVList = () => {
   // const { t } = useTranslation();
   // Pagination State
   const page = Math.floor(CCTVFilter.Start / CCTVFilter.Length);
-const rowsPerPage = CCTVFilter.Length;
-const orderBy = CCTVFilter.SortColumn;
-const order = CCTVFilter.SortDir;
+  const rowsPerPage = CCTVFilter.Length;
+  const orderBy = CCTVFilter.SortColumn;
+  const order = CCTVFilter.SortDir;
 
-const handleChangePage = (_: unknown, newPage: number) => {
-  dispatch(UpdateFilter({ Start: newPage * CCTVFilter.Length }));
-};
+  const handleChangePage = (_: unknown, newPage: number) => {
+    dispatch(UpdateFilter({ Start: newPage * CCTVFilter.Length }));
+  };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const newLength = parseInt(event.target.value, 10);
-  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
-};
+    const newLength = parseInt(event.target.value, 10);
+    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+  };
 
   useEffect(() => {
     dispatch(fetchAccessCCTVDT(CCTVFilter));
   }, [CCTVFilter, dispatch]);
-
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -86,24 +84,28 @@ const handleChangePage = (_: unknown, newPage: number) => {
     handleCloseDeleteDialog();
   };
 
-const handleSort = (column: string) => {
-  const isAsc = CCTVFilter.SortColumn === column && CCTVFilter.SortDir === 'asc';
-  const isDesc = CCTVFilter.SortColumn === column && CCTVFilter.SortDir === 'desc';
+  const handleSort = (column: string) => {
+    const isAsc = CCTVFilter.SortColumn === column && CCTVFilter.SortDir === 'asc';
+    const isDesc = CCTVFilter.SortColumn === column && CCTVFilter.SortDir === 'desc';
 
-  if (isDesc) {
-    dispatch(UpdateFilter({
-      SortColumn: '',
-      SortDir: 'asc',
-      Start: 0,
-    }));
-  } else {
-    dispatch(UpdateFilter({
-      SortColumn: column,
-      SortDir: isAsc ? 'desc' : 'asc',
-      Start: 0,
-    }));
-  }
-};
+    if (isDesc) {
+      dispatch(
+        UpdateFilter({
+          SortColumn: 'UpdatedAt',
+          SortDir: 'desc',
+          Start: 0,
+        }),
+      );
+    } else {
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
+    }
+  };
 
   return (
     <Grid container spacing={3}>

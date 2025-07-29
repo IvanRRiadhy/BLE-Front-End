@@ -74,7 +74,7 @@ const initialState: StateType = {
         Draw: 1,
         Start: 0,
         Length: 5,
-        SortColumn: "updatedAt",
+        SortColumn: "UpdatedAt",
         SortDir: "desc",
         searchValue: "",
         filters: {},
@@ -161,6 +161,7 @@ export const fetchFloorDT = createAsyncThunk(
     "floors/fetchFloorDT",
     async (filter: any, { rejectWithValue }) => {
         try {
+            console.log("Fetch Floor DT: ", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetFloor(response.data.collection.data || []));
             console.log("Fetch floors", response.data.collection);

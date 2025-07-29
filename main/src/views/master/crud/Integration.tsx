@@ -29,12 +29,12 @@ const Integration = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const integrationList = useSelector((state: RootState) => state.integrationReducer.integrations);
+  const integrationCount = useSelector((state: RootState) => state.integrationReducer.IntegrationFilteredCount);
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
       title: 'Total Integrations',
-      subtitle: integrationList.length.toString(),
+      subtitle: integrationCount.toString(),
       bgcolor: 'success',
     },
   ];

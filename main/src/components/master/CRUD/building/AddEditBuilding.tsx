@@ -12,14 +12,16 @@ import {
   Typography,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
+import { toast } from 'react-hot-toast';
 import React from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { AppDispatch,  useDispatch } from 'src/store/Store';
+import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
   addBuilding,
   BuildingType,
   editBuilding,
+  fetchBuildingDT,
   fetchBuildings,
 } from 'src/store/apps/crud/building';
 
@@ -32,6 +34,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
   const [open, setOpen] = React.useState(false);
   const [image, setImage] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(building?.image || null);
+  const [fromLocal, setFromLocal] = React.useState(false);
   const [formData, setFormData] = React.useState(
     building || {
       id: '',
@@ -43,14 +46,21 @@ const AddEditBuilding = ({ type, building }: FormType) => {
       updatedAt: '',
     },
   );
+  const buildingFilter = useSelector((state: RootState) => state.buildingReducer.buildingFilter);
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = () => {
+            if (type === 'edit' && building) {
+              setFormData(building);
+            } else {
+              setFormData({} as BuildingType);
+            }
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
     setPreview(building?.image || null);
+    setFromLocal(false);
   };
 
   const handleInputChange = (
@@ -74,7 +84,8 @@ const AddEditBuilding = ({ type, building }: FormType) => {
         setImage(file);
         console.log('Selected file:', file);
         setPreview(URL.createObjectURL(file)); // Preview selected image
-        console.log(image);
+        setFromLocal(true);
+        console.log(preview);
       } else {
         alert('Please select a valid image file (PNG, JPG, JPEG)');
       }
@@ -99,17 +110,26 @@ const AddEditBuilding = ({ type, building }: FormType) => {
       if (image) {
         data.append('image', image);
       }
+
+      let result;
       if (type === 'edit') {
-        await dispatch(editBuilding(data)); // Dispatch update
+        result = await dispatch(editBuilding(data));
       }
       if (type === 'add') {
-        await dispatch(addBuilding(data));
+        result = await dispatch(addBuilding(data));
       }
-      await dispatch(fetchBuildings());
-      console.log('Saved!');
-      setOpen(false);
-      setPreview(null);
+
+      // Check if the action was fulfilled
+      if (result && result.type && result.type.endsWith('/fulfilled')) {
+        console.log('Building saved successfully');
+        await dispatch(fetchBuildingDT(buildingFilter));
+        toast.success('Update successful', { position: 'top-right' });
+        handleClose();
+      } else {
+        toast.error('Update unsuccessful', { position: 'top-right' });
+      }
     } catch (error) {
+      toast.error('Update unsuccessful', { position: 'top-right' });
       console.error('Error saving Building:', error);
     }
   };
@@ -147,7 +167,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
               <CustomFormLabel htmlFor="department-Name">Building Name</CustomFormLabel>
               <CustomTextField
                 id="name"
-                placeholder={formData.name}
+                value={formData.name}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -164,7 +184,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
               />
               {preview && (
                 <img
-                  src={`${BASE_URL}${preview}`}
+                  src={fromLocal ? `${preview}` : `${BASE_URL}${preview}`}
                   alt="Building Preview"
                   style={{ width: '100%', marginTop: '10px', borderRadius: '5px' }}
                 />

@@ -72,7 +72,7 @@ const initialState: StateType = {
         Draw: 0,
         Start: 0,
         Length: 10,
-        SortColumn: 'name',
+        SortColumn: 'name', 
         SortDir: 'asc',
         searchValue: '',
     },

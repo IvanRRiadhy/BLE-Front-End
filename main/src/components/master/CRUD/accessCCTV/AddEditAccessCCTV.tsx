@@ -14,8 +14,14 @@ import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { AppDispatch, useDispatch } from 'src/store/Store';
-import { CCTVType, editCCTV, addCCTV, fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
+import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
+import {
+  CCTVType,
+  editCCTV,
+  addCCTV,
+  fetchAccessCCTV,
+  fetchAccessCCTVDT,
+} from 'src/store/apps/crud/accessCCTV';
 
 interface FormType {
   type?: string;
@@ -33,15 +39,22 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
       createdAt: '',
       updatedBy: '',
       updatedAt: '',
-      integrationId: 'A6D795EF-58C9-4CBD-AEF4-34C2A5E3B952',
+      integrationId: '48842BFF-1605-422A-A0B7-98380EE7D1B8',
       applicationId: localStorage.getItem('applicationId') || '',
     },
   );
+
+  const CCTVFilter = useSelector((state: RootState) => state.CCTVReducer.cctvFilter);
   const dispatch: AppDispatch = useDispatch();
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+const handleClickOpen = () => {
+  if (type === 'edit' && cctv) {
+    setFormData(cctv);
+  } else {
+    setFormData({} as CCTVType);
+  }
+  setOpen(true);
+};
   const handleClose = () => {
     setOpen(false);
   };
@@ -53,9 +66,9 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
       if (type === 'add') {
         await dispatch(addCCTV(formData));
       }
-      await dispatch(fetchAccessCCTV());
+      await dispatch(fetchAccessCCTVDT(CCTVFilter));
       console.log('Saved!');
-      setOpen(false);
+      handleClose();
     } catch (error) {
       console.error('Error saving application:', error);
     }
@@ -102,7 +115,7 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
               <CustomFormLabel htmlFor="cctv-Name">Name</CustomFormLabel>
               <CustomTextField
                 id="name"
-                placeholder={formData.name}
+                value={formData.name}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -110,7 +123,7 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
               {/* <CustomFormLabel htmlFor="integration-id">Integration ID</CustomFormLabel>
               <CustomTextField
                 id="integrationId"
-                placeholder={formData.integrationId}
+                value={formData.integrationId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -120,7 +133,7 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
               <CustomFormLabel htmlFor="cctv-RTSP">RTSP</CustomFormLabel>
               <CustomTextField
                 id="rtsp"
-                placeholder={formData.rtsp}
+                value={formData.rtsp}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"

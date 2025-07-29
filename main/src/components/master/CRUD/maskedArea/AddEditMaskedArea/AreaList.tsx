@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useSelector, useDispatch, AppDispatch, AppState } from 'src/store/Store';
+import { useSelector, useDispatch, AppDispatch, AppState, RootState } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
+import { fetchFloorplan, fetchFloorplanDT } from 'src/store/apps/crud/floorplan';
 import {
   fetchMaskedAreas,
   MaskedAreaType,
@@ -73,6 +73,7 @@ const AreaList = () => {
   const filteredOriginalAreas = originalAreas.filter(
     (area) => area.floorplanId === activeFloorplan?.id,
   );
+    const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   const deletedArea = useSelector((state: AppState) => state.maskedAreaReducer.deletedMaskedArea);
   const addedArea = useSelector((state: AppState) => state.maskedAreaReducer.addedMaskedArea);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -216,6 +217,7 @@ const AreaList = () => {
         await dispatch(deleteMaskedArea(area.id));
       }
     }
+    dispatch(fetchFloorplanDT(floorplanFilter));
     console.log('Save operation completed.');
     handleCloseEditing();
   };

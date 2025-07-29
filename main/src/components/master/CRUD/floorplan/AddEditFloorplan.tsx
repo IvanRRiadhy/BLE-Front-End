@@ -18,7 +18,7 @@ import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
-import { FloorplanType, fetchFloorplan, addFloorplan, editFloorplan } from 'src/store/apps/crud/floorplan';
+import { FloorplanType, fetchFloorplan, addFloorplan, editFloorplan, fetchFloorplanDT } from 'src/store/apps/crud/floorplan';
 
 interface FormType {
   type?: string;
@@ -37,13 +37,14 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
     updatedBy: floorplan?.updatedBy || '',
     updatedAt: floorplan?.updatedAt || '',
   })
+  const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchFloors());
     console.log(formData);
   },[dispatch]);
 
-  const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
+  const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floorAll);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -68,7 +69,7 @@ Object.keys(formData).forEach((key: string) => {
     if (type === 'add') {
       await dispatch(addFloorplan(data));
     }
-    await dispatch(fetchFloorplan());
+    await dispatch(fetchFloorplanDT(floorplanFilter));
     console.log('Saved!');
     setOpen(false);
   } catch (error) {

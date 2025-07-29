@@ -14,11 +14,12 @@ import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { AppDispatch, useDispatch } from 'src/store/Store';
+import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
   addDepartment,
   DepartmentType,
   editDepartment,
+  fetchDepartmentDT,
   fetchDepartments,
 } from 'src/store/apps/crud/department';
 
@@ -42,9 +43,17 @@ const AddEditDepartment = ({ type, department }: FormType) => {
       updatedAt: '',
     },
   );
+  const departmentFilter = useSelector(
+    (state: RootState) => state.departmentReducer.departmentFilter,
+  );
   const dispatch: AppDispatch = useDispatch();
 
   const handleClickOpen = () => {
+    if (type === 'edit' && department) {
+      setFormData(department);
+    } else {
+      setFormData({} as DepartmentType);
+    }
     setOpen(true);
   };
 
@@ -60,7 +69,7 @@ const AddEditDepartment = ({ type, department }: FormType) => {
       if (type === 'add') {
         await dispatch(addDepartment(formData));
       }
-      await dispatch(fetchDepartments());
+      await dispatch(fetchDepartmentDT(departmentFilter));
       console.log('Saved!');
       setOpen(false);
     } catch (error) {
@@ -111,7 +120,7 @@ const AddEditDepartment = ({ type, department }: FormType) => {
               <CustomFormLabel htmlFor="department-code">Department Code</CustomFormLabel>
               <CustomTextField
                 id="code"
-                placeholder={formData.code}
+                value={formData.code}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -119,7 +128,7 @@ const AddEditDepartment = ({ type, department }: FormType) => {
               <CustomFormLabel htmlFor="department-host">Department Host</CustomFormLabel>
               <CustomTextField
                 id="departmentHost"
-                placeholder={formData.departmentHost}
+                value={formData.departmentHost}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -129,7 +138,7 @@ const AddEditDepartment = ({ type, department }: FormType) => {
               <CustomFormLabel htmlFor="department-Name">Department Name</CustomFormLabel>
               <CustomTextField
                 id="name"
-                placeholder={formData.name}
+                value={formData.name}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"

@@ -30,13 +30,13 @@ const District = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const districtList = useSelector((state: RootState) => state.districtReducer.districts);
+  const districtCount = useSelector((state: RootState) => state.districtReducer.districtFilteredCount);
   const { t } = useTranslation();
 
   const topCards: cardType[] = [
     {
       title: 'Total Districts',
-      subtitle: districtList.length.toString(),
+      subtitle: districtCount.toString(),
       bgcolor: 'success',
     },
   ];

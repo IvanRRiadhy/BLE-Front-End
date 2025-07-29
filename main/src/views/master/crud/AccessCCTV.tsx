@@ -31,12 +31,12 @@ const AccessCCTV = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const cctvList = useSelector((state: RootState) => state.CCTVReducer.cctvs);
+  const cctvCount = useSelector((state: RootState) => state.CCTVReducer.cctvFilteredCount);
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
       title: 'Total Access CCTVs',
-      subtitle: cctvList.length.toString(),
+      subtitle: cctvCount.toString(),
       bgcolor: 'success',
     },
   ];

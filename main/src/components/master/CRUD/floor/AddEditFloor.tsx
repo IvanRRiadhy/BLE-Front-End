@@ -30,11 +30,11 @@ const AddEditFloor = ({ type, floor }: FormType) => {
   const [open, setOpen] = React.useState(false);
   const [image, setImage] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(floor?.floorImage || null);
-  const [formData, setFormData] = React.useState({
+  const [formData, setFormData] = React.useState<floorType>({
     id: floor?.id || '',
     buildingId: floor?.buildingId || '',
     name: floor?.name || '',
-    floor: floor?.floorImage || '',
+    floorImage: floor?.floorImage || '',
     pixelX: floor?.pixelX || 0,
     pixelY: floor?.pixelY || 0,
     floorX: floor?.floorX || 0,
@@ -56,6 +56,11 @@ const AddEditFloor = ({ type, floor }: FormType) => {
   }, [dispatch]);
 
   const handleClickOpen = () => {
+                if (type === 'edit' && floor) {
+                  setFormData(floor);
+                } else {
+                  setFormData({} as floorType);
+                }
     setOpen(true);
     console.log('Floor Data:', formData);
     // console.log('buildingData:', buildingData);
@@ -63,22 +68,6 @@ const AddEditFloor = ({ type, floor }: FormType) => {
 
   const handleClose = () => {
     setOpen(false);
-    setFormData({
-      id: floor?.id || '',
-      buildingId: floor?.buildingId || '',
-      name: floor?.name || '',
-      floor: floor?.floorImage || '',
-      pixelX: floor?.pixelX || 0,
-      pixelY: floor?.pixelY || 0,
-      floorX: floor?.floorX || 0,
-      floorY: floor?.floorY || 0,
-      meterPerPx: floor?.meterPerPx || 0,
-      engineFloorId: floor?.engineFloorId || 0,
-      createdBy: floor?.createdBy || '',
-      createdAt: floor?.createdAt || '',
-      updatedBy: floor?.updatedBy || '',
-      updatedAt: floor?.updatedAt || '',
-    });
     setImage(null);
     setPreview(floor?.floorImage || null);
     console.log('Form reset to initial state');
@@ -277,7 +266,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                 variant="outlined"
                 disabled
               />
-              <CustomFormLabel htmlFor="floorX">Floor X</CustomFormLabel>
+              <CustomFormLabel htmlFor="floorX">Floor X (in meters)</CustomFormLabel>
               <CustomTextField
                 id="floorX"
                 placeholder={formData.floorX}
@@ -315,7 +304,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                 variant="outlined"
                 disabled
               />
-              <CustomFormLabel htmlFor="floorY">Floor Y</CustomFormLabel>
+              <CustomFormLabel htmlFor="floorY">Floor Y (in meters)</CustomFormLabel>
               <CustomTextField
                 id="floorY"
                 placeholder={formData.floorY}

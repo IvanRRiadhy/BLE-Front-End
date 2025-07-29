@@ -21,6 +21,7 @@ import {
   addBleReader,
   bleReaderType,
   editBleReader,
+  fetchBleReaderDT,
   fetchBleReaders,
 } from 'src/store/apps/crud/bleReader';
 import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
@@ -47,12 +48,18 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
     },
   );
   const brands: BrandType[] = useSelector((state: RootState) => state.brandReducer.brands);
+  const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchBrands());
   }, [dispatch]);
 
   const handleClickOpen = () => {
+    if (type === 'edit' && bleReader) {
+      setFormData(bleReader);
+    } else {
+      setFormData({} as bleReaderType);
+    }
     console.log('Form Data : ', formData);
     setOpen(true);
   };
@@ -69,7 +76,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
       if (type === 'add') {
         await dispatch(addBleReader(formData));
       }
-      await dispatch(fetchBleReaders());
+      await dispatch(fetchBleReaderDT(bleReaderFilter));
       console.log('Saved!');
       setOpen(false);
       setFormData({
@@ -146,7 +153,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
               <CustomFormLabel htmlFor="ble-name">Name</CustomFormLabel>
               <CustomTextField
                 id="name"
-                placeholder={formData.name}
+                value={formData.name}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -154,7 +161,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
               <CustomFormLabel htmlFor="ble-ip">IP</CustomFormLabel>
               <CustomTextField
                 id="ip"
-                placeholder={formData.ip}
+                value={formData.ip}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -164,7 +171,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
               <CustomFormLabel htmlFor="reader-id">Engine Reader ID</CustomFormLabel>
               <CustomTextField
                 id="engineReaderId"
-                placeholder={formData.engineReaderId}
+                value={formData.engineReaderId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -172,7 +179,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
               <CustomFormLabel htmlFor="ble-gmac">GMAC</CustomFormLabel>
               <CustomTextField
                 id="gmac"
-                placeholder={formData.gmac}
+                value={formData.gmac}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"

@@ -21,6 +21,7 @@ import {
   editAccessControl,
   addAccessControl,
   fetchAccessControls,
+  fetchAccessControlsDT,
 } from 'src/store/apps/crud/accessControl';
 import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
@@ -50,6 +51,10 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
       updatedAt: '',
     },
   );
+
+    const accessControlFilter = useSelector(
+      (state: RootState) => state.accessControlReducer.accessControlFilter,
+    )
   const brandData: BrandType[] = useSelector(
     (state: RootState) => state.brandReducer.brands,
   );
@@ -59,6 +64,12 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
   }, [dispatch]);
 
   const handleClickOpen = () => {
+      if (type === 'edit' && accessControl) {
+        setFormData(accessControl);
+      } else {
+        setFormData({} as AccessControlType);
+      }
+      console.log(formData.controllerBrandId);
     setOpen(true);
   };
 
@@ -74,7 +85,7 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
       if (type === 'add') {
         await dispatch(addAccessControl(formData));
       }
-      await dispatch(fetchAccessControls());
+      await dispatch(fetchAccessControlsDT(accessControlFilter));
       console.log('Saved!');
       setOpen(false);
     } catch (error) {
@@ -105,7 +116,7 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
           startIcon={<IconPlus size={20} />}
           onClick={handleClickOpen}
         >
-          Add Integration
+          Add Access Control
         </Button>
       )}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
@@ -124,8 +135,9 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
             <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
               <CustomFormLabel htmlFor="ctrl-brand-id">Controller Brand</CustomFormLabel>
               <CustomSelect
-                id="controllerBrandID"
-                placeholder={formData.controllerBrandId}
+                id="controllerBrandId"
+                name="controllerBrandId"
+                value={formData.controllerBrandId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -139,7 +151,7 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
               <CustomFormLabel htmlFor="ctrl-type">Controller Type</CustomFormLabel>
               <CustomTextField
                 id="type"
-                placeholder={formData.type}
+                value={formData.type}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -149,7 +161,7 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
               <CustomFormLabel htmlFor="ctrl-name">Name</CustomFormLabel>
               <CustomTextField
                 id="name"
-                placeholder={formData.name}
+                value={formData.name}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -157,7 +169,7 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
               <CustomFormLabel htmlFor="ctrl-description">Description</CustomFormLabel>
               <CustomTextField
                 id="description"
-                placeholder={formData.description}
+                value={formData.description}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -173,7 +185,7 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
               <CustomFormLabel htmlFor="door-id">Door ID</CustomFormLabel>
               <CustomTextField
                 id="doorId"
-                placeholder={formData.doorId}
+                value={formData.doorId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -181,7 +193,7 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
               <CustomFormLabel htmlFor="raw">Raw Data</CustomFormLabel>
               <CustomTextField
                 id="raw"
-                placeholder={formData.raw}
+                value={formData.raw}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -191,7 +203,7 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
               <CustomFormLabel htmlFor="ctrl-channel">Channel</CustomFormLabel>
               <CustomTextField
                 id="channel"
-                placeholder={formData.channel}
+                value={formData.channel}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"

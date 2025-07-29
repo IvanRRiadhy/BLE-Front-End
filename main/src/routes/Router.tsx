@@ -9,11 +9,13 @@ import VisitorCard from 'src/views/master/tag/VisitorCard';
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
+const MyVisitLayout = Loadable(lazy(() => import('../layouts/MyVisit/MyVisitLayout')));
 
 /* ****Pages***** */
 const MainMenuDash = Loadable(lazy(() => import('../views/dashboard/Main')));
 const MonitoringDash = Loadable(lazy(() => import('../views/dashboard/Monitoring')));
 const MonitoringConfig = Loadable(lazy(() => import('../views/dashboard/MonitoringConfig')));
+const MyVisitDashboard = Loadable(lazy(() => import('../views/MyVisit/MyVisitDashboard')));
 
 /* ***Master**** */
 const GatewayApp = Loadable(lazy(() => import('../views/master/gateway/gateway')));
@@ -368,6 +370,13 @@ const Router = [
 
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
+  },
+  {
+    path: '/',
+    element: <MyVisitLayout />,
+    children: [
+      {path: '/my-visit', element: <MyVisitDashboard />},
+    ]
   },
   {
     path: '/',

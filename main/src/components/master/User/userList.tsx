@@ -25,10 +25,10 @@ import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Stor
 import { fetchUser, UpdateFilter, userType } from 'src/store/apps/crud/users';
 
 const columns = [
-  { label: 'Username', field: 'username', sortAble: false },
-  { label: 'Email', field: 'email', sortAble: false },
-  { label: 'Email Verified', field: 'isEmailConfirmation', sortAble: true },
-  { label: 'Last Login', field: 'lastLoginAt', sortAble: true },
+  { label: 'Username', field: 'Username', sortAble: false },
+  { label: 'Email', field: 'Email', sortAble: false },
+  { label: 'Email Verified', field: 'IsEmailConfirmation', sortAble: true },
+  { label: 'Last Login', field: 'LastLoginAt', sortAble: true },
 ];
 
 const UserList = () => {

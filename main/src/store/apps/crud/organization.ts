@@ -64,7 +64,7 @@ const initialState: StateType = {
         Draw: 1,
         Start: 0,
         Length: 5,
-        SortColumn: "updatedAt",
+        SortColumn: "UpdatedAt",
         SortDir: "desc",
         searchValue: "",
     }
@@ -151,6 +151,7 @@ export const fetchOrganizationDT = createAsyncThunk(
     "organizations/fetchOrganizationDT",
     async (filter: any, { rejectWithValue }) => {
         try {
+            console.log("Fetch Organization DT: ", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetOrganization(response.data.collection.data || []));
             console.log("Fetch organizations", response.data.collection);

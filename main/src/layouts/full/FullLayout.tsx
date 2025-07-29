@@ -13,6 +13,8 @@ import { setSessionExpiredHandler } from 'src/utils/axios';
 import SessionExp from './shared/SessionExp';
 import AlarmPopup from './AlarmPopup';
 import { hydrateEvacState } from 'src/store/customizer/CustomizerSlice';
+import { Toaster } from 'react-hot-toast';
+
 
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
@@ -134,6 +136,7 @@ const FullLayout: FC = () => {
           {/* <Customizer /> */}
         </PageWrapper>
       </MainWrapper>
+      <Toaster />
     </>
   );
 };

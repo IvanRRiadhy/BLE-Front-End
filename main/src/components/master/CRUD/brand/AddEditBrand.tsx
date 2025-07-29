@@ -13,8 +13,8 @@ import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { AppDispatch, useDispatch } from 'src/store/Store';
-import { addBrand, BrandType, editBrand, fetchBrands } from 'src/store/apps/crud/brand';
+import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
+import { addBrand, BrandType, editBrand, fetchBrandDT, fetchBrands } from 'src/store/apps/crud/brand';
 
 interface FormType {
   type?: string;
@@ -24,9 +24,15 @@ interface FormType {
 const AddEditBrand = ({ type, brand }: FormType) => {
   const [open, setOpen] = React.useState(false);
   const [formData, setFormData] = React.useState<BrandType>(brand || { id: '', name: '', tag: '' });
+    const brandFilter = useSelector((state: RootState) => state.brandReducer.brandFilter);
   const dispatch: AppDispatch = useDispatch();
 
   const handleClickOpen = () => {
+        if (type === 'edit' && brand) {
+          setFormData(brand);
+        } else {
+          setFormData({} as BrandType);
+        }
     setOpen(true);
   };
 
@@ -42,7 +48,7 @@ const AddEditBrand = ({ type, brand }: FormType) => {
       if (type === 'add') {
         await dispatch(addBrand(formData));
       }
-      await dispatch(fetchBrands());
+      await dispatch(fetchBrandDT(brandFilter));
       console.log('Saved!');
       setOpen(false);
     } catch (error) {
@@ -89,7 +95,7 @@ const AddEditBrand = ({ type, brand }: FormType) => {
               <CustomFormLabel htmlFor="brand-Name">Brand Name</CustomFormLabel>
               <CustomTextField
                 id="name"
-                placeholder={formData.name}
+                value={formData.name}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -97,7 +103,7 @@ const AddEditBrand = ({ type, brand }: FormType) => {
               <CustomFormLabel htmlFor="brand-tag">Brand Tag</CustomFormLabel>
               <CustomTextField
                 id="tag"
-                placeholder={formData.tag}
+                value={formData.tag}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"

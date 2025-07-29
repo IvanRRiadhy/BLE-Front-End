@@ -16,6 +16,8 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 // import AddEditDevice from 'src/components/master/CRUD/floorplanDevice/addEditDevice';
 import FloorplanDeviceList2 from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceList2';
+import FloorplanDeviceImport from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceImport';
+import FloorplanDeviceExport from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceExport';
 interface cardType {
   icon?: string;
   title: string;
@@ -30,14 +32,14 @@ const FloorplanDevice = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 
-  const deviceList = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.floorplanDevices,
+  const deviceCount = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceFilteredCount,
   );
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
       title: 'Total Floorplan Devices',
-      subtitle: deviceList.length.toString(),
+      subtitle: deviceCount.toString(),
       bgcolor: 'success',
     },
   ];
@@ -84,7 +86,10 @@ const FloorplanDevice = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Floorplan List">
+          <ParentCard title="Floorplan List" codeModel={[
+            <FloorplanDeviceImport key="import" />,
+            <FloorplanDeviceExport key="export" />,
+          ]}>
             {/* <FloorplanDeviceList /> */}
             <FloorplanDeviceList2 />
           </ParentCard>

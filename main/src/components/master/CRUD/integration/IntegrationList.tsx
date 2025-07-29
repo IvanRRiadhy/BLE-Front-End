@@ -33,17 +33,15 @@ import { RootState, AppDispatch } from 'src/store/Store';
 import AddEditIntegration from './AddEditIntegration';
 // import { useTranslation } from 'react-i18next';
 
-
-
 const columns = [
   { label: 'Brand Name', field: 'Brand.Name', sortAble: true },
-  { label: 'Integration Type', field: 'integrationType', sortAble: true },
-    { label: 'API Authentication Type', field: 'apiTypeAuth', sortAble: true },
-      { label: 'API URL', field: 'Brand.Name', sortAble: true },
+  { label: 'Integration Type', field: 'IntegrationType', sortAble: true },
+  { label: 'API Authentication Type', field: 'ApiTypeAuth', sortAble: true },
+  { label: 'API URL', field: 'Brand.Name', sortAble: true },
 ];
 
 const IntegrationList = () => {
-    const dispatch: AppDispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const IntegrationData: IntegrationType[] = useSelector(
     (state: RootState) => state.integrationReducer.integrations,
   );
@@ -55,39 +53,43 @@ const IntegrationList = () => {
   );
   const IntegrationFilter = useSelector(
     (state: RootState) => state.integrationReducer.IntegrationFilter,
-  )
+  );
   // const { t } = useTranslation();
   // Pagination State
   const page = Math.floor(IntegrationFilter.Start / IntegrationFilter.Length);
-const rowsPerPage = IntegrationFilter.Length;
-const orderBy = IntegrationFilter.SortColumn;
-const order = IntegrationFilter.SortDir;
+  const rowsPerPage = IntegrationFilter.Length;
+  const orderBy = IntegrationFilter.SortColumn;
+  const order = IntegrationFilter.SortDir;
 
-const handleChangePage = (_: unknown, newPage: number) => {
-  dispatch(UpdateFilter({ Start: newPage * IntegrationFilter.Length }));
-};
+  const handleChangePage = (_: unknown, newPage: number) => {
+    dispatch(UpdateFilter({ Start: newPage * IntegrationFilter.Length }));
+  };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const newLength = parseInt(event.target.value, 10);
-  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
-};
-const handleSort = (column: string) => {
-  const isAsc = IntegrationFilter.SortColumn === column && IntegrationFilter.SortDir === 'asc';
-  const isDesc = IntegrationFilter.SortColumn === column && IntegrationFilter.SortDir === 'desc';
+    const newLength = parseInt(event.target.value, 10);
+    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+  };
+  const handleSort = (column: string) => {
+    const isAsc = IntegrationFilter.SortColumn === column && IntegrationFilter.SortDir === 'asc';
+    const isDesc = IntegrationFilter.SortColumn === column && IntegrationFilter.SortDir === 'desc';
 
-  if (isDesc) {
-    dispatch(UpdateFilter({
-      SortColumn: '',
-      SortDir: 'asc',
-      Start: 0,
-    }));
-  } else {
-    dispatch(UpdateFilter({
-      SortColumn: column,
-      SortDir: isAsc ? 'desc' : 'asc',
-      Start: 0,
-    }));
-  }
-};
+    if (isDesc) {
+      dispatch(
+        UpdateFilter({
+          SortColumn: 'UpdatedAt',
+          SortDir: 'desc',
+          Start: 0,
+        }),
+      );
+    } else {
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchIntegrationDT(IntegrationFilter));
@@ -98,7 +100,6 @@ const handleSort = (column: string) => {
   useEffect(() => {
     dispatch(fetchBrands());
   }, [dispatch]);
-
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -141,7 +142,7 @@ const handleSort = (column: string) => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                     {columns.map((col) => (
+                    {columns.map((col) => (
                       <TableCell key={col.label}>
                         {col.sortAble && col.field ? (
                           <TableSortLabel
@@ -165,42 +166,40 @@ const handleSort = (column: string) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {IntegrationData.map(
-                    (integration, index) => (
-                      <TableRow key={index}>
-                        <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
-                        >
-                          {index + 1 + page * rowsPerPage}
-                        </TableCell>
-                        <TableCell>{getBrandName(integration.brandId)}</TableCell>
-                        <TableCell>{integration.integrationType}</TableCell>
-                        <TableCell>{integration.apiTypeAuth}</TableCell>
-                        <TableCell>{integration.apiUrl}</TableCell>
+                  {IntegrationData.map((integration, index) => (
+                    <TableRow key={index}>
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                      >
+                        {index + 1 + page * rowsPerPage}
+                      </TableCell>
+                      <TableCell>{getBrandName(integration.brandId)}</TableCell>
+                      <TableCell>{integration.integrationType}</TableCell>
+                      <TableCell>{integration.apiTypeAuth}</TableCell>
+                      <TableCell>{integration.apiUrl}</TableCell>
 
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            display: 'flex',
-                            gap: 1,
-                            alignItems: 'center',
-                          }}
+                      <TableCell
+                        sx={{
+                          position: 'sticky',
+                          right: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          display: 'flex',
+                          gap: 1,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <AddEditIntegration type="edit" integration={integration} />
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleOpenDeleteDialog(integration)}
                         >
-                          <AddEditIntegration type="edit" integration={integration} />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(integration)}
-                          >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ),
-                  )}
+                          <IconTrash size={20} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>

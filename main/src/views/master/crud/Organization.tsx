@@ -30,15 +30,15 @@ const Organization = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const organizationList = useSelector(
-    (state: RootState) => state.organizationReducer.organizations,
+  const organizationCount = useSelector(
+    (state: RootState) => state.organizationReducer.organizationFilteredCount,
   );
   const { t } = useTranslation();
 
   const topCards: cardType[] = [
     {
       title: 'Total Organizations',
-      subtitle: organizationList.length.toString(),
+      subtitle: organizationCount.toString(),
       bgcolor: 'success',
     },
   ];

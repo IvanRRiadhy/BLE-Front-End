@@ -55,6 +55,11 @@ const AddEditApplication = ({ type, application }: FormType) => {
 
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = () => {
+    if (type === 'edit' && application) {
+      setFormData(application);
+    } else {
+      setFormData({} as ApplicationType);
+    }
     setOpen(true);
   };
 
@@ -128,7 +133,7 @@ const AddEditApplication = ({ type, application }: FormType) => {
               <CustomFormLabel htmlFor="app-name">Application Name</CustomFormLabel>
               <CustomTextField
                 id="applicationName"
-                placeholder={formData.applicationName}
+                value={formData.applicationName}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -176,7 +181,7 @@ const AddEditApplication = ({ type, application }: FormType) => {
               <CustomFormLabel htmlFor="org-address">Organization Address</CustomFormLabel>
               <CustomTextField
                 id="organizationAddress"
-                placeholder={formData.organizationAddress}
+                value={formData.organizationAddress}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -192,7 +197,7 @@ const AddEditApplication = ({ type, application }: FormType) => {
               <CustomFormLabel htmlFor="host-name">Host Name</CustomFormLabel>
               <CustomTextField
                 id="hostName"
-                placeholder={formData.hostName}
+                value={formData.hostName}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -200,7 +205,7 @@ const AddEditApplication = ({ type, application }: FormType) => {
               <CustomFormLabel htmlFor="host-email">Host Email</CustomFormLabel>
               <CustomTextField
                 id="hostEmail"
-                placeholder={formData.hostEmail}
+                value={formData.hostEmail}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -210,7 +215,7 @@ const AddEditApplication = ({ type, application }: FormType) => {
               <CustomFormLabel htmlFor="host-phone">Host Phone</CustomFormLabel>
               <CustomTextField
                 id="hostPhone"
-                placeholder={formData.hostPhone}
+                value={formData.hostPhone}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -218,7 +223,7 @@ const AddEditApplication = ({ type, application }: FormType) => {
               <CustomFormLabel htmlFor="host-address">Host Address</CustomFormLabel>
               <CustomTextField
                 id="hostAddress"
-                placeholder={formData.hostAddress}
+                value={formData.hostAddress}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -234,7 +239,7 @@ const AddEditApplication = ({ type, application }: FormType) => {
               <CustomFormLabel htmlFor="app-cust-name">Application Custom Name</CustomFormLabel>
               <CustomTextField
                 id="applicationCustomName"
-                placeholder={formData.applicationCustomName}
+                value={formData.applicationCustomName}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -242,7 +247,7 @@ const AddEditApplication = ({ type, application }: FormType) => {
               <CustomFormLabel htmlFor="app-cust-port">Application Custom Port</CustomFormLabel>
               <CustomTextField
                 id="applicationCustomPort"
-                placeholder={formData.applicationCustomPort}
+                value={formData.applicationCustomPort}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -252,7 +257,7 @@ const AddEditApplication = ({ type, application }: FormType) => {
               <CustomFormLabel htmlFor="app-cust-domain">Application Custom Domain</CustomFormLabel>
               <CustomTextField
                 id="applicationCustomDomain"
-                placeholder={formData.applicationCustomDomain}
+                value={formData.applicationCustomDomain}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -284,7 +289,7 @@ const AddEditApplication = ({ type, application }: FormType) => {
               <CustomFormLabel htmlFor="license-code">License Code</CustomFormLabel>
               <CustomTextField
                 id="licenseCode"
-                placeholder={formData.licenseCode}
+                value={formData.licenseCode}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"

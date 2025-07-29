@@ -104,8 +104,8 @@ const initialState: StateType = {
         Draw: 1,
         Start: 0,
         Length: 5,
-        SortColumn: "updatedAt",
-        SortDir: "asc",
+        SortColumn: "UpdatedAt",
+        SortDir: "desc",
         searchValue: "",
         filters: {
             FloorplanId: [],
@@ -413,7 +413,7 @@ export const ImportMaskedArea = createAsyncThunk(
 
 export const ExportMaskedArea = createAsyncThunk(
     "maskedAreas/exportMaskedArea",
-    async (filter: "pdf" | "xlsx", { rejectWithValue }) => {
+    async (filter: "pdf" | "excel", { rejectWithValue }) => {
     const url = `${API_URL}export/${filter}`;
     const accessToken = localStorage.getItem('token');
     try {

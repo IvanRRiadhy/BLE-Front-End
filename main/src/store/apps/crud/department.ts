@@ -65,8 +65,8 @@ const initialState: StateType = {
         Draw: 1,
         Start: 0,
         Length: 5,
-        SortColumn: "updatedAt",
-        SortDir: "asc",
+        SortColumn: "UpdatedAt",
+        SortDir: "desc",
         searchValue: "",
     }
 };

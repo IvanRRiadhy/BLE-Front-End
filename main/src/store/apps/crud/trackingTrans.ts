@@ -76,7 +76,7 @@ const initialState: StateType = {
         Draw: 1,
         Start: 0,
         Length: 5,
-        SortColumn: "transTime",
+        SortColumn: "TransTime",
         SortDir: "desc",
         searchValue: "",
         filters: {
@@ -103,6 +103,9 @@ export const TrackingTransSlice = createSlice({
         SearchTrackingTrans: (state, action: PayloadAction<string>) => {
             state.trackingTransSearch = action.payload;
         },
+        UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
+            state.trackingTransFilter = { ...state.trackingTransFilter, ...action.payload };
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -140,7 +143,7 @@ export const TrackingTransSlice = createSlice({
     },
 });
 
-export const { GetTrackingTrans, GetAllTrackingTrans, SelectTrackingTrans, SearchTrackingTrans } = TrackingTransSlice.actions;
+export const { GetTrackingTrans, GetAllTrackingTrans, SelectTrackingTrans, SearchTrackingTrans, UpdateFilter } = TrackingTransSlice.actions;
 
 export const fetchTrackingTrans = () => async (dispatch: AppDispatch) => {
     try {

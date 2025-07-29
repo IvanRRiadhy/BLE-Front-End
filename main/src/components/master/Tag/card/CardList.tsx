@@ -26,13 +26,13 @@ import { CardType, UpdateFilter, fetchCard } from 'src/store/apps/crud/card';
 import AddEditCard from './AddEditCard';
 
 const columns = [
-  { label: 'Name', field: 'name', sortAble: true },
-  { label: 'Remarks', field: 'remarks', sortAble: false },
-  { label: 'Card Type', field: 'cardType', sortAble: true },
-  { label: 'Card Number', field: 'cardNumber', sortAble: true },
-  { label: 'Registered Site', field: 'registeredSite', sortAble: false },
-  { label: 'Active', field: 'isUsed', sortAble: true },
-  { label: 'Last Used By', field: 'lastUsed', sortAble: false },
+  { label: 'Name', field: 'Name', sortAble: true },
+  { label: 'Remarks', field: 'Remarks', sortAble: false },
+  { label: 'Card Type', field: 'CardType', sortAble: true },
+  { label: 'Card Number', field: 'CardNumber', sortAble: true },
+  { label: 'Registered Site', field: 'RegisteredSite', sortAble: false },
+  { label: 'Active', field: 'IsUsed', sortAble: true },
+  { label: 'Last Used By', field: 'LastUsed', sortAble: false },
 ];
 
 const CardList = () => {
@@ -53,24 +53,28 @@ const CardList = () => {
     const newLength = parseInt(event.target.value, 10);
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
-const handleSort = (column: string) => {
-  const isAsc = cardFilter.SortColumn === column && cardFilter.SortDir === 'asc';
-  const isDesc = cardFilter.SortColumn === column && cardFilter.SortDir === 'desc';
+  const handleSort = (column: string) => {
+    const isAsc = cardFilter.SortColumn === column && cardFilter.SortDir === 'asc';
+    const isDesc = cardFilter.SortColumn === column && cardFilter.SortDir === 'desc';
 
-  if (isDesc) {
-    dispatch(UpdateFilter({
-      SortColumn: '',
-      SortDir: 'asc',
-      Start: 0,
-    }));
-  } else {
-    dispatch(UpdateFilter({
-      SortColumn: column,
-      SortDir: isAsc ? 'desc' : 'asc',
-      Start: 0,
-    }));
-  }
-};
+    if (isDesc) {
+      dispatch(
+        UpdateFilter({
+          SortColumn: 'updatedAt',
+          SortDir: 'desc',
+          Start: 0,
+        }),
+      );
+    } else {
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchCard());

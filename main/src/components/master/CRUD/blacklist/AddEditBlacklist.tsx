@@ -21,6 +21,7 @@ import {
   addBlacklist,
   editBlacklist,
   fetchBlacklist,
+  fetchBlacklistDT,
 } from 'src/store/apps/crud/blacklist';
 import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import { fetchVisitor } from 'src/store/apps/crud/visitor';
@@ -35,7 +36,7 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
   const [formData, setFormData] = React.useState(
     blacklist || { id: '', visitorId: '', floorplanMaskedAreaId: '' },
   );
-
+const blacklistFilter = useSelector((state: RootState) => state.blacklistReducer.blacklistFilter);
   const visitorData = useSelector((state: RootState) => state.visitorReducer.visitors);
   const maskedAreaData = useSelector(
     (state: RootState) => state.maskedAreaReducer.maskedAreas,
@@ -48,6 +49,11 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
   }, [dispatch]);
 
   const handleClickOpen = () => {
+          if (type === 'edit' && blacklist) {
+            setFormData(blacklist);
+          } else {
+            setFormData({} as blacklistType);
+          }
     setOpen(true);
   };
 
@@ -75,7 +81,7 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
       if (type === 'add') {
         await dispatch(addBlacklist(data));
       }
-      await dispatch(fetchBlacklist());
+      await dispatch(fetchBlacklistDT(blacklistFilter));
       console.log('Saved!');
       setOpen(false);
     } catch (error) {

@@ -30,15 +30,15 @@ const AccessControl = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const accessControlList = useSelector(
-    (state: RootState) => state.accessControlReducer.accessControls,
+  const accesControlCount = useSelector(
+    (state: RootState) => state.accessControlReducer.accessControlFilteredCount,
   );
   const { t } = useTranslation();
 
   const topCards: cardType[] = [
     {
       title: 'Total Access Controls',
-      subtitle: accessControlList.length.toString(),
+      subtitle: accesControlCount.toString(),
       bgcolor: 'success',
     },
   ];

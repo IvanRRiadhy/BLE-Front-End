@@ -17,6 +17,7 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  TableSortLabel,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
@@ -24,49 +25,79 @@ import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Stor
 import {
   deleteTrackingTrans,
   fetchTrackingTrans,
+  fetchTrackingTransDT,
   trackingTransType,
+  UpdateFilter,
 } from 'src/store/apps/crud/trackingTrans';
 import AddEditTrackingTransaction from './AddEditTrackingTransaction';
 import { useTranslation } from 'react-i18next';
 
-const TrackingTransactionList = () => {
-  const { t } = useTranslation();
-  // Pagination State
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
-  // const filter = {
-  //   Draw: 1,
-  //   Start: 0,
-  //   Length: rowsPerPage,
-  //   SortColumn: '',
-  //   SortDir: 'asc',
-  //   searchValue: '',
-  // };
-  // Handle page change
-  const handleChangePage = (event: unknown, newPage: number) => {
-    console.log(event);
-    setPage(newPage);
-  };
+const columns = [
+  { label: 'Transaction Time', field: 'TransTime', sortAble: true },
+  { label: 'Reader', field: 'Reader.Name', sortAble: true },
+  { label: 'Floorplan', field: 'Floorplan.Name', sortAble: true },
+  { label: 'Card ', field: 'CardId', sortAble: true },
+  { label: 'Coordinate', field: '', sortAble: false },
+  { label: 'Alarm Status', field: 'AlarmStatus', sortAble: true },
+  { label: 'Battery', field: 'Battery', sortAble: true },
+];
 
-  // Handle rows per page change
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+const TrackingTransactionList = () => {
   const dispatch: AppDispatch = useDispatch();
   const trackingTransData = useSelector(
     (state: RootState) => state.trackingTransReducer.trackingTrans,
   );
-  // const trackingTransTotalCount = useSelector(
-  //   (state: RootState) => state.trackingTransReducer.trackingTransTotalCount,
-  // );
-  // const trackingTransFilteredCount = useSelector(
-  //   (state: RootState) => state.trackingTransReducer.trackingTransFilteredCount,
-  // );
+  const trackingTransTotalCount = useSelector(
+    (state: RootState) => state.trackingTransReducer.trackingTransTotalCount,
+  );
+  const trackingTransFilteredCount = useSelector(
+    (state: RootState) => state.trackingTransReducer.trackingTransFilteredCount,
+  );
+  const trackingTransFilter = useSelector(
+    (state: RootState) => state.trackingTransReducer.trackingTransFilter,
+  );
+  const { t } = useTranslation();
+  // Pagination State
+  const page = Math.floor(trackingTransFilter.Start / trackingTransFilter.Length);
+  const rowsPerPage = trackingTransFilter.Length;
+  const orderBy = trackingTransFilter.SortColumn;
+  const order = trackingTransFilter.SortDir;
+
+  const handleChangePage = (_: unknown, newPage: number) => {
+    dispatch(UpdateFilter({ Start: newPage * trackingTransFilter.Length }));
+  };
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newLength = parseInt(event.target.value, 10);
+    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+  };
+  const handleSort = (column: string) => {
+    const isAsc =
+      trackingTransFilter.SortColumn === column && trackingTransFilter.SortDir === 'asc';
+    const isDesc =
+      trackingTransFilter.SortColumn === column && trackingTransFilter.SortDir === 'desc';
+
+    if (isDesc) {
+      dispatch(
+        UpdateFilter({
+          SortColumn: 'UpdatedAt',
+          SortDir: 'desc',
+          Start: 0,
+        }),
+      );
+    } else {
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
+    }
+  };
 
   useEffect(() => {
-    dispatch(fetchTrackingTrans());
-  }, [dispatch]);
+    dispatch(fetchTrackingTransDT(trackingTransFilter));
+  }, [trackingTransFilter, dispatch]);
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -121,20 +152,19 @@ const TrackingTransactionList = () => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"> </Typography>
                     </TableCell>
-                    {[
-                      'transTime',
-                      'Reader Name',
-                      'cardId',
-                      'Floorplan Name',
-                      'coordinateX',
-                      'coordinateY',
-                      'coordinatePxX',
-                      'coordinatePxY',
-                      'alarmStatus',
-                      'battery',
-                    ].map((header) => (
-                      <TableCell key={header}>
-                        <Typography variant="h6">{header}</Typography>
+                    {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
+                          >
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
                       </TableCell>
                     ))}
                     {/* Right Sticky Empty Column */}
@@ -146,57 +176,53 @@ const TrackingTransactionList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {trackingTransData
-                    .map((trackingTrans: trackingTransType, index) => (
-                      <TableRow key={trackingTrans.id}>
-                        <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
-                        >
-                          {' '}
-                          {index + 1 + page * rowsPerPage}{' '}
-                        </TableCell>
-                        <TableCell>{formatTime(trackingTrans.transTime)}</TableCell>
-                        <TableCell>{trackingTrans.reader?.name}</TableCell>
-                        <TableCell>{trackingTrans.cardId}</TableCell>
-                        <TableCell>{trackingTrans.floorplanMaskedArea?.name}</TableCell>
-                        <TableCell>{trackingTrans.coordinateX}</TableCell>
-                        <TableCell>{trackingTrans.coordinateY}</TableCell>
-                        <TableCell>{trackingTrans.coordinatePxX}</TableCell>
-                        <TableCell>{trackingTrans.coordinatePxY}</TableCell>
-                        <TableCell>{trackingTrans.alarmStatus}</TableCell>
-                        <TableCell>{trackingTrans.battery}</TableCell>
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            display: 'flex',
-                            gap: 1,
-                            alignItems: 'center',
-                          }}
-                        >
-                          <AddEditTrackingTransaction
+                  {trackingTransData.map((trackingTrans: trackingTransType, index) => (
+                    <TableRow key={trackingTrans.id}>
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                      >
+                        {' '}
+                        {index + 1 + page * rowsPerPage}{' '}
+                      </TableCell>
+                      <TableCell>{formatTime(trackingTrans.transTime)}</TableCell>
+                      <TableCell>{trackingTrans.reader?.name}</TableCell>
+                      <TableCell>{trackingTrans.floorplanMaskedArea?.name}</TableCell>
+                      <TableCell>{trackingTrans.cardId}</TableCell>
+                      <TableCell>{`(${trackingTrans.coordinateX}, ${trackingTrans.coordinateY})`}</TableCell>
+                      <TableCell>{trackingTrans.alarmStatus}</TableCell>
+                      <TableCell>{trackingTrans.battery}</TableCell>
+                      <TableCell
+                        sx={{
+                          position: 'sticky',
+                          right: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          display: 'flex',
+                          gap: 1,
+                          alignItems: 'center',
+                        }}
+                      >
+                        {/* <AddEditTrackingTransaction
                             type="edit"
                             trackingTransaction={trackingTrans}
-                          />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(trackingTrans)}
-                          >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          /> */}
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleOpenDeleteDialog(trackingTrans)}
+                        >
+                          <IconTrash size={20} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={trackingTransData.length}
+              count={trackingTransFilteredCount}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

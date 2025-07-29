@@ -99,7 +99,7 @@ const initialState: StateType = {
         Draw: 1,
         Start: 0,
         Length: 5,
-        SortColumn: "updatedAt",
+        SortColumn: "UpdatedAt",
         SortDir: "desc",
         searchValue: "",
         filters: {
@@ -409,7 +409,7 @@ export const ImportFloorplanDevice = createAsyncThunk(
 
 export const ExportFloorplanDevice = createAsyncThunk(
     "floorplanDevice/exportFloorplanDevice",
-    async (filter: "pdf" | "xlsx", { rejectWithValue }) => {
+    async (filter: "pdf" | "excel", { rejectWithValue }) => {
     const url = `${API_URL}export/${filter}`;
     const accessToken = localStorage.getItem('token');
     try {

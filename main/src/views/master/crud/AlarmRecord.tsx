@@ -15,6 +15,8 @@ import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import AlarmRecordList from 'src/components/master/CRUD/alarmRecord/AlarmRecordList';
+import AlarmRecordImport from 'src/components/master/CRUD/alarmRecord/AlarmRecordImport';
+import AlarmExport from 'src/components/master/CRUD/alarmRecord/AlarmRecordExport';
 
 interface cardType {
   icon?: string;
@@ -29,15 +31,15 @@ const AlarmRecord = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const alarmRecordList = useSelector(
-    (state: RootState) => state.alarmReducer.alarmRecordTrackings,
+  const alarmRecordCount = useSelector(
+    (state: RootState) => state.alarmReducer.alarmRecordFilteredCount,
   );
   const { t } = useTranslation();
 
   const topCards: cardType[] = [
     {
       title: 'Total Alarm Records',
-      subtitle: alarmRecordList.length.toString(),
+      subtitle: alarmRecordCount.toString(),
       bgcolor: 'success',
     },
   ];
@@ -84,7 +86,10 @@ const AlarmRecord = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Alarm Record List">
+          <ParentCard
+            title="Alarm Record List"
+            codeModel={[<AlarmRecordImport key={'import'} />, <AlarmExport key={'export'} />]}
+          >
             <AlarmRecordList />
           </ParentCard>
         </Drawer>

@@ -17,6 +17,8 @@ import { useTranslation } from 'react-i18next';
 import FloorplanList from 'src/components/master/CRUD/floorplan/FloorplanList';
 import AddEditFloorplan from 'src/components/master/CRUD/floorplan/AddEditFloorplan';
 import FloorplanFilter from 'src/components/master/CRUD/floorplan/FloorplanFilter';
+import FloorplanImport from 'src/components/master/CRUD/floorplan/FloorplanImport';
+import FloorplanExport from 'src/components/master/CRUD/floorplan/FloorplanExport';
 
 interface cardType {
   icon?: string;
@@ -32,12 +34,12 @@ const Floorplan = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 
-  const floorplanList = useSelector((state: RootState) => state.floorplanReducer.floorplans);
+  const floorplanCount = useSelector((state: RootState) => state.floorplanReducer.floorplanFilteredCount);
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
       title: 'Total Floorplan',
-      subtitle: floorplanList.length.toString(),
+      subtitle: floorplanCount.toString(),
       bgcolor: 'success',
     },
   ];
@@ -85,6 +87,8 @@ const Floorplan = () => {
           }}
         >
           <ParentCard title="Floorplan List" codeModel={[
+            <FloorplanImport key="import" />,
+            <FloorplanExport key="export" />,
             <FloorplanFilter key="filter" />,
             <AddEditFloorplan key="add" type="add" />
             ]}>

@@ -18,15 +18,17 @@ import React from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { AppDispatch, useDispatch } from 'src/store/Store';
+import { AppDispatch, RootState, useDispatch } from 'src/store/Store';
 import { visitorStatus, gender, visitorType } from 'src/types/crud/input';
 import {
   addVisitor,
   editVisitor,
   fetchVisitor,
+  fetchVisitorDT,
   masterVisitorType,
   VisitorType,
 } from 'src/store/apps/crud/visitor';
+import { useSelector } from 'react-redux';
 
 interface FormType {
   type?: string;
@@ -63,6 +65,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
     applicationId: visitor?.applicationId || localStorage.getItem('applicationId') || '',
 
   });
+  const visitorFilter = useSelector((state: RootState) => state.visitorReducer.visitorFilter);
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = () => {
     setOpen(true);
@@ -103,7 +106,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
       if (type === 'add') {
         await dispatch(addVisitor(data));
       }
-      await dispatch(fetchVisitor());
+      await dispatch(fetchVisitorDT(visitorFilter));
       console.log('Saved!');
       setOpen(false);
     } catch (error) {

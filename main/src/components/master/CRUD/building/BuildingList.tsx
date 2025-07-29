@@ -67,8 +67,8 @@ const handleSort = (column: string) => {
 
   if (isDesc) {
     dispatch(UpdateFilter({
-      SortColumn: '',
-      SortDir: 'asc',
+      SortColumn: 'UpdatedAt',
+      SortDir: 'desc',
       Start: 0,
     }));
   } else {

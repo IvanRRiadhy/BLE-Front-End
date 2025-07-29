@@ -34,17 +34,17 @@ import AddEditAccessControl from './AddEditAccesControl';
 
 const columns = [
   { label: 'Brand Name', field: 'Building.Name', sortAble: true },
-  { label: 'Access Control Name', field: 'name', sortAble: true },
-  { label: 'Type', field: 'type', sortAble: true },
+  { label: 'Access Control Name', field: 'Name', sortAble: true },
+  { label: 'Type', field: 'Type', sortAble: true },
   { label: 'Description', field: '', sortAble: false },
-  { label: 'Channel', field: 'channel', sortAble: true },
-  { label: 'Door ID', field: 'doorId', sortAble: true },
+  { label: 'Channel', field: 'Channel', sortAble: true },
+  { label: 'Door ID', field: 'DoorId', sortAble: true },
   { label: 'Raw', field: '', sortAble: false },
   { label: 'Integration Name', field: 'Integration.Name', sortAble: true },
 ];
 
 const AccessControlList = () => {
-    const dispatch: AppDispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const accessControlData: AccessControlType[] = useSelector(
     (state: RootState) => state.accessControlReducer.accessControls,
   );
@@ -56,21 +56,21 @@ const AccessControlList = () => {
   );
   const accessControlFilter = useSelector(
     (state: RootState) => state.accessControlReducer.accessControlFilter,
-  )
+  );
   // const { t } = useTranslation();
   // Pagination State
   const page = Math.floor(accessControlFilter.Start / accessControlFilter.Length);
-const rowsPerPage = accessControlFilter.Length;
-const orderBy = accessControlFilter.SortColumn;
-const order = accessControlFilter.SortDir;
+  const rowsPerPage = accessControlFilter.Length;
+  const orderBy = accessControlFilter.SortColumn;
+  const order = accessControlFilter.SortDir;
 
-const handleChangePage = (_: unknown, newPage: number) => {
-  dispatch(UpdateFilter({ Start: newPage * accessControlFilter.Length }));
-};
+  const handleChangePage = (_: unknown, newPage: number) => {
+    dispatch(UpdateFilter({ Start: newPage * accessControlFilter.Length }));
+  };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const newLength = parseInt(event.target.value, 10);
-  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
-};
+    const newLength = parseInt(event.target.value, 10);
+    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+  };
 
   useEffect(() => {
     dispatch(fetchAccessControlsDT(accessControlFilter));
@@ -98,24 +98,30 @@ const handleChangePage = (_: unknown, newPage: number) => {
     }
     handleCloseDeleteDialog();
   };
-const handleSort = (column: string) => {
-  const isAsc = accessControlFilter.SortColumn === column && accessControlFilter.SortDir === 'asc';
-  const isDesc = accessControlFilter.SortColumn === column && accessControlFilter.SortDir === 'desc';
+  const handleSort = (column: string) => {
+    const isAsc =
+      accessControlFilter.SortColumn === column && accessControlFilter.SortDir === 'asc';
+    const isDesc =
+      accessControlFilter.SortColumn === column && accessControlFilter.SortDir === 'desc';
 
-  if (isDesc) {
-    dispatch(UpdateFilter({
-      SortColumn: '',
-      SortDir: 'asc',
-      Start: 0,
-    }));
-  } else {
-    dispatch(UpdateFilter({
-      SortColumn: column,
-      SortDir: isAsc ? 'desc' : 'asc',
-      Start: 0,
-    }));
-  }
-};
+    if (isDesc) {
+      dispatch(
+        UpdateFilter({
+          SortColumn: 'UpdatedAt',
+          SortDir: 'desc',
+          Start: 0,
+        }),
+      );
+    } else {
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
+    }
+  };
 
   return (
     <Grid container spacing={3}>

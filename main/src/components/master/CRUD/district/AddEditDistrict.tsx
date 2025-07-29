@@ -14,11 +14,12 @@ import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { AppDispatch, useDispatch} from 'src/store/Store';
+import { AppDispatch, RootState, useDispatch, useSelector} from 'src/store/Store';
 import {
   addDistrict,
   DistrictType,
   editDistrict,
+  fetchDistrictDT,
   fetchDistricts,
 } from 'src/store/apps/crud/district';
 
@@ -42,9 +43,15 @@ const AddEditDistrict = ({ type, district }: FormType) => {
       updatedAt: '',
     },
   );
+    const districtFilter = useSelector((state: RootState) => state.districtReducer.districtFilter);
   const dispatch: AppDispatch = useDispatch();
 
   const handleClickOpen = () => {
+                if (type === 'edit' && district) {
+                  setFormData(district);
+                } else {
+                  setFormData({} as DistrictType);
+                }
     setOpen(true);
   };
 
@@ -60,7 +67,7 @@ const AddEditDistrict = ({ type, district }: FormType) => {
       if (type === 'add') {
         await dispatch(addDistrict(formData));
       }
-      await dispatch(fetchDistricts());
+      await dispatch(fetchDistrictDT(districtFilter));
       console.log('Saved!');
       setOpen(false);
     } catch (error) {
@@ -111,7 +118,7 @@ const AddEditDistrict = ({ type, district }: FormType) => {
               <CustomFormLabel htmlFor="district-code">District Code</CustomFormLabel>
               <CustomTextField
                 id="code"
-                placeholder={formData.code}
+                value={formData.code}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -119,7 +126,7 @@ const AddEditDistrict = ({ type, district }: FormType) => {
               <CustomFormLabel htmlFor="district-host">District Host</CustomFormLabel>
               <CustomTextField
                 id="districtHost"
-                placeholder={formData.districtHost}
+                value={formData.districtHost}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -129,7 +136,7 @@ const AddEditDistrict = ({ type, district }: FormType) => {
               <CustomFormLabel htmlFor="district-Name">District Name</CustomFormLabel>
               <CustomTextField
                 id="name"
-                placeholder={formData.name}
+                value={formData.name}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"

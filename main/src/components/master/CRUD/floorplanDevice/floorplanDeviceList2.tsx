@@ -24,57 +24,69 @@ import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 // import { useTranslation } from 'react-i18next';
 import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
-import { fetchFloorplan, fetchFloorplanDT, FloorplanType, SelectFloorplan, UpdateFilter } from 'src/store/apps/crud/floorplan';
+import {
+  fetchFloorplan,
+  fetchFloorplanDT,
+  FloorplanType,
+  SelectFloorplan,
+  UpdateFilter,
+} from 'src/store/apps/crud/floorplan';
 import { IconEdit } from '@tabler/icons-react';
 import { useNavigate } from 'react-router';
 
 const columns = [
-    { label: 'Floorplan Name', field: 'name', sortAble: true },
+  { label: 'Floorplan Name', field: 'Name', sortAble: true },
   { label: 'Total Device', field: 'DeviceCount', sortAble: true },
 ];
 
 const FloorplanDeviceList2 = () => {
-    const dispatch: AppDispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
-      const floorplanFilteredCount = useSelector((state: RootState) => state.floorplanReducer.floorplanFilteredCount);
+  const floorplanFilteredCount = useSelector(
+    (state: RootState) => state.floorplanReducer.floorplanFilteredCount,
+  );
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   // const { t } = useTranslation();
   const navigate = useNavigate();
   // Pagination State
   const page = Math.floor(floorplanFilter.Start / floorplanFilter.Length);
-const rowsPerPage = floorplanFilter.Length;
-const orderBy = floorplanFilter.SortColumn;
-const order = floorplanFilter.SortDir;
+  const rowsPerPage = floorplanFilter.Length;
+  const orderBy = floorplanFilter.SortColumn;
+  const order = floorplanFilter.SortDir;
 
-const handleChangePage = (_: unknown, newPage: number) => {
-  dispatch(UpdateFilter({ Start: newPage * floorplanFilter.Length }));
-};
+  const handleChangePage = (_: unknown, newPage: number) => {
+    dispatch(UpdateFilter({ Start: newPage * floorplanFilter.Length }));
+  };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const newLength = parseInt(event.target.value, 10);
-  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
-};
-const handleSort = (column: string) => {
-  const isAsc = floorplanFilter.SortColumn === column && floorplanFilter.SortDir === 'asc';
-  const isDesc = floorplanFilter.SortColumn === column && floorplanFilter.SortDir === 'desc';
+    const newLength = parseInt(event.target.value, 10);
+    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+  };
+  const handleSort = (column: string) => {
+    const isAsc = floorplanFilter.SortColumn === column && floorplanFilter.SortDir === 'asc';
+    const isDesc = floorplanFilter.SortColumn === column && floorplanFilter.SortDir === 'desc';
 
-  if (isDesc) {
-    dispatch(UpdateFilter({
-      SortColumn: '',
-      SortDir: 'asc',
-      Start: 0,
-    }));
-  } else {
-    dispatch(UpdateFilter({
-      SortColumn: column,
-      SortDir: isAsc ? 'desc' : 'asc',
-      Start: 0,
-    }));
-  }
-};
+    if (isDesc) {
+      dispatch(
+        UpdateFilter({
+          SortColumn: 'UpdatedAt',
+          SortDir: 'desc',
+          Start: 0,
+        }),
+      );
+    } else {
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
+    }
+  };
 
-// useEffect(() => {
-//   console.log("Floorplan Data:", floorplanData);
-// }, [floorplanData]);
+  // useEffect(() => {
+  //   console.log("Floorplan Data:", floorplanData);
+  // }, [floorplanData]);
 
   useEffect(() => {
     dispatch(fetchFloorplanDT(floorplanFilter));
@@ -155,44 +167,43 @@ const handleSort = (column: string) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {floorplanData
-                    .map((floorplan: FloorplanType, index) => (
-                      <TableRow key={index}>
-                        <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
-                        >
-                          {floorplan.name}
-                        </TableCell>
-                        <TableCell>{floorplan.deviceCount}</TableCell>
+                  {floorplanData.map((floorplan: FloorplanType, index) => (
+                    <TableRow key={index}>
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                      >
+                        {floorplan.name}
+                      </TableCell>
+                      <TableCell>{floorplan.deviceCount}</TableCell>
 
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            display: 'flex',
-                            gap: 1,
-                            alignItems: 'center',
-                          }}
+                      <TableCell
+                        sx={{
+                          position: 'sticky',
+                          right: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          display: 'flex',
+                          gap: 1,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <IconButton
+                          color="primary"
+                          size="small"
+                          onClick={() => handleOnClick(floorplan.id)}
                         >
-                          <IconButton
-                            color="primary"
-                            size="small"
-                            onClick={() => handleOnClick(floorplan.id)}
-                          >
-                            <IconEdit size={20} />
-                          </IconButton>
-                          {/* <IconButton
+                          <IconEdit size={20} />
+                        </IconButton>
+                        {/* <IconButton
                             color="error"
                             size="small"
                             onClick={() => handleOpenDeleteDialog(floorplan)}
                           >
                             <IconTrash size={20} />
                           </IconButton> */}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>

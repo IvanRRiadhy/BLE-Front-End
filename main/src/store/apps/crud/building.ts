@@ -66,7 +66,7 @@ const initialState: StateType = {
         Draw: 1,
         Start: 0,
         Length: 5,
-        SortColumn: "updatedAt",
+        SortColumn: "UpdatedAt",
         SortDir: "desc",
         searchValue: "",
     }
@@ -124,6 +124,7 @@ export const fetchBuildingDT = createAsyncThunk(
     "buildings/fetchBuildingDT",
     async (filter: any, { rejectWithValue }) => {
         try {
+            console.log("Fetch Building DT: ", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetBuildings(response.data.collection.data || []));
             console.log("Fetch buildings", response.data.collection);
@@ -195,7 +196,7 @@ export const ImportBuilding = createAsyncThunk(
 
 export const ExportBuilding = createAsyncThunk(
     "buildings/exportBuilding",
-    async (filter: "pdf" | "xlsx", { rejectWithValue }) => {
+    async (filter: "pdf" | "excel", { rejectWithValue }) => {
     const url = `${API_URL}export/${filter}`;
     const accessToken = localStorage.getItem('token');
     try {

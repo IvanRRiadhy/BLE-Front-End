@@ -15,7 +15,7 @@ import { toggleMobileSidebar } from 'src/store/customizer/CustomizerSlice';
 import { IconMenu2 } from '@tabler/icons-react';
 import Profile from 'src/layouts/full/vertical/header/Profile';
 import Language from 'src/layouts/full/vertical/header/Language';
-import Logo from 'src/layouts/full/shared/logo/Logo';
+import Logo from 'src/layouts/full/shared/logo/MyVisitLogo';
 import { AppState } from 'src/store/Store';
 
 const Header = () => {

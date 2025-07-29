@@ -33,12 +33,12 @@ const Floor = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const floorList = useSelector((state: RootState) => state.floorReducer.floors);
+  const floorCount = useSelector((state: RootState) => state.floorReducer.floorFilteredCount);
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
       title: 'Total Floors',
-      subtitle: floorList.length.toString(),
+      subtitle: floorCount.toString(),
       bgcolor: 'success',
     },
   ];

@@ -22,7 +22,12 @@ import {
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import {  blacklistType, deleteBlacklist, fetchBlacklistDT, UpdateFilter } from 'src/store/apps/crud/blacklist';
+import {
+  blacklistType,
+  deleteBlacklist,
+  fetchBlacklistDT,
+  UpdateFilter,
+} from 'src/store/apps/crud/blacklist';
 import { fetchVisitor } from 'src/store/apps/crud/visitor';
 import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
@@ -34,42 +39,48 @@ const columns = [
 ];
 
 const BlacklistList = () => {
-    const dispatch: AppDispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const blaclistData = useSelector((state: RootState) => state.blacklistReducer.blacklists);
   // const blacklistTotalCount = useSelector((state: RootState) => state.blacklistReducer.blacklistTotalCount);
-  const blacklistFilteredCount = useSelector((state: RootState) => state.blacklistReducer.blacklistFilteredCount);
-const blacklistFilter = useSelector((state: RootState) => state.blacklistReducer.blacklistFilter);
+  const blacklistFilteredCount = useSelector(
+    (state: RootState) => state.blacklistReducer.blacklistFilteredCount,
+  );
+  const blacklistFilter = useSelector((state: RootState) => state.blacklistReducer.blacklistFilter);
   // Pagination State
   const page = Math.floor(blacklistFilter.Start / blacklistFilter.Length);
-const rowsPerPage = blacklistFilter.Length;
-const orderBy = blacklistFilter.SortColumn;
-const order = blacklistFilter.SortDir;
+  const rowsPerPage = blacklistFilter.Length;
+  const orderBy = blacklistFilter.SortColumn;
+  const order = blacklistFilter.SortDir;
 
-const handleChangePage = (_: unknown, newPage: number) => {
-  dispatch(UpdateFilter({ Start: newPage * blacklistFilter.Length }));
-};
+  const handleChangePage = (_: unknown, newPage: number) => {
+    dispatch(UpdateFilter({ Start: newPage * blacklistFilter.Length }));
+  };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const newLength = parseInt(event.target.value, 10);
-  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
-};
-const handleSort = (column: string) => {
-  const isAsc = blacklistFilter.SortColumn === column && blacklistFilter.SortDir === 'asc';
-  const isDesc = blacklistFilter.SortColumn === column && blacklistFilter.SortDir === 'desc';
+    const newLength = parseInt(event.target.value, 10);
+    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+  };
+  const handleSort = (column: string) => {
+    const isAsc = blacklistFilter.SortColumn === column && blacklistFilter.SortDir === 'asc';
+    const isDesc = blacklistFilter.SortColumn === column && blacklistFilter.SortDir === 'desc';
 
-  if (isDesc) {
-    dispatch(UpdateFilter({
-      SortColumn: '',
-      SortDir: 'asc',
-      Start: 0,
-    }));
-  } else {
-    dispatch(UpdateFilter({
-      SortColumn: column,
-      SortDir: isAsc ? 'desc' : 'asc',
-      Start: 0,
-    }));
-  }
-};
+    if (isDesc) {
+      dispatch(
+        UpdateFilter({
+          SortColumn: 'UpdatedAt',
+          SortDir: 'desc',
+          Start: 0,
+        }),
+      );
+    } else {
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchBlacklistDT(blacklistFilter));
@@ -117,7 +128,7 @@ const handleSort = (column: string) => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"> </Typography>
                     </TableCell>
-                     {columns.map((col) => (
+                    {columns.map((col) => (
                       <TableCell key={col.label}>
                         {col.sortAble && col.field ? (
                           <TableSortLabel
@@ -141,40 +152,39 @@ const handleSort = (column: string) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {blaclistData
-                    .map((blacklist, index) => (
-                      <TableRow key={blacklist.id}>
-                        <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
-                        >
-                          {' '}
-                          {index + 1 + page * rowsPerPage}
-                        </TableCell>
-                        <TableCell>{blacklist.visitor?.name}</TableCell>
-                        <TableCell>{blacklist.floorplanMaskedArea?.name}</TableCell>
+                  {blaclistData.map((blacklist, index) => (
+                    <TableRow key={blacklist.id}>
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                      >
+                        {' '}
+                        {index + 1 + page * rowsPerPage}
+                      </TableCell>
+                      <TableCell>{blacklist.visitor?.name}</TableCell>
+                      <TableCell>{blacklist.floorplanMaskedArea?.name}</TableCell>
 
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            display: 'flex',
-                            gap: 1,
-                            alignItems: 'center',
-                          }}
+                      <TableCell
+                        sx={{
+                          position: 'sticky',
+                          right: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          display: 'flex',
+                          gap: 1,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <AddEditBlacklist type="edit" blacklist={blacklist} />
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleOpenDeleteDialog(blacklist)}
                         >
-                          <AddEditBlacklist type="edit" blacklist={blacklist} />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(blacklist)}
-                          >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          <IconTrash size={20} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>

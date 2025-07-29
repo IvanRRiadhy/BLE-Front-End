@@ -16,6 +16,8 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 // import AddEditMaskedArea from 'src/components/master/CRUD/maskedArea/AddEditMaskedArea';
 import MaskedAreaList2 from 'src/components/master/CRUD/maskedArea/MaskedAreaList2';
+import MaskedAreaImport from 'src/components/master/CRUD/maskedArea/MaskedAreaImport';
+import MaskedAreaExport from 'src/components/master/CRUD/maskedArea/MaskedAreaExport';
 
 interface cardType {
   icon?: string;
@@ -30,12 +32,12 @@ const MaskedArea = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const maskedAreaList = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreas);
+  const maskedAreaCount = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaFilteredCount);
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
       title: 'Total Masked Areas',
-      subtitle: maskedAreaList.length.toString(),
+      subtitle: maskedAreaCount.toString(),
       bgcolor: 'success',
     },
   ];
@@ -87,7 +89,10 @@ const MaskedArea = () => {
         >
           <ParentCard
             title="Floorplan List"
-            // codeModel={<AddEditMaskedArea type="add" />}
+            codeModel={[
+              <MaskedAreaImport key="import" />,
+              <MaskedAreaExport key="export" />,
+            ]}
           >
             {/* <MaskedAreaList /> */}
             <MaskedAreaList2 />

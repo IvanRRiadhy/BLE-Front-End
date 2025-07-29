@@ -22,57 +22,67 @@ import {
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
-import {  DistrictType, UpdateFilter, deleteDistrict, fetchDistrictDT } from 'src/store/apps/crud/district';
+import {
+  DistrictType,
+  UpdateFilter,
+  deleteDistrict,
+  fetchDistrictDT,
+} from 'src/store/apps/crud/district';
 import AddEditDistrict from './AddEditDistrict';
 // import { useTranslation } from 'react-i18next';
 
 const columns = [
   { label: 'District Code', field: '', sortAble: false },
-  { label: 'District Name', field: 'name', sortAble: true },
-    { label: 'District Host', field: 'districtHost', sortAble: true },
+  { label: 'District Name', field: 'Name', sortAble: true },
+  { label: 'District Host', field: 'DistrictHost', sortAble: true },
 ];
 
 const DistrictList = () => {
-    const dispatch: AppDispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const districtData: DistrictType[] = useSelector(
     (state: RootState) => state.districtReducer.districts,
   );
   // const districtTotalCount = useSelector((state: RootState) => state.districtReducer.districtTotalCount);
-  const districtFilteredCount = useSelector((state: RootState) => state.districtReducer.districtFilteredCount);
+  const districtFilteredCount = useSelector(
+    (state: RootState) => state.districtReducer.districtFilteredCount,
+  );
   const districtFilter = useSelector((state: RootState) => state.districtReducer.districtFilter);
   // const { t } = useTranslation();
   // Pagination State
   const page = Math.floor(districtFilter.Start / districtFilter.Length);
-const rowsPerPage = districtFilter.Length;
-const orderBy = districtFilter.SortColumn;
-const order = districtFilter.SortDir;
+  const rowsPerPage = districtFilter.Length;
+  const orderBy = districtFilter.SortColumn;
+  const order = districtFilter.SortDir;
 
-const handleChangePage = (_: unknown, newPage: number) => {
-  dispatch(UpdateFilter({ Start: newPage * districtFilter.Length }));
-};
+  const handleChangePage = (_: unknown, newPage: number) => {
+    dispatch(UpdateFilter({ Start: newPage * districtFilter.Length }));
+  };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const newLength = parseInt(event.target.value, 10);
-  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
-};
-const handleSort = (column: string) => {
-  const isAsc = districtFilter.SortColumn === column && districtFilter.SortDir === 'asc';
-  const isDesc = districtFilter.SortColumn === column && districtFilter.SortDir === 'desc';
+    const newLength = parseInt(event.target.value, 10);
+    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+  };
+  const handleSort = (column: string) => {
+    const isAsc = districtFilter.SortColumn === column && districtFilter.SortDir === 'asc';
+    const isDesc = districtFilter.SortColumn === column && districtFilter.SortDir === 'desc';
 
-  if (isDesc) {
-    dispatch(UpdateFilter({
-      SortColumn: '',
-      SortDir: 'asc',
-      Start: 0,
-    }));
-  } else {
-    dispatch(UpdateFilter({
-      SortColumn: column,
-      SortDir: isAsc ? 'desc' : 'asc',
-      Start: 0,
-    }));
-  }
-};
-
+    if (isDesc) {
+      dispatch(
+        UpdateFilter({
+          SortColumn: 'UpdatedAt',
+          SortDir: 'desc',
+          Start: 0,
+        }),
+      );
+    } else {
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchDistrictDT(districtFilter));
@@ -101,7 +111,6 @@ const handleSort = (column: string) => {
     handleCloseDeleteDialog();
   };
 
-
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -115,7 +124,7 @@ const handleSort = (column: string) => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                     {columns.map((col) => (
+                    {columns.map((col) => (
                       <TableCell key={col.label}>
                         {col.sortAble && col.field ? (
                           <TableSortLabel
@@ -139,40 +148,39 @@ const handleSort = (column: string) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {districtData
-                    .map((district, index) => (
-                      <TableRow key={district.id}>
-                        <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
-                        >
-                          {index + 1 + page * rowsPerPage}
-                        </TableCell>
-                        <TableCell>{district.code}</TableCell>
-                        <TableCell>{district.name}</TableCell>
-                        <TableCell>{district.districtHost}</TableCell>
+                  {districtData.map((district, index) => (
+                    <TableRow key={district.id}>
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                      >
+                        {index + 1 + page * rowsPerPage}
+                      </TableCell>
+                      <TableCell>{district.code}</TableCell>
+                      <TableCell>{district.name}</TableCell>
+                      <TableCell>{district.districtHost}</TableCell>
 
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            display: 'flex',
-                            gap: 1,
-                            alignItems: 'center',
-                          }}
+                      <TableCell
+                        sx={{
+                          position: 'sticky',
+                          right: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          display: 'flex',
+                          gap: 1,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <AddEditDistrict type="edit" district={district} />
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleOpenDeleteDialog(district)}
                         >
-                          <AddEditDistrict type="edit" district={district} />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(district)}
-                          >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          <IconTrash size={20} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>

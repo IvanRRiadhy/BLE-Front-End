@@ -16,6 +16,8 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import BuildingList from 'src/components/master/CRUD/building/BuildingList';
 import AddEditBuilding from 'src/components/master/CRUD/building/AddEditBuilding';
+import BuildingImport from 'src/components/master/CRUD/building/BuildingImport';
+import BuildingExport from 'src/components/master/CRUD/building/BuildingExport';
 
 interface cardType {
   icon?: string;
@@ -31,12 +33,12 @@ const Building = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const { t } = useTranslation();
-  const buildingList = useSelector((state: RootState) => state.buildingReducer.buildings);
+  const buildingCount = useSelector((state: RootState) => state.buildingReducer.buildingFilteredCount);
 
   const topCards: cardType[] = [
     {
       title: 'Total Buildings',
-      subtitle: buildingList.length.toString(),
+      subtitle: buildingCount.toString(),
       bgcolor: 'success',
     },
   ];
@@ -84,7 +86,11 @@ const Building = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Building List" codeModel={<AddEditBuilding type="add" />}>
+          <ParentCard title="Building List" codeModel={[
+            <BuildingImport key={"import"} />,
+            <BuildingExport key={"export"} />,
+            <AddEditBuilding key={"add"} type="add" />
+            ]}>
             <BuildingList />
           </ParentCard>
         </Drawer>

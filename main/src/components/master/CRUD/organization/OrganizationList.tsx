@@ -33,51 +33,59 @@ import AddEditOrganization from './AddEditOrganizationList';
 
 const columns = [
   { label: 'Organization Code', field: '', sortAble: false },
-  { label: 'Organization Name', field: 'name', sortAble: true },
-    { label: 'Organization Host', field: 'organizationHost', sortAble: true },
+  { label: 'Organization Name', field: 'Name', sortAble: true },
+  { label: 'Organization Host', field: 'OrganizationHost', sortAble: true },
 ];
 
-
 const OrganizationList = () => {
-    const dispatch: AppDispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const organizationData: OrganizationType[] = useSelector(
     (state: RootState) => state.organizationReducer.organizations,
   );
   // const organizationTotalCount = useSelector((state: RootState) => state.organizationReducer.organizationTotalCount);
-  const organizationFilteredCount = useSelector((state: RootState) => state.organizationReducer.organizationFilteredCount);
-  const organizationFilter = useSelector((state: RootState) => state.organizationReducer.organizationFilter);
+  const organizationFilteredCount = useSelector(
+    (state: RootState) => state.organizationReducer.organizationFilteredCount,
+  );
+  const organizationFilter = useSelector(
+    (state: RootState) => state.organizationReducer.organizationFilter,
+  );
   // const { t } = useTranslation();
   // Pagination State
   const page = Math.floor(organizationFilter.Start / organizationFilter.Length);
-const rowsPerPage = organizationFilter.Length;
-const orderBy = organizationFilter.SortColumn;
-const order = organizationFilter.SortDir;
+  const rowsPerPage = organizationFilter.Length;
+  const orderBy = organizationFilter.SortColumn;
+  const order = organizationFilter.SortDir;
 
-const handleChangePage = (_: unknown, newPage: number) => {
-  dispatch(UpdateFilter({ Start: newPage * organizationFilter.Length }));
-};
+  const handleChangePage = (_: unknown, newPage: number) => {
+    dispatch(UpdateFilter({ Start: newPage * organizationFilter.Length }));
+  };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const newLength = parseInt(event.target.value, 10);
-  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
-};
-const handleSort = (column: string) => {
-  const isAsc = organizationFilter.SortColumn === column && organizationFilter.SortDir === 'asc';
-  const isDesc = organizationFilter.SortColumn === column && organizationFilter.SortDir === 'desc';
+    const newLength = parseInt(event.target.value, 10);
+    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+  };
+  const handleSort = (column: string) => {
+    const isAsc = organizationFilter.SortColumn === column && organizationFilter.SortDir === 'asc';
+    const isDesc =
+      organizationFilter.SortColumn === column && organizationFilter.SortDir === 'desc';
 
-  if (isDesc) {
-    dispatch(UpdateFilter({
-      SortColumn: '',
-      SortDir: 'asc',
-      Start: 0,
-    }));
-  } else {
-    dispatch(UpdateFilter({
-      SortColumn: column,
-      SortDir: isAsc ? 'desc' : 'asc',
-      Start: 0,
-    }));
-  }
-};
+    if (isDesc) {
+      dispatch(
+        UpdateFilter({
+          SortColumn: 'UpdatedAt',
+          SortDir: 'asc',
+          Start: 0,
+        }),
+      );
+    } else {
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchOrganizationDT(organizationFilter));
@@ -106,7 +114,6 @@ const handleSort = (column: string) => {
     handleCloseDeleteDialog();
   };
 
-
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -120,7 +127,7 @@ const handleSort = (column: string) => {
                     <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
-                     {columns.map((col) => (
+                    {columns.map((col) => (
                       <TableCell key={col.label}>
                         {col.sortAble && col.field ? (
                           <TableSortLabel
@@ -144,39 +151,38 @@ const handleSort = (column: string) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {organizationData
-                    .map((organization, index) => (
-                      <TableRow key={organization.id}>
-                        <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                  {organizationData.map((organization, index) => (
+                    <TableRow key={organization.id}>
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                      >
+                        {index + 1 + page * rowsPerPage}
+                      </TableCell>
+                      <TableCell>{organization.code}</TableCell>
+                      <TableCell>{organization.name}</TableCell>
+                      <TableCell>{organization.organizationHost}</TableCell>
+                      <TableCell
+                        sx={{
+                          position: 'sticky',
+                          right: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          display: 'flex',
+                          gap: 1,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <AddEditOrganization type="edit" organization={organization} />
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleOpenDeleteDialog(organization)}
                         >
-                          {index + 1 + page * rowsPerPage}
-                        </TableCell>
-                        <TableCell>{organization.code}</TableCell>
-                        <TableCell>{organization.name}</TableCell>
-                        <TableCell>{organization.organizationHost}</TableCell>
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            display: 'flex',
-                            gap: 1,
-                            alignItems: 'center',
-                          }}
-                        >
-                          <AddEditOrganization type="edit" organization={organization} />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(organization)}
-                          >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          <IconTrash size={20} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>

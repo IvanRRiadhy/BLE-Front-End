@@ -30,13 +30,13 @@ const Department = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const departmentList = useSelector((state: RootState) => state.departmentReducer.departments);
+  const departmentCount = useSelector((state: RootState) => state.departmentReducer.departmentFilteredCount);
   const { t } = useTranslation();
 
   const topCards: cardType[] = [
     {
       title: 'Total Departments',
-      subtitle: departmentList.length.toString(),
+      subtitle: departmentCount.toString(),
       bgcolor: 'success',
     },
   ];
