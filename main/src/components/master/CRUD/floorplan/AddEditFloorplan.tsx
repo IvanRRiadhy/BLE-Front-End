@@ -25,6 +25,8 @@ import {
   editFloorplan,
   fetchFloorplanDT,
 } from 'src/store/apps/crud/floorplan';
+import toast from 'react-hot-toast';
+import { defaultFloorplanForm } from 'src/store/apps/defaultForm';
 
 interface FormType {
   type?: string;
@@ -33,15 +35,10 @@ interface FormType {
 
 const AddEditFloorplan = ({ type, floorplan }: FormType) => {
   const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
   const [formData, setFormData] = React.useState({
-    id: floorplan?.id || '',
-    name: floorplan?.name || '',
-    floorId: floorplan?.floorId || '',
-    applicationId: floorplan?.applicationId || localStorage.getItem('applicationId') || '',
-    createdBy: floorplan?.createdBy || '',
-    createdAt: floorplan?.createdAt || '',
-    updatedBy: floorplan?.updatedBy || '',
-    updatedAt: floorplan?.updatedAt || '',
+    ...defaultFloorplanForm,
+    ...floorplan,
   });
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   const dispatch: AppDispatch = useDispatch();
@@ -54,11 +51,17 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
 
   const handleClickOpen = () => {
     if (type === 'edit' && floorplan) {
-      setFormData(floorplan);
+      if (!floorplan.id) {
+        dispatch(fetchFloorplanDT(floorplanFilter));
+      }
+      setFormData({ ...defaultFloorplanForm, ...floorplan });
     } else {
-      setFormData({applicationId: localStorage.getItem('applicationId') || ''} as FloorplanType);
+      setFormData({ ...defaultFloorplanForm });
     }
-    setOpen(true);
+    setTimeout(() => {
+      setLoading(false);
+      setOpen(true);
+    }, 100);
   };
 
   const handleClose = () => {
@@ -70,20 +73,31 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
     try {
       const data = new FormData();
       Object.keys(formData).forEach((key: string) => {
-        data.append(key, formData[key as keyof typeof formData]);
+        const value = formData[key as keyof typeof formData];
+        if (typeof value === 'string' || value instanceof Blob) {
+          data.append(key, value);
+        } else {
+          console.error(`Invalid value type for key ${key}: ${typeof value}`);
+        }
       });
-
+      let result;
       if (type === 'edit') {
-        await dispatch(editFloorplan(data)); // Dispatch update
+        result = await dispatch(editFloorplan(data)); // Dispatch update
       }
       if (type === 'add') {
-        await dispatch(addFloorplan(data));
+        result = await dispatch(addFloorplan(data));
       }
-      await dispatch(fetchFloorplanDT(floorplanFilter));
-      console.log('Saved!');
-      setOpen(false);
+      if (result && result.type && result.type.endsWith('/fulfilled')) {
+        await dispatch(fetchFloorplanDT(floorplanFilter));
+        console.log('Floorplan Saved!');
+        toast.success('Data Saved', { position: 'top-right' });
+        handleClose();
+      } else {
+        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      }
     } catch (error) {
-      console.error('Error saving application:', error);
+      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      console.error('Error saving floorplan:', error);
     }
   };
 
@@ -114,58 +128,77 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
           Add Floor
         </Button>
       )}
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>
-          <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
-            {type === 'add' ? 'Add Floorplan' : 'Edit Floorplan'}
-          </Typography>
-          <Divider />
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-            Floorplan Details
-          </Typography>
-          <Divider />
-          <Grid container spacing={5} mb={3}>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="floorplan-Name">Floorplan Name</CustomFormLabel>
-              <CustomTextField
-                id="name"
-                placeholder={formData.name}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-              <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel>
-              <CustomSelect
-                name="floorId"
-                id="floorId"
-                value={formData.floorId}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              >
-                <MenuItem value="" disabled>
-                  Select Floor
-                </MenuItem>
-                {floorData.map((floor) => (
-                  <MenuItem key={floor.id} value={floor.id}>
-                    {floor.name}
+
+      {!loading && (
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogTitle>
+            <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
+              {type === 'add' ? 'Add Floorplan' : 'Edit Floorplan'}
+            </Typography>
+            <Divider />
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              Floorplan Details
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="floorplan-Name">Floorplan Name</CustomFormLabel>
+                <CustomTextField
+                  id="name"
+                  placeholder={formData.name}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+                <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel>
+                <CustomSelect
+                  name="floorId"
+                  id="floorId"
+                  value={formData.floorId}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                >
+                  <MenuItem value="" disabled>
+                    Select Floor
                   </MenuItem>
-                ))}
-              </CustomSelect>
+                  {floorData.map((floor) => (
+                    <MenuItem key={floor.id} value={floor.id}>
+                      {floor.name}
+                    </MenuItem>
+                  ))}
+                </CustomSelect>
+              </Grid>
             </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
-          <Button onClick={handleClose} variant="outlined" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} variant="contained" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </DialogContent>
+          <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
+            <Button
+              onClick={handleClose}
+              variant="outlined"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              variant="contained"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
+      {loading && (
+        <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogContent sx={{ textAlign: 'center', py: 10 }}>
+            <Typography variant="h6">Loading...</Typography>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };

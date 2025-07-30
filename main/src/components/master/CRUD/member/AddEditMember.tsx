@@ -19,12 +19,20 @@ import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { dispatch, RootState, useSelector } from 'src/store/Store';
-import { addMember, editMember, fetchMemberDT, fetchMembers, memberType } from 'src/store/apps/crud/member';
+import {
+  addMember,
+  editMember,
+  fetchMemberDT,
+  fetchMembers,
+  memberType,
+} from 'src/store/apps/crud/member';
 import { fetchDistricts, DistrictType } from 'src/store/apps/crud/district';
 import { fetchDepartments, DepartmentType } from 'src/store/apps/crud/department';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
 
 import { gender, statusEmployee } from 'src/types/crud/input';
+import toast from 'react-hot-toast';
+import { defaultMemberForm } from 'src/store/apps/defaultForm';
 
 interface FormType {
   type?: string;
@@ -33,35 +41,12 @@ interface FormType {
 
 const AddEditMember = ({ type, member }: FormType) => {
   const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
   const [image, setImage] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(member?.faceImage || null);
-  const [formData, setFormData] = React.useState({
-    id: member?.id || '',
-    personId: member?.personId || '',
-    organizationId: member?.organizationId || '',
-    departmentId: member?.departmentId || '',
-    districtId: member?.districtId || '',
-    identityId: member?.identityId || '',
-    cardNumber: member?.cardNumber || '',
-    bleCardNumber: member?.bleCardNumber || '',
-    name: member?.name || '',
-    phone: member?.phone || '',
-    email: member?.email || '',
-    gender: member?.gender || '',
-    address: member?.address || '',
-    uploadFr: member?.uploadFr || 0,
-    uploadFrError: member?.uploadFrError || '',
-    birthDate: member?.birthDate || '',
-    joinDate: member?.joinDate || '',
-    exitDate: member?.exitDate || '',
-    headMember1: member?.headMember1 || '',
-    headMember2: member?.headMember2 || '',
-    applicationId: member?.applicationId || localStorage.getItem('applicationId') || '',
-    statusEmployee: member?.statusEmployee || '',
-    createdBy: member?.createdBy || '',
-    createdAt: member?.createdAt || '',
-    updatedBy: member?.updatedBy || '',
-    updatedAt: member?.updatedAt || '',
+  const [formData, setFormData] = React.useState<memberType>({
+    ...defaultMemberForm,
+    ...member,
   });
 
   const districtData: DistrictType[] = useSelector(
@@ -82,46 +67,25 @@ const AddEditMember = ({ type, member }: FormType) => {
   }, [dispatch]);
 
   const handleClickOpen = () => {
-        if (type === 'edit' && member) {
-          setFormData(member);
-        } else {
-          setFormData({
-            applicationId: localStorage.getItem('applicationId') || '',
-          } as memberType);
-        }
-    setOpen(true);
+    if (type === 'edit' && member) {
+      if (!member.id) {
+        dispatch(fetchMemberDT(memberFilter));
+      }
+      setFormData({
+        ...defaultMemberForm,
+        ...member,
+      });
+    } else {
+      setFormData({ ...defaultMemberForm });
+    }
+    setTimeout(() => {
+      setLoading(false);
+      setOpen(true);
+    }, 100);
   };
 
   const handleClose = () => {
     setOpen(false);
-    setFormData({
-      id: '',
-      personId: '',
-      organizationId: '',
-      departmentId: '',
-      districtId: '',
-      identityId: '',
-      cardNumber: '',
-      bleCardNumber: '',
-      name: '',
-      phone: '',
-      email: '',
-      gender: '',
-      address: '',
-      uploadFr: 0,
-      uploadFrError: '',
-      birthDate: '',
-      joinDate: '',
-      exitDate: '',
-      headMember1: '',
-      headMember2: '',
-      applicationId: localStorage.getItem('applicationId') || '',
-      statusEmployee: '',
-      createdBy: '',
-      createdAt: '',
-      updatedBy: '',
-      updatedAt: '',
-    });
     setPreview(member?.faceImage || null);
     setImage(null);
   };
@@ -145,20 +109,24 @@ const AddEditMember = ({ type, member }: FormType) => {
       if (image) {
         data.append('faceImage', image);
       }
+      let result;
       if (type === 'edit') {
-        console.log('Form Data :', JSON.stringify(data));
-        await dispatch(editMember(data)); // Dispatch update
+        result = await dispatch(editMember(data)); // Dispatch update
       }
       if (type === 'add') {
-        console.log('Form Data :', data);
-        await dispatch(addMember(data));
+        result = await dispatch(addMember(data));
       }
-      await dispatch(fetchMemberDT(memberFilter));
-      console.log('Saved!');
-      handleClose();
-      setPreview(null);
+      if (result && result.type && result.type.endsWith('/fulfilled')) {
+        await dispatch(fetchMemberDT(memberFilter));
+        console.log('Member Data Saved!');
+        toast.success('Data Saved', { position: 'top-right' });
+        handleClose();
+      } else {
+        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      }
     } catch (error) {
-      console.error('Error saving Member:', error);
+      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      console.error('Error saving member data:', error);
     }
   };
 
@@ -187,38 +155,6 @@ const AddEditMember = ({ type, member }: FormType) => {
       }
     }
   };
-  useEffect(() => {
-    if (member) {
-      setFormData({
-        id: member.id,
-        personId: member.personId,
-        organizationId: member.organizationId,
-        departmentId: member.departmentId,
-        districtId: member.districtId,
-        identityId: member.identityId,
-        cardNumber: member.cardNumber,
-        bleCardNumber: member.bleCardNumber,
-        name: member.name,
-        phone: member.phone,
-        email: member.email,
-        gender: member.gender,
-        address: member.address,
-        uploadFr: member.uploadFr,
-        uploadFrError: member.uploadFrError,
-        birthDate: member.birthDate,
-        joinDate: member.joinDate,
-        exitDate: member.exitDate,
-        headMember1: member.headMember1,
-        headMember2: member.headMember2,
-        applicationId: member.applicationId,
-        statusEmployee: member.statusEmployee,
-        createdBy: member.createdBy,
-        createdAt: member.createdAt,
-        updatedBy: member.updatedBy,
-        updatedAt: member.updatedAt,
-      });
-    }
-  }, [member]);
 
   return (
     <>
@@ -242,233 +178,261 @@ const AddEditMember = ({ type, member }: FormType) => {
           </Button>
         </Tooltip>
       )}
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>
-          <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
-            {type === 'add' ? 'Add Member' : 'Edit Member'}
-          </Typography>
-          <Divider />
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-            IDs
-          </Typography>
-          <Divider />
-          <Grid container spacing={5} mb={3}>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="person-id">person ID</CustomFormLabel>
-              <CustomTextField
-                id="personId"
-                placeholder={formData.personId}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-              <CustomFormLabel htmlFor="department-Id">Department ID</CustomFormLabel>
-              <CustomSelect
-                name="departmentId"
-                value={formData.departmentId || ''}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              >
-                {departmentData.map((department) => (
-                  <MenuItem key={department.id} value={department.id}>
-                    {department.name}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
-              <CustomFormLabel htmlFor="identity-Id">Identity ID</CustomFormLabel>
-              <CustomTextField
-                id="identityId"
-                placeholder={formData.identityId}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="organization-id">Organization ID</CustomFormLabel>
-              <CustomSelect
-                name="organizationId"
-                value={formData.organizationId || ''}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              >
-                {organizationData.map((organization) => (
-                  <MenuItem key={organization.id} value={organization.id}>
-                    {organization.name}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
-              <CustomFormLabel htmlFor="district-id">District ID</CustomFormLabel>
-              <CustomSelect
-                name="districtId"
-                value={formData.districtId || ''}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              >
-                {districtData.map((district) => (
-                  <MenuItem key={district.id} value={district.id}>
-                    {district.name}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
-            </Grid>
-          </Grid>
-          <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-            Card Details
-          </Typography>
-          <Divider />
-          <Grid container spacing={5} mb={3}>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
-              <CustomTextField
-                id="cardNumber"
-                placeholder={formData.cardNumber}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="ble-card-number">Ble Card Number</CustomFormLabel>
-              <CustomTextField
-                id="bleCardNumber"
-                placeholder={formData.bleCardNumber}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-          </Grid>
-          <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-            Member Details
-          </Typography>
-          <Divider />
-          <Grid container spacing={5} mb={3}>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="name">Name</CustomFormLabel>
-              <CustomTextField
-                id="name"
-                placeholder={formData.name}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-              <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
-              <CustomTextField
-                id="email"
-                placeholder={formData.email}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-              <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
-              <CustomTextField
-                id="address"
-                placeholder={formData.address}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-              <CustomFormLabel htmlFor="status-employee">Status Employee</CustomFormLabel>
-              <CustomSelect
-                name="statusEmployee"
-                value={formData.statusEmployee || ''}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              >
-                {statusEmployee.map((stats) => (
-                  <MenuItem
-                    key={stats.value}
-                    value={stats.value}
-                    disabled={stats.disabled || false}
-                  >
-                    {stats.label}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
-            </Grid>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="phone">Phone</CustomFormLabel>
-              <CustomTextField
-                id="phone"
-                placeholder={formData.phone}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-              <CustomFormLabel htmlFor="gender">Gender</CustomFormLabel>
-              <CustomSelect
-                name="gender"
-                value={formData.gender}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              >
-                {gender.map((gender) => (
-                  <MenuItem
-                    key={gender.value}
-                    value={gender.value}
-                    disabled={gender.disabled || false}
-                  >
-                    {gender.label}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
-              <CustomFormLabel htmlFor="head-Member-1">Head Member 1</CustomFormLabel>
-              <CustomTextField
-                id="headMember1"
-                placeholder={formData.headMember1}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-              <CustomFormLabel htmlFor="head-Member-2">Head Member 2</CustomFormLabel>
-              <CustomTextField
-                id="headMember2"
-                placeholder={formData.headMember2}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-          </Grid>
-          <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-            Photo
-          </Typography>
-          <Divider />
-          <Grid container spacing={5} mb={3}>
-            <Grid size={12}>
-              <CustomFormLabel htmlFor="face-image">Face Image</CustomFormLabel>
-              <input
-                type="file"
-                accept="image/png, image/jpeg, image/jpg"
-                onChange={handleImageChange}
-              />
-              {preview && (
-                <img
-                  src={`${BASE_URL}${preview}`}
-                  alt="Face Preview"
-                  style={{ width: '100%', marginTop: '10px', borderRadius: '5px' }}
+
+      {!loading && (
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogTitle>
+            <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
+              {type === 'add' ? 'Add Member' : 'Edit Member'}
+            </Typography>
+            <Divider />
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              IDs
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="person-id">person ID</CustomFormLabel>
+                <CustomTextField
+                  id="personId"
+                  placeholder={formData.personId}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
                 />
-              )}
+                <CustomFormLabel htmlFor="department-Id">Department ID</CustomFormLabel>
+                <CustomSelect
+                  name="departmentId"
+                  value={formData.departmentId || ''}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                >
+                  <MenuItem value="" disabled>
+                    Select Department
+                  </MenuItem>
+                  {departmentData.map((department) => (
+                    <MenuItem key={department.id} value={department.id}>
+                      {department.name}
+                    </MenuItem>
+                  ))}
+                </CustomSelect>
+                <CustomFormLabel htmlFor="identity-Id">Identity ID</CustomFormLabel>
+                <CustomTextField
+                  id="identityId"
+                  placeholder={formData.identityId}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="organization-id">Organization ID</CustomFormLabel>
+                <CustomSelect
+                  name="organizationId"
+                  value={formData.organizationId || ''}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                >
+                  <MenuItem value="" disabled>
+                    Select Organization
+                  </MenuItem>
+                  {organizationData.map((organization) => (
+                    <MenuItem key={organization.id} value={organization.id}>
+                      {organization.name}
+                    </MenuItem>
+                  ))}
+                </CustomSelect>
+                <CustomFormLabel htmlFor="district-id">District ID</CustomFormLabel>
+                <CustomSelect
+                  name="districtId"
+                  value={formData.districtId || ''}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                >
+                  <MenuItem value="" disabled>
+                    Select District
+                  </MenuItem>
+                  {districtData.map((district) => (
+                    <MenuItem key={district.id} value={district.id}>
+                      {district.name}
+                    </MenuItem>
+                  ))}
+                </CustomSelect>
+              </Grid>
             </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
-          <Button onClick={handleClose} variant="outlined" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} variant="contained" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              Card Details
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
+                <CustomTextField
+                  id="cardNumber"
+                  placeholder={formData.cardNumber}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="ble-card-number">Ble Card Number</CustomFormLabel>
+                <CustomTextField
+                  id="bleCardNumber"
+                  placeholder={formData.bleCardNumber}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
+            </Grid>
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              Member Details
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="name">Name</CustomFormLabel>
+                <CustomTextField
+                  id="name"
+                  placeholder={formData.name}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+                <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
+                <CustomTextField
+                  id="email"
+                  placeholder={formData.email}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+                <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
+                <CustomTextField
+                  id="address"
+                  placeholder={formData.address}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+                <CustomFormLabel htmlFor="status-employee">Status Employee</CustomFormLabel>
+                <CustomSelect
+                  name="statusEmployee"
+                  value={formData.statusEmployee || ''}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                >
+                  {statusEmployee.map((stats) => (
+                    <MenuItem
+                      key={stats.value}
+                      value={stats.value}
+                      disabled={stats.disabled || false}
+                    >
+                      {stats.label}
+                    </MenuItem>
+                  ))}
+                </CustomSelect>
+              </Grid>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="phone">Phone</CustomFormLabel>
+                <CustomTextField
+                  id="phone"
+                  placeholder={formData.phone}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+                <CustomFormLabel htmlFor="gender">Gender</CustomFormLabel>
+                <CustomSelect
+                  name="gender"
+                  value={formData.gender || ''}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                >
+                  {gender.map((gender) => (
+                    <MenuItem
+                      key={gender.value}
+                      value={gender.value}
+                      disabled={gender.disabled || false}
+                    >
+                      {gender.label}
+                    </MenuItem>
+                  ))}
+                </CustomSelect>
+                <CustomFormLabel htmlFor="head-Member-1">Head Member 1</CustomFormLabel>
+                <CustomTextField
+                  id="headMember1"
+                  placeholder={formData.headMember1}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+                <CustomFormLabel htmlFor="head-Member-2">Head Member 2</CustomFormLabel>
+                <CustomTextField
+                  id="headMember2"
+                  placeholder={formData.headMember2}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
+            </Grid>
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              Photo
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={12}>
+                <CustomFormLabel htmlFor="face-image">Face Image</CustomFormLabel>
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg, image/jpg"
+                  onChange={handleImageChange}
+                />
+                {preview && (
+                  <img
+                    src={`${BASE_URL}${preview}`}
+                    alt="Face Preview"
+                    style={{ width: '100%', marginTop: '10px', borderRadius: '5px' }}
+                  />
+                )}
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
+            <Button
+              onClick={handleClose}
+              variant="outlined"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              variant="contained"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
+      {loading && (
+        <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogContent sx={{ textAlign: 'center', py: 10 }}>
+            <Typography variant="h6">Loading...</Typography>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };

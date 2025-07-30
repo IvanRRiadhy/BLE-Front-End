@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
@@ -25,6 +26,7 @@ import {
 } from 'src/store/apps/crud/blacklist';
 import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import { fetchVisitor } from 'src/store/apps/crud/visitor';
+import { defaultBlaclistForm } from 'src/store/apps/defaultForm';
 
 interface FormType {
   type?: string;
@@ -33,28 +35,37 @@ interface FormType {
 
 const AddEditBlacklist = ({ type, blacklist }: FormType) => {
   const [open, setOpen] = React.useState(false);
-  const [formData, setFormData] = React.useState(
-    blacklist || { id: '', visitorId: '', floorplanMaskedAreaId: '' },
-  );
-const blacklistFilter = useSelector((state: RootState) => state.blacklistReducer.blacklistFilter);
+  const [loading, setLoading] = React.useState(false);
+  const [formData, setFormData] = React.useState<blacklistType>({
+    ...defaultBlaclistForm,
+    ...blacklist,
+  });
+  const blacklistFilter = useSelector((state: RootState) => state.blacklistReducer.blacklistFilter);
   const visitorData = useSelector((state: RootState) => state.visitorReducer.visitors);
-  const maskedAreaData = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
-  );
+  const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
   const dispatch: AppDispatch = useDispatch();
 
   useEffect(() => {
     dispatch(fetchVisitor());
-        dispatch(fetchMaskedAreas());
+    dispatch(fetchMaskedAreas());
   }, [dispatch]);
 
   const handleClickOpen = () => {
-          if (type === 'edit' && blacklist) {
-            setFormData(blacklist);
-          } else {
-            setFormData({} as blacklistType);
-          }
-    setOpen(true);
+    if (type === 'edit' && blacklist) {
+      if (!blacklist.id) {
+        dispatch(fetchBlacklistDT(blacklistFilter));
+      }
+      setFormData({
+        ...defaultBlaclistForm,
+        ...blacklist,
+      });
+    } else {
+      setFormData({ ...defaultBlaclistForm });
+    }
+    setTimeout(() => {
+      setLoading(false);
+      setOpen(true);
+    }, 100);
   };
 
   const handleClose = () => {
@@ -75,20 +86,26 @@ const blacklistFilter = useSelector((state: RootState) => state.blacklistReducer
       }
     });
     try {
+      let result;
       if (type === 'edit') {
-        await dispatch(editBlacklist(data)); // Dispatch update
+        result = await dispatch(editBlacklist(data)); // Dispatch update
       }
       if (type === 'add') {
-        await dispatch(addBlacklist(data));
+        result = await dispatch(addBlacklist(data));
       }
-      await dispatch(fetchBlacklistDT(blacklistFilter));
-      console.log('Saved!');
-      setOpen(false);
+      if (result && result.type && result.type.endsWith('/fulfilled')) {
+        await dispatch(fetchBlacklistDT(blacklistFilter));
+        console.log('Blaclist Saved!');
+        toast.success('Data Saved', { position: 'top-right' });
+        handleClose();
+      } else {
+        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      }
     } catch (error) {
-      console.error('Error saving application:', error);
+      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      console.error('Error saving blacklist:', error);
     }
   };
-
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
   ) => {
@@ -115,61 +132,80 @@ const blacklistFilter = useSelector((state: RootState) => state.blacklistReducer
           Add Blacklist
         </Button>
       )}
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>
-          <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
-            {type === 'add' ? 'Add Blacklist' : 'Edit Blacklist'}
-          </Typography>
-          <Divider />
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-            Blacklist Details
-          </Typography>
-          <Divider />
-          <Grid container spacing={5} mb={3}>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="visitor-id">Visitor</CustomFormLabel>
-              <CustomSelect
-                name="visitorId"
-                value={formData.visitorId || ''}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              >
-                {visitorData.map((visitor) => (
-                  <MenuItem key={visitor.id} value={visitor.id}>
-                    {visitor.name}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
-              <CustomFormLabel htmlFor="floorplanMaskedArea-id">Area</CustomFormLabel>
-              <CustomSelect
-                id="floorplanMaskedAreaId"
-                name='floorplanMaskedAreaId'
-                value={formData.floorplanMaskedAreaId}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              >
-                {maskedAreaData.map((maskedArea) => (
-                  <MenuItem key={maskedArea.id} value={maskedArea.id}>
-                    {maskedArea.name}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
+
+      {!loading && (
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogTitle>
+            <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
+              {type === 'add' ? 'Add Blacklist' : 'Edit Blacklist'}
+            </Typography>
+            <Divider />
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              Blacklist Details
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="visitor-id">Visitor</CustomFormLabel>
+                <CustomSelect
+                  name="visitorId"
+                  value={formData.visitorId || ''}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                >
+                  {visitorData.map((visitor) => (
+                    <MenuItem key={visitor.id} value={visitor.id}>
+                      {visitor.name}
+                    </MenuItem>
+                  ))}
+                </CustomSelect>
+                <CustomFormLabel htmlFor="floorplanMaskedArea-id">Area</CustomFormLabel>
+                <CustomSelect
+                  id="floorplanMaskedAreaId"
+                  name="floorplanMaskedAreaId"
+                  value={formData.floorplanMaskedAreaId}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                >
+                  {maskedAreaData.map((maskedArea) => (
+                    <MenuItem key={maskedArea.id} value={maskedArea.id}>
+                      {maskedArea.name}
+                    </MenuItem>
+                  ))}
+                </CustomSelect>
+              </Grid>
             </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
-          <Button onClick={handleClose} variant="outlined" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} variant="contained" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </DialogContent>
+          <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
+            <Button
+              onClick={handleClose}
+              variant="outlined"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              variant="contained"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
+      {loading && (
+        <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogContent sx={{ textAlign: 'center', py: 10 }}>
+            <Typography variant="h6">Loading...</Typography>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };

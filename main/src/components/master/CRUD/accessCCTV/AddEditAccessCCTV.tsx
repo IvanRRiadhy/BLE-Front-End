@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React from 'react';
+import toast from 'react-hot-toast';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
@@ -22,6 +23,7 @@ import {
   fetchAccessCCTV,
   fetchAccessCCTVDT,
 } from 'src/store/apps/crud/accessCCTV';
+import { defaultAccessCCTVForm } from 'src/store/apps/defaultForm';
 
 interface FormType {
   type?: string;
@@ -30,46 +32,51 @@ interface FormType {
 
 const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
   const [open, setOpen] = React.useState(false);
-  const [formData, setFormData] = React.useState<CCTVType>(
-    cctv || {
-      id: '',
-      name: '',
-      rtsp: '',
-      createdBy: '',
-      createdAt: '',
-      updatedBy: '',
-      updatedAt: '',
-      integrationId: '48842BFF-1605-422A-A0B7-98380EE7D1B8',
-      applicationId: localStorage.getItem('applicationId') || '',
-    },
-  );
+  const [loading, setLoading] = React.useState(false);
+  const [formData, setFormData] = React.useState<CCTVType>({
+    ...defaultAccessCCTVForm,
+    ...cctv,
+  });
 
   const CCTVFilter = useSelector((state: RootState) => state.CCTVReducer.cctvFilter);
   const dispatch: AppDispatch = useDispatch();
 
-const handleClickOpen = () => {
-  if (type === 'edit' && cctv) {
-    setFormData(cctv);
-  } else {
-    setFormData({applicationId: localStorage.getItem('applicationId') || ''} as CCTVType);
-  }
-  setOpen(true);
-};
+  const handleClickOpen = async () => {
+    if (type === 'edit' && cctv) {
+      if (!cctv.id) {
+        await dispatch(fetchAccessCCTVDT(CCTVFilter));
+      }
+      setFormData({ ...defaultAccessCCTVForm, ...cctv });
+    } else {
+      setFormData({ ...defaultAccessCCTVForm });
+    }
+    setTimeout(() => {
+      setLoading(false);
+      setOpen(true);
+    }, 100);
+  };
   const handleClose = () => {
     setOpen(false);
   };
   const handleSave = async () => {
     try {
+      let result;
       if (type === 'edit') {
-        await dispatch(editCCTV(formData)); // Dispatch update
+        result = await dispatch(editCCTV(formData)); // Dispatch update
       }
       if (type === 'add') {
-        await dispatch(addCCTV(formData));
+        result = await dispatch(addCCTV(formData));
       }
-      await dispatch(fetchAccessCCTVDT(CCTVFilter));
-      console.log('Saved!');
-      handleClose();
+      if (result && result.type && result.type.endsWith('/fulfilled')) {
+        await dispatch(fetchAccessCCTVDT(CCTVFilter));
+        console.log('CCTV Saved!');
+        toast.success('Data Saved', { position: 'top-right' });
+        handleClose();
+      } else {
+        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      }
     } catch (error) {
+      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
       console.error('Error saving application:', error);
     }
   };
@@ -98,29 +105,30 @@ const handleClickOpen = () => {
           Add Access CCTV
         </Button>
       )}
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>
-          <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
-            {type === 'add' ? 'Add Access CCTV' : 'Edit Access CCTV'}
-          </Typography>
-          <Divider />
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-            Access CCTV Details
-          </Typography>
-          <Divider />
-          <Grid container spacing={5} mb={3}>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="cctv-Name">Name</CustomFormLabel>
-              <CustomTextField
-                id="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-              {/* <CustomFormLabel htmlFor="integration-id">Integration ID</CustomFormLabel>
+      {!loading && (
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogTitle>
+            <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
+              {type === 'add' ? 'Add Access CCTV' : 'Edit Access CCTV'}
+            </Typography>
+            <Divider />
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              Access CCTV Details
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="cctv-Name">Name</CustomFormLabel>
+                <CustomTextField
+                  id="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+                {/* <CustomFormLabel htmlFor="integration-id">Integration ID</CustomFormLabel>
               <CustomTextField
                 id="integrationId"
                 value={formData.integrationId}
@@ -128,17 +136,17 @@ const handleClickOpen = () => {
                 fullWidth
                 variant="outlined"
               /> */}
-            </Grid>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="cctv-RTSP">RTSP</CustomFormLabel>
-              <CustomTextField
-                id="rtsp"
-                value={formData.rtsp}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-              {/* <CustomFormLabel htmlFor="app-id">Application</CustomFormLabel>
+              </Grid>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="cctv-RTSP">RTSP</CustomFormLabel>
+                <CustomTextField
+                  id="rtsp"
+                  value={formData.rtsp}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+                {/* <CustomFormLabel htmlFor="app-id">Application</CustomFormLabel>
               <CustomSelect
                 name="applicationId"
                 value={formData.applicationId || ''}
@@ -152,18 +160,34 @@ const handleClickOpen = () => {
                   </MenuItem>
                 ))}
               </CustomSelect> */}
+              </Grid>
             </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
-          <Button onClick={handleClose} variant="outlined" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} variant="contained" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </DialogContent>
+          <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
+            <Button
+              onClick={handleClose}
+              variant="outlined"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              variant="contained"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+      {loading && (
+        <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogContent sx={{ textAlign: 'center', py: 10 }}>
+            <Typography variant="h6">Loading...</Typography>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PageContainer from 'src/components/container/PageContainer';
 import AppCard from 'src/components/shared/AppCard';
 import { Box } from '@mui/material';
@@ -9,14 +9,34 @@ import { RootState, useSelector } from 'src/store/Store';
 
 const FloorplanDeviceEdit = () => {
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(true);
+  const [loading, setLoading] = useState(false);
   const editingDevice = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.editingFloorplanDevice,
   );
   const selectedFloorplan = useSelector(
     (state: RootState) => state.floorplanReducer.selectedFloorplan,
   );
-  if(!selectedFloorplan) {
+    useEffect(() => {
+    if (selectedFloorplan) {
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+  }, [selectedFloorplan]);
+  if(!selectedFloorplan && !loading) {
     window.location.href = '/master/device';
+  }
+
+    if (loading) {
+    return (
+      <PageContainer title="Floorplan Device" description="this is floorplan device page">
+        <AppCard>
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+            Loading...
+          </Box>
+        </AppCard>
+      </PageContainer>
+    );
   }
   return (
     <PageContainer title="Floorplan Device" description="this is floorplan device page">

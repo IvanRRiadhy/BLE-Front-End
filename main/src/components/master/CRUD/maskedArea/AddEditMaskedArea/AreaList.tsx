@@ -33,6 +33,7 @@ import {
 import AreaListItem from './AreaListItem';
 import { useNavigate } from 'react-router';
 import { uniqueId } from 'lodash';
+import toast from 'react-hot-toast';
 
 const filter = {
   draw: 1,
@@ -73,7 +74,7 @@ const AreaList = () => {
   const filteredOriginalAreas = originalAreas.filter(
     (area) => area.floorplanId === activeFloorplan?.id,
   );
-    const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
+  const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   const deletedArea = useSelector((state: AppState) => state.maskedAreaReducer.deletedMaskedArea);
   const addedArea = useSelector((state: AppState) => state.maskedAreaReducer.addedMaskedArea);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -195,31 +196,53 @@ const AreaList = () => {
       const originalArea = originArea.get(unsavedArea.id);
       console.log('Original Area:', originalArea);
       console.log('Unsaved Area:', unsavedArea);
-      console.log('Is Area Edited:', originalArea && JSON.stringify(unsavedArea) !== JSON.stringify(originalArea));
+      console.log(
+        'Is Area Edited:',
+        originalArea && JSON.stringify(unsavedArea) !== JSON.stringify(originalArea),
+      );
       return originalArea && JSON.stringify(unsavedArea) !== JSON.stringify(originalArea);
     });
     console.log('Areas to Edit:', areasToEdit);
-    for (const area of areasToEdit) {
-      await dispatch(editMaskedArea(area));
-    }
 
-    if (addedArea) {
-      console.log('Areas to Add:', addedArea);
-      for (const area of addedArea) {
-        await dispatch(addMaskedArea(area));
+    try {
+      let resultAdd, resultEdit, resultDelete;
+      for (const area of areasToEdit) {
+        resultEdit = await dispatch(editMaskedArea(area));
       }
-    }
 
-    //3. Delete Area
-    if (deletedArea) {
-      console.log('Areas to Delete:', deletedArea);
-      for (const area of deletedArea) {
-        await dispatch(deleteMaskedArea(area.id));
+      if (addedArea) {
+        console.log('Areas to Add:', addedArea);
+        for (const area of addedArea) {
+          resultAdd = await dispatch(addMaskedArea(area));
+        }
       }
+
+      //3. Delete Area
+      if (deletedArea) {
+        console.log('Areas to Delete:', deletedArea);
+        for (const area of deletedArea) {
+          resultDelete = await dispatch(deleteMaskedArea(area.id));
+        }
+      }
+      if (resultAdd || resultEdit || resultDelete) {
+        resultAdd?.type.endsWith('/fulfilled')
+          ? toast.success('Add successful', { position: 'top-right' })
+          : toast.error('Add unsuccessful', { position: 'top-right' });
+        resultEdit?.type.endsWith('/fulfilled')
+          ? toast.success('Data Saved', { position: 'top-right' })
+          : toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        resultDelete?.type.endsWith('/fulfilled')
+          ? toast.success('Delete successful', { position: 'top-right' })
+          : toast.error('Delete unsuccessful', { position: 'top-right' });
+        // Call deleteFloorplanDevice for each device to delete
+        dispatch(fetchFloorplanDT(floorplanFilter));
+        console.log('Save operation completed.');
+        handleCloseEditing(); // Navigate back to the device list
+      }
+    } catch (error) {
+      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      console.error('Error saving floorplan:', error);
     }
-    dispatch(fetchFloorplanDT(floorplanFilter));
-    console.log('Save operation completed.');
-    handleCloseEditing();
   };
 
   return (

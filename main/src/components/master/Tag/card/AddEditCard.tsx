@@ -30,6 +30,8 @@ import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
 import { floorType, fetchFloors } from 'src/store/apps/crud/floor';
 import { FloorplanType, fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { MaskedAreaType, fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
+import toast from 'react-hot-toast';
+import { defaultCardForm } from 'src/store/apps/defaultForm';
 interface FormData {
   [key: string]: string | boolean | string[];
 }
@@ -88,17 +90,8 @@ const AddEditCard = ({ type, card }: formType) => {
   const [qrOpen, setQrOpen] = React.useState(false);
   const [expanded, setExpanded] = React.useState<{ [nodeId: string]: boolean }>({});
   const [formData, setFormData] = React.useState<FormData>({
-    id: card?.id || '',
-    name: card?.name || '',
-    remarks: card?.remarks || '',
-    cardType: card?.cardType || '',
-    cardNumber: card?.cardNumber || '',
-    cardBarcode: card?.cardBarcode || '',
-    dmac: card?.dmac || '',
-    isMultiArea: card?.isMultiArea || false,
-    registeredArea: card?.registeredArea || [],
-    lastUsed: card?.lastUsed || '',
-    StatusCard: card?.statusCard || false,
+    ...defaultCardForm,
+    ...card,
   });
   const buildingData = useSelector((state: RootState) => state.buildingReducer.buildingAll);
   const floorData = useSelector((state: RootState) => state.floorReducer.floorAll);
@@ -119,6 +112,11 @@ const AddEditCard = ({ type, card }: formType) => {
   }, [dispatch]);
 
   const handleClickOpen = () => {
+    if (type === 'edit' && card) {
+      setFormData({ ...defaultCardForm, ...card });
+    } else {
+      setFormData({ ...defaultCardForm });
+    }
     setOpen(true);
   };
 
@@ -158,17 +156,24 @@ const AddEditCard = ({ type, card }: formType) => {
       } else {
         form.append('isMultiArea', 'false');
       }
+      let result;
       if (type === 'edit') {
-        await dispatch(editCard(form)); // Await ensures the update completes
+        result = await dispatch(editCard(form)); // Dispatch update
       }
       if (type === 'add') {
-        await dispatch(addCard(form)); // Await ensures the add completes
+        result = await dispatch(addCard(form));
       }
-      // Reload the card list after saving
-      await dispatch(fetchCard());
-      setOpen(false);
+      if (result && result.type && result.type.endsWith('/fulfilled')) {
+        await dispatch(fetchCard());
+        console.log('Card Data Saved!');
+        toast.success('Data Saved', { position: 'top-right' });
+        handleClose();
+      } else {
+        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      }
     } catch (error) {
-      console.error('Error saving card:', error);
+      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      console.error('Error saving card data:', error);
     }
   };
 

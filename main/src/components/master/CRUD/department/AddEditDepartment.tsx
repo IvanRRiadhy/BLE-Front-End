@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React from 'react';
+import toast from 'react-hot-toast';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
@@ -22,6 +23,7 @@ import {
   fetchDepartmentDT,
   fetchDepartments,
 } from 'src/store/apps/crud/department';
+import { defaultDepartmentForm } from 'src/store/apps/defaultForm';
 
 interface FormType {
   type?: string;
@@ -30,19 +32,11 @@ interface FormType {
 
 const AddEditDepartment = ({ type, department }: FormType) => {
   const [open, setOpen] = React.useState(false);
-  const [formData, setFormData] = React.useState<DepartmentType>(
-    department || {
-      id: '',
-      code: '',
-      name: '',
-      departmentHost: '',
-      applicationId: localStorage.getItem('applicationId') || '',
-      createdBy: '',
-      createdAt: '',
-      updatedBy: '',
-      updatedAt: '',
-    },
-  );
+  const [loading, setLoading] = React.useState(false);
+  const [formData, setFormData] = React.useState<DepartmentType>({
+    ...defaultDepartmentForm,
+    ...department,
+  });
   const departmentFilter = useSelector(
     (state: RootState) => state.departmentReducer.departmentFilter,
   );
@@ -50,11 +44,17 @@ const AddEditDepartment = ({ type, department }: FormType) => {
 
   const handleClickOpen = () => {
     if (type === 'edit' && department) {
-      setFormData(department);
+      if (!department.id) {
+        dispatch(fetchDepartmentDT(departmentFilter));
+      }
+      setFormData({ ...defaultDepartmentForm, ...department });
     } else {
-      setFormData({applicationId: localStorage.getItem('applicationId') || ''} as DepartmentType);
+      setFormData({ ...defaultDepartmentForm });
     }
-    setOpen(true);
+    setTimeout(() => {
+      setLoading(false);
+      setOpen(true);
+    }, 100);
   };
 
   const handleClose = () => {
@@ -63,17 +63,24 @@ const AddEditDepartment = ({ type, department }: FormType) => {
 
   const handleSave = async () => {
     try {
+      let result;
       if (type === 'edit') {
-        await dispatch(editDepartment(formData)); // Dispatch update
+        result = await dispatch(editDepartment(formData)); // Dispatch update
       }
       if (type === 'add') {
-        await dispatch(addDepartment(formData));
+        result = await dispatch(addDepartment(formData));
       }
-      await dispatch(fetchDepartmentDT(departmentFilter));
-      console.log('Saved!');
-      setOpen(false);
+      if (result && result.type && result.type.endsWith('/fulfilled')) {
+        await dispatch(fetchDepartmentDT(departmentFilter));
+        console.log('Department Saved!');
+        toast.success('Data Saved', { position: 'top-right' });
+        handleClose();
+      } else {
+        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      }
     } catch (error) {
-      console.error('Error saving application:', error);
+      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      console.error('Error saving department:', error);
     }
   };
 
@@ -103,58 +110,77 @@ const AddEditDepartment = ({ type, department }: FormType) => {
           Add Department
         </Button>
       )}
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>
-          <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
-            {type === 'add' ? 'Add Department' : 'Edit Department'}
-          </Typography>
-          <Divider />
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-            Department Details
-          </Typography>
-          <Divider />
-          <Grid container spacing={5} mb={3}>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="department-code">Department Code</CustomFormLabel>
-              <CustomTextField
-                id="code"
-                value={formData.code}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-              <CustomFormLabel htmlFor="department-host">Department Host</CustomFormLabel>
-              <CustomTextField
-                id="departmentHost"
-                value={formData.departmentHost}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
+
+      {!loading && (
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogTitle>
+            <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
+              {type === 'add' ? 'Add Department' : 'Edit Department'}
+            </Typography>
+            <Divider />
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              Department Details
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="department-code">Department Code</CustomFormLabel>
+                <CustomTextField
+                  id="code"
+                  value={formData.code}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+                <CustomFormLabel htmlFor="department-host">Department Host</CustomFormLabel>
+                <CustomTextField
+                  id="departmentHost"
+                  value={formData.departmentHost}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="department-Name">Department Name</CustomFormLabel>
+                <CustomTextField
+                  id="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
             </Grid>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="department-Name">Department Name</CustomFormLabel>
-              <CustomTextField
-                id="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
-          <Button onClick={handleClose} variant="outlined" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} variant="contained" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </DialogContent>
+          <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
+            <Button
+              onClick={handleClose}
+              variant="outlined"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              variant="contained"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
+      {loading && (
+        <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogContent sx={{ textAlign: 'center', py: 10 }}>
+            <Typography variant="h6">Loading...</Typography>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };

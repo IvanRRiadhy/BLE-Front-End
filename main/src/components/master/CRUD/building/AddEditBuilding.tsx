@@ -24,6 +24,7 @@ import {
   fetchBuildingDT,
   fetchBuildings,
 } from 'src/store/apps/crud/building';
+import { defaultBuildingForm } from 'src/store/apps/defaultForm';
 
 interface FormType {
   type?: string;
@@ -32,29 +33,36 @@ interface FormType {
 
 const AddEditBuilding = ({ type, building }: FormType) => {
   const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
   const [image, setImage] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(building?.image || null);
   const [fromLocal, setFromLocal] = React.useState(false);
-  const [formData, setFormData] = React.useState(
-    building || {
-      id: '',
-      name: '',
-      applicationId: localStorage.getItem('applicationId') || '',
-      createdBy: '',
-      createdAt: '',
-      updatedBy: '',
-      updatedAt: '',
-    },
-  );
+  const [formData, setFormData] = React.useState({
+    ...defaultBuildingForm,
+    ...building,
+  });
   const buildingFilter = useSelector((state: RootState) => state.buildingReducer.buildingFilter);
   const dispatch: AppDispatch = useDispatch();
-  const handleClickOpen = () => {
-            if (type === 'edit' && building) {
-              setFormData(building);
-            } else {
-              setFormData({applicationId: localStorage.getItem('applicationId') || ''} as BuildingType);
-            }
-    setOpen(true);
+  const handleClickOpen = async () => {
+    setLoading(true);
+
+    if (type === 'edit') {
+      if (!building?.id) {
+        // You can optionally fetch the building detail here using the ID
+        await dispatch(fetchBuildingDT(buildingFilter));
+      }
+      setFormData({ ...defaultBuildingForm, ...building });
+      setPreview(building?.image || null);
+    } else {
+      setFormData({ ...defaultBuildingForm });
+      setPreview(null);
+    }
+
+    // Simulate or wait for building data to finish preparing
+    setTimeout(() => {
+      setLoading(false);
+      setOpen(true);
+    }, 100); // optional small delay for smoother UX
   };
 
   const handleClose = () => {
@@ -110,7 +118,9 @@ const AddEditBuilding = ({ type, building }: FormType) => {
       if (image) {
         data.append('image', image);
       }
-
+      Object.entries(formData).forEach(([key, value]) => {
+        console.log(key, typeof value);
+      });
       let result;
       if (type === 'edit') {
         result = await dispatch(editBuilding(data));
@@ -123,13 +133,13 @@ const AddEditBuilding = ({ type, building }: FormType) => {
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         console.log('Building saved successfully');
         await dispatch(fetchBuildingDT(buildingFilter));
-        toast.success('Update successful', { position: 'top-right' });
+        toast.success('Data Saved', { position: 'top-right' });
         handleClose();
       } else {
-        toast.error('Update unsuccessful', { position: 'top-right' });
+        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
       }
     } catch (error) {
-      toast.error('Update unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
       console.error('Error saving Building:', error);
     }
   };
@@ -150,57 +160,74 @@ const AddEditBuilding = ({ type, building }: FormType) => {
           Add Building
         </Button>
       )}
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>
-          <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
-            {type === 'add' ? 'Add Building' : 'Edit Building'}
-          </Typography>
-          <Divider />
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-            Building Details
-          </Typography>
-          <Divider />
-          <Grid container spacing={5} mb={3}>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel htmlFor="department-Name">Building Name</CustomFormLabel>
-              <CustomTextField
-                id="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-          </Grid>
-          <Grid container spacing={5} mb={3}>
-            <Grid size={12}>
-              <CustomFormLabel htmlFor="building-image">Building Image</CustomFormLabel>
-              <input
-                type="file"
-                accept="image/png, image/jpeg, image/jpg"
-                onChange={handleImageChange}
-              />
-              {preview && (
-                <img
-                  src={fromLocal ? `${preview}` : `${BASE_URL}${preview}`}
-                  alt="Building Preview"
-                  style={{ width: '100%', marginTop: '10px', borderRadius: '5px' }}
+      {!loading && (
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogTitle>
+            <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
+              {type === 'add' ? 'Add Building' : 'Edit Building'}
+            </Typography>
+            <Divider />
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              Building Details
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="department-Name">Building Name</CustomFormLabel>
+                <CustomTextField
+                  id="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
                 />
-              )}
+              </Grid>
             </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
-          <Button onClick={handleClose} variant="outlined" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} variant="contained" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <Grid container spacing={5} mb={3}>
+              <Grid size={12}>
+                <CustomFormLabel htmlFor="building-image">Building Image</CustomFormLabel>
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg, image/jpg"
+                  onChange={handleImageChange}
+                />
+                {preview && (
+                  <img
+                    src={fromLocal ? `${preview}` : `${BASE_URL}${preview}`}
+                    alt="Building Preview"
+                    style={{ width: '100%', marginTop: '10px', borderRadius: '5px' }}
+                  />
+                )}
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
+            <Button
+              onClick={handleClose}
+              variant="outlined"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              variant="contained"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+      {loading && (
+        <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogContent sx={{ textAlign: 'center', py: 10 }}>
+            <Typography variant="h6">Loading...</Typography>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };

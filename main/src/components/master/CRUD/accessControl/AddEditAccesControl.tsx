@@ -25,6 +25,8 @@ import {
 } from 'src/store/apps/crud/accessControl';
 import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
+import toast from 'react-hot-toast';
+import { defaultAccessControlForm } from 'src/store/apps/defaultForm';
 
 interface FormType {
   type?: string;
@@ -33,44 +35,35 @@ interface FormType {
 
 const AddEditAccessControl = ({ type, accessControl }: FormType) => {
   const [open, setOpen] = React.useState(false);
-  const [formData, setFormData] = React.useState<AccessControlType>(
-    accessControl || {
-      id: '',
-      controllerBrandId: '',
-      name: '',
-      type: '',
-      description: '',
-      channel: '',
-      doorId: '',
-      raw: '',
-      integrationId: 'F3FC00F0-F8FA-4DA1-A8C7-FC8336F24923',
-      applicationId: localStorage.getItem('applicationId') || '',
-      createdBy: '',
-      createdAt: '',
-      updatedBy: '',
-      updatedAt: '',
-    },
-  );
+  const [loading, setLoading] = React.useState(false);
+  const [formData, setFormData] = React.useState<AccessControlType>({
+    ...defaultAccessControlForm,
+    ...accessControl,
+  });
 
-    const accessControlFilter = useSelector(
-      (state: RootState) => state.accessControlReducer.accessControlFilter,
-    )
-  const brandData: BrandType[] = useSelector(
-    (state: RootState) => state.brandReducer.brands,
+  const accessControlFilter = useSelector(
+    (state: RootState) => state.accessControlReducer.accessControlFilter,
   );
+  const brandData: BrandType[] = useSelector((state: RootState) => state.brandReducer.brands);
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchBrands());
   }, [dispatch]);
 
-  const handleClickOpen = () => {
-      if (type === 'edit' && accessControl) {
-        setFormData(accessControl);
-      } else {
-        setFormData({applicationId: localStorage.getItem('applicationId') || ''} as AccessControlType);
+  const handleClickOpen = async () => {
+    if (type === 'edit' && accessControl) {
+      if (!accessControl.id) {
+        await dispatch(fetchAccessControlsDT(accessControlFilter));
       }
-      console.log(formData.controllerBrandId);
-    setOpen(true);
+      setFormData({ ...defaultAccessControlForm, ...accessControl });
+    } else {
+      setFormData({ ...defaultAccessControlForm });
+    }
+    console.log(formData.controllerBrandId);
+    setTimeout(() => {
+      setLoading(false);
+      setOpen(true);
+    }, 100);
   };
 
   const handleClose = () => {
@@ -79,17 +72,24 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
 
   const handleSave = async () => {
     try {
+      let result;
       if (type === 'edit') {
-        await dispatch(editAccessControl(formData)); // Dispatch update
+        result = await dispatch(editAccessControl(formData)); // Dispatch update
       }
       if (type === 'add') {
-        await dispatch(addAccessControl(formData));
+        result = await dispatch(addAccessControl(formData));
       }
-      await dispatch(fetchAccessControlsDT(accessControlFilter));
-      console.log('Saved!');
-      setOpen(false);
+      if (result && result.type && result.type.endsWith('/fulfilled')) {
+        await dispatch(fetchAccessControlsDT(accessControlFilter));
+        console.log('Access Control Saved!');
+        toast.success('Data Saved', { position: 'top-right' });
+        handleClose();
+      } else {
+        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      }
     } catch (error) {
-      console.error('Error saving application:', error);
+      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      console.error('Error saving Access Control:', error);
     }
   };
 
@@ -119,108 +119,125 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
           Add Access Control
         </Button>
       )}
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>
-          <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
-            {type === 'add' ? 'Add Access Control' : 'Edit Access Control'}
-          </Typography>
-          <Divider />
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-            Access Control Details
-          </Typography>
-          <Divider />
-          <Grid container spacing={5} mb={3}>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
-              <CustomFormLabel htmlFor="ctrl-brand-id">Controller Brand</CustomFormLabel>
-              <CustomSelect
-                id="controllerBrandId"
-                name="controllerBrandId"
-                value={formData.controllerBrandId}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
+      {!loading && (
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogTitle>
+            <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
+              {type === 'add' ? 'Add Access Control' : 'Edit Access Control'}
+            </Typography>
+            <Divider />
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              Access Control Details
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
+                <CustomFormLabel htmlFor="ctrl-brand-id">Controller Brand</CustomFormLabel>
+                <CustomSelect
+                  id="controllerBrandId"
+                  name="controllerBrandId"
+                  value={formData.controllerBrandId}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
                 >
-              {brandData.map((brand) => (
-                <MenuItem key={brand.id} value={brand.id}>
-                  {brand.name}
-                </MenuItem>
-              ))}
-              </CustomSelect>
-              <CustomFormLabel htmlFor="ctrl-type">Controller Type</CustomFormLabel>
-              <CustomTextField
-                id="type"
-                value={formData.type}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
+                  {brandData.map((brand) => (
+                    <MenuItem key={brand.id} value={brand.id}>
+                      {brand.name}
+                    </MenuItem>
+                  ))}
+                </CustomSelect>
+                <CustomFormLabel htmlFor="ctrl-type">Controller Type</CustomFormLabel>
+                <CustomTextField
+                  id="type"
+                  value={formData.type}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
+                <CustomFormLabel htmlFor="ctrl-name">Name</CustomFormLabel>
+                <CustomTextField
+                  id="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+                <CustomFormLabel htmlFor="ctrl-description">Description</CustomFormLabel>
+                <CustomTextField
+                  id="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
             </Grid>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
-              <CustomFormLabel htmlFor="ctrl-name">Name</CustomFormLabel>
-              <CustomTextField
-                id="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-              <CustomFormLabel htmlFor="ctrl-description">Description</CustomFormLabel>
-              <CustomTextField
-                id="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              Other Details
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
+                <CustomFormLabel htmlFor="door-id">Door ID</CustomFormLabel>
+                <CustomTextField
+                  id="doorId"
+                  value={formData.doorId}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+                <CustomFormLabel htmlFor="raw">Raw Data</CustomFormLabel>
+                <CustomTextField
+                  id="raw"
+                  value={formData.raw}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
+                <CustomFormLabel htmlFor="ctrl-channel">Channel</CustomFormLabel>
+                <CustomTextField
+                  id="channel"
+                  value={formData.channel}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
             </Grid>
-          </Grid>
-          <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-            Other Details
-          </Typography>
-          <Divider />
-          <Grid container spacing={5} mb={3}>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
-              <CustomFormLabel htmlFor="door-id">Door ID</CustomFormLabel>
-              <CustomTextField
-                id="doorId"
-                value={formData.doorId}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-              <CustomFormLabel htmlFor="raw">Raw Data</CustomFormLabel>
-              <CustomTextField
-                id="raw"
-                value={formData.raw}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
-              <CustomFormLabel htmlFor="ctrl-channel">Channel</CustomFormLabel>
-              <CustomTextField
-                id="channel"
-                value={formData.channel}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
+          </DialogContent>
+          <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
+            <Button
+              onClick={handleClose}
+              variant="outlined"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              variant="contained"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
 
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
-          <Button onClick={handleClose} variant="outlined" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} variant="contained" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {loading && (
+        <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogContent sx={{ textAlign: 'center', py: 10 }}>
+            <Typography variant="h6">Loading...</Typography>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch, AppDispatch, AppState, RootState } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
+import { fetchFloorplan, fetchFloorplanDT } from 'src/store/apps/crud/floorplan';
 import {
   addFloorplanDevice,
   AddUnsavedDevice,
@@ -36,6 +36,7 @@ import { fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
 import { fetchAccessControls } from 'src/store/apps/crud/accessControl';
 import { fetchBleReaders } from 'src/store/apps/crud/bleReader';
 import { fetchFloorDT } from 'src/store/apps/crud/floor';
+import toast from 'react-hot-toast';
 
 const DeviceList = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -195,39 +196,55 @@ const DeviceList = () => {
     // Get the current state of devices
     // const unsavedDevicesMap = new Map(filteredUnsavedDevices.map((device) => [device.id, device]));
     const floorplanDevicesMap = new Map(
-      filteredOriginalDevices.map((device) => [device.id, device]),
+      filteredOriginalDevices.map((device: FloorplanDeviceType) => [device.id, device]),
     );
     // 1. Edit devices: Check for devices with different fields
-    const devicesToEdit = filteredUnsavedDevices.filter((unsavedDevice) => {
+    const devicesToEdit = filteredUnsavedDevices.filter((unsavedDevice: FloorplanDeviceType) => {
       const originalDevice = floorplanDevicesMap.get(unsavedDevice.id);
       return originalDevice && JSON.stringify(unsavedDevice) !== JSON.stringify(originalDevice);
     });
     console.log('devicesToEdit', devicesToEdit);
-
-    // Call editFloorplanDevice for each device that needs editing
-    for (const device of devicesToEdit) {
-      await dispatch(editFloorplanDevice(device));
-    }
-
-    // 2. Add devices: Check for devices in unsavedDevices but not in floorplanDevices
-    if (addedDevice) {
-      console.log('addedDevice', addedDevice);
-      // Call addFloorplanDevice for each new device
-      for (const device of addedDevice) {
-        await dispatch(addFloorplanDevice(device));
+    try {
+      let resultAdd, resultEdit, resultDelete;
+      // Call editFloorplanDevice for each device that needs editing
+      for (const device of devicesToEdit) {
+        resultEdit = await dispatch(editFloorplanDevice(device));
       }
-    }
 
-    // 3. Delete devices: Check for devices in floorplanDevices but not in unsavedDevices
-    if (deletedDevice) {
-      for (const device of deletedDevice) {
-        await dispatch(deleteFloorplanDevice(device.id));
+      // 2. Add devices: Check for devices in unsavedDevices but not in floorplanDevices
+      if (addedDevice) {
+        console.log('addedDevice', addedDevice);
+        // Call addFloorplanDevice for each new device
+        for (const device of addedDevice) {
+          resultAdd = await dispatch(addFloorplanDevice(device));
+        }
       }
+
+      // 3. Delete devices: Check for devices in floorplanDevices but not in unsavedDevices
+      if (deletedDevice) {
+        for (const device of deletedDevice) {
+          resultDelete = await dispatch(deleteFloorplanDevice(device.id));
+        }
+      }
+      if (resultAdd || resultEdit || resultDelete) {
+        resultAdd?.type.endsWith('/fulfilled')
+          ? toast.success('Add successful', { position: 'top-right' })
+          : toast.error('Add unsuccessful', { position: 'top-right' });
+        resultEdit?.type.endsWith('/fulfilled')
+          ? toast.success('Data Saved', { position: 'top-right' })
+          : toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        resultDelete?.type.endsWith('/fulfilled')
+          ? toast.success('Delete successful', { position: 'top-right' })
+          : toast.error('Delete unsuccessful', { position: 'top-right' });
+        // Call deleteFloorplanDevice for each device to delete
+        dispatch(fetchFloorplanDT(floorplanFilter));
+        console.log('Save operation completed.');
+        handleCloseEditing(); // Navigate back to the device list
+      }
+    } catch (error) {
+      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      console.error('Error saving floorplan:', error);
     }
-    // Call deleteFloorplanDevice for each device to delete
-    dispatch(fetchFloorDT(floorplanFilter));
-    console.log('Save operation completed.');
-    handleCloseEditing(); // Navigate back to the device list
   };
 
   return (
