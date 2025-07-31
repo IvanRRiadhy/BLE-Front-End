@@ -7,6 +7,7 @@ import {
   Divider,
   Grid2 as Grid,
   IconButton,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
@@ -86,19 +87,23 @@ const AddEditBrand = ({ type, brand }: FormType) => {
   return (
     <>
       {type === 'edit' && (
-        <IconButton color="primary" size="small" onClick={handleClickOpen}>
-          <IconPencil size={20} />
-        </IconButton>
+        <Tooltip title="Edit Brand">
+          <IconButton color="primary" size="small" onClick={handleClickOpen}>
+            <IconPencil size={20} />
+          </IconButton>
+        </Tooltip>
       )}
       {type === 'add' && (
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<IconPlus size={20} />}
-          onClick={handleClickOpen}
-        >
-          Add Brand
-        </Button>
+        <Tooltip title="Add Brand">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<IconPlus size={20} />}
+            onClick={handleClickOpen}
+          >
+            Add Brand
+          </Button>
+        </Tooltip>
       )}
 
       {!loading && (

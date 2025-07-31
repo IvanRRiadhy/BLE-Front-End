@@ -171,8 +171,8 @@ const TrackingDetailPopup = ({
   }, []);
 
   const maxWidth = 900;
-  const maxHeight = 500;
-  const minHeight = 400;
+  const maxHeight = 350;
+  const minHeight = 200;
 
   const scale = Math.min(maxWidth / imageDimensions.width, maxHeight / imageDimensions.height);
   // console.log("Scale: ",scale, " = ", maxWidth, " / ", imageDimensions.width, " = ", maxHeight, " / ", imageDimensions.height);
@@ -379,7 +379,7 @@ const TrackingDetailPopup = ({
         <Box
           sx={{
             border: '2px solid #000',
-            height: stageHeight,
+            height: stageHeight > 0 ? stageHeight : minHeight,
             mb: 2,
             overflow: 'hidden',
             flexShrink: 0,

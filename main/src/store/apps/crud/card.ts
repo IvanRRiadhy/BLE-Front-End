@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { defaultCardFilter } from "../defaultForm";
 
 const API_URL = "/api/Card/";
 const API_DT_URL = "/api/Card/filter/";
@@ -60,14 +61,7 @@ const initialState: StateType = {
     cards: [],
     cardAll: [],
     cardSearch: '',
-    cardFilter: {
-        Draw: 0,
-        Start: 0,
-        Length: 10,
-        SortColumn: 'LastUsed',
-        SortDir: 'desc',
-        searchValue: '',
-    },
+    cardFilter: defaultCardFilter,
     cardTotalCount: 0,
     cardFilteredCount: 0,
 };

@@ -29,6 +29,7 @@ import {
   DialogTitle,
   DialogContentText,
   IconButton,
+  Tooltip,
 } from '@mui/material';
 import AreaListItem from './AreaListItem';
 import { useNavigate } from 'react-router';
@@ -257,9 +258,13 @@ const AreaList = () => {
           <Typography variant="h6" mt={0}>
             Masked Areas
           </Typography>
-          <IconButton color="primary" onClick={handleAddAreaClick}>
-            <AddIcon />
-          </IconButton>
+          {!editingMaskedArea && (
+            <Tooltip title="Add Masked Area">
+              <IconButton color="primary" onClick={handleAddAreaClick}>
+                <AddIcon />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
         <Divider />
         <Scrollbar

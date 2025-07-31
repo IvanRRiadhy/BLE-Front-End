@@ -10,6 +10,7 @@ import {
   IconButton,
   MenuItem,
   SelectChangeEvent,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
@@ -209,19 +210,23 @@ const AddEditFloor = ({ type, floor }: FormType) => {
   return (
     <>
       {type === 'edit' && (
-        <IconButton color="primary" size="small" onClick={handleClickOpen}>
-          <IconPencil size={20} />
-        </IconButton>
+        <Tooltip title="Edit Floor">
+          <IconButton color="primary" size="small" onClick={handleClickOpen}>
+            <IconPencil size={20} />
+          </IconButton>
+        </Tooltip>
       )}
       {type === 'add' && (
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<IconPlus size={20} />}
-          onClick={handleClickOpen}
-        >
-          Add Floor
-        </Button>
+        <Tooltip title="Add Floor">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<IconPlus size={20} />}
+            onClick={handleClickOpen}
+          >
+            Add Floor
+          </Button>
+        </Tooltip>
       )}
 
       {!loading && (

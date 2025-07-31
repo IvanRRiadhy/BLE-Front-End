@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { defaultFloorFilter } from "../defaultForm";
 
 const API_URL = "/api/MstFloor/";
 const API_DT_URL = "/api/MstFloor/filter/";
@@ -15,7 +16,7 @@ export type GetFilter = {
     SortDir: 'asc' | 'desc',
     searchValue: string,
     filters: {
-        BuildingId?: string,
+        BuildingId: string,
     }
 }
 
@@ -70,15 +71,7 @@ const initialState: StateType = {
     selectedFloor: null,
     floorTotalCount: 0,
     floorFilteredCount: 0,
-    floorFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "UpdatedAt",
-        SortDir: "desc",
-        searchValue: "",
-        filters: {},
-    }
+    floorFilter: defaultFloorFilter,
 };
 
 export const FloorSlice = createSlice({

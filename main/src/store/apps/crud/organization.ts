@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { defaultOrganizationFilter } from "../defaultForm";
 
 const API_URL = "/api/MstOrganization/";
 const API_DT_URL = "/api/MstOrganization/filter/";
@@ -60,14 +61,7 @@ const initialState: StateType = {
     selectedOrganization: null,
     organizationTotalCount: 0,
     organizationFilteredCount: 0,
-    organizationFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "UpdatedAt",
-        SortDir: "desc",
-        searchValue: "",
-    }
+    organizationFilter: defaultOrganizationFilter,
 };
 
 export const OrganizationSlice = createSlice({

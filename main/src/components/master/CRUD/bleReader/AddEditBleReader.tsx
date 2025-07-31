@@ -10,6 +10,7 @@ import {
   Typography,
   MenuItem,
   SelectChangeEvent,
+  Tooltip,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
@@ -105,19 +106,23 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
   return (
     <>
       {type === 'edit' && (
-        <IconButton color="primary" size="small" onClick={handleClickOpen}>
-          <IconPencil size={20} />
-        </IconButton>
+        <Tooltip title="Edit BLE Reader">
+          <IconButton color="primary" size="small" onClick={handleClickOpen}>
+            <IconPencil size={20} />
+          </IconButton>
+        </Tooltip>
       )}
       {type === 'add' && (
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<IconPlus size={20} />}
-          onClick={handleClickOpen}
-        >
-          Add Ble Reader
-        </Button>
+        <Tooltip title="Add BLE Reader">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<IconPlus size={20} />}
+            onClick={handleClickOpen}
+          >
+            Add Ble Reader
+          </Button>
+        </Tooltip>
       )}
 
       {!loading && (

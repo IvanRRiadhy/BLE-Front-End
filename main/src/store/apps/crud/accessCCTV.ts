@@ -4,6 +4,7 @@ import { AppDispatch, dispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { IntegrationType } from "src/store/apps/crud/integration";
+import { defaultAccessCCTVFilter } from "../defaultForm";
 
 const API_URL = "/api/MstAccessCctv/";
 const API_DT_URL = "/api/MstAccessCctv/filter/";
@@ -61,14 +62,7 @@ const initialState: StateType = {
     selectedCCTV: null,
     cctvTotalCount: 0,
     cctvFilteredCount: 0,
-    cctvFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "UpdatedAt",
-        SortDir: "desc",
-        searchValue: "",
-    }
+    cctvFilter: defaultAccessCCTVFilter,
 };
 
 export const CCTVSlice = createSlice({

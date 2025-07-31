@@ -22,9 +22,9 @@ const EmployeeBeacon = 73;
 const VisitorBeacon = 74;
 
 const BeaconList = [
-  { name: 'EmployeeBeacon', value: 73, color: '#43a047' },
-  { name: 'VisitorBeacon', value: 25, color: '#ff5252' },
-  { name: 'UnknownBeacon', value: 2, color: '#afafaf' },
+  { name: 'Employee Beacon', value: 73, color: '#43a047' },
+  { name: 'Visitor Beacon', value: 25, color: '#ff5252' },
+  { name: 'Unknown Beacon', value: 2, color: '#afafaf' },
 ];
 
 const BeaconDistribution = () => {
@@ -40,9 +40,9 @@ const BeaconDistribution = () => {
               startAngle={180}
               endAngle={0}
               cx="50%"
-              cy="50%"
-              innerRadius={60}
-              outerRadius={80}
+              cy="65%"
+              innerRadius={80}
+              outerRadius={100}
             //   fill="#8884d8"
               label={({ name, value }) => `${name}: ${value} Card`}
             >

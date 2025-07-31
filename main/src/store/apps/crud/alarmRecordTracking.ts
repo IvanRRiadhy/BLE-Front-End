@@ -5,6 +5,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { masterVisitorType } from "./visitor";
 import { bleReaderType } from "./bleReader";
 import { MaskedAreaType } from "./maskedArea";
+import { defaultAlarmRecordFilter } from "../defaultForm";
 
 const API_URL = '/api/AlarmRecordTracking/';
 const API_DT_URL = '/api/AlarmRecordTracking/filter/';
@@ -80,19 +81,7 @@ const initialState: StateType = {
     selectedAlarmRecordTracking: null,
     alarmRecordTotalCount: 0,
     alarmRecordFilteredCount: 0,
-    alarmRecordFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "Timestamp",
-        SortDir: "desc",
-        searchValue: "",
-        filters: {
-            FloorplanMaskedAreaId: [],
-            ReaderId: [],
-            VisitorId: [],
-        }
-    }
+    alarmRecordFilter: defaultAlarmRecordFilter,
 };
 export const AlarmSlice = createSlice({
     name: 'alarmRecordTrackings',

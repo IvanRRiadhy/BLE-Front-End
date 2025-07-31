@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { defaultDistrictFilter } from "../defaultForm";
 
 const API_URL = "/api/MstDistrict/";
 const API_DT_URL = "/api/MstDistrict/filter/";
@@ -60,14 +61,7 @@ const initialState: StateType = {
     selectedDistrict: null,
     districtTotalCount: 0,
     districtFilteredCount: 0,
-    districtFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "UpdatedAt",
-        SortDir: "desc",
-        searchValue: ""
-    }
+    districtFilter: defaultDistrictFilter,
 };
 
 export const DistrictSlice = createSlice({

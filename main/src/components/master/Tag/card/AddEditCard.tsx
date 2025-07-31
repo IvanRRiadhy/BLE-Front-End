@@ -276,7 +276,7 @@ const AddEditCard = ({ type, card }: formType) => {
                   border: '1px solid #ced4da',
                   borderRadius: 4,
                   padding: 8,
-                  minHeight: 45,
+                  minHeight: 115,
                   maxHeight: 215,
                   overflowY: 'auto',
                   background: '#fafbfc',
@@ -324,7 +324,11 @@ const AddEditCard = ({ type, card }: formType) => {
         <DialogContent
           sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}
         >
-          <QRCode value={formData.cardNumber.toString()} size={256} />
+          {formData.cardNumber ? 
+          (<QRCode value={formData.cardNumber.toString()} size={256} />) : 
+          <Typography variant="body1">No QR Code</Typography>
+          
+          }
         </DialogContent>
         <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
           <Button onClick={() => setQrOpen(false)}>Close</Button>

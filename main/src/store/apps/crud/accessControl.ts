@@ -5,6 +5,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { IntegrationType } from "./integration";
 import { BrandType } from "./brand";
+import { defaultAccessControlFilter } from "../defaultForm";
 
 const API_URL = "/api/MstAccessControl/";
 const API_DT_URL = "/api/MstAccessControl/filter/";
@@ -68,14 +69,7 @@ const initialState: StateType = {
     selectedAccessControl: null,
     accessControlTotalCount: 0,
     accessControlFilteredCount: 0,
-    accessControlFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "UpdatedAt",
-        SortDir: "desc",
-        searchValue: "",
-    }
+    accessControlFilter: defaultAccessControlFilter,
 };
 
 export const AccessControlSlice = createSlice({

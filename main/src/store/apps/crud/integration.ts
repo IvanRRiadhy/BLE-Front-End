@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { defaultIntegrationFilter } from "../defaultForm";
 
 const API_URL = "/api/MstIntegration/";
 const API_DT_URL = "/api/MstIntegration/filter/";
@@ -65,14 +66,7 @@ const initialState: StateType = {
     selectedIntegration: null,
     IntegrationTotalCount: 0,
     IntegrationFilteredCount: 0,
-    IntegrationFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "UpdatedAt",
-        SortDir: "desc",
-        searchValue: "",
-    },
+    IntegrationFilter: defaultIntegrationFilter,
 };
 
 export const IntegrationSlice = createSlice({

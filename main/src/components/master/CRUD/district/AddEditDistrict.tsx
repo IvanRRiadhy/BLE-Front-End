@@ -8,6 +8,7 @@ import {
   Grid2 as Grid,
   IconButton,
   SelectChangeEvent,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
@@ -94,19 +95,23 @@ const AddEditDistrict = ({ type, district }: FormType) => {
   return (
     <>
       {type === 'edit' && (
-        <IconButton color="primary" size="small" onClick={handleClickOpen}>
-          <IconPencil size={20} />
-        </IconButton>
+        <Tooltip title="Edit District">
+          <IconButton color="primary" size="small" onClick={handleClickOpen}>
+            <IconPencil size={20} />
+          </IconButton>
+        </Tooltip>
       )}
       {type === 'add' && (
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<IconPlus size={20} />}
-          onClick={handleClickOpen}
-        >
-          Add District
-        </Button>
+        <Tooltip title="Add District">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<IconPlus size={20} />}
+            onClick={handleClickOpen}
+          >
+            Add District
+          </Button>
+        </Tooltip>
       )}
 
       {!loading && (

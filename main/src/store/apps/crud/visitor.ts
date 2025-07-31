@@ -6,6 +6,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { OrganizationType } from "./organization";
 import { DistrictType } from "./district";
 import { DepartmentType } from "./department";
+import { defaultVisitorFilter } from "../defaultForm";
 
 const API_URL = "/api/Visitor/";
 const API_DT_URL = "/api/Visitor/filter/";
@@ -120,14 +121,7 @@ const initialState: StateType = {
     currentFilter: "show_all",
     visitorTotalCount: 0,
     visitorFilteredCount: 0,
-    visitorFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 10,
-        SortColumn: "name",
-        SortDir: "asc",
-        searchValue: "",
-    }
+    visitorFilter: defaultVisitorFilter,
 };
 
 export const VisitorSlice = createSlice({

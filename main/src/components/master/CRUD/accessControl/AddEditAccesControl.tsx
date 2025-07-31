@@ -10,6 +10,7 @@ import {
   Typography,
   MenuItem,
   SelectChangeEvent,
+  Tooltip,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
@@ -105,19 +106,23 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
   return (
     <>
       {type === 'edit' && (
-        <IconButton color="primary" size="small" onClick={handleClickOpen}>
-          <IconPencil size={20} />
-        </IconButton>
+        <Tooltip title="Edit Access Control">
+          <IconButton color="primary" size="small" onClick={handleClickOpen}>
+            <IconPencil size={20} />
+          </IconButton>
+        </Tooltip>
       )}
       {type === 'add' && (
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<IconPlus size={20} />}
-          onClick={handleClickOpen}
-        >
-          Add Access Control
-        </Button>
+        <Tooltip title="Add Access Control">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<IconPlus size={20} />}
+            onClick={handleClickOpen}
+          >
+            Add Access Control
+          </Button>
+        </Tooltip>
       )}
       {!loading && (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">

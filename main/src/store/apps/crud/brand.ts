@@ -4,6 +4,7 @@ import { AppDispatch, dispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axiosServices from "../../../utils/axios";
+import { defaultBrandFilter } from "../defaultForm";
 
 const API_URL = "/api/MstBrand/";
 const API_DT_URL = "/api/MstBrand/filter/";
@@ -55,14 +56,7 @@ const initialState: StateType = {
     selectedBrand: null,
     brandTotalCount: 0,
     brandFilteredCount: 0,
-    brandFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "UpdatedAt",
-        SortDir: "desc",
-        searchValue: "",
-    },
+    brandFilter: defaultBrandFilter,
 };
 
 export const BrandSlice = createSlice({

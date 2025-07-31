@@ -6,6 +6,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { FloorplanType } from "./floorplan";
 import { floorType } from "./floor";
 import { restrictedStatus } from "src/types/crud/input";
+import { defaultMaskedAreaFilter } from "../defaultForm";
 
 const API_URL = '/api/FloorplanMaskedArea/';
 const API_DT_URL = '/api/FloorplanMaskedArea/filter/';
@@ -100,18 +101,7 @@ const initialState: StateType = {
     drawingMaskedArea: "",
     maskedAreaTotalCount: 0,
     maskedAreaFilteredCount: 0,
-    maskedAreaFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "UpdatedAt",
-        SortDir: "desc",
-        searchValue: "",
-        filters: {
-            FloorplanId: [],
-            FloorId: [],
-        }
-    }
+    maskedAreaFilter: defaultMaskedAreaFilter,
 };
 
 export const MaskedAreaSlice = createSlice({

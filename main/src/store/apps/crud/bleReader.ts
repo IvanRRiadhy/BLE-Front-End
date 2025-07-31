@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { defaultBleReaderFilter } from "../defaultForm";
 
 
 const API_URL = "/api/MstBleReader/";
@@ -16,8 +17,8 @@ export type GetFilter = {
     SortDir: 'asc' | 'desc',
     searchValue: string,
     filters: {
-        BrandId?: string,
-        EngineReaderId?: string,
+        BrandId: string,
+        EngineReaderId: string,
     }
 }
 
@@ -70,15 +71,7 @@ const initialState: StateType = {
     editedBleReader: "",
     bleReaderTotalCount: 0,
     bleReaderFilterCount: 0,
-    bleReaderFilter: { 
-        Draw: 1, 
-        Start: 0, 
-        Length: 5, 
-        SortColumn: "UpdatedAt", 
-        SortDir: "desc", 
-        searchValue: "",
-        filters: {} 
-    },
+    bleReaderFilter: defaultBleReaderFilter,
 };
 
 export const BleReaderSlice = createSlice({

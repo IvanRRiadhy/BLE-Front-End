@@ -5,6 +5,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { masterVisitorType } from "./visitor";
 import { MaskedAreaType } from "./maskedArea";
+import { defaultBlaclistFilter } from "../defaultForm";
 
 const API_URL = '/api/VisitorBlacklistArea/';
 const API_DT_URL = '/api/VisitorBlacklistArea/filter/';
@@ -66,18 +67,7 @@ const initialState: StateType = {
     selectedBlacklist: null,
     blacklistTotalCount: 0,
     blacklistFilteredCount: 0,
-    blacklistFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "UpdatedAt",
-        SortDir: "desc",
-        searchValue: "",
-        filters: {
-            FloorplanMaskedAreaId: [],
-            VisitorId: [],
-        }
-    },
+    blacklistFilter: defaultBlaclistFilter,
 };
 
 export const BlacklistSlice = createSlice({

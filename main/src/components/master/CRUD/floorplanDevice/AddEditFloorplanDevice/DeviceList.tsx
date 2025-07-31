@@ -29,6 +29,7 @@ import {
   DialogTitle,
   DialogContentText,
   IconButton,
+  Tooltip,
 } from '@mui/material';
 import DeviceListItem from './DeviceListItem';
 import { useNavigate } from 'react-router';
@@ -259,9 +260,13 @@ const DeviceList = () => {
           <Typography variant="h6" mt={0}>
             Devices
           </Typography>
-          <IconButton color="primary" onClick={handleAddDeviceClick}>
-            <AddIcon />
-          </IconButton>
+          {!editingDevice && (
+            <Tooltip title="Add Device">
+              <IconButton color="primary" onClick={handleAddDeviceClick}>
+                <AddIcon />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
         <Divider />
         <Scrollbar

@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { defaultBuildingFilter } from "../defaultForm";
 
 const API_URL = '/api/MstBuilding/';
 const API_DT_URL = '/api/MstBuilding/filter/';
@@ -62,14 +63,7 @@ const initialState: StateType = {
     selectedBuilding: null,
     buildingTotalCount: 0,
     buildingFilteredCount: 0,
-    buildingFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "UpdatedAt",
-        SortDir: "desc",
-        searchValue: "",
-    }
+    buildingFilter: defaultBuildingFilter,
 };
 
 export const BuildingSlice = createSlice({

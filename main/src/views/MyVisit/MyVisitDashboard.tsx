@@ -1,8 +1,15 @@
 import { Box, Grid2 as Grid, Typography } from "@mui/material"
 import PageContainer from "src/components/container/PageContainer"
-
+import { visitorData } from "./DummyVisitorData";
+import { trackingData } from "./trackingData";
+import { invitationData } from "./invitationData";
+import VisitCounterCard from "./MyVisitDashboardCards/VisitCounterCard";
+const visitorId = '123456'
 
 const MyVisitDashboard = () => {
+    const visitor = visitorData.find((item) => item.id === visitorId)
+    const filteredTrackingData = trackingData.filter((item) => item.visitorId === visitorId)
+    const filteredInvitationData = invitationData.filter((item) => item.visitorId === visitorId)
     
     return (
         <PageContainer title="Dashboard" description="this is dashboard page">
@@ -11,10 +18,12 @@ const MyVisitDashboard = () => {
                     <Grid
                     size={{
                         xs: 12,
-                        lg:12,
+                        sm: 6,
+                        md: 4,
                     }}
                     >
-                        <Typography variant="h4">My Visit</Typography>
+                        <VisitCounterCard invitations={filteredInvitationData} title="Remaining Invitations" />
+                        {/* <Typography variant="h4">My Visit</Typography> */}
                     </Grid>
                     
                 </Grid>

@@ -52,15 +52,24 @@ const Modern = () => {
     }
     dispatch(setMainMenu(true));
   }, []);
+  // useEffect(() => {
+  //   const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+  //     dispatch(setMainMenu(false));
+  //     console.log('Before Unload');
+  //     e.preventDefault();
+  //     // e.returnValue = ''; // Triggers browser's native dialog
+  //   };
+  //   window.addEventListener('beforeunload', handleBeforeUnload);
+  //   return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  // }, []);
   useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      dispatch(setMainMenu(false));
-      e.preventDefault();
-      // e.returnValue = ''; // Triggers browser's native dialog
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, []);
+  // This runs on every route change
+  return () => {
+    // This cleanup runs when leaving the page
+    dispatch(setMainMenu(false));
+    console.log('Navigated away from dashboard');
+  };
+}, [location.pathname]);
 
   const handleClosePopup = () => {
     setShowWelcomePopup(false); // Close the popup

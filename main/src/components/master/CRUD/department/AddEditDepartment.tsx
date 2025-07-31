@@ -8,6 +8,7 @@ import {
   Grid2 as Grid,
   IconButton,
   SelectChangeEvent,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
@@ -96,12 +97,15 @@ const AddEditDepartment = ({ type, department }: FormType) => {
   return (
     <>
       {type === 'edit' && (
-        <IconButton color="primary" size="small" onClick={handleClickOpen}>
+        <Tooltip title="Edit Department">
+                  <IconButton color="primary" size="small" onClick={handleClickOpen}>
           <IconPencil size={20} />
         </IconButton>
+        </Tooltip>
       )}
       {type === 'add' && (
-        <Button
+        <Tooltip title="Add Department">
+                  <Button
           variant="contained"
           color="primary"
           startIcon={<IconPlus size={20} />}
@@ -109,6 +113,7 @@ const AddEditDepartment = ({ type, department }: FormType) => {
         >
           Add Department
         </Button>
+        </Tooltip>
       )}
 
       {!loading && (

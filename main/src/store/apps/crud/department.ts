@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { defaultDepartmentFilter } from "../defaultForm";
 
 const API_URL = "/api/MstDepartment/";
 const API_DT_URL = "/api/MstDepartment/filter/";
@@ -61,14 +62,7 @@ const initialState: StateType = {
     selectedDepartment: null,
     departmentTotalCount: 0,
     departmentFilteredCount: 0,
-    departmentFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "UpdatedAt",
-        SortDir: "desc",
-        searchValue: "",
-    }
+    departmentFilter: defaultDepartmentFilter,
 };
 
 export const DepartmentSlice = createSlice({

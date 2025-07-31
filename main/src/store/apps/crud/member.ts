@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { defaultMemberFilter } from "../defaultForm";
 
 const API_URL = "/api/MstMember/";
 const API_DT_URL = "/api/MstMember/filter/";
@@ -80,14 +81,7 @@ const initialState: StateType = {
     curentFilter: "show_all",
     memberTotalCount: 0,
     memberFilteredCount: 0,
-    memberFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "name",
-        SortDir: "asc",
-        searchValue: "",
-    }
+    memberFilter: defaultMemberFilter,
 };
 
 export const MemberSlice = createSlice({

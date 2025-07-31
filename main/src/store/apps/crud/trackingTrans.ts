@@ -5,6 +5,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { MaskedAreaType } from "./maskedArea";
 import { bleReaderType } from "./bleReader";
+import { defaultTrackingTransFilter } from "../defaultForm";
 
 const API_URL = "/api/TrackingTransaction/";
 const API_DT_URL = "/api/TrackingTransaction/filter/";
@@ -72,18 +73,7 @@ const initialState: StateType = {
     selectedTrackingTrans: null,
     trackingTransTotalCount: 0,
     trackingTransFilteredCount: 0,
-    trackingTransFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "TransTime",
-        SortDir: "desc",
-        searchValue: "",
-        filters: {
-            FloorplanMaskedAreaId: [],
-            ReaderId: [],
-        }
-    }
+    trackingTransFilter: defaultTrackingTransFilter,
 };
 
 export const TrackingTransSlice = createSlice({

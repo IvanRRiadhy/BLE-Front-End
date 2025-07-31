@@ -5,6 +5,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { floorType } from "./floor";
 import { FloorplanDeviceType } from "./floorplanDevice";
 import { MaskedAreaType } from "./maskedArea";
+import { defaultFloorplanFilter } from "../defaultForm";
 
 const Floorplan_API_URL = '/api/MstFloorplan/';
 const Floorplan_DT_URL = '/api/MstFloorplan/filter/';
@@ -75,17 +76,7 @@ const initialState: StateType = {
     selectedFloorplan: null,
     floorplanTotalCount: 0,
     floorplanFilteredCount: 0,
-    floorplanFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "UpdatedAt",
-        SortDir: "desc",
-        searchValue: "",
-        filters:{
-            FloorId: [],
-        },
-    }
+    floorplanFilter: defaultFloorplanFilter,
 };
 
 export const FloorplanSlice = createSlice({

@@ -8,6 +8,7 @@ import { MaskedAreaType } from "./maskedArea";
 import { CCTVType } from "./accessCCTV";
 import { AccessControlType } from "./accessControl";
 import { DeviceType } from "src/types/crud/input";
+import { defaultFloorplanDeviceFilter } from "../defaultForm";
 
 const API_URL = '/api/FloorplanDevice/';
 const API_DT_URL = '/api/FloorplanDevice/filter/';
@@ -95,19 +96,7 @@ const initialState: StateType = {
     addedFloorplanDevice: [],
     floorplanDeviceTotalCount: 0,
     floorplanDeviceFilteredCount: 0,
-    floorplanDeviceFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "UpdatedAt",
-        SortDir: "desc",
-        searchValue: "",
-        filters: {
-            FloorplanId: "",
-            FloorplanMaskedAreaId: "",
-            Type: "",
-        },
-    }
+    floorplanDeviceFilter: defaultFloorplanDeviceFilter,
 };
 
 export const FloorplanDeviceSlice = createSlice({
