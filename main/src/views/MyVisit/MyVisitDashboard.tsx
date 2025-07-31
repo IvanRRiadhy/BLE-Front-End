@@ -4,6 +4,8 @@ import { visitorData } from "./DummyVisitorData";
 import { trackingData } from "./trackingData";
 import { invitationData } from "./invitationData";
 import VisitCounterCard from "./MyVisitDashboardCards/VisitCounterCard";
+import VisitAreaCard from "./MyVisitDashboardCards/VisitAreaCard";
+import VisitFrequencyCard from "./MyVisitDashboardCards/VisitFrequencyCard";
 const visitorId = '123456'
 
 const MyVisitDashboard = () => {
@@ -19,13 +21,34 @@ const MyVisitDashboard = () => {
                     size={{
                         xs: 12,
                         sm: 6,
-                        md: 4,
+                        md: 2,
                     }}
                     >
                         <VisitCounterCard invitations={filteredInvitationData} title="Remaining Invitations" />
                         {/* <Typography variant="h4">My Visit</Typography> */}
                     </Grid>
-                    
+                    <Grid
+                    size={{
+                        xs: 12,
+                        sm: 6,
+                        md: 5,
+                    }}
+                    >
+                        <VisitAreaCard 
+                        invitationData={filteredInvitationData} 
+                        trackingData={filteredTrackingData}
+                        title="Most Visited Areas" 
+                        />
+                    </Grid>
+                                        <Grid
+                    size={{
+                        xs: 12,
+                        sm: 6,
+                        md: 5,
+                    }}
+                    >
+                        <VisitFrequencyCard trackingData={filteredTrackingData} title="Tracking Count by Date" />
+                    </Grid>
                 </Grid>
             </Box>
         </PageContainer>

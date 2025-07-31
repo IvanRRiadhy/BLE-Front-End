@@ -10,6 +10,7 @@ import {
   SelectChangeEvent,
   Tooltip,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React from 'react';
@@ -34,6 +35,7 @@ interface FormType {
 const AddEditDepartment = ({ type, department }: FormType) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
   const [formData, setFormData] = React.useState<DepartmentType>({
     ...defaultDepartmentForm,
     ...department,
@@ -63,6 +65,7 @@ const AddEditDepartment = ({ type, department }: FormType) => {
   };
 
   const handleSave = async () => {
+    setIsSaving(true);
     try {
       let result;
       if (type === 'edit') {
@@ -83,6 +86,9 @@ const AddEditDepartment = ({ type, department }: FormType) => {
       toast.error('Saving Data Unsuccessful', { position: 'top-right' });
       console.error('Error saving department:', error);
     }
+    setTimeout(() => {
+      setIsSaving(false);
+    }, 1000);
   };
 
   const handleInputChange = (
@@ -172,8 +178,9 @@ const AddEditDepartment = ({ type, department }: FormType) => {
               onClick={handleSave}
               variant="contained"
               sx={{ fontSize: '1rem', py: 1, px: 3 }}
+              disabled={isSaving}
             >
-              Save
+              {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </DialogActions>
         </Dialog>
@@ -183,6 +190,7 @@ const AddEditDepartment = ({ type, department }: FormType) => {
         <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h6">Loading...</Typography>
+            <CircularProgress size={20} color="inherit" />
           </DialogContent>
         </Dialog>
       )}

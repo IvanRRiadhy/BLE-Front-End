@@ -168,6 +168,14 @@ const DashboardFilter = () => {
     handleClose();
   };
 
+  const handleResetFilter = () => {
+    setAppliedFilter({ BuildingId: [], FloorId: [], FloorplanId: [], MaskedAreaId: [] });
+    dispatch(
+      setDashboardFilter({ BuildingId: [], FloorId: [], FloorplanId: [], MaskedAreaId: [] }),
+    );
+    handleClose();
+  };
+
   return (
     <>
       <Button
@@ -493,17 +501,34 @@ const DashboardFilter = () => {
           )}
         </Grid>
         <Box mt={3}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => {
-              //   handleApplyFilter();
-              console.log('Applied Filters:', appliedFilter);
-              handleApplyFilter();
-            }}
-          >
-            Apply Filter
-          </Button>
+          <Grid container justifyContent="space-between">
+            <Grid size={3}>
+              <Button
+                variant="outlined"
+                color="error"
+                fullWidth
+                onClick={() => {
+                  handleResetFilter();
+                }}
+                // disabled={isEqual(appliedFilter, defaultFloorFilter.filters)}
+              >
+                Reset
+              </Button>
+            </Grid>
+            <Grid size={6}>
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={() => {
+                  //   handleApplyFilter();
+                  console.log('Applied Filters:', appliedFilter);
+                  handleApplyFilter();
+                }}
+              >
+                Apply Filter
+              </Button>
+            </Grid>
+          </Grid>
         </Box>
       </Drawer>
     </>

@@ -246,7 +246,7 @@ export const defaultFloorFilter: FloorFilter = {
   SortDir: 'desc',
   searchValue: '',
   filters: {
-    BuildingId: '',
+    BuildingId: [''],
   },
 };
 //#endregion

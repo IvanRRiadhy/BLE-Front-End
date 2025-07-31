@@ -9,6 +9,7 @@ import {
   IconButton,
   Tooltip,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React from 'react';
@@ -33,6 +34,7 @@ interface FormType {
 const AddEditBrand = ({ type, brand }: FormType) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
   const [formData, setFormData] = React.useState<BrandType>({ ...defaultBrandForm, ...brand });
   const brandFilter = useSelector((state: RootState) => state.brandReducer.brandFilter);
   const dispatch: AppDispatch = useDispatch();
@@ -57,6 +59,7 @@ const AddEditBrand = ({ type, brand }: FormType) => {
   };
 
   const handleSave = async () => {
+    setIsSaving(true);
     try {
       let result;
       if (type === 'edit') {
@@ -77,6 +80,9 @@ const AddEditBrand = ({ type, brand }: FormType) => {
       toast.error('Saving Data Unsuccessful', { position: 'top-right' });
       console.error('Error saving Brand:', error);
     }
+    setTimeout(() => {
+      setIsSaving(false);
+    }, 1000);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,8 +158,9 @@ const AddEditBrand = ({ type, brand }: FormType) => {
               onClick={handleSave}
               variant="contained"
               sx={{ fontSize: '1rem', py: 1, px: 3 }}
+              disabled={isSaving}
             >
-              Save
+              {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </DialogActions>
         </Dialog>
@@ -163,6 +170,7 @@ const AddEditBrand = ({ type, brand }: FormType) => {
         <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h6">Loading...</Typography>
+            <CircularProgress size={20} color="inherit" />
           </DialogContent>
         </Dialog>
       )}

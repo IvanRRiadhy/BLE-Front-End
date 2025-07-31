@@ -10,6 +10,7 @@ import {
   Typography,
   SelectChangeEvent,
   Tooltip,
+  CircularProgress,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React from 'react';
@@ -34,6 +35,7 @@ interface FormType {
 const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
   const [formData, setFormData] = React.useState<CCTVType>({
     ...defaultAccessCCTVForm,
     ...cctv,
@@ -60,6 +62,7 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
     setOpen(false);
   };
   const handleSave = async () => {
+    setIsSaving(true);
     try {
       let result;
       if (type === 'edit') {
@@ -80,6 +83,9 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
       toast.error('Saving Data Unsuccessful', { position: 'top-right' });
       console.error('Error saving application:', error);
     }
+    setTimeout(() => {
+      setIsSaving(false);
+    }, 1000);
   };
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
@@ -180,8 +186,9 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
               onClick={handleSave}
               variant="contained"
               sx={{ fontSize: '1rem', py: 1, px: 3 }}
+              disabled={isSaving}
             >
-              Save
+              {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </DialogActions>
         </Dialog>
@@ -190,6 +197,7 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
         <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h6">Loading...</Typography>
+            <CircularProgress size={20} color="inherit" />
           </DialogContent>
         </Dialog>
       )}

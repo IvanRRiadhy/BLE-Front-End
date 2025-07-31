@@ -11,6 +11,7 @@ import {
   SelectChangeEvent,
   Tooltip,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
@@ -37,6 +38,7 @@ interface FormType {
 const AddEditBlacklist = ({ type, blacklist }: FormType) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
   const [formData, setFormData] = React.useState<blacklistType>({
     ...defaultBlaclistForm,
     ...blacklist,
@@ -74,6 +76,7 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
   };
 
   const handleSave = async () => {
+    setIsSaving(true);
     const data = new FormData();
 
     Object.entries(formData).forEach(([key, value]) => {
@@ -106,6 +109,9 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
       toast.error('Saving Data Unsuccessful', { position: 'top-right' });
       console.error('Error saving blacklist:', error);
     }
+    setTimeout(() => {
+      setIsSaving(false);
+    }, 1000);
   };
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
@@ -197,8 +203,9 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
               onClick={handleSave}
               variant="contained"
               sx={{ fontSize: '1rem', py: 1, px: 3 }}
+              disabled={isSaving}
             >
-              Save
+              {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </DialogActions>
         </Dialog>
@@ -208,6 +215,7 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
         <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h6">Loading...</Typography>
+            <CircularProgress size={20} color="inherit" />
           </DialogContent>
         </Dialog>
       )}

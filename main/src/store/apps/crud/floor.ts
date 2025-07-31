@@ -16,7 +16,7 @@ export type GetFilter = {
     SortDir: 'asc' | 'desc',
     searchValue: string,
     filters: {
-        BuildingId: string,
+        BuildingId: string[],
     }
 }
 

@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import MaskedAreaList2 from 'src/components/master/CRUD/maskedArea/MaskedAreaList2';
 import MaskedAreaImport from 'src/components/master/CRUD/maskedArea/MaskedAreaImport';
 import MaskedAreaExport from 'src/components/master/CRUD/maskedArea/MaskedAreaExport';
+import FloorplanFilter from 'src/components/master/CRUD/floorplan/FloorplanFilter';
 
 interface cardType {
   icon?: string;
@@ -92,6 +93,7 @@ const MaskedArea = () => {
             codeModel={[
               <MaskedAreaImport key="import" />,
               <MaskedAreaExport key="export" />,
+              <FloorplanFilter key="filter" />,
             ]}
           >
             {/* <MaskedAreaList /> */}

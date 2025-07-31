@@ -12,6 +12,7 @@ import {
   SelectChangeEvent,
   Tooltip,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React from 'react';
@@ -38,6 +39,7 @@ interface FormType {
 const AddEditFloor = ({ type, floor }: FormType) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
   const [image, setImage] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(floor?.floorImage || null);
   const [formData, setFormData] = React.useState<floorType>({
@@ -97,6 +99,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
   }, [open]);
 
   const handleSave = async () => {
+    setIsSaving(true);
     try {
       const data = new FormData();
 
@@ -137,6 +140,9 @@ const AddEditFloor = ({ type, floor }: FormType) => {
       toast.error('Saving Data Unsuccessful', { position: 'top-right' });
       console.error('Error saving floor:', error);
     }
+    setTimeout(() => {
+      setIsSaving(false);
+    }, 1000);
   };
 
   const handleInputChange = (
@@ -359,8 +365,9 @@ const AddEditFloor = ({ type, floor }: FormType) => {
               onClick={handleSave}
               variant="contained"
               sx={{ fontSize: '1rem', py: 1, px: 3 }}
+              disabled={isSaving}
             >
-              Save
+              {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </DialogActions>
         </Dialog>
@@ -370,6 +377,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
         <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h6">Loading...</Typography>
+            <CircularProgress size={20} color="inherit" />
           </DialogContent>
         </Dialog>
       )}

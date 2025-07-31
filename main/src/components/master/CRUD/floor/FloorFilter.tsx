@@ -103,10 +103,12 @@ const FloorFilter = () => {
             <Grid size={3}>
               <Button
                 variant="outlined"
-                color="secondary"
+                color="error"
                 fullWidth
-                onClick={handleResetFilter}
-                disabled={isEqual(appliedFilter, defaultFloorFilter.filters)}
+                onClick={() => {
+                  handleResetFilter();
+                  handleClose();
+                }}
               >
                 Reset
               </Button>

@@ -1,10 +1,12 @@
-import { Box, Button, Checkbox, Drawer, Grid2 as Grid, ListItem, ListItemIcon, ListItemText, MenuItem, Typography } from '@mui/material';
+import { Box, Button, Checkbox, Drawer, Grid2 as Grid, ListItemIcon, ListItemText, MenuItem, Typography } from '@mui/material';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
+import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { fetchFloors } from 'src/store/apps/crud/floor';
 import { UpdateFilter } from 'src/store/apps/crud/floorplan';
+import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 
 const FloorplanFilter = () => {
@@ -45,6 +47,11 @@ const FloorplanFilter = () => {
   const handleApplyFilter = () => {
     dispatch(UpdateFilter({ filters: appliedFilter }));
   };
+
+  const handleResetFilter = () => {
+    setAppliedFilter(defaultFloorplanFilter.filters);
+    dispatch(UpdateFilter({ filters: defaultFloorplanFilter.filters }));
+  }
 
   return (
     <>
@@ -131,16 +138,35 @@ const FloorplanFilter = () => {
         </Grid>
 
         <Box mt={3}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => {
-              handleApplyFilter();
-              handleClose();
-            }}
-          >
-            Apply Filter
-          </Button>
+          <Grid container  justifyContent="space-between">
+            <Grid size={3}>
+              <Button
+                variant="outlined"
+                color="error"
+                fullWidth
+                onClick={() => {
+                  handleResetFilter();
+                  handleClose();
+                }}
+              >
+                Reset
+              </Button>
+            </Grid>
+            <Grid size={6}>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={() => {
+                  handleApplyFilter();
+                  handleClose();
+                }}
+                disabled={isEqual(appliedFilter, floorplanFilter.filters)}
+              >
+                Apply
+              </Button>
+            </Grid>
+          </Grid>
         </Box>
       </Drawer>
     </>

@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import FloorplanDeviceList2 from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceList2';
 import FloorplanDeviceImport from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceImport';
 import FloorplanDeviceExport from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceExport';
+import FloorplanFilter from 'src/components/master/CRUD/floorplan/FloorplanFilter';
 interface cardType {
   icon?: string;
   title: string;
@@ -89,6 +90,7 @@ const FloorplanDevice = () => {
           <ParentCard title="Floorplan List" codeModel={[
             <FloorplanDeviceImport key="import" />,
             <FloorplanDeviceExport key="export" />,
+            <FloorplanFilter key="filter" />,
           ]}>
             {/* <FloorplanDeviceList /> */}
             <FloorplanDeviceList2 />
