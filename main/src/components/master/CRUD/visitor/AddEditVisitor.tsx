@@ -12,6 +12,7 @@ import {
   SelectChangeEvent,
   Tooltip,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React from 'react';
@@ -40,6 +41,7 @@ interface FormType {
 const AddEditVisitor = ({ type, visitor }: FormType) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
   const [image, setImage] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(visitor?.faceImage || null);
   const [formData, setFormData] = React.useState<VisitorType>({
@@ -71,6 +73,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
   };
 
   const handleSave = async () => {
+    setIsSaving(true);
     try {
       const data = new FormData();
 
@@ -112,6 +115,9 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
       toast.error('Saving Data Unsuccessful', { position: 'top-right' });
       console.error('Error saving visitor data:', error);
     }
+    setTimeout(() => {
+      setIsSaving(false);
+    }, 1000);
   };
 
   const handleInputChange = (
@@ -480,8 +486,9 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
               onClick={handleSave}
               variant="contained"
               sx={{ fontSize: '1rem', py: 1, px: 3 }}
+              disabled={isSaving}
             >
-              Save
+              {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </DialogActions>
         </Dialog>
@@ -491,6 +498,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
         <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h6">Loading...</Typography>
+            <CircularProgress size={20} color="inherit" />
           </DialogContent>
         </Dialog>
       )}

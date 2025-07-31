@@ -30,7 +30,10 @@ import {
   DialogContentText,
   IconButton,
   Tooltip,
+  CircularProgress,
+  Backdrop,
 } from '@mui/material';
+import { createPortal } from 'react-dom';
 import AreaListItem from './AreaListItem';
 import { useNavigate } from 'react-router';
 import { uniqueId } from 'lodash';
@@ -48,6 +51,7 @@ const filter = {
 const AreaList = () => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
+  const [isSaving, setIsSaving] = useState(false);
 
   const activeFloorplan = useSelector(
     (state: AppState) => state.floorplanReducer.selectedFloorplan,
@@ -189,6 +193,7 @@ const AreaList = () => {
   };
 
   const handleSaveEdits = async () => {
+    setIsSaving(true);
     // const unsavedArea = new Map(filteredMaskedArea.map((area) => [area.id, area]));
     const originArea = new Map(filteredOriginalAreas.map((area) => [area.id, area]));
     // console.log('Origin Areas:', originArea);
@@ -225,6 +230,7 @@ const AreaList = () => {
           resultDelete = await dispatch(deleteMaskedArea(area.id));
         }
       }
+
       if (resultAdd || resultEdit || resultDelete) {
         resultAdd?.type.endsWith('/fulfilled')
           ? toast.success('Add successful', { position: 'top-right' })
@@ -239,11 +245,18 @@ const AreaList = () => {
         dispatch(fetchFloorplanDT(floorplanFilter));
         console.log('Save operation completed.');
         handleCloseEditing(); // Navigate back to the device list
+      } else {
+        dispatch(fetchFloorplanDT(floorplanFilter));
+        console.log('Nothing Saved');
+        handleCloseEditing(); // Navigate back to the device list
       }
     } catch (error) {
       toast.error('Saving Data Unsuccessful', { position: 'top-right' });
       console.error('Error saving floorplan:', error);
     }
+    setTimeout(() => {
+      setIsSaving(false);
+    }, 1000);
   };
 
   return (
@@ -304,8 +317,8 @@ const AreaList = () => {
             <Button variant="outlined" onClick={handleOpenCancelEditingDialog}>
               Cancel
             </Button>
-            <Button variant="contained" onClick={handleSaveEdits}>
-              Save
+            <Button variant="contained" onClick={handleSaveEdits} disabled={isSaving}>
+              {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </Box>
         </Box>
@@ -362,6 +375,19 @@ const AreaList = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      {isSaving &&
+        createPortal(
+          <Backdrop
+            open={isSaving}
+            sx={{
+              color: '#fff',
+              zIndex: (theme) => theme.zIndex.drawer + 1,
+            }}
+          >
+            <CircularProgress color="inherit" />
+          </Backdrop>,
+          document.body,
+        )}
     </>
   );
 };

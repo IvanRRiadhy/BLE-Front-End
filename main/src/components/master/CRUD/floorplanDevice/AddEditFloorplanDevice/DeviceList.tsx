@@ -30,7 +30,10 @@ import {
   DialogContentText,
   IconButton,
   Tooltip,
+  CircularProgress,
+  Backdrop,
 } from '@mui/material';
+import { createPortal } from 'react-dom';
 import DeviceListItem from './DeviceListItem';
 import { useNavigate } from 'react-router';
 import { fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
@@ -42,6 +45,7 @@ import toast from 'react-hot-toast';
 const DeviceList = () => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
+  const [isSaving, setIsSaving] = useState(false);
   const activeFloorplan = useSelector(
     (state: AppState) => state.floorplanReducer.selectedFloorplan,
   );
@@ -194,6 +198,7 @@ const DeviceList = () => {
   };
 
   const handleSaveEdits = async () => {
+    setIsSaving(true);
     // Get the current state of devices
     // const unsavedDevicesMap = new Map(filteredUnsavedDevices.map((device) => [device.id, device]));
     const floorplanDevicesMap = new Map(
@@ -241,11 +246,18 @@ const DeviceList = () => {
         dispatch(fetchFloorplanDT(floorplanFilter));
         console.log('Save operation completed.');
         handleCloseEditing(); // Navigate back to the device list
+      } else {
+        dispatch(fetchFloorplanDT(floorplanFilter));
+        console.log('Nothing Saved');
+        handleCloseEditing(); // Navigate back to the device list
       }
     } catch (error) {
       toast.error('Saving Data Unsuccessful', { position: 'top-right' });
       console.error('Error saving floorplan:', error);
     }
+    setTimeout(() => {
+      setIsSaving(false);
+    }, 1000);
   };
 
   return (
@@ -306,8 +318,8 @@ const DeviceList = () => {
             <Button variant="outlined" onClick={handleOpenCancelEditingDialog}>
               Cancel
             </Button>
-            <Button variant="contained" onClick={handleSaveEdits}>
-              Save
+            <Button variant="contained" onClick={handleSaveEdits} disabled={isSaving}>
+              {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </Box>
         )}
@@ -364,6 +376,19 @@ const DeviceList = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      {isSaving &&
+        createPortal(
+          <Backdrop
+            open={isSaving}
+            sx={{
+              color: '#fff',
+              zIndex: (theme) => theme.zIndex.drawer + 1,
+            }}
+          >
+            <CircularProgress color="inherit" />
+          </Backdrop>,
+          document.body,
+        )}
     </>
   );
 };
