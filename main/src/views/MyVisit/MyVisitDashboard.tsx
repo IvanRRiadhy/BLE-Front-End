@@ -31,7 +31,7 @@ const MyVisitDashboard = () => {
                     size={{
                         xs: 12,
                         sm: 6,
-                        md: 5,
+                        md: 4,
                     }}
                     >
                         <VisitAreaCard 
@@ -44,7 +44,7 @@ const MyVisitDashboard = () => {
                     size={{
                         xs: 12,
                         sm: 6,
-                        md: 5,
+                        md: 6,
                     }}
                     >
                         <VisitFrequencyCard trackingData={filteredTrackingData} title="Tracking Count by Date" />

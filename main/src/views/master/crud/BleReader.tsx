@@ -19,6 +19,7 @@ import AddEditBleReader from 'src/components/master/CRUD/bleReader/AddEditBleRea
 import BleReaderFilter from 'src/components/master/CRUD/bleReader/BleReaderFilter';
 import BleReaderExport from 'src/components/master/CRUD/bleReader/BleReaderExport';
 import BleReaderImport from 'src/components/master/CRUD/bleReader/BleReaderImport';
+import BulkAddEditBleReader from 'src/components/master/CRUD/bleReader/BulkAddEditBleReader';
 
 interface cardType {
   icon?: string;
@@ -89,6 +90,7 @@ const BleReader = () => {
             <BleReaderImport key="import" />,
               <BleReaderExport key="export" />,
             <BleReaderFilter key="filter" />,
+            <BulkAddEditBleReader key="bulkAdd" type="add" />,
             <AddEditBleReader key="add" type="add" />
             ]}>
             <BleReaderList />

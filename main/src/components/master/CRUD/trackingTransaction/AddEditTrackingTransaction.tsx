@@ -131,7 +131,7 @@ const AddEditTrackingTransaction = ({ type, trackingTransaction }: FormType) => 
               <CustomFormLabel htmlFor="reader-id">Reader ID</CustomFormLabel>
               <CustomTextField
                 id="readerId"
-                placeholder={formData.readerId}
+                value={formData.readerId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -139,7 +139,7 @@ const AddEditTrackingTransaction = ({ type, trackingTransaction }: FormType) => 
               <CustomFormLabel htmlFor="card-Id">Card ID</CustomFormLabel>
               <CustomTextField
                 id="cardId"
-                placeholder={formData.readerId}
+                value={formData.readerId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -149,7 +149,7 @@ const AddEditTrackingTransaction = ({ type, trackingTransaction }: FormType) => 
               <CustomFormLabel htmlFor="floorplan-id">Floorplan</CustomFormLabel>
               <CustomSelect
                 id="floorplanId"
-                placeholder={formData.floorplanMaskedAreaId}
+                value={formData.floorplanMaskedAreaId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -171,7 +171,7 @@ const AddEditTrackingTransaction = ({ type, trackingTransaction }: FormType) => 
               <CustomFormLabel htmlFor="trans-Time">Transaction Time</CustomFormLabel>
               <CustomTextField
                 id="transTime"
-                placeholder={formData.transTime}
+                value={formData.transTime}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -179,7 +179,7 @@ const AddEditTrackingTransaction = ({ type, trackingTransaction }: FormType) => 
               <CustomFormLabel htmlFor="battery">Battery</CustomFormLabel>
               <CustomTextField
                 id="battery"
-                placeholder={formData.battery}
+                value={formData.battery}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -215,7 +215,7 @@ const AddEditTrackingTransaction = ({ type, trackingTransaction }: FormType) => 
               <CustomFormLabel htmlFor="coordinate-X">Coordinate X</CustomFormLabel>
               <CustomTextField
                 id="coordinateX"
-                placeholder={formData.coordinateX}
+                value={formData.coordinateX}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -223,7 +223,7 @@ const AddEditTrackingTransaction = ({ type, trackingTransaction }: FormType) => 
               <CustomFormLabel htmlFor="Coordinate-Px-X">Coordinate on Pixel X</CustomFormLabel>
               <CustomTextField
                 id="coordinatePxX"
-                placeholder={formData.coordinatePxX}
+                value={formData.coordinatePxX}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -233,7 +233,7 @@ const AddEditTrackingTransaction = ({ type, trackingTransaction }: FormType) => 
               <CustomFormLabel htmlFor="coordinate-Y">Coordinate Y</CustomFormLabel>
               <CustomTextField
                 id="coordinateY"
-                placeholder={formData.coordinateY}
+                value={formData.coordinateY}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -241,7 +241,7 @@ const AddEditTrackingTransaction = ({ type, trackingTransaction }: FormType) => 
               <CustomFormLabel htmlFor="Coordinate-Px-Y">Coordinate on Pixel Y</CustomFormLabel>
               <CustomTextField
                 id="coordinatePxY"
-                placeholder={formData.coordinatePxY}
+                value={formData.coordinatePxY}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"

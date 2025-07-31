@@ -87,7 +87,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
         await dispatch(fetchBleReaderDT(bleReaderFilter));
         console.log('BLE Reader Saved!');
         toast.success('Data Saved', { position: 'top-right' });
-        handleClose();
+        handleClose();  
       } else {
         toast.error('Saving Data Unsuccessful', { position: 'top-right' });
       }

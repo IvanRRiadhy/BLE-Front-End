@@ -131,7 +131,7 @@ const VisitCounterCard = ({ invitations, title = 'Remaining Invitations' }: Prop
             textAlign: 'center',
           }}
         >
-          <Typography variant="h1" sx={{ fontSize: '7.5rem' }}>
+          <Typography variant="h1" sx={{ fontSize: '7.5rem' }} color='primary'>
             {filteredInvites.length}
           </Typography>
         </Box>

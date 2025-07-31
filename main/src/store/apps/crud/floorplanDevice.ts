@@ -21,9 +21,9 @@ export type GetFilter = {
     SortDir: 'asc' | 'desc',
     searchValue: string,
     filters: {
-        FloorplanId: string,
-        FloorplanMaskedAreaId?: string,
-        Type: string,
+        FloorplanId: string[],
+        FloorplanMaskedAreaId?: string[],
+        Type: string[],
     }
 }
 

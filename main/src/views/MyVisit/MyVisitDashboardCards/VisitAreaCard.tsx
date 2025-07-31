@@ -257,7 +257,14 @@ const VisitAreaCard = ({ invitationData, trackingData, title = 'Most Visited Are
             <Box sx={{ width: 250, height: 190 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie dataKey="value" data={chartData} cx="40%" cy="50%" outerRadius={90}>
+                  <Pie
+                    dataKey="value"
+                    data={chartData}
+                    cx="40%"
+                    cy="50%"
+                    // innerRadius={55}
+                    outerRadius={90}
+                  >
                     {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={colors[index]} />
                     ))}

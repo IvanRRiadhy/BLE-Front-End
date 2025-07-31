@@ -131,8 +131,8 @@ export const defaultBleReaderFilter: BleReaderFilter = {
   SortDir: 'desc',
   searchValue: '',
   filters: {
-    BrandId: '',
-    EngineReaderId: '',
+    BrandId: [],
+    EngineReaderId: [],
   },
 };
 //#endregion
@@ -246,7 +246,7 @@ export const defaultFloorFilter: FloorFilter = {
   SortDir: 'desc',
   searchValue: '',
   filters: {
-    BuildingId: [''],
+    BuildingId: [],
   },
 };
 //#endregion
@@ -285,9 +285,9 @@ export const defaultFloorplanDeviceFilter: FloorplanDeviceFilter = {
   SortDir: 'desc',
   searchValue: '',
   filters: {
-    FloorplanId: '',
-    FloorplanMaskedAreaId: '',
-    Type: '',
+    FloorplanId: [],
+    FloorplanMaskedAreaId: [],
+    Type: [],
   },
 };
 //#endregion

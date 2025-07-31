@@ -13,6 +13,7 @@ import {
 import { IconTrash, IconPencil } from '@tabler/icons-react';
 import Area5 from 'src/assets/images/svgs/area/5.svg';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { RootState, useSelector } from 'src/store/Store';
 
 type Props = {
   onListClick: (event: React.MouseEvent<HTMLElement>) => void;
@@ -23,7 +24,7 @@ type Props = {
 };
 
 const AreaListItem = ({ onListClick, onEditClick, onDeleteClick, area, active }: Props) => {
-
+  const isEditing = useSelector((state: RootState) => state.maskedAreaReducer.editingMaskedArea);
   return (
     <ListItemButton
       sx={{ mb: 1 }}
@@ -48,7 +49,7 @@ const AreaListItem = ({ onListClick, onEditClick, onDeleteClick, area, active }:
           </Box>
         </Stack>
       </ListItemText>
-      {active && (
+      {active && !isEditing && (
         <>
           <IconButton
             className="interactive"

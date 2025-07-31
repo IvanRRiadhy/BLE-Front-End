@@ -26,7 +26,7 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { IconChevronDown } from '@tabler/icons-react';
 dayjs.extend(isSameOrBefore);
 type Props = {
-  trackingData: { time: string }[];
+  trackingData: { time: string; isAlarm: boolean }[];
   title?: string;
 };
 
@@ -53,19 +53,19 @@ const VisitFrequencyCard = ({ trackingData, title = 'Tracking Count by Date' }: 
     switch (newRange) {
       case 'day':
         setStartDate(now.startOf('day'));
-        setEndDate(now.endOf('day'));
+        setEndDate(now);
         break;
       case 'week':
         setStartDate(now.startOf('week'));
-        setEndDate(now.endOf('week'));
+        setEndDate(now);
         break;
       case 'month':
         setStartDate(now.startOf('month'));
-        setEndDate(now.endOf('month'));
+        setEndDate(now);
         break;
       case 'year':
-        setStartDate(now);
-        setEndDate(now.endOf('year'));
+        setStartDate(now.startOf('year'));
+        setEndDate(now);
         break;
       case 'custom':
         setStartDate(null);
@@ -89,11 +89,20 @@ const VisitFrequencyCard = ({ trackingData, title = 'Tracking Count by Date' }: 
     return true;
   });
 
-const countMap: Record<string, number> = {};
-filteredTracking.forEach((item) => {
-  const date = dayjs(item.time).format('YYYY-MM-DD');
-  countMap[date] = (countMap[date] || 0) + 1;
-});
+  type CountPerDay = Record<string, { alarm: number; normal: number }>;
+
+  const countMap: CountPerDay = {};
+  filteredTracking.forEach((item) => {
+    const date = dayjs(item.time).format('YYYY-MM-DD');
+    if (!countMap[date]) {
+      countMap[date] = { alarm: 0, normal: 0 };
+    }
+    if (item.isAlarm) {
+      countMap[date].alarm += 1;
+    } else {
+      countMap[date].normal += 1;
+    }
+  });
 
   // Generate full list of dates between startDate and endDate
   const generateDateRange = (start: Dayjs, end: Dayjs) => {
@@ -110,12 +119,13 @@ filteredTracking.forEach((item) => {
 
   const chartData = fullDates.map((date) => ({
     date,
-    count: countMap[date] || 0,
+    normal: countMap[date]?.normal || 0,
+    alarm: countMap[date]?.alarm || 0,
   }));
   return (
     <Card>
       <CardContent>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={0}>
           <Typography variant="h6">{title}</Typography>
           <Button
             size="small"
@@ -191,19 +201,20 @@ filteredTracking.forEach((item) => {
             </Typography>
           </Box>
         ) : (
-          <Box sx={{ width: '100%', height: 230 }}>
+          <Box sx={{ width: '100%', height: 200 - 2 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 20, right: 0, left: 0, bottom: 0 }}>
+              <BarChart data={chartData} margin={{ top: 20, right: 120, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" fontSize={10} />
                 <YAxis />
                 <Tooltip />
-                <Legend
-                  layout="vertical"
-                  verticalAlign="middle"
-                  align="right"
-                />
-                <Bar dataKey="count" fill="#8884d8" name="Tracking Count" />
+                <Legend layout="vertical" verticalAlign="middle" align="right" />
+
+                {/* Normal tracking */}
+                <Bar dataKey="normal" fill="#8884d8" name="Tracking Count" stackId="overlay" />
+
+                {/* Alarm tracking */}
+                <Bar dataKey="alarm" fill="#ff4d4f" name="Alarm Count" stackId="overlay" />
               </BarChart>
             </ResponsiveContainer>
           </Box>

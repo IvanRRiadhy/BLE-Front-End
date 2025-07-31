@@ -181,8 +181,9 @@ const DeviceList = () => {
   const handleConfirmDelete = () => {
     if (deleteDeviceId) {
       dispatch(DeleteUnsavedDevice(deleteDeviceId)); // Delete the device from the unsaved devices list
-      dispatch(SelectFloorplanDevice(null)); // Deselect the device
     }
+    dispatch(SelectFloorplanDevice(null)); // Deselect the device
+    dispatch(SelectEditingFloorplanDevice(null));
     handleCloseDeleteDialog(); // Close the delete dialog
   };
 

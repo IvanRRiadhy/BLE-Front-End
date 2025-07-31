@@ -26,7 +26,7 @@ const PageWrapper = styled('div')(() => ({
   flexDirection: 'column',
   zIndex: 1,
   width: '100%',
-  backgroundColor: 'transparent',
+  backgroundColor: '#f5f5f5',
 }));
 
 const MyVisitLayout: FC = () => {
@@ -106,7 +106,7 @@ const MyVisitLayout: FC = () => {
           >
             <Container
               sx={{
-                pt: '0px',
+                pt: '5px',
                 maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',
                 flexGrow: 1, // Allow content to take remaining space
               }}
@@ -114,7 +114,7 @@ const MyVisitLayout: FC = () => {
               {/* ------------------------------------------- */}
               {/* PageContent */}
               {/* ------------------------------------------- */}
-              <Box sx={{ minHeight: 'calc(100vh - 170px)' }}>
+              <Box sx={{ minHeight: 'calc(100vh - 160px)' }}>
                 <ScrollToTop>
                   <Outlet />
                 </ScrollToTop>

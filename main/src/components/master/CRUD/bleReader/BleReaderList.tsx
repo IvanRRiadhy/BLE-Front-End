@@ -97,6 +97,7 @@ const BleReaderList = () => {
       dispatch(deleteBleReader(selectedBle.id));
     }
     handleCloseDeleteDialog();
+    dispatch(fetchBleReaderDT(bleReaderFilter));
   };
 
   // const handleSort = (column: string) => {

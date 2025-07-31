@@ -78,6 +78,7 @@ interface StateType {
     originalMaskedAreas: MaskedAreaType[];
     unsavedMaskedAreas: MaskedAreaType[];
     maskedAreaSearch: string;
+    isDrawing: boolean;
     selectedMaskedArea?: MaskedAreaType | null;
     editingMaskedArea?: MaskedAreaType | null;
     deletedMaskedArea?: MaskedAreaType[];
@@ -94,6 +95,7 @@ const initialState: StateType = {
     originalMaskedAreas: [],
     unsavedMaskedAreas: [],
     maskedAreaSearch: "",
+    isDrawing: false,
     selectedMaskedArea: null,
     editingMaskedArea: null,
     deletedMaskedArea: [],
@@ -241,6 +243,9 @@ export const MaskedAreaSlice = createSlice({
         },
         UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
           state.maskedAreaFilter = { ...state.maskedAreaFilter, ...action.payload };
+        },
+        SetIsDrawing: (state: StateType, action: PayloadAction<boolean>) => {
+            state.isDrawing = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -296,6 +301,7 @@ export const {
     ResetAreaState,
     EditMaskedAreaPosition,
     UpdateFilter,
+    SetIsDrawing,
 } = MaskedAreaSlice.actions;    
 
 export const fetchMaskedAreas = () => async (dispatch: AppDispatch) => {

@@ -1,4 +1,14 @@
-import { Box, Button, Drawer, Grid2 as Grid, MenuItem, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Drawer,
+  Grid2 as Grid,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+  Typography,
+} from '@mui/material';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
 import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
@@ -8,6 +18,8 @@ import { fetchBuildings } from 'src/store/apps/crud/building';
 import { UpdateFilter } from 'src/store/apps/crud/floor';
 import { defaultFloorFilter } from 'src/store/apps/defaultForm';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
+import BuildingList from '../building/BuildingList';
+import { CheckBox } from '@mui/icons-material';
 
 const FloorFilter = () => {
   const dispatch = useDispatch();
@@ -19,17 +31,28 @@ const FloorFilter = () => {
     setOpen(false);
   };
 
-  const buildingList = useSelector((state: RootState) => state.buildingReducer.buildings);
+  const buildingList = useSelector((state: RootState) => state.buildingReducer.buildingAll);
   const floorFilter = useSelector((state: RootState) => state.floorReducer.floorFilter);
   const [appliedFilter, setAppliedFilter] = useState(floorFilter.filters);
   useEffect(() => {
     dispatch(fetchBuildings());
+    setAppliedFilter(floorFilter.filters);
   }, [dispatch]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | { name?: string; value: string }>,
   ) => {
+    console.log(appliedFilter)
     const { name, value } = e.target;
+    if (value.includes('all')) {
+      setAppliedFilter((prev) => ({
+        ...prev,
+        BuildingId: appliedFilter.BuildingId?.length
+          ? []
+          : buildingList.map((building) => building.id),
+      }));
+      return;
+    }
     if (name) {
       setAppliedFilter({ ...appliedFilter, [name]: value });
     }
@@ -79,18 +102,49 @@ const FloorFilter = () => {
 
         <Grid container spacing={3}>
           <Grid size={12}>
-            <CustomFormLabel htmlFor="integrationType">
+            <CustomFormLabel htmlFor="BuildingId">
               <Typography variant="caption">Building :</Typography>
             </CustomFormLabel>
             <CustomSelect
               name="BuildingId"
-              value={appliedFilter.BuildingId || ''}
+              value={appliedFilter.BuildingId}
               onChange={handleInputChange}
               fullWidth
               variant="outlined"
+              multiple
+              renderValue={(selected: string[]) => {
+                if (selected.length === 0) return 'All Buildings';
+                return buildingList
+                  .filter((building) => selected.includes(building.id))
+                  .map((building) => building.name)
+                  .join(', ');
+              }}
+              MenuProps={{
+                PaperProps: {
+                  style: {
+                    maxHeight: 200, // Set the maximum height of the dropdown menu
+                    width: 100, // Adjust the width of the dropdown menu
+                  },
+                },
+              }}
             >
+              <MenuItem value="all">
+                <ListItemIcon>
+                  <Checkbox
+                    checked={appliedFilter.BuildingId?.length === buildingList.length}
+                    indeterminate={
+                      appliedFilter.BuildingId?.length > 0 &&
+                      appliedFilter.BuildingId?.length < buildingList.length
+                    }
+                  />
+                </ListItemIcon>
+                <ListItemText primary="All Buildings" />
+              </MenuItem>
               {buildingList.map((building) => (
                 <MenuItem key={building.id} value={building.id}>
+                  <ListItemIcon>
+                    <Checkbox checked={appliedFilter.BuildingId?.includes(building.id)} />
+                  </ListItemIcon>
                   {building.name}
                 </MenuItem>
               ))}
@@ -99,7 +153,7 @@ const FloorFilter = () => {
         </Grid>
 
         <Box mt={3}>
-          <Grid container  justifyContent="space-between">
+          <Grid container justifyContent="space-between">
             <Grid size={3}>
               <Button
                 variant="outlined"

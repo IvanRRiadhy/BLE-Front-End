@@ -140,7 +140,7 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
                 <CustomFormLabel htmlFor="organization-code">Organization Code</CustomFormLabel>
                 <CustomTextField
                   id="code"
-                  placeholder={formData.code}
+                  value={formData.code}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -148,7 +148,7 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
                 <CustomFormLabel htmlFor="organization-host">Organization Host</CustomFormLabel>
                 <CustomTextField
                   id="organizationHost"
-                  placeholder={formData.organizationHost}
+                  value={formData.organizationHost}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -158,7 +158,7 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
                 <CustomFormLabel htmlFor="organization-Name">Organization Name</CustomFormLabel>
                 <CustomTextField
                   id="name"
-                  placeholder={formData.name}
+                  value={formData.name}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"

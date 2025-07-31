@@ -1,4 +1,14 @@
-import { Box, Button, Checkbox, Drawer, Grid2 as Grid, ListItemIcon, ListItemText, MenuItem, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Drawer,
+  Grid2 as Grid,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+  Typography,
+} from '@mui/material';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
 import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
@@ -30,12 +40,15 @@ const FloorplanFilter = () => {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | { name?: string; value: string }>,
   ) => {
+    console.log(appliedFilter);
     const { name, value } = e.target;
-    if(value.includes('all')){
+    if (value.includes('all')) {
       setAppliedFilter((prev) => ({
         ...prev,
-        FloorId: appliedFilter.FloorId?.length ? [] : floorList.map((floor) => floor.id),
-      }))
+        FloorId: appliedFilter.FloorId?.length 
+        ? [] 
+        : floorList.map((floor) => floor.id),
+      }));
       return;
     }
     if (name) {
@@ -51,7 +64,7 @@ const FloorplanFilter = () => {
   const handleResetFilter = () => {
     setAppliedFilter(defaultFloorplanFilter.filters);
     dispatch(UpdateFilter({ filters: defaultFloorplanFilter.filters }));
-  }
+  };
 
   return (
     <>
@@ -107,7 +120,7 @@ const FloorplanFilter = () => {
                   .map((floor) => floor.name)
                   .join(', ');
               }}
-                            MenuProps={{
+              MenuProps={{
                 PaperProps: {
                   style: {
                     maxHeight: 200, // Set the maximum height of the dropdown menu
@@ -118,9 +131,12 @@ const FloorplanFilter = () => {
             >
               <MenuItem value="all">
                 <ListItemIcon>
-                  <Checkbox 
-                  checked={appliedFilter.FloorId?.length === floorList.length} 
-                  indeterminate={appliedFilter.FloorId.length > 0 && appliedFilter.FloorId.length < floorList.length}
+                  <Checkbox
+                    checked={appliedFilter.FloorId?.length === floorList.length}
+                    indeterminate={
+                      appliedFilter.FloorId.length > 0 &&
+                      appliedFilter.FloorId.length < floorList.length
+                    }
                   />
                 </ListItemIcon>
                 <ListItemText primary="All Floors" />
@@ -138,7 +154,7 @@ const FloorplanFilter = () => {
         </Grid>
 
         <Box mt={3}>
-          <Grid container  justifyContent="space-between">
+          <Grid container justifyContent="space-between">
             <Grid size={3}>
               <Button
                 variant="outlined"

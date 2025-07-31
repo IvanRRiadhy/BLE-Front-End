@@ -158,7 +158,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                 <CustomFormLabel htmlFor="floorplan-Name">Floorplan Name</CustomFormLabel>
                 <CustomTextField
                   id="name"
-                  placeholder={formData.name}
+                  value={formData.name}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"

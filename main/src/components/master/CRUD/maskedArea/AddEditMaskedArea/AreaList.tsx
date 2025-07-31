@@ -79,6 +79,7 @@ const AreaList = () => {
   const filteredOriginalAreas = originalAreas.filter(
     (area) => area.floorplanId === activeFloorplan?.id,
   );
+  const drawingArea = useSelector((state: AppState) => state.maskedAreaReducer.drawingMaskedArea);
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   const deletedArea = useSelector((state: AppState) => state.maskedAreaReducer.deletedMaskedArea);
   const addedArea = useSelector((state: AppState) => state.maskedAreaReducer.addedMaskedArea);
@@ -122,18 +123,19 @@ const AreaList = () => {
   };
 
   const handleAddAreaClick = () => {
-    if (editingMaskedArea) {
+    if (editingMaskedArea || drawingArea) {
       setPendingAreaId(newArea.id); // Clear the pending device ID
       setDialogType('add'); // Set the dialog type to 'add'
       setConfirmDialogOpen(true); // Open the confirmation dialog
       return;
     }
+    dispatch(SelectMaskedArea(''));
     dispatch(DrawingMaskedArea(newArea.id)); // Add a new device
   };
 
   const handleOnClick = (id: string) => {
     if (selectedMaskedArea?.id === id) return; // Prevent re-selecting the same device
-    if (editingMaskedArea) {
+    if (editingMaskedArea || drawingArea) {
       setPendingAreaId(id); // Store the device ID for later use
       setDialogType('select'); // Set the dialog type to 'select'
       setConfirmDialogOpen(true); // Open the confirmation dialog
@@ -143,6 +145,7 @@ const AreaList = () => {
   };
   const handleConfirmProceed = () => {
     dispatch(RevertMaskedArea(editingMaskedArea?.id || '')); // Revert the editing device to its original state
+    dispatch(DrawingMaskedArea(''));
     if (pendingAreaId) {
       if (dialogType === 'add') {
         dispatch(DrawingMaskedArea(pendingAreaId));
@@ -176,8 +179,9 @@ const AreaList = () => {
   const handleConfirmDelete = () => {
     if (deleteAreaId) {
       dispatch(DeleteUnsavedMaskedArea(deleteAreaId)); // Delete the device from the unsaved devices list
-      dispatch(SelectMaskedArea(null)); // Deselect the device
     }
+    dispatch(SelectMaskedArea(null)); // Deselect the device
+    dispatch(SelectEditingMaskedArea(null));
     handleCloseDeleteDialog(); // Close the delete dialog
   };
 
