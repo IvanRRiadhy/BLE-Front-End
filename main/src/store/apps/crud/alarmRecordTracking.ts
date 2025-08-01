@@ -68,6 +68,7 @@ export interface AlarmType {
 
 interface StateType {
     alarmRecordTrackings: AlarmType[];
+    alarmRecordTrackingAll: AlarmType[];
     alarmRecordTrackingSearch: string;
     selectedAlarmRecordTracking?: AlarmType | null;
     alarmRecordTotalCount: number;
@@ -77,6 +78,7 @@ interface StateType {
 
 const initialState: StateType = {
     alarmRecordTrackings: [],
+    alarmRecordTrackingAll: [],
     alarmRecordTrackingSearch: '',
     selectedAlarmRecordTracking: null,
     alarmRecordTotalCount: 0,
@@ -89,6 +91,9 @@ export const AlarmSlice = createSlice({
     reducers: {
         GetAlarms: (state, action:PayloadAction<AlarmType[]>) => {
             state.alarmRecordTrackings = action.payload;
+        },
+        GetAllAlarms: (state, action:PayloadAction<AlarmType[]>) => {
+            state.alarmRecordTrackingAll = action.payload;
         },
         SelectAlarm: (state, action: PayloadAction<string>) => {
             const selected = state.alarmRecordTrackings.find(
@@ -120,14 +125,14 @@ export const AlarmSlice = createSlice({
 
 
 export const {
-    GetAlarms, SelectAlarm, SearchAlarm, UpdateFilter
+    GetAlarms,GetAllAlarms, SelectAlarm, SearchAlarm, UpdateFilter
 } = AlarmSlice.actions;
 
 
 export const fetchAlarm = () => async (dispatch: AppDispatch) => {
     try{
         const response = await axiosServices.get(`${API_URL}`);
-        dispatch(GetAlarms(response.data.collection?.data || []));
+        dispatch(GetAllAlarms(response.data.collection?.data || []));
         console.log("Alarm records fetched successfully: ", response.data);
     } catch (err: any) {
         console.error("Error fetching Alarm: ", err);

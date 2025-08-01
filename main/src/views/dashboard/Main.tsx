@@ -11,9 +11,9 @@ import WelcomePopup from 'src/components/dashboards/mainmenu/WelcomePopup';
 import { blacklistType, fetchBlacklistDT } from 'src/store/apps/crud/blacklist';
 import { fetchMaskedAreaDT, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { fetchBleReaderDT } from 'src/store/apps/crud/bleReader';
-import { AlarmType, fetchAlarmDT } from 'src/store/apps/crud/alarmRecordTracking';
+import { AlarmType, fetchAlarmDT, fetchAlarm } from 'src/store/apps/crud/alarmRecordTracking';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
-import { fetchTrackingTransDT, trackingTransType } from 'src/store/apps/crud/trackingTrans';
+import { fetchTrackingTrans, fetchTrackingTransDT, trackingTransType } from 'src/store/apps/crud/trackingTrans';
 import { setMainMenu } from 'src/store/customizer/CustomizerSlice';
 import { fetchFloorplanDeviceDT, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import BlacklistList from 'src/components/master/CRUD/blacklist/BlacklistList';
@@ -85,15 +85,19 @@ const Modern = () => {
   useEffect(() => {
     // Fetch initial data for the dashboard
     dispatch(
-      fetchTrackingTransDT({
-        ...filter,
-        length: 999,
-        filters: {
-          FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || [],
-          ReaderId: [],
-        },
-      }),
+      // fetchTrackingTransDT({
+      //   ...filter,
+      //   length: 999,
+      //   filters: {
+      //     FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || [],
+      //     ReaderId: [],
+      //   },
+      // }),
+      fetchTrackingTrans()
     );
+    dispatch(
+      fetchAlarm()
+    )
     dispatch(
       fetchBlacklistDT({
         ...filter,
@@ -168,9 +172,11 @@ const Modern = () => {
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
   );
   const trackingData: trackingTransType[] = useSelector(
-    (state: RootState) => state.trackingTransReducer.trackingTrans,
+    (state: RootState) => state.trackingTransReducer.trackingTransAll,
   );
-
+  const alarmAllData: AlarmType[] = useSelector(
+    (state: RootState) => state.alarmReducer.alarmRecordTrackingAll,
+  )
   // const maskedAreaData: MaskedAreaType[] = useSelector(
   //   (state: RootState) => state.maskedAreaReducer.maskedAreas,
   // );
@@ -218,7 +224,7 @@ const Modern = () => {
           <Grid container spacing={3} alignItems={'stretch'}>
             {/* Tracking Graphic */}
             <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
-              <TrackingGraph alarmData={alarmData} trackingData={trackingData} />
+              <TrackingGraph alarmData={alarmAllData} trackingData={trackingData} />
             </Grid>
 
             {/* Alarm Warning */}

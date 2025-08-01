@@ -121,7 +121,7 @@ const TrackingGraph: React.FC<TrackingGraphProps> = ({ trackingData = [], alarmD
 
   // Get all days in the selected month
   const firstDay = new Date(selectedYear, selectedMonth - 1, 1);
-  const lastDay = new Date(selectedYear, selectedMonth, 0); // last day of month
+const lastDay = new Date(selectedYear, selectedMonth, 0, 23, 59, 59, 999); // end of the last day
   const firstDayStr = firstDay.toISOString().slice(0, 10);
   const lastDayStr = lastDay.toISOString().slice(0, 10);
 
