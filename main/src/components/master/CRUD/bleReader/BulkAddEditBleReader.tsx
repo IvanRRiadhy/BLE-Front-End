@@ -17,7 +17,7 @@ import {
   Tooltip,
   CircularProgress,
 } from '@mui/material';
-import { IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconPencil, IconPlus, IconTrash, IconLock, IconLockOpen } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector, AppDispatch, RootState } from 'src/store/Store';
 import {
@@ -32,12 +32,18 @@ import { defaultBleReaderForm } from 'src/store/apps/defaultForm';
 
 type Props = {
   type: 'add' | 'edit';
+  initialData?: bleReaderType[];
+  setSelectedIds?: React.Dispatch<React.SetStateAction<Set<string>>>;
 };
 
-const BulkAddEditBleReader = ({ type }: Props) => {
+const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
   const dispatch: AppDispatch = useDispatch();
   const [openBulk, setOpenBulk] = useState(false);
   const [rows, setRows] = useState<bleReaderType[]>([{ ...defaultBleReaderForm }]);
+  const [lockedCells, setLockedCells] = useState<
+    Record<number, Partial<Record<keyof bleReaderType, boolean>>>
+  >({});
+  const [lockedRows, setLockedRows] = useState<Record<number, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
   const brands = useSelector((state: RootState) => state.brandReducer.brands);
   const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
@@ -56,7 +62,11 @@ const BulkAddEditBleReader = ({ type }: Props) => {
   });
 
   const handleClickOpen = () => {
-    setRows([{ ...defaultBleReaderForm }]);
+    if (type === 'edit' && initialData && initialData.length > 0) {
+      setRows(initialData);
+    } else {
+      setRows([{ ...defaultBleReaderForm }]);
+    }
     setColumnDefaults({});
     setUseDefault({
       brandId: false,
@@ -97,12 +107,37 @@ const BulkAddEditBleReader = ({ type }: Props) => {
   };
 
   const handleRemoveRow = (index: number) => {
-    setRows((prev) => prev.filter((_, i) => i !== index));
+    // Remove the row
+    setRows((prevRows) => {
+      const newRows = prevRows.filter((_, i) => i !== index);
+
+      // Rebuild lockedCells and lockedRows for the new indices
+      const newLockedCells: typeof lockedCells = {};
+      const newLockedRows: typeof lockedRows = {};
+
+      Object.entries(lockedCells).forEach(([key, value]) => {
+        const i = parseInt(key, 10);
+        if (i < index) newLockedCells[i] = value;
+        else if (i > index) newLockedCells[i - 1] = value; // shift index down
+      });
+
+      Object.entries(lockedRows).forEach(([key, value]) => {
+        const i = parseInt(key, 10);
+        if (i < index) newLockedRows[i] = value;
+        else if (i > index) newLockedRows[i - 1] = value; // shift index down
+      });
+
+      setLockedCells(newLockedCells);
+      setLockedRows(newLockedRows);
+
+      return newRows;
+    });
   };
 
   const handleSaveAll = async () => {
-    setIsSaving(true);
     let allSuccess = true;
+    let successCount = 0;
+    let failCount = 0;
     for (const row of rows) {
       let result;
       if (row.id) {
@@ -113,31 +148,47 @@ const BulkAddEditBleReader = ({ type }: Props) => {
 
       if (!result || !result.type?.endsWith('/fulfilled')) {
         allSuccess = false;
+        failCount += 1;
+      } else {
+        successCount += 1;
       }
     }
 
     await dispatch(fetchBleReaderDT(bleReaderFilter));
-    setIsSaving(false);
+    if(setSelectedIds) setSelectedIds(new Set());
 
     if (allSuccess) {
-      toast.success('All data saved successfully');
+      toast.success(
+        `All ${successCount} item(s) ${type === 'add' ? 'added' : 'updated'} successfully`,
+      );
       handleClose();
     } else {
-      toast.error('Some data failed to save');
+      toast.success(`${successCount} item(s) ${type === 'add' ? 'added' : 'updated'} successfully`);
+      toast.error(`${failCount} item(s) failed to ${type === 'add' ? 'add' : 'update'}`);
     }
+    setTimeout(() => {
+      setIsSaving(false);
+    }, 1000);
+  };
+
+  const getCellStyle = (rowIndex: number, key: keyof bleReaderType) => {
+    const isLocked = lockedRows[rowIndex] || lockedCells[rowIndex]?.[key];
+    return {
+      backgroundColor: isLocked ? '#e3f2fd' : 'transparent',
+    };
   };
 
   return (
     <>
       {type === 'edit' && (
-        <Tooltip title="Edit BLE Reader">
-          <IconButton color="primary" size="small" onClick={handleClickOpen}>
+        <Tooltip title="Bulk Edit BLE Reader">
+          <IconButton color="default" size="small" onClick={handleClickOpen}>
             <IconPencil size={20} />
           </IconButton>
         </Tooltip>
       )}
       {type === 'add' && (
-        <Tooltip title="Add BLE Reader">
+        <Tooltip title="Bulk Add BLE Reader">
           <Button
             variant="contained"
             color="primary"
@@ -151,7 +202,7 @@ const BulkAddEditBleReader = ({ type }: Props) => {
       )}
       <Dialog open={openBulk} onClose={handleClose} fullWidth maxWidth="lg">
         <DialogTitle>
-          <Typography fontWeight={700} variant="h4">
+          <Typography fontWeight={700} variant="h4" p={2}>
             Bulk Add/Edit BLE Reader
           </Typography>
         </DialogTitle>
@@ -169,13 +220,20 @@ const BulkAddEditBleReader = ({ type }: Props) => {
                       onChange={(e) => {
                         const checked = e.target.checked;
                         setUseDefault((prev) => ({ ...prev, brandId: checked }));
+
+                        // Apply default if already selected
                         if (checked && columnDefaults.brandId) {
+                          const value = columnDefaults.brandId;
                           setRows((prev) =>
-                            prev.map((row) => ({ ...row, brandId: columnDefaults.brandId! })),
+                            prev.map((row, index) => {
+                              if (lockedRows[index] || lockedCells[index]?.brandId) return row;
+                              return { ...row, brandId: value };
+                            }),
                           );
                         }
                       }}
                     />
+
                     <TextField
                       select
                       size="small"
@@ -183,8 +241,15 @@ const BulkAddEditBleReader = ({ type }: Props) => {
                       onChange={(e) => {
                         const value = e.target.value;
                         setColumnDefaults((prev) => ({ ...prev, brandId: value }));
+
+                        // Only apply if checkbox is checked and not locked
                         if (useDefault.brandId) {
-                          setRows((prev) => prev.map((row) => ({ ...row, brandId: value })));
+                          setRows((prev) =>
+                            prev.map((row, index) => {
+                              if (lockedRows[index] || lockedCells[index]?.brandId) return row;
+                              return { ...row, brandId: value };
+                            }),
+                          );
                         }
                       }}
                       disabled={!useDefault.brandId}
@@ -215,7 +280,12 @@ const BulkAddEditBleReader = ({ type }: Props) => {
                         const key = 'name'; // or 'ip', etc.
                         setColumnDefaults((prev) => ({ ...prev, [key]: value }));
                         if (useDefault[key]) {
-                          setRows((prevRows) => prevRows.map((row) => ({ ...row, [key]: value })));
+                          setRows((prevRows) =>
+                            prevRows.map((row, index) => {
+                              if (lockedRows[index] || lockedCells[index]?.[key]) return row;
+                              return { ...row, [key]: value };
+                            }),
+                          );
                         }
                       }}
                       disabled={!useDefault.name}
@@ -241,7 +311,12 @@ const BulkAddEditBleReader = ({ type }: Props) => {
                         const key = 'ip'; // or 'ip', etc.
                         setColumnDefaults((prev) => ({ ...prev, [key]: value }));
                         if (useDefault[key]) {
-                          setRows((prevRows) => prevRows.map((row) => ({ ...row, [key]: value })));
+                          setRows((prevRows) =>
+                            prevRows.map((row, index) => {
+                              if (lockedRows[index] || lockedCells[index]?.[key]) return row;
+                              return { ...row, [key]: value };
+                            }),
+                          );
                         }
                       }}
                       disabled={!useDefault.ip}
@@ -268,7 +343,12 @@ const BulkAddEditBleReader = ({ type }: Props) => {
                         const key = 'engineReaderId'; // or 'ip', etc.
                         setColumnDefaults((prev) => ({ ...prev, [key]: value }));
                         if (useDefault[key]) {
-                          setRows((prevRows) => prevRows.map((row) => ({ ...row, [key]: value })));
+                          setRows((prevRows) =>
+                            prevRows.map((row, index) => {
+                              if (lockedRows[index] || lockedCells[index]?.[key]) return row;
+                              return { ...row, [key]: value };
+                            }),
+                          );
                         }
                       }}
                       disabled={!useDefault.engineReaderId}
@@ -293,7 +373,12 @@ const BulkAddEditBleReader = ({ type }: Props) => {
                         const key = 'gmac'; // or 'ip', etc.
                         setColumnDefaults((prev) => ({ ...prev, [key]: value }));
                         if (useDefault[key]) {
-                          setRows((prevRows) => prevRows.map((row) => ({ ...row, [key]: value })));
+                          setRows((prevRows) =>
+                            prevRows.map((row, index) => {
+                              if (lockedRows[index] || lockedCells[index]?.[key]) return row;
+                              return { ...row, [key]: value };
+                            }),
+                          );
                         }
                       }}
                       disabled={!useDefault.gmac}
@@ -303,66 +388,225 @@ const BulkAddEditBleReader = ({ type }: Props) => {
 
                 {/* Action */}
                 <TableCell>
-                  <Tooltip title="Add row">
-                    <IconButton onClick={handleAddRow}>
-                      <IconPlus size={20} />
-                    </IconButton>
-                  </Tooltip>
+                  {type === 'add' && (
+                    <Tooltip title="Add row">
+                      <IconButton onClick={handleAddRow}>
+                        <IconPlus size={20} />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                 </TableCell>
               </TableRow>
             </TableHead>
 
             <TableBody>
               {rows.map((row, idx) => (
-                <TableRow key={idx}>
+                <TableRow
+                  key={idx}
+                  sx={{ backgroundColor: lockedRows[idx] ? '#e3f2fd' : 'transparent' }}
+                >
                   <TableCell>
-                    <TextField
-                      select
-                      value={row.brandId || ''}
-                      onChange={(e) => handleChange(idx, 'brandId', e.target.value)}
-                      fullWidth
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        ...getCellStyle(idx, 'brandId'),
+                      }}
                     >
-                      {brands.map((brand) => (
-                        <MenuItem key={brand.id} value={brand.id}>
-                          {brand.name}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      value={row.name}
-                      onChange={(e) => handleChange(idx, 'name', e.target.value)}
-                      fullWidth
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      value={row.ip}
-                      onChange={(e) => handleChange(idx, 'ip', e.target.value)}
-                      fullWidth
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      value={row.engineReaderId}
-                      onChange={(e) => handleChange(idx, 'engineReaderId', e.target.value)}
-                      fullWidth
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      value={row.gmac}
-                      onChange={(e) => handleChange(idx, 'gmac', e.target.value)}
-                      fullWidth
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Tooltip title="Delete row">
-                      <IconButton color="error" onClick={() => handleRemoveRow(idx)}>
-                        <IconTrash size={20} />
+                      <TextField
+                        select
+                        value={row.brandId || ''}
+                        onChange={(e) => handleChange(idx, 'brandId', e.target.value)}
+                        fullWidth
+                      >
+                        {brands.map((brand) => (
+                          <MenuItem key={brand.id} value={brand.id}>
+                            {brand.name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          setLockedCells((prev) => ({
+                            ...prev,
+                            [idx]: {
+                              ...prev[idx],
+                              brandId: !prev[idx]?.brandId,
+                            },
+                          }))
+                        }
+                      >
+                        {lockedCells[idx]?.brandId ? (
+                          <IconLock size={16} />
+                        ) : (
+                          <IconLockOpen size={16} />
+                        )}
                       </IconButton>
-                    </Tooltip>
+                    </div>
+                  </TableCell>
+
+                  <TableCell>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        ...getCellStyle(idx, 'name'),
+                      }}
+                    >
+                      <TextField
+                        value={row.name}
+                        onChange={(e) => handleChange(idx, 'name', e.target.value)}
+                        fullWidth
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          setLockedCells((prev) => ({
+                            ...prev,
+                            [idx]: {
+                              ...prev[idx],
+                              name: !prev[idx]?.name,
+                            },
+                          }))
+                        }
+                      >
+                        {lockedCells[idx]?.name ? (
+                          <IconLock size={16} />
+                        ) : (
+                          <IconLockOpen size={16} />
+                        )}
+                      </IconButton>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div
+                      style={{ display: 'flex', alignItems: 'center', ...getCellStyle(idx, 'ip') }}
+                    >
+                      <TextField
+                        value={row.ip}
+                        onChange={(e) => handleChange(idx, 'ip', e.target.value)}
+                        fullWidth
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          setLockedCells((prev) => ({
+                            ...prev,
+                            [idx]: {
+                              ...prev[idx],
+                              ip: !prev[idx]?.ip,
+                            },
+                          }))
+                        }
+                      >
+                        {lockedCells[idx]?.ip ? <IconLock size={16} /> : <IconLockOpen size={16} />}
+                      </IconButton>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        ...getCellStyle(idx, 'engineReaderId'),
+                      }}
+                    >
+                      <TextField
+                        value={row.engineReaderId}
+                        onChange={(e) => handleChange(idx, 'engineReaderId', e.target.value)}
+                        fullWidth
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          setLockedCells((prev) => ({
+                            ...prev,
+                            [idx]: {
+                              ...prev[idx],
+                              engineReaderId: !prev[idx]?.engineReaderId,
+                            },
+                          }))
+                        }
+                      >
+                        {lockedCells[idx]?.engineReaderId ? (
+                          <IconLock size={16} />
+                        ) : (
+                          <IconLockOpen size={16} />
+                        )}
+                      </IconButton>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        ...getCellStyle(idx, 'gmac'),
+                      }}
+                    >
+                      <TextField
+                        value={row.gmac}
+                        onChange={(e) => handleChange(idx, 'gmac', e.target.value)}
+                        fullWidth
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          setLockedCells((prev) => ({
+                            ...prev,
+                            [idx]: {
+                              ...prev[idx],
+                              gmac: !prev[idx]?.gmac,
+                            },
+                          }))
+                        }
+                      >
+                        {lockedCells[idx]?.gmac ? (
+                          <IconLock size={16} />
+                        ) : (
+                          <IconLockOpen size={16} />
+                        )}
+                      </IconButton>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Tooltip title={lockedRows[idx] ? 'Unlock Row' : 'Lock Row'}>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            const isLocked = !lockedRows[idx];
+                            setLockedRows((prev) => ({ ...prev, [idx]: isLocked }));
+                            setLockedCells((prevCells) => ({
+                              ...prevCells,
+                              [idx]: isLocked
+                                ? {
+                                    brandId: true,
+                                    name: true,
+                                    ip: true,
+                                    engineReaderId: true,
+                                    gmac: true,
+                                  }
+                                : {},
+                            }));
+                          }}
+                          sx={{
+                            color: lockedRows[idx] ? '#1976d2' : 'inherit', // Blue if locked
+                          }}
+                        >
+                          {lockedRows[idx] ? <IconLock size={16} /> : <IconLockOpen size={16} />}
+                        </IconButton>
+                      </Tooltip>
+
+                      {type === 'add' && (
+                        <Tooltip title="Delete row">
+                          <IconButton color="error" onClick={() => handleRemoveRow(idx)}>
+                            <IconTrash size={20} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -375,7 +619,10 @@ const BulkAddEditBleReader = ({ type }: Props) => {
           </Button>
           <Button
             variant="contained"
-            onClick={handleSaveAll}
+            onClick={() => {
+              setIsSaving(true);
+              handleSaveAll();
+            }}
             disabled={isSaving}
             startIcon={isSaving ? <CircularProgress size={18} color="inherit" /> : null}
           >
