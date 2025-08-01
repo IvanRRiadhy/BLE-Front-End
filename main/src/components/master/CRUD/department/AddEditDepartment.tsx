@@ -65,7 +65,7 @@ const AddEditDepartment = ({ type, department }: FormType) => {
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
+    setLoading(true);
     try {
       let result;
       if (type === 'edit') {
@@ -87,7 +87,7 @@ const AddEditDepartment = ({ type, department }: FormType) => {
       console.error('Error saving department:', error);
     }
     setTimeout(() => {
-      setIsSaving(false);
+      setLoading(false);
     }, 1000);
   };
 
@@ -104,21 +104,21 @@ const AddEditDepartment = ({ type, department }: FormType) => {
     <>
       {type === 'edit' && (
         <Tooltip title="Edit Department">
-                  <IconButton color="primary" size="small" onClick={handleClickOpen}>
-          <IconPencil size={20} />
-        </IconButton>
+          <IconButton color="primary" size="small" onClick={handleClickOpen}>
+            <IconPencil size={20} />
+          </IconButton>
         </Tooltip>
       )}
       {type === 'add' && (
         <Tooltip title="Add Department">
-                  <Button
-          variant="contained"
-          color="primary"
-          startIcon={<IconPlus size={20} />}
-          onClick={handleClickOpen}
-        >
-          Add Department
-        </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<IconPlus size={20} />}
+            onClick={handleClickOpen}
+          >
+            Add Department
+          </Button>
         </Tooltip>
       )}
 
@@ -187,10 +187,12 @@ const AddEditDepartment = ({ type, department }: FormType) => {
       )}
 
       {loading && (
-        <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
+        <Dialog open={true} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
-            <Typography variant="h6">Loading...</Typography>
-            <CircularProgress size={20} color="inherit" />
+            <Typography variant="h1" mb={5}>
+              Loading...{' '}
+            </Typography>
+            <CircularProgress size={50} color="primary" />
           </DialogContent>
         </Dialog>
       )}

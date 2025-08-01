@@ -18,6 +18,7 @@ import {
   DialogActions,
   Button,
   TableSortLabel,
+  CircularProgress,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import {
@@ -44,6 +45,7 @@ const AccessCCTVList = () => {
   // const CCTVTotalCount = useSelector((state: RootState) => state.CCTVReducer.cctvTotalCount);
   const CCTVFilteredCount = useSelector((state: RootState) => state.CCTVReducer.cctvFilteredCount);
   const CCTVFilter = useSelector((state: RootState) => state.CCTVReducer.cctvFilter);
+  const [loading, setLoading] = useState(false);
   // const { t } = useTranslation();
   // Pagination State
   const page = Math.floor(CCTVFilter.Start / CCTVFilter.Length);
@@ -61,10 +63,29 @@ const AccessCCTVList = () => {
 
   useEffect(() => {
     dispatch(UpdateFilter(defaultAccessCCTVFilter));
+    try {
+      setLoading(true);
+      dispatch(fetchAccessCCTVDT(CCTVFilter));
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+    }
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(fetchAccessCCTVDT(CCTVFilter));
+    try {
+      setLoading(true);
+      dispatch(fetchAccessCCTVDT(CCTVFilter));
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+    }
     // dispatch(UpdateFilter(defaultAccessCCTVFilter));
   }, [CCTVFilter, dispatch]);
 
@@ -117,87 +138,102 @@ const AccessCCTVList = () => {
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          <BlankCard>
-            <TableContainer>
-              <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
-                <TableHead>
-                  <TableRow>
-                    {/* Left Sticky Empty Column */}
-                    <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
-                      <Typography variant="h6"> </Typography>
-                    </TableCell>
-                    {/* Main Table Header */}
-                    {columns.map((col) => (
-                      <TableCell key={col.label}>
-                        {col.sortAble && col.field ? (
-                          <TableSortLabel
-                            active={orderBy === col.field}
-                            direction={orderBy === col.field ? order : 'asc'}
-                            onClick={() => handleSort(col.field)}
-                          >
+          {loading ? (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100%',
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          ) : (
+            <BlankCard>
+              <TableContainer>
+                <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
+                  <TableHead>
+                    <TableRow>
+                      {/* Left Sticky Empty Column */}
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}
+                      >
+                        <Typography variant="h6"> </Typography>
+                      </TableCell>
+                      {/* Main Table Header */}
+                      {columns.map((col) => (
+                        <TableCell key={col.label}>
+                          {col.sortAble && col.field ? (
+                            <TableSortLabel
+                              active={orderBy === col.field}
+                              direction={orderBy === col.field ? order : 'asc'}
+                              onClick={() => handleSort(col.field)}
+                            >
+                              <Typography variant="h6">{col.label}</Typography>
+                            </TableSortLabel>
+                          ) : (
                             <Typography variant="h6">{col.label}</Typography>
-                          </TableSortLabel>
-                        ) : (
-                          <Typography variant="h6">{col.label}</Typography>
-                        )}
-                      </TableCell>
-                    ))}
-                    {/* Right Sticky Empty Column */}
-                    <TableCell
-                      sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
-                    >
-                      <Typography variant="h6"> Actions </Typography>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {CCTVData.map((cctv, index) => (
-                    <TableRow key={index}>
+                          )}
+                        </TableCell>
+                      ))}
+                      {/* Right Sticky Empty Column */}
                       <TableCell
-                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                        sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
                       >
-                        {index + 1 + page * rowsPerPage}
-                      </TableCell>
-                      <TableCell>{cctv.name}</TableCell>
-                      <TableCell>{cctv.rtsp}</TableCell>
-                      <TableCell>{cctv.integration?.integrationType}</TableCell>
-                      <TableCell
-                        sx={{
-                          position: 'sticky',
-                          right: 0,
-                          background: 'white',
-                          zIndex: 2,
-                          display: 'flex',
-                          gap: 1,
-                          alignItems: 'center',
-                        }}
-                      >
-                        <AddEditAccessCCTV type="edit" cctv={cctv} />
-                        <IconButton
-                          color="error"
-                          size="small"
-                          onClick={() => handleOpenDeleteDialog(cctv)}
-                        >
-                          <IconTrash size={20} />
-                        </IconButton>
+                        <Typography variant="h6"> Actions </Typography>
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </BlankCard>
+                  </TableHead>
+                  <TableBody>
+                    {CCTVData.map((cctv, index) => (
+                      <TableRow key={index}>
+                        <TableCell
+                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                        >
+                          {index + 1 + page * rowsPerPage}
+                        </TableCell>
+                        <TableCell>{cctv.name}</TableCell>
+                        <TableCell>{cctv.rtsp}</TableCell>
+                        <TableCell>{cctv.integration?.integrationType}</TableCell>
+                        <TableCell
+                          sx={{
+                            position: 'sticky',
+                            right: 0,
+                            background: 'white',
+                            zIndex: 2,
+                            display: 'flex',
+                            gap: 1,
+                            alignItems: 'center',
+                          }}
+                        >
+                          <AddEditAccessCCTV type="edit" cctv={cctv} />
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={() => handleOpenDeleteDialog(cctv)}
+                          >
+                            <IconTrash size={20} />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              {/* Pagination */}
+              <TablePagination
+                component="div"
+                count={CCTVFilteredCount}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                onPageChange={handleChangePage}
+                rowsPerPageOptions={[5, 10, 25]}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </BlankCard>
+          )}
         </Box>
-        {/* Pagination */}
-        <TablePagination
-          component="div"
-          count={CCTVFilteredCount}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          onPageChange={handleChangePage}
-          rowsPerPageOptions={[5, 10, 25]}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
       </Grid>
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>

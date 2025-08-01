@@ -12,6 +12,7 @@ import {
   Tooltip,
   Typography,
   CircularProgress,
+  Box,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import { toast } from 'react-hot-toast';
@@ -37,6 +38,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
+  const [error, setError] = React.useState(false);
   const [image, setImage] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(building?.image || null);
   const [fromLocal, setFromLocal] = React.useState(false);
@@ -105,7 +107,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
 
   const handleSave = async () => {
     try {
-      setIsSaving(true);
+      setLoading(true);
       const data = new FormData();
 
       Object.entries(formData).forEach(([key, value]) => {
@@ -141,14 +143,17 @@ const AddEditBuilding = ({ type, building }: FormType) => {
         handleClose();
       } else {
         toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        setError(true);
       }
     } catch (error) {
       toast.error('Saving Data Unsuccessful', { position: 'top-right' });
       console.error('Error saving Building:', error);
+      setError(true);
     }
     setTimeout(() => {
-      setIsSaving(false);
-    }, 1000);
+      setLoading(false);
+      setError(false);
+    }, 1500);
   };
   return (
     <>
@@ -234,10 +239,10 @@ const AddEditBuilding = ({ type, building }: FormType) => {
         </Dialog>
       )}
       {loading && (
-        <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
+        <Dialog open={true} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
-            <Typography variant="h6">Loading... </Typography>
-            <CircularProgress size={20} color="inherit" />
+            <Typography variant="h1" mb={5}>Loading... </Typography>
+            <CircularProgress  size={50} color="primary" />
           </DialogContent>
         </Dialog>
       )}

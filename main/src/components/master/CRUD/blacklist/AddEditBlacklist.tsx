@@ -76,7 +76,7 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
+    setLoading(true);
     const data = new FormData();
 
     Object.entries(formData).forEach(([key, value]) => {
@@ -110,7 +110,7 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
       console.error('Error saving blacklist:', error);
     }
     setTimeout(() => {
-      setIsSaving(false);
+      setLoading(false);
     }, 1000);
   };
   const handleInputChange = (
@@ -212,10 +212,12 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
       )}
 
       {loading && (
-        <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
+        <Dialog open={true} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
-            <Typography variant="h6">Loading...</Typography>
-            <CircularProgress size={20} color="inherit" />
+            <Typography variant="h1" mb={5}>
+              Loading...{' '}
+            </Typography>
+            <CircularProgress size={50} color="primary" />
           </DialogContent>
         </Dialog>
       )}
