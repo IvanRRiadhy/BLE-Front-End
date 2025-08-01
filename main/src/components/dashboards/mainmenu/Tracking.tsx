@@ -12,6 +12,11 @@ import { Props } from 'react-apexcharts';
 import { useTranslation } from 'react-i18next';
 import { trackingTransType } from 'src/store/apps/crud/trackingTrans';
 import { AlarmType } from 'src/store/apps/crud/alarmRecordTracking';
+import dayjs from 'dayjs';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
 
 interface TrackingGraphProps {
   trackingData: trackingTransType[];
@@ -120,24 +125,32 @@ const TrackingGraph: React.FC<TrackingGraphProps> = ({ trackingData = [], alarmD
   const selectedMonth = Number(monthParts[1]);
 
   // Get all days in the selected month
-  const firstDay = new Date(selectedYear, selectedMonth - 1, 1);
-const lastDay = new Date(selectedYear, selectedMonth, 0, 23, 59, 59, 999); // end of the last day
+  const firstDay = dayjs(`${selectedYear}-${selectedMonth}-01`).startOf('month');
+const lastDay = dayjs(firstDay).endOf('month'); // end of the last day
   const firstDayStr = firstDay.toISOString().slice(0, 10);
   const lastDayStr = lastDay.toISOString().slice(0, 10);
 
   // Build continuous day series for each type
-  const allowedSeries = buildContinuousSeriesByDay(
-    trackingData,
-    'transTime',
-    firstDayStr,
-    lastDayStr,
-  );
-  const unAllowedSeries = buildContinuousSeriesByDay(
-    alarmData,
-    'timestamp',
-    firstDayStr,
-    lastDayStr,
-  );
+const allowedSeries = buildContinuousSeriesByDay(
+  trackingData.filter((item) => {
+    const d = dayjs(item.transTime);
+    return d.isSameOrAfter(firstDay) && d.isSameOrBefore(lastDay);
+  }),
+  'transTime',
+  firstDayStr,
+  lastDayStr,
+);
+
+const unAllowedSeries = buildContinuousSeriesByDay(
+  alarmData.filter((item) => {
+    const d = dayjs(item.timestamp);
+    return d.isSameOrAfter(firstDay) && d.isSameOrBefore(lastDay);
+  }),
+  'timestamp',
+  firstDayStr,
+  lastDayStr,
+);
+
 
   // Combine x points (dates) from both series, so both series use all dates in month
   const allDatesSet = new Set([
@@ -156,13 +169,13 @@ const lastDay = new Date(selectedYear, selectedMonth, 0, 23, 59, 59, 999); // en
     y: unAllowedSeries.find((s) => s.x === date)?.y || 0,
   }));
 
-  const allowedVisitorMonthTotal = trackingData.filter((item) => {
-    const d = new Date(item.transTime);
-    return d.getFullYear() === selectedYear && d.getMonth() + 1 === selectedMonth;
-  }).length;
+const allowedVisitorMonthTotal = trackingData.filter((item) => {
+  const d = dayjs(item.transTime);
+  return d.isAfter(firstDay.subtract(1, 'ms')) && d.isBefore(lastDay.add(1, 'ms'));
+}).length;
   const unAllowedVisitorMonthTotal = alarmData.filter((item) => {
-    const d = new Date(item.timestamp);
-    return d.getFullYear() === selectedYear && d.getMonth() + 1 === selectedMonth;
+  const d = dayjs(item.timestamp);
+  return d.isAfter(firstDay.subtract(1, 'ms')) && d.isBefore(lastDay.add(1, 'ms'));
   }).length;
 
   // chart
