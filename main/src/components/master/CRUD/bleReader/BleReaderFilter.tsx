@@ -10,12 +10,14 @@ import {
   Typography,
 } from '@mui/material';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
+import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { UpdateFilter } from 'src/store/apps/crud/bleReader';
 import { fetchBrands } from 'src/store/apps/crud/brand';
+import { defaultBleReaderFilter } from 'src/store/apps/defaultForm';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 
 type DummyFilter = {
@@ -42,7 +44,7 @@ const BleReaderFilter = () => {
   };
   const brandList = useSelector((state: RootState) => state.brandReducer.brands);
   const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
-  const [appliedFilter, setAppliedFilter] = useState(bleReaderFilter.filters);
+  const [appliedFilter, setAppliedFilter] = useState(defaultBleReaderFilter.filters);
   const [testing, setTesting] = useState<DummyFilter>({
     Draw: 1,
     Start: 0,
@@ -73,6 +75,11 @@ const BleReaderFilter = () => {
 
   const handleApplyFilter = () => {
     dispatch(UpdateFilter({ filters: appliedFilter }));
+  };
+
+  const handleResetFilter = () => {
+    setAppliedFilter(defaultBleReaderFilter.filters);
+    dispatch(UpdateFilter({ filters: defaultBleReaderFilter.filters }));
   };
 
   return (
@@ -111,7 +118,7 @@ const BleReaderFilter = () => {
         </Typography>
 
         <Grid container spacing={3}>
-          <Grid size={12}>
+          {/* <Grid size={12}>
             <CustomFormLabel htmlFor="brandName">
               <Typography variant="caption">Brand Name :</Typography>
             </CustomFormLabel>
@@ -128,35 +135,29 @@ const BleReaderFilter = () => {
                 </MenuItem>
               ))}
             </CustomSelect>
-          </Grid>
+          </Grid> */}
           <Grid size={12}>
             <CustomFormLabel htmlFor="brandName">
               <Typography variant="caption">Multi-Brand Name :</Typography>
             </CustomFormLabel>
             <CustomSelect
               name="BrandId"
-              value={testing.filters.BrandId}
+              value={appliedFilter.BrandId}
               onChange={(e: any) => {
                 const value = e.target.value as string[];
                 if (value.includes('all')) {
-                  setTesting((prev) => ({
+                  setAppliedFilter((prev) => ({
                     ...prev,
-                    filters: {
-                      ...prev.filters,
                       BrandId:
-                        testing.filters.BrandId?.length === brandList.length
+                        appliedFilter.BrandId?.length === brandList.length
                           ? []
                           : brandList.map((brand: any) => brand.id),
-                    },
                   }));
                   return;
                 }
-                setTesting((prev) => ({
+                setAppliedFilter((prev) => ({
                   ...prev,
-                  filters: {
-                    ...prev.filters,
                     BrandId: value,
-                  },
                 }));
               }}
               fullWidth
@@ -182,10 +183,10 @@ const BleReaderFilter = () => {
               <MenuItem value="all">
                 <ListItemIcon>
                   <Checkbox
-                    checked={testing.filters.BrandId?.length === brandList.length}
+                    checked={appliedFilter.BrandId?.length === brandList.length}
                     indeterminate={
-                      testing.filters.BrandId.length > 0 &&
-                      testing.filters.BrandId.length < brandList.length
+                      appliedFilter.BrandId.length > 0 &&
+                      appliedFilter.BrandId.length < brandList.length
                     }
                   />
                 </ListItemIcon>
@@ -194,7 +195,7 @@ const BleReaderFilter = () => {
               {brandList.map((brand: any) => (
                 <MenuItem key={brand.id} value={brand.id}>
                   <ListItemIcon>
-                    <Checkbox checked={testing.filters.BrandId?.includes(brand.id)} />
+                    <Checkbox checked={appliedFilter.BrandId?.includes(brand.id)} />
                   </ListItemIcon>
                   {brand.name}
                 </MenuItem>
@@ -220,16 +221,35 @@ const BleReaderFilter = () => {
         </Grid>
 
         <Box mt={3}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => {
-              handleApplyFilter();
-              handleClose();
-            }}
-          >
-            Apply Filter
-          </Button>
+          <Grid container justifyContent="space-between">
+            <Grid size={3}>
+              <Button
+                variant="outlined"
+                color="error"
+                fullWidth
+                onClick={() => {
+                  handleResetFilter();
+                  handleClose();
+                }}
+              >
+                Reset
+              </Button>
+            </Grid>
+            <Grid size={6}>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={() => {
+                  handleApplyFilter();
+                  handleClose();
+                }}
+                disabled={isEqual(appliedFilter, bleReaderFilter.filters)}
+              >
+                Apply
+              </Button>
+            </Grid>
+          </Grid>
         </Box>
       </Drawer>
     </>

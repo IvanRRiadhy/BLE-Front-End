@@ -31,6 +31,7 @@ import {
 } from 'src/store/apps/crud/trackingTrans';
 import AddEditTrackingTransaction from './AddEditTrackingTransaction';
 import { useTranslation } from 'react-i18next';
+import { defaultTrackingTransFilter } from 'src/store/apps/defaultForm';
 
 const columns = [
   { label: 'Transaction Time', field: 'TransTime', sortAble: true },
@@ -94,6 +95,10 @@ const TrackingTransactionList = () => {
       );
     }
   };
+
+  useEffect(() => {
+    dispatch(UpdateFilter(defaultTrackingTransFilter));
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(fetchTrackingTransDT(trackingTransFilter));

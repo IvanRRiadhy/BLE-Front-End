@@ -29,6 +29,7 @@ import {
   fetchDepartmentDT,
 } from 'src/store/apps/crud/department';
 import AddEditDepartment from './AddEditDepartment';
+import { defaultDepartmentFilter } from 'src/store/apps/defaultForm';
 // import { useTranslation } from 'react-i18next';
 
 const columns = [
@@ -85,6 +86,10 @@ const DepartmentList = () => {
       );
     }
   };
+
+  useEffect(() => {
+    dispatch(UpdateFilter(defaultDepartmentFilter));
+  }, [ dispatch]);
 
   useEffect(() => {
     dispatch(fetchDepartmentDT(departmentFilter));

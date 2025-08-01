@@ -25,6 +25,7 @@ import {
 } from 'src/store/apps/crud/floorplan';
 import { IconEdit } from '@tabler/icons-react';
 import { useNavigate } from 'react-router';
+import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
 
 const columns = [
   { label: 'Floorplan', field: 'Name', sortAble: true },
@@ -75,6 +76,10 @@ const MaskedAreaList2 = () => {
       );
     }
   };
+
+  useEffect(() => {
+    dispatch(UpdateFilter(defaultFloorplanFilter));
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(fetchFloorplanDT(floorplanFilter));

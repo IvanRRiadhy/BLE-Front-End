@@ -26,6 +26,7 @@ import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Stor
 import { deleteFloor, fetchFloorDT, floorType, UpdateFilter } from 'src/store/apps/crud/floor';
 import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import AddEditFloor from './AddEditFloor';
+import { defaultFloorFilter } from 'src/store/apps/defaultForm';
 // import { useTranslation } from 'react-i18next';
 
 const columns = [
@@ -91,8 +92,9 @@ const FloorList = () => {
 
   useEffect(() => {
     dispatch(fetchBuildings());
-    dispatch(fetchFloorDT(floorFilter));
-    console.log('Fetch Buildings and Floors');
+    dispatch(UpdateFilter(defaultFloorFilter))
+    // dispatch(fetchFloorDT(floorFilter));
+    // console.log('Fetch Buildings and Floors');
   }, [dispatch]);
 
   //Delete Pop-up

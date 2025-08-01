@@ -30,6 +30,7 @@ import {
 } from 'src/store/apps/crud/floorplan';
 // import { useTranslation } from 'react-i18next';
 import AddEditFloorplan from './AddEditFloorplan';
+import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
 
 const columns = [
   { label: 'Floorplan Name', field: 'Name', sortAble: true },
@@ -84,6 +85,10 @@ const FloorplanList = () => {
   // useEffect(() => {
   //   console.log("Floorplan Data:", floorplanData);
   // }, [floorplanData]);
+
+  useEffect(() => {
+    dispatch(UpdateFilter(defaultFloorplanFilter));
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(fetchFloorplanDT(floorplanFilter));

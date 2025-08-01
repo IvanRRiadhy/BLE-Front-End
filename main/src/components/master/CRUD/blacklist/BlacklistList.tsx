@@ -32,6 +32,7 @@ import { fetchVisitor } from 'src/store/apps/crud/visitor';
 import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import AddEditBlacklist from './AddEditBlacklist';
+import { defaultBlaclistFilter } from 'src/store/apps/defaultForm';
 
 const columns = [
   { label: 'Blacklisted Visitor', field: 'Visitor.Name', sortAble: true },
@@ -81,6 +82,10 @@ const BlacklistList = () => {
       );
     }
   };
+
+  useEffect(() => {
+    dispatch(UpdateFilter(defaultBlaclistFilter));
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(fetchBlacklistDT(blacklistFilter));

@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { AlarmType, fetchAlarmDT, UpdateFilter } from 'src/store/apps/crud/alarmRecordTracking';
+import { defaultAlarmRecordFilter } from 'src/store/apps/defaultForm';
 
 const columns = [
   { label: 'Time', field: 'Time', sortAble: true },
@@ -54,6 +55,10 @@ const handleChangePage = (_: unknown, newPage: number) => {
   const newLength = parseInt(event.target.value, 10);
   dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
 };
+
+useEffect(() => {
+  dispatch(UpdateFilter(defaultAlarmRecordFilter));
+}, [ dispatch]);
 
   useEffect(() => {
     dispatch(fetchAlarmDT(AlarmRecordFilter));

@@ -30,6 +30,7 @@ import {
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import AddEditAccessControl from './AddEditAccesControl';
+import { defaultAccessControlFilter } from 'src/store/apps/defaultForm';
 // import { useTranslation } from 'react-i18next';
 
 const columns = [
@@ -59,10 +60,12 @@ const AccessControlList = () => {
   );
   // const { t } = useTranslation();
   // Pagination State
-  const page = Math.floor(accessControlFilter.Start / accessControlFilter.Length);
-  const rowsPerPage = accessControlFilter.Length;
-  const orderBy = accessControlFilter.SortColumn;
-  const order = accessControlFilter.SortDir;
+  // const page = Math.floor(accessControlFilter.Start / accessControlFilter.Length);
+  // const rowsPerPage = accessControlFilter.Length;
+  // const orderBy = accessControlFilter.SortColumn;
+  // const order = accessControlFilter.SortDir;
+    const {Start: page, Length: rowsPerPage, SortColumn: orderBy, SortDir: order} = defaultAccessControlFilter;
+  
 
   const handleChangePage = (_: unknown, newPage: number) => {
     dispatch(UpdateFilter({ Start: newPage * accessControlFilter.Length }));

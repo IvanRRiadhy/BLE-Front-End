@@ -30,6 +30,7 @@ import {
   UpdateFilter,
 } from 'src/store/apps/crud/building';
 import AddEditBuilding from './AddEditBuilding';
+import { defaultBuildingFilter } from 'src/store/apps/defaultForm';
 
 const columns = [
   { label: 'Building Name', field: 'name', sortAble: true },
@@ -79,6 +80,10 @@ const handleSort = (column: string) => {
     }));
   }
 };
+
+useEffect(() => {
+  dispatch(UpdateFilter(defaultBuildingFilter));
+}, [dispatch]);
 
   useEffect(() => {
     dispatch(fetchBuildingDT(buildingFilter));

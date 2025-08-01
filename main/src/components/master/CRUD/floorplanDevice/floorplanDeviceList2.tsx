@@ -33,6 +33,7 @@ import {
 } from 'src/store/apps/crud/floorplan';
 import { IconEdit } from '@tabler/icons-react';
 import { useNavigate } from 'react-router';
+import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
 
 const columns = [
   { label: 'Floorplan Name', field: 'Name', sortAble: true },
@@ -93,6 +94,7 @@ const FloorplanDeviceList2 = () => {
   }, [floorplanFilter, dispatch]);
   useEffect(() => {
     dispatch(fetchFloorplanDevices());
+    dispatch(UpdateFilter(defaultFloorplanFilter));
     // dispatch(fetchFloorplan());
   }, [dispatch]);
 

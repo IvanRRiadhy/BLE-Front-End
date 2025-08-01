@@ -29,6 +29,7 @@ import {
   fetchDistrictDT,
 } from 'src/store/apps/crud/district';
 import AddEditDistrict from './AddEditDistrict';
+import { defaultDistrictFilter } from 'src/store/apps/defaultForm';
 // import { useTranslation } from 'react-i18next';
 
 const columns = [
@@ -83,6 +84,10 @@ const DistrictList = () => {
       );
     }
   };
+
+  useEffect(() => {
+    dispatch(UpdateFilter(defaultDistrictFilter));
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(fetchDistrictDT(districtFilter));

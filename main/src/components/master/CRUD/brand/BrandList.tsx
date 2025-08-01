@@ -24,6 +24,7 @@ import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { BrandType, deleteBrand, fetchBrandDT, UpdateFilter } from 'src/store/apps/crud/brand';
 import AddEditBrand from './AddEditBrand';
+import { defaultBrandFilter } from 'src/store/apps/defaultForm';
 
 const columns = [
   { label: 'Brand Name', field: 'Name', sortAble: true },
@@ -73,6 +74,10 @@ const BrandList = () => {
       );
     }
   };
+
+  useEffect(() => {
+    dispatch(UpdateFilter(defaultBrandFilter));
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(fetchBrandDT(brandFilter));

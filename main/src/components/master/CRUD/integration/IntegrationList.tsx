@@ -31,6 +31,7 @@ import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch } from 'src/store/Store';
 import AddEditIntegration from './AddEditIntegration';
+import { defaultIntegrationFilter } from 'src/store/apps/defaultForm';
 // import { useTranslation } from 'react-i18next';
 
 const columns = [
@@ -99,6 +100,7 @@ const IntegrationList = () => {
 
   useEffect(() => {
     dispatch(fetchBrands());
+    dispatch(UpdateFilter(defaultIntegrationFilter));
   }, [dispatch]);
 
   //Delete Pop-up

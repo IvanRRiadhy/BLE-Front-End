@@ -29,6 +29,7 @@ import {
   fetchOrganizationDT,
 } from 'src/store/apps/crud/organization';
 import AddEditOrganization from './AddEditOrganizationList';
+import { defaultOrganizationFilter } from 'src/store/apps/defaultForm';
 // import { useTranslation } from 'react-i18next';
 
 const columns = [
@@ -86,6 +87,10 @@ const OrganizationList = () => {
       );
     }
   };
+
+  useEffect(() => {
+    dispatch(UpdateFilter(defaultOrganizationFilter));
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(fetchOrganizationDT(organizationFilter));

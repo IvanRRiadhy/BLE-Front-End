@@ -30,6 +30,7 @@ import {
 } from 'src/store/apps/crud/bleReader';
 import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
 import AddEditBleReader from './AddEditBleReader';
+import { defaultBleReaderFilter } from 'src/store/apps/defaultForm';
 // import { useTranslation } from 'react-i18next';
 
 const columns = [
@@ -68,6 +69,7 @@ const BleReaderList = () => {
   };
 
   useEffect(() => {
+    dispatch(UpdateFilter(defaultBleReaderFilter));
     // dispatch(fetchBleReaders());
     dispatch(fetchBrands());
   }, [dispatch]);

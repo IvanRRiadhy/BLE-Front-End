@@ -29,6 +29,7 @@ import {
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
 import AddEditAccessCCTV from './AddEditAccessCCTV';
+import { defaultAccessCCTVFilter } from 'src/store/apps/defaultForm';
 // import { useTranslation } from 'react-i18next';
 
 const columns = [
@@ -59,7 +60,12 @@ const AccessCCTVList = () => {
   };
 
   useEffect(() => {
+    dispatch(UpdateFilter(defaultAccessCCTVFilter));
+  }, [dispatch]);
+
+  useEffect(() => {
     dispatch(fetchAccessCCTVDT(CCTVFilter));
+    // dispatch(UpdateFilter(defaultAccessCCTVFilter));
   }, [CCTVFilter, dispatch]);
 
   //Delete Pop-up
