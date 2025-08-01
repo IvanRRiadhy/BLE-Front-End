@@ -132,7 +132,6 @@ const AlarmWarning = () => {
                 </TableHead>
                 <TableBody>
                   {alarmRecordData
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((alarm) => (
                       <TableRow key={alarm.id}>
                         <TableCell
