@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Grid2 as Grid,
@@ -51,6 +51,7 @@ const BleReaderList = () => {
   const bleReaderData = useSelector((state: RootState) => state.bleReaderReducer.bleReaders);
   const currentPageIds = React.useMemo(() => bleReaderData.map((x) => x.id), [bleReaderData]);
   const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
+  const prevFilterRef = useRef(bleReaderFilter);
   const brandData = useSelector((state: RootState) => state.brandReducer.brands);
   // const bleReaderTotalCount = useSelector(
   //   (state: RootState) => state.bleReaderReducer.bleReaderTotalCount,
@@ -88,17 +89,29 @@ const BleReaderList = () => {
     }, 500);
   }, [dispatch]);
 
-  useEffect(() => {
-    try {
-      setLoading(true);
-      dispatch(fetchBleReaderDT(bleReaderFilter));
-    } catch (error) {
-      console.error('Error fetching data:', error);
+useEffect(() => {
+  const prevFilter = prevFilterRef.current;
+
+  const isStartOrLengthChanged =
+    prevFilter.Start !== bleReaderFilter.Start ||
+    prevFilter.Length !== bleReaderFilter.Length;
+
+  // Only show loading if Start or Length changed (pagination),
+  // but NOT if only SortColumn/SortDir changed
+  if (isStartOrLengthChanged) {
+    setLoading(true);
+  }
+
+  dispatch(fetchBleReaderDT(bleReaderFilter)).finally(() => {
+    if (isStartOrLengthChanged) {
+      setTimeout(() => setLoading(false), 500);
     }
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
-  }, [bleReaderFilter, dispatch]);
+  });
+
+  // Update previous filter
+  prevFilterRef.current = bleReaderFilter;
+}, [bleReaderFilter, dispatch]);
+
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

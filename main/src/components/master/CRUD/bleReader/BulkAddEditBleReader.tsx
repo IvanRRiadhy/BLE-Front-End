@@ -135,6 +135,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
   };
 
   const handleSaveAll = async () => {
+    setIsSaving(true);
     let allSuccess = true;
     let successCount = 0;
     let failCount = 0;
