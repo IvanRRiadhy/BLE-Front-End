@@ -200,7 +200,7 @@ const AlarmWarning = () => {
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[5]}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Grid>
