@@ -32,12 +32,17 @@ const FloorplanDevice = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-
+  const floorplanCount = useSelector((state: RootState) => state.floorplanReducer.floorplanFilteredCount);
   const deviceCount = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceFilteredCount,
+    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceAll.length,
   );
   const { t } = useTranslation();
   const topCards: cardType[] = [
+    {
+      title: 'Total Floorplans',
+      subtitle: floorplanCount.toString(),
+      bgcolor: 'primary',
+    },
     {
       title: 'Total Floorplan Devices',
       subtitle: deviceCount.toString(),

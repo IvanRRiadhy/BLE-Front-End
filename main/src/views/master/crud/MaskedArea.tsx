@@ -33,9 +33,15 @@ const MaskedArea = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const maskedAreaCount = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaFilteredCount);
+  const floorplanCount = useSelector((state: RootState) => state.floorplanReducer.floorplanFilteredCount);
+  const maskedAreaCount = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll.length);
   const { t } = useTranslation();
   const topCards: cardType[] = [
+    {
+      title: 'Total Floorplans',
+      subtitle: floorplanCount.toString(),
+      bgcolor: 'primary',
+    },
     {
       title: 'Total Masked Areas',
       subtitle: maskedAreaCount.toString(),
