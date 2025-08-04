@@ -16,7 +16,7 @@ import {
   FormHelperText,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
@@ -77,9 +77,8 @@ const AddEditFloor = ({ type, floor }: FormType) => {
     setOpen(false);
     setImage(null);
     setPreview(floor?.floorImage || null);
-    console.log('Form reset to initial state');
   };
-  React.useEffect(() => {
+  useEffect(() => {
     // Only run for edit mode and if floorImage is a string path
     if (type === 'edit' && floor?.floorImage && typeof floor.floorImage === 'string') {
       // Fetch the image from the server
@@ -293,7 +292,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                 <CustomFormLabel htmlFor="floor-name">name</CustomFormLabel>
                 <CustomTextField
                   id="name"
-                  placeholder={formData.name}
+                  value={formData.name}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -303,7 +302,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                 <CustomFormLabel htmlFor="floor-pixelX">Pixel X</CustomFormLabel>
                 <CustomTextField
                   id="pixelX"
-                  placeholder={formData.pixelX}
+                  value={formData.pixelX}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -312,7 +311,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                 <CustomFormLabel htmlFor="floorX">Floor X (in meters)</CustomFormLabel>
                 <CustomTextField
                   id="floorX"
-                  placeholder={formData.floorX}
+                  value={formData.floorX}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -326,7 +325,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                 <CustomFormLabel htmlFor="Engine-id">Engine Floor ID</CustomFormLabel>
                 <CustomTextField
                   id="engineFloorId"
-                  placeholder={formData.engineFloorId}
+                  value={formData.engineFloorId}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -334,7 +333,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                 <CustomFormLabel htmlFor="m-per-px">Meter Per Pixel</CustomFormLabel>
                 <CustomTextField
                   id="meterPerPx"
-                  placeholder={formData.meterPerPx}
+                  value={formData.meterPerPx}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -343,7 +342,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                 <CustomFormLabel htmlFor="floor-pixelY">Pixel Y</CustomFormLabel>
                 <CustomTextField
                   id="pixelY"
-                  placeholder={formData.pixelY}
+                  value={formData.pixelY}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -352,7 +351,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                 <CustomFormLabel htmlFor="floorY">Floor Y (in meters)</CustomFormLabel>
                 <CustomTextField
                   id="floorY"
-                  placeholder={formData.floorY}
+                  value={formData.floorY}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"

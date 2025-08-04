@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import { toast } from 'react-hot-toast';
-import React from 'react';
+import React, { useEffect } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
@@ -78,6 +78,28 @@ const AddEditBuilding = ({ type, building }: FormType) => {
     setPreview(building?.image || null);
     setFromLocal(false);
   };
+  useEffect(() => {
+    // Only run for edit mode and if floorImage is a string path
+    if (type === 'edit' && building?.image && typeof building.image === 'string') {
+      // Fetch the image from the server
+      fetch(`${BASE_URL}${building.image}`)
+        .then((res) => res.blob())
+        .then((blob) => {
+          // Create a File object from the Blob
+          const file = new File([blob], building.image.split('/').pop() || 'floorplan.jpg', {
+            type: blob.type,
+          });
+          setImage(file);
+          // Optionally set preview as well
+          setPreview(URL.createObjectURL(file));
+        })
+        .catch((err) => {
+          console.error('Failed to fetch floor image:', err);
+        });
+      console.log('Image URL:', preview);
+    }
+    // eslint-disable-next-line
+  }, [open]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
@@ -244,7 +266,8 @@ const AddEditBuilding = ({ type, building }: FormType) => {
                 {formErrors.image && <FormHelperText error>{formErrors.image}</FormHelperText>}
                 {preview && (
                   <img
-                    src={fromLocal ? `${preview}` : `${BASE_URL}${preview}`}
+                    // src={fromLocal ? `${preview}` : image ? `${BASE_URL}${building?.image}` : `${BASE_URL}/${preview}`}
+                    src={preview?.startsWith('blob:') ? preview : `${BASE_URL}${preview}`}
                     alt="Building Preview"
                     style={{ width: '100%', marginTop: '10px', borderRadius: '5px' }}
                   />
