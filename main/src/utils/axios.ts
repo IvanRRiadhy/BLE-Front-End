@@ -23,17 +23,25 @@ export const setSessionExpiredHandler = (handler: () => void) => {
   if (accessToken) {
     request.headers['Authorization'] = `Bearer ${accessToken}`;
   }
-  if(
-    request.method === 'post' &&
-    levelPriority === 'System'
-  ){
-        // If body is JSON, parse and modify it
-    if (request.headers['Content-Type'] === 'application/json' && typeof request.data === 'string') {
+  if (request.method === 'post' && levelPriority === 'System') {
+    if (request.data instanceof FormData) {
+  if (ApplicationId !== null) {
+    request.data.append('ApplicationId', ApplicationId);
+    console.log('Appended ApplicationId to FormData');
+  } else {
+    console.error('ApplicationId is null');
+  }
+    } else if (
+      request.headers['Content-Type'] === 'application/json' &&
+      typeof request.data === 'string'
+    ) {
       const dataObj = JSON.parse(request.data);
       dataObj.ApplicationId = ApplicationId;
       request.data = JSON.stringify(dataObj);
+      console.log('Updated JSON payload with ApplicationId', dataObj);
     } else if (typeof request.data === 'object' && request.data !== null) {
       request.data.ApplicationId = ApplicationId;
+      console.log('Updated object payload with ApplicationId', request.data);
     }
   }
   return request;
