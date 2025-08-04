@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Grid2 as Grid,
@@ -18,6 +18,7 @@ import {
   Button,
   DialogContentText,
   TableSortLabel,
+  CircularProgress,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
@@ -25,6 +26,7 @@ import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Stor
 import { BrandType, deleteBrand, fetchBrandDT, UpdateFilter } from 'src/store/apps/crud/brand';
 import AddEditBrand from './AddEditBrand';
 import { defaultBrandFilter } from 'src/store/apps/defaultForm';
+import toast from 'react-hot-toast';
 
 const columns = [
   { label: 'Brand Name', field: 'Name', sortAble: true },
@@ -39,6 +41,9 @@ const BrandList = () => {
     (state: RootState) => state.brandReducer.brandFilteredCount,
   );
   const brandFilter = useSelector((state: RootState) => state.brandReducer.brandFilter);
+  const prevFilterRef = useRef(brandFilter);
+  // const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
   // Pagination State
   const page = Math.floor(brandFilter.Start / brandFilter.Length);
   const rowsPerPage = brandFilter.Length;
@@ -77,10 +82,33 @@ const BrandList = () => {
 
   useEffect(() => {
     dispatch(UpdateFilter(defaultBrandFilter));
+    try {
+      setLoading(true);
+      dispatch(fetchBrandDT(defaultBrandFilter));
+    } catch (error) {
+      console.log(error);
+    }
+    setTimeout(() => {
+      setLoading(false);
+    }, 500);
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(fetchBrandDT(brandFilter));
+    const prevFilter = prevFilterRef.current;
+    const isStartOrLengthChanged =
+      prevFilter.Start !== brandFilter.Start || prevFilter.Length !== brandFilter.Length;
+    if (isStartOrLengthChanged) {
+      setLoading(true);
+    }
+    dispatch(fetchBrandDT(brandFilter)).finally(() => {
+      if (isStartOrLengthChanged) {
+        setTimeout(() => {
+          setLoading(false);
+        }, 500);
+      }
+    });
+    prevFilterRef.current = brandFilter;
+    console.log('FetchDT');
   }, [brandFilter, dispatch]);
 
   //Delete Pop-up
@@ -99,9 +127,22 @@ const BrandList = () => {
   };
 
   // Confirm delete action
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (selectedBrand) {
-      dispatch(deleteBrand(selectedBrand.id));
+      setLoading(true);
+      try {
+        const result = await dispatch(deleteBrand(selectedBrand.id));
+        if (result && result.type && result.type.endsWith('/fulfilled')) {
+          await dispatch(fetchBrandDT(brandFilter));
+          toast.success('Data Deleted');
+        }
+      } catch (error) {
+        toast.error('Delete Data Unsuccessful');
+        console.error('Error deleting floor:', error);
+      }
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
     }
     handleCloseDeleteDialog();
   };
@@ -110,86 +151,105 @@ const BrandList = () => {
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          <BlankCard>
-            <TableContainer>
-              <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
-                <TableHead>
-                  <TableRow>
-                    {/* Left Sticky Empty Column */}
-                    <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
-                      <Typography variant="h6"></Typography>
-                    </TableCell>
-                    {columns.map((col) => (
-                      <TableCell key={col.label}>
-                        {col.sortAble && col.field ? (
-                          <TableSortLabel
-                            active={orderBy === col.field}
-                            direction={orderBy === col.field ? order : 'asc'}
-                            onClick={() => handleSort(col.field)}
-                          >
-                            <Typography variant="h6">{col.label}</Typography>
-                          </TableSortLabel>
-                        ) : (
-                          <Typography variant="h6">{col.label}</Typography>
-                        )}
-                      </TableCell>
-                    ))}
-                    {/* Right Sticky Empty Column */}
-                    <TableCell
-                      sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
-                    >
-                      <Typography variant="h6"> Actions </Typography>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {brandData.map((brand, index) => (
-                    <TableRow key={index}>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <BlankCard>
+              <TableContainer>
+                <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
+                  <TableHead>
+                    <TableRow>
+                      {/* Left Sticky Empty Column */}
                       <TableCell
-                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}
                       >
-                        {index + 1 + page * rowsPerPage}
+                        <Typography variant="h6"></Typography>
                       </TableCell>
-                      <TableCell>{brand.name}</TableCell>
-                      <TableCell>{brand.tag}</TableCell>
-
+                      {columns.map((col) => (
+                        <TableCell key={col.label}>
+                          {col.sortAble && col.field ? (
+                            <TableSortLabel
+                              active={orderBy === col.field}
+                              direction={orderBy === col.field ? order : 'asc'}
+                              onClick={() => handleSort(col.field)}
+                            >
+                              <Typography variant="h6">{col.label}</Typography>
+                            </TableSortLabel>
+                          ) : (
+                            <Typography variant="h6">{col.label}</Typography>
+                          )}
+                        </TableCell>
+                      ))}
+                      {/* Right Sticky Empty Column */}
                       <TableCell
                         sx={{
                           position: 'sticky',
                           right: 0,
                           background: 'white',
                           zIndex: 2,
-                          display: 'flex',
-                          gap: 1,
-                          alignItems: 'center',
+                          width: 150, // Fixed width
+                          minWidth: 150,
+                          maxWidth: 150,
                         }}
                       >
-                        <AddEditBrand type="edit" brand={brand} />
-                        <IconButton
-                          color="error"
-                          size="small"
-                          onClick={() => handleOpenDeleteDialog(brand)}
-                        >
-                          <IconTrash size={20} />
-                        </IconButton>
+                        <Typography variant="h6"> Actions </Typography>
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </BlankCard>
+                  </TableHead>
+                  <TableBody>
+                    {brandData.map((brand, index) => (
+                      <TableRow key={index}>
+                        <TableCell
+                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                        >
+                          {index + 1 + page * rowsPerPage}
+                        </TableCell>
+                        <TableCell>{brand.name}</TableCell>
+                        <TableCell>{brand.tag}</TableCell>
+
+                        <TableCell
+                          sx={{
+                            position: 'sticky',
+                            right: 0,
+                            background: 'white',
+                            zIndex: 2,
+                            display: 'flex',
+                            gap: 1,
+                            alignItems: 'center',
+                            width: 150, // Fixed width
+                            minWidth: 150,
+                            maxWidth: 150,
+                          }}
+                        >
+                          <AddEditBrand type="edit" brand={brand} />
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={() => handleOpenDeleteDialog(brand)}
+                          >
+                            <IconTrash size={20} />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              {/* Pagination */}
+              <TablePagination
+                component="div"
+                count={brandFilteredCount}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                onPageChange={handleChangePage}
+                rowsPerPageOptions={[5, 10, 25]}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </BlankCard>
+          )}
         </Box>
-        {/* Pagination */}
-        <TablePagination
-          component="div"
-          count={brandFilteredCount}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          onPageChange={handleChangePage}
-          rowsPerPageOptions={[5, 10, 25]}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
       </Grid>
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>

@@ -23,14 +23,14 @@ import { defaultAlarmRecordFilter } from 'src/store/apps/defaultForm';
 const columns = [
   { label: 'Time', field: 'Time', sortAble: true },
   { label: 'Visitor Name', field: 'Visitor.Name', sortAble: true },
-  { label: 'Reader', field: 'Reader', sortAble: true }, 
-    { label: 'Alarm Status', field: 'AlarmStatus', sortAble: true },
+  { label: 'Reader', field: 'Reader', sortAble: true },
+  { label: 'Alarm Status', field: 'AlarmStatus', sortAble: true },
   { label: 'Action Status', field: 'ActionStatus', sortAble: true },
-  { label: 'Area Name', field: 'Area.Name', sortAble: true }, 
+  { label: 'Area Name', field: 'Area.Name', sortAble: true },
 ];
 
 const AlarmRecordList = () => {
-    const dispatch: AppDispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const alarmRecordData: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
   );
@@ -44,26 +44,25 @@ const AlarmRecordList = () => {
   const { t } = useTranslation();
   // Pagination State
   const page = Math.floor(AlarmRecordFilter.Start / AlarmRecordFilter.Length);
-const rowsPerPage = AlarmRecordFilter.Length;
-const orderBy = AlarmRecordFilter.SortColumn;
-const order = AlarmRecordFilter.SortDir;
+  const rowsPerPage = AlarmRecordFilter.Length;
+  const orderBy = AlarmRecordFilter.SortColumn;
+  const order = AlarmRecordFilter.SortDir;
 
-const handleChangePage = (_: unknown, newPage: number) => {
-  dispatch(UpdateFilter({ Start: newPage * AlarmRecordFilter.Length }));
-};
+  const handleChangePage = (_: unknown, newPage: number) => {
+    dispatch(UpdateFilter({ Start: newPage * AlarmRecordFilter.Length }));
+  };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const newLength = parseInt(event.target.value, 10);
-  dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
-};
+    const newLength = parseInt(event.target.value, 10);
+    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+  };
 
-useEffect(() => {
-  dispatch(UpdateFilter(defaultAlarmRecordFilter));
-}, [ dispatch]);
+  useEffect(() => {
+    dispatch(UpdateFilter(defaultAlarmRecordFilter));
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(fetchAlarmDT(AlarmRecordFilter));
   }, [AlarmRecordFilter, dispatch]);
-
 
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
@@ -82,24 +81,28 @@ useEffect(() => {
     )}`;
   };
 
-const handleSort = (column: string) => {
-  const isAsc = AlarmRecordFilter.SortColumn === column && AlarmRecordFilter.SortDir === 'asc';
-  const isDesc = AlarmRecordFilter.SortColumn === column && AlarmRecordFilter.SortDir === 'desc';
+  const handleSort = (column: string) => {
+    const isAsc = AlarmRecordFilter.SortColumn === column && AlarmRecordFilter.SortDir === 'asc';
+    const isDesc = AlarmRecordFilter.SortColumn === column && AlarmRecordFilter.SortDir === 'desc';
 
-  if (isDesc) {
-    dispatch(UpdateFilter({
-      SortColumn: 'UpdatedAt',
-      SortDir: 'desc',
-      Start: 0,
-    }));
-  } else {
-    dispatch(UpdateFilter({
-      SortColumn: column,
-      SortDir: isAsc ? 'desc' : 'asc',
-      Start: 0,
-    }));
-  }
-};
+    if (isDesc) {
+      dispatch(
+        UpdateFilter({
+          SortColumn: 'UpdatedAt',
+          SortDir: 'desc',
+          Start: 0,
+        }),
+      );
+    } else {
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
+    }
+  };
 
   return (
     <Grid container spacing={3}>
@@ -131,50 +134,60 @@ const handleSort = (column: string) => {
                     ))}
                     {/* Right Sticky Empty Column */}
                     <TableCell
-                      sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
+                      sx={{
+                        position: 'sticky',
+                        right: 0,
+                        background: 'white',
+                        zIndex: 2,
+                        width: 150, // Fixed width
+                        minWidth: 150,
+                        maxWidth: 150,
+                      }}
                     >
                       <Typography variant="h6"> Actions </Typography>
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {alarmRecordData
-                    .map((alarmRecordData, index) => (
-                      <TableRow key={index}>
-                        <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
-                        >
-                          {index + 1 + page * rowsPerPage}
-                        </TableCell>
-                        <TableCell>{formatTime(alarmRecordData.timestamp)}</TableCell>
-                        <TableCell>{alarmRecordData.visitor?.name}</TableCell>
-                        <TableCell>{alarmRecordData.reader?.name}</TableCell>
-                        <TableCell>{alarmRecordData.alarmRecordStatus}</TableCell>
-                        <TableCell>{alarmRecordData.actionStatus}</TableCell>
-                        <TableCell>{alarmRecordData.floorplanMaskedArea?.name}</TableCell>
+                  {alarmRecordData.map((alarmRecordData, index) => (
+                    <TableRow key={index}>
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                      >
+                        {index + 1 + page * rowsPerPage}
+                      </TableCell>
+                      <TableCell>{formatTime(alarmRecordData.timestamp)}</TableCell>
+                      <TableCell>{alarmRecordData.visitor?.name}</TableCell>
+                      <TableCell>{alarmRecordData.reader?.name}</TableCell>
+                      <TableCell>{alarmRecordData.alarmRecordStatus}</TableCell>
+                      <TableCell>{alarmRecordData.actionStatus}</TableCell>
+                      <TableCell>{alarmRecordData.floorplanMaskedArea?.name}</TableCell>
 
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            display: 'flex',
-                            gap: 1,
-                            alignItems: 'center',
-                          }}
+                      <TableCell
+                        sx={{
+                          position: 'sticky',
+                          right: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          display: 'flex',
+                          gap: 1,
+                          alignItems: 'center',
+                          width: 150, // Fixed width
+                          minWidth: 150,
+                          maxWidth: 150,
+                        }}
+                      >
+                        {/* <AddEditAccessControl type="edit" alarmRecordData={alarmRecordData} /> */}
+                        <IconButton
+                          color="error"
+                          size="small"
+                          // onClick={() => handleOpenDeleteDialog(alarmRecordData)}
                         >
-                          {/* <AddEditAccessControl type="edit" alarmRecordData={alarmRecordData} /> */}
-                          <IconButton
-                            color="error"
-                            size="small"
-                            // onClick={() => handleOpenDeleteDialog(alarmRecordData)}
-                          >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          <IconTrash size={20} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>

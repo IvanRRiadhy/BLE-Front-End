@@ -207,7 +207,15 @@ const FloorList = () => {
                       ))}
                       {/* Right Sticky Empty Column */}
                       <TableCell
-                        sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
+                        sx={{
+                          position: 'sticky',
+                          right: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          width: 150, // Fixed width
+                          minWidth: 150,
+                          maxWidth: 150,
+                        }}
                       >
                         <Typography variant="h6"> Actions </Typography>
                       </TableCell>
@@ -244,6 +252,9 @@ const FloorList = () => {
                             zIndex: 2,
                             gap: 1,
                             alignItems: 'center',
+                            width: 150, // Fixed width
+                            minWidth: 150,
+                            maxWidth: 150,
                           }}
                         >
                           <AddEditFloor type="edit" floor={floor} />

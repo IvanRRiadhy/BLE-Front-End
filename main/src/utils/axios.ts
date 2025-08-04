@@ -75,6 +75,9 @@ axiosServices.interceptors.response.use(
         // Make a request to your auth server to refresh the token.
         const response = await axios.post('http://192.168.1.116:5000/api/Auth/refresh/', {
           refreshToken,
+          headers: {
+                    'X-API-KEY-TRACKING-PEOPLE': "FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK",
+          }
         });
         const res = response.data.collection.data; // Extract the collection from the response.
         const { token } = response.data.collection.data; // Extract the new access and refresh tokens from the response.
