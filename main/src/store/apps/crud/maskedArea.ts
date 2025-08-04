@@ -175,7 +175,8 @@ export const MaskedAreaSlice = createSlice({
             console.log("Unsaved Masked Area: ", JSON.stringify(state.unsavedMaskedAreas, null, 2));
             const index = state.unsavedMaskedAreas.findIndex((maskedAreaAll) => maskedAreaAll.id === action.payload);
             console.log(index);
-            if (index !== -1 && (state.maskedAreaAll[index].id === action.payload)) {
+            if (index !== -1 && state.maskedAreaAll[index] ) {
+                if(state.maskedAreaAll[index].id !== action.payload)return;
                 if(state.maskedAreaAll[index].id === state.unsavedMaskedAreas[index].id) {
                     state.maskedAreaAll[index] = state.unsavedMaskedAreas[index];
                 }
