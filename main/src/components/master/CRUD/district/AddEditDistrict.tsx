@@ -40,6 +40,8 @@ const AddEditDistrict = ({ type, district }: FormType) => {
     ...defaultDistrictForm,
     ...district,
   });
+  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+
   const districtFilter = useSelector((state: RootState) => state.districtReducer.districtFilter);
   const dispatch: AppDispatch = useDispatch();
 
@@ -62,7 +64,22 @@ const AddEditDistrict = ({ type, district }: FormType) => {
     setOpen(false);
   };
 
+    const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.code?.trim()) errors.code = 'District code is required';
+    if (!formData.name?.trim()) errors.name = 'District name is required';
+    if (!formData.districtHost?.trim()) errors.districtHost = 'District host is required';
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields correctly.');
+      return
+    };
     setLoading(true);
     try {
       let result;
@@ -75,13 +92,13 @@ const AddEditDistrict = ({ type, district }: FormType) => {
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchDistrictDT(districtFilter));
         console.log('District Saved!');
-        toast.success('Data Saved', { position: 'top-right' });
+        toast.success('Data Saved');
         handleClose();
       } else {
-        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        toast.error('Saving Data Unsuccessful');
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving district:', error);
     }
     setTimeout(() => {
@@ -142,6 +159,9 @@ const AddEditDistrict = ({ type, district }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  required
+                  error={!!formErrors.code}
+                  helperText={formErrors.code}
                 />
                 <CustomFormLabel htmlFor="district-host">District Host</CustomFormLabel>
                 <CustomTextField
@@ -150,6 +170,9 @@ const AddEditDistrict = ({ type, district }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  required
+                  error={!!formErrors.districtHost}
+                  helperText={formErrors.districtHost}
                 />
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
@@ -160,6 +183,9 @@ const AddEditDistrict = ({ type, district }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  required
+                  error={!!formErrors.name}
+                  helperText={formErrors.name}
                 />
               </Grid>
             </Grid>

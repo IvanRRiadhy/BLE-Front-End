@@ -1,6 +1,8 @@
  import axios from 'axios';
 
- export const BASE_URL = 'http://192.168.1.116:5000';
+ export const BASE_URL = 'http://192.168.1.116:10000';
+ const ApplicationId = localStorage.getItem('applicationId');
+ const levelPriority = localStorage.getItem('levelPriority');
 
 let onSessionExpired: (() => void) | null = null;
 export const setSessionExpiredHandler = (handler: () => void) => {
@@ -8,10 +10,11 @@ export const setSessionExpiredHandler = (handler: () => void) => {
 };
 
  const axiosServices = axios.create({
-    baseURL: 'http://192.168.1.116:5000',
+    baseURL: 'http://192.168.1.116:10000',
     headers: {
         'Content-Type': 'application/json',
         'X-API-KEY-TRACKING-PEOPLE': "FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK",
+
     },
  });
 
@@ -19,6 +22,19 @@ export const setSessionExpiredHandler = (handler: () => void) => {
   const accessToken = localStorage.getItem('token');
   if (accessToken) {
     request.headers['Authorization'] = `Bearer ${accessToken}`;
+  }
+  if(
+    request.method === 'post' &&
+    levelPriority === 'System'
+  ){
+        // If body is JSON, parse and modify it
+    if (request.headers['Content-Type'] === 'application/json' && typeof request.data === 'string') {
+      const dataObj = JSON.parse(request.data);
+      dataObj.ApplicationId = ApplicationId;
+      request.data = JSON.stringify(dataObj);
+    } else if (typeof request.data === 'object' && request.data !== null) {
+      request.data.ApplicationId = ApplicationId;
+    }
   }
   return request;
 }, error => {

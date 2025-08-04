@@ -234,15 +234,22 @@ const DeviceList = () => {
         }
       }
       if (resultAdd || resultEdit || resultDelete) {
+        if(resultAdd){
         resultAdd?.type.endsWith('/fulfilled')
-          ? toast.success('Add successful', { position: 'top-right' })
-          : toast.error('Add unsuccessful', { position: 'top-right' });
+          ? toast.success('Add successful')
+          : toast.error('Add unsuccessful');
+        }
+        if(resultEdit){
         resultEdit?.type.endsWith('/fulfilled')
-          ? toast.success('Data Saved', { position: 'top-right' })
-          : toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+          ? toast.success('Edit successful')
+          : toast.error('Edit unsuccessful');
+        }
+        if(resultDelete){
         resultDelete?.type.endsWith('/fulfilled')
-          ? toast.success('Delete successful', { position: 'top-right' })
-          : toast.error('Delete unsuccessful', { position: 'top-right' });
+          ? toast.success('Delete successful')
+          : toast.error('Delete unsuccessful');
+        }
+
         // Call deleteFloorplanDevice for each device to delete
         dispatch(fetchFloorplanDT(floorplanFilter));
         console.log('Save operation completed.');
@@ -253,7 +260,7 @@ const DeviceList = () => {
         handleCloseEditing(); // Navigate back to the device list
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving floorplan:', error);
     }
     setTimeout(() => {

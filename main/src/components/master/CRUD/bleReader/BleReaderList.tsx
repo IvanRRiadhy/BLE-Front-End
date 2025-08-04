@@ -89,29 +89,27 @@ const BleReaderList = () => {
     }, 500);
   }, [dispatch]);
 
-useEffect(() => {
-  const prevFilter = prevFilterRef.current;
+  useEffect(() => {
+    const prevFilter = prevFilterRef.current;
 
-  const isStartOrLengthChanged =
-    prevFilter.Start !== bleReaderFilter.Start ||
-    prevFilter.Length !== bleReaderFilter.Length;
+    const isStartOrLengthChanged =
+      prevFilter.Start !== bleReaderFilter.Start || prevFilter.Length !== bleReaderFilter.Length;
 
-  // Only show loading if Start or Length changed (pagination),
-  // but NOT if only SortColumn/SortDir changed
-  if (isStartOrLengthChanged) {
-    setLoading(true);
-  }
-
-  dispatch(fetchBleReaderDT(bleReaderFilter)).finally(() => {
+    // Only show loading if Start or Length changed (pagination),
+    // but NOT if only SortColumn/SortDir changed
     if (isStartOrLengthChanged) {
-      setTimeout(() => setLoading(false), 500);
+      setLoading(true);
     }
-  });
 
-  // Update previous filter
-  prevFilterRef.current = bleReaderFilter;
-}, [bleReaderFilter, dispatch]);
+    dispatch(fetchBleReaderDT(bleReaderFilter)).finally(() => {
+      if (isStartOrLengthChanged) {
+        setTimeout(() => setLoading(false), 500);
+      }
+    });
 
+    // Update previous filter
+    prevFilterRef.current = bleReaderFilter;
+  }, [bleReaderFilter, dispatch]);
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -145,14 +143,14 @@ useEffect(() => {
 
     const successes = results.filter((r) => r.status === 'fulfilled');
     const failures = results.filter((r) => r.status === 'rejected');
-    
+
     if (successes.length > 0) {
       toast.success(`${successes.length} Ble Reader deleted successfully`, {
         position: 'top-right',
       });
     }
     if (failures.length > 0) {
-      toast.error(`${failures.length} Ble Reader failed to delete`, { position: 'top-right' });
+      toast.error(`${failures.length} Ble Reader failed to delete`);
       console.error('Failed deletions:', failures);
     }
 
@@ -227,7 +225,11 @@ useEffect(() => {
                 >
                   <Typography>{selectedIds.size} item(s) selected</Typography>
                   <Box display="flex" gap={1}>
-                    <BulkAddEditBleReader type="edit" initialData={selectedData} setSelectedIds={setSelectedIds} />
+                    <BulkAddEditBleReader
+                      type="edit"
+                      initialData={selectedData}
+                      setSelectedIds={setSelectedIds}
+                    />
                     <Tooltip title="Multi-Delete">
                       <IconButton
                         color="default"

@@ -1001,6 +1001,20 @@ const EditAreaRenderer: React.FC<{
     return Math.sqrt(dx * dx + dy * dy);
   }
 
+  const handleRightClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
+  e.evt.preventDefault();
+
+  if (!drawingMaskedArea) return;
+
+  // Cancel drawing
+  setDrawingNodes([]); // Clear current drawing nodes
+  dispatch(DrawingMaskedArea('')); // Reset drawing mode
+  dispatch(SelectMaskedArea('')); // Clear selection
+  dispatch(SelectEditingMaskedArea('')); // Clear editing
+  setActiveArea(''); // Reset active area
+  console.log('Drawing cancelled by right click');
+};
+
   return (
     <>
       <Stage
@@ -1010,6 +1024,7 @@ const EditAreaRenderer: React.FC<{
         style={{ position: 'absolute', top: 0, left: 0 }}
         onMouseMove={handleMouseMove}
         onClick={handleCanvasClick}
+        onContextMenu={handleRightClick}
       >
         <Layer>
           {image && (

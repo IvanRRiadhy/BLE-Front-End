@@ -21,6 +21,7 @@ import HeatmapFloorplan from 'src/components/dashboards/mainmenu/Heatmap';
 import { fetchFloorDT, floorType } from 'src/store/apps/crud/floor';
 import BeaconDistribution from 'src/components/dashboards/mainmenu/BeaconDistribution';
 import AreaDistribution from 'src/components/dashboards/mainmenu/AreaDistribution';
+import { CardType, fetchCardDT } from 'src/store/apps/crud/card';
 
 const filter = {
   draw: 1,
@@ -97,6 +98,22 @@ const Modern = () => {
     );
     dispatch(
       fetchAlarm()
+    );
+    dispatch(
+      fetchCardDT({
+        ...filter,
+        filters: {
+          IsUsed: 'true',
+        }
+      })
+    )
+        dispatch(
+      fetchCardDT({
+        ...filter,
+        filters: {
+          IsUsed: 'false',
+        }
+      })
     )
     dispatch(
       fetchBlacklistDT({
@@ -186,10 +203,22 @@ const Modern = () => {
   const alarmData: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
   );
-  console.log(
-    'MaskedArea Data: ',
-    maskedAreaData.flat().map((item) => item.name),
+  const activeTag: number = useSelector(
+    (state: RootState) => state.CardReducer.cardActiveCount ?? 0,
   );
+  const nonActiveTag: number = useSelector(
+    (state: RootState) => state.CardReducer.cardNonActiveCount ?? 0,
+  )
+  const activeTagData: CardType[] = useSelector(
+    (state: RootState) => state.CardReducer.cardActiveData,
+  )
+  const nonActiveTagData: CardType[] = useSelector(
+    (state: RootState) => state.CardReducer.cardNonActiveData,
+  )
+  // console.log(
+  //   'MaskedArea Data: ',
+  //   maskedAreaData.flat().map((item) => item.name),
+  // );
   return (
     <PageContainer title="Dashboard" description="this is Dashboard page">
       <Box>
@@ -202,13 +231,13 @@ const Modern = () => {
             }}
           >
             <TopCards
-              ActiveBeaconCount={100}
+              ActiveBeaconCount={activeTag}
               ActiveGatewayCount={bleReaderTotalCount}
               AreaCount={maskedAreaTotalCount}
               BlacklistCount={blacklistTotalCount}
               AlarmCount={alarmFilteredCount}
-              NonActiveBeaconCount={20}
-              FirstActiveBeacon={[]}
+              NonActiveBeaconCount={nonActiveTag}
+              FirstActiveBeacon={activeTagData.flat().map((item) => item.name)}
               FirstActiveGateway={bleReaderData.flat().map((item) => item.name)}
               FirstArea={maskedAreaData.flat().map((item) => item.name)}
               FirstBlacklist={blacklistData
@@ -217,7 +246,7 @@ const Modern = () => {
               FirstAlarm={alarmFilteredData
                 .flat()
                 .map((item) => item.visitor?.name ?? 'Unknown Visitor')}
-              FirstNonActiveBeacon={[]}
+              FirstNonActiveBeacon={nonActiveTagData.flat().map((item) => item.name)}
             />
           </Grid>
           {/* column */}

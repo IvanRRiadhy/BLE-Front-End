@@ -166,13 +166,13 @@ const AddEditCard = ({ type, card }: formType) => {
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchCard());
         console.log('Card Data Saved!');
-        toast.success('Data Saved', { position: 'top-right' });
+        toast.success('Data Saved');
         handleClose();
       } else {
-        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        toast.error('Saving Data Unsuccessful');
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving card data:', error);
     }
   };
@@ -324,11 +324,11 @@ const AddEditCard = ({ type, card }: formType) => {
         <DialogContent
           sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}
         >
-          {formData.cardNumber ? 
-          (<QRCode value={formData.cardNumber.toString()} size={256} />) : 
-          <Typography variant="body1">No QR Code</Typography>
-          
-          }
+          {formData.cardNumber ? (
+            <QRCode value={formData.cardNumber.toString()} size={256} />
+          ) : (
+            <Typography variant="body1">No QR Code</Typography>
+          )}
         </DialogContent>
         <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
           <Button onClick={() => setQrOpen(false)}>Close</Button>

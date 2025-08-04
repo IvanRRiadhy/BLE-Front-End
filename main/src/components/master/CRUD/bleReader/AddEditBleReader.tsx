@@ -43,6 +43,8 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
     ...defaultBleReaderForm,
     ...bleReader,
   });
+  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+
   const brands: BrandType[] = useSelector((state: RootState) => state.brandReducer.brands);
   const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
   const dispatch: AppDispatch = useDispatch();
@@ -73,7 +75,24 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
     setOpen(false);
   };
 
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.name?.trim()) errors.name = 'Reader Name is required';
+    if (!formData.ip?.trim()) errors.ip = 'Reader IP is required';
+    if (!formData.gmac?.trim()) errors.gmac = 'Reader MAC is required';
+    if (!formData.brandId) errors.brandId = 'Reader Brand is required';
+    if(!formData.engineReaderId) errors.engineReaderId = 'Reader Engine is required';
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields correctly.');
+      return;
+    }
     setLoading(true);
     try {
       let result;
@@ -86,13 +105,13 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchBleReaderDT(bleReaderFilter));
         console.log('BLE Reader Saved!');
-        toast.success('Data Saved', { position: 'top-right' });
-        handleClose();  
+        toast.success('Data Saved');
+        handleClose();
       } else {
-        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        toast.error('Saving Data Unsuccessful');
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving BLE reader:', error);
     }
     setTimeout(() => {
@@ -148,11 +167,14 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="brand-id">Brand</CustomFormLabel>
                 <CustomSelect
+                  id="brandId"
                   name="brandId"
                   value={formData.brandId || ''}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.brandId}
+                  helperText={formErrors.brandId}
                 >
                   {brands.map((brand) => (
                     <MenuItem key={brand.id} value={brand.id}>
@@ -167,6 +189,8 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.name}
+                  helperText={formErrors.name}
                 />
                 <CustomFormLabel htmlFor="ble-ip">IP</CustomFormLabel>
                 <CustomTextField
@@ -175,6 +199,8 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.ip}
+                  helperText={formErrors.ip}
                 />
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
@@ -185,6 +211,8 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.engineReaderId}
+                  helperText={formErrors.engineReaderId}
                 />
                 <CustomFormLabel htmlFor="ble-gmac">GMAC</CustomFormLabel>
                 <CustomTextField
@@ -193,6 +221,8 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.gmac}
+                  helperText={formErrors.gmac}
                 />
               </Grid>
             </Grid>
@@ -220,7 +250,9 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
       {loading && (
         <Dialog open={true} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
-            <Typography variant="h1" mb={5}>Loading...</Typography>
+            <Typography variant="h1" mb={5}>
+              Loading...
+            </Typography>
             <CircularProgress size={50} color="primary" />
           </DialogContent>
         </Dialog>

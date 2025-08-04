@@ -39,6 +39,8 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
     ...defaultOrganizationForm,
     ...organization,
   });
+  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+
   useEffect(() => {
     if (organization) {
       console.log('Organization Data:', organization);
@@ -68,7 +70,22 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
     setOpen(false);
   };
 
+    const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.code?.trim()) errors.code = 'Organization code is required';
+    if (!formData.name?.trim()) errors.name = 'Organization name is required';
+    if (!formData.organizationHost?.trim()) errors.organizationHost = 'Organization host is required';
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
+        if (!validateForm()) {
+          toast.error('Please fill in all required fields correctly.');
+          return;
+        }
     setLoading(true);
     try {
       let result;
@@ -81,13 +98,13 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchOrganizationDT(organizationFilter));
         console.log('Organization Saved!');
-        toast.success('Data Saved', { position: 'top-right' });
+        toast.success('Data Saved');
         handleClose();
       } else {
-        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        toast.error('Saving Data Unsuccessful');
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving organization:', error);
     }
     setTimeout(() => {
@@ -144,6 +161,8 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.code}
+                  helperText={formErrors.code}
                 />
                 <CustomFormLabel htmlFor="organization-host">Organization Host</CustomFormLabel>
                 <CustomTextField
@@ -152,6 +171,8 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.organizationHost}
+                  helperText={formErrors.organizationHost}
                 />
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
@@ -162,6 +183,8 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.name}
+                  helperText={formErrors.name}
                 />
               </Grid>
             </Grid>

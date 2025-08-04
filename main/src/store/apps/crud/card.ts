@@ -15,6 +15,10 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     searchValue: string,
+    fiilters: {
+        IsUsed: string,
+        // RegisteredArea: string[],
+    }
 }
 
 export type GetCardResponse = {
@@ -55,6 +59,10 @@ interface StateType {
     cardFilter: GetFilter;
     cardTotalCount: number;
     cardFilteredCount: number;
+    cardActiveCount: number;
+    cardNonActiveCount: number;
+    cardActiveData: CardType[];
+    cardNonActiveData: CardType[];
 };
 
 const initialState: StateType = {
@@ -64,6 +72,10 @@ const initialState: StateType = {
     cardFilter: defaultCardFilter,
     cardTotalCount: 0,
     cardFilteredCount: 0,
+    cardActiveCount: 0,
+    cardNonActiveCount: 0,
+    cardActiveData: [],
+    cardNonActiveData: [],
 };
 
 export const CardSlice = createSlice({
@@ -82,14 +94,36 @@ export const CardSlice = createSlice({
         },
         UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
             state.cardFilter = { ...state.cardFilter, ...action.payload };
+        },
+        UpdateActiveCardCount: (state, action: PayloadAction<number>) => {
+            state.cardActiveCount = action.payload;
+        },
+        UpdateNonActiveCardCount: (state, action: PayloadAction<number>) => {
+            state.cardNonActiveCount = action.payload;
+        },
+        SetActiveCardData: (state, action: PayloadAction<CardType[]>) => {
+            state.cardActiveData = action.payload;
+        },
+        SetNonActiveCardData: (state, action: PayloadAction<CardType[]>) => {
+            state.cardNonActiveData = action.payload;
         }
     },
     extraReducers: (builder) => {
         builder
-            .addCase(fetchCardDT.fulfilled, (state, action) => {
-                state.cardFilteredCount = action.payload.recordsFiltered || 0;
-                state.cardTotalCount = action.payload.recordsTotal || 0;
-            })
+.addCase(fetchCardDT.fulfilled, (state, action) => {
+    const cardData: CardType[] = action.payload.data || [];
+
+    // Update list
+    state.cards = cardData;
+
+    // Update counts
+    state.cardFilteredCount = action.payload.recordsFiltered || 0;
+    state.cardTotalCount = action.payload.recordsTotal || 0;
+
+    // // Count active and inactive
+    // state.cardActiveCount = cardData.filter(card => card.isUsed).length;
+    // state.cardNonActiveCount = cardData.filter(card => !card.isUsed).length;
+})
             .addCase(fetchCardDT.rejected, (state, action) => {
                 console.error("Error fetching card data:", action.error, state);
             })
@@ -113,6 +147,10 @@ export const {
     GetAllCard,
     SetCardSearch,
     UpdateFilter,
+    UpdateActiveCardCount,
+    UpdateNonActiveCardCount,
+    SetActiveCardData,
+    SetNonActiveCardData
 } = CardSlice.actions;
 
 export const fetchCard = () => async (dispatch: any) => {
@@ -131,6 +169,17 @@ export const fetchCardDT = createAsyncThunk(
         try {
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetCard(response.data.collection.data || []));
+            console.log(filter);
+            if(filter.IsUsed === "true"){
+                console.log("UpdateActiveCardCount", response.data.collection.recordsFiltered);
+                dispatch(UpdateActiveCardCount(response.data.collection.recordsFiltered));
+                dispatch(SetActiveCardData(response.data.collection.data || []));
+            };
+            if(filter.IsUsed === "false"){
+                console.log("UpdateNonActiveCardCount", response.data.collection.recordsFiltered);
+                dispatch(UpdateNonActiveCardCount(response.data.collection.recordsFiltered));
+                dispatch(SetNonActiveCardData(response.data.collection.data || []));
+            };
             console.log("Fetch cards", response.data.collection);
             return response.data.collection;
         } catch (error: any) {

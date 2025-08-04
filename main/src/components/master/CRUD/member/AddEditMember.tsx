@@ -13,6 +13,7 @@ import {
   Tooltip,
   Typography,
   CircularProgress,
+  FormHelperText,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
@@ -50,6 +51,7 @@ const AddEditMember = ({ type, member }: FormType) => {
     ...defaultMemberForm,
     ...member,
   });
+  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
 
   const districtData: DistrictType[] = useSelector(
     (state: RootState) => state.districtReducer.districts,
@@ -92,7 +94,33 @@ const AddEditMember = ({ type, member }: FormType) => {
     setImage(null);
   };
 
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.name?.trim()) errors.name = "Member's name is required";
+    if (!formData.cardNumber?.trim()) errors.cardNumber = "Member's Card Number is required";
+    if (!formData.bleCardNumber?.trim())
+      errors.bleCardNumber = "Member's BLE Card Number is required";
+    if (!formData.departmentId?.trim()) errors.departmentId = "Member's Department is required";
+    if (!formData.organizationId?.trim())
+      errors.organizationId = "Member's Organization is required";
+    if (!formData.districtId?.trim()) errors.districtId = "Member's District is required";
+    if (!formData.gender?.trim()) errors.gender = "Member's Gender is required";
+    if (!formData.phone?.trim()) errors.phone = "Member's Phone Number is required";
+    if (!image) errors.faceImage = "Member's Face Image is required";
+    if (!!formData.email?.trim() && !formData.email?.includes('@'))
+      errors.email = 'Valid Email is required';
+    if (!formData.personId?.trim()) errors.personId = "Member's ID is required";
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields correctly.');
+      return;
+    }
     setLoading(true);
     try {
       const data = new FormData();
@@ -122,13 +150,13 @@ const AddEditMember = ({ type, member }: FormType) => {
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchMemberDT(memberFilter));
         console.log('Member Data Saved!');
-        toast.success('Data Saved', { position: 'top-right' });
+        toast.success('Data Saved');
         handleClose();
       } else {
-        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        toast.error('Saving Data Unsuccessful');
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving member data:', error);
     }
     setTimeout(() => {
@@ -207,6 +235,8 @@ const AddEditMember = ({ type, member }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.personId}
+                  helperText={formErrors.personId}
                 />
                 <CustomFormLabel htmlFor="department-Id">Department ID</CustomFormLabel>
                 <CustomSelect
@@ -215,6 +245,8 @@ const AddEditMember = ({ type, member }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.departmentId}
+                  helperText={formErrors.departmentId}
                 >
                   <MenuItem value="" disabled>
                     Select Department
@@ -242,6 +274,8 @@ const AddEditMember = ({ type, member }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.organizationId}
+                  helperText={formErrors.organizationId}
                 >
                   <MenuItem value="" disabled>
                     Select Organization
@@ -259,6 +293,8 @@ const AddEditMember = ({ type, member }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.districtId}
+                  helperText={formErrors.districtId}
                 >
                   <MenuItem value="" disabled>
                     Select District
@@ -284,6 +320,8 @@ const AddEditMember = ({ type, member }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.cardNumber}
+                  helperText={formErrors.cardNumber}
                 />
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
@@ -294,6 +332,8 @@ const AddEditMember = ({ type, member }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.bleCardNumber}
+                  helperText={formErrors.bleCardNumber}
                 />
               </Grid>
             </Grid>
@@ -310,6 +350,8 @@ const AddEditMember = ({ type, member }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.name}
+                  helperText={formErrors.name}
                 />
                 <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
                 <CustomTextField
@@ -318,6 +360,8 @@ const AddEditMember = ({ type, member }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.email}
+                  helperText={formErrors.email}
                 />
                 <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
                 <CustomTextField
@@ -354,6 +398,8 @@ const AddEditMember = ({ type, member }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.phone}
+                  helperText={formErrors.phone}
                 />
                 <CustomFormLabel htmlFor="gender">Gender</CustomFormLabel>
                 <CustomSelect
@@ -362,6 +408,8 @@ const AddEditMember = ({ type, member }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.gender}
+                  helperText={formErrors.gender}
                 >
                   {gender.map((gender) => (
                     <MenuItem
@@ -397,12 +445,24 @@ const AddEditMember = ({ type, member }: FormType) => {
             <Divider />
             <Grid container spacing={5} mb={3}>
               <Grid size={12}>
-                <CustomFormLabel htmlFor="face-image">Face Image</CustomFormLabel>
+                <CustomFormLabel htmlFor="face-image" error={!!formErrors.faceImage}>
+                  Face Image
+                </CustomFormLabel>
                 <input
                   type="file"
                   accept="image/png, image/jpeg, image/jpg"
                   onChange={handleImageChange}
+                  style={{
+                    border: formErrors.faceImage ? '1px solid red' : undefined,
+                    padding: '6px',
+                    borderRadius: '4px',
+                    width: '100%',
+                    marginTop: '5px',
+                  }}
                 />
+                {formErrors.faceImage && (
+                  <FormHelperText error>{formErrors.faceImage}</FormHelperText>
+                )}
                 {preview && (
                   <img
                     src={`${BASE_URL}${preview}`}

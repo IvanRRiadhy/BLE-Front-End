@@ -48,6 +48,8 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
     ...defaultVisitorForm,
     ...visitor,
   });
+    const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+    
   const visitorFilter = useSelector((state: RootState) => state.visitorReducer.visitorFilter);
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = () => {
@@ -106,13 +108,13 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchVisitorDT(visitorFilter));
         console.log('Visitor data Saved!');
-        toast.success('Data Saved', { position: 'top-right' });
+        toast.success('Data Saved');
         handleClose();
       } else {
-        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        toast.error('Saving Data Unsuccessful');
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving visitor data:', error);
     }
     setTimeout(() => {

@@ -45,11 +45,14 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         console.log('JWT Token: ', data.token);
         console.log('Refresh Token: ', data.refreshToken);
         console.log('User Role: ', data.groupId);
+        console.log('ApplicationId: ', data.applicationId);
+        console.log('LevelPriority: ', data.levelPriority);
 
         localStorage.setItem('token', data.token);
         localStorage.setItem('welcomePopupShown', 'false');
         localStorage.setItem('refreshToken', data.refreshToken);
         localStorage.setItem('applicationId', data.applicationId);
+        localStorage.setItem('levelPriority', data.levelPriority);
         navigate('/');
       })
       .catch((error) => {

@@ -13,6 +13,7 @@ import {
   Tooltip,
   Typography,
   CircularProgress,
+  FormHelperText,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React from 'react';
@@ -46,6 +47,8 @@ const AddEditFloor = ({ type, floor }: FormType) => {
     ...defaultFloorForm,
     ...floor,
   });
+  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+
   const dispatch: AppDispatch = useDispatch();
   const buildingData: BuildingType[] = useSelector(
     (state: RootState) => state.buildingReducer.buildingAll,
@@ -98,7 +101,24 @@ const AddEditFloor = ({ type, floor }: FormType) => {
     // eslint-disable-next-line
   }, [open]);
 
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.name?.trim()) errors.name = 'Floor name is required';
+    if (!image) errors.floorImage = 'Floor Image is required';
+    if (!formData.buildingId) errors.buildingId = 'Building is required';
+    if (!formData.floorX) errors.floorX = 'Floor Length is required';
+    if (!formData.floorY) errors.floorY = 'Floor Width is required';
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields correctly.');
+      return;
+    }
     setLoading(true);
     try {
       const data = new FormData();
@@ -131,13 +151,13 @@ const AddEditFloor = ({ type, floor }: FormType) => {
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchFloorDT(floorFilter));
         console.log('Floor Saved!');
-        toast.success('Data Saved', { position: 'top-right' });
+        toast.success('Data Saved');
         handleClose();
       } else {
-        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        toast.error('Saving Data Unsuccessful');
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving floor:', error);
     }
     setTimeout(() => {
@@ -258,6 +278,8 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.buildingId}
+                  helperText={formErrors.buildingId}
                 >
                   <MenuItem value="" disabled>
                     Select Building
@@ -275,6 +297,8 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.name}
+                  helperText={formErrors.name}
                 />
                 <CustomFormLabel htmlFor="floor-pixelX">Pixel X</CustomFormLabel>
                 <CustomTextField
@@ -294,6 +318,8 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                   variant="outlined"
                   type="number"
                   inputProps={{ step: 'any' }}
+                  error={!!formErrors.floorX}
+                  helperText={formErrors.floorX}
                 />
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
@@ -332,16 +358,31 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                   variant="outlined"
                   type="number"
                   inputProps={{ step: 'any' }}
+                  error={!!formErrors.floorY}
+                  helperText={formErrors.floorY}
                 />
               </Grid>
               <Grid size={{ lg: 12, md: 12, sm: 12 }} direction={'column'}>
                 <Grid size={12}>
-                  <CustomFormLabel htmlFor="fp-image">Floorplan Image</CustomFormLabel>
+                  <CustomFormLabel htmlFor="fp-image" error={!!formErrors.floorImage}>
+                    Floorplan Image
+                  </CustomFormLabel>
                   <input
                     type="file"
                     accept="image/png, image/jpeg, image/jpg"
                     onChange={handleImageChange}
+                    required
+                    style={{
+                      border: formErrors.floorImage ? '1px solid red' : undefined,
+                      padding: '6px',
+                      borderRadius: '4px',
+                      width: '100%',
+                      marginTop: '5px',
+                    }}
                   />
+                  {formErrors.floorImage && (
+                    <FormHelperText error>{formErrors.floorImage}</FormHelperText>
+                  )}
                   {preview && (
                     <img
                       src={preview?.startsWith('blob:') ? preview : `${BASE_URL}${preview}`}

@@ -40,6 +40,8 @@ const AddEditDepartment = ({ type, department }: FormType) => {
     ...defaultDepartmentForm,
     ...department,
   });
+  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+
   const departmentFilter = useSelector(
     (state: RootState) => state.departmentReducer.departmentFilter,
   );
@@ -64,7 +66,22 @@ const AddEditDepartment = ({ type, department }: FormType) => {
     setOpen(false);
   };
 
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.code?.trim()) errors.code = 'Department code is required';
+    if (!formData.name?.trim()) errors.name = 'Department name is required';
+    if (!formData.departmentHost?.trim()) errors.departmentHost = 'Department host is required';
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields correctly.');
+      return;
+    }
     setLoading(true);
     try {
       let result;
@@ -77,13 +94,13 @@ const AddEditDepartment = ({ type, department }: FormType) => {
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchDepartmentDT(departmentFilter));
         console.log('Department Saved!');
-        toast.success('Data Saved', { position: 'top-right' });
+        toast.success('Data Saved');
         handleClose();
       } else {
-        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        toast.error('Saving Data Unsuccessful');
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving department:', error);
     }
     setTimeout(() => {
@@ -144,6 +161,9 @@ const AddEditDepartment = ({ type, department }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  required
+                  error={!!formErrors.code}
+                  helperText={formErrors.code}
                 />
                 <CustomFormLabel htmlFor="department-host">Department Host</CustomFormLabel>
                 <CustomTextField
@@ -152,6 +172,8 @@ const AddEditDepartment = ({ type, department }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.departmentHost}
+                  helperText={formErrors.departmentHost}
                 />
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
@@ -162,6 +184,8 @@ const AddEditDepartment = ({ type, department }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.name}
+                  helperText={formErrors.name}
                 />
               </Grid>
             </Grid>

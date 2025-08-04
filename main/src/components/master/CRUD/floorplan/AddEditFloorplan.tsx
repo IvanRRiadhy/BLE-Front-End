@@ -43,6 +43,8 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
     ...defaultFloorplanForm,
     ...floorplan,
   });
+  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
@@ -72,7 +74,21 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
     console.log(floorData);
   };
 
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.name?.trim()) errors.name = 'Floorplan name is required';
+    if (!formData.floorId?.trim()) errors.floorId = 'Floor is required';
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields correctly.');
+      return;
+    }
     setLoading(true);
     try {
       const data = new FormData();
@@ -94,13 +110,13 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchFloorplanDT(floorplanFilter));
         console.log('Floorplan Saved!');
-        toast.success('Data Saved', { position: 'top-right' });
+        toast.success('Data Saved');
         handleClose();
       } else {
-        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        toast.error('Saving Data Unsuccessful');
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving floorplan:', error);
     }
     setTimeout(() => {
@@ -162,6 +178,8 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.name}
+                  helperText={formErrors.name}
                 />
                 <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel>
                 <CustomSelect
@@ -171,6 +189,8 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.floorId}
+                  helperText={formErrors.floorId}
                 >
                   <MenuItem value="" disabled>
                     Select Floor

@@ -44,6 +44,8 @@ const AddEditIntegration = ({ type, integration }: FormType) => {
     ...defaultIntegrationForm,
     ...integration,
   });
+  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+
   const appData: ApplicationType[] = useSelector(
     (state: RootState) => state.applicationReducer.applications,
   );
@@ -85,13 +87,13 @@ const AddEditIntegration = ({ type, integration }: FormType) => {
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchIntegrationDT(IntegrationFilter));
         console.log('Integration Saved!');
-        toast.success('Data Saved', { position: 'top-right' });
+        toast.success('Data Saved');
         handleClose();
       } else {
-        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        toast.error('Saving Data Unsuccessful');
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving integration:', error);
     }
     setTimeout(() => {

@@ -36,6 +36,8 @@ const AddEditBrand = ({ type, brand }: FormType) => {
   const [loading, setLoading] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const [formData, setFormData] = React.useState<BrandType>({ ...defaultBrandForm, ...brand });
+  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+
   const brandFilter = useSelector((state: RootState) => state.brandReducer.brandFilter);
   const dispatch: AppDispatch = useDispatch();
 
@@ -58,7 +60,21 @@ const AddEditBrand = ({ type, brand }: FormType) => {
     setOpen(false);
   };
 
+    const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.name?.trim()) errors.name = 'Brand name is required';
+    if (!formData.tag?.trim()) errors.tag = 'Brand Tag is required';
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields correctly.');  
+      return
+    };
     setLoading(true);
     try {
       let result;
@@ -71,13 +87,13 @@ const AddEditBrand = ({ type, brand }: FormType) => {
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchBrandDT(brandFilter));
         console.log('Brand Saved!');
-        toast.success('Data Saved', { position: 'top-right' });
+        toast.success('Data Saved');
         handleClose();
       } else {
-        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        toast.error('Saving Data Unsuccessful');
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving Brand:', error);
     }
     setTimeout(() => {
@@ -134,6 +150,8 @@ const AddEditBrand = ({ type, brand }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.name}
+                  helperText={formErrors.name}
                 />
                 <CustomFormLabel htmlFor="brand-tag">Brand Tag</CustomFormLabel>
                 <CustomTextField
@@ -142,6 +160,8 @@ const AddEditBrand = ({ type, brand }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.tag}
+                  helperText={formErrors.tag}
                 />
               </Grid>
             </Grid>

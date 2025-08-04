@@ -96,7 +96,11 @@ const AreaList = () => {
   }, [dispatch]);
   useEffect(() => {
     dispatch(GetUnsavedMaskedArea());
-  }, [maskedAreasData]);
+    console.log("SOmething");
+  }, [originalAreas]);
+  useEffect(() => {
+    console.log('Filtered Masked Area:', filteredUnsavedMaksedArea);
+  },[unsavedMaskedAreas]);
 
   // useEffect(() => {
   //   console.log('Masked Area Data:', maskedAreasData);
@@ -200,8 +204,8 @@ const AreaList = () => {
     setIsSaving(true);
     // const unsavedArea = new Map(filteredMaskedArea.map((area) => [area.id, area]));
     const originArea = new Map(filteredOriginalAreas.map((area) => [area.id, area]));
-    // console.log('Origin Areas:', originArea);
-    // console.log('Filtered Masked Area:', filteredMaskedArea);
+    console.log('Origin Areas:', originArea);
+    console.log('Filtered Masked Area:', filteredMaskedArea);
     const areasToEdit = filteredMaskedArea.filter((unsavedArea) => {
       const originalArea = originArea.get(unsavedArea.id);
       console.log('Original Area:', originalArea);
@@ -236,30 +240,36 @@ const AreaList = () => {
       }
 
       if (resultAdd || resultEdit || resultDelete) {
-        resultAdd?.type.endsWith('/fulfilled')
-          ? toast.success('Add successful', { position: 'top-right' })
-          : toast.error('Add unsuccessful', { position: 'top-right' });
-        resultEdit?.type.endsWith('/fulfilled')
-          ? toast.success('Data Saved', { position: 'top-right' })
-          : toast.error('Saving Data Unsuccessful', { position: 'top-right' });
-        resultDelete?.type.endsWith('/fulfilled')
-          ? toast.success('Delete successful', { position: 'top-right' })
-          : toast.error('Delete unsuccessful', { position: 'top-right' });
+        if (resultAdd) {
+          resultAdd?.type.endsWith('/fulfilled')
+            ? toast.success('Add successful')
+            : toast.error('Add unsuccessful');
+        }
+        if (resultEdit) {
+          resultEdit?.type.endsWith('/fulfilled')
+            ? toast.success('Data Saved')
+            : toast.error('Saving Data Unsuccessful');
+        }
+        if (resultDelete) {
+          resultDelete?.type.endsWith('/fulfilled')
+            ? toast.success('Delete successful')
+            : toast.error('Delete unsuccessful');
+        }
+
         // Call deleteFloorplanDevice for each device to delete
         dispatch(fetchFloorplanDT(floorplanFilter));
         console.log('Save operation completed.');
-        handleCloseEditing(); // Navigate back to the device list
       } else {
         dispatch(fetchFloorplanDT(floorplanFilter));
         console.log('Nothing Saved');
-        handleCloseEditing(); // Navigate back to the device list
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving floorplan:', error);
     }
     setTimeout(() => {
       setIsSaving(false);
+      handleCloseEditing();
     }, 1000);
   };
 

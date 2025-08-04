@@ -13,6 +13,7 @@ import {
   Typography,
   CircularProgress,
   Box,
+  FormHelperText,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import { toast } from 'react-hot-toast';
@@ -46,6 +47,8 @@ const AddEditBuilding = ({ type, building }: FormType) => {
     ...defaultBuildingForm,
     ...building,
   });
+  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+
   const buildingFilter = useSelector((state: RootState) => state.buildingReducer.buildingFilter);
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = async () => {
@@ -105,7 +108,21 @@ const AddEditBuilding = ({ type, building }: FormType) => {
     }
   };
 
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.name?.trim()) errors.name = 'Department name is required';
+    if (!image) errors.image = 'Building Image is required';
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields correctly.');
+      return;
+    }
     try {
       setLoading(true);
       const data = new FormData();
@@ -139,21 +156,21 @@ const AddEditBuilding = ({ type, building }: FormType) => {
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         console.log('Building saved successfully');
         await dispatch(fetchBuildingDT(buildingFilter));
-        toast.success('Data Saved', { position: 'top-right' });
+        toast.success('Data Saved');
         handleClose();
       } else {
-        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        toast.error('Saving Data Unsuccessful');
         setError(true);
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving Building:', error);
       setError(true);
     }
     setTimeout(() => {
       setLoading(false);
       setError(false);
-    }, 1500);
+    }, 1000);
   };
   return (
     <>
@@ -198,17 +215,33 @@ const AddEditBuilding = ({ type, building }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  placeholder="Enter Building Name"
+                  error={!!formErrors.name}
+                  helperText={formErrors.name}
+                  required
                 />
               </Grid>
             </Grid>
             <Grid container spacing={5} mb={3}>
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="building-image">Building Image</CustomFormLabel>
+              <Grid size={6}>
+                <CustomFormLabel htmlFor="building-image" error={!!formErrors.image} required>
+                  Building Image
+                </CustomFormLabel>
                 <input
                   type="file"
                   accept="image/png, image/jpeg, image/jpg"
                   onChange={handleImageChange}
+                  id="building-image"
+                  style={{
+                    border: formErrors.image ? '1px solid red' : undefined,
+                    padding: '6px',
+                    borderRadius: '4px',
+                    width: '100%',
+                    marginTop: '5px',
+                  }}
                 />
+                {/* Show error manually */}
+                {formErrors.image && <FormHelperText error>{formErrors.image}</FormHelperText>}
                 {preview && (
                   <img
                     src={fromLocal ? `${preview}` : `${BASE_URL}${preview}`}
@@ -241,8 +274,10 @@ const AddEditBuilding = ({ type, building }: FormType) => {
       {loading && (
         <Dialog open={true} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
-            <Typography variant="h1" mb={5}>Loading... </Typography>
-            <CircularProgress  size={50} color="primary" />
+            <Typography variant="h1" mb={5}>
+              Loading...{' '}
+            </Typography>
+            <CircularProgress size={50} color="primary" />
           </DialogContent>
         </Dialog>
       )}

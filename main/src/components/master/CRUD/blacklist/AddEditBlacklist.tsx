@@ -43,6 +43,8 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
     ...defaultBlaclistForm,
     ...blacklist,
   });
+  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+
   const blacklistFilter = useSelector((state: RootState) => state.blacklistReducer.blacklistFilter);
   const visitorData = useSelector((state: RootState) => state.visitorReducer.visitors);
   const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
@@ -75,7 +77,21 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
     setOpen(false);
   };
 
+    const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.visitorId?.trim()) errors.visitorId = 'Visitor is required';
+    if (!formData.floorplanMaskedAreaId?.trim()) errors.floorplanMaskedAreaId = 'Floorplan Masked Area is required';
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()){
+      toast.error('Please fill in all required fields correctly.');
+      return
+    };
     setLoading(true);
     const data = new FormData();
 
@@ -100,13 +116,13 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchBlacklistDT(blacklistFilter));
         console.log('Blaclist Saved!');
-        toast.success('Data Saved', { position: 'top-right' });
+        toast.success('Data Saved');
         handleClose();
       } else {
-        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        toast.error('Saving Data Unsuccessful');
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving blacklist:', error);
     }
     setTimeout(() => {
@@ -166,6 +182,10 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  id="visitorId"
+                  error={!!formErrors.visitorId}
+                  helperText={formErrors.visitorId}
+                  required
                 >
                   {visitorData.map((visitor) => (
                     <MenuItem key={visitor.id} value={visitor.id}>
@@ -181,6 +201,9 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.floorplanMaskedAreaId}
+                  helperText={formErrors.floorplanMaskedAreaId}
+                  required
                 >
                   {maskedAreaData.map((maskedArea) => (
                     <MenuItem key={maskedArea.id} value={maskedArea.id}>

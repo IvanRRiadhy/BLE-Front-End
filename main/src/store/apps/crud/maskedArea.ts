@@ -82,7 +82,7 @@ interface StateType {
     selectedMaskedArea?: MaskedAreaType | null;
     editingMaskedArea?: MaskedAreaType | null;
     deletedMaskedArea?: MaskedAreaType[];
-    addedMaskedArea?: MaskedAreaType[];
+    addedMaskedArea: MaskedAreaType[];
     drawingMaskedArea?: string;
     maskedAreaTotalCount: number;
     maskedAreaFilteredCount: number;
@@ -144,7 +144,7 @@ export const MaskedAreaSlice = createSlice({
                 state.unsavedMaskedAreas = state.unsavedMaskedAreas.map((maskedAreaAll, i) =>
                     i === index ? {...maskedAreaAll, ...action.payload} : maskedAreaAll
                 );
-        
+                console.log("Editing Masked Area: ",JSON.stringify(state.unsavedMaskedAreas, null, 2));
                 // Update the editingMaskedArea immutably
                 state.editingMaskedArea = {
                     ...state.editingMaskedArea,
@@ -171,9 +171,11 @@ export const MaskedAreaSlice = createSlice({
             }
         },
         SaveMaskedArea: (state, action: PayloadAction<string>) => {
+            console.log("Action Payload: ", action.payload);
+            console.log("Unsaved Masked Area: ", JSON.stringify(state.unsavedMaskedAreas, null, 2));
             const index = state.unsavedMaskedAreas.findIndex((maskedAreaAll) => maskedAreaAll.id === action.payload);
             console.log(index);
-            if (index !== -1 && state.maskedAreaAll[index]) {
+            if (index !== -1 && (state.maskedAreaAll[index].id === action.payload)) {
                 if(state.maskedAreaAll[index].id === state.unsavedMaskedAreas[index].id) {
                     state.maskedAreaAll[index] = state.unsavedMaskedAreas[index];
                 }
@@ -182,9 +184,10 @@ export const MaskedAreaSlice = createSlice({
             else {
                 console.log("Masked Area added");
                 state.maskedAreaAll.push(state.unsavedMaskedAreas[index]);
-                state.addedMaskedArea?.push(state.unsavedMaskedAreas[index]);
+                state.addedMaskedArea.push(state.unsavedMaskedAreas[index]);
             }
-
+            console.log("Added Area: ",JSON.stringify(state.addedMaskedArea, null, 2));
+                        console.log("Unsaved Masked Area2: ", JSON.stringify(state.unsavedMaskedAreas, null, 2));
             // GetUnsavedMaskedArea();
         },
         DeleteUnsavedMaskedArea: (state, action: PayloadAction<string>) => {
@@ -194,6 +197,8 @@ export const MaskedAreaSlice = createSlice({
                 state.unsavedMaskedAreas.splice(index, 1);
 
                 console.log(`Area with ID ${action.payload} deleted from unsaved Area.`);
+                                        console.log("Unsaved Masked Area2: ", JSON.stringify(state.unsavedMaskedAreas, null, 2));
+                
             } else {
                 console.warn(`Area with ID ${action.payload} not found in unsaved Area.`);
             }

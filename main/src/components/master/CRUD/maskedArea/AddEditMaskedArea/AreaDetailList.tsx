@@ -47,7 +47,7 @@ const AreaDetailList = () => {
 
   useEffect(() => {
     if (area) {
-      console.log('Area data changed:', area);
+      // console.log('Area data changed:', area);
       const newFormData = {
         id: area.id || '',
         name: formData.name || '',
@@ -217,7 +217,7 @@ const AreaDetailList = () => {
                     >
                       {restrictedStatus.map(
                         (status) => (
-                          console.log(status),
+                          // console.log(status),
                           (
                             <MenuItem
                               key={status.value}

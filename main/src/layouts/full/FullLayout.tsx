@@ -15,7 +15,6 @@ import AlarmPopup from './AlarmPopup';
 import { hydrateEvacState } from 'src/store/customizer/CustomizerSlice';
 import { Toaster } from 'react-hot-toast';
 
-
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
   minHeight: '100vh',
@@ -136,26 +135,27 @@ const FullLayout: FC = () => {
           {/* <Customizer /> */}
         </PageWrapper>
       </MainWrapper>
-      <Toaster 
-      containerStyle={{
-        fontSize: '1.15rem',
-        padding: '16px 24px',
-        minWidth: '500px',
-      }}
-      toastOptions={{
-        success: {
-          style: {
-            background: 'darkgreen',
-            color: '#fff',
-          }
-        },
-        error: {
-          style: {
-            background: 'darkred',
-            color: '#fff',
-          }
-        }
-      }}
+      <Toaster
+        position="top-center"
+        containerStyle={{
+          fontSize: '1.15rem',
+          padding: '16px 24px',
+          minWidth: '500px',
+        }}
+        toastOptions={{
+          success: {
+            style: {
+              background: 'darkgreen',
+              color: '#fff',
+            },
+          },
+          error: {
+            style: {
+              background: 'darkred',
+              color: '#fff',
+            },
+          },
+        }}
       />
     </>
   );

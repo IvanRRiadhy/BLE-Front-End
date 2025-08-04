@@ -40,6 +40,7 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
     ...defaultAccessCCTVForm,
     ...cctv,
   });
+    const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
 
   const CCTVFilter = useSelector((state: RootState) => state.CCTVReducer.cctvFilter);
   const dispatch: AppDispatch = useDispatch();
@@ -61,7 +62,23 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
   const handleClose = () => {
     setOpen(false);
   };
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.name?.trim()) errors.name = 'CCTV Name is required';
+    if (!formData.rtsp?.trim()) errors.rtsp = 'CCTV RTSP is required';
+    // if (!formData.?.trim()) errors.departmentHost = 'Department host is required';
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields correctly.');
+      return;
+    }
     setLoading(true);
     try {
       let result;
@@ -74,13 +91,13 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchAccessCCTVDT(CCTVFilter));
         console.log('CCTV Saved!');
-        toast.success('Data Saved', { position: 'top-right' });
+        toast.success('Data Saved');
         handleClose();
       } else {
-        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        toast.error('Saving Data Unsuccessful');
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving application:', error);
     }
     setTimeout(() => {
@@ -138,6 +155,9 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  required
+                  error={!!formErrors.name}
+                  helperText={formErrors.name}
                 />
                 {/* <CustomFormLabel htmlFor="integration-id">Integration ID</CustomFormLabel>
               <CustomTextField
@@ -156,6 +176,9 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  required
+                  error={!!formErrors.rtsp}
+                  helperText={formErrors.rtsp}
                 />
                 {/* <CustomFormLabel htmlFor="app-id">Application</CustomFormLabel>
               <CustomSelect

@@ -43,6 +43,7 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
     ...defaultAccessControlForm,
     ...accessControl,
   });
+    const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
 
   const accessControlFilter = useSelector(
     (state: RootState) => state.accessControlReducer.accessControlFilter,
@@ -73,6 +74,8 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
     setOpen(false);
   };
 
+  
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -86,13 +89,13 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchAccessControlsDT(accessControlFilter));
         console.log('Access Control Saved!');
-        toast.success('Data Saved', { position: 'top-right' });
+        toast.success('Data Saved');
         handleClose();
       } else {
-        toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+        toast.error('Saving Data Unsuccessful');
       }
     } catch (error) {
-      toast.error('Saving Data Unsuccessful', { position: 'top-right' });
+      toast.error('Saving Data Unsuccessful');
       console.error('Error saving Access Control:', error);
     }
     setTimeout(() => {

@@ -30,6 +30,9 @@ const EditAreaFloorView: React.FC<{
   const editingMaskedArea = useSelector(
     (state: AppState) => state.maskedAreaReducer.editingMaskedArea,
   );
+  const drawingMaskedArea = useSelector(
+    (state: AppState) => state.maskedAreaReducer.drawingMaskedArea,
+  );
 
   const [filteredUnsavedMaskedArea, setFilteredUnsavedMaskedArea] = useState<MaskedAreaType[]>([]);
 
@@ -345,28 +348,81 @@ const EditAreaFloorView: React.FC<{
               Create new Node
             </FormLabel>
           </Box>
-          <Box mt={5} display="flex" alignItems="center" gap={1}>
-                          <Box
-                sx={{
-                  width: 40,
-                  height: 40,
-                  bgcolor: 'white',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mr: 4.75,
-                  ml: 4.25,
-                }}
-              >
-                <img
-                  src={MouseRightClickIcon}
-                  alt="Right Click"
-                  style={{ width: 36, height: 36 }}
-                />
-              </Box>
-              <FormLabel sx={{ color: 'white', fontSize: '0.875rem', fontWeight: 600 }}>
+          <Box mt={5} mb={1} display="flex" alignItems="center" gap={1}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                bgcolor: 'white',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mr: 4.75,
+                ml: 4.25,
+              }}
+            >
+              <img src={MouseRightClickIcon} alt="Right Click" style={{ width: 36, height: 36 }} />
+            </Box>
+            <FormLabel sx={{ color: 'white', fontSize: '0.875rem', fontWeight: 600 }}>
               Delete Node
+            </FormLabel>
+          </Box>
+        </Box>
+      )}
+      {drawingMaskedArea && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            zIndex: 10,
+            width: '280px',
+            background: 'rgba(37, 31, 31, 0.77)',
+            opacity: 0.7,
+            borderRadius: 2,
+            boxShadow: 2,
+            p: 1,
+          }}
+        >
+          <Box mt={1} display="flex" alignItems="center" gap={1}>
+              <Box
+              sx={{
+                width: 40,
+                height: 40,
+                bgcolor: 'white',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mr: 4.75,
+                ml: 2.25,
+              }}
+              >
+              <img src={MouseLeftClickIcon} alt="Left Click" style={{ width: 36, height: 36 }} />
+            </Box>
+            <FormLabel sx={{ color: 'white', fontSize: '0.875rem', fontWeight: 600 }}>
+              Add 3 Points to create a new Area
+            </FormLabel>
+          </Box>
+          <Box mt={5} mb={1} display="flex" alignItems="center" gap={1}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                bgcolor: 'white',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mr: 4.75,
+                ml: 2.25,
+              }}
+            >
+              <img src={MouseRightClickIcon} alt="Right Click" style={{ width: 36, height: 36 }} />
+            </Box>
+            <FormLabel sx={{ color: 'white', fontSize: '0.875rem', fontWeight: 600 }}>
+              Cancel Add
             </FormLabel>
           </Box>
         </Box>

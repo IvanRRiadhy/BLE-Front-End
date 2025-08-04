@@ -474,5 +474,9 @@ export const defaultCardFilter: CardFilter = {
   SortColumn: 'LastUsed',
   SortDir: 'desc',
   searchValue: '',
+  fiilters: {
+    IsUsed: "",
+    // RegisteredArea: [],
+  }
 };
 //#endregion
