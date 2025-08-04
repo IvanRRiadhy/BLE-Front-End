@@ -73,7 +73,7 @@ const DeviceDetailList = () => {
         updatedBy: formData.updatedBy || '',
         updatedAt: formData.updatedAt || '',
       };
-      console.log('newFormData', newFormData);
+      // console.log('newFormData', newFormData);
       if (!isEqual(formData, newFormData)) {
         setFormData(newFormData);
       }
@@ -218,7 +218,7 @@ const DeviceDetailList = () => {
         });
 
         // setTestNode(newTestNodes); // Update the testNode state
-        console.log('Test nodes created:', newTestNodes);
+        // console.log('Test nodes created:', newTestNodes);
       }
       console.log('Device saved successfully');
       handleClose();
@@ -322,7 +322,6 @@ const DeviceDetailList = () => {
                     value={formData.type || ''}
                     onChange={(e: SelectChangeEvent) => {
                       dispatch(EditUnsavedDevice({ ...formData, type: e.target.value }));
-                      console.log('A', e);
                       handleInputChange(e);
                     }}
                     fullWidth

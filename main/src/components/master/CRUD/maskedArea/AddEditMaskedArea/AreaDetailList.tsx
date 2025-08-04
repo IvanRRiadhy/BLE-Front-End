@@ -65,8 +65,8 @@ const AreaDetailList = () => {
         updatedBy: area.updatedBy || '',
         updatedAt: area.updatedAt || '',
       };
-      console.log('Current Form Data:', formData);
-      console.log('New Form Data:', newFormData);
+      // console.log('Current Form Data:', formData);
+      // console.log('New Form Data:', newFormData);
       if (!isEqual(formData, newFormData)) {
         setFormData(newFormData);
       }
@@ -75,10 +75,6 @@ const AreaDetailList = () => {
 
   const dispatch: AppDispatch = useDispatch();
 
-  useEffect(() => {
-    // dispatch(fetchMaskedAreas());
-    console.log('Masked Areas fetched', area);
-  }, [dispatch]);
 
   const handleClose = () => {
     // setOpen(false);
@@ -117,8 +113,8 @@ const AreaDetailList = () => {
     try {
       await dispatch(EditUnsavedMaskedArea(formData));
       await dispatch(SaveMaskedArea(formData.id));
-      console.log(formData);
-      console.log('Masked Area saved successfully!', formData);
+      // console.log(formData);
+      // console.log('Masked Area saved successfully!', formData);
       // await dispatch(GetUnsavedMaskedArea());
       handleClose();
     } catch (error) {

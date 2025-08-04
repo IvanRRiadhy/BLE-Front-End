@@ -96,8 +96,8 @@ const DeviceList = () => {
   }, [dispatch]);
   useEffect(() => {
     dispatch(GetUnsavedFloorplanDevices());
-    console.log('Unsaved devices fetched:', unsavedDevices);
-    console.log('Original devices fetched:', originalDevices);
+    // console.log('Unsaved devices fetched:', unsavedDevices);
+    // console.log('Original devices fetched:', originalDevices);
   }, [originalDevices]);
 
   const newDevice: FloorplanDeviceType = {
@@ -210,7 +210,7 @@ const DeviceList = () => {
       const originalDevice = floorplanDevicesMap.get(unsavedDevice.id);
       return originalDevice && JSON.stringify(unsavedDevice) !== JSON.stringify(originalDevice);
     });
-    console.log('devicesToEdit', devicesToEdit);
+    // console.log('devicesToEdit', devicesToEdit);
     try {
       let resultAdd, resultEdit, resultDelete;
       // Call editFloorplanDevice for each device that needs editing
@@ -220,7 +220,7 @@ const DeviceList = () => {
 
       // 2. Add devices: Check for devices in unsavedDevices but not in floorplanDevices
       if (addedDevice) {
-        console.log('addedDevice', addedDevice);
+        // console.log('addedDevice', addedDevice);
         // Call addFloorplanDevice for each new device
         for (const device of addedDevice) {
           resultAdd = await dispatch(addFloorplanDevice(device));
@@ -252,11 +252,11 @@ const DeviceList = () => {
 
         // Call deleteFloorplanDevice for each device to delete
         dispatch(fetchFloorplanDT(floorplanFilter));
-        console.log('Save operation completed.');
+        // console.log('Save operation completed.');
         handleCloseEditing(); // Navigate back to the device list
       } else {
         dispatch(fetchFloorplanDT(floorplanFilter));
-        console.log('Nothing Saved');
+        // console.log('Nothing Saved');
         handleCloseEditing(); // Navigate back to the device list
       }
     } catch (error) {

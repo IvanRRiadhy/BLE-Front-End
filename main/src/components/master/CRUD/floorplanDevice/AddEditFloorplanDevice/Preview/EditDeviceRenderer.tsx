@@ -73,7 +73,7 @@ const EditDeviceRenderer: React.FC<{
         setImage(img);
       };
     }
-    console.log('Width:', width, 'Height:', height, 'Scale:', scale);
+    // console.log('Width:', width, 'Height:', height, 'Scale:', scale);
   }, [imageSrc]);
   const useDeviceIcon = (src: string) => {
     const [img, setImg] = useState<HTMLImageElement | null>(null);
@@ -120,7 +120,7 @@ const EditDeviceRenderer: React.FC<{
 
   
   const handleDragStart = (e: string) => {
-    console.log('Drag started:', e); // Log the name of the dragged element
+    // console.log('Drag started:', e); // Log the name of the dragged element
     setIsDragging(e); // Set dragging state to true
   };
 
@@ -145,7 +145,7 @@ const EditDeviceRenderer: React.FC<{
       posPxX: newPosX,
       posPxY: newPosY,
     };
-    console.log(newDevice);
+    // console.log(newDevice);
     dispatch(editDevicePosition(newDevice)); // Update the device position in the store
     setIsDragging(''); // Set dragging state to false
     // console.log(`Device ${device.id} dropped at:`, { newPosX, newPosY });

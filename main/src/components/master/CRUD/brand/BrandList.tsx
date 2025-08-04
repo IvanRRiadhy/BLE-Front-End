@@ -108,7 +108,6 @@ const BrandList = () => {
       }
     });
     prevFilterRef.current = brandFilter;
-    console.log('FetchDT');
   }, [brandFilter, dispatch]);
 
   //Delete Pop-up

@@ -96,11 +96,8 @@ const AreaList = () => {
   }, [dispatch]);
   useEffect(() => {
     dispatch(GetUnsavedMaskedArea());
-    console.log("SOmething");
+    // console.log("SOmething");
   }, [originalAreas]);
-  useEffect(() => {
-    console.log('Filtered Masked Area:', filteredUnsavedMaksedArea);
-  },[unsavedMaskedAreas]);
 
   // useEffect(() => {
   //   console.log('Masked Area Data:', maskedAreasData);
@@ -204,19 +201,19 @@ const AreaList = () => {
     setIsSaving(true);
     // const unsavedArea = new Map(filteredMaskedArea.map((area) => [area.id, area]));
     const originArea = new Map(filteredOriginalAreas.map((area) => [area.id, area]));
-    console.log('Origin Areas:', originArea);
-    console.log('Filtered Masked Area:', filteredMaskedArea);
+    // console.log('Origin Areas:', originArea);
+    // console.log('Filtered Masked Area:', filteredMaskedArea);
     const areasToEdit = filteredMaskedArea.filter((unsavedArea) => {
       const originalArea = originArea.get(unsavedArea.id);
-      console.log('Original Area:', originalArea);
-      console.log('Unsaved Area:', unsavedArea);
-      console.log(
-        'Is Area Edited:',
-        originalArea && JSON.stringify(unsavedArea) !== JSON.stringify(originalArea),
-      );
+      // console.log('Original Area:', originalArea);
+      // console.log('Unsaved Area:', unsavedArea);
+      // console.log(
+      //   'Is Area Edited:',
+      //   originalArea && JSON.stringify(unsavedArea) !== JSON.stringify(originalArea),
+      // );
       return originalArea && JSON.stringify(unsavedArea) !== JSON.stringify(originalArea);
     });
-    console.log('Areas to Edit:', areasToEdit);
+    // console.log('Areas to Edit:', areasToEdit);
 
     try {
       let resultAdd, resultEdit, resultDelete;
@@ -225,7 +222,7 @@ const AreaList = () => {
       }
 
       if (addedArea) {
-        console.log('Areas to Add:', addedArea);
+        // console.log('Areas to Add:', addedArea);
         for (const area of addedArea) {
           resultAdd = await dispatch(addMaskedArea(area));
         }
@@ -233,7 +230,7 @@ const AreaList = () => {
 
       //3. Delete Area
       if (deletedArea) {
-        console.log('Areas to Delete:', deletedArea);
+        // console.log('Areas to Delete:', deletedArea);
         for (const area of deletedArea) {
           resultDelete = await dispatch(deleteMaskedArea(area.id));
         }

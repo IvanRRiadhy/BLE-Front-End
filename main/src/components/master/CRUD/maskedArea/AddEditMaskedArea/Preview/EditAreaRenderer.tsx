@@ -202,7 +202,7 @@ const EditAreaRenderer: React.FC<{
         setImage(img);
       };
     }
-    console.log('Width:', width, 'Height:', height, 'Scale:', scale);
+    // console.log('Width:', width, 'Height:', height, 'Scale:', scale);
   }, [imageSrc]);
 
   const setPointsFromNodes = (nodes: Nodes[]): number[] => {
@@ -561,14 +561,14 @@ const EditAreaRenderer: React.FC<{
       });
 
       if (collision) {
-        console.log(drawingNodes);
+        // console.log(drawingNodes);
         alert(`Areas cannot overlap! Position reverted.`);
         setDrawingNodes([]);
         dispatch(DrawingMaskedArea('')); // Reset the drawing mode
         dispatch(SelectMaskedArea('')); // Reset the selected area
         dispatch(SelectEditingMaskedArea('')); // Reset the editing area
         setActiveArea(''); // Clear the active area
-        console.log(drawingNodes);
+        // console.log(drawingNodes);
         return []; // Revert to previous nodes
       }
 
@@ -801,8 +801,8 @@ const EditAreaRenderer: React.FC<{
     const updatedAreas = filteredUnsavedArea.map((area) => {
       if (area.name === areaName) {
         const newNodes = [...(area.nodes || [])];
-        console.log('x,y : ', newNodes[cornerIndex].x, newNodes[cornerIndex].y);
-        console.log('pxX,pxY : ', newNodes[cornerIndex].x_px, newNodes[cornerIndex].y_px);
+        // console.log('x,y : ', newNodes[cornerIndex].x, newNodes[cornerIndex].y);
+        // console.log('pxX,pxY : ', newNodes[cornerIndex].x_px, newNodes[cornerIndex].y_px);
         newNodes[cornerIndex] = {
           ...newNodes[cornerIndex],
           x: x * scale,
@@ -810,7 +810,7 @@ const EditAreaRenderer: React.FC<{
           x_px: x,
           y_px: y,
         }; // Update the corner's position
-        console.log('newNodes[cornerIndex] : ', newNodes[cornerIndex]);
+        // console.log('newNodes[cornerIndex] : ', newNodes[cornerIndex]);
         return { ...area, nodes: newNodes, areaShape: JSON.stringify(newNodes) };
       }
       return area;
@@ -849,9 +849,9 @@ const EditAreaRenderer: React.FC<{
     if (hasCollision) {
       // Revert to original position
       if (cornerDragData) {
-        console.log(isColliding);
+        // console.log(isColliding);
         if (!area.nodes) return false;
-        console.log(checkPolygonCollision({ nodes: proposedNodes }, { nodes: area.nodes }));
+        // console.log(checkPolygonCollision({ nodes: proposedNodes }, { nodes: area.nodes }));
         // alert('Invalid position! Lines cannot intersect or overlap other areas.');
         handleDragCorner(
           cornerDragData.areaName,
@@ -1037,10 +1037,6 @@ const EditAreaRenderer: React.FC<{
               left={0}
               bottom={0}
               right={0}
-              onClick={(e) => {
-                console.log(e.target?.getStage()?.getPointerPosition());
-                console.log('dims : ', width, height);
-              }}
             />
           )}
           {filteredUnsavedArea.map((area: MaskedAreaType) => (
