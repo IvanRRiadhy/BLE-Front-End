@@ -28,6 +28,7 @@ import { deleteFloor, fetchFloorDT, floorType, UpdateFilter } from 'src/store/ap
 import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import AddEditFloor from './AddEditFloor';
 import { defaultFloorFilter } from 'src/store/apps/defaultForm';
+import toast from 'react-hot-toast';
 // import { useTranslation } from 'react-i18next';
 
 const columns = [
@@ -136,9 +137,22 @@ const FloorList = () => {
   };
 
   // Confirm delete action
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (selectedFloor) {
-      dispatch(deleteFloor(selectedFloor.id));
+      setLoading(true);
+      try {
+        const result = await dispatch(deleteFloor(selectedFloor.id));
+        if (result && result.type && result.type.endsWith('/fulfilled')) {
+          await dispatch(fetchFloorDT(floorFilter));
+          toast.success('Data Deleted');
+        }
+      } catch (error) {
+        toast.error('Delete Data Unsuccessful');
+        console.error('Error deleting floor:', error);
+      }
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
     }
     handleCloseDeleteDialog();
   };

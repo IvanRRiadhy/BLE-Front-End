@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Grid2 as Grid,
@@ -18,6 +18,7 @@ import {
   DialogActions,
   Button,
   TableSortLabel,
+  CircularProgress,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
@@ -31,6 +32,7 @@ import {
 // import { useTranslation } from 'react-i18next';
 import AddEditFloorplan from './AddEditFloorplan';
 import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
+import toast from 'react-hot-toast';
 
 const columns = [
   { label: 'Floorplan Name', field: 'Name', sortAble: true },
@@ -45,7 +47,9 @@ const FloorplanList = () => {
     (state: RootState) => state.floorplanReducer.floorplanFilteredCount,
   );
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
+  const prevFilterRef = useRef(floorplanFilter);
   // const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
   // Pagination State
   const page = Math.floor(floorplanFilter.Start / floorplanFilter.Length);
   const rowsPerPage = floorplanFilter.Length;
@@ -88,10 +92,32 @@ const FloorplanList = () => {
 
   useEffect(() => {
     dispatch(UpdateFilter(defaultFloorplanFilter));
+    try {
+      setLoading(true);
+      dispatch(fetchFloorplanDT(defaultFloorplanFilter));
+    } catch (error) {
+      console.error('Error fetching floorplan data:', error);
+    }
+    setTimeout(() => {
+      setLoading(false);
+    }, 500);
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(fetchFloorplanDT(floorplanFilter));
+    const prevFilter = prevFilterRef.current;
+    const isStartorLengthChanged =
+      prevFilter.Start !== floorplanFilter.Start || prevFilter.Length !== floorplanFilter.Length;
+    if (isStartorLengthChanged) {
+      setLoading(true);
+    }
+    dispatch(fetchFloorplanDT(floorplanFilter)).finally(() => {
+      if (isStartorLengthChanged) {
+        setTimeout(() => {
+          setLoading(false);
+        }, 500);
+      }
+    });
+    prevFilterRef.current = floorplanFilter;
   }, [floorplanFilter, dispatch]);
 
   //Delete Pop-up
@@ -110,9 +136,22 @@ const FloorplanList = () => {
   };
 
   // Confirm delete action
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (selectedFloorplan) {
-      dispatch(deleteFloorplan(selectedFloorplan.id));
+      setLoading(true);
+      try {
+        const result = await dispatch(deleteFloorplan(selectedFloorplan.id));
+        if (result && result.type && result.type.endsWith('/fulfilled')) {
+          await dispatch(fetchFloorplanDT(floorplanFilter));
+          toast.success('Data Deleted');
+        }
+      } catch (error) {
+        toast.error('Delete Data Unsuccessful');
+        console.error('Error deleting floorplan:', error);
+      }
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
     }
     handleCloseDeleteDialog();
   };
@@ -121,83 +160,91 @@ const FloorplanList = () => {
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          <BlankCard>
-            <TableContainer>
-              <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
-                <TableHead>
-                  <TableRow>
-                    {/* Left Sticky Empty Column */}
-                    <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
-                      <Typography variant="h6"></Typography>
-                    </TableCell>
-                    {columns.map((col) => (
-                      <TableCell key={col.label}>
-                        {col.sortAble && col.field ? (
-                          <TableSortLabel
-                            active={orderBy === col.field}
-                            direction={orderBy === col.field ? order : 'asc'}
-                            onClick={() => handleSort(col.field)}
-                          >
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <BlankCard>
+              <TableContainer>
+                <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
+                  <TableHead>
+                    <TableRow>
+                      {/* Left Sticky Empty Column */}
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}
+                      >
+                        <Typography variant="h6"></Typography>
+                      </TableCell>
+                      {columns.map((col) => (
+                        <TableCell key={col.label}>
+                          {col.sortAble && col.field ? (
+                            <TableSortLabel
+                              active={orderBy === col.field}
+                              direction={orderBy === col.field ? order : 'asc'}
+                              onClick={() => handleSort(col.field)}
+                            >
+                              <Typography variant="h6">{col.label}</Typography>
+                            </TableSortLabel>
+                          ) : (
                             <Typography variant="h6">{col.label}</Typography>
-                          </TableSortLabel>
-                        ) : (
-                          <Typography variant="h6">{col.label}</Typography>
-                        )}
-                      </TableCell>
-                    ))}
-                    {/* Right Sticky Empty Column */}
-                    <TableCell
-                      sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
-                    >
-                      <Typography variant="h6"> Actions </Typography>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {floorplanData.map((floorplan: FloorplanType, index: number) => (
-                    <TableRow key={index}>
+                          )}
+                        </TableCell>
+                      ))}
+                      {/* Right Sticky Empty Column */}
                       <TableCell
-                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                        sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
                       >
-                        {index + 1 + page * rowsPerPage}
-                      </TableCell>
-                      <TableCell>{floorplan.name}</TableCell>
-                      <TableCell>{floorplan.floor?.name}</TableCell>
-                      <TableCell
-                        sx={{
-                          position: 'sticky',
-                          right: 0,
-                          background: 'white',
-                          zIndex: 2,
-                          display: 'flex',
-                          gap: 1,
-                          alignItems: 'center',
-                        }}
-                      >
-                        <AddEditFloorplan type="edit" floorplan={floorplan} />
-                        <IconButton
-                          color="error"
-                          size="small"
-                          onClick={() => handleOpenDeleteDialog(floorplan)}
-                        >
-                          <IconTrash size={20} />
-                        </IconButton>
+                        <Typography variant="h6"> Actions </Typography>
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={floorplanFilteredCount}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </BlankCard>
+                  </TableHead>
+                  <TableBody>
+                    {floorplanData.map((floorplan: FloorplanType, index: number) => (
+                      <TableRow key={index}>
+                        <TableCell
+                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                        >
+                          {index + 1 + page * rowsPerPage}
+                        </TableCell>
+                        <TableCell>{floorplan.name}</TableCell>
+                        <TableCell>{floorplan.floor?.name}</TableCell>
+                        <TableCell
+                          sx={{
+                            position: 'sticky',
+                            right: 0,
+                            background: 'white',
+                            zIndex: 2,
+                            display: 'flex',
+                            gap: 1,
+                            alignItems: 'center',
+                          }}
+                        >
+                          <AddEditFloorplan type="edit" floorplan={floorplan} />
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={() => handleOpenDeleteDialog(floorplan)}
+                          >
+                            <IconTrash size={20} />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={floorplanFilteredCount}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </BlankCard>
+          )}
         </Box>
       </Grid>
       {/* Delete Confirmation Dialog */}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Grid2 as Grid,
@@ -18,6 +18,7 @@ import {
   DialogActions,
   Button,
   TableSortLabel,
+  CircularProgress,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
@@ -30,6 +31,7 @@ import {
 } from 'src/store/apps/crud/department';
 import AddEditDepartment from './AddEditDepartment';
 import { defaultDepartmentFilter } from 'src/store/apps/defaultForm';
+import toast from 'react-hot-toast';
 // import { useTranslation } from 'react-i18next';
 
 const columns = [
@@ -50,7 +52,9 @@ const DepartmentList = () => {
   const departmentFilter = useSelector(
     (state: RootState) => state.departmentReducer.departmentFilter,
   );
+  const prevFilterRef = useRef(departmentFilter);
   // const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
   // Pagination State
   const page = Math.floor(departmentFilter.Start / departmentFilter.Length);
   const rowsPerPage = departmentFilter.Length;
@@ -89,10 +93,32 @@ const DepartmentList = () => {
 
   useEffect(() => {
     dispatch(UpdateFilter(defaultDepartmentFilter));
-  }, [ dispatch]);
+    try {
+      setLoading(true);
+      dispatch(fetchDepartmentDT(defaultDepartmentFilter));
+    } catch (error) {
+      console.error('Error fetching department data:', error);
+    }
+    setTimeout(() => {
+      setLoading(false);
+    }, 500);
+  }, [dispatch]);
 
   useEffect(() => {
-    dispatch(fetchDepartmentDT(departmentFilter));
+    const prevFilter = prevFilterRef.current;
+    const isStartorLengthChanged =
+      prevFilter.Start !== departmentFilter.Start || prevFilter.Length !== departmentFilter.Length;
+    if (isStartorLengthChanged) {
+      setLoading(true);
+    }
+    dispatch(fetchDepartmentDT(departmentFilter)).finally(() => {
+      if (isStartorLengthChanged) {
+        setTimeout(() => {
+          setLoading(false);
+        }, 500);
+      }
+    });
+    prevFilterRef.current = departmentFilter;
   }, [departmentFilter, dispatch]);
 
   //Delete Pop-up
@@ -111,9 +137,22 @@ const DepartmentList = () => {
   };
 
   // Confirm delete action
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (selectedDept) {
-      dispatch(deleteDepartment(selectedDept.id));
+      setLoading(true);
+      try {
+        const result = await dispatch(deleteDepartment(selectedDept.id));
+        if (result && result.type && result.type.endsWith('/fulfilled')) {
+          await dispatch(fetchDepartmentDT(departmentFilter));
+          toast.success('Data Deleted');
+        }
+      } catch (error) {
+        toast.error('Delete Data Unsuccessful');
+        console.error('Error deleting department:', error);
+      }
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
     }
     handleCloseDeleteDialog();
   };
@@ -122,87 +161,101 @@ const DepartmentList = () => {
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          <BlankCard>
-            <TableContainer>
-              <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
-                <TableHead>
-                  <TableRow>
-                    {/* Left Sticky Empty Column */}
-                    <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
-                      <Typography variant="h6"></Typography>
-                    </TableCell>
-                    {columns.map((col) => (
-                      <TableCell key={col.label}>
-                        {col.sortAble && col.field ? (
-                          <TableSortLabel
-                            active={orderBy === col.field}
-                            direction={orderBy === col.field ? order : 'asc'}
-                            onClick={() => handleSort(col.field)}
-                          >
+          {loading ? (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          ) : (
+            <BlankCard>
+              <TableContainer>
+                <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
+                  <TableHead>
+                    <TableRow>
+                      {/* Left Sticky Empty Column */}
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}
+                      >
+                        <Typography variant="h6"></Typography>
+                      </TableCell>
+                      {columns.map((col) => (
+                        <TableCell key={col.label}>
+                          {col.sortAble && col.field ? (
+                            <TableSortLabel
+                              active={orderBy === col.field}
+                              direction={orderBy === col.field ? order : 'asc'}
+                              onClick={() => handleSort(col.field)}
+                            >
+                              <Typography variant="h6">{col.label}</Typography>
+                            </TableSortLabel>
+                          ) : (
                             <Typography variant="h6">{col.label}</Typography>
-                          </TableSortLabel>
-                        ) : (
-                          <Typography variant="h6">{col.label}</Typography>
-                        )}
-                      </TableCell>
-                    ))}
-                    {/* Right Sticky Empty Column */}
-                    <TableCell
-                      sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
-                    >
-                      <Typography variant="h6"> Actions </Typography>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {departmentData.map((department, index) => (
-                    <TableRow key={department.id}>
+                          )}
+                        </TableCell>
+                      ))}
+                      {/* Right Sticky Empty Column */}
                       <TableCell
-                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                        sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
                       >
-                        {index + 1 + page * rowsPerPage}
-                      </TableCell>
-                      <TableCell>{department.code}</TableCell>
-                      <TableCell>{department.name}</TableCell>
-                      <TableCell>{department.departmentHost}</TableCell>
-
-                      <TableCell
-                        sx={{
-                          position: 'sticky',
-                          right: 0,
-                          background: 'white',
-                          zIndex: 2,
-                          display: 'flex',
-                          gap: 1,
-                          alignItems: 'center',
-                        }}
-                      >
-                        <AddEditDepartment type="edit" department={department} />
-                        <IconButton
-                          color="error"
-                          size="small"
-                          onClick={() => handleOpenDeleteDialog(department)}
-                        >
-                          <IconTrash size={20} />
-                        </IconButton>
+                        <Typography variant="h6"> Actions </Typography>
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </BlankCard>
+                  </TableHead>
+                  <TableBody>
+                    {departmentData.map((department, index) => (
+                      <TableRow key={department.id}>
+                        <TableCell
+                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                        >
+                          {index + 1 + page * rowsPerPage}
+                        </TableCell>
+                        <TableCell>{department.code}</TableCell>
+                        <TableCell>{department.name}</TableCell>
+                        <TableCell>{department.departmentHost}</TableCell>
+
+                        <TableCell
+                          sx={{
+                            position: 'sticky',
+                            right: 0,
+                            background: 'white',
+                            zIndex: 2,
+                            display: 'flex',
+                            gap: 1,
+                            alignItems: 'center',
+                          }}
+                        >
+                          <AddEditDepartment type="edit" department={department} />
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={() => handleOpenDeleteDialog(department)}
+                          >
+                            <IconTrash size={20} />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              {/* Pagination */}
+              <TablePagination
+                component="div"
+                count={departmentFilteredCount}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                onPageChange={handleChangePage}
+                rowsPerPageOptions={[5, 10, 25]}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </BlankCard>
+          )}
         </Box>
-        {/* Pagination */}
-        <TablePagination
-          component="div"
-          count={departmentFilteredCount}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          onPageChange={handleChangePage}
-          rowsPerPageOptions={[5, 10, 25]}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
       </Grid>
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
