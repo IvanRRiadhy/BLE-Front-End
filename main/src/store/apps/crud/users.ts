@@ -77,7 +77,7 @@ export const fetchUser = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
         dispatch(GetUsers(response.data.collection.data || []));
-        console.log("Fetch Users", response.data.collection || []);
+        // console.log("Fetch Users", response.data.collection || []);
     } catch (err: any) {
         console.log("Error: ", err);
     }

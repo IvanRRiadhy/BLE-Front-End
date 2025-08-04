@@ -130,13 +130,13 @@ export const fetchFloorplanDT = createAsyncThunk(
     "floorplans/fetchFloorplanDT",
     async (filter: any, { rejectWithValue }) => {
         try {
-            console.log("Fetch Floorplan DT: ", filter);
+            // console.log("Fetch Floorplan DT: ", filter);
             const response = await axiosServices.post(Floorplan_DT_URL, filter);
             const floorplans = response.data.collection.data || [];
             // console.log("FLOOR :", response.data.collection.data || []);
-            response.data.collection.data.forEach((floorplan: FloorplanType) => {
-                console.log("Floorplan: ", floorplan);
-            });
+            // response.data.collection.data.forEach((floorplan: FloorplanType) => {
+            //     console.log("Floorplan: ", floorplan);
+            // });
             dispatch(GetFloorplan(floorplans));
       // Dispatch after all data is enriched
     //   dispatch(GetFloorplan(enrichedFloorplans));
@@ -152,7 +152,7 @@ export const fetchFloorplanDT = createAsyncThunk(
 export const addFloorplan = createAsyncThunk("floorplans/addFloorplan", async (formData: FormData, { rejectWithValue }) => {
     try {
         const response = await axiosServices.post(Floorplan_API_URL, formData);
-        console.log("Floorplan added: ", response.data);
+        // console.log("Floorplan added: ", response.data);
         return response.data;
     } catch (error: any) {
         console.error("Error adding floorplan:", error);
@@ -190,7 +190,7 @@ export const ImportFloorplan = createAsyncThunk(
                     "Content-Type": "multipart/form-data",
                 },
             });
-            console.log("Floorplan imported: ", response.data);
+            // console.log("Floorplan imported: ", response.data);
             return response.data;
         } catch (error: any) {
             console.error("Error importing floorplan: ", error);

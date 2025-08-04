@@ -27,7 +27,7 @@ export const setSessionExpiredHandler = (handler: () => void) => {
     if (request.data instanceof FormData) {
   if (ApplicationId !== null) {
     request.data.append('ApplicationId', ApplicationId);
-    console.log('Appended ApplicationId to FormData');
+    // console.log('Appended ApplicationId to FormData');
   } else {
     console.error('ApplicationId is null');
   }
@@ -38,10 +38,10 @@ export const setSessionExpiredHandler = (handler: () => void) => {
       const dataObj = JSON.parse(request.data);
       dataObj.ApplicationId = ApplicationId;
       request.data = JSON.stringify(dataObj);
-      console.log('Updated JSON payload with ApplicationId', dataObj);
+      // console.log('Updated JSON payload with ApplicationId', dataObj);
     } else if (typeof request.data === 'object' && request.data !== null) {
       request.data.ApplicationId = ApplicationId;
-      console.log('Updated object payload with ApplicationId', request.data);
+      // console.log('Updated object payload with ApplicationId', request.data);
     }
   }
   return request;

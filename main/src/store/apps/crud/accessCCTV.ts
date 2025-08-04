@@ -128,9 +128,9 @@ export const CCTVSlice = createSlice({
 });
 
 export const selectAccessCCTV = 
-    (accessCCTVID: string) => (dispatch: AppDispatch, getState: () => RootState) => {
-        const state = getState();
-        console.log(state);
+    (accessCCTVID: string) => (dispatch: AppDispatch) => {
+        // const state = getState();
+        // console.log(state);
         const isEditing = false;
 
         if(!isEditing) {
@@ -167,7 +167,7 @@ export const selectAccessCCTV =
                 (arr: any) => Array.isArray(arr) && arr.includes("Empty")
             )
         ) {
-            console.log("Filter contains 'Empty', skipping request");
+            // console.log("Filter contains 'Empty', skipping request");
             // Option 1: just return null (success, no data)
             // return null;
             // Option 2: reject, if you want to treat as error
@@ -175,7 +175,7 @@ export const selectAccessCCTV =
         }
                 const response = await axiosServices.post(API_DT_URL, filter);
                 dispatch(GetAccessCCTV(response.data?.collection?.data || []));
-                console.log("Fetch cctvs", response.data.collection);
+                // console.log("Fetch cctvs", response.data.collection);
                 return response.data.collection;
             } catch (error: any) {
                 console.error("Error fetching cctvs:", error);

@@ -250,12 +250,12 @@ const Menuitems: MenuitemsType[] = [
       },
     ]
   },
-    {
-      id: uniqueId(),
-      title: 'Application',
-      icon: IconMap,
-      href: '/master/application/',
-    },
+    // {
+    //   id: uniqueId(),
+    //   title: 'Application',
+    //   icon: IconMap,
+    //   href: '/master/application/',
+    // },
     {
         id:uniqueId(),
         title: 'Integration',

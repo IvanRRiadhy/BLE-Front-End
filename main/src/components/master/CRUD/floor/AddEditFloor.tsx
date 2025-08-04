@@ -138,7 +138,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
       // Append the file if selected
       if (image) {
         data.append('floorImage', image); // File goes here
-        console.log('Image file added to form data:', image);
+        // console.log('Image file added to form data:', image);
       }
       let result;
       if (type === 'edit') {
@@ -203,9 +203,9 @@ const AddEditFloor = ({ type, floor }: FormType) => {
       if (['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
         setImage(file);
         const prepreview = URL.createObjectURL(file);
-        console.log(prepreview);
+        // console.log(prepreview);
         setPreview(prepreview); // Preview selected image
-        console.log(image);
+        // console.log(image);
         // Calculate image dimensions
         const img = new window.Image();
         img.onload = () => {

@@ -154,10 +154,10 @@ export const fetchFloorDT = createAsyncThunk(
     "floors/fetchFloorDT",
     async (filter: any, { rejectWithValue }) => {
         try {
-            console.log("Fetch Floor DT: ", filter);
+            // console.log("Fetch Floor DT: ", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetFloor(response.data.collection.data || []));
-            console.log("Fetch floors", response.data.collection);
+            // console.log("Fetch floors", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching floors:", error);
@@ -168,9 +168,9 @@ export const fetchFloorDT = createAsyncThunk(
 
 export const addFloor = createAsyncThunk("floors/addFloor", async (formData: FormData, { rejectWithValue }) => {
     try {
-        for (const [key, value] of formData.entries()) {
-  console.log(`${key}:`, value);
-}
+//         for (const [key, value] of formData.entries()) {
+//   console.log(`${key}:`, value);
+// }
         const response = await axiosServices.post(API_URL, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -178,7 +178,7 @@ export const addFloor = createAsyncThunk("floors/addFloor", async (formData: For
         });
         return response.data;
     } catch (error: any) {
-        console.error("Error adding floor:", error);
+        // console.error("Error adding floor:", error);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });
@@ -186,7 +186,7 @@ export const addFloor = createAsyncThunk("floors/addFloor", async (formData: For
 export const editFloor = createAsyncThunk("floors/editFloor", async (formData: FormData, { rejectWithValue }) => {
     try {
         const id = formData.get('id'); // Extract ID from FormData
-        console.log("Form Data", JSON.stringify(Object.fromEntries(formData.entries())));
+        // console.log("Form Data", JSON.stringify(Object.fromEntries(formData.entries())));
         formData.delete('id'); // Remove ID from FormData to avoid sending it again
         const response = await axiosServices.put(`${API_URL}${id}`, formData,{
             headers: {
@@ -242,7 +242,7 @@ export const ExportFloor = createAsyncThunk(
         },
             });
             if(!response.ok) throw new Error('Export failed');
-            console.log('Response content-type:', response.headers.get('content-type'));
+            // console.log('Response content-type:', response.headers.get('content-type'));
 
                   const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);

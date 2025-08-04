@@ -113,9 +113,9 @@ export const OrganizationSlice = createSlice({
     }
 });
 
-export const selectOrganization = (organizationID: string) => async (dispatch: AppDispatch, getState: () => RootState) => {
-    const state = getState();
-    console.log(state);
+export const selectOrganization = (organizationID: string) => async (dispatch: AppDispatch) => {
+    // const state = getState();
+    // console.log(state);
     const isEditing = false;
 
     if(!isEditing){
@@ -145,10 +145,10 @@ export const fetchOrganizationDT = createAsyncThunk(
     "organizations/fetchOrganizationDT",
     async (filter: any, { rejectWithValue }) => {
         try {
-            console.log("Fetch Organization DT: ", filter);
+            // console.log("Fetch Organization DT: ", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetOrganization(response.data.collection.data || []));
-            console.log("Fetch organizations", response.data.collection);
+            // console.log("Fetch organizations", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching organizations:", error);

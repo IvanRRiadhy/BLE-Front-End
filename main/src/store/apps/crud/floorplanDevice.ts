@@ -108,7 +108,7 @@ export const FloorplanDeviceSlice = createSlice({
 
         },
         GetAllFloorplanDevices: (state, action) => {
-            console.log("GetAllFloorplanDevices: ", action.payload);
+            // console.log("GetAllFloorplanDevices: ", action.payload);
             state.floorplanDeviceAll = action.payload;
                         state.originalFloorplanDevices = action.payload;
         },
@@ -138,13 +138,13 @@ export const FloorplanDeviceSlice = createSlice({
             const index = state.unsavedFloorplanDevices.findIndex(
                 (device) => device.id === action.payload.id
             );
-            console.log("Index: ", index);
+            // console.log("Index: ", index);
             if (index !== -1) {
                 state.unsavedFloorplanDevices = state.unsavedFloorplanDevices.map((device, i) => 
                     i === index ? { ...device, ...action.payload } : device
 
                 );
-                                console.log("Editing Device", action.payload);
+                                // console.log("Editing Device", action.payload);
                 // state.unsavedFloorplanDevices[index] = action.payload;
                 state.editingFloorplanDevice = {
                     ...state.editingFloorplanDevice,
@@ -172,15 +172,15 @@ export const FloorplanDeviceSlice = createSlice({
         },
         SaveDevice: (state, action: PayloadAction<string>) => {
             const index = state.unsavedFloorplanDevices.findIndex((device) => device.id === action.payload);
-            console.log(index);
+            // console.log(index);
             if(index !== -1 && state.floorplanDeviceAll[index]) {
                 if(state.floorplanDeviceAll[index].id === state.unsavedFloorplanDevices[index].id) {
                     state.floorplanDeviceAll[index] = state.unsavedFloorplanDevices[index];
-                    console.log(JSON.stringify(state.floorplanDeviceAll[index], null, 2));
+                    // console.log(JSON.stringify(state.floorplanDeviceAll[index], null, 2));
                 }
             }
             else {
-                console.log("New device added");
+                // console.log("New device added");
                 state.floorplanDeviceAll.push(state.unsavedFloorplanDevices[index]);
                 state.addedFloorplanDevice?.push(state.unsavedFloorplanDevices[index]);
             }
@@ -195,7 +195,7 @@ export const FloorplanDeviceSlice = createSlice({
             if (index !== -1) {
                 state.deletedFloorplanDevice?.push(state.unsavedFloorplanDevices[index]);
                 state.unsavedFloorplanDevices.splice(index, 1);
-                console.log(`Device with ID ${action.payload} deleted from unsaved devices.`);
+                // console.log(`Device with ID ${action.payload} deleted from unsaved devices.`);
             } else {
                 console.warn(`Device with ID ${action.payload} not found in unsaved devices.`);
             }
@@ -210,7 +210,7 @@ export const FloorplanDeviceSlice = createSlice({
                     const unsavedDevice = state.unsavedFloorplanDevices[deviceIndex];
                     // Check if the device type is valid
                     const validDeviceTypes = DeviceType.map((type) => type.value); // Extract valid types from DeviceType
-                    console.log("Unsaved Device: ", JSON.stringify(unsavedDevice));
+                    // console.log("Unsaved Device: ", JSON.stringify(unsavedDevice));
                     if (unsavedDevice.type === "" || !validDeviceTypes.includes(unsavedDevice.type) || unsavedDevice.floorplanMaskedAreaId === "") {
                         // Remove the device if its type is invalid
                         state.unsavedFloorplanDevices.splice(deviceIndex, 1);
@@ -224,7 +224,7 @@ export const FloorplanDeviceSlice = createSlice({
                     }
                 }
                 if (deviceIndex !== -1 && device) {
-                    console.log(JSON.stringify(device, null, 2));
+                    // console.log(JSON.stringify(device, null, 2));
                     state.unsavedFloorplanDevices[deviceIndex] = device;
                     state.editingFloorplanDevice = null ;
                 }
@@ -298,7 +298,7 @@ export const {
 export const fetchFloorplanDevices = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
-        console.log("Floorplan devices fetched: ", response.data);
+        // console.log("Floorplan devices fetched: ", response.data);
         dispatch(GetAllFloorplanDevices(response.data?.collection?.data || []));
     } catch (error) {
         console.error("Error fetching floorplan devices: ", error);
@@ -315,7 +315,7 @@ export const fetchFloorplanDeviceDT = createAsyncThunk(
                 (arr: any) => Array.isArray(arr) && arr.includes("Empty")
             )
         ) {
-            console.log("Filter contains 'Empty', skipping request");
+            // console.log("Filter contains 'Empty', skipping request");
             // Option 1: just return null (success, no data)
             // return null;
             // Option 2: reject, if you want to treat as error
@@ -323,7 +323,7 @@ export const fetchFloorplanDeviceDT = createAsyncThunk(
         }
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetFloorplanDevices(response.data.collection.data || []));
-            console.log("Fetch floorplan devices", response.data.collection);
+            // console.log("Fetch floorplan devices", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching floorplan devices:", error);
@@ -337,10 +337,10 @@ export const addFloorplanDevice = createAsyncThunk(
     async (floorplanDevice: FloorplanDeviceType, { rejectWithValue }) => {
         try {
             const { id, createdAt, createdBy, updatedAt, updatedBy, accessCctv, reader, accessControl, floorplanMaskedArea, ...filteredFloorplanDevice } = floorplanDevice;
-            console.log(filteredFloorplanDevice.applicationId);
-            console.log("Filtered Floorplan Device: ", filteredFloorplanDevice);
+            // console.log(filteredFloorplanDevice.applicationId);
+            // console.log("Filtered Floorplan Device: ", filteredFloorplanDevice);
             const response = await axiosServices.post(API_URL, filteredFloorplanDevice);
-            console.log("Floorplan device added: ", response.data);
+            // console.log("Floorplan device added: ", response.data);
             return response.data;
         } catch (error: any) {
             console.error("Error adding floorplan device: ", error);
@@ -355,7 +355,7 @@ export const editFloorplanDevice = createAsyncThunk(
         try {
             const { id, createdAt, createdBy, updatedAt, updatedBy, accessCctv, reader, accessControl, floorplanMaskedArea, ...filteredFloorplanDevice } = floorplanDevice;
              const response = await axiosServices.put(`${API_URL}${floorplanDevice.id}`, filteredFloorplanDevice);
-            console.log("Floorplan device edited: ", response.data);
+            // console.log("Floorplan device edited: ", response.data);
             return response.data;
         } catch (error: any) {
             console.error("Error editing floorplan device: ", error);
@@ -369,7 +369,7 @@ export const deleteFloorplanDevice = createAsyncThunk(
     async (id: string, { rejectWithValue }) => {
         try {
             const response = await axiosServices.delete(`${API_URL}${id}`);
-            console.log("Floorplan device deleted: ", response.data);
+            // console.log("Floorplan device deleted: ", response.data);
             return response.data;
         } catch (error: any) {
             console.error("Error deleting floorplan device: ", error);
@@ -387,7 +387,7 @@ export const ImportFloorplanDevice = createAsyncThunk(
                     "Content-Type": "multipart/form-data",
                 },
             });
-            console.log("Floorplan device imported: ", response.data);
+            // console.log("Floorplan device imported: ", response.data);
             return response.data;
         } catch (error: any) {
             console.error("Error importing floorplan device: ", error);

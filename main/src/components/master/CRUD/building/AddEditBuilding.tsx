@@ -96,7 +96,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
         .catch((err) => {
           console.error('Failed to fetch floor image:', err);
         });
-      console.log('Image URL:', preview);
+      // console.log('Image URL:', preview);
     }
     // eslint-disable-next-line
   }, [open]);
@@ -120,10 +120,10 @@ const AddEditBuilding = ({ type, building }: FormType) => {
       }
       if (['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
         setImage(file);
-        console.log('Selected file:', file);
+        // console.log('Selected file:', file);
         setPreview(URL.createObjectURL(file)); // Preview selected image
         setFromLocal(true);
-        console.log(preview);
+        // console.log(preview);
       } else {
         alert('Please select a valid image file (PNG, JPG, JPEG)');
       }
@@ -163,9 +163,9 @@ const AddEditBuilding = ({ type, building }: FormType) => {
       if (image) {
         data.append('image', image);
       }
-      Object.entries(formData).forEach(([key, value]) => {
-        console.log(key, typeof value);
-      });
+      // Object.entries(formData).forEach(([key, value]) => {
+      //   console.log(key, typeof value);
+      // });
       let result;
       if (type === 'edit') {
         result = await dispatch(editBuilding(data));

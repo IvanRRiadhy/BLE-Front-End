@@ -49,7 +49,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchFloors());
-    console.log(formData);
+    // console.log(formData);
   }, [dispatch]);
 
   const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floorAll);
@@ -71,7 +71,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
 
   const handleClose = () => {
     setOpen(false);
-    console.log(floorData);
+    // console.log(floorData);
   };
 
   const validateForm = (): boolean => {

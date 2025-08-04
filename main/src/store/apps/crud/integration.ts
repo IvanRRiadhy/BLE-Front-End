@@ -126,9 +126,9 @@ export const IntegrationSlice = createSlice({
 });
 
 export const selectIntegration = (integrationID: string) => 
-    (dispatch: AppDispatch, getState: () => RootState) => {
-        const state = getState();
-        console.log(state);
+    (dispatch: AppDispatch) => {
+        // const state = getState();
+        // console.log(state);
         const isEditing = false;
 
         if(!isEditing){
@@ -161,7 +161,7 @@ export const fetchIntegrationDT = createAsyncThunk(
         try {
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetIntegrations(response.data.collection.data || []));
-            console.log("Fetch integrations", response.data.collection);
+            // console.log("Fetch integrations", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching integrations:", error);

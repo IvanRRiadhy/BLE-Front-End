@@ -118,9 +118,9 @@ export const DistrictSlice = createSlice({
     },
 }); 
 
-export const selectDistrict = (districtID: string) => (dispatch: AppDispatch, getState: () => RootState) => {
-    const state = getState();
-    console.log(state);
+export const selectDistrict = (districtID: string) => (dispatch: AppDispatch) => {
+    // const state = getState();
+    // console.log(state);
     const isEditing = false;
 
     if(!isEditing){
@@ -147,7 +147,7 @@ export const fetchDistrictDT = createAsyncThunk(
         try {
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetDistricts(response.data.collection.data || []));
-            console.log("Fetch districts", response.data.collection);
+            // console.log("Fetch districts", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching districts:", error);

@@ -138,7 +138,7 @@ export const BleReaderSlice = createSlice({
             }),
         },
 UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
-    console.log("UpdateFilter: ", action.payload);
+    // console.log("UpdateFilter: ", action.payload);
   state.bleReaderFilter = { ...state.bleReaderFilter, ...action.payload };
 }
 
@@ -196,7 +196,7 @@ export const fetchBleReaders = () => async (dispatch: AppDispatch) => {
         const response = await axiosServices.get(API_URL);
         dispatch(GetBleReader(response.data?.collection?.data || []));
 
-        console.log("Ble reader: ", response.data?.collection?.data || []);
+        // console.log("Ble reader: ", response.data?.collection?.data || []);
     } catch (error) {
         console.log(error);
     }
@@ -207,7 +207,7 @@ export const fetchBleReaderDT = createAsyncThunk(
   async (filter: any, { rejectWithValue }) => {
     try {
       const response = await axiosServices.post(API_DT_URL, filter);
-        console.log("Ble reader DT: ", response.data);
+        // console.log("Ble reader DT: ", response.data);
         dispatch(GetBleReader(response.data?.collection?.data || []));
       // Return only the serializable data
       return response.data.collection; // or just response.data if needed

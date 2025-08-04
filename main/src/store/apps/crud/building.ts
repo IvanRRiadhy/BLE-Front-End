@@ -118,10 +118,10 @@ export const fetchBuildingDT = createAsyncThunk(
     "buildings/fetchBuildingDT",
     async (filter: any, { rejectWithValue }) => {
         try {
-            console.log("Fetch Building DT: ", filter);
+            // console.log("Fetch Building DT: ", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetBuildings(response.data.collection.data || []));
-            console.log("Fetch buildings", response.data.collection);
+            // console.log("Fetch buildings", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching buildings:", error);
@@ -179,7 +179,7 @@ export const ImportBuilding = createAsyncThunk(
                     "Content-Type": "multipart/form-data",
                 },
             });
-            console.log("Building imported: ", response.data);
+            // console.log("Building imported: ", response.data);
             return response.data;
         } catch (error: any) {
             console.error("Error importing building: ", error);

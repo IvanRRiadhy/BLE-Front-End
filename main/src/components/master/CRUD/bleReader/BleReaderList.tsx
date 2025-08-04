@@ -257,7 +257,15 @@ const BleReaderList = () => {
                       {/* Left Sticky Empty Column */}
                       <TableCell
                         padding="checkbox"
-                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}
+                        sx={{
+                          position: 'sticky',
+                          left: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          width: 80, // Fixed width
+                          minWidth: 80,
+                          maxWidth: 80,
+                        }}
                       >
                         <Checkbox
                           indeterminate={
@@ -325,7 +333,12 @@ const BleReaderList = () => {
                             zIndex: 2,
                             display: 'flex',
                             alignItems: 'center',
+                            justifyContent: 'center',
                             gap: 1,
+                            width: 80, // Fixed width
+                            minWidth: 80,
+                            maxWidth: 80,
+
                           }}
                         >
                           <Checkbox

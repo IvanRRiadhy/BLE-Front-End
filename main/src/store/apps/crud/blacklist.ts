@@ -75,7 +75,7 @@ export const BlacklistSlice = createSlice({
     initialState,
     reducers: {
         GetBlaclist(state, action: PayloadAction<blacklistType[]>) {
-            console.log(action.payload);
+            // console.log(action.payload);
             state.blacklists = action.payload;
         },
         SelectBlacklist(state, action: PayloadAction<string>){
@@ -136,7 +136,7 @@ export const fetchBlacklist = () => async (dispatch: AppDispatch) => {
     try{
         const response = await axiosServices.get(API_URL);
         dispatch(GetBlaclist(response.data?.collection?.data || []));
-        console.log("Blaclist :", response);
+        // console.log("Blaclist :", response);
     } catch (err){
         console.log("Error: ", err);
     }
@@ -152,7 +152,7 @@ export const fetchBlacklistDT = createAsyncThunk(
                 (arr: any) => Array.isArray(arr) && arr.includes("Empty")
             )
         ) {
-            console.log("Filter contains 'Empty', skipping request");
+            // console.log("Filter contains 'Empty', skipping request");
             // Option 1: just return null (success, no data)
             // return null;
             // Option 2: reject, if you want to treat as error
@@ -160,7 +160,7 @@ export const fetchBlacklistDT = createAsyncThunk(
         }
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetBlaclist(response.data.collection.data || []));
-            console.log("Fetch blacklists", response.data.collection);
+            // console.log("Fetch blacklists", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching blacklists:", error);

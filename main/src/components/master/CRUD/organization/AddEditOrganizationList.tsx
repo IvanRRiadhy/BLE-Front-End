@@ -41,11 +41,11 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
   });
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
 
-  useEffect(() => {
-    if (organization) {
-      console.log('Organization Data:', organization);
-    }
-  }, [formData, organization]);
+  // useEffect(() => {
+  //   if (organization) {
+  //     console.log('Organization Data:', organization);
+  //   }
+  // }, [formData, organization]);
   const organizationFilter = useSelector(
     (state: RootState) => state.organizationReducer.organizationFilter,
   );

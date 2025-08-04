@@ -179,7 +179,15 @@ const DepartmentList = () => {
                     <TableRow>
                       {/* Left Sticky Empty Column */}
                       <TableCell
-                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}
+                        sx={{
+                          position: 'sticky',
+                          left: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          width: 35, // Fixed width
+                          minWidth: 35,
+                          maxWidth: 35,
+                        }}
                       >
                         <Typography variant="h6"></Typography>
                       </TableCell>
@@ -218,7 +226,17 @@ const DepartmentList = () => {
                     {departmentData.map((department, index) => (
                       <TableRow key={department.id}>
                         <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                          sx={{
+                            position: 'sticky',
+                            left: 0,
+                            background: 'white',
+                            zIndex: 1,
+                            width: 35, // Fixed width
+                            minWidth: 35,
+                            maxWidth: 35,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
                         >
                           {index + 1 + page * rowsPerPage}
                         </TableCell>

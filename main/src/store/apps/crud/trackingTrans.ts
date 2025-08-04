@@ -155,14 +155,14 @@ export const fetchTrackingTransDT = createAsyncThunk(
                     (arr: any) => Array.isArray(arr) && arr.includes("Empty")
                 )   
         ) {
-            console.log("Filter contains 'Empty', skipping request");
+            // console.log("Filter contains 'Empty', skipping request");
             // Option 1: just return null (success, no data)
             // return null;
             // Option 2: reject, if you want to treat as error
             return rejectWithValue("Filter contains 'Empty', skipping request");
         }
             const response = await axiosServices.post(API_DT_URL, filter);
-            console.log("Fetch trackingTrans", response.data.collection);
+            // console.log("Fetch trackingTrans", response.data.collection);
             dispatch(GetTrackingTrans(response.data.collection.data || []));
             return response.data.collection;
         } catch (error: any) {

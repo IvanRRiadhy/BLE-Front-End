@@ -154,7 +154,17 @@ const TrackingTransactionList = () => {
                 <TableHead>
                   <TableRow>
                     {/* Left Sticky Empty Column */}
-                    <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
+                    <TableCell
+                      sx={{
+                        position: 'sticky',
+                        left: 0,
+                        background: 'white',
+                        zIndex: 2,
+                        width: 35, // Fixed width
+                        minWidth: 35,
+                        maxWidth: 35,
+                      }}
+                    >
                       <Typography variant="h6"> </Typography>
                     </TableCell>
                     {columns.map((col) => (
@@ -172,19 +182,23 @@ const TrackingTransactionList = () => {
                         )}
                       </TableCell>
                     ))}
-                    {/* Right Sticky Empty Column */}
-                    <TableCell
-                      sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
-                    >
-                      <Typography variant="h6"> Actions </Typography>
-                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {trackingTransData.map((trackingTrans: trackingTransType, index) => (
                     <TableRow key={trackingTrans.id}>
                       <TableCell
-                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                        sx={{
+                          position: 'sticky',
+                          left: 0,
+                          background: 'white',
+                          zIndex: 1,
+                          width: 35, // Fixed width
+                          minWidth: 35,
+                          maxWidth: 35,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
                       >
                         {' '}
                         {index + 1 + page * rowsPerPage}{' '}
@@ -196,29 +210,6 @@ const TrackingTransactionList = () => {
                       <TableCell>{`(${trackingTrans.coordinateX}, ${trackingTrans.coordinateY})`}</TableCell>
                       <TableCell>{trackingTrans.alarmStatus}</TableCell>
                       <TableCell>{trackingTrans.battery}</TableCell>
-                      <TableCell
-                        sx={{
-                          position: 'sticky',
-                          right: 0,
-                          background: 'white',
-                          zIndex: 2,
-                          display: 'flex',
-                          gap: 1,
-                          alignItems: 'center',
-                        }}
-                      >
-                        {/* <AddEditTrackingTransaction
-                            type="edit"
-                            trackingTransaction={trackingTrans}
-                          /> */}
-                        <IconButton
-                          color="error"
-                          size="small"
-                          onClick={() => handleOpenDeleteDialog(trackingTrans)}
-                        >
-                          <IconTrash size={20} />
-                        </IconButton>
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

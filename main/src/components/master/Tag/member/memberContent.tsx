@@ -1,5 +1,6 @@
 import { BASE_URL } from 'src/utils/axios';
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
   Box,
@@ -16,12 +17,10 @@ import {
   DialogContent,
   DialogActions,
   DialogContentText,
+  Backdrop,
+  CircularProgress,
 } from '@mui/material';
-import {
-  memberType,
-  deleteMember,
-  SelectMember,
-} from 'src/store/apps/crud/member';
+import { memberType, deleteMember, SelectMember, fetchMembers } from 'src/store/apps/crud/member';
 import AddEditMember from '../../CRUD/member/AddEditMember';
 import { IconTrash } from '@tabler/icons-react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
@@ -31,6 +30,7 @@ import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organi
 import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
 import { useTranslation } from 'react-i18next';
 import IconClose from 'src/assets/images/frontend-pages/icons/icon-close.svg';
+import toast from 'react-hot-toast';
 
 const MemberContent = () => {
   const { t } = useTranslation();
@@ -46,6 +46,7 @@ const MemberContent = () => {
 
   const dispatch = useDispatch();
   // const theme = useTheme();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     dispatch(fetchDistricts());
@@ -87,12 +88,26 @@ const MemberContent = () => {
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
     setSelectedMember(null);
+    dispatch(SelectMember(""));
   };
 
   // Confirm delete action
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (selectedMember) {
-      dispatch(deleteMember(selectedMember.id));
+      setLoading(true);
+      try {
+        const result = await dispatch(deleteMember(selectedMember.id));
+        if (result && result.type && result.type.endsWith('/fulfilled')) {
+          await dispatch(fetchMembers());
+          toast.success('Data Deleted');
+        }
+      } catch (error) {
+        toast.error('Delete Data Unsuccessful');
+        console.error('Error deleting floor:', error);
+      }
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
     }
     handleCloseDeleteDialog();
   };
@@ -238,6 +253,19 @@ const MemberContent = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      {loading &&
+        createPortal(
+          <Backdrop
+            open={loading}
+            sx={{
+              color: '#fff',
+              zIndex: (theme) => theme.zIndex.drawer + 1,
+            }}
+          >
+            <CircularProgress color="inherit" />
+          </Backdrop>,
+          document.body,
+        )}
     </>
   );
 };

@@ -231,7 +231,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                 <CustomFormLabel htmlFor="person-id">person ID</CustomFormLabel>
                 <CustomTextField
                   id="personId"
-                  placeholder={formData.personId}
+                  value={formData.personId}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -260,7 +260,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                 <CustomFormLabel htmlFor="identity-Id">Identity ID</CustomFormLabel>
                 <CustomTextField
                   id="identityId"
-                  placeholder={formData.identityId}
+                  value={formData.identityId}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -316,7 +316,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                 <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
                 <CustomTextField
                   id="cardNumber"
-                  placeholder={formData.cardNumber}
+                  value={formData.cardNumber}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -328,7 +328,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                 <CustomFormLabel htmlFor="ble-card-number">Ble Card Number</CustomFormLabel>
                 <CustomTextField
                   id="bleCardNumber"
-                  placeholder={formData.bleCardNumber}
+                  value={formData.bleCardNumber}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -346,7 +346,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                 <CustomFormLabel htmlFor="name">Name</CustomFormLabel>
                 <CustomTextField
                   id="name"
-                  placeholder={formData.name}
+                  value={formData.name}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -356,7 +356,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                 <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
                 <CustomTextField
                   id="email"
-                  placeholder={formData.email}
+                  value={formData.email}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -366,7 +366,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                 <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
                 <CustomTextField
                   id="address"
-                  placeholder={formData.address}
+                  value={formData.address}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -394,7 +394,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                 <CustomFormLabel htmlFor="phone">Phone</CustomFormLabel>
                 <CustomTextField
                   id="phone"
-                  placeholder={formData.phone}
+                  value={formData.phone}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -424,7 +424,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                 <CustomFormLabel htmlFor="head-Member-1">Head Member 1</CustomFormLabel>
                 <CustomTextField
                   id="headMember1"
-                  placeholder={formData.headMember1}
+                  value={formData.headMember1}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -432,7 +432,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                 <CustomFormLabel htmlFor="head-Member-2">Head Member 2</CustomFormLabel>
                 <CustomTextField
                   id="headMember2"
-                  placeholder={formData.headMember2}
+                  value={formData.headMember2}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -465,7 +465,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                 )}
                 {preview && (
                   <img
-                    src={`${BASE_URL}${preview}`}
+                      src={preview?.startsWith('blob:') ? preview : `${BASE_URL}${preview}`}
                     alt="Face Preview"
                     style={{ width: '100%', marginTop: '10px', borderRadius: '5px' }}
                   />

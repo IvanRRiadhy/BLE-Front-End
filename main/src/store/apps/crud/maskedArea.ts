@@ -128,7 +128,7 @@ export const MaskedAreaSlice = createSlice({
         },
         SelectEditingMaskedArea: (state, action) => {
             const selected = state.unsavedMaskedAreas.find((maskedAreaAll: MaskedAreaType) => maskedAreaAll.id === action.payload);
-            console.log("Selected Masked Area: ", action.payload);
+            // console.log("Selected Masked Area: ", action.payload);
             state.editingMaskedArea = selected || null;
         },
         SearchMaskedArea: (state, action: PayloadAction<string>) => {
@@ -144,7 +144,7 @@ export const MaskedAreaSlice = createSlice({
                 state.unsavedMaskedAreas = state.unsavedMaskedAreas.map((maskedAreaAll, i) =>
                     i === index ? {...maskedAreaAll, ...action.payload} : maskedAreaAll
                 );
-                console.log("Editing Masked Area: ",JSON.stringify(state.unsavedMaskedAreas, null, 2));
+                // console.log("Editing Masked Area: ",JSON.stringify(state.unsavedMaskedAreas, null, 2));
                 // Update the editingMaskedArea immutably
                 state.editingMaskedArea = {
                     ...state.editingMaskedArea,
@@ -171,24 +171,24 @@ export const MaskedAreaSlice = createSlice({
             }
         },
         SaveMaskedArea: (state, action: PayloadAction<string>) => {
-            console.log("Action Payload: ", action.payload);
-            console.log("Unsaved Masked Area: ", JSON.stringify(state.unsavedMaskedAreas, null, 2));
+            // console.log("Action Payload: ", action.payload);
+            // console.log("Unsaved Masked Area: ", JSON.stringify(state.unsavedMaskedAreas, null, 2));
             const index = state.unsavedMaskedAreas.findIndex((maskedAreaAll) => maskedAreaAll.id === action.payload);
-            console.log(index);
+            // console.log(index);
             if (index !== -1 && state.maskedAreaAll[index] ) {
                 if(state.maskedAreaAll[index].id !== action.payload)return;
                 if(state.maskedAreaAll[index].id === state.unsavedMaskedAreas[index].id) {
                     state.maskedAreaAll[index] = state.unsavedMaskedAreas[index];
                 }
-                console.log("Saved Masked Area: ", JSON.stringify(state.maskedAreaAll[index].areaShape, null, 2));
+                // console.log("Saved Masked Area: ", JSON.stringify(state.maskedAreaAll[index].areaShape, null, 2));
             }
             else {
-                console.log("Masked Area added");
+                // console.log("Masked Area added");
                 state.maskedAreaAll.push(state.unsavedMaskedAreas[index]);
                 state.addedMaskedArea.push(state.unsavedMaskedAreas[index]);
             }
-            console.log("Added Area: ",JSON.stringify(state.addedMaskedArea, null, 2));
-                        console.log("Unsaved Masked Area2: ", JSON.stringify(state.unsavedMaskedAreas, null, 2));
+            // console.log("Added Area: ",JSON.stringify(state.addedMaskedArea, null, 2));
+            //             console.log("Unsaved Masked Area2: ", JSON.stringify(state.unsavedMaskedAreas, null, 2));
             // GetUnsavedMaskedArea();
         },
         DeleteUnsavedMaskedArea: (state, action: PayloadAction<string>) => {
@@ -197,8 +197,8 @@ export const MaskedAreaSlice = createSlice({
                 state.deletedMaskedArea?.push(state.unsavedMaskedAreas[index]);
                 state.unsavedMaskedAreas.splice(index, 1);
 
-                console.log(`Area with ID ${action.payload} deleted from unsaved Area.`);
-                                        console.log("Unsaved Masked Area2: ", JSON.stringify(state.unsavedMaskedAreas, null, 2));
+                // console.log(`Area with ID ${action.payload} deleted from unsaved Area.`);
+                //                         console.log("Unsaved Masked Area2: ", JSON.stringify(state.unsavedMaskedAreas, null, 2));
                 
             } else {
                 console.warn(`Area with ID ${action.payload} not found in unsaved Area.`);
@@ -206,15 +206,15 @@ export const MaskedAreaSlice = createSlice({
         },
         RevertMaskedArea: {
             reducer: (state, action: PayloadAction<{id: string}>) => {
-                console.log(action.payload);
+                // console.log(action.payload);
                 const index = state.unsavedMaskedAreas.findIndex((maskedAreaAll) => maskedAreaAll.id === action.payload.id);
                 const area = state.maskedAreas.find((maskedAreaAll) => maskedAreaAll.id === action.payload.id);
                 if(index !== -1) {
                     const area = state.unsavedMaskedAreas[index];
                     //Check if status is valid
                     const validStatus = restrictedStatus.map((status) => status.value);
-                    console.log("Valid Status: ", validStatus);
-                    console.log("Area Status: ", area.restrictedStatus);
+                    // console.log("Valid Status: ", validStatus);
+                    // console.log("Area Status: ", area.restrictedStatus);
                     if(!validStatus.includes(area.restrictedStatus) || area.restrictedStatus === "") {
                         state.unsavedMaskedAreas.splice(index, 1);
                         return;
@@ -245,7 +245,7 @@ export const MaskedAreaSlice = createSlice({
         },
         DrawingMaskedArea: (state, action: PayloadAction<string>) => {
             state.drawingMaskedArea = action.payload;
-            console.log("Drawing Masked Area: ", action.payload);
+            // console.log("Drawing Masked Area: ", action.payload);
         },
         UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
           state.maskedAreaFilter = { ...state.maskedAreaFilter, ...action.payload };
@@ -278,8 +278,8 @@ export const MaskedAreaSlice = createSlice({
                 console.error("Delete failed: ", action.payload);
             })
             .addCase(fetchMaskedAreaDT.fulfilled, (state, action) => {
-                console.log("Masked Area Records Total: ", action.payload.recordsTotal);
-                console.log("Masked Area Records Filtered: ", action.payload.recordsFiltered);
+                // console.log("Masked Area Records Total: ", action.payload.recordsTotal);
+                // console.log("Masked Area Records Filtered: ", action.payload.recordsFiltered);
                 state.maskedAreaTotalCount = action.payload.recordsTotal;
                 state.maskedAreaFilteredCount = action.payload.recordsFiltered;
             })
@@ -321,7 +321,7 @@ export const fetchMaskedAreas = () => async (dispatch: AppDispatch) => {
                 return maskedArea;
             })
         }
-        console.log("MaskedArea: " ,response.data.collection);
+        // console.log("MaskedArea: " ,response.data.collection);
         dispatch(GetAllMaskedArea(newAreas || []));
     } catch (error) {
         console.log(error);
@@ -338,16 +338,16 @@ export const fetchMaskedAreaDT = createAsyncThunk(
                 (arr: any) => Array.isArray(arr) && arr.includes("Empty")
             )
         ) {
-            console.log("Filter contains 'Empty', skipping request");
+            // console.log("Filter contains 'Empty', skipping request");
             // Option 1: just return null (success, no data)
             // return null;
             // Option 2: reject, if you want to treat as error
             return rejectWithValue("Filter contains 'Empty', skipping request");
         }
-            console.log("Fetch Masked Area DT: ", filter);
+            // console.log("Fetch Masked Area DT: ", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetMaskedArea([response.data.collection.data]));
-            console.log("Fetch masked areas", response.data.collection);
+            // console.log("Fetch masked areas", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching masked area:", error);
@@ -370,7 +370,7 @@ export const addMaskedArea = createAsyncThunk("maskedAreas/addMaskedArea", async
 export const editMaskedArea = createAsyncThunk("maskedAreas/editMaskedArea", async (maskedArea: MaskedAreaType, { rejectWithValue }) => {
     try {
         const {id, createdAt, createdBy, updatedAt, updatedBy, generate, status, floor, floorplan, ... filteredMaskedAreaData} = maskedArea;
-        console.log("Data being sent to the server:", JSON.stringify(filteredMaskedAreaData, null, 2));
+        // console.log("Data being sent to the server:", JSON.stringify(filteredMaskedAreaData, null, 2));
 
         const response = await axiosServices.put(`${API_URL}${id}`, filteredMaskedAreaData, {
             headers: {
@@ -388,7 +388,7 @@ export const editMaskedArea = createAsyncThunk("maskedAreas/editMaskedArea", asy
 export const deleteMaskedArea = createAsyncThunk("maskedAreas/deleteMaskedArea", async (maskedAreaId: string, { rejectWithValue }) => {
     try {
         await axiosServices.delete(`${API_URL}${maskedAreaId}`);
-        console.log("Masked area deleted:", maskedAreaId);
+        // console.log("Masked area deleted:", maskedAreaId);
         return maskedAreaId; // Return the deleted masked area's ID to update the state
     } catch (error: any) {
         console.error("Error deleting masked area:", error);
@@ -405,7 +405,7 @@ export const ImportMaskedArea = createAsyncThunk(
                     "Content-Type": "multipart/form-data",
                 },
             });
-            console.log("Masked area imported: ", response.data);
+            // console.log("Masked area imported: ", response.data);
             return response.data;
         } catch (error: any) {
             console.error("Error importing masked area: ", error);

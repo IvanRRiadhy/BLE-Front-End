@@ -87,7 +87,7 @@ export const CardSlice = createSlice({
         },
         GetAllCard: (state, action: PayloadAction<CardType[]>) => {
             state.cardAll = action.payload;
-            console.log("GetAllCard action payload:", JSON.stringify(state.cardAll, null, 2));
+            // console.log("GetAllCard action payload:", JSON.stringify(state.cardAll, null, 2));
         },
         SetCardSearch: (state, action: PayloadAction<string>) => {
             state.cardSearch = action.payload;
@@ -156,7 +156,7 @@ export const {
 export const fetchCard = () => async (dispatch: any) => {
     try {
         const response = await axiosServices.get(API_URL);
-        console.log("Response from fetchCard:", response.data);
+        // console.log("Response from fetchCard:", response.data);
         dispatch(GetAllCard(response.data.collection.data || []));
     } catch (error) {
         console.error("Error fetching cards:", error);
@@ -169,18 +169,18 @@ export const fetchCardDT = createAsyncThunk(
         try {
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetCard(response.data.collection.data || []));
-            console.log(filter);
+            // console.log(filter);
             if(filter.IsUsed === "true"){
-                console.log("UpdateActiveCardCount", response.data.collection.recordsFiltered);
+                // console.log("UpdateActiveCardCount", response.data.collection.recordsFiltered);
                 dispatch(UpdateActiveCardCount(response.data.collection.recordsFiltered));
                 dispatch(SetActiveCardData(response.data.collection.data || []));
             };
             if(filter.IsUsed === "false"){
-                console.log("UpdateNonActiveCardCount", response.data.collection.recordsFiltered);
+                // console.log("UpdateNonActiveCardCount", response.data.collection.recordsFiltered);
                 dispatch(UpdateNonActiveCardCount(response.data.collection.recordsFiltered));
                 dispatch(SetNonActiveCardData(response.data.collection.data || []));
             };
-            console.log("Fetch cards", response.data.collection);
+            // console.log("Fetch cards", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching cards:", error);
@@ -231,7 +231,7 @@ export const ImportCard = createAsyncThunk(
                     "Content-Type": "multipart/form-data",
                 },
             });
-            console.log("Card imported: ", response.data);
+            // console.log("Card imported: ", response.data);
             return response.data;
         } catch (error: any) {
             console.error("Error importing Card:", error);

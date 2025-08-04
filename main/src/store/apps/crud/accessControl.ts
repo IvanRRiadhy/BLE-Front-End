@@ -134,10 +134,10 @@ export const AccessControlSlice = createSlice({
 });
 
 export const selectAccessControl = (accessControlID: string) =>
-(dispatch: AppDispatch, getState: () => RootState) => {
-    const state = getState();
+(dispatch: AppDispatch) => {
+    // const state = getState();
     const isEditing = false;
-    console.log(state);
+    // console.log(state);
     if (!isEditing) {
         dispatch(SelectAccessControl(accessControlID));
     } else {
@@ -166,7 +166,7 @@ export const fetchAccessControlsDT = createAsyncThunk(
                 (arr: any) => Array.isArray(arr) && arr.includes("Empty")
             )
         ) {
-            console.log("Filter contains 'Empty', skipping request");
+            // console.log("Filter contains 'Empty', skipping request");
             // Option 1: just return null (success, no data)
             // return null;
             // Option 2: reject, if you want to treat as error
@@ -174,7 +174,7 @@ export const fetchAccessControlsDT = createAsyncThunk(
         }
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetAccessControls(response.data?.collection?.data || []));
-            console.log("Fetch accessControls", response.data.collection);
+            // console.log("Fetch accessControls", response.data.collection);
             return response.data.collection; // or just response.data if needed
         } catch (error: any) {
             console.error("Error fetching accessControls:", error);

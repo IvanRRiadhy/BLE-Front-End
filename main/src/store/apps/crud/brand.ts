@@ -114,9 +114,9 @@ export const BrandSlice = createSlice({
 });
 
 export const selectBrand = (brandID: string) => 
-(dispatch: AppDispatch, getState: () => RootState) => {
-    const state = getState();
-    console.log(state);
+(dispatch: AppDispatch) => {
+    // const state = getState();
+    // console.log(state);
     const isEditing = false;
 
     if(!isEditing){
@@ -144,7 +144,7 @@ export const fetchBrandDT = createAsyncThunk(
         try {
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetBrands(response.data.collection.data || []));
-            console.log("Fetch brands", response.data.collection);
+            // console.log("Fetch brands", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching brands:", error);
