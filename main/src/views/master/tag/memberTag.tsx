@@ -73,7 +73,7 @@ const MemberTag = () => {
                 color="primary"
                 size="small"
                 onClick={() => setRightSidebarOpen(false)}
-                sx={{ mb: 3, display: { xs: 'block', md: 'none', lg: 'none' } }}
+                sx={{ display: { xs: 'block', md: 'none', lg: 'none' } }}
               >
                 Back{' '}
               </Button>

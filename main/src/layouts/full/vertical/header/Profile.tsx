@@ -141,8 +141,7 @@ const Profile = () => {
             color="primary"
             //component={Link}
             onClick={() => {
-              localStorage.removeItem('token'); // Remove the token from localStorage
-              localStorage.removeItem('welcomePopupShown'); // Reset the welcome popup state
+              localStorage.clear();
               window.location.href = '/auth/login'; // Redirect to the login page
             }}
             fullWidth

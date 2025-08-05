@@ -65,7 +65,7 @@ export const orgType: inputDataType[] = [
     { label: "Please select Gender", value: '', disabled: true},
     { label: "Male", value: "Male" },
     { label: "Female", value: "Female" },
-    { label: "Rather not say", value: "Other" },
+    { label: "Rather not say", value: "RatherNotSay" },
   ];
   export const genderIconMap: Record<string, any> = {
   Male: IconGenderMale,
@@ -164,3 +164,10 @@ export const orgType: inputDataType[] = [
     { label: "Start", value: 'Start'},
     { label: "Stop", value: 'Stop'},
   ];
+
+  export const IdentityType: inputDataType[] = [
+    {label: "Please select Type", value: '', disabled: true},
+    {label: "KTP", value: 'KTP'},
+    {label: "Passport", value: 'Passport'},
+    {label: "NIK", value: 'NIK'},
+  ]

@@ -1,8 +1,6 @@
  import axios from 'axios';
 
  export const BASE_URL = 'http://192.168.1.116:10000';
- const ApplicationId = localStorage.getItem('applicationId');
- const levelPriority = localStorage.getItem('levelPriority');
 
 let onSessionExpired: (() => void) | null = null;
 export const setSessionExpiredHandler = (handler: () => void) => {
@@ -19,7 +17,10 @@ export const setSessionExpiredHandler = (handler: () => void) => {
  });
 
  axiosServices.interceptors.request.use(request => {
+   const ApplicationId = localStorage.getItem('applicationId');
+ const levelPriority = localStorage.getItem('levelPriority');
   const accessToken = localStorage.getItem('token');
+  // console.log('Request : ', request);
   if (accessToken) {
     request.headers['Authorization'] = `Bearer ${accessToken}`;
   }
@@ -73,7 +74,7 @@ axiosServices.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken'); // Retrieve the stored refresh token.
 
         // Make a request to your auth server to refresh the token.
-        const response = await axios.post('http://192.168.1.116:5000/api/Auth/refresh/', {
+        const response = await axios.post(`${BASE_URL}/api/Auth/refresh/`, {
           refreshToken,
           headers: {
                     'X-API-KEY-TRACKING-PEOPLE': "FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK",

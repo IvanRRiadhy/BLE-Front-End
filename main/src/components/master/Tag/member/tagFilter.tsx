@@ -1,4 +1,4 @@
-import  { useEffect } from 'react';
+import { useEffect } from 'react';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
   ListItemText,
@@ -10,21 +10,24 @@ import {
   Box,
 } from '@mui/material';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import { IconMail,  IconFolder } from '@tabler/icons-react';
+import { IconMail, IconFolder } from '@tabler/icons-react';
 import { SetVisibilityFilter } from 'src/store/apps/crud/member';
 import { fetchDepartments, DepartmentType } from 'src/store/apps/crud/department';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
 import AddEditMember from '../../CRUD/member/AddEditMember';
 import { DistrictType, fetchDistricts } from 'src/store/apps/crud/district';
+import { UpdateFilter } from 'src/store/apps/crud/member';
+import member from 'src/views/master/crud/Member';
 
 interface DataType {
   id: string | number;
   name?: string;
-  sort?: string;
+  filter?: string;
   icon?: any;
   filterbyTitle?: string;
   divider?: boolean;
   color?: string;
+  category?: string;
 }
 
 const TagFilter = () => {
@@ -37,6 +40,7 @@ const TagFilter = () => {
   const organizationData = useSelector(
     (state: RootState) => state.organizationReducer.organizations,
   );
+  const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter.filters);
 
   useEffect(() => {
     dispatch(fetchDepartments());
@@ -47,21 +51,24 @@ const TagFilter = () => {
   const departmentFilters: DataType[] = departmentData.map((dept: DepartmentType) => ({
     id: dept.id,
     name: dept.name,
-    sort: dept.id,
+    filter: dept.id,
+    category: 'department',
     icon: IconFolder,
   }));
 
   const districtFilters: DataType[] = districtData.map((dist: DistrictType) => ({
     id: dist.id,
     name: dist.name,
-    sort: dist.id,
+    filter: dist.id,
+    category: 'district',
     icon: IconFolder,
   }));
 
   const organizationFilters: DataType[] = organizationData.map((orgz: OrganizationType) => ({
     id: orgz.id,
     name: orgz.name,
-    sort: orgz.id,
+    filter: orgz.id,
+    category: 'organization',
     icon: IconFolder,
   }));
 
@@ -69,7 +76,7 @@ const TagFilter = () => {
     {
       id: 1,
       name: 'All',
-      sort: 'show_all',
+      filter: 'show_all',
       icon: IconMail,
       color: 'primary.main',
     },
@@ -102,6 +109,44 @@ const TagFilter = () => {
     ...organizationFilters, // Inject dynamic organization data here
   ];
 
+  const handleFilter = (filter: string, category?: string) => {
+    const currentFilters = { ...memberFilter };
+
+    switch (category) {
+      case 'department': {
+        const selected = currentFilters.DepartmentId || [];
+        const newSelected = selected.includes(filter)
+          ? selected.filter((id: string) => id !== filter) // Remove if already selected
+          : [...selected, filter]; // Add if not selected
+        dispatch(UpdateFilter({ filters: { ...currentFilters, DepartmentId: newSelected } }));
+        break;
+      }
+      case 'district': {
+        const selected = currentFilters.DistrictId || [];
+        const newSelected = selected.includes(filter)
+          ? selected.filter((id: string) => id !== filter)
+          : [...selected, filter];
+        dispatch(UpdateFilter({ filters: { ...currentFilters, DistrictId: newSelected } }));
+        break;
+      }
+      case 'organization': {
+        const selected = currentFilters.OrganizationId || [];
+        const newSelected = selected.includes(filter)
+          ? selected.filter((id: string) => id !== filter)
+          : [...selected, filter];
+        dispatch(UpdateFilter({ filters: { ...currentFilters, OrganizationId: newSelected } }));
+        break;
+      }
+      default:
+        dispatch(
+          UpdateFilter({
+            filters: { OrganizationId: [], DistrictId: [], DepartmentId: [] },
+          }),
+        );
+        break;
+    }
+  };
+
   return (
     <>
       <Box p={2}>
@@ -109,7 +154,7 @@ const TagFilter = () => {
       </Box>
 
       <List>
-        <Scrollbar sx={{ height: { lg: 'calc(100vh - 100px)', md: '100vh' }, maxHeight: '800px' }}>
+        <Box sx={{ height: { lg: 'calc(100vh - 230px)', md: '100vh' }, maxHeight: '800px', overflow: 'auto' }}>
           {filterData.map((filter) => {
             if (filter.filterbyTitle) {
               return (
@@ -130,10 +175,28 @@ const TagFilter = () => {
 
             return (
               <ListItemButton
-                sx={{ mb: 1, mx: 3, borderRadius: br }}
-                selected={active}
-                onClick={() => dispatch(SetVisibilityFilter(`${filter.sort}`))}
-                key={filter.id} // ✅ Add key here
+                sx={{
+                  mb: 1,
+                  mx: 3,
+                  borderRadius: br,
+                  '&.Mui-selected': {
+                    backgroundColor: 'primary.main', // or any color
+                    color: 'white',
+                    '&:hover': {
+                      backgroundColor: 'primary.dark',
+                    },
+                  },
+                }}
+                selected={
+                  (filter.category === 'department' &&
+                    memberFilter.DepartmentId?.includes(filter.filter!)) ||
+                  (filter.category === 'district' &&
+                    memberFilter.DistrictId?.includes(filter.filter!)) ||
+                  (filter.category === 'organization' &&
+                    memberFilter.OrganizationId?.includes(filter.filter!))
+                }
+                onClick={() => handleFilter(`${filter.filter}`, filter.category)}
+                key={filter.id}
               >
                 <ListItemIcon sx={{ minWidth: '30px', color: filter.color }}>
                   <filter.icon stroke="1.5" size={19} />
@@ -142,7 +205,7 @@ const TagFilter = () => {
               </ListItemButton>
             );
           })}
-        </Scrollbar>
+        </Box>
       </List>
     </>
   );

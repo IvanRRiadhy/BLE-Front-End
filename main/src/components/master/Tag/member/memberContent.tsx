@@ -88,7 +88,7 @@ const MemberContent = () => {
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
     setSelectedMember(null);
-    dispatch(SelectMember(""));
+    dispatch(SelectMember(''));
   };
 
   // Confirm delete action
@@ -148,19 +148,32 @@ const MemberContent = () => {
           <Divider />
           {/* Table Part */}
 
-          <Box sx={{ overflow: 'auto' }} p={5}>
-            <Box display="flex" alignItems="center">
+          <Box
+            sx={{
+              overflow: 'auto',
+              height: { lg: 'calc(100vh - 220px)', md: '100vh' },
+              maxHeight: '800px',
+            }}
+            p={5}
+          >
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              mb={5}
+              mr={5}
+            >
               <Avatar
                 alt="Member Profile"
                 src={`${BASE_URL}${memberDetail.faceImage}`}
-                sx={{ width: '72px', height: '72px' }}
+                sx={{ width: 200, height: 200, mb: 2 }}
               />
-              <Box sx={{ ml: 2 }}>
-                <Typography variant="h6" mb={0.5}>
-                  {memberDetail.name}
-                </Typography>
-              </Box>
+              <Typography variant="h4" fontWeight={800}>
+                {memberDetail.name}
+              </Typography>
             </Box>
+
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
@@ -213,7 +226,7 @@ const MemberContent = () => {
               Card Details
             </Typography>
             <Divider />
-            <Grid container spacing={5} mb={3}>
+            <Grid container spacing={5}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
                 <Typography>{memberDetail.cardNumber}</Typography>

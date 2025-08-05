@@ -15,6 +15,11 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     searchValue: string,
+    filters: {
+        OrganizationId: string[],
+        DistrictId: string[],
+        DepartmentId: string[],
+    }
 }
 
 
@@ -66,6 +71,7 @@ export interface memberType {
 
 interface StateType {
     members: memberType[];
+    memberAll: memberType[];
     memberSearch: string;
     selectedMember?: memberType;
     curentFilter: string;
@@ -76,6 +82,7 @@ interface StateType {
 
 const initialState: StateType = {
     members: [],
+    memberAll: [],
     memberSearch: "",
     selectedMember: undefined,
     curentFilter: "show_all",
@@ -90,6 +97,9 @@ export const MemberSlice = createSlice({
     reducers: {
         GetMember(state, action: PayloadAction<memberType[]>) {
             state.members = action.payload;
+        },
+        GetAllMember(state, action: PayloadAction<memberType[]>) {
+            state.memberAll = action.payload;
         },
         SelectMember(state, action: PayloadAction<string>) {
             const selected = state.members.find((member: memberType) => member.id === action.payload);
@@ -135,12 +145,12 @@ export const MemberSlice = createSlice({
     },
 });
 
-export const { GetMember, SelectMember, SearchMember, SetVisibilityFilter, UpdateFilter } = MemberSlice.actions;
+export const { GetMember, GetAllMember, SelectMember, SearchMember, SetVisibilityFilter, UpdateFilter } = MemberSlice.actions;
 
 export const fetchMembers = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
-        dispatch(GetMember(response.data?.collection?.data || []));
+        dispatch(GetAllMember(response.data?.collection?.data || []));
                     // console.log("Fetch members", response.data.collection);
     } catch (error) {
         console.log(error);
@@ -153,7 +163,7 @@ export const fetchMemberDT = createAsyncThunk(
         try {
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetMember(response.data.collection.data || []));
-            // console.log("Fetch members", response.data.collection);
+            console.log("Fetch members", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching members:", error);

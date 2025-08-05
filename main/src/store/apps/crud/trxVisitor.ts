@@ -1,10 +1,12 @@
 import axiosServices from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
-import { dispatch } from "src/store/Store";
+import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { VisitorType } from "./visitor";
+import { MaskedAreaType } from "./maskedArea";
 
-// const API_URL = "/api/TrxVisitor/";
+const API_URL = "/api/TrxVisitor/";
 const API_DT_URL = "/api/TrxVisitor/filter/";
 
 export type GetFilter = {
@@ -34,7 +36,7 @@ export type GetTrxVisitorResponse = {
 };
 
 export type TrxVisitorType = {
-    id: number,
+    id: string,
     checkinAt: string,
     checkoutAt: string,
     denyAt: string,
@@ -46,20 +48,25 @@ export type TrxVisitorType = {
     denyReason: string,
     blockBy: string,
     blockReason: string,
-    visitorStatus: string,
+    status: string,
     invitationCreatedAt: string,
-    visitorGroupCode: string,
-    visitorNumber: string,
+    visitorPeriodStart: string,
+    visitorPeriodEnd: string,
     vehiclePlateNumber: string,
+    isInvitationAccepted: string,
+    invitationCode: string,
     remarks: string,
-    siteId: string,
+    maskedAreaId: string,
     parkingId: string,
     visitorId: string,
+    visitor?: VisitorType,
+    maskedArea?: MaskedAreaType,
 }
 
 interface StateType {
     TrxVisitors: TrxVisitorType[];
     TrxVisitorSearch: string;
+    SelectedTrxVisitor: TrxVisitorType;
     TrxVisitorTotalCount: number;
     TrxVisitorFilteredCount: number;
     TrxVisitorFilter: GetFilter;
@@ -67,6 +74,7 @@ interface StateType {
 
 const initialState: StateType = {
     TrxVisitors: [],
+    SelectedTrxVisitor: {} as TrxVisitorType,
     TrxVisitorSearch: "",
     TrxVisitorTotalCount: 0,
     TrxVisitorFilteredCount: 0,
@@ -90,6 +98,10 @@ export const TrxVisitorSlice = createSlice({
         setTrxVisitorSearch: (state, action: PayloadAction<string>) => {
             state.TrxVisitorSearch = action.payload;
         },
+        SelectTrxVisitor: (state, action: PayloadAction<string>) => {
+            const selected = state.TrxVisitors.find((visitor: TrxVisitorType) => visitor.id === action.payload);
+            state.SelectedTrxVisitor = selected || {} as TrxVisitorType;
+        },
         UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
           state.TrxVisitorFilter = { ...state.TrxVisitorFilter, ...action.payload };
         }
@@ -105,9 +117,20 @@ export const TrxVisitorSlice = createSlice({
 
 export const {
     GetTrxVisitors,
+    SelectTrxVisitor,
     setTrxVisitorSearch,
     UpdateFilter,
 } = TrxVisitorSlice.actions;
+
+export const fetchTrxVisitor = () => async(dispatch: AppDispatch) => {
+    try {
+        const response = await axiosServices.get(API_URL);
+        dispatch(GetTrxVisitors(response.data?.collection?.data || []));
+        console.log("Fetch TrxVisitors", response.data.collection);
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 export const fetchTrxVisitorDT = createAsyncThunk(
     "TrxVisitor/fetchTrxVisitorDT",

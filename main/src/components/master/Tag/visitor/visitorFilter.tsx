@@ -86,7 +86,7 @@ const VisitorFilter = () => {
       </Box>
 
       <List>
-        <Scrollbar sx={{ height: { lg: 'calc(100vh - 100px)', md: '100vh' }, maxHeight: '800px' }}>
+        <Box sx={{ height: { lg: 'calc(100vh - 230px)', md: '100vh' }, maxHeight: '800px', overflow: 'auto' }}>
           {filterData.map((filter) => {
             if (filter.filterbyTitle) {
               return (
@@ -119,7 +119,7 @@ const VisitorFilter = () => {
               </ListItemButton>
             );
           })}
-        </Scrollbar>
+        </Box>
       </List>
     </>
   );

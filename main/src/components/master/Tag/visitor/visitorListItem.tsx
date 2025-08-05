@@ -11,16 +11,17 @@ import {
   ListItemAvatar,
   // useTheme,
 } from '@mui/material';
-import { masterVisitorType } from 'src/store/apps/crud/visitor';
+import { VisitorType } from 'src/store/apps/crud/visitor';
+import { TrxVisitorType } from 'src/store/apps/crud/trxVisitor';
 
 type Props = {
   onTagClick: (event: React.MouseEvent<HTMLElement>) => void;
-  visitor?: masterVisitorType;
+  trx?: TrxVisitorType;
   active: any;
 };
 
 
-const VisitorListItem = ({ onTagClick, visitor, active }: Props) => {
+const VisitorListItem = ({ onTagClick, trx, active }: Props) => {
   const customizer = useSelector((state) => state.customizer);
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -32,19 +33,19 @@ const VisitorListItem = ({ onTagClick, visitor, active }: Props) => {
   return (
     <ListItemButton sx={{ mb: 1 }} selected={active} onClick={onTagClick}>
       <ListItemAvatar>
-        <Avatar alt="Visitor Face" src={`${BASE_URL}${visitor?.faceImage}`} />
+        <Avatar alt="Visitor Face" src={`${BASE_URL}${trx?.visitor?.faceImage}`} />
       </ListItemAvatar>
       <ListItemText>
         <Stack direction="row" gap="10px" alignItems="center">
           <Box mr="auto">
             <Typography variant="subtitle1" noWrap fontWeight={600} sx={{ maxWidth: '200px' }}>
-              {visitor?.name}
+              {trx?.visitor?.name}
             </Typography>
             <Typography variant="body2" color="text.secondary" noWrap>
-              {visitor?.bleCardNumber}
+              {trx?.visitor?.bleCardNumber}
             </Typography>
             <Typography variant="body2" color="text.secondary" noWrap>
-              {visitor?.personId}
+              {trx?.visitor?.personId}
             </Typography>
           </Box>
         </Stack>

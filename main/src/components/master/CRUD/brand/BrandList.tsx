@@ -137,7 +137,7 @@ const BrandList = () => {
         }
       } catch (error) {
         toast.error('Delete Data Unsuccessful');
-        console.error('Error deleting floor:', error);
+        console.error('Error deleting Brand:', error);
       }
       setTimeout(() => {
         setLoading(false);

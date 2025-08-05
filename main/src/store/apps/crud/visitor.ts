@@ -76,6 +76,7 @@ export interface masterVisitorType {
 export type VisitorType = {
     id: string,
     visitorType: string;
+    identityType: string;
     name: string,
     email: string,
     gender: string,
@@ -83,9 +84,9 @@ export type VisitorType = {
     faceImage: string,
         cardNumber: string,
     bleCardNumber:string,
-    organizationId:string,
-    districtId: string,
-    departmentId: string,
+    organizationName:string,
+    districtName: string,
+    departmentName: string,
     isVip: boolean,
     isEmailVerified: boolean,
     emailVerificationSendAt: string,
@@ -94,9 +95,6 @@ export type VisitorType = {
     visitorPeriodEnd: string,
     address:string,
     applicationId: string,
-    organization?: OrganizationType,
-    district?: DistrictType,
-    department?: DepartmentType,
     identityId: string,
     isEmployee: boolean,
     personId: string,
@@ -194,7 +192,7 @@ export const fetchVisitor = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
         dispatch(GetVisitor(response.data?.collection?.data || []));
-        // console.log("Fetch Visitors", response.data?.collection || []);
+        console.log("Fetch Visitors", response.data?.collection || []);
     } catch (err) {
         console.log("Error: ", err);
     }
@@ -206,10 +204,10 @@ export const fetchVisitorDT = createAsyncThunk(
         try {
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetVisitor(response.data.collection.data || []));
-            // console.log("Fetch Visitors", response.data.collection);
+            console.log("Fetch Visitors", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
-            console.error("Error fetching members:", error);
+            console.error("Error fetching visitors:", error);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
@@ -232,6 +230,9 @@ export const addVisitor = createAsyncThunk("visitor/addVisitor", async (formData
 
 export const editVisitor = createAsyncThunk("visitor/editVisitor", async (formData: FormData) => {
     try {
+        Object.keys(formData).forEach((key) => {
+            console.log(`${key}:`, formData.get(key));
+        })
         const id = formData.get('id');
         formData.delete('id');
         const response = await axiosServices.put(`${API_URL}${id}`, formData, {

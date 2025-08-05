@@ -28,13 +28,11 @@ import { DepartmentType, fetchDepartments } from 'src/store/apps/crud/department
 import { DistrictType, fetchDistricts } from 'src/store/apps/crud/district';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
 
-
 const VisitorContent = () => {
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const visitorDetail: VisitorType | undefined = useSelector(
-    (state: RootState) => state.visitorReducer.selectedVisitor,
-  );
+  const trxVisitorDetail = useSelector((state: RootState) => state.TrxVisitorReducer.SelectedTrxVisitor);
+  const visitorDetail: VisitorType | undefined = trxVisitorDetail.visitor;
   const applicationData = useSelector((state: RootState) => state.applicationReducer.applications);
   const districtData = useSelector((state: RootState) => state.districtReducer.districts);
   const departmentData = useSelector((state: RootState) => state.departmentReducer.departments);
@@ -92,6 +90,14 @@ const VisitorContent = () => {
     handleCloseDeleteDialog();
   };
 
+  const getOrganizationDisplay = (
+    organization?: string,
+    department?: string,
+    district?: string,
+  ) => {
+    return [organization, department, district].filter((v) => v && v.trim() !== '').join(' - ');
+  };
+
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
 
@@ -139,31 +145,45 @@ const VisitorContent = () => {
           <Divider />
           {/* Table Part */}
 
-          <Box sx={{ overflow: 'auto' }} p={5}>
-            <Box display="flex" alignItems="center">
+          <Box
+            sx={{
+              overflow: 'auto',
+              height: { lg: 'calc(100vh - 220px)', md: '100vh' },
+              maxHeight: '800px',
+            }}
+            p={5}
+          >
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              mb={3}
+            >
               <Avatar
-                alt="Visitor Face"
-                src={visitorDetail.faceImage ? `${BASE_URL}${visitorDetail.faceImage}` : undefined}
-                sx={{ width: '72px', height: '72px' }}
-              >
-                {/* {visitorDetail.name?.charAt(0) || '?'} */}
-              </Avatar>
-              <Box sx={{ ml: 2 }}>
-                <Typography variant="h6" mb={0.5}>
-                  {visitorDetail.name}
-                </Typography>
-              </Box>
+                alt="Member Profile"
+                src={`${BASE_URL}${visitorDetail.faceImage}`}
+                sx={{ width: 200, height: 200, mb: 2 }}
+              />
+              <Typography variant="h4" fontWeight={800}>
+                {visitorDetail.name}
+              </Typography>
             </Box>
+
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
                 <Typography>{visitorDetail.email}</Typography>
                 <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
                 <Typography>{visitorDetail.address}</Typography>
-                <CustomFormLabel htmlFor="organization">Organization Name</CustomFormLabel>
-                <Typography>{getOrganizationName(visitorDetail.organizationId)}</Typography>
-                <CustomFormLabel htmlFor="department">Department Name</CustomFormLabel>
-                <Typography>{getDepartmentName(visitorDetail.departmentId)}</Typography>
+                <CustomFormLabel htmlFor="organization">Organization</CustomFormLabel>
+                <Typography>
+                  {getOrganizationDisplay(
+                    visitorDetail.organizationName,
+                    visitorDetail.departmentName,
+                    visitorDetail.districtName,
+                  )}
+                </Typography>
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="phone">Phone</CustomFormLabel>
@@ -172,8 +192,6 @@ const VisitorContent = () => {
                 <Typography>{visitorDetail.gender}</Typography>
                 <CustomFormLabel htmlFor="status">Status</CustomFormLabel>
                 <Typography>{visitorDetail.isVip ? 'VIP' : 'Normal'}</Typography>
-                <CustomFormLabel htmlFor="district">District Name</CustomFormLabel>
-                <Typography>{getDistrictName(visitorDetail.districtId)}</Typography>
               </Grid>
             </Grid>
             <Typography variant="h5" fontWeight={600} mb={2} mt={2}>

@@ -13,6 +13,9 @@ import {
   Tooltip,
   Typography,
   CircularProgress,
+  FormControlLabel,
+  Switch,
+  FormHelperText,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React from 'react';
@@ -20,7 +23,7 @@ import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, RootState, useDispatch } from 'src/store/Store';
-import { visitorStatus, gender, visitorType } from 'src/types/crud/input';
+import { visitorStatus, gender, visitorType, IdentityType } from 'src/types/crud/input';
 import {
   addVisitor,
   editVisitor,
@@ -48,8 +51,8 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
     ...defaultVisitorForm,
     ...visitor,
   });
-    const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
-    
+  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+
   const visitorFilter = useSelector((state: RootState) => state.visitorReducer.visitorFilter);
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = () => {
@@ -74,8 +77,46 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
     setOpen(false);
   };
 
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.name?.trim()) errors.name = "Member's name is required";
+    if (!formData.gender?.trim()) errors.gender = "Member's Gender is required";
+    if (!image) errors.faceImage = "Member's Face Image is required";
+    if (!formData.email?.trim() || !formData.email?.includes('@'))
+      errors.email = 'Valid Email is required';
+
+    // Validate identityType
+    const isValidIdentityType = IdentityType.some(
+      (identity) => identity.value === formData.identityType,
+    );
+
+    if(!formData.identityType?.trim()) errors.identityType = 'Identity Type is required';
+
+    // Only require identityId if identityType is valid
+    if (formData.identityType && isValidIdentityType) {
+      if (!formData.identityId?.trim()) {
+        errors.identityId = 'Identity Number is required';
+      }
+    }
+
+    // Optional: if identityType is filled but invalid, mark as error too
+    if (formData.identityType && !isValidIdentityType) {
+      errors.identityType = 'Invalid Identity Type';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields correctly.');
+      console.log('Form errors:', formErrors);
+      return;
+    }
     setLoading(true);
+    console.log(formData);
     try {
       const data = new FormData();
 
@@ -85,19 +126,19 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
           key !== 'registeredDate' &&
           key !== 'visitorPeriodStart' &&
           key !== 'visitorPeriodEnd' &&
-          key !== 'timestampBlocked' &&
-          key !== 'timestampCheckedIn' &&
-          key !== 'timestampCheckedOut' &&
-          key !== 'timestampPreRegistration' &&
-          key !== 'timestampUnblocked' &&
-          key !== 'timestampDeny'
+          key !== 'visitorGroudCode' &&
+          key !== 'visitorCode' &&
+          key !== 'visitorNumber'
         ) {
-          data.append(key, value.toString());
+          if (value !== null && value !== undefined) {
+            data.append(key, value.toString());
+          }
         }
       });
       if (image) {
         data.append('faceImage', image);
       }
+      console.log(data);
       let result;
       if (type === 'edit') {
         result = await dispatch(editVisitor(data)); // Dispatch update
@@ -105,6 +146,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
       if (type === 'add') {
         result = await dispatch(addVisitor(data));
       }
+      console.log('Result: ', result);
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchVisitorDT(visitorFilter));
         console.log('Visitor data Saved!');
@@ -178,32 +220,12 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
             <Divider />
           </DialogTitle>
           <DialogContent>
-            <Grid container spacing={3}>
-              {/* id */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="id">Visitor ID</CustomFormLabel>
-                <CustomTextField
-                  id="id"
-                  value={formData.id}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  disabled={!!visitor} // usually ID should not be editable
-                />
-              </Grid>
-              {/* identityId */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="identityId">Identity ID</CustomFormLabel>
-                <CustomTextField
-                  id="identityId"
-                  value={formData.identityId}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                />
-              </Grid>
-              {/* name */}
-              <Grid size={12}>
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              Personal Information
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="name">Name</CustomFormLabel>
                 <CustomTextField
                   id="name"
@@ -211,11 +233,9 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.name}
                 />
-              </Grid>
-              {/* personId */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="personId">Person ID</CustomFormLabel>
+                <CustomFormLabel htmlFor="person-id">Person ID</CustomFormLabel>
                 <CustomTextField
                   id="personId"
                   value={formData.personId}
@@ -223,48 +243,14 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
                   fullWidth
                   variant="outlined"
                 />
-              </Grid>
-              {/* cardNumber */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="cardNumber">Card Number</CustomFormLabel>
+                <CustomFormLabel htmlFor="address">Address</CustomFormLabel>
                 <CustomTextField
-                  id="cardNumber"
-                  value={formData.cardNumber}
+                  id="address"
+                  value={formData.address}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
                 />
-              </Grid>
-              {/* bleCardNumber */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="bleCardNumber">BLE Card Number</CustomFormLabel>
-                <CustomTextField
-                  id="bleCardNumber"
-                  value={formData.bleCardNumber}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                />
-              </Grid>
-              {/* visitorType */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="visitorType">Visitor Type</CustomFormLabel>
-                <CustomSelect
-                  name="visitorType"
-                  value={formData.visitorType}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                >
-                  {visitorType.map((type) => (
-                    <MenuItem key={type.value} value={type.value}>
-                      {type.label}
-                    </MenuItem>
-                  ))}
-                </CustomSelect>
-              </Grid>
-              {/* phone */}
-              <Grid size={12}>
                 <CustomFormLabel htmlFor="phone">Phone</CustomFormLabel>
                 <CustomTextField
                   id="phone"
@@ -274,8 +260,40 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
                   variant="outlined"
                 />
               </Grid>
-              {/* email */}
-              <Grid size={12}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="identity-type">Identity Type</CustomFormLabel>
+                <CustomSelect
+                  name="identityType"
+                  value={formData.identityType}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                  error={!!formErrors.identityType}
+                  helperText={formErrors.identityType}
+                >
+                  {IdentityType.map((identity) => (
+                    <MenuItem
+                      key={identity.value}
+                      value={identity.value}
+                      disabled={identity.disabled}
+                    >
+                      {identity.label}
+                    </MenuItem>
+                  ))}
+                </CustomSelect>
+                <CustomFormLabel htmlFor="identity-number">Identity Number</CustomFormLabel>
+                <CustomTextField
+                  id="identityId"
+                  value={formData.identityId}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                  disabled={
+                    !formData.identityType || // empty
+                    !IdentityType.some((identity) => identity.value === formData.identityType) // not in list
+                  }
+                  error={!!formErrors.identityId}
+                />
                 <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
                 <CustomTextField
                   id="email"
@@ -283,192 +301,129 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
+                  error={!!formErrors.email}
                 />
-              </Grid>
-              {/* gender */}
-              <Grid size={12}>
                 <CustomFormLabel htmlFor="gender">Gender</CustomFormLabel>
                 <CustomSelect
                   name="gender"
-                  value={formData.gender}
+                  value={formData.gender || ''}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
                 >
-                  {gender.map((g) => (
-                    <MenuItem key={g.value} value={g.value}>
-                      {g.label}
+                  {gender.map((gender) => (
+                    <MenuItem
+                      key={gender.value}
+                      value={gender.value}
+                      disabled={gender.disabled || false}
+                    >
+                      {gender.label}
                     </MenuItem>
                   ))}
                 </CustomSelect>
               </Grid>
-              {/* address */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="address">Address</CustomFormLabel>
+            </Grid>
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              Card Details
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
                 <CustomTextField
-                  id="address"
-                  value={formData.address}
+                  id="cardNumber"
+                  value={formData.cardNumber}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
                 />
               </Grid>
-              {/* organizationId */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="organizationId">Organization ID</CustomFormLabel>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="ble-card-number">Ble Card Number</CustomFormLabel>
                 <CustomTextField
-                  id="organizationId"
-                  value={formData.organizationId}
+                  id="bleCardNumber"
+                  value={formData.bleCardNumber}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
                 />
               </Grid>
-              {/* districtId */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="districtId">District ID</CustomFormLabel>
+            </Grid>
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              Extra Details
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="organization-name">Organization Name</CustomFormLabel>
                 <CustomTextField
-                  id="districtId"
-                  value={formData.districtId}
+                  id="organizationName"
+                  value={formData.organizationName}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+                <CustomFormLabel htmlFor="department-name">Department Name</CustomFormLabel>
+                <CustomTextField
+                  id="departmentName"
+                  value={formData.departmentName}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
                 />
               </Grid>
-              {/* departmentId */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="departmentId">Department ID</CustomFormLabel>
-                <CustomTextField
-                  id="departmentId"
-                  value={formData.departmentId}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                />
-              </Grid>
-              {/* isVip */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="isVip">Is VIP</CustomFormLabel>
-                <CustomSelect
-                  name="isVip"
-                  value={formData.isVip ? 'true' : 'false'}
-                  onChange={(e: SelectChangeEvent) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      isVip: e.target.value === 'true',
-                    }))
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel htmlFor="vip">VIP</CustomFormLabel>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      id="isVip"
+                      checked={formData.isVip}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, isVip: e.target.checked }))
+                      }
+                      color="primary"
+                    />
                   }
+                  label={formData.isVip ? 'Yes' : 'No'}
+                />
+                <CustomFormLabel htmlFor="district-name">District Name</CustomFormLabel>
+                <CustomTextField
+                  id="districtName"
+                  value={formData.districtName}
+                  onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
-                >
-                  <MenuItem value="true">Yes</MenuItem>
-                  <MenuItem value="false">No</MenuItem>
-                </CustomSelect>
+                />
               </Grid>
-              {/* isEmailVerified */}
+            </Grid>
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              Photo
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
               <Grid size={12}>
-                <CustomFormLabel htmlFor="isEmailVerified">Email Verified</CustomFormLabel>
-                <CustomSelect
-                  name="isEmailVerified"
-                  value={formData.isEmailVerified ? 'true' : 'false'}
-                  onChange={(e: SelectChangeEvent) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      isEmailVerified: e.target.value === 'true',
-                    }))
-                  }
-                  fullWidth
-                  variant="outlined"
-                >
-                  <MenuItem value="true">Yes</MenuItem>
-                  <MenuItem value="false">No</MenuItem>
-                </CustomSelect>
-              </Grid>
-              {/* emailVerificationSendAt */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="emailVerificationSendAt">
-                  Email Verification Send At
+                <CustomFormLabel htmlFor="face-image" error={!!formErrors.faceImage}>
+                  Face Image
                 </CustomFormLabel>
-                <CustomTextField
-                  id="emailVerificationSendAt"
-                  type="datetime-local"
-                  value={formData.emailVerificationSendAt}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                />
-              </Grid>
-              {/* emailVerificationToken */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="emailVerificationToken">
-                  Email Verification Token
-                </CustomFormLabel>
-                <CustomTextField
-                  id="emailVerificationToken"
-                  value={formData.emailVerificationToken}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                />
-              </Grid>
-              {/* visitorPeriodStart */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="visitorPeriodStart">Visitor Period Start</CustomFormLabel>
-                <CustomTextField
-                  id="visitorPeriodStart"
-                  type="datetime-local"
-                  value={formData.visitorPeriodStart}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                />
-              </Grid>
-              {/* visitorPeriodEnd */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="visitorPeriodEnd">Visitor Period End</CustomFormLabel>
-                <CustomTextField
-                  id="visitorPeriodEnd"
-                  type="datetime-local"
-                  value={formData.visitorPeriodEnd}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                />
-              </Grid>
-              {/* isEmployee */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="isEmployee">Is Employee</CustomFormLabel>
-                <CustomSelect
-                  name="isEmployee"
-                  value={formData.isEmployee ? 'true' : 'false'}
-                  onChange={(e: SelectChangeEvent) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      isEmployee: e.target.value === 'true',
-                    }))
-                  }
-                  fullWidth
-                  variant="outlined"
-                >
-                  <MenuItem value="true">Yes</MenuItem>
-                  <MenuItem value="false">No</MenuItem>
-                </CustomSelect>
-              </Grid>
-              {/* faceImage */}
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="faceImage">Face Image</CustomFormLabel>
                 <input
                   type="file"
                   accept="image/png, image/jpeg, image/jpg"
                   onChange={handleImageChange}
+                  style={{
+                    border: formErrors.faceImage ? '1px solid red' : undefined,
+                    padding: '6px',
+                    borderRadius: '4px',
+                    width: '100%',
+                    marginTop: '5px',
+                  }}
                 />
+                {formErrors.faceImage && (
+                  <FormHelperText error>{formErrors.faceImage}</FormHelperText>
+                )}
                 {preview && (
                   <img
-                    src={
-                      typeof preview === 'string' && preview.startsWith('blob:')
-                        ? preview
-                        : `${BASE_URL}${preview}`
-                    }
+                    src={preview?.startsWith('blob:') ? preview : `${BASE_URL}${preview}`}
                     alt="Face Preview"
                     style={{ width: '100%', marginTop: '10px', borderRadius: '5px' }}
                   />

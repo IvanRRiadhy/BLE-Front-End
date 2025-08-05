@@ -369,10 +369,15 @@ export const defaultMemberForm: memberType = {
 export const defaultMemberFilter: MemberFilter = {
   Draw: 1,
   Start: 0,
-  Length: 5,
+  Length: 10,
   SortColumn: 'Name',
   SortDir: 'desc',
   searchValue: '',
+  filters: {
+    OrganizationId: [],
+    DepartmentId: [],
+    DistrictId: [],
+  },
 };
 //#endregion
 
@@ -418,6 +423,7 @@ export const defaultTrackingTransFilter: TrackingTransFilter = {
 export const defaultVisitorForm: VisitorType = {
   id: '',
   identityId: '',
+  identityType: '',
   name: '',
   personId: '',
   cardNumber: '',
@@ -425,11 +431,11 @@ export const defaultVisitorForm: VisitorType = {
   visitorType: '',
   phone: '',
   email: '',
-  gender: 'male',
+  gender: 'Male',
   address: '',
-  organizationId: '',
-  districtId: '',
-  departmentId: '',
+  organizationName: '',
+  districtName: '',
+  departmentName: '',
   isVip: false,
   isEmailVerified: false,
   emailVerificationSendAt: '',
@@ -444,7 +450,7 @@ export const defaultVisitorForm: VisitorType = {
 export const defaultVisitorFilter: VisitorFilter = {
   Draw: 1,
   Start: 0,
-  Length: 5,
+  Length: 10,
   SortColumn: 'name',
   SortDir: 'desc',
   searchValue: '',

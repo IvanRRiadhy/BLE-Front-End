@@ -1,59 +1,38 @@
-import { useEffect } from 'react';
-import { List } from '@mui/material';
+import { useEffect, useMemo } from 'react';
+import { Box, List } from '@mui/material';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
-import { fetchVisitor, masterVisitorType, SelectVisitor } from 'src/store/apps/crud/visitor';
+import { fetchVisitor, fetchVisitorDT, masterVisitorType, SelectVisitor } from 'src/store/apps/crud/visitor';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import VisitorListItem from './visitorListItem';
+import { fetchTrxVisitor, SelectTrxVisitor } from 'src/store/apps/crud/trxVisitor';
 
 const VisitorList = () => {
+  const visitorFilter = useSelector((state: RootState) => state.visitorReducer.visitorFilter);
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(fetchVisitor());
+    dispatch(fetchVisitorDT(visitorFilter));
+    dispatch(fetchTrxVisitor());
   }, [dispatch]);
 
-  const getVisibilityTags = (visitor: masterVisitorType[], filter: string, search: string) => {
-    if (filter === 'show_all') {
-      return visitor.filter(
-        (vis) =>
-          vis.name.toLowerCase().includes(search.toLowerCase()) ||
-          vis.bleCardNumber.toLowerCase().includes(search.toLowerCase()) ||
-          vis.personId.toLowerCase().includes(search.toLowerCase()),
-      );
-    }
+  const visitors = useSelector((state: RootState) =>state.visitorReducer.visitors);
+  const trxVisitors = useSelector((state: RootState) => state.TrxVisitorReducer.TrxVisitors);
 
-    return visitor.filter(
-      (vis) =>
-        (vis.gender === filter || vis.status === filter) &&
-        (vis.name.toLowerCase().includes(search.toLowerCase()) ||
-          vis.bleCardNumber.toLowerCase().includes(search.toLowerCase()) ||
-          vis.personId.toLowerCase().includes(search.toLowerCase())),
-    );
-  };
-
-  const visitors = useSelector((state: RootState) =>
-    getVisibilityTags(
-      state.visitorReducer.visitors,
-      state.visitorReducer.currentFilter,
-      state.visitorReducer.visitorSearch,
-    ),
-  );
-
-  const active = useSelector((state: RootState) => state.visitorReducer.selectedVisitor);
+  const active = useSelector((state: RootState) => state.TrxVisitorReducer.SelectedTrxVisitor);
 
   return (
     <List>
-      <Scrollbar sx={{ height: { lg: 'calc(100vh - 100px)', md: '100vh' }, maxHeight: '800px' }}>
-        {visitors.map((visitor) => (
+      <Box sx={{ height: { lg: 'calc(100vh - 350px)', md: '100vh' }, maxHeight: '800px', overflow: 'auto' }}>
+        {trxVisitors.map((trx) => (
           <VisitorListItem
-            key={visitor.id}
-            active={visitor === active}
-            visitor={visitor}
+            key={trx.id}
+            active={trx === active}
+            trx={trx}
             onTagClick={() => {
-              dispatch(SelectVisitor(visitor.id));
+              dispatch(SelectTrxVisitor(trx.id));
             }}
           />
         ))}
-      </Scrollbar>
+      </Box>
     </List>
   );
 };

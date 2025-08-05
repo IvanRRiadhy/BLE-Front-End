@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -12,17 +12,34 @@ import {
   Typography,
 } from '@mui/material';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
-import { deleteMember, fetchMembers, memberType, SelectMember } from 'src/store/apps/crud/member';
+import { deleteMember, fetchMemberDT, fetchMembers, memberType, SelectMember, UpdateFilter } from 'src/store/apps/crud/member';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import TagListItem from './tagListItem';
+import { defaultMemberFilter } from 'src/store/apps/defaultForm';
 
 const TagList = () => {
-  const [isManySelect, setIsManySelect] = React.useState(false);
-  const [manySelectMembers, setManySelectMembers] = React.useState<memberType[]>([]);
+  const [isManySelect, setIsManySelect] = useState(false);
+  const [manySelectMembers, setManySelectMembers] = useState<memberType[]>([]);
+  const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
+  const [loading, setLoading] = useState(false);
+
   const dispatch = useDispatch();
+
+    useEffect(() => {
+      dispatch(UpdateFilter(defaultMemberFilter));
+      try {
+        setLoading(true);
+        dispatch(fetchMemberDT(defaultMemberFilter));
+      } catch (error) {
+        console.error('Error fetching Member data:', error);
+      }
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+    }, [dispatch]);
   useEffect(() => {
-    dispatch(fetchMembers());
-  }, [dispatch]);
+    dispatch(fetchMemberDT(memberFilter));
+  }, [memberFilter, dispatch]);
 
   const getVisibilityTags = (members: memberType[], filter: string, search: string) => {
     if (filter === 'show_all') {
@@ -45,13 +62,7 @@ const TagList = () => {
     );
   };
 
-  const members = useSelector((state: RootState) =>
-    getVisibilityTags(
-      state.memberReducer.members,
-      state.memberReducer.curentFilter,
-      state.memberReducer.memberSearch,
-    ),
-  );
+  const members = useSelector((state: RootState) => state.memberReducer.members);
 
   const active = useSelector((state: RootState) => state.memberReducer.selectedMember);
   const [isChecked, setIsChecked] = useState(false);
@@ -136,7 +147,7 @@ const TagList = () => {
       </Box>
 
       <List>
-        <Scrollbar sx={{ height: { lg: 'calc(100vh - 100px)', md: '100vh' }, maxHeight: '800px' }}>
+        <Box sx={{ height: { lg: 'calc(100vh - 260px)', md: '100vh' }, maxHeight: '800px', overflow: 'auto' }}>
           {isManySelect && (
             <>
               <Box
@@ -167,7 +178,7 @@ const TagList = () => {
               }}
             />
           ))}
-        </Scrollbar>
+        </Box>
       </List>
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
