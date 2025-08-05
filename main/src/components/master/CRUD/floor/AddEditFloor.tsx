@@ -269,7 +269,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
             <Divider />
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-                <CustomFormLabel htmlFor="building-id">Building ID</CustomFormLabel>
+                <CustomFormLabel htmlFor="building">Building</CustomFormLabel>
                 <CustomSelect
                   name="buildingId"
                   id="buildingId"
@@ -308,7 +308,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                   variant="outlined"
                   disabled
                 />
-                <CustomFormLabel htmlFor="floorX">Floor X (in meters)</CustomFormLabel>
+                <CustomFormLabel htmlFor="floorX">Floor Length (in meters)</CustomFormLabel>
                 <CustomTextField
                   id="floorX"
                   value={formData.floorX}
@@ -348,7 +348,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                   variant="outlined"
                   disabled
                 />
-                <CustomFormLabel htmlFor="floorY">Floor Y (in meters)</CustomFormLabel>
+                <CustomFormLabel htmlFor="floorY">Floor Width (in meters)</CustomFormLabel>
                 <CustomTextField
                   id="floorY"
                   value={formData.floorY}
