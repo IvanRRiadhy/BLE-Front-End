@@ -237,16 +237,16 @@ const Modern = () => {
               BlacklistCount={blacklistTotalCount}
               AlarmCount={alarmFilteredCount}
               NonActiveBeaconCount={nonActiveTag}
-              FirstActiveBeacon={activeTagData.flat().map((item) => item.name)}
-              FirstActiveGateway={bleReaderData.flat().map((item) => item.name)}
-              FirstArea={maskedAreaData.flat().map((item) => item.name)}
+              FirstActiveBeacon={activeTagData?.flat().map((item) => item.name)}
+              FirstActiveGateway={bleReaderData?.flat().map((item) => item.name)}
+              FirstArea={maskedAreaData?.flat().map((item) => item.name)}
               FirstBlacklist={blacklistData
-                .flat()
+                ?.flat()
                 .map((item) => item.visitor?.name ?? 'Unknown Visitor')}
               FirstAlarm={alarmFilteredData
-                .flat()
+                ?.flat()
                 .map((item) => item.visitor?.name ?? 'Unknown Visitor')}
-              FirstNonActiveBeacon={nonActiveTagData.flat().map((item) => item.name)}
+              FirstNonActiveBeacon={nonActiveTagData?.flat().map((item) => item.name)}
             />
           </Grid>
           {/* column */}
