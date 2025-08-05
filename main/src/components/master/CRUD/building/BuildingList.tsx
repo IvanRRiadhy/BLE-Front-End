@@ -32,6 +32,7 @@ import {
 } from 'src/store/apps/crud/building';
 import AddEditBuilding from './AddEditBuilding';
 import { defaultBuildingFilter } from 'src/store/apps/defaultForm';
+import toast from 'react-hot-toast';
 
 const columns = [
   { label: 'Building Name', field: 'name', sortAble: true },
@@ -119,9 +120,22 @@ const BuildingList = () => {
   };
 
   // Confirm delete action
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (selectedBuilding) {
-      dispatch(deleteBuilding(selectedBuilding.id));
+      setLoading(true);
+      try {
+        const result = await dispatch(deleteBuilding(selectedBuilding.id));
+        if (result && result.type && result.type.endsWith('/fulfilled')) {
+          await dispatch(fetchBuildingDT(buildingFilter));
+          toast.success('Data Deleted');
+        }
+      } catch (error) {
+        toast.error('Delete Data Unsuccessful');
+        console.error('Error deleting Building:', error);
+      }
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
     }
     handleCloseDeleteDialog();
   };

@@ -151,6 +151,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
 
       Object.entries(formData).forEach(([key, value]) => {
         if (
+          key!== 'applicationId' &&
           key !== 'image' &&
           key !== 'createdBy' &&
           key !== 'createdAt' &&
