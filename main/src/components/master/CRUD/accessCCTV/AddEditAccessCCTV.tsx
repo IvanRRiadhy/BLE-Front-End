@@ -46,6 +46,8 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
   const dispatch: AppDispatch = useDispatch();
 
   const handleClickOpen = async () => {
+    setLoading(true);
+    setFormErrors({});
     if (type === 'edit' && cctv) {
       if (!cctv.id) {
         await dispatch(fetchAccessCCTVDT(CCTVFilter));

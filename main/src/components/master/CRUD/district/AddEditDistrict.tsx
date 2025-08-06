@@ -46,6 +46,8 @@ const AddEditDistrict = ({ type, district }: FormType) => {
   const dispatch: AppDispatch = useDispatch();
 
   const handleClickOpen = () => {
+    setLoading(true);
+    setFormErrors({});
     if (type === 'edit' && district) {
       if (!district.id) {
         dispatch(fetchDistrictDT(districtFilter));

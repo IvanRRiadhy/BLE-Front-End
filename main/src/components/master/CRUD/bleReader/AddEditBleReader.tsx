@@ -53,6 +53,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
   }, [dispatch]);
 
   const handleClickOpen = () => {
+    setLoading(true);
     setFormErrors({});
     if (type === 'edit' && bleReader) {
       if (!bleReader.id) {

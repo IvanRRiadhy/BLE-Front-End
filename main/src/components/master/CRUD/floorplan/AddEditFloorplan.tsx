@@ -55,6 +55,8 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
   const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floorAll);
 
   const handleClickOpen = () => {
+    setLoading(true);
+    setFormErrors({});
     if (type === 'edit' && floorplan) {
       if (!floorplan.id) {
         dispatch(fetchFloorplanDT(floorplanFilter));

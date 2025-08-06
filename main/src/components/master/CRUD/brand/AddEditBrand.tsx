@@ -42,6 +42,8 @@ const AddEditBrand = ({ type, brand }: FormType) => {
   const dispatch: AppDispatch = useDispatch();
 
   const handleClickOpen = () => {
+    setLoading(true);
+    setFormErrors({});
     if (type === 'edit' && brand) {
       if (!brand.id) {
         dispatch(fetchBrandDT(brandFilter));

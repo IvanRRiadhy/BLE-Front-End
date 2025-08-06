@@ -56,6 +56,8 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
   const visitorFilter = useSelector((state: RootState) => state.visitorReducer.visitorFilter);
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = () => {
+    setLoading(true);
+    setFormErrors({});
     if (type === 'edit' && visitor) {
       if (!visitor.id) {
         dispatch(fetchVisitorDT(visitorFilter));

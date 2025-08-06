@@ -59,6 +59,8 @@ const AddEditFloor = ({ type, floor }: FormType) => {
   }, [dispatch]);
 
   const handleClickOpen = () => {
+    setLoading(true);
+    setFormErrors({});
     if (type === 'edit' && floor) {
       if (!floor.id) {
         dispatch(fetchFloorDT(floorFilter));

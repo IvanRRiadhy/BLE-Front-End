@@ -56,6 +56,8 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
   }, [dispatch]);
 
   const handleClickOpen = () => {
+    setLoading(true);
+    setFormErrors({});
     if (type === 'edit' && blacklist) {
       if (!blacklist.id) {
         dispatch(fetchBlacklistDT(blacklistFilter));

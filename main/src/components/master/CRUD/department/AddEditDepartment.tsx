@@ -48,6 +48,8 @@ const AddEditDepartment = ({ type, department }: FormType) => {
   const dispatch: AppDispatch = useDispatch();
 
   const handleClickOpen = () => {
+    setLoading(true);
+    setFormErrors({});
     if (type === 'edit' && department) {
       if (!department.id) {
         dispatch(fetchDepartmentDT(departmentFilter));

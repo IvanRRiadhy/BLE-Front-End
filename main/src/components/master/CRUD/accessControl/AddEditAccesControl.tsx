@@ -55,6 +55,8 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
   }, [dispatch]);
 
   const handleClickOpen = async () => {
+    setLoading(true);
+    setFormErrors({});
     if (type === 'edit' && accessControl) {
       if (!accessControl.id) {
         await dispatch(fetchAccessControlsDT(accessControlFilter));

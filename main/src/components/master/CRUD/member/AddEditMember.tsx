@@ -71,6 +71,8 @@ const AddEditMember = ({ type, member }: FormType) => {
   }, [dispatch]);
 
   const handleClickOpen = () => {
+    setLoading(true);
+    setFormErrors({});
     if (type === 'edit' && member) {
       if (!member.id) {
         dispatch(fetchMemberDT(memberFilter));

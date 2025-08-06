@@ -53,7 +53,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = async () => {
     setLoading(true);
-
+    setFormErrors({});
     if (type === 'edit') {
       if (!building?.id) {
         // You can optionally fetch the building detail here using the ID

@@ -51,6 +51,8 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
   );
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = () => {
+    setLoading(true);
+    setFormErrors({});
     if (type === 'edit' && organization) {
       if (!organization.id) {
         dispatch(fetchOrganizationDT(organizationFilter));
