@@ -23,7 +23,7 @@ export type GetFilter = {
     filters: {
         FloorplanId: string[],
         FloorplanMaskedAreaId?: string[],
-        Type: string[],
+        Type?: number,
     }
 }
 

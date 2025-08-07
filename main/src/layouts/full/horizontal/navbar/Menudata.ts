@@ -18,6 +18,7 @@ import {
   IconAffiliate,
   IconCropLandscape,
   IconBadgeTm,
+  IconUsers,
 } from '@tabler/icons-react';
 import { uniqueId } from 'lodash';
 
@@ -360,6 +361,12 @@ const Menuitems = [
   //           },
     ],
   },
+  {
+    id: uniqueId(),
+    title: 'My Visit',
+    icon: IconUsers,
+    href: '/my-visit/',
+  }
   // {
   //   id: uniqueId(),
   //   title: 'CRUD',

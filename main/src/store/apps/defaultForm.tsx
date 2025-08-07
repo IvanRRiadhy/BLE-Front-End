@@ -17,6 +17,7 @@ import { memberType, GetFilter as MemberFilter } from './crud/member';
 import { OrganizationType, GetFilter as OrganizationFilter } from './crud/organization';
 import { GetFilter as TrackingTransFilter } from './crud/trackingTrans';
 import { VisitorType, GetFilter as VisitorFilter } from './crud/visitor';
+import { TrxVisitorType, GetFilter as TrxVisitorFilter } from './crud/trxVisitor';
 
 //#region AccessCCTV
 export const defaultAccessCCTVForm: CCTVType = {
@@ -287,7 +288,6 @@ export const defaultFloorplanDeviceFilter: FloorplanDeviceFilter = {
   filters: {
     FloorplanId: [],
     FloorplanMaskedAreaId: [],
-    Type: [],
   },
 };
 //#endregion
@@ -419,6 +419,18 @@ export const defaultTrackingTransFilter: TrackingTransFilter = {
 };
 //#endregion
 
+//#region TrxVisitor
+export const defaultTrxVisitorFilter: TrxVisitorFilter = {
+  Draw: 1,
+  Start: 0,
+  Length: 5,
+  SortColumn: 'Status',
+  SortDir: 'desc',
+  searchValue: '',
+  filters: {},
+};
+//#endregion
+
 //#region Visitor
 export const defaultVisitorForm: VisitorType = {
   id: '',
@@ -481,8 +493,8 @@ export const defaultCardFilter: CardFilter = {
   SortDir: 'desc',
   searchValue: '',
   fiilters: {
-    IsUsed: "",
+    IsUsed: '',
     // RegisteredArea: [],
-  }
+  },
 };
 //#endregion

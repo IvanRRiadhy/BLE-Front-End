@@ -10,6 +10,7 @@ import { defaultVisitorFilter } from "../defaultForm";
 
 const API_URL = "/api/Visitor/";
 const API_DT_URL = "/api/Visitor/filter/";
+const FILL_FORM_URL = '/api/Visitor/fill-invitation-form';
 
 export type GetFilter = {
         Draw: number,
@@ -213,6 +214,17 @@ export const fetchVisitorDT = createAsyncThunk(
     }
 )
 
+export const fetchVisitorbyId = (id: string) => async (dispatch: AppDispatch) => {
+    try {
+        const response = await axiosServices.get(`${API_URL}public/${id}`);
+                console.log("Fetch Visitors", response.data?.collection || []);
+        return(response.data.collection.data || []);
+
+    } catch (err) {
+        console.log("Error: ", err);
+    }
+}
+
 export const addVisitor = createAsyncThunk("visitor/addVisitor", async (formData: FormData) => {
     try {
         formData.delete('id');
@@ -246,6 +258,34 @@ export const editVisitor = createAsyncThunk("visitor/editVisitor", async (formDa
         throw error;
     }
 });
+
+export const fillFormVisitor = createAsyncThunk(
+    "visitor/fillFormVisitor",
+    async ({ code, visitorId, applicationId, trxVisitorId, formData }: { code: string, visitorId: string, applicationId: string, trxVisitorId: string, formData: FormData }, thunkAPI) => {
+        try {
+for (const [key, value] of formData.entries()) {
+  console.log(key, value);
+}
+            const response = await axiosServices.post(`${FILL_FORM_URL}`, formData, {
+                params:{
+                    code: code,
+                    visitorId: visitorId,
+                    applicationId: applicationId,
+                    trxVisitorId: trxVisitorId
+                },
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+
+            });
+            console.log("Fill Form Visitor", response.data);
+            return response.data;
+        } catch (error) {
+            console.error("Error submitting form:", error);
+            throw error;
+        }
+    }
+)
 
 export const deleteVisitor = createAsyncThunk("visitor/deleteVisitor", async (visitorId: string) => {
     try {

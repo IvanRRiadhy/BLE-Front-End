@@ -167,6 +167,18 @@ export const addDistrict = createAsyncThunk("districts/addDistrict", async (dist
     }
 });
 
+export const addBatchDistrict = createAsyncThunk("districts/addBatchDistrict", async (districts: DistrictType[], { rejectWithValue }) => {
+    try {
+      const cleanedDistricts = districts.map(({ id, createdBy, createdAt, updatedBy, updatedAt, ...rest }) => rest);
+
+      const response = await axiosServices.post(`${API_URL}batch/`, cleanedDistricts);
+      return response.data;
+    } catch (error: any) {
+        console.error("Error adding district:", error);
+        return rejectWithValue(error.response?.data || "Unknown error");
+    }
+})
+
 export const editDistrict = createAsyncThunk("districts/editDistrict", async (district: DistrictType, { rejectWithValue }) => {
     try {
         const { id, createdBy, createdAt, updatedBy, updatedAt, ...filteredDistrictData } = district;

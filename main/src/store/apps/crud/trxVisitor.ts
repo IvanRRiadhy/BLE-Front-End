@@ -5,6 +5,8 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { VisitorType } from "./visitor";
 import { MaskedAreaType } from "./maskedArea";
+import { defaultTrxVisitorFilter } from "../defaultForm";
+import { memberType } from "./member";
 
 const API_URL = "/api/TrxVisitor/";
 const API_DT_URL = "/api/TrxVisitor/filter/";
@@ -16,6 +18,9 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     searchValue: string,
+    filters:{
+        Status?: number,
+    }
 }
 
 
@@ -59,7 +64,9 @@ export type TrxVisitorType = {
     maskedAreaId: string,
     parkingId: string,
     visitorId: string,
+    memberId: string,
     visitor?: VisitorType,
+    member?: memberType,
     maskedArea?: MaskedAreaType,
 }
 
@@ -78,14 +85,7 @@ const initialState: StateType = {
     TrxVisitorSearch: "",
     TrxVisitorTotalCount: 0,
     TrxVisitorFilteredCount: 0,
-    TrxVisitorFilter: {
-        Draw: 1,
-        Start: 0,
-        Length: 5,
-        SortColumn: "UpdatedAt",
-        SortDir: "desc",
-        searchValue: "",
-    }
+    TrxVisitorFilter: defaultTrxVisitorFilter,
 };
 
 export const TrxVisitorSlice = createSlice({
@@ -104,6 +104,7 @@ export const TrxVisitorSlice = createSlice({
         },
         UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
           state.TrxVisitorFilter = { ...state.TrxVisitorFilter, ...action.payload };
+        //   console.log(JSON.stringify(state.TrxVisitorFilter, null, 2));
         }
     },
     extraReducers: (builder) => {
@@ -138,7 +139,7 @@ export const fetchTrxVisitorDT = createAsyncThunk(
         try{
             const response = await axiosServices.post(`${API_DT_URL}`, filter);
             dispatch(GetTrxVisitors(response.data.collection.data || []));
-            console.log("Fetch TrxVisitors", response.data.collection);
+            // console.log("Fetch TrxVisitors", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching TrxVisitors:", error);

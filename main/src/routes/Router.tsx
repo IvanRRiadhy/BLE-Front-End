@@ -17,6 +17,11 @@ const MonitoringDash = Loadable(lazy(() => import('../views/dashboard/Monitoring
 const MonitoringConfig = Loadable(lazy(() => import('../views/dashboard/MonitoringConfig')));
 const MyVisitDashboard = Loadable(lazy(() => import('../views/MyVisit/MyVisitDashboard')));
 
+/* ****Invitation***** */
+const InvitationForm = Loadable(lazy(() => import('../components/InvitationForm/InvitationForm')));
+const ThankYouPage = Loadable(lazy(() => import('../components/InvitationForm/ThankYouPage')));
+const InvitationPage = Loadable(lazy(() => import('../views/MyVisit/MyVisitInvitation/InvitationPage')));
+
 /* ***Master**** */
 const GatewayApp = Loadable(lazy(() => import('../views/master/gateway/gateway')));
 const MemberTag = Loadable(lazy(() => import('../views/master/tag/memberTag')));
@@ -85,7 +90,7 @@ const Tracking = Loadable(lazy(() => import('../views/apps/Tracking/Tracking')))
 // Evacuation
 const EvacuationDashboard = Loadable(
   lazy(() => import('../views/dashboard/Evacuation/Evacuation')),
-)
+);
 
 // ui components
 const MuiAlert = Loadable(lazy(() => import('../views/ui-components/MuiAlert')));
@@ -260,7 +265,6 @@ const Router = [
       //Dashboard Evacuation
       { path: '/dashboards/evacuation', exact: true, element: <EvacuationDashboard /> },
 
-
       { path: '/master/user', exact: true, element: <User /> },
 
       { path: '/apps/contacts', element: <Contacts /> },
@@ -375,8 +379,9 @@ const Router = [
     path: '/',
     element: <MyVisitLayout />,
     children: [
-      {path: '/my-visit', element: <MyVisitDashboard />},
-    ]
+      { path: '/my-visit', element: <MyVisitDashboard /> },
+      { path: '/my-visit/invite', element: <InvitationPage /> },
+    ],
   },
   {
     path: '/',
@@ -401,6 +406,9 @@ const Router = [
       { path: '/frontend-pages/blog', element: <BlogPage /> },
       { path: '/frontend-pages/blog/detail/:id', element: <BlogPost /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
+      //Invitation Form
+      { path: '/visitor-form', exact: true, element: <InvitationForm /> },
+      { path: '/thank-you', exact: true, element: <ThankYouPage /> },
     ],
   },
 ];

@@ -12,6 +12,7 @@ import { setSessionExpiredHandler } from 'src/utils/axios';
 import SessionExp from 'src/layouts/full/shared/SessionExp';
 import { hydrateEvacState } from 'src/store/customizer/CustomizerSlice';
 import Header from './Header/Header';
+import { Toaster } from 'react-hot-toast';
 
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
@@ -123,6 +124,28 @@ const MyVisitLayout: FC = () => {
           </Box>
         </PageWrapper>
       </MainWrapper>
+      <Toaster
+        position="top-center"
+        containerStyle={{
+          fontSize: '1.15rem',
+          padding: '16px 24px',
+          minWidth: '500px',
+        }}
+        toastOptions={{
+          success: {
+            style: {
+              background: 'darkgreen',
+              color: '#fff',
+            },
+          },
+          error: {
+            style: {
+              background: 'darkred',
+              color: '#fff',
+            },
+          },
+        }}
+      />
     </>
   );
 };

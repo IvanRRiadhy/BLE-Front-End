@@ -21,7 +21,7 @@ type Props = {
 };
 
 
-const VisitorListItem = ({ onTagClick, trx, active }: Props) => {
+const TrxVisitorListItem = ({ onTagClick, trx, active }: Props) => {
   const customizer = useSelector((state) => state.customizer);
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -54,4 +54,4 @@ const VisitorListItem = ({ onTagClick, trx, active }: Props) => {
   );
 };
 
-export default VisitorListItem;
+export default TrxVisitorListItem;

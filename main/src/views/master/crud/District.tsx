@@ -16,6 +16,7 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import DistrictList from 'src/components/master/CRUD/district/DistrictList';
 import AddEditDistrict from 'src/components/master/CRUD/district/AddEditDistrict';
+import BulkAddEditDistrict from 'src/components/master/CRUD/district/BulkAddEditDistrict';
 
 interface cardType {
   icon?: string;
@@ -83,7 +84,10 @@ const District = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="District List" codeModel={<AddEditDistrict type="add" />}>
+          <ParentCard title="District List" codeModel={[
+            <BulkAddEditDistrict type="add" />,
+            <AddEditDistrict type="add" />
+            ]}>
             <DistrictList />
           </ParentCard>
         </Drawer>

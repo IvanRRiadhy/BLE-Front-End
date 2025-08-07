@@ -1,4 +1,4 @@
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -12,7 +12,14 @@ import {
   Typography,
 } from '@mui/material';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
-import { deleteMember, fetchMemberDT, fetchMembers, memberType, SelectMember, UpdateFilter } from 'src/store/apps/crud/member';
+import {
+  deleteMember,
+  fetchMemberDT,
+  fetchMembers,
+  memberType,
+  SelectMember,
+  UpdateFilter,
+} from 'src/store/apps/crud/member';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import TagListItem from './tagListItem';
 import { defaultMemberFilter } from 'src/store/apps/defaultForm';
@@ -25,19 +32,21 @@ const TagList = () => {
 
   const dispatch = useDispatch();
 
-    useEffect(() => {
-      dispatch(UpdateFilter(defaultMemberFilter));
-      try {
-        setLoading(true);
-        dispatch(fetchMemberDT(defaultMemberFilter));
-      } catch (error) {
-        console.error('Error fetching Member data:', error);
-      }
-      setTimeout(() => {
-        setLoading(false);
-      }, 500);
-    }, [dispatch]);
   useEffect(() => {
+    dispatch(UpdateFilter(defaultMemberFilter));
+    setLoading(true);
+    try {
+      console.log('Fetching on Start');
+      dispatch(fetchMemberDT(defaultMemberFilter));
+    } catch (error) {
+      console.error('Error fetching Member data:', error);
+    }
+    setTimeout(() => {
+      setLoading(false);
+    }, 500);
+  }, [dispatch]);
+  useEffect(() => {
+    console.log('Fetching on Filter');
     dispatch(fetchMemberDT(memberFilter));
   }, [memberFilter, dispatch]);
 
@@ -147,7 +156,13 @@ const TagList = () => {
       </Box>
 
       <List>
-        <Box sx={{ height: { lg: 'calc(100vh - 260px)', md: '100vh' }, maxHeight: '800px', overflow: 'auto' }}>
+        <Box
+          sx={{
+            height: { lg: 'calc(100vh - 260px)', md: '100vh' },
+            maxHeight: '800px',
+            overflow: 'auto',
+          }}
+        >
           {isManySelect && (
             <>
               <Box

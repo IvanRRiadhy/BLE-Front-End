@@ -33,6 +33,8 @@ import {
   IconIdBadge,
   IconDeviceIpad,
   IconBadgeTm,
+  IconPlane,
+  IconSend,
 } from '@tabler/icons-react';
 
 const Menuitems: MenuitemsType[] = [    
@@ -50,6 +52,12 @@ const Menuitems: MenuitemsType[] = [
     {
         navlabel: true,
         subheader: 'Apps',
+    },
+    {
+      id: uniqueId(),
+      title: 'Invite',
+      icon: IconSend,
+      href: '/my-visit/invite',
     }
   ];
 

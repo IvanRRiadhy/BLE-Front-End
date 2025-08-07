@@ -93,7 +93,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
       (identity) => identity.value === formData.identityType,
     );
 
-    if(!formData.identityType?.trim()) errors.identityType = 'Identity Type is required';
+    if (!formData.identityType?.trim()) errors.identityType = 'Identity Type is required';
 
     // Only require identityId if identityType is valid
     if (formData.identityType && isValidIdentityType) {
@@ -202,13 +202,8 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
       )}
       {type === 'add' && (
         <Tooltip title="Add Visitor">
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<IconPlus size={20} />}
-            onClick={handleClickOpen}
-          >
-            Add Visitor
+          <Button variant="contained"  color="primary" size="small"  onClick={handleClickOpen}>
+            <IconPlus size={20} />
           </Button>
         </Tooltip>
       )}

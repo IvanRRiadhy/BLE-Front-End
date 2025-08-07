@@ -4,7 +4,7 @@ import PageContainer from 'src/components/container/PageContainer';
 // import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import AppCard from 'src/components/shared/AppCard';
 import VisitorFilter from 'src/components/master/Tag/visitor/visitorFilter';
-import VisitorList from 'src/components/master/Tag/visitor/visitorList';
+import VisitorList from 'src/components/master/Tag/visitor/trxvisitorlist/trxVisitorList';
 import VisitorContent from 'src/components/master/Tag/visitor/visitorContent';
 import VisitorSearch from 'src/components/master/Tag/visitor/visitorSearch';
 

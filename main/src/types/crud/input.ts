@@ -105,6 +105,15 @@ export const orgType: inputDataType[] = [
     PreCheckin: IconClockCheck,
     Preregist: IconCircleDashedCheck,
   }
+export const visitorStatusEnumMap: Record<string, number> = {
+  Waiting: 1,
+  Checkin: 2,
+  Checkout: 3,
+  Denied: 4,
+  Block: 5,
+  PreCheckin: 6,
+  Preregist: 7,
+};
   
   export const alarmStatus: inputDataType[] = [
     { label: "Please select Status", value: '', disabled: true},

@@ -139,7 +139,7 @@ export const fetchTrackingTrans = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(`${API_URL}`);
         dispatch(GetAllTrackingTrans(response.data?.collection?.data || []));
-        // console.log("Tracking transactions fetched successfully: ", response.data);
+        console.log("Tracking transactions fetched successfully: ", response.data);
     } catch (error) {
         console.log(error);
     }
@@ -162,7 +162,7 @@ export const fetchTrackingTransDT = createAsyncThunk(
             return rejectWithValue("Filter contains 'Empty', skipping request");
         }
             const response = await axiosServices.post(API_DT_URL, filter);
-            // console.log("Fetch trackingTrans", response.data.collection);
+            console.log("Fetch trackingTrans", response.data.collection);
             dispatch(GetTrackingTrans(response.data.collection.data || []));
             return response.data.collection;
         } catch (error: any) {
