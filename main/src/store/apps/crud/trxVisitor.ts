@@ -58,7 +58,7 @@ export type TrxVisitorType = {
     visitorPeriodStart: string,
     visitorPeriodEnd: string,
     vehiclePlateNumber: string,
-    isInvitationAccepted: string,
+    isInvitationAccepted: boolean,
     invitationCode: string,
     remarks: string,
     maskedAreaId: string,
@@ -67,7 +67,7 @@ export type TrxVisitorType = {
     memberId: string,
     visitor?: VisitorType,
     member?: memberType,
-    maskedArea?: MaskedAreaType,
+    maskedarea?: MaskedAreaType,
 }
 
 interface StateType {
@@ -139,7 +139,7 @@ export const fetchTrxVisitorDT = createAsyncThunk(
         try{
             const response = await axiosServices.post(`${API_DT_URL}`, filter);
             dispatch(GetTrxVisitors(response.data.collection.data || []));
-            // console.log("Fetch TrxVisitors", response.data.collection);
+            console.log("Fetch TrxVisitors", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching TrxVisitors:", error);

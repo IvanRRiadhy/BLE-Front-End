@@ -194,9 +194,9 @@ const InvitationList = () => {
                         <TableCell>{trx.visitor?.name}</TableCell>
                         <TableCell>{trx.visitorPeriodStart}</TableCell>
                         <TableCell>{trx.visitorPeriodEnd}</TableCell>
-                        <TableCell>{trx.maskedArea?.name}</TableCell>
+                        <TableCell>{trx.maskedarea?.name}</TableCell>
                         <TableCell>{trx.status}</TableCell>
-                        <TableCell>{trx.isInvitationAccepted}</TableCell>
+                        <TableCell>{trx.isInvitationAccepted === true ? 'Yes' : 'No'}</TableCell>
                         <TableCell
                           sx={{
                             position: 'sticky',

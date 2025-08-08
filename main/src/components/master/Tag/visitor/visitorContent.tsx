@@ -31,7 +31,9 @@ import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organi
 const VisitorContent = () => {
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const trxVisitorDetail = useSelector((state: RootState) => state.TrxVisitorReducer.SelectedTrxVisitor);
+  const trxVisitorDetail = useSelector(
+    (state: RootState) => state.TrxVisitorReducer.SelectedTrxVisitor,
+  );
   const visitorDetail: VisitorType | undefined = trxVisitorDetail.visitor;
   const applicationData = useSelector((state: RootState) => state.applicationReducer.applications);
   const districtData = useSelector((state: RootState) => state.districtReducer.districts);
@@ -123,10 +125,10 @@ const VisitorContent = () => {
       },
     )}`;
   };
-  console.log(`${BASE_URL}${visitorDetail?.faceImage}`);
+  // console.log(`${BASE_URL}${visitorDetail?.faceImage}`);
   return (
     <>
-      {visitorDetail ? (
+      {visitorDetail && trxVisitorDetail ? (
         <>
           {/* Header Part */}
           <Box p={3} py={2} display={'flex'} alignItems={'center'}>
@@ -161,37 +163,37 @@ const VisitorContent = () => {
               mb={3}
             >
               <Avatar
-                alt="Member Profile"
-                src={`${BASE_URL}${visitorDetail.faceImage}`}
+                alt="Visitor Face"
+                src={`${BASE_URL}${trxVisitorDetail.visitor?.faceImage}`}
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
               <Typography variant="h4" fontWeight={800}>
-                {visitorDetail.name}
+                {trxVisitorDetail.visitor?.name}
               </Typography>
             </Box>
 
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
-                <Typography>{visitorDetail.email}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.email}</Typography>
                 <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
-                <Typography>{visitorDetail.address}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.address}</Typography>
                 <CustomFormLabel htmlFor="organization">Organization</CustomFormLabel>
                 <Typography>
                   {getOrganizationDisplay(
-                    visitorDetail.organizationName,
-                    visitorDetail.departmentName,
-                    visitorDetail.districtName,
+                    trxVisitorDetail.visitor?.organizationName,
+                    trxVisitorDetail.visitor?.departmentName,
+                    trxVisitorDetail.visitor?.districtName,
                   )}
                 </Typography>
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="phone">Phone</CustomFormLabel>
-                <Typography>{visitorDetail.phone}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.phone}</Typography>
                 <CustomFormLabel htmlFor="gender">Gender</CustomFormLabel>
-                <Typography>{visitorDetail.gender}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.gender}</Typography>
                 <CustomFormLabel htmlFor="status">Status</CustomFormLabel>
-                <Typography>{visitorDetail.isVip ? 'VIP' : 'Normal'}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.isVip ? 'VIP' : 'Normal'}</Typography>
               </Grid>
             </Grid>
             <Typography variant="h5" fontWeight={600} mb={2} mt={2}>
@@ -201,13 +203,13 @@ const VisitorContent = () => {
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="arrival">Arrival</CustomFormLabel>
-                <Typography>{formatTime(visitorDetail.visitorPeriodStart)}</Typography>
+                <Typography>{formatTime(trxVisitorDetail.visitorPeriodStart)}</Typography>
                 <CustomFormLabel htmlFor="end">End</CustomFormLabel>
-                <Typography>{formatTime(visitorDetail.visitorPeriodEnd)}</Typography>
+                <Typography>{formatTime(trxVisitorDetail.visitorPeriodEnd)}</Typography>
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-                <CustomFormLabel htmlFor="regis-date">Verified</CustomFormLabel>
-                <Typography>{visitorDetail.isEmailVerified ? 'Yes' : 'No'}</Typography>
+                <CustomFormLabel htmlFor="accepted">Accepted</CustomFormLabel>
+                <Typography>{trxVisitorDetail.isInvitationAccepted ? 'Yes' : 'No'}</Typography>
               </Grid>
             </Grid>
             <Typography variant="h5" fontWeight={600} mb={2} mt={2}>
@@ -217,13 +219,11 @@ const VisitorContent = () => {
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="person-id">Person ID</CustomFormLabel>
-                <Typography>{visitorDetail.personId}</Typography>
-                <CustomFormLabel htmlFor="identity-Id">Identity ID</CustomFormLabel>
-                <Typography>{visitorDetail.identityId}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.personId}</Typography>
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-                <CustomFormLabel htmlFor="applicationID">Application Name</CustomFormLabel>
-                <Typography>{getAppName(visitorDetail.applicationId)}</Typography>
+                <CustomFormLabel htmlFor="identity-Id">Identity ID</CustomFormLabel>
+                <Typography>{trxVisitorDetail.visitor?.identityId}</Typography>
               </Grid>
             </Grid>
             <Typography variant="h5" fontWeight={600} mb={2} mt={2}>
@@ -233,11 +233,11 @@ const VisitorContent = () => {
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
-                <Typography>{visitorDetail.cardNumber}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.cardNumber}</Typography>
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="ble-card-number">Ble Card Number</CustomFormLabel>
-                <Typography>{visitorDetail.bleCardNumber}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.bleCardNumber}</Typography>
               </Grid>
             </Grid>
           </Box>

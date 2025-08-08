@@ -11,6 +11,7 @@ import { defaultVisitorFilter } from "../defaultForm";
 const API_URL = "/api/Visitor/";
 const API_DT_URL = "/api/Visitor/filter/";
 const FILL_FORM_URL = '/api/Visitor/fill-invitation-form';
+const SEND_INVITATION_URL = '/api/Visitor/batch/send-invitation/';
 
 export type GetFilter = {
         Draw: number,
@@ -240,6 +241,21 @@ export const addVisitor = createAsyncThunk("visitor/addVisitor", async (formData
     }
 });
 
+export const sendInvitation = createAsyncThunk("visitor/sendInvitation", async (payload: any) => {
+    try{
+        console.log(typeof payload);
+        for (const [key, value] of payload.entries()) {
+            console.log(key, value);
+        }
+        const response = await axiosServices.post(`${SEND_INVITATION_URL}`, payload);
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error sending Invitation:", error);
+        throw error;
+    }
+})
+
 export const editVisitor = createAsyncThunk("visitor/editVisitor", async (formData: FormData) => {
     try {
         Object.keys(formData).forEach((key) => {
@@ -254,7 +270,7 @@ export const editVisitor = createAsyncThunk("visitor/editVisitor", async (formDa
         });
         return response.data;
     } catch (error) {
-        console.error("Error editing member:", error);
+        console.error("Error editing Visitor:", error);
         throw error;
     }
 });

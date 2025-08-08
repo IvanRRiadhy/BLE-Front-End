@@ -51,7 +51,7 @@ const InvitationPage = () => {
                       }}
                     >
                       <ParentCard title="Invitation List" codeModel={[
-                        <InviteForm />
+                        <InviteForm key="InviteForm" />
                       ]}>
                         <InvitationList />
                       </ParentCard>

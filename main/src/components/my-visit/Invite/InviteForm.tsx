@@ -14,6 +14,16 @@ import {
   Chip,
   MenuItem,
   DialogActions,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  IconButton,
+  TableBody,
+  Menu,
+  Tab,
+  TableContainer,
+  Paper,
 } from '@mui/material';
 import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -29,10 +39,10 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import utc from 'dayjs/plugin/utc';
-import { IconPlus } from '@tabler/icons-react';
+import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { ChangeEvent, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { fetchVisitorDT, VisitorType } from 'src/store/apps/crud/visitor';
+import { fetchVisitorDT, sendInvitation, VisitorType } from 'src/store/apps/crud/visitor';
 import { AppDispatch, RootState, useSelector } from 'src/store/Store';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
@@ -42,14 +52,15 @@ import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import AddEditVisitor from 'src/components/master/CRUD/visitor/AddEditVisitor';
 import { memberType } from 'src/store/apps/crud/member';
 import { DateTimePicker, renderTimeViewClock } from '@mui/x-date-pickers';
-
+import { defaultVisitorForm } from 'src/store/apps/defaultForm';
+import toast from 'react-hot-toast';
 
 dayjs.extend(utc);
 dayjs.extend(weekday);
 dayjs.extend(localizedFormat);
 dayjs.extend(customParseFormat);
 dayjs.extend(advancedFormat);
-dayjs.locale('id')
+dayjs.locale('id');
 type AreaNode = MaskedAreaType & {
   nodeType: 'area';
   maskedAreas?: never;
@@ -122,6 +133,7 @@ function buildNestedHierarchy(
 
 const InviteForm = () => {
   const dispatch: AppDispatch = useDispatch();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const visitorList = useSelector((state: RootState) => state.visitorReducer.visitors);
   const buildingData = useSelector((state: RootState) => state.buildingReducer.buildingAll);
   const floorData = useSelector((state: RootState) => state.floorReducer.floorAll);
@@ -139,6 +151,7 @@ const InviteForm = () => {
   const [saving, setSaving] = useState(false);
   const [startTime, setStartTime] = useState<Dayjs | null>(dayjs());
   const [endTime, setEndTime] = useState<Dayjs | null>(dayjs());
+  const [openMenu, setOpenMenu] = useState(false);
 
   const toUtcFormatted = (time: dayjs.Dayjs | null) => {
     return time?.utc().format('YYYY-MM-DDTHH:mm:ss.SSS');
@@ -146,7 +159,7 @@ const InviteForm = () => {
 
   const handleClickOpen = () => {
     setLoading(true);
-    setSelectedVisitor([]);
+    setSelectedVisitor([{ ...defaultVisitorForm, name: '', email: '' }]);
     setSelectedMaskedArea('');
     setSelectedMember({} as memberType);
     setSearchVisitor('');
@@ -167,26 +180,46 @@ const InviteForm = () => {
     setOpen(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setLoading(true);
     setSaving(true);
-    const startUtc = toUtcFormatted(startTime);
-    const endUtc = toUtcFormatted(endTime);
-    console.log(
-      'Form Data : ',
-      selectedVisitor,
-      selectedMember,
-      selectedMaskedArea,
-      startUtc,
-      endUtc,
-      notes,
-    );
+
+    const startDate = toUtcFormatted(startTime);
+    const endDate = toUtcFormatted(endTime);
+
+    // Transform into backend's expected shape
+    const payload = selectedVisitor.map((visitor) => ({
+      Email: visitor.email,
+      MaskedAreaId: selectedMaskedArea,
+      VisitorPeriodStart: startDate,
+      VisitorPeriodEnd: endDate,
+      PurposePerson: '7f8b58e0-527e-409f-8046-36c8b24ced16',
+      Agenda: notes,
+    }));
+    let result;
+    try {
+      result = await dispatch(sendInvitation(payload));
+    } catch (error) {
+      console.error('Invitation failed', error);
+    }
+
+    if (result && result.type && result.type.endsWith('/fulfilled')) {
+      toast.success('Invitation sent successfully');
+      setTimeout(() => {
+        setLoading(false);
+        setSaving(false);
+        handleClose();
+      }, 1000);
+    } else {
+      toast.error('Invitation failed');
+    }
+
     setTimeout(() => {
       setLoading(false);
       setSaving(false);
-      setOpen(false);
     }, 1000);
   };
+
   const buildingHierarchy = buildNestedHierarchy(
     buildingData,
     floorData,
@@ -239,6 +272,30 @@ const InviteForm = () => {
   useEffect(() => {
     dispatch(fetchVisitorDT({ ...visitorFilter, length: 999, searchValue: searchVisitor }));
   }, [searchVisitor]);
+  const isRegisteredVisitor = (visitor: VisitorType) => {
+    return !!visitor.id; // registered visitors have a defined ID
+  };
+  const handleAddRow = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+    setOpenMenu(true);
+  };
+  const handleChangeVisitorField = (index: number, field: keyof VisitorType, value: string) => {
+    setSelectedVisitor((prev) => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
+        [field]: value,
+      };
+      return updated;
+    });
+  };
+  const handleRemoveRow = (indexToRemove: number) => {
+    setSelectedVisitor((prev) => prev.filter((_, index) => index !== indexToRemove));
+  };
+  const handleCloseMenu = () => {
+    setOpenMenu(false);
+    setAnchorEl(null);
+  };
 
   return (
     <>
@@ -253,7 +310,7 @@ const InviteForm = () => {
         </Button>
       </Tooltip>
       {!loading ? (
-        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xl">
           <DialogTitle>
             <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
               Invite
@@ -261,174 +318,72 @@ const InviteForm = () => {
             <Divider />
           </DialogTitle>
           <DialogContent>
-            <Grid container spacing={2}>
-              {/* Visitor Input */}
-              <Grid container spacing={2} alignItems="center" justifyContent="center">
-                <Grid>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexWrap: 'wrap',
-                      gap: 2,
-                      minWidth: '750px',
-                      maxWidth: '800px',
-                      mb: 1,
-                      ml: 3,
-                    }}
-                  >
-                    <Box sx={{ flexGrow: 0 }}>
-                      <Autocomplete
-                        multiple
-                        id="visitor-select"
-                        options={visitorList}
-                        value={selectedVisitor}
-                        onChange={(event, newValue) => {
-                          setSelectedVisitor(newValue);
-                        }}
-                        getOptionLabel={(option) => option.name || ''}
-                        isOptionEqualToValue={(option, value) => option.id === value.id}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="outlined"
-                            placeholder="Search or select visitors"
-                            fullWidth
-                          />
-                        )}
-                        renderTags={(tagValue, getTagProps) =>
-                          tagValue.map((option, index) => (
-                            <Chip label={option.name} {...getTagProps({ index })} key={option.id} />
-                          ))
-                        }
-                        renderOption={(props, option) => (
-                          <li {...props} key={option.id}>
-                            <strong>{option.name}</strong>
-                            <br />
-                            <small>{option.cardNumber}</small>
-                          </li>
-                        )}
-                        sx={{
-                          backgroundColor: 'white',
-                          flex: 1,
-                          minWidth: '500px',
-                        }}
-                      />
-                    </Box>
-
-                    <AddEditVisitor type="add" />
-                  </Box>
-                </Grid>
-              </Grid>
-
-              {/* Time Input */}
-              <Grid container size={12} spacing={2} px={3} mt={-4}>
-                <Grid size={12}>
-                  <CustomFormLabel> Visit Time </CustomFormLabel>
-                </Grid>
-                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="id">
-                  {/* Start Time */}
-                  <Grid size={6}>
-                    {/* <CustomClockInput
+            <Grid container spacing={2} alignItems={'flex-start'}>
+              <Grid container size={7} height={'550px'}>
+                {/* Time Input */}
+                <Grid container size={12} spacing={2} px={3} mt={0}>
+                  <Grid size={12}>
+                    <CustomFormLabel> Visit Time </CustomFormLabel>
+                  </Grid>
+                  <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="id">
+                    {/* Start Time */}
+                    <Grid size={6}>
+                      <DateTimePicker
                         label="Start Time"
-                        type={['time', 'date']}
                         value={startTime}
                         onChange={setStartTime}
-                      /> */}
-                    <DateTimePicker
-                      label="Start Time"
-                      value={startTime}
-                      onChange={setStartTime}
-                      
-                      ampm={false}
+                        ampm={false}
                         format="ddd, DD - MMM - YYYY, HH:mm"
-                      viewRenderers={{
-                        hours: renderTimeViewClock,
-                        minutes: renderTimeViewClock,
-                        seconds: renderTimeViewClock,
-                      }}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                        }
-                      }}
-                    />
-                  </Grid>
-                  {/* End Time */}
-                  <Grid size={6}>
-                    <DateTimePicker
-                      label="End Time"
-                      value={endTime}
-                      onChange={setEndTime}
-                      
-                      ampm={false}
+                        viewRenderers={{
+                          hours: renderTimeViewClock,
+                          minutes: renderTimeViewClock,
+                          seconds: renderTimeViewClock,
+                        }}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                          },
+                        }}
+                      />
+                    </Grid>
+                    {/* End Time */}
+                    <Grid size={6}>
+                      <DateTimePicker
+                        label="End Time"
+                        value={endTime}
+                        onChange={setEndTime}
+                        ampm={false}
                         format="ddd, DD - MMM - YYYY, HH:mm"
-                      viewRenderers={{
-                        hours: renderTimeViewClock,
-                        minutes: renderTimeViewClock,
-                        seconds: renderTimeViewClock,
-                      }}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                        }
-                      }}
-                    />
-                  </Grid>
-                </LocalizationProvider>
-              </Grid>
-              {/* Purpose Input */}
-              <Grid container size={12} spacing={2} px={3} mb={2} mt={-2}>
-                <Grid size={6}>
-                  {/* Member Input */}
-                  {/* <CustomFormLabel> Purpose Visit </CustomFormLabel>
-                    <CustomSelect
-                      name="selectedMember"
-                      value={selectedMember?.id || ''}
-                      onChange={(event: ChangeEvent<{ value: unknown }>) => {
-                        const memberId = event.target.value;
-                        const selected = members.find((m) => m.id === memberId);
-                        setSelectedMember(selected || ({} as memberType));
-                      }}
-                      fullWidth
-                      variant="outlined"
-                    >
-                      <MenuItem value="" disabled>
-                        Select Member
-                      </MenuItem>
-                      {members.map((member) => (
-                        <MenuItem key={member.id} value={member.id}>
-                          {member.name}
-                        </MenuItem>
-                      ))}
-                    </CustomSelect> */}
-                  {/* Notes Input */}
-                  <CustomFormLabel> Notes </CustomFormLabel>
-                  <CustomTextField
-                    id="notes"
-                    name="notes"
-                    value={notes}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setNotes(e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    multiline
-                    minRows={3}
-                    maxRows={6}
-                  />
+                        viewRenderers={{
+                          hours: renderTimeViewClock,
+                          minutes: renderTimeViewClock,
+                          seconds: renderTimeViewClock,
+                        }}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                          },
+                        }}
+                      />
+                    </Grid>
+                  </LocalizationProvider>
                 </Grid>
-                <Grid size={6}>
+                {/* Purpose Input */}
+                <Grid container size={12} spacing={2} px={3} mb={2} mt={-2}>
+                  {/* Notes Input */}
+
                   <CustomFormLabel>Area(s) to Visit</CustomFormLabel>
                   <div
                     style={{
                       border: '1px solid #ced4da',
                       borderRadius: 4,
                       padding: 8,
-                      minHeight: 117,
-                      maxHeight: 176,
+                      minHeight: 180,
+                      maxHeight: 250,
                       background: '#fafbfc',
                       display: 'flex',
                       flexDirection: 'column',
+                      width: '100%',
                     }}
                   >
                     <div style={{ flex: 1, overflowY: 'auto' }}>
@@ -449,6 +404,131 @@ const InviteForm = () => {
                       </Typography>
                     </div>
                   </div>
+                  <CustomFormLabel> Notes </CustomFormLabel>
+                  <CustomTextField
+                    id="notes"
+                    name="notes"
+                    value={notes}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setNotes(e.target.value)}
+                    variant="outlined"
+                    fullWidth
+                    multiline
+                    minRows={3}
+                    maxRows={3}
+                  />
+                </Grid>
+              </Grid>
+              <Grid container size={5}>
+                {/* Visitor Input */}
+                <Grid container spacing={2} alignItems="flex-start" justifyContent="center">
+                  <Grid>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexWrap: 'wrap',
+                        gap: 2,
+                        width: '100%',
+                        mb: 1,
+                      }}
+                    >
+                      <Box sx={{ width: '100%', px: 3, pt: 2 }}>
+                        <TableContainer
+                          component={Paper}
+                          sx={{ width: '100%', maxHeight: '550px' }}
+                        >
+                          <Table stickyHeader sx={{ width: '100%', tableLayout: 'fixed' }}>
+                            <TableHead>
+                              <TableRow>
+                                <TableCell
+                                  sx={{
+                                    position: 'sticky',
+                                    width: '44%',
+                                    top: 0,
+                                    backgroundColor: '#fff', // or theme.palette.background.paper
+                                    zIndex: 2,
+                                  }}
+                                >
+                                  <Typography fontWeight={600}>Visitor Name</Typography>
+                                </TableCell>
+                                <TableCell
+                                  sx={{
+                                    position: 'sticky',
+                                    width: '44%',
+                                    top: 0,
+                                    backgroundColor: '#fff', // or theme.palette.background.paper
+                                    zIndex: 2,
+                                  }}
+                                >
+                                  <Typography fontWeight={600}>Visitor Email</Typography>
+                                </TableCell>
+                                <TableCell
+                                  sx={{
+                                    position: 'sticky',
+                                    right: 0,
+                                    width: 25,
+                                    top: 0,
+                                    backgroundColor: '#fff', // or theme.palette.background.paper
+                                    zIndex: 2,
+                                  }}
+                                >
+                                  <Tooltip title="Add row">
+                                    <IconButton onClick={handleAddRow}>
+                                      <IconPlus size={20} />
+                                    </IconButton>
+                                  </Tooltip>
+                                </TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {selectedVisitor.map((visitor, index) => {
+                                const isRegistered = isRegisteredVisitor(visitor);
+
+                                return (
+                                  <TableRow
+                                    key={index}
+                                    sx={{ backgroundColor: isRegistered ? '#f5f5f5' : 'inherit' }}
+                                  >
+                                    <TableCell>
+                                      <TextField
+                                        value={visitor.name || ''}
+                                        onChange={(e) =>
+                                          handleChangeVisitorField(index, 'name', e.target.value)
+                                        }
+                                        fullWidth
+                                        disabled={isRegistered}
+                                      />
+                                    </TableCell>
+                                    <TableCell>
+                                      <TextField
+                                        value={visitor.email || ''}
+                                        onChange={(e) =>
+                                          handleChangeVisitorField(index, 'email', e.target.value)
+                                        }
+                                        fullWidth
+                                        disabled={isRegistered}
+                                      />
+                                    </TableCell>
+                                    <TableCell>
+                                      <Tooltip title="Delete row">
+                                        <IconButton
+                                          color="error"
+                                          onClick={() => handleRemoveRow(index)}
+                                        >
+                                          <IconTrash size={20} />
+                                        </IconButton>
+                                      </Tooltip>
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      </Box>
+                    </Box>
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
@@ -481,6 +561,66 @@ const InviteForm = () => {
           </DialogContent>
         </Dialog>
       )}
+      <Menu
+        anchorEl={anchorEl}
+        open={openMenu}
+        onClose={handleCloseMenu}
+        PaperProps={{
+          sx: { maxHeight: 300, width: 300 },
+        }}
+      >
+        {/* Sticky Add New Visitor */}
+        <MenuItem
+          onClick={() => {
+            setSelectedVisitor([
+              ...selectedVisitor,
+              { ...defaultVisitorForm, name: '', email: '' },
+            ]);
+            handleCloseMenu();
+          }}
+          sx={{
+            position: 'sticky',
+            top: 0,
+            backgroundColor: '#f5f5f5',
+            zIndex: 1,
+            fontWeight: 'bold',
+          }}
+        >
+          ➕ Add New Visitor
+        </MenuItem>
+
+        {/* Visitor List */}
+        {visitorList.map((v) => (
+          <MenuItem
+            key={v.id}
+            onClick={() => {
+              setSelectedVisitor((prev) => {
+                // Check if only 1 row, and it's empty
+                if (
+                  prev.length === 1 &&
+                  !prev[0].id && // no id means it's a dummy row
+                  !prev[0].email &&
+                  !prev[0].name
+                ) {
+                  return [v]; // replace the dummy
+                } else {
+                  return [...prev, v]; // append new visitor
+                }
+              });
+              handleCloseMenu();
+            }}
+          >
+            <Box>
+              <Typography variant="body2" fontWeight={600}>
+                {v.name}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {v.cardNumber || v.email}
+              </Typography>
+            </Box>
+          </MenuItem>
+        ))}
+      </Menu>
     </>
   );
 };
@@ -513,6 +653,7 @@ const renderTreeItems = (
           variant="body2"
           sx={{
             fontWeight: isLeaf ? 400 : 500,
+            fontSize: isLeaf ? '0.875rem' : '0.875rem',
             color: isSelected ? 'primary.main' : isAncestor ? 'secondary.main' : 'inherit',
             cursor: isLeaf ? 'pointer' : 'default',
             backgroundColor: isSelected || isAncestor ? 'rgba(25, 118, 210, 0.08)' : 'transparent',
