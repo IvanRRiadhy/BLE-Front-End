@@ -20,8 +20,9 @@ import {
 import AddEditVisitor from '../../CRUD/visitor/AddEditVisitor';
 import { SetVisibilityFilter } from 'src/store/apps/crud/visitor';
 import VisitorRegister from './visitorregister/visitorRegister';
-import { UpdateFilter } from 'src/store/apps/crud/trxVisitor';
+import { SelectTrxVisitor, UpdateFilter } from 'src/store/apps/crud/trxVisitor';
 import InvitePage from 'src/components/my-visit/Invite/InviteForm';
+import { useEffect } from 'react';
 
 interface DataType {
   id: string | number;
@@ -106,7 +107,7 @@ const VisitorFilter = () => {
         const currentValue = currentFilters.Status;
 
         const newValue = currentValue === mappedValue ? undefined : mappedValue;
-
+        console.log(newValue);
         dispatch(UpdateFilter({ filters: { ...currentFilters, Status: newValue } }));
         break;
       }
@@ -166,7 +167,10 @@ const VisitorFilter = () => {
                   filter.category === 'status' &&
                   trxVisitorFilter.Status === visitorStatusEnumMap[filter.filter!]
                 }
-                onClick={() => handleFilter(`${filter.filter}`, filter.category)}
+                onClick={() => {
+                  handleFilter(`${filter.filter}`, filter.category);
+                  dispatch(SelectTrxVisitor(''));
+                }}
                 key={filter.id}
               >
                 <ListItemIcon sx={{ minWidth: '30px', color: filter.color }}>

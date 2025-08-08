@@ -279,6 +279,7 @@ export const fillFormVisitor = createAsyncThunk(
     "visitor/fillFormVisitor",
     async ({ code, visitorId, applicationId, trxVisitorId, formData }: { code: string, visitorId: string, applicationId: string, trxVisitorId: string, formData: FormData }, thunkAPI) => {
         try {
+            console.log(code,visitorId, applicationId, trxVisitorId);
 for (const [key, value] of formData.entries()) {
   console.log(key, value);
 }

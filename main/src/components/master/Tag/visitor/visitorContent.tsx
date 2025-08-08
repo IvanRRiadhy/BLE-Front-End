@@ -17,6 +17,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Backdrop,
+  CircularProgress,
 } from '@mui/material';
 import { masterVisitorType, deleteVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import AddEditVisitor from '../../CRUD/visitor/AddEditVisitor';
@@ -27,6 +29,31 @@ import { useTranslation } from 'react-i18next';
 import { DepartmentType, fetchDepartments } from 'src/store/apps/crud/department';
 import { DistrictType, fetchDistricts } from 'src/store/apps/crud/district';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
+import { visitorStatusEnumMap } from 'src/types/crud/input';
+import {
+  fetchTrxVisitorDT,
+  SelectTrxVisitor,
+  UpdateFilter,
+  visitorStatusChange,
+} from 'src/store/apps/crud/trxVisitor';
+import toast from 'react-hot-toast';
+import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
+import { defaultTrxVisitorFilter } from 'src/store/apps/defaultForm';
+import { createPortal } from 'react-dom';
+type ChipColor = 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
+
+// Map enum value to MUI Chip color
+const visitorStatusColorMap: Record<number, ChipColor> = {
+  0: 'default',
+  1: 'success',
+  2: 'primary',
+  3: 'warning',
+  4: 'error',
+  5: 'default',
+  6: 'secondary',
+  7: 'info',
+};
+
 
 const VisitorContent = () => {
   const { t } = useTranslation();
@@ -41,14 +68,25 @@ const VisitorContent = () => {
   const organizationData = useSelector(
     (state: RootState) => state.organizationReducer.organizations,
   );
+  const [reason, setReason] = useState('');
+  const [openReasonMenu, setOpenReasonMenu] = useState(false);
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   // const theme = useTheme();
 
   useEffect(() => {
-    dispatch(fetchApplications());
-    dispatch(fetchDistricts());
-    dispatch(fetchDepartments());
-    dispatch(fetchOrganizations());
+    setLoading(true);
+    try {
+      dispatch(fetchApplications());
+      dispatch(fetchDistricts());
+      dispatch(fetchDepartments());
+      dispatch(fetchOrganizations());
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   }, [dispatch]);
 
   const getAppName = (appId: string) => {
@@ -125,13 +163,157 @@ const VisitorContent = () => {
       },
     )}`;
   };
+
+  const handleCheckin = async () => {
+    setLoading(true);
+    if (!trxVisitorDetail.id) {
+      setLoading(false);
+      toast.error('Visitor not found');
+      return;
+    }
+    try {
+      const result = await dispatch(
+        visitorStatusChange({ trxVisitorId: trxVisitorDetail.id, status: 'checkin' }),
+      );
+      if (result && result.type && result.type.endsWith('/fulfilled')) {
+        toast.success('Visitor checked in successfully');
+        dispatch(UpdateFilter(defaultTrxVisitorFilter));
+        await dispatch(fetchTrxVisitorDT(defaultTrxVisitorFilter));
+        dispatch(SelectTrxVisitor(trxVisitorDetail.id));
+      } else {
+        toast.error('Error checking in visitor');
+      }
+    } catch (error) {
+      toast.error('Error checking in visitor');
+      console.error('Error checking in visitor:', error);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+    }
+  };
+  const handleCheckout = async () => {
+    setLoading(true);
+    if (!trxVisitorDetail.id) {
+      setLoading(false);
+      toast.error('Visitor not found');
+      return;
+    }
+    try {
+      const result = await dispatch(
+        visitorStatusChange({ trxVisitorId: trxVisitorDetail.id, status: 'checkout' }),
+      );
+      if (result && result.type && result.type.endsWith('/fulfilled')) {
+        toast.success('Visitor checked out successfully');
+        dispatch(UpdateFilter(defaultTrxVisitorFilter));
+        await dispatch(fetchTrxVisitorDT(defaultTrxVisitorFilter));
+        dispatch(SelectTrxVisitor(trxVisitorDetail.id));
+      } else {
+        toast.error('Error checking out visitor');
+      }
+    } catch (error) {
+      toast.error('Error checking out visitor');
+      console.error('Error checking out visitor:', error);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+    }
+  };
+  const handleDeny = async () => {
+    setLoading(true);
+    if (!trxVisitorDetail.id) {
+      setLoading(false);
+      toast.error('Visitor not found');
+      return;
+    }
+    try {
+      const result = await dispatch(
+        visitorStatusChange({ trxVisitorId: trxVisitorDetail.id, status: 'denied' }),
+      );
+      if (result && result.type && result.type.endsWith('/fulfilled')) {
+        toast.success('Visitor denied successfully');
+        dispatch(UpdateFilter(defaultTrxVisitorFilter));
+        await dispatch(fetchTrxVisitorDT(defaultTrxVisitorFilter));
+        dispatch(SelectTrxVisitor(trxVisitorDetail.id));
+      } else {
+        toast.error('Error denying visitor');
+      }
+    } catch (error) {
+      toast.error('Error denying visitor');
+      console.error('Error denying visitor:', error);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+        handleCloseReasonMenu();
+      }, 500);
+    }
+  };
+  const handleBlock = async () => {
+    setLoading(true);
+    if (!trxVisitorDetail.id) {
+      setLoading(false);
+      toast.error('Visitor not found');
+      return;
+    }
+    try {
+      const result = await dispatch(
+        visitorStatusChange({ trxVisitorId: trxVisitorDetail.id, status: 'blocked' }),
+      );
+      if (result && result.type && result.type.endsWith('/fulfilled')) {
+        toast.success('Visitor blocked successfully');
+        dispatch(UpdateFilter(defaultTrxVisitorFilter));
+        await dispatch(fetchTrxVisitorDT(defaultTrxVisitorFilter));
+        dispatch(SelectTrxVisitor(trxVisitorDetail.id));
+      } else {
+        toast.error('Error blocking visitor');
+      }
+    } catch (error) {
+      toast.error('Error blocking visitor');
+      console.error('Error blocking visitor:', error);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+        handleCloseReasonMenu();
+      }, 500);
+    }
+  };
+
+  const handleCloseReasonMenu = () => {
+    setReason('');
+    setOpenReasonMenu(false);
+  };
+  const handleConfirmReason = () => {
+    if (trxVisitorDetail.status === 'Checkin') {
+      // block action
+      handleBlock();
+    } else {
+      // deny action
+      handleDeny();
+    }
+  };
+  const statusValue = trxVisitorDetail?.status
+    ? visitorStatusEnumMap[trxVisitorDetail.status]
+    : undefined;
+  const chipColor = statusValue !== undefined ? visitorStatusColorMap[statusValue] : 'default';
+
+  console.log(statusValue, chipColor);
   // console.log(`${BASE_URL}${visitorDetail?.faceImage}`);
   return (
     <>
       {visitorDetail && trxVisitorDetail ? (
         <>
           {/* Header Part */}
-          <Box p={3} py={2} display={'flex'} alignItems={'center'}>
+          <Box
+            p={3}
+            py={2}
+            display={'flex'}
+            alignItems={'center'}
+            sx={{
+              backgroundColor: (theme) =>
+                chipColor !== 'default' ? theme.palette[chipColor].main : theme.palette.grey[300],
+            }}
+          >
             <Typography variant="h4">Visitor Details</Typography>
             <Stack gap={0} direction="row" ml={'auto'}>
               <Tooltip title="Edit">
@@ -145,6 +327,7 @@ const VisitorContent = () => {
             </Stack>
           </Box>
           <Divider />
+
           {/* Table Part */}
 
           <Box
@@ -155,22 +338,66 @@ const VisitorContent = () => {
             }}
             p={5}
           >
+            {/* Avatar + Actions */}
             <Box
               display="flex"
               flexDirection="column"
               alignItems="center"
               justifyContent="center"
               mb={3}
+              sx={{ position: 'relative' }} // <-- make this the positioning context
             >
               <Avatar
                 alt="Visitor Face"
                 src={`${BASE_URL}${trxVisitorDetail.visitor?.faceImage}`}
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
+
+              {/* Floating actions (hidden if checked-out) */}
+              {(trxVisitorDetail?.status === 'Checkin' ||
+                trxVisitorDetail?.status === 'Preregist') && (
+                <Box
+                  sx={{
+                    position: { xs: 'static', md: 'absolute' }, // stack on small screens
+                    top: { md: 0 }, // align with avatar top
+                    left: { md: 0 }, // stick to top-right
+                    zIndex: 2,
+                  }}
+                >
+                  <Stack spacing={1} direction="column" alignItems="flex-start">
+                    <Button
+                      size="large"
+                      variant="contained"
+                      color={trxVisitorDetail.status === 'Checkin' ? 'warning' : 'success'}
+                      onClick={() =>
+                        trxVisitorDetail.status === 'Checkin' ? handleCheckout() : handleCheckin()
+                      }
+                      sx={{ boxShadow: 2, width: 200, height: 50 }}
+                    >
+                      {trxVisitorDetail.status === 'Checkin'
+                        ? 'Check-out Visitor'
+                        : 'Check-in Visitor'}
+                    </Button>
+
+                    <Button
+                      size="large"
+                      variant="contained"
+                      color="error"
+                      onClick={() => setOpenReasonMenu(true)}
+                      sx={{ boxShadow: 2, width: 200, height: 50 }}
+                    >
+                      {trxVisitorDetail.status === 'Checkin' ? 'Block Visitor' : 'Deny Visitor'}
+                    </Button>
+                  </Stack>
+                </Box>
+              )}
+
               <Typography variant="h4" fontWeight={800}>
                 {trxVisitorDetail.visitor?.name}
               </Typography>
             </Box>
+
+            {trxVisitorDetail.status}
 
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
@@ -270,6 +497,44 @@ const VisitorContent = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog open={openReasonMenu} onClose={handleCloseReasonMenu} fullWidth maxWidth="sm">
+        <DialogTitle mb={2} p={2}>
+          Reason
+        </DialogTitle>
+        <DialogContent>
+          <Grid size={12} direction={'column'} p={1}>
+            <CustomTextField
+              id="reason"
+              label="Reason"
+              multiline
+              fullWidth
+              value={reason}
+              onChange={(e: any) => setReason(e.target.value)}
+            />
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseReasonMenu} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmReason} color="error">
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {loading &&
+        createPortal(
+          <Backdrop
+            open={loading}
+            sx={{
+              color: '#fff',
+              zIndex: (theme) => theme.zIndex.drawer + 1,
+            }}
+          >
+            <CircularProgress color="inherit" />
+          </Backdrop>,
+          document.body,
+        )}
     </>
   );
 };

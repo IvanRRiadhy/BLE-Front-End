@@ -93,6 +93,7 @@ export const orgType: inputDataType[] = [
     { label: "Check-out", value: "Checkout" },
     { label: "Denied", value: "Denied" },
     { label: "Block", value: "Block" },
+    { label: "Unblock", value: "Unblock" },
     { label: "Pre-Check-in", value: "PreCheckin" },
     { label: "Pre-Register", value: "Preregist" },
   ];
@@ -106,11 +107,12 @@ export const orgType: inputDataType[] = [
     Preregist: IconCircleDashedCheck,
   }
 export const visitorStatusEnumMap: Record<string, number> = {
-  Waiting: 1,
-  Checkin: 2,
-  Checkout: 3,
-  Denied: 4,
-  Block: 5,
+  Waiting: 0,
+  Checkin: 1,
+  Checkout: 2,
+  Denied: 3,
+  Block: 4,
+  Unblock: 5,
   PreCheckin: 6,
   Preregist: 7,
 };

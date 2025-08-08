@@ -423,7 +423,7 @@ export const defaultTrackingTransFilter: TrackingTransFilter = {
 export const defaultTrxVisitorFilter: TrxVisitorFilter = {
   Draw: 1,
   Start: 0,
-  Length: 10,
+  Length: 999,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
   searchValue: '',

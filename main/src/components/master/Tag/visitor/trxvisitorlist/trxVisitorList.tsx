@@ -56,6 +56,9 @@ const VisitorList = () => {
   const trxVisitors = useSelector((state: RootState) => state.TrxVisitorReducer.TrxVisitors);
 
   const active = useSelector((state: RootState) => state.TrxVisitorReducer.SelectedTrxVisitor);
+  useEffect(() => {
+    console.log("active", active);
+  },[active])
 
   return (
     <>
@@ -70,7 +73,7 @@ const VisitorList = () => {
           {trxVisitors.map((trx) => (
             <TrxVisitorListItem
               key={trx.id}
-              active={trx === active}
+              active={trx.id === active.id}
               trx={trx}
               onTagClick={() => {
                 dispatch(SelectTrxVisitor(trx.id));

@@ -1,4 +1,4 @@
-import axiosServices from "../../../utils/axios";
+import axiosServices, { BASE_URL } from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
@@ -146,7 +146,72 @@ export const fetchTrxVisitorDT = createAsyncThunk(
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
-)
+);
+
+export const visitorStatusChange = createAsyncThunk(
+  "TrxVisitor/visitorStatusChange",
+  async (
+    {
+      trxVisitorId,
+      status,
+      reason,
+    }: { trxVisitorId: string; status: string; reason?: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      console.log("Visitor ", trxVisitorId, " Status: ", status);
+
+      // Prepare body only if needed
+      let body: Record<string, string> | undefined;
+
+      if (status.toLowerCase() === "denied") {
+        body = { denyReason: reason ?? "" };
+      } else if (status.toLowerCase() === "blocked") {
+        body = { blockReason: reason ?? "" };
+      }
+
+      const response = await axiosServices.post(
+        `${API_URL}${trxVisitorId}/${status}`,
+        body // will be undefined if not deny/block
+      );
+
+      console.log("response", response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error changing visitor status:", error);
+      return rejectWithValue(error.response?.data || "Unknown error");
+    }
+  }
+);
+
+
+export const visitorCheckIn = createAsyncThunk(
+    "TrxVisitor/visitorCheckIn",
+    async (visitorId: string) => {
+        try{
+            const response = await axiosServices.post(`${API_URL}${visitorId}/checkin`);
+            console.log("response", response.data);
+            return response.data;
+        } catch (error) {
+            console.error("Error checking in visitor:", error);
+            throw error;
+        }
+    }
+);
+
+export const visitorCheckOut = createAsyncThunk(
+    "TrxVisitor/visitorCheckOut",
+    async (visitorId: string) => {
+        try{
+            const response = await axiosServices.post(`${API_URL}${visitorId}/checkout`);
+            console.log("response", response.data);
+            return response.data;
+        } catch (error) {
+            console.error("Error checking out visitor:", error);
+            throw error;
+        }
+    }
+);
 
 
 export default TrxVisitorSlice.reducer;
