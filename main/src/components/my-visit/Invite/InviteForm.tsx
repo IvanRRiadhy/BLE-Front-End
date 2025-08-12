@@ -40,7 +40,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import utc from 'dayjs/plugin/utc';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchVisitorDT, sendInvitation, VisitorType } from 'src/store/apps/crud/visitor';
 import { AppDispatch, RootState, useSelector } from 'src/store/Store';
@@ -295,6 +295,17 @@ const InviteForm = () => {
     setOpenMenu(false);
     setAnchorEl(null);
   };
+
+  const selectedIds = useMemo(
+    () => new Set(selectedVisitor.filter((v) => !!v.id).map((v) => v.id as string)),
+    [selectedVisitor],
+  );
+
+  // Only show visitors not yet selected
+  const availableVisitors = useMemo(
+    () => visitorList.filter((v) => !selectedIds.has(v.id)),
+    [visitorList, selectedIds],
+  );
 
   return (
     <>
@@ -589,22 +600,19 @@ const InviteForm = () => {
         </MenuItem>
 
         {/* Visitor List */}
-        {visitorList.map((v) => (
+        {availableVisitors.map((v) => (
           <MenuItem
             key={v.id}
             onClick={() => {
               setSelectedVisitor((prev) => {
-                // Check if only 1 row, and it's empty
-                if (
-                  prev.length === 1 &&
-                  !prev[0].id && // no id means it's a dummy row
-                  !prev[0].email &&
-                  !prev[0].name
-                ) {
-                  return [v]; // replace the dummy
-                } else {
-                  return [...prev, v]; // append new visitor
+                // safety guard against double-add
+                if (v.id && prev.some((p) => p.id === v.id)) return prev;
+
+                // replace dummy single empty row if present
+                if (prev.length === 1 && !prev[0].id && !prev[0].email && !prev[0].name) {
+                  return [v];
                 }
+                return [...prev, v];
               });
               handleCloseMenu();
             }}
