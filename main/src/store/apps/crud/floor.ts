@@ -4,6 +4,7 @@ import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { defaultFloorFilter } from "../defaultForm";
+import { BuildingType } from "./building";
 
 const API_URL = "/api/MstFloor/";
 const API_DT_URL = "/api/MstFloor/filter/";
@@ -52,6 +53,7 @@ export interface floorType {
     createdAt: string,
     updatedBy: string,
     updatedAt: string,
+        building?: BuildingType,
 }
 
 interface StateType {

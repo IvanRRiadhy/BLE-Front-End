@@ -33,15 +33,20 @@ import {
 import AddEditFloorplan from './AddEditFloorplan';
 import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
+import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
 
 const columns = [
   { label: 'Floorplan Name', field: 'Name', sortAble: true },
   { label: 'Floor Name', field: 'Floor.Name', sortAble: true },
+  { label: 'Building Name', field: '', sortAble: false },
 ];
 
 const FloorplanList = () => {
   const dispatch: AppDispatch = useDispatch();
   const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
+  const buildingData: BuildingType[] = useSelector(
+    (state: RootState) => state.buildingReducer.buildingAll,
+  );
   // const floorplanTotalCount = useSelector((state: RootState) => state.floorplanReducer.floorplanTotalCount);
   const floorplanFilteredCount = useSelector(
     (state: RootState) => state.floorplanReducer.floorplanFilteredCount,
@@ -95,6 +100,7 @@ const FloorplanList = () => {
     try {
       setLoading(true);
       dispatch(fetchFloorplanDT(defaultFloorplanFilter));
+      dispatch(fetchBuildings());
     } catch (error) {
       console.error('Error fetching floorplan data:', error);
     }
@@ -155,7 +161,10 @@ const FloorplanList = () => {
     }
     handleCloseDeleteDialog();
   };
-
+  const getbuildingName = (buildingId: string) => {
+    const building = buildingData.find((b) => b.id === buildingId);
+    return building ? building.name : 'Unknown Building';
+  };
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -235,6 +244,7 @@ const FloorplanList = () => {
                         </TableCell>
                         <TableCell>{floorplan.name}</TableCell>
                         <TableCell>{floorplan.floor?.name}</TableCell>
+                        <TableCell> {getbuildingName(floorplan.floor?.buildingId || '')}</TableCell>
                         <TableCell
                           sx={{
                             position: 'sticky',

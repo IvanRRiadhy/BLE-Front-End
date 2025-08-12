@@ -133,7 +133,7 @@ export const fetchFloorplanDT = createAsyncThunk(
             // console.log("Fetch Floorplan DT: ", filter);
             const response = await axiosServices.post(Floorplan_DT_URL, filter);
             const floorplans = response.data.collection.data || [];
-            // console.log("FLOOR :", response.data.collection.data || []);
+            console.log("FLOOR :", response.data.collection.data || []);
             // response.data.collection.data.forEach((floorplan: FloorplanType) => {
             //     console.log("Floorplan: ", floorplan);
             // });

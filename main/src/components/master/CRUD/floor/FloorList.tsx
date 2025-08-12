@@ -246,7 +246,7 @@ const FloorList = () => {
                         >
                           {index + 1 + page * rowsPerPage}
                         </TableCell>
-                        <TableCell>{getbuildingName(floor.buildingId)}</TableCell>
+                        <TableCell>{floor.building?.name}</TableCell>
                         <TableCell>{floor.name}</TableCell>
                         <TableCell>
                           {floor.floorImage ? (

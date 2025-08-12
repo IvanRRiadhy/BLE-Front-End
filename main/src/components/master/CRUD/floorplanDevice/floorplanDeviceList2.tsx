@@ -34,15 +34,21 @@ import {
 import { IconEdit } from '@tabler/icons-react';
 import { useNavigate } from 'react-router';
 import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
+import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
 
 const columns = [
-  { label: 'Floorplan Name', field: 'Name', sortAble: true },
+  { label: 'Building', field: 'Floor.Name', sortAble: true },
+  { label: 'Floor', field: 'Floor.Name', sortAble: true },
+  { label: 'Floorplan', field: 'Name', sortAble: true },
   { label: 'Total Device', field: 'DeviceCount', sortAble: true },
 ];
 
 const FloorplanDeviceList2 = () => {
   const dispatch: AppDispatch = useDispatch();
   const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
+    const buildingData: BuildingType[] = useSelector(
+      (state: RootState) => state.buildingReducer.buildingAll,
+    );
   const floorplanFilteredCount = useSelector(
     (state: RootState) => state.floorplanReducer.floorplanFilteredCount,
   );
@@ -95,6 +101,7 @@ const FloorplanDeviceList2 = () => {
   useEffect(() => {
     dispatch(fetchFloorplanDevices());
     dispatch(UpdateFilter(defaultFloorplanFilter));
+    dispatch(fetchBuildings());
     // dispatch(fetchFloorplan());
   }, [dispatch]);
 
@@ -133,6 +140,11 @@ const FloorplanDeviceList2 = () => {
     //     dispatch(SetActiveGate(gate.id, false));
     //   }
     // });
+  };
+
+    const getbuildingName = (buildingId: string) => {
+    const building = buildingData.find((b) => b.id === buildingId);
+    return building ? building.name : 'Unknown Building';
   };
 
   return (
@@ -182,8 +194,10 @@ const FloorplanDeviceList2 = () => {
                       <TableCell
                         sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
                       >
-                        {floorplan.name}
+                        {getbuildingName(floorplan.floor?.buildingId || '')}
                       </TableCell>
+                      <TableCell>{floorplan.floor?.name}</TableCell>
+                      <TableCell>{floorplan.name}</TableCell>
                       <TableCell>{floorplan.deviceCount}</TableCell>
 
                       <TableCell
