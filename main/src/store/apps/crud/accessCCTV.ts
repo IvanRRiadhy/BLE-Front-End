@@ -188,7 +188,7 @@ export const selectAccessCCTV =
         "cctvs/addCCTV",
         async (newCCTV: CCTVType, { rejectWithValue }) => {
             try {
-                const {id, createdBy, createdAt, updatedBy, updatedAt, ...filteredCCTVData} = newCCTV
+                const {id, integrationId, createdBy, createdAt, updatedBy, updatedAt, ...filteredCCTVData} = newCCTV
                 const response = await axiosServices.post(API_URL, filteredCCTVData);
                 return response.data;
             } catch (error: any) {
