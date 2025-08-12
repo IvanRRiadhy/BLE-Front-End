@@ -43,6 +43,7 @@ export interface BrandType {
 
 interface StateType {
     brands: BrandType[];
+    brandAll: BrandType[];
     brandSearch: string;
     selectedBrand?: BrandType | null;
     brandTotalCount: number;
@@ -52,6 +53,7 @@ interface StateType {
 
 const initialState: StateType = {
     brands: [],
+    brandAll: [],
     brandSearch: "",
     selectedBrand: null,
     brandTotalCount: 0,
@@ -66,6 +68,9 @@ export const BrandSlice = createSlice({
     reducers: {
         GetBrands: (state, action: PayloadAction<BrandType[]>) => {
             state.brands = action.payload;
+        },
+        GetAllBrand: (state, action: PayloadAction<BrandType[]>) => {
+            state.brandAll = action.payload;
         },
         SelectBrand: (state, action: PayloadAction<string>) => {
             const selected = state.brands.find((brand: BrandType) => brand.id === action.payload);
@@ -126,12 +131,12 @@ export const selectBrand = (brandID: string) =>
     }
 };
 
-export const { GetBrands, SelectBrand, SearchBrand, UpdateFilter } = BrandSlice.actions;
+export const { GetBrands, GetAllBrand, SelectBrand, SearchBrand, UpdateFilter } = BrandSlice.actions;
 
 export const fetchBrands = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
-        dispatch(GetBrands(response.data?.collection?.data || []));
+        dispatch(GetAllBrand(response.data?.collection?.data || []));
         // console.log("Brands fetched successfully:", response);
     } catch (err: any) {
         console.log("Error fetching brands:", err);
