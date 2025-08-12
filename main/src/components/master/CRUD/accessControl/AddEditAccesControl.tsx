@@ -48,7 +48,7 @@ const AddEditAccessControl = ({ type, accessControl }: FormType) => {
   const accessControlFilter = useSelector(
     (state: RootState) => state.accessControlReducer.accessControlFilter,
   );
-  const brandData: BrandType[] = useSelector((state: RootState) => state.brandReducer.brands);
+  const brandData: BrandType[] = useSelector((state: RootState) => state.brandReducer.brandAll);
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchBrands());
