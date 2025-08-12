@@ -216,7 +216,7 @@ const AddEditMember = ({ type, member }: FormType) => {
       )}
 
       {!loading && (
-        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
           <DialogTitle>
             <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
               {type === 'add' ? 'Add Member' : 'Edit Member'}

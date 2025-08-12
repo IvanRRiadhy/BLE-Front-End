@@ -60,14 +60,11 @@ const MemberList = () => {
   const organizationData = useSelector(
     (state: RootState) => state.organizationReducer.organizations,
   );
-  const applicationData = useSelector((state: RootState) => state.applicationReducer.applications);
-
   useEffect(() => {
     dispatch(fetchMembers());
     dispatch(fetchDistricts());
     dispatch(fetchDepartments());
     dispatch(fetchOrganizations());
-    dispatch(fetchApplications());
   }, [dispatch]);
 
   //Delete Pop-up
@@ -110,10 +107,6 @@ const MemberList = () => {
     return organization ? organization.name : 'Unknown Organization';
   };
 
-  const getAppName = (appId: string) => {
-    const app = applicationData.find((a: ApplicationType) => a.id === appId);
-    return app ? app.applicationName : 'Unknown App';
-  };
 
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
@@ -157,7 +150,6 @@ const MemberList = () => {
                       'exitDate',
                       'headMember1',
                       'headMember2',
-                      'Application Name',
                       'statusEmployee',
                     ].map((header) => (
                       <TableCell key={header}>
@@ -200,7 +192,6 @@ const MemberList = () => {
                         <TableCell>{formatDate(member.exitDate)}</TableCell>
                         <TableCell>{member.headMember1}</TableCell>
                         <TableCell>{member.headMember2}</TableCell>
-                        <TableCell>{getAppName(member.applicationId)}</TableCell>
                         <TableCell>{member.statusEmployee}</TableCell>
                         <TableCell
                           sx={{

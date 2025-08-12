@@ -33,11 +33,11 @@ const TagList = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(UpdateFilter(defaultMemberFilter));
+    dispatch(UpdateFilter({...defaultMemberFilter, Length: 999}));
     setLoading(true);
     try {
       console.log('Fetching on Start');
-      dispatch(fetchMemberDT(defaultMemberFilter));
+      dispatch(fetchMemberDT({...defaultMemberFilter, Length: 999}));
     } catch (error) {
       console.error('Error fetching Member data:', error);
     }
@@ -47,29 +47,10 @@ const TagList = () => {
   }, [dispatch]);
   useEffect(() => {
     console.log('Fetching on Filter');
-    dispatch(fetchMemberDT(memberFilter));
+    dispatch(fetchMemberDT({...memberFilter, Length: 999}));
   }, [memberFilter, dispatch]);
 
-  const getVisibilityTags = (members: memberType[], filter: string, search: string) => {
-    if (filter === 'show_all') {
-      return members.filter(
-        (mem) =>
-          mem.name.toLowerCase().includes(search.toLowerCase()) ||
-          mem.bleCardNumber.toLowerCase().includes(search.toLowerCase()) ||
-          mem.personId.toLowerCase().includes(search.toLowerCase()),
-      );
-    }
 
-    return members.filter(
-      (mem) =>
-        (mem.departmentId === filter ||
-          mem.districtId === filter ||
-          mem.organizationId === filter) &&
-        (mem.name.toLowerCase().includes(search.toLowerCase()) ||
-          mem.bleCardNumber.toLowerCase().includes(search.toLowerCase()) ||
-          mem.personId.toLowerCase().includes(search.toLowerCase())),
-    );
-  };
 
   const members = useSelector((state: RootState) => state.memberReducer.members);
 

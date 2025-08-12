@@ -10,7 +10,7 @@ import {
   Box,
 } from '@mui/material';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import { IconMail, IconFolder } from '@tabler/icons-react';
+import { IconMail, IconFolder, IconClearAll } from '@tabler/icons-react';
 import { SetVisibilityFilter } from 'src/store/apps/crud/member';
 import { fetchDepartments, DepartmentType } from 'src/store/apps/crud/department';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
@@ -77,8 +77,8 @@ const TagFilter = () => {
       id: 1,
       name: 'All',
       filter: 'show_all',
-      icon: IconMail,
-      color: 'primary.main',
+      icon: IconClearAll,
+      category: 'all',
     },
     {
       id: 2,
@@ -137,6 +137,7 @@ const TagFilter = () => {
         dispatch(UpdateFilter({ filters: { ...currentFilters, OrganizationId: newSelected } }));
         break;
       }
+      case 'all':
       default:
         dispatch(
           UpdateFilter({
@@ -147,6 +148,11 @@ const TagFilter = () => {
     }
   };
 
+  const isAllEmpty =
+    !memberFilter?.OrganizationId?.length &&
+    !memberFilter?.DepartmentId?.length &&
+    !memberFilter?.DistrictId?.length;
+
   return (
     <>
       <Box p={2}>
@@ -154,7 +160,13 @@ const TagFilter = () => {
       </Box>
 
       <List>
-        <Box sx={{ height: { lg: 'calc(100vh - 230px)', md: '100vh' }, maxHeight: '800px', overflow: 'auto' }}>
+        <Box
+          sx={{
+            height: { lg: 'calc(100vh - 230px)', md: '100vh' },
+            maxHeight: '800px',
+            overflow: 'auto',
+          }}
+        >
           {filterData.map((filter) => {
             if (filter.filterbyTitle) {
               return (
@@ -193,7 +205,8 @@ const TagFilter = () => {
                   (filter.category === 'district' &&
                     memberFilter.DistrictId?.includes(filter.filter!)) ||
                   (filter.category === 'organization' &&
-                    memberFilter.OrganizationId?.includes(filter.filter!))
+                    memberFilter.OrganizationId?.includes(filter.filter!)) ||
+                  (filter.category === 'all' && isAllEmpty)
                 }
                 onClick={() => handleFilter(`${filter.filter}`, filter.category)}
                 key={filter.id}

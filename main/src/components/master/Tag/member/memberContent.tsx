@@ -42,7 +42,6 @@ const MemberContent = () => {
   const organizationData = useSelector(
     (state: RootState) => state.organizationReducer.organizations,
   );
-  const applicationData = useSelector((state: RootState) => state.applicationReducer.applications);
 
   const dispatch = useDispatch();
   // const theme = useTheme();
@@ -52,7 +51,6 @@ const MemberContent = () => {
     dispatch(fetchDistricts());
     dispatch(fetchDepartments());
     dispatch(fetchOrganizations());
-    dispatch(fetchApplications());
   }, [dispatch]);
 
   const getDepartmentName = (departmentId: string) => {
@@ -70,10 +68,6 @@ const MemberContent = () => {
       (org: OrganizationType) => org.id === organizationId,
     );
     return organization ? organization.name : 'Unknown Organization';
-  };
-  const getAppName = (appId: string) => {
-    const app = applicationData.find((a: ApplicationType) => a.id === appId);
-    return app ? app.applicationName : 'Unknown App';
   };
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -218,8 +212,6 @@ const MemberContent = () => {
                 <Typography>{getOrganizationName(memberDetail.organizationId)}</Typography>
                 <CustomFormLabel htmlFor="district-id">District Name</CustomFormLabel>
                 <Typography>{getDistrictName(memberDetail.districtId)}</Typography>
-                <CustomFormLabel htmlFor="applicationID">Application Name</CustomFormLabel>
-                <Typography>{getAppName(memberDetail.applicationId)}</Typography>
               </Grid>
             </Grid>
             <Typography variant="h5" fontWeight={600} mb={2} mt={2}>
