@@ -46,14 +46,13 @@ type ChipColor = 'default' | 'primary' | 'secondary' | 'success' | 'warning' | '
 const visitorStatusColorMap: Record<number, ChipColor> = {
   0: 'default',
   1: 'success',
-  2: 'primary',
+  2: 'default',
   3: 'warning',
   4: 'error',
-  5: 'default',
-  6: 'secondary',
-  7: 'info',
+  5: 'success',
+  6: 'primary',
+  7: 'secondary',
 };
-
 
 const VisitorContent = () => {
   const { t } = useTranslation();
@@ -279,6 +278,36 @@ const VisitorContent = () => {
     }
   };
 
+  const handleUnblock = async () => {
+    setLoading(true);
+    if (!trxVisitorDetail.id) {
+      setLoading(false);
+      toast.error('Visitor not found');
+      return;
+    }
+    try {
+      const result = await dispatch(
+        visitorStatusChange({ trxVisitorId: trxVisitorDetail.id, status: 'unblocked' }),
+      );
+      if (result && result.type && result.type.endsWith('/fulfilled')) {
+        toast.success('Visitor unblocked successfully');
+        dispatch(UpdateFilter(defaultTrxVisitorFilter));
+        await dispatch(fetchTrxVisitorDT(defaultTrxVisitorFilter));
+        dispatch(SelectTrxVisitor(trxVisitorDetail.id));
+      } else {
+        toast.error('Error unblocking visitor');
+      }
+    } catch (error) {
+      toast.error('Error unblocking visitor');
+      console.error('Error unblocking visitor:', error);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+        handleCloseReasonMenu();
+      }, 500);
+    }
+  };
+
   const handleCloseReasonMenu = () => {
     setReason('');
     setOpenReasonMenu(false);
@@ -298,7 +327,37 @@ const VisitorContent = () => {
   const chipColor = statusValue !== undefined ? visitorStatusColorMap[statusValue] : 'default';
 
   console.log(statusValue, chipColor);
-  // console.log(`${BASE_URL}${visitorDetail?.faceImage}`);
+  // console.log(`${BASE_URL}${visitorDetail?.faceImage}`)
+  // ;
+  const status = trxVisitorDetail?.status;
+
+  const actionMap: Record<
+    string,
+    {
+      primary?: { label: string; color: 'success' | 'warning' | 'error'; onClick: () => void };
+      secondary?: { label: string; color: 'error' | 'warning' | 'success'; onClick: () => void };
+    }
+  > = {
+    Precheckin: {
+      primary: { label: 'Check-in Visitor', color: 'success', onClick: handleCheckin },
+      secondary: { label: 'Deny Visitor', color: 'error', onClick: () => setOpenReasonMenu(true) },
+    },
+    Checkin: {
+      primary: { label: 'Check-out Visitor', color: 'warning', onClick: handleCheckout },
+      secondary: { label: 'Block Visitor', color: 'error', onClick: () => setOpenReasonMenu(true) },
+    },
+      Unblock: {
+    primary: { label: 'Check-out Visitor', color: 'warning', onClick: handleCheckout },
+    secondary: { label: 'Block Visitor', color: 'error', onClick: () => setOpenReasonMenu(true) },
+  },
+    Block: {
+      primary: { label: 'Check-out Visitor', color: 'warning', onClick: handleCheckout },
+      secondary: { label: 'Unblock Visitor', color: 'success', onClick: handleUnblock }, // You'll need to define handleUnblock
+    },
+  };
+
+  const currentActions = status ? actionMap[status] : undefined;
+
   return (
     <>
       {visitorDetail && trxVisitorDetail ? (
@@ -353,41 +412,39 @@ const VisitorContent = () => {
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
 
-              {/* Floating actions (hidden if checked-out) */}
-              {(trxVisitorDetail?.status === 'Checkin' ||
-                trxVisitorDetail?.status === 'Preregist') && (
+              {/* Floating actions */}
+              {currentActions && (
                 <Box
                   sx={{
-                    position: { xs: 'static', md: 'absolute' }, // stack on small screens
-                    top: { md: 0 }, // align with avatar top
-                    left: { md: 0 }, // stick to top-right
+                    position: { xs: 'static', md: 'absolute' },
+                    top: { md: 0 },
+                    left: { md: 0 },
                     zIndex: 2,
                   }}
                 >
                   <Stack spacing={1} direction="column" alignItems="flex-start">
-                    <Button
-                      size="large"
-                      variant="contained"
-                      color={trxVisitorDetail.status === 'Checkin' ? 'warning' : 'success'}
-                      onClick={() =>
-                        trxVisitorDetail.status === 'Checkin' ? handleCheckout() : handleCheckin()
-                      }
-                      sx={{ boxShadow: 2, width: 200, height: 50 }}
-                    >
-                      {trxVisitorDetail.status === 'Checkin'
-                        ? 'Check-out Visitor'
-                        : 'Check-in Visitor'}
-                    </Button>
-
-                    <Button
-                      size="large"
-                      variant="contained"
-                      color="error"
-                      onClick={() => setOpenReasonMenu(true)}
-                      sx={{ boxShadow: 2, width: 200, height: 50 }}
-                    >
-                      {trxVisitorDetail.status === 'Checkin' ? 'Block Visitor' : 'Deny Visitor'}
-                    </Button>
+                    {currentActions.primary && (
+                      <Button
+                        size="large"
+                        variant="contained"
+                        color={currentActions.primary.color}
+                        onClick={currentActions.primary.onClick}
+                        sx={{ boxShadow: 2, width: 200, height: 50 }}
+                      >
+                        {currentActions.primary.label}
+                      </Button>
+                    )}
+                    {currentActions.secondary && (
+                      <Button
+                        size="large"
+                        variant="contained"
+                        color={currentActions.secondary.color}
+                        onClick={currentActions.secondary.onClick}
+                        sx={{ boxShadow: 2, width: 200, height: 50 }}
+                      >
+                        {currentActions.secondary.label}
+                      </Button>
+                    )}
                   </Stack>
                 </Box>
               )}

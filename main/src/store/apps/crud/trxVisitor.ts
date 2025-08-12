@@ -18,6 +18,12 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     searchValue: string,
+    dateFilters: {
+        VisitorPeriodStart?: {
+            DateFrom?: string | null,
+            DateTo?: string | null,
+        },
+    }
     filters:{
         Status?: number,
     }
@@ -65,6 +71,7 @@ export type TrxVisitorType = {
     parkingId: string,
     visitorId: string,
     memberId: string,
+    purposePersonId: string,
     visitor?: VisitorType,
     member?: memberType,
     maskedarea?: MaskedAreaType,
@@ -147,6 +154,17 @@ export const fetchTrxVisitorDT = createAsyncThunk(
         }
     }
 );
+
+export const fetchTrxVisitorById = (id: string) => async (dispatch: AppDispatch) => {
+    try {
+        const response = await axiosServices.get(`${API_URL}public/${id}`);
+                console.log("Fetch Trx Visitors", response.data?.collection || []);
+        return(response.data.collection.data || []);
+
+    } catch (err) {
+        console.log("Error: ", err);
+    }
+}
 
 export const visitorStatusChange = createAsyncThunk(
   "TrxVisitor/visitorStatusChange",

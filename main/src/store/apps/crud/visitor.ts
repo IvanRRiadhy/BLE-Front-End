@@ -256,6 +256,19 @@ export const sendInvitation = createAsyncThunk("visitor/sendInvitation", async (
     }
 })
 
+export const declineInvitation = createAsyncThunk("visitor/declineInvitation", async (payload: string) => {
+    try{
+        console.log( payload);
+
+        const response = await axiosServices.post(`${API_URL}public/${payload}/decline-invitation`);
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error declining Invitation:", error);
+        throw error;
+    }
+})
+
 export const editVisitor = createAsyncThunk("visitor/editVisitor", async (formData: FormData) => {
     try {
         Object.keys(formData).forEach((key) => {

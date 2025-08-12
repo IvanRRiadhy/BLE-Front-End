@@ -193,7 +193,6 @@ const InviteForm = () => {
       MaskedAreaId: selectedMaskedArea,
       VisitorPeriodStart: startDate,
       VisitorPeriodEnd: endDate,
-      PurposePerson: '7f8b58e0-527e-409f-8046-36c8b24ced16',
       Agenda: notes,
     }));
     let result;

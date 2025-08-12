@@ -427,6 +427,12 @@ export const defaultTrxVisitorFilter: TrxVisitorFilter = {
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
   searchValue: '',
+  dateFilters: {
+    VisitorPeriodStart:{
+      DateFrom: null,
+      DateTo: null,
+    }
+  },
   filters: {},
 };
 //#endregion

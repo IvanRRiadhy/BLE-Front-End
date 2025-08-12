@@ -10,12 +10,16 @@ import {
   CircularProgress,
   FormHelperText,
   Backdrop,
+  Container,
+  Paper,
+  Grid2 as Grid,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchVisitorbyId, fillFormVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import { AppDispatch, dispatch, useDispatch } from 'src/store/Store';
 import toast from 'react-hot-toast';
+import { BASE_URL } from 'src/utils/axios';
 
 const useQuery = () => {
   return new URLSearchParams(useLocation().search);
@@ -51,9 +55,7 @@ const VisitorFormPage = () => {
       fetchData();
     }
   }, []);
-  useEffect(() => {
-    console.log(visitorInfo);
-  }, [visitorInfo]);
+
   const [formData, setFormData] = useState({
     name: '',
     personId: '',
@@ -135,7 +137,7 @@ const VisitorFormPage = () => {
         console.log(key, value);
       }
 
-      await dispatch(
+      const result = await dispatch(
         fillFormVisitor({
           code: code || '',
           visitorId: visitorId || '',
@@ -144,190 +146,239 @@ const VisitorFormPage = () => {
           formData: data,
         }),
       ).unwrap();
-      toast.success('Submitted successfully!');
+      if (result && result.types && result.types.endsWith('/fulfilled')) {
+        navigate('/thank-you');
+        toast.success('Submitted successfully!');
+        setFormData({
+          name: '',
+          personId: '',
+          address: '',
+          phone: '',
+          identityType: '',
+          identityId: '',
+          gender: '',
+          organizationName: '',
+          departmentName: '',
+          districtName: '',
+          faceImage: null,
+        });
+        setPreview(null);
+      } else {
+        toast.error('Saving Data Unsuccessful');
+      }
     } catch (error) {
       toast.error('Failed to submit!');
     } finally {
       setTimeout(() => {
         setIsSaving(false);
         setLoading(false);
-        navigate('/thank-you');
       }, 1500);
-
-      setFormData({
-        name: '',
-        personId: '',
-        address: '',
-        phone: '',
-        identityType: '',
-        identityId: '',
-        gender: '',
-        organizationName: '',
-        departmentName: '',
-        districtName: '',
-        faceImage: null,
-      });
-      setPreview(null);
     }
   };
 
   return (
-    <>
-      <Box
-        sx={{
-          maxWidth: '600px',
-          mx: 'auto',
-          p: 5,
-          pointerEvents: loading || isSaving ? 'none' : 'auto',
-          opacity: loading || isSaving ? 0.5 : 1,
-        }}
-      >
-        <Typography variant="h5" fontWeight={700} mb={2} align="center">
-          Visitor Registration
-        </Typography>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        // colored gutters (left/right)
+        bgcolor: '#e3edfd', // pick any soft color you like
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        py: { xs: 0, sm: 1 }, // top/bottom breathing room
+      }}
+    >
+      {/* Limit width so it always looks like mobile on desktop */}
+      <Container maxWidth="sm" disableGutters>
+        <Paper elevation={3} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+          {/* Top accent header like Google Forms */}
+          <Box sx={{ bgcolor: '#4285f4', color: '#fff', p: 2 }}>
+            <Typography variant="h4" align="center" fontWeight={700}>
+              Visitor Registration
+            </Typography>
+          </Box>
 
-        {/* Personal Info */}
-        <Typography variant="h6" fontWeight={600} mt={2} mb={1}>
-          Personal Info
-        </Typography>
-        <Divider />
-        <TextField
-          id="name"
-          label="Name"
-          fullWidth
-          margin="normal"
-          value={formData.name}
-          onChange={handleInputChange}
-        />
-        <TextField
-          id="personId"
-          label="Person ID"
-          fullWidth
-          margin="normal"
-          value={formData.personId}
-          onChange={handleInputChange}
-        />
-        <TextField
-          select
-          name="identityType"
-          label="Identity Type"
-          fullWidth
-          margin="normal"
-          value={formData.identityType || ''}
-          onChange={handleInputChange}
-        >
-          {identityTypes.map((item) => (
-            <MenuItem key={item.value} value={item.value}>
-              {item.label}
-            </MenuItem>
-          ))}
-        </TextField>
-        <TextField
-          id="identityId"
-          label="Identity Number"
-          fullWidth
-          margin="normal"
-          value={formData.identityId}
-          onChange={handleInputChange}
-          disabled={!formData.identityType}
-        />
-        <TextField
-          id="address"
-          label="Address"
-          fullWidth
-          margin="normal"
-          value={formData.address}
-          onChange={handleInputChange}
-        />
-        <TextField
-          id="phone"
-          label="Phone"
-          fullWidth
-          margin="normal"
-          value={formData.phone}
-          onChange={handleInputChange}
-        />
-        <TextField
-          select
-          name="gender"
-          label="Gender"
-          fullWidth
-          margin="normal"
-          value={formData.gender || ''}
-          onChange={handleInputChange}
-        >
-          {genders.map((item) => (
-            <MenuItem key={item.value} value={item.value}>
-              {item.label}
-            </MenuItem>
-          ))}
-        </TextField>
-
-        {/* Extra Info */}
-        <Typography variant="h6" fontWeight={600} mt={3} mb={1}>
-          Extra Info
-        </Typography>
-        <Divider />
-        <TextField
-          id="organizationName"
-          label="Organization"
-          fullWidth
-          margin="normal"
-          value={formData.organizationName}
-          onChange={handleInputChange}
-        />
-        <TextField
-          id="departmentName"
-          label="Department"
-          fullWidth
-          margin="normal"
-          value={formData.departmentName}
-          onChange={handleInputChange}
-        />
-        <TextField
-          id="districtName"
-          label="District"
-          fullWidth
-          margin="normal"
-          value={formData.districtName}
-          onChange={handleInputChange}
-        />
-
-        {/* Photo */}
-        <Typography variant="h6" fontWeight={600} mt={3} mb={1}>
-          Photo
-        </Typography>
-        <Divider />
-        <Box mt={2}>
-          <input type="file" accept="image/*" onChange={handleImageChange} />
-          {preview && (
-            <img
-              src={preview}
-              alt="Preview"
-              style={{ width: '100%', borderRadius: 8, marginTop: 10 }}
-            />
-          )}
-        </Box>
-
-        {/* Submit */}
-        <Box mt={4} mb={2} textAlign="center">
-          <Button
-            variant="contained"
-            onClick={handleSubmit}
-            disabled={isSaving}
-            sx={{ width: '100%', py: 1.5, fontSize: '1rem' }}
+          {/* Form body */}
+          <Box
+            sx={{
+              p: { xs: 2, sm: 3 }, // responsive padding
+              pointerEvents: loading || isSaving ? 'none' : 'auto',
+              opacity: loading || isSaving ? 0.6 : 1,
+              backgroundColor: 'background.paper',
+            }}
           >
-            {isSaving ? <CircularProgress size={24} color="inherit" /> : 'Submit'}
-          </Button>
-        </Box>
-      </Box>
-      <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 9999 }}
-        open={loading || isSaving}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
-    </>
+            {/* Personal Info */}
+            <Typography variant="h6" fontWeight={600} mt={2} mb={1}>
+              Personal Info
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+
+            <Grid container spacing={{ xs: 0, sm: 2 }}>
+              <Grid size={{ xs: 12, sm: 6 }} order={{ xs: 1, sm: 1 }}>
+                <TextField
+                  id="name"
+                  label="Full Name"
+                  fullWidth
+                  margin="normal"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }} order={{ xs: 2, sm: 2 }}>
+                <TextField
+                  select
+                  name="identityType"
+                  label="Identity Type"
+                  fullWidth
+                  margin="normal"
+                  value={formData.identityType || ''}
+                  onChange={handleInputChange}
+                >
+                  {identityTypes.map((item) => (
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }} order={{ xs: 4, sm: 3 }}>
+                <TextField
+                  id="address"
+                  label="Address"
+                  fullWidth
+                  margin="normal"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }} order={{ xs: 3, sm: 4 }}>
+                <TextField
+                  id="identityId"
+                  label="Identity Number"
+                  fullWidth
+                  margin="normal"
+                  value={formData.identityId}
+                  onChange={handleInputChange}
+                  disabled={!formData.identityType}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }} order={{ xs: 5, sm: 5 }}>
+                <TextField
+                  id="phone"
+                  label="Phone"
+                  fullWidth
+                  margin="normal"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }} order={{ xs: 6, sm: 6 }}>
+                <TextField
+                  select
+                  name="gender"
+                  label="Gender"
+                  fullWidth
+                  margin="normal"
+                  value={formData.gender || ''}
+                  onChange={handleInputChange}
+                >
+                  {genders.map((item) => (
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+            </Grid>
+
+            {/* Extra Info */}
+            <Typography variant="h6" fontWeight={600} mt={3} mb={1}>
+              Extra Info
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            <Grid container spacing={{ xs: 0, sm: 2 }}>
+              <Grid size={{ xs: 12, sm: 6 }} order={{ xs: 1, sm: 1 }}>
+                <TextField
+                  id="personId"
+                  label="Person ID"
+                  fullWidth
+                  margin="normal"
+                  value={formData.personId}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }} order={{ xs: 2, sm: 2 }}>
+                <TextField
+                  id="organizationName"
+                  label="Organization"
+                  fullWidth
+                  margin="normal"
+                  value={formData.organizationName}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }} order={{ xs: 3, sm: 3 }}>
+                <TextField
+                  id="departmentName"
+                  label="Department"
+                  fullWidth
+                  margin="normal"
+                  value={formData.departmentName}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }} order={{ xs: 4, sm: 4 }}>
+                <TextField
+                  id="districtName"
+                  label="District"
+                  fullWidth
+                  margin="normal"
+                  value={formData.districtName}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+            </Grid>
+
+            {/* Photo */}
+            <Typography variant="h6" fontWeight={600} mt={3} mb={1}>
+              Photo
+            </Typography>
+            <Divider />
+            <Box mt={2}>
+              <input type="file" accept="image/*" onChange={handleImageChange} />
+              {preview && (
+                <img
+                  src={`${BASE_URL}${preview}`}
+                  alt="Preview"
+                  style={{ width: '100%', borderRadius: 8, marginTop: 10 }}
+                />
+              )}
+            </Box>
+
+            {/* Submit */}
+            <Box mt={3}>
+              <Button
+                fullWidth
+                variant="contained"
+                size="large"
+                onClick={handleSubmit}
+                disabled={isSaving}
+                sx={{
+                  py: 1.25,
+                  borderRadius: 2,
+                  backgroundColor: '#4285f4', // override the background color
+                  '&:hover': {
+                    backgroundColor: '#4285f4', // override the hover background color
+                  },
+                }}
+              >
+                {isSaving ? <CircularProgress size={24} color="inherit" /> : 'Submit'}
+              </Button>
+            </Box>
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 

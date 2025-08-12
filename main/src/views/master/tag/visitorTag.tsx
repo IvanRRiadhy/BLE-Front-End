@@ -8,7 +8,7 @@ import VisitorList from 'src/components/master/Tag/visitor/trxvisitorlist/trxVis
 import VisitorContent from 'src/components/master/Tag/visitor/visitorContent';
 import VisitorSearch from 'src/components/master/Tag/visitor/visitorSearch';
 
-const drawerWidth = 240;
+const drawerWidth = 320;
 const secdrawerWidth = 320;
 
 const Tag = () => {

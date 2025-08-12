@@ -23,14 +23,14 @@ type Props = {
 
 // Map enum value to MUI Chip color
 const visitorStatusColorMap: Record<number, any> = {
-  0: 'default',   // grey
-  1: 'success',   // green
-  2: 'default',   // blue
-  3: 'warning',   // yellow
-  4: 'error',     // red
-  5: 'default',   // grey
-  6: 'secondary', // purple
-  7: 'primary',      // light blue
+  0: 'default',   // grey : Waiting
+  1: 'success',   // green : Checkin
+  2: 'default',   // grey : Checkout
+  3: 'warning',   // yellow : Deny
+  4: 'error',     // red : Block
+  5: 'success',   // green : Unblock
+  6: 'primary', // light blue : Precheckin
+  7: 'secondary',      // blue : Preregist
 };
 
 const TrxVisitorListItem = ({ onTagClick, trx, active }: Props) => {

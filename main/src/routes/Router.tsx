@@ -19,6 +19,7 @@ const MyVisitDashboard = Loadable(lazy(() => import('../views/MyVisit/MyVisitDas
 
 /* ****Invitation***** */
 const InvitationForm = Loadable(lazy(() => import('../components/InvitationForm/InvitationForm')));
+const InvitationInfo = Loadable(lazy(() => import('../components/InvitationForm/InvitationInfo')));
 const ThankYouPage = Loadable(lazy(() => import('../components/InvitationForm/ThankYouPage')));
 const InvitationPage = Loadable(lazy(() => import('../views/MyVisit/MyVisitInvitation/InvitationPage')));
 
@@ -408,6 +409,7 @@ const Router = [
       { path: '*', element: <Navigate to="/auth/404" /> },
       //Invitation Form
       { path: '/visitor-form', exact: true, element: <InvitationForm /> },
+      { path: '/visitor-info', exact: true, element: <InvitationInfo /> },
       { path: '/thank-you', exact: true, element: <ThankYouPage /> },
     ],
   },
