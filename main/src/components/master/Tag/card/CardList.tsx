@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Grid2 as Grid,
@@ -22,8 +22,9 @@ import {
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
-import { CardType, UpdateFilter, fetchCard } from 'src/store/apps/crud/card';
+import { CardType, UpdateFilter, fetchCard, fetchCardDT } from 'src/store/apps/crud/card';
 import AddEditCard from './AddEditCard';
+import { defaultCardFilter } from 'src/store/apps/defaultForm';
 
 const columns = [
   { label: 'Name', field: 'Name', sortAble: true },
@@ -37,9 +38,12 @@ const columns = [
 
 const CardList = () => {
   const dispatch: AppDispatch = useDispatch();
-  const cardData: CardType[] = useSelector((state: RootState) => state.CardReducer.cardAll);
+  const cardData: CardType[] = useSelector((state: RootState) => state.CardReducer.cards);
   const cardFilteredCount = useSelector((state: RootState) => state.CardReducer.cardFilteredCount);
   const cardFilter = useSelector((state: RootState) => state.CardReducer.cardFilter);
+    const prevFilterRef = useRef(cardFilter);
+    // const { t } = useTranslation();
+    const [loading, setLoading] = useState(false);
   // Pagination State
   const page = Math.floor(cardFilter.Start / cardFilter.Length);
   const rowsPerPage = cardFilter.Length;
@@ -76,8 +80,34 @@ const CardList = () => {
     }
   };
 
+    useEffect(() => {
+      dispatch(UpdateFilter(defaultCardFilter));
+      try {
+        setLoading(true);
+        dispatch(fetchCardDT(defaultCardFilter));
+      } catch (error) {
+        console.log(error);
+      }
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+    }, [dispatch]);
+
   useEffect(() => {
-    dispatch(fetchCard());
+    const prevFilter = prevFilterRef.current;
+    const isStartOrLengthChanged =
+      prevFilter.Start !== cardFilter.Start || prevFilter.Length !== cardFilter.Length;
+    if (isStartOrLengthChanged) {
+      setLoading(true);
+    }
+    dispatch(fetchCardDT(cardFilter)).finally(() => {
+      if (isStartOrLengthChanged) {
+        setTimeout(() => {
+          setLoading(false);
+        }, 500);
+      }
+    });
+    prevFilterRef.current = cardFilter;
   }, [cardFilter, dispatch]);
 
   //Delete Pop-up
@@ -155,7 +185,7 @@ const CardList = () => {
                       </TableCell>
                       <TableCell>{card.cardType}</TableCell>
                       <TableCell>{card.cardNumber}</TableCell>
-                      <TableCell>{card.registeredArea}</TableCell>
+                      <TableCell>{card.isMultiMaskedArea ? 'Multi-Area' : card.registeredMaskedAreaId}</TableCell>
                       <TableCell>{card.isUsed ? 'Yes' : 'No'}</TableCell>
                       <TableCell>{card.lastUsed || 'N/A'}</TableCell>
                       <TableCell

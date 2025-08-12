@@ -423,7 +423,7 @@ export const defaultTrackingTransFilter: TrackingTransFilter = {
 export const defaultTrxVisitorFilter: TrxVisitorFilter = {
   Draw: 1,
   Start: 0,
-  Length: 999,
+  Length: 5,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
   searchValue: '',
@@ -484,8 +484,8 @@ export const defaultCardForm: CardType = {
   cardNumber: '',
   cardBarcode: '',
   dmac: '',
-  isMultiArea: false,
-  registeredArea: [],
+  isMultiMaskedArea: false,
+  registeredMaskedAreaId: '',
   lastUsed: '',
   statusCard: false,
   isUsed: false,
@@ -495,12 +495,10 @@ export const defaultCardFilter: CardFilter = {
   Draw: 1,
   Start: 0,
   Length: 5,
-  SortColumn: 'LastUsed',
+  SortColumn: 'UpdatedAt',
   SortDir: 'desc',
   searchValue: '',
-  fiilters: {
-    IsUsed: '',
-    // RegisteredArea: [],
+  filters: {
   },
 };
 //#endregion

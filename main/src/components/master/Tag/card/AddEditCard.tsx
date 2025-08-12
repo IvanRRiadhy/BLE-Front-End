@@ -6,10 +6,12 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  FormControlLabel,
   Grid2 as Grid,
   IconButton,
   MenuItem,
   SelectChangeEvent,
+  Switch,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -32,13 +34,36 @@ import { FloorplanType, fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { MaskedAreaType, fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import toast from 'react-hot-toast';
 import { defaultCardForm } from 'src/store/apps/defaultForm';
-interface FormData {
-  [key: string]: string | boolean | string[];
-}
+import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
 interface formType {
   type?: string;
   card?: CardType;
 }
+type AreaNode = MaskedAreaType & {
+  nodeType: 'area';
+  maskedAreas?: never;
+  floors?: never;
+  floorplans?: never;
+};
+type FloorplanNode = FloorplanType & {
+  nodeType: 'floorplan';
+  maskedAreas: AreaNode[];
+  floorplans?: never;
+  floors?: never;
+};
+type FloorNode = floorType & {
+  nodeType: 'floor';
+  floorplans: FloorplanNode[];
+  maskedAreas?: never;
+  floors?: never;
+};
+type BuildingNode = BuildingType & {
+  nodeType: 'building';
+  floors: FloorNode[];
+  maskedAreas?: never;
+  floorplans?: never;
+};
+
 function buildNestedHierarchy(
   buildings: BuildingType[],
   floors: floorType[],
@@ -89,7 +114,7 @@ const AddEditCard = ({ type, card }: formType) => {
   const [open, setOpen] = React.useState(false);
   const [qrOpen, setQrOpen] = React.useState(false);
   const [expanded, setExpanded] = React.useState<{ [nodeId: string]: boolean }>({});
-  const [formData, setFormData] = React.useState<FormData>({
+  const [formData, setFormData] = React.useState<CardType>({
     ...defaultCardForm,
     ...card,
   });
@@ -137,44 +162,88 @@ const AddEditCard = ({ type, card }: formType) => {
     return area ? area.name : 'Unknown area';
   };
 
-  const handleSave = async () => {
-    try {
-      const form = new FormData();
-      Object.keys(formData).forEach((key) => {
-        const value = formData[key];
-        if (typeof value === 'boolean') {
-          form.append(key, String(value)); // Convert boolean to string
-        } else if (Array.isArray(value)) {
-          form.append(key, JSON.stringify(value)); // Convert array to JSON string
-        } else {
-          form.append(key, value); // Value is already a string or Blob
-        }
-      });
-      // form.append('isUsed', 'true');
-      if (Array.isArray(formData.registeredArea) && formData.registeredArea.length > 1) {
-        form.append('isMultiArea', 'true');
-      } else {
-        form.append('isMultiArea', 'false');
-      }
-      let result;
-      if (type === 'edit') {
-        result = await dispatch(editCard(form)); // Dispatch update
-      }
-      if (type === 'add') {
-        result = await dispatch(addCard(form));
-      }
-      if (result && result.type && result.type.endsWith('/fulfilled')) {
-        await dispatch(fetchCard());
-        console.log('Card Data Saved!');
-        toast.success('Data Saved');
-        handleClose();
-      } else {
-        toast.error('Saving Data Unsuccessful');
-      }
-    } catch (error) {
+const handleSave = async () => {
+  try {
+    // shape what the API expects
+    const payload = {
+      ...formData,
+      // ensure boolean + clear single area if multi-area is ON
+      isMultiMaskedArea: !!formData.isMultiMaskedArea,
+      registeredMaskedAreaId: formData.isMultiMaskedArea ? '' : (formData.registeredMaskedAreaId ?? ''),
+    };
+
+    // if you have Date fields, serialize explicitly (optional)
+    // payload.lastUsed = formData.lastUsed ? new Date(formData.lastUsed).toISOString() : null;
+
+    const result =
+      type === 'edit'
+        ? await dispatch(editCard(payload))     // <- send JSON
+        : await dispatch(addCard(payload));     // <- send JSON
+
+    if (result && result.type?.endsWith('/fulfilled')) {
+      await dispatch(fetchCard());
+      toast.success('Data Saved');
+      handleClose();
+    } else {
       toast.error('Saving Data Unsuccessful');
-      console.error('Error saving card data:', error);
     }
+  } catch (err) {
+    console.error(err);
+    toast.error('Saving Data Unsuccessful');
+  }
+};
+
+
+  function getAreaPath(areaId: string): string {
+    if (!areaId) return 'None';
+    const area = maskedAreaData.find((a) => a.id === areaId);
+    if (!area) return 'Unknown Area';
+
+    const floorplan = floorplanData.find((fp) => fp.id === area.floorplanId);
+    const floor = floorplan ? floorData.find((f) => f.id === floorplan.floorId) : null;
+    const building = floor ? buildingData.find((b) => b.id === floor.buildingId) : null;
+
+    const pathParts = [
+      area.name,
+      floorplan?.name ? `(${floorplan.name}` : '',
+      floor?.name ? ` > ${floor.name}` : '',
+      building?.name ? ` > ${building.name})` : '',
+    ];
+
+    return pathParts.filter(Boolean).join('');
+  }
+
+  function getSelectedAncestorIds(areaId: string): Set<string> {
+    const ids = new Set<string>();
+    if (!areaId) return ids;
+
+    const area = maskedAreaData.find((a) => a.id === areaId);
+    if (!area) return ids;
+
+    ids.add(area.id);
+
+    const floorplan = floorplanData.find((fp) => fp.id === area.floorplanId);
+    if (floorplan) {
+      ids.add(floorplan.id);
+      const floor = floorData.find((f) => f.id === floorplan.floorId);
+      if (floor) {
+        ids.add(floor.id);
+        const building = buildingData.find((b) => b.id === floor.buildingId);
+        if (building) ids.add(building.id);
+      }
+    }
+
+    return ids;
+  }
+  const selectedAncestorIds = getSelectedAncestorIds(formData.registeredMaskedAreaId);
+  const setRegisteredArea: React.Dispatch<React.SetStateAction<string>> = (value) => {
+    setFormData((prev) => {
+      const next =
+        typeof value === 'function'
+          ? (value as (p: string) => string)(prev.registeredMaskedAreaId ?? '')
+          : value;
+      return { ...prev, registeredMaskedAreaId: next };
+    });
   };
 
   return (
@@ -271,37 +340,91 @@ const AddEditCard = ({ type, card }: formType) => {
                 ))}
               </CustomSelect>
               <CustomFormLabel>Registered Area for Returning</CustomFormLabel>
-              <div
-                style={{
-                  border: '1px solid #ced4da',
-                  borderRadius: 4,
-                  padding: 8,
-                  minHeight: 115,
-                  maxHeight: 215,
-                  overflowY: 'auto',
-                  background: '#fafbfc',
-                }}
-              >
-                {buildingHierarchy.map((building) =>
-                  renderTreeNode(
-                    building,
-                    formData.registeredArea as string[],
-                    setFormData,
-                    expanded,
-                    setExpanded,
-                  ),
-                )}
-                <div style={{ marginTop: 8 }}>
-                  {Array.isArray(formData.registeredArea) && formData.registeredArea.length > 0 && (
-                    <Typography variant="body2">
-                      Selected Area(s):{' '}
-                      {formData.registeredArea
-                        .map((areaId: string) => getAreaName(areaId))
-                        .join(', ')}
+
+              <FormControlLabel
+                sx={{ mb: 1 }}
+                control={
+                  <Switch
+                    checked={formData.isMultiMaskedArea}
+                    onChange={(_, checked) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        isMultiMaskedArea: checked,
+                        registeredMaskedAreaId: checked ? '' : prev.registeredMaskedAreaId,
+                      }));
+                    }}
+                  />
+                }
+                label={
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Typography variant="body2" fontWeight={500}>
+                      {formData.isMultiMaskedArea ? 'Multi-Area' : 'Single-Area'}
                     </Typography>
-                  )}
+                    <Tooltip
+                      title={
+                        formData.isMultiMaskedArea
+                          ? 'Card can be returned in any area'
+                          : 'Card can only be returned to the selected area below'
+                      }
+                      arrow
+                      placement="top"
+                    >
+                      <Box
+                        sx={{
+                          width: 18,
+                          height: 18,
+                          borderRadius: '50%',
+                          backgroundColor: 'transparent',
+                          color: '#000',
+                          border: '1px solid #000',
+                          borderColor: '#000',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.75rem',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        ?
+                      </Box>
+                    </Tooltip>
+                  </Box>
+                }
+              />
+
+              {!formData.isMultiMaskedArea && (
+                <div
+                  style={{
+                    border: '1px solid #ced4da',
+                    borderRadius: 4,
+                    padding: 8,
+                    minHeight: 180,
+                    maxHeight: 250,
+                    background: '#fafbfc',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    width: '100%',
+                  }}
+                >
+                  <div style={{ flex: 1, overflowY: 'auto' }}>
+                    <SimpleTreeView>
+                      {buildingHierarchy.map((node) =>
+                        renderTreeItems(
+                          node,
+                          formData.registeredMaskedAreaId,
+                          setRegisteredArea,
+                          selectedAncestorIds,
+                        ),
+                      )}
+                    </SimpleTreeView>
+                  </div>
+                  <div style={{ marginTop: 8 }}>
+                    <Typography variant="body2">
+                      Selected Area: {getAreaPath(formData.registeredMaskedAreaId)}
+                    </Typography>
+                  </div>
                 </div>
-              </div>
+              )}
             </Grid>
           </Grid>
         </DialogContent>
@@ -340,196 +463,54 @@ const AddEditCard = ({ type, card }: formType) => {
 
 export default AddEditCard;
 
-type AreaNode = MaskedAreaType & {
-  nodeType: 'area';
-  maskedAreas?: never;
-  floors?: never;
-  floorplans?: never;
-};
-type FloorplanNode = FloorplanType & {
-  nodeType: 'floorplan';
-  maskedAreas: AreaNode[];
-  floorplans?: never;
-  floors?: never;
-};
-type FloorNode = floorType & {
-  nodeType: 'floor';
-  floorplans: FloorplanNode[];
-  maskedAreas?: never;
-  floors?: never;
-};
-type BuildingNode = BuildingType & {
-  nodeType: 'building';
-  floors: FloorNode[];
-  maskedAreas?: never;
-  floorplans?: never;
-};
 type TreeNode = BuildingNode | FloorNode | FloorplanNode | AreaNode;
-function isBuilding(node: TreeNode): node is BuildingNode {
-  return node.nodeType === 'building';
-}
-function isFloor(node: TreeNode): node is FloorNode {
-  return node.nodeType === 'floor';
-}
-function isFloorplan(node: TreeNode): node is FloorplanNode {
-  return node.nodeType === 'floorplan';
-}
-function isArea(node: TreeNode): node is AreaNode {
-  return node.nodeType === 'area';
-}
 
-function getAllMaskedAreaIdsUnder(node: TreeNode) {
-  // node can be Building, Floor, or Floorplan
-  if ('maskedAreas' in node && Array.isArray(node.maskedAreas)) {
-    return node.maskedAreas.map((a) => a.id);
-  }
-  let ids: string[] = [];
-  if (node.floors) {
-    node.floors.forEach((floor) => {
-      ids = ids.concat(getAllMaskedAreaIdsUnder(floor));
-    });
-  }
-  if (node.floorplans) {
-    node.floorplans.forEach((fp) => {
-      ids = ids.concat(getAllMaskedAreaIdsUnder(fp));
-    });
-  }
-  return ids;
-}
-
-// For Area, just return [node.id]
-function getMaskedAreaIds(node: TreeNode) {
-  if ('maskedAreas' in node || node.floors || node.floorplans)
-    return getAllMaskedAreaIdsUnder(node);
-  return [node.id];
-}
-
-function isParentChecked(node: TreeNode, selectedIds: string[]) {
-  // Checked if ALL maskedAreas under this node are selected
-  const allIds = getAllMaskedAreaIdsUnder(node);
-  return allIds.length > 0 && allIds.every((id) => selectedIds.includes(id));
-}
-
-function isParentIndeterminate(node: TreeNode, selectedIds: string[]) {
-  // Indeterminate if SOME (but not all) maskedAreas under this node are selected
-  const allIds = getAllMaskedAreaIdsUnder(node);
-  return (
-    allIds.length > 0 &&
-    !allIds.every((id) => selectedIds.includes(id)) &&
-    allIds.some((id) => selectedIds.includes(id))
-  );
-}
-
-function renderTreeNode(
+const renderTreeItems = (
   node: TreeNode,
-  selectedIds: string[],
-  setFormData: React.Dispatch<React.SetStateAction<any>>,
-  expanded: { [nodeId: string]: boolean },
-  setExpanded: React.Dispatch<React.SetStateAction<{ [nodeId: string]: boolean }>>,
-) {
-  // "node" can be building, floor, floorplan, or maskedArea
-  // Each node may have children as .floors, .floorplans, or .maskedAreas
-  const hasChildren = node.floors || node.floorplans || node.maskedAreas;
+  selectedMaskedArea: string,
+  setSelectedMaskedArea: React.Dispatch<React.SetStateAction<string>>,
+  selectedAncestorIds: Set<string>,
+): React.ReactNode => {
+  const isLeaf = node.nodeType === 'area';
+  const isSelected = isLeaf && selectedMaskedArea === node.id;
+  const isAncestor = selectedAncestorIds.has(node.id);
 
   let children: TreeNode[] = [];
-  if (isBuilding(node)) children = node.floors;
-  else if (isFloor(node)) children = node.floorplans;
-  else if (isFloorplan(node)) children = node.maskedAreas;
+  if ('floors' in node && node.floors) children = node.floors;
+  else if ('floorplans' in node && node.floorplans) children = node.floorplans;
+  else if ('maskedAreas' in node && node.maskedAreas) children = node.maskedAreas;
 
-  const isArea = !hasChildren;
-
-  // checked/indeterminate for parent
-  const checked = isArea ? selectedIds.includes(node.id) : isParentChecked(node, selectedIds);
-
-  const indeterminate = !isArea && isParentIndeterminate(node, selectedIds);
-  const isExpanded = !!expanded[node.id];
   return (
-    <div key={node.id} style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          width: '100%',
-          cursor: 'pointer',
-          padding: '2px 0',
-          background: checked ? '#e6f4ea' : 'inherit',
-        }}
-        onClick={() => {
-          // Only toggle children on checkbox click, not label click
-        }}
-      >
-        <Checkbox
-          checked={checked}
-          indeterminate={indeterminate}
-          size="small"
-          style={{ marginRight: 8 }}
-          onClick={(e) => {
-            e.stopPropagation();
-            const allIds = isArea ? [node.id] : getAllMaskedAreaIdsUnder(node);
-            setFormData((prev: any) => {
-              let areas = Array.isArray(prev.registeredArea) ? [...prev.registeredArea] : [];
-              if (checked) {
-                // Uncheck all below
-                areas = areas.filter((id) => !allIds.includes(id));
-              } else {
-                // Check all below
-                allIds.forEach((id) => {
-                  if (!areas.includes(id)) areas.push(id);
-                });
-              }
-              return { ...prev, registeredArea: areas };
-            });
+    <TreeItem
+      key={node.id}
+      itemId={node.id}
+      label={
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: isLeaf ? 400 : 500,
+            fontSize: isLeaf ? '0.875rem' : '0.875rem',
+            color: isSelected ? 'primary.main' : isAncestor ? 'secondary.main' : 'inherit',
+            cursor: isLeaf ? 'pointer' : 'default',
+            backgroundColor: isSelected || isAncestor ? 'rgba(25, 118, 210, 0.08)' : 'transparent',
+            borderRadius: 1,
+            px: 0.5,
           }}
-        />
-        <span
-          style={{ flex: 1, cursor: 'pointer', userSelect: 'none', fontWeight: isArea ? 400 : 500 }}
           onClick={(e) => {
             e.stopPropagation();
-            if (isArea) {
-              // Toggle selection (just like checkbox)
-              setFormData((prev: any) => {
-                let areas = Array.isArray(prev.registeredArea) ? [...prev.registeredArea] : [];
-                if (areas.includes(node.id)) {
-                  areas = areas.filter((id) => id !== node.id);
-                } else {
-                  areas.push(node.id);
-                }
-                return { ...prev, registeredArea: areas };
-              });
-            } else if (hasChildren) {
-              // Toggle expand/collapse
-              setExpanded((prev) => ({
-                ...prev,
-                [node.id]: !prev[node.id],
-              }));
+            if (isLeaf) {
+              setSelectedMaskedArea((prev) => (prev === node.id ? '' : node.id));
             }
           }}
         >
           {node.name}
-        </span>
-
-        {hasChildren && (
-          <span
-            onClick={(e) => {
-              e.stopPropagation();
-              setExpanded((prev) => ({
-                ...prev,
-                [node.id]: !prev[node.id],
-              }));
-            }}
-            style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', paddingLeft: 8 }}
-          >
-            {isExpanded ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
-          </span>
+        </Typography>
+      }
+    >
+      {children.length > 0 &&
+        children.map((child) =>
+          renderTreeItems(child, selectedMaskedArea, setSelectedMaskedArea, selectedAncestorIds),
         )}
-      </div>
-      {hasChildren && isExpanded && (
-        <div style={{ marginLeft: 24 }}>
-          {children.map((child) =>
-            renderTreeNode(child, selectedIds, setFormData, expanded, setExpanded),
-          )}
-        </div>
-      )}
-    </div>
+    </TreeItem>
   );
-}
+};

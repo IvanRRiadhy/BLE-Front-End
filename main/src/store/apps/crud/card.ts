@@ -7,6 +7,7 @@ import { defaultCardFilter } from "../defaultForm";
 
 const API_URL = "/api/Card/";
 const API_DT_URL = "/api/Card/filter/";
+const ASSIGN_CARD_URL = "/api/CardRecord/";
 
 export type GetFilter = {
         Draw: number,
@@ -15,9 +16,7 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     searchValue: string,
-    fiilters: {
-        IsUsed: string,
-        // RegisteredArea: string[],
+    filters: {
     }
 }
 
@@ -45,8 +44,8 @@ export type CardType = {
     cardType: string,
     cardBarcode: string,
     dmac: string,
-    isMultiArea: boolean,
-    registeredArea: string[],
+    isMultiMaskedArea: boolean,
+    registeredMaskedAreaId: string,
     isUsed: boolean,
     lastUsed: string,
     statusCard: boolean,
@@ -115,7 +114,7 @@ export const CardSlice = createSlice({
 
     // Update list
     state.cards = cardData;
-
+    console.log("Fetch cards", action.payload);
     // Update counts
     state.cardFilteredCount = action.payload.recordsFiltered || 0;
     state.cardTotalCount = action.payload.recordsTotal || 0;
@@ -167,6 +166,7 @@ export const fetchCardDT = createAsyncThunk(
     "cards/fetchCardDT",
     async (filter: any, { rejectWithValue }) => {
         try {
+            console.log("Filter:", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetCard(response.data.collection.data || []));
             // console.log(filter);
@@ -189,10 +189,11 @@ export const fetchCardDT = createAsyncThunk(
     }
 );
 
-export const addCard = createAsyncThunk("card/addCard", async (formData: FormData, { rejectWithValue }) => {
+export const addCard = createAsyncThunk("card/addCard", async (formData: CardType, { rejectWithValue }) => {
     try {
-        formData.delete('id');
-        const response = await axiosServices.post(API_URL, formData);
+        const { id, ...data } = formData;
+        console.log(data)
+        const response = await axiosServices.post(API_URL, data);
         return response.data;
     } catch (error: any) {
         console.error("Error adding card:", error);
@@ -200,11 +201,25 @@ export const addCard = createAsyncThunk("card/addCard", async (formData: FormDat
     }
 });
 
-export const editCard = createAsyncThunk("card/editCard", async (formData: FormData, { rejectWithValue }) => {
+export const assignCard = createAsyncThunk(
+    "card/assignCard",
+    async(data: any, {rejectWithValue}) => {
+        try {
+            console.log(data);
+            const response = await axiosServices.post(`${ASSIGN_CARD_URL}`, data);
+            console.log(response.data);
+            return response.data;
+        } catch (error: any) {
+            console.error("Error assigning card:", error);
+            return rejectWithValue(error.response?.data || "Unknown error");
+        }
+    }
+)
+
+export const editCard = createAsyncThunk("card/editCard", async (formData: CardType, { rejectWithValue }) => {
     try {
-        const id = formData.get('id');
-        formData.delete('id');
-        const response = await axiosServices.put(`${API_URL}${id}`, formData);
+        const { id, ...data } = formData;
+        const response = await axiosServices.put(`${API_URL}${id}`, data);
         return response.data;
     } catch (error: any) {
         console.error("Error editing card:", error);
