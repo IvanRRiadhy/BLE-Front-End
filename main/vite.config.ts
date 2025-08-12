@@ -30,6 +30,7 @@ export default defineConfig({
         alias: {
             src: resolve(__dirname, 'src'),
         },
+         dedupe: ['react', 'react-dom', 'react-redux'] ,
     },
     esbuild: {
         loader: 'tsx',
