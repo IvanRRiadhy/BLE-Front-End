@@ -185,7 +185,7 @@ const CardList = () => {
                       </TableCell>
                       <TableCell>{card.cardType}</TableCell>
                       <TableCell>{card.cardNumber}</TableCell>
-                      <TableCell>{card.isMultiMaskedArea ? 'Multi-Area' : card.registeredMaskedAreaId}</TableCell>
+                      <TableCell>{card.isMultiMaskedArea ? 'Multi-Area' : card.registeredMaskedArea?.name}</TableCell>
                       <TableCell>{card.isUsed ? 'Yes' : 'No'}</TableCell>
                       <TableCell>{card.lastUsed || 'N/A'}</TableCell>
                       <TableCell

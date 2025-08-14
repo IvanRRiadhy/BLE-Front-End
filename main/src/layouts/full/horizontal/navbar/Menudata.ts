@@ -149,7 +149,7 @@ const Menuitems = [
       },
       {
         id: uniqueId(),
-        title: 'Access Control',
+        title: 'Access Control --(WIP)--',
         icon: IconIdBadge,
         href: '/master/accesscontrol/'
       },
@@ -202,20 +202,20 @@ const Menuitems = [
     // },
     {
         id:uniqueId(),
-        title: 'Integration',
+        title: 'Integration  --(WIP)--',
         icon: IconLicense,
         href: '/master/integration/'
       },
 
       {
         id: uniqueId(),
-        title: 'Brand',
+        title: 'Brand  --(WIP)--',
         icon: IconBadgeTm,
         href: '/master/brand/'
       },
       {
         id: uniqueId(),
-        title: 'Users',
+        title: 'Users  --(WIP)--',
         icon: IconMapPin,
         href: '/master/user/'
       },
@@ -240,6 +240,12 @@ const Menuitems = [
         title: 'Alarm Notification',
         icon: IconBellExclamation,
         href: '/report/alarmRecord/',
+      },
+      {
+        id: uniqueId(),
+        title: 'Card Record',
+        icon: IconBarrierBlock,
+        href: '/report/cardrecord/',
       },
       {
         id: uniqueId(),

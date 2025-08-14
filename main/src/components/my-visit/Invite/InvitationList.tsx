@@ -29,6 +29,7 @@ import toast from 'react-hot-toast';
 
 const columns = [
   { label: 'Visitor', field: 'Visitor.Name', sortAble: true },
+  { label: 'Agenda', field: '', sortAble: false},
   { label: 'Visit Start', field: 'VisitorPeriodStart', sortAble: true },
   { label: 'Visit End', field: 'VisitorPeriodEnd', sortAble: true },
   { label: 'Area', field: 'Area.Name', sortAble: true },
@@ -192,6 +193,7 @@ const InvitationList = () => {
                           {index + 1 + page * rowsPerPage}
                         </TableCell>
                         <TableCell>{trx.visitor?.name}</TableCell>
+                        <TableCell>{trx.agenda}</TableCell>
                         <TableCell>{trx.visitorPeriodStart}</TableCell>
                         <TableCell>{trx.visitorPeriodEnd}</TableCell>
                         <TableCell>{trx.maskedarea?.name}</TableCell>

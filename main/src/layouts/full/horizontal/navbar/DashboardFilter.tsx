@@ -108,24 +108,24 @@ const DashboardFilter = () => {
     // Step 1: Derive each level based on the current appliedFilter
     // 1. Filter Floors
     const floorsResult = filterData(
-      floorList.filter((floor) =>
+      floorList.filter((floor: floorType) =>
         appliedFilter.BuildingId.length === 0
           ? true
           : appliedFilter.BuildingId.includes(floor.buildingId),
       ), // filter by building first
       appliedFilter.FloorId,
-      (f) => f.id,
+      (f: floorType) => f.id,
     );
     // floorsResult: { data: floorType[], empty: boolean }
 
     // 2. Filter Floorplans (only from filtered floors)
     let floorplansResult: FilterResult<FloorplanType> = { data: [], empty: true };
     if (!floorsResult.empty) {
-      const floorIds = floorsResult.data.map((f) => f.id);
+      const floorIds = floorsResult.data.map((f: floorType) => f.id);
       floorplansResult = filterData(
-        floorplanList.filter((fp) => floorIds.includes(fp.floorId)),
+        floorplanList.filter((fp: FloorplanType) => floorIds.includes(fp.floorId)),
         appliedFilter.FloorplanId,
-        (fp) => fp.id,
+        (fp: FloorplanType) => fp.id,
       );
     }
     // floorplansResult: { data: FloorplanType[], empty: boolean }

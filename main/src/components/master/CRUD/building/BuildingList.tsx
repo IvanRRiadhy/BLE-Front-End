@@ -264,18 +264,18 @@ const BuildingList = () => {
                     </TableBody>
                   </Table>
                 </TableContainer>
+                {/* Pagination */}
+                <TablePagination
+                  component="div"
+                  count={buildingFilteredCount}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                  onPageChange={handleChangePage}
+                  rowsPerPageOptions={[5, 10, 25]}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
               </BlankCard>
             </Box>
-            {/* Pagination */}
-            <TablePagination
-              component="div"
-              count={buildingFilteredCount}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              onPageChange={handleChangePage}
-              rowsPerPageOptions={[5, 10, 25]}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
           </>
         )}
       </Grid>

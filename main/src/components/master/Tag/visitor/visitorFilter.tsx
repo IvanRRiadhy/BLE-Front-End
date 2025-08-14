@@ -10,7 +10,7 @@ import {
   Grid2 as Grid,
 } from '@mui/material';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import { IconMail, IconCircleX } from '@tabler/icons-react';
+import { IconMail, IconCircleX, IconClearAll } from '@tabler/icons-react';
 import {
   gender,
   genderIconMap,
@@ -18,13 +18,10 @@ import {
   visitorStatusEnumMap,
   visitorStatusIconMap,
 } from 'src/types/crud/input';
-import AddEditVisitor from '../../CRUD/visitor/AddEditVisitor';
-import { SetVisibilityFilter } from 'src/store/apps/crud/visitor';
 import VisitorRegister from './visitorregister/visitorRegister';
 import { SelectTrxVisitor, UpdateFilter } from 'src/store/apps/crud/trxVisitor';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
-import InvitePage from 'src/components/my-visit/Invite/InviteForm';
 import { useEffect, useState } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
@@ -93,8 +90,8 @@ const VisitorFilter = () => {
       id: 1,
       name: 'All',
       filter: 'show_all',
-      icon: IconMail,
-      color: 'primary.main',
+      category: 'all',
+      icon: IconClearAll,
     },
     {
       id: 2,
@@ -102,15 +99,23 @@ const VisitorFilter = () => {
     },
     {
       id: 3,
-      filterbyTitle: 'Gender',
+      filterbyTitle: 'Visiting Time',
     },
-    ...genderFilters,
     {
       id: 4,
       divider: true,
     },
     {
       id: 5,
+      filterbyTitle: 'Gender',
+    },
+    ...genderFilters,
+    {
+      id: 6,
+      divider: true,
+    },
+    {
+      id: 7,
       filterbyTitle: 'Status',
     },
     ...statusFilters,
@@ -146,7 +151,7 @@ const VisitorFilter = () => {
     if (!start || !end) {
       // clear when "Any"
       const { DateFrom, DateTo, ...rest } = currentFilters;
-      dispatch(UpdateFilter({ filters:{}, dateFilters:{}}));
+      dispatch(UpdateFilter({ filters: {}, dateFilters: {} }));
       return;
     }
     // Use ISO; swap to your preferred format if needed
@@ -207,7 +212,7 @@ const VisitorFilter = () => {
 
   return (
     <>
-      <Box p={2}>
+      <Box p={3} sx={{width: '95%', height: '100%', overflow: 'auto'}}>
         <VisitorRegister />
       </Box>
 
@@ -215,23 +220,84 @@ const VisitorFilter = () => {
         <Box
           sx={{
             height: { lg: 'calc(100vh - 230px)', md: '100vh' },
-            maxHeight: '800px',
+            maxHeight: '75vh',
             overflow: 'auto',
           }}
         >
+          
           {filterData.map((filter) => {
             if (filter.filterbyTitle) {
               return (
-                <Typography
-                  variant="subtitle1"
-                  fontWeight={600}
-                  pl={5.1}
-                  mt={1}
-                  pb={2}
-                  key={filter.id} // ✅ Add key here
-                >
-                  {filter.filterbyTitle}
-                </Typography>
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight={600}
+                    pl={5.1}
+                    mt={1}
+                    pb={2}
+                    key={filter.id} // ✅ Add key here
+                  >
+                    {filter.filterbyTitle}
+                  </Typography>
+                  {/* ⬇️ Time Range UI goes here, just under "All" */}
+                  {filter.id === 3 && (
+                    <Box mx={3} mt={1} mb={2}>
+                      <TextField
+                        select
+                        label="Time Range"
+                        value={timeRange}
+                        onChange={(e) => setTimeRange(e.target.value as TimeRangeKey)}
+                        fullWidth
+                        size="small"
+                      >
+                        <MenuItem value="any">Any</MenuItem>
+                        <MenuItem value="today">Today</MenuItem>
+                        <MenuItem value="week">This Week</MenuItem>
+                        <MenuItem value="month">This Month</MenuItem>
+                        <MenuItem value="custom">Custom</MenuItem>
+                      </TextField>
+
+                      {timeRange === 'custom' && (
+                        <Box mt={2}>
+                          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="id">
+                            <Grid container direction={'column'} spacing={1.5}>
+                              <Grid>
+                                <DateTimePicker
+                                  label="From"
+                                  value={startTime}
+                                  onChange={setStartTime}
+                                  ampm={false}
+                                  format="ddd, DD - MMM - YYYY, HH:mm"
+                                  viewRenderers={{
+                                    hours: renderTimeViewClock,
+                                    minutes: renderTimeViewClock,
+                                    seconds: renderTimeViewClock,
+                                  }}
+                                  slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                                />
+                              </Grid>
+                              <Grid>
+                                <DateTimePicker
+                                  label="To"
+                                  value={endTime}
+                                  onChange={setEndTime}
+                                  ampm={false}
+                                  format="ddd, DD - MMM - YYYY, HH:mm"
+                                  viewRenderers={{
+                                    hours: renderTimeViewClock,
+                                    minutes: renderTimeViewClock,
+                                    seconds: renderTimeViewClock,
+                                  }}
+                                  slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                                />
+                              </Grid>
+                            </Grid>
+                          </LocalizationProvider>
+                        </Box>
+                      )}
+                    </Box>
+                  )}
+                </>
               );
             } else if (filter.divider) {
               return <Divider key={filter.id} sx={{ mb: 3 }} />; // ✅ Add key here
@@ -251,6 +317,8 @@ const VisitorFilter = () => {
                     },
                   }}
                   selected={
+                    filter.category === 'all' &&
+                    trxVisitorFilter.Status === undefined ||
                     filter.category === 'status' &&
                     trxVisitorFilter.Status === visitorStatusEnumMap[filter.filter!]
                   }
@@ -274,65 +342,6 @@ const VisitorFilter = () => {
                   </ListItemIcon>
                   <ListItemText primary={filter.name} />
                 </ListItemButton>
-
-                {/* ⬇️ Time Range UI goes here, just under "All" */}
-                {filter.id === 1 && (
-                  <Box mx={3} mt={1} mb={2}>
-                    <TextField
-                      select
-                      label="Time Range"
-                      value={timeRange}
-                      onChange={(e) => setTimeRange(e.target.value as TimeRangeKey)}
-                      fullWidth
-                      size="small"
-                    >
-                      <MenuItem value="any">Any</MenuItem>
-                      <MenuItem value="today">Today</MenuItem>
-                      <MenuItem value="week">This Week</MenuItem>
-                      <MenuItem value="month">This Month</MenuItem>
-                      <MenuItem value="custom">Custom</MenuItem>
-                    </TextField>
-
-                    {timeRange === 'custom' && (
-                      <Box mt={2}>
-                        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="id">
-                          <Grid container direction={'column'} spacing={1.5}>
-                            <Grid>
-                              <DateTimePicker
-                                label="From"
-                                value={startTime}
-                                onChange={setStartTime}
-                                ampm={false}
-                                format="ddd, DD - MMM - YYYY, HH:mm"
-                                viewRenderers={{
-                                  hours: renderTimeViewClock,
-                                  minutes: renderTimeViewClock,
-                                  seconds: renderTimeViewClock,
-                                }}
-                                slotProps={{ textField: { fullWidth: true, size: 'small' } }}
-                              />
-                            </Grid>
-                            <Grid>
-                              <DateTimePicker
-                                label="To"
-                                value={endTime}
-                                onChange={setEndTime}
-                                ampm={false}
-                                format="ddd, DD - MMM - YYYY, HH:mm"
-                                viewRenderers={{
-                                  hours: renderTimeViewClock,
-                                  minutes: renderTimeViewClock,
-                                  seconds: renderTimeViewClock,
-                                }}
-                                slotProps={{ textField: { fullWidth: true, size: 'small' } }}
-                              />
-                            </Grid>
-                          </Grid>
-                        </LocalizationProvider>
-                      </Box>
-                    )}
-                  </Box>
-                )}
               </React.Fragment>
             );
           })}

@@ -142,6 +142,7 @@ export const fetchAlarm = () => async (dispatch: AppDispatch) => {
 export const fetchAlarmDT = createAsyncThunk(
     "alarmRecordTrackings/fetchAlarmDT",
     async (filter: any, { rejectWithValue }) => {
+        console.log("Filter:", filter);
         try {
                                 if (
             filter?.filters &&

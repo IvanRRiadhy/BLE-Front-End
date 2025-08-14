@@ -18,6 +18,7 @@ import { OrganizationType, GetFilter as OrganizationFilter } from './crud/organi
 import { GetFilter as TrackingTransFilter } from './crud/trackingTrans';
 import { VisitorType, GetFilter as VisitorFilter } from './crud/visitor';
 import { TrxVisitorType, GetFilter as TrxVisitorFilter } from './crud/trxVisitor';
+import { CardRecordType, GetFilter as CardRecordFilter } from './crud/cardRecord';
 
 //#region AccessCCTV
 export const defaultAccessCCTVForm: CCTVType = {
@@ -100,7 +101,7 @@ export const defaultBlaclistFilter: BlacklistFilter = {
   Draw: 1,
   Start: 0,
   Length: 5,
-  SortColumn: 'UpdatedAt',
+  SortColumn: 'Visitor.Name',
   SortDir: 'desc',
   searchValue: '',
   filters: {
@@ -501,4 +502,17 @@ export const defaultCardFilter: CardFilter = {
   filters: {
   },
 };
+//#endregion
+
+//#region Card Record
+export const defaultCardRecordFilter: CardRecordFilter = {
+  Draw: 1,
+  Start: 0,
+  Length: 5,
+  SortColumn: 'UpdatedAt',
+  SortDir: 'desc',
+  searchValue: '',
+  filters: {
+  },
+}
 //#endregion

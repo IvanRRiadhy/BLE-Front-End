@@ -27,10 +27,10 @@ const VisitorList = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   useEffect(() => {
-    dispatch(UpdateFilter(defaultTrxVisitorFilter));
+    dispatch(UpdateFilter({...defaultTrxVisitorFilter, Length: 999}));
     setLoading(true);
     try {
-      dispatch(fetchTrxVisitorDT(defaultTrxVisitorFilter));
+      dispatch(fetchTrxVisitorDT({...defaultTrxVisitorFilter, Length: 999}));
     } catch (error) {
       console.error('Error fetching visitors:', error);
     }
@@ -41,7 +41,7 @@ const VisitorList = () => {
   useEffect(() => {
     setLoading(true);
     try {
-    dispatch(fetchTrxVisitorDT(trxVisitorFilter));
+    dispatch(fetchTrxVisitorDT({...trxVisitorFilter, Length: 999}));
     } catch (error) {
       console.error('Error fetching visitors:', error);
     } finally {
@@ -65,8 +65,8 @@ const VisitorList = () => {
       <List>
         <Box
           sx={{
-            height: { lg: 'calc(100vh - 350px)', md: '100vh' },
-            maxHeight: '800px',
+            height: { lg: 'calc(100vh - 220px)', md: '100vh' },
+            maxHeight: '75vh',
             overflow: 'auto',
           }}
         >

@@ -7,39 +7,39 @@ import {
   Typography,
   Avatar,
   Divider,
-  IconButton,
   Stack,
   Grid2 as Grid,
-  Tooltip,
   // useTheme,
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogContentText,
+
   DialogActions,
   Backdrop,
   CircularProgress,
+  MenuItem,
 } from '@mui/material';
-import { masterVisitorType, deleteVisitor, VisitorType } from 'src/store/apps/crud/visitor';
-import AddEditVisitor from '../../CRUD/visitor/AddEditVisitor';
-import { IconTrash } from '@tabler/icons-react';
+import {VisitorType } from 'src/store/apps/crud/visitor';
+
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
-import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
+
 import { useTranslation } from 'react-i18next';
-import { DepartmentType, fetchDepartments } from 'src/store/apps/crud/department';
-import { DistrictType, fetchDistricts } from 'src/store/apps/crud/district';
-import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
 import { visitorStatusEnumMap } from 'src/types/crud/input';
 import {
   fetchTrxVisitorDT,
   SelectTrxVisitor,
   UpdateFilter,
+  visitorCheckIn,
+  visitorCheckOut,
   visitorStatusChange,
 } from 'src/store/apps/crud/trxVisitor';
 import toast from 'react-hot-toast';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { defaultTrxVisitorFilter } from 'src/store/apps/defaultForm';
+import { defaultCardFilter, defaultTrxVisitorFilter } from 'src/store/apps/defaultForm';
 import { createPortal } from 'react-dom';
+import {  CardType,  fetchCardDT } from 'src/store/apps/crud/card';
+import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
+import VisitorActions from './visitorActions';
 type ChipColor = 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
 
 // Map enum value to MUI Chip color
@@ -56,19 +56,15 @@ const visitorStatusColorMap: Record<number, ChipColor> = {
 
 const VisitorContent = () => {
   const { t } = useTranslation();
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const trxVisitorDetail = useSelector(
     (state: RootState) => state.TrxVisitorReducer.SelectedTrxVisitor,
   );
   const visitorDetail: VisitorType | undefined = trxVisitorDetail.visitor;
-  const applicationData = useSelector((state: RootState) => state.applicationReducer.applications);
-  const districtData = useSelector((state: RootState) => state.districtReducer.districts);
-  const departmentData = useSelector((state: RootState) => state.departmentReducer.departments);
-  const organizationData = useSelector(
-    (state: RootState) => state.organizationReducer.organizations,
-  );
+  const cardData = useSelector((state: RootState) => state.CardReducer.cards);
   const [reason, setReason] = useState('');
+  const [selectedCard, setSelectedCard] = useState<string>('');
   const [openReasonMenu, setOpenReasonMenu] = useState(false);
+  const [openCardMenu, setOpenCardMenu] = useState(false);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   // const theme = useTheme();
@@ -76,10 +72,7 @@ const VisitorContent = () => {
   useEffect(() => {
     setLoading(true);
     try {
-      dispatch(fetchApplications());
-      dispatch(fetchDistricts());
-      dispatch(fetchDepartments());
-      dispatch(fetchOrganizations());
+      dispatch(fetchCardDT({ ...defaultCardFilter, length: 0, fiters: { IsUsed: false } }));
       setTimeout(() => {
         setLoading(false);
       }, 500);
@@ -88,46 +81,6 @@ const VisitorContent = () => {
     }
   }, [dispatch]);
 
-  const getAppName = (appId: string) => {
-    const app = applicationData.find((a: ApplicationType) => a.id === appId);
-    return app ? app.applicationName : 'Unknown App';
-  };
-
-  const getDepartmentName = (departmentId: string) => {
-    const department = departmentData.find((dpt: DepartmentType) => dpt.id === departmentId);
-    return department ? department.name : 'Unknown Department';
-  };
-
-  const getDistrictName = (districtId: string) => {
-    const district = districtData.find((dst: DistrictType) => dst.id === districtId);
-    return district ? district.name : 'Unknown District';
-  };
-
-  const getOrganizationName = (organizationId: string) => {
-    const organization = organizationData.find(
-      (org: OrganizationType) => org.id === organizationId,
-    );
-    return organization ? organization.name : 'Unknown Organization';
-  };
-  const [selectedVisitor, setSelectedVisitor] = useState<VisitorType | null>(null);
-  const handleOpenDeleteDialog = (vis: VisitorType) => {
-    setSelectedVisitor(vis);
-    setDeleteDialogOpen(true);
-  };
-
-  // Close delete confirmation dialog
-  const handleCloseDeleteDialog = () => {
-    setDeleteDialogOpen(false);
-    setSelectedVisitor(null);
-  };
-
-  // Confirm delete action
-  const handleConfirmDelete = () => {
-    if (selectedVisitor) {
-      dispatch(deleteVisitor(selectedVisitor.id));
-    }
-    handleCloseDeleteDialog();
-  };
 
   const getOrganizationDisplay = (
     organization?: string,
@@ -170,15 +123,23 @@ const VisitorContent = () => {
       toast.error('Visitor not found');
       return;
     }
+    if (!cardData.some((card: CardType) => card.id === selectedCard)) {
+      setLoading(false);
+      toast.error('Please select a card');
+      return;
+    }
     try {
       const result = await dispatch(
-        visitorStatusChange({ trxVisitorId: trxVisitorDetail.id, status: 'checkin' }),
+        visitorCheckIn({ TrxVisitorId: trxVisitorDetail.id, CardId: selectedCard }),
       );
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         toast.success('Visitor checked in successfully');
         dispatch(UpdateFilter(defaultTrxVisitorFilter));
         await dispatch(fetchTrxVisitorDT(defaultTrxVisitorFilter));
         dispatch(SelectTrxVisitor(trxVisitorDetail.id));
+        setTimeout(() => {
+          handleCloseCardMenu();
+        }, 500);
       } else {
         toast.error('Error checking in visitor');
       }
@@ -198,10 +159,9 @@ const VisitorContent = () => {
       toast.error('Visitor not found');
       return;
     }
+
     try {
-      const result = await dispatch(
-        visitorStatusChange({ trxVisitorId: trxVisitorDetail.id, status: 'checkout' }),
-      );
+      const result = await dispatch(visitorCheckOut(trxVisitorDetail.id));
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         toast.success('Visitor checked out successfully');
         dispatch(UpdateFilter(defaultTrxVisitorFilter));
@@ -321,6 +281,13 @@ const VisitorContent = () => {
       handleDeny();
     }
   };
+
+  const handleCloseCardMenu = () => {
+    setSelectedCard('');
+    setOpenCardMenu(false);
+  };
+
+
   const statusValue = trxVisitorDetail?.status
     ? visitorStatusEnumMap[trxVisitorDetail.status]
     : undefined;
@@ -338,18 +305,27 @@ const VisitorContent = () => {
       secondary?: { label: string; color: 'error' | 'warning' | 'success'; onClick: () => void };
     }
   > = {
+    Preregist: {
+      primary: { label: 'Deny Visitor', color: 'error', onClick: () => setOpenReasonMenu(true) },
+    },
     Precheckin: {
-      primary: { label: 'Check-in Visitor', color: 'success', onClick: handleCheckin },
+      primary: {
+        label: 'Check-in Visitor',
+        color: 'success',
+        onClick: () =>{ 
+          dispatch(fetchCardDT({ ...defaultCardFilter, length: 0, fiters: { IsUsed: false } }))
+          setOpenCardMenu(true)},
+      },
       secondary: { label: 'Deny Visitor', color: 'error', onClick: () => setOpenReasonMenu(true) },
     },
     Checkin: {
       primary: { label: 'Check-out Visitor', color: 'warning', onClick: handleCheckout },
       secondary: { label: 'Block Visitor', color: 'error', onClick: () => setOpenReasonMenu(true) },
     },
-      Unblock: {
-    primary: { label: 'Check-out Visitor', color: 'warning', onClick: handleCheckout },
-    secondary: { label: 'Block Visitor', color: 'error', onClick: () => setOpenReasonMenu(true) },
-  },
+    Unblock: {
+      primary: { label: 'Check-out Visitor', color: 'warning', onClick: handleCheckout },
+      secondary: { label: 'Block Visitor', color: 'error', onClick: () => setOpenReasonMenu(true) },
+    },
     Block: {
       primary: { label: 'Check-out Visitor', color: 'warning', onClick: handleCheckout },
       secondary: { label: 'Unblock Visitor', color: 'success', onClick: handleUnblock }, // You'll need to define handleUnblock
@@ -374,16 +350,6 @@ const VisitorContent = () => {
             }}
           >
             <Typography variant="h4">Visitor Details</Typography>
-            <Stack gap={0} direction="row" ml={'auto'}>
-              <Tooltip title="Edit">
-                <AddEditVisitor visitor={visitorDetail} type="edit" />
-              </Tooltip>
-              <Tooltip title="Delete">
-                <IconButton onClick={() => handleOpenDeleteDialog(visitorDetail)}>
-                  <IconTrash size="18" stroke={1.3} />
-                </IconButton>
-              </Tooltip>
-            </Stack>
           </Box>
           <Divider />
 
@@ -411,50 +377,12 @@ const VisitorContent = () => {
                 src={`${BASE_URL}${trxVisitorDetail.visitor?.faceImage}`}
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
-
-              {/* Floating actions */}
-              {currentActions && (
-                <Box
-                  sx={{
-                    position: { xs: 'static', md: 'absolute' },
-                    top: { md: 0 },
-                    left: { md: 0 },
-                    zIndex: 2,
-                  }}
-                >
-                  <Stack spacing={1} direction="column" alignItems="flex-start">
-                    {currentActions.primary && (
-                      <Button
-                        size="large"
-                        variant="contained"
-                        color={currentActions.primary.color}
-                        onClick={currentActions.primary.onClick}
-                        sx={{ boxShadow: 2, width: 200, height: 50 }}
-                      >
-                        {currentActions.primary.label}
-                      </Button>
-                    )}
-                    {currentActions.secondary && (
-                      <Button
-                        size="large"
-                        variant="contained"
-                        color={currentActions.secondary.color}
-                        onClick={currentActions.secondary.onClick}
-                        sx={{ boxShadow: 2, width: 200, height: 50 }}
-                      >
-                        {currentActions.secondary.label}
-                      </Button>
-                    )}
-                  </Stack>
-                </Box>
-              )}
+                            <VisitorActions trxVisitorDetail={trxVisitorDetail} floating />
 
               <Typography variant="h4" fontWeight={800}>
                 {trxVisitorDetail.visitor?.name}
               </Typography>
             </Box>
-
-            {trxVisitorDetail.status}
 
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
@@ -517,11 +445,11 @@ const VisitorContent = () => {
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
-                <Typography>{trxVisitorDetail.visitor?.cardNumber}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.cardNumber ?? "Not Assigned"}</Typography>
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="ble-card-number">Ble Card Number</CustomFormLabel>
-                <Typography>{trxVisitorDetail.visitor?.bleCardNumber}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.bleCardNumber ?? "Not Assigned"}</Typography>
               </Grid>
             </Grid>
           </Box>
@@ -537,23 +465,56 @@ const VisitorContent = () => {
           </Box>
         </Box>
       )}
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
+
+      {/* Card Assign Pop-up */}
+      <Dialog open={openCardMenu} onClose={handleCloseCardMenu} fullWidth maxWidth="sm">
+        <DialogTitle mb={2} p={2}>
+          Assign Card
+        </DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete visitor <strong>{selectedVisitor?.name}</strong>?
-          </DialogContentText>
+          <Grid size={12} direction={'column'} p={1}>
+            <CustomSelect
+              name="selectedCard"
+              value={selectedCard || ''}
+              onChange={(e: any) => setSelectedCard(e.target.value)}
+              fullWidth
+              variant="outlined"
+              MenuProps={{
+                PaperProps: {
+                  style: {
+                    maxHeight: 200, // Set the maximum height of the dropdown menu
+                    width: 100, // Adjust the width of the dropdown menu
+                  },
+                },
+              }}
+            >
+              <MenuItem value="" disabled>
+                Select Card to Assign
+              </MenuItem>
+              {cardData.map((card) => (
+                <MenuItem key={card.id} value={card.id}>
+                  {card.name} | {card.cardNumber}
+                </MenuItem>
+              ))}
+            </CustomSelect>
+          </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">
+          <Button onClick={handleCloseCardMenu} color="error" variant="outlined">
             Cancel
           </Button>
-          <Button onClick={handleConfirmDelete} color="error">
-            Delete
+          <Button
+            onClick={() => {
+              handleCheckin();
+            }}
+            color="primary"
+          >
+            Assign Card
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Reason Pop-up */}
       <Dialog open={openReasonMenu} onClose={handleCloseReasonMenu} fullWidth maxWidth="sm">
         <DialogTitle mb={2} p={2}>
           Reason

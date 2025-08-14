@@ -311,7 +311,7 @@ const allowedVisitorMonthTotal = trackingData.filter((item) => {
               options={optionscolumnchart}
               series={seriescolumnchart}
               type="bar"
-              height="415px"
+              height="455px"
             />
             {/* <Chart options={options} series={seriescolumnchart} type="area" height={300} /> */}
           </Box>

@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import {
   Box,
   Grid2 as Grid,
-  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -15,13 +14,12 @@ import {
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { useTranslation } from 'react-i18next';
-import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { AlarmType, fetchAlarmDT, UpdateFilter } from 'src/store/apps/crud/alarmRecordTracking';
 import { defaultAlarmRecordFilter } from 'src/store/apps/defaultForm';
 
 const columns = [
-  { label: 'Time', field: 'Time', sortAble: true },
+  { label: 'Time', field: 'Timestamp', sortAble: true },
   { label: 'Visitor Name', field: 'Visitor.Name', sortAble: true },
   { label: 'Reader', field: 'Reader', sortAble: true },
   { label: 'Alarm Status', field: 'AlarmStatus', sortAble: true },
@@ -88,7 +86,7 @@ const AlarmRecordList = () => {
     if (isDesc) {
       dispatch(
         UpdateFilter({
-          SortColumn: 'UpdatedAt',
+          SortColumn: 'Timestamp',
           SortDir: 'desc',
           Start: 0,
         }),

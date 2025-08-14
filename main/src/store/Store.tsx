@@ -34,6 +34,7 @@ import FloorplanDeviceReducer from './apps/crud/floorplanDevice';
 import FloorplanReducer from './apps/crud/floorplan';
 import CardReducer from './apps/crud/card';
 import VisitorCardReducer from './apps/crud/visitorCard';
+import CardRecordReducer from './apps/crud/cardRecord';
 import TrxVisitorReducer from './apps/crud/trxVisitor';
 import layoutReducer from './apps/monitoring/layout';
 import BleNodeReducer from './apps/crud/bleNode';
@@ -83,6 +84,7 @@ const rootReducer = combineReducers({
   floorplanReducer: FloorplanReducer,
   CardReducer: CardReducer,
   VisitorCardReducer: VisitorCardReducer,
+  CardRecordReducer: CardRecordReducer,
   TrxVisitorReducer: TrxVisitorReducer,
   bleNodeReducer: BleNodeReducer,
   RulesNodeReducer: RulesNodeReducer,
@@ -99,8 +101,10 @@ const persistConfig = {
 };
 
 // Create persisted root reducer
-const persistedReducer = persistReducer(persistConfig, rootReducer);
-
+const persistedReducer = persistReducer<ReturnType<typeof rootReducer>>(
+  persistConfig,
+  rootReducer
+);
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
@@ -154,11 +158,12 @@ export const store = configureStore({
 export const persistor = persistStore(store);
 
 
-export type AppState = ReturnType<typeof rootReducer> & PersistPartial;
-export type AppDispatch = typeof store.dispatch;
-export const { dispatch } = store;
-export const useDispatch = () => useAppDispatch<AppDispatch>();
-export const useSelector: TypedUseSelectorHook<AppState> = useAppSelector;
 export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+
+export const useDispatch = () => useAppDispatch<AppDispatch>();
+export const useSelector: TypedUseSelectorHook<RootState> = useAppSelector;
+export const { dispatch } = store;
 
 export default store;
+

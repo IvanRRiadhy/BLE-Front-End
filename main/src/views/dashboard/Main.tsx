@@ -24,11 +24,11 @@ import AreaDistribution from 'src/components/dashboards/mainmenu/AreaDistributio
 import { CardType, fetchCardDT } from 'src/store/apps/crud/card';
 
 const filter = {
-  draw: 1,
-  start: 0,
-  length: 3,
-  sortColumn: '',
-  sortDir: 'asc',
+  Draw: 1,
+  Start: 0,
+  Length: 0,
+  SortColumn: '',
+  SortDir: 'desc',
   searchValue: '',
 };
 
@@ -88,7 +88,7 @@ const Modern = () => {
     dispatch(
       // fetchTrackingTransDT({
       //   ...filter,
-      //   length: 999,
+      //   length: 0,
       //   filters: {
       //     FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || [],
       //     ReaderId: [],
@@ -102,8 +102,9 @@ const Modern = () => {
     dispatch(
       fetchCardDT({
         ...filter,
+        Length: 0,
         filters: {
-          IsUsed: 'true',
+          IsUsed: true,
         }
       })
     )
@@ -111,7 +112,7 @@ const Modern = () => {
       fetchCardDT({
         ...filter,
         filters: {
-          IsUsed: 'false',
+          IsUsed: false,
         }
       })
     )
@@ -152,6 +153,7 @@ const Modern = () => {
     dispatch(
       fetchAlarmDT({
         ...filter,
+        SortColumn: 'Timestamp',
         Length: alarmRowsPerPage,
         Start: alarmPage * alarmRowsPerPage,
         filters: {

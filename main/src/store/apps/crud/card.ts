@@ -4,6 +4,7 @@ import { dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { defaultCardFilter } from "../defaultForm";
+import { MaskedAreaType } from "./maskedArea";
 
 const API_URL = "/api/Card/";
 const API_DT_URL = "/api/Card/filter/";
@@ -45,7 +46,8 @@ export type CardType = {
     cardBarcode: string,
     dmac: string,
     isMultiMaskedArea: boolean,
-    registeredMaskedAreaId: string,
+    registeredMaskedAreaId: string | null,
+    registeredMaskedArea?: MaskedAreaType,
     isUsed: boolean,
     lastUsed: string,
     statusCard: boolean,
@@ -169,18 +171,18 @@ export const fetchCardDT = createAsyncThunk(
             console.log("Filter:", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetCard(response.data.collection.data || []));
-            // console.log(filter);
-            if(filter.IsUsed === "true"){
-                // console.log("UpdateActiveCardCount", response.data.collection.recordsFiltered);
+            console.log(filter);
+            if(filter.filters.IsUsed === true){
+                console.log("UpdateActiveCardCount", response.data.collection.recordsFiltered);
                 dispatch(UpdateActiveCardCount(response.data.collection.recordsFiltered));
                 dispatch(SetActiveCardData(response.data.collection.data || []));
             };
-            if(filter.IsUsed === "false"){
-                // console.log("UpdateNonActiveCardCount", response.data.collection.recordsFiltered);
+            if(filter.filters.IsUsed === false){
+                console.log("UpdateNonActiveCardCount", response.data.collection.recordsFiltered);
                 dispatch(UpdateNonActiveCardCount(response.data.collection.recordsFiltered));
                 dispatch(SetNonActiveCardData(response.data.collection.data || []));
             };
-            // console.log("Fetch cards", response.data.collection);
+            console.log("Fetch cards", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching cards:", error);

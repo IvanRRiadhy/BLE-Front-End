@@ -24,6 +24,7 @@ import {
   Tab,
   TableContainer,
   Paper,
+  Switch,
 } from '@mui/material';
 import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -193,6 +194,7 @@ const VisitorRegister = () => {
     const payload = selectedVisitor.map((visitor) => ({
       Email: visitor.email,
       Name: visitor.name,
+      isVip: visitor.isVip,
       MaskedAreaId: selectedMaskedArea,
       VisitorPeriodStart: startDate,
       VisitorPeriodEnd: endDate,
@@ -316,6 +318,7 @@ const VisitorRegister = () => {
     <>
       <Tooltip title="Add Visitor">
         <Button
+          fullWidth
           variant="contained"
           color="primary"
           startIcon={<IconPlus size={20} />}
@@ -479,9 +482,10 @@ const VisitorRegister = () => {
                             <TableHead>
                               <TableRow>
                                 <TableCell
+                                  align="center"
                                   sx={{
                                     position: 'sticky',
-                                    width: '44%',
+                                    width: '35%',
                                     top: 0,
                                     backgroundColor: '#fff', // or theme.palette.background.paper
                                     zIndex: 2,
@@ -490,9 +494,10 @@ const VisitorRegister = () => {
                                   <Typography fontWeight={600}>Visitor Name</Typography>
                                 </TableCell>
                                 <TableCell
+                                  align="center"
                                   sx={{
                                     position: 'sticky',
-                                    width: '44%',
+                                    width: '35%',
                                     top: 0,
                                     backgroundColor: '#fff', // or theme.palette.background.paper
                                     zIndex: 2,
@@ -501,6 +506,19 @@ const VisitorRegister = () => {
                                   <Typography fontWeight={600}>Visitor Email</Typography>
                                 </TableCell>
                                 <TableCell
+                                  align="center"
+                                  sx={{
+                                    position: 'sticky',
+                                    width: 15,
+                                    top: 0,
+                                    backgroundColor: '#fff', // or theme.palette.background.paper
+                                    zIndex: 2,
+                                  }}
+                                >
+                                  <Typography fontWeight={600}>VIP</Typography>
+                                </TableCell>
+                                <TableCell
+                                  align="center"
                                   sx={{
                                     position: 'sticky',
                                     right: 0,
@@ -544,6 +562,19 @@ const VisitorRegister = () => {
                                           handleChangeVisitorField(index, 'email', e.target.value)
                                         }
                                         fullWidth
+                                        disabled={isRegistered}
+                                      />
+                                    </TableCell>
+                                    <TableCell>
+                                      <Switch
+                                        checked={!!visitor.isVip}
+                                        onChange={(e) =>
+                                          handleChangeVisitorField(
+                                            index,
+                                            'isVip',
+                                            e.target.checked as any,
+                                          )
+                                        }
                                         disabled={isRegistered}
                                       />
                                     </TableCell>

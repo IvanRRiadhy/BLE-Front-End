@@ -48,9 +48,9 @@ const InvitationInfo = () => {
   console.log(code, applicationId, visitorId, trxVisitorId);
 
   useEffect(() => {
+    setLoading(true);
     if (visitorId && trxVisitorId) {
       const fetchData = async () => {
-        setLoading(true);
         try {
           const data = await dispatch(fetchVisitorbyId(visitorId));
           const trxData = await dispatch(fetchTrxVisitorById(trxVisitorId));
@@ -60,11 +60,15 @@ const InvitationInfo = () => {
             setPreview(data?.faceImage || null);
             console.log(data);
             console.log(trxData);
+          } else {
+            toast.error('Visitor not found');
           }
         } catch (err) {
           toast.error('Failed to load visitor data');
         } finally {
-          setLoading(false);
+          setTimeout(() => {
+            setLoading(false);
+          }, 1500);
         }
       };
       fetchData();
@@ -160,23 +164,80 @@ const InvitationInfo = () => {
     }
   };
 
-  if (late) {
+  if (late && !loading) {
     return (
-      <Box p={3}>
-        <Typography variant="h5" color="error">
-          The link has expired. You can’t fill the form anymore.
-        </Typography>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          // colored gutters (left/right)
+          bgcolor: '#e3edfd', // pick any soft color you like
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          py: { xs: 0, sm: 1 }, // top/bottom breathing room
+        }}
+      >
+        <Container maxWidth="sm" disableGutters>
+          <Paper elevation={3} sx={{ borderRadius: 3, overflow: 'hidden', padding: 3 }}>
+            <Box p={3}>
+              <Typography align="center" variant="h5" color="error">
+                The link has expired. You can’t fill the form anymore.
+              </Typography>
+            </Box>
+          </Paper>
+        </Container>
       </Box>
     );
   }
-  if (alreadyAccepted) {
+  if (alreadyAccepted && !loading) {
     return (
-      <Box p={3}>
-        <Typography variant="h5" color="error">
-          You have already accepted the invitation.
-        </Typography>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          // colored gutters (left/right)
+          bgcolor: '#e3edfd', // pick any soft color you like
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          my: { xs: -5, sm: 0 }, // top/bottom breathing room
+        }}
+      >
+        <Container maxWidth="sm" disableGutters>
+          <Paper elevation={3} sx={{ borderRadius: 3, overflow: 'hidden', padding: 3 }}>
+            <Box p={3}>
+              <Typography align="center" variant="h5" color="error">
+                You have already accepted the invitation.
+              </Typography>
+            </Box>
+          </Paper>
+        </Container>
       </Box>
     );
+  }
+  if(!visitorInfo){
+    return (
+          <Box
+      sx={{
+        minHeight: '100vh',
+        // colored gutters (left/right)
+        bgcolor: '#e3edfd', // pick any soft color you like
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        py: { xs: 0, sm: 1 }, // top/bottom breathing room
+      }}
+    >
+      <Container maxWidth="sm" disableGutters>
+        <Paper elevation={3} sx={{ borderRadius: 3, overflow: 'hidden', padding: 3 }}>
+              <Box sx={{ bgcolor: '#f44242ff', color: '#fff', p: 2 }}>
+                <Typography variant="h4" align="center" fontWeight={700}>
+                  Invitation Not Found
+                </Typography>
+              </Box>
+        </Paper>
+      </Container>
+    </Box>
+    )
   }
 
   return (
@@ -187,167 +248,182 @@ const InvitationInfo = () => {
         bgcolor: '#e3edfd', // pick any soft color you like
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         py: { xs: 0, sm: 1 }, // top/bottom breathing room
       }}
     >
       <Container maxWidth="sm" disableGutters>
         <Paper elevation={3} sx={{ borderRadius: 3, overflow: 'hidden', padding: 3 }}>
-          <Box sx={{ bgcolor: '#4285f4', color: '#fff', p: 2 }}>
-            <Typography variant="h4" align="center" fontWeight={700}>
-              Invitation Form
-            </Typography>
-          </Box>
-          {visitorInfo && trxVisitorInfo && (
+          {loading ? (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100%',
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          ) : (
             <>
-              <Typography variant="body1" mb={3} align="center">
-                {visitorInfo.identityId
-                  ? `You have been invited to ${trxVisitorInfo.maskedarea?.name}. Please review your personal details below. 
+              <Box sx={{ bgcolor: '#4285f4', color: '#fff', p: 2 }}>
+                <Typography variant="h4" align="center" fontWeight={700}>
+                  Invitation Form
+                </Typography>
+              </Box>
+              {visitorInfo && trxVisitorInfo && (
+                <Box p={3}>
+                  <Typography variant="body1" mb={3} align="center">
+                    {visitorInfo.identityId
+                      ? `Please review your personal details below. 
                If everything is correct, click Submit. Otherwise, click Edit to update your information.`
-                  : `You have been invited to ${trxVisitorInfo.maskedarea?.name}. Please proceed to fill the invitation form.`}
-              </Typography>
-
-              {/* Render the same Invitation Form content regardless */}
-              {/* Replace this with your actual form fields */}
-              {visitorInfo.identityId && (
-                <Box>
-                  {/* Personal Info */}
-                  <Typography variant="h6" fontWeight={600} mt={2} mb={1}>
-                    Personal Info
+                      : `Please proceed to fill the invitation form.`}
                   </Typography>
-                  <Divider />
-                  <TextField
-                    id="name"
-                    label="Name"
-                    fullWidth
-                    margin="normal"
-                    value={visitorInfo.name}
-                    disabled
-                  />
-                  <TextField
-                    id="personId"
-                    label="Person ID"
-                    fullWidth
-                    margin="normal"
-                    disabled
-                    value={visitorInfo.personId}
-                  />
-                  <TextField
-                    name="identityType"
-                    label="Identity Type"
-                    fullWidth
-                    margin="normal"
-                    disabled
-                    value={visitorInfo.identityType}
-                  />
 
-                  <TextField
-                    id="identityId"
-                    label="Identity Number"
-                    fullWidth
-                    margin="normal"
-                    disabled
-                    value={visitorInfo.identityId}
-                  />
-                  <TextField
-                    id="address"
-                    label="Address"
-                    fullWidth
-                    margin="normal"
-                    disabled
-                    value={visitorInfo.address}
-                  />
-                  <TextField
-                    id="phone"
-                    label="Phone"
-                    fullWidth
-                    margin="normal"
-                    disabled
-                    value={visitorInfo.phone}
-                  />
-                  <TextField
-                    name="gender"
-                    label="Gender"
-                    fullWidth
-                    margin="normal"
-                    disabled
-                    value={visitorInfo.gender}
-                  />
-
-                  {/* Extra Info */}
-                  <Typography variant="h6" fontWeight={600} mt={3} mb={1}>
-                    Extra Info
-                  </Typography>
-                  <Divider />
-                  <TextField
-                    id="organizationName"
-                    label="Organization"
-                    fullWidth
-                    margin="normal"
-                    disabled
-                    value={visitorInfo.organizationName}
-                  />
-                  <TextField
-                    id="departmentName"
-                    label="Department"
-                    fullWidth
-                    margin="normal"
-                    disabled
-                    value={visitorInfo.departmentName}
-                  />
-                  <TextField
-                    id="districtName"
-                    label="District"
-                    fullWidth
-                    margin="normal"
-                    disabled
-                    value={visitorInfo.districtName}
-                  />
-
-                  {/* Photo */}
-                  <Typography variant="h6" fontWeight={600} mt={3} mb={1}>
-                    Photo
-                  </Typography>
-                  <Divider />
-                  <Box mt={2}>
-                    {preview && (
-                      <img
-                        src={`${BASE_URL}${preview}`}
-                        alt="Preview"
-                        style={{ width: '100%', borderRadius: 8, marginTop: 10 }}
+                  {/* Render the same Invitation Form content regardless */}
+                  {/* Replace this with your actual form fields */}
+                  {visitorInfo.identityId && (
+                    <Box>
+                      {/* Personal Info */}
+                      <Typography variant="h6" fontWeight={600} mt={2} mb={1}>
+                        Personal Info
+                      </Typography>
+                      <Divider />
+                      <TextField
+                        id="name"
+                        label="Name"
+                        fullWidth
+                        margin="normal"
+                        value={visitorInfo.name}
+                        disabled
                       />
-                    )}
-                  </Box>
+                      <TextField
+                        id="personId"
+                        label="Person ID"
+                        fullWidth
+                        margin="normal"
+                        disabled
+                        value={visitorInfo.personId}
+                      />
+                      <TextField
+                        name="identityType"
+                        label="Identity Type"
+                        fullWidth
+                        margin="normal"
+                        disabled
+                        value={visitorInfo.identityType}
+                      />
+
+                      <TextField
+                        id="identityId"
+                        label="Identity Number"
+                        fullWidth
+                        margin="normal"
+                        disabled
+                        value={visitorInfo.identityId}
+                      />
+                      <TextField
+                        id="address"
+                        label="Address"
+                        fullWidth
+                        margin="normal"
+                        disabled
+                        value={visitorInfo.address}
+                      />
+                      <TextField
+                        id="phone"
+                        label="Phone"
+                        fullWidth
+                        margin="normal"
+                        disabled
+                        value={visitorInfo.phone}
+                      />
+                      <TextField
+                        name="gender"
+                        label="Gender"
+                        fullWidth
+                        margin="normal"
+                        disabled
+                        value={visitorInfo.gender}
+                      />
+
+                      {/* Extra Info */}
+                      <Typography variant="h6" fontWeight={600} mt={3} mb={1}>
+                        Extra Info
+                      </Typography>
+                      <Divider />
+                      <TextField
+                        id="organizationName"
+                        label="Organization"
+                        fullWidth
+                        margin="normal"
+                        disabled
+                        value={visitorInfo.organizationName}
+                      />
+                      <TextField
+                        id="departmentName"
+                        label="Department"
+                        fullWidth
+                        margin="normal"
+                        disabled
+                        value={visitorInfo.departmentName}
+                      />
+                      <TextField
+                        id="districtName"
+                        label="District"
+                        fullWidth
+                        margin="normal"
+                        disabled
+                        value={visitorInfo.districtName}
+                      />
+
+                      {/* Photo */}
+                      <Typography variant="h6" fontWeight={600} mt={3} mb={1}>
+                        Photo
+                      </Typography>
+                      <Divider />
+                      <Box mt={2}>
+                        {preview && (
+                          <img
+                            src={`${BASE_URL}${preview}`}
+                            alt="Preview"
+                            style={{ width: '100%', borderRadius: 8, marginTop: 10 }}
+                          />
+                        )}
+                      </Box>
+                    </Box>
+                  )}
                 </Box>
               )}
+              <Box display="flex" justifyContent="space-between" gap={2} mt={3} p={2}>
+                {/* Left-most: Decline Invitation */}
+                <Button fullWidth variant="contained" color="error" onClick={handleDecline}>
+                  Decline Invitation
+                </Button>
+                {visitorInfo && visitorInfo.identityId ? (
+                  <>
+                    {/* Center: Edit Form */}
+                    <Button fullWidth variant="outlined" color="primary" onClick={goToVisitorForm}>
+                      Edit Form
+                    </Button>
+
+                    {/* Right: Accept Invitation */}
+                    <Button fullWidth variant="contained" color="success" onClick={handleSubmit}>
+                      Accept Invitation
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    {/* Only Right: Fill Form */}
+                    <Button fullWidth variant="contained" color="primary" onClick={goToVisitorForm}>
+                      Fill Form
+                    </Button>
+                  </>
+                )}
+              </Box>
             </>
           )}
-          <Box display="flex" justifyContent="space-between" gap={2} mt={3} p={2}>
-            {/* Left-most: Decline Invitation */}
-            <Button fullWidth variant="contained" color="error" onClick={handleDecline}>
-              Decline Invitation
-            </Button>
-            {visitorInfo && visitorInfo.identityId ? (
-              <>
-                {/* Center: Edit Form */}
-                <Button fullWidth variant="outlined" color="primary" onClick={goToVisitorForm}>
-                  Edit Form
-                </Button>
-
-                {/* Right: Accept Invitation */}
-                <Button fullWidth variant="contained" color="success" onClick={handleSubmit}>
-                  Accept Invitation
-                </Button>
-              </>
-            ) : (
-              <>
-                {/* Only Right: Fill Form */}
-                <Button fullWidth variant="contained" color="primary" onClick={goToVisitorForm}>
-                  Fill Form
-                </Button>
-              </>
-            )}
-          </Box>
         </Paper>
       </Container>
     </Box>

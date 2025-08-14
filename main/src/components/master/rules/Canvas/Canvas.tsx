@@ -13,7 +13,7 @@ import AndNodes from '../Nodes/Logical/AndNodes';
 import OrNodes from '../Nodes/Logical/OrNodes';
 import IfNodes from '../Nodes/Logical/IfNodes';
 import PreviewArrow from './PreviewArrow';
-import { useSelector, AppState, dispatch } from 'src/store/Store';
+import { useSelector,  dispatch, RootState } from 'src/store/Store';
 import {
   ArrowType,
   setArrowDrawing,
@@ -34,9 +34,9 @@ const nodeComponentMapping: { [key: string]: React.FC<any> } = {
 };
 
 const Canvas = () => {
-  const nodes = useSelector((state: AppState) => state.RulesNodeReducer.nodes);
-  const arrows = useSelector((state: AppState) => state.RulesConnectorReducer.arrows);
-  const arrowDrawing = useSelector((state: AppState) => state.RulesConnectorReducer.arrowDrawing);
+  const nodes = useSelector((state: RootState) => state.RulesNodeReducer.nodes);
+  const arrows = useSelector((state: RootState) => state.RulesConnectorReducer.arrows);
+  const arrowDrawing = useSelector((state: RootState) => state.RulesConnectorReducer.arrowDrawing);
   const [ifSelector, setIfSelector] = React.useState(false);
   return (
     <Box

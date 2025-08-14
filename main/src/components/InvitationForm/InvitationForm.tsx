@@ -45,6 +45,7 @@ const VisitorFormPage = () => {
             setVisitorInfo(data);
             setFormData((prev) => ({ ...prev, ...sanitizeVisitorData(data) }));
             setPreview(data?.faceImage || null);
+            setFormErrors({});
           }
         } catch (err) {
           toast.error('Failed to load visitor data');
@@ -116,7 +117,23 @@ const VisitorFormPage = () => {
     }
   };
 
+    const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.name?.trim()) errors.name = 'Full name is required';
+    if (!formData.identityType?.trim()) errors.identityType = 'Identity Type is required';
+    if(!formData.identityId?.trim()) errors.identityId = 'Identity ID is required';
+    if(!formData.faceImage) errors.faceImage = 'Photo is required';
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async () => {
+        if (!validateForm()) {
+          toast.error('Please fill in all required fields correctly.');
+          return;
+        }
     setIsSaving(true);
     setLoading(true);
     // Prepare FormData
@@ -146,7 +163,7 @@ const VisitorFormPage = () => {
           formData: data,
         }),
       ).unwrap();
-      if (result && result.types && result.types.endsWith('/fulfilled')) {
+      if (result && result.msg && result.msg.endsWith('successfully')) {
         navigate('/thank-you');
         toast.success('Submitted successfully!');
         setFormData({
@@ -222,6 +239,9 @@ const VisitorFormPage = () => {
                   margin="normal"
                   value={formData.name}
                   onChange={handleInputChange}
+                  error={!!formErrors.name}
+                  helperText={formErrors.name}
+                  required
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }} order={{ xs: 2, sm: 2 }}>

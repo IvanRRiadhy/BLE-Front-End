@@ -47,6 +47,7 @@ const Blacklist = Loadable(lazy(() => import('../views/master/crud/Blacklist')))
 const Building = Loadable(lazy(() => import('../views/master/crud/Building')));
 const FloorplanDevice = Loadable(lazy(() => import('../views/master/crud/FloorplanDevice')));
 const AlarmRecord = Loadable(lazy(() => import('../views/master/crud/AlarmRecord')));
+const CardRecord = Loadable(lazy(() => import('../views/master/crud/CardRecord')));
 const Floorplan = Loadable(lazy(() => import('../views/master/crud/Floorplan')));
 const User = Loadable(lazy(() => import('../views/master/user/User')));
 
@@ -259,6 +260,7 @@ const Router = [
       { path: '/master/building', exact: true, element: <Building /> },
       { path: '/master/device', exact: true, element: <FloorplanDevice /> },
       { path: '/report/alarmrecord', exact: true, element: <AlarmRecord /> },
+      { path: '/report/cardrecord', exact: true, element: <CardRecord /> },
       { path: '/master/floorplan', exact: true, element: <Floorplan /> },
       { path: '/master/card', exact: true, element: <Card /> },
       { path: '/master/visitorcard', exact: true, element: <VisitorCard /> },

@@ -67,6 +67,7 @@ export type TrxVisitorType = {
     isInvitationAccepted: boolean,
     invitationCode: string,
     remarks: string,
+    agenda: string,
     maskedAreaId: string,
     parkingId: string,
     visitorId: string,
@@ -205,9 +206,9 @@ export const visitorStatusChange = createAsyncThunk(
 
 export const visitorCheckIn = createAsyncThunk(
     "TrxVisitor/visitorCheckIn",
-    async (visitorId: string) => {
+    async (data: any) => {
         try{
-            const response = await axiosServices.post(`${API_URL}${visitorId}/checkin`);
+            const response = await axiosServices.post(`${API_URL}checkin`, data);
             console.log("response", response.data);
             return response.data;
         } catch (error) {
@@ -219,9 +220,9 @@ export const visitorCheckIn = createAsyncThunk(
 
 export const visitorCheckOut = createAsyncThunk(
     "TrxVisitor/visitorCheckOut",
-    async (visitorId: string) => {
+    async (trxVisitorId: string) => {
         try{
-            const response = await axiosServices.post(`${API_URL}${visitorId}/checkout`);
+            const response = await axiosServices.post(`${API_URL}${trxVisitorId}/checkout`);
             console.log("response", response.data);
             return response.data;
         } catch (error) {

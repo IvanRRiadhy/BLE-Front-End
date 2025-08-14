@@ -133,7 +133,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
-    if (!formData.name?.trim()) errors.name = 'Department name is required';
+    if (!formData.name?.trim()) errors.name = 'Building name is required';
     if (!image) errors.image = 'Building Image is required';
 
     setFormErrors(errors);
@@ -145,13 +145,13 @@ const AddEditBuilding = ({ type, building }: FormType) => {
       toast.error('Please fill in all required fields correctly.');
       return;
     }
+    setLoading(true);
     try {
-      setLoading(true);
       const data = new FormData();
 
       Object.entries(formData).forEach(([key, value]) => {
         if (
-          key!== 'applicationId' &&
+          key !== 'applicationId' &&
           key !== 'image' &&
           key !== 'createdBy' &&
           key !== 'createdAt' &&
@@ -180,9 +180,12 @@ const AddEditBuilding = ({ type, building }: FormType) => {
         console.log('Building saved successfully');
         await dispatch(fetchBuildingDT(buildingFilter));
         toast.success('Data Saved');
-        handleClose();
+        setTimeout(() => {
+          handleClose();
+        }, 1000);
       } else {
         toast.error('Saving Data Unsuccessful');
+
         setError(true);
       }
     } catch (error) {

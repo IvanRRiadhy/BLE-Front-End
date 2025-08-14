@@ -24,6 +24,12 @@ import {
   Tab,
   TableContainer,
   Paper,
+  Switch,
+  Collapse,
+  MenuList,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -39,7 +45,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import utc from 'dayjs/plugin/utc';
-import { IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconChevronDown, IconChevronUp, IconPlus, IconTrash, IconUser, IconUsers } from '@tabler/icons-react';
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchVisitorDT, sendInvitation, VisitorType } from 'src/store/apps/crud/visitor';
@@ -50,10 +56,11 @@ import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
 import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import AddEditVisitor from 'src/components/master/CRUD/visitor/AddEditVisitor';
-import { memberType } from 'src/store/apps/crud/member';
+import { fetchMemberDT, memberType } from 'src/store/apps/crud/member';
 import { DateTimePicker, renderTimeViewClock } from '@mui/x-date-pickers';
-import { defaultVisitorForm } from 'src/store/apps/defaultForm';
+import { defaultMemberForm, defaultVisitorForm } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
+import { floorplanType } from 'src/types/tracking/floorplan';
 
 dayjs.extend(utc);
 dayjs.extend(weekday);
@@ -131,20 +138,31 @@ function buildNestedHierarchy(
     .filter(Boolean) as BuildingNode[];
 }
 
+type CombinedRow = {
+  source: 'visitor' | 'member';
+  sourceIndex: number;
+  id?: string | null;
+  name?: string | null;
+  email?: string | null;
+  isVip?: boolean | null;
+};
+
 const InviteForm = () => {
   const dispatch: AppDispatch = useDispatch();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const visitorList = useSelector((state: RootState) => state.visitorReducer.visitors);
+  const memberList = useSelector((state: RootState) => state.memberReducer.members);
   const buildingData = useSelector((state: RootState) => state.buildingReducer.buildingAll);
   const floorData = useSelector((state: RootState) => state.floorReducer.floorAll);
   const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
   const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
   const visitorFilter = useSelector((state: RootState) => state.visitorReducer.visitorFilter);
+  const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
   const [selectedVisitor, setSelectedVisitor] = useState<VisitorType[]>([]);
-  const [selectedMember, setSelectedMember] = useState<memberType>({} as memberType);
+  const [selectedMember, setSelectedMember] = useState<memberType[]>([]);
   const [selectedMaskedArea, setSelectedMaskedArea] = useState<string | null>(null);
 
-  const [searchVisitor, setSearchVisitor] = useState('');
+  const [searchName, setSearchName] = useState('');
   const [notes, setNotes] = useState('');
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -152,6 +170,8 @@ const InviteForm = () => {
   const [startTime, setStartTime] = useState<Dayjs | null>(dayjs());
   const [endTime, setEndTime] = useState<Dayjs | null>(dayjs());
   const [openMenu, setOpenMenu] = useState(false);
+  const [openMemberSection, setOpenMemberSection] = useState(true);
+const [openVisitorSection, setOpenVisitorSection] = useState(true);
 
   const toUtcFormatted = (time: dayjs.Dayjs | null) => {
     return time?.utc().format('YYYY-MM-DDTHH:mm:ss.SSS');
@@ -161,12 +181,13 @@ const InviteForm = () => {
     setLoading(true);
     setSelectedVisitor([{ ...defaultVisitorForm, name: '', email: '' }]);
     setSelectedMaskedArea('');
-    setSelectedMember({} as memberType);
-    setSearchVisitor('');
+    setSelectedMember([{ ...defaultMemberForm, name: '', email: '' }]);
+    setSearchName('');
     setNotes('');
     setStartTime(dayjs());
     setEndTime(dayjs());
-    dispatch(fetchVisitorDT({ ...visitorFilter, length: 999 }));
+    dispatch(fetchVisitorDT({ ...visitorFilter, length: 0 }));
+    dispatch(fetchMemberDT({ ...memberFilter, length: 999 }));
     dispatch(fetchMaskedAreas());
     dispatch(fetchBuildings());
     dispatch(fetchFloors());
@@ -190,6 +211,7 @@ const InviteForm = () => {
     // Transform into backend's expected shape
     const payload = selectedVisitor.map((visitor) => ({
       Email: visitor.email,
+      isVip: visitor.isVip,
       MaskedAreaId: selectedMaskedArea,
       VisitorPeriodStart: startDate,
       VisitorPeriodEnd: endDate,
@@ -228,12 +250,12 @@ const InviteForm = () => {
 
   function getAreaPath(areaId: string | null): string {
     if (!areaId) return 'None';
-    const area = maskedAreaData.find((a) => a.id === areaId);
+    const area = maskedAreaData.find((a: MaskedAreaType) => a.id === areaId);
     if (!area) return 'Unknown Area';
 
-    const floorplan = floorplanData.find((fp) => fp.id === area.floorplanId);
-    const floor = floorplan ? floorData.find((f) => f.id === floorplan.floorId) : null;
-    const building = floor ? buildingData.find((b) => b.id === floor.buildingId) : null;
+    const floorplan = floorplanData.find((fp: FloorplanType) => fp.id === area.floorplanId);
+    const floor = floorplan ? floorData.find((f: floorType) => f.id === floorplan.floorId) : null;
+    const building = floor ? buildingData.find((b: BuildingType) => b.id === floor.buildingId) : null;
 
     const pathParts = [
       area.name,
@@ -269,8 +291,8 @@ const InviteForm = () => {
   const selectedAncestorIds = getSelectedAncestorIds(selectedMaskedArea);
 
   useEffect(() => {
-    dispatch(fetchVisitorDT({ ...visitorFilter, length: 999, searchValue: searchVisitor }));
-  }, [searchVisitor]);
+    dispatch(fetchVisitorDT({ ...visitorFilter, length: 0, searchValue: searchName }));
+  }, [searchName]);
   const isRegisteredVisitor = (visitor: VisitorType) => {
     return !!visitor.id; // registered visitors have a defined ID
   };
@@ -288,8 +310,12 @@ const InviteForm = () => {
       return updated;
     });
   };
-  const handleRemoveRow = (indexToRemove: number) => {
-    setSelectedVisitor((prev) => prev.filter((_, index) => index !== indexToRemove));
+  const handleRemoveVisitorRow = (indexToRemove: number) => {
+    setSelectedVisitor((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const handleRemoveMemberRow = (indexToRemove: number) => {
+    setSelectedMember((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
   const handleCloseMenu = () => {
     setOpenMenu(false);
@@ -301,11 +327,44 @@ const InviteForm = () => {
     [selectedVisitor],
   );
 
+  const selectedMemberIds = useMemo(
+    () => new Set(selectedMember.filter((v) => !!v.id).map((v) => v.id as string)),
+    [selectedMember],
+  );
+
   // Only show visitors not yet selected
   const availableVisitors = useMemo(
     () => visitorList.filter((v) => !selectedIds.has(v.id)),
     [visitorList, selectedIds],
   );
+
+  const availableMembers = useMemo(
+    () => memberList.filter((m) => !selectedMemberIds.has(m.id)),
+    [memberList, selectedMemberIds],
+  );
+
+  const rows: CombinedRow[] = useMemo(() => {
+    const memberRows: CombinedRow[] = selectedMember.map((m, i) => ({
+      source: 'member',
+      sourceIndex: i,
+      id: m.id ?? null,
+      name: m.name ?? '',
+      email: (m as any).email ?? (m as any).cardNumber ?? '',
+      isVip: null,
+    }));
+
+    const visitorRows: CombinedRow[] = selectedVisitor.map((v, i) => ({
+      source: 'visitor',
+      sourceIndex: i,
+      id: v.id ?? null,
+      name: v.name ?? '',
+      email: v.email ?? '',
+      isVip: !!v.isVip,
+    }));
+
+    // You can choose the order; here we show Members first then Visitors
+    return [...memberRows, ...visitorRows];
+  }, [selectedMember, selectedVisitor]);
 
   return (
     <>
@@ -329,7 +388,7 @@ const InviteForm = () => {
           </DialogTitle>
           <DialogContent>
             <Grid container spacing={2} alignItems={'flex-start'}>
-              <Grid container size={7} height={'550px'}>
+              <Grid container size={6} height={'550px'}>
                 {/* Time Input */}
                 <Grid container size={12} spacing={2} px={3} mt={0}>
                   <Grid size={12}>
@@ -414,7 +473,7 @@ const InviteForm = () => {
                       </Typography>
                     </div>
                   </div>
-                  <CustomFormLabel> Notes </CustomFormLabel>
+                  <CustomFormLabel> Agenda </CustomFormLabel>
                   <CustomTextField
                     id="notes"
                     name="notes"
@@ -428,7 +487,7 @@ const InviteForm = () => {
                   />
                 </Grid>
               </Grid>
-              <Grid container size={5}>
+              <Grid container size={6}>
                 {/* Visitor Input */}
                 <Grid container spacing={2} alignItems="flex-start" justifyContent="center">
                   <Grid>
@@ -452,35 +511,62 @@ const InviteForm = () => {
                             <TableHead>
                               <TableRow>
                                 <TableCell
+                                  align="center"
                                   sx={{
                                     position: 'sticky',
-                                    width: '44%',
                                     top: 0,
-                                    backgroundColor: '#fff', // or theme.palette.background.paper
                                     zIndex: 2,
+                                    backgroundColor: '#fff',
+                                    width: 110,
                                   }}
                                 >
-                                  <Typography fontWeight={600}>Visitor Name</Typography>
+                                  <Typography fontWeight={600}>Type</Typography>
                                 </TableCell>
                                 <TableCell
+                                  align="center"
                                   sx={{
                                     position: 'sticky',
-                                    width: '44%',
                                     top: 0,
-                                    backgroundColor: '#fff', // or theme.palette.background.paper
                                     zIndex: 2,
+                                    backgroundColor: '#fff',
+                                    width: '35%',
                                   }}
                                 >
-                                  <Typography fontWeight={600}>Visitor Email</Typography>
+                                  <Typography fontWeight={600}>Name</Typography>
                                 </TableCell>
                                 <TableCell
+                                  align="center"
+                                  sx={{
+                                    position: 'sticky',
+                                    top: 0,
+                                    zIndex: 2,
+                                    backgroundColor: '#fff',
+                                    width: '35%',
+                                  }}
+                                >
+                                  <Typography fontWeight={600}>Email</Typography>
+                                </TableCell>
+                                <TableCell
+                                  align="center"
+                                  sx={{
+                                    position: 'sticky',
+                                    top: 0,
+                                    zIndex: 2,
+                                    backgroundColor: '#fff',
+                                    width: 80,
+                                  }}
+                                >
+                                  <Typography fontWeight={600}>VIP</Typography>
+                                </TableCell>
+                                <TableCell
+                                  align="center"
                                   sx={{
                                     position: 'sticky',
                                     right: 0,
-                                    width: 25,
                                     top: 0,
-                                    backgroundColor: '#fff', // or theme.palette.background.paper
                                     zIndex: 2,
+                                    backgroundColor: '#fff',
+                                    width: 80,
                                   }}
                                 >
                                   <Tooltip title="Add row">
@@ -492,39 +578,93 @@ const InviteForm = () => {
                               </TableRow>
                             </TableHead>
                             <TableBody>
-                              {selectedVisitor.map((visitor, index) => {
-                                const isRegistered = isRegisteredVisitor(visitor);
+                              {rows.map((row, i) => {
+                                const isVisitor = row.source === 'visitor';
+                                const isRegistered = !!row.id;
 
                                 return (
                                   <TableRow
-                                    key={index}
-                                    sx={{ backgroundColor: isRegistered ? '#f5f5f5' : 'inherit' }}
+                                    key={`${row.source}-${row.id ?? `tmp-${row.sourceIndex}`}`}
+                                    sx={{ backgroundColor: isVisitor ? 'inherit' : '#fafafa' }}
                                   >
-                                    <TableCell>
-                                      <TextField
-                                        value={visitor.name || ''}
-                                        onChange={(e) =>
-                                          handleChangeVisitorField(index, 'name', e.target.value)
-                                        }
-                                        fullWidth
-                                        disabled={isRegistered}
-                                      />
+                                    {/* Type */}
+                                    <TableCell align="center">
+                                      <Typography variant="body2" fontWeight={600}>
+                                        {isVisitor ? 'Visitor' : 'Member'}
+                                      </Typography>
                                     </TableCell>
+
+                                    {/* Name */}
                                     <TableCell>
-                                      <TextField
-                                        value={visitor.email || ''}
-                                        onChange={(e) =>
-                                          handleChangeVisitorField(index, 'email', e.target.value)
-                                        }
-                                        fullWidth
-                                        disabled={isRegistered}
-                                      />
+                                      {isVisitor ? (
+                                        <TextField
+                                          value={row.name ?? ''}
+                                          onChange={(e) =>
+                                            handleChangeVisitorField(
+                                              row.sourceIndex,
+                                              'name',
+                                              e.target.value,
+                                            )
+                                          }
+                                          fullWidth
+                                          disabled={isRegistered}
+                                        />
+                                      ) : (
+                                        <TextField value={row.name ?? ''} fullWidth disabled />
+                                      )}
                                     </TableCell>
+
+                                    {/* Email */}
                                     <TableCell>
+                                      {isVisitor ? (
+                                        <TextField
+                                          value={row.email ?? ''}
+                                          onChange={(e) =>
+                                            handleChangeVisitorField(
+                                              row.sourceIndex,
+                                              'email',
+                                              e.target.value,
+                                            )
+                                          }
+                                          fullWidth
+                                          disabled={isRegistered}
+                                        />
+                                      ) : (
+                                        <TextField value={row.email ?? ''} fullWidth disabled />
+                                      )}
+                                    </TableCell>
+
+                                    {/* VIP (visitors only) */}
+                                    <TableCell align="center">
+                                      {isVisitor ? (
+                                        <Switch
+                                          checked={!!row.isVip}
+                                          onChange={(e) =>
+                                            handleChangeVisitorField(
+                                              row.sourceIndex,
+                                              'isVip',
+                                              e.target.checked as any,
+                                            )
+                                          }
+                                          disabled={isRegistered}
+                                        />
+                                      ) : (
+                                        <Typography variant="body2" color="text.secondary">
+                                          —
+                                        </Typography>
+                                      )}
+                                    </TableCell>
+
+                                    {/* Delete */}
+                                    <TableCell align="center">
                                       <Tooltip title="Delete row">
                                         <IconButton
                                           color="error"
-                                          onClick={() => handleRemoveRow(index)}
+                                          onClick={() =>
+                                            row.source === 'visitor'
+                                              ? handleRemoveVisitorRow(row.sourceIndex)
+                                              : handleRemoveMemberRow(row.sourceIndex)
+                                          }
                                         >
                                           <IconTrash size={20} />
                                         </IconButton>
@@ -571,14 +711,89 @@ const InviteForm = () => {
           </DialogContent>
         </Dialog>
       )}
-      <Menu
-        anchorEl={anchorEl}
-        open={openMenu}
-        onClose={handleCloseMenu}
-        PaperProps={{
-          sx: { maxHeight: 300, width: 300 },
-        }}
-      >
+<Menu
+  anchorEl={anchorEl}
+  open={openMenu}
+  onClose={handleCloseMenu}
+  PaperProps={{ sx: { maxHeight: 500, width: 340, p: 0 } }}
+>
+  <MenuList dense disablePadding>
+    {/* Member header */}
+<ListItemButton
+  onClick={() => setOpenMemberSection((v) => !v)}
+  sx={{
+    px: 2,
+    py: 1,
+    backgroundColor: '#f0f0f0',
+    '&:hover': {
+      backgroundColor: '#e0e0e0', // darker shade
+    },
+  }}
+>
+      <ListItemIcon sx={{ minWidth: 28 }}>
+        <IconUsers size={18} />
+      </ListItemIcon>
+      <ListItemText primary="Member" primaryTypographyProps={{ fontWeight: 700 }} />
+      {openMemberSection ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+    </ListItemButton>
+
+    {/* Member list */}
+    <Collapse in={openMemberSection} timeout="auto" unmountOnExit>
+      <Box sx={{ maxHeight: 180, overflowY: 'auto', py: 0 }}>
+        {availableMembers.length === 0 && (
+          <Box sx={{ px: 2, py: 1.5, color: 'text.secondary' }}>
+            <Typography variant="body2">No members found</Typography>
+          </Box>
+        )}
+        {availableMembers.map((m) => (
+          <MenuItem
+            key={m.id}
+            onClick={() => {
+              setSelectedMember((prev) => {
+                if (m.id && prev.some((p) => p.id === m.id)) return prev;
+                if (prev.length === 1 && !prev[0].id && !prev[0].email && !prev[0].name)
+                  return [m];
+                return [...prev, m];
+              });
+              handleCloseMenu();
+            }}
+            sx={{ py: 1, px: 2 }}
+          >
+            <Box>
+              <Typography variant="body2" fontWeight={600}>{m.name}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {m.cardNumber || m.email}
+              </Typography>
+            </Box>
+          </MenuItem>
+        ))}
+      </Box>
+    </Collapse>
+
+    <Divider />
+
+    {/* Visitor header */}
+<ListItemButton
+  onClick={() => setOpenVisitorSection((v) => !v)}
+  sx={{
+    px: 2,
+    py: 1,
+    backgroundColor: '#f0f0f0',
+    '&:hover': {
+      backgroundColor: '#e0e0e0', // darker shade
+    },
+  }}
+>
+      <ListItemIcon sx={{ minWidth: 28 }}>
+        <IconUser size={18} />
+      </ListItemIcon>
+      <ListItemText primary="Visitor" primaryTypographyProps={{ fontWeight: 700 }} />
+      {openVisitorSection ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+    </ListItemButton>
+
+    {/* Visitor list (+ Add New) */}
+    <Collapse in={openVisitorSection} timeout="auto" unmountOnExit>
+      <Box sx={{ maxHeight: 220, overflowY: 'auto', position: 'relative' }}>
         {/* Sticky Add New Visitor */}
         <MenuItem
           onClick={() => {
@@ -591,24 +806,28 @@ const InviteForm = () => {
           sx={{
             position: 'sticky',
             top: 0,
-            backgroundColor: '#f5f5f5',
+            backgroundColor: 'background.paper',
             zIndex: 1,
             fontWeight: 'bold',
+            py: 1,
+            px: 2,
+            borderBottom: (t) => `1px solid ${t.palette.divider}`,
           }}
         >
-          ➕ Add New Visitor
+          <IconPlus size={16} style={{ marginRight: 8 }} /> Add New Visitor
         </MenuItem>
 
-        {/* Visitor List */}
+        {availableVisitors.length === 0 && (
+          <Box sx={{ px: 2, py: 1.5, color: 'text.secondary' }}>
+            <Typography variant="body2">No visitors found</Typography>
+          </Box>
+        )}
         {availableVisitors.map((v) => (
           <MenuItem
             key={v.id}
             onClick={() => {
               setSelectedVisitor((prev) => {
-                // safety guard against double-add
                 if (v.id && prev.some((p) => p.id === v.id)) return prev;
-
-                // replace dummy single empty row if present
                 if (prev.length === 1 && !prev[0].id && !prev[0].email && !prev[0].name) {
                   return [v];
                 }
@@ -616,18 +835,21 @@ const InviteForm = () => {
               });
               handleCloseMenu();
             }}
+            sx={{ py: 1, px: 2 }}
           >
             <Box>
-              <Typography variant="body2" fontWeight={600}>
-                {v.name}
-              </Typography>
+              <Typography variant="body2" fontWeight={600}>{v.name}</Typography>
               <Typography variant="caption" color="text.secondary">
                 {v.cardNumber || v.email}
               </Typography>
             </Box>
           </MenuItem>
         ))}
-      </Menu>
+      </Box>
+    </Collapse>
+  </MenuList>
+</Menu>
+
     </>
   );
 };

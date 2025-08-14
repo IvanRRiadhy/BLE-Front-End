@@ -33,7 +33,7 @@ const MotionForm = motion(
 );
 
 const ADMIN_API_URL = '/api/Auth/login/';              // existing
-const VISITOR_API_URL = '/api/Auth/visitor-login/';   // TODO: set your actual visitor endpoint
+const VISITOR_API_URL = '/api/Auth/login/';   // TODO: set your actual visitor endpoint
 
 type TabKey = 'admin' | 'visitor';
 
@@ -87,8 +87,12 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         if (data?.applicationId) localStorage.setItem('applicationId', data.applicationId);
         if (data?.levelPriority) localStorage.setItem('levelPriority', data.levelPriority);
         localStorage.setItem('welcomePopupShown', 'false');
-
+        if(isAdmin){
         navigate('/');
+        } else {
+          navigate('/my-visit');
+        }
+
       })
       .catch((err) => {
         setLoginError('Invalid username or password. Please try again.');

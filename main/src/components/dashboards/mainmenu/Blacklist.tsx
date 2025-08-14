@@ -88,7 +88,6 @@ useEffect(() => {
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [filterFloorplanId, blacklistFilter.filters]);
-
   useEffect(() => {
     dispatch(fetchBlacklistDT(blacklistFilter));
   }, [blacklistFilter, dispatch]);
@@ -108,8 +107,8 @@ useEffect(() => {
               flex: 1,
               display: 'flex',
               flexDirection: 'column',
-              minHeight: 400,
-              maxHeight: 400,
+              minHeight: 440,
+              maxHeight: 440,
               overflow: 'auto',
               maxWidth: '100%',
             }}

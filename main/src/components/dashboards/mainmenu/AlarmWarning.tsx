@@ -20,12 +20,13 @@ import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Stor
 import { AlarmType, fetchAlarmDT, UpdateFilter } from 'src/store/apps/crud/alarmRecordTracking';
 import { alarmRecordStatusColormap } from 'src/types/crud/input';
 import DashboardCard from 'src/components/shared/DashboardCard';
+import { defaultAlarmRecordFilter } from 'src/store/apps/defaultForm';
 
 const columns = [
   { label: 'Visitor Name', field: 'Visitor.Name', sortAble: true },
   { label: 'Alarm Status', field: 'alarmStatus', sortAble: true },
-  { label: 'Area Name', field: 'Area.Name', sortAble: true },
-  { label: 'Time', field: 'time', sortAble: true },
+  { label: 'Area Name', field: 'FloorplanMaskedArea.Name', sortAble: true },
+  { label: 'Time', field: 'Timestamp', sortAble: true },
 ];
 
 const AlarmWarning = () => {
@@ -54,6 +55,9 @@ const AlarmWarning = () => {
     const newLength = parseInt(event.target.value, 10);
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
+  useEffect(() => {
+    dispatch(UpdateFilter({...defaultAlarmRecordFilter, SortColumn: ''}));
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(fetchAlarmDT(AlarmRecordFilter));
@@ -83,8 +87,8 @@ const AlarmWarning = () => {
     if (isDesc) {
       dispatch(
         UpdateFilter({
-          SortColumn: '',
-          SortDir: 'asc',
+          SortColumn: 'Timestamp',
+          SortDir: 'desc',
           Start: 0,
         }),
       );
@@ -100,39 +104,50 @@ const AlarmWarning = () => {
   };
 
   return (
-    <DashboardCard title={t('Alarm Warning')} >
-          <Grid container spacing={3}>
-      <Grid size={12}>
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 400, maxHeight: 400, overflow: 'auto', maxWidth: '100%' }}>
-          <BlankCard>
-            <TableContainer>
-              <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
-                <TableHead>
-                  <TableRow>
-                    {/* Left Sticky Empty Column */}
-                    <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
-                      <Typography variant="h6"></Typography>
-                    </TableCell>
-                    {columns.map((col) => (
-                      <TableCell key={col.label}>
-                        {col.sortAble && col.field ? (
-                          <TableSortLabel
-                            active={orderBy === col.field}
-                            direction={orderBy === col.field ? order : 'asc'}
-                            onClick={() => handleSort(col.field)}
-                          >
-                            <Typography variant="h6">{col.label}</Typography>
-                          </TableSortLabel>
-                        ) : (
-                          <Typography variant="h6">{col.label}</Typography>
-                        )}
+    <DashboardCard title={t('Alarm Warning')}>
+      <Grid container spacing={3}>
+        <Grid size={12}>
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: 440,
+              maxHeight: 440,
+              overflow: 'auto',
+              maxWidth: '100%',
+            }}
+          >
+            <BlankCard>
+              <TableContainer>
+                <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
+                  <TableHead>
+                    <TableRow>
+                      {/* Left Sticky Empty Column */}
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}
+                      >
+                        <Typography variant="h6"></Typography>
                       </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {alarmRecordData
-                    .map((alarm) => (
+                      {columns.map((col) => (
+                        <TableCell key={col.label}>
+                          {col.sortAble && col.field ? (
+                            <TableSortLabel
+                              active={orderBy === col.field}
+                              direction={orderBy === col.field ? order : 'asc'}
+                              onClick={() => handleSort(col.field)}
+                            >
+                              <Typography variant="h6">{col.label}</Typography>
+                            </TableSortLabel>
+                          ) : (
+                            <Typography variant="h6">{col.label}</Typography>
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {alarmRecordData.map((alarm) => (
                       <TableRow key={alarm.id}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
@@ -141,23 +156,19 @@ const AlarmWarning = () => {
                             src={alarm.visitor?.faceImage}
                             alt={alarm.visitor?.faceImage}
                             sx={{ width: 40, height: 40 }}
-                          />  
+                          />
                         </TableCell>
                         <TableCell>
-                            <Box>
-                              <Typography variant="subtitle2" fontWeight={600}>
-                                {alarm.visitor?.name || 'Unknown Visitor'}
-                              </Typography>
-                              <Typography color="textSecondary" fontSize="12px" variant="subtitle2">
-                                {alarm.visitor?.cardNumber || 'No Card Number'}
-                              </Typography>
-                            </Box>
+                          <Box>
+                            <Typography variant="subtitle2" fontWeight={600}>
+                              {alarm.visitor?.name || 'Unknown Visitor'}
+                            </Typography>
+                            <Typography color="textSecondary" fontSize="12px" variant="subtitle2">
+                              {alarm.visitor?.cardNumber || 'No Card Number'}
+                            </Typography>
+                          </Box>
                         </TableCell>
-                        <TableCell>
-                          <Typography color="textSecondary" variant="subtitle2" fontWeight={400}>
-                            {alarm.floorplanMaskedArea?.name || 'Unknown Area'}
-                          </Typography>
-                        </TableCell>
+
                         <TableCell>
                           <Chip
                             sx={{
@@ -171,7 +182,11 @@ const AlarmWarning = () => {
                             label={t(`${alarm.alarmRecordStatus}`)}
                           />
                         </TableCell>
-
+                        <TableCell>
+                          <Typography color="textSecondary" variant="subtitle2" fontWeight={400}>
+                            {alarm.floorplanMaskedArea?.name || 'Unknown Area'}
+                          </Typography>
+                        </TableCell>
                         <TableCell>
                           <Typography color="textSecondary" variant="subtitle2" fontWeight={400}>
                             {alarm.timestamp ? formatTime(alarm.timestamp) : 'Unknown Time'}
@@ -179,32 +194,32 @@ const AlarmWarning = () => {
                         </TableCell>
                       </TableRow>
                     ))}
-                  {Array.from({
-                    length:
-                      rowsPerPage -
-                      Math.min(rowsPerPage, alarmRecordData.length - page * rowsPerPage),
-                  }).map((_, idx) => (
-                    <TableRow key={`empty-row-${idx}`} style={{ height: 63 }}>
-                      <TableCell colSpan={5} />
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </BlankCard>
-        </Box>
-        {/* Pagination */}
-        <TablePagination
-          component="div"
-          count={AlarmRecordFilteredCount}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          onPageChange={handleChangePage}
-          rowsPerPageOptions={[5]}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
+                    {Array.from({
+                      length:
+                        rowsPerPage -
+                        Math.min(rowsPerPage, alarmRecordData.length - page * rowsPerPage),
+                    }).map((_, idx) => (
+                      <TableRow key={`empty-row-${idx}`} style={{ height: 63 }}>
+                        <TableCell colSpan={5} />
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </BlankCard>
+          </Box>
+          {/* Pagination */}
+          <TablePagination
+            component="div"
+            count={AlarmRecordFilteredCount}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            onPageChange={handleChangePage}
+            rowsPerPageOptions={[5]}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Grid>
       </Grid>
-    </Grid>
     </DashboardCard>
   );
 };

@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -26,7 +27,7 @@ import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
-import { addCard, editCard, fetchCard, CardType } from 'src/store/apps/crud/card';
+import { addCard, editCard, fetchCard, CardType, fetchCardDT } from 'src/store/apps/crud/card';
 import { cardType } from 'src/types/crud/input';
 import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
 import { floorType, fetchFloors } from 'src/store/apps/crud/floor';
@@ -112,12 +113,15 @@ function buildNestedHierarchy(
 const AddEditCard = ({ type, card }: formType) => {
   const dispatch: AppDispatch = useDispatch();
   const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
   const [qrOpen, setQrOpen] = React.useState(false);
   const [expanded, setExpanded] = React.useState<{ [nodeId: string]: boolean }>({});
   const [formData, setFormData] = React.useState<CardType>({
     ...defaultCardForm,
     ...card,
   });
+  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+
   const buildingData = useSelector((state: RootState) => state.buildingReducer.buildingAll);
   const floorData = useSelector((state: RootState) => state.floorReducer.floorAll);
   const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
@@ -129,6 +133,8 @@ const AddEditCard = ({ type, card }: formType) => {
     maskedAreaData,
   );
 
+  const cardFilter = useSelector((state: RootState) => state.CardReducer.cardFilter);
+
   useEffect(() => {
     dispatch(fetchBuildings());
     dispatch(fetchFloors());
@@ -137,12 +143,20 @@ const AddEditCard = ({ type, card }: formType) => {
   }, [dispatch]);
 
   const handleClickOpen = () => {
+    setLoading(true);
+    setFormErrors({});
     if (type === 'edit' && card) {
+      if (!card.id) {
+        dispatch(fetchCardDT(cardFilter));
+      }
       setFormData({ ...defaultCardForm, ...card });
     } else {
       setFormData({ ...defaultCardForm });
     }
-    setOpen(true);
+    setTimeout(() => {
+      setLoading(false);
+      setOpen(true);
+    }, 100);
   };
 
   const handleClose = () => {
@@ -162,37 +176,44 @@ const AddEditCard = ({ type, card }: formType) => {
     return area ? area.name : 'Unknown area';
   };
 
-const handleSave = async () => {
-  try {
-    // shape what the API expects
-    const payload = {
-      ...formData,
-      // ensure boolean + clear single area if multi-area is ON
-      isMultiMaskedArea: !!formData.isMultiMaskedArea,
-      registeredMaskedAreaId: formData.isMultiMaskedArea ? '' : (formData.registeredMaskedAreaId ?? ''),
-    };
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      // shape what the API expects
+      const payload = {
+        ...formData,
+        // ensure boolean + clear single area if multi-area is ON
+        isMultiMaskedArea: !!formData.isMultiMaskedArea,
+        registeredMaskedAreaId: formData.isMultiMaskedArea
+          ? null
+          : formData.registeredMaskedAreaId ?? '',
+      };
 
-    // if you have Date fields, serialize explicitly (optional)
-    // payload.lastUsed = formData.lastUsed ? new Date(formData.lastUsed).toISOString() : null;
+      // if you have Date fields, serialize explicitly (optional)
+      // payload.lastUsed = formData.lastUsed ? new Date(formData.lastUsed).toISOString() : null;
 
-    const result =
-      type === 'edit'
-        ? await dispatch(editCard(payload))     // <- send JSON
-        : await dispatch(addCard(payload));     // <- send JSON
+      const result =
+        type === 'edit'
+          ? await dispatch(editCard(payload)) // <- send JSON
+          : await dispatch(addCard(payload)); // <- send JSON
 
-    if (result && result.type?.endsWith('/fulfilled')) {
-      await dispatch(fetchCard());
-      toast.success('Data Saved');
-      handleClose();
-    } else {
+      if (result && result.type?.endsWith('/fulfilled')) {
+        await dispatch(fetchCardDT(cardFilter));
+        toast.success('Data Saved');
+        setTimeout(() => {
+          handleClose();
+        }, 1000);
+      } else {
+        toast.error('Saving Data Unsuccessful');
+      }
+    } catch (err) {
+      console.error(err);
       toast.error('Saving Data Unsuccessful');
     }
-  } catch (err) {
-    console.error(err);
-    toast.error('Saving Data Unsuccessful');
-  }
-};
-
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
 
   function getAreaPath(areaId: string): string {
     if (!areaId) return 'None';
@@ -235,7 +256,7 @@ const handleSave = async () => {
 
     return ids;
   }
-  const selectedAncestorIds = getSelectedAncestorIds(formData.registeredMaskedAreaId);
+  const selectedAncestorIds = getSelectedAncestorIds(formData.registeredMaskedAreaId ?? '');
   const setRegisteredArea: React.Dispatch<React.SetStateAction<string>> = (value) => {
     setFormData((prev) => {
       const next =
@@ -267,180 +288,186 @@ const handleSave = async () => {
           </Button>
         </Tooltip>
       )}
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
-        <DialogTitle>
-          <Box display="flex" alignItems="center" justifyContent="space-between" m={2}>
-            <Typography component="div" variant="h4" fontWeight={700}>
-              {type === 'add' ? 'Add Card' : 'Edit Card'}
-            </Typography>
-            <Button variant="outlined" onClick={() => setQrOpen(true)}>
-              Show QR Code
-            </Button>
-          </Box>
-          <Divider />
-        </DialogTitle>
-        <DialogContent>
-          <Grid container spacing={3}>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel>Card Details</CustomFormLabel>
-              <CustomTextField
-                id="name"
-                name="name"
-                label="Name"
-                placeholder={formData.name}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-              <CustomFormLabel>Card Information</CustomFormLabel>
-              <CustomTextField
-                id="remarks"
-                name="remarks"
-                placeholder={formData.remarks}
-                onChange={handleInputChange}
-                fullWidth
-                multiline
-                variant="outlined"
-                minRows={3}
-                maxRows={3}
-              />
-              <CustomFormLabel>Mac</CustomFormLabel>
-              <CustomTextField
-                id="dmac"
-                name="dmac"
-                placeholder={formData.dmac}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-              <CustomFormLabel>Card Number</CustomFormLabel>
-              <CustomTextField
-                id="cardNumber"
-                name="cardNumber"
-                placeholder={formData.cardNumber}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-              <CustomFormLabel>Card Type</CustomFormLabel>
-              <CustomSelect
-                id="cardType"
-                name="cardType"
-                value={formData.cardType}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              >
-                {cardType.map((item) => (
-                  <MenuItem key={item.value} value={item.value} disabled={item.disabled}>
-                    {item.label}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
-              <CustomFormLabel>Registered Area for Returning</CustomFormLabel>
-
-              <FormControlLabel
-                sx={{ mb: 1 }}
-                control={
-                  <Switch
-                    checked={formData.isMultiMaskedArea}
-                    onChange={(_, checked) => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        isMultiMaskedArea: checked,
-                        registeredMaskedAreaId: checked ? '' : prev.registeredMaskedAreaId,
-                      }));
-                    }}
-                  />
-                }
-                label={
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <Typography variant="body2" fontWeight={500}>
-                      {formData.isMultiMaskedArea ? 'Multi-Area' : 'Single-Area'}
-                    </Typography>
-                    <Tooltip
-                      title={
-                        formData.isMultiMaskedArea
-                          ? 'Card can be returned in any area'
-                          : 'Card can only be returned to the selected area below'
-                      }
-                      arrow
-                      placement="top"
-                    >
-                      <Box
-                        sx={{
-                          width: 18,
-                          height: 18,
-                          borderRadius: '50%',
-                          backgroundColor: 'transparent',
-                          color: '#000',
-                          border: '1px solid #000',
-                          borderColor: '#000',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '0.75rem',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        ?
-                      </Box>
-                    </Tooltip>
-                  </Box>
-                }
-              />
-
-              {!formData.isMultiMaskedArea && (
-                <div
-                  style={{
-                    border: '1px solid #ced4da',
-                    borderRadius: 4,
-                    padding: 8,
-                    minHeight: 180,
-                    maxHeight: 250,
-                    background: '#fafbfc',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    width: '100%',
-                  }}
+      {!loading && (
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+          <DialogTitle>
+            <Box display="flex" alignItems="center" justifyContent="space-between" m={2}>
+              <Typography component="div" variant="h4" fontWeight={700}>
+                {type === 'add' ? 'Add Card' : 'Edit Card'}
+              </Typography>
+              <Button variant="outlined" onClick={() => setQrOpen(true)}>
+                Show QR Code
+              </Button>
+            </Box>
+            <Divider />
+          </DialogTitle>
+          <DialogContent>
+            <Grid container spacing={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel>Card Details</CustomFormLabel>
+                <CustomTextField
+                  id="name"
+                  name="name"
+                  label="Name"
+                  placeholder={formData.name}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+                <CustomFormLabel>Card Information</CustomFormLabel>
+                <CustomTextField
+                  id="remarks"
+                  name="remarks"
+                  placeholder={formData.remarks}
+                  onChange={handleInputChange}
+                  fullWidth
+                  multiline
+                  variant="outlined"
+                  minRows={3}
+                  maxRows={3}
+                />
+                <CustomFormLabel>Mac</CustomFormLabel>
+                <CustomTextField
+                  id="dmac"
+                  name="dmac"
+                  placeholder={formData.dmac}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+                <CustomFormLabel>Card Number</CustomFormLabel>
+                <CustomTextField
+                  id="cardNumber"
+                  name="cardNumber"
+                  placeholder={formData.cardNumber}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+                <CustomFormLabel>Card Type</CustomFormLabel>
+                <CustomSelect
+                  id="cardType"
+                  name="cardType"
+                  value={formData.cardType}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
                 >
-                  <div style={{ flex: 1, overflowY: 'auto' }}>
-                    <SimpleTreeView>
-                      {buildingHierarchy.map((node) =>
-                        renderTreeItems(
-                          node,
-                          formData.registeredMaskedAreaId,
-                          setRegisteredArea,
-                          selectedAncestorIds,
-                        ),
-                      )}
-                    </SimpleTreeView>
+                  {cardType.map((item) => (
+                    <MenuItem key={item.value} value={item.value} disabled={item.disabled}>
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </CustomSelect>
+                <CustomFormLabel>Registered Area for Returning</CustomFormLabel>
+
+                <FormControlLabel
+                  sx={{ mb: 1 }}
+                  control={
+                    <Switch
+                      checked={formData.isMultiMaskedArea}
+                      onChange={(_, checked) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          isMultiMaskedArea: checked,
+                          registeredMaskedAreaId: checked ? '' : prev.registeredMaskedAreaId,
+                        }));
+                      }}
+                    />
+                  }
+                  label={
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Typography variant="body2" fontWeight={500}>
+                        {formData.isMultiMaskedArea ? 'Multi-Area' : 'Single-Area'}
+                      </Typography>
+                      <Tooltip
+                        title={
+                          formData.isMultiMaskedArea
+                            ? 'Card can be returned in any area'
+                            : 'Card can only be returned to the selected area below'
+                        }
+                        arrow
+                        placement="top"
+                      >
+                        <Box
+                          sx={{
+                            width: 18,
+                            height: 18,
+                            borderRadius: '50%',
+                            backgroundColor: 'transparent',
+                            color: '#000',
+                            border: '1px solid #000',
+                            borderColor: '#000',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '0.75rem',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          ?
+                        </Box>
+                      </Tooltip>
+                    </Box>
+                  }
+                />
+
+                {!formData.isMultiMaskedArea && (
+                  <div
+                    style={{
+                      border: '1px solid #ced4da',
+                      borderRadius: 4,
+                      padding: 8,
+                      minHeight: 180,
+                      maxHeight: 250,
+                      background: '#fafbfc',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      width: '100%',
+                    }}
+                  >
+                    <div style={{ flex: 1, overflowY: 'auto' }}>
+                      <SimpleTreeView>
+                        {buildingHierarchy.map((node) =>
+                          renderTreeItems(
+                            node,
+                            formData.registeredMaskedAreaId ?? '',
+                            setRegisteredArea,
+                            selectedAncestorIds,
+                          ),
+                        )}
+                      </SimpleTreeView>
+                    </div>
+                    <div style={{ marginTop: 8 }}>
+                      <Typography variant="body2">
+                        Selected Area: {getAreaPath(formData.registeredMaskedAreaId ?? '')}
+                      </Typography>
+                    </div>
                   </div>
-                  <div style={{ marginTop: 8 }}>
-                    <Typography variant="body2">
-                      Selected Area: {getAreaPath(formData.registeredMaskedAreaId)}
-                    </Typography>
-                  </div>
-                </div>
-              )}
+                )}
+              </Grid>
             </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
-          <Button onClick={handleClose} variant="outlined" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
-            Cancel
-          </Button>
-          <Button
-            onClick={() => handleSave()}
-            variant="contained"
-            sx={{ fontSize: '1rem', py: 1, px: 3 }}
-          >
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </DialogContent>
+          <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
+            <Button
+              onClick={handleClose}
+              variant="outlined"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => handleSave()}
+              variant="contained"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
       <Dialog open={qrOpen} onClose={() => setQrOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle m={2}>Card QR Code</DialogTitle>
         <Divider />
@@ -457,6 +484,16 @@ const handleSave = async () => {
           <Button onClick={() => setQrOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
+      {loading && (
+        <Dialog open={true} fullWidth maxWidth="sm">
+          <DialogContent sx={{ textAlign: 'center', py: 10 }}>
+            <Typography variant="h1" mb={5}>
+              Loading...{' '}
+            </Typography>
+            <CircularProgress size={50} color="primary" />
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };
