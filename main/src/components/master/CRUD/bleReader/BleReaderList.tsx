@@ -52,7 +52,7 @@ const BleReaderList = () => {
   const currentPageIds = React.useMemo(() => bleReaderData.map((x) => x.id), [bleReaderData]);
   const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
   const prevFilterRef = useRef(bleReaderFilter);
-  const brandData = useSelector((state: RootState) => state.brandReducer.brands);
+  const brandData = useSelector((state: RootState) => state.brandReducer.brandAll);
   // const bleReaderTotalCount = useSelector(
   //   (state: RootState) => state.bleReaderReducer.bleReaderTotalCount,
   // );

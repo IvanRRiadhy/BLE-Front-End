@@ -45,7 +45,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
   >({});
   const [lockedRows, setLockedRows] = useState<Record<number, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
-  const brands = useSelector((state: RootState) => state.brandReducer.brands);
+  const brands = useSelector((state: RootState) => state.brandReducer.brandAll);
   const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
   const [columnDefaults, setColumnDefaults] = useState<Partial<bleReaderType>>({});
   const [useDefault, setUseDefault] = useState<Record<keyof bleReaderType, boolean>>({
@@ -203,7 +203,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
       )}
       <Dialog open={openBulk} onClose={handleClose} fullWidth maxWidth="lg">
         <DialogTitle>
-          <Typography fontWeight={700} variant="h4" p={2}>
+          <Typography fontWeight={700} variant="h2" p={2}>
             Bulk Add/Edit BLE Reader
           </Typography>
         </DialogTitle>

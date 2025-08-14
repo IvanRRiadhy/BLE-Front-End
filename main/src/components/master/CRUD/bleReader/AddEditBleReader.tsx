@@ -45,7 +45,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
   });
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
 
-  const brands: BrandType[] = useSelector((state: RootState) => state.brandReducer.brands);
+  const brands: BrandType[] = useSelector((state: RootState) => state.brandReducer.brandAll);
   const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
