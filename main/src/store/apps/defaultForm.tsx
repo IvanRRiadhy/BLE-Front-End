@@ -150,7 +150,7 @@ export const defaultBrandFilter: BrandFilter = {
   Draw: 1,
   Start: 0,
   Length: 5,
-  SortColumn: 'UpdatedAt',
+  SortColumn: 'Name',
   SortDir: 'desc',
   searchValue: '',
 };

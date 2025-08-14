@@ -64,7 +64,7 @@ const BrandList = () => {
     if (isDesc) {
       dispatch(
         UpdateFilter({
-          SortColumn: 'UpdatedAt',
+          SortColumn: 'Name',
           SortDir: 'desc',
           Start: 0,
         }),
