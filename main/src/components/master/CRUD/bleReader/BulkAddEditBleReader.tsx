@@ -68,6 +68,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
       setRows([{ ...defaultBleReaderForm }]);
     }
     setColumnDefaults({});
+    setRowErrors({});
     setUseDefault({
       brandId: false,
       name: false,
@@ -92,6 +93,15 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
 
   const handleChange = (index: number, key: keyof bleReaderType, value: string) => {
     setRows((prev) => prev.map((row, i) => (i === index ? { ...row, [key]: value } : row)));
+    // clear the error for this cell if any
+    setRowErrors((prev) => {
+      if (!prev[index]?.[key as RequiredKey]) return prev;
+      const newRow = { ...(prev[index] || {}) };
+      delete newRow[key as RequiredKey];
+      const next = { ...prev, [index]: newRow };
+      if (Object.keys(newRow).length === 0) delete next[index];
+      return next;
+    });
   };
 
   const handleAddRow = () => {
@@ -133,9 +143,56 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
       return newRows;
     });
   };
+  type RequiredKey = 'brandId' | 'name' | 'ip' | 'engineReaderId' | 'gmac';
+  type RowErrorMap = Partial<Record<RequiredKey, string>>;
 
+  const [rowErrors, setRowErrors] = useState<Record<number, RowErrorMap>>({});
+  const validateAllRows = (): boolean => {
+    const errors: Record<number, RowErrorMap> = {};
+
+    // optional: tighten validation
+    const ipRegex = /^(?:(?:25[0-5]|2[0-4]\d|1?\d{1,2})\.){3}(?:25[0-5]|2[0-4]\d|1?\d{1,2})$/;
+    const macRegex = /^([0-9A-Fa-f]{2}([:\-])){5}[0-9A-Fa-f]{2}$/; // 00:11:22:33:44:55 or 00-11-22-33-44-55
+
+    rows.forEach((r, idx) => {
+      const e: RowErrorMap = {};
+
+      if (!r.brandId) e.brandId = 'Brand is required';
+
+      if (!r.name?.trim()) e.name = 'Reader Name is required';
+
+      const ip = r.ip?.trim() ?? '';
+      if (!ip) e.ip = 'Reader IP is required';
+      // else if (!ipRegex.test(ip)) e.ip = 'Invalid IPv4 address';
+
+      const engine = r.engineReaderId?.toString().trim() ?? '';
+      if (!engine) e.engineReaderId = 'Reader Engine is required';
+
+      const gmac = r.gmac?.trim() ?? '';
+      if (!gmac) e.gmac = 'Reader MAC is required';
+      // else if (!macRegex.test(gmac)) e.gmac = 'Invalid MAC format (e.g. 00:11:22:33:44:55)';
+
+      if (Object.keys(e).length) errors[idx] = e;
+    });
+
+    setRowErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      // (optional) scroll to first error row
+      // document.querySelector(`[data-row="${Object.keys(errors)[0]}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      toast.error(`Please fix ${Object.keys(errors).length} row(s) with errors`);
+      return false;
+    }
+    return true;
+  };
   const handleSaveAll = async () => {
     setIsSaving(true);
+
+    if (!validateAllRows()) {
+      setIsSaving(false);
+      return;
+    }
+
     let allSuccess = true;
     let successCount = 0;
     let failCount = 0;
@@ -156,7 +213,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
     }
 
     await dispatch(fetchBleReaderDT(bleReaderFilter));
-    if(setSelectedIds) setSelectedIds(new Set());
+    if (setSelectedIds) setSelectedIds(new Set());
 
     if (allSuccess) {
       toast.success(
@@ -203,7 +260,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
       )}
       <Dialog open={openBulk} onClose={handleClose} fullWidth maxWidth="lg">
         <DialogTitle>
-          <Typography fontWeight={700} variant="h2" p={2}>
+          <Typography variant="h4" component="span" p={2} fontWeight={700}>
             Bulk Add/Edit BLE Reader
           </Typography>
         </DialogTitle>
@@ -419,6 +476,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         value={row.brandId || ''}
                         onChange={(e) => handleChange(idx, 'brandId', e.target.value)}
                         fullWidth
+                        error={!!rowErrors[idx]?.brandId}
                       >
                         {brands.map((brand) => (
                           <MenuItem key={brand.id} value={brand.id}>
@@ -459,6 +517,8 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         value={row.name}
                         onChange={(e) => handleChange(idx, 'name', e.target.value)}
                         fullWidth
+                        error={!!rowErrors[idx]?.name}
+                        helperText={rowErrors[idx]?.name}
                       />
                       <IconButton
                         size="small"
@@ -488,6 +548,8 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         value={row.ip}
                         onChange={(e) => handleChange(idx, 'ip', e.target.value)}
                         fullWidth
+                        error={!!rowErrors[idx]?.ip}
+                        helperText={rowErrors[idx]?.ip}
                       />
                       <IconButton
                         size="small"
@@ -517,6 +579,8 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         value={row.engineReaderId}
                         onChange={(e) => handleChange(idx, 'engineReaderId', e.target.value)}
                         fullWidth
+                        error={!!rowErrors[idx]?.engineReaderId}
+                        helperText={rowErrors[idx]?.engineReaderId}
                       />
                       <IconButton
                         size="small"
@@ -550,6 +614,8 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         value={row.gmac}
                         onChange={(e) => handleChange(idx, 'gmac', e.target.value)}
                         fullWidth
+                        error={!!rowErrors[idx]?.gmac}
+                        helperText={rowErrors[idx]?.gmac}
                       />
                       <IconButton
                         size="small"

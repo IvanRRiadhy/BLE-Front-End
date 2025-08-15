@@ -65,6 +65,7 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
       setRows([{ ...defaultDistrictForm }]);
     }
     setColumnDefaults({});
+    setRowErrors({});
     setUseDefault({
       name: false,
       districtHost: false,
@@ -125,8 +126,49 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
     });
   };
 
+  type RequiredKey = 'districtHost' | 'name' | 'code';
+  type RowErrorMap = Partial<Record<RequiredKey, string>>;
+
+  const [rowErrors, setRowErrors] = useState<Record<number, RowErrorMap>>({});
+  const validateAllRows = (): boolean => {
+    const errors: Record<number, RowErrorMap> = {};
+
+    // optional: tighten validation
+    const ipRegex = /^(?:(?:25[0-5]|2[0-4]\d|1?\d{1,2})\.){3}(?:25[0-5]|2[0-4]\d|1?\d{1,2})$/;
+    const macRegex = /^([0-9A-Fa-f]{2}([:\-])){5}[0-9A-Fa-f]{2}$/; // 00:11:22:33:44:55 or 00-11-22-33-44-55
+
+    rows.forEach((r, idx) => {
+      const e: RowErrorMap = {};
+
+      if (!r.name?.trim()) e.name = 'District Name is required';
+
+      const code = r.code?.trim() ?? '';
+      if (!code) e.code = 'District Code is required';
+
+      const districtHost = r.districtHost?.trim() ?? '';
+      if (!districtHost) e.districtHost = 'District Host is required';
+      // else if (!macRegex.test(gmac)) e.gmac = 'Invalid MAC format (e.g. 00:11:22:33:44:55)';
+
+      if (Object.keys(e).length) errors[idx] = e;
+    });
+
+    setRowErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      // (optional) scroll to first error row
+      // document.querySelector(`[data-row="${Object.keys(errors)[0]}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      toast.error(`Please fix ${Object.keys(errors).length} row(s) with errors`);
+      return false;
+    }
+    return true;
+  };
+
   const handleSaveAll = async () => {
     setIsSaving(true);
+    if (!validateAllRows()) {
+      setIsSaving(false);
+      return;
+    }
     try {
       let result;
       if (type === 'edit') {
@@ -318,6 +360,8 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
                         value={row.name}
                         onChange={(e) => handleChange(idx, 'name', e.target.value)}
                         fullWidth
+                        error={!!rowErrors[idx]?.name}
+                        helperText={rowErrors[idx]?.name}
                       />
                       <IconButton
                         size="small"
@@ -351,6 +395,8 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
                         value={row.code}
                         onChange={(e) => handleChange(idx, 'code', e.target.value)}
                         fullWidth
+                                                error={!!rowErrors[idx]?.code}
+                        helperText={rowErrors[idx]?.code}
                       />
                       <IconButton
                         size="small"
@@ -384,6 +430,8 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
                         value={row.districtHost}
                         onChange={(e) => handleChange(idx, 'districtHost', e.target.value)}
                         fullWidth
+                                                error={!!rowErrors[idx]?.districtHost}
+                        helperText={rowErrors[idx]?.districtHost}
                       />
                       <IconButton
                         size="small"

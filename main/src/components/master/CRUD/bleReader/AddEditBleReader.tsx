@@ -84,7 +84,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
     if (!formData.ip?.trim()) errors.ip = 'Reader IP is required';
     if (!formData.gmac?.trim()) errors.gmac = 'Reader MAC is required';
     if (!formData.brandId) errors.brandId = 'Reader Brand is required';
-    if(!formData.engineReaderId) errors.engineReaderId = 'Reader Engine is required';
+    if (!formData.engineReaderId) errors.engineReaderId = 'Reader Engine is required';
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -166,7 +166,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="brand-id">Brand</CustomFormLabel>
                 <CustomSelect
                   id="brandId"
@@ -176,7 +176,6 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                   fullWidth
                   variant="outlined"
                   error={!!formErrors.brandId}
-                  helperText={formErrors.brandId}
                 >
                   {brands.map((brand) => (
                     <MenuItem key={brand.id} value={brand.id}>
@@ -205,7 +204,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                   helperText={formErrors.ip}
                 />
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="reader-id">Engine Reader ID</CustomFormLabel>
                 <CustomTextField
                   id="engineReaderId"
