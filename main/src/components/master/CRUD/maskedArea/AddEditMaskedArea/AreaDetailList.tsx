@@ -254,7 +254,7 @@ const AreaDetailList = () => {
                               }}
                             >
                               <Typography variant="body2">
-                                Node {index + 1}: (x: {node.x}, y: {node.y})
+                                Node {node.id}: (x: {node.x}, y: {node.y})
                                 (x_px: {node.x_px}, y_px: {node.y_px})
                               </Typography>
                             </Box>
