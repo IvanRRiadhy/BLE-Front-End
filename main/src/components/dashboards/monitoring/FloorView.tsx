@@ -1,6 +1,6 @@
 import { BASE_URL } from 'src/utils/axios';
 import React, { use, useEffect, useRef, useState } from 'react';
-import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
+import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import {
   Box,
   Button,
@@ -20,8 +20,8 @@ import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea
 import { RefreshTrigger, SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
 import axiosServices from 'src/utils/axios';
 import { AlarmType } from 'src/store/apps/tracking/Alarm';
-import { fetchMembers } from 'src/store/apps/crud/member';
-import { fetchVisitor } from 'src/store/apps/crud/visitor';
+import { fetchMembers, memberType } from 'src/store/apps/crud/member';
+import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import BeaconDetailPopup from './Popup/BeaconDetailPopup';
 import TrackingDetailPopup from './Popup/TrackingDetailPopup';
 
@@ -29,8 +29,8 @@ const ALARM_URL = 'http://192.168.1.116:3300';
 const FloorView: React.FC<{
   activeFloorplan: string;
   zoomable: boolean;
-  containerWidth: number; // New prop
-  containerHeight: number; // New prop
+  containerWidth: number; 
+  containerHeight: number; 
   activeMaskedArea?: string;
   screenSettings: { scale: number; translateX: number; translateY: number };
 }> = ({ activeFloorplan, activeMaskedArea, zoomable, screenSettings }) => {
@@ -46,21 +46,21 @@ const FloorView: React.FC<{
 
   //DUMMY
   const [dummyAlarm, setDummyAlarm] = useState<AlarmType>();
-  const memberList = useSelector((state: AppState) => state.memberReducer.members);
-  const visitorList = useSelector((state: AppState) => state.visitorReducer.visitors);
+  const memberList = useSelector((state: RootState) => state.memberReducer.members);
+  const visitorList = useSelector((state: RootState) => state.visitorReducer.visitors);
   const [open, setOpen] = useState(false);
 
-  // console.log('testing', useSelector((state: AppState) => state.floorReducer.floors));
+  // console.log('testing', useSelector((state: RootState) => state.floorReducer.floors));
   const containerRef = useRef<HTMLDivElement>(null);
-  const floor = useSelector((state: AppState) => state.floorReducer.floorAll);
-  const floorplans = useSelector((state: AppState) => state.floorplanReducer.floorplanAll);
+  const floor = useSelector((state: RootState) => state.floorReducer.floorAll);
+  const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
   const actFloorplan = floorplans.find(
     (floorplan: FloorplanType) => floorplan.id === activeFloorplan,
   );
   const activeFloorData = floor.find((floor: floorType) => floor.id === actFloorplan?.floorId);
 
   const Areas: MaskedAreaType[] = useSelector(
-    (state: AppState) => state.maskedAreaReducer.maskedAreaAll,
+    (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
   );
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorplan);
   const [showArea, setShowArea] = useState(true);
@@ -99,14 +99,14 @@ const FloorView: React.FC<{
       : activeFloorData.floorImage // Prepend BASE_URL for relative paths
     : 'No Active Floorplan'; // Fallback to default image if not available
 
-  const devices = useSelector((state: AppState) => state.floorplanDeviceReducer.floorplanDeviceAll);
+  const devices = useSelector((state: RootState) => state.floorplanDeviceReducer.floorplanDeviceAll);
   const [filteredDevices, setFilteredDevices] = useState<FloorplanDeviceType[]>([]);
 
   //Popup State
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [openTrackDetail, setOpenTrackDetail] = useState(false);
-  const trackingBeacon = useSelector((state: AppState) => state.BeaconReducer.trackingBeacon);
-  const selectedBeacon = useSelector((state: AppState) => state.BeaconReducer.selectedBeacon);
+  const trackingBeacon = useSelector((state: RootState) => state.BeaconReducer.trackingBeacon);
+  const selectedBeacon = useSelector((state: RootState) => state.BeaconReducer.selectedBeacon);
 
   const handleSelectBeacon = (info: {
     id: string;
@@ -340,7 +340,7 @@ const FloorView: React.FC<{
   //       setScale(minScale);
   //     }
   //   }
-  // }, [imgSize]); // Reset scale when imgSize changes
+  // }, [imgSize]); // Reset scale when imgSize changes!
 
   useEffect(() => {
     if (!activeMaskedArea) {
@@ -458,8 +458,8 @@ const FloorView: React.FC<{
   const getName = (bleNuber: string) => {
     let name = '';
     name =
-      memberList.find((member) => member.bleCardNumber === bleNuber)?.name ??
-      visitorList.find((visitor) => visitor.bleCardNumber === bleNuber)?.name ??
+      memberList.find((member: memberType) => member.bleCardNumber === bleNuber)?.name ??
+      visitorList.find((visitor: VisitorType) => visitor.bleCardNumber === bleNuber)?.name ??
       'Unknown Person';
     return name;
   };

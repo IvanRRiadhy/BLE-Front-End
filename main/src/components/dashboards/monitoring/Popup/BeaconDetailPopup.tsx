@@ -99,7 +99,7 @@ const BeaconDetailPopup = ({
       <DialogContent>
         <Grid container spacing={3} mb={2} p={2}>
           <Grid container size={12} direction={'row'} mb={2}>
-            <Grid size={12} display={'flex'} justifyContent={'center'} mr={2}>
+            <Grid size={12} display={'flex'} justifyContent={'center'} >
               <Avatar
                 alt="Member Profile"
                 src={`${BASE_URL}${

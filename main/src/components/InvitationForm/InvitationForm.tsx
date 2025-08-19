@@ -253,6 +253,8 @@ const VisitorFormPage = () => {
                   margin="normal"
                   value={formData.identityType || ''}
                   onChange={handleInputChange}
+                  error={!!formErrors.identityType}
+                  helperText={formErrors.identityType}
                 >
                   {identityTypes.map((item) => (
                     <MenuItem key={item.value} value={item.value}>
@@ -280,6 +282,8 @@ const VisitorFormPage = () => {
                   value={formData.identityId}
                   onChange={handleInputChange}
                   disabled={!formData.identityType}
+                  error={!!formErrors.identityId}
+                  helperText={formErrors.identityId}
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }} order={{ xs: 5, sm: 5 }}>
@@ -366,6 +370,7 @@ const VisitorFormPage = () => {
             <Divider />
             <Box mt={2}>
               <input type="file" accept="image/*" onChange={handleImageChange} />
+              {formErrors.faceImage && <FormHelperText error>{formErrors.faceImage}</FormHelperText>}
               {preview && (
                 <img
                   src={`${BASE_URL}${preview}`}

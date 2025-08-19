@@ -24,7 +24,7 @@ import { defaultAlarmRecordFilter } from 'src/store/apps/defaultForm';
 
 const columns = [
   { label: 'Visitor Name', field: 'Visitor.Name', sortAble: true },
-  { label: 'Alarm Status', field: 'alarmStatus', sortAble: true },
+  { label: 'Alarm Status', field: 'AlarmRecordStatus', sortAble: true },
   { label: 'Area Name', field: 'FloorplanMaskedArea.Name', sortAble: true },
   { label: 'Time', field: 'Timestamp', sortAble: true },
 ];
@@ -56,7 +56,7 @@ const AlarmWarning = () => {
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
   useEffect(() => {
-    dispatch(UpdateFilter({...defaultAlarmRecordFilter, SortColumn: ''}));
+    dispatch(UpdateFilter({...defaultAlarmRecordFilter}));
   }, [dispatch]);
 
   useEffect(() => {
@@ -79,7 +79,7 @@ const AlarmWarning = () => {
       },
     )}`;
   };
-
+  console.log(alarmRecordData)
   const handleSort = (column: string) => {
     const isAsc = AlarmRecordFilter.SortColumn === column && AlarmRecordFilter.SortDir === 'asc';
     const isDesc = AlarmRecordFilter.SortColumn === column && AlarmRecordFilter.SortDir === 'desc';

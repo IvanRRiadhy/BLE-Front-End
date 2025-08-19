@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSelector, useDispatch, AppDispatch, AppState, RootState } from 'src/store/Store';
+import { useSelector, useDispatch, AppDispatch, RootState } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import { fetchFloorplan, fetchFloorplanDT } from 'src/store/apps/crud/floorplan';
 import {
@@ -47,38 +47,38 @@ const DeviceList = () => {
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const activeFloorplan = useSelector(
-    (state: AppState) => state.floorplanReducer.selectedFloorplan,
+    (state: RootState) => state.floorplanReducer.selectedFloorplan,
   );
   const originalDevices = useSelector(
-    (state: AppState) => state.floorplanDeviceReducer.originalFloorplanDevices,
+    (state: RootState) => state.floorplanDeviceReducer.originalFloorplanDevices,
   );
   const selectedDevice = useSelector(
-    (state: AppState) => state.floorplanDeviceReducer.selectedFloorplanDevice,
+    (state: RootState) => state.floorplanDeviceReducer.selectedFloorplanDevice,
   );
   const unsavedDevices = useSelector(
-    (state: AppState) => state.floorplanDeviceReducer.unsavedFloorplanDevices,
+    (state: RootState) => state.floorplanDeviceReducer.unsavedFloorplanDevices,
   );
   const editingDevice = useSelector(
-    (state: AppState) => state.floorplanDeviceReducer.editingFloorplanDevice,
+    (state: RootState) => state.floorplanDeviceReducer.editingFloorplanDevice,
   );
   const filteredUnsavedDevices = unsavedDevices.filter(
-    (device) => device.floorplanId === activeFloorplan?.id,
+    (device: FloorplanDeviceType) => device.floorplanId === activeFloorplan?.id,
   );
   const filteredOriginalDevices = originalDevices.filter(
     (device: FloorplanDeviceType) => device.floorplanId === activeFloorplan?.id,
   );
   const deletedDevice = useSelector(
-    (state: AppState) => state.floorplanDeviceReducer.deletedFloorplanDevice,
+    (state: RootState) => state.floorplanDeviceReducer.deletedFloorplanDevice,
   );
   const addedDevice = useSelector(
-    (state: AppState) => state.floorplanDeviceReducer.addedFloorplanDevice,
+    (state: RootState) => state.floorplanDeviceReducer.addedFloorplanDevice,
   );
 
-  const firstCCTV = useSelector((state: AppState) => state.CCTVReducer.cctvs[0]);
+  const firstCCTV = useSelector((state: RootState) => state.CCTVReducer.cctvs[0]);
   const firstAccessControl = useSelector(
-    (state: AppState) => state.accessControlReducer.accessControls[0],
+    (state: RootState) => state.accessControlReducer.accessControls[0],
   );
-  const firstBleReader = useSelector((state: AppState) => state.bleReaderReducer.bleReaders[0]);
+  const firstBleReader = useSelector((state: RootState) => state.bleReaderReducer.bleReaders[0]);
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState('');
@@ -269,7 +269,17 @@ const DeviceList = () => {
   };
 
   return (
-    <>
+    <Box
+      sx={{
+        height: '80vh',
+        display: 'grid',
+        minHeight: 0,
+        gridTemplateRows: 'auto 1fr auto',
+        overflow: 'hidden',
+        bgColor: 'background.default',
+        borderColor: 'divider',
+      }}
+    >
       <Box p={3} px={2} display="flex" justifyContent="flex-start" alignItems="center">
         <Typography variant="h5" mb={2} fontWeight={700} textAlign="left">
           {activeFloorplan?.name}
@@ -310,15 +320,12 @@ const DeviceList = () => {
       </Box>
       <Box
         p={2}
+        bottom={0}
         sx={{
-          position: 'fixed',
-          bottom: '0',
-          left: '10',
-          width: '260px',
-          height: '80px',
-          backgroundColor: 'background.paper',
           borderTop: '1px solid',
           borderColor: 'divider',
+          bgcolor: '#fafafa',
+          m: 0,
         }}
       >
         {!editingDevice && (
@@ -397,7 +404,7 @@ const DeviceList = () => {
           </Backdrop>,
           document.body,
         )}
-    </>
+    </Box>
   );
 };
 

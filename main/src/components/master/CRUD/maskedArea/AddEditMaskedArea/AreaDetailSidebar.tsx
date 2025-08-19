@@ -1,4 +1,4 @@
-import { Drawer, Theme,  useMediaQuery } from '@mui/material';
+import { Divider, Drawer, Theme, useMediaQuery } from '@mui/material';
 import React from 'react';
 import AreaDetailList from './AreaDetailList';
 
@@ -15,6 +15,9 @@ const AreaDetailSidebar = ({ isEditingSidebarOpen, onEditingSidebarClose }: Prop
     <>
       <Drawer
         sx={{
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
           width: drawerWidth,
           flexShrink: 0,
           zIndex: lgUp ? 0 : 1,
@@ -35,6 +38,7 @@ const AreaDetailSidebar = ({ isEditingSidebarOpen, onEditingSidebarClose }: Prop
       >
         <AreaDetailList />
       </Drawer>
+      
     </>
   );
 };

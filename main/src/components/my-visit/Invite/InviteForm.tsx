@@ -45,7 +45,14 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import utc from 'dayjs/plugin/utc';
-import { IconChevronDown, IconChevronUp, IconPlus, IconTrash, IconUser, IconUsers } from '@tabler/icons-react';
+import {
+  IconChevronDown,
+  IconChevronUp,
+  IconPlus,
+  IconTrash,
+  IconUser,
+  IconUsers,
+} from '@tabler/icons-react';
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchVisitorDT, sendInvitation, VisitorType } from 'src/store/apps/crud/visitor';
@@ -146,6 +153,14 @@ type CombinedRow = {
   email?: string | null;
   isVip?: boolean | null;
 };
+type RowError = { name?: string; email?: string };
+type FormErrors = {
+  maskedArea?: string;
+  agenda?: string;
+  time?: string;
+  visitors?: string; // “at least one visitor” error
+  rowErrors?: RowError[]; // same length as selectedVisitor
+};
 
 const InviteForm = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -171,7 +186,9 @@ const InviteForm = () => {
   const [endTime, setEndTime] = useState<Dayjs | null>(dayjs());
   const [openMenu, setOpenMenu] = useState(false);
   const [openMemberSection, setOpenMemberSection] = useState(true);
-const [openVisitorSection, setOpenVisitorSection] = useState(true);
+  const [openVisitorSection, setOpenVisitorSection] = useState(true);
+
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   const toUtcFormatted = (time: dayjs.Dayjs | null) => {
     return time?.utc().format('YYYY-MM-DDTHH:mm:ss.SSS');
@@ -179,9 +196,10 @@ const [openVisitorSection, setOpenVisitorSection] = useState(true);
 
   const handleClickOpen = () => {
     setLoading(true);
+    setFormErrors({});
     setSelectedVisitor([{ ...defaultVisitorForm, name: '', email: '' }]);
     setSelectedMaskedArea('');
-    setSelectedMember([{ ...defaultMemberForm, name: '', email: '' }]);
+    setSelectedMember([]);
     setSearchName('');
     setNotes('');
     setStartTime(dayjs());
@@ -201,7 +219,95 @@ const [openVisitorSection, setOpenVisitorSection] = useState(true);
     setOpen(false);
   };
 
+  const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+
+  const notEmpty = (v?: string | null) => !!v && v.trim().length > 0;
+
+  const dedupe = <T,>(arr: T[]) => {
+    const m = new Map<T, number>();
+    arr.forEach((v) => m.set(v, (m.get(v) ?? 0) + 1));
+    return m;
+  };
+
+  const validateForm = (): boolean => {
+    const errors: FormErrors = {};
+    const rowErrors: RowError[] = selectedVisitor.map(() => ({}));
+
+    // Area
+    if (!selectedMaskedArea) {
+      errors.maskedArea = 'Visiting Area is required';
+    }
+
+    // Agenda
+    if (!notEmpty(notes) || (notes ?? '').trim().length < 5) {
+      errors.agenda = 'Agenda must be at least 5 characters';
+    }
+
+    // Time
+    if (!startTime || !endTime) {
+      errors.time = 'Start and End time are required';
+    } else if (!endTime.isAfter(startTime)) {
+      errors.time = 'End time must be after start time';
+    }
+
+    // At least one visitor (matches your current backend payload)
+    if (selectedVisitor.length === 0) {
+      errors.visitors = 'Add at least one visitor';
+    }
+
+    // Per-row validation for unregistered visitors (id is undefined/null)
+    const emailsForDedupe: string[] = [];
+
+    selectedVisitor.forEach((v, idx) => {
+      const isRegistered = !!v.id;
+
+      if (!isRegistered) {
+        if (!notEmpty(v.name)) {
+          rowErrors[idx].name = 'Name is required';
+        } else if ((v.name ?? '').trim().length < 2) {
+          rowErrors[idx].name = 'Name must be at least 2 characters';
+        }
+
+        if (!notEmpty(v.email)) {
+          rowErrors[idx].email = 'Email is required';
+        } else if (!isEmail(v.email!)) {
+          rowErrors[idx].email = 'Invalid email format';
+        } else {
+          emailsForDedupe.push((v.email ?? '').trim().toLowerCase());
+        }
+      }
+    });
+
+    // Duplicate email check among newly entered (unregistered) visitors
+    const counts = dedupe(emailsForDedupe);
+    if (emailsForDedupe.length > 0) {
+      // map back duplicates to row errors
+      const duplicates = new Set([...counts.entries()].filter(([, c]) => c > 1).map(([e]) => e));
+      if (duplicates.size > 0) {
+        selectedVisitor.forEach((v, idx) => {
+          if (!v.id && v.email && duplicates.has(v.email.trim().toLowerCase())) {
+            rowErrors[idx].email = 'Duplicate email';
+          }
+        });
+      }
+    }
+
+    // Attach row errors if any
+    if (rowErrors.some((re) => re.name || re.email)) {
+      errors.rowErrors = rowErrors;
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
+    const ok = validateForm();
+    if (!ok) {
+      toast.error('Please fix the highlighted errors.');
+      scrollToFirstError();
+      return;
+    }
     setLoading(true);
     setSaving(true);
 
@@ -255,7 +361,9 @@ const [openVisitorSection, setOpenVisitorSection] = useState(true);
 
     const floorplan = floorplanData.find((fp: FloorplanType) => fp.id === area.floorplanId);
     const floor = floorplan ? floorData.find((f: floorType) => f.id === floorplan.floorId) : null;
-    const building = floor ? buildingData.find((b: BuildingType) => b.id === floor.buildingId) : null;
+    const building = floor
+      ? buildingData.find((b: BuildingType) => b.id === floor.buildingId)
+      : null;
 
     const pathParts = [
       area.name,
@@ -293,9 +401,7 @@ const [openVisitorSection, setOpenVisitorSection] = useState(true);
   useEffect(() => {
     dispatch(fetchVisitorDT({ ...visitorFilter, length: 0, searchValue: searchName }));
   }, [searchName]);
-  const isRegisteredVisitor = (visitor: VisitorType) => {
-    return !!visitor.id; // registered visitors have a defined ID
-  };
+
   const handleAddRow = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
     setOpenMenu(true);
@@ -366,6 +472,36 @@ const [openVisitorSection, setOpenVisitorSection] = useState(true);
     return [...memberRows, ...visitorRows];
   }, [selectedMember, selectedVisitor]);
 
+  const scrollToFirstError = () => {
+    // Check order: area -> time -> agenda -> table rows
+    if (formErrors.maskedArea) {
+      document
+        .querySelector('#area-section')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (formErrors.time) {
+      document
+        .querySelector('input[placeholder*="Start Time"]')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (formErrors.agenda) {
+      document.querySelector('#notes')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (formErrors.rowErrors) {
+      // Find the first row with error and scroll its input
+      const idx = formErrors.rowErrors.findIndex((r) => r.name || r.email);
+      if (idx >= 0) {
+        // your inputs are controlled; add data-index attributes for reliability
+        document
+          .querySelector(`[data-visitor-name="${idx}"], [data-visitor-email="${idx}"]`)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  };
+
   return (
     <>
       <Tooltip title="Add Visitor">
@@ -411,6 +547,8 @@ const [openVisitorSection, setOpenVisitorSection] = useState(true);
                         slotProps={{
                           textField: {
                             fullWidth: true,
+                            error: !!formErrors.time,
+                            helperText: formErrors.time,
                           },
                         }}
                       />
@@ -431,6 +569,8 @@ const [openVisitorSection, setOpenVisitorSection] = useState(true);
                         slotProps={{
                           textField: {
                             fullWidth: true,
+                            error: !!formErrors.time,
+                            helperText: formErrors.time,
                           },
                         }}
                       />
@@ -473,6 +613,11 @@ const [openVisitorSection, setOpenVisitorSection] = useState(true);
                       </Typography>
                     </div>
                   </div>
+                  {formErrors.maskedArea && (
+                    <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                      {formErrors.maskedArea}
+                    </Typography>
+                  )}
                   <CustomFormLabel> Agenda </CustomFormLabel>
                   <CustomTextField
                     id="notes"
@@ -484,6 +629,8 @@ const [openVisitorSection, setOpenVisitorSection] = useState(true);
                     multiline
                     minRows={3}
                     maxRows={3}
+                    error={!!formErrors.agenda}
+                    helperText={formErrors.agenda}
                   />
                 </Grid>
               </Grid>
@@ -608,6 +755,8 @@ const [openVisitorSection, setOpenVisitorSection] = useState(true);
                                           }
                                           fullWidth
                                           disabled={isRegistered}
+                                          error={!!formErrors.rowErrors?.[row.sourceIndex]?.name}
+                                          helperText={formErrors.rowErrors?.[row.sourceIndex]?.name}
                                         />
                                       ) : (
                                         <TextField value={row.name ?? ''} fullWidth disabled />
@@ -628,6 +777,10 @@ const [openVisitorSection, setOpenVisitorSection] = useState(true);
                                           }
                                           fullWidth
                                           disabled={isRegistered}
+                                          error={!!formErrors.rowErrors?.[row.sourceIndex]?.email}
+                                          helperText={
+                                            formErrors.rowErrors?.[row.sourceIndex]?.email
+                                          }
                                         />
                                       ) : (
                                         <TextField value={row.email ?? ''} fullWidth disabled />
@@ -696,6 +849,7 @@ const [openVisitorSection, setOpenVisitorSection] = useState(true);
               onClick={() => handleSave()}
               variant="contained"
               sx={{ fontSize: '1rem', py: 1, px: 3 }}
+              disabled={saving}
             >
               Save
             </Button>
@@ -711,145 +865,148 @@ const [openVisitorSection, setOpenVisitorSection] = useState(true);
           </DialogContent>
         </Dialog>
       )}
-<Menu
-  anchorEl={anchorEl}
-  open={openMenu}
-  onClose={handleCloseMenu}
-  PaperProps={{ sx: { maxHeight: 500, width: 340, p: 0 } }}
->
-  <MenuList dense disablePadding>
-    {/* Member header */}
-<ListItemButton
-  onClick={() => setOpenMemberSection((v) => !v)}
-  sx={{
-    px: 2,
-    py: 1,
-    backgroundColor: '#f0f0f0',
-    '&:hover': {
-      backgroundColor: '#e0e0e0', // darker shade
-    },
-  }}
->
-      <ListItemIcon sx={{ minWidth: 28 }}>
-        <IconUsers size={18} />
-      </ListItemIcon>
-      <ListItemText primary="Member" primaryTypographyProps={{ fontWeight: 700 }} />
-      {openMemberSection ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
-    </ListItemButton>
-
-    {/* Member list */}
-    <Collapse in={openMemberSection} timeout="auto" unmountOnExit>
-      <Box sx={{ maxHeight: 180, overflowY: 'auto', py: 0 }}>
-        {availableMembers.length === 0 && (
-          <Box sx={{ px: 2, py: 1.5, color: 'text.secondary' }}>
-            <Typography variant="body2">No members found</Typography>
-          </Box>
-        )}
-        {availableMembers.map((m) => (
-          <MenuItem
-            key={m.id}
-            onClick={() => {
-              setSelectedMember((prev) => {
-                if (m.id && prev.some((p) => p.id === m.id)) return prev;
-                if (prev.length === 1 && !prev[0].id && !prev[0].email && !prev[0].name)
-                  return [m];
-                return [...prev, m];
-              });
-              handleCloseMenu();
+      <Menu
+        anchorEl={anchorEl}
+        open={openMenu}
+        onClose={handleCloseMenu}
+        PaperProps={{ sx: { maxHeight: 500, width: 340, p: 0 } }}
+      >
+        <MenuList dense disablePadding>
+          {/* Member header */}
+          <ListItemButton
+            onClick={() => setOpenMemberSection((v) => !v)}
+            sx={{
+              px: 2,
+              py: 1,
+              backgroundColor: '#f0f0f0',
+              '&:hover': {
+                backgroundColor: '#e0e0e0', // darker shade
+              },
             }}
-            sx={{ py: 1, px: 2 }}
           >
-            <Box>
-              <Typography variant="body2" fontWeight={600}>{m.name}</Typography>
-              <Typography variant="caption" color="text.secondary">
-                {m.cardNumber || m.email}
-              </Typography>
+            <ListItemIcon sx={{ minWidth: 28 }}>
+              <IconUsers size={18} />
+            </ListItemIcon>
+            <ListItemText primary="Member" primaryTypographyProps={{ fontWeight: 700 }} />
+            {openMemberSection ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+          </ListItemButton>
+
+          {/* Member list */}
+          <Collapse in={openMemberSection} timeout="auto" unmountOnExit>
+            <Box sx={{ maxHeight: 180, overflowY: 'auto', py: 0 }}>
+              {availableMembers.length === 0 && (
+                <Box sx={{ px: 2, py: 1.5, color: 'text.secondary' }}>
+                  <Typography variant="body2">No members found</Typography>
+                </Box>
+              )}
+              {availableMembers.map((m) => (
+                <MenuItem
+                  key={m.id}
+                  onClick={() => {
+                    setSelectedMember((prev) => {
+                      if (m.id && prev.some((p) => p.id === m.id)) return prev;
+                      if (prev.length === 1 && !prev[0].id && !prev[0].email && !prev[0].name)
+                        return [m];
+                      return [...prev, m];
+                    });
+                    handleCloseMenu();
+                  }}
+                  sx={{ py: 1, px: 2 }}
+                >
+                  <Box>
+                    <Typography variant="body2" fontWeight={600}>
+                      {m.name}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {m.cardNumber || m.email}
+                    </Typography>
+                  </Box>
+                </MenuItem>
+              ))}
             </Box>
-          </MenuItem>
-        ))}
-      </Box>
-    </Collapse>
+          </Collapse>
 
-    <Divider />
+          <Divider />
 
-    {/* Visitor header */}
-<ListItemButton
-  onClick={() => setOpenVisitorSection((v) => !v)}
-  sx={{
-    px: 2,
-    py: 1,
-    backgroundColor: '#f0f0f0',
-    '&:hover': {
-      backgroundColor: '#e0e0e0', // darker shade
-    },
-  }}
->
-      <ListItemIcon sx={{ minWidth: 28 }}>
-        <IconUser size={18} />
-      </ListItemIcon>
-      <ListItemText primary="Visitor" primaryTypographyProps={{ fontWeight: 700 }} />
-      {openVisitorSection ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
-    </ListItemButton>
-
-    {/* Visitor list (+ Add New) */}
-    <Collapse in={openVisitorSection} timeout="auto" unmountOnExit>
-      <Box sx={{ maxHeight: 220, overflowY: 'auto', position: 'relative' }}>
-        {/* Sticky Add New Visitor */}
-        <MenuItem
-          onClick={() => {
-            setSelectedVisitor([
-              ...selectedVisitor,
-              { ...defaultVisitorForm, name: '', email: '' },
-            ]);
-            handleCloseMenu();
-          }}
-          sx={{
-            position: 'sticky',
-            top: 0,
-            backgroundColor: 'background.paper',
-            zIndex: 1,
-            fontWeight: 'bold',
-            py: 1,
-            px: 2,
-            borderBottom: (t) => `1px solid ${t.palette.divider}`,
-          }}
-        >
-          <IconPlus size={16} style={{ marginRight: 8 }} /> Add New Visitor
-        </MenuItem>
-
-        {availableVisitors.length === 0 && (
-          <Box sx={{ px: 2, py: 1.5, color: 'text.secondary' }}>
-            <Typography variant="body2">No visitors found</Typography>
-          </Box>
-        )}
-        {availableVisitors.map((v) => (
-          <MenuItem
-            key={v.id}
-            onClick={() => {
-              setSelectedVisitor((prev) => {
-                if (v.id && prev.some((p) => p.id === v.id)) return prev;
-                if (prev.length === 1 && !prev[0].id && !prev[0].email && !prev[0].name) {
-                  return [v];
-                }
-                return [...prev, v];
-              });
-              handleCloseMenu();
+          {/* Visitor header */}
+          <ListItemButton
+            onClick={() => setOpenVisitorSection((v) => !v)}
+            sx={{
+              px: 2,
+              py: 1,
+              backgroundColor: '#f0f0f0',
+              '&:hover': {
+                backgroundColor: '#e0e0e0', // darker shade
+              },
             }}
-            sx={{ py: 1, px: 2 }}
           >
-            <Box>
-              <Typography variant="body2" fontWeight={600}>{v.name}</Typography>
-              <Typography variant="caption" color="text.secondary">
-                {v.cardNumber || v.email}
-              </Typography>
-            </Box>
-          </MenuItem>
-        ))}
-      </Box>
-    </Collapse>
-  </MenuList>
-</Menu>
+            <ListItemIcon sx={{ minWidth: 28 }}>
+              <IconUser size={18} />
+            </ListItemIcon>
+            <ListItemText primary="Visitor" primaryTypographyProps={{ fontWeight: 700 }} />
+            {openVisitorSection ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+          </ListItemButton>
 
+          {/* Visitor list (+ Add New) */}
+          <Collapse in={openVisitorSection} timeout="auto" unmountOnExit>
+            <Box sx={{ maxHeight: 220, overflowY: 'auto', position: 'relative' }}>
+              {/* Sticky Add New Visitor */}
+              <MenuItem
+                onClick={() => {
+                  setSelectedVisitor([
+                    ...selectedVisitor,
+                    { ...defaultVisitorForm, name: '', email: '' },
+                  ]);
+                  handleCloseMenu();
+                }}
+                sx={{
+                  position: 'sticky',
+                  top: 0,
+                  backgroundColor: 'background.paper',
+                  zIndex: 1,
+                  fontWeight: 'bold',
+                  py: 1,
+                  px: 2,
+                  borderBottom: (t) => `1px solid ${t.palette.divider}`,
+                }}
+              >
+                <IconPlus size={16} style={{ marginRight: 8 }} /> Add New Visitor
+              </MenuItem>
+
+              {availableVisitors.length === 0 && (
+                <Box sx={{ px: 2, py: 1.5, color: 'text.secondary' }}>
+                  <Typography variant="body2">No visitors found</Typography>
+                </Box>
+              )}
+              {availableVisitors.map((v) => (
+                <MenuItem
+                  key={v.id}
+                  onClick={() => {
+                    setSelectedVisitor((prev) => {
+                      if (v.id && prev.some((p) => p.id === v.id)) return prev;
+                      if (prev.length === 1 && !prev[0].id && !prev[0].email && !prev[0].name) {
+                        return [v];
+                      }
+                      return [...prev, v];
+                    });
+                    handleCloseMenu();
+                  }}
+                  sx={{ py: 1, px: 2 }}
+                >
+                  <Box>
+                    <Typography variant="body2" fontWeight={600}>
+                      {v.name}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {v.cardNumber || v.email}
+                    </Typography>
+                  </Box>
+                </MenuItem>
+              ))}
+            </Box>
+          </Collapse>
+        </MenuList>
+      </Menu>
     </>
   );
 };

@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { AppState, useDispatch } from 'src/store/Store';
+import { RootState, useDispatch } from 'src/store/Store';
 import PageContainer from 'src/components/container/PageContainer';
 // import { useTheme } from '@mui/material';
 import ConfigSidebar from 'src/components/dashboards/monitoring/config/ConfigSidebar';
@@ -21,17 +21,17 @@ const Config = () => {
     translateX: 0,
     translateY: 0,
   });
-  const floorIds = useSelector((state: AppState) => state.layoutReducer.floorplanId);
-  const screenDisplay = useSelector((state: AppState) => state.layoutReducer.screenDisplay);
+  const floorIds = useSelector((state: RootState) => state.layoutReducer.floorplanId);
+  const screenDisplay = useSelector((state: RootState) => state.layoutReducer.screenDisplay);
   // console.log(screenDisplay);
-  const floorIds2 = screenDisplay?.map((row) => row.map((item) => item.displayOutput)) ?? [];
-  const screenType = screenDisplay?.map((row) => row.map((item) => item.displayType)) ?? [];
+  const floorIds2 = screenDisplay?.map((row: any) => row.map((item: any) => item.displayOutput)) ?? [];
+  const screenType = screenDisplay?.map((row: any) => row.map((item: any) => item.displayType)) ?? [];
 
   const memoizedFloorIds = useMemo(() => floorIds, [floorIds]);
   const memoizedFloorIds2 = useMemo(() => floorIds2, [floorIds2]);
   const memoizedScreenType = useMemo(() => screenType, [screenType]);
-  const screenSettingsState = useSelector((state: AppState) => state.layoutReducer.screenSettings);
-  const wholeState = useSelector((state: AppState) => state.layoutReducer);
+  const screenSettingsState = useSelector((state: RootState) => state.layoutReducer.screenSettings);
+  const wholeState = useSelector((state: RootState) => state.layoutReducer);
   useEffect(() => {
     // Dispatch actions when the component is mounted
     dispatch(toggleHorizontal(false)); // Enable horizontal layout

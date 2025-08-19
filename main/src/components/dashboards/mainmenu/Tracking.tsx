@@ -38,6 +38,65 @@ const TrackingGraph: React.FC<TrackingGraphProps> = ({ trackingData = [], alarmD
   }
   // console.log(trackingData, alarmData);
 
+  function dedupeByAreaChange<T extends Record<string, any>>(
+  records: T[],
+  cfg: { personKey: keyof T; areaKey: keyof T; timeKey: keyof T }
+): T[] {
+  const { personKey, areaKey, timeKey } = cfg;
+
+  // Group by person
+  const groups = new Map<string, T[]>();
+  for (const r of records) {
+    const person = String(r[personKey] ?? '');
+    if (!person) continue; // skip if no person id
+    const arr = groups.get(person);
+    if (arr) arr.push(r);
+    else groups.set(person, [r]);
+  }
+
+  // Within each person, sort by time and keep only area changes
+  const out: T[] = [];
+  groups.forEach((arr) => {
+    arr.sort(
+      (a, b) =>
+        dayjs(String(a[timeKey] ?? 0)).valueOf() -
+        dayjs(String(b[timeKey] ?? 0)).valueOf()
+    );
+    let lastArea: string | undefined;
+    for (const rec of arr) {
+      const area = String(rec[areaKey] ?? '');
+      if (lastArea !== area) {
+        out.push(rec);      // keep only when area changes (or first)
+        lastArea = area;
+      }
+    }
+  });
+
+  return out;
+}
+
+const trackingFiltered = React.useMemo(
+  () =>
+    dedupeByAreaChange(trackingData, {
+      personKey: 'cardId',                // identity for tracking data
+      areaKey: 'floorplanMaskedAreaId',   // area id
+      timeKey: 'transTime',               // timestamp field
+    }),
+  [trackingData]
+);
+
+const alarmFiltered = React.useMemo(
+  () =>
+    dedupeByAreaChange(alarmData, {
+      personKey: 'visitorId',             // identity for alarm data
+      areaKey: 'floorplanMaskedAreaId',
+      timeKey: 'timestamp',
+    }),
+  [alarmData]
+);
+
+
+
   const allowedVisitor = getCountsByDay(trackingData, 'transTime');
   const unAllowedVisitor = getCountsByDay(alarmData, 'timestamp');
   const { t } = useTranslation();
@@ -60,8 +119,8 @@ const TrackingGraph: React.FC<TrackingGraphProps> = ({ trackingData = [], alarmD
   };
 
   const allMonths = [
-    ...trackingData.map((d) => getMonthYear(d.transTime)),
-    ...alarmData.map((d) => getMonthYear(d.timestamp)),
+    ...trackingFiltered.map((d) => getMonthYear(d.transTime)),
+    ...alarmFiltered.map((d) => getMonthYear(d.timestamp)),
     todayMonth,
   ].filter(Boolean);
 
@@ -106,19 +165,6 @@ const TrackingGraph: React.FC<TrackingGraphProps> = ({ trackingData = [], alarmD
     return result;
   }
 
-  function getCountsByHour(data: any[], dateField: string) {
-    const counts: Record<string, number> = {};
-    data.forEach((item) => {
-      const d = new Date(item[dateField]);
-      // ISO string with hour precision (yyyy-mm-ddTHH:00:00)
-      const hourStr =
-        new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours())
-          .toISOString()
-          .slice(0, 13) + ':00:00';
-      counts[hourStr] = (counts[hourStr] || 0) + 1;
-    });
-    return counts;
-  }
   // Find the date range for the selected month
   const monthParts = month.split('-');
   const selectedYear = Number(monthParts[0]);
@@ -132,7 +178,7 @@ const lastDay = dayjs(firstDay).endOf('month'); // end of the last day
 
   // Build continuous day series for each type
 const allowedSeries = buildContinuousSeriesByDay(
-  trackingData.filter((item) => {
+  trackingFiltered.filter((item) => {
     const d = dayjs(item.transTime);
     return d.isSameOrAfter(firstDay) && d.isSameOrBefore(lastDay);
   }),
@@ -142,7 +188,7 @@ const allowedSeries = buildContinuousSeriesByDay(
 );
 
 const unAllowedSeries = buildContinuousSeriesByDay(
-  alarmData.filter((item) => {
+  alarmFiltered.filter((item) => {
     const d = dayjs(item.timestamp);
     return d.isSameOrAfter(firstDay) && d.isSameOrBefore(lastDay);
   }),
@@ -150,6 +196,8 @@ const unAllowedSeries = buildContinuousSeriesByDay(
   firstDayStr,
   lastDayStr,
 );
+
+
 
 
   // Combine x points (dates) from both series, so both series use all dates in month
@@ -169,11 +217,11 @@ const unAllowedSeries = buildContinuousSeriesByDay(
     y: unAllowedSeries.find((s) => s.x === date)?.y || 0,
   }));
 
-const allowedVisitorMonthTotal = trackingData.filter((item) => {
+const allowedVisitorMonthTotal = trackingFiltered.filter((item) => {
   const d = dayjs(item.transTime);
   return d.isAfter(firstDay.subtract(1, 'ms')) && d.isBefore(lastDay.add(1, 'ms'));
 }).length;
-  const unAllowedVisitorMonthTotal = alarmData.filter((item) => {
+  const unAllowedVisitorMonthTotal = alarmFiltered.filter((item) => {
   const d = dayjs(item.timestamp);
   return d.isAfter(firstDay.subtract(1, 'ms')) && d.isBefore(lastDay.add(1, 'ms'));
   }).length;

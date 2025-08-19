@@ -77,7 +77,7 @@ export const defaultAlarmRecordFilter: AlarmRecordFilter = {
   Length: 5,
   SortColumn: 'Timestamp',
   SortDir: 'desc',
-  searchValue: '',
+  searchValue: '',  
   filters: {
     FloorplanMaskedAreaId: [],
     ReaderId: [],

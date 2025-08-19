@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSelector, useDispatch, AppDispatch, AppState, RootState } from 'src/store/Store';
+import { useSelector, useDispatch, AppDispatch, RootState } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import { fetchFloorplan, fetchFloorplanDT } from 'src/store/apps/crud/floorplan';
 import {
@@ -54,35 +54,35 @@ const AreaList = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   const activeFloorplan = useSelector(
-    (state: AppState) => state.floorplanReducer.selectedFloorplan,
+    (state: RootState) => state.floorplanReducer.selectedFloorplan,
   );
-  const maskedAreasData = useSelector((state: AppState) => state.maskedAreaReducer.maskedAreaAll);
+  const maskedAreasData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
   const originalAreas = useSelector(
-    (state: AppState) => state.maskedAreaReducer.originalMaskedAreas,
+    (state: RootState) => state.maskedAreaReducer.originalMaskedAreas,
   );
   const selectedMaskedArea = useSelector(
-    (state: AppState) => state.maskedAreaReducer.selectedMaskedArea,
+    (state: RootState) => state.maskedAreaReducer.selectedMaskedArea,
   );
   const unsavedMaskedAreas = useSelector(
-    (state: AppState) => state.maskedAreaReducer.unsavedMaskedAreas,
+    (state: RootState) => state.maskedAreaReducer.unsavedMaskedAreas,
   );
   const editingMaskedArea = useSelector(
-    (state: AppState) => state.maskedAreaReducer.editingMaskedArea,
+    (state: RootState) => state.maskedAreaReducer.editingMaskedArea,
   );
   const filteredUnsavedMaksedArea = unsavedMaskedAreas.filter(
-    (maskedArea) => maskedArea.floorplanId === activeFloorplan?.id,
+    (maskedArea: MaskedAreaType) => maskedArea.floorplanId === activeFloorplan?.id,
   );
   const filteredMaskedArea = maskedAreasData.filter(
-    (maskedArea) => maskedArea.floorplanId === activeFloorplan?.id,
+    (maskedArea: MaskedAreaType) => maskedArea.floorplanId === activeFloorplan?.id,
   );
 
   const filteredOriginalAreas = originalAreas.filter(
-    (area) => area.floorplanId === activeFloorplan?.id,
+    (area: MaskedAreaType) => area.floorplanId === activeFloorplan?.id,
   );
-  const drawingArea = useSelector((state: AppState) => state.maskedAreaReducer.drawingMaskedArea);
+  const drawingArea = useSelector((state: RootState) => state.maskedAreaReducer.drawingMaskedArea);
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
-  const deletedArea = useSelector((state: AppState) => state.maskedAreaReducer.deletedMaskedArea);
-  const addedArea = useSelector((state: AppState) => state.maskedAreaReducer.addedMaskedArea);
+  const deletedArea = useSelector((state: RootState) => state.maskedAreaReducer.deletedMaskedArea);
+  const addedArea = useSelector((state: RootState) => state.maskedAreaReducer.addedMaskedArea);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState('');
   const [pendingAreaId, setPendingAreaId] = useState<string | null>(null);
@@ -200,10 +200,12 @@ const AreaList = () => {
   const handleSaveEdits = async () => {
     setIsSaving(true);
     // const unsavedArea = new Map(filteredMaskedArea.map((area) => [area.id, area]));
-    const originArea = new Map(filteredOriginalAreas.map((area) => [area.id, area]));
+    const originArea = new Map(
+      filteredOriginalAreas.map((area: MaskedAreaType) => [area.id, area]),
+    );
     // console.log('Origin Areas:', originArea);
     // console.log('Filtered Masked Area:', filteredMaskedArea);
-    const areasToEdit = filteredMaskedArea.filter((unsavedArea) => {
+    const areasToEdit = filteredMaskedArea.filter((unsavedArea: MaskedAreaType) => {
       const originalArea = originArea.get(unsavedArea.id);
       // console.log('Original Area:', originalArea);
       // console.log('Unsaved Area:', unsavedArea);
@@ -271,7 +273,17 @@ const AreaList = () => {
   };
 
   return (
-    <>
+    <Box
+      sx={{
+        height: '80vh',
+        display: 'grid',
+        minHeight: 0,
+        gridTemplateRows: 'auto 1fr auto',
+        overflow: 'hidden',
+        bgColor: 'background.default',
+        borderColor: 'divider',
+      }}
+    >
       <Box p={3} px={2} display="flex" justifyContent="flex-start" alignItems="center">
         <Typography variant="h5" mb={2} fontWeight={700} textAlign="left">
           {activeFloorplan?.name}
@@ -310,20 +322,18 @@ const AreaList = () => {
           )}
         </Scrollbar>
       </Box>
-      {!editingMaskedArea && (
-        <Box
-          p={2}
-          sx={{
-            position: 'fixed',
-            bottom: '0',
-            left: '10',
-            width: '260px',
-            height: '80px',
-            backgroundColor: 'background.paper',
-            borderTop: '1px solid',
-            borderColor: 'divider',
-          }}
-        >
+
+      <Box
+        p={2}
+        bottom={0}
+        sx={{
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          bgcolor: '#fafafa',
+          m: 0,
+        }}
+      >
+        {!editingMaskedArea && (
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <Button variant="outlined" onClick={handleOpenCancelEditingDialog}>
               Cancel
@@ -332,8 +342,9 @@ const AreaList = () => {
               {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </Box>
-        </Box>
-      )}
+        )}
+      </Box>
+
       {/*Confirmation Dialog */}
       <Dialog open={confirmDialogOpen} onClose={handleCancelProceed} maxWidth="xs" fullWidth>
         <DialogTitle>Confirm Action</DialogTitle>
@@ -399,7 +410,7 @@ const AreaList = () => {
           </Backdrop>,
           document.body,
         )}
-    </>
+    </Box>
   );
 };
 

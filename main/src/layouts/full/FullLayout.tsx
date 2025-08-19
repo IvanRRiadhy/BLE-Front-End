@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { styled, Container, Box, useTheme } from '@mui/material';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { Outlet } from 'react-router';
-import { AppState } from 'src/store/Store';
+import { RootState } from 'src/store/Store';
 import Sidebar from './vertical/sidebar/Sidebar';
 import Navigation from '../full/horizontal/navbar/Navigation';
 import HorizontalHeader from '../full/horizontal/header/Header';
@@ -33,8 +33,8 @@ const PageWrapper = styled('div')(() => ({
 
 const FullLayout: FC = () => {
   const dispatch = useDispatch();
-  const customizer = useSelector((state: AppState) => state.customizer);
-  const evacState = useSelector((state: AppState) => state.customizer.evacState);
+  const customizer = useSelector((state: RootState) => state.customizer);
+  const evacState = useSelector((state: RootState) => state.customizer.evacState);
   const theme = useTheme();
 
   const [sessionExpired, setSessionExpired] = useState(false);

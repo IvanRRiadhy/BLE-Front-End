@@ -241,17 +241,23 @@ const DeviceDetailList = () => {
     setFormData((prev) => ({ ...prev, [id || name]: value }));
   };
   return (
-    <Box display={'flex'} flexDirection="column" height="84vh">
-      <Box display="flex" flexDirection="column" height="100vh">
+    <Box
+      sx={{
+        height: '80vh',
+        display: 'grid',
+        minHeight: 0,
+        gridTemplateRows: 'auto 1fr auto',
+        overflow: 'hidden',
+        bgColor: 'background.paper',
+        borderColor: 'divider',
+      }}
+    >
         <Box p={3} sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
           <Typography variant="h5" fontWeight={700} mb={2}>
             Edit Device Details
           </Typography>
         </Box>
-        <Box flex="1" overflow="hidden">
-          <Scrollbar
-            sx={{ height: { lg: 'calc(100vh - 300px)' }, width: '100%', maxHeight: 'fit-content' }}
-          >
+    <Box sx={{ minHeight: 0, overflow: 'auto' }}>
             <Box pl={3} pr={1}>
               <Grid container spacing={1}>
                 <Grid size={12}>
@@ -439,22 +445,17 @@ const DeviceDetailList = () => {
                 </Grid>
               </Grid>
             </Box>
-          </Scrollbar>
         </Box>
-      </Box>
-      <Box
-        p={2}
-        sx={{
-          position: 'fixed',
-          bottom: '0',
-          left: '10',
-          width: '260px',
-          height: '80px',
-          backgroundColor: 'background.paper',
-          borderTop: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
+    <Box
+      p={2}
+      bottom={0}
+      sx={{
+        borderTop: '1px solid',
+        borderColor: 'divider',
+        bgcolor: '#fafafa',
+               m: 0,
+      }}
+    >
         <Box display="flex" justifyContent="space-between">
           <Button variant="outlined" onClick={handleCancel}>
             Cancel

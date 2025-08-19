@@ -33,18 +33,13 @@ const FloorplanDeviceEdit = () => {
             isMobileSidebarOpen={isMobileSidebarOpen}
             onSidebarClose={() => setMobileSidebarOpen(false)}
           />
-        </Box>
-
-        <Box flexGrow={1}>
-          <EditAreaFloorView zoomable />
-        </Box>
-        {editingArea && (
+                  {editingArea && (
           <Box
             position="absolute"
             top={140}
             left={285}
-            minHeight={'70vh'}
-            maxHeight={710}
+            minHeight='80vh'
+            maxHeight={"100%"}
             zIndex={1000}
             sx={{
               boxShadow: '-2px 0px 8px rgba(0,0,0,0.15)', // Add shadow for visual separation
@@ -56,6 +51,12 @@ const FloorplanDeviceEdit = () => {
             />
           </Box>
         )}
+        </Box>
+
+        <Box flexGrow={1}>
+          <EditAreaFloorView zoomable />
+        </Box>
+
       </AppCard>
     </PageContainer>
   );
