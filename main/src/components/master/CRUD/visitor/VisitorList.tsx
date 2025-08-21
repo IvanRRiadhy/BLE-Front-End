@@ -22,7 +22,12 @@ import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { useTranslation } from 'react-i18next';
-import { deleteVisitor, fetchVisitorDT, masterVisitorType, VisitorType } from 'src/store/apps/crud/visitor';
+import {
+  deleteVisitor,
+  fetchVisitorDT,
+  masterVisitorType,
+  VisitorType,
+} from 'src/store/apps/crud/visitor';
 import AddEditVisitor from './AddEditVisitor';
 
 const VisitorList = () => {
@@ -36,7 +41,7 @@ const VisitorList = () => {
     Length: rowsPerPage,
     SortColumn: '',
     SortDir: 'asc',
-    searchValue: '',
+    SearchValue: '',
   };
   // Handle page change
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -51,13 +56,17 @@ const VisitorList = () => {
   };
   const dispatch: AppDispatch = useDispatch();
   const visitorData = useSelector((state: RootState) => state.visitorReducer.visitors);
-  const visitorTotalCount = useSelector((state: RootState) => state.visitorReducer.visitorTotalCount);
-  const visitorFilteredCount = useSelector((state: RootState) => state.visitorReducer.visitorFilteredCount);
+  const visitorTotalCount = useSelector(
+    (state: RootState) => state.visitorReducer.visitorTotalCount,
+  );
+  const visitorFilteredCount = useSelector(
+    (state: RootState) => state.visitorReducer.visitorFilteredCount,
+  );
 
   useEffect(() => {
     const newFilter = { ...filter, Start: page * rowsPerPage, Length: rowsPerPage };
     const visitorDT = dispatch(fetchVisitorDT(newFilter));
-    console.log("BLE Reader DT: ", visitorDT);
+    console.log('BLE Reader DT: ', visitorDT);
     console.log('Visitor Count: ', visitorTotalCount, visitorFilteredCount);
   }, [page, rowsPerPage, dispatch]);
 
@@ -161,44 +170,43 @@ const VisitorList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {visitorData
-                    .map((visitor: VisitorType) => (
-                      <TableRow key={visitor.id}>
-                        <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
-                        ></TableCell>
-                        <TableCell>{visitor.personId}</TableCell>
-                        <TableCell>{visitor.identityId}</TableCell>
-                        <TableCell>{visitor.cardNumber}</TableCell>
-                        <TableCell>{visitor.bleCardNumber}</TableCell>
-                        <TableCell>{visitor.name}</TableCell>
-                        <TableCell>{visitor.phone}</TableCell>
-                        <TableCell>{visitor.email}</TableCell>
-                        <TableCell>{visitor.gender}</TableCell>
-                        <TableCell>{visitor.address}</TableCell>
-                        <TableCell>{visitor.faceImage}</TableCell>
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            display: 'flex',
-                            gap: 1,
-                            alignItems: 'center',
-                          }}
+                  {visitorData.map((visitor: VisitorType) => (
+                    <TableRow key={visitor.id}>
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                      ></TableCell>
+                      <TableCell>{visitor.personId}</TableCell>
+                      <TableCell>{visitor.identityId}</TableCell>
+                      <TableCell>{visitor.cardNumber}</TableCell>
+                      <TableCell>{visitor.bleCardNumber}</TableCell>
+                      <TableCell>{visitor.name}</TableCell>
+                      <TableCell>{visitor.phone}</TableCell>
+                      <TableCell>{visitor.email}</TableCell>
+                      <TableCell>{visitor.gender}</TableCell>
+                      <TableCell>{visitor.address}</TableCell>
+                      <TableCell>{visitor.faceImage}</TableCell>
+                      <TableCell
+                        sx={{
+                          position: 'sticky',
+                          right: 0,
+                          background: 'white',
+                          zIndex: 2,
+                          display: 'flex',
+                          gap: 1,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <AddEditVisitor type="edit" visitor={visitor} />
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleOpenDeleteDialog(visitor)}
                         >
-                          <AddEditVisitor type="edit" visitor={visitor} />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(visitor)}
-                          >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          <IconTrash size={20} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>

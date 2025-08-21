@@ -399,7 +399,7 @@ const InviteForm = () => {
   const selectedAncestorIds = getSelectedAncestorIds(selectedMaskedArea);
 
   useEffect(() => {
-    dispatch(fetchVisitorDT({ ...visitorFilter, length: 0, searchValue: searchName }));
+    dispatch(fetchVisitorDT({ ...visitorFilter, length: 0, SearchValue: searchName }));
   }, [searchName]);
 
   const handleAddRow = (event: React.MouseEvent<HTMLElement>) => {

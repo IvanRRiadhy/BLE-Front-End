@@ -40,7 +40,7 @@ const MemberList = () => {
   //   Length: rowsPerPage,
   //   SortColumn: '',
   //   SortDir: 'asc',
-  //   searchValue: '',
+  //   SearchValue: '',
   // };
   // Handle page change
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -106,7 +106,6 @@ const MemberList = () => {
     );
     return organization ? organization.name : 'Unknown Organization';
   };
-
 
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);

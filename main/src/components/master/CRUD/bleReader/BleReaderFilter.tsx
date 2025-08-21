@@ -26,7 +26,7 @@ type DummyFilter = {
   Length: number;
   SortColumn: string;
   SortDir: 'asc' | 'desc';
-  searchValue: string;
+  SearchValue: string;
   filters: {
     BrandId: string[];
     EngineReaderId: string[];
@@ -51,7 +51,7 @@ const BleReaderFilter = () => {
     Length: 10,
     SortColumn: 'name',
     SortDir: 'asc',
-    searchValue: '',
+    SearchValue: '',
     filters: {
       BrandId: [],
       EngineReaderId: [],
@@ -148,16 +148,16 @@ const BleReaderFilter = () => {
                 if (value.includes('all')) {
                   setAppliedFilter((prev) => ({
                     ...prev,
-                      BrandId:
-                        appliedFilter.BrandId?.length === brandList.length
-                          ? []
-                          : brandList.map((brand: any) => brand.id),
+                    BrandId:
+                      appliedFilter.BrandId?.length === brandList.length
+                        ? []
+                        : brandList.map((brand: any) => brand.id),
                   }));
                   return;
                 }
                 setAppliedFilter((prev) => ({
                   ...prev,
-                    BrandId: value,
+                  BrandId: value,
                 }));
               }}
               fullWidth
@@ -166,10 +166,12 @@ const BleReaderFilter = () => {
               renderValue={(selected: string[]) => {
                 if (selected.length === 0) return 'Select Brands';
                 if (selected.length === brandList.length) return 'All Brands';
-                return selected.map((id: string) => {
-                  const brand = brandList.find((b: any) => b.id === id);
-                  return brand ? brand.name : '';
-                }).join(', ');
+                return selected
+                  .map((id: string) => {
+                    const brand = brandList.find((b: any) => b.id === id);
+                    return brand ? brand.name : '';
+                  })
+                  .join(', ');
               }}
               MenuProps={{
                 PaperProps: {

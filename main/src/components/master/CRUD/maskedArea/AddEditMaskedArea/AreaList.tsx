@@ -45,7 +45,7 @@ const filter = {
   length: 99,
   sortColumn: '',
   sortDir: 'asc',
-  searchValue: '',
+  SearchValue: '',
 };
 
 const AreaList = () => {

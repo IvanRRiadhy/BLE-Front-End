@@ -38,7 +38,7 @@ export const defaultAccessCCTVFilter: CCTVFilter = {
   Length: 5,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
 };
 //#endregion
 
@@ -66,7 +66,7 @@ export const defaultAccessControlFilter: AccessControlFilter = {
   Length: 5,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
 };
 //#endregion
 
@@ -77,7 +77,7 @@ export const defaultAlarmRecordFilter: AlarmRecordFilter = {
   Length: 5,
   SortColumn: 'Timestamp',
   SortDir: 'desc',
-  searchValue: '',  
+  SearchValue: '',  
   filters: {
     FloorplanMaskedAreaId: [],
     ReaderId: [],
@@ -103,7 +103,7 @@ export const defaultBlaclistFilter: BlacklistFilter = {
   Length: 5,
   SortColumn: 'Visitor.Name',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
   filters: {
     FloorplanMaskedAreaId: [],
     VisitorId: [],
@@ -131,7 +131,7 @@ export const defaultBleReaderFilter: BleReaderFilter = {
   Length: 5,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
   filters: {
     BrandId: [],
     EngineReaderId: [],
@@ -152,7 +152,7 @@ export const defaultBrandFilter: BrandFilter = {
   Length: 5,
   SortColumn: 'Name',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
 };
 //#endregion
 
@@ -174,7 +174,7 @@ export const defaultBuildingFilter: BuildingFilter = {
   Length: 5,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
 };
 //#endregion
 
@@ -197,7 +197,7 @@ export const defaultDepartmentFilter: DepartmentFilter = {
   Length: 5,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
 };
 //#endregion
 
@@ -219,7 +219,7 @@ export const defaultDistrictFilter: DistrictFilter = {
   Length: 5,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
 };
 //#endregion
 
@@ -246,7 +246,7 @@ export const defaultFloorFilter: FloorFilter = {
   Length: 5,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
   filters: {
     BuildingId: [],
   },
@@ -271,7 +271,7 @@ export const defaultFloorplanFilter: FloorplanFilter = {
   Length: 5,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
   filters: {
     FloorId: [],
   },
@@ -285,7 +285,7 @@ export const defaultFloorplanDeviceFilter: FloorplanDeviceFilter = {
   Length: 5,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
   filters: {
     FloorplanId: [],
     FloorplanMaskedAreaId: [],
@@ -317,7 +317,7 @@ export const defaultIntegrationFilter: IntegrationFilter = {
   Length: 5,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
 };
 //#endregion
 
@@ -328,7 +328,7 @@ export const defaultMaskedAreaFilter: MaskedAreaFilter = {
   Length: 5,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
   filters: {
     FloorplanId: [],
     FloorId: [],
@@ -373,7 +373,7 @@ export const defaultMemberFilter: MemberFilter = {
   Length: 10,
   SortColumn: 'Name',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
   filters: {
     OrganizationId: [],
     DepartmentId: [],
@@ -401,7 +401,7 @@ export const defaultOrganizationFilter: OrganizationFilter = {
   Length: 5,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
 };
 //#endregion
 
@@ -412,7 +412,7 @@ export const defaultTrackingTransFilter: TrackingTransFilter = {
   Length: 5,
   SortColumn: 'TransTime',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
   filters: {
     FloorplanMaskedAreaId: [],
     ReaderId: [],
@@ -427,7 +427,7 @@ export const defaultTrxVisitorFilter: TrxVisitorFilter = {
   Length: 5,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
   dateFilters: {
     VisitorPeriodStart:{
       DateFrom: null,
@@ -472,7 +472,7 @@ export const defaultVisitorFilter: VisitorFilter = {
   Length: 10,
   SortColumn: 'name',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
 };
 //#endregion
 
@@ -498,7 +498,7 @@ export const defaultCardFilter: CardFilter = {
   Length: 5,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
   filters: {
   },
 };
@@ -511,7 +511,7 @@ export const defaultCardRecordFilter: CardRecordFilter = {
   Length: 5,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
   filters: {
   },
 }

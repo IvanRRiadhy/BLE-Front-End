@@ -17,7 +17,7 @@ export type GetFilter = {
     Length: number,
     SortColumn: string,
     SortDir: 'asc' | 'desc',
-    searchValue: string,
+    SearchValue: string,
     filters : {
         FloorplanId: string[],
         FloorId: string[],
@@ -112,7 +112,7 @@ export const MaskedAreaSlice = createSlice({
     reducers: {
         GetMaskedArea: (state, action: PayloadAction<MaskedAreaType[]>) => {
             state.maskedAreas = action.payload;
-
+             console.log("Masked Areas: ", JSON.stringify(state.maskedAreas, null, 2));
         },
         GetAllMaskedArea: (state, action: PayloadAction<MaskedAreaType[]>) => {
             state.maskedAreaAll = action.payload;
@@ -338,16 +338,16 @@ export const fetchMaskedAreaDT = createAsyncThunk(
                 (arr: any) => Array.isArray(arr) && arr.includes("Empty")
             )
         ) {
-            // console.log("Filter contains 'Empty', skipping request");
+            console.log("Filter contains 'Empty', skipping request");
             // Option 1: just return null (success, no data)
             // return null;
             // Option 2: reject, if you want to treat as error
             return rejectWithValue("Filter contains 'Empty', skipping request");
         }
-            // console.log("Fetch Masked Area DT: ", filter);
+            console.log("Fetch Masked Area DT: ", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
-            dispatch(GetMaskedArea([response.data.collection.data]));
-            // console.log("Fetch masked areas", response.data.collection);
+            dispatch(GetMaskedArea(response.data.collection.data || []));
+            console.log("Fetch masked areas", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching masked area:", error);

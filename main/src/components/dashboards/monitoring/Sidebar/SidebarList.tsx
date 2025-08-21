@@ -41,8 +41,8 @@ const filter = {
   length: 999,
   sortColumn: '',
   sortDir: 'asc',
-  searchValue: '',
-}
+  SearchValue: '',
+};
 
 const SidebarList = ({ filterType }: SidebarListProps) => {
   const { t } = useTranslation();
@@ -58,9 +58,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
   const alarmRecord: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
   );
-  const memberList: memberType[] = useSelector(
-    (state: RootState) => state.memberReducer.members,
-  );
+  const memberList: memberType[] = useSelector((state: RootState) => state.memberReducer.members);
   const visitorList: VisitorType[] = useSelector(
     (state: RootState) => state.visitorReducer.visitors,
   );
@@ -75,7 +73,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
       return visitor.name;
     }
     return 'Unknown';
-  }
+  };
 
   useEffect(() => {
     dispatch(fetchTrackingTrans());
@@ -121,15 +119,10 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
     setSelectedItem(item);
     setOpenModal(true);
   };
-  const handleOpenDetails = (
-    cardNumber: string,
-    area: string,
-    floorplan: string,
-    time: string
-  ) => {
+  const handleOpenDetails = (cardNumber: string, area: string, floorplan: string, time: string) => {
     dispatch(SetSelectedBeacon({ active: true, id: cardNumber, area, floorplan, time }));
     setOpenModal(false);
-  }
+  };
 
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
@@ -196,20 +189,26 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
             </DialogContent>
 
             <DialogActions sx={{ padding: '8px 16px' }}>
-              <Button 
-              onClick= {() => 
-                handleOpenDetails(
-                  "BC572913EA8B",
-                  selectedItem.area,
-                  selectedItem.floor,
-                  selectedItem.time
-                )
-              }
-              size='small' 
-              variant='contained'>
+              <Button
+                onClick={() =>
+                  handleOpenDetails(
+                    'BC572913EA8B',
+                    selectedItem.area,
+                    selectedItem.floor,
+                    selectedItem.time,
+                  )
+                }
+                size="small"
+                variant="contained"
+              >
                 Person Details
               </Button>
-              <Button color='error' onClick={() => setOpenModal(false)} size="small" variant="outlined">
+              <Button
+                color="error"
+                onClick={() => setOpenModal(false)}
+                size="small"
+                variant="outlined"
+              >
                 Close
               </Button>
             </DialogActions>

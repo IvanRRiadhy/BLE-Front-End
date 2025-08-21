@@ -13,7 +13,11 @@ import { fetchMaskedAreaDT, MaskedAreaType } from 'src/store/apps/crud/maskedAre
 import { fetchBleReaderDT } from 'src/store/apps/crud/bleReader';
 import { AlarmType, fetchAlarmDT, fetchAlarm } from 'src/store/apps/crud/alarmRecordTracking';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
-import { fetchTrackingTrans, fetchTrackingTransDT, trackingTransType } from 'src/store/apps/crud/trackingTrans';
+import {
+  fetchTrackingTrans,
+  fetchTrackingTransDT,
+  trackingTransType,
+} from 'src/store/apps/crud/trackingTrans';
 import { setMainMenu } from 'src/store/customizer/CustomizerSlice';
 import { fetchFloorplanDeviceDT, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import BlacklistList from 'src/components/master/CRUD/blacklist/BlacklistList';
@@ -29,7 +33,7 @@ const filter = {
   Length: 0,
   SortColumn: '',
   SortDir: 'desc',
-  searchValue: '',
+  SearchValue: '',
 };
 
 const Modern = () => {
@@ -64,13 +68,13 @@ const Modern = () => {
   //   return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   // }, []);
   useEffect(() => {
-  // This runs on every route change
-  return () => {
-    // This cleanup runs when leaving the page
-    dispatch(setMainMenu(false));
-    console.log('Navigated away from dashboard');
-  };
-}, [location.pathname]);
+    // This runs on every route change
+    return () => {
+      // This cleanup runs when leaving the page
+      dispatch(setMainMenu(false));
+      console.log('Navigated away from dashboard');
+    };
+  }, [location.pathname]);
 
   const handleClosePopup = () => {
     setShowWelcomePopup(false); // Close the popup
@@ -94,28 +98,26 @@ const Modern = () => {
       //     ReaderId: [],
       //   },
       // }),
-      fetchTrackingTrans()
+      fetchTrackingTrans(),
     );
-    dispatch(
-      fetchAlarm()
-    );
+    dispatch(fetchAlarm());
     dispatch(
       fetchCardDT({
         ...filter,
         Length: 0,
         filters: {
           IsUsed: true,
-        }
-      })
-    )
-        dispatch(
+        },
+      }),
+    );
+    dispatch(
       fetchCardDT({
         ...filter,
         filters: {
           IsUsed: false,
-        }
-      })
-    )
+        },
+      }),
+    );
     dispatch(
       fetchBlacklistDT({
         ...filter,
@@ -195,7 +197,7 @@ const Modern = () => {
   );
   const alarmAllData: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackingAll,
-  )
+  );
   // const maskedAreaData: MaskedAreaType[] = useSelector(
   //   (state: RootState) => state.maskedAreaReducer.maskedAreas,
   // );
@@ -210,13 +212,13 @@ const Modern = () => {
   );
   const nonActiveTag: number = useSelector(
     (state: RootState) => state.CardReducer.cardNonActiveCount ?? 0,
-  )
+  );
   const activeTagData: CardType[] = useSelector(
     (state: RootState) => state.CardReducer.cardActiveData,
-  )
+  );
   const nonActiveTagData: CardType[] = useSelector(
     (state: RootState) => state.CardReducer.cardNonActiveData,
-  )
+  );
   // console.log(
   //   'MaskedArea Data: ',
   //   maskedAreaData.flat().map((item) => item.name),

@@ -15,7 +15,7 @@ export type GetFilter = {
     Length: number,
     SortColumn: string,
     SortDir: 'asc' | 'desc',
-    searchValue: string,
+    SearchValue: string,
     filters: {
         BrandId: string[],
         EngineReaderId: string[],

@@ -25,7 +25,11 @@ import {
 import { fetchFloorplan, fetchFloorplanDT, FloorplanType } from 'src/store/apps/crud/floorplan';
 import { fetchBuildings, BuildingType, fetchBuildingDT } from 'src/store/apps/crud/building';
 import { fetchFloorDT, fetchFloors, floorType } from 'src/store/apps/crud/floor';
-import { fetchMaskedAreaDT, fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import {
+  fetchMaskedAreaDT,
+  fetchMaskedAreas,
+  MaskedAreaType,
+} from 'src/store/apps/crud/maskedArea';
 import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { CCTVType, fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
 
@@ -42,7 +46,7 @@ const filter = {
   length: 99,
   sortColumn: '',
   sortDir: 'asc',
-  searchValue: '',
+  SearchValue: '',
 };
 
 const ConfigSidebar: React.FC<configSidebarProps> = ({
@@ -215,26 +219,32 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
   }, [previewSelectedScreen]);
 
   useEffect(() => {
-    dispatch(fetchFloorplanDT({
-      ...filter,
-      filter:{
-        FloorId: selectedFloor
-      }
-    }));
+    dispatch(
+      fetchFloorplanDT({
+        ...filter,
+        filter: {
+          FloorId: selectedFloor,
+        },
+      }),
+    );
     dispatch(fetchBuildingDT(filter));
-    dispatch(fetchFloorDT({
-      ...filter,
-      filter:{
-        BuildingId: selectedBuilding
-      }
-    }));
-    dispatch(fetchMaskedAreaDT({
-      ...filter,
-      filter:{
-        FloorId: selectedFloor,
-        FloorplanId: selectedFloorplan
-      }
-    }));
+    dispatch(
+      fetchFloorDT({
+        ...filter,
+        filter: {
+          BuildingId: selectedBuilding,
+        },
+      }),
+    );
+    dispatch(
+      fetchMaskedAreaDT({
+        ...filter,
+        filter: {
+          FloorId: selectedFloor,
+          FloorplanId: selectedFloorplan,
+        },
+      }),
+    );
     dispatch(fetchAccessCCTV());
   }, [dispatch]);
 

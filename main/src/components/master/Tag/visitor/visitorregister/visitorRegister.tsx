@@ -287,7 +287,7 @@ const VisitorRegister = () => {
   );
 
   useEffect(() => {
-    dispatch(fetchVisitorDT({ ...visitorFilter, length: 999, searchValue: searchVisitor }));
+    dispatch(fetchVisitorDT({ ...visitorFilter, length: 999, SearchValue: searchVisitor }));
   }, [searchVisitor]);
   const isRegisteredVisitor = (visitor: VisitorType) => {
     return !!visitor.id; // registered visitors have a defined ID
