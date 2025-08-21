@@ -9,7 +9,7 @@ import {
   Button,
 } from '@mui/material';
 import { useSelector } from 'react-redux';
-import { AppState, useDispatch } from 'src/store/Store';
+import { RootState, useDispatch } from 'src/store/Store';
 import { useTheme } from '@mui/material';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
@@ -58,22 +58,22 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
   const theme = useTheme();
   const dispatch = useDispatch();
   const floorplanLists: FloorplanType[] = useSelector(
-    (state: AppState) => state.floorplanReducer.floorplans,
+    (state: RootState) => state.floorplanReducer.floorplans,
   );
   const buildingLists: BuildingType[] = useSelector(
-    (state: AppState) => state.buildingReducer.buildings,
+    (state: RootState) => state.buildingReducer.buildings,
   );
-  const floorLists: floorType[] = useSelector((state: AppState) => state.floorReducer.floors);
+  const floorLists: floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
   const areaLists: MaskedAreaType[] = useSelector(
-    (state: AppState) => state.maskedAreaReducer.maskedAreas,
+    (state: RootState) => state.maskedAreaReducer.maskedAreas,
   );
-  const cctvLists: CCTVType[] = useSelector((state: AppState) => state.CCTVReducer.cctvs);
+  const cctvLists: CCTVType[] = useSelector((state: RootState) => state.CCTVReducer.cctvs);
   const floorplanDeviceLists: FloorplanDeviceType[] = useSelector(
-    (state: AppState) => state.floorplanDeviceReducer.floorplanDevices,
+    (state: RootState) => state.floorplanDeviceReducer.floorplanDevices,
   );
-  const customizer = useSelector((state: AppState) => state.customizer);
-  const floorplanId = useSelector((state: AppState) => state.layoutReducer.floorplanId);
-  const screenDisplay = useSelector((state: AppState) => state.layoutReducer.screenDisplay);
+  const customizer = useSelector((state: RootState) => state.customizer);
+  const floorplanId = useSelector((state: RootState) => state.layoutReducer.floorplanId);
+  const screenDisplay = useSelector((state: RootState) => state.layoutReducer.screenDisplay);
   // const [buildingList, setBuildingList] = useState([
   //   { id: '1', name: 'Building 1' },
   //   { id: '2', name: 'Building 2' },
