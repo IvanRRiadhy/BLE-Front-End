@@ -16,7 +16,7 @@ export type GetFilter = {
     Length: number,
     SortColumn: string,
     SortDir: 'asc' | 'desc',
-    searchValue: string,
+    SearchValue: string,
 }
 
 export type GetVisitorCardResponse = {
@@ -74,7 +74,7 @@ const initialState: StateType = {
         Length: 10,
         SortColumn: 'name', 
         SortDir: 'asc',
-        searchValue: '',
+        SearchValue: '',
     },
     visitorCardTotalCount: 0,
     visitorCardFilteredCount: 0,
