@@ -12,6 +12,8 @@ import {
   SelectChangeEvent,
   Tooltip,
   CircularProgress,
+  Autocomplete,
+  TextField,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
@@ -168,21 +170,40 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="brand-id">Brand</CustomFormLabel>
-                <CustomSelect
-                  id="brandId"
-                  name="brandId"
-                  value={formData.brandId || ''}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  error={!!formErrors.brandId}
-                >
-                  {brands.map((brand) => (
-                    <MenuItem key={brand.id} value={brand.id}>
-                      {brand.name}
-                    </MenuItem>
-                  ))}
-                </CustomSelect>
+                <Autocomplete
+                  options={brands.map((b) => ({ id: b.id, label: b.name }))}
+                  value={
+                    brands
+                      .map((b) => ({ id: b.id, label: b.name }))
+                      .find((o) => o.id === formData.brandId) ?? null
+                  }
+                  onChange={(_, newVal) => {
+                    const id = newVal?.id ?? '';
+                    setFormData((prev) => ({ ...prev, brandId: id }));
+                    setFormErrors((prev) => {
+                      if (!prev.brandId) return prev;
+                      const next = { ...prev };
+                      delete next.brandId;
+                      return next;
+                    });
+                  }}
+                  isOptionEqualToValue={(opt, val) => opt.id === val.id}
+                  getOptionLabel={(opt) => (typeof opt === 'string' ? opt : opt.label)}
+                  clearOnEscape
+                  disableClearable={false}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      id="brandId"
+                      variant="outlined"
+                      fullWidth
+                      required
+                      error={!!formErrors.brandId}
+                      helperText={formErrors.brandId || ''}
+                    />
+                  )}
+                />
+
                 <CustomFormLabel htmlFor="ble-name">Name</CustomFormLabel>
                 <CustomTextField
                   id="name"

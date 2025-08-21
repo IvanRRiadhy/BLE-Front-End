@@ -161,14 +161,6 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
                   error={!!formErrors.name}
                   helperText={formErrors.name}
                 />
-                {/* <CustomFormLabel htmlFor="integration-id">Integration ID</CustomFormLabel>
-              <CustomTextField
-                id="integrationId"
-                value={formData.integrationId}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              /> */}
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="cctv-RTSP">RTSP</CustomFormLabel>
@@ -182,20 +174,6 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
                   error={!!formErrors.rtsp}
                   helperText={formErrors.rtsp}
                 />
-                {/* <CustomFormLabel htmlFor="app-id">Application</CustomFormLabel>
-              <CustomSelect
-                name="applicationId"
-                value={formData.applicationId || ''}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              >
-                {appData.map((app) => (
-                  <MenuItem key={app.id} value={app.id}>
-                    {app.applicationName}
-                  </MenuItem>
-                ))}
-              </CustomSelect> */}
               </Grid>
             </Grid>
           </DialogContent>

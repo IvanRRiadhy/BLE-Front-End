@@ -7,28 +7,27 @@ import {
   Divider,
   Grid2 as Grid,
   IconButton,
-  MenuItem,
   SelectChangeEvent,
   Tooltip,
   Typography,
   CircularProgress,
+  Autocomplete,
+  TextField,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
-import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
   blacklistType,
   addBlacklist,
   editBlacklist,
-  fetchBlacklist,
   fetchBlacklistDT,
 } from 'src/store/apps/crud/blacklist';
-import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
+import { fetchMaskedAreaDT} from 'src/store/apps/crud/maskedArea';
 import { fetchVisitor } from 'src/store/apps/crud/visitor';
-import { defaultBlaclistForm } from 'src/store/apps/defaultForm';
+import { defaultBlaclistForm, defaultMaskedAreaFilter } from 'src/store/apps/defaultForm';
 
 interface FormType {
   type?: string;
@@ -46,14 +45,20 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
 
   const blacklistFilter = useSelector((state: RootState) => state.blacklistReducer.blacklistFilter);
+
   const visitorData = useSelector((state: RootState) => state.visitorReducer.visitors);
-  const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
+  const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreas);
+
+  const visitorOptions = (visitorData ?? []).map((visitor) => ({ id: visitor.id, name: visitor.name }));
+  const areaOptions = (maskedAreaData ?? []).map((area) => ({ id: area.id, name: area.name }));
+
   const dispatch: AppDispatch = useDispatch();
 
   useEffect(() => {
     dispatch(fetchVisitor());
-    dispatch(fetchMaskedAreas());
+    dispatch(fetchMaskedAreaDT({ ...defaultMaskedAreaFilter , filters: { RestrictedStatus: 1 } }));
   }, [dispatch]);
+  console.log(maskedAreaData);
 
   const handleClickOpen = () => {
     setLoading(true);
@@ -131,14 +136,26 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
       setLoading(false);
     }, 1000);
   };
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
-  ) => {
-    const { value, name, id } = e.target as
-      | HTMLInputElement
-      | { value: string; name: string; id?: string };
-    setFormData((prev) => ({ ...prev, [id || name]: value }));
-  };
+const handleInputChange = (
+  e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
+) => {
+  const { value, name, id } = e.target as
+    | HTMLInputElement
+    | { value: string; name?: string; id?: string };
+
+  const key = (id || name) as string;
+
+  // update value
+  setFormData((prev) => ({ ...prev, [key]: value }));
+
+  // clear error for the edited field (if any)
+  setFormErrors((prev) => {
+    if (!prev[key]) return prev;        // nothing to clear
+    const next = { ...prev };
+    delete next[key];
+    return next;
+  });
+};
 
   return (
     <>
@@ -175,46 +192,70 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
               Blacklist Details
             </Typography>
             <Divider />
-            <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-                <CustomFormLabel htmlFor="visitor-id">Visitor</CustomFormLabel>
-                <CustomSelect
-                  name="visitorId"
-                  value={formData.visitorId || ''}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  id="visitorId"
-                  error={!!formErrors.visitorId}
-                  helperText={formErrors.visitorId}
-                  required
-                >
-                  {visitorData.map((visitor) => (
-                    <MenuItem key={visitor.id} value={visitor.id}>
-                      {visitor.name}
-                    </MenuItem>
-                  ))}
-                </CustomSelect>
-                <CustomFormLabel htmlFor="floorplanMaskedArea-id">Area</CustomFormLabel>
-                <CustomSelect
-                  id="floorplanMaskedAreaId"
-                  name="floorplanMaskedAreaId"
-                  value={formData.floorplanMaskedAreaId}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  error={!!formErrors.floorplanMaskedAreaId}
-                  helperText={formErrors.floorplanMaskedAreaId}
-                  required
-                >
-                  {maskedAreaData.map((maskedArea) => (
-                    <MenuItem key={maskedArea.id} value={maskedArea.id}>
-                      {maskedArea.name}
-                    </MenuItem>
-                  ))}
-                </CustomSelect>
-              </Grid>
-            </Grid>
+<Grid container spacing={5} mb={3}>
+  <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+    <CustomFormLabel htmlFor="visitorId">Visitor</CustomFormLabel>
+    <Autocomplete
+      options={visitorOptions}
+      // show clear (x) button
+      disableClearable={false}
+      clearOnEscape
+      sx={{ m: 0 }}  // keep margins/padding unchanged
+      value={visitorOptions.find(o => o.id === formData.visitorId) ?? null}
+      onChange={(_, newVal) => {
+        const id = newVal?.id ?? '';
+        setFormData(prev => ({ ...prev, visitorId: id }));
+        // clear error for this field
+        setFormErrors(prev => {
+          if (!prev.visitorId) return prev;
+          const next = { ...prev }; delete next.visitorId; return next;
+        });
+      }}
+      isOptionEqualToValue={(opt, val) => opt.id === val.id}
+      getOptionLabel={(opt) => (typeof opt === 'string' ? opt : opt.name)}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          id="visitorId"
+          variant="outlined"
+          required
+          error={!!formErrors.visitorId}
+          helperText={formErrors.visitorId || ''}
+        />
+      )}
+    />
+
+    <CustomFormLabel htmlFor="floorplanMaskedAreaId">Area</CustomFormLabel>
+    <Autocomplete
+      options={areaOptions}
+      disableClearable={false}
+      clearOnEscape
+      sx={{ m: 0 }}
+      value={areaOptions.find(o => o.id === formData.floorplanMaskedAreaId) ?? null}
+      onChange={(_, newVal) => {
+        const id = newVal?.id ?? '';
+        setFormData(prev => ({ ...prev, floorplanMaskedAreaId: id }));
+        setFormErrors(prev => {
+          if (!prev.floorplanMaskedAreaId) return prev;
+          const next = { ...prev }; delete next.floorplanMaskedAreaId; return next;
+        });
+      }}
+      isOptionEqualToValue={(opt, val) => opt.id === val.id}
+      getOptionLabel={(opt) => (typeof opt === 'string' ? opt : opt.name)}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          id="floorplanMaskedAreaId"
+          variant="outlined"
+          required
+          error={!!formErrors.floorplanMaskedAreaId}
+          helperText={formErrors.floorplanMaskedAreaId || ''}
+        />
+      )}
+    />
+  </Grid>
+</Grid>
+
           </DialogContent>
           <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
             <Button

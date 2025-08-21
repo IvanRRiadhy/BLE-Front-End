@@ -16,9 +16,10 @@ import {
   MenuItem,
   Tooltip,
   CircularProgress,
+  Autocomplete,
 } from '@mui/material';
 import { IconPencil, IconPlus, IconTrash, IconLock, IconLockOpen } from '@tabler/icons-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector, AppDispatch, RootState } from 'src/store/Store';
 import {
   addBleReader,
@@ -46,6 +47,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
   const [lockedRows, setLockedRows] = useState<Record<number, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
   const brands = useSelector((state: RootState) => state.brandReducer.brandAll);
+  const brandOptions = useMemo(() => brands, [brands]);
   const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
   const [columnDefaults, setColumnDefaults] = useState<Partial<bleReaderType>>({});
   const [useDefault, setUseDefault] = useState<Record<keyof bleReaderType, boolean>>({
@@ -236,6 +238,8 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
     };
   };
 
+  const brandById = (id?: string) => brands.find((b) => b.id === id) ?? null;
+
   return (
     <>
       {type === 'edit' && (
@@ -265,7 +269,22 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
           </Typography>
         </DialogTitle>
         <DialogContent>
-          <Table size="small">
+          
+          <Table
+            size="small"
+            sx={{
+              // thicker line under the header
+              '& thead th': {
+                borderBottom: '3px solid',
+                borderColor: 'divider',
+              },
+              // thicker lines between body rows
+              '& tbody td': {
+                borderBottom: '2px solid',
+                borderColor: 'divider',
+              },
+            }}
+          >
             <TableHead>
               <TableRow>
                 {/** BRAND HEADER WITH DEFAULT SETTING */}
@@ -292,12 +311,14 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                       }}
                     />
 
-                    <TextField
-                      select
-                      size="small"
-                      value={columnDefaults.brandId || ''}
-                      onChange={(e) => {
-                        const value = e.target.value;
+                    <Autocomplete
+                      size="medium"
+                      options={brands}
+                      getOptionLabel={(b: BrandType) => b.name}
+                      isOptionEqualToValue={(a, b) => a.id === b.id}
+                      value={brandById(columnDefaults.brandId)}
+                      onChange={(_, newVal) => {
+                        const value = newVal?.id ?? '';
                         setColumnDefaults((prev) => ({ ...prev, brandId: value }));
 
                         // Only apply if checkbox is checked and not locked
@@ -311,13 +332,24 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         }
                       }}
                       disabled={!useDefault.brandId}
-                    >
-                      {brands.map((brand) => (
-                        <MenuItem key={brand.id} value={brand.id}>
-                          {brand.name}
-                        </MenuItem>
-                      ))}
-                    </TextField>
+                      clearOnEscape
+                      disableClearable={false} // show (x) to clear
+                      sx={{
+                        minWidth: 240, // wider cell if needed
+                        '& .MuiOutlinedInput-root': { height: 37 }, // 56–64 looks good in tables
+                        '& .MuiAutocomplete-input': { py: 1.25 },
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Brand"
+                          inputProps={{
+                            ...params.inputProps,
+                            title: brandById(columnDefaults.brandId)?.name || '',
+                          }}
+                        />
+                      )}
+                    />
                   </div>
                 </TableCell>
 
@@ -347,6 +379,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         }
                       }}
                       disabled={!useDefault.name}
+                      slotProps={{ input: { title: columnDefaults.name || '' } }}
                     />
                   </div>
                 </TableCell>
@@ -378,6 +411,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         }
                       }}
                       disabled={!useDefault.ip}
+                      slotProps={{ input: { title: columnDefaults.ip || '' } }}
                     />
                   </div>
                 </TableCell>
@@ -410,6 +444,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         }
                       }}
                       disabled={!useDefault.engineReaderId}
+                      slotProps={{ input: { title: columnDefaults.engineReaderId || '' } }}
                     />
                   </div>
                 </TableCell>
@@ -440,6 +475,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         }
                       }}
                       disabled={!useDefault.gmac}
+                      slotProps={{ input: { title: columnDefaults.gmac || '' } }}
                     />
                   </div>
                 </TableCell>
@@ -471,19 +507,6 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         ...getCellStyle(idx, 'brandId'),
                       }}
                     >
-                      <TextField
-                        select
-                        value={row.brandId || ''}
-                        onChange={(e) => handleChange(idx, 'brandId', e.target.value)}
-                        fullWidth
-                        error={!!rowErrors[idx]?.brandId}
-                      >
-                        {brands.map((brand) => (
-                          <MenuItem key={brand.id} value={brand.id}>
-                            {brand.name}
-                          </MenuItem>
-                        ))}
-                      </TextField>
                       <IconButton
                         size="small"
                         onClick={() =>
@@ -502,6 +525,36 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                           <IconLockOpen size={16} />
                         )}
                       </IconButton>
+                      <Autocomplete
+                        size="medium"
+                        options={brandOptions}
+                        getOptionLabel={(b: BrandType) => b.name}
+                        isOptionEqualToValue={(a, b) => a.id === b.id}
+                        value={brandById(row.brandId)}
+                        onChange={(_, v) => handleChange(idx, 'brandId', v?.id ?? '')}
+                        renderOption={(props, option) => (
+                          <li {...props} title={option.name}>
+                            {option.name}
+                          </li>
+                        )}
+                        sx={{
+                          minWidth: 240, // wider cell if needed
+                          '& .MuiOutlinedInput-root': { height: 44 }, // 56–64 looks good in tables
+                          '& .MuiAutocomplete-input': { py: 1.25 },
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            fullWidth
+                            error={!!rowErrors[idx]?.brandId}
+                            helperText={rowErrors[idx]?.brandId}
+                            inputProps={{
+                              ...params.inputProps,
+                              title: brandById(row.brandId)?.name || '',
+                            }}
+                          />
+                        )}
+                      />
                     </div>
                   </TableCell>
 
@@ -513,13 +566,6 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         ...getCellStyle(idx, 'name'),
                       }}
                     >
-                      <TextField
-                        value={row.name}
-                        onChange={(e) => handleChange(idx, 'name', e.target.value)}
-                        fullWidth
-                        error={!!rowErrors[idx]?.name}
-                        helperText={rowErrors[idx]?.name}
-                      />
                       <IconButton
                         size="small"
                         onClick={() =>
@@ -538,19 +584,20 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                           <IconLockOpen size={16} />
                         )}
                       </IconButton>
+                      <TextField
+                        value={row.name}
+                        onChange={(e) => handleChange(idx, 'name', e.target.value)}
+                        fullWidth
+                        error={!!rowErrors[idx]?.name}
+                        helperText={rowErrors[idx]?.name}
+                        slotProps={{ input: { title: row.name || '' } }}
+                      />
                     </div>
                   </TableCell>
                   <TableCell>
                     <div
                       style={{ display: 'flex', alignItems: 'center', ...getCellStyle(idx, 'ip') }}
                     >
-                      <TextField
-                        value={row.ip}
-                        onChange={(e) => handleChange(idx, 'ip', e.target.value)}
-                        fullWidth
-                        error={!!rowErrors[idx]?.ip}
-                        helperText={rowErrors[idx]?.ip}
-                      />
                       <IconButton
                         size="small"
                         onClick={() =>
@@ -565,6 +612,14 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                       >
                         {lockedCells[idx]?.ip ? <IconLock size={16} /> : <IconLockOpen size={16} />}
                       </IconButton>
+                      <TextField
+                        value={row.ip}
+                        onChange={(e) => handleChange(idx, 'ip', e.target.value)}
+                        fullWidth
+                        error={!!rowErrors[idx]?.ip}
+                        helperText={rowErrors[idx]?.ip}
+                        slotProps={{ input: { title: row.ip || '' } }}
+                      />
                     </div>
                   </TableCell>
                   <TableCell>
@@ -575,13 +630,6 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         ...getCellStyle(idx, 'engineReaderId'),
                       }}
                     >
-                      <TextField
-                        value={row.engineReaderId}
-                        onChange={(e) => handleChange(idx, 'engineReaderId', e.target.value)}
-                        fullWidth
-                        error={!!rowErrors[idx]?.engineReaderId}
-                        helperText={rowErrors[idx]?.engineReaderId}
-                      />
                       <IconButton
                         size="small"
                         onClick={() =>
@@ -600,6 +648,14 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                           <IconLockOpen size={16} />
                         )}
                       </IconButton>
+                      <TextField
+                        value={row.engineReaderId}
+                        onChange={(e) => handleChange(idx, 'engineReaderId', e.target.value)}
+                        fullWidth
+                        error={!!rowErrors[idx]?.engineReaderId}
+                        helperText={rowErrors[idx]?.engineReaderId}
+                        slotProps={{ input: { title: row.engineReaderId || '' } }}
+                      />
                     </div>
                   </TableCell>
                   <TableCell>
@@ -610,13 +666,6 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         ...getCellStyle(idx, 'gmac'),
                       }}
                     >
-                      <TextField
-                        value={row.gmac}
-                        onChange={(e) => handleChange(idx, 'gmac', e.target.value)}
-                        fullWidth
-                        error={!!rowErrors[idx]?.gmac}
-                        helperText={rowErrors[idx]?.gmac}
-                      />
                       <IconButton
                         size="small"
                         onClick={() =>
@@ -635,6 +684,14 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                           <IconLockOpen size={16} />
                         )}
                       </IconButton>
+                      <TextField
+                        value={row.gmac}
+                        onChange={(e) => handleChange(idx, 'gmac', e.target.value)}
+                        fullWidth
+                        error={!!rowErrors[idx]?.gmac}
+                        helperText={rowErrors[idx]?.gmac}
+                        slotProps={{ input: { title: row.gmac || '' } }}
+                      />
                     </div>
                   </TableCell>
                   <TableCell>
