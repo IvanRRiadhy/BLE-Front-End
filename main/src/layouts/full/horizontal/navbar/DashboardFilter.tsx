@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@mui/material';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
@@ -18,6 +18,7 @@ import { BuildingType, fetchBuildingDT, fetchBuildings } from 'src/store/apps/cr
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
 import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import AutocompleteFilter from './AutocompleteFilter';
 import { setDashboardFilter } from 'src/store/customizer/CustomizerSlice';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 type FilterState = {
@@ -31,6 +32,8 @@ type FilterResult<T> = { data: T[]; empty: boolean };
 const DashboardFilter = () => {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
+  const [resetToken, setResetToken] = useState(0);
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -104,77 +107,104 @@ const DashboardFilter = () => {
     return { data, empty: data.length === 0 };
   }
 
+  // const handleApplyFilter = () => {
+  //   // Step 1: Derive each level based on the current appliedFilter
+  //   // 1. Filter Floors
+  //   const floorsResult = filterData(
+  //     floorList.filter((floor: floorType) =>
+  //       appliedFilter.BuildingId.length === 0
+  //         ? true
+  //         : appliedFilter.BuildingId.includes(floor.buildingId),
+  //     ), // filter by building first
+  //     appliedFilter.FloorId,
+  //     (f: floorType) => f.id,
+  //   );
+  //   // floorsResult: { data: floorType[], empty: boolean }
+
+  //   // 2. Filter Floorplans (only from filtered floors)
+  //   let floorplansResult: FilterResult<FloorplanType> = { data: [], empty: true };
+  //   if (!floorsResult.empty) {
+  //     const floorIds = floorsResult.data.map((f: floorType) => f.id);
+  //     floorplansResult = filterData(
+  //       floorplanList.filter((fp: FloorplanType) => floorIds.includes(fp.floorId)),
+  //       appliedFilter.FloorplanId,
+  //       (fp: FloorplanType) => fp.id,
+  //     );
+  //   }
+  //   // floorplansResult: { data: FloorplanType[], empty: boolean }
+
+  //   // 3. Filter MaskedAreas (only from filtered floorplans)
+  //   let maskedAreasResult: FilterResult<MaskedAreaType> = { data: [], empty: true };
+  //   if (!floorplansResult.empty) {
+  //     const floorplanIds = floorplansResult.data.map((fp) => fp.id);
+  //     maskedAreasResult = filterData(
+  //       maskedAreaList.filter((m) => floorplanIds.includes(m.floorplanId)),
+  //       appliedFilter.MaskedAreaId,
+  //       (m) => m.id,
+  //     );
+  //   }
+  //   // maskedAreasResult: { data: MaskedAreaType[], empty: boolean }
+
+  //   // // Step 2: Update appliedFilter ONCE
+  //   // setAppliedFilter((prev) => ({
+  //   //   ...prev,
+  //   //   floorId: floors.map((f: any) => f.id),
+  //   //   floorplanId: floorplans.map((fp: any) => fp.id),
+  //   //   maskedAreaId: maskedAreas.map((m: any) => m.id),
+  //   // }));
+  //   console.log('Filtered Floors:', floorsResult);
+  //   console.log('Filtered Floorplans:', floorplansResult);
+  //   console.log('Filtered Masked Areas:', maskedAreasResult);
+  //   // Step 3: Dispatch the final filter state
+  //   dispatch(
+  //     setDashboardFilter({
+  //       BuildingId: appliedFilter.BuildingId,
+  //       FloorId: floorsResult.empty ? ['Empty'] : floorsResult.data.map((f: any) => f.id),
+  //       FloorplanId: floorplansResult.empty
+  //         ? ['Empty']
+  //         : floorplansResult.data.map((fp: any) => fp.id),
+  //       FloorplanMaskedAreaId: maskedAreasResult.empty
+  //         ? ['Empty']
+  //         : maskedAreasResult.data.map((m: any) => m.id),
+  //     }),
+  //   );
+  //   handleClose();
+  // };
+
   const handleApplyFilter = () => {
-    // Step 1: Derive each level based on the current appliedFilter
-    // 1. Filter Floors
-    const floorsResult = filterData(
-      floorList.filter((floor: floorType) =>
-        appliedFilter.BuildingId.length === 0
-          ? true
-          : appliedFilter.BuildingId.includes(floor.buildingId),
-      ), // filter by building first
-      appliedFilter.FloorId,
-      (f: floorType) => f.id,
-    );
-    // floorsResult: { data: floorType[], empty: boolean }
-
-    // 2. Filter Floorplans (only from filtered floors)
-    let floorplansResult: FilterResult<FloorplanType> = { data: [], empty: true };
-    if (!floorsResult.empty) {
-      const floorIds = floorsResult.data.map((f: floorType) => f.id);
-      floorplansResult = filterData(
-        floorplanList.filter((fp: FloorplanType) => floorIds.includes(fp.floorId)),
-        appliedFilter.FloorplanId,
-        (fp: FloorplanType) => fp.id,
-      );
-    }
-    // floorplansResult: { data: FloorplanType[], empty: boolean }
-
-    // 3. Filter MaskedAreas (only from filtered floorplans)
-    let maskedAreasResult: FilterResult<MaskedAreaType> = { data: [], empty: true };
-    if (!floorplansResult.empty) {
-      const floorplanIds = floorplansResult.data.map((fp) => fp.id);
-      maskedAreasResult = filterData(
-        maskedAreaList.filter((m) => floorplanIds.includes(m.floorplanId)),
-        appliedFilter.MaskedAreaId,
-        (m) => m.id,
-      );
-    }
-    // maskedAreasResult: { data: MaskedAreaType[], empty: boolean }
-
-    // // Step 2: Update appliedFilter ONCE
-    // setAppliedFilter((prev) => ({
-    //   ...prev,
-    //   floorId: floors.map((f: any) => f.id),
-    //   floorplanId: floorplans.map((fp: any) => fp.id),
-    //   maskedAreaId: maskedAreas.map((m: any) => m.id),
-    // }));
-    console.log('Filtered Floors:', floorsResult);
-    console.log('Filtered Floorplans:', floorplansResult);
-    console.log('Filtered Masked Areas:', maskedAreasResult);
-    // Step 3: Dispatch the final filter state
+    // appliedFilter already expanded by AutocompleteFilter
     dispatch(
       setDashboardFilter({
         BuildingId: appliedFilter.BuildingId,
-        FloorId: floorsResult.empty ? ['Empty'] : floorsResult.data.map((f: any) => f.id),
-        FloorplanId: floorplansResult.empty
-          ? ['Empty']
-          : floorplansResult.data.map((fp: any) => fp.id),
-        FloorplanMaskedAreaId: maskedAreasResult.empty
-          ? ['Empty']
-          : maskedAreasResult.data.map((m: any) => m.id),
+        FloorId: appliedFilter.FloorId.length ? appliedFilter.FloorId : ['Empty'],
+        FloorplanId: appliedFilter.FloorplanId.length ? appliedFilter.FloorplanId : ['Empty'],
+        FloorplanMaskedAreaId: appliedFilter.MaskedAreaId.length
+          ? appliedFilter.MaskedAreaId
+          : ['Empty'],
       }),
     );
-    handleClose();
+    setOpen(false);
   };
+
+  // const handleResetFilter = () => {
+  //   setAppliedFilter({ BuildingId: [], FloorId: [], FloorplanId: [], MaskedAreaId: [] });
+  //   dispatch(
+  //     setDashboardFilter({ BuildingId: [], FloorId: [], FloorplanId: [], MaskedAreaId: [] }),
+  //   );
+  //   handleClose();
+  // };
 
   const handleResetFilter = () => {
     setAppliedFilter({ BuildingId: [], FloorId: [], FloorplanId: [], MaskedAreaId: [] });
+    setResetToken((n) => n + 1); // tell Autocomplete to clear selection
     dispatch(
       setDashboardFilter({ BuildingId: [], FloorId: [], FloorplanId: [], MaskedAreaId: [] }),
     );
-    handleClose();
+    setOpen(false);
   };
+  const handleFilterChange = useCallback((f: FilterState) => {
+  setAppliedFilter(f);
+}, []);
 
   return (
     <>
@@ -214,291 +244,16 @@ const DashboardFilter = () => {
           *Leave empty to skip filter
         </Typography>
         <Grid container spacing={2}>
-          {/* Building Filter */}
-          <Grid size={12}>
-            <CustomFormLabel htmlFor="building">
-              <Typography variant="caption">Building(s)</Typography>
-            </CustomFormLabel>
-            <CustomSelect
-              id="BuildingId"
-              name="BuildingId"
-              value={appliedFilter.BuildingId || []}
-              onChange={(e: any) => {
-                const value = e.target.value;
-                if (value.includes('all')) {
-                  setAppliedFilter({
-                    ...appliedFilter,
-                    BuildingId:
-                      appliedFilter.BuildingId.length === buildingList.length
-                        ? []
-                        : buildingList.map((b: any) => b.id),
-                    FloorId: [],
-                    FloorplanId: [],
-                    MaskedAreaId: [],
-                  });
-                  return;
-                }
-                setAppliedFilter({
-                  ...appliedFilter,
-                  BuildingId: value,
-                  FloorId: [],
-                  FloorplanId: [],
-                  MaskedAreaId: [],
-                });
-
-                console.log('Selected Buildings:', value);
-                // const isAllSelected = value.includes('all');
-                // const newValue = isAllSelected ? buildingList.map((b: any) => b.id) : value;
-                // setAppliedFilter({
-                //   ...appliedFilter,
-                //   buildingId: newValue,
-                //   floorId: [],
-                //   floorplanId: [],
-                //   maskedAreaId: [],
-                // });
-              }}
-              fullWidth
-              variant="outlined"
-              multiple
-              renderValue={(selected: string[]) => {
-                if (selected.length === 0) return 'All Building';
-                if (selected.length === buildingList.length) return 'All Buildings';
-                return selected
-                  .map((id: string) => buildingList.find((b: any) => b.id === id)?.name)
-                  .join(', ');
-              }}
-              MenuProps={{ PaperProps: { style: { maxHeight: 200 } } }}
-            >
-              <MenuItem value="all">
-                <ListItemIcon>
-                  <Checkbox
-                    checked={appliedFilter.BuildingId?.length === buildingList.length}
-                    indeterminate={
-                      appliedFilter.BuildingId?.length > 0 &&
-                      appliedFilter.BuildingId?.length < buildingList.length
-                    }
-                  />
-                </ListItemIcon>
-                <ListItemText primary="All Buildings" />
-              </MenuItem>
-              {buildingList.map((building: BuildingType) => (
-                <MenuItem key={building.id} value={building.id}>
-                  <ListItemIcon>
-                    <Checkbox checked={appliedFilter.BuildingId?.includes(building.id)} />
-                  </ListItemIcon>
-                  {building.name}
-                </MenuItem>
-              ))}
-            </CustomSelect>
-          </Grid>
-
-          {/* Floor Filter */}
-          {appliedFilter.BuildingId?.length > 0 && (
-            <Grid size={12}>
-              <CustomFormLabel htmlFor="floor">
-                <Typography variant="caption">Floor(s)</Typography>
-              </CustomFormLabel>
-              <CustomSelect
-                id="FloorId"
-                name="FloorId"
-                value={appliedFilter.FloorId || []}
-                onChange={(e: any) => {
-                  const value = e.target.value;
-                  if (value.includes('all')) {
-                    setAppliedFilter({
-                      ...appliedFilter,
-                      FloorId:
-                        appliedFilter.FloorId.length === filteredFloors.length
-                          ? []
-                          : filteredFloors.map((f: any) => f.id),
-                      FloorplanId: [],
-                      MaskedAreaId: [],
-                    });
-                    return;
-                  }
-                  setAppliedFilter({
-                    ...appliedFilter,
-                    FloorId: value,
-                    FloorplanId: [],
-                    MaskedAreaId: [],
-                  });
-                  console.log('Selected Floors:', value);
-                  console.log('All Floorplans:', floorplanList);
-                  console.log('Filtered Floorplans:', filteredFloorplans);
-                }}
-                fullWidth
-                variant="outlined"
-                multiple
-                renderValue={(selected: string[]) => {
-                  if (selected.length === 0) return 'All Floors';
-                  if (selected.length === filteredFloors.length) return 'All Floors';
-                  const filtered = filteredFloors.filter((f: any) => selected.includes(f.id));
-                  if (selected.length === 0) return 'Select Floor';
-                  return filtered.map((f: any) => f.name).join(', ');
-                }}
-              >
-                <MenuItem value="all">
-                  <ListItemIcon>
-                    <Checkbox
-                      checked={
-                        appliedFilter.FloorId?.length ===
-                        filteredFloors.filter((f: any) =>
-                          appliedFilter.BuildingId.includes(f.buildingId),
-                        ).length
-                      }
-                      indeterminate={
-                        appliedFilter.FloorId?.length > 0 &&
-                        appliedFilter.FloorId?.length <
-                          filteredFloors.filter((f: any) =>
-                            appliedFilter.BuildingId.includes(f.buildingId),
-                          ).length
-                      }
-                    />
-                  </ListItemIcon>
-                  <ListItemText primary="All Floors" />
-                </MenuItem>
-                {filteredFloors.map((floor: floorType) => (
-                  <MenuItem key={floor.id} value={floor.id}>
-                    <ListItemIcon>
-                      <Checkbox checked={appliedFilter.FloorId.includes(floor.id)} />
-                    </ListItemIcon>
-                    {floor.name}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
-            </Grid>
-          )}
-
-          {/* Floorplan Filter */}
-          {appliedFilter.FloorId?.length > 0 && (
-            <Grid size={12}>
-              <CustomFormLabel htmlFor="floorplan">
-                <Typography variant="caption">Floorplan(s)</Typography>
-              </CustomFormLabel>
-              <CustomSelect
-                id="FloorplanId"
-                name="FloorplanId"
-                value={appliedFilter.FloorplanId || []}
-                onChange={(e: any) => {
-                  const value = e.target.value;
-                  const selected = value.includes('all')
-                    ? filteredFloorplans
-                        .filter((fp: any) => appliedFilter.FloorId.includes(fp.floorId))
-                        .map((fp: any) => fp.id)
-                    : value;
-                  setAppliedFilter({
-                    ...appliedFilter,
-                    FloorplanId: selected,
-                    MaskedAreaId: [],
-                  });
-                }}
-                fullWidth
-                variant="outlined"
-                multiple
-                renderValue={(selected: string[]) => {
-                  if (selected.length === 0) return 'All Floorplans';
-                  if (selected.length === filteredFloorplans.length) return 'All Floorplans';
-                  const filtered = filteredFloorplans.filter((fp: any) => selected.includes(fp.id));
-                  if (selected.length === 0) return 'Select Floorplan';
-                  return filtered.map((f: any) => f.name).join(', ');
-                }}
-              >
-                <MenuItem value="all">
-                  <ListItemIcon>
-                    <Checkbox
-                      checked={
-                        appliedFilter.FloorplanId?.length ===
-                        filteredFloorplans.filter((f: FloorplanType) =>
-                          appliedFilter.FloorId.includes(f.floorId),
-                        ).length
-                      }
-                      indeterminate={
-                        appliedFilter.FloorplanId?.length > 0 &&
-                        appliedFilter.FloorplanId?.length <
-                          filteredFloorplans.filter((f: FloorplanType) =>
-                            appliedFilter.FloorId.includes(f.floorId),
-                          ).length
-                      }
-                    />
-                  </ListItemIcon>
-                  <ListItemText primary="All Floorplans" />
-                </MenuItem>
-                {filteredFloorplans.map((fp: any) => (
-                  <MenuItem key={fp.id} value={fp.id}>
-                    <ListItemIcon>
-                      <Checkbox checked={appliedFilter.FloorplanId.includes(fp.id)} />
-                    </ListItemIcon>
-                    {fp.name}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
-            </Grid>
-          )}
-
-          {/* Masked Area Filter */}
-          {appliedFilter.FloorplanId?.length > 0 && (
-            <Grid size={12}>
-              <CustomFormLabel htmlFor="maskedArea">
-                <Typography variant="caption">Masked Area(s)</Typography>
-              </CustomFormLabel>
-              <CustomSelect
-                id="MaskedAreaId"
-                name="MaskedAreaId"
-                value={appliedFilter.MaskedAreaId || []}
-                onChange={(e: any) => {
-                  const value = e.target.value;
-                  const selected = value.includes('all')
-                    ? maskedAreaList
-                        .filter((m: any) => appliedFilter.FloorplanId.includes(m.floorplanId))
-                        .map((m: any) => m.id)
-                    : value;
-                  setAppliedFilter({
-                    ...appliedFilter,
-                    MaskedAreaId: selected,
-                  });
-                }}
-                fullWidth
-                variant="outlined"
-                multiple
-                renderValue={(selected: string[]) => {
-                  if (selected.length === 0) return 'All Masked Areas';
-                  if (selected.length === filteredMaskedAreas.length) return 'All Masked Areas';
-                  const filtered = maskedAreaList.filter((m: any) => selected.includes(m.id));
-                  if (selected.length === 0) return 'Select Masked Area';
-                  return filtered.map((m: any) => m.name).join(', ');
-                }}
-              >
-                <MenuItem value="all">
-                  <ListItemIcon>
-                    <Checkbox
-                      checked={
-                        appliedFilter.MaskedAreaId?.length ===
-                        filteredMaskedAreas.filter((m: any) =>
-                          appliedFilter.FloorplanId.includes(m.floorplanId),
-                        ).length
-                      }
-                      indeterminate={
-                        appliedFilter.MaskedAreaId?.length > 0 &&
-                        appliedFilter.MaskedAreaId?.length <
-                          filteredMaskedAreas.filter((m: any) =>
-                            appliedFilter.FloorplanId.includes(m.floorplanId),
-                          ).length
-                      }
-                    />
-                  </ListItemIcon>
-                  <ListItemText primary="All Masked Areas" />
-                </MenuItem>
-                {filteredMaskedAreas.map((m: any) => (
-                  <MenuItem key={m.id} value={m.id}>
-                    <ListItemIcon>
-                      <Checkbox checked={appliedFilter.MaskedAreaId.includes(m.id)} />
-                    </ListItemIcon>
-                    {m.name}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
-            </Grid>
-          )}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+            <AutocompleteFilter
+              buildings={buildingList}
+              floors={floorList}
+              floorplans={floorplanList}
+              maskedAreas={maskedAreaList}
+              onChangeFilter={handleFilterChange}
+              resetToken={resetToken}
+            />
+          </Box>
         </Grid>
         <Box mt={3}>
           <Grid container justifyContent="space-between">
