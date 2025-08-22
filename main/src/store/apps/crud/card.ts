@@ -9,6 +9,7 @@ import { MaskedAreaType } from "./maskedArea";
 const API_URL = "/api/Card/";
 const API_DT_URL = "/api/Card/filter/";
 const ASSIGN_CARD_URL = "/api/CardRecord/";
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetFilter = {
         Draw: number,
@@ -116,8 +117,10 @@ export const CardSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+
         .addCase(fetchCardDT.pending, (state) => {
             state.isLoading = true;
+            state.hasLoaded = false;
         })
 .addCase(fetchCardDT.fulfilled, (state, action) => {
     const cardData: CardType[] = action.payload.data || [];
@@ -128,33 +131,54 @@ export const CardSlice = createSlice({
     // Update counts
     state.cardFilteredCount = action.payload.recordsFiltered || 0;
     state.cardTotalCount = action.payload.recordsTotal || 0;
-    setTimeout(() => {
+
         state.isLoading = false;
         state.hasLoaded = true;
-    }, 1000); // Simulate loading delay
-    // // Count active and inactive
-    // state.cardActiveCount = cardData.filter(card => card.isUsed).length;
-    // state.cardNonActiveCount = cardData.filter(card => !card.isUsed).length;
+
 })
             .addCase(fetchCardDT.rejected, (state, action) => {
                 console.error("Error fetching card data:", action.error, state);
                 state.cardFilteredCount = 0;
-                setTimeout(() => {
+            
                     state.isLoading = false;
-                    state.hasLoaded = true;
-                }, 1000); // Simulate loading delay
+                    state.hasLoaded = false;
+            
+            })
+            .addCase(addCard.pending, (state) => {
+                state.isLoading = true;
             })
             .addCase(addCard.fulfilled, (state, action) => {
                 state.cards.push(action.payload);
+                state.isLoading = false;
+            })
+            .addCase(addCard.rejected, (state, action) => {
+                console.error("Error adding card:", action.error);
+                state.isLoading = false;
+            })
+            .addCase(editCard.pending, (state) => {
+                state.isLoading = true;
             })
             .addCase(editCard.fulfilled, (state, action) => {
                 const index = state.cards.findIndex(card => card.id === action.payload.id);
                 if (index !== -1) {
                     state.cards[index] = action.payload;
                 }
+                state.isLoading = false;
+            })
+            .addCase(editCard.rejected, (state, action) => {
+                console.error("Error editing card:", action.error);
+                state.isLoading = false;
+            })
+            .addCase(deleteCard.pending, (state) => {
+                state.isLoading = true;
             })
             .addCase(deleteCard.fulfilled, (state, action) => {
                 state.cards = state.cards.filter(card => card.id !== action.payload.id);
+                state.isLoading = false;
+            })
+            .addCase(deleteCard.rejected, (state, action) => {
+                console.error("Error deleting card:", action.error);
+                state.isLoading = false;
             });
     },
 });
@@ -183,6 +207,7 @@ export const fetchCard = () => async (dispatch: any) => {
 export const fetchCardDT = createAsyncThunk(
     "cards/fetchCardDT",
     async (filter: any, { rejectWithValue }) => {
+        const started = Date.now();
         try {
             console.log("Filter:", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
@@ -199,22 +224,31 @@ export const fetchCardDT = createAsyncThunk(
                 dispatch(SetNonActiveCardData(response.data.collection.data || []));
             };
             console.log("Fetch cards", response.data.collection);
+            const elapsed = Date.now() - started;
+            if (elapsed < 500) await delay(500 - elapsed);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching cards:", error);
+                    const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
 );
 
 export const addCard = createAsyncThunk("card/addCard", async (formData: CardType, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         const { id, ...data } = formData;
         console.log(data)
         const response = await axiosServices.post(API_URL, data);
+                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error: any) {
         console.error("Error adding card:", error);
+                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });
@@ -222,35 +256,50 @@ export const addCard = createAsyncThunk("card/addCard", async (formData: CardTyp
 export const assignCard = createAsyncThunk(
     "card/assignCard",
     async(data: any, {rejectWithValue}) => {
+        const started = Date.now();
         try {
             console.log(data);
             const response = await axiosServices.post(`${ASSIGN_CARD_URL}`, data);
             console.log(response.data);
+                    const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data;
         } catch (error: any) {
             console.error("Error assigning card:", error);
+                    const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
 )
 
 export const editCard = createAsyncThunk("card/editCard", async (formData: CardType, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         const { id, ...data } = formData;
         const response = await axiosServices.put(`${API_URL}${id}`, data);
+                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error: any) {
         console.error("Error editing card:", error);
+                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });
 
 export const deleteCard = createAsyncThunk("card/deleteCard", async (id: string, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         const response = await axiosServices.delete(`${API_URL}${id}`);
+                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error: any) {
         console.error("Error deleting card:", error);
+                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });

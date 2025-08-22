@@ -45,7 +45,8 @@ const AccessCCTVList = () => {
   // const CCTVTotalCount = useSelector((state: RootState) => state.CCTVReducer.cctvTotalCount);
   const CCTVFilteredCount = useSelector((state: RootState) => state.CCTVReducer.cctvFilteredCount);
   const CCTVFilter = useSelector((state: RootState) => state.CCTVReducer.cctvFilter);
-  const [loading, setLoading] = useState(false);
+  const isLoading = useSelector((state: RootState) => state.CCTVReducer.isLoading);
+  const hasLoaded = useSelector((state: RootState) => state.CCTVReducer.hasLoaded);
   // const { t } = useTranslation();
   // Pagination State
   const page = Math.floor(CCTVFilter.Start / CCTVFilter.Length);
@@ -64,28 +65,19 @@ const AccessCCTVList = () => {
   useEffect(() => {
     dispatch(UpdateFilter(defaultAccessCCTVFilter));
     try {
-      setLoading(true);
       dispatch(fetchAccessCCTVDT(CCTVFilter));
     } catch (error) {
       console.error('Error fetching data:', error);
-    } finally {
-      setTimeout(() => {
-        setLoading(false);
-      }, 500);
     }
   }, [dispatch]);
 
   useEffect(() => {
     try {
-      setLoading(true);
       dispatch(fetchAccessCCTVDT(CCTVFilter));
     } catch (error) {
       console.error('Error fetching data:', error);
-    } finally {
-      setTimeout(() => {
-        setLoading(false);
-      }, 500);
     }
+    
     // dispatch(UpdateFilter(defaultAccessCCTVFilter));
   }, [CCTVFilter, dispatch]);
 
@@ -138,7 +130,7 @@ const AccessCCTVList = () => {
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          {loading ? (
+          {isLoading ? (
             <Box
               sx={{
                 display: 'flex',

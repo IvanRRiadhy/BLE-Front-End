@@ -10,6 +10,7 @@ import { memberType } from "./member";
 
 const API_URL = "/api/TrxVisitor/";
 const API_DT_URL = "/api/TrxVisitor/filter/";
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetFilter = {
         Draw: number,
@@ -127,19 +128,15 @@ export const TrxVisitorSlice = createSlice({
             .addCase(fetchTrxVisitorDT.fulfilled, (state, action) => {
                 state.TrxVisitorTotalCount = action.payload.recordsTotal;
                 state.TrxVisitorFilteredCount = action.payload.recordsFiltered;
-                setTimeout(() => {
                     state.isLoading = false;
                     state.hasLoaded = true;
-                }, 1000); // Simulate loading delay
             })
             .addCase(fetchTrxVisitorDT.rejected, (state, action) => {
                 console.error("Error fetching TrxVisitors: ", action.payload);
                 state.TrxVisitorTotalCount = 0;
                 state.TrxVisitorFilteredCount = 0;
-                setTimeout(() => {
                     state.isLoading = false;
                     state.hasLoaded = true;
-                }, 1000); // Simulate loading delay
             })
     }
 });

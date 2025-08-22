@@ -7,6 +7,7 @@ import { defaultOrganizationFilter } from "../defaultForm";
 
 const API_URL = "/api/MstOrganization/";
 const API_DT_URL = "/api/MstOrganization/filter/";
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetFilter = {
         Draw: number,
@@ -116,19 +117,16 @@ export const OrganizationSlice = createSlice({
             .addCase(fetchOrganizationDT.fulfilled, (state, action) => {
                 state.organizationTotalCount = action.payload.recordsTotal;
                 state.organizationFilteredCount = action.payload.recordsFiltered;
-                setTimeout(() => {
                     state.isLoading = false;
                     state.hasLoaded = true;
-                }, 1000); // Simulate loading delay
             })
             .addCase(fetchOrganizationDT.rejected, (_state, action) => {
                 console.error("Fetch failed: ", action.payload);
                 // _state.organizationTotalCount = 0;
                 _state.organizationFilteredCount = 0;
-                setTimeout(() => {
+
                     _state.isLoading = false;
                     _state.hasLoaded = true;
-                }, 1000); // Simulate loading delay
             });
     }
 });

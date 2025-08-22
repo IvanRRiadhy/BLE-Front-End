@@ -7,6 +7,7 @@ import { defaultIntegrationFilter } from "../defaultForm";
 
 const API_URL = "/api/MstIntegration/";
 const API_DT_URL = "/api/MstIntegration/filter/";
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetFilter = {
         Draw: number,
@@ -125,19 +126,17 @@ export const IntegrationSlice = createSlice({
             .addCase(fetchIntegrationDT.fulfilled, (state, action) => {
                 state.IntegrationTotalCount = action.payload.recordsTotal;
                 state.IntegrationFilteredCount = action.payload.recordsFiltered;
-                setTimeout(() => {
+
                     state.isLoading = false;
                     state.hasLoaded = true;
-                }, 1000); // Simulate loading delay
             })
             .addCase(fetchIntegrationDT.rejected, (_state, action) => {
                 console.error("Fetch failed: ", action.payload);
                 // _state.IntegrationTotalCount = 0;
                 _state.IntegrationFilteredCount = 0;
-                setTimeout(() => {
+
                     _state.isLoading = false;
                     _state.hasLoaded = true;
-                }, 1000); // Simulate loading delay
             });
         }
 });

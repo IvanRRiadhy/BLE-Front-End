@@ -10,6 +10,7 @@ import { defaultMaskedAreaFilter } from "../defaultForm";
 
 const API_URL = '/api/FloorplanMaskedArea/';
 const API_DT_URL = '/api/FloorplanMaskedArea/filter/';
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetFilter = {
         Draw: number,
@@ -289,19 +290,15 @@ export const MaskedAreaSlice = createSlice({
                 // console.log("Masked Area Records Filtered: ", action.payload.recordsFiltered);
                 state.maskedAreaTotalCount = action.payload.recordsTotal;
                 state.maskedAreaFilteredCount = action.payload.recordsFiltered;
-                setTimeout(() => {
                     state.isLoading = false;
                     state.hasLoaded = true;
-                }, 1000); // Simulate loading delay
             })
             .addCase(fetchMaskedAreaDT.rejected, (_state, action) => {
                 console.error("Fetch failed: ", action.payload);
                 // _state.maskedAreaTotalCount = 0;
                 _state.maskedAreaFilteredCount = 0;
-                setTimeout(() => {
                     _state.isLoading = false;
                     _state.hasLoaded = true;
-                })
             });
     },
 });

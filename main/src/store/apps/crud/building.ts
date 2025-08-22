@@ -4,9 +4,11 @@ import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { defaultBuildingFilter } from "../defaultForm";
+import toast from "react-hot-toast";
 
 const API_URL = '/api/MstBuilding/';
 const API_DT_URL = '/api/MstBuilding/filter/';
+const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 
 export type GetFilter = {
@@ -97,22 +99,63 @@ export const BuildingSlice = createSlice({
         .addCase(fetchBuildingDT.fulfilled, (state, action) => {
             state.buildingTotalCount = action.payload.recordsTotal;
             state.buildingFilteredCount = action.payload.recordsFiltered;
-            setTimeout(() => {
-                state.isLoading = false;
-                state.hasLoaded = true;
-            }, 1000); // Simulate loading delay
+            state.isLoading = false;
+            state.hasLoaded = true;
+            console.log("Buildings fetched:", JSON.stringify(state.hasLoaded, null, 2));
         })
         .addCase(fetchBuildingDT.pending, (state) => {
             state.isLoading = true;
+            state.hasLoaded = false;
         })
         .addCase(fetchBuildingDT.rejected, (state, action) => {
             console.error("Error fetching buildings: ", action.payload);
+            toast.error("Error fetching buildings: " + action.payload);
             // state.buildingTotalCount = 0;
             state.buildingFilteredCount = 0;
-            setTimeout(() => {
+            state.isLoading = false;
+            state.hasLoaded = false;
+        })
+        .addCase(addBuilding.pending, (state) => {
+            state.isLoading = true;
+        })
+        .addCase(addBuilding.fulfilled, (state, action) => {
+            state.buildings.push(action.payload);
                 state.isLoading = false;
-                state.hasLoaded = true;
-            }, 1000); // Simulate loading delay
+
+        })
+        .addCase(addBuilding.rejected, (state, action) => {
+            console.error("Add failed: ", action.payload);
+                state.isLoading = false;
+
+        })
+        .addCase(editBuilding.pending, (state) => {
+            state.isLoading = true;
+        })
+        .addCase(editBuilding.fulfilled, (state, action) => {
+            const index = state.buildings.findIndex((building) => building.id === action.payload.id);
+            if (index !== -1) {
+                state.buildings[index] = action.payload;
+                state.selectedBuilding = action.payload;
+            }
+                state.isLoading = false;
+        })
+        .addCase(editBuilding.rejected, (state, action) => {
+            console.error("Update failed: ", action.payload);
+                state.isLoading = false;
+        })
+        .addCase(deleteBuilding.pending, (state) => {
+            state.isLoading = true;
+        })
+        .addCase(deleteBuilding.fulfilled, (state, action) => {
+            state.buildings = state.buildings.filter(building => building.id !== action.payload);
+            if (state.selectedBuilding?.id === action.payload) {
+                state.selectedBuilding = null;
+            }
+                state.isLoading = false;
+        })
+        .addCase(deleteBuilding.rejected, (state, action) => {
+            console.error("Delete failed: ", action.payload);
+                state.isLoading = false;
         })
 
     }
@@ -138,13 +181,20 @@ export const fetchBuildings = () => async (dispatch: AppDispatch) => {
 export const fetchBuildingDT = createAsyncThunk(
     "buildings/fetchBuildingDT",
     async (filter: any, { rejectWithValue }) => {
+        const started = Date.now();
         try {
             // console.log("Fetch Building DT: ", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetBuildings(response.data.collection.data || []));
             // console.log("Fetch buildings", response.data.collection);
+                  const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+
             return response.data.collection;
         } catch (error: any) {
+                  const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+
             console.error("Error fetching buildings:", error);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
@@ -152,6 +202,7 @@ export const fetchBuildingDT = createAsyncThunk(
 )
 
 export const addBuilding = createAsyncThunk("buildings/addBuilding", async (formData: FormData, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         formData.delete('id');
         const response = await axiosServices.post(API_URL, formData, {
@@ -159,14 +210,21 @@ export const addBuilding = createAsyncThunk("buildings/addBuilding", async (form
                 'Content-Type': 'multipart/form-data',
             },
         });
+              const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+
         return response.data;
     } catch (error: any) {
+              const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+
         console.error("Error adding building:", error);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });
 
 export const editBuilding = createAsyncThunk("buildings/editBuilding", async (formData: FormData, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         const id = formData.get('id'); // Extract ID from FormData
         formData.delete('id');
@@ -175,18 +233,32 @@ export const editBuilding = createAsyncThunk("buildings/editBuilding", async (fo
                 'Content-Type': 'multipart/form-data',
             },
         });
+              const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+
         return response.data;
     } catch (error: any) {
+              const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+
         console.error("Error editing building:", error);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });
 
 export const deleteBuilding = createAsyncThunk("buildings/deleteBuilding", async (buildingId: string, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         await axiosServices.delete(`${API_URL}${buildingId}`);
+                      const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return buildingId; // Return the deleted building's ID to update the state
+
+
     } catch (error: any) {
+              const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+
         console.error("Error deleting building:", error);
         return rejectWithValue(error.response?.data || "Unknown error");
     }

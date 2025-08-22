@@ -9,10 +9,7 @@ import { defaultFloorplanFilter } from "../defaultForm";
 
 const Floorplan_API_URL = '/api/MstFloorplan/';
 const Floorplan_DT_URL = '/api/MstFloorplan/filter/';
-const Device_API_URL = '/api/FloorplanDevice/';
-const Device_DT_URL = '/api/FloorplanDevice/filter/';
-const Area_API_URL = '/api/FloorplanMaskedArea/';
-const Area_DT_URL = '/api/FloorplanMaskedArea/filter/';
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetFilter = {
         Draw: number,
@@ -120,10 +117,8 @@ export const FloorplanSlice = createSlice({
                 console.error("Error fetching floorplans: ", action.payload);
                 // _state.floorplanTotalCount = 0;
                 _state.floorplanFilteredCount = 0;
-                setTimeout(() => {
                     _state.isLoading = false;
                     _state.hasLoaded = true;
-                }, 1000); // Simulate loading delay
             })
     },
 });

@@ -51,7 +51,8 @@ const BuildingList = () => {
     (state: RootState) => state.buildingReducer.buildingFilteredCount,
   );
   const buildingFilter = useSelector((state: RootState) => state.buildingReducer.buildingFilter);
-  const [loading, setLoading] = useState(false);
+  const isLoading = useSelector((state => state.buildingReducer.isLoading));
+  const hasLoaded = useSelector(state => state.buildingReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(buildingFilter.Start / buildingFilter.Length);
   const rowsPerPage = buildingFilter.Length;
@@ -94,14 +95,10 @@ const BuildingList = () => {
 
   useEffect(() => {
     try {
-      setLoading(true);
       dispatch(fetchBuildingDT(buildingFilter));
     } catch (error) {
       console.error('Error fetching building data:', error);
     }
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
   }, [buildingFilter, dispatch]);
 
   //Delete Pop-up
@@ -122,7 +119,6 @@ const BuildingList = () => {
   // Confirm delete action
   const handleConfirmDelete = async () => {
     if (selectedBuilding) {
-      setLoading(true);
       try {
         const result = await dispatch(deleteBuilding(selectedBuilding.id));
         if (result && result.type && result.type.endsWith('/fulfilled')) {
@@ -133,9 +129,6 @@ const BuildingList = () => {
         toast.error('Delete Data Unsuccessful');
         console.error('Error deleting Building:', error);
       }
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
     }
     handleCloseDeleteDialog();
   };
@@ -143,7 +136,7 @@ const BuildingList = () => {
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
-        {loading ? (
+        {isLoading ? (
           <Box
             sx={{
               display: 'flex',

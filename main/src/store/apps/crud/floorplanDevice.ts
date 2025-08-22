@@ -12,6 +12,7 @@ import { defaultFloorplanDeviceFilter } from "../defaultForm";
 
 const API_URL = '/api/FloorplanDevice/';
 const API_DT_URL = '/api/FloorplanDevice/filter/';
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetFilter = {
         Draw: number,
@@ -275,19 +276,19 @@ export const FloorplanDeviceSlice = createSlice({
             .addCase(fetchFloorplanDeviceDT.fulfilled, (state, action) => {
                 state.floorplanDeviceTotalCount = action.payload.recordsTotal;
                 state.floorplanDeviceFilteredCount = action.payload.recordsFiltered;
-                setTimeout(() => {
+
                     state.isLoading = false;
                     state.hasLoaded = true;
-                }, 1000); // Simulate loading delay
+
             })
             .addCase(fetchFloorplanDeviceDT.rejected, (_state, action) => {
                 console.error("Fetch floorplan device DT failed: ", action.payload);
                 // _state.floorplanDeviceTotalCount = 0;
                 _state.floorplanDeviceFilteredCount = 0;
-                setTimeout(() => {
+
                     _state.isLoading = false;
                     _state.hasLoaded = true;
-                }, 1000); // Simulate loading delay
+
             })
             
     },

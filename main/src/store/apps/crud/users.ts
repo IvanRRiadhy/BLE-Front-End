@@ -6,7 +6,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 
 const API_URL = "/api/Auth/users";
 const REGIST_URL = '/api/Auth/register/';
-const API_DT_URL = "/api/Auth/users/filter/";
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetFilter = {
         Draw: number,
@@ -69,7 +69,7 @@ export const UserSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
-        
+
         builder.addCase(userRegistration.fulfilled, (state, action) => {
             state.users.push(action.payload);
         });

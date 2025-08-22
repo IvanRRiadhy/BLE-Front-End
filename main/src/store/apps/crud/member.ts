@@ -7,6 +7,7 @@ import { defaultMemberFilter } from "../defaultForm";
 
 const API_URL = "/api/MstMember/";
 const API_DT_URL = "/api/MstMember/filter/";
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetFilter = {
         Draw: number,
@@ -148,19 +149,15 @@ export const MemberSlice = createSlice({
             .addCase(fetchMemberDT.fulfilled, (state, action) => {
                 state.memberTotalCount = action.payload.recordsTotal;
                 state.memberFilteredCount = action.payload.recordsFiltered;
-                setTimeout(() => {
                     state.isLoading = false;
                     state.hasLoaded = true;
-                }, 1000); // Simulate loading delay
             })
             .addCase(fetchMemberDT.rejected, (_state, action) => {
                 console.error("Fetch failed: ", action.payload);
                 // _state.memberTotalCount = 0;
                 _state.memberFilteredCount = 0;
-                setTimeout(() => {
                     _state.isLoading = false;
                     _state.hasLoaded = true;
-                }, 1000); // Simulate loading delay
             });
     },
 });

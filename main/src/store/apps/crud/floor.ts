@@ -8,6 +8,7 @@ import { BuildingType } from "./building";
 
 const API_URL = "/api/MstFloor/";
 const API_DT_URL = "/api/MstFloor/filter/";
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetFilter = {
         Draw: number,
@@ -106,11 +107,20 @@ export const FloorSlice = createSlice({
 
     extraReducers: (builder) => {
         builder
+        .addCase(addFloor.pending, (state) => {
+            state.isLoading = true;
+        })
             .addCase(addFloor.fulfilled, (state, action) => {
                 state.floors.push(action.payload);
+                state.isLoading = false;
             })
             .addCase(addFloor.rejected, (_state, action) => {
                 console.error("Add floor failed: ", action.payload);
+                _state.isLoading = false;
+            })
+            .addCase(editFloor.pending, (state) => {
+                state.isLoading = true;
+
             })
             .addCase(editFloor.fulfilled, (state, action) => {
                 const index = state.floors.findIndex((floor) => floor.id === action.payload.id);
@@ -118,15 +128,21 @@ export const FloorSlice = createSlice({
                     state.floors[index] = action.payload;
                     state.selectedFloor = action.payload;
                 }
+                state.isLoading = false;
             })
             .addCase(editFloor.rejected, (_state, action) => {
                 console.error("Update failed: ", action.payload);
+                _state.isLoading = false;
+            })
+            .addCase(deleteFloor.pending, (state) => {
+                state.isLoading = true;
             })
             .addCase(deleteFloor.fulfilled, (state, action) => {
                 state.floors = state.floors.filter(floor => floor.id !== action.payload);
                 if (state.selectedFloor?.id === action.payload) {
                     state.selectedFloor = null;
                 }
+                state.isLoading = false;
             })
             .addCase(deleteFloor.rejected, (_state, action) => {
                 console.error("Delete failed: ", action.payload);
@@ -142,10 +158,9 @@ export const FloorSlice = createSlice({
                 console.error("Error fetching floors: ", action.payload);
                 // _state.floorTotalCount = 0;
                 _state.floorFilteredCount = 0;
-                setTimeout(() => {
+
                     _state.isLoading = false;
                     _state.hasLoaded = true;
-                }, 1000); // Simulate loading delay
             })
         }
 });

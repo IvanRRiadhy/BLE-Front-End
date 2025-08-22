@@ -8,6 +8,7 @@ import { defaultBrandFilter } from "../defaultForm";
 
 const API_URL = "/api/MstBrand/";
 const API_DT_URL = "/api/MstBrand/filter/";
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetFilter = {
         Draw: number,
@@ -121,19 +122,15 @@ export const BrandSlice = createSlice({
         .addCase(fetchBrandDT.fulfilled, (state, action) => {
             state.brandTotalCount = action.payload.recordsTotal;
             state.brandFilteredCount = action.payload.recordsFiltered;
-            setTimeout(() => {
                 state.isLoading = false;
                 state.hasLoaded = true;
-            }, 1000); // Simulate loading delay
         })
         .addCase(fetchBrandDT.rejected, (_state, action) => {
             console.error("Error fetching brands: ", action.payload);
             // _state.brandTotalCount = 0;
             _state.brandFilteredCount = 0;
-            setTimeout(() => {
                 _state.isLoading = false;
                 _state.hasLoaded = true;
-            }, 1000); // Simulate loading delay
         });
     },
 });

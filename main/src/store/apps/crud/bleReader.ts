@@ -8,6 +8,7 @@ import { defaultBleReaderFilter } from "../defaultForm";
 
 const API_URL = "/api/MstBleReader/";
 const API_DT_URL = "/api/MstBleReader/filter/";
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetFilter = {
         Draw: number,
@@ -60,7 +61,9 @@ interface StateType {
     editedBleReader?: string;
     bleReaderTotalCount: number;
     bleReaderFilterCount: number;
-    bleReaderFilter: GetFilter
+    bleReaderFilter: GetFilter;
+    isLoading: boolean;
+    hasLoaded: boolean;
 }
 
 const initialState: StateType = {
@@ -72,6 +75,8 @@ const initialState: StateType = {
     bleReaderTotalCount: 0,
     bleReaderFilterCount: 0,
     bleReaderFilter: defaultBleReaderFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const BleReaderSlice = createSlice({
@@ -145,11 +150,19 @@ UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
     },
     extraReducers: (builder) => {
         builder
+        .addCase(addBleReader.pending, (state) => {
+            state.isLoading = true;
+        })
         .addCase(addBleReader.fulfilled, (state, action) => {
             state.bleReaders.push(action.payload);
+            state.isLoading = false;
         })
         .addCase(addBleReader.rejected, (_state, action) => {
             console.error("Add bleReader failed: ", action.payload);
+            _state.isLoading = false;
+        })
+        .addCase(editBleReader.pending, (state) => {
+            state.isLoading = true;
         })
         .addCase(editBleReader.fulfilled, (state, action) => {
             const index = state.bleReaders.findIndex((bleReader) => bleReader.id === action.payload.id);
@@ -157,24 +170,43 @@ UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
                 state.bleReaders[index] = action.payload;
                 state.selectedBleReader = action.payload;
             }
+            state.isLoading = false;
         })
         .addCase(editBleReader.rejected, (_state, action) => {
             console.error("Update failed: ", action.payload);
+            _state.isLoading = false;
+        })
+        .addCase(deleteBleReader.pending, (state) => {
+            state.isLoading = true;
         })
         .addCase(deleteBleReader.fulfilled, (state, action) => {
             state.bleReaders = state.bleReaders.filter(bleReader => bleReader.id !== action.payload);
             if (state.selectedBleReader?.id === action.payload) {
                 state.selectedBleReader = null;
             }
+            state.isLoading = false;
         })
         .addCase(deleteBleReader.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
+            _state.isLoading = false;
+        })
+        .addCase(fetchBleReaderDT.pending, (state) => {
+            state.isLoading = true;
+            state.hasLoaded = false;
         })
         .addCase(fetchBleReaderDT.fulfilled, (state, action) => {
             // console.log("Ble reader DT: ", action.payload.recordsTotal);
     state.bleReaderTotalCount = action.payload.recordsTotal;
     state.bleReaderFilterCount = action.payload.recordsFiltered;
+            state.isLoading = false;
+            state.hasLoaded = true;
   })
+  .addCase(fetchBleReaderDT.rejected, (_state, action) => {
+            console.error("Error fetching bleReaders: ", action.payload);
+            _state.bleReaderFilterCount = 0;
+            _state.isLoading = false;
+            _state.hasLoaded = false;
+        });
     },
 });
 
@@ -205,14 +237,19 @@ export const fetchBleReaders = () => async (dispatch: AppDispatch) => {
 export const fetchBleReaderDT = createAsyncThunk(
   "bleReaders/fetchBleReaderDT",
   async (filter: any, { rejectWithValue }) => {
+    const started = Date.now();
     try {
       const response = await axiosServices.post(API_DT_URL, filter);
         // console.log("Ble reader DT: ", response.data);
         dispatch(GetBleReader(response.data?.collection?.data || []));
       // Return only the serializable data
+        const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
       return response.data.collection; // or just response.data if needed
     } catch (error: any) {
       console.error("Error fetching bleReaders:", error);
+              const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
       return rejectWithValue(error.response?.data || "Unknown error");
     }
   }
@@ -222,12 +259,17 @@ export const fetchBleReaderDT = createAsyncThunk(
 export const addBleReader = createAsyncThunk(
     "bleReaders/addBleReader",
     async (newBleReader: bleReaderType, { rejectWithValue }) => {
+        const started = Date.now();
         try {
             const {id, createdBy, createdAt, updatedBy, updatedAt, ...filteredBleReaderData} = newBleReader
             const response = await axiosServices.post(API_URL, filteredBleReaderData);
+                    const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data;
         } catch (error: any) {
             console.error("Error adding bleReader:", error);
+                    const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     },
@@ -236,12 +278,17 @@ export const addBleReader = createAsyncThunk(
 export const editBleReader = createAsyncThunk(
     "bleReaders/editBleReader",
     async (updateBleReader: bleReaderType, {rejectWithValue}) => {
+        const started = Date.now();
         try {
             const { id, createdBy, createdAt, updatedBy, updatedAt, ...filteredBleReaderData } = updateBleReader;
             const response = await axiosServices.put(`${API_URL}${id}`, filteredBleReaderData);
+                    const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data;
         } catch (error: any) {
             console.error("Error editing bleReader:", error);
+                    const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     },
@@ -250,11 +297,16 @@ export const editBleReader = createAsyncThunk(
 export const deleteBleReader = createAsyncThunk(
     "bleReaders/deleteBleReader",
     async (bleReaderId: string, { rejectWithValue }) => {
+        const started = Date.now();
         try {
             await axiosServices.delete(`${API_URL}${bleReaderId}`);
+                    const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return bleReaderId; // Return the deleted bleReader's ID to update the state
         } catch (error: any) {
             console.error("Error deleting bleReader:", error);
+                    const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     },

@@ -7,6 +7,7 @@ import { defaultDepartmentFilter } from "../defaultForm";
 
 const API_URL = "/api/MstDepartment/";
 const API_DT_URL = "/api/MstDepartment/filter/";
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 
 export type GetFilter = {
@@ -91,11 +92,19 @@ export const DepartmentSlice = createSlice({
 
     extraReducers: (builder) => {
         builder
+        .addCase(addDepartment.pending, (state) => {
+            state.isLoading = true;
+        })
         .addCase(addDepartment.fulfilled, (state, action) => {
             state.departments.push(action.payload);
+            state.isLoading = false;
         })
         .addCase(addDepartment.rejected, (_state, action) => {
             console.error("Add department failed: ", action.payload);
+            _state.isLoading = false;
+        })
+        .addCase(editDepartment.pending, (state) => {
+            state.isLoading = true;
         })
         .addCase(editDepartment.fulfilled, (state, action) => {
             const index = state.departments.findIndex((department) => department.id === action.payload.id);
@@ -103,37 +112,41 @@ export const DepartmentSlice = createSlice({
                 state.departments[index] = action.payload;
                 state.selectedDepartment = action.payload;
             }
+            state.isLoading = false;
         })
         .addCase(editDepartment.rejected, (_state, action) => {
             console.error("Update failed: ", action.payload);
+            _state.isLoading = false;
+        })
+        .addCase(deleteDepartment.pending, (state) => {
+            state.isLoading = true;
         })
         .addCase(deleteDepartment.fulfilled, (state, action) => {
             state.departments = state.departments.filter(department => department.id !== action.payload);
             if (state.selectedDepartment?.id === action.payload) {
                 state.selectedDepartment = null;
             }
+            state.isLoading = false;
         })
         .addCase(deleteDepartment.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
+            _state.isLoading = false;
         })
         .addCase(fetchDepartmentDT.pending, (state) => {
             state.isLoading = true;
+            state.hasLoaded = false;
         })
         .addCase(fetchDepartmentDT.fulfilled, (state, action) => {
             state.departmentTotalCount = action.payload.recordsTotal;
             state.departmentFilteredCount = action.payload.recordsFiltered;
-            setTimeout(() => {
                 state.isLoading = false;
                 state.hasLoaded = true;
-            }, 1000);
         })
         .addCase(fetchDepartmentDT.rejected, (_state, action) => {
             console.error("Error fetching departments: ", action.payload);
             _state.departmentFilteredCount = 0;
-            setTimeout(() => {
                 _state.isLoading = false;
-                _state.hasLoaded = true;
-            }, 1000); // Simulate loading delay
+                _state.hasLoaded = false;
         });
     }
 });
@@ -171,46 +184,66 @@ export const fetchDepartments = () => async (dispatch: AppDispatch) => {
 export const fetchDepartmentDT = createAsyncThunk(
     "departments/fetchDepartmentDT",
     async (filter: any, { rejectWithValue }) => {
+        const started = Date.now();
         try {
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetDepartments(response.data.collection.data || []));
             // console.log("Fetch departments", response.data.collection);
+                    const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching departments:", error);
+                    const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
 )
 
 export const addDepartment = createAsyncThunk("departments/addDepartment", async (department: DepartmentType, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         const {id,createdBy, createdAt, updatedBy, updatedAt, ...filteredDepartmentData} = department
         const response = await axiosServices.post(API_URL, filteredDepartmentData);
+                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error: any) {
         console.error("Error adding department:", error);
+                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });
 
 export const editDepartment = createAsyncThunk("departments/editDepartment", async (department: DepartmentType, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         const { id, createdBy, createdAt, updatedBy, updatedAt, ...filteredDepartmentData } = department;
         const response = await axiosServices.put(`${API_URL}${id}`, filteredDepartmentData);
+                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error: any) {
         console.error("Error editing department:", error);
+                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });
 
 export const deleteDepartment = createAsyncThunk("departments/deleteDepartment", async (departmentId: string, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         await axiosServices.delete(`${API_URL}${departmentId}`);
+                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return departmentId; // Return the deleted department's ID to update the state
     } catch (error: any) {
         console.error("Error deleting department:", error);
+                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });

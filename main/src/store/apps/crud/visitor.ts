@@ -12,6 +12,7 @@ const API_URL = "/api/Visitor/";
 const API_DT_URL = "/api/Visitor/filter/";
 const FILL_FORM_URL = '/api/Visitor/fill-invitation-form';
 const SEND_INVITATION_URL = '/api/Visitor/batch/send-invitation/';
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetFilter = {
         Draw: number,
@@ -183,19 +184,15 @@ UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
         .addCase(fetchVisitorDT.fulfilled, (state, action) => {
             state.visitorTotalCount = action.payload.recordsTotal;
             state.visitorFilteredCount = action.payload.recordsFiltered;
-            setTimeout(() => {
                 state.isLoading = false;
                 state.hasLoaded = true;
-            }, 1000); // Simulate loading delay
         })
         .addCase(fetchVisitorDT.rejected, (_state, action) => {
             console.error("Error fetching visitors: ", action.payload);
             // _state.visitorTotalCount = 0;
             _state.visitorFilteredCount = 0;
-            setTimeout(() => {
                 _state.isLoading = false;
                 _state.hasLoaded = true;
-            }, 1000); // Simulate loading delay
         })
     },
 

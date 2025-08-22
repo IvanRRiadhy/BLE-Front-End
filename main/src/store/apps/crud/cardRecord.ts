@@ -11,6 +11,7 @@ import { create } from "lodash";
 
 const API_URL = "/api/CardRecord/";
 const API_DT_URL = "/api/CardRecord/filter/";
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetFilter = {
         Draw: number,
@@ -100,23 +101,20 @@ export const CardRecordSlice = createSlice({
         builder
         .addCase(fetchCardRecordDt.pending, (state) => {
             state.isLoading = true;
+            state.hasLoaded = false;
         })
         .addCase(fetchCardRecordDt.fulfilled, (state, action) => {
             state.cardRecordTotalCount = action.payload.recordsTotal;
             state.cardRecordFilteredCount = action.payload.recordsFiltered;
-            setTimeout(() => {
                 state.isLoading = false;
                 state.hasLoaded = true;
-            }, 1000); // Simulate loading delay
         })
         .addCase(fetchCardRecordDt.rejected, (state, action) => {
             console.error("Error fetching card records:", action.error);
             state.cardRecordTotalCount = 0;
             state.cardRecordFilteredCount = 0;
-            setTimeout(() => {
                 state.isLoading = false;
-                state.hasLoaded = true;
-            }, 1000); // Simulate loading delay
+                state.hasLoaded = false;
         })
     }
 });
@@ -130,14 +128,19 @@ export const {
 export const fetchCardRecordDt = createAsyncThunk(
     "CardRecord/fetchCardRecordDt",
     async (filter: GetFilter, { rejectWithValue }) => {
+        const started = Date.now();
         try {
             console.log("Filter:", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetCardRecord(response.data.collection.data || []));
             console.log("Fetch card Records", response.data.collection);
+                    const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching card Records:", error);
+                    const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }

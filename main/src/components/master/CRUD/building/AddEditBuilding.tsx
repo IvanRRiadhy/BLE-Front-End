@@ -37,8 +37,8 @@ interface FormType {
 
 const AddEditBuilding = ({ type, building }: FormType) => {
   const [open, setOpen] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
-  const [isSaving, setIsSaving] = React.useState(false);
+  const isLoading = useSelector((state: RootState) => state.buildingReducer.isLoading);
+  const hasLoaded = useSelector((state: RootState) => state.buildingReducer.hasLoaded);
   const [error, setError] = React.useState(false);
   const [image, setImage] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(building?.image || null);
@@ -52,7 +52,6 @@ const AddEditBuilding = ({ type, building }: FormType) => {
   const buildingFilter = useSelector((state: RootState) => state.buildingReducer.buildingFilter);
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = async () => {
-    setLoading(true);
     setFormErrors({});
     if (type === 'edit') {
       if (!building?.id) {
@@ -68,7 +67,6 @@ const AddEditBuilding = ({ type, building }: FormType) => {
 
     // Simulate or wait for building data to finish preparing
     setTimeout(() => {
-      setLoading(false);
       setOpen(true);
     }, 100); // optional small delay for smoother UX
   };
@@ -145,7 +143,6 @@ const AddEditBuilding = ({ type, building }: FormType) => {
       toast.error('Please fill in all required fields correctly.');
       return;
     }
-    setLoading(true);
     try {
       const data = new FormData();
 
@@ -180,9 +177,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
         console.log('Building saved successfully');
         await dispatch(fetchBuildingDT(buildingFilter));
         toast.success('Data Saved');
-        setTimeout(() => {
           handleClose();
-        }, 1000);
       } else {
         toast.error('Saving Data Unsuccessful');
 
@@ -194,7 +189,6 @@ const AddEditBuilding = ({ type, building }: FormType) => {
       setError(true);
     }
     setTimeout(() => {
-      setLoading(false);
       setError(false);
     }, 1000);
   };
@@ -219,7 +213,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
           </Button>
         </Tooltip>
       )}
-      {!loading && (
+      {hasLoaded && (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>
             <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
@@ -233,7 +227,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="department-Name">Building Name</CustomFormLabel>
                 <CustomTextField
                   id="name"
@@ -250,7 +244,11 @@ const AddEditBuilding = ({ type, building }: FormType) => {
             </Grid>
             <Grid container spacing={5} mb={3}>
               <Grid size={6}>
-                <CustomFormLabel htmlFor="building-image" error={!!formErrors.image} required>
+                <CustomFormLabel
+                  htmlFor="building-image"
+                  required
+                  sx={formErrors.image ? { color: 'error.main' } : undefined}
+                >
                   Building Image
                 </CustomFormLabel>
                 <input
@@ -291,14 +289,14 @@ const AddEditBuilding = ({ type, building }: FormType) => {
               onClick={handleSave}
               variant="contained"
               sx={{ fontSize: '1rem', py: 1, px: 3 }}
-              disabled={isSaving}
+              disabled={isLoading}
             >
-              {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
+              {isLoading ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </DialogActions>
         </Dialog>
       )}
-      {loading && (
+      {isLoading && (
         <Dialog open={true} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h1" mb={5}>

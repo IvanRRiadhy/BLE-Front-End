@@ -36,6 +36,8 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
+  const isLoading = useSelector((state: RootState) => state.CCTVReducer.isLoading);
+  const hasLoaded = useSelector((state: RootState) => state.CCTVReducer.hasLoaded);
   const [formData, setFormData] = React.useState<CCTVType>({
     ...defaultAccessCCTVForm,
     ...cctv,
@@ -135,7 +137,7 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
           </Button>
         </Tooltip>
       )}
-      {!loading && (
+      {hasLoaded && (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>
             <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
@@ -144,12 +146,8 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
             <Divider />
           </DialogTitle>
           <DialogContent>
-            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-              Access CCTV Details
-            </Typography>
-            <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="cctv-Name">Name</CustomFormLabel>
                 <CustomTextField
                   id="name"
@@ -162,7 +160,7 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
                   helperText={formErrors.name}
                 />
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="cctv-RTSP">RTSP</CustomFormLabel>
                 <CustomTextField
                   id="rtsp"
@@ -189,14 +187,14 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
               onClick={handleSave}
               variant="contained"
               sx={{ fontSize: '1rem', py: 1, px: 3 }}
-              disabled={isSaving}
+              disabled={isLoading}
             >
-              {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
+              {isLoading ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </DialogActions>
         </Dialog>
       )}
-      {loading && (
+      {isLoading && (
         <Dialog open={true} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h1" mb={5}>

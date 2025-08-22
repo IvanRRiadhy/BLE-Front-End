@@ -6,9 +6,11 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { masterVisitorType } from "./visitor";
 import { MaskedAreaType } from "./maskedArea";
 import { defaultBlaclistFilter } from "../defaultForm";
+import { stat } from "fs";
 
 const API_URL = '/api/VisitorBlacklistArea/';
 const API_DT_URL = '/api/VisitorBlacklistArea/filter/';
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetFilter = {
         Draw: number,
@@ -96,46 +98,59 @@ export const BlacklistSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+        .addCase(addBlacklist.pending, (state) => {
+            state.isLoading = true;
+        })
         .addCase(addBlacklist.fulfilled, (state, action) => {
             state.blacklists.push(action.payload);
+
+            state.isLoading = false;
         })
         .addCase(addBlacklist.rejected, (_state, action) => {
             console.error("Add failed: ", action.payload);
+            _state.isLoading = false;
+        })
+        .addCase(editBlacklist.pending, (state) => {
+            state.isLoading = true;
         })
         .addCase(editBlacklist.fulfilled, (state, action) => {
             const index = state.blacklists.findIndex((blacklist: blacklistType) => blacklist.id === action.payload.id);
             if (index !== -1) {
                 state.blacklists[index] = action.payload;
             }
+            state.selectedBlacklist = action.payload;
         })
         .addCase(editBlacklist.rejected, (_state, action) => {
             console.error("Update failed: ", action.payload);
+            _state.isLoading = false;
+        })
+        .addCase(deleteBlacklist.pending, (state) => {
+            state.isLoading = true;
         })
         .addCase(deleteBlacklist.fulfilled, (state, action) => {
             state.blacklists = state.blacklists.filter((blacklist: blacklistType) => blacklist.id !== action.payload);
+            state.isLoading = false;
         })
         .addCase(deleteBlacklist.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
+            _state.isLoading = false;
         })
         .addCase(fetchBlacklistDT.pending, (state) => {
             state.isLoading = true;
+            state.hasLoaded = false;
         })
         .addCase(fetchBlacklistDT.fulfilled, (state, action) => {
             state.blacklistTotalCount = action.payload.recordsTotal;
             state.blacklistFilteredCount = action.payload.recordsFiltered;
-            setTimeout(() => {
                 state.isLoading = false;
                 state.hasLoaded = true;
-            }, 1000); // Simulate loading delay
         })
         .addCase(fetchBlacklistDT.rejected, (_state, action) => {
             console.error("Error fetching blacklists: ", action.payload);
             // _state.blacklistTotalCount = 0;
             _state.blacklistFilteredCount = 0;
-            setTimeout(() => {
                 _state.isLoading = false;
-                _state.hasLoaded = true;
-            }, 1000); // Simulate loading delay
+                _state.hasLoaded = false;
         });
     },
 });
@@ -160,6 +175,7 @@ export const fetchBlacklist = () => async (dispatch: AppDispatch) => {
 export const fetchBlacklistDT = createAsyncThunk(
     "blacklist/fetchBlacklistDT",
     async (filter: any, { rejectWithValue }) => {
+        const started = Date.now();
         try {
                                 if (
             filter?.filters &&
@@ -171,48 +187,69 @@ export const fetchBlacklistDT = createAsyncThunk(
             // Option 1: just return null (success, no data)
             // return null;
             // Option 2: reject, if you want to treat as error
+                              const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue("Filter contains 'Empty', skipping request");
         }
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetBlaclist(response.data.collection.data || []));
             // console.log("Fetch blacklists", response.data.collection);
+                              const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching blacklists:", error);
+                              const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
 )
 
 export const addBlacklist = createAsyncThunk("blacklist/addBlacklist", async (formData: FormData) => {
+    const started = Date.now();
     try {
         formData.delete('id');
         const response = await axiosServices.post(API_URL, formData);
+                          const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error) {
         console.error("Error adding blacklist:", error);
+                          const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 });
 
 export const editBlacklist = createAsyncThunk("blacklist/editBlacklist", async (formData: FormData) => {
+    const started = Date.now();
     try {
         const id = formData.get('id');
         formData.delete('id');
         const response = await axiosServices.put(`${API_URL}${id}`, formData);
+                          const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error) {
         console.error("Error editing blacklist:", error);
+                          const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 });
 
 export const deleteBlacklist = createAsyncThunk("blacklist/deleteBlacklist", async (blacklistId: string) => {
+    const started = Date.now();
     try {
         await axiosServices.delete(`${API_URL}${blacklistId}`);
+                          const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return blacklistId; // Return the deleted blacklist's ID to update the state
     } catch (error) {
         console.error("Error deleting blacklist:", error);
+                          const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 });
