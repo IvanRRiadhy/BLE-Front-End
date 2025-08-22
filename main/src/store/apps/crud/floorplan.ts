@@ -67,6 +67,8 @@ interface StateType {
     floorplanTotalCount: number;
     floorplanFilteredCount: number;
     floorplanFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
 };
 
 const initialState: StateType = {
@@ -77,6 +79,8 @@ const initialState: StateType = {
     floorplanTotalCount: 0,
     floorplanFilteredCount: 0,
     floorplanFilter: defaultFloorplanFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const FloorplanSlice = createSlice({
@@ -105,10 +109,22 @@ export const FloorplanSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            .addCase(fetchFloorplanDT.pending, (state) => {
+                state.isLoading = true;
+            })
             .addCase(fetchFloorplanDT.fulfilled, (state, action) => {
                 state.floorplanTotalCount = action.payload.recordsTotal;
                 state.floorplanFilteredCount = action.payload.recordsFiltered;
-            });
+            })
+            .addCase(fetchFloorplanDT.rejected, (_state, action) => {
+                console.error("Error fetching floorplans: ", action.payload);
+                // _state.floorplanTotalCount = 0;
+                _state.floorplanFilteredCount = 0;
+                setTimeout(() => {
+                    _state.isLoading = false;
+                    _state.hasLoaded = true;
+                }, 1000); // Simulate loading delay
+            })
     },
 });
 

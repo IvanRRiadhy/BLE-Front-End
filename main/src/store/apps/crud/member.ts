@@ -78,6 +78,8 @@ interface StateType {
     memberTotalCount: number;
     memberFilteredCount: number;
     memberFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
 }
 
 const initialState: StateType = {
@@ -89,6 +91,8 @@ const initialState: StateType = {
     memberTotalCount: 0,
     memberFilteredCount: 0,
     memberFilter: defaultMemberFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const MemberSlice = createSlice({
@@ -138,10 +142,26 @@ export const MemberSlice = createSlice({
             .addCase(deleteMember.rejected, (_state, action) => {
                 console.error("Delete failed: ", action.payload);
             })
+            .addCase(fetchMemberDT.pending, (state) => {
+                state.isLoading = true;
+            })
             .addCase(fetchMemberDT.fulfilled, (state, action) => {
                 state.memberTotalCount = action.payload.recordsTotal;
                 state.memberFilteredCount = action.payload.recordsFiltered;
+                setTimeout(() => {
+                    state.isLoading = false;
+                    state.hasLoaded = true;
+                }, 1000); // Simulate loading delay
             })
+            .addCase(fetchMemberDT.rejected, (_state, action) => {
+                console.error("Fetch failed: ", action.payload);
+                // _state.memberTotalCount = 0;
+                _state.memberFilteredCount = 0;
+                setTimeout(() => {
+                    _state.isLoading = false;
+                    _state.hasLoaded = true;
+                }, 1000); // Simulate loading delay
+            });
     },
 });
 

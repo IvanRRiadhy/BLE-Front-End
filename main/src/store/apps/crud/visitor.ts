@@ -111,6 +111,8 @@ interface StateType {
     visitorTotalCount: number,
     visitorFilteredCount: number,
     visitorFilter: GetFilter,
+    isLoading: boolean;
+    hasLoaded: boolean;
 }
 
 const initialState: StateType = {
@@ -122,6 +124,8 @@ const initialState: StateType = {
     visitorTotalCount: 0,
     visitorFilteredCount: 0,
     visitorFilter: defaultVisitorFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const VisitorSlice = createSlice({
@@ -173,10 +177,26 @@ UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
         .addCase(deleteVisitor.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
         })
+        .addCase(fetchVisitorDT.pending, (state) => {
+            state.isLoading = true;
+        })
         .addCase(fetchVisitorDT.fulfilled, (state, action) => {
             state.visitorTotalCount = action.payload.recordsTotal;
             state.visitorFilteredCount = action.payload.recordsFiltered;
-        });
+            setTimeout(() => {
+                state.isLoading = false;
+                state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
+        })
+        .addCase(fetchVisitorDT.rejected, (_state, action) => {
+            console.error("Error fetching visitors: ", action.payload);
+            // _state.visitorTotalCount = 0;
+            _state.visitorFilteredCount = 0;
+            setTimeout(() => {
+                _state.isLoading = false;
+                _state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
+        })
     },
 
 });

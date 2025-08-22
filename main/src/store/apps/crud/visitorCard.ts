@@ -60,6 +60,8 @@ interface StateType {
     visitorCardAll: VisitorCardType[];
     visitorCardSearch: string;
     visitorCardFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
     visitorCardTotalCount: number;
     visitorCardFilteredCount: number;
 };

@@ -64,6 +64,8 @@ interface StateType {
     trackingTransTotalCount: number;
     trackingTransFilteredCount: number;
     trackingTransFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
 }
 
 const initialState: StateType = {
@@ -74,6 +76,8 @@ const initialState: StateType = {
     trackingTransTotalCount: 0,
     trackingTransFilteredCount: 0,
     trackingTransFilter: defaultTrackingTransFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const TrackingTransSlice = createSlice({
@@ -120,15 +124,26 @@ export const TrackingTransSlice = createSlice({
         .addCase(deleteTrackingTrans.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
         })
+        .addCase(fetchTrackingTransDT.pending, (state) => {
+            state.isLoading = true;
+        })
         .addCase(fetchTrackingTransDT.fulfilled, (state, action) => {
             state.trackingTransTotalCount = action.payload.recordsTotal;
             state.trackingTransFilteredCount = action.payload.recordsFiltered;
+            setTimeout(() => {
+                state.isLoading = false;
+                state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
         })
         .addCase(fetchTrackingTransDT.rejected, (_state, action) => {
             console.error("Error fetching tracking transactions: ", action.payload);
             _state.trackingTrans = [];
             _state.trackingTransTotalCount = 0;
             _state.trackingTransFilteredCount = 0;
+            setTimeout(() => {
+                _state.isLoading = false;
+                _state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
         });
     },
 });

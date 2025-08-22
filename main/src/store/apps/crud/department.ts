@@ -54,6 +54,8 @@ interface StateType {
     departmentTotalCount: number;
     departmentFilteredCount: number;
     departmentFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
 }
 
 const initialState: StateType = {
@@ -63,6 +65,8 @@ const initialState: StateType = {
     departmentTotalCount: 0,
     departmentFilteredCount: 0,
     departmentFilter: defaultDepartmentFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const DepartmentSlice = createSlice({
@@ -112,10 +116,25 @@ export const DepartmentSlice = createSlice({
         .addCase(deleteDepartment.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
         })
+        .addCase(fetchDepartmentDT.pending, (state) => {
+            state.isLoading = true;
+        })
         .addCase(fetchDepartmentDT.fulfilled, (state, action) => {
             state.departmentTotalCount = action.payload.recordsTotal;
             state.departmentFilteredCount = action.payload.recordsFiltered;
+            setTimeout(() => {
+                state.isLoading = false;
+                state.hasLoaded = true;
+            }, 1000);
         })
+        .addCase(fetchDepartmentDT.rejected, (_state, action) => {
+            console.error("Error fetching departments: ", action.payload);
+            _state.departmentFilteredCount = 0;
+            setTimeout(() => {
+                _state.isLoading = false;
+                _state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
+        });
     }
 });
 

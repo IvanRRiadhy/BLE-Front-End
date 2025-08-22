@@ -53,6 +53,8 @@ interface StateType {
     organizationTotalCount: number;
     organizationFilteredCount: number;
     organizationFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
 }
 
 const initialState: StateType = {
@@ -62,6 +64,8 @@ const initialState: StateType = {
     organizationTotalCount: 0,
     organizationFilteredCount: 0,
     organizationFilter: defaultOrganizationFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const OrganizationSlice = createSlice({
@@ -106,9 +110,25 @@ export const OrganizationSlice = createSlice({
             .addCase(deleteOrganization.rejected, (_state, action) => {
                 console.error("Delete failed: ", action.payload);
             })
+            .addCase(fetchOrganizationDT.pending, (state) => {
+                state.isLoading = true;
+            })
             .addCase(fetchOrganizationDT.fulfilled, (state, action) => {
                 state.organizationTotalCount = action.payload.recordsTotal;
                 state.organizationFilteredCount = action.payload.recordsFiltered;
+                setTimeout(() => {
+                    state.isLoading = false;
+                    state.hasLoaded = true;
+                }, 1000); // Simulate loading delay
+            })
+            .addCase(fetchOrganizationDT.rejected, (_state, action) => {
+                console.error("Fetch failed: ", action.payload);
+                // _state.organizationTotalCount = 0;
+                _state.organizationFilteredCount = 0;
+                setTimeout(() => {
+                    _state.isLoading = false;
+                    _state.hasLoaded = true;
+                }, 1000); // Simulate loading delay
             });
     }
 });

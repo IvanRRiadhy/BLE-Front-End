@@ -58,6 +58,8 @@ interface StateType {
     IntegrationTotalCount: number;
     IntegrationFilteredCount: number;
     IntegrationFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
 }
 
 const initialState: StateType = {
@@ -67,6 +69,8 @@ const initialState: StateType = {
     IntegrationTotalCount: 0,
     IntegrationFilteredCount: 0,
     IntegrationFilter: defaultIntegrationFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const IntegrationSlice = createSlice({
@@ -115,12 +119,25 @@ export const IntegrationSlice = createSlice({
             .addCase(deleteIntegration.rejected, (_state, action) => {
                 console.error("Delete failed: ", action.payload);
             })
+            .addCase(fetchIntegrationDT.pending, (state) => {
+                state.isLoading = true;
+            })
             .addCase(fetchIntegrationDT.fulfilled, (state, action) => {
                 state.IntegrationTotalCount = action.payload.recordsTotal;
                 state.IntegrationFilteredCount = action.payload.recordsFiltered;
+                setTimeout(() => {
+                    state.isLoading = false;
+                    state.hasLoaded = true;
+                }, 1000); // Simulate loading delay
             })
             .addCase(fetchIntegrationDT.rejected, (_state, action) => {
                 console.error("Fetch failed: ", action.payload);
+                // _state.IntegrationTotalCount = 0;
+                _state.IntegrationFilteredCount = 0;
+                setTimeout(() => {
+                    _state.isLoading = false;
+                    _state.hasLoaded = true;
+                }, 1000); // Simulate loading delay
             });
         }
 });

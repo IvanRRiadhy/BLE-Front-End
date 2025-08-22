@@ -40,6 +40,8 @@ interface StateType {
     userTotalCount: number;
     userFilteredCount: number;
     userFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
 }
 
 const initialState: StateType = {
@@ -48,6 +50,8 @@ const initialState: StateType = {
     userTotalCount: 0,
     userFilteredCount: 0,
     userFilter: {} as GetFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const UserSlice = createSlice({
@@ -65,6 +69,7 @@ export const UserSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
+        
         builder.addCase(userRegistration.fulfilled, (state, action) => {
             state.users.push(action.payload);
         });

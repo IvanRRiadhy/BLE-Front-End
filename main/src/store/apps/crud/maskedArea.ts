@@ -87,6 +87,8 @@ interface StateType {
     maskedAreaTotalCount: number;
     maskedAreaFilteredCount: number;
     maskedAreaFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
 }
 
 const initialState: StateType = {
@@ -104,6 +106,8 @@ const initialState: StateType = {
     maskedAreaTotalCount: 0,
     maskedAreaFilteredCount: 0,
     maskedAreaFilter: defaultMaskedAreaFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const MaskedAreaSlice = createSlice({
@@ -277,16 +281,27 @@ export const MaskedAreaSlice = createSlice({
             .addCase(deleteMaskedArea.rejected, (_state, action) => {
                 console.error("Delete failed: ", action.payload);
             })
+            .addCase(fetchMaskedAreaDT.pending, (state) => {
+                state.isLoading = true;
+            })
             .addCase(fetchMaskedAreaDT.fulfilled, (state, action) => {
                 // console.log("Masked Area Records Total: ", action.payload.recordsTotal);
                 // console.log("Masked Area Records Filtered: ", action.payload.recordsFiltered);
                 state.maskedAreaTotalCount = action.payload.recordsTotal;
                 state.maskedAreaFilteredCount = action.payload.recordsFiltered;
+                setTimeout(() => {
+                    state.isLoading = false;
+                    state.hasLoaded = true;
+                }, 1000); // Simulate loading delay
             })
             .addCase(fetchMaskedAreaDT.rejected, (_state, action) => {
                 console.error("Fetch failed: ", action.payload);
                 // _state.maskedAreaTotalCount = 0;
                 _state.maskedAreaFilteredCount = 0;
+                setTimeout(() => {
+                    _state.isLoading = false;
+                    _state.hasLoaded = true;
+                })
             });
     },
 });

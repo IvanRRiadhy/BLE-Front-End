@@ -54,6 +54,8 @@ interface StateType {
     buildingTotalCount: number;
     buildingFilteredCount: number;
     buildingFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
 }
 
 const initialState: StateType = {
@@ -64,6 +66,8 @@ const initialState: StateType = {
     buildingTotalCount: 0,
     buildingFilteredCount: 0,
     buildingFilter: defaultBuildingFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const BuildingSlice = createSlice({
@@ -93,7 +97,24 @@ export const BuildingSlice = createSlice({
         .addCase(fetchBuildingDT.fulfilled, (state, action) => {
             state.buildingTotalCount = action.payload.recordsTotal;
             state.buildingFilteredCount = action.payload.recordsFiltered;
-        });
+            setTimeout(() => {
+                state.isLoading = false;
+                state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
+        })
+        .addCase(fetchBuildingDT.pending, (state) => {
+            state.isLoading = true;
+        })
+        .addCase(fetchBuildingDT.rejected, (state, action) => {
+            console.error("Error fetching buildings: ", action.payload);
+            // state.buildingTotalCount = 0;
+            state.buildingFilteredCount = 0;
+            setTimeout(() => {
+                state.isLoading = false;
+                state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
+        })
+
     }
 });
 

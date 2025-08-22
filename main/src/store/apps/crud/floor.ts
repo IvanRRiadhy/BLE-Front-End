@@ -64,6 +64,8 @@ interface StateType {
     floorTotalCount: number;
     floorFilteredCount: number;
     floorFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
 }
 
 const initialState: StateType = {
@@ -74,6 +76,8 @@ const initialState: StateType = {
     floorTotalCount: 0,
     floorFilteredCount: 0,
     floorFilter: defaultFloorFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const FloorSlice = createSlice({
@@ -127,9 +131,21 @@ export const FloorSlice = createSlice({
             .addCase(deleteFloor.rejected, (_state, action) => {
                 console.error("Delete failed: ", action.payload);
             })
+            .addCase(fetchFloorDT.pending, (state) => {
+                state.isLoading = true;
+            })
             .addCase(fetchFloorDT.fulfilled, (state, action) => {
                 state.floorTotalCount = action.payload.recordsTotal;
                 state.floorFilteredCount = action.payload.recordsFiltered;
+            })
+            .addCase(fetchFloorDT.rejected, (_state, action) => {
+                console.error("Error fetching floors: ", action.payload);
+                // _state.floorTotalCount = 0;
+                _state.floorFilteredCount = 0;
+                setTimeout(() => {
+                    _state.isLoading = false;
+                    _state.hasLoaded = true;
+                }, 1000); // Simulate loading delay
             })
         }
 });

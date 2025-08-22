@@ -53,6 +53,8 @@ interface StateType {
     districtTotalCount: number;
     districtFilteredCount: number;
     districtFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
 }
 
 const initialState: StateType = {
@@ -62,6 +64,8 @@ const initialState: StateType = {
     districtTotalCount: 0,
     districtFilteredCount: 0,
     districtFilter: defaultDistrictFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const DistrictSlice = createSlice({
@@ -111,10 +115,26 @@ export const DistrictSlice = createSlice({
         .addCase(deleteDistrict.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
         })
+        .addCase(fetchDistrictDT.pending, (state, action) => {
+
+            state.isLoading = true;
+        })
         .addCase(fetchDistrictDT.fulfilled, (state, action) => {
             state.districtTotalCount = action.payload.recordsTotal;
             state.districtFilteredCount = action.payload.recordsFiltered;
+            setTimeout(() => {
+                state.isLoading = false;
+                state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
         })
+        .addCase(fetchDistrictDT.rejected, (_state, action) => {
+            console.error("Error fetching districts: ", action.payload);
+            _state.districtFilteredCount = 0;
+            setTimeout(() => {
+                _state.isLoading = false;
+                _state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
+        });
     },
 }); 
 

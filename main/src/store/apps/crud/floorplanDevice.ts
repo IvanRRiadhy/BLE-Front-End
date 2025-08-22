@@ -82,6 +82,8 @@ interface StateType {
     floorplanDeviceTotalCount: number;
     floorplanDeviceFilteredCount: number;
     floorplanDeviceFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
 };
 
 const initialState: StateType = {
@@ -97,6 +99,8 @@ const initialState: StateType = {
     floorplanDeviceTotalCount: 0,
     floorplanDeviceFilteredCount: 0,
     floorplanDeviceFilter: defaultFloorplanDeviceFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const FloorplanDeviceSlice = createSlice({
@@ -265,14 +269,25 @@ export const FloorplanDeviceSlice = createSlice({
             .addCase(deleteFloorplanDevice.rejected, (_state, action) => {
                 console.error("Delete floorplan device failed: ", action.payload);
             })
+            .addCase(fetchFloorplanDeviceDT.pending, (state) => {
+                state.isLoading = true;
+            })
             .addCase(fetchFloorplanDeviceDT.fulfilled, (state, action) => {
                 state.floorplanDeviceTotalCount = action.payload.recordsTotal;
                 state.floorplanDeviceFilteredCount = action.payload.recordsFiltered;
+                setTimeout(() => {
+                    state.isLoading = false;
+                    state.hasLoaded = true;
+                }, 1000); // Simulate loading delay
             })
             .addCase(fetchFloorplanDeviceDT.rejected, (_state, action) => {
                 console.error("Fetch floorplan device DT failed: ", action.payload);
                 // _state.floorplanDeviceTotalCount = 0;
                 _state.floorplanDeviceFilteredCount = 0;
+                setTimeout(() => {
+                    _state.isLoading = false;
+                    _state.hasLoaded = true;
+                }, 1000); // Simulate loading delay
             })
             
     },

@@ -85,6 +85,8 @@ interface StateType {
     TrxVisitorTotalCount: number;
     TrxVisitorFilteredCount: number;
     TrxVisitorFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
 }
 
 const initialState: StateType = {
@@ -94,6 +96,8 @@ const initialState: StateType = {
     TrxVisitorTotalCount: 0,
     TrxVisitorFilteredCount: 0,
     TrxVisitorFilter: defaultTrxVisitorFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const TrxVisitorSlice = createSlice({
@@ -117,10 +121,26 @@ export const TrxVisitorSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+        .addCase(fetchTrxVisitorDT.pending, (state) => {
+            state.isLoading = true;
+        })
             .addCase(fetchTrxVisitorDT.fulfilled, (state, action) => {
                 state.TrxVisitorTotalCount = action.payload.recordsTotal;
                 state.TrxVisitorFilteredCount = action.payload.recordsFiltered;
-            });
+                setTimeout(() => {
+                    state.isLoading = false;
+                    state.hasLoaded = true;
+                }, 1000); // Simulate loading delay
+            })
+            .addCase(fetchTrxVisitorDT.rejected, (state, action) => {
+                console.error("Error fetching TrxVisitors: ", action.payload);
+                state.TrxVisitorTotalCount = 0;
+                state.TrxVisitorFilteredCount = 0;
+                setTimeout(() => {
+                    state.isLoading = false;
+                    state.hasLoaded = true;
+                }, 1000); // Simulate loading delay
+            })
     }
 });
 

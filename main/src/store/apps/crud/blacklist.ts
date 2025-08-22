@@ -59,6 +59,8 @@ interface StateType {
     blacklistTotalCount: number;
     blacklistFilteredCount: number;
     blacklistFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
 }
 
 const initialState: StateType = {
@@ -68,6 +70,8 @@ const initialState: StateType = {
     blacklistTotalCount: 0,
     blacklistFilteredCount: 0,
     blacklistFilter: defaultBlaclistFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const BlacklistSlice = createSlice({
@@ -113,14 +117,25 @@ export const BlacklistSlice = createSlice({
         .addCase(deleteBlacklist.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
         })
+        .addCase(fetchBlacklistDT.pending, (state) => {
+            state.isLoading = true;
+        })
         .addCase(fetchBlacklistDT.fulfilled, (state, action) => {
             state.blacklistTotalCount = action.payload.recordsTotal;
             state.blacklistFilteredCount = action.payload.recordsFiltered;
+            setTimeout(() => {
+                state.isLoading = false;
+                state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
         })
         .addCase(fetchBlacklistDT.rejected, (_state, action) => {
             console.error("Error fetching blacklists: ", action.payload);
             // _state.blacklistTotalCount = 0;
             _state.blacklistFilteredCount = 0;
+            setTimeout(() => {
+                _state.isLoading = false;
+                _state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
         });
     },
 });

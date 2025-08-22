@@ -58,6 +58,8 @@ interface StateType {
     cardAll: CardType[];
     cardSearch: string;
     cardFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
     cardTotalCount: number;
     cardFilteredCount: number;
     cardActiveCount: number;
@@ -71,12 +73,15 @@ const initialState: StateType = {
     cardAll: [],
     cardSearch: '',
     cardFilter: defaultCardFilter,
+    isLoading: false,
+    hasLoaded: false,
     cardTotalCount: 0,
     cardFilteredCount: 0,
     cardActiveCount: 0,
     cardNonActiveCount: 0,
     cardActiveData: [],
     cardNonActiveData: [],
+
 };
 
 export const CardSlice = createSlice({
@@ -111,6 +116,9 @@ export const CardSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+        .addCase(fetchCardDT.pending, (state) => {
+            state.isLoading = true;
+        })
 .addCase(fetchCardDT.fulfilled, (state, action) => {
     const cardData: CardType[] = action.payload.data || [];
 
@@ -120,13 +128,21 @@ export const CardSlice = createSlice({
     // Update counts
     state.cardFilteredCount = action.payload.recordsFiltered || 0;
     state.cardTotalCount = action.payload.recordsTotal || 0;
-
+    setTimeout(() => {
+        state.isLoading = false;
+        state.hasLoaded = true;
+    }, 1000); // Simulate loading delay
     // // Count active and inactive
     // state.cardActiveCount = cardData.filter(card => card.isUsed).length;
     // state.cardNonActiveCount = cardData.filter(card => !card.isUsed).length;
 })
             .addCase(fetchCardDT.rejected, (state, action) => {
                 console.error("Error fetching card data:", action.error, state);
+                state.cardFilteredCount = 0;
+                setTimeout(() => {
+                    state.isLoading = false;
+                    state.hasLoaded = true;
+                }, 1000); // Simulate loading delay
             })
             .addCase(addCard.fulfilled, (state, action) => {
                 state.cards.push(action.payload);

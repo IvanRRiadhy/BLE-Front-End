@@ -49,6 +49,8 @@ interface StateType {
     brandTotalCount: number;
     brandFilteredCount: number;
     brandFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
 }
 
 const initialState: StateType = {
@@ -59,6 +61,8 @@ const initialState: StateType = {
     brandTotalCount: 0,
     brandFilteredCount: 0,
     brandFilter: defaultBrandFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const BrandSlice = createSlice({
@@ -111,10 +115,26 @@ export const BrandSlice = createSlice({
         .addCase(deleteBrand.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
         })
+        .addCase(fetchBrandDT.pending, (state) => {
+            state.isLoading = true;
+        })
         .addCase(fetchBrandDT.fulfilled, (state, action) => {
             state.brandTotalCount = action.payload.recordsTotal;
             state.brandFilteredCount = action.payload.recordsFiltered;
+            setTimeout(() => {
+                state.isLoading = false;
+                state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
         })
+        .addCase(fetchBrandDT.rejected, (_state, action) => {
+            console.error("Error fetching brands: ", action.payload);
+            // _state.brandTotalCount = 0;
+            _state.brandFilteredCount = 0;
+            setTimeout(() => {
+                _state.isLoading = false;
+                _state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
+        });
     },
 });
 

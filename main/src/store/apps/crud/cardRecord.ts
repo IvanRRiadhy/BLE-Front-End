@@ -68,6 +68,8 @@ interface StateType {
     cardRecordAll: CardRecordType[];
     cardRecordSearch: string;
     cardRecordFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
     cardRecordTotalCount: number;
     cardRecordFilteredCount: number;
 };
@@ -77,6 +79,8 @@ const initialState: StateType = {
     cardRecordAll: [],
     cardRecordSearch: '',
     cardRecordFilter: defaultCardRecordFilter,
+    isLoading: false,
+    hasLoaded: false,
     cardRecordTotalCount: 0,
     cardRecordFilteredCount: 0,
 };
@@ -94,9 +98,25 @@ export const CardRecordSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+        .addCase(fetchCardRecordDt.pending, (state) => {
+            state.isLoading = true;
+        })
         .addCase(fetchCardRecordDt.fulfilled, (state, action) => {
             state.cardRecordTotalCount = action.payload.recordsTotal;
             state.cardRecordFilteredCount = action.payload.recordsFiltered;
+            setTimeout(() => {
+                state.isLoading = false;
+                state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
+        })
+        .addCase(fetchCardRecordDt.rejected, (state, action) => {
+            console.error("Error fetching card records:", action.error);
+            state.cardRecordTotalCount = 0;
+            state.cardRecordFilteredCount = 0;
+            setTimeout(() => {
+                state.isLoading = false;
+                state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
         })
     }
 });

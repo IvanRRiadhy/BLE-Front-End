@@ -54,6 +54,8 @@ interface StateType {
     cctvTotalCount: number;
     cctvFilteredCount: number;
     cctvFilter: GetFilter;
+isLoading: boolean;
+hasLoaded: boolean;
 }
 
 const initialState: StateType = {
@@ -63,6 +65,8 @@ const initialState: StateType = {
     cctvTotalCount: 0,
     cctvFilteredCount: 0,
     cctvFilter: defaultAccessCCTVFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 
 export const CCTVSlice = createSlice({
@@ -114,14 +118,25 @@ export const CCTVSlice = createSlice({
         .addCase(deleteCCTV.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
         })
+        .addCase(fetchAccessCCTVDT.pending, (state) => {
+            state.isLoading = true;
+        })
         .addCase(fetchAccessCCTVDT.fulfilled, (state, action) => {
             state.cctvTotalCount = action.payload.recordsTotal;
             state.cctvFilteredCount = action.payload.recordsFiltered;
+            setTimeout(() => {
+                state.isLoading = false;
+                state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
         })
         .addCase(fetchAccessCCTVDT.rejected, (_state, action) => {
             console.error("Fetch failed: ", action.payload);
             // _state.cctvTotalCount = 0;
             _state.cctvFilteredCount = 0;
+            setTimeout(() => {
+                _state.isLoading = false;
+                _state.hasLoaded = true;
+            }, 1000); // Simulate loading delay
         });
     }
 
