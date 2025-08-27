@@ -29,8 +29,8 @@ const ALARM_URL = 'http://192.168.1.116:3300';
 const FloorView: React.FC<{
   activeFloorplan: string;
   zoomable: boolean;
-  containerWidth: number; 
-  containerHeight: number; 
+  containerWidth: number;
+  containerHeight: number;
   activeMaskedArea?: string;
   screenSettings: { scale: number; translateX: number; translateY: number };
 }> = ({ activeFloorplan, activeMaskedArea, zoomable, screenSettings }) => {

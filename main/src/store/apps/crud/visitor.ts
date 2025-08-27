@@ -180,6 +180,7 @@ UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
         })
         .addCase(fetchVisitorDT.pending, (state) => {
             state.isLoading = true;
+            state.hasLoaded = false;
         })
         .addCase(fetchVisitorDT.fulfilled, (state, action) => {
             state.visitorTotalCount = action.payload.recordsTotal;
@@ -192,7 +193,7 @@ UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
             // _state.visitorTotalCount = 0;
             _state.visitorFilteredCount = 0;
                 _state.isLoading = false;
-                _state.hasLoaded = true;
+                _state.hasLoaded = false;
         })
     },
 
@@ -220,30 +221,41 @@ export const fetchVisitor = () => async (dispatch: AppDispatch) => {
 export const fetchVisitorDT = createAsyncThunk(
     "visitor/fetchVisitorDT",
     async (filter: any, { rejectWithValue }) => {
+        const started = Date.now();
         try {
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetVisitor(response.data.collection.data || []));
             console.log("Fetch Visitors", response.data.collection);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching visitors:", error);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
 )
 
 export const fetchVisitorbyId = (id: string) => async (dispatch: AppDispatch) => {
+    const started = Date.now();
     try {
         const response = await axiosServices.get(`${API_URL}public/${id}`);
                 console.log("Fetch Visitors", response.data?.collection || []);
+                                    const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return(response.data.collection.data || []);
 
     } catch (err) {
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         console.log("Error: ", err);
     }
 }
 
 export const addVisitor = createAsyncThunk("visitor/addVisitor", async (formData: FormData) => {
+    const started = Date.now();
     try {
         formData.delete('id');
         const response = await axiosServices.post(API_URL, formData, {
@@ -251,14 +263,19 @@ export const addVisitor = createAsyncThunk("visitor/addVisitor", async (formData
                 'Content-Type': 'multipart/form-data',
             },
         });
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error) {
         console.error("Error adding member:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 });
 
 export const sendInvitation = createAsyncThunk("visitor/sendInvitation", async (payload: any) => {
+    const started = Date.now();
     try{
         console.log(typeof payload);
         for (const [key, value] of payload.entries()) {
@@ -266,27 +283,37 @@ export const sendInvitation = createAsyncThunk("visitor/sendInvitation", async (
         }
         const response = await axiosServices.post(`${SEND_INVITATION_URL}`, payload);
         console.log(response.data);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error) {
         console.error("Error sending Invitation:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 })
 
 export const declineInvitation = createAsyncThunk("visitor/declineInvitation", async (payload: string) => {
+    const started = Date.now();
     try{
         console.log( payload);
 
         const response = await axiosServices.post(`${API_URL}public/${payload}/decline-invitation`);
         console.log(response.data);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error) {
         console.error("Error declining Invitation:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 })
 
 export const editVisitor = createAsyncThunk("visitor/editVisitor", async (formData: FormData) => {
+    const started = Date.now();
     try {
         Object.keys(formData).forEach((key) => {
             console.log(`${key}:`, formData.get(key));
@@ -298,9 +325,13 @@ export const editVisitor = createAsyncThunk("visitor/editVisitor", async (formDa
                 'Content-Type': 'multipart/form-data',
             },
         });
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error) {
         console.error("Error editing Visitor:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 });
@@ -308,6 +339,7 @@ export const editVisitor = createAsyncThunk("visitor/editVisitor", async (formDa
 export const fillFormVisitor = createAsyncThunk(
     "visitor/fillFormVisitor",
     async ({ code, visitorId, applicationId, trxVisitorId, formData }: { code: string, visitorId: string, applicationId: string, trxVisitorId: string, formData: FormData }, thunkAPI) => {
+        const started = Date.now();
         try {
             console.log(code,visitorId, applicationId, trxVisitorId);
 for (const [key, value] of formData.entries()) {
@@ -326,20 +358,29 @@ for (const [key, value] of formData.entries()) {
 
             });
             console.log("Fill Form Visitor", response.data);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data;
         } catch (error) {
             console.error("Error submitting form:", error);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             throw error;
         }
     }
 )
 
 export const deleteVisitor = createAsyncThunk("visitor/deleteVisitor", async (visitorId: string) => {
+    const started = Date.now();
     try {
         await axiosServices.delete(`${API_URL}${visitorId}`);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return visitorId; // Return the deleted visitor's ID to update the state
     } catch (error) {
         console.error("Error deleting visitor:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 });

@@ -30,7 +30,7 @@ const Blacklist = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const blacklistCount = useSelector((state: RootState) => state.blacklistReducer.blacklistFilteredCount);
+  const blacklistCount = useSelector((state: RootState) => state.blacklistReducer.blacklistTotalCount);
   const { t } = useTranslation();
 
   const topCards: cardType[] = [

@@ -16,12 +16,14 @@ const MainMenuDash = Loadable(lazy(() => import('../views/dashboard/Main')));
 const MonitoringDash = Loadable(lazy(() => import('../views/dashboard/Monitoring')));
 const MonitoringConfig = Loadable(lazy(() => import('../views/dashboard/MonitoringConfig')));
 const MyVisitDashboard = Loadable(lazy(() => import('../views/MyVisit/MyVisitDashboard')));
+const WebView = Loadable(lazy(() => import('../components/dashboards/monitoring/FloorView')))
 
 /* ****Invitation***** */
 const InvitationForm = Loadable(lazy(() => import('../components/InvitationForm/InvitationForm')));
 const InvitationInfo = Loadable(lazy(() => import('../components/InvitationForm/InvitationInfo')));
 const ThankYouPage = Loadable(lazy(() => import('../components/InvitationForm/ThankYouPage')));
 const InvitationPage = Loadable(lazy(() => import('../views/MyVisit/MyVisitInvitation/InvitationPage')));
+
 
 /* ***Master**** */
 const GatewayApp = Loadable(lazy(() => import('../views/master/gateway/gateway')));
@@ -390,6 +392,7 @@ const Router = [
     path: '/',
     element: <BlankLayout />,
     children: [
+      { path: '/webview/monitoring/viewer', exact: true, element: <MonitoringDash /> },
       { path: '/auth/404', element: <Error /> },
       { path: '/auth/login', element: <Login /> },
       { path: '/auth/login2', element: <Login2 /> },

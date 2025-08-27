@@ -126,20 +126,25 @@ export const FloorplanSlice = createSlice({
 export const { GetFloorplan, GetAllFloorplan, SelectFloorplan, SearchFloorplan, UpdateFilter } = FloorplanSlice.actions;
 
 export const fetchFloorplan = () => async (dispatch: AppDispatch) => {
+    const started = Date.now();
     try {
         const response = await axiosServices.get(Floorplan_API_URL);
         const floorplans = response.data.collection.data || [];
-
+                    const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         dispatch(GetAllFloorplan(floorplans));
-
+        
     } catch (error) {
         console.error('Error fetching floorplans:', error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
     }
 };
 
 export const fetchFloorplanDT = createAsyncThunk(
     "floorplans/fetchFloorplanDT",
     async (filter: any, { rejectWithValue }) => {
+        const started = Date.now();
         try {
             // console.log("Fetch Floorplan DT: ", filter);
             const response = await axiosServices.post(Floorplan_DT_URL, filter);
@@ -151,43 +156,61 @@ export const fetchFloorplanDT = createAsyncThunk(
             dispatch(GetFloorplan(floorplans));
       // Dispatch after all data is enriched
     //   dispatch(GetFloorplan(enrichedFloorplans));
-
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
       return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching floorplans:", error);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
 )
 
 export const addFloorplan = createAsyncThunk("floorplans/addFloorplan", async (formData: FormData, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         const response = await axiosServices.post(Floorplan_API_URL, formData);
         // console.log("Floorplan added: ", response.data);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error: any) {
         console.error("Error adding floorplan:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });
 
 export const editFloorplan = createAsyncThunk("floorplans/editFloorplan", async (formData: FormData, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         const id = formData.get('id'); // Extract ID from FormData
         const response = await axiosServices.put(`${Floorplan_API_URL}${id}`, formData);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error: any) {
         console.error("Error editing floorplan:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });
 
 export const deleteFloorplan = createAsyncThunk("floorplans/deleteFloorplan", async (floorplanId: string, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         await axiosServices.delete(`${Floorplan_API_URL}${floorplanId}`);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return floorplanId; // Return the deleted floor's ID to update the state
     } catch (error: any) {
         console.error("Error deleting floor:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });

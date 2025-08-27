@@ -30,7 +30,7 @@ const CardRecord = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const cardRecordCount = useSelector(
-    (state: RootState) => state.CardRecordReducer.cardRecordFilteredCount,
+    (state: RootState) => state.CardRecordReducer.cardRecordTotalCount,
   );
   const { t } = useTranslation();
 

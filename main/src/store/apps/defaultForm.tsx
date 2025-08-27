@@ -469,7 +469,7 @@ export const defaultVisitorForm: VisitorType = {
 export const defaultVisitorFilter: VisitorFilter = {
   Draw: 1,
   Start: 0,
-  Length: 10,
+  Length: 5,
   SortColumn: 'name',
   SortDir: 'desc',
   SearchValue: '',

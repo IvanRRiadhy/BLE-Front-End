@@ -168,26 +168,26 @@ const Modern = () => {
     (state: RootState) => state.trackingTransReducer.trackingTransTotalCount ?? 0,
   );
   const blacklistTotalCount: number = useSelector(
-    (state: RootState) => state.blacklistReducer.blacklistFilteredCount ?? 0,
+    (state: RootState) => state.blacklistReducer.blacklistTotalCount ?? 0,
   );
   const blacklistData: blacklistType[] = useSelector(
     (state: RootState) => state.blacklistReducer.blacklists,
   );
   const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
   const maskedAreaTotalCount: number = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreaFilteredCount ?? 0,
+    (state: RootState) => state.maskedAreaReducer.maskedAreaTotalCount ?? 0,
   );
   const maskedAreaData: MaskedAreaType[] = useSelector(
     (state: RootState) => state.maskedAreaReducer.maskedAreas,
   );
   const bleReaderTotalCount: number = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceFilteredCount ?? 0,
+    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceTotalCount ?? 0,
   );
   const bleReaderData: FloorplanDeviceType[] = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.floorplanDevices,
   );
-  const alarmFilteredCount: number = useSelector(
-    (state: RootState) => state.alarmReducer.alarmRecordFilteredCount ?? 0,
+  const alarmTotalCount: number = useSelector(
+    (state: RootState) => state.alarmReducer.alarmRecordTotalCount ?? 0,
   );
   const alarmFilteredData: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
@@ -239,7 +239,7 @@ const Modern = () => {
               ActiveGatewayCount={bleReaderTotalCount}
               AreaCount={maskedAreaTotalCount}
               BlacklistCount={blacklistTotalCount}
-              AlarmCount={alarmFilteredCount}
+              AlarmCount={alarmTotalCount}
               NonActiveBeaconCount={nonActiveTag}
               FirstActiveBeacon={activeTagData?.flat().map((item) => item.name)}
               FirstActiveGateway={bleReaderData?.flat().map((item) => item.name)}

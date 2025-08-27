@@ -42,11 +42,12 @@ const columns = [
 const BlacklistList = () => {
   const dispatch: AppDispatch = useDispatch();
   const blaclistData = useSelector((state: RootState) => state.blacklistReducer.blacklists);
-  // const blacklistTotalCount = useSelector((state: RootState) => state.blacklistReducer.blacklistTotalCount);
-  const blacklistFilteredCount = useSelector(
-    (state: RootState) => state.blacklistReducer.blacklistFilteredCount,
-  );
+  const blacklistTotalCount = useSelector((state: RootState) => state.blacklistReducer.blacklistTotalCount);
+  // const blacklistFilteredCount = useSelector(
+  //   (state: RootState) => state.blacklistReducer.blacklistFilteredCount,
+  // );
   const blacklistFilter = useSelector((state: RootState) => state.blacklistReducer.blacklistFilter);
+  const hasLoaded = useSelector((state: RootState) => state.blacklistReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(blacklistFilter.Start / blacklistFilter.Length);
   const rowsPerPage = blacklistFilter.Length;
@@ -229,7 +230,7 @@ const BlacklistList = () => {
         {/* Pagination */}
         <TablePagination
           component="div"
-          count={blacklistFilteredCount}
+          count={blacklistTotalCount}
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}

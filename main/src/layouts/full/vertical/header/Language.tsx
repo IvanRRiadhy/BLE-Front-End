@@ -8,7 +8,7 @@ import FlagEn from 'src/assets/images/flag/icon-flag-en.svg';
 import FlagId from 'src/assets/images/flag/icon-flag-idn.svg';
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
-import { AppState } from 'src/store/Store';
+import { RootState } from 'src/store/Store';
 
 const Languages = [
   {
@@ -28,7 +28,7 @@ const Language = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const dispatch = useDispatch();
   const open = Boolean(anchorEl);
-  const customizer = useSelector((state: AppState) => state.customizer);
+  const customizer = useSelector((state: RootState) => state.customizer);
   const currentLang =
     Languages.find((_lang) => _lang.value === customizer.isLanguage) || Languages[1];
   const { i18n } = useTranslation();

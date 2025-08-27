@@ -30,12 +30,14 @@ const visitor = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const visitorList = useSelector((state: RootState) => state.visitorReducer.visitors);
+  const visitorTotalCount = useSelector(
+    (state: RootState) => state.visitorReducer.visitorTotalCount,
+  );
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
       title: 'Total Visitors',
-      subtitle: visitorList.length.toString(),
+      subtitle: visitorTotalCount.toString(),
       bgcolor: 'success',
     },
   ];

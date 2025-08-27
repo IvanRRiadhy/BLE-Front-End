@@ -169,13 +169,19 @@ const Menuitems = [
     children: [
       {
         id:uniqueId(),
-        title: 'Member',
+        title: 'Member Data',
         icon: IconMapPin,
         href: '/master/membertag/'
       },
+            {
+        id:uniqueId(),
+        title: 'Visitor Data',
+        icon: IconMapPin,
+        href: '/master/visitor/'
+      },
       {
         id:uniqueId(),
-        title: 'Visitor',
+        title: 'Visitor Invitation',
         icon: IconMapPin,
         href: '/master/visitortag/'
       },

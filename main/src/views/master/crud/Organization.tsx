@@ -31,7 +31,7 @@ const Organization = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const organizationCount = useSelector(
-    (state: RootState) => state.organizationReducer.organizationFilteredCount,
+    (state: RootState) => state.organizationReducer.organizationTotalCount,
   );
   const { t } = useTranslation();
 

@@ -31,7 +31,7 @@ const AccessCCTV = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const cctvCount = useSelector((state: RootState) => state.CCTVReducer.cctvFilteredCount);
+  const cctvCount = useSelector((state: RootState) => state.CCTVReducer.cctvTotalCount);
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {

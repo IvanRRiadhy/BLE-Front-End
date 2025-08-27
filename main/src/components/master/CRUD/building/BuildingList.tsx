@@ -44,12 +44,12 @@ const BuildingList = () => {
   const buildingData: BuildingType[] = useSelector(
     (state: RootState) => state.buildingReducer.buildings,
   );
-  // const buildingTotalCount = useSelector(
-  //   (state: RootState) => state.buildingReducer.buildingTotalCount,
-  // );
-  const buildingFilteredCount = useSelector(
-    (state: RootState) => state.buildingReducer.buildingFilteredCount,
+  const buildingTotalCount = useSelector(
+    (state: RootState) => state.buildingReducer.buildingTotalCount,
   );
+  // const buildingFilteredCount = useSelector(
+  //   (state: RootState) => state.buildingReducer.buildingFilteredCount,
+  // );
   const buildingFilter = useSelector((state: RootState) => state.buildingReducer.buildingFilter);
   const isLoading = useSelector((state => state.buildingReducer.isLoading));
   const hasLoaded = useSelector(state => state.buildingReducer.hasLoaded);
@@ -136,7 +136,7 @@ const BuildingList = () => {
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
-        {isLoading ? (
+        {!hasLoaded ? (
           <Box
             sx={{
               display: 'flex',
@@ -260,7 +260,7 @@ const BuildingList = () => {
                 {/* Pagination */}
                 <TablePagination
                   component="div"
-                  count={buildingFilteredCount}
+                  count={buildingTotalCount}
                   page={page}
                   rowsPerPage={rowsPerPage}
                   onPageChange={handleChangePage}

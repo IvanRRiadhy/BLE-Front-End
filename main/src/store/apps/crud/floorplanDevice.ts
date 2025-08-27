@@ -324,6 +324,7 @@ export const fetchFloorplanDevices = () => async (dispatch: AppDispatch) => {
 export const fetchFloorplanDeviceDT = createAsyncThunk(
     'floorplanDevice/fetchFloorplanDeviceDT',
     async (filter: any, { rejectWithValue }) => {
+        const started = Date.now();
         try {
                     if (
             filter?.filters &&
@@ -335,14 +336,20 @@ export const fetchFloorplanDeviceDT = createAsyncThunk(
             // Option 1: just return null (success, no data)
             // return null;
             // Option 2: reject, if you want to treat as error
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue("Filter contains 'Empty', skipping request");
         }
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetFloorplanDevices(response.data.collection.data || []));
             // console.log("Fetch floorplan devices", response.data.collection);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching floorplan devices:", error);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
@@ -351,15 +358,20 @@ export const fetchFloorplanDeviceDT = createAsyncThunk(
 export const addFloorplanDevice = createAsyncThunk(
     'floorplanDevice/addFloorplanDevice',
     async (floorplanDevice: FloorplanDeviceType, { rejectWithValue }) => {
+        const started = Date.now();
         try {
             const { id, createdAt, createdBy, updatedAt, updatedBy, accessCctv, reader, accessControl, floorplanMaskedArea, ...filteredFloorplanDevice } = floorplanDevice;
             // console.log(filteredFloorplanDevice.applicationId);
             // console.log("Filtered Floorplan Device: ", filteredFloorplanDevice);
             const response = await axiosServices.post(API_URL, filteredFloorplanDevice);
             // console.log("Floorplan device added: ", response.data);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data;
         } catch (error: any) {
             console.error("Error adding floorplan device: ", error);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
@@ -368,13 +380,18 @@ export const addFloorplanDevice = createAsyncThunk(
 export const editFloorplanDevice = createAsyncThunk(
     'floorplanDevice/editFloorplanDevice',
     async (floorplanDevice: FloorplanDeviceType, { rejectWithValue }) => {
+        const started = Date.now();
         try {
             const { id, createdAt, createdBy, updatedAt, updatedBy, accessCctv, reader, accessControl, floorplanMaskedArea, ...filteredFloorplanDevice } = floorplanDevice;
              const response = await axiosServices.put(`${API_URL}${floorplanDevice.id}`, filteredFloorplanDevice);
             // console.log("Floorplan device edited: ", response.data);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data;
         } catch (error: any) {
             console.error("Error editing floorplan device: ", error);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
@@ -383,12 +400,17 @@ export const editFloorplanDevice = createAsyncThunk(
 export const deleteFloorplanDevice = createAsyncThunk(
     'floorplanDevice/deleteFloorplanDevice',
     async (id: string, { rejectWithValue }) => {
+        const started = Date.now();
         try {
             const response = await axiosServices.delete(`${API_URL}${id}`);
             // console.log("Floorplan device deleted: ", response.data);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data;
         } catch (error: any) {
             console.error("Error deleting floorplan device: ", error);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }

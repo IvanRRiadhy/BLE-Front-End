@@ -12,6 +12,7 @@ import {
   Typography,
   TablePagination,
   TableSortLabel,
+  CircularProgress,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
@@ -35,12 +36,14 @@ const columns = [
 const MaskedAreaList2 = () => {
   const dispatch: AppDispatch = useDispatch();
   const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
-  const floorplanFilteredCount = useSelector(
-    (state: RootState) => state.floorplanReducer.floorplanFilteredCount,
-  );
+  const floorplanTotalCount = useSelector((state: RootState) => state.floorplanReducer.floorplanTotalCount);
+  // const floorplanFilteredCount = useSelector(
+  //   (state: RootState) => state.floorplanReducer.floorplanFilteredCount,
+  // );
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   // const { t } = useTranslation();
   const navigate = useNavigate();
+  const hasLoaded = useSelector((state: RootState) => state.floorplanReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(floorplanFilter.Start / floorplanFilter.Length);
   const rowsPerPage = floorplanFilter.Length;
@@ -95,7 +98,12 @@ const MaskedAreaList2 = () => {
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          <BlankCard>
+        { !hasLoaded ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <CircularProgress />
+            </Box>
+        ): (
+                    <BlankCard>
             <TableContainer>
               <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
                 <TableHead>
@@ -171,13 +179,14 @@ const MaskedAreaList2 = () => {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={floorplanFilteredCount}
+              count={floorplanTotalCount}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
           </BlankCard>
+        )}
         </Box>
       </Grid>
     </Grid>

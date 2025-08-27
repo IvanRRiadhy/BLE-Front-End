@@ -47,14 +47,15 @@ const FloorplanList = () => {
   const buildingData: BuildingType[] = useSelector(
     (state: RootState) => state.buildingReducer.buildingAll,
   );
-  // const floorplanTotalCount = useSelector((state: RootState) => state.floorplanReducer.floorplanTotalCount);
-  const floorplanFilteredCount = useSelector(
-    (state: RootState) => state.floorplanReducer.floorplanFilteredCount,
-  );
+  const floorplanTotalCount = useSelector((state: RootState) => state.floorplanReducer.floorplanTotalCount);
+  // const floorplanFilteredCount = useSelector(
+  //   (state: RootState) => state.floorplanReducer.floorplanFilteredCount,
+  // );
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   const prevFilterRef = useRef(floorplanFilter);
   // const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const hasLoaded = useSelector((state: RootState) => state.floorplanReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(floorplanFilter.Start / floorplanFilter.Length);
   const rowsPerPage = floorplanFilter.Length;
@@ -169,7 +170,7 @@ const FloorplanList = () => {
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          {loading ? (
+          {!hasLoaded ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <CircularProgress />
             </Box>
@@ -275,7 +276,7 @@ const FloorplanList = () => {
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
-                count={floorplanFilteredCount}
+                count={floorplanTotalCount}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}

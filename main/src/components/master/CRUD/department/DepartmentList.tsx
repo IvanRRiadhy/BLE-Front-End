@@ -45,21 +45,24 @@ const DepartmentList = () => {
   const departmentData: DepartmentType[] = useSelector(
     (state: RootState) => state.departmentReducer.departments,
   );
-  // const departmentTotalCount = useSelector((state: RootState) => state.departmentReducer.departmentTotalCount);
-  const departmentFilteredCount = useSelector(
-    (state: RootState) => state.departmentReducer.departmentFilteredCount,
-  );
+  const departmentTotalCount = useSelector((state: RootState) => state.departmentReducer.departmentTotalCount);
+  // const departmentFilteredCount = useSelector(
+  //   (state: RootState) => state.departmentReducer.departmentFilteredCount,
+  // );
   const departmentFilter = useSelector(
     (state: RootState) => state.departmentReducer.departmentFilter,
   );
   const prevFilterRef = useRef(departmentFilter);
   // const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const isLoading = useSelector((state: RootState) => state.departmentReducer.isLoading);
+  const hasLoaded = useSelector((state: RootState) => state.departmentReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(departmentFilter.Start / departmentFilter.Length);
   const rowsPerPage = departmentFilter.Length;
   const orderBy = departmentFilter.SortColumn;
   const order = departmentFilter.SortDir;
+  
 
   const handleChangePage = (_: unknown, newPage: number) => {
     dispatch(UpdateFilter({ Start: newPage * departmentFilter.Length }));
@@ -161,7 +164,7 @@ const DepartmentList = () => {
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          {loading ? (
+          {!hasLoaded ? (
             <Box
               sx={{
                 display: 'flex',
@@ -274,7 +277,7 @@ const DepartmentList = () => {
               {/* Pagination */}
               <TablePagination
                 component="div"
-                count={departmentFilteredCount}
+                count={departmentTotalCount}
                 page={page}
                 rowsPerPage={rowsPerPage}
                 onPageChange={handleChangePage}

@@ -31,7 +31,7 @@ const AccessControl = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const accesControlCount = useSelector(
-    (state: RootState) => state.accessControlReducer.accessControlFilteredCount,
+    (state: RootState) => state.accessControlReducer.accessControlTotalCount,
   );
   const { t } = useTranslation();
 

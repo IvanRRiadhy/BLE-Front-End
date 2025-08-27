@@ -11,7 +11,7 @@ export const setSessionExpiredHandler = (handler: () => void) => {
     baseURL: 'http://192.168.1.116:10000',
     headers: {
         'Content-Type': 'application/json',
-        'X-API-KEY-TRACKING-PEOPLE': "FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK",
+        'X-BIOPEOPLETRACKING-API-KEY': "FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK",
 
     },
  });

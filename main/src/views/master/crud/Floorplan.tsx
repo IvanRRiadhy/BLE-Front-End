@@ -34,7 +34,7 @@ const Floorplan = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 
-  const floorplanCount = useSelector((state: RootState) => state.floorplanReducer.floorplanFilteredCount);
+  const floorplanCount = useSelector((state: RootState) => state.floorplanReducer.floorplanTotalCount);
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {

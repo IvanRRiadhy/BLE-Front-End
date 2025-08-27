@@ -53,14 +53,16 @@ const BleReaderList = () => {
   const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
   const prevFilterRef = useRef(bleReaderFilter);
   const brandData = useSelector((state: RootState) => state.brandReducer.brandAll);
-  // const bleReaderTotalCount = useSelector(
-  //   (state: RootState) => state.bleReaderReducer.bleReaderTotalCount,
-  // );
-  const bleReaderFilterCount = useSelector(
-    (state: RootState) => state.bleReaderReducer.bleReaderFilterCount,
+  const bleReaderTotalCount = useSelector(
+    (state: RootState) => state.bleReaderReducer.bleReaderTotalCount,
   );
+  // const bleReaderFilterCount = useSelector(
+  //   (state: RootState) => state.bleReaderReducer.bleReaderFilterCount,
+  // );
   // const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const isLoading = useSelector((state: RootState) => state.bleReaderReducer.isLoading);
+  const hasLoaded = useSelector((state: RootState) => state.bleReaderReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(bleReaderFilter.Start / bleReaderFilter.Length);
   const rowsPerPage = bleReaderFilter.Length;
@@ -203,7 +205,7 @@ const BleReaderList = () => {
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          {loading ? (
+          {!hasLoaded ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <CircularProgress />
             </Box>
@@ -393,7 +395,7 @@ const BleReaderList = () => {
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
-                count={bleReaderFilterCount}
+                count={bleReaderTotalCount}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}

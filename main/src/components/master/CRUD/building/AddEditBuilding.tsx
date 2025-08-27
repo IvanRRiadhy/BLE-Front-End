@@ -213,7 +213,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
           </Button>
         </Tooltip>
       )}
-      {hasLoaded && (
+      {!isLoading && (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>
             <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
@@ -297,7 +297,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
         </Dialog>
       )}
       {isLoading && (
-        <Dialog open={true} fullWidth maxWidth="sm">
+        <Dialog open={open} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h1" mb={5}>
               Loading...{' '}

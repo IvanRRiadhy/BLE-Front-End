@@ -31,7 +31,7 @@ const TrackingTrans = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const trackingTransCount = useSelector(
-    (state: RootState) => state.trackingTransReducer.trackingTransFilteredCount,
+    (state: RootState) => state.trackingTransReducer.trackingTransTotalCount,
   );
   const { t } = useTranslation();
   const topCards: cardType[] = [

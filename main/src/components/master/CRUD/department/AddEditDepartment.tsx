@@ -41,7 +41,8 @@ const AddEditDepartment = ({ type, department }: FormType) => {
     ...department,
   });
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
-
+  const isLoading = useSelector((state: RootState) => state.departmentReducer.isLoading);
+  const hasLoaded = useSelector((state: RootState) => state.departmentReducer.hasLoaded);
   const departmentFilter = useSelector(
     (state: RootState) => state.departmentReducer.departmentFilter,
   );
@@ -141,7 +142,7 @@ const AddEditDepartment = ({ type, department }: FormType) => {
         </Tooltip>
       )}
 
-      {!loading && (
+      {!isLoading && (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>
             <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
@@ -154,8 +155,8 @@ const AddEditDepartment = ({ type, department }: FormType) => {
               Department Details
             </Typography>
             <Divider />
-            <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+            <Grid container spacing={{lg: 5, md: 0}} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="department-code">Department Code</CustomFormLabel>
                 <CustomTextField
                   id="code"
@@ -178,7 +179,7 @@ const AddEditDepartment = ({ type, department }: FormType) => {
                   helperText={formErrors.departmentHost}
                 />
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="department-Name">Department Name</CustomFormLabel>
                 <CustomTextField
                   id="name"
@@ -212,8 +213,8 @@ const AddEditDepartment = ({ type, department }: FormType) => {
         </Dialog>
       )}
 
-      {loading && (
-        <Dialog open={true} fullWidth maxWidth="sm">
+      {isLoading && (
+        <Dialog open={open} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h1" mb={5}>
               Loading...{' '}

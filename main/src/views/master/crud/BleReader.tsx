@@ -34,7 +34,7 @@ const BleReader = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const bleReaderCount = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilterCount);
+  const bleReaderCount = useSelector((state: RootState) => state.bleReaderReducer.bleReaderTotalCount);
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {

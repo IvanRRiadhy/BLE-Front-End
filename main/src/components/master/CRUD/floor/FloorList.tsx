@@ -42,13 +42,15 @@ const columns = [
 const FloorList = () => {
   const dispatch: AppDispatch = useDispatch();
   const floorData = useSelector((state: RootState) => state.floorReducer.floors);
-  const floorFilteredCount = useSelector(
-    (state: RootState) => state.floorReducer.floorFilteredCount,
-  );
+  const floorTotalCount = useSelector((state: RootState) => state.floorReducer.floorTotalCount);
+  // const floorFilteredCount = useSelector(
+  //   (state: RootState) => state.floorReducer.floorFilteredCount,
+  // );
   const floorFilter = useSelector((state: RootState) => state.floorReducer.floorFilter);
   const prevFilterRef = useRef(floorFilter);
   // const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const hasLoaded = useSelector((state: RootState) => state.floorReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(floorFilter.Start / floorFilter.Length);
   const rowsPerPage = floorFilter.Length;
@@ -165,7 +167,7 @@ const FloorList = () => {
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          {loading ? (
+          {!hasLoaded ? (
             <Box
               sx={{
                 display: 'flex',
@@ -229,7 +231,7 @@ const FloorList = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {floorData.map((floor: floorType, index) => (
+                    {floorData.map((floor: floorType, index: number) => (
                       <TableRow key={index}>
                         <TableCell
                           sx={{
@@ -291,7 +293,7 @@ const FloorList = () => {
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
-                count={floorFilteredCount}
+                count={floorTotalCount}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}

@@ -31,7 +31,7 @@ const District = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const districtCount = useSelector((state: RootState) => state.districtReducer.districtFilteredCount);
+  const districtCount = useSelector((state: RootState) => state.districtReducer.districtTotalCount);
   const { t } = useTranslation();
 
   const topCards: cardType[] = [

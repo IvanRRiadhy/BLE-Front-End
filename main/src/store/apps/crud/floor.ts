@@ -186,20 +186,26 @@ export const fetchFloors = () => async (dispatch: AppDispatch) => {
 export const fetchFloorDT = createAsyncThunk(
     "floors/fetchFloorDT",
     async (filter: any, { rejectWithValue }) => {
+        const started = Date.now();
         try {
             // console.log("Fetch Floor DT: ", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetFloor(response.data.collection.data || []));
             // console.log("Fetch floors", response.data.collection);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching floors:", error);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
 )
 
 export const addFloor = createAsyncThunk("floors/addFloor", async (formData: FormData, { rejectWithValue }) => {
+    const started = Date.now();
     try {
 //         for (const [key, value] of formData.entries()) {
 //   console.log(`${key}:`, value);
@@ -209,14 +215,19 @@ export const addFloor = createAsyncThunk("floors/addFloor", async (formData: For
                 'Content-Type': 'multipart/form-data',
             },
         });
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error: any) {
         // console.error("Error adding floor:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });
 
 export const editFloor = createAsyncThunk("floors/editFloor", async (formData: FormData, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         const id = formData.get('id'); // Extract ID from FormData
         // console.log("Form Data", JSON.stringify(Object.fromEntries(formData.entries())));
@@ -226,19 +237,28 @@ export const editFloor = createAsyncThunk("floors/editFloor", async (formData: F
                 'Content-Type': 'multipart/form-data',
             },
         });
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error: any) {
         console.error("Error editing floor:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });
 
 export const deleteFloor = createAsyncThunk("floors/deleteFloor", async (floorId: string, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         await axiosServices.delete(`${API_URL}${floorId}`);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return floorId; // Return the deleted floor's ID to update the state
     } catch (error: any) {
         console.error("Error deleting floor:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });

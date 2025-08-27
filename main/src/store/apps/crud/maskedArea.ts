@@ -343,6 +343,7 @@ export const fetchMaskedAreas = () => async (dispatch: AppDispatch) => {
 export const fetchMaskedAreaDT = createAsyncThunk(
     "maskedAreas/fetchMaskedAreaDT", 
     async (filter: any, { rejectWithValue }) => {
+        const started = Date.now();
         try {
                     if (
             filter?.filters &&
@@ -354,32 +355,44 @@ export const fetchMaskedAreaDT = createAsyncThunk(
             // Option 1: just return null (success, no data)
             // return null;
             // Option 2: reject, if you want to treat as error
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue("Filter contains 'Empty', skipping request");
         }
             console.log("Fetch Masked Area DT: ", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetMaskedArea(response.data.collection.data || []));
             console.log("Fetch masked areas", response.data.collection);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching masked area:", error);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
 )
 
 export const addMaskedArea = createAsyncThunk("maskedAreas/addMaskedArea", async (maskedArea: MaskedAreaType, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         const {id, createdAt, createdBy, updatedAt, updatedBy, generate, status, ... filteredMaskedAreaData} = maskedArea;
         const response = await axiosServices.post(API_URL, filteredMaskedAreaData);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error: any) {
         console.error("Error adding masked area:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });
 
 export const editMaskedArea = createAsyncThunk("maskedAreas/editMaskedArea", async (maskedArea: MaskedAreaType, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         const {id, createdAt, createdBy, updatedAt, updatedBy, generate, status, floor, floorplan, ... filteredMaskedAreaData} = maskedArea;
         // console.log("Data being sent to the server:", JSON.stringify(filteredMaskedAreaData, null, 2));
@@ -390,20 +403,29 @@ export const editMaskedArea = createAsyncThunk("maskedAreas/editMaskedArea", asy
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
         });
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error: any) {
         console.error("Error editing masked area:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });
 
 export const deleteMaskedArea = createAsyncThunk("maskedAreas/deleteMaskedArea", async (maskedAreaId: string, { rejectWithValue }) => {
+    const started = Date.now();
     try {
         await axiosServices.delete(`${API_URL}${maskedAreaId}`);
         // console.log("Masked area deleted:", maskedAreaId);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return maskedAreaId; // Return the deleted masked area's ID to update the state
     } catch (error: any) {
         console.error("Error deleting masked area:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return rejectWithValue(error.response?.data || "Unknown error");
     }
 });

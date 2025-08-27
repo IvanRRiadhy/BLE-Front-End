@@ -162,47 +162,67 @@ export const fetchOrganizations = () => async (dispatch: AppDispatch) => {
 export const fetchOrganizationDT = createAsyncThunk(
     "organizations/fetchOrganizationDT",
     async (filter: any, { rejectWithValue }) => {
+        const started = Date.now();
         try {
             // console.log("Fetch Organization DT: ", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetOrganization(response.data.collection.data || []));
             // console.log("Fetch organizations", response.data.collection);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching organizations:", error);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
 )
 
 export const addOrganization = createAsyncThunk("organizations/addOrganization", async (organization: OrganizationType) => {
+    const started = Date.now();
     try {
         const {id, createdBy, createdAt, updatedBy, updatedAt, ...filteredOrganizationData} = organization
         const response = await axiosServices.post(API_URL, filteredOrganizationData);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error) {
         console.error("Error adding organization:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 }); 
 
 export const editOrganization = createAsyncThunk("organizations/editOrganization", async (organization: OrganizationType) => {
+    const started = Date.now();
     try {
         const { id, createdBy, createdAt, updatedBy, updatedAt, ...filteredOrganizationData } = organization;
         const response = await axiosServices.put(`${API_URL}${id}`, filteredOrganizationData);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error) {
         console.error("Error editing organization:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 });
 
 export const deleteOrganization = createAsyncThunk("organizations/deleteOrganization", async (organizationId: string) => {
+    const started = Date.now();
     try {
         await axiosServices.delete(`${API_URL}${organizationId}`);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return organizationId; // Return the deleted organization's ID to update the state
     } catch (error) {
         console.error("Error deleting organization:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 });

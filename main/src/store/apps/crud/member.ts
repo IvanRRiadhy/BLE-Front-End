@@ -177,19 +177,25 @@ export const fetchMembers = () => async (dispatch: AppDispatch) => {
 export const fetchMemberDT = createAsyncThunk(
     "members/fetchMemberDT",
     async (filter: any, { rejectWithValue }) => {
+        const started = Date.now();
         try {
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetMember(response.data.collection.data || []));
             console.log("Fetch members", response.data.collection);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching members:", error);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
 )
 
 export const addMember = createAsyncThunk("member/addMember", async (formData: FormData) => {
+    const started = Date.now();
     try {
         formData.delete('id');
         const response = await axiosServices.post(API_URL, formData, {
@@ -197,15 +203,20 @@ export const addMember = createAsyncThunk("member/addMember", async (formData: F
                 'Content-Type': 'multipart/form-data',
             },
         });
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error) {
         console.error("Error adding member:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 });
 
 
 export const editMember = createAsyncThunk("member/editMember", async (formData: FormData) => {
+    const started = Date.now();
     try {
         const id = formData.get('id');
         formData.delete('id');
@@ -217,19 +228,28 @@ export const editMember = createAsyncThunk("member/editMember", async (formData:
                 'Content-Type': 'multipart/form-data',
             },
         });
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error) {
         console.error("Error editing member:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 });
 
 export const deleteMember = createAsyncThunk("member/deleteMember", async (memberId: string) => {
+    const started = Date.now();
     try {
         await axiosServices.delete(`${API_URL}${memberId}`);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return memberId; // Return the deleted member's ID to update the state
     } catch (error) {
         console.error("Error deleting member:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 });

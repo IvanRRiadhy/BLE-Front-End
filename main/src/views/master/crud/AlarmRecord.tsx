@@ -32,7 +32,7 @@ const AlarmRecord = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const alarmRecordCount = useSelector(
-    (state: RootState) => state.alarmReducer.alarmRecordFilteredCount,
+    (state: RootState) => state.alarmReducer.alarmRecordTotalCount,
   );
   const { t } = useTranslation();
 

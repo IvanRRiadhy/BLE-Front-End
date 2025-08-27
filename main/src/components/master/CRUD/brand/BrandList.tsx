@@ -36,10 +36,10 @@ const columns = [
 const BrandList = () => {
   const dispatch: AppDispatch = useDispatch();
   const brandData: BrandType[] = useSelector((state: RootState) => state.brandReducer.brands);
-  // const brandTotalCount = useSelector((state: RootState) => state.brandReducer.brandTotalCount);
-  const brandFilteredCount = useSelector(
-    (state: RootState) => state.brandReducer.brandFilteredCount,
-  );
+  const brandTotalCount = useSelector((state: RootState) => state.brandReducer.brandTotalCount);
+  // const brandFilteredCount = useSelector(
+  //   (state: RootState) => state.brandReducer.brandFilteredCount,
+  // );
   const brandFilter = useSelector((state: RootState) => state.brandReducer.brandFilter);
   const prevFilterRef = useRef(brandFilter);
   // const { t } = useTranslation();
@@ -257,7 +257,7 @@ const BrandList = () => {
               {/* Pagination */}
               <TablePagination
                 component="div"
-                count={brandFilteredCount}
+                count={brandTotalCount}
                 page={page}
                 rowsPerPage={rowsPerPage}
                 onPageChange={handleChangePage}

@@ -160,6 +160,7 @@ export const fetchTrackingTrans = () => async (dispatch: AppDispatch) => {
 export const fetchTrackingTransDT = createAsyncThunk(
     "trackingTrans/fetchTrackingTransDT", 
     async (filter: any, { rejectWithValue }) => {
+        const started = Date.now();
         try {
             if (
                 filter?.filters &&
@@ -171,47 +172,68 @@ export const fetchTrackingTransDT = createAsyncThunk(
             // Option 1: just return null (success, no data)
             // return null;
             // Option 2: reject, if you want to treat as error
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue("Filter contains 'Empty', skipping request");
         }
             const response = await axiosServices.post(API_DT_URL, filter);
             console.log("Fetch trackingTrans", response.data.collection);
             dispatch(GetTrackingTrans(response.data.collection.data || []));
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching trackingTrans:", error);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
 )
 
 export const addTrackingTrans = createAsyncThunk("trackingTrans/addTrackingTrans", async (trackingTrans: trackingTransType) => {
+    const started = Date.now();
     try {
         const {id, ...filteredTrackingTransData} = trackingTrans
         const response = await axiosServices.post(API_URL, filteredTrackingTransData);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error) {
         console.error("Error adding trackingTrans:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 });
 
 export const editTrackingTrans = createAsyncThunk("trackingTrans/editTrackingTrans", async (trackingTrans: trackingTransType) => {
+    const started = Date.now();
     try {
         const { id, ...filteredTrackingTransData } = trackingTrans;
         const response = await axiosServices.put(`${API_URL}${id}`, filteredTrackingTransData);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
     } catch (error) {
         console.error("Error editing trackingTrans:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 });
 
 export const deleteTrackingTrans = createAsyncThunk("trackingTrans/deleteTrackingTrans", async (trackingTransId: string) => {
+    const started = Date.now();
     try {
         await axiosServices.delete(`${API_URL}${trackingTransId}`);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         return trackingTransId; // Return the deleted trackingTrans's ID to update the state
     } catch (error) {
         console.error("Error deleting trackingTrans:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
         throw error;
     }
 });

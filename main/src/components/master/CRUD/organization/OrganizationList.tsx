@@ -45,16 +45,17 @@ const OrganizationList = () => {
   const organizationData: OrganizationType[] = useSelector(
     (state: RootState) => state.organizationReducer.organizations,
   );
-  // const organizationTotalCount = useSelector((state: RootState) => state.organizationReducer.organizationTotalCount);
-  const organizationFilteredCount = useSelector(
-    (state: RootState) => state.organizationReducer.organizationFilteredCount,
-  );
+  const organizationTotalCount = useSelector((state: RootState) => state.organizationReducer.organizationTotalCount);
+  // const organizationFilteredCount = useSelector(
+  //   (state: RootState) => state.organizationReducer.organizationFilteredCount,
+  // );
   const organizationFilter = useSelector(
     (state: RootState) => state.organizationReducer.organizationFilter,
   );
   const prevFilterRef = useRef(organizationFilter);
   // const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const hasLoaded = useSelector((state: RootState) => state.organizationReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(organizationFilter.Start / organizationFilter.Length);
   const rowsPerPage = organizationFilter.Length;
@@ -163,7 +164,7 @@ const OrganizationList = () => {
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          {loading ? (
+          {!hasLoaded ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <CircularProgress />
             </Box>
@@ -269,7 +270,7 @@ const OrganizationList = () => {
               {/* Pagination */}
               <TablePagination
                 component="div"
-                count={organizationFilteredCount}
+                count={organizationTotalCount}
                 page={page}
                 rowsPerPage={rowsPerPage}
                 onPageChange={handleChangePage}

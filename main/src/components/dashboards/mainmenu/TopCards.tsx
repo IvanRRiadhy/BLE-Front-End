@@ -1,4 +1,12 @@
-import { Box, CardContent, Grid2 as Grid, IconButton, Tooltip, Typography } from '@mui/material';
+import {
+  Box,
+  CardContent,
+  CircularProgress,
+  Grid2 as Grid,
+  IconButton,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import icon1 from '../../../assets/images/svgs/icon-pin-inactive.svg';
@@ -7,6 +15,7 @@ import icon3 from '../../../assets/images/svgs/icon-antena.svg';
 import icon4 from '../../../assets/images/svgs/icon-box2.svg';
 import icon5 from '../../../assets/images/svgs/icon-block.svg';
 import icon6 from '../../../assets/images/svgs/icon-exclamation.svg';
+import { RootState, useSelector } from 'src/store/Store';
 
 interface cardType {
   icon: string;
@@ -86,6 +95,11 @@ const TopCards: React.FC<TopCardsProps> = ({
   const { t } = useTranslation();
   // const [data, setData] = useState(['100', '50', '25', '15', '25', '20', '15']);
   // Array of counts for display, order matches topcards
+  const beaconLoaded = useSelector((state: RootState) => state.CardReducer.hasLoaded);
+  const gatewayLoaded = useSelector((state: RootState) => state.floorplanDeviceReducer.hasLoaded);
+  const areaLoaded = useSelector((state: RootState) => state.maskedAreaReducer.hasLoaded);
+  const blacklistLoaded = useSelector((state: RootState) => state.blacklistReducer.hasLoaded);
+  const alarmLoaded = useSelector((state: RootState) => state.alarmReducer.hasLoaded);
   const counts = [
     ActiveBeaconCount,
     ActiveGatewayCount,
@@ -103,59 +117,71 @@ const TopCards: React.FC<TopCardsProps> = ({
     FirstAlarm,
     FirstNonActiveBeacon,
   ];
-  console.log("First Area: ", FirstArea);
+  const loadedFlags = [
+    beaconLoaded,
+    gatewayLoaded,
+    areaLoaded,
+    blacklistLoaded,
+    alarmLoaded,
+    beaconLoaded,
+  ];
+  console.log('First Area: ', FirstArea);
   return (
     <Grid container spacing={3}>
-      {topcards.map((topcard, i) => (
-        <Grid
-          key={i}
-          size={{
-            xs: 12,
-            sm: 4,
-            lg: 2,
-          }}
-        >
-          <Box bgcolor={topcard.bgcolor + '.light'} textAlign="center">
-            <CardContent>
-              <img src={topcard.icon} alt={topcard.icon} width="50" />
-              <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
-                <Typography
-                  color={topcard.bgcolor + '.dark'}
-                  mt={1}
-                  variant="subtitle1"
-                  fontWeight={600}
-                  fontSize={13}
-                >
-                  {t(`${topcard.title}`)}
-                </Typography>
-                <Tooltip
-                  title={
-                    firstDataArrays[i] && firstDataArrays[i].length > 0
-                      ? counts[i] > firstDataArrays[i].length
-                        ? `${firstDataArrays[i].join(', ')}, . . .`
-                        : firstDataArrays[i].join(', ')
-                      : 'No data'
-                  }
-                  arrow
-                  placement="top"
-                >
-                  <IconButton size="small" sx={{ mt: 1 }}>
-                    <HelpOutlineIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-              <Typography
-                color={topcard.bgcolor + '.main'}
-                variant="h4"
-                fontWeight={600}
-                fontSize={25}
-              >
-                {counts[i]}
-              </Typography>
-            </CardContent>
-          </Box>
-        </Grid>
-      ))}
+      {topcards.map((topcard, i) => {
+        const isLoaded = loadedFlags[i];
+        const titleColor = `${topcard.bgcolor}.dark`;
+        const numberColor = `${topcard.bgcolor}.main`;
+        return (
+          <Grid
+            key={i}
+            size={{
+              xs: 12,
+              sm: 4,
+              lg: 2,
+            }}
+          >
+            <Box bgcolor={topcard.bgcolor + '.light'} textAlign="center">
+              <CardContent>
+                <img src={topcard.icon} alt={topcard.icon} width="50" />
+                <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
+                  <Typography
+                    color={titleColor}
+                    mt={1}
+                    variant="subtitle1"
+                    fontWeight={600}
+                    fontSize={13}
+                  >
+                    {t(`${topcard.title}`)}
+                  </Typography>
+                  <Tooltip
+                    title={
+                      firstDataArrays[i] && firstDataArrays[i].length > 0
+                        ? counts[i] > firstDataArrays[i].length
+                          ? `${firstDataArrays[i].join(', ')}, . . .`
+                          : firstDataArrays[i].join(', ')
+                        : 'No data'
+                    }
+                    arrow
+                    placement="top"
+                  >
+                    <IconButton size="small" sx={{ mt: 1 }}>
+                      <HelpOutlineIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+                {isLoaded ? (
+                  <Typography color={numberColor} variant="h4" fontWeight={600} fontSize={25}>
+                    {counts[i]}
+                  </Typography>
+                ) : (
+                  <CircularProgress size={18} thickness={5} />
+                )}
+              </CardContent>
+            </Box>
+          </Grid>
+        );
+      })}
     </Grid>
   );
 };

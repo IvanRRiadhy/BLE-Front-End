@@ -46,6 +46,7 @@ const DeviceList = () => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
+  const hasLoaded = useSelector((state: RootState) => state.floorplanDeviceReducer.hasLoaded);
   const activeFloorplan = useSelector(
     (state: RootState) => state.floorplanReducer.selectedFloorplan,
   );
@@ -234,20 +235,20 @@ const DeviceList = () => {
         }
       }
       if (resultAdd || resultEdit || resultDelete) {
-        if(resultAdd){
-        resultAdd?.type.endsWith('/fulfilled')
-          ? toast.success('Add successful')
-          : toast.error('Add unsuccessful');
+        if (resultAdd) {
+          resultAdd?.type.endsWith('/fulfilled')
+            ? toast.success('Add successful')
+            : toast.error('Add unsuccessful');
         }
-        if(resultEdit){
-        resultEdit?.type.endsWith('/fulfilled')
-          ? toast.success('Edit successful')
-          : toast.error('Edit unsuccessful');
+        if (resultEdit) {
+          resultEdit?.type.endsWith('/fulfilled')
+            ? toast.success('Edit successful')
+            : toast.error('Edit unsuccessful');
         }
-        if(resultDelete){
-        resultDelete?.type.endsWith('/fulfilled')
-          ? toast.success('Delete successful')
-          : toast.error('Delete unsuccessful');
+        if (resultDelete) {
+          resultDelete?.type.endsWith('/fulfilled')
+            ? toast.success('Delete successful')
+            : toast.error('Delete unsuccessful');
         }
 
         // Call deleteFloorplanDevice for each device to delete
@@ -302,19 +303,23 @@ const DeviceList = () => {
         <Scrollbar
           sx={{ height: { lg: 'calc(100vh - 370px)', sm: '100vh' }, maxHeight: 'fit-content' }}
         >
-          {filteredUnsavedDevices ? (
-            filteredUnsavedDevices.map((device: FloorplanDeviceType) => (
-              <DeviceListItem
-                key={device.id}
-                device={device}
-                onListClick={() => handleOnClick(device.id)}
-                onEditClick={() => handleOnEditClick(device.id)}
-                onDeleteClick={() => handleOpenDeleteDialog(device.id)}
-                active={device.id === selectedDevice?.id} // Replace with your logic to determine if the item is active
-              />
-            ))
+          {hasLoaded ? (
+            filteredUnsavedDevices ? (
+              filteredUnsavedDevices.map((device: FloorplanDeviceType) => (
+                <DeviceListItem
+                  key={device.id}
+                  device={device}
+                  onListClick={() => handleOnClick(device.id)}
+                  onEditClick={() => handleOnEditClick(device.id)}
+                  onDeleteClick={() => handleOpenDeleteDialog(device.id)}
+                  active={device.id === selectedDevice?.id} // Replace with your logic to determine if the item is active
+                />
+              ))
+            ) : (
+              <Alert severity="info">No devices found for this floorplan.</Alert>
+            )
           ) : (
-            <Alert severity="info">No devices found for this floorplan.</Alert>
+            <></>
           )}
         </Scrollbar>
       </Box>

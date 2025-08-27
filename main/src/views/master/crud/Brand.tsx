@@ -30,7 +30,7 @@ const Brand = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const brandCount = useSelector((state: RootState) => state.brandReducer.brandFilteredCount);
+  const brandCount = useSelector((state: RootState) => state.brandReducer.brandTotalCount);
   const { t } = useTranslation();
 
   const topCards: cardType[] = [

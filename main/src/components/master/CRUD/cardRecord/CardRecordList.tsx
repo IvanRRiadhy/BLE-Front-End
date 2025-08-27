@@ -34,15 +34,19 @@ const columns = [
 const CardRecordList = () => {
   const dispatch: AppDispatch = useDispatch();
   const cardRecordData = useSelector((state: RootState) => state.CardRecordReducer.cardRecords);
-  const CardRecordFilteredCount: number = useSelector(
-    (state: RootState) => state.CardRecordReducer.cardRecordFilteredCount,
+  const CardRecordTotalCount = useSelector(
+    (state: RootState) => state.CardRecordReducer.cardRecordTotalCount,
   );
+  // const CardRecordFilteredCount: number = useSelector(
+  //   (state: RootState) => state.CardRecordReducer.cardRecordFilteredCount,
+  // );
   const CardRecordFilter: GetFilter = useSelector(
     (state: RootState) => state.CardRecordReducer.cardRecordFilter,
   );
   const { t } = useTranslation();
 
   const [loading, setLoading] = useState(false);
+  const hasLoaded = useSelector((state: RootState) => state.CardRecordReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(CardRecordFilter.Start / CardRecordFilter.Length);
   const rowsPerPage = CardRecordFilter.Length;
@@ -115,7 +119,7 @@ const CardRecordList = () => {
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
-        {loading ? (
+        {!hasLoaded ? (
           <Box
             sx={{
               display: 'flex',
@@ -203,7 +207,7 @@ const CardRecordList = () => {
                 {/* Pagination */}
                 <TablePagination
                   component="div"
-                  count={CardRecordFilteredCount}
+                  count={CardRecordTotalCount}
                   page={page}
                   rowsPerPage={rowsPerPage}
                   onPageChange={handleChangePage}

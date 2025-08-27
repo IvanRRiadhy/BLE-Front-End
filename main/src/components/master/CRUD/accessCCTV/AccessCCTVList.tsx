@@ -42,8 +42,8 @@ const columns = [
 const AccessCCTVList = () => {
   const dispatch: AppDispatch = useDispatch();
   const CCTVData: CCTVType[] = useSelector((state: RootState) => state.CCTVReducer.cctvs);
-  // const CCTVTotalCount = useSelector((state: RootState) => state.CCTVReducer.cctvTotalCount);
-  const CCTVFilteredCount = useSelector((state: RootState) => state.CCTVReducer.cctvFilteredCount);
+  const CCTVTotalCount = useSelector((state: RootState) => state.CCTVReducer.cctvTotalCount);
+  // const CCTVFilteredCount = useSelector((state: RootState) => state.CCTVReducer.cctvFilteredCount);
   const CCTVFilter = useSelector((state: RootState) => state.CCTVReducer.cctvFilter);
   const isLoading = useSelector((state: RootState) => state.CCTVReducer.isLoading);
   const hasLoaded = useSelector((state: RootState) => state.CCTVReducer.hasLoaded);
@@ -130,7 +130,7 @@ const AccessCCTVList = () => {
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          {isLoading ? (
+          {!hasLoaded ? (
             <Box
               sx={{
                 display: 'flex',
@@ -245,7 +245,7 @@ const AccessCCTVList = () => {
               {/* Pagination */}
               <TablePagination
                 component="div"
-                count={CCTVFilteredCount}
+                count={CCTVTotalCount}
                 page={page}
                 rowsPerPage={rowsPerPage}
                 onPageChange={handleChangePage}

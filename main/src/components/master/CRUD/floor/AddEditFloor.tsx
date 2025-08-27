@@ -48,6 +48,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
     ...floor,
   });
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+  const isLoading = useSelector((state: RootState) => state.floorReducer.isLoading);
 
   const dispatch: AppDispatch = useDispatch();
   const buildingData: BuildingType[] = useSelector(
@@ -256,7 +257,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
         </Tooltip>
       )}
 
-      {!loading && (
+      {!isLoading && (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>
             <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
@@ -415,8 +416,8 @@ const AddEditFloor = ({ type, floor }: FormType) => {
         </Dialog>
       )}
 
-      {loading && (
-        <Dialog open={true} fullWidth maxWidth="sm">
+      {isLoading && (
+        <Dialog open={open} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h1" mb={5}>
               Loading...{' '}

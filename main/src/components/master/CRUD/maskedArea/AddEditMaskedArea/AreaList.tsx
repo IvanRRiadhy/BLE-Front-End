@@ -52,6 +52,7 @@ const AreaList = () => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
+  const hasLoaded = useSelector((state: RootState) => state.maskedAreaReducer.hasLoaded);
 
   const activeFloorplan = useSelector(
     (state: RootState) => state.floorplanReducer.selectedFloorplan,
@@ -306,7 +307,8 @@ const AreaList = () => {
         <Scrollbar
           sx={{ height: { lg: 'calc(100vh - 370px)', sm: '100vh' }, maxHeight: 'fit-content' }}
         >
-          {filteredUnsavedMaksedArea ? (
+          {hasLoaded ? (
+            filteredUnsavedMaksedArea ? (
             filteredUnsavedMaksedArea.map((area: MaskedAreaType) => (
               <AreaListItem
                 key={area.id}
@@ -319,6 +321,9 @@ const AreaList = () => {
             ))
           ) : (
             <Alert severity="info">No masked areas found for this floorplan.</Alert>
+          )
+          ): (
+            <></>
           )}
         </Scrollbar>
       </Box>

@@ -9,6 +9,7 @@ import { defaultAlarmRecordFilter } from "../defaultForm";
 
 const API_URL = '/api/AlarmRecordTracking/';
 const API_DT_URL = '/api/AlarmRecordTracking/filter/';
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetAlarmRecordResponse = {
     RecordsTotal : number;
@@ -74,6 +75,8 @@ interface StateType {
     alarmRecordTotalCount: number;
     alarmRecordFilteredCount: number;
     alarmRecordFilter: GetFilter
+isLoading: boolean;
+hasLoaded: boolean;
 };
 
 const initialState: StateType = {
@@ -84,6 +87,8 @@ const initialState: StateType = {
     alarmRecordTotalCount: 0,
     alarmRecordFilteredCount: 0,
     alarmRecordFilter: defaultAlarmRecordFilter,
+    isLoading: false,
+    hasLoaded: false,
 };
 export const AlarmSlice = createSlice({
     name: 'alarmRecordTrackings',
@@ -111,14 +116,22 @@ export const AlarmSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+        .addCase(fetchAlarmDT.pending, (state) => {
+            state.isLoading = true;
+            state.hasLoaded = false;
+        })
         .addCase(fetchAlarmDT.fulfilled, (state, action) => {
             state.alarmRecordTotalCount = action.payload.recordsTotal;
             state.alarmRecordFilteredCount = action.payload.recordsFiltered;
+                state.isLoading = false;
+                state.hasLoaded = true;
         })
         .addCase(fetchAlarmDT.rejected, (_state, action) => {
             console.error("Error fetching Alarm: ", action.payload);
             // _state.alarmRecordTotalCount = 0;
             _state.alarmRecordFilteredCount = 0;
+                _state.isLoading = false;
+                _state.hasLoaded = false;
         });
     }
 });

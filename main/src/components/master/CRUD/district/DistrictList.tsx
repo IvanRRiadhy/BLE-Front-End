@@ -45,14 +45,15 @@ const DistrictList = () => {
   const districtData: DistrictType[] = useSelector(
     (state: RootState) => state.districtReducer.districts,
   );
-  // const districtTotalCount = useSelector((state: RootState) => state.districtReducer.districtTotalCount);
-  const districtFilteredCount = useSelector(
-    (state: RootState) => state.districtReducer.districtFilteredCount,
-  );
+  const districtTotalCount = useSelector((state: RootState) => state.districtReducer.districtTotalCount);
+  // const districtFilteredCount = useSelector(
+  //   (state: RootState) => state.districtReducer.districtFilteredCount,
+  // );
   const districtFilter = useSelector((state: RootState) => state.districtReducer.districtFilter);
   const prevFilterRef = useRef(districtFilter);
   // const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const hasLoaded = useSelector((state: RootState) => state.districtReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(districtFilter.Start / districtFilter.Length);
   const rowsPerPage = districtFilter.Length;
@@ -159,7 +160,7 @@ const DistrictList = () => {
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          {loading ? (
+          {!hasLoaded ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <CircularProgress />
             </Box>
@@ -267,7 +268,7 @@ const DistrictList = () => {
               {/* Pagination */}
               <TablePagination
                 component="div"
-                count={districtFilteredCount}
+                count={districtTotalCount}
                 page={page}
                 rowsPerPage={rowsPerPage}
                 onPageChange={handleChangePage}

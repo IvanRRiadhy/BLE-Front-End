@@ -33,7 +33,7 @@ const Building = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const { t } = useTranslation();
-  const buildingCount = useSelector((state: RootState) => state.buildingReducer.buildingFilteredCount);
+  const buildingCount = useSelector((state: RootState) => state.buildingReducer.buildingTotalCount);
 
   const topCards: cardType[] = [
     {

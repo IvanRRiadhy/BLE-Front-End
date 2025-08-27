@@ -31,7 +31,7 @@ const Device = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const DeviceCount = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceFilteredCount,
+    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceTotalCount,
   );
   const { t } = useTranslation();
   const topCards: cardType[] = [

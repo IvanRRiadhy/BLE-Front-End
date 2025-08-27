@@ -11,7 +11,7 @@ import VisitorSearch from 'src/components/master/Tag/visitor/visitorSearch';
 const drawerWidth = 320;
 const secdrawerWidth = 320;
 
-const Tag = () => {
+const VisitorTag = () => {
   const [isLeftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
@@ -85,4 +85,4 @@ const Tag = () => {
   );
 };
 
-export default Tag;
+export default VisitorTag;

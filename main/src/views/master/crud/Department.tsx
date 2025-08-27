@@ -30,7 +30,7 @@ const Department = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const departmentCount = useSelector((state: RootState) => state.departmentReducer.departmentFilteredCount);
+  const departmentCount = useSelector((state: RootState) => state.departmentReducer.departmentTotalCount);
   const { t } = useTranslation();
 
   const topCards: cardType[] = [
