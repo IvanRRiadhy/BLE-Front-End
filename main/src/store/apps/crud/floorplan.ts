@@ -108,17 +108,56 @@ export const FloorplanSlice = createSlice({
         builder
             .addCase(fetchFloorplanDT.pending, (state) => {
                 state.isLoading = true;
+                state.hasLoaded = false;
             })
             .addCase(fetchFloorplanDT.fulfilled, (state, action) => {
                 state.floorplanTotalCount = action.payload.recordsTotal;
                 state.floorplanFilteredCount = action.payload.recordsFiltered;
+                state.isLoading = false;
+                state.hasLoaded = true;
             })
             .addCase(fetchFloorplanDT.rejected, (_state, action) => {
                 console.error("Error fetching floorplans: ", action.payload);
                 // _state.floorplanTotalCount = 0;
                 _state.floorplanFilteredCount = 0;
                     _state.isLoading = false;
-                    _state.hasLoaded = true;
+                    _state.hasLoaded = false;
+            })
+            .addCase(addFloorplan.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(addFloorplan.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.floorplans.push(action.payload);
+            })
+            .addCase(addFloorplan.rejected, (_state, action) => {
+                console.error("Add floorplan failed: ", action.payload);
+                _state.isLoading = false;
+            })
+            .addCase(editFloorplan.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(editFloorplan.fulfilled, (state, action) => {
+                state.isLoading = false;
+                const index = state.floorplans.findIndex(fp => fp.id === action.payload.id);
+                if (index !== -1) {
+                    state.floorplans[index] = action.payload;
+                }
+            })
+            .addCase(editFloorplan.rejected, (_state, action) => {
+                console.error("Edit floorplan failed: ", action.payload);
+                _state.isLoading = false;
+            })
+            .addCase(deleteFloorplan.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(deleteFloorplan.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.floorplans = state.floorplans.filter(fp => fp.id !== action.payload);
+            })
+            .addCase(deleteFloorplan.rejected, (_state, action) => {
+                console.error("Delete floorplan failed: ", action.payload);
+                _state.isLoading = false;
             })
     },
 });

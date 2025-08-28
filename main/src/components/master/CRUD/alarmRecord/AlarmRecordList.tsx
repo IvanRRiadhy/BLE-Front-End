@@ -11,6 +11,7 @@ import {
   Typography,
   TablePagination,
   TableSortLabel,
+  Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +28,8 @@ const columns = [
   { label: 'Area Name', field: 'Area.Name', sortAble: true },
 ];
 
+const SKELETON_ROWS = 5;
+
 const AlarmRecordList = () => {
   const dispatch: AppDispatch = useDispatch();
   const alarmRecordData: AlarmType[] = useSelector(
@@ -40,6 +43,7 @@ const AlarmRecordList = () => {
   );
   const AlarmRecordFilter = useSelector((state: RootState) => state.alarmReducer.alarmRecordFilter);
   const { t } = useTranslation();
+  const hasLoaded = useSelector((state: RootState) => state.alarmReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(AlarmRecordFilter.Start / AlarmRecordFilter.Length);
   const rowsPerPage = AlarmRecordFilter.Length;
@@ -102,6 +106,47 @@ const AlarmRecordList = () => {
     }
   };
 
+    const renderSkeletonRows = (rows: number) => (
+      <>
+        {Array.from({ length: rows }).map((_, i) => (
+          <TableRow key={`skeleton-${i}`}>
+            {/* sticky index */}
+            <TableCell
+              sx={{
+                position: 'sticky',
+                left: 0,
+                background: 'white',
+                zIndex: 1,
+                width: 35,
+                minWidth: 35,
+                maxWidth: 35,
+              }}
+            >
+              <Skeleton variant="text" width={18} />
+            </TableCell>
+            <TableCell>
+              <Skeleton variant="text" width={180} height={22} />
+            </TableCell>
+            <TableCell>
+              <Skeleton variant="text" width={160} height={22} />
+            </TableCell>
+            <TableCell>
+              <Skeleton variant="text" width={120} height={22} />
+            </TableCell>
+            <TableCell>
+              <Skeleton variant="text" width={160} height={22} />
+            </TableCell>
+            <TableCell>
+              <Skeleton variant="text" width={160} height={22} />
+            </TableCell>
+            <TableCell>
+              <Skeleton variant="text" width={120} height={22} />
+            </TableCell>
+          </TableRow>
+        ))}
+      </>
+    );
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -143,7 +188,10 @@ const AlarmRecordList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {alarmRecordData.map((alarmRecordData, index) => (
+                  {!hasLoaded ? (
+                    renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                  ) : (
+                    alarmRecordData.map((alarmRecordData, index) => (
                     <TableRow key={index}>
                       <TableCell
                         sx={{
@@ -167,7 +215,8 @@ const AlarmRecordList = () => {
                       <TableCell>{alarmRecordData.actionStatus}</TableCell>
                       <TableCell>{alarmRecordData.floorplanMaskedArea?.name}</TableCell>
                     </TableRow>
-                  ))}
+                  ))
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>

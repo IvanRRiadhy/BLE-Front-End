@@ -340,10 +340,11 @@ export const ExportBleReader = createAsyncThunk(
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`,
-          'X-API-KEY-TRACKING-PEOPLE':
+          'X-BIOPEOPLETRACKING-API-KEY':
             'FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK',
         },
       });
+      console.log("Export response: ", response);
       if (!response.ok) throw new Error('Export failed');
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);

@@ -18,7 +18,7 @@ import {
   DialogActions,
   Button,
   TableSortLabel,
-  CircularProgress,
+  Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
@@ -44,13 +44,17 @@ const columns = [
   { label: 'Total Device', field: 'DeviceCount', sortAble: true },
 ];
 
+const SKELETON_ROWS = 5;
+
 const FloorplanDeviceList2 = () => {
   const dispatch: AppDispatch = useDispatch();
   const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
   const buildingData: BuildingType[] = useSelector(
     (state: RootState) => state.buildingReducer.buildingAll,
   );
-  const floorplanTotalCount = useSelector((state: RootState) => state.floorplanReducer.floorplanTotalCount);
+  const floorplanTotalCount = useSelector(
+    (state: RootState) => state.floorplanReducer.floorplanTotalCount,
+  );
   // const floorplanFilteredCount = useSelector(
   //   (state: RootState) => state.floorplanReducer.floorplanFilteredCount,
   // );
@@ -150,108 +154,143 @@ const FloorplanDeviceList2 = () => {
     return building ? building.name : 'Unknown Building';
   };
 
+  const renderSkeletonRows = (rows: number) => (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <TableRow key={`skeleton-${i}`}>
+          <TableCell>
+            <Skeleton variant="text" width={180} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={160} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={160} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={160} height={22} />
+          </TableCell>
+          {/* right actions */}
+          <TableCell
+            sx={{
+              position: 'sticky',
+              right: 0,
+              background: 'white',
+              zIndex: 2,
+              width: 150,
+              minWidth: 150,
+              maxWidth: 150,
+            }}
+          >
+            <Box display="flex" gap={1}>
+              <Skeleton variant="rounded" width={90} height={32} />
+              {/* <Skeleton variant="circular" width={32} height={32} />
+                      <Skeleton variant="circular" width={32} height={32} /> */}
+            </Box>
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          {!hasLoaded ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <BlankCard>
-              <TableContainer>
-                <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
-                  <TableHead>
-                    <TableRow>
-                      {/* Left Sticky Empty Column */}
-                      {columns.map((col) => (
-                        <TableCell key={col.label}>
-                          {col.sortAble && col.field ? (
-                            <TableSortLabel
-                              active={orderBy === col.field}
-                              direction={orderBy === col.field ? order : 'asc'}
-                              onClick={() => handleSort(col.field)}
-                            >
-                              <Typography variant="h6">{col.label}</Typography>
-                            </TableSortLabel>
-                          ) : (
-                            <Typography variant="h6">{col.label}</Typography>
-                          )}
-                        </TableCell>
-                      ))}
-                      {/* Right Sticky Empty Column */}
-                      <TableCell
-                        sx={{
-                          position: 'sticky',
-                          right: 0,
-                          background: 'white',
-                          zIndex: 2,
-                          width: 150, // Fixed width
-                          minWidth: 150,
-                          maxWidth: 150,
-                        }}
-                      >
-                        <Typography variant="h6"> Actions </Typography>
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {floorplanData.map((floorplan: FloorplanType, index) => (
-                      <TableRow key={index}>
-                        <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
-                        >
-                          {getbuildingName(floorplan.floor?.buildingId || '')}
-                        </TableCell>
-                        <TableCell>{floorplan.floor?.name}</TableCell>
-                        <TableCell>{floorplan.name}</TableCell>
-                        <TableCell>{floorplan.deviceCount}</TableCell>
-
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            gap: 1,
-                            alignItems: 'center',
-                            width: 150, // Fixed width
-                            minWidth: 150,
-                            maxWidth: 150,
-                          }}
-                        >
-                          <IconButton
-                            color="primary"
-                            size="small"
-                            onClick={() => handleOnClick(floorplan.id)}
+          <BlankCard>
+            <TableContainer>
+              <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
+                <TableHead>
+                  <TableRow>
+                    {/* Left Sticky Empty Column */}
+                    {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
                           >
-                            <IconEdit size={20} />
-                          </IconButton>
-                          {/* <IconButton
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
+                      </TableCell>
+                    ))}
+                    {/* Right Sticky Empty Column */}
+                    <TableCell
+                      sx={{
+                        position: 'sticky',
+                        right: 0,
+                        background: 'white',
+                        zIndex: 2,
+                        width: 150, // Fixed width
+                        minWidth: 150,
+                        maxWidth: 150,
+                      }}
+                    >
+                      <Typography variant="h6"> Actions </Typography>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {!hasLoaded
+                    ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                    : floorplanData.map((floorplan: FloorplanType, index) => (
+                        <TableRow key={index}>
+                          <TableCell
+                            sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                          >
+                            {getbuildingName(floorplan.floor?.buildingId || '')}
+                          </TableCell>
+                          <TableCell>{floorplan.floor?.name}</TableCell>
+                          <TableCell>{floorplan.name}</TableCell>
+                          <TableCell>{floorplan.deviceCount}</TableCell>
+
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              right: 0,
+                              background: 'white',
+                              zIndex: 2,
+                              gap: 1,
+                              alignItems: 'center',
+                              width: 150, // Fixed width
+                              minWidth: 150,
+                              maxWidth: 150,
+                            }}
+                          >
+                            <IconButton
+                              color="primary"
+                              size="small"
+                              onClick={() => handleOnClick(floorplan.id)}
+                            >
+                              <IconEdit size={20} />
+                            </IconButton>
+                            {/* <IconButton
                             color="error"
                             size="small"
                             onClick={() => handleOpenDeleteDialog(floorplan)}
                           >
                             <IconTrash size={20} />
                           </IconButton> */}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={floorplanTotalCount}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </BlankCard>
-          )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={floorplanTotalCount}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </BlankCard>
         </Box>
       </Grid>
       {/* Delete Confirmation Dialog */}

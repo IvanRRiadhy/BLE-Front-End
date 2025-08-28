@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Backdrop, Box, CircularProgress, List } from '@mui/material';
+import {
+  Backdrop,
+  Box,
+  CircularProgress,
+  List,
+  Skeleton,
+  ListItemButton,
+  ListItemAvatar,
+  ListItemText,
+  Stack,
+} from '@mui/material';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
   fetchVisitor,
@@ -17,7 +27,8 @@ import {
 } from 'src/store/apps/crud/trxVisitor';
 import { defaultTrxVisitorFilter } from 'src/store/apps/defaultForm';
 import { createPortal } from 'react-dom';
-import { ca } from 'date-fns/locale';
+
+const SKELETON_ROWS = 5;
 
 const VisitorList = () => {
   const visitorFilter = useSelector((state: RootState) => state.visitorReducer.visitorFilter);
@@ -26,11 +37,13 @@ const VisitorList = () => {
   );
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
+  const hasLoaded = useSelector((state: RootState) => state.TrxVisitorReducer.hasLoaded);
+
   useEffect(() => {
-    dispatch(UpdateFilter({...defaultTrxVisitorFilter, Length: 999}));
+    dispatch(UpdateFilter({ ...defaultTrxVisitorFilter, Length: 999 }));
     setLoading(true);
     try {
-      dispatch(fetchTrxVisitorDT({...defaultTrxVisitorFilter, Length: 999}));
+      dispatch(fetchTrxVisitorDT({ ...defaultTrxVisitorFilter, Length: 999 }));
     } catch (error) {
       console.error('Error fetching visitors:', error);
     }
@@ -41,7 +54,7 @@ const VisitorList = () => {
   useEffect(() => {
     setLoading(true);
     try {
-    dispatch(fetchTrxVisitorDT({...trxVisitorFilter, Length: 999}));
+      dispatch(fetchTrxVisitorDT({ ...trxVisitorFilter, Length: 999 }));
     } catch (error) {
       console.error('Error fetching visitors:', error);
     } finally {
@@ -49,7 +62,6 @@ const VisitorList = () => {
         setLoading(false);
       }, 500);
     }
-
   }, [trxVisitorFilter, dispatch]);
 
   const visitors = useSelector((state: RootState) => state.visitorReducer.visitors);
@@ -57,8 +69,29 @@ const VisitorList = () => {
 
   const active = useSelector((state: RootState) => state.TrxVisitorReducer.SelectedTrxVisitor);
   useEffect(() => {
-    console.log("active", active);
-  },[active])
+    console.log('active', active);
+  }, [active]);
+
+      const renderSkeletonItems = (count: number) => (
+    <>
+      {Array.from({ length: count }).map((_, idx) => (
+        <ListItemButton key={`skeleton-${idx}`} sx={{ mb: 1 }}>
+          <ListItemAvatar>
+            <Skeleton variant="circular" width={40} height={40} />
+          </ListItemAvatar>
+          <ListItemText>
+            <Stack direction="row" gap="10px" alignItems="center">
+              <Box mr="auto">
+                <Skeleton variant="text" width={160} height={22} />
+                <Skeleton variant="text" width={120} height={18} />
+                <Skeleton variant="text" width={100} height={18} />
+              </Box>
+            </Stack>
+          </ListItemText>
+        </ListItemButton>
+      ))}
+    </>
+  );
 
   return (
     <>
@@ -70,7 +103,7 @@ const VisitorList = () => {
             overflow: 'auto',
           }}
         >
-          {trxVisitors.map((trx) => (
+          {hasLoaded ? (trxVisitors.map((trx) => (
             <TrxVisitorListItem
               key={trx.id}
               active={trx.id === active.id}
@@ -79,7 +112,9 @@ const VisitorList = () => {
                 dispatch(SelectTrxVisitor(trx.id));
               }}
             />
-          ))}
+          ))) : (
+            renderSkeletonItems(SKELETON_ROWS)
+          )}
         </Box>
       </List>
       {loading &&

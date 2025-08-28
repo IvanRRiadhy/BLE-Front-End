@@ -10,6 +10,11 @@ import {
   DialogTitle,
   List,
   Typography,
+  Skeleton,
+  ListItemButton,
+  ListItemAvatar,
+  ListItemText,
+  Stack,
 } from '@mui/material';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
@@ -24,11 +29,14 @@ import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import TagListItem from './tagListItem';
 import { defaultMemberFilter } from 'src/store/apps/defaultForm';
 
+const SKELETON_ROWS = 5;
+
 const TagList = () => {
   const [isManySelect, setIsManySelect] = useState(false);
   const [manySelectMembers, setManySelectMembers] = useState<memberType[]>([]);
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
   const [loading, setLoading] = useState(false);
+  const hasLoaded = useSelector((state: RootState) => state.memberReducer.hasLoaded);
 
   const dispatch = useDispatch();
 
@@ -91,6 +99,27 @@ const TagList = () => {
       setManySelectMembers(members);
     }
   };
+
+    const renderSkeletonItems = (count: number) => (
+    <>
+      {Array.from({ length: count }).map((_, idx) => (
+        <ListItemButton key={`skeleton-${idx}`} sx={{ mb: 1 }}>
+          <ListItemAvatar>
+            <Skeleton variant="circular" width={40} height={40} />
+          </ListItemAvatar>
+          <ListItemText>
+            <Stack direction="row" gap="10px" alignItems="center">
+              <Box mr="auto">
+                <Skeleton variant="text" width={160} height={22} />
+                <Skeleton variant="text" width={120} height={18} />
+                <Skeleton variant="text" width={100} height={18} />
+              </Box>
+            </Stack>
+          </ListItemText>
+        </ListItemButton>
+      ))}
+    </>
+  );
 
   return (
     <>
@@ -161,7 +190,7 @@ const TagList = () => {
               </Box>
             </>
           )}
-          {members.map((member) => (
+          {hasLoaded ? (members.map((member) => (
             <TagListItem
               key={member.id}
               active={member === active}
@@ -173,7 +202,9 @@ const TagList = () => {
                 dispatch(SelectMember(member.id));
               }}
             />
-          ))}
+          ))) : (
+            renderSkeletonItems(SKELETON_ROWS)
+          )}
         </Box>
       </List>
       {/* Delete Confirmation Dialog */}

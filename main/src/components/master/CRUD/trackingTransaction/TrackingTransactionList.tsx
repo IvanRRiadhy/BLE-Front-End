@@ -18,6 +18,7 @@ import {
   DialogActions,
   Button,
   TableSortLabel,
+  Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
@@ -43,6 +44,8 @@ const columns = [
   { label: 'Battery', field: 'Battery', sortAble: true },
 ];
 
+const SKELETON_ROWS = 5;
+
 const TrackingTransactionList = () => {
   const dispatch: AppDispatch = useDispatch();
   const trackingTransData = useSelector(
@@ -58,6 +61,7 @@ const TrackingTransactionList = () => {
     (state: RootState) => state.trackingTransReducer.trackingTransFilter,
   );
   const { t } = useTranslation();
+  const hasLoaded = useSelector((state: RootState) => state.trackingTransReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(trackingTransFilter.Start / trackingTransFilter.Length);
   const rowsPerPage = trackingTransFilter.Length;
@@ -144,6 +148,50 @@ const TrackingTransactionList = () => {
     )}`;
   };
 
+  const renderSkeletonRows = (rows: number) => (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <TableRow key={`skeleton-${i}`}>
+          {/* sticky index */}
+          <TableCell
+            sx={{
+              position: 'sticky',
+              left: 0,
+              background: 'white',
+              zIndex: 1,
+              width: 35,
+              minWidth: 35,
+              maxWidth: 35,
+            }}
+          >
+            <Skeleton variant="text" width={18} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={180} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={160} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={120} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={160} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={160} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={120} height={22} />
+          </TableCell>
+                    <TableCell>
+            <Skeleton variant="text" width={120} height={22} />
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -185,7 +233,10 @@ const TrackingTransactionList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {trackingTransData.map((trackingTrans: trackingTransType, index) => (
+                  {!hasLoaded ? (
+                    renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                  ) : (
+                    trackingTransData.map((trackingTrans: trackingTransType, index) => (
                     <TableRow key={trackingTrans.id}>
                       <TableCell
                         sx={{
@@ -211,7 +262,8 @@ const TrackingTransactionList = () => {
                       <TableCell>{trackingTrans.alarmStatus}</TableCell>
                       <TableCell>{trackingTrans.battery}</TableCell>
                     </TableRow>
-                  ))}
+                  ))
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>

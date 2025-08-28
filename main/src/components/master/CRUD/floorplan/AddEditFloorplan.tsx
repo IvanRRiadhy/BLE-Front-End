@@ -173,7 +173,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="floorplan-Name">Floorplan Name</CustomFormLabel>
                 <CustomTextField
                   id="name"

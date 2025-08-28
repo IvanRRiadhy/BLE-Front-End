@@ -7,6 +7,7 @@ import {
   Box,
   CardContent,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
@@ -33,6 +34,7 @@ const visitor = () => {
   const visitorTotalCount = useSelector(
     (state: RootState) => state.visitorReducer.visitorTotalCount,
   );
+  const hasLoaded = useSelector((state: RootState) => state.visitorReducer.hasLoaded);
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
@@ -58,14 +60,21 @@ const visitor = () => {
                 >
                   {t(`${topcard.title}`)}
                 </Typography>
-                <Typography
-                  color={topcard.bgcolor + '.main'}
-                  variant="h4"
-                  fontWeight={600}
-                  fontSize={25}
-                >
-                  {topcard.subtitle}
-                </Typography>
+                {!hasLoaded ? (
+                  <CircularProgress
+                    size={24}
+                    style={{ marginTop: 10, color: topcard.bgcolor + '.main' }}
+                  />
+                ) : (
+                  <Typography
+                    color={topcard.bgcolor + '.main'}
+                    variant="h4"
+                    fontWeight={600}
+                    fontSize={25}
+                  >
+                    {topcard.subtitle}
+                  </Typography>
+                )}
               </CardContent>
             </Box>
           </Grid>

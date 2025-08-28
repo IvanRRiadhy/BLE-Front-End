@@ -11,7 +11,7 @@ import {
   Typography,
   TablePagination,
   TableSortLabel,
-  CircularProgress,
+  Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { useTranslation } from 'react-i18next';
@@ -30,6 +30,8 @@ const columns = [
   { label: 'Check-out', field: 'checkoutAt', sortAble: true },
   { label: 'Status', field: 'visitor_type', sortAble: true },
 ];
+
+const SKELETON_ROWS = 5;
 
 const CardRecordList = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -116,22 +118,44 @@ const CardRecordList = () => {
     )}`;
   };
 
+    const renderSkeletonRows = (rows: number) => (
+      <>
+        {Array.from({ length: rows }).map((_, i) => (
+          <TableRow key={`skeleton-${i}`}>
+            {/* sticky index */}
+            <TableCell
+              sx={{
+                position: 'sticky',
+                left: 0,
+                background: 'white',
+                zIndex: 1,
+                width: 35,
+                minWidth: 35,
+                maxWidth: 35,
+              }}
+            >
+              <Skeleton variant="text" width={18} />
+            </TableCell>
+            <TableCell>
+              <Skeleton variant="text" width={180} height={22} />
+            </TableCell>
+            <TableCell>
+              <Skeleton variant="text" width={160} height={22} />
+            </TableCell>
+            <TableCell>
+              <Skeleton variant="text" width={120} height={22} />
+            </TableCell>
+            <TableCell>
+              <Skeleton variant="text" width={160} height={22} />
+            </TableCell>
+          </TableRow>
+        ))}
+      </>
+    );
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
-        {!hasLoaded ? (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '100%',
-            }}
-          >
-            <CircularProgress />
-          </Box>
-        ) : (
-          <>
             <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
               <BlankCard>
                 <TableContainer>
@@ -170,7 +194,10 @@ const CardRecordList = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {cardRecordData.map((cardRecord, index) => (
+                      {!hasLoaded ? (
+                        renderSkeletonRows(SKELETON_ROWS)
+                      ) : (
+                        cardRecordData.map((cardRecord, index) => (
                         <TableRow key={index}>
                           <TableCell
                             sx={{
@@ -200,7 +227,8 @@ const CardRecordList = () => {
                           </TableCell>
                           <TableCell>{cardRecord.visitorType}</TableCell>
                         </TableRow>
-                      ))}
+                      ))
+                      )}
                     </TableBody>
                   </Table>
                 </TableContainer>
@@ -216,8 +244,6 @@ const CardRecordList = () => {
                 />
               </BlankCard>
             </Box>
-          </>
-        )}
       </Grid>
     </Grid>
   );

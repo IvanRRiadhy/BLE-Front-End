@@ -156,7 +156,7 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="organization-code">Organization Code</CustomFormLabel>
                 <CustomTextField
                   id="code"
@@ -178,7 +178,7 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
                   helperText={formErrors.organizationHost}
                 />
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="organization-Name">Organization Name</CustomFormLabel>
                 <CustomTextField
                   id="name"

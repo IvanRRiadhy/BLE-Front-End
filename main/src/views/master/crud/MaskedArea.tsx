@@ -7,6 +7,7 @@ import {
   Box,
   CardContent,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
@@ -34,7 +35,10 @@ const MaskedArea = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const floorplanCount = useSelector((state: RootState) => state.floorplanReducer.floorplanTotalCount);
+  const hasFloorplanLoaded = useSelector((state: RootState) => state.floorplanReducer.hasLoaded);
   const maskedAreaCount = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll.length);
+  const hasMaskedAreaLoaded = useSelector((state: RootState) => state.maskedAreaReducer.hasLoaded);
+  const hasLoaded = [hasFloorplanLoaded, hasMaskedAreaLoaded]
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
@@ -55,7 +59,9 @@ const MaskedArea = () => {
     >
       <Breadcrumb title="Floorplan Masked Area Table" />
       <Grid container spacing={3} mb={3}>
-        {topCards.map((topcard, i) => (
+        {topCards.map((topcard, i) => {
+          const loaded = hasLoaded[i];
+          return(
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>
             <Box bgcolor={topcard.bgcolor + '.light'} textAlign="center">
               <CardContent>
@@ -68,18 +74,25 @@ const MaskedArea = () => {
                 >
                   {t(`${topcard.title}`)}
                 </Typography>
-                <Typography
-                  color={topcard.bgcolor + '.main'}
-                  variant="h4"
-                  fontWeight={600}
-                  fontSize={25}
-                >
-                  {topcard.subtitle}
-                </Typography>
+                {!loaded ? (
+                  <CircularProgress
+                    size={24}
+                    style={{ marginTop: 10, color: topcard.bgcolor + '.main' }}
+                  />
+                ) : (
+                  <Typography
+                    color={topcard.bgcolor + '.main'}
+                    variant="h4"
+                    fontWeight={600}
+                    fontSize={25}
+                  >
+                    {topcard.subtitle}
+                  </Typography>
+                )}
               </CardContent>
             </Box>
           </Grid>
-        ))}
+        )})}
       </Grid>
       <AppCard>
         <Drawer

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector, useDispatch, AppState } from 'src/store/Store';
+import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import { Box, Fab, TextField, InputAdornment } from '@mui/material';
 
 import { SearchMember } from 'src/store/apps/crud/member';
@@ -10,7 +10,7 @@ type Props = {
 };
 
 const TagSearch = ({ onClick }: Props) => {
-  const searchTerm = useSelector((state: AppState) => state.memberReducer.memberSearch);
+  const searchTerm = useSelector((state: RootState) => state.memberReducer.memberSearch);
   const dispatch = useDispatch();
   return (
     <Box display="flex" sx={{ p: 2 }} flexDirection="column">

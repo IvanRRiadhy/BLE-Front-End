@@ -19,7 +19,7 @@ import {
   DialogActions,
   Button,
   TableSortLabel,
-  CircularProgress,
+  Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
@@ -38,6 +38,8 @@ const columns = [
   { label: 'Floor Dimension (meter)', field: '', sortAble: false },
   { label: 'Engine Floor', field: 'EngineFloorId', sortAble: true },
 ];
+
+const SKELETON_ROWS = 5;
 
 const FloorList = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -158,149 +160,189 @@ const FloorList = () => {
     handleCloseDeleteDialog();
   };
 
-  const getbuildingName = (buildingId: string) => {
-    const building = buildingData.find((b) => b.id === buildingId);
-    return building ? building.name : 'Unknown Building';
-  };
+  const renderSkeletonRows = (rows: number) => (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <TableRow key={`skeleton-${i}`}>
+          {/* sticky index */}
+          <TableCell
+            sx={{
+              position: 'sticky',
+              left: 0,
+              background: 'white',
+              zIndex: 1,
+              width: 35,
+              minWidth: 35,
+              maxWidth: 35,
+            }}
+          >
+            <Skeleton variant="text" width={18} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={180} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={160} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="rectangular" width={80} height={60} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={140} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={120} height={22} />
+          </TableCell>
+          {/* right actions */}
+          <TableCell
+            sx={{
+              position: 'sticky',
+              right: 0,
+              background: 'white',
+              zIndex: 2,
+              width: 150,
+              minWidth: 150,
+              maxWidth: 150,
+            }}
+          >
+            <Box display="flex" gap={1}>
+              <Skeleton variant="rounded" width={90} height={32} />
+              {/* <Skeleton variant="circular" width={32} height={32} />
+              <Skeleton variant="circular" width={32} height={32} /> */}
+            </Box>
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
 
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          {!hasLoaded ? (
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100%',
-              }}
-            >
-              <CircularProgress />
-            </Box>
-          ) : (
-            <BlankCard>
-              <TableContainer>
-                <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
-                  <TableHead>
-                    <TableRow>
-                      {/* Left Sticky Empty Column */}
-                      <TableCell
-                        sx={{
-                          position: 'sticky',
-                          left: 0,
-                          background: 'white',
-                          zIndex: 2,
-                          width: 35, // Fixed width
-                          minWidth: 35,
-                          maxWidth: 35,
-                        }}
-                      >
-                        <Typography variant="h6"></Typography>
-                      </TableCell>
-                      {/* Main Table Header */}
-                      {columns.map((col) => (
-                        <TableCell key={col.label}>
-                          {col.sortAble && col.field ? (
-                            <TableSortLabel
-                              active={orderBy === col.field}
-                              direction={orderBy === col.field ? order : 'asc'}
-                              onClick={() => handleSort(col.field)}
-                            >
-                              <Typography variant="h6">{col.label}</Typography>
-                            </TableSortLabel>
-                          ) : (
-                            <Typography variant="h6">{col.label}</Typography>
-                          )}
-                        </TableCell>
-                      ))}
-                      {/* Right Sticky Empty Column */}
-                      <TableCell
-                        sx={{
-                          position: 'sticky',
-                          right: 0,
-                          background: 'white',
-                          zIndex: 2,
-                          width: 150, // Fixed width
-                          minWidth: 150,
-                          maxWidth: 150,
-                        }}
-                      >
-                        <Typography variant="h6"> Actions </Typography>
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {floorData.map((floor: floorType, index: number) => (
-                      <TableRow key={index}>
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            left: 0,
-                            background: 'white',
-                            zIndex: 1,
-                            width: 35, // Fixed width
-                            minWidth: 35,
-                            maxWidth: 35,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          {index + 1 + page * rowsPerPage}
-                        </TableCell>
-                        <TableCell>{floor.building?.name}</TableCell>
-                        <TableCell>{floor.name}</TableCell>
-                        <TableCell>
-                          {floor.floorImage ? (
-                            <img
-                              src={`${BASE_URL}${floor.floorImage}`}
-                              alt="Floor"
-                              style={{ width: 80, height: 80, objectFit: 'cover' }}
-                            />
-                          ) : (
-                            'No Image'
-                          )}
-                        </TableCell>
-                        <TableCell>{`(${floor.floorX}, ${floor.floorY})`}</TableCell>
-                        <TableCell>{floor.engineFloorId}</TableCell>
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            gap: 1,
-                            alignItems: 'center',
-                            width: 150, // Fixed width
-                            minWidth: 150,
-                            maxWidth: 150,
-                          }}
-                        >
-                          <AddEditFloor type="edit" floor={floor} />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(floor)}
+          <BlankCard>
+            <TableContainer>
+              <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
+                <TableHead>
+                  <TableRow>
+                    {/* Left Sticky Empty Column */}
+                    <TableCell
+                      sx={{
+                        position: 'sticky',
+                        left: 0,
+                        background: 'white',
+                        zIndex: 2,
+                        width: 35, // Fixed width
+                        minWidth: 35,
+                        maxWidth: 35,
+                      }}
+                    >
+                      <Typography variant="h6"></Typography>
+                    </TableCell>
+                    {/* Main Table Header */}
+                    {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
                           >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
+                      </TableCell>
                     ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={floorTotalCount}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </BlankCard>
-          )}
+                    {/* Right Sticky Empty Column */}
+                    <TableCell
+                      sx={{
+                        position: 'sticky',
+                        right: 0,
+                        background: 'white',
+                        zIndex: 2,
+                        width: 150, // Fixed width
+                        minWidth: 150,
+                        maxWidth: 150,
+                      }}
+                    >
+                      <Typography variant="h6"> Actions </Typography>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {!hasLoaded
+                    ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                    : floorData.map((floor: floorType, index: number) => (
+                        <TableRow key={index}>
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              left: 0,
+                              background: 'white',
+                              zIndex: 1,
+                              width: 35, // Fixed width
+                              minWidth: 35,
+                              maxWidth: 35,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            {index + 1 + page * rowsPerPage}
+                          </TableCell>
+                          <TableCell>{floor.building?.name}</TableCell>
+                          <TableCell>{floor.name}</TableCell>
+                          <TableCell>
+                            {floor.floorImage ? (
+                              <img
+                                src={`${BASE_URL}${floor.floorImage}`}
+                                alt="Floor"
+                                style={{ width: 80, height: 80, objectFit: 'cover' }}
+                              />
+                            ) : (
+                              'No Image'
+                            )}
+                          </TableCell>
+                          <TableCell>{`(${floor.floorX}, ${floor.floorY})`}</TableCell>
+                          <TableCell>{floor.engineFloorId}</TableCell>
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              right: 0,
+                              background: 'white',
+                              zIndex: 2,
+                              gap: 1,
+                              alignItems: 'center',
+                              width: 150, // Fixed width
+                              minWidth: 150,
+                              maxWidth: 150,
+                            }}
+                          >
+                            <AddEditFloor type="edit" floor={floor} />
+                            <IconButton
+                              color="error"
+                              size="small"
+                              onClick={() => handleOpenDeleteDialog(floor)}
+                            >
+                              <IconTrash size={20} />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={floorTotalCount}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </BlankCard>
         </Box>
       </Grid>
       {/* Delete Confirmation Dialog */}

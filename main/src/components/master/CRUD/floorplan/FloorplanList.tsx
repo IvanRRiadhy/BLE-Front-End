@@ -18,7 +18,7 @@ import {
   DialogActions,
   Button,
   TableSortLabel,
-  CircularProgress,
+  Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
@@ -40,6 +40,8 @@ const columns = [
   { label: 'Floor Name', field: 'Floor.Name', sortAble: true },
   { label: 'Building Name', field: '', sortAble: false },
 ];
+
+const SKELETON_ROWS = 5;
 
 const FloorplanList = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -166,15 +168,61 @@ const FloorplanList = () => {
     const building = buildingData.find((b) => b.id === buildingId);
     return building ? building.name : 'Unknown Building';
   };
+
+      const renderSkeletonRows = (rows: number) => (
+        <>
+          {Array.from({ length: rows }).map((_, i) => (
+            <TableRow key={`skeleton-${i}`}>
+              {/* sticky index */}
+              <TableCell
+                sx={{
+                  position: 'sticky',
+                  left: 0,
+                  background: 'white',
+                  zIndex: 1,
+                  width: 35,
+                  minWidth: 35,
+                  maxWidth: 35,
+                }}
+              >
+                <Skeleton variant="text" width={18} />
+              </TableCell>
+              <TableCell>
+                <Skeleton variant="text" width={180} height={22} />
+              </TableCell>
+              <TableCell>
+                <Skeleton variant="text" width={160} height={22} />
+              </TableCell>
+              <TableCell>
+                <Skeleton variant="text" width={120} height={22} />
+              </TableCell>
+              {/* right actions */}
+              <TableCell
+                sx={{
+                  position: 'sticky',
+                  right: 0,
+                  background: 'white',
+                  zIndex: 2,
+                  width: 150,
+                  minWidth: 150,
+                  maxWidth: 150,
+                }}
+              >
+                <Box display="flex" gap={1}>
+                  <Skeleton variant="rounded" width={90} height={32} />
+                  {/* <Skeleton variant="circular" width={32} height={32} />
+                  <Skeleton variant="circular" width={32} height={32} /> */}
+                </Box>
+              </TableCell>
+            </TableRow>
+          ))}
+        </>
+      );
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          {!hasLoaded ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <CircularProgress />
-            </Box>
-          ) : (
             <BlankCard>
               <TableContainer>
                 <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
@@ -226,7 +274,10 @@ const FloorplanList = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {floorplanData.map((floorplan: FloorplanType, index: number) => (
+                    {!hasLoaded ? (
+                      renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                    ) : (
+                      floorplanData.map((floorplan: FloorplanType, index: number) => (
                       <TableRow key={index}>
                         <TableCell
                           sx={{
@@ -269,7 +320,8 @@ const FloorplanList = () => {
                           </IconButton>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ))
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -283,7 +335,6 @@ const FloorplanList = () => {
                 onRowsPerPageChange={handleChangeRowsPerPage}
               />
             </BlankCard>
-          )}
         </Box>
       </Grid>
       {/* Delete Confirmation Dialog */}

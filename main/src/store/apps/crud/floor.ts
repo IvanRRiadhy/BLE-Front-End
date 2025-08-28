@@ -149,10 +149,13 @@ export const FloorSlice = createSlice({
             })
             .addCase(fetchFloorDT.pending, (state) => {
                 state.isLoading = true;
+                state.hasLoaded = false;
             })
             .addCase(fetchFloorDT.fulfilled, (state, action) => {
                 state.floorTotalCount = action.payload.recordsTotal;
                 state.floorFilteredCount = action.payload.recordsFiltered;
+                state.isLoading = false;
+                state.hasLoaded = true;
             })
             .addCase(fetchFloorDT.rejected, (_state, action) => {
                 console.error("Error fetching floors: ", action.payload);
@@ -160,7 +163,7 @@ export const FloorSlice = createSlice({
                 _state.floorFilteredCount = 0;
 
                     _state.isLoading = false;
-                    _state.hasLoaded = true;
+                    _state.hasLoaded = false;
             })
         }
 });

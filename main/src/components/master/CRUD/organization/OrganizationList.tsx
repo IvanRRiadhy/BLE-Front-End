@@ -18,7 +18,7 @@ import {
   DialogActions,
   Button,
   TableSortLabel,
-  CircularProgress,
+  Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
@@ -39,6 +39,7 @@ const columns = [
   { label: 'Organization Name', field: 'Name', sortAble: true },
   { label: 'Organization Host', field: 'OrganizationHost', sortAble: true },
 ];
+const SKELETON_ROWS = 5;
 
 const OrganizationList = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -160,15 +161,60 @@ const OrganizationList = () => {
     handleCloseDeleteDialog();
   };
 
+    const renderSkeletonRows = (rows: number) => (
+      <>
+        {Array.from({ length: rows }).map((_, i) => (
+          <TableRow key={`skeleton-${i}`}>
+            {/* sticky index */}
+            <TableCell
+              sx={{
+                position: 'sticky',
+                left: 0,
+                background: 'white',
+                zIndex: 1,
+                width: 35,
+                minWidth: 35,
+                maxWidth: 35,
+              }}
+            >
+              <Skeleton variant="text" width={18} />
+            </TableCell>
+            <TableCell>
+              <Skeleton variant="text" width={180} height={22} />
+            </TableCell>
+            <TableCell>
+              <Skeleton variant="text" width={160} height={22} />
+            </TableCell>
+            <TableCell>
+              <Skeleton variant="text" width={120} height={22} />
+            </TableCell>
+            {/* right actions */}
+            <TableCell
+              sx={{
+                position: 'sticky',
+                right: 0,
+                background: 'white',
+                zIndex: 2,
+                width: 150,
+                minWidth: 150,
+                maxWidth: 150,
+              }}
+            >
+              <Box display="flex" gap={1}>
+                <Skeleton variant="rounded" width={90} height={32} />
+                {/* <Skeleton variant="circular" width={32} height={32} />
+                <Skeleton variant="circular" width={32} height={32} /> */}
+              </Box>
+            </TableCell>
+          </TableRow>
+        ))}
+      </>
+    );
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          {!hasLoaded ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <CircularProgress />
-            </Box>
-          ) : (
             <BlankCard>
               <TableContainer>
                 <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
@@ -220,7 +266,10 @@ const OrganizationList = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {organizationData.map((organization, index) => (
+                    {!hasLoaded ? (
+                      renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                    ) : (
+                      organizationData.map((organization, index) => (
                       <TableRow key={organization.id}>
                         <TableCell
                           sx={{
@@ -263,7 +312,8 @@ const OrganizationList = () => {
                           </IconButton>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ))
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -278,7 +328,6 @@ const OrganizationList = () => {
                 onRowsPerPageChange={handleChangeRowsPerPage}
               />
             </BlankCard>
-          )}
         </Box>
       </Grid>
       {/* Delete Confirmation Dialog */}

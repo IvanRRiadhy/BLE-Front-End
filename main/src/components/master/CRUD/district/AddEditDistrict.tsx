@@ -155,7 +155,7 @@ const AddEditDistrict = ({ type, district }: FormType) => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="district-code">District Code</CustomFormLabel>
                 <CustomTextField
                   id="code"
@@ -179,7 +179,7 @@ const AddEditDistrict = ({ type, district }: FormType) => {
                   helperText={formErrors.districtHost}
                 />
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="district-Name">District Name</CustomFormLabel>
                 <CustomTextField
                   id="name"

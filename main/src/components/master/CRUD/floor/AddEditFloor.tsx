@@ -271,7 +271,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="building">Building</CustomFormLabel>
                 <CustomSelect
                   name="buildingId"
@@ -324,7 +324,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                   helperText={formErrors.floorX}
                 />
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="Engine-id">Engine Floor ID</CustomFormLabel>
                 <CustomTextField
                   id="engineFloorId"
@@ -364,7 +364,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                   helperText={formErrors.floorY}
                 />
               </Grid>
-              <Grid size={{ lg: 12, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 12, md: 12, sm: 12 }} >
                 <Grid size={12}>
                   <CustomFormLabel htmlFor="fp-image" error={!!formErrors.floorImage}>
                     Floorplan Image

@@ -19,7 +19,7 @@ import {
   DialogActions,
   Button,
   TableSortLabel,
-  CircularProgress,
+  Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
@@ -38,6 +38,10 @@ const columns = [
   { label: 'Building Name', field: 'name', sortAble: true },
   { label: 'Building Image', field: '', sortAble: false },
 ];
+
+const SKELETON_ROWS = 5;
+
+
 
 const BuildingList = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -133,22 +137,38 @@ const BuildingList = () => {
     handleCloseDeleteDialog();
   };
 
+    const renderSkeletonRows = (rows: number) => (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <TableRow key={`skeleton-${i}`}>
+          {/* sticky index cell */}
+          <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1, width: 35, minWidth: 35, maxWidth: 35 }}>
+            <Skeleton variant="text" width={18} />
+          </TableCell>
+          {/* Building Name */}
+          <TableCell>
+            <Skeleton variant="text" width={220} height={22} />
+          </TableCell>
+          {/* Building Image */}
+          <TableCell>
+            <Skeleton variant="rectangular" width={80} height={60} />
+          </TableCell>
+          {/* Actions (right sticky) */}
+          <TableCell sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2, width: 150, minWidth: 150, maxWidth: 150 }}>
+            <Box display="flex" gap={1}>
+              <Skeleton variant="rounded" width={90} height={32} />
+              {/* <Skeleton variant="circular" width={32} height={32} /> */}
+            </Box>
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
-        {!hasLoaded ? (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '100%',
-            }}
-          >
-            <CircularProgress />
-          </Box>
-        ) : (
-          <>
+
             <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
               <BlankCard>
                 <TableContainer>
@@ -201,7 +221,10 @@ const BuildingList = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {buildingData.map((building, index) => (
+                      {!hasLoaded ? (
+                        renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                        ): (
+                          buildingData.map((building, index) => (
                         <TableRow key={index}>
                           <TableCell
                             sx={{
@@ -253,7 +276,8 @@ const BuildingList = () => {
                             </IconButton>
                           </TableCell>
                         </TableRow>
-                      ))}
+                      ))
+                        )}
                     </TableBody>
                   </Table>
                 </TableContainer>
@@ -269,8 +293,7 @@ const BuildingList = () => {
                 />
               </BlankCard>
             </Box>
-          </>
-        )}
+
       </Grid>
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>

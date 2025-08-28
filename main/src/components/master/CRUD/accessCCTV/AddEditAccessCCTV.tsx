@@ -195,7 +195,7 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
         </Dialog>
       )}
       {isLoading && (
-        <Dialog open={true} fullWidth maxWidth="sm">
+        <Dialog open={open} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h1" mb={5}>
               Loading...{' '}

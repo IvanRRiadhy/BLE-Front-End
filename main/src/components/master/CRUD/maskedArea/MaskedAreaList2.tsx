@@ -12,7 +12,7 @@ import {
   Typography,
   TablePagination,
   TableSortLabel,
-  CircularProgress,
+  Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
@@ -32,6 +32,8 @@ const columns = [
   { label: 'Floorplan', field: 'Name', sortAble: true },
   { label: 'Total Area', field: 'MaskedAreaCount', sortAble: true },
 ];
+
+const SKELETON_ROWS = 5;
 
 const MaskedAreaList2 = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -94,16 +96,44 @@ const MaskedAreaList2 = () => {
     navigate('/master/floorplanmaskedarea/edit');
   };
 
+        const renderSkeletonRows = (rows: number) => (
+          <>
+            {Array.from({ length: rows }).map((_, i) => (
+              <TableRow key={`skeleton-${i}`}>
+                <TableCell>
+                  <Skeleton variant="text" width={180} height={22} />
+                </TableCell>
+                <TableCell>
+                  <Skeleton variant="text" width={160} height={22} />
+                </TableCell>
+                {/* right actions */}
+                <TableCell
+                  sx={{
+                    position: 'sticky',
+                    right: 0,
+                    background: 'white',
+                    zIndex: 2,
+                    width: 150,
+                    minWidth: 150,
+                    maxWidth: 150,
+                  }}
+                >
+                  <Box display="flex" gap={1}>
+                    <Skeleton variant="rounded" width={90} height={32} />
+                    {/* <Skeleton variant="circular" width={32} height={32} />
+                    <Skeleton variant="circular" width={32} height={32} /> */}
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ))}
+          </>
+        );
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-        { !hasLoaded ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <CircularProgress />
-            </Box>
-        ): (
-                    <BlankCard>
+          <BlankCard>
             <TableContainer>
               <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
                 <TableHead>
@@ -141,7 +171,10 @@ const MaskedAreaList2 = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {floorplanData.map((floorplan: any, index) => (
+                  {!hasLoaded ? (
+                    renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                  ) : (
+                    floorplanData.map((floorplan: any, index) => (
                     <TableRow key={index}>
                       <TableCell
                         sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
@@ -172,7 +205,8 @@ const MaskedAreaList2 = () => {
                         </IconButton>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ))
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -186,7 +220,6 @@ const MaskedAreaList2 = () => {
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
           </BlankCard>
-        )}
         </Box>
       </Grid>
     </Grid>

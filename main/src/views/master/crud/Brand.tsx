@@ -7,6 +7,7 @@ import {
   Box,
   CardContent,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
@@ -31,6 +32,7 @@ const Brand = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const brandCount = useSelector((state: RootState) => state.brandReducer.brandTotalCount);
+  const hasLoaded = useSelector((state: RootState) => state.brandReducer.hasLoaded);
   const { t } = useTranslation();
 
   const topCards: cardType[] = [
@@ -57,14 +59,21 @@ const Brand = () => {
                 >
                   {t(`${topcard.title}`)}
                 </Typography>
-                <Typography
-                  color={topcard.bgcolor + '.main'}
-                  variant="h4"
-                  fontWeight={600}
-                  fontSize={25}
-                >
-                  {topcard.subtitle}
-                </Typography>
+                {!hasLoaded ? (
+                  <CircularProgress
+                    size={24}
+                    style={{ marginTop: 10, color: topcard.bgcolor + '.main' }}
+                  />
+                ) : (
+                  <Typography
+                    color={topcard.bgcolor + '.main'}
+                    variant="h4"
+                    fontWeight={600}
+                    fontSize={25}
+                  >
+                    {topcard.subtitle}
+                  </Typography>
+                )}
               </CardContent>
             </Box>
           </Grid>

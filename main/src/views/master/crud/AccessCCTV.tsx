@@ -7,6 +7,7 @@ import {
   Box,
   CardContent,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
@@ -32,6 +33,7 @@ const AccessCCTV = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const cctvCount = useSelector((state: RootState) => state.CCTVReducer.cctvTotalCount);
+  const hasLoaded = useSelector((state: RootState) => state.CCTVReducer.hasLoaded);
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
@@ -57,14 +59,21 @@ const AccessCCTV = () => {
                 >
                   {t(`${topcard.title}`)}
                 </Typography>
-                <Typography
-                  color={topcard.bgcolor + '.main'}
-                  variant="h4"
-                  fontWeight={600}
-                  fontSize={25}
-                >
-                  {topcard.subtitle}
-                </Typography>
+                {!hasLoaded ? (
+                  <CircularProgress
+                    size={24}
+                    style={{ marginTop: 10, color: topcard.bgcolor + '.main' }}
+                  />
+                ) : (
+                  <Typography
+                    color={topcard.bgcolor + '.main'}
+                    variant="h4"
+                    fontWeight={600}
+                    fontSize={25}
+                  >
+                    {topcard.subtitle}
+                  </Typography>
+                )}
               </CardContent>
             </Box>
           </Grid>
@@ -83,10 +92,13 @@ const AccessCCTV = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Access CCTV List" codeModel={[
-            <AccessCCTVFilter key='filter' />,
-            <AddEditAccessCCTV key='add' type="add" />
-          ]}>
+          <ParentCard
+            title="Access CCTV List"
+            codeModel={[
+              <AccessCCTVFilter key="filter" />,
+              <AddEditAccessCCTV key="add" type="add" />,
+            ]}
+          >
             <AccessCCTVList />
           </ParentCard>
         </Drawer>
@@ -96,4 +108,3 @@ const AccessCCTV = () => {
 };
 
 export default AccessCCTV;
-

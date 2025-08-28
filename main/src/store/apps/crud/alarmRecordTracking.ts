@@ -155,7 +155,7 @@ export const fetchAlarm = () => async (dispatch: AppDispatch) => {
 export const fetchAlarmDT = createAsyncThunk(
     "alarmRecordTrackings/fetchAlarmDT",
     async (filter: any, { rejectWithValue }) => {
-        console.log("Filter:", filter);
+        const started = Date.now();
         try {
                                 if (
             filter?.filters &&
@@ -167,14 +167,20 @@ export const fetchAlarmDT = createAsyncThunk(
             // Option 1: just return null (success, no data)
             // return null;
             // Option 2: reject, if you want to treat as error
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue("Filter contains 'Empty', skipping request");
         }
             const response = await axiosServices.post(`${API_DT_URL}`, filter);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             dispatch(GetAlarms(response.data.collection.data || []));
             // console.log("Fetch Alarm", response.data.collection);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching Alarm:", error);
+                                const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }

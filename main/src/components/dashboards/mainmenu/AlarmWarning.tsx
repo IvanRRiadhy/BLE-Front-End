@@ -13,6 +13,7 @@ import {
   TableSortLabel,
   Chip,
   Avatar,
+  Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +30,8 @@ const columns = [
   { label: 'Time', field: 'Timestamp', sortAble: true },
 ];
 
+const SKELETON_ROWS = 5;
+
 const AlarmWarning = () => {
   const dispatch: AppDispatch = useDispatch();
   const alarmRecordData: AlarmType[] = useSelector(
@@ -41,6 +44,7 @@ const AlarmWarning = () => {
     (state: RootState) => state.alarmReducer.alarmRecordFilteredCount,
   );
   const AlarmRecordFilter = useSelector((state: RootState) => state.alarmReducer.alarmRecordFilter);
+  const hasLoaded = useSelector((state: RootState) => state.alarmReducer.hasLoaded);
   const { t } = useTranslation();
   // Pagination State
   const page = Math.floor(AlarmRecordFilter.Start / AlarmRecordFilter.Length);
@@ -56,7 +60,7 @@ const AlarmWarning = () => {
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
   useEffect(() => {
-    dispatch(UpdateFilter({...defaultAlarmRecordFilter}));
+    dispatch(UpdateFilter({ ...defaultAlarmRecordFilter }));
   }, [dispatch]);
 
   useEffect(() => {
@@ -79,7 +83,7 @@ const AlarmWarning = () => {
       },
     )}`;
   };
-  console.log(alarmRecordData)
+  console.log(alarmRecordData);
   const handleSort = (column: string) => {
     const isAsc = AlarmRecordFilter.SortColumn === column && AlarmRecordFilter.SortDir === 'asc';
     const isDesc = AlarmRecordFilter.SortColumn === column && AlarmRecordFilter.SortDir === 'desc';
@@ -102,6 +106,42 @@ const AlarmWarning = () => {
       );
     }
   };
+
+  const renderSkeletonRows = (rows: number) => (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <TableRow key={`skeleton-${i}`}>
+          {/* sticky avatar cell */}
+          <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}>
+            <Skeleton variant="circular" width={40} height={40} />
+          </TableCell>
+
+          {/* Visitor Name */}
+          <TableCell>
+            <Box>
+              <Skeleton variant="text" width={160} height={20} />
+              <Skeleton variant="text" width={120} height={16} sx={{ mt: 0.5 }} />
+            </Box>
+          </TableCell>
+
+          {/* Alarm Status */}
+          <TableCell>
+            <Skeleton variant="rounded" width={100} height={28} />
+          </TableCell>
+
+          {/* Area Name */}
+          <TableCell>
+            <Skeleton variant="text" width={140} height={20} />
+          </TableCell>
+
+          {/* Time */}
+          <TableCell>
+            <Skeleton variant="text" width={180} height={20} />
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
 
   return (
     <DashboardCard title={t('Alarm Warning')}>
@@ -147,62 +187,80 @@ const AlarmWarning = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {alarmRecordData.map((alarm) => (
-                      <TableRow key={alarm.id}>
-                        <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
-                        >
-                          <Avatar
-                            src={alarm.visitor?.faceImage}
-                            alt={alarm.visitor?.faceImage}
-                            sx={{ width: 40, height: 40 }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Box>
-                            <Typography variant="subtitle2" fontWeight={600}>
-                              {alarm.visitor?.name || 'Unknown Visitor'}
-                            </Typography>
-                            <Typography color="textSecondary" fontSize="12px" variant="subtitle2">
-                              {alarm.visitor?.cardNumber || 'No Card Number'}
-                            </Typography>
-                          </Box>
-                        </TableCell>
+                    {!hasLoaded ? (
+                      renderSkeletonRows(SKELETON_ROWS)
+                    ) : (
+                      <>
+                        {alarmRecordData.map((alarm) => (
+                          <TableRow key={alarm.id}>
+                            <TableCell
+                              sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                            >
+                              <Avatar
+                                src={alarm.visitor?.faceImage}
+                                alt={alarm.visitor?.faceImage}
+                                sx={{ width: 40, height: 40 }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Box>
+                                <Typography variant="subtitle2" fontWeight={600}>
+                                  {alarm.visitor?.name || 'Unknown Visitor'}
+                                </Typography>
+                                <Typography
+                                  color="textSecondary"
+                                  fontSize="12px"
+                                  variant="subtitle2"
+                                >
+                                  {alarm.visitor?.cardNumber || 'No Card Number'}
+                                </Typography>
+                              </Box>
+                            </TableCell>
 
-                        <TableCell>
-                          <Chip
-                            sx={{
-                              bgcolor:
-                                alarmRecordStatusColormap[alarm.alarmRecordStatus] ||
-                                'secondary.light',
-                              color: 'white',
-                              borderRadius: '8px',
-                            }}
-                            size="small"
-                            label={t(`${alarm.alarmRecordStatus}`)}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Typography color="textSecondary" variant="subtitle2" fontWeight={400}>
-                            {alarm.floorplanMaskedArea?.name || 'Unknown Area'}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography color="textSecondary" variant="subtitle2" fontWeight={400}>
-                            {alarm.timestamp ? formatTime(alarm.timestamp) : 'Unknown Time'}
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {Array.from({
-                      length:
-                        rowsPerPage -
-                        Math.min(rowsPerPage, alarmRecordData.length - page * rowsPerPage),
-                    }).map((_, idx) => (
-                      <TableRow key={`empty-row-${idx}`} style={{ height: 63 }}>
-                        <TableCell colSpan={5} />
-                      </TableRow>
-                    ))}
+                            <TableCell>
+                              <Chip
+                                sx={{
+                                  bgcolor:
+                                    alarmRecordStatusColormap[alarm.alarmRecordStatus] ||
+                                    'secondary.light',
+                                  color: 'white',
+                                  borderRadius: '8px',
+                                }}
+                                size="small"
+                                label={t(`${alarm.alarmRecordStatus}`)}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Typography
+                                color="textSecondary"
+                                variant="subtitle2"
+                                fontWeight={400}
+                              >
+                                {alarm.floorplanMaskedArea?.name || 'Unknown Area'}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography
+                                color="textSecondary"
+                                variant="subtitle2"
+                                fontWeight={400}
+                              >
+                                {alarm.timestamp ? formatTime(alarm.timestamp) : 'Unknown Time'}
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        {Array.from({
+                          length:
+                            rowsPerPage -
+                            Math.min(rowsPerPage, alarmRecordData.length - page * rowsPerPage),
+                        }).map((_, idx: number) => (
+                          <TableRow key={`empty-row-${idx}`} style={{ height: 63 }}>
+                            <TableCell colSpan={5} />
+                          </TableRow>
+                        ))}
+                      </>
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>

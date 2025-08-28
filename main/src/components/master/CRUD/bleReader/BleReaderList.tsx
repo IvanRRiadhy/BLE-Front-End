@@ -19,7 +19,7 @@ import {
   DialogActions,
   TableSortLabel,
   Checkbox,
-  CircularProgress,
+  Skeleton,
   Tooltip,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
@@ -45,6 +45,8 @@ const columns = [
   { label: 'GMAC', field: 'Gmac', sortAble: false },
   { label: 'Engine Reader', field: 'EngineFloorId', sortAble: true },
 ];
+
+const SKELETON_ROWS = 5;
 
 const BleReaderList = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -201,15 +203,66 @@ const BleReaderList = () => {
 
   const selectedData = bleReaderData.filter((x) => selectedIds.has(x.id));
 
+        const renderSkeletonRows = (rows: number) => (
+          <>
+            {Array.from({ length: rows }).map((_, i) => (
+              <TableRow key={`skeleton-${i}`}>
+                {/* sticky index */}
+                <TableCell
+                  sx={{
+                    position: 'sticky',
+                    left: 0,
+                    background: 'white',
+                    zIndex: 1,
+                    width: 35,
+                    minWidth: 35,
+                    maxWidth: 35,
+                  }}
+                >
+                  <Skeleton variant="rounded" width={30} height={32} />
+                </TableCell>
+                <TableCell>
+                  <Skeleton variant="text" width={180} height={22} />
+                </TableCell>
+                <TableCell>
+                  <Skeleton variant="text" width={160} height={22} />
+                </TableCell>
+                <TableCell>
+                  <Skeleton variant="text" width={120} height={22} />
+                </TableCell>
+                                <TableCell>
+                  <Skeleton variant="text" width={160} height={22} />
+                </TableCell>
+                <TableCell>
+                  <Skeleton variant="text" width={120} height={22} />
+                </TableCell>
+                {/* right actions */}
+                <TableCell
+                  sx={{
+                    position: 'sticky',
+                    right: 0,
+                    background: 'white',
+                    zIndex: 2,
+                    width: 150,
+                    minWidth: 150,
+                    maxWidth: 150,
+                  }}
+                >
+                  <Box display="flex" gap={1}>
+                    <Skeleton variant="rounded" width={90} height={32} />
+                    {/* <Skeleton variant="circular" width={32} height={32} />
+                    <Skeleton variant="circular" width={32} height={32} /> */}
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ))}
+          </>
+        );
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          {!hasLoaded ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <CircularProgress />
-            </Box>
-          ) : (
             <BlankCard>
               {selectedIds.size > 0 && (
                 <Box
@@ -325,7 +378,10 @@ const BleReaderList = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {bleReaderData.map((bleReader: bleReaderType, index) => (
+                    {!hasLoaded ? (
+                      renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                    ) : (
+                      bleReaderData.map((bleReader: bleReaderType, index) => (
                       <TableRow key={index}>
                         <TableCell
                           sx={{
@@ -388,7 +444,8 @@ const BleReaderList = () => {
                           </IconButton>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ))
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -402,7 +459,6 @@ const BleReaderList = () => {
                 onRowsPerPageChange={handleChangeRowsPerPage}
               />
             </BlankCard>
-          )}
         </Box>
       </Grid>
       {/* Delete Confirmation Dialog */}
