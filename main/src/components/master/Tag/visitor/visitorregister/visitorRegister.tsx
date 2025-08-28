@@ -424,7 +424,7 @@ const VisitorRegister = () => {
                   </div>
                   {/* Member Input */}
                   <CustomFormLabel> Purpose Visit </CustomFormLabel>
-                  <CustomSelect
+                  {/* <CustomSelect
                     name="selectedMember"
                     value={selectedMember?.id || ''}
                     onChange={(event: ChangeEvent<{ value: unknown }>) => {
@@ -443,7 +443,35 @@ const VisitorRegister = () => {
                         {member.name}
                       </MenuItem>
                     ))}
-                  </CustomSelect>
+                  </CustomSelect> */}
+
+                  <Autocomplete<memberType>
+                    options={members} // use the actual member objects
+                    value={selectedMember || null} // same selected state as CustomSelect
+                    onChange={(_, newValue) => {
+                      setSelectedMember(newValue ?? ({} as memberType));
+                    }}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    getOptionLabel={(option) => option?.name ?? ''} // show member name
+                    clearOnEscape
+                    disableClearable={false}
+                    fullWidth
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Select Member"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        error={!!(selectedMember === null || selectedMember.id === undefined)}
+                        helperText={
+                          !!(selectedMember === null || selectedMember.id === undefined)
+                            ? 'Purpose Person is required'
+                            : ''
+                        }
+                      />
+                    )}
+                  />
                   <CustomFormLabel> Notes </CustomFormLabel>
                   <CustomTextField
                     id="notes"

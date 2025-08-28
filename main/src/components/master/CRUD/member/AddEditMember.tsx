@@ -14,6 +14,8 @@ import {
   Typography,
   CircularProgress,
   FormHelperText,
+  Autocomplete,
+  TextField,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
@@ -241,7 +243,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                   helperText={formErrors.personId}
                 />
                 <CustomFormLabel htmlFor="department-Id">Department ID</CustomFormLabel>
-                <CustomSelect
+                {/* <CustomSelect
                   name="departmentId"
                   value={formData.departmentId || ''}
                   onChange={handleInputChange}
@@ -258,7 +260,40 @@ const AddEditMember = ({ type, member }: FormType) => {
                       {department.name}
                     </MenuItem>
                   ))}
-                </CustomSelect>
+                </CustomSelect> */}
+                <Autocomplete
+                  options={departmentData.map((dept) => ({label: dept.name, id: dept.id}))}
+                  value={
+                    departmentData
+                      .map((d) => ({ label: d.name, id: d.id }))
+                      .find((d) => d.id === formData.departmentId) || null
+                  }
+                  onChange={(_, newValue) => {
+                    const id = newValue?.id ?? '';
+                    setFormData((prev) => ({ ...prev, departmentId: id }));
+                    setFormErrors((prev) => {
+                      if(!prev.departmentId) return prev;
+                      const next = { ...prev };
+                      delete next.departmentId;
+                      return next;
+                    })
+                  }}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                  clearOnEscape
+                  disableClearable={false}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      id="departmentId"
+                      variant="outlined"
+                      fullWidth
+                      required
+                      error={!!formErrors.departmentId}
+                      helperText={formErrors.departmentId}
+                    />
+                  )}
+                  />
                 <CustomFormLabel htmlFor="identity-Id">Identity ID</CustomFormLabel>
                 <CustomTextField
                   id="identityId"
@@ -270,7 +305,7 @@ const AddEditMember = ({ type, member }: FormType) => {
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="organization-id">Organization ID</CustomFormLabel>
-                <CustomSelect
+                {/* <CustomSelect
                   name="organizationId"
                   value={formData.organizationId || ''}
                   onChange={handleInputChange}
@@ -287,9 +322,42 @@ const AddEditMember = ({ type, member }: FormType) => {
                       {organization.name}
                     </MenuItem>
                   ))}
-                </CustomSelect>
+                </CustomSelect> */}
+                <Autocomplete
+                  options={organizationData.map((orgz) => ({label: orgz.name, id: orgz.id}))}
+                  value={
+                    organizationData
+                      .map((o) => ({ label: o.name, id: o.id }))
+                      .find((o) => o.id === formData.organizationId) || null
+                  }
+                  onChange={(_, newValue) => {
+                    const id = newValue?.id ?? '';
+                    setFormData((prev) => ({ ...prev, organizationId: id }));
+                    setFormErrors((prev) => {
+                      if(!prev.organizationId) return prev;
+                      const next = { ...prev };
+                      delete next.organizationId;
+                      return next;
+                    })
+                  }}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                  clearOnEscape
+                  disableClearable={false}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      id="organizationId"
+                      variant="outlined"
+                      fullWidth
+                      required
+                      error={!!formErrors.organizationId}
+                      helperText={formErrors.organizationId}
+                    />
+                  )}
+                  />
                 <CustomFormLabel htmlFor="district-id">District ID</CustomFormLabel>
-                <CustomSelect
+                {/* <CustomSelect
                   name="districtId"
                   value={formData.districtId || ''}
                   onChange={handleInputChange}
@@ -306,7 +374,40 @@ const AddEditMember = ({ type, member }: FormType) => {
                       {district.name}
                     </MenuItem>
                   ))}
-                </CustomSelect>
+                </CustomSelect> */}
+                <Autocomplete
+                  options={districtData.map((dist) => ({label: dist.name, id: dist.id}))}
+                  value={
+                    districtData
+                      .map((d) => ({ label: d.name, id: d.id }))
+                      .find((d) => d.id === formData.districtId) || null
+                  }
+                  onChange={(_, newValue) => {
+                    const id = newValue?.id ?? '';
+                    setFormData((prev) => ({ ...prev, districtId: id }));
+                    setFormErrors((prev) => {
+                      if(!prev.districtId) return prev;
+                      const next = { ...prev };
+                      delete next.districtId;
+                      return next;
+                    })
+                  }}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                  clearOnEscape
+                  disableClearable={false}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      id="districtId"
+                      variant="outlined"
+                      fullWidth
+                      required
+                      error={!!formErrors.districtId}
+                      helperText={formErrors.districtId}
+                    />
+                  )}
+                  />
               </Grid>
             </Grid>
             <Typography variant="h6" fontWeight={600} mb={2} mt={2}>

@@ -12,6 +12,8 @@ import {
   Tooltip,
   Typography,
   CircularProgress,
+  Autocomplete,
+  TextField,
 } from '@mui/material';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
@@ -185,7 +187,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                   helperText={formErrors.name}
                 />
                 <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel>
-                <CustomSelect
+                {/* <CustomSelect
                   name="floorId"
                   id="floorId"
                   value={formData.floorId}
@@ -203,7 +205,40 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                       {floor.name}
                     </MenuItem>
                   ))}
-                </CustomSelect>
+                </CustomSelect> */}
+                <Autocomplete
+                  options={floorData.map((f) => ({ label: f.name, id: f.id }))}
+                  value={
+                    floorData
+                      .map((f) => ({ label: f.name, id: f.id }))
+                      .find((option) => option.id === formData.floorId) || null
+                  }
+                  onChange={(_, newValue) =>{
+                    const id = newValue?.id ?? '';
+                    setFormData((prev) => ({ ...prev, floorId: id }));
+                    setFormErrors((prev) => {
+                      if(!prev.floorId) return prev;
+                      const next = {...prev};
+                      delete next.floorId;
+                      return next;
+                    });
+                  }}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                  clearOnEscape
+                  disableClearable={false}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      id="floorId"
+                      variant="outlined"
+                      fullWidth
+                      required
+                      error={!!formErrors.floorId}
+                      helperText={formErrors.floorId}
+                    />
+                  )}
+                />
               </Grid>
             </Grid>
           </DialogContent>

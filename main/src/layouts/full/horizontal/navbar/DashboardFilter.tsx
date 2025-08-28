@@ -1,23 +1,16 @@
 import {
   Box,
   Button,
-  Checkbox,
   Drawer,
   Grid2 as Grid,
-  ListItemIcon,
-  ListItemText,
-  MenuItem,
   Typography,
 } from '@mui/material';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
-import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
-import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { BuildingType, fetchBuildingDT, fetchBuildings } from 'src/store/apps/crud/building';
-import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
-import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
-import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { useCallback, useEffect, useState } from 'react';
+import { fetchBuildings } from 'src/store/apps/crud/building';
+import { fetchFloors } from 'src/store/apps/crud/floor';
+import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
+import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import AutocompleteFilter from './AutocompleteFilter';
 import { setDashboardFilter } from 'src/store/customizer/CustomizerSlice';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
@@ -27,8 +20,6 @@ type FilterState = {
   FloorplanId: string[];
   MaskedAreaId: string[];
 };
-type FilterResult<T> = { data: T[]; empty: boolean };
-
 const DashboardFilter = () => {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
@@ -52,28 +43,6 @@ const DashboardFilter = () => {
     FloorplanId: [],
     MaskedAreaId: [],
   });
-  const filteredFloors = useMemo(() => {
-    return floorList.filter((floor: any) => appliedFilter.BuildingId.includes(floor.buildingId));
-  }, [appliedFilter.BuildingId, floorList]);
-
-  const filteredFloorplans = useMemo(() => {
-    return floorplanList.filter((fp: any) => appliedFilter.FloorId.includes(fp.floorId));
-  }, [appliedFilter.FloorId, floorplanList]);
-
-  const filteredMaskedAreas = useMemo(() => {
-    return maskedAreaList.filter((m: any) => appliedFilter.FloorplanId.includes(m.floorplanId));
-  }, [appliedFilter.FloorplanId, maskedAreaList]);
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: string }>,
-  ) => {
-    // console.log('e.target.name', e.target.name);
-    const { name, value } = e.target;
-    if (name) {
-      setAppliedFilter({ ...appliedFilter, [name]: value });
-      //   dispatch(UpdateFilter({ filters: { ...bleReaderFilter.filters, BrandId: value } }));
-    }
-  };
   useEffect(() => {
     dispatch(fetchBuildings());
     dispatch(fetchFloors());
@@ -106,71 +75,6 @@ const DashboardFilter = () => {
     }
     return { data, empty: data.length === 0 };
   }
-
-  // const handleApplyFilter = () => {
-  //   // Step 1: Derive each level based on the current appliedFilter
-  //   // 1. Filter Floors
-  //   const floorsResult = filterData(
-  //     floorList.filter((floor: floorType) =>
-  //       appliedFilter.BuildingId.length === 0
-  //         ? true
-  //         : appliedFilter.BuildingId.includes(floor.buildingId),
-  //     ), // filter by building first
-  //     appliedFilter.FloorId,
-  //     (f: floorType) => f.id,
-  //   );
-  //   // floorsResult: { data: floorType[], empty: boolean }
-
-  //   // 2. Filter Floorplans (only from filtered floors)
-  //   let floorplansResult: FilterResult<FloorplanType> = { data: [], empty: true };
-  //   if (!floorsResult.empty) {
-  //     const floorIds = floorsResult.data.map((f: floorType) => f.id);
-  //     floorplansResult = filterData(
-  //       floorplanList.filter((fp: FloorplanType) => floorIds.includes(fp.floorId)),
-  //       appliedFilter.FloorplanId,
-  //       (fp: FloorplanType) => fp.id,
-  //     );
-  //   }
-  //   // floorplansResult: { data: FloorplanType[], empty: boolean }
-
-  //   // 3. Filter MaskedAreas (only from filtered floorplans)
-  //   let maskedAreasResult: FilterResult<MaskedAreaType> = { data: [], empty: true };
-  //   if (!floorplansResult.empty) {
-  //     const floorplanIds = floorplansResult.data.map((fp) => fp.id);
-  //     maskedAreasResult = filterData(
-  //       maskedAreaList.filter((m) => floorplanIds.includes(m.floorplanId)),
-  //       appliedFilter.MaskedAreaId,
-  //       (m) => m.id,
-  //     );
-  //   }
-  //   // maskedAreasResult: { data: MaskedAreaType[], empty: boolean }
-
-  //   // // Step 2: Update appliedFilter ONCE
-  //   // setAppliedFilter((prev) => ({
-  //   //   ...prev,
-  //   //   floorId: floors.map((f: any) => f.id),
-  //   //   floorplanId: floorplans.map((fp: any) => fp.id),
-  //   //   maskedAreaId: maskedAreas.map((m: any) => m.id),
-  //   // }));
-  //   console.log('Filtered Floors:', floorsResult);
-  //   console.log('Filtered Floorplans:', floorplansResult);
-  //   console.log('Filtered Masked Areas:', maskedAreasResult);
-  //   // Step 3: Dispatch the final filter state
-  //   dispatch(
-  //     setDashboardFilter({
-  //       BuildingId: appliedFilter.BuildingId,
-  //       FloorId: floorsResult.empty ? ['Empty'] : floorsResult.data.map((f: any) => f.id),
-  //       FloorplanId: floorplansResult.empty
-  //         ? ['Empty']
-  //         : floorplansResult.data.map((fp: any) => fp.id),
-  //       FloorplanMaskedAreaId: maskedAreasResult.empty
-  //         ? ['Empty']
-  //         : maskedAreasResult.data.map((m: any) => m.id),
-  //     }),
-  //   );
-  //   handleClose();
-  // };
-
   const handleApplyFilter = () => {
     // appliedFilter already expanded by AutocompleteFilter
     dispatch(
@@ -186,13 +90,6 @@ const DashboardFilter = () => {
     setOpen(false);
   };
 
-  // const handleResetFilter = () => {
-  //   setAppliedFilter({ BuildingId: [], FloorId: [], FloorplanId: [], MaskedAreaId: [] });
-  //   dispatch(
-  //     setDashboardFilter({ BuildingId: [], FloorId: [], FloorplanId: [], MaskedAreaId: [] }),
-  //   );
-  //   handleClose();
-  // };
 
   const handleResetFilter = () => {
     setAppliedFilter({ BuildingId: [], FloorId: [], FloorplanId: [], MaskedAreaId: [] });

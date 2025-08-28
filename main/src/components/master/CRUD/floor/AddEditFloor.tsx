@@ -14,6 +14,8 @@ import {
   Typography,
   CircularProgress,
   FormHelperText,
+  Autocomplete,
+  TextField,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
@@ -273,7 +275,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="building">Building</CustomFormLabel>
-                <CustomSelect
+                {/* <CustomSelect
                   name="buildingId"
                   id="buildingId"
                   value={formData.buildingId}
@@ -291,7 +293,40 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                       {building.name}
                     </MenuItem>
                   ))}
-                </CustomSelect>
+                </CustomSelect> */}
+                <Autocomplete
+                options={buildingData.map((b) => ({ id: b.id, label: b.name }))}
+                value={
+                  buildingData
+                    .map((b) => ({ id: b.id, label: b.name }))
+                    .find((option) => option.id === formData.buildingId) || null
+                }
+                onChange={(_, newVal) => {
+                  const id= newVal?.id ?? '';
+                  setFormData((prev) => ({ ...prev, buildingId: id }));
+                  setFormErrors((prev) => {
+                    if(!prev.buildingId) return prev;
+                    const next = {...prev};
+                    delete next.buildingId;
+                    return next;
+                  });
+                }}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                clearOnEscape
+                disableClearable={false}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    id = "buildingId"
+                    variant="outlined"
+                    fullWidth
+                    required
+                    error={!!formErrors.buildingId}
+                    helperText={formErrors.buildingId}
+                  />
+                )}
+                />
                 <CustomFormLabel htmlFor="floor-name">name</CustomFormLabel>
                 <CustomTextField
                   id="name"
