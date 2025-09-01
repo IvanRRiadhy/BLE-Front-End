@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Stage, Layer, Image as KonvaImage, Text, Line } from 'react-konva';
+import { Stage, Layer, Image as KonvaImage, Text, Line, Label, Tag, Group } from 'react-konva';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { fetchBeacon, RefreshBeaconState } from 'src/store/apps/tracking/Beacon';
 import BeaconRenderer from './BeaconRenderer';
@@ -11,6 +11,7 @@ import { uniqueId } from 'lodash';
 import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { darken } from '@mui/material';
+import { setFocus } from 'src/store/apps/monitoring/layout';
 
 type Nodes = {
   id: string;
@@ -89,9 +90,6 @@ const DeviceRenderer: React.FC<{
   const beaconData = useSelector((state) => state.BeaconReducer.beaconsByTopic[topic]);
   useEffect(() => {
     if (imageSrc) {
-      // console.log('imageSrc', imageSrc);
-      // console.log('Width', width);
-      // console.log('Height', height);
       const img = new window.Image();
       img.src = imageSrc;
       img.onload = () => {
@@ -99,16 +97,6 @@ const DeviceRenderer: React.FC<{
       };
     }
   }, [imageSrc]);
-  // function getLatestBeacons(beacons: any[]) {
-  //   const latestMap = new Map<string, any>();
-  //   beacons.forEach((beacon) => {
-  //     const existing = latestMap.get(beacon.beaconId);
-  //     if (!existing || new Date(beacon.time) > new Date(existing.time)) {
-  //       latestMap.set(beacon.beaconId, beacon);
-  //     }
-  //   });
-  //   return Array.from(latestMap.values());
-  // }
   const useDeviceIcon = (src: string) => {
     const [img, setImg] = useState<HTMLImageElement | null>(null);
     useEffect(() => {
@@ -118,17 +106,6 @@ const DeviceRenderer: React.FC<{
     }, [src]);
     return img;
   };
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     // startMQTTclient();
-  //     console.log("Fetching beacon data...");
-  //     // startMQTTclient(null);
-  //     // dispatch(fetchBeacon());
-  //     // console.log("Fetching beacon data...", beaconData);
-  //     // const latestBeacons = getLatestBeacons(beaconData);
-  //   }, 1000);
-  //   return () => clearInterval(interval);
-  // }, [dispatch]);
 
   useEffect(() => {
     const unsubscribe = dispatch(fetchBeacon(topic));
@@ -136,14 +113,6 @@ const DeviceRenderer: React.FC<{
       if (typeof unsubscribe === 'function') unsubscribe();
     };
   }, [dispatch, topic]);
-
-  // useEffect(() => {
-  //   if (beaconData && Array.isArray(beaconData)) {
-  //     beaconData.forEach((beacon) => {
-  //       console.log('Beacon points:', beacon.points);
-  //     });
-  //   }
-  // }, [beaconData]);
 
   const iconCCTV = useDeviceIcon(CCTVSVG);
   const iconGateway = useDeviceIcon(GatewaySVG);
@@ -179,93 +148,41 @@ const DeviceRenderer: React.FC<{
 
     const x = (device.posPxX / originalWidth) * width - iconWidth / 2;
     const y = (device.posPxY / originalHeight) * height - iconHeight / 2;
-    // console.log('Device coordinates:', x, y, scaleX, scaleY);
-    // console.log('Device Position:', device.posPxX, device.posPxY);
-    // console.log('image dimensions:', width, height);
+
     return (
       deviceIcon && (
-        <React.Fragment key={`device-${device.id}-${uniqueId()}`}>
+        <Group
+          key={`device-${device.id}}`}
+          name="device"
+          onClick={(e: any) => {
+            e.cancelBubble = true; // stop bubbling to area/stage
+            dispatch(setFocus({ type: 'device', id: device.id }));
+          }}
+        >
           <Text
-            x={x - 40} // Center the text above the icon
-            y={y - 5} // Position text above the icon
+            x={x - 40}
+            y={y - 5}
             text={device.reader?.gmac || device.id}
             fontSize={9}
             fill="#1976d2"
             fontStyle="bold"
             width={120}
             align="center"
+            listening={false} // label doesn’t need events
           />
           <KonvaImage
-            key={device.id}
-            name="Device"
+            name="device"
             image={deviceIcon}
-            x={x} // Center the icon inside the rect
+            x={x}
             y={y}
             width={iconWidth}
             height={iconHeight}
-            listening={false}
           />
-        </React.Fragment>
+        </Group>
       )
     );
   };
 
-  // const renderBeacon = (beacon: { id: string; x: number; y: number }) => {
-  //   // console.log('Rendering beacon:', beacon);
-  //   const radius = 9;
-  //   const triangleHeight = 10;
-  //   const triangleWidth = 9;
-  //   const x = beacon.x; // Scale the x coordinate
-  //   const y = beacon.y;
-  //   const key = `beacon-${beacon.id}-${uniqueId()}`;
-  //   // console.log('Beacon coordinates:', x, y);
-  //   return (
-  //     <React.Fragment key={key}>
-  //       {/* Circle */}
-  //       <Text
-  //         x={x - 55}
-  //         y={y - triangleHeight - radius - 30}
-  //         text={beacon.id}
-  //         fontSize={14}
-  //         fill="#1976d2"
-  //         fontStyle="bold"
-  //         width={120}
-  //         align="center"
-  //       />
-  //       <Circle
-  //         x={x}
-  //         y={y - triangleHeight - radius}
-  //         radius={radius}
-  //         fill="#1976d2"
-  //         stroke="#fff"
-  //         strokeWidth={3}
-  //         shadowBlur={3}
-  //       />
-  //       {/* Downward-pointing triangle */}
-  //       <Shape
-  //         x={x}
-  //         y={y - triangleHeight}
-  //         sceneFunc={(context, shape) => {
-  //           context.beginPath();
-  //           // Start from bottom left
-  //           context.moveTo(0, triangleHeight);
-  //           // Line to bottom right
-  //           context.lineTo(radius * 0.7, 0);
-  //           // Curved line across the top (matching circle curvature)
-  //           context.quadraticCurveTo(0, 5, -radius * 0.7, 0);
-  //           // Close back to bottom point
-  //           context.closePath();
-  //           context.fillStrokeShape(shape);
-  //         }}
-  //         fill="#1976d2"
-  //         shadowBlur={2}
-  //       />
-  //       {/* Optionally, you can add a placeholder for the photo here */}
-  //     </React.Fragment>
-  //   );
-  // };
-
-  // Update lastSeenBeacons whenever beaconData changes
   useEffect(() => {
     if (!beaconData) return;
 
@@ -345,11 +262,31 @@ const DeviceRenderer: React.FC<{
     }
   }, [refreshTrigger, refreshBeacons]);
 
+  const [tip, setTip] = useState<{ visible: boolean; x: number; y: number; text: string }>({
+    visible: false,
+    x: 0,
+    y: 0,
+    text: '',
+  });
+
   return (
-    <Stage width={width} height={height} style={{ position: 'absolute', top: 0, left: 0 }}>
+    <Stage
+      width={width}
+      height={height}
+      style={{ position: 'absolute', top: 0, left: 0 }}
+      onMouseDown={(e) => {
+        const nm = (e.target && e.target.name && e.target.name()) || '';
+        // allow-list
+        const keep = nm === 'area' || nm === 'device' || nm === 'beacon';
+        if (!keep) {
+          dispatch(setFocus({ type: '', id: '' }));
+        }
+      }}
+    >
       <Layer>
         {image && (
           <KonvaImage
+            name="background"
             image={image}
             width={width}
             height={height}
@@ -365,6 +302,7 @@ const DeviceRenderer: React.FC<{
           areas.map((area) => (
             <Line
               key={area.id}
+              name="area"
               points={area.nodes ? setPointsFromNodes(area.nodes) : []}
               stroke={darken(area.colorArea, 0.5)}
               strokeWidth={5}
@@ -373,8 +311,30 @@ const DeviceRenderer: React.FC<{
               closed
               fill={area.colorArea}
               opacity={0.5}
+              onMouseEnter={(e) => {
+                const stage = e.target.getStage();
+                if (!stage) return;
+                stage.container().style.cursor = 'pointer';
+                const p = stage.getPointerPosition();
+                if (!p) return;
+                setTip({ visible: true, x: p.x + 10, y: p.y + 10, text: area.name });
+              }}
+              onMouseMove={(e) => {
+                const p = e.target.getStage()?.getPointerPosition();
+                if (!p) return;
+                setTip((t) => ({ ...t, x: p.x, y: p.y }));
+              }}
+              onMouseLeave={(e) => {
+                const stage = e.target.getStage();
+                if (stage) stage.container().style.cursor = 'default';
+                setTip((t) => ({ ...t, visible: false }));
+              }}
+              onClick={() => {
+                dispatch(setFocus({ type: 'area', id: area.id }));
+              }}
             />
           ))}
+
         {/*Render devices*/}
         {showGates && devices.map((device) => renderDeviceShape(device))}
         {/*Render beacons*/}
@@ -406,6 +366,22 @@ const DeviceRenderer: React.FC<{
             />
           );
         })}
+      </Layer>
+      {/* Top-most UI layer for tooltip */}
+      <Layer listening={false}>
+        {tip.visible && (
+          <Label x={tip.x} y={tip.y} listening={false}>
+            <Tag
+              fill="rgba(0,0,0,0.8)"
+              cornerRadius={4}
+              pointerDirection="down"
+              pointerWidth={8}
+              pointerHeight={6}
+              listening={false}
+            />
+            <Text text={tip.text} fill="#fff" fontSize={12} padding={6} listening={false} />
+          </Label>
+        )}
       </Layer>
     </Stage>
   );

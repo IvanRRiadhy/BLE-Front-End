@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Box, Typography } from '@mui/material';
-import { AppState, useSelector } from 'src/store/Store';
+import { RootState, useSelector } from 'src/store/Store';
 import TrackingRecord from './TrackingRecord';
 import AlarmList from './Alarm';
 
 const MonitoringFooter = () => {
-  const customizer = useSelector((state: AppState) => state.customizer);
+  const customizer = useSelector((state: RootState) => state.customizer);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const footerRef = useRef<HTMLDivElement>(null); // Reference to the footer
   const toggleHeight = customizer.isMonitorSidebar ? '50px' : '0px';

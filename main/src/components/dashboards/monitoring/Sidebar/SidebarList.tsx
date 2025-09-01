@@ -13,12 +13,13 @@ import {
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import SidebarListItem from './SidebarListItem';
-import { fetchTrackingTrans, trackingTransType } from 'src/store/apps/crud/trackingTrans';
-import { fetchAlarm, AlarmType } from 'src/store/apps/crud/alarmRecordTracking';
+import { fetchTrackingTrans, fetchTrackingTransDT, trackingTransType } from 'src/store/apps/crud/trackingTrans';
+import { fetchAlarm, AlarmType, fetchAlarmDT } from 'src/store/apps/crud/alarmRecordTracking';
 import { useTranslation } from 'react-i18next';
 import { fetchMemberDT, memberType } from 'src/store/apps/crud/member';
 import { fetchVisitorDT, VisitorType } from 'src/store/apps/crud/visitor';
 import { SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
+import { defaultAlarmRecordFilter, defaultTrackingTransFilter } from 'src/store/apps/defaultForm';
 
 interface SidebarListProps {
   filterType: string;
@@ -62,6 +63,10 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
   const visitorList: VisitorType[] = useSelector(
     (state: RootState) => state.visitorReducer.visitors,
   );
+  const selectedGrid = useSelector((state: RootState) => state.layoutReducer.grid);
+  const selectedFloorplan = useSelector(
+    (state: RootState) => state.layoutReducer.floorplanId
+  );
 
   const getName = (bleNumber: string) => {
     const member = memberList.find((member) => member.bleCardNumber === bleNumber);
@@ -76,7 +81,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
   };
 
   useEffect(() => {
-    dispatch(fetchTrackingTrans());
+    dispatch(fetchTrackingTransDT({...defaultTrackingTransFilter, length: 0, filters: { FloorplanMaskedAreaId: selectedFloorplan[selectedGrid].join(',') ?? '' }}));
     dispatch(fetchAlarm());
     dispatch(fetchVisitorDT(filter));
     dispatch(fetchMemberDT(filter));
@@ -144,7 +149,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
   return (
     <>
       <List>
-        <Scrollbar sx={{ height: { lg: 'calc(100vh - 100px)', md: '100vh' }, maxHeight: '800px' }}>
+        <Scrollbar sx={{ height: { lg: 'calc(100vh - 270px)', md: '100vh' }, maxHeight: '800px' }}>
           {list.map((item) => (
             <SidebarListItem key={item.id} item={item} onItemClick={() => handleItemClick(item)} />
           ))}

@@ -115,7 +115,6 @@ const FloorView: React.FC<{
     time: string;
   }) => {
     dispatch(SetSelectedBeacon({active: true, ...info}));
-    // setDetailDialogOpen(true);
   };
   useEffect(() => {
     if(selectedBeacon.active){
@@ -128,43 +127,27 @@ const FloorView: React.FC<{
       (device: FloorplanDeviceType) => device.floorplanId === activeFloorplan,
     );
     setFilteredDevices(filteredDevices);
-    // console.log('Filtered Devices:', devices);
   }, [devices, activeFloorplan]);
 
   useEffect(() => {
     dispatch(RefreshTrigger());
-    // console.log('floors:', floor);
-    // console.log('activeFloorData:', activeFloorData);
-    // console.log('activeFloorplan:', floorplans);
+
     if (floorplanImage) {
       const img = new Image();
       img.src = floorplanImage;
       img.onload = () => {
         setImage(img);
         setImgSize({ width: img.width, height: img.height });
-        // console.log(imgSize);
         // Center the image when it is loaded
         if (containerRef.current) {
           const containerWidth = containerRef.current.clientWidth;
           const containerHeight = containerRef.current.clientHeight;
 
-          // Dynamically calculate the scale to fit the image within the container
-
-          // Ensure the scale doesn't make the image smaller than the container
-
-          // setScale(finalScale); // Set the initial scale
 
           // Calculate the initial translate values to center the image
           const offsetX = containerWidth / 2;
           const offsetY = containerHeight / 2;
 
-          // console.log('Container Width:', containerWidth);
-          // console.log('Container Height:', containerHeight);
-          // console.log('Image Width:', img.width);
-          // console.log('Image Height:', img.height);
-          // console.log('Min Scale:', minScale);
-          // console.log('OffsetX:', offsetX);
-          // console.log('OffsetY:', offsetY);
           setTranslate({
             x: screenSettings?.translateX || offsetX,
             y: screenSettings?.translateY || offsetY,
@@ -178,33 +161,6 @@ const FloorView: React.FC<{
       };
     }
   }, [activeFloorData, floor]);
-
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     if (containerRef.current && imgSize && imgSize.width > 1 && imgSize.height > 1) {
-  //       const containerWidth = containerRef.current.clientWidth;
-  //       const containerHeight = containerRef.current.clientHeight;
-
-  //       const widthRatio = containerWidth / imgSize.width;
-  //       const heightRatio = containerHeight / imgSize.height;
-
-  //       // Calculate minScale based on the larger ratio
-  //       const minScale = Math.min(widthRatio, heightRatio);
-
-  //       // Adjust the current scale if it's below the new minimum scale
-  //       setScale((prevScale) => Math.max(prevScale, minScale));
-  //     }
-  //   };
-
-  //   window.addEventListener('resize', handleResize);
-
-  //   // Only call handleResize if imgSize is valid
-  //   if (imgSize && imgSize.width > 1 && imgSize.height > 1) {
-  //     handleResize();
-  //   }
-
-  //   return () => window.removeEventListener('resize', handleResize);
-  // }, [imgSize]);
 
   const calculateImageDimensions = (
     containerWidth: number,
@@ -326,21 +282,6 @@ const FloorView: React.FC<{
     };
   }, [handleZoom]);
 
-  // useEffect(() => {
-  //   if (containerRef.current && imgSize && imgSize.width > 1 && imgSize.height > 1) {
-  //     const containerWidth = containerRef.current.clientWidth;
-  //     const containerHeight = containerRef.current.clientHeight;
-
-  //     const widthRatio = containerWidth / imgSize.width;
-  //     const heightRatio = containerHeight / imgSize.height;
-  //     // setMinScale(Math.min(widthRatio, heightRatio));
-
-  //     //console.log('Resetting scale to minScale:', minScale); // Debug scale reset
-  //     if (screenSettings.scale === 1) {
-  //       setScale(minScale);
-  //     }
-  //   }
-  // }, [imgSize]); // Reset scale when imgSize changes!
 
   useEffect(() => {
     if (!activeMaskedArea) {

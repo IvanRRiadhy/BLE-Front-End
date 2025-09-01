@@ -62,9 +62,7 @@ const DeviceRenderer: React.FC<{
 
   useEffect(() => {
     if (imageSrc) {
-      // console.log('imageSrc', imageSrc);
-      // console.log('Width', width);
-      // console.log('Height', height);
+
       const img = new window.Image();
       img.src = imageSrc;
       img.onload = () => {
@@ -82,25 +80,7 @@ const DeviceRenderer: React.FC<{
     }, [src]);
     return img;
   };
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     // startMQTTclient();
-  //     console.log("Fetching beacon data...");
-  //     // startMQTTclient(null);
-  //     // dispatch(fetchBeacon());
-  //     // console.log("Fetching beacon data...", beaconData);
-  //     // const latestBeacons = getLatestBeacons(beaconData);
-  //   }, 1000);
-  //   return () => clearInterval(interval);
-  // }, [dispatch]);
 
-  // useEffect(() => {
-  //   if (beaconData && Array.isArray(beaconData)) {
-  //     beaconData.forEach((beacon) => {
-  //       console.log('Beacon points:', beacon.points);
-  //     });
-  //   }
-  // }, [beaconData]);
 
   const iconCCTV = useDeviceIcon(CCTVSVG);
   const iconGateway = useDeviceIcon(GatewaySVG);

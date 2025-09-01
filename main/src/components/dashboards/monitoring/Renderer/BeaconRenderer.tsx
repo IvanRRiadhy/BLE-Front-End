@@ -118,6 +118,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   return (
     <>
       <Group
+        name='beacon'
         ref={groupRef}
         onClick={(e) => {
           if (!clickable) return;

@@ -40,12 +40,14 @@ export const screenOrderMap: { [grid: number]: Array<[number, number?, number?]>
 interface Statetype {
   grid: number;
   floorplanId: string[][];
+  focus: { type: string; id: string };
   screenDisplay: screenDisplay[][];
   screenSettings: screenSettings[][];
 }
 
 const initialState: Statetype = {
   grid: 1,
+  focus: { type: '', id: '' },
   floorplanId: [
     [],
     [''],
@@ -132,6 +134,10 @@ export const LayoutSlice = createSlice({
     setGrid: (state, action: PayloadAction<number>) => {
       state.grid = action.payload;
     },
+    setFocus: (state, action: PayloadAction<{ type: string; id: string }>) => {
+      state.focus = action.payload;
+      console.log("setting Focus: ", JSON.stringify(state.focus));
+    },
     setFloorplan: {
       reducer: (state: Statetype, action: PayloadAction<any>) => {
         console.log('setFloorplan: ', action.payload);
@@ -214,6 +220,6 @@ export const LayoutSlice = createSlice({
   },
 });
 
-export const { setGrid, setFloorplan, setScreenDisplay, setScreenSettings, resetScreen } = LayoutSlice.actions;
+export const { setGrid, setFloorplan, setScreenDisplay, setScreenSettings, resetScreen, setFocus } = LayoutSlice.actions;
 
 export default LayoutSlice.reducer;

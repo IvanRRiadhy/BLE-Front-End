@@ -1,6 +1,6 @@
 import { BASE_URL } from 'src/utils/axios';
 import React, { useEffect, useRef, useState } from 'react';
-import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
+import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import { Box, FormControlLabel, Grid2 as Grid, Switch, Typography } from '@mui/material';
 // import { fetchFloorplans } from 'src/store/apps/tracking/FloorPlanSlice';
 import ZoomControls from 'src/components/shared/ZoomControls';
@@ -26,17 +26,17 @@ const ConfigFloorView: React.FC<{
     dispatch(fetchFloorplanDevices());
     dispatch(fetchMaskedAreas());
   }, [dispatch]);
-  // console.log('testing', useSelector((state: AppState) => state.floorReducer.floors));
+  // console.log('testing', useSelector((state: RootState) => state.floorReducer.floors));
   const containerRef = useRef<HTMLDivElement>(null);
-  const floor = useSelector((state: AppState) => state.floorReducer.floors);
-  const floorplans = useSelector((state: AppState) => state.floorplanReducer.floorplans);
+  const floor = useSelector((state: RootState) => state.floorReducer.floors);
+  const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplans);
   const actFloorplan = floorplans.find(
     (floorplan: FloorplanType) => floorplan.id === activeFloorplan,
   );
   const activeFloorData = floor.find((floor: floorType) => floor.id === actFloorplan?.floorId);
 
   const Areas: MaskedAreaType[] = useSelector(
-    (state: AppState) => state.maskedAreaReducer.maskedAreaAll,
+    (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
   );
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorplan);
   const [showArea, setShowArea] = useState(true);
@@ -75,7 +75,7 @@ const ConfigFloorView: React.FC<{
       : activeFloorData.floorImage // Prepend BASE_URL for relative paths
     : 'No Active Floorplan'; // Fallback to default image if not available
 
-  const devices = useSelector((state: AppState) => state.floorplanDeviceReducer.floorplanDevices);
+  const devices = useSelector((state: RootState) => state.floorplanDeviceReducer.floorplanDevices);
   const [filteredDevices, setFilteredDevices] = useState<FloorplanDeviceType[]>([]);
   useEffect(() => {
     const filteredDevices = devices.filter(

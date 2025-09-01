@@ -14,12 +14,13 @@ import {
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import { fetchTrackingTrans, trackingTransType } from 'src/store/apps/crud/trackingTrans';
+import { fetchTrackingTrans, fetchTrackingTransDT, trackingTransType } from 'src/store/apps/crud/trackingTrans';
 import { fetchBleReaders, bleReaderType } from 'src/store/apps/crud/bleReader';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { useTranslation } from 'react-i18next';
 import { fetchMembers, memberType } from 'src/store/apps/crud/member';
-import { fetchVisitor, masterVisitorType } from 'src/store/apps/crud/visitor';
+import { fetchVisitor, masterVisitorType, VisitorType } from 'src/store/apps/crud/visitor';
+import { defaultTrackingTransFilter } from 'src/store/apps/defaultForm';
 
 const dummyData: trackingTransType[] = [
   {
@@ -128,7 +129,7 @@ const TrackingTransactionList = ({ isNew }: Props) => {
   ) as memberType[];
   const visitorsData = useSelector(
     (state: RootState) => state.visitorReducer.visitors,
-  ) as masterVisitorType[];
+  ) as VisitorType[];
 
   const findNewestTransaction = (data: trackingTransType[]) => {
     if (data.length === 0) return null;
@@ -141,7 +142,7 @@ const TrackingTransactionList = ({ isNew }: Props) => {
   const newestTransaction = findNewestTransaction(dummyData);
 
   useEffect(() => {
-    dispatch(fetchTrackingTrans());
+    dispatch(fetchTrackingTransDT({...defaultTrackingTransFilter}));
     dispatch(fetchBleReaders());
     dispatch(fetchMaskedAreas());
     dispatch(fetchMembers());
@@ -236,7 +237,7 @@ const TrackingTransactionList = ({ isNew }: Props) => {
                 <TableBody>
                   {(isNew
                     ? [newestTransaction]
-                    : dummyData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    : trackingTransData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   )
                     .filter((item) => item !== null) // Ensure no null values are rendered
                     .map((trackingTrans: trackingTransType, index) => {
@@ -250,12 +251,12 @@ const TrackingTransactionList = ({ isNew }: Props) => {
                           </TableCell>
                           {/* <TableCell>{trackingTrans.id}</TableCell> */}
                           <TableCell>{formatTime(trackingTrans.transTime)}</TableCell>
-                          <TableCell>{getReaderName(trackingTrans.readerId)}</TableCell>
+                          <TableCell>{trackingTrans.reader?.name}</TableCell>
                           <TableCell>
                             {isVisitor ? '(Visitor) ' : isMember ? '(Member) ' : 'Unknown'} {label}
                           </TableCell>
                           <TableCell>
-                            {getFloorplanMaskedAreaName(trackingTrans.floorplanMaskedAreaId)}
+                            {trackingTrans.floorplanMaskedArea?.name ?? 'Unknown Area'}
                           </TableCell>
                           <TableCell>
                             {formatCoords(trackingTrans.coordinateX, trackingTrans.coordinateY)}
