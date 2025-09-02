@@ -1,13 +1,10 @@
 import { BASE_URL } from 'src/utils/axios';
 import React, { useEffect, useRef, useState } from 'react';
-import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
+import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import { Box, Switch, FormControlLabel } from '@mui/material';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloors } from 'src/store/apps/crud/floor';
-import {
-  fetchFloorplanDevices,
-  FloorplanDeviceType,
-} from 'src/store/apps/crud/floorplanDevice';
+import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import ZoomControls from 'src/components/shared/ZoomControls';
 import EditDeviceRenderer from './EditDeviceRenderer';
 import FloorplanHouse from 'src/assets/images/masters/Floorplan/Floorplan-House.png';
@@ -17,26 +14,24 @@ const EditDeviceFloorView: React.FC<{
   zoomable: boolean;
 }> = ({ zoomable }) => {
   const dispatch: AppDispatch = useDispatch();
-  //   const floors = useSelector((state: AppState) => state.floorReducer.floors);
+  //   const floors = useSelector((state: RootState) => state.floorReducer.floors);
   const activeFloorPlan = useSelector(
-    (state: AppState) => state.floorplanReducer.selectedFloorplan,
+    (state: RootState) => state.floorplanReducer.selectedFloorplan,
   );
   const activeFloorData = activeFloorPlan?.floor;
   const activeDevice = useSelector(
-    (state: AppState) => state.floorplanDeviceReducer.selectedFloorplanDevice,
+    (state: RootState) => state.floorplanDeviceReducer.selectedFloorplanDevice,
   );
   const unsavedDevices = useSelector(
-    (state: AppState) => state.floorplanDeviceReducer.unsavedFloorplanDevices,
+    (state: RootState) => state.floorplanDeviceReducer.unsavedFloorplanDevices,
   );
   const editingDevice = useSelector(
-    (state: AppState) => state.floorplanDeviceReducer.editingFloorplanDevice,
+    (state: RootState) => state.floorplanDeviceReducer.editingFloorplanDevice,
   );
-    const Areas: MaskedAreaType[] = useSelector(
-      (state: AppState) => state.maskedAreaReducer.maskedAreaAll,
-    );
-    const filteredArea = Areas.filter(
-    (area) => area.floorplanId === activeFloorPlan?.id,
+  const Areas: MaskedAreaType[] = useSelector(
+    (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
   );
+  const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorPlan?.id);
   const [showArea, setShowArea] = useState(true);
 
   const [filteredUnsavedDevices, setFilteredUnsavedDevices] = useState<FloorplanDeviceType[]>([]);
@@ -48,7 +43,7 @@ const EditDeviceFloorView: React.FC<{
       (device: FloorplanDeviceType) => device.floorplanId === activeFloorPlan?.id,
     );
     setFilteredUnsavedDevices(filteredDevices);
-  }, [unsavedDevices, activeFloorPlan]);  
+  }, [unsavedDevices, activeFloorPlan]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
@@ -282,7 +277,6 @@ const EditDeviceFloorView: React.FC<{
 
   return (
     <Box
-      
       onMouseEnter={() => setIsHovered(true)} // Show ZoomControls on mouse enter
       onMouseLeave={() => setIsHovered(false)} // Hide ZoomControls on mouse leave
       sx={{
@@ -325,7 +319,7 @@ const EditDeviceFloorView: React.FC<{
       {/* Zoomable Content */}
       <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
         {isHovered &&
-        !isPanning &&
+          !isPanning &&
           zoomable && ( // Only show ZoomControls when hovered
             <ZoomControls
               scale={scale}
@@ -402,7 +396,7 @@ const EditDeviceFloorView: React.FC<{
                   devices={filteredUnsavedDevices}
                   activeDevice={activeDevice}
                   setIsDragging={setIsDragging}
-                  areas = {filteredArea}
+                  areas={filteredArea}
                   showAreas={showArea}
                 />
               </>

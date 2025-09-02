@@ -4,15 +4,15 @@ import React from 'react';
 
 import { Card, CardHeader, CardContent, Divider } from '@mui/material';
 import { useSelector } from 'src/store/Store';
-import { AppState } from 'src/store/Store';
+import { RootState } from 'src/store/Store';
 
 type Props = {
   title: string;
-  children: any | any[]
+  children: any | any[];
 };
 
 const BaseCard = ({ title, children }: Props) => {
-  const customizer = useSelector((state: AppState) => state.customizer);
+  const customizer = useSelector((state: RootState) => state.customizer);
 
   return (
     <Card

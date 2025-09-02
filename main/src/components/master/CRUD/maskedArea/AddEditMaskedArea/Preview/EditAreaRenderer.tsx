@@ -10,7 +10,7 @@ import {
 import Konva from 'konva';
 import React, { useEffect, useState } from 'react';
 import { Stage, Layer, Circle, Image as KonvaImage, Line } from 'react-konva';
-import { useSelector, useDispatch, AppState } from 'src/store/Store';
+import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
   MaskedAreaType,
   RevertMaskedArea,
@@ -134,14 +134,14 @@ const EditAreaRenderer: React.FC<{
   const [dragOffset, setDragOffset] = useState({ dx: 0, dy: 0 });
   const [isColliding, setIsColliding] = useState(false);
   const editingMaskedArea = useSelector(
-    (state: AppState) => state.maskedAreaReducer.editingMaskedArea,
+    (state: RootState) => state.maskedAreaReducer.editingMaskedArea,
   );
   const [editingArea, setEditingArea] = useState(editingMaskedArea?.name || '');
   const unsavedArea: MaskedAreaType[] = useSelector(
-    (state: AppState) => state.maskedAreaReducer.unsavedMaskedAreas,
+    (state: RootState) => state.maskedAreaReducer.unsavedMaskedAreas,
   );
   const selectedFloorplan = useSelector(
-    (state: AppState) => state.floorplanReducer.selectedFloorplan,
+    (state: RootState) => state.floorplanReducer.selectedFloorplan,
   );
   const filteredUnsavedArea = unsavedArea.filter(
     (area) => area.floorplanId === selectedFloorplan?.id,
@@ -150,7 +150,7 @@ const EditAreaRenderer: React.FC<{
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [pendingAreaId, setPendingAreaId] = useState<string | null>(null);
   const drawingMaskedArea = useSelector(
-    (state: AppState) => state.maskedAreaReducer.drawingMaskedArea,
+    (state: RootState) => state.maskedAreaReducer.drawingMaskedArea,
   );
   const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null);
   const [drawingNodes, setDrawingNodes] = useState<Nodes[]>([]); // Track the nodes being drawn
@@ -1002,18 +1002,18 @@ const EditAreaRenderer: React.FC<{
   }
 
   const handleRightClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
-  e.evt.preventDefault();
+    e.evt.preventDefault();
 
-  if (!drawingMaskedArea) return;
+    if (!drawingMaskedArea) return;
 
-  // Cancel drawing
-  setDrawingNodes([]); // Clear current drawing nodes
-  dispatch(DrawingMaskedArea('')); // Reset drawing mode
-  dispatch(SelectMaskedArea('')); // Clear selection
-  dispatch(SelectEditingMaskedArea('')); // Clear editing
-  setActiveArea(''); // Reset active area
-  console.log('Drawing cancelled by right click');
-};
+    // Cancel drawing
+    setDrawingNodes([]); // Clear current drawing nodes
+    dispatch(DrawingMaskedArea('')); // Reset drawing mode
+    dispatch(SelectMaskedArea('')); // Clear selection
+    dispatch(SelectEditingMaskedArea('')); // Clear editing
+    setActiveArea(''); // Reset active area
+    console.log('Drawing cancelled by right click');
+  };
 
   return (
     <>

@@ -24,7 +24,7 @@ import BlogComment from './BlogComment';
 import { uniqueId } from 'lodash';
 import { addComment } from 'src/store/apps/blog/BlogSlice';
 import BlankCard from '../../../shared/BlankCard';
-import { AppState, useDispatch, useSelector } from 'src/store/Store';
+import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import type { BlogPostType, BlogType } from 'src/types/apps/blog';
 
 const BlogDetail = () => {
@@ -38,7 +38,9 @@ const BlogDetail = () => {
   }, [dispatch]);
 
   // Get post
-  const post: BlogPostType | any = useSelector((state: AppState) => state.blogReducer.selectedPost);
+  const post: BlogPostType | any = useSelector(
+    (state: RootState) => state.blogReducer.selectedPost,
+  );
 
   const onSubmit = async (id: number, reply: string) => {
     const replyId: string = uniqueId('#comm_');

@@ -1,14 +1,11 @@
 import { IconButton, Box, AppBar, useMediaQuery, Toolbar, styled, Stack } from '@mui/material';
 
 import { useSelector, useDispatch } from 'src/store/Store';
-import {
-  toggleSidebar,
-  toggleMobileSidebar,
-} from 'src/store/customizer/CustomizerSlice';
-import { IconMenu2} from '@tabler/icons-react';
+import { toggleSidebar, toggleMobileSidebar } from 'src/store/customizer/CustomizerSlice';
+import { IconMenu2 } from '@tabler/icons-react';
 import Profile from './Profile';
 import Language from './Language';
-import { AppState } from 'src/store/Store';
+import { RootState } from 'src/store/Store';
 import MobileRightSidebar from './MobileRightSidebar';
 import Logo from '../../shared/logo/Logo';
 
@@ -17,7 +14,7 @@ const Header = () => {
   const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
 
   // drawer
-  const customizer = useSelector((state: AppState) => state.customizer);
+  const customizer = useSelector((state: RootState) => state.customizer);
   const dispatch = useDispatch();
 
   const AppBarStyled = styled(AppBar)(({ theme }) => ({

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import { Stage, Layer, Rect, Text, Group, Circle, Arrow, Line } from 'react-konva';
-import { useSelector, useDispatch, AppDispatch, AppState } from 'src/store/Store';
+import { useSelector, useDispatch, AppDispatch, RootState } from 'src/store/Store';
 import { nodeType, setSelectedNode, updateNodePosition } from 'src/store/apps/rules/RulesNodes';
 
 const RulesCanvas = () => {
   const dispatch: AppDispatch = useDispatch();
-  const nodes: nodeType[] = useSelector((state: AppState) => state.RulesNodeReducer.nodes);
+  const nodes: nodeType[] = useSelector((state: RootState) => state.RulesNodeReducer.nodes);
 
   // State to track arrow drawing
   const [arrowDrawing, setArrowDrawing] = useState(false);

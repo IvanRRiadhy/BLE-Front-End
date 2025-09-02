@@ -1,6 +1,6 @@
 import { BASE_URL } from 'src/utils/axios';
 import React, { useEffect, useRef, useState } from 'react';
-import { AppDispatch, useDispatch, useSelector, AppState } from 'src/store/Store';
+import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import { Box, FormLabel } from '@mui/material';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloors } from 'src/store/apps/crud/floor';
@@ -18,20 +18,20 @@ const EditAreaFloorView: React.FC<{
 }> = ({ zoomable }) => {
   const dispatch: AppDispatch = useDispatch();
   const activeFloorPlan = useSelector(
-    (state: AppState) => state.floorplanReducer.selectedFloorplan,
+    (state: RootState) => state.floorplanReducer.selectedFloorplan,
   );
   const activeFloorData = activeFloorPlan?.floor;
   const activeMaskedArea = useSelector(
-    (state: AppState) => state.maskedAreaReducer.selectedMaskedArea,
+    (state: RootState) => state.maskedAreaReducer.selectedMaskedArea,
   );
   const unsavedMaskedAreas = useSelector(
-    (state: AppState) => state.maskedAreaReducer.unsavedMaskedAreas,
+    (state: RootState) => state.maskedAreaReducer.unsavedMaskedAreas,
   );
   const editingMaskedArea = useSelector(
-    (state: AppState) => state.maskedAreaReducer.editingMaskedArea,
+    (state: RootState) => state.maskedAreaReducer.editingMaskedArea,
   );
   const drawingMaskedArea = useSelector(
-    (state: AppState) => state.maskedAreaReducer.drawingMaskedArea,
+    (state: RootState) => state.maskedAreaReducer.drawingMaskedArea,
   );
 
   const [filteredUnsavedMaskedArea, setFilteredUnsavedMaskedArea] = useState<MaskedAreaType[]>([]);
@@ -386,7 +386,7 @@ const EditAreaFloorView: React.FC<{
           }}
         >
           <Box mt={1} display="flex" alignItems="center" gap={1}>
-              <Box
+            <Box
               sx={{
                 width: 40,
                 height: 40,
@@ -398,7 +398,7 @@ const EditAreaFloorView: React.FC<{
                 mr: 4.75,
                 ml: 2.25,
               }}
-              >
+            >
               <img src={MouseLeftClickIcon} alt="Left Click" style={{ width: 36, height: 36 }} />
             </Box>
             <FormLabel sx={{ color: 'white', fontSize: '0.875rem', fontWeight: 600 }}>

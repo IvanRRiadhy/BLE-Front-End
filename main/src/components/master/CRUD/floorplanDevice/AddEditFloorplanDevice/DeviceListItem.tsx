@@ -21,7 +21,7 @@ import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
 import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
 
 import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
-import { AppState, useSelector } from 'src/store/Store';
+import { RootState, useSelector } from 'src/store/Store';
 
 type Props = {
   onListClick: (event: React.MouseEvent<HTMLElement>) => void;
@@ -36,7 +36,9 @@ const DeviceListItem = ({ onListClick, onEditClick, onDeleteClick, device, activ
   // const br = `${customizer.borderRadius}px`;
 
   // const theme = useTheme();
-  const isEditing = useSelector((state: AppState) => state.floorplanDeviceReducer.editingFloorplanDevice);
+  const isEditing = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.editingFloorplanDevice,
+  );
   // Map device types to their corresponding icons
   const iconMap: { [key: string]: string } = {
     Cctv: CCTVSVG, // Path to CCTV icon

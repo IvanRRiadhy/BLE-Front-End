@@ -13,7 +13,7 @@ import NavItem from '../NavItem/NavItem';
 
 // plugins
 import { IconChevronDown } from '@tabler/icons-react';
-import { AppState } from 'src/store/Store';
+import { RootState } from 'src/store/Store';
 
 type NavGroupProps = {
   [x: string]: any;
@@ -45,7 +45,7 @@ const NavCollapse = ({
   const theme = useTheme();
   const { pathname } = useLocation();
   const [open, setOpen] = React.useState(false);
-  const customizer = useSelector((state: AppState) => state.customizer);
+  const customizer = useSelector((state: RootState) => state.customizer);
   const menuIcon =
     level > 1 ? <Icon stroke={1.5} size="1rem" /> : <Icon stroke={1.5} size="1.1rem" />;
 
@@ -125,9 +125,7 @@ const NavCollapse = ({
           level={level + 1}
           pathDirect={pathDirect}
           hideMenu={hideMenu}
-          onClick={function (): void {
-            
-          }}
+          onClick={function (): void {}}
         />
       );
     }

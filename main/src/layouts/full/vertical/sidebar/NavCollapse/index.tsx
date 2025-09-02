@@ -22,7 +22,7 @@ import NavItem from '../NavItem';
 // plugins
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { AppState } from 'src/store/Store';
+import { RootState } from 'src/store/Store';
 
 type NavGroupProps = {
   [x: string]: any;
@@ -51,7 +51,7 @@ const NavCollapse = ({
   hideMenu,
   onClick,
 }: NavCollapseProps) => {
-  const customizer = useSelector((state: AppState) => state.customizer);
+  const customizer = useSelector((state: RootState) => state.customizer);
   const Icon = menu?.icon;
   const theme = useTheme();
   const { pathname } = useLocation();

@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React from 'react';
-import { useSelector, useDispatch, AppState } from 'src/store/Store';
+import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import { Box, Fab, TextField, InputAdornment } from '@mui/material';
 
 import { SearchContact } from '../../../store/apps/contacts/ContactSlice';
@@ -12,7 +12,7 @@ type Props = {
 };
 
 const ContactSearch = ({ onClick }: Props) => {
-  const searchTerm = useSelector((state: AppState) => state.contactsReducer.contactSearch);
+  const searchTerm = useSelector((state: RootState) => state.contactsReducer.contactSearch);
   const dispatch = useDispatch();
 
   return (

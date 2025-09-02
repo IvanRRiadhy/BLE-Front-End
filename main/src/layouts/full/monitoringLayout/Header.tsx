@@ -10,13 +10,10 @@ import {
 } from '@mui/material';
 
 import { useSelector, useDispatch } from 'src/store/Store';
-import {
-  toggleMobileSidebar,
-  hoverSidebar,
-} from 'src/store/customizer/CustomizerSlice';
+import { toggleMobileSidebar, hoverSidebar } from 'src/store/customizer/CustomizerSlice';
 import { IconMenu2 } from '@tabler/icons-react';
 import Profile from '../vertical/header/Profile';
-import { AppState } from 'src/store/Store';
+import { RootState } from 'src/store/Store';
 import Logo from '../shared/logo/Logo';
 import NavListing from './Navigation/NavListing';
 import { useEffect, useState } from 'react';
@@ -25,9 +22,9 @@ const Header = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   // drawer
-  const customizer = useSelector((state: AppState) => state.customizer);
+  const customizer = useSelector((state: RootState) => state.customizer);
   const dispatch = useDispatch();
-  const isSidebarHover = useSelector((state: AppState) => state.customizer.isSidebarHover);
+  const isSidebarHover = useSelector((state: RootState) => state.customizer.isSidebarHover);
 
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
     boxShadow: 'none',

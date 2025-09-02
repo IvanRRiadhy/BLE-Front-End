@@ -4,15 +4,9 @@ import React from 'react';
 import { NavLink } from 'react-router';
 
 // mui imports
-import {
-  List,
-  styled,
-  useTheme,
-  ListItemButton,
-  Typography,
-} from '@mui/material';
+import { List, styled, useTheme, ListItemButton, Typography } from '@mui/material';
 import { useSelector } from 'src/store/Store';
-import { AppState } from 'src/store/Store';
+import { RootState } from 'src/store/Store';
 
 type NavGroup = {
   [x: string]: any;
@@ -39,7 +33,7 @@ interface ItemType {
 }
 
 const MonitorNavItem = ({ item, level, pathDirect, onClick }: ItemType) => {
-  const customizer = useSelector((state: AppState) => state.customizer);
+  const customizer = useSelector((state: RootState) => state.customizer);
   const theme = useTheme();
   const ListItemStyled2 = styled(ListItemButton)(() => ({
     padding: '5px 10px',

@@ -9,8 +9,8 @@ import {
   // useTheme,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { Stage, Layer,  Image as KonvaImage, Line } from 'react-konva';
-import { useSelector, useDispatch, AppState } from 'src/store/Store';
+import { Stage, Layer, Image as KonvaImage, Line } from 'react-konva';
+import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
   FloorplanDeviceType,
   RevertDevice,
@@ -63,7 +63,7 @@ const EditDeviceRenderer: React.FC<{
   const [scales] = useState<number>(scale);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const editingDevice = useSelector(
-    (state: AppState) => state.floorplanDeviceReducer.editingFloorplanDevice,
+    (state: RootState) => state.floorplanDeviceReducer.editingFloorplanDevice,
   );
   useEffect(() => {
     if (imageSrc) {
@@ -118,7 +118,6 @@ const EditDeviceRenderer: React.FC<{
     return inside;
   }
 
-  
   const handleDragStart = (e: string) => {
     // console.log('Drag started:', e); // Log the name of the dragged element
     setIsDragging(e); // Set dragging state to true

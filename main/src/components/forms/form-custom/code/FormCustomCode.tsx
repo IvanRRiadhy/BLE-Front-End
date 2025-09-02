@@ -34,7 +34,7 @@ import Radio, { RadioProps } from '@mui/material/Radio';
 import { useTheme } from '@mui/material/styles';
 import { Card, CardHeader, CardContent, Divider, Box } from '@mui/material';
 import { useSelector } from '@/store/hooks';
-import { AppState } from '@/store/store';
+import { RootState } from '@/store/store';
 import { IconVolume, IconVolume2 } from '@tabler/icons-react';
 import { Stack } from '@mui/material';
 

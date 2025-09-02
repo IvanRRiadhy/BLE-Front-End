@@ -7,13 +7,13 @@ import { IconMinus, IconPlus } from '@tabler/icons-react';
 import { useSelector, useDispatch } from 'src/store/Store';
 import emptyCart from 'src/assets/images/products/empty-shopping-cart.svg';
 import { increment, decrement } from 'src/store/apps/eCommerce/ECommerceSlice';
-import { AppState } from 'src/store/Store';
+import { RootState } from 'src/store/Store';
 
 const CartItems = () => {
   const dispatch = useDispatch();
 
   // Get Products
-  const Cartproduct = useSelector((state: AppState) => state.ecommerceReducer.cart);
+  const Cartproduct = useSelector((state: RootState) => state.ecommerceReducer.cart);
 
   const Increase = (productId: string) => {
     dispatch(increment(productId));

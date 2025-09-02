@@ -7,14 +7,14 @@ import { Box, Typography, Badge, Drawer, IconButton, Button, Stack } from '@mui/
 import { useSelector } from 'src/store/Store';
 import { Link } from 'react-router';
 import CartItems from './CartItem';
-import { AppState } from 'src/store/Store';
+import { RootState } from 'src/store/Store';
 
 const Cart = () => {
   // Get Products
-  const Cartproduct = useSelector((state: AppState) => state.ecommerceReducer.cart);
+  const Cartproduct = useSelector((state: RootState) => state.ecommerceReducer.cart);
   const bcount = Cartproduct.length > 0 ? Cartproduct.length : '0';
 
-  const checkout = useSelector((state: AppState) => state.ecommerceReducer.cart);
+  const checkout = useSelector((state: RootState) => state.ecommerceReducer.cart);
   const total = sum(checkout.map((product: any) => product.price * product.qty));
 
   const [showDrawer, setShowDrawer] = useState(false);

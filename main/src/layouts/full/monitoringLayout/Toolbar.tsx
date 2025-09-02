@@ -1,12 +1,12 @@
 import { Box, Button, List, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
 import { useState, useEffect } from 'react';
-import { useDispatch, AppDispatch, useSelector, AppState } from 'src/store/Store';
+import { useDispatch, AppDispatch, useSelector, RootState } from 'src/store/Store';
 import { setMonitorSidebar } from 'src/store/customizer/CustomizerSlice';
 import { setGrid } from 'src/store/apps/monitoring/layout';
 
 const Toolbar = () => {
   const [currentDateTime, setCurrentDateTime] = useState<string>(''); // Initialize with the current time in Indonesian format
-  const selectedGrid = useSelector((state: AppState) => state.layoutReducer.grid); // Get the current grid value from the store
+  const selectedGrid = useSelector((state: RootState) => state.layoutReducer.grid); // Get the current grid value from the store
   const dispatch: AppDispatch = useDispatch();
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const handleChange = (event: SelectChangeEvent<string>) => {

@@ -1,6 +1,6 @@
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { useTheme } from '@mui/material';
-import { AppState, useSelector } from 'src/store/Store';
+import { RootState, useSelector } from 'src/store/Store';
 
 interface ConfigPreviewProps {
   selectedGrid: number;
@@ -14,7 +14,7 @@ const ConfigPreview: React.FC<ConfigPreviewProps> = ({
   setSelectedScreen,
 }: ConfigPreviewProps) => {
   const theme = useTheme();
-  const customizer = useSelector((state: AppState) => state.customizer);
+  const customizer = useSelector((state: RootState) => state.customizer);
   const renderLayout = () => {
     switch (selectedGrid) {
       case 1:

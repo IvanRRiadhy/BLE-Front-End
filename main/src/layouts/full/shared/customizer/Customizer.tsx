@@ -19,7 +19,7 @@ import {
   toggleSidebar,
   toggleHorizontal,
 } from 'src/store/customizer/CustomizerSlice';
-import { AppState } from 'src/store/Store';
+import { RootState } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import AspectRatioTwoToneIcon from '@mui/icons-material/AspectRatioTwoTone';
 import CallToActionTwoToneIcon from '@mui/icons-material/CallToActionTwoTone';
@@ -35,7 +35,7 @@ interface colors {
 }
 const Customizer: FC = () => {
   const [showDrawer, setShowDrawer] = useState(false);
-  const customizer = useSelector((state: AppState) => state.customizer);
+  const customizer = useSelector((state: RootState) => state.customizer);
 
   const dispatch = useDispatch();
 

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import FloorView from 'src/components/dashboards/monitoring/FloorView';
 import VideoPlayer from 'src/components/shared/VideoPlayer';
 import { screenOrderMap, screenSettings } from 'src/store/apps/monitoring/layout';
-// import { AppState } from 'src/store/Store';
+// import { RootState } from 'src/store/Store';
 
 interface MonitoringGridProps {
   grid: number;
@@ -152,7 +152,7 @@ const MonitoringGrid = React.memo(
     const gridRef = useRef<HTMLDivElement>(null);
     const [gridDimensions, setGridDimensions] = useState({ width: 0, height: 0 });
     const theme = useTheme();
-    // const customizer = useSelector((state: AppState) => state.customizer);
+    // const customizer = useSelector((state: RootState) => state.customizer);
     useEffect(() => {
       if (gridRef.current) {
         const { clientWidth, clientHeight } = gridRef.current;

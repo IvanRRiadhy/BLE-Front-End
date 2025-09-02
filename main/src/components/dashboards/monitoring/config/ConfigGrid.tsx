@@ -1,7 +1,7 @@
 import { Box, Grid2 as Grid, Typography, useTheme } from '@mui/material';
 import React from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { AppState, useSelector } from 'src/store/Store';
+import { RootState, useSelector } from 'src/store/Store';
 import ConfigFloorView from './ConfigFloorView';
 import { screenSettings, screenOrderMap } from 'src/store/apps/monitoring/layout';
 import VideoPlayer from 'src/components/shared/VideoPlayer';
@@ -162,7 +162,7 @@ const ConfigGrid = React.memo(
     const gridRef = useRef<HTMLDivElement>(null);
     const [gridDimensions, setGridDimensions] = useState({ width: 0, height: 0 });
     const theme = useTheme();
-    const customizer = useSelector((state: AppState) => state.customizer);
+    const customizer = useSelector((state: RootState) => state.customizer);
     useEffect(() => {
       if (gridRef.current) {
         const { clientWidth, clientHeight } = gridRef.current;

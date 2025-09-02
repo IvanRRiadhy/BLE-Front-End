@@ -4,15 +4,15 @@ import Logo from '../../shared/logo/Logo';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { toggleMobileSidebar } from 'src/store/customizer/CustomizerSlice';
 import SidebarItems from '../../vertical/sidebar/SidebarItems';
-import { AppState } from 'src/store/Store';
+import { RootState } from 'src/store/Store';
 import TimeDisplay from './TimeDisplay';
 import DashboardFilter from './DashboardFilter';
 
 const Navigation = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
-  const customizer = useSelector((state: AppState) => state.customizer);
+  const customizer = useSelector((state: RootState) => state.customizer);
   const dispatch = useDispatch();
-  const isMain = useSelector((state: AppState) => state.customizer.isMainMenu);
+  const isMain = useSelector((state: RootState) => state.customizer.isMainMenu);
 
   if (lgUp) {
     return (

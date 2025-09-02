@@ -5,17 +5,13 @@ import { ThemeSettings } from './theme/Theme';
 import RTL from './layouts/full/shared/customizer/RTL';
 import { RouterProvider } from 'react-router';
 import router from './routes/Router';
-import { AppState } from './store/Store';
-
+import { RootState } from './store/Store';
 
 function App() {
-
   const theme = ThemeSettings();
-  const customizer = useSelector((state: AppState) => state.customizer);
-
+  const customizer = useSelector((state: RootState) => state.customizer);
 
   return (
-
     <ThemeProvider theme={theme}>
       <RTL direction={customizer.activeDir}>
         <CssBaseline />
