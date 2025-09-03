@@ -218,7 +218,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
                 variant="contained"
                 color={currentActions.primary.color}
                 onClick={currentActions.primary.onClick}
-                sx={{ boxShadow: 2, width: 200, height: 50 }}
+                sx={{ boxShadow: 2, width: "12vw", height: 50 }}
               >
                 {currentActions.primary.label}
               </Button>
@@ -229,7 +229,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
                 variant="contained"
                 color={currentActions.secondary.color}
                 onClick={currentActions.secondary.onClick}
-                sx={{ boxShadow: 2, width: 200, height: 50 }}
+                sx={{ boxShadow: 2, width: "12vw", height: 50 }}
               >
                 {currentActions.secondary.label}
               </Button>
