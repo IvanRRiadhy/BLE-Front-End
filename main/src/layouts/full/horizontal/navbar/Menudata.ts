@@ -247,6 +247,12 @@ const Menuitems = [
         icon: IconBellExclamation,
         href: '/report/alarmRecord/',
       },
+            {
+        id: uniqueId(),
+        title: 'Alarm Triger',
+        icon: IconBellExclamation,
+        href: '/report/alarmTrigger/',
+      },
       {
         id: uniqueId(),
         title: 'Card Record',

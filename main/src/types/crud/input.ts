@@ -130,22 +130,23 @@ export const visitorStatusEnumMap: Record<string, number> = {
     { label: "Wrong Zone", value: 'WrongZone'},
     { label: "Expired", value: 'Expired'},
     { label: "Lost", value: 'Lost'},
+    { label: "Blacklist", value: "Blacklist"},
   ];
 
   export const alarmRecordStatusColormap: Record<string, string> = {
-    Block: 'black',
+    Block: 'error.dark',
     Help: 'success.main',
     WrongZone: 'error.dark',
     Expired: 'warning.main',
     Lost: 'primary.main',
+    Blacklist: 'black',
   };
 
   export const actionStatus: inputDataType[] = [
     { label: "Please select Status", value: '', disabled: true},
     { label: "Idle", value: 'Idle'},
     { label: "Done", value: 'Done'},
-    { label: "Cancel", value: 'Cancel'},
-    { label: "Need", value: 'Need'},
+    { label: "No Action", value: 'NoAction'},
     { label: "Waiting", value: 'Waiting'},
     { label: "Investigated", value: 'Investigated'},
     { label: "Done Investigated", value: 'DoneInvestigated'},

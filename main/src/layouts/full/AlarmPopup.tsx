@@ -1,4 +1,4 @@
-import React, {  useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, Button, Typography } from '@mui/material';
 import { startMQTTclient } from 'src/store/apps/tracking/MQTT';
 import { AlarmType, RefreshAlarmState } from 'src/store/apps/tracking/Alarm';
@@ -30,30 +30,6 @@ const AlarmPopup: React.FC = () => {
   });
   const [open, setOpen] = useState(false);
 
-  // useEffect(() => {
-  //   // Subscribe to the MQTT topic
-  //   const unsubscribe = startMQTTclient((data: AlarmType | AlarmType[]) => {
-  //     const parsed = Array.isArray(data) ? data[0] : data;
-  //     setAlarm(parsed);
-  //     setOpen(true);
-  //     // console.log('parsed : ', parsed);
-  //   }, ALARM_TOPIC);
-  //   // Cleanup on unmount
-  //   return () => {
-  //     if (typeof unsubscribe === 'function') unsubscribe();
-  //   };
-  // }, []);
-
-  // const dummyAlarm = useSelector((state: any) => state.alarmReducer.alarms);
-
-  // useEffect(() => {
-  //   if (dummyAlarm !== undefined) {
-  //     setOpen(true);
-  //     setAlarm(dummyAlarm);
-  //     console.log('dummyAlarm : ', dummyAlarm);
-  //   }
-  // }, [dummyAlarm]);
-
   const handleClose = async () => {
     console.log(deactivateAlarm, alarm?.beaconId);
     setOpen(false);
@@ -70,12 +46,12 @@ const AlarmPopup: React.FC = () => {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} >
+    <Dialog open={open} onClose={handleClose}>
       <DialogTitle>Alarm Triggered!</DialogTitle>
       <DialogContent>
         <Typography variant="body1">
-          ALERT! Beacon {alarm?.beaconId} is in area {alarm?.maskedAreaName} on{' '}
-          {alarm?.floorplanName}.
+          ALERT! Beacon {alarm?.beaconId ?? 'ALARM'} is in area{' '}
+          {alarm?.maskedAreaName ?? 'SOMEWHERE'} on {alarm?.floorplanName ?? 'SOMEWHERE'}.
         </Typography>
         <pre>{JSON.stringify(alarm, null, 2)}</pre>
         <Button onClick={handleClose}>Close</Button>

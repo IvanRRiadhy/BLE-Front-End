@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { AppDispatch } from 'src/store/Store';
 import { startMQTTclient } from './MQTT';
+import { startNTFYclient } from './NTFY';
 import axiosServices from 'src/utils/axios';
 
 const ALARM_URL = 'http://192.168.1.116:3300';
@@ -75,8 +76,12 @@ export const { GetAlarm, RefreshTrigger, RefreshAlarmState } = AlarmSlice.action
 
 export const fetchAlarm = (topic: string) => (dispatch: AppDispatch) => {
   let lastDispatch = 0;
-  const unsubscribe = startMQTTclient((data: any) => {
+  const actualTopic = topic || 'tracking-ntfy';
+
+  console.log(`[NTFY] Subscribing to alarm topic "${actualTopic}"`);
+  const unsubscribe = startNTFYclient((data: any) => {
     const now = Date.now();
+    console.log(`[NTFY] Message from alarm topic "${actualTopic}":`, data);
     if (now - lastDispatch > 200) {
       lastDispatch = now;
       dispatch(
@@ -85,9 +90,18 @@ export const fetchAlarm = (topic: string) => (dispatch: AppDispatch) => {
         }),
       );
     }
-  }, topic);
+  }, actualTopic, {
+    baseUrl: 'http://192.168.1.116:6099',
+  });
+
+  if (!unsubscribe) {
+    console.error(`[NTFY] Failed to subscribe to alarm topic "${actualTopic}"`);
+  }
   return unsubscribe;
 };
+
+function safeParse(s: string) { try { return JSON.parse(s); } catch { return s; } }
+
 
 export const handleFetchDummyBeacon = () => async (dispatch: AppDispatch) => {
   try {

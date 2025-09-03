@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+// src/views/monitoring/SidebarList.tsx
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -13,30 +14,30 @@ import {
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import SidebarListItem from './SidebarListItem';
-import { fetchTrackingTrans, fetchTrackingTransDT, trackingTransType } from 'src/store/apps/crud/trackingTrans';
-import { fetchAlarm, AlarmType, fetchAlarmDT } from 'src/store/apps/crud/alarmRecordTracking';
-import { useTranslation } from 'react-i18next';
+
+import { fetchAlarm } from 'src/store/apps/tracking/Alarm';          // NTFY-backed
+import { fetchBeacon } from 'src/store/apps/tracking/Beacon';        // MQTT-backed
 import { fetchMemberDT, memberType } from 'src/store/apps/crud/member';
 import { fetchVisitorDT, VisitorType } from 'src/store/apps/crud/visitor';
 import { SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
-import { defaultAlarmRecordFilter, defaultTrackingTransFilter } from 'src/store/apps/defaultForm';
 
 interface SidebarListProps {
-  filterType: string;
+  filterType: string; // '', 'All', 'Tracking', 'Alarm'
 }
 
 type ListType = {
-  id: string;
-  device: string;
-  target: string;
+  id: string;                       // stable unique id for React key
+  device: string;                   // label (Alarm / Tracking Event)
+  target: string;                   // person name or beacon id
   floor: string;
   area: string;
-  alarmType?: string;
-  time: string;
-  status?: string;
-  type?: string;
+  alarmType?: string;               // Alarm only
+  time: string;                     // ISO
+  status?: string;                  // Alarm only (Active/Inactive)
+  type: 'Alarm' | 'Tracking';
 };
-const filter = {
+
+const dataTableFilter = {
   draw: 1,
   start: 0,
   length: 999,
@@ -46,104 +47,190 @@ const filter = {
 };
 
 const SidebarList = ({ filterType }: SidebarListProps) => {
-  const { t } = useTranslation();
   const dispatch = useDispatch();
+
+  // ── modal state
   const [openModal, setOpenModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ListType | null>(null);
+
+  // ── list state (append-only from initialization)
   const [list, setList] = useState<ListType[]>([]);
 
-  const trackTrans: trackingTransType[] = useSelector(
-    (state: RootState) => state.trackingTransReducer.trackingTrans,
-  );
-  // console.log(trackTrans);
-  const alarmRecord: AlarmType[] = useSelector(
-    (state: RootState) => state.alarmReducer.alarmRecordTrackings,
-  );
-  const memberList: memberType[] = useSelector((state: RootState) => state.memberReducer.members);
-  const visitorList: VisitorType[] = useSelector(
-    (state: RootState) => state.visitorReducer.visitors,
-  );
-  const selectedGrid = useSelector((state: RootState) => state.layoutReducer.grid);
-  const selectedFloorplan = useSelector(
-    (state: RootState) => state.layoutReducer.floorplanId
-  );
+  // ── master data for resolving names
+  const memberList: memberType[] = useSelector((s: RootState) => s.memberReducer.members);
+  const visitorList: VisitorType[] = useSelector((s: RootState) => s.visitorReducer.visitors);
 
+  // ── live data: MQTT beacons by topic (Beacon slice)
+  const beaconsByTopic = useSelector((s: RootState) => s.BeaconReducer.beaconsByTopic || {});
+  // ── live data: NTFY alarms (Alarm slice)
+  const alarmList = useSelector((s: RootState) => s.AlarmActiveReducer.alarms || []);
+
+  // ── layout selection (which floorplans should we listen to)
+  const selectedGrid = useSelector((s: RootState) => s.layoutReducer.grid);
+  const selectedFloorplan = useSelector((s: RootState) => s.layoutReducer.floorplanId);
+
+  const floorplanIds: string[] = useMemo(() => {
+    const ids = selectedFloorplan?.[selectedGrid] ?? [];
+    return Array.isArray(ids) ? ids : [];
+  }, [selectedFloorplan, selectedGrid]);
+
+  // ── resolve display name from beacon/card id
   const getName = (bleNumber: string) => {
-    const member = memberList.find((member) => member.bleCardNumber === bleNumber);
-    if (member) {
-      return member.name;
-    }
-    const visitor = visitorList.find((visitor) => visitor.bleCardNumber === bleNumber);
-    if (visitor) {
-      return visitor.name;
-    }
-    return 'Unknown';
+    const m = memberList.find((x) => x.bleCardNumber === bleNumber);
+    if (m) return m.name;
+    const v = visitorList.find((x) => x.bleCardNumber === bleNumber);
+    if (v) return v.name;
+    return bleNumber || 'Unknown';
   };
 
+  // ── remember previous area per beacon to detect ENTER events only
+  const prevAreaByBeaconRef = useRef<Record<string, string>>({});
+
+  // ── remember which row IDs we've already appended (de-dup / stable keys)
+  const seenIdsRef = useRef<Set<string>>(new Set());
+
+  // ── keep unsubscribers for MQTT/NTFY to clean on changes/unmount
+  const unsubscribersRef = useRef<Array<() => void>>([]);
+
+  // ── build stable keys (avoid duplicate React keys)
+  const alarmKey = (a: any) => {
+    const t = a.time ? new Date(a.time).getTime() : 0;
+    if (a.id) return `alarm-${a.id}`;
+    return `alarm-${a.beaconId || 'unk'}-${a.maskedAreaName || a.maskedAreaId || 'na'}-${t}`;
+  };
+  const trackingKey = (b: any) => {
+    const t = b.time ? new Date(b.time).getTime() : 0;
+    const beaconId = b.beaconId || b.cardId || b.id || 'unk';
+    const area = b.maskedAreaName || b.areaName || b.maskedAreaId || 'na';
+    return `trk-${beaconId}-${area}-${t}`;
+  };
+
+  // ── bootstrap: fetch master lists + subscribe to MQTT (beacons) & NTFY (alarms)
   useEffect(() => {
-    dispatch(fetchTrackingTransDT({...defaultTrackingTransFilter, length: 0, filters: { FloorplanMaskedAreaId: selectedFloorplan[selectedGrid].join(',') ?? '' }}));
-    dispatch(fetchAlarm());
-    dispatch(fetchVisitorDT(filter));
-    dispatch(fetchMemberDT(filter));
-  }, [dispatch]);
-  useEffect(() => {
-    const transformedTrackTrans: ListType[] = trackTrans.map((item) => ({
-      id: item.id,
-      device: item.reader?.name ?? 'Unknown Device',
-      target: item.cardId,
-      floor: item.floorplanMaskedArea?.floor?.name ?? 'Floor 2',
-      area: item.floorplanMaskedArea?.name ?? 'Unknown Area',
-      time: item.transTime,
-    }));
-    const transformedAlarm: ListType[] = alarmRecord.map((item) => ({
-      id: item.id,
-      device: item.reader?.name ?? 'Unknown Device', // Provide a default value
-      target: item.visitor?.name ?? 'Unknown Visitor', // Provide a default value
-      floor: item.floorplanMaskedArea?.floor?.name ?? 'Floor 2', // Provide a default value
-      area: item.floorplanMaskedArea?.name ?? 'Unknown Area', // Provide a default value
-      alarmType: item.alarmRecordStatus,
-      status: item.actionStatus,
-      time: item.timestamp,
-    }));
-    let updatedList: ListType[] = [
-      ...transformedAlarm.map((item) => ({ ...item, type: 'Alarm' })),
-      ...transformedTrackTrans.map((item) => ({ ...item, type: 'Tracking' })),
-      // ...TrackingList.map((item) => ({ ...item, type: 'Tracking' })),
-    ];
-    console.log('Tracking Trans: ', transformedTrackTrans);
-    // Filter the list based on the filterType prop
-    if (filterType !== '' && filterType !== 'All') {
-      updatedList = updatedList.filter((item) => item.type === filterType);
+    // master data (names)
+    dispatch(fetchVisitorDT(dataTableFilter));
+    dispatch(fetchMemberDT(dataTableFilter));
+
+    // clear old subscriptions
+    unsubscribersRef.current.forEach((u) => u());
+    unsubscribersRef.current = [];
+
+    // MQTT: subscribe beacons per floorplan
+    for (const floorplanId of floorplanIds) {
+      const topic = `tracking/${floorplanId}`;
+      const u = dispatch(fetchBeacon(topic)); // thunk returns unsubscribe
+      if (typeof u === 'function') unsubscribersRef.current.push(u);
     }
-    updatedList.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 
-    setList(updatedList);
-  }, [filterType, trackTrans, alarmRecord]);
+    // NTFY: subscribe alarms (single topic; adapt if you want per-floorplan)
+    const ua = dispatch(fetchAlarm('192.168.1.116:6099/tracking-ntfy'));
+    if (typeof ua === 'function') unsubscribersRef.current.push(ua);
 
+    return () => {
+      unsubscribersRef.current.forEach((u) => u());
+      unsubscribersRef.current = [];
+    };
+  }, [dispatch, floorplanIds]);
+
+  // ── on any new data, append new rows (area-entry for Tracking, all Alarms), then filter/sort
+  useEffect(() => {
+    const rowsToAppend: ListType[] = [];
+
+    // A) append alarms from NTFY (Alarm slice)
+    for (const a of alarmList) {
+      const id = alarmKey(a);
+      if (!seenIdsRef.current.has(id)) {
+        rowsToAppend.push({
+          id,
+          device: 'Alarm',
+          target: getName(a.beaconId),
+          floor: a.floorplanName || 'Unknown Floor',
+          area: a.maskedAreaName || 'Unknown Area',
+          alarmType: a.inRestrictedArea ? 'Restricted' : undefined,
+          status: a.is_Active ? 'Active' : 'Inactive',
+          time: a.time || new Date().toISOString(),
+          type: 'Alarm',
+        });
+        console.log('[Sidebar] Append Alarm:', id);
+      } else {
+        // console.log('[Sidebar] Skip duplicate Alarm:', id);
+      }
+    }
+
+    // B) append tracking events only when a beacon ENTERS a new area (MQTT beacons)
+    Object.entries(beaconsByTopic).forEach(([, beacons]) => {
+      (beacons || []).forEach((b: any) => {
+        const beaconId = b.beaconId || b.cardId || b.id || '';
+        if (!beaconId) return;
+
+        const areaNow = b.maskedAreaName || b.areaName || '';
+        if (!areaNow) return; // can't detect area changes
+
+        const prevArea = prevAreaByBeaconRef.current[beaconId];
+        if (prevArea !== areaNow) {
+          // area change: record and append
+          prevAreaByBeaconRef.current[beaconId] = areaNow;
+
+          const id = trackingKey(b);
+          if (!seenIdsRef.current.has(id)) {
+            rowsToAppend.push({
+              id,
+              device: 'Tracking Event',
+              target: getName(beaconId),
+              floor: b.floorplanName || 'Unknown Floor',
+              area: areaNow,
+              time: b.time || new Date().toISOString(),
+              type: 'Tracking',
+            });
+            console.log('[Sidebar] Append Tracking (area-enter):', id);
+          } else {
+            // console.log('[Sidebar] Skip duplicate Tracking:', id);
+          }
+        } else {
+          // stayed in same area → ignore
+          // console.log('[Sidebar] Ignore (same area):', beaconId, areaNow);
+        }
+      });
+    });
+
+    if (rowsToAppend.length === 0) return;
+
+    // Merge safely and apply filter/sort
+    setList((prev) => {
+      const merged = [...prev];
+      for (const row of rowsToAppend) {
+        if (!seenIdsRef.current.has(row.id)) {
+          seenIdsRef.current.add(row.id);
+          merged.push(row);
+        }
+      }
+
+      let filtered = merged;
+      if (filterType && filterType !== 'All') {
+        filtered = filtered.filter((x) => x.type === filterType);
+      }
+
+      // ascending by time; switch operands for newest-on-top
+      filtered.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+      return filtered;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alarmList, beaconsByTopic, filterType]);
+
+  // ── dialog actions
   const handleItemClick = (item: ListType) => {
     setSelectedItem(item);
     setOpenModal(true);
   };
+
   const handleOpenDetails = (cardNumber: string, area: string, floorplan: string, time: string) => {
     dispatch(SetSelectedBeacon({ active: true, id: cardNumber, area, floorplan, time }));
     setOpenModal(false);
   };
 
-  const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
-
-    // Extract the weekday
-    const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
-    const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-
-    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
-      'en-GB',
-      {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      },
-    )}`;
+  const formatTime = (iso: string) => {
+    const d = new Date(iso);
+    return d.toLocaleString('en-GB', { hour12: false });
   };
 
   return (
@@ -155,21 +242,22 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
           ))}
         </Scrollbar>
       </List>
+
       <Dialog open={openModal} onClose={() => setOpenModal(false)} maxWidth="xs" fullWidth>
         {selectedItem && (
           <>
             <DialogTitle
-              sx={{ fontSize: '1rem', padding: '16px 16px' }}
+              sx={{ fontSize: '1rem', p: '16px' }}
               bgcolor={selectedItem.type === 'Alarm' ? 'error.main' : 'secondary.main'}
               color="white"
             >
               {selectedItem.device}
             </DialogTitle>
             <Divider />
-            <DialogContent sx={{ padding: '8px 16px', marginLeft: '8px' }}>
+            <DialogContent sx={{ p: '8px 16px', ml: '8px' }}>
               <Box>
                 <Typography variant="body1" fontWeight="bold" gutterBottom>
-                  Target: {selectedItem.target}{' '}
+                  Target: {selectedItem.target}
                 </Typography>
                 <Typography variant="body1" gutterBottom>
                   Time: {formatTime(selectedItem.time)}
@@ -181,23 +269,22 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
                   Area: {selectedItem.area}
                 </Typography>
                 {selectedItem.type === 'Alarm' && (
-                  <Typography variant="body1" gutterBottom>
-                    Alarm Type: {selectedItem.alarmType}
-                  </Typography>
-                )}
-                {selectedItem.type === 'Alarm' && (
-                  <Typography variant="body1" gutterBottom>
-                    Status: {selectedItem.status}
-                  </Typography>
+                  <>
+                    <Typography variant="body1" gutterBottom>
+                      Alarm Type: {selectedItem.alarmType || '-'}
+                    </Typography>
+                    <Typography variant="body1" gutterBottom>
+                      Status: {selectedItem.status || '-'}
+                    </Typography>
+                  </>
                 )}
               </Box>
             </DialogContent>
-
-            <DialogActions sx={{ padding: '8px 16px' }}>
+            <DialogActions sx={{ p: '8px 16px' }}>
               <Button
                 onClick={() =>
                   handleOpenDetails(
-                    'BC572913EA8B',
+                    selectedItem.target,
                     selectedItem.area,
                     selectedItem.floor,
                     selectedItem.time,
@@ -208,12 +295,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
               >
                 Person Details
               </Button>
-              <Button
-                color="error"
-                onClick={() => setOpenModal(false)}
-                size="small"
-                variant="outlined"
-              >
+              <Button color="error" onClick={() => setOpenModal(false)} size="small" variant="outlined">
                 Close
               </Button>
             </DialogActions>

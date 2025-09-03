@@ -110,7 +110,7 @@ export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
       );
     }
   }, topic);
-  return unsubscribe; // <-- return the unsubscribe function
+  return unsubscribe;
 };
 
 export default BeaconSlice.reducer;

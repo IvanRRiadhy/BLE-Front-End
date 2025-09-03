@@ -385,7 +385,7 @@ const VisitorContent = () => {
             </Box>
 
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
                 <Typography>{trxVisitorDetail.visitor?.email}</Typography>
                 <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
@@ -399,7 +399,7 @@ const VisitorContent = () => {
                   )}
                 </Typography>
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="phone">Phone</CustomFormLabel>
                 <Typography>{trxVisitorDetail.visitor?.phone}</Typography>
                 <CustomFormLabel htmlFor="gender">Gender</CustomFormLabel>
@@ -413,13 +413,13 @@ const VisitorContent = () => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="arrival">Arrival</CustomFormLabel>
                 <Typography>{formatTime(trxVisitorDetail.visitorPeriodStart)}</Typography>
                 <CustomFormLabel htmlFor="end">End</CustomFormLabel>
                 <Typography>{formatTime(trxVisitorDetail.visitorPeriodEnd)}</Typography>
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="accepted">Accepted</CustomFormLabel>
                 <Typography>{trxVisitorDetail.isInvitationAccepted ? 'Yes' : 'No'}</Typography>
               </Grid>
@@ -429,11 +429,11 @@ const VisitorContent = () => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="person-id">Person ID</CustomFormLabel>
                 <Typography>{trxVisitorDetail.visitor?.personId}</Typography>
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="identity-Id">Identity ID</CustomFormLabel>
                 <Typography>{trxVisitorDetail.visitor?.identityId}</Typography>
               </Grid>
@@ -443,11 +443,11 @@ const VisitorContent = () => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
                 <Typography>{trxVisitorDetail.visitor?.cardNumber ?? "Not Assigned"}</Typography>
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="ble-card-number">Ble Card Number</CustomFormLabel>
                 <Typography>{trxVisitorDetail.visitor?.bleCardNumber ?? "Not Assigned"}</Typography>
               </Grid>
@@ -472,7 +472,7 @@ const VisitorContent = () => {
           Assign Card
         </DialogTitle>
         <DialogContent>
-          <Grid size={12} direction={'column'} p={1}>
+          <Grid size={12}  p={1}>
             <CustomSelect
               name="selectedCard"
               value={selectedCard || ''}
@@ -520,7 +520,7 @@ const VisitorContent = () => {
           Reason
         </DialogTitle>
         <DialogContent>
-          <Grid size={12} direction={'column'} p={1}>
+          <Grid size={12}  p={1}>
             <CustomTextField
               id="reason"
               label="Reason"

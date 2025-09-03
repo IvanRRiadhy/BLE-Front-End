@@ -1,6 +1,7 @@
 import { CCTVType, GetFilter as CCTVFilter } from './crud/accessCCTV';
 import { AccessControlType, GetFilter as AccessControlFilter } from './crud/accessControl';
 import { GetFilter as AlarmRecordFilter } from './crud/alarmRecordTracking';
+import { GetFilter as AlarmTriggerFilter } from './crud/alarmTrigger';
 import { blacklistType, GetFilter as BlacklistFilter } from './crud/blacklist';
 import { bleReaderType, GetFilter as BleReaderFilter } from './crud/bleReader';
 import { BrandType, GetFilter as BrandFilter } from './crud/brand';
@@ -85,6 +86,20 @@ export const defaultAlarmRecordFilter: AlarmRecordFilter = {
   },
 };
 //#endregion
+
+//#region AlarmTrigger
+export const defaultAlarmTriggerFilter: AlarmTriggerFilter = {
+    Draw: 1,
+  Start: 0,
+  Length: 5,
+  SortColumn: 'TriggerTime',
+  SortDir: 'desc',
+  SearchValue: '', 
+  filters: {
+
+  }
+}
+//endregion
 
 //#region Blacklist
 export const defaultBlaclistForm: blacklistType = {

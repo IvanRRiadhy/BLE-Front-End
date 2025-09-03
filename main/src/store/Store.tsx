@@ -29,6 +29,7 @@ import trackingTransReducer from './apps/crud/trackingTrans';
 import visitorReducer from './apps/crud/visitor';
 import blacklistReducer from './apps/crud/blacklist';
 import alarmReducer from './apps/crud/alarmRecordTracking';
+import alarmTriggerReducer from './apps/crud/alarmTrigger';
 import buildingReducer from './apps/crud/building';
 import FloorplanDeviceReducer from './apps/crud/floorplanDevice';
 import FloorplanReducer from './apps/crud/floorplan';
@@ -41,6 +42,7 @@ import BleNodeReducer from './apps/crud/bleNode';
 import RulesNodeReducer from './apps/rules/RulesNodes';
 import RulesConnectorReducer from './apps/rules/RulesConnectors';
 import BeaconReducer from './apps/tracking/Beacon';
+import AlarmActiveReducer from './apps/tracking/Alarm';
 import UserReducer from './apps/crud/users';
 import SessionReducer from './apps/session';
 import { combineReducers } from 'redux';
@@ -78,6 +80,7 @@ const rootReducer = combineReducers({
   visitorReducer: visitorReducer,
   blacklistReducer: blacklistReducer,
   alarmReducer: alarmReducer,
+  alarmTriggerReducer: alarmTriggerReducer,
   buildingReducer: buildingReducer,
   floorplanDeviceReducer: FloorplanDeviceReducer,
   layoutReducer: layoutReducer,
@@ -90,6 +93,7 @@ const rootReducer = combineReducers({
   RulesNodeReducer: RulesNodeReducer,
   RulesConnectorReducer: RulesConnectorReducer,
   BeaconReducer: BeaconReducer,
+  AlarmActiveReducer: AlarmActiveReducer,
   userReducer: UserReducer,
   sessionReducer: SessionReducer,
 });

@@ -152,7 +152,7 @@ const FloorView: React.FC<{
             x: screenSettings?.translateX || offsetX,
             y: screenSettings?.translateY || offsetY,
           });
-          console.log(screenSettings);
+          // console.log(screenSettings);
           // setTranslate({ x: offsetX, y: offsetY });
         }
       };
@@ -225,10 +225,10 @@ const FloorView: React.FC<{
       // Calculate translation to keep zoom centered at mouse position
       const offsetX = mouseX - (mouseX - translate.x) * (newScale / scale);
       const offsetY = mouseY - (mouseY - translate.y) * (newScale / scale);
-      console.log('MouseX:', mouseX);
-      console.log('MouseY:', mouseY);
-      console.log('translate:', translate);
-      console.log('Scale: ', newScale, scale);
+      // console.log('MouseX:', mouseX);
+      // console.log('MouseY:', mouseY);
+      // console.log('translate:', translate);
+      // console.log('Scale: ', newScale, scale);
 
       const minX = Math.min(0, containerWidth - scaledWidth);
       const minY = Math.min(0, containerHeight - scaledHeight);
@@ -239,8 +239,8 @@ const FloorView: React.FC<{
         x: Math.max(minX, newTranslateX),
         y: Math.max(minY, newTranslateY),
       });
-      console.log('OffsetX:', offsetX);
-      console.log('OffsetY:', offsetY);
+      // console.log('OffsetX:', offsetX);
+      // console.log('OffsetY:', offsetY);
     }
   };
 

@@ -19,7 +19,7 @@ import { fetchBleReaders, bleReaderType } from 'src/store/apps/crud/bleReader';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { useTranslation } from 'react-i18next';
 import { fetchMembers, memberType } from 'src/store/apps/crud/member';
-import { fetchVisitor, masterVisitorType, VisitorType } from 'src/store/apps/crud/visitor';
+import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import { defaultTrackingTransFilter } from 'src/store/apps/defaultForm';
 
 const dummyData: trackingTransType[] = [
@@ -97,9 +97,11 @@ const dummyData: trackingTransType[] = [
 
 type Props = {
   isNew?: boolean;
+  focusType?: string;
+  focusId?: string;
 };
 
-const TrackingTransactionList = ({ isNew }: Props) => {
+const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
   const { t } = useTranslation();
   // Pagination State
   const [page, setPage] = useState(0);
@@ -168,16 +170,6 @@ const TrackingTransactionList = ({ isNew }: Props) => {
 
   const formatCoords = (coordinateX: number, coordinateY: number) => {
     return `(${coordinateX}, ${coordinateY})`;
-  };
-
-  const getReaderName = (readerId: string) => {
-    const reader = readerData.find((rd: bleReaderType) => rd.id === readerId);
-    return reader ? reader.name : 'Unknown Reader';
-  };
-
-  const getFloorplanMaskedAreaName = (areaId: string) => {
-    const area = floorplanMaskedAreaData.find((fl: MaskedAreaType) => fl.id === areaId);
-    return area ? area.name : 'Unknown Area';
   };
 
   const getName = (cardNumber: string) => {

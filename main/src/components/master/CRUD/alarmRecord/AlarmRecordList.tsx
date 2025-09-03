@@ -35,9 +35,9 @@ const AlarmRecordList = () => {
   const alarmRecordData: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
   );
-  // const alarmRecordTotalCount: number = useSelector(
-  //   (state: RootState) => state.alarmReducer.alarmRecordTotalCount,
-  // );
+  const alarmRecordTotalCount: number = useSelector(
+    (state: RootState) => state.alarmReducer.alarmRecordTotalCount,
+  );
   const AlarmRecordFilteredCount: number = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordFilteredCount,
   );
@@ -64,6 +64,7 @@ const AlarmRecordList = () => {
 
   useEffect(() => {
     dispatch(fetchAlarmDT(AlarmRecordFilter));
+    console.log(alarmRecordData)
   }, [AlarmRecordFilter, dispatch]);
 
   const formatTime = (isoString: string) => {
@@ -225,7 +226,7 @@ const AlarmRecordList = () => {
         {/* Pagination */}
         <TablePagination
           component="div"
-          count={AlarmRecordFilteredCount}
+          count={alarmRecordTotalCount}
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}

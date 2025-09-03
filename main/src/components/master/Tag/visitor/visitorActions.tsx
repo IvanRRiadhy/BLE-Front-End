@@ -244,7 +244,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
           Assign Card
         </DialogTitle>
         <DialogContent>
-          <Grid size={12} direction={'column'} p={1}>
+          <Grid size={12}  p={1}>
             <CustomSelect
               name="selectedCard"
               value={selectedCard || ''}
@@ -263,7 +263,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
               <MenuItem value="" disabled>
                 Select Card to Assign
               </MenuItem>
-              {cardData.map((card) => (
+              {cardData.map((card: CardType) => (
                 <MenuItem key={card.id} value={card.id}>
                   {card.name} | {card.cardNumber}
                 </MenuItem>
@@ -292,7 +292,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
           Reason
         </DialogTitle>
         <DialogContent>
-          <Grid size={12} direction={'column'} p={1}>
+          <Grid size={12}  p={1}>
             <CustomTextField
               id="reason"
               label="Reason"

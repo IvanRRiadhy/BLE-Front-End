@@ -218,6 +218,7 @@ const VisitorFilter = () => {
 
       <List>
         <Box
+          key={'filter-list'}
           sx={{
             height: { lg: 'calc(100vh - 230px)', md: '100vh' },
             maxHeight: '75vh',
@@ -228,7 +229,7 @@ const VisitorFilter = () => {
           {filterData.map((filter) => {
             if (filter.filterbyTitle) {
               return (
-                <>
+                <React.Fragment key={filter.id}>
                   <Typography
                     variant="subtitle1"
                     fontWeight={600}
@@ -260,7 +261,7 @@ const VisitorFilter = () => {
                       {timeRange === 'custom' && (
                         <Box mt={2}>
                           <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="id">
-                            <Grid container direction={'column'} spacing={1.5}>
+                            <Grid container  spacing={1.5}>
                               <Grid>
                                 <DateTimePicker
                                   label="From"
@@ -297,7 +298,7 @@ const VisitorFilter = () => {
                       )}
                     </Box>
                   )}
-                </>
+                </React.Fragment>
               );
             } else if (filter.divider) {
               return <Divider key={filter.id} sx={{ mb: 3 }} />; // ✅ Add key here

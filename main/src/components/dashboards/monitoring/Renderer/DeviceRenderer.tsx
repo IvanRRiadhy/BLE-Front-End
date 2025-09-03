@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Stage, Layer, Image as KonvaImage, Text, Line, Label, Tag, Group } from 'react-konva';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { fetchBeacon, RefreshBeaconState } from 'src/store/apps/tracking/Beacon';
@@ -7,11 +7,11 @@ import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
 import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
 import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
-import { uniqueId } from 'lodash';
 import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { darken } from '@mui/material';
 import { setFocus } from 'src/store/apps/monitoring/layout';
+import polylabel from 'polylabel';
 
 type Nodes = {
   id: string;
@@ -21,28 +21,36 @@ type Nodes = {
   y_px: number;
 };
 
-const DeviceRenderer: React.FC<{
-  width: number;
-  height: number;
-  scaleX: number;
-  scaleY: number;
-  originalWidth: number;
-  originalHeight: number;
-  imageSrc?: string;
-  scale: number;
-  devices: FloorplanDeviceType[];
-  areas: MaskedAreaType[];
-  showAreas: boolean;
-  showGates: boolean;
-  topic: string;
-  detailDialogOpen: boolean;
-  setDetailDialogOpen: (open: boolean) => void;
-  openTrackDetail: boolean;
-  setOpenTrackDetail: (open: boolean) => void;
-  selectedBeaconId: string | null;
+const closeRing = (ring: number[][]) => {
+  if (!ring.length) return ring;
+  const [fx, fy] = ring[0];
+  const [lx, ly] = ring[ring.length - 1];
+  if (fx !== lx || fy !== ly) return [...ring, [fx, fy]];
+  return ring;
+};
 
-  onSelectBeacon: (info: { id: string; area: string; floorplan: string; time: string }) => void;
-}> = ({
+function areaToPolygonRings(area: MaskedAreaType): number[][][] {
+  const outer: number[][] = (area.nodes ?? []).map((n: Nodes) => [n.x_px, n.y_px]);
+  const holesRaw: Nodes[][] = (area as any).holes ?? [];
+  const holes: number[][][] = holesRaw.map((nodes) => nodes.map((n) => [n.x_px, n.y_px]));
+  return [closeRing(outer), ...holes.map(closeRing)];
+}
+
+function toCanvas(
+  x_px: number,
+  y_px: number,
+  width: number,
+  height: number,
+  originalWidth: number,
+  originalHeight: number
+) {
+  return {
+    x: (x_px / originalWidth) * width,
+    y: (y_px / originalHeight) * height,
+  };
+}
+
+const DeviceRenderer: React.FC<any> = ({
   width,
   height,
   originalWidth,
@@ -60,45 +68,26 @@ const DeviceRenderer: React.FC<{
   onSelectBeacon,
 }) => {
   const dispatch = useDispatch();
-  // const [scales, setScale] = useState<number>(scale);
-  const [image, setImage] = useState<HTMLImageElement | null>(null);
-  const [animatedBeacons, setAnimatedBeacons] = useState<{
-    [id: string]: { x: number; y: number };
-  }>({});
-  const refreshTrigger = useSelector((state) => state.BeaconReducer.refreshTrigger);
-  const refreshBeacons = React.useCallback(() => {
-    dispatch(RefreshBeaconState());
-  }, [dispatch]);
+  const [image, setImage] = useState<HTMLImageElement | undefined>(undefined);
+  const [animatedBeacons, setAnimatedBeacons] = useState<{ [id: string]: { x: number; y: number } }>({});
   const [lastSeenBeacons, setLastSeenBeacons] = useState<{
-    [id: string]: {
-      x: number;
-      y: number;
-      lastSeen: number;
-      area: string;
-      floorplan: string;
-      time: string;
-    };
+    [id: string]: { x: number; y: number; lastSeen: number; area: string; floorplan: string; time: string };
   }>({});
-  const setPointsFromNodes = (nodes: Nodes[]): number[] => {
-    // console.log('Setting nodes: ', nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]))
-    return nodes.flatMap((node) => [
-      (node.x_px / originalWidth) * width,
-      (node.y_px / originalHeight) * height,
-    ]); // Flatten x and y into a single array
-  };
 
+  const refreshTrigger = useSelector((state) => state.BeaconReducer.refreshTrigger);
   const beaconData = useSelector((state) => state.BeaconReducer.beaconsByTopic[topic]);
+
+  // background image
   useEffect(() => {
-    if (imageSrc) {
-      const img = new window.Image();
-      img.src = imageSrc;
-      img.onload = () => {
-        setImage(img);
-      };
-    }
+    if (!imageSrc) { setImage(undefined); return; }
+    const img = new window.Image();
+    img.src = imageSrc;
+    img.onload = () => setImage(img);
   }, [imageSrc]);
+
+  // load device icons
   const useDeviceIcon = (src: string) => {
-    const [img, setImg] = useState<HTMLImageElement | null>(null);
+    const [img, setImg] = useState<HTMLImageElement | undefined>(undefined);
     useEffect(() => {
       const image = new window.Image();
       image.src = src;
@@ -106,7 +95,12 @@ const DeviceRenderer: React.FC<{
     }, [src]);
     return img;
   };
+  const iconCCTV = useDeviceIcon(CCTVSVG);
+  const iconGateway = useDeviceIcon(GatewaySVG);
+  const iconFaceRecog = useDeviceIcon(FaceRecog);
+  const iconUnknown = useDeviceIcon(UnknownDevice);
 
+  // fetch beacons
   useEffect(() => {
     const unsubscribe = dispatch(fetchBeacon(topic));
     return () => {
@@ -114,160 +108,124 @@ const DeviceRenderer: React.FC<{
     };
   }, [dispatch, topic]);
 
-  const iconCCTV = useDeviceIcon(CCTVSVG);
-  const iconGateway = useDeviceIcon(GatewaySVG);
-  const iconFaceRecog = useDeviceIcon(FaceRecog);
-  const iconUnknown = useDeviceIcon(UnknownDevice);
-
-  const renderDeviceShape = (device: FloorplanDeviceType) => {
-    // console.log('Rendering device:', device);
-    let deviceIcon, iconWidth, iconHeight;
-    switch (device.type) {
-      case 'Cctv':
-        deviceIcon = iconCCTV;
-        iconWidth = 40;
-        iconHeight = 40;
-        break;
-      case 'BleReader':
-        deviceIcon = iconGateway;
-        iconWidth = 40;
-        iconHeight = 40;
-        break;
-      case 'AccessDoor':
-        deviceIcon = iconFaceRecog;
-        iconWidth = 40;
-        iconHeight = 40;
-        break;
-
-      default:
-        deviceIcon = iconUnknown;
-        iconWidth = 40;
-        iconHeight = 40;
-        break;
-    }
-
-    const x = (device.posPxX / originalWidth) * width - iconWidth / 2;
-    const y = (device.posPxY / originalHeight) * height - iconHeight / 2;
-
-    return (
-      deviceIcon && (
-        <Group
-          key={`device-${device.id}}`}
-          name="device"
-          onClick={(e: any) => {
-            e.cancelBubble = true; // stop bubbling to area/stage
-            dispatch(setFocus({ type: 'device', id: device.id }));
-          }}
-        >
-          <Text
-            x={x - 40}
-            y={y - 5}
-            text={device.reader?.gmac || device.id}
-            fontSize={9}
-            fill="#1976d2"
-            fontStyle="bold"
-            width={120}
-            align="center"
-            listening={false} // label doesn’t need events
-          />
-          <KonvaImage
-            name="device"
-            image={deviceIcon}
-            x={x}
-            y={y}
-            width={iconWidth}
-            height={iconHeight}
-          />
-        </Group>
-      )
-    );
-  };
-
+  // maintain beacon state
   useEffect(() => {
     if (!beaconData) return;
-
     setLastSeenBeacons((prev) => {
       const now = Date.now();
-      const updated: typeof prev = { ...prev };
-
-      // Mark all beacons from backend as seen now
-      beaconData.forEach((beacon) => {
-        if (beacon.point) {
-          // console.log("beaconData : ", beacon);
-          updated[beacon.beaconId] = {
-            x: beacon.point.x,
-            y: beacon.point.y,
-            lastSeen: now,
-            area: beacon.maskedAreaName,
-            floorplan: beacon.floorplanName,
-            time: beacon.time,
-          };
-        }
+      const updated = { ...prev };
+      beaconData.forEach((b: any) => {
+        if (!b.point) return;
+        updated[b.beaconId] = {
+          x: b.point.x,
+          y: b.point.y,
+          lastSeen: now,
+          area: b.maskedAreaName,
+          floorplan: b.floorplanName,
+          time: b.time,
+        };
       });
-      // Remove beacons not seen for more than 10 seconds
-      Object.keys(updated).forEach((id) => {
-        if (now - updated[id].lastSeen > 10000) {
-          delete updated[id];
-        }
-      });
-      // console.log("Beacon :", updated);
+      for (const id of Object.keys(updated)) {
+        if (now - updated[id].lastSeen > 10000) delete updated[id];
+      }
       return updated;
     });
   }, [beaconData]);
 
+  // animate beacons
   useEffect(() => {
-    // console.log('FloorplanID : ', topic, 'Beacons : ', beaconData);
     Object.entries(lastSeenBeacons).forEach(([beaconId, beacon]) => {
       const point = { x: beacon.x, y: beacon.y };
-      const prev = animatedBeacons[beaconId] || { x: point.x, y: point.y };
-
-      if (prev.x !== point.x || prev.y !== point.y) {
-        const duration = 100;
-        const startX = prev.x;
-        const startY = prev.y;
-        const endX = point.x;
-        const endY = point.y;
-        const startTime = performance.now();
-        function animate(now: number) {
-          const elapsed = now - startTime;
-          const t = Math.min(1, elapsed / duration);
-          const newX = startX + (endX - startX) * t;
-          const newY = startY + (endY - startY) * t;
-
-          setAnimatedBeacons((prevState) => ({
-            ...prevState,
-            [beaconId]: { x: newX, y: newY },
-          }));
-
-          if (t < 1) {
-            requestAnimationFrame(animate);
-          }
-        }
-        requestAnimationFrame(animate);
-      } else {
-        setAnimatedBeacons((prevState) => ({
-          ...prevState,
-          [beaconId]: { x: point.x, y: point.y },
-        }));
+      const prev = animatedBeacons[beaconId] || point;
+      if (prev.x === point.x && prev.y === point.y) {
+        setAnimatedBeacons((s) => ({ ...s, [beaconId]: point }));
+        return;
       }
+      const duration = 100;
+      const startX = prev.x;
+      const startY = prev.y;
+      const endX = point.x;
+      const endY = point.y;
+      const startTime = performance.now();
+      function animate(now: number) {
+        const t = Math.min(1, (now - startTime) / duration);
+        const nx = startX + (endX - startX) * t;
+        const ny = startY + (endY - startY) * t;
+        setAnimatedBeacons((s) => ({ ...s, [beaconId]: { x: nx, y: ny } }));
+        if (t < 1) requestAnimationFrame(animate);
+      }
+      requestAnimationFrame(animate);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastSeenBeacons]);
 
   useEffect(() => {
-    if (refreshTrigger) {
-      refreshBeacons();
-      setLastSeenBeacons({});
-      setAnimatedBeacons({});
-      console.log(beaconData);
-    }
-  }, [refreshTrigger, refreshBeacons]);
+    if (!refreshTrigger) return;
+    dispatch(RefreshBeaconState());
+    setLastSeenBeacons({});
+    setAnimatedBeacons({});
+  }, [refreshTrigger, dispatch]);
 
-  const [tip, setTip] = useState<{ visible: boolean; x: number; y: number; text: string }>({
-    visible: false,
-    x: 0,
-    y: 0,
-    text: '',
-  });
+  // compute static centers for each area
+  const areaCenters = useMemo(() => {
+    const map: Record<string, { x: number; y: number }> = {};
+    for (const area of areas) {
+      const rings = areaToPolygonRings(area);
+      if (!rings.length) continue;
+      const [cx, cy] = polylabel(rings, 1.0);
+      map[area.id] = toCanvas(cx, cy, width, height, originalWidth, originalHeight);
+    }
+    return map;
+  }, [areas, width, height, originalWidth, originalHeight]);
+
+  // track which area is hovered
+  const [hoveredAreaId, setHoveredAreaId] = useState<string | null>(null);
+
+  // render devices
+  const renderDeviceShape = (device: FloorplanDeviceType) => {
+    let deviceIcon = iconUnknown;
+    switch (device.type) {
+      case 'Cctv':
+        deviceIcon = iconCCTV;
+        break;
+      case 'BleReader':
+        deviceIcon = iconGateway;
+        break;
+      case 'AccessDoor':
+        deviceIcon = iconFaceRecog;
+        break;
+    }
+    const x = (device.posPxX / originalWidth) * width - 20;
+    const y = (device.posPxY / originalHeight) * height - 20;
+    return (
+      <Group
+        key={`device-${device.id}`}
+        name="device"
+        onClick={(e: any) => {
+          e.cancelBubble = true;
+          dispatch(setFocus({ type: 'device', id: device.id }));
+        }}
+      >
+        <Text
+          x={x - 40}
+          y={y - 5}
+          text={device.reader?.gmac || device.id}
+          fontSize={9}
+          fill="#1976d2"
+          fontStyle="bold"
+          width={120}
+          align="center"
+          listening={false}
+        />
+        <KonvaImage name="device" image={deviceIcon} x={x} y={y} width={40} height={40} />
+      </Group>
+    );
+  };
+
+  const setPointsFromNodes = (nodes: Nodes[] | undefined): number[] => {
+    if (!nodes?.length) return [];
+    return nodes.flatMap((n) => [(n.x_px / originalWidth) * width, (n.y_px / originalHeight) * height]);
+  };
 
   return (
     <Stage
@@ -275,35 +233,22 @@ const DeviceRenderer: React.FC<{
       height={height}
       style={{ position: 'absolute', top: 0, left: 0 }}
       onMouseDown={(e) => {
-        const nm = (e.target && e.target.name && e.target.name()) || '';
-        // allow-list
-        const keep = nm === 'area' || nm === 'device' || nm === 'beacon';
-        if (!keep) {
+        const nm = (e.target && (e.target as any).name && (e.target as any).name()) || '';
+        if (!['area', 'device', 'beacon'].includes(nm)) {
           dispatch(setFocus({ type: '', id: '' }));
         }
       }}
     >
       <Layer>
-        {image && (
-          <KonvaImage
-            name="background"
-            image={image}
-            width={width}
-            height={height}
-            opacity={1}
-            top={0}
-            left={0}
-            bottom={0}
-            right={0}
-          />
-        )}
-        {/* Render areas if showAreas is true */}
+        {image && <KonvaImage name="background" image={image} width={width} height={height} />}
+
+        {/* Areas */}
         {showAreas &&
-          areas.map((area) => (
+          areas.map((area: MaskedAreaType) => (
             <Line
               key={area.id}
               name="area"
-              points={area.nodes ? setPointsFromNodes(area.nodes) : []}
+              points={setPointsFromNodes(area.nodes)}
               stroke={darken(area.colorArea, 0.5)}
               strokeWidth={5}
               lineJoin="round"
@@ -311,34 +256,16 @@ const DeviceRenderer: React.FC<{
               closed
               fill={area.colorArea}
               opacity={0.5}
-              onMouseEnter={(e) => {
-                const stage = e.target.getStage();
-                if (!stage) return;
-                stage.container().style.cursor = 'pointer';
-                const p = stage.getPointerPosition();
-                if (!p) return;
-                setTip({ visible: true, x: p.x + 10, y: p.y + 10, text: area.name });
-              }}
-              onMouseMove={(e) => {
-                const p = e.target.getStage()?.getPointerPosition();
-                if (!p) return;
-                setTip((t) => ({ ...t, x: p.x, y: p.y }));
-              }}
-              onMouseLeave={(e) => {
-                const stage = e.target.getStage();
-                if (stage) stage.container().style.cursor = 'default';
-                setTip((t) => ({ ...t, visible: false }));
-              }}
-              onClick={() => {
-                dispatch(setFocus({ type: 'area', id: area.id }));
-              }}
+              onMouseEnter={() => setHoveredAreaId(area.id)}
+              onMouseLeave={() => setHoveredAreaId((id) => (id === area.id ? null : id))}
+              onClick={() => dispatch(setFocus({ type: 'area', id: area.id }))}
             />
           ))}
 
-        {/*Render devices*/}
-        {showGates && devices.map((device) => renderDeviceShape(device))}
-        {/*Render beacons*/}
-        {/* {Beacon.map((beacon) => renderBeacon(beacon))} */}
+        {/* Devices */}
+        {showGates && devices.map((d: FloorplanDeviceType) => renderDeviceShape(d))}
+
+        {/* Beacons */}
         {Object.entries(lastSeenBeacons).map(([beaconId, beacon]) => {
           const anim = animatedBeacons[beaconId] || beacon;
           return (
@@ -367,19 +294,20 @@ const DeviceRenderer: React.FC<{
           );
         })}
       </Layer>
-      {/* Top-most UI layer for tooltip */}
+
+      {/* Hover label fixed at visual center */}
       <Layer listening={false}>
-        {tip.visible && (
-          <Label x={tip.x} y={tip.y} listening={false}>
-            <Tag
-              fill="rgba(0,0,0,0.8)"
-              cornerRadius={4}
-              pointerDirection="down"
-              pointerWidth={8}
-              pointerHeight={6}
+        {hoveredAreaId && areaCenters[hoveredAreaId] && (
+          <Label x={areaCenters[hoveredAreaId].x} y={areaCenters[hoveredAreaId].y} listening={false}>
+            <Tag fill="rgba(0,0,0,0.75)" cornerRadius={4} pointerDirection="down" pointerWidth={8} pointerHeight={6} />
+            <Text
+              text={areas.find((a:MaskedAreaType) => a.id === hoveredAreaId)?.name || ''}
+              fill="#fff"
+              fontSize={16}
+              padding={6}
+              align="center"
               listening={false}
             />
-            <Text text={tip.text} fill="#fff" fontSize={12} padding={6} listening={false} />
           </Label>
         )}
       </Layer>
