@@ -155,32 +155,7 @@ const EditAreaRenderer: React.FC<{
   const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null);
   const [drawingNodes, setDrawingNodes] = useState<Nodes[]>([]); // Track the nodes being drawn
 
-  // useEffect(() => {
-  //   if (maskedAreas) {
-  //     console.log('maskedAreas: ', maskedAreas);
-  //     try {
-  //       const newAreas = maskedAreas.map((maskedArea) => {
-  //         const parsedNodes = JSON.parse(maskedArea.areaShape || '[]'); // Parse the JSON string
-  //         return {
-  //           id: maskedArea.id,
-  //           name: maskedArea.name,
-  //           color: maskedArea.colorArea,
-  //           nodes: maskedArea.nodes || [],
-  //         };
-  //       });
-  //       setAreas(newAreas); // Set all areas at once
-  //     } catch (error) {
-  //       console.error('Error parsing area shapes:', error);
-  //     }
-  //   } else {
-  //     console.log('No masked areas');
-  //   }
-  // }, [
-  //   maskedAreas.map((maskedArea) => maskedArea.colorArea).join(','), // Trigger when colorArea changes
-  //   maskedAreas.map((maskedArea) => maskedArea.name).join(','), // Trigger when colorArea changes
-  //   maskedAreas.map((maskedArea) => maskedArea.nodes).join(','), // Trigger when colorArea changes
-  //   maskedAreas.length, // Trigger when the length of maskedAreas changes
-  // ]);
+
   useEffect(() => {
     setActiveArea(activeMaskedArea?.name || '');
   }, [activeMaskedArea]);
@@ -212,54 +187,6 @@ const EditAreaRenderer: React.FC<{
       (node.y_px / originalHeight) * height,
     ]); // Flatten x and y into a single array
   };
-
-  // Function to check if two polygons intersect
-  // const checkPolygonCollision = (
-  //   poly1: { x: number[]; y: number[] },
-  //   poly2: { x: number[]; y: number[] },
-  // ): boolean => {
-  //   const getPolygonPoints = (poly: { x: number[]; y: number[] }) =>
-  //     poly.x.map((x, i) => ({ x, y: poly.y[i] }));
-
-  //   const polygons = [getPolygonPoints(poly1), getPolygonPoints(poly2)];
-
-  //   for (let i = 0; i < polygons.length; i++) {
-  //     const polygon = polygons[i];
-
-  //     for (let j = 0; j < polygon.length; j++) {
-  //       const k = (j + 1) % polygon.length;
-  //       const edge = {
-  //         x: polygon[k].x - polygon[j].x,
-  //         y: polygon[k].y - polygon[j].y,
-  //       };
-
-  //       // Normal to the edge
-  //       const axis = { x: -edge.y, y: edge.x };
-
-  //       let minA = Infinity,
-  //         maxA = -Infinity;
-  //       for (const point of polygons[0]) {
-  //         const projection = point.x * axis.x + point.y * axis.y;
-  //         minA = Math.min(minA, projection);
-  //         maxA = Math.max(maxA, projection);
-  //       }
-
-  //       let minB = Infinity,
-  //         maxB = -Infinity;
-  //       for (const point of polygons[1]) {
-  //         const projection = point.x * axis.x + point.y * axis.y;
-  //         minB = Math.min(minB, projection);
-  //         maxB = Math.max(maxB, projection);
-  //       }
-
-  //       if (maxA < minB || maxB < minA) {
-  //         return false; // Separating axis found
-  //       }
-  //     }
-  //   }
-
-  //   return true; // No separating axis => collision
-  // };
 
   type Point = { x: number; y: number };
   type Triangle = [Point, Point, Point];
