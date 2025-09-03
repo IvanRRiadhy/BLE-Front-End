@@ -390,7 +390,7 @@ const AlarmTriggerList = () => {
               onChange={(e: any) => setActionCurrent(e.target.value)}
             >
               {actionStatus
-                .filter((opt) => opt.value !== 'Idle') // 👈 exclude Idle
+                .filter((opt) => opt.value !== 'Idle' && opt.value !== actionCurrent) // 👈 exclude Idle
                 .map((opt) => (
                   <MenuItem key={opt.value} value={opt.value} disabled={opt.disabled ?? false}>
                     {opt.label}

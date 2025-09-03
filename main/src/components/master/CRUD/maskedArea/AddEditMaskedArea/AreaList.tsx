@@ -94,6 +94,8 @@ const AreaList = () => {
   useEffect(() => {
     dispatch(fetchFloorplan());
     dispatch(fetchMaskedAreas());
+    console.log("Active Floorplan: ", activeFloorplan);
+    console.log("Filtered Unsaved Masked Area: ", filteredUnsavedMaksedArea);
   }, [dispatch]);
   useEffect(() => {
     dispatch(GetUnsavedMaskedArea());
