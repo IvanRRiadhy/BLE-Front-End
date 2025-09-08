@@ -6,6 +6,7 @@ import { masterVisitorType } from "./visitor";
 import { bleReaderType } from "./bleReader";
 import { MaskedAreaType } from "./maskedArea";
 import { defaultAlarmRecordFilter } from "../defaultForm";
+import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 
 const API_URL = '/api/AlarmRecordTracking/';
 const API_DT_URL = '/api/AlarmRecordTracking/filter/';
@@ -153,38 +154,42 @@ export const fetchAlarm = () => async (dispatch: AppDispatch) => {
 };
 
 export const fetchAlarmDT = createAsyncThunk(
-    "alarmRecordTrackings/fetchAlarmDT",
-    async (filter: any, { rejectWithValue }) => {
-        const started = Date.now();
-        try {
-                                if (
-            filter?.filters &&
-            Object.values(filter.filters).some(
-                (arr: any) => Array.isArray(arr) && arr.includes("Empty")
-            )
-        ) {
-            // console.log("Filter contains 'Empty', skipping request");
-            // Option 1: just return null (success, no data)
-            // return null;
-            // Option 2: reject, if you want to treat as error
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-            return rejectWithValue("Filter contains 'Empty', skipping request");
-        }
-            const response = await axiosServices.post(`${API_DT_URL}`, filter);
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-            dispatch(GetAlarms(response.data.collection.data || []));
-            // console.log("Fetch Alarm", response.data.collection);
-            return response.data.collection;
-        } catch (error: any) {
-            console.error("Error fetching Alarm:", error);
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-            return rejectWithValue(error.response?.data || "Unknown error");
-        }
+  "alarmRecordTrackings/fetchAlarmDT",
+  async (filter: any, thunkAPI) => {
+    const { dispatch, signal, rejectWithValue } = thunkAPI;
+    const started = Date.now();
+
+    try {
+      // Early guard: skip if any filter array contains "Empty"
+      if (
+        filter?.filters &&
+        Object.values(filter.filters).some(
+          (arr: any) => Array.isArray(arr) && arr.includes("Empty")
+        )
+      ) {
+        await ensureMinLatency(started, 500);
+        return rejectWithValue("Filter contains 'Empty', skipping request");
+      }
+
+      // Retry-able request with cancellation
+      const response = await retryUntilSuccess(
+        () => axiosServices.post(`${API_DT_URL}`, filter),
+        { signal } // uses thunkAPI.signal to cancel if needed
+      );
+
+      // Update list in store
+      dispatch(GetAlarms(response.data.collection.data || []));
+
+      await ensureMinLatency(started, 500);
+      return response.data.collection; // { data, draw, recordsTotal, recordsFiltered }
+    } catch (error: any) {
+      console.error("Error fetching Alarm:", error);
+      await ensureMinLatency(started, 500);
+      return rejectWithValue(error?.response?.data || "Unknown error");
     }
+  }
 );
+
 
 export const ImportAlarm = createAsyncThunk(
     "alarmRecordTrackings/importAlarm",

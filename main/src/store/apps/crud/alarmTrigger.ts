@@ -3,6 +3,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { defaultAlarmTriggerFilter } from "../defaultForm";
+import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 
 const API_DT_URL = "/api/AlarmTriggers/filter";
 const API_URL = "/api/AlarmTriggers/";
@@ -139,8 +140,8 @@ export const {
 export const fetchAlarmTrigger = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
-        dispatch(GetAllAlarmTrigger(response.data));
-
+        dispatch(GetAllAlarmTrigger(response.data.collection.data || []));
+        console.log("Response: ", response);
     } catch (err: any) {
         console.log("Error: ", err);
     }
@@ -148,22 +149,23 @@ export const fetchAlarmTrigger = () => async (dispatch: AppDispatch) => {
 
 export const fetchAlarmTriggerDT = createAsyncThunk(
     "alarmTriggers/fetchAlarmTriggerDT",
-    async (filter: any, {rejectWithValue}) => {
+    async (filter: any, thunkAPI) => {
         const started = Date.now();
-        try{
-            const response = await axiosServices.post(API_DT_URL, filter);
-            dispatch(GetAlarmTriggers(response.data.collection.data || []));
+    const res = await retryUntilSuccess(
+      () => axiosServices.post(API_DT_URL, filter),
+      {
+        signal: thunkAPI.signal,     
+        timeoutMs: 2 * 60 * 1000,    
+        minDelay: 500,
+        maxDelay: 8000,
+      }
+    );
 
-            const elapsed = Date.now() - started;
-            if (elapsed < 500) await delay(500 - elapsed);
-            return response.data.collection;
-        } catch (error: any) {
-            console.error("Error fetching AlarmTriggers:", error);
-            const elapsed = Date.now() - started;
-            if (elapsed < 500) await delay(500 - elapsed);
-            return rejectWithValue(error.response?.data || "Unknown error");
-        }
-    }
+    dispatch(GetAlarmTriggers(res.data.collection.data || []));
+    await ensureMinLatency(started, 500);
+    return res.data.collection;
+  }
+    
 )
 
 export const editAlarmTrigger = createAsyncThunk(

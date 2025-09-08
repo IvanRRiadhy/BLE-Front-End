@@ -8,6 +8,7 @@ import { memberType } from "./member";
 import { CardType } from "./card";
 import { defaultCardRecordFilter } from "../defaultForm";
 import { create } from "lodash";
+import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 
 const API_URL = "/api/CardRecord/";
 const API_DT_URL = "/api/CardRecord/filter/";
@@ -127,23 +128,22 @@ export const {
 
 export const fetchCardRecordDt = createAsyncThunk(
     "CardRecord/fetchCardRecordDt",
-    async (filter: GetFilter, { rejectWithValue }) => {
+    async (filter: any, thunkAPI) => {
         const started = Date.now();
-        try {
-            console.log("Filter:", filter);
-            const response = await axiosServices.post(API_DT_URL, filter);
-            dispatch(GetCardRecord(response.data.collection.data || []));
-            console.log("Fetch card Records", response.data.collection);
-                    const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-            return response.data.collection;
-        } catch (error: any) {
-            console.error("Error fetching card Records:", error);
-                    const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-            return rejectWithValue(error.response?.data || "Unknown error");
-        }
-    }
+    const res = await retryUntilSuccess(
+      () => axiosServices.post(API_DT_URL, filter),
+      {
+        signal: thunkAPI.signal,     
+        timeoutMs: 2 * 60 * 1000,    
+        minDelay: 500,
+        maxDelay: 8000,
+      }
+    );
+
+    dispatch(GetCardRecord(res.data.collection.data || []));
+    await ensureMinLatency(started, 500);
+    return res.data.collection;
+  }
 );  
 
 export default CardRecordSlice.reducer;

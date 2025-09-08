@@ -4,6 +4,7 @@ import { AppDispatch, dispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { defaultDepartmentFilter } from "../defaultForm";
+import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 
 const API_URL = "/api/MstDepartment/";
 const API_DT_URL = "/api/MstDepartment/filter/";
@@ -183,22 +184,22 @@ export const fetchDepartments = () => async (dispatch: AppDispatch) => {
 
 export const fetchDepartmentDT = createAsyncThunk(
     "departments/fetchDepartmentDT",
-    async (filter: any, { rejectWithValue }) => {
+    async (filter: any, thunkAPI) => {
         const started = Date.now();
-        try {
-            const response = await axiosServices.post(API_DT_URL, filter);
-            dispatch(GetDepartments(response.data.collection.data || []));
-            // console.log("Fetch departments", response.data.collection);
-                    const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-            return response.data.collection;
-        } catch (error: any) {
-            console.error("Error fetching departments:", error);
-                    const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-            return rejectWithValue(error.response?.data || "Unknown error");
-        }
-    }
+    const res = await retryUntilSuccess(
+      () => axiosServices.post(API_DT_URL, filter),
+      {
+        signal: thunkAPI.signal,     
+        timeoutMs: 2 * 60 * 1000,    
+        minDelay: 500,
+        maxDelay: 8000,
+      }
+    );
+
+    dispatch(GetDepartments(res.data.collection.data || []));
+    await ensureMinLatency(started, 500);
+    return res.data.collection;
+  }
 )
 
 export const addDepartment = createAsyncThunk("departments/addDepartment", async (department: DepartmentType, { rejectWithValue }) => {

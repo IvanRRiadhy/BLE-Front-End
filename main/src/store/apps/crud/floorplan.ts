@@ -6,6 +6,7 @@ import { floorType } from "./floor";
 import { FloorplanDeviceType } from "./floorplanDevice";
 import { MaskedAreaType } from "./maskedArea";
 import { defaultFloorplanFilter } from "../defaultForm";
+import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 
 const Floorplan_API_URL = '/api/MstFloorplan/';
 const Floorplan_DT_URL = '/api/MstFloorplan/filter/';
@@ -182,29 +183,22 @@ export const fetchFloorplan = () => async (dispatch: AppDispatch) => {
 
 export const fetchFloorplanDT = createAsyncThunk(
     "floorplans/fetchFloorplanDT",
-    async (filter: any, { rejectWithValue }) => {
+    async (filter: any, thunkAPI) => {
         const started = Date.now();
-        try {
-            // console.log("Fetch Floorplan DT: ", filter);
-            const response = await axiosServices.post(Floorplan_DT_URL, filter);
-            const floorplans = response.data.collection.data || [];
-            console.log("FLOOR :", response.data.collection.data || []);
-            // response.data.collection.data.forEach((floorplan: FloorplanType) => {
-            //     console.log("Floorplan: ", floorplan);
-            // });
-            dispatch(GetFloorplan(floorplans));
-      // Dispatch after all data is enriched
-    //   dispatch(GetFloorplan(enrichedFloorplans));
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-      return response.data.collection;
-        } catch (error: any) {
-            console.error("Error fetching floorplans:", error);
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-            return rejectWithValue(error.response?.data || "Unknown error");
-        }
-    }
+    const res = await retryUntilSuccess(
+      () => axiosServices.post(Floorplan_DT_URL, filter),
+      {
+        signal: thunkAPI.signal,     
+        timeoutMs: 2 * 60 * 1000,    
+        minDelay: 500,
+        maxDelay: 8000,
+      }
+    );
+
+    dispatch(GetFloorplan(res.data.collection.data || []));
+    await ensureMinLatency(started, 500);
+    return res.data.collection;
+  }
 )
 
 export const addFloorplan = createAsyncThunk("floorplans/addFloorplan", async (formData: FormData, { rejectWithValue }) => {

@@ -7,6 +7,7 @@ import { OrganizationType } from "./organization";
 import { DistrictType } from "./district";
 import { DepartmentType } from "./department";
 import { defaultVisitorFilter } from "../defaultForm";
+import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 
 const API_URL = "/api/Visitor/";
 const API_DT_URL = "/api/Visitor/filter/";
@@ -220,22 +221,22 @@ export const fetchVisitor = () => async (dispatch: AppDispatch) => {
 
 export const fetchVisitorDT = createAsyncThunk(
     "visitor/fetchVisitorDT",
-    async (filter: any, { rejectWithValue }) => {
+    async (filter: any, thunkAPI) => {
         const started = Date.now();
-        try {
-            const response = await axiosServices.post(API_DT_URL, filter);
-            dispatch(GetVisitor(response.data.collection.data || []));
-            console.log("Fetch Visitors", response.data.collection);
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-            return response.data.collection;
-        } catch (error: any) {
-            console.error("Error fetching visitors:", error);
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-            return rejectWithValue(error.response?.data || "Unknown error");
-        }
-    }
+    const res = await retryUntilSuccess(
+      () => axiosServices.post(API_DT_URL, filter),
+      {
+        signal: thunkAPI.signal,     
+        timeoutMs: 2 * 60 * 1000,    
+        minDelay: 500,
+        maxDelay: 8000,
+      }
+    );
+
+    dispatch(GetVisitor(res.data.collection.data || []));
+    await ensureMinLatency(started, 500);
+    return res.data.collection;
+  }
 )
 
 export const fetchVisitorbyId = (id: string) => async (dispatch: AppDispatch) => {

@@ -5,6 +5,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axiosServices from "../../../utils/axios";
 import { defaultBrandFilter } from "../defaultForm";
+import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 
 const API_URL = "/api/MstBrand/";
 const API_DT_URL = "/api/MstBrand/filter/";
@@ -162,17 +163,22 @@ export const fetchBrands = () => async (dispatch: AppDispatch) => {
 
 export const fetchBrandDT = createAsyncThunk(
     "brands/fetchBrandDT",
-    async (filter: any, { rejectWithValue }) => {
-        try {
-            const response = await axiosServices.post(API_DT_URL, filter);
-            dispatch(GetBrands(response.data.collection.data || []));
-            // console.log("Fetch brands", response.data.collection);
-            return response.data.collection;
-        } catch (error: any) {
-            console.error("Error fetching brands:", error);
-            return rejectWithValue(error.response?.data || "Unknown error");
-        }
-    }
+    async (filter: any, thunkAPI) => {
+        const started = Date.now();
+    const res = await retryUntilSuccess(
+      () => axiosServices.post(API_DT_URL, filter),
+      {
+        signal: thunkAPI.signal,     
+        timeoutMs: 2 * 60 * 1000,    
+        minDelay: 500,
+        maxDelay: 8000,
+      }
+    );
+
+    dispatch(GetBrands(res.data.collection.data || []));
+    await ensureMinLatency(started, 500);
+    return res.data.collection;
+  }
 )
 
 export const addBrand = createAsyncThunk("brands/addBrand", async (brand: BrandType, { rejectWithValue }) => {

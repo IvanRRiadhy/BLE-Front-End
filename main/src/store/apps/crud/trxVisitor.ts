@@ -7,6 +7,7 @@ import { VisitorType } from "./visitor";
 import { MaskedAreaType } from "./maskedArea";
 import { defaultTrxVisitorFilter } from "../defaultForm";
 import { memberType } from "./member";
+import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 
 const API_URL = "/api/TrxVisitor/";
 const API_DT_URL = "/api/TrxVisitor/filter/";
@@ -160,17 +161,22 @@ export const fetchTrxVisitor = () => async(dispatch: AppDispatch) => {
 
 export const fetchTrxVisitorDT = createAsyncThunk(
     "TrxVisitor/fetchTrxVisitorDT",
-    async (filter: any, { rejectWithValue }) => {
-        try{
-            const response = await axiosServices.post(`${API_DT_URL}`, filter);
-            dispatch(GetTrxVisitors(response.data.collection.data || []));
-            console.log("Fetch TrxVisitors", response.data.collection);
-            return response.data.collection;
-        } catch (error: any) {
-            console.error("Error fetching TrxVisitors:", error);
-            return rejectWithValue(error.response?.data || "Unknown error");
-        }
-    }
+    async (filter: any, thunkAPI) => {
+        const started = Date.now();
+    const res = await retryUntilSuccess(
+      () => axiosServices.post(API_DT_URL, filter),
+      {
+        signal: thunkAPI.signal,     
+        timeoutMs: 2 * 60 * 1000,    
+        minDelay: 500,
+        maxDelay: 8000,
+      }
+    );
+
+    dispatch(GetTrxVisitors(res.data.collection.data || []));
+    await ensureMinLatency(started, 500);
+    return res.data.collection;
+  }
 );
 
 export const fetchTrxVisitorById = (id: string) => async (dispatch: AppDispatch) => {

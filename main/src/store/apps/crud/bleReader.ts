@@ -4,6 +4,7 @@ import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { defaultBleReaderFilter } from "../defaultForm";
+import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 
 
 const API_URL = "/api/MstBleReader/";
@@ -236,22 +237,21 @@ export const fetchBleReaders = () => async (dispatch: AppDispatch) => {
 
 export const fetchBleReaderDT = createAsyncThunk(
   "bleReaders/fetchBleReaderDT",
-  async (filter: any, { rejectWithValue }) => {
-    const started = Date.now();
-    try {
-      const response = await axiosServices.post(API_DT_URL, filter);
-        // console.log("Ble reader DT: ", response.data);
-        dispatch(GetBleReader(response.data?.collection?.data || []));
-      // Return only the serializable data
-        const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-      return response.data.collection; // or just response.data if needed
-    } catch (error: any) {
-      console.error("Error fetching bleReaders:", error);
-              const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-      return rejectWithValue(error.response?.data || "Unknown error");
-    }
+    async (filter: any, thunkAPI) => {
+        const started = Date.now();
+    const res = await retryUntilSuccess(
+      () => axiosServices.post(API_DT_URL, filter),
+      {
+        signal: thunkAPI.signal,     
+        timeoutMs: 2 * 60 * 1000,    
+        minDelay: 500,
+        maxDelay: 8000,
+      }
+    );
+
+    dispatch(GetBleReader(res.data.collection.data || []));
+    await ensureMinLatency(started, 500);
+    return res.data.collection;
   }
 );
 

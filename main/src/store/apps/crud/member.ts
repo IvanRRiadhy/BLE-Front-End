@@ -4,6 +4,7 @@ import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { defaultMemberFilter } from "../defaultForm";
+import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 
 const API_URL = "/api/MstMember/";
 const API_DT_URL = "/api/MstMember/filter/";
@@ -176,22 +177,22 @@ export const fetchMembers = () => async (dispatch: AppDispatch) => {
 
 export const fetchMemberDT = createAsyncThunk(
     "members/fetchMemberDT",
-    async (filter: any, { rejectWithValue }) => {
+    async (filter: any, thunkAPI) => {
         const started = Date.now();
-        try {
-            const response = await axiosServices.post(API_DT_URL, filter);
-            dispatch(GetMember(response.data.collection.data || []));
-            console.log("Fetch members", response.data.collection);
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-            return response.data.collection;
-        } catch (error: any) {
-            console.error("Error fetching members:", error);
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-            return rejectWithValue(error.response?.data || "Unknown error");
-        }
-    }
+    const res = await retryUntilSuccess(
+      () => axiosServices.post(API_DT_URL, filter),
+      {
+        signal: thunkAPI.signal,     
+        timeoutMs: 2 * 60 * 1000,    
+        minDelay: 500,
+        maxDelay: 8000,
+      }
+    );
+
+    dispatch(GetMember(res.data.collection.data || []));
+    await ensureMinLatency(started, 500);
+    return res.data.collection;
+  }
 )
 
 export const addMember = createAsyncThunk("member/addMember", async (formData: FormData) => {

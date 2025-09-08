@@ -5,6 +5,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { defaultBuildingFilter } from "../defaultForm";
 import toast from "react-hot-toast";
+import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 
 const API_URL = '/api/MstBuilding/';
 const API_DT_URL = '/api/MstBuilding/filter/';
@@ -180,25 +181,22 @@ export const fetchBuildings = () => async (dispatch: AppDispatch) => {
 
 export const fetchBuildingDT = createAsyncThunk(
     "buildings/fetchBuildingDT",
-    async (filter: any, { rejectWithValue }) => {
+    async (filter: any, thunkAPI) => {
         const started = Date.now();
-        try {
-            // console.log("Fetch Building DT: ", filter);
-            const response = await axiosServices.post(API_DT_URL, filter);
-            dispatch(GetBuildings(response.data.collection.data || []));
-            // console.log("Fetch buildings", response.data.collection);
-                  const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
+    const res = await retryUntilSuccess(
+      () => axiosServices.post(API_DT_URL, filter),
+      {
+        signal: thunkAPI.signal,     
+        timeoutMs: 2 * 60 * 1000,    
+        minDelay: 500,
+        maxDelay: 8000,
+      }
+    );
 
-            return response.data.collection;
-        } catch (error: any) {
-                  const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-
-            console.error("Error fetching buildings:", error);
-            return rejectWithValue(error.response?.data || "Unknown error");
-        }
-    }
+    dispatch(GetBuildings(res.data.collection.data || []));
+    await ensureMinLatency(started, 500);
+    return res.data.collection;
+  }
 )
 
 export const addBuilding = createAsyncThunk("buildings/addBuilding", async (formData: FormData, { rejectWithValue }) => {

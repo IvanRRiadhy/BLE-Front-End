@@ -4,6 +4,7 @@ import { AppDispatch, dispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { defaultIntegrationFilter } from "../defaultForm";
+import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 
 const API_URL = "/api/MstIntegration/";
 const API_DT_URL = "/api/MstIntegration/filter/";
@@ -173,17 +174,22 @@ export const fetchIntegrations = () => async (dispatch: AppDispatch) => {
 
 export const fetchIntegrationDT = createAsyncThunk(
     "integrations/fetchIntegrationDT",
-    async (filter: any, { rejectWithValue }) => {
-        try {
-            const response = await axiosServices.post(API_DT_URL, filter);
-            dispatch(GetIntegrations(response.data.collection.data || []));
-            // console.log("Fetch integrations", response.data.collection);
-            return response.data.collection;
-        } catch (error: any) {
-            console.error("Error fetching integrations:", error);
-            return rejectWithValue(error.response?.data || "Unknown error");
-        }
-    }
+    async (filter: any, thunkAPI) => {
+        const started = Date.now();
+    const res = await retryUntilSuccess(
+      () => axiosServices.post(API_DT_URL, filter),
+      {
+        signal: thunkAPI.signal,     
+        timeoutMs: 2 * 60 * 1000,    
+        minDelay: 500,
+        maxDelay: 8000,
+      }
+    );
+
+    dispatch(GetIntegrations(res.data.collection.data || []));
+    await ensureMinLatency(started, 500);
+    return res.data.collection;
+  }
 )
 
 export const addIntegration = createAsyncThunk("integrations/addIntegration", async (integration: IntegrationType, { rejectWithValue }) => {
