@@ -19,6 +19,7 @@ import Profile from 'src/layouts/full/vertical/header/Profile';
 import Language from 'src/layouts/full/vertical/header/Language';
 import Logo from 'src/layouts/full/shared/logo/Logo';
 import { RootState } from 'src/store/Store';
+import Notifications from '../../vertical/header/Notification';
 
 const Header = () => {
   const lgDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('lg'));
@@ -96,7 +97,7 @@ const Header = () => {
               <IconSun size="21" stroke="1.5" onClick={() => dispatch(setDarkMode('light'))} />
             )}
           </IconButton> */}
-          {/* <Notifications /> */}
+          <Notifications />
 
           <Profile />
         </Stack>

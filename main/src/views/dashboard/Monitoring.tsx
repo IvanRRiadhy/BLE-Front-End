@@ -12,10 +12,13 @@ import {
   toggleSidebar,
 } from 'src/store/customizer/CustomizerSlice';
 import MonitoringGrid from 'src/views/dashboard/MonitoringGrid.tsx';
+import { hideAlarmPopup } from 'src/store/apps/monitoring/AlarmUI';
+import AlarmPopup from 'src/layouts/full/AlarmPopup';
 
 const Monitoring = () => {
   const dispatch = useDispatch();
   const theme = useTheme();
+  const { latest, open } = useSelector((s: RootState) => s.AlarmUIReducer);
   const grid = useSelector((state: RootState) => state.layoutReducer.grid); // Get the current grid value
   const floorIds = useSelector((state: RootState) => state.layoutReducer.floorplanId); // Get the current floor IDs
   const screenDisplay = useSelector((state: RootState) => state.layoutReducer.screenDisplay);
@@ -43,225 +46,12 @@ const Monitoring = () => {
       dispatch(toggleSidebar()); // Reset sidebar
     };
   }, [dispatch]);
-  // Define layouts for each grid type
-  // const renderLayout = () => {
-  //   switch (grid) {
-  //     case 1:
-  //       return (
-  //         <Grid container>
-  //           <Grid
-  //             size={{ xs: 12 }}
-  //             sx={{
-  //               overflow: 'hidden',
-  //               border: '2.5px solid black',
-  //               transition: 'border-color 0.3s ease, border-width 0.1s ease',
-  //               '&:hover': { borderColor: 'success.light', borderWidth: '5px' },
-  //             }}
-  //           >
-  //             <FloorView activeFloor={floorIds[grid][0]} zoomable />
-  //           </Grid>
-  //         </Grid>
-  //       );
-  //     case 2:
-  //       return (
-  //         <Grid container>
-  //           <Grid
-  //             size={{ xs: 12, lg: 6 }}
-  //             sx={{
-  //               overflow: 'hidden',
-  //               border: '2.5px solid black',
-  //               transition: 'border-color 0.3s ease, border-width 0.1s ease',
-  //               '&:hover': { borderColor: 'success.dark', borderWidth: '5px' },
-  //             }}
-  //           >
-  //             <FloorView activeFloor={floorIds[grid][0]} zoomable />
-  //           </Grid>
 
-  //           <Grid
-  //             size={{ xs: 12, lg: 6 }}
-  //             sx={{
-  //               overflow: 'hidden',
-  //               border: '2.5px solid black',
-  //               transition: 'border-color 0.3s ease, border-width 0.1s ease',
-  //               '&:hover': { borderColor: 'success.dark', borderWidth: '5px' },
-  //             }}
-  //           >
-  //             <FloorView activeFloor={floorIds[grid][1]} zoomable={false} />
-  //           </Grid>
-  //         </Grid>
-  //       );
-  //     case 3:
-  //       return (
-  //         <Grid container>
-  //           <Grid size={{ xs: 12, lg: 6 }} sx={{ overflow: 'hidden', border: '2.5px solid black' }}>
-  //             <FloorView activeFloor={floorIds[grid][0]} zoomable />
-  //           </Grid>
-  //           <Grid size={{ xs: 12, lg: 6 }}>
-  //             <Grid container direction={'column'}>
-  //               <Grid
-  //                 size={{ xs: 12 }}
-  //                 sx={{ height: '40vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][1]} zoomable={false} />
-  //               </Grid>
-  //               <Grid
-  //                 size={{ xs: 12 }}
-  //                 sx={{ height: '40vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][2]} zoomable={false} />
-  //               </Grid>
-  //             </Grid>
-  //           </Grid>
-  //         </Grid>
-  //       );
-  //     case 4:
-  //       return (
-  //         <Grid container>
-  //           <Grid size={{ xs: 12, lg: 6 }}>
-  //             <Grid container direction={'column'}>
-  //               <Grid
-  //                 size={{ xs: 12 }}
-  //                 sx={{ height: '40vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][0]} zoomable />
-  //               </Grid>
-  //               <Grid
-  //                 size={{ xs: 12 }}
-  //                 sx={{ height: '40vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][2]} zoomable={false} />
-  //               </Grid>
-  //             </Grid>
-  //           </Grid>
-  //           <Grid size={{ xs: 12, lg: 6 }}>
-  //             <Grid container direction={'column'}>
-  //               <Grid
-  //                 size={{ xs: 12 }}
-  //                 sx={{ height: '40vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][1]} zoomable={false} />
-  //               </Grid>
-  //               <Grid
-  //                 size={{ xs: 12 }}
-  //                 sx={{ height: '40vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][3]} zoomable={false} />
-  //               </Grid>
-  //             </Grid>
-  //           </Grid>
-  //         </Grid>
-  //       );
-  //     case 5:
-  //       return (
-  //         <Grid container>
-  //           <Grid size={{ xs: 12, lg: 8 }}>
-  //             <Grid container>
-  //               <Grid
-  //                 size={{ xs: 12 }}
-  //                 sx={{ height: '53vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][0]} zoomable />
-  //               </Grid>
-  //             </Grid>
-  //             <Grid container>
-  //               <Grid
-  //                 size={{ xs: 12, lg: 6 }}
-  //                 sx={{ height: '27vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][2]} zoomable={false} />
-  //               </Grid>
-  //               <Grid
-  //                 size={{ xs: 12, lg: 6 }}
-  //                 sx={{ height: '27vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][3]} zoomable={false} />
-  //               </Grid>
-  //             </Grid>
-  //           </Grid>
-  //           <Grid size={{ xs: 12, lg: 4 }}>
-  //             <Grid container>
-  //               <Grid
-  //                 size={{ xs: 12 }}
-  //                 sx={{ height: '40vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][1]} zoomable={false} />
-  //               </Grid>
-  //               <Grid
-  //                 size={{ xs: 12 }}
-  //                 sx={{ height: '40vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][4]} zoomable={false} />
-  //               </Grid>
-  //             </Grid>
-  //           </Grid>
-  //         </Grid>
-  //       );
-  //     case 6:
-  //       return (
-  //         <Grid container>
-  //           <Grid size={{ xs: 12, lg: 8 }}>
-  //             <Grid container>
-  //               <Grid
-  //                 size={{ xs: 12 }}
-  //                 sx={{ height: '53vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][0]} zoomable />
-  //               </Grid>
-  //             </Grid>
-  //             <Grid container>
-  //               <Grid
-  //                 size={{ xs: 12, lg: 6 }}
-  //                 sx={{ height: '27vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][3]} zoomable={false} />
-  //               </Grid>
-  //               <Grid
-  //                 size={{ xs: 12, lg: 6 }}
-  //                 sx={{ height: '27vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][4]} zoomable={false} />
-  //               </Grid>
-  //             </Grid>
-  //           </Grid>
-  //           <Grid size={{ xs: 12, lg: 4 }}>
-  //             <Grid container>
-  //               <Grid
-  //                 size={{ xs: 12 }}
-  //                 sx={{ height: '26.5vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][1]} zoomable={false} />
-  //               </Grid>
-  //               <Grid
-  //                 size={{ xs: 12 }}
-  //                 sx={{ height: '26.5vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][2]} zoomable={false} />
-  //               </Grid>
-  //               <Grid
-  //                 size={{ xs: 12 }}
-  //                 sx={{ height: '27vh', overflow: 'hidden', border: '2.5px solid black' }}
-  //               >
-  //                 <FloorView activeFloor={floorIds[grid][5]} zoomable={false} />
-  //               </Grid>
-  //             </Grid>
-  //           </Grid>
-  //         </Grid>
-  //       );
-  //     default:
-  //       return (
-  //         <Grid container>
-  //           <Grid size={{ xs: 12 }}>
-  //             <Typography variant="h4" fontStyle="bold" fontWeight={900} mt={0.5}>
-  //               Monitoring Dashboard
-  //             </Typography>
-  //             <Typography variant="h6" fontStyle="bold" fontWeight={900} mt={0.5}>
-  //               Please select a Grid
-  //             </Typography>
-  //           </Grid>
-  //         </Grid>
-  //       );
-  //   }
-  // };
+  useEffect(() => {
+    console.log(
+      `Monitoring: memoizedFloorIds: ${memoizedFloorIds}, memoizedFloorIds2: ${memoizedFloorIds2}, memoizedScreenType: ${memoizedScreenType}`
+    );
+  }, [memoizedFloorIds, memoizedFloorIds2, memoizedScreenType]);
 
   return (
     <>
@@ -300,6 +90,7 @@ const Monitoring = () => {
         </Box>
       </PageContainer>
       <MonitoringFooter />
+      <AlarmPopup alarm={latest} open={open} onClose={() => dispatch(hideAlarmPopup())} />
     </>
   );
 };

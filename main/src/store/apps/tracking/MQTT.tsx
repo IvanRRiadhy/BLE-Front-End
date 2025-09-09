@@ -46,7 +46,7 @@ export function startMQTTclient(messagecallback: any, topic: string) {
       let data: unknown;
       try {
         data = JSON.parse(message_str);
-        // console.log("Received message on topic", msgTopic, ":", data);
+        console.log("Received message on topic", msgTopic, ":", data);
         (messageCallbacks[msgTopic] || []).forEach(cb => cb(data));
       } catch (e) {
         console.warn("Invalid JSON received on topic", msgTopic, ":", message_str);
@@ -65,7 +65,7 @@ export function startMQTTclient(messagecallback: any, topic: string) {
   // Return unsubscribe function
   return () => {
     if (messageCallbacks[topic]) {
-
+      // console.log("Unsubscribing from topic", topic);
       messageCallbacks[topic] = messageCallbacks[topic].filter(cb => cb !== messagecallback);
       if (messageCallbacks[topic].length === 0) {
         // Optionally unsubscribe from topic if no callbacks left

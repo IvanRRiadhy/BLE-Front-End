@@ -43,6 +43,8 @@ import RulesNodeReducer from './apps/rules/RulesNodes';
 import RulesConnectorReducer from './apps/rules/RulesConnectors';
 import BeaconReducer from './apps/tracking/Beacon';
 import AlarmActiveReducer from './apps/tracking/Alarm';
+import AlarmUIReducer from './apps/monitoring/AlarmUI';
+import NotifyReducer from './apps/monitoring/NotifySlice';
 import UserReducer from './apps/crud/users';
 import SessionReducer from './apps/session';
 import { combineReducers } from 'redux';
@@ -94,6 +96,8 @@ const rootReducer = combineReducers({
   RulesConnectorReducer: RulesConnectorReducer,
   BeaconReducer: BeaconReducer,
   AlarmActiveReducer: AlarmActiveReducer,
+  AlarmUIReducer: AlarmUIReducer,
+  NotifyReducer: NotifyReducer,
   userReducer: UserReducer,
   sessionReducer: SessionReducer,
 });

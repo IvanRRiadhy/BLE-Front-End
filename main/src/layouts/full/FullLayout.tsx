@@ -1,8 +1,8 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState, useRef } from 'react';
 import { styled, Container, Box, useTheme } from '@mui/material';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { Outlet } from 'react-router';
-import { RootState } from 'src/store/Store';
+import { RootState, AppDispatch } from 'src/store/Store';
 import Sidebar from './vertical/sidebar/Sidebar';
 import Navigation from '../full/horizontal/navbar/Navigation';
 import HorizontalHeader from '../full/horizontal/header/Header';
@@ -11,9 +11,14 @@ import LoadingBar from '../../LoadingBar';
 import MonitoringHeader from './monitoringLayout/Header';
 import { setSessionExpiredHandler } from 'src/utils/axios';
 import SessionExp from './shared/SessionExp';
-import AlarmPopup from './AlarmPopup';
 import { hydrateEvacState } from 'src/store/customizer/CustomizerSlice';
 import { Toaster } from 'react-hot-toast';
+import { startNTFYclient } from 'src/store/apps/tracking/NTFY';
+import { fetchAlarmTrigger } from 'src/store/apps/crud/alarmTrigger';
+import { memberType } from 'src/store/apps/crud/member';
+import { VisitorType } from 'src/store/apps/crud/visitor';
+import { showAlarmPopup } from 'src/store/apps/monitoring/AlarmUI';
+import { pushItem, openPanel } from 'src/store/apps/monitoring/NotifySlice';
 
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
@@ -24,34 +29,121 @@ const MainWrapper = styled('div')(() => ({
 const PageWrapper = styled('div')(() => ({
   display: 'flex',
   flexGrow: 1,
-  // paddingBottom: '60px',
   flexDirection: 'column',
   zIndex: 1,
   width: '100%',
   backgroundColor: '#fcfcfc',
 }));
 
+
 const FullLayout: FC = () => {
-  const dispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const customizer = useSelector((state: RootState) => state.customizer);
   const evacState = useSelector((state: RootState) => state.customizer.evacState);
   const theme = useTheme();
+  const memberList: memberType[] = useSelector((s: RootState) => s.memberReducer.members);
+  const visitorList: VisitorType[] = useSelector((s: RootState) => s.visitorReducer.visitors);
 
   const [sessionExpired, setSessionExpired] = useState(false);
+  const lastDispatchRef = useRef(0);
+  const unsubscriberRef = useRef<(() => void) | null>(null);
 
-  useEffect(() => {
-    setSessionExpiredHandler(() => setSessionExpired(true));
-    // Hydrate evacState from localStorage
-    const savedEvac = localStorage.getItem('evacState');
-    if (savedEvac) {
-      dispatch(hydrateEvacState(JSON.parse(savedEvac)));
-    }
-    return () => setSessionExpiredHandler(() => {});
-  }, []);
+  // Resolve display name from beacon/card ID
+  const getName = (bleNumber: string) => {
+    const m = memberList.find((x) => x.bleCardNumber === bleNumber);
+    if (m) return m.name;
+    const v = visitorList.find((x) => x.bleCardNumber === bleNumber);
+    if (v) return v.name;
+    return bleNumber || 'Unknown';
+  };
 
+  // useEffect(() => {
+  //   // Request notification permission
+  //   if ('Notification' in window && Notification.permission !== 'granted') {
+  //     Notification.requestPermission().then((permission) => {
+  //       if (permission === 'granted') {
+  //         console.log('[Notifications] Permission granted');
+  //       } else {
+  //         console.warn('[Notifications] Permission denied');
+  //       }
+  //     });
+  //   }
+
+  //   // Set up session expiration handler
+  //   setSessionExpiredHandler(() => setSessionExpired(true));
+  //   const savedEvac = localStorage.getItem('evacState');
+  //   if (savedEvac) {
+  //     dispatch(hydrateEvacState(JSON.parse(savedEvac)));
+  //   }
+
+  //   // NTFY subscription for alarms
+  //   const topic = '192.168.1.116:6099/tracking-ntfy';
+  //   console.log(`[NTFY] Subscribing to alarm topic "${topic}"`);
+  //   const unsubscribe = startNTFYclient(
+  //     (data: any) => {
+  //       const now = Date.now();
+  //       console.log(`[NTFY] Message from alarm topic "${topic}":`, data);
+  //       const alarmData = Array.isArray(data) ? data[0] : data;
+  //       // setLatestAlarm(alarmData);
+  //       // setOpenAlarmPopup(true);
+  //       dispatch(showAlarmPopup(alarmData));
+  //       window.dispatchEvent(new CustomEvent('app:new-alarm', { detail: { alarm: alarmData } }));
+  //  // Add to bell dialogue & open it
+  //  dispatch(pushItem({
+  //    id: `${alarmData?.beaconId ?? 'unknown'}-${Date.now()}`,
+  //    alarm: alarmData,
+  //    title: 'Alarm Triggered',
+  //    message: `Beacon ${getName(alarmData?.beaconId || 'Unknown')} · ${alarmData?.maskedAreaName ?? 'Unknown'} · ${alarmData?.floorplanName ?? 'Unknown'}`,
+  //  }));
+  //  dispatch(openPanel());
+
+  //       // Show browser notification if window is not focused
+  //       if (
+  //         'Notification' in window &&
+  //         Notification.permission === 'granted' &&
+  //         !document.hasFocus()
+  //       ) {
+  //         const title = 'Alarm Triggered!';
+  //         const body = `Beacon ${getName(alarmData.beaconId || 'Unknown')} is in ${
+  //           alarmData.maskedAreaName || 'Unknown Area'
+  //         } on ${alarmData.floorplanName || 'Unknown Floor'}.`;
+  //         const notification = new Notification(title, {
+  //           body,
+  //           icon: '/icon.png', // Replace with actual icon path
+  //         });
+  //         notification.onclick = () => {
+  //           window.focus();
+  //           notification.close();
+  //         };
+  //       }
+
+  //       if (now - lastDispatchRef.current > 1500) {
+  //         lastDispatchRef.current = now;
+  //         dispatch(fetchAlarmTrigger());
+  //       }
+  //     },
+  //     topic,
+  //     { baseUrl: 'http://192.168.1.116:6099' },
+  //   );
+
+  //   if (!unsubscribe) {
+  //     console.error(`[NTFY] Failed to subscribe to alarm topic "${topic}"`);
+  //   } else {
+  //     unsubscriberRef.current = unsubscribe;
+  //   }
+
+  //   return () => {
+  //     setSessionExpiredHandler(() => {});
+  //     if (unsubscriberRef.current) {
+  //       unsubscriberRef.current();
+  //       unsubscriberRef.current = null;
+  //     }
+  //   };
+  // }, [dispatch, memberList, visitorList]);
+  
   return (
     <>
-      <AlarmPopup />
+      {/* <AlarmPopup alarm={latestAlarm} open={openAlarmPopup} onClose={() => setOpenAlarmPopup(false)} /> */}
       <SessionExp open={sessionExpired} />
       <LoadingBar />
       <MainWrapper
@@ -82,13 +174,9 @@ const FullLayout: FC = () => {
           />
         )}
 
-        {/* ------------------------------------------- */}
         {/* Sidebar */}
-        {/* ------------------------------------------- */}
         {customizer.isHorizontal ? '' : <Sidebar />}
-        {/* ------------------------------------------- */}
         {/* Main Wrapper */}
-        {/* ------------------------------------------- */}
         <PageWrapper
           className="page-wrapper"
           sx={{
@@ -97,34 +185,25 @@ const FullLayout: FC = () => {
             }),
           }}
         >
-          {/* ------------------------------------------- */}
           {/* Header */}
-          {/* ------------------------------------------- */}
           {customizer.isHorizontal ? <HorizontalHeader /> : <MonitoringHeader />}
-
           {/* PageContent */}
           {customizer.isHorizontal ? <Navigation /> : ''}
-          {/* ------------------------------------------- */}
           {/* Monitoring Sidebar */}
-          {/* ------------------------------------------- */}
           <Box
             sx={{
-              display: 'flex', // Align MonitoringSidebar and content horizontally
+              display: 'flex',
               flexDirection: 'row',
               width: '100%',
             }}
           >
-            {/* {customizer.isMonitorSidebar && <MonitoringSidebar />} */}
             <Container
               sx={{
                 pt: '0px',
                 maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',
-                flexGrow: 1, // Allow content to take remaining space
+                flexGrow: 1,
               }}
             >
-              {/* ------------------------------------------- */}
-              {/* PageContent */}
-              {/* ------------------------------------------- */}
               <Box sx={{ minHeight: 'calc(100vh - 170px)' }}>
                 <ScrollToTop>
                   <Outlet />
@@ -132,7 +211,6 @@ const FullLayout: FC = () => {
               </Box>
             </Container>
           </Box>
-          {/* <Customizer /> */}
         </PageWrapper>
       </MainWrapper>
       <Toaster

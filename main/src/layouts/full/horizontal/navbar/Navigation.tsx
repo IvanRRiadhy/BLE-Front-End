@@ -21,7 +21,7 @@ const Navigation = () => {
           position: 'sticky',
           top: customizer.TopbarHeight,
           width: '100%',
-          zIndex: 1100, // Ensures it's above other content
+          zIndex: 100, // Ensures it's above other content
           backgroundColor: 'background.paper',
           borderBottom: '1px solid rgba(0,0,0,0.05)',
         }}

@@ -20,6 +20,8 @@ import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organi
 import { masterVisitorType, VisitorType } from 'src/store/apps/crud/visitor';
 import { SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
+import { setScreenDisplay } from 'src/store/apps/monitoring/layout';
+
 
 type BeaconDetailPopupProps = {
   bleNumber: string;
@@ -31,6 +33,8 @@ type BeaconDetailPopupProps = {
   detailDialogOpen: boolean;
   setDetailDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setOpenTrackDetail: React.Dispatch<React.SetStateAction<boolean>>;
+  grid?: number;
+  screen?: number;
 };
 
 
@@ -44,6 +48,8 @@ const BeaconDetailPopup = ({
   detailDialogOpen,
   setDetailDialogOpen,
   setOpenTrackDetail,
+  grid,
+  screen,
 }: BeaconDetailPopupProps) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -88,6 +94,23 @@ const BeaconDetailPopup = ({
     return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()}`;
   };
 
+
+    const handleFollowOnThisScreen = () => {
+      console.log("Grid, Screen :", grid, screen);
+    if (typeof grid !== 'number' || typeof screen !== 'number') return;
+    dispatch(
+      setScreenDisplay(
+        grid,
+        screen,
+        {
+          displayType: 3,          // Follow Beacon
+          displayOutput: bleNumber // the target beaconId
+        }
+      )
+    );
+    handleClose();
+  };
+
   return (
     <Dialog fullWidth maxWidth={'md'} open={detailDialogOpen} onClose={handleClose}>
       <DialogTitle>
@@ -107,6 +130,24 @@ const BeaconDetailPopup = ({
                 }`}
                 sx={{ width: '128px', height: '128px', ml: 2 }}
               />
+               <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={handleFollowOnThisScreen}
+                sx={{
+                  position: 'absolute',
+                  right: 0,            // stick to the right-most side
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  borderRadius: 2,
+                  minWidth: 0,
+                  px: 2,
+                  py: 1,
+                }}
+              >
+                Follow
+              </Button>
             </Grid>
           </Grid>
           <Grid container size={12} direction={'row'}>

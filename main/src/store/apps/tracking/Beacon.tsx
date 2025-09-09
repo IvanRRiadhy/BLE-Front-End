@@ -33,6 +33,8 @@ export interface BeaconType {
   is_Active: string;
   floorplanName: string;
   maskedAreaName: string;
+  fromFloorplanId: string;
+  toFloorplanId: string;
 }
 
 interface StateType {

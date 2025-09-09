@@ -1,5 +1,5 @@
 import { BASE_URL } from 'src/utils/axios';
-import React, { use, useEffect, useRef, useState } from 'react';
+import React, { use, useCallback, useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import {
   Box,
@@ -24,6 +24,9 @@ import { fetchMembers, memberType } from 'src/store/apps/crud/member';
 import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import BeaconDetailPopup from './Popup/BeaconDetailPopup';
 import TrackingDetailPopup from './Popup/TrackingDetailPopup';
+import { setFloorplan, setScreenDisplay } from 'src/store/apps/monitoring/layout';
+
+const FOLLOW_SCALE = 1.5; // tweak as needed
 
 const ALARM_URL = 'http://192.168.1.116:3300';
 const FloorView: React.FC<{
@@ -32,8 +35,19 @@ const FloorView: React.FC<{
   containerWidth: number;
   containerHeight: number;
   activeMaskedArea?: string;
+  focusBeacon?: string;
+  gridNumber: number;
+  screenNumber: number;
   screenSettings: { scale: number; translateX: number; translateY: number };
-}> = ({ activeFloorplan, activeMaskedArea, zoomable, screenSettings }) => {
+}> = ({
+  activeFloorplan,
+  activeMaskedArea,
+  zoomable,
+  screenSettings,
+  focusBeacon,
+  gridNumber,
+  screenNumber,
+}) => {
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchFloorplan());
@@ -99,7 +113,9 @@ const FloorView: React.FC<{
       : activeFloorData.floorImage // Prepend BASE_URL for relative paths
     : 'No Active Floorplan'; // Fallback to default image if not available
 
-  const devices = useSelector((state: RootState) => state.floorplanDeviceReducer.floorplanDeviceAll);
+  const devices = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceAll,
+  );
   const [filteredDevices, setFilteredDevices] = useState<FloorplanDeviceType[]>([]);
 
   //Popup State
@@ -114,13 +130,13 @@ const FloorView: React.FC<{
     floorplan: string;
     time: string;
   }) => {
-    dispatch(SetSelectedBeacon({active: true, ...info}));
+    dispatch(SetSelectedBeacon({ active: true, ...info }));
   };
   useEffect(() => {
-    if(selectedBeacon.active){
+    if (selectedBeacon.active) {
       setDetailDialogOpen(true);
     }
-  },[selectedBeacon])
+  }, [selectedBeacon]);
 
   useEffect(() => {
     const filteredDevices = devices.filter(
@@ -142,7 +158,6 @@ const FloorView: React.FC<{
         if (containerRef.current) {
           const containerWidth = containerRef.current.clientWidth;
           const containerHeight = containerRef.current.clientHeight;
-
 
           // Calculate the initial translate values to center the image
           const offsetX = containerWidth / 2;
@@ -282,7 +297,6 @@ const FloorView: React.FC<{
     };
   }, [handleZoom]);
 
-
   useEffect(() => {
     if (!activeMaskedArea) {
       setFocusArea(null);
@@ -358,6 +372,108 @@ const FloorView: React.FC<{
   const handleMouseUp = () => {
     setIsDragging(false);
     if (containerRef.current) containerRef.current.style.cursor = 'grab'; // Reset cursor
+  };
+
+  //Focus Beacon
+  const beaconsByTopic = useSelector((s: RootState) => s.BeaconReducer.beaconsByTopic);
+
+  // keep last switched floorplan to avoid loops
+  const lastSwitchedRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!focusBeacon || !gridNumber || !screenNumber) return;
+
+    // scan all topics for this beacon
+    let transition: { from?: string; to?: string } | null = null;
+    for (const arr of Object.values(beaconsByTopic)) {
+      const hit = Array.isArray(arr)
+        ? arr.find((b) => b.beaconId === focusBeacon && b.fromFloorplanId && b.toFloorplanId)
+        : undefined;
+      if (hit) {
+        transition = { from: hit.fromFloorplanId, to: hit.toFloorplanId };
+        break;
+      }
+    }
+
+    // if there is a from/to AND we are not already on 'to'
+    if (
+      transition?.to &&
+      transition.to !== activeFloorplan &&
+      lastSwitchedRef.current !== transition.to
+    ) {
+      dispatch(setFloorplan(gridNumber, screenNumber, transition.to));
+      lastSwitchedRef.current = transition.to;
+    }
+  }, [focusBeacon, beaconsByTopic, activeFloorplan, gridNumber, screenNumber, dispatch]);
+  
+  // === FOLLOW CAMERA HOOK ===
+  // 1) center on the focused beacon whenever we receive its canvas coords
+  const handleFocusPosition = useCallback((pt: { x: number; y: number }) => {
+    if (!containerRef.current) return;
+    // lock scale to follow zoom (or keep current if you prefer)
+    const nextScale = FOLLOW_SCALE;
+
+    const cw = containerRef.current.clientWidth;
+    const ch = containerRef.current.clientHeight;
+
+    // center formula: center - pos * scale  (same as TrackingDetailPopup's Stage x/y)
+    const nextTranslateX = cw / 2 - pt.x * nextScale;
+    const nextTranslateY = ch / 2 - pt.y * nextScale;
+
+    setScale(nextScale);
+    setTranslate({ x: nextTranslateX, y: nextTranslateY });
+  }, []);
+
+  // 2) auto-handoff floorplan when the beacon crosses floors (follow mode)
+
+// inside FloorView
+useEffect(() => {
+  if (!focusBeacon || !gridNumber || !screenNumber) return;
+
+  let to: string | null = null;
+  console.log("beaconsByTopic", beaconsByTopic);
+  console.log("FocusBeacon", focusBeacon);
+  for (const arr of Object.values(beaconsByTopic)) {
+    const hit = Array.isArray(arr)
+      ? arr.find((b: any) => {
+          const sameBeacon =
+            (b.beaconId && b.beaconId.toLowerCase() === String(focusBeacon).toLowerCase()) ||
+            (b.cardNumber && String(b.cardNumber) === String(focusBeacon)); // optional, if you ever follow by card #
+          // prefer explicit toFloorplanId
+          const explicitTo = b.toFloorplanId ?? b.toFlooplanId ?? null;
+          if (explicitTo) { to = explicitTo; return true; }
+          // fallback: parse TransM like "…to floorplan <UUID>"
+          if (b.TransM && typeof b.TransM === 'string') {
+            const m = b.TransM.match(/to floorplan\s+([0-9A-Fa-f-]{36})/);
+            if (m) { to = m[1]; return true; }
+          }
+          return false;
+        })
+      : undefined;
+      console.log(hit)
+    if (hit) break;
+  }
+  
+  if (to && to !== activeFloorplan && lastSwitchedRef.current !== to) {
+    dispatch(setFloorplan(gridNumber, screenNumber, to));
+    lastSwitchedRef.current = to;
+  }
+}, [focusBeacon, beaconsByTopic, activeFloorplan, gridNumber, screenNumber, dispatch]);
+
+  // === END FOLLOW CAMERA HOOK ===
+
+    const handleCancelFollowing = () => {
+    if (!gridNumber || !screenNumber) return;
+    dispatch(
+      setScreenDisplay(
+        gridNumber,
+        screenNumber,
+        {
+          displayType: 0,
+          displayOutput: '',
+        }
+      )
+    );
   };
 
   if (floorplanImage === 'No Active Floorplan') {
@@ -464,9 +580,15 @@ const FloorView: React.FC<{
             }
             label="Show Gateways"
           />
-          <Button variant="contained" color="primary" onClick={handleFetchDummyBeacon}>
-            Alarm Trigger
-          </Button>
+         {Boolean(focusBeacon) && (
+           <Button
+             variant="contained"
+             color="error"
+             onClick={handleCancelFollowing}
+           >
+             Cancel Following
+           </Button>
+         )}
         </Box>
       )}
       {/* Zoomable Content */}
@@ -484,7 +606,9 @@ const FloorView: React.FC<{
           )}
         <Box
           ref={containerRef}
-          onMouseDown={handleMouseDown}
+          onMouseDown={(e) => {
+            if (!focusBeacon) handleMouseDown(e);
+          }}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           //onWheelCapture={handleZoom}
@@ -560,7 +684,6 @@ const FloorView: React.FC<{
                     {...dims}
                     devices={filteredDevices}
                     imageSrc={floorplanImage}
-                    scale={scale}
                     areas={filteredArea}
                     showAreas={showArea}
                     showGates={showGates}
@@ -571,6 +694,8 @@ const FloorView: React.FC<{
                     openTrackDetail={openTrackDetail}
                     setOpenTrackDetail={setOpenTrackDetail}
                     selectedBeaconId={selectedBeacon?.id ?? null}
+                    focusBeaconId={focusBeacon || undefined}
+                    onFocusPosition={handleFocusPosition}
                   />
                 </Box>
               );
@@ -630,22 +755,22 @@ const FloorView: React.FC<{
               </Box>
             </Box>
 
-      <Typography variant="h6" mb={3}>
-        Card ID:{' '}
-        <Box component="span" fontWeight="bold" fontSize="1.1rem">
-          {dummyAlarm?.beaconId}
-        </Box>
-      </Typography>
-      <Typography variant="h6" mb={3}>
-        Area:{' '}
-        <Box component="span" fontWeight="bold" fontSize="1.1rem">
-          {dummyAlarm?.maskedAreaName}
-        </Box>{' '}
-        |{' '}
-        <Box component="span" fontWeight="bold" fontSize="1.1rem">
-          {dummyAlarm?.floorplanName}
-        </Box>
-      </Typography>
+            <Typography variant="h6" mb={3}>
+              Card ID:{' '}
+              <Box component="span" fontWeight="bold" fontSize="1.1rem">
+                {dummyAlarm?.beaconId}
+              </Box>
+            </Typography>
+            <Typography variant="h6" mb={3}>
+              Area:{' '}
+              <Box component="span" fontWeight="bold" fontSize="1.1rem">
+                {dummyAlarm?.maskedAreaName}
+              </Box>{' '}
+              |{' '}
+              <Box component="span" fontWeight="bold" fontSize="1.1rem">
+                {dummyAlarm?.floorplanName}
+              </Box>
+            </Typography>
 
             {/* White pill-shaped button bar */}
             <Box
@@ -702,6 +827,8 @@ const FloorView: React.FC<{
                 area={selectedBeacon.area}
                 floorplan={selectedBeacon.floorplan}
                 time={selectedBeacon.time}
+                grid={gridNumber}
+                screen={screenNumber}
               />
               {person && (
                 <TrackingDetailPopup

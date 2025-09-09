@@ -359,7 +359,7 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
           >
             <Divider />
             <Grid container mb={2} sx={{ padding: 2, paddingTop: 0 }}>
-              <Grid size={{ lg: 12, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 12, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="grid-type">
                   Grid Type {<span style={{ color: 'red' }}>*</span>}
                 </CustomFormLabel>

@@ -136,7 +136,7 @@ export const LayoutSlice = createSlice({
     },
     setFocus: (state, action: PayloadAction<{ type: string; id: string }>) => {
       state.focus = action.payload;
-      console.log("setting Focus: ", JSON.stringify(state.focus));
+      console.log('setting Focus: ', JSON.stringify(state.focus));
     },
     setFloorplan: {
       reducer: (state: Statetype, action: PayloadAction<any>) => {
@@ -148,7 +148,7 @@ export const LayoutSlice = createSlice({
       },
 
       prepare: (gridNumber: number, screenNumber: number, id: string) => {
-        return { payload: { gridNumber, screenNumber, id } };
+        return { payload: { gridNumber, screenNumber, id: id?.toLowerCase?.() ?? id } };
       },
     },
     setScreenDisplay: {
@@ -220,6 +220,7 @@ export const LayoutSlice = createSlice({
   },
 });
 
-export const { setGrid, setFloorplan, setScreenDisplay, setScreenSettings, resetScreen, setFocus } = LayoutSlice.actions;
+export const { setGrid, setFloorplan, setScreenDisplay, setScreenSettings, resetScreen, setFocus } =
+  LayoutSlice.actions;
 
 export default LayoutSlice.reducer;

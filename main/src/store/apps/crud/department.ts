@@ -206,6 +206,7 @@ export const addDepartment = createAsyncThunk("departments/addDepartment", async
     const started = Date.now();
     try {
         const {id,createdBy, createdAt, updatedBy, updatedAt, ...filteredDepartmentData} = department
+        console.log(filteredDepartmentData)
         const response = await axiosServices.post(API_URL, filteredDepartmentData);
                 const elapsed = Date.now() - started;
       if (elapsed < 500) await delay(500 - elapsed);

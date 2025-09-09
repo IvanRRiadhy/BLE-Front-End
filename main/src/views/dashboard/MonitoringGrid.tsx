@@ -295,11 +295,31 @@ const MonitoringGrid = React.memo(
                                             (grandChild as { floorId: number }).floorId
                                           ]
                                         }
+                                        gridNumber={grid}
+                                        screenNumber={screenNum}
                                       />
                                     ) : screenType[grid][
                                         (grandChild as { floorId: number }).floorId
                                       ] === 2 ? (
                                       <VideoPlayer options={videoJsOptions} />
+                                    ) : screenType[grid][
+                                        (grandChild as { floorId: number }).floorId
+                                      ] === 3 ? (
+                                      <FloorView
+                                        activeFloorplan={floorIds[grid][screenNum - 1]}
+                                        zoomable={(grandChild as { zoomable: boolean }).zoomable}
+                                        containerWidth={gridDimensions.width}
+                                        containerHeight={gridDimensions.height}
+                                        screenSettings={screenSettings[grid][screenNum - 1]}
+                                        // NEW: follow a specific beaconId and know which cell we are
+                                        focusBeacon={
+                                          screenDisplay[grid][
+                                            (grandChild as { floorId: number }).floorId
+                                          ]
+                                        }
+                                        gridNumber={grid}
+                                        screenNumber={screenNum}
+                                      />
                                     ) : (
                                       <FloorView
                                         activeFloorplan={floorIds[grid][screenNum - 1]}
@@ -307,6 +327,8 @@ const MonitoringGrid = React.memo(
                                         containerWidth={gridDimensions.width} // Pass width
                                         containerHeight={gridDimensions.height} // Pass height
                                         screenSettings={screenSettings[grid][screenNum - 1]}
+                                        gridNumber={grid}
+                                        screenNumber={screenNum}
                                       />
                                     )}
                                   </Grid>
@@ -351,9 +373,25 @@ const MonitoringGrid = React.memo(
                               activeMaskedArea={
                                 screenDisplay[grid][(child as { floorId: number }).floorId]
                               }
+                              gridNumber={grid}
+                              screenNumber={screenNum}
                             />
                           ) : screenType[grid][(child as { floorId: number }).floorId] === 2 ? (
                             <VideoPlayer options={videoJsOptions} />
+                          ) : screenType[grid][(child as { floorId: number }).floorId] === 3 ? (
+                            <FloorView
+                              activeFloorplan={floorIds[grid][screenNum - 1]}
+                              zoomable={(child as { zoomable: boolean }).zoomable}
+                              containerWidth={gridDimensions.width}
+                              containerHeight={gridDimensions.height}
+                              screenSettings={screenSettings[grid][screenNum - 1]}
+                              // NEW: follow a specific beaconId and know which cell we are
+                              focusBeacon={
+                                screenDisplay[grid][(child as { floorId: number }).floorId]
+                              }
+                              gridNumber={grid}
+                              screenNumber={screenNum}
+                            />
                           ) : (
                             <FloorView
                               activeFloorplan={floorIds[grid][screenNum - 1]}
@@ -361,6 +399,8 @@ const MonitoringGrid = React.memo(
                               containerWidth={gridDimensions.width} // Pass width
                               containerHeight={gridDimensions.height} // Pass height
                               screenSettings={screenSettings[grid][screenNum - 1]}
+                              gridNumber={grid}
+                              screenNumber={screenNum}
                             />
                           )}
                         </Grid>
@@ -403,9 +443,23 @@ const MonitoringGrid = React.memo(
                     containerHeight={gridDimensions.height} // Pass height
                     screenSettings={screenSettings[grid][screenNum - 1]}
                     activeMaskedArea={screenDisplay[grid][(item as { floorId: number }).floorId]}
+                    gridNumber={grid}
+                    screenNumber={screenNum}
                   />
                 ) : screenType[grid][(item as { floorId: number }).floorId] === 2 ? (
                   <VideoPlayer options={videoJsOptions} />
+                ) : screenType[grid][(item as { floorId: number }).floorId] === 3 ? (
+                  <FloorView
+                    activeFloorplan={floorIds[grid][screenNum - 1]}
+                    zoomable={(item as { zoomable: boolean }).zoomable}
+                    containerWidth={gridDimensions.width}
+                    containerHeight={gridDimensions.height}
+                    screenSettings={screenSettings[grid][screenNum - 1]}
+                    // NEW: follow a specific beaconId and know which cell we are
+                    focusBeacon={screenDisplay[grid][(item as { floorId: number }).floorId]}
+                    gridNumber={grid}
+                    screenNumber={screenNum}
+                  />
                 ) : (
                   // <Typography>Video Player</Typography>
                   <FloorView
@@ -414,6 +468,8 @@ const MonitoringGrid = React.memo(
                     containerWidth={gridDimensions.width} // Pass width
                     containerHeight={gridDimensions.height} // Pass height
                     screenSettings={screenSettings[grid][screenNum - 1]}
+                    gridNumber={grid}
+                    screenNumber={screenNum}
                   />
                 )}
               </Grid>

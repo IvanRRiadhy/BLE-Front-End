@@ -50,23 +50,37 @@ function toCanvas(
   };
 }
 
-const DeviceRenderer: React.FC<any> = ({
-  width,
-  height,
-  originalWidth,
-  originalHeight,
-  imageSrc,
-  devices,
-  areas,
-  showAreas,
-  showGates,
-  topic,
-  detailDialogOpen,
-  setDetailDialogOpen,
-  openTrackDetail,
-  setOpenTrackDetail,
-  onSelectBeacon,
-}) => {
+// DeviceRenderer.tsx
+type DeviceRendererProps = {
+  width: number;
+  height: number;
+  originalWidth: number;
+  originalHeight: number;
+  imageSrc: string;
+  devices: FloorplanDeviceType[];
+  areas: MaskedAreaType[];
+  showAreas: boolean;
+  showGates: boolean;
+  topic: string;
+  detailDialogOpen?: boolean;
+  setDetailDialogOpen?: (open: boolean) => void;
+  openTrackDetail?: boolean;
+  setOpenTrackDetail?: (open: boolean) => void;
+  selectedBeaconId?: string;
+  onSelectBeacon: (info: { id: string; area: string; floorplan: string; time: string }) => void;
+
+  // NEW:
+  focusBeaconId?: string;
+  onFocusPosition?: (pt: { x: number; y: number }) => void;
+};
+
+const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
+  const {
+    width, height, originalWidth, originalHeight,
+    imageSrc, devices, areas, showAreas, showGates, topic,
+    detailDialogOpen, setDetailDialogOpen, openTrackDetail, setOpenTrackDetail, onSelectBeacon, selectedBeaconId,
+    focusBeaconId, onFocusPosition,                                // NEW
+  } = props;
   const dispatch = useDispatch();
   const [image, setImage] = useState<HTMLImageElement | undefined>(undefined);
   const [animatedBeacons, setAnimatedBeacons] = useState<{ [id: string]: { x: number; y: number } }>({});
@@ -165,6 +179,16 @@ const DeviceRenderer: React.FC<any> = ({
     setLastSeenBeacons({});
     setAnimatedBeacons({});
   }, [refreshTrigger, dispatch]);
+
+    useEffect(() => {
+    if (!focusBeaconId || !onFocusPosition) return;
+    const b = animatedBeacons[focusBeaconId];
+    if (!b) return;
+
+    const canvas = toCanvas(b.x, b.y, width, height, originalWidth, originalHeight);
+    onFocusPosition(canvas);
+  }, [animatedBeacons, focusBeaconId, onFocusPosition, width, height, originalWidth, originalHeight]);
+
 
   // compute static centers for each area
   const areaCenters = useMemo(() => {

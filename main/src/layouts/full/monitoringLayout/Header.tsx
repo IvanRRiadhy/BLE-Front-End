@@ -17,6 +17,7 @@ import { RootState } from 'src/store/Store';
 import Logo from '../shared/logo/Logo';
 import NavListing from './Navigation/NavListing';
 import { useEffect, useState } from 'react';
+import Notification from '../vertical/header/Notification';
 
 const Header = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
@@ -91,6 +92,7 @@ const Header = () => {
 
           <Box flexGrow={1} />
           <Stack spacing={1} direction="row" alignItems="center">
+
             <Profile />
           </Stack>
         </ToolbarStyled>
