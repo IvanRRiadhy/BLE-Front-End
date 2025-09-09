@@ -310,7 +310,7 @@ const ConfigGrid = React.memo(
                                     {floorIds[grid][(grandChild as { floorId: number }).floorId] ? (
                                       screenType[grid][
                                         (grandChild as { floorId: number }).floorId
-                                      ] === 0 ? (
+                                      ] === (0 || 3) ? (
                                         <ConfigFloorView
                                           activeFloorplan={floorIds[grid][screenNum - 1]}
                                           zoomable={selectedScreen === screenNum}
@@ -406,29 +406,39 @@ const ConfigGrid = React.memo(
                           }}
                         >
                           {floorIds[grid][(child as { floorId: number }).floorId] ? (
-                            screenType[grid][(child as { floorId: number }).floorId] === 0 ? (
-                              (console.log(
-                                'Floor ID:',
-                                floorIds[grid][(child as { floorId: number }).floorId],
-                                screenNum,
-                              ),
-                              (
-                                <ConfigFloorView
-                                  activeFloorplan={floorIds[grid][screenNum - 1]}
-                                  zoomable={selectedScreen === screenNum}
-                                  containerWidth={gridDimensions.width} // Pass width
-                                  containerHeight={gridDimensions.height} // Pass height
-                                  screenSettings={
-                                    screenSettings && screenNum
-                                      ? screenSettings[grid][screenNum - 1]
-                                      : undefined
-                                  }
-                                  activeMaskedArea={
-                                    screenDisplay[grid][(child as { floorId: number }).floorId]
-                                  }
-                                  setScreenSettings={setScreenSettings}
-                                />
-                              ))
+                            screenType[grid][(child as { floorId: number }).floorId] ===
+                            (0 || 3) ? (
+                              <ConfigFloorView
+                                activeFloorplan={floorIds[grid][screenNum - 1]}
+                                zoomable={selectedScreen === screenNum}
+                                containerWidth={gridDimensions.width} // Pass width
+                                containerHeight={gridDimensions.height} // Pass height
+                                screenSettings={
+                                  screenSettings && screenNum
+                                    ? screenSettings[grid][screenNum - 1]
+                                    : undefined
+                                }
+                                activeMaskedArea={
+                                  screenDisplay[grid][(child as { floorId: number }).floorId]
+                                }
+                                setScreenSettings={setScreenSettings}
+                              />
+                            ) : screenType[grid][(child as { floorId: number }).floorId] === 1 ? (
+                              <ConfigFloorView
+                                activeFloorplan={floorIds[grid][screenNum - 1]}
+                                zoomable={selectedScreen === screenNum}
+                                containerWidth={gridDimensions.width} // Pass width
+                                containerHeight={gridDimensions.height} // Pass height
+                                screenSettings={
+                                  screenSettings && screenNum
+                                    ? screenSettings[grid][screenNum - 1]
+                                    : undefined
+                                }
+                                activeMaskedArea={
+                                  screenDisplay[grid][(child as { floorId: number }).floorId]
+                                }
+                                setScreenSettings={setScreenSettings}
+                              />
                             ) : (
                               <VideoPlayer options={videoJsOptions} />
                             )
@@ -495,7 +505,7 @@ const ConfigGrid = React.memo(
                 }}
               >
                 {floorIds[grid][(item as { floorId: number }).floorId] ? (
-                  screenType[grid][(item as { floorId: number }).floorId] === 0 ? (
+                  screenType[grid][(item as { floorId: number }).floorId] === (0 || 3) ? (
                     <ConfigFloorView
                       activeFloorplan={floorIds[grid][screenNum - 1]}
                       zoomable={selectedScreen === screenNum}

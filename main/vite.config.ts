@@ -8,20 +8,7 @@ import svgr from 'vite-plugin-svgr';
 export default defineConfig({
       base: '/',
 
-    // server: {
-    //     proxy: {
-    //       '/api': {
-    //         target: 'http://192.168.1.116:5000', // Your back-end server
-    //         changeOrigin: true,
-    //         rewrite: (path) => path.replace(/^\/api/, ''), // Optional path rewrite
-    //         configure: (proxy) => {
-    //             proxy.on('proxyReq', (proxyReq, req) => {
-    //               console.log('Proxying request:', req.url);
-    //             });
-    //         },
-    //       },
-    //     },
-    //   },
+
     server: {
   host: true, // or '0.0.0.0'
   port: 3000,
