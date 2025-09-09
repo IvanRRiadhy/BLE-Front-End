@@ -19,6 +19,7 @@ import {
   Button,
   TableSortLabel,
   Skeleton,
+  CircularProgress,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
@@ -55,6 +56,7 @@ const DistrictList = () => {
   const prevFilterRef = useRef(districtFilter);
   // const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const isLoading = useSelector((state: RootState) => state.districtReducer.isLoading);
   const hasLoaded = useSelector((state: RootState) => state.districtReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(districtFilter.Start / districtFilter.Length);
@@ -231,10 +233,11 @@ const DistrictList = () => {
                       >
                         <Typography variant="h6"></Typography>
                       </TableCell>
-                      {columns.map((col) => (
-                        <TableCell key={col.label}>
+                      {columns.map((col, idx: number) => (
+                        <TableCell key={`${col.label}-${idx}`}>
                           {col.sortAble && col.field ? (
                             <TableSortLabel
+                            
                               active={orderBy === col.field}
                               direction={orderBy === col.field ? order : 'asc'}
                               onClick={() => handleSort(col.field)}
@@ -262,7 +265,7 @@ const DistrictList = () => {
                       </TableCell>
                     </TableRow>
                   </TableHead>
-                  <TableBody>
+                  <TableBody key={'skeleton-body'}>
                     {!hasLoaded ? (
                       renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     ) : (
@@ -341,8 +344,13 @@ const DistrictList = () => {
           <Button onClick={handleCloseDeleteDialog} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleConfirmDelete} color="error">
-            Delete
+          <Button
+            onClick={handleConfirmDelete}
+            color={isLoading ? 'primary' : 'error'}
+            disabled={isLoading}
+            startIcon={isLoading ? <CircularProgress size={20} /> : null}
+          >
+            {isLoading ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

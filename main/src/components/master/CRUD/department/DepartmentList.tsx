@@ -19,6 +19,7 @@ import {
   Button,
   TableSortLabel,
   Skeleton,
+  CircularProgress,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
@@ -47,7 +48,9 @@ const DepartmentList = () => {
   const departmentData: DepartmentType[] = useSelector(
     (state: RootState) => state.departmentReducer.departments,
   );
-  const departmentTotalCount = useSelector((state: RootState) => state.departmentReducer.departmentTotalCount);
+  const departmentTotalCount = useSelector(
+    (state: RootState) => state.departmentReducer.departmentTotalCount,
+  );
   // const departmentFilteredCount = useSelector(
   //   (state: RootState) => state.departmentReducer.departmentFilteredCount,
   // );
@@ -64,7 +67,6 @@ const DepartmentList = () => {
   const rowsPerPage = departmentFilter.Length;
   const orderBy = departmentFilter.SortColumn;
   const order = departmentFilter.SortDir;
-  
 
   const handleChangePage = (_: unknown, newPage: number) => {
     dispatch(UpdateFilter({ Start: newPage * departmentFilter.Length }));
@@ -162,174 +164,172 @@ const DepartmentList = () => {
     handleCloseDeleteDialog();
   };
 
-      const renderSkeletonRows = (rows: number) => (
-        <>
-          {Array.from({ length: rows }).map((_, i) => (
-            <TableRow key={`skeleton-${i}`}>
-              {/* sticky index */}
-              <TableCell
-                sx={{
-                  position: 'sticky',
-                  left: 0,
-                  background: 'white',
-                  zIndex: 1,
-                  width: 35,
-                  minWidth: 35,
-                  maxWidth: 35,
-                }}
-              >
-                <Skeleton variant="text" width={18} />
-              </TableCell>
-              <TableCell>
-                <Skeleton variant="text" width={180} height={22} />
-              </TableCell>
-              <TableCell>
-                <Skeleton variant="text" width={160} height={22} />
-              </TableCell>
-              <TableCell>
-                <Skeleton variant="text" width={120} height={22} />
-              </TableCell>
-              {/* right actions */}
-              <TableCell
-                sx={{
-                  position: 'sticky',
-                  right: 0,
-                  background: 'white',
-                  zIndex: 2,
-                  width: 150,
-                  minWidth: 150,
-                  maxWidth: 150,
-                }}
-              >
-                <Box display="flex" gap={1}>
-                  <Skeleton variant="rounded" width={90} height={32} />
-                  {/* <Skeleton variant="circular" width={32} height={32} />
+  const renderSkeletonRows = (rows: number) => (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <TableRow key={`skeleton-${i}`}>
+          {/* sticky index */}
+          <TableCell
+            sx={{
+              position: 'sticky',
+              left: 0,
+              background: 'white',
+              zIndex: 1,
+              width: 35,
+              minWidth: 35,
+              maxWidth: 35,
+            }}
+          >
+            <Skeleton variant="text" width={18} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={180} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={160} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={120} height={22} />
+          </TableCell>
+          {/* right actions */}
+          <TableCell
+            sx={{
+              position: 'sticky',
+              right: 0,
+              background: 'white',
+              zIndex: 2,
+              width: 150,
+              minWidth: 150,
+              maxWidth: 150,
+            }}
+          >
+            <Box display="flex" gap={1}>
+              <Skeleton variant="rounded" width={90} height={32} />
+              {/* <Skeleton variant="circular" width={32} height={32} />
                   <Skeleton variant="circular" width={32} height={32} /> */}
-                </Box>
-              </TableCell>
-            </TableRow>
-          ))}
-        </>
-      );
+            </Box>
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
 
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-            <BlankCard>
-              <TableContainer>
-                <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
-                  <TableHead>
-                    <TableRow>
-                      {/* Left Sticky Empty Column */}
-                      <TableCell
-                        sx={{
-                          position: 'sticky',
-                          left: 0,
-                          background: 'white',
-                          zIndex: 2,
-                          width: 35, // Fixed width
-                          minWidth: 35,
-                          maxWidth: 35,
-                        }}
-                      >
-                        <Typography variant="h6"></Typography>
-                      </TableCell>
-                      {columns.map((col) => (
-                        <TableCell key={col.label}>
-                          {col.sortAble && col.field ? (
-                            <TableSortLabel
-                              active={orderBy === col.field}
-                              direction={orderBy === col.field ? order : 'asc'}
-                              onClick={() => handleSort(col.field)}
-                            >
-                              <Typography variant="h6">{col.label}</Typography>
-                            </TableSortLabel>
-                          ) : (
-                            <Typography variant="h6">{col.label}</Typography>
-                          )}
-                        </TableCell>
-                      ))}
-                      {/* Right Sticky Empty Column */}
-                      <TableCell
-                        sx={{
-                          position: 'sticky',
-                          right: 0,
-                          background: 'white',
-                          zIndex: 2,
-                          width: 150, // Fixed width
-                          minWidth: 150,
-                          maxWidth: 150,
-                        }}
-                      >
-                        <Typography variant="h6"> Actions </Typography>
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {!hasLoaded ? (
-                      renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
-                    ) : (
-                      departmentData.map((department, index) => (
-                      <TableRow key={department.id}>
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            left: 0,
-                            background: 'white',
-                            zIndex: 1,
-                            width: 35, // Fixed width
-                            minWidth: 35,
-                            maxWidth: 35,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          {index + 1 + page * rowsPerPage}
-                        </TableCell>
-                        <TableCell>{department.code}</TableCell>
-                        <TableCell>{department.name}</TableCell>
-                        <TableCell>{department.departmentHost}</TableCell>
-
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            gap: 1,
-                            alignItems: 'center',
-                            width: 150, // Fixed width
-                            minWidth: 150,
-                            maxWidth: 150,
-                          }}
-                        >
-                          <AddEditDepartment type="edit" department={department} />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(department)}
+          <BlankCard>
+            <TableContainer>
+              <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
+                <TableHead>
+                  <TableRow>
+                    {/* Left Sticky Empty Column */}
+                    <TableCell
+                      sx={{
+                        position: 'sticky',
+                        left: 0,
+                        background: 'white',
+                        zIndex: 2,
+                        width: 35, // Fixed width
+                        minWidth: 35,
+                        maxWidth: 35,
+                      }}
+                    >
+                      <Typography variant="h6"></Typography>
+                    </TableCell>
+                    {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
                           >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              {/* Pagination */}
-              <TablePagination
-                component="div"
-                count={departmentTotalCount}
-                page={page}
-                rowsPerPage={rowsPerPage}
-                onPageChange={handleChangePage}
-                rowsPerPageOptions={[5, 10, 25]}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </BlankCard>
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
+                      </TableCell>
+                    ))}
+                    {/* Right Sticky Empty Column */}
+                    <TableCell
+                      sx={{
+                        position: 'sticky',
+                        right: 0,
+                        background: 'white',
+                        zIndex: 2,
+                        width: 150, // Fixed width
+                        minWidth: 150,
+                        maxWidth: 150,
+                      }}
+                    >
+                      <Typography variant="h6"> Actions </Typography>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {!hasLoaded
+                    ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                    : departmentData.map((department, index) => (
+                        <TableRow key={department.id}>
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              left: 0,
+                              background: 'white',
+                              zIndex: 1,
+                              width: 35, // Fixed width
+                              minWidth: 35,
+                              maxWidth: 35,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            {index + 1 + page * rowsPerPage}
+                          </TableCell>
+                          <TableCell>{department.code}</TableCell>
+                          <TableCell>{department.name}</TableCell>
+                          <TableCell>{department.departmentHost}</TableCell>
+
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              right: 0,
+                              background: 'white',
+                              zIndex: 2,
+                              gap: 1,
+                              alignItems: 'center',
+                              width: 150, // Fixed width
+                              minWidth: 150,
+                              maxWidth: 150,
+                            }}
+                          >
+                            <AddEditDepartment type="edit" department={department} />
+                            <IconButton
+                              color="error"
+                              size="small"
+                              onClick={() => handleOpenDeleteDialog(department)}
+                            >
+                              <IconTrash size={20} />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            {/* Pagination */}
+            <TablePagination
+              component="div"
+              count={departmentTotalCount}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              onPageChange={handleChangePage}
+              rowsPerPageOptions={[5, 10, 25]}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </BlankCard>
         </Box>
       </Grid>
       {/* Delete Confirmation Dialog */}
@@ -344,8 +344,13 @@ const DepartmentList = () => {
           <Button onClick={handleCloseDeleteDialog} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleConfirmDelete} color="error">
-            Delete
+          <Button
+            onClick={handleConfirmDelete}
+            color={isLoading ? 'primary' : 'error'}
+            disabled={isLoading}
+            startIcon={isLoading ? <CircularProgress size={20} /> : null}
+          >
+            {isLoading ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

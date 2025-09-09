@@ -122,7 +122,7 @@ const AlarmTriggerList = () => {
     if (isDesc) {
       dispatch(
         UpdateFilter({
-          SortColumn: 'Timestamp',
+          SortColumn: 'TriggerTime',
           SortDir: 'desc',
           Start: 0,
         }),

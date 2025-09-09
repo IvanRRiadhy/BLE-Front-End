@@ -84,7 +84,7 @@ const TrackingTransactionList = () => {
     if (isDesc) {
       dispatch(
         UpdateFilter({
-          SortColumn: 'UpdatedAt',
+          SortColumn: 'TransTime',
           SortDir: 'desc',
           Start: 0,
         }),
@@ -270,7 +270,7 @@ const TrackingTransactionList = () => {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={trackingTransFilteredCount}
+              count={trackingTransTotalCount}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

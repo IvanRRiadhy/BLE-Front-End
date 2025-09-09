@@ -20,6 +20,7 @@ import {
   Button,
   TableSortLabel,
   Skeleton,
+  CircularProgress,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
@@ -52,6 +53,7 @@ const FloorList = () => {
   const prevFilterRef = useRef(floorFilter);
   // const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const isLoading = useSelector((state: RootState) => state.floorReducer.isLoading);
   const hasLoaded = useSelector((state: RootState) => state.floorReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(floorFilter.Start / floorFilter.Length);
@@ -357,8 +359,13 @@ const FloorList = () => {
           <Button onClick={handleCloseDeleteDialog} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleConfirmDelete} color="error">
-            Delete
+          <Button
+            onClick={handleConfirmDelete}
+            color={isLoading ? 'primary' : 'error'}
+            disabled={isLoading}
+            startIcon={isLoading ? <CircularProgress size={20} /> : null}
+          >
+            {isLoading ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

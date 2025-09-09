@@ -166,7 +166,7 @@ const MemberList = () => {
                 <TableBody>
                   {memberData
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((member: memberType, index) => (
+                    .map((member: memberType, index: number) => (
                       <TableRow key={index}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}

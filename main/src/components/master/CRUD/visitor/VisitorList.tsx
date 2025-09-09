@@ -59,6 +59,7 @@ const VisitorList = () => {
   const prevFilterRef = useRef(visitorFilter);
   // const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const isLoading = useSelector((state: RootState) => state.visitorReducer.isLoading);
   const hasLoaded = useSelector((state: RootState) => state.visitorReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(visitorFilter.Start / visitorFilter.Length);
@@ -285,8 +286,13 @@ const VisitorList = () => {
           <Button onClick={handleCloseDeleteDialog} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleConfirmDelete} color="error">
-            Delete
+          <Button
+            onClick={handleConfirmDelete}
+            color={isLoading ? 'primary' : 'error'}
+            disabled={isLoading}
+            startIcon={isLoading ? <CircularProgress size={20} /> : null}
+          >
+            {isLoading ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>
