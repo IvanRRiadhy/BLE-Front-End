@@ -1,6 +1,6 @@
  import axios from 'axios';
 
- export const BASE_URL = 'http://192.168.1.116:10000';
+ export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 let onSessionExpired: (() => void) | null = null;
 export const setSessionExpiredHandler = (handler: () => void) => {
@@ -8,10 +8,10 @@ export const setSessionExpiredHandler = (handler: () => void) => {
 };
 
  const axiosServices = axios.create({
-    baseURL: 'http://192.168.1.116:10000',
+    baseURL: BASE_URL,
     headers: {
         'Content-Type': 'application/json',
-        'X-BIOPEOPLETRACKING-API-KEY': "FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK",
+        'X-BIOPEOPLETRACKING-API-KEY': import.meta.env.VITE_API_KEY,
 
     },
  });
@@ -20,6 +20,7 @@ export const setSessionExpiredHandler = (handler: () => void) => {
    const ApplicationId = localStorage.getItem('applicationId');
  const levelPriority = localStorage.getItem('levelPriority');
   const accessToken = localStorage.getItem('token');
+  console.log(request)
   // console.log('Request : ', request);
   if (accessToken) {
     request.headers['Authorization'] = `Bearer ${accessToken}`;
@@ -77,7 +78,7 @@ axiosServices.interceptors.response.use(
         const response = await axios.post(`${BASE_URL}/api/Auth/refresh/`, {
           refreshToken,
           headers: {
-                    'X-API-KEY-TRACKING-PEOPLE': "FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK",
+                    'X-API-KEY-TRACKING-PEOPLE': import.meta.env.VITE_API_KEY,
           }
         });
         const res = response.data.collection.data; // Extract the collection from the response.
