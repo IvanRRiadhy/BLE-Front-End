@@ -151,10 +151,6 @@ const AddEditDepartment = ({ type, department }: FormType) => {
             <Divider />
           </DialogTitle>
           <DialogContent>
-            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-              Department Details
-            </Typography>
-            <Divider />
             <Grid container spacing={{lg: 5, md: 0}} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="department-code">Department Code</CustomFormLabel>

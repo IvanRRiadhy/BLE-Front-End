@@ -308,7 +308,7 @@ const DeviceList = () => {
 
               filteredUnsavedDevices.map((device: FloorplanDeviceType) => (
                 <DeviceListItem
-                  key={device.id}
+                  key={device.id} 
                   device={device}
                   onListClick={() => handleOnClick(device.id)}
                   onEditClick={() => handleOnEditClick(device.id)}

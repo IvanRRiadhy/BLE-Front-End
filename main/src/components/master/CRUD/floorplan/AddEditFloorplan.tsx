@@ -170,10 +170,6 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
             <Divider />
           </DialogTitle>
           <DialogContent>
-            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-              Floorplan Details
-            </Typography>
-            <Divider />
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="floorplan-Name">Floorplan Name</CustomFormLabel>
@@ -187,31 +183,12 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                   helperText={formErrors.name}
                 />
                 <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel>
-                {/* <CustomSelect
-                  name="floorId"
-                  id="floorId"
-                  value={formData.floorId}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  error={!!formErrors.floorId}
-                  helperText={formErrors.floorId}
-                >
-                  <MenuItem value="" disabled>
-                    Select Floor
-                  </MenuItem>
-                  {floorData.map((floor) => (
-                    <MenuItem key={floor.id} value={floor.id}>
-                      {floor.name}
-                    </MenuItem>
-                  ))}
-                </CustomSelect> */}
                 <Autocomplete
                   options={floorData.map((f) => ({ label: f.name, id: f.id }))}
                   value={
                     floorData
                       .map((f) => ({ label: f.name, id: f.id }))
-                      .find((option) => option.id === formData.floorId) || null
+                      .find((option: { id: string }) => option.id === formData.floorId) || null
                   }
                   onChange={(_, newValue) =>{
                     const id = newValue?.id ?? '';

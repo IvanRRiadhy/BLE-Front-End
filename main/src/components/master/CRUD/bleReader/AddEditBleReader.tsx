@@ -165,10 +165,6 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
             <Divider />
           </DialogTitle>
           <DialogContent>
-            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-              Ble Reader Details
-            </Typography>
-            <Divider />
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="brand-id">Brand</CustomFormLabel>

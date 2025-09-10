@@ -268,32 +268,9 @@ const AddEditFloor = ({ type, floor }: FormType) => {
             <Divider />
           </DialogTitle>
           <DialogContent>
-            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-              Floor Details
-            </Typography>
-            <Divider />
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="building">Building</CustomFormLabel>
-                {/* <CustomSelect
-                  name="buildingId"
-                  id="buildingId"
-                  value={formData.buildingId}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  error={!!formErrors.buildingId}
-                  helperText={formErrors.buildingId}
-                >
-                  <MenuItem value="" disabled>
-                    Select Building
-                  </MenuItem>
-                  {buildingData.map((building) => (
-                    <MenuItem key={building.id} value={building.id}>
-                      {building.name}
-                    </MenuItem>
-                  ))}
-                </CustomSelect> */}
                 <Autocomplete
                 options={buildingData.map((b) => ({ id: b.id, label: b.name }))}
                 value={
@@ -337,15 +314,6 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                   error={!!formErrors.name}
                   helperText={formErrors.name}
                 />
-                <CustomFormLabel htmlFor="floor-pixelX">Pixel X</CustomFormLabel>
-                <CustomTextField
-                  id="pixelX"
-                  value={formData.pixelX}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  disabled
-                />
                 <CustomFormLabel htmlFor="floorX">Floor Length (in meters)</CustomFormLabel>
                 <CustomTextField
                   id="floorX"
@@ -372,15 +340,6 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                 <CustomTextField
                   id="meterPerPx"
                   value={formData.meterPerPx}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  disabled
-                />
-                <CustomFormLabel htmlFor="floor-pixelY">Pixel Y</CustomFormLabel>
-                <CustomTextField
-                  id="pixelY"
-                  value={formData.pixelY}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"

@@ -20,7 +20,7 @@ export const setSessionExpiredHandler = (handler: () => void) => {
    const ApplicationId = localStorage.getItem('applicationId');
  const levelPriority = localStorage.getItem('levelPriority');
   const accessToken = localStorage.getItem('token');
-  console.log(request)
+  // console.log(request)
   // console.log('Request : ', request);
   if (accessToken) {
     request.headers['Authorization'] = `Bearer ${accessToken}`;
