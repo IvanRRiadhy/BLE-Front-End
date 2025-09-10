@@ -34,12 +34,10 @@ const FloorplanDevice = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const floorplanCount = useSelector((state: RootState) => state.floorplanReducer.floorplanTotalCount);
-  const hasFloorplanLoaded = useSelector((state: RootState) => state.floorplanReducer.hasLoaded);
+  const hasLoaded = useSelector((state: RootState) => state.floorplanReducer.hasLoaded);
   const deviceCount = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceAll.length,
   );
-  const hasDeviceLoaded = useSelector((state: RootState) => state.floorplanDeviceReducer.hasLoaded);
-  const hasLoaded = [hasFloorplanLoaded, hasDeviceLoaded]
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
@@ -58,7 +56,7 @@ const FloorplanDevice = () => {
       <Breadcrumb title="Floorplan Device Table" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => {
-          const loaded = hasLoaded[i];
+          
           return(
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>
             <Box bgcolor={topcard.bgcolor + '.light'} textAlign="center">
@@ -72,7 +70,7 @@ const FloorplanDevice = () => {
                 >
                   {t(`${topcard.title}`)}
                 </Typography>
-                {!loaded ? (
+                {!hasLoaded ? (
                   <CircularProgress
                     size={24}
                     style={{ marginTop: 10, color: topcard.bgcolor + '.main' }}

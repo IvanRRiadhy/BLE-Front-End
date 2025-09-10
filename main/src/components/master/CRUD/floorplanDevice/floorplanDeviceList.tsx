@@ -117,7 +117,7 @@ const FloorplanDeviceList = () => {
                 <TableBody>
                   {deviceData
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((device: FloorplanDeviceType, index) => (
+                    .map((device: FloorplanDeviceType, index: number) => (
                       <TableRow key={index}>
                         <TableCell
                           sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}

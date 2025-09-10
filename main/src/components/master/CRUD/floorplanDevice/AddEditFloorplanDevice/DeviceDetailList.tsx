@@ -134,7 +134,7 @@ const DeviceDetailList = () => {
     // }
     if (selectedFloorplanData) {
       const otherReaderData = unsavedDevices.filter(
-        (reader) =>
+        (reader: FloorplanDeviceType) =>
           reader.floorplanId === selectedFloorplanData.id &&
           reader.id !== formData.id &&
           reader.type === 'BleReader',

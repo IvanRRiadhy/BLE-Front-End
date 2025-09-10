@@ -96,7 +96,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       })
       .catch((err) => {
         setLoginError('Invalid username or password. Please try again.');
-        console.error('error: ', err?.response ? err.response.data?.collection ?? err.response.data : err?.message);
+        console.error('error: ', err?.response ? err.response.data?.collection.data ?? err.response.data : err?.message);
       });
   };
 

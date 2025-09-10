@@ -276,7 +276,7 @@ export const FloorplanDeviceSlice = createSlice({
             .addCase(fetchFloorplanDeviceDT.fulfilled, (state, action) => {
                 state.floorplanDeviceTotalCount = action.payload.recordsTotal;
                 state.floorplanDeviceFilteredCount = action.payload.recordsFiltered;
-
+                console.log("Floorplan Device Records Total: ", action.payload.recordsTotal);
                     state.isLoading = false;
                     state.hasLoaded = true;
 
@@ -287,7 +287,7 @@ export const FloorplanDeviceSlice = createSlice({
                 _state.floorplanDeviceFilteredCount = 0;
 
                     _state.isLoading = false;
-                    _state.hasLoaded = true;
+                    _state.hasLoaded = false;
 
             })
             

@@ -46,7 +46,7 @@ const DeviceList = () => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
-  const hasLoaded = useSelector((state: RootState) => state.floorplanDeviceReducer.hasLoaded);
+  // const hasLoaded = useSelector((state: RootState) => state.floorplanDeviceReducer.hasLoaded);
   const activeFloorplan = useSelector(
     (state: RootState) => state.floorplanReducer.selectedFloorplan,
   );
@@ -100,6 +100,7 @@ const DeviceList = () => {
     // console.log('Unsaved devices fetched:', unsavedDevices);
     // console.log('Original devices fetched:', originalDevices);
   }, [originalDevices]);
+
 
   const newDevice: FloorplanDeviceType = {
     id: `temp-${Date.now()}`, // Generate a temporary unique ID
@@ -303,8 +304,8 @@ const DeviceList = () => {
         <Scrollbar
           sx={{ height: { lg: 'calc(100vh - 370px)', sm: '100vh' }, maxHeight: 'fit-content' }}
         >
-          {hasLoaded ? (
-            filteredUnsavedDevices ? (
+          {filteredUnsavedDevices.length > 0 ? (
+
               filteredUnsavedDevices.map((device: FloorplanDeviceType) => (
                 <DeviceListItem
                   key={device.id}
@@ -317,10 +318,7 @@ const DeviceList = () => {
               ))
             ) : (
               <Alert severity="info">No devices found for this floorplan.</Alert>
-            )
-          ) : (
-            <></>
-          )}
+            )}
         </Scrollbar>
       </Box>
       <Box
