@@ -127,7 +127,7 @@ const TopCards: React.FC<TopCardsProps> = ({
   ];
   console.log('First Area: ', FirstArea);
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={3} mt={1}>
       {topcards.map((topcard, i) => {
         const isLoaded = loadedFlags[i];
         const titleColor = `${topcard.bgcolor}.dark`;
@@ -137,20 +137,22 @@ const TopCards: React.FC<TopCardsProps> = ({
             key={i}
             size={{
               xs: 12,
-              sm: 4,
+              sm: 6,
+              md: 4,
               lg: 2,
             }}
           >
             <Box bgcolor={topcard.bgcolor + '.light'} textAlign="center">
               <CardContent>
                 <img src={topcard.icon} alt={topcard.icon} width="50" />
-                <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
+                <Box display="flex" alignItems="center" justifyContent="center">
                   <Typography
                     color={titleColor}
                     mt={1}
                     variant="subtitle1"
                     fontWeight={600}
                     fontSize={13}
+                    ml={2.5}
                   >
                     {t(`${topcard.title}`)}
                   </Typography>
@@ -170,6 +172,7 @@ const TopCards: React.FC<TopCardsProps> = ({
                     </IconButton>
                   </Tooltip>
                 </Box>
+                
                 {isLoaded ? (
                   <Typography color={numberColor} variant="h4" fontWeight={600} fontSize={25}>
                     {counts[i]}

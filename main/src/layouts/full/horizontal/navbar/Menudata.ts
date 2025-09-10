@@ -60,34 +60,16 @@ const Menuitems = [
       },
     ],
   },
+
   {
     id: uniqueId(),
     title: 'Master',
     icon: IconAppWindow,
     href: '/master/',
     children: [
-  {
+          {
     id: uniqueId(),
-    title: 'Building',
-    icon: IconBuilding,
-    children: [
-        {
-    id: uniqueId(),
-    title: 'Building',
-    icon: IconBuilding,
-    href: '/master/building/',
-  },
-        {
-        id: uniqueId(),
-        title: 'Floor',
-        icon: IconMap,
-        href: '/master/floor/'
-      },
-    ]
-  },
-  {
-    id: uniqueId(),
-    title: 'Organization',
+    title: 'Company',
     icon: IconAffiliate,
     children: [
       {
@@ -111,12 +93,24 @@ const Menuitems = [
     ]
   },
   {
+    
     id: uniqueId(),
-    title: 'Floor Plan',
-    icon: IconMap,
-    href: '/master/floorplan/',
+    title: 'Building',
+    icon: IconBuilding,
     children: [
-      {
+        {
+    id: uniqueId(),
+    title: 'Building',
+    icon: IconBuilding,
+    href: '/master/building/',
+  },
+        {
+        id: uniqueId(),
+        title: 'Floor',
+        icon: IconMap,
+        href: '/master/floor/'
+      },
+            {
         id: uniqueId(),
         title: 'Floor Plan',
         icon: IconMap,
@@ -128,19 +122,30 @@ const Menuitems = [
         icon: IconCropLandscape,
         href: '/master/floorplanmaskedarea/'
       },
-            {
-        id: uniqueId(),
-        title: 'Floor Plan Devices',
-        icon: IconDevices,
-        href: '/master/device/'
-      },
     ]
   },
+
+  // {
+  //   id: uniqueId(),
+  //   title: 'Floor Plan',
+  //   icon: IconMap,
+  //   href: '/master/floorplan/',
+  //   children: [
+
+
+  //   ]
+  // },
   {
     id: uniqueId(),
     title: 'Devices',
     icon: IconDevices,
     children: [
+            {
+        id: uniqueId(),
+        title: 'Brand',
+        icon: IconBadgeTm,
+        href: '/master/brand/'
+      },
       {
         id: uniqueId(),
         title: 'Access CCTV',
@@ -159,47 +164,26 @@ const Menuitems = [
         icon: IconDeviceIpad,
         href: '/master/blereader/'
       },
+                  {
+        id: uniqueId(),
+        title: 'Device Mapping',
+        icon: IconDevices,
+        href: '/master/device/'
+      },
     ]
   },
-
-  {
-    id: uniqueId(),
-    title: 'Tag',
-    icon: IconMapPin,
-    children: [
-      {
-        id:uniqueId(),
-        title: 'Member Data',
-        icon: IconMapPin,
-        href: '/master/membertag/'
-      },
-            {
-        id:uniqueId(),
-        title: 'Visitor Data',
-        icon: IconMapPin,
-        href: '/master/visitor/'
-      },
-      {
-        id:uniqueId(),
-        title: 'Visitor Invitation',
-        icon: IconMapPin,
-        href: '/master/visitortag/'
-      },
       {
         id: uniqueId(),
         title: 'Card',
         icon: IconMapPin,
         href: '/master/card/',
       },
-      //       {
-      //   id: uniqueId(),
-      //   title: 'Visitor Card',
-      //   icon: IconMapPin,
-      //   href: '/master/visitorcard/',
-      // },
-    ]
-  },
-
+            {
+        id:uniqueId(),
+        title: 'Member Data',
+        icon: IconMapPin,
+        href: '/master/membertag/'
+      },
     // {
     //   id: uniqueId(),
     //   title: 'Application',
@@ -213,12 +197,7 @@ const Menuitems = [
         href: '/master/integration/'
       },
 
-      {
-        id: uniqueId(),
-        title: 'Brand  --(WIP)--',
-        icon: IconBadgeTm,
-        href: '/master/brand/'
-      },
+
       {
         id: uniqueId(),
         title: 'Users  --(WIP)--',
@@ -228,6 +207,32 @@ const Menuitems = [
 
 
     ],
+  },
+    {
+    id: uniqueId(),
+    title: 'Visitor',
+    icon: IconMapPin,
+    children: [
+
+            {
+        id:uniqueId(),
+        title: 'Visitor Data',
+        icon: IconMapPin,
+        href: '/master/visitor/'
+      },
+      {
+        id:uniqueId(),
+        title: 'Visitor Invitation',
+        icon: IconMapPin,
+        href: '/master/visitortag/'
+      },
+            {
+        id: uniqueId(),
+        title: 'Blacklist',
+        icon: IconBarrierBlock,
+        href: '/report/blacklist/',
+      },
+    ]
   },
   {
     id: uniqueId(),
@@ -259,12 +264,7 @@ const Menuitems = [
         icon: IconBarrierBlock,
         href: '/report/cardrecord/',
       },
-      {
-        id: uniqueId(),
-        title: 'Blacklist',
-        icon: IconBarrierBlock,
-        href: '/report/blacklist/',
-      },
+
       // {
       //   id: uniqueId(),
       //   title: 'Login',
