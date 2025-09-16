@@ -83,6 +83,26 @@ export const CardAccessSlice = createSlice ({
             const selected = state.cardAccess.find((cardAccess: CardAccessType) => cardAccess.id === action.payload);
             state.selectedCardAccess = selected || null;
         },
+    },
+    extraReducers: (builder) => {
+        builder
+        .addCase(fetchCardAccessDT.pending, (state) => {
+            state.isLoading = true;
+            state.hasLoaded = false;
+        })
+        .addCase(fetchCardAccessDT.fulfilled, (state, action) => {
+            state.cardAccessTotalCount = action.payload.recordsTotal;
+            state.cardAccessFilteredCount = action.payload.recordsFiltered;
+            state.isLoading = false;
+            state.hasLoaded = true;
+        })
+        .addCase(fetchCardAccessDT.rejected, (state, action) => {
+            console.error("Error fetching card accesses:", action.error);
+            state.cardAccessTotalCount = 0;
+            state.cardAccessFilteredCount = 0;
+            state.isLoading = false;
+            state.hasLoaded = false;
+        })
     }   
 })
 

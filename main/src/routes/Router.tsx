@@ -54,6 +54,8 @@ const Card = Loadable(lazy(() => import('../views/master/tag/card')));
 const TimeGroup = Loadable(lazy(() => import('../views/master/crud/TimeGroup')));
 const Floorplan = Loadable(lazy(() => import('../views/master/crud/Floorplan')));
 const User = Loadable(lazy(() => import('../views/master/user/User')));
+const CardAccess = Loadable(lazy(() => import('../views/master/crud/CardAccess')));
+const CardGroup = Loadable(lazy(() => import('../views/master/crud/CardGroup')));
 
 const FloorplanDeviceEdit = Loadable(
   lazy(() => import('../views/master/crud/FloorplanDeviceEdit')),
@@ -270,6 +272,8 @@ const Router = [
       { path: '/master/card', exact: true, element: <Card /> },
       { path: '/master/timegroup', exact: true, element: <TimeGroup /> },
       { path: '/master/visitorcard', exact: true, element: <VisitorCard /> },
+      { path: '/master/cardaccess', exact: true, element: <CardAccess /> },
+      { path: '/master/cardgroup', exact: true, element: <CardGroup /> },
 
       //Dashboard Evacuation
       { path: '/dashboards/evacuation', exact: true, element: <EvacuationDashboard /> },

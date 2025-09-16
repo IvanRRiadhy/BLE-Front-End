@@ -31,7 +31,6 @@ import {
 } from 'src/store/apps/crud/floorplan';
 import toast from 'react-hot-toast';
 import { defaultFloorplanForm } from 'src/store/apps/defaultForm';
-import { set } from 'lodash';
 
 interface FormType {
   type?: string;

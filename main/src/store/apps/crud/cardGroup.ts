@@ -80,6 +80,26 @@ export const CardGroupSlice = createSlice ({
             state.cardGroupFilter = { ...state.cardGroupFilter, ...action.payload };
         },
 
+    },
+    extraReducers: (builder) => {
+        builder
+        .addCase(fetchCardGroupDT.pending, (state) => {
+            state.isLoading = true;
+            state.hasLoaded = false;
+        })
+        .addCase(fetchCardGroupDT.fulfilled, (state, action) => {
+            state.cardGroupTotalCount = action.payload.recordsTotal;
+            state.cardGroupFilteredCount = action.payload.recordsFiltered;
+            state.isLoading = false;
+            state.hasLoaded = true;
+        })
+        .addCase(fetchCardGroupDT.rejected, (state, action) => {
+            console.error("Error fetching card groups:", action.error);
+            state.cardGroupTotalCount = 0;
+            state.cardGroupFilteredCount = 0;
+            state.isLoading = false;
+            state.hasLoaded = false;
+        })
     }
 })
 

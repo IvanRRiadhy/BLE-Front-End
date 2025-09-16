@@ -25,51 +25,47 @@ import {
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import { CardAccessType, UpdateFilter, fetchCardAccessDT } from 'src/store/apps/crud/cardAccess';
-
-// import AddEditCardAccess from './AddEditCardAccess';
-import { defaultCardAccessFilter } from 'src/store/apps/defaultForm';
+import { CardGroupType, fetchCardGroupDT, UpdateFilter } from 'src/store/apps/crud/cardGroup';
+import { defaultCardGroupFilter } from 'src/store/apps/defaultForm';
 
 const columns = [
-  { label: 'Access Name', field: 'Name', sortAble: true },
+  { label: 'Group Name', field: 'Name', sortAble: true },
   { label: 'Description', field: 'Remarks', sortAble: false },
-  { label: 'Access Number', field: 'AccessNumber', sortAble: true },
-  { label: 'Allowed Areas', field: '', sortAble: false },
+  { label: 'Cards', field: '', sortAble: false },
+  { label: 'Access', field: '', sortAble: false },
 ];
 
 const SKELETON_ROWS = 5;
 
-const CardAccessList = () => {
+const CardGroupList = () => {
   const dispatch: AppDispatch = useDispatch();
-  const cardAccessData = useSelector((state: RootState) => state.CardAccessReducer.cardAccess);
-  const cardAccessTotalCount = useSelector(
-    (state: RootState) => state.CardAccessReducer.cardAccessTotalCount,
+  const cardGroupData = useSelector((state: RootState) => state.CardGroupReducer.cardGroups);
+  const cardGroupTotalCount = useSelector(
+    (state: RootState) => state.CardGroupReducer.cardGroupTotalCount,
   );
-  const cardAccessFilteredCount = useSelector(
-    (state: RootState) => state.CardAccessReducer.cardAccessFilteredCount,
+  const cardGroupFilteredCount = useSelector(
+    (state: RootState) => state.CardGroupReducer.cardGroupFilteredCount,
   );
-  const cardAccessFilter = useSelector(
-    (state: RootState) => state.CardAccessReducer.cardAccessFilter,
-  );
-  const isLoading = useSelector((state: RootState) => state.CardAccessReducer.isLoading);
-  const hasLoaded = useSelector((state: RootState) => state.CardAccessReducer.hasLoaded);
+  const cardGroupFilter = useSelector((state: RootState) => state.CardGroupReducer.cardGroupFilter);
+  const isLoading = useSelector((state: RootState) => state.CardGroupReducer.isLoading);
+  const hasLoaded = useSelector((state: RootState) => state.CardGroupReducer.hasLoaded);
 
   //Pagination State
-  const page = Math.floor(cardAccessFilter.Start / cardAccessFilter.Length);
-  const rowsPerPage = cardAccessFilter.Length;
-  const orderBy = cardAccessFilter.SortColumn;
-  const order = cardAccessFilter.SortDir;
+  const page = Math.floor(cardGroupFilter.Start / cardGroupFilter.Length);
+  const rowsPerPage = cardGroupFilter.Length;
+  const orderBy = cardGroupFilter.SortColumn;
+  const order = cardGroupFilter.SortDir;
 
   const handleChangePage = (_: unknown, newPage: number) => {
-    dispatch(UpdateFilter({ Start: newPage * cardAccessFilter.Length }));
+    dispatch(UpdateFilter({ Start: newPage * cardGroupFilter.Length }));
   };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newLength = parseInt(event.target.value, 10);
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
   const handleSort = (column: string) => {
-    const isAsc = cardAccessFilter.SortColumn === column && cardAccessFilter.SortDir === 'asc';
-    const isDesc = cardAccessFilter.SortColumn === column && cardAccessFilter.SortDir === 'desc';
+    const isAsc = cardGroupFilter.SortColumn === column && cardGroupFilter.SortDir === 'asc';
+    const isDesc = cardGroupFilter.SortColumn === column && cardGroupFilter.SortDir === 'desc';
 
     if (isDesc) {
       dispatch(
@@ -91,17 +87,18 @@ const CardAccessList = () => {
   };
 
   useEffect(() => {
-    dispatch(UpdateFilter(defaultCardAccessFilter));
+    dispatch(UpdateFilter(defaultCardGroupFilter));
     try {
-      dispatch(fetchCardAccessDT(defaultCardAccessFilter));
+      dispatch(fetchCardGroupDT(defaultCardGroupFilter));
     } catch (error) {
       console.error('Error fetching data: ', error);
     }
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(fetchCardAccessDT(cardAccessFilter));
-  }, [cardAccessFilter, dispatch]);
+    dispatch(fetchCardGroupDT(cardGroupFilter));
+  }, [cardGroupFilter, dispatch]);
+
   const renderSkeletonRows = (rows: number) => (
     <>
       {Array.from({ length: rows }).map((_, i) => (
@@ -129,9 +126,6 @@ const CardAccessList = () => {
           <TableCell>
             <Skeleton variant="text" width={180} height={22} />
           </TableCell>
-          <TableCell>
-            <Skeleton variant="text" width={160} height={22} />
-          </TableCell>
 
           {/* right actions */}
           <TableCell
@@ -148,7 +142,7 @@ const CardAccessList = () => {
             <Box display="flex" gap={1}>
               <Skeleton variant="rounded" width={90} height={32} />
               {/* <Skeleton variant="circular" width={32} height={32} />
-                    <Skeleton variant="circular" width={32} height={32} /> */}
+                          <Skeleton variant="circular" width={32} height={32} /> */}
             </Box>
           </TableCell>
         </TableRow>
@@ -213,7 +207,7 @@ const CardAccessList = () => {
                 <TableBody>
                   {!hasLoaded
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
-                    : cardAccessData.map((cardAccess: CardAccessType, index: number) => (
+                    : cardGroupData.map((cardGroup: CardGroupType, index: number) => (
                         <TableRow key={index}>
                           <TableCell
                             sx={{
@@ -230,10 +224,10 @@ const CardAccessList = () => {
                           >
                             {index + 1 + page * rowsPerPage}
                           </TableCell>
-                          <TableCell>{cardAccess.name}</TableCell>
-                          <TableCell>{cardAccess.remarks}</TableCell>
-                          <TableCell>{cardAccess.accessNumber}</TableCell>
-                          <TableCell>{cardAccess.maskedArea?.length ?? 0}</TableCell>
+                          <TableCell>{cardGroup.name}</TableCell>
+                          <TableCell>{cardGroup.remarks}</TableCell>
+                          <TableCell>{cardGroup.cards?.length ?? 0}</TableCell>
+                          <TableCell>{cardGroup.cardAccess?.length ?? 0}</TableCell>
                           <TableCell
                             sx={{
                               position: 'sticky',
@@ -264,7 +258,7 @@ const CardAccessList = () => {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={cardAccessTotalCount}
+              count={cardGroupTotalCount}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}
@@ -299,4 +293,4 @@ const CardAccessList = () => {
   );
 };
 
-export default CardAccessList;
+export default CardGroupList;

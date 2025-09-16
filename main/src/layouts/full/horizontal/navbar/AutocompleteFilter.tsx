@@ -451,7 +451,7 @@ const AutocompleteFilter: React.FC<Props> = ({
       <Box ref={anchorRef}>
         <TextField
           fullWidth
-          label="Filter by Area"
+          // label="Filter by Area"
           placeholder="Building / Floor / Floorplan / Area"
           value={query}
           onChange={(e) => setQuery(e.target.value)}

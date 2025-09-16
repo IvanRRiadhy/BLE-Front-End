@@ -21,6 +21,8 @@ import { VisitorType, GetFilter as VisitorFilter } from './crud/visitor';
 import { TrxVisitorType, GetFilter as TrxVisitorFilter } from './crud/trxVisitor';
 import { CardRecordType, GetFilter as CardRecordFilter } from './crud/cardRecord';
 import { TimeGroupType, GetFilter as TimeGroupFilter } from './crud/timeGroup';
+import { CardAccessType, GetFilter as CardAccessFilter } from './crud/cardAccess';
+import { CardGroupType, GetFilter as CardGroupFilter } from './crud/cardGroup';
 
 //#region AccessCCTV
 export const defaultAccessCCTVForm: CCTVType = {
@@ -549,4 +551,56 @@ export const defaultCardRecordFilter: CardRecordFilter = {
   filters: {
   },
 }
+//#endregion
+
+//#region Card Access
+export const defaultCardAccessFilter: CardAccessFilter = {
+  Draw: 1,
+  Start: 0,
+  Length: 5,
+  SortColumn: 'name',
+  SortDir: 'asc',
+  SearchValue: '',
+  filters: {
+  },
+}
+
+export const defaultCardAccessForm: CardAccessType = {
+  id: '',
+  name: '',
+  accessNumber: '',
+  remarks: '',
+  maskedAreaId: [],
+  maskedArea: [],
+  createdBy: '',
+  createdAt: '',
+  updatedBy: '',
+  updatedAt: '',
+}
+
+//#endregion
+
+//#region Card Group
+export const defaultCardGroupForm: CardGroupType = {
+  id: '',
+  name: '',
+  remarks: '',
+  cards: [],
+  cardAccess: [],
+  createdBy: '',
+  createdAt: '',
+  updatedBy: '',
+  updatedAt: '',
+};
+export const defaultCardGroupFilter: CardGroupFilter = {
+  Draw: 1,
+  Start: 0,
+  Length: 5,
+  SortColumn: 'UpdatedAt',
+  SortDir: 'desc',
+  SearchValue: '',
+  filters: {
+    
+  }
+};
 //#endregion
