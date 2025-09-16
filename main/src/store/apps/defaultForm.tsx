@@ -20,6 +20,7 @@ import { GetFilter as TrackingTransFilter } from './crud/trackingTrans';
 import { VisitorType, GetFilter as VisitorFilter } from './crud/visitor';
 import { TrxVisitorType, GetFilter as TrxVisitorFilter } from './crud/trxVisitor';
 import { CardRecordType, GetFilter as CardRecordFilter } from './crud/cardRecord';
+import { TimeGroupType, GetFilter as TimeGroupFilter } from './crud/timeGroup';
 
 //#region AccessCCTV
 export const defaultAccessCCTVForm: CCTVType = {
@@ -418,6 +419,24 @@ export const defaultOrganizationFilter: OrganizationFilter = {
   SortDir: 'desc',
   SearchValue: '',
 };
+//#endregion
+
+//#region TimeGroup
+export const defaultTimeGroupForm: TimeGroupType = {
+  id: '',
+  name: 'Add Name',
+  description: 'Add Description',
+  timeBlocks: [], 
+};
+
+export const defaultTimeGroupFilter: TimeGroupFilter = {
+    Draw: 1,
+  Start: 0,
+  Length: 5,
+  SortColumn: 'name',
+  SortDir: 'asc',
+  SearchValue: '',
+}
 //#endregion
 
 //#region TrackingTransaction

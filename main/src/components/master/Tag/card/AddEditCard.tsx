@@ -303,7 +303,7 @@ const AddEditCard = ({ type, card }: formType) => {
           </DialogTitle>
           <DialogContent>
             <Grid container spacing={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel>Card Details</CustomFormLabel>
                 <CustomTextField
                   id="name"
@@ -345,7 +345,7 @@ const AddEditCard = ({ type, card }: formType) => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel>Card Type</CustomFormLabel>
                 <CustomSelect
                   id="cardType"

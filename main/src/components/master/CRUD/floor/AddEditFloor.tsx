@@ -16,6 +16,7 @@ import {
   FormHelperText,
   Autocomplete,
   TextField,
+  Box,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
@@ -33,6 +34,7 @@ import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import toast from 'react-hot-toast';
 import { defaultFloorForm } from 'src/store/apps/defaultForm';
+import AddEditBuilding from '../building/AddEditBuilding';
 
 interface FormType {
   type?: string;
@@ -123,7 +125,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
       toast.error('Please fill in all required fields correctly.');
       return;
     }
-    setLoading(true);
+    setIsSaving(true);
     try {
       const data = new FormData();
 
@@ -165,7 +167,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
       console.error('Error saving floor:', error);
     }
     setTimeout(() => {
-      setLoading(false);
+      setIsSaving(false);
     }, 1000);
   };
 
@@ -248,14 +250,24 @@ const AddEditFloor = ({ type, floor }: FormType) => {
       )}
       {type === 'add' && (
         <Tooltip title="Add Floor">
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<IconPlus size={20} />}
-            onClick={handleClickOpen}
-          >
-            Add Floor
-          </Button>
+          {isLoading ? (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+            >
+              <CircularProgress color='inherit' size={20} />
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+              onClick={handleClickOpen}
+            >
+              <IconPlus size={20} />
+            </Button>
+          )}
         </Tooltip>
       )}
 
@@ -271,7 +283,9 @@ const AddEditFloor = ({ type, floor }: FormType) => {
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="building">Building</CustomFormLabel>
+                <Box display="flex" alignItems="center" gap={1}>
                 <Autocomplete
+                sx={{ flex: 1 }}
                 options={buildingData.map((b) => ({ id: b.id, label: b.name }))}
                 value={
                   buildingData
@@ -304,6 +318,9 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                   />
                 )}
                 />
+                <AddEditBuilding type='add' />
+                </Box>
+
                 <CustomFormLabel htmlFor="floor-name">name</CustomFormLabel>
                 <CustomTextField
                   id="name"

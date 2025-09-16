@@ -99,7 +99,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
       toast.error('Please fill in all required fields correctly.');
       return;
     }
-    setLoading(true);
+    setIsSaving(true);
     try {
       let result;
       if (type === 'edit') {
@@ -121,7 +121,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
       console.error('Error saving BLE reader:', error);
     }
     setTimeout(() => {
-      setLoading(false);
+      setIsSaving(false);
     }, 1000);
   };
 
@@ -145,14 +145,24 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
       )}
       {type === 'add' && (
         <Tooltip title="Add BLE Reader">
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<IconPlus size={20} />}
-            onClick={handleClickOpen}
-          >
-            Add Ble Reader
-          </Button>
+          {isLoading ? (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+            >
+              <CircularProgress color='inherit' size={20} />
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+              onClick={handleClickOpen}
+            >
+              <IconPlus size={20} />
+            </Button>
+          )}
         </Tooltip>
       )}
 

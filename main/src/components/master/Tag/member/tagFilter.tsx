@@ -35,10 +35,10 @@ const TagFilter = () => {
   const dispatch = useDispatch();
   const customizer = useSelector((state: any) => state.customizer);
   const br = `${customizer.borderRadius}px`;
-  const departmentData = useSelector((state: RootState) => state.departmentReducer.departments);
-  const districtData = useSelector((state: RootState) => state.districtReducer.districts);
+  const departmentData = useSelector((state: RootState) => state.departmentReducer.departmentAll);
+  const districtData = useSelector((state: RootState) => state.districtReducer.districtAll);
   const organizationData = useSelector(
-    (state: RootState) => state.organizationReducer.organizations,
+    (state: RootState) => state.organizationReducer.organizationAll,
   );
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter.filters);
 

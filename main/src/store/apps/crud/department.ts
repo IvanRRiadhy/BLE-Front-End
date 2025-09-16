@@ -51,6 +51,7 @@ export interface DepartmentType {
 
 interface StateType {
     departments: DepartmentType[];
+    departmentAll: DepartmentType[];
     departmentSearch: string;
     selectedDepartment?: DepartmentType | null;
     departmentTotalCount: number;
@@ -62,6 +63,7 @@ hasLoaded: boolean;
 
 const initialState: StateType = {
     departments: [],
+    departmentAll: [],
     departmentSearch: "",
     selectedDepartment: null,
     departmentTotalCount: 0,
@@ -79,6 +81,9 @@ export const DepartmentSlice = createSlice({
         GetDepartments: (state, action: PayloadAction<DepartmentType[]>) => {
             state.departments = action.payload;
         },     
+        GetAllDepartment: (state, action: PayloadAction<DepartmentType[]>) => {
+            state.departmentAll = action.payload;
+        },
         SelectDepartment: (state, action: PayloadAction<string>) => {
             const selected = state.departments.find((department: DepartmentType) => department.id === action.payload);
             state.selectedDepartment = selected || null;
@@ -168,6 +173,7 @@ export const selectDepartment = (departmentID : string) =>
 
 export const {
     GetDepartments,
+    GetAllDepartment,
     SelectDepartment,
     SearchDepartment,
     UpdateFilter
@@ -176,7 +182,7 @@ export const {
 export const fetchDepartments = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
-        dispatch(GetDepartments(response.data?.collection?.data || []));
+        dispatch(GetAllDepartment(response.data?.collection?.data || []));
     } catch (err: any) {
         console.log("Error fetching departments:", err);
     }

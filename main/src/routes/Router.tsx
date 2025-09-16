@@ -3,7 +3,6 @@
 import React, { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
-import Card from 'src/views/master/tag/card';
 import VisitorCard from 'src/views/master/tag/VisitorCard';
 
 /* ***Layouts**** */
@@ -51,6 +50,8 @@ const FloorplanDevice = Loadable(lazy(() => import('../views/master/crud/Floorpl
 const AlarmRecord = Loadable(lazy(() => import('../views/master/crud/AlarmRecord')));
 const AlarmTrigger = Loadable(lazy(() => import('../views/master/crud/AlarmTrigger')));
 const CardRecord = Loadable(lazy(() => import('../views/master/crud/CardRecord')));
+const Card = Loadable(lazy(() => import('../views/master/tag/card')));
+const TimeGroup = Loadable(lazy(() => import('../views/master/crud/TimeGroup')));
 const Floorplan = Loadable(lazy(() => import('../views/master/crud/Floorplan')));
 const User = Loadable(lazy(() => import('../views/master/user/User')));
 
@@ -244,7 +245,7 @@ const Router = [
       // { path: '/master/floorplan', exact: true, element: <Floorplan /> },
       { path: '/master/gateway', exact: true, element: <GatewayApp /> },
       { path: '/master/membertag', exact: true, element: <MemberTag /> },
-      { path: '/master/visitortag', exact: true, element: <VisitorTag /> },
+      { path: '/visitor/visitorinvitation', exact: true, element: <VisitorTag /> },
       { path: '/master/application', element: <Application /> },
       { path: '/master/integration', exact: true, element: <Integration /> },
       { path: '/master/accesscctv', exact: true, element: <AccessCCTV /> },
@@ -258,8 +259,8 @@ const Router = [
       { path: '/master/floor', exact: true, element: <Floor /> },
       { path: '/master/member', exact: true, element: <Member /> },
       { path: '/report/trackingtransaction', exact: true, element: <TrackingTransaction /> },
-      { path: '/master/visitor', exact: true, element: <Visitor /> },
-      { path: '/report/blacklist', exact: true, element: <Blacklist /> },
+      { path: '/visitor/visitordata', exact: true, element: <Visitor /> },
+      { path: '/visitor/blacklist', exact: true, element: <Blacklist /> },
       { path: '/master/building', exact: true, element: <Building /> },
       { path: '/master/device', exact: true, element: <FloorplanDevice /> },
       { path: '/report/alarmrecord', exact: true, element: <AlarmRecord /> },
@@ -267,6 +268,7 @@ const Router = [
       { path: '/report/cardrecord', exact: true, element: <CardRecord /> },
       { path: '/master/floorplan', exact: true, element: <Floorplan /> },
       { path: '/master/card', exact: true, element: <Card /> },
+      { path: '/master/timegroup', exact: true, element: <TimeGroup /> },
       { path: '/master/visitorcard', exact: true, element: <VisitorCard /> },
 
       //Dashboard Evacuation

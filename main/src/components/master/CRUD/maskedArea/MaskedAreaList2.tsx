@@ -27,8 +27,12 @@ import {
 import { IconEdit } from '@tabler/icons-react';
 import { useNavigate } from 'react-router';
 import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
+import { fetchFloorplanDevices } from 'src/store/apps/crud/floorplanDevice';
+import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
 
 const columns = [
+  { label: 'Building', field: 'Floor.Name', sortAble: true },
+  { label: 'Floor', field: 'Floor.Name', sortAble: true },
   { label: 'Floorplan', field: 'Name', sortAble: true },
   { label: 'Total Area', field: 'MaskedAreaCount', sortAble: true },
 ];
@@ -38,7 +42,12 @@ const SKELETON_ROWS = 5;
 const MaskedAreaList2 = () => {
   const dispatch: AppDispatch = useDispatch();
   const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
-  const floorplanTotalCount = useSelector((state: RootState) => state.floorplanReducer.floorplanTotalCount);
+  const buildingData: BuildingType[] = useSelector(
+    (state: RootState) => state.buildingReducer.buildingAll,
+  );
+  const floorplanTotalCount = useSelector(
+    (state: RootState) => state.floorplanReducer.floorplanTotalCount,
+  );
   // const floorplanFilteredCount = useSelector(
   //   (state: RootState) => state.floorplanReducer.floorplanFilteredCount,
   // );
@@ -83,7 +92,9 @@ const MaskedAreaList2 = () => {
   };
 
   useEffect(() => {
+    dispatch(fetchMaskedAreas());
     dispatch(UpdateFilter(defaultFloorplanFilter));
+    dispatch(fetchBuildings());
   }, [dispatch]);
 
   useEffect(() => {
@@ -96,38 +107,49 @@ const MaskedAreaList2 = () => {
     navigate('/master/floorplanmaskedarea/edit');
   };
 
-        const renderSkeletonRows = (rows: number) => (
-          <>
-            {Array.from({ length: rows }).map((_, i) => (
-              <TableRow key={`skeleton-${i}`}>
-                <TableCell>
-                  <Skeleton variant="text" width={180} height={22} />
-                </TableCell>
-                <TableCell>
-                  <Skeleton variant="text" width={160} height={22} />
-                </TableCell>
-                {/* right actions */}
-                <TableCell
-                  sx={{
-                    position: 'sticky',
-                    right: 0,
-                    background: 'white',
-                    zIndex: 2,
-                    width: 150,
-                    minWidth: 150,
-                    maxWidth: 150,
-                  }}
-                >
-                  <Box display="flex" gap={1}>
-                    <Skeleton variant="rounded" width={90} height={32} />
-                    {/* <Skeleton variant="circular" width={32} height={32} />
-                    <Skeleton variant="circular" width={32} height={32} /> */}
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
-          </>
-        );
+  const getbuildingName = (buildingId: string) => {
+    const building = buildingData.find((b) => b.id === buildingId);
+    return building ? building.name : 'Unknown Building';
+  };
+
+  const renderSkeletonRows = (rows: number) => (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <TableRow key={`skeleton-${i}`}>
+          <TableCell>
+            <Skeleton variant="text" width={180} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={160} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={160} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={160} height={22} />
+          </TableCell>
+          {/* right actions */}
+          <TableCell
+            sx={{
+              position: 'sticky',
+              right: 0,
+              background: 'white',
+              zIndex: 2,
+              width: 150,
+              minWidth: 150,
+              maxWidth: 150,
+            }}
+          >
+            <Box display="flex" gap={1}>
+              <Skeleton variant="rounded" width={90} height={32} />
+              {/* <Skeleton variant="circular" width={32} height={32} />
+                      <Skeleton variant="circular" width={32} height={32} /> */}
+            </Box>
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
 
   return (
     <Grid container spacing={3}>
@@ -171,42 +193,42 @@ const MaskedAreaList2 = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {!hasLoaded ? (
-                    renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
-                  ) : (
-                    floorplanData.map((floorplan: any, index) => (
-                    <TableRow key={index}>
-                      <TableCell
-                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
-                      >
-                        {floorplan.name}
-                      </TableCell>
-                      <TableCell>{floorplan.maskedAreaCount}</TableCell>
+                  {!hasLoaded
+                    ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                    : floorplanData.map((floorplan: any, index) => (
+                        <TableRow key={index}>
+                          <TableCell
+                            sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                          >
+                            {getbuildingName(floorplan.floor?.buildingId || '')}
+                          </TableCell>
+                          <TableCell>{floorplan.floor?.name}</TableCell>
+                          <TableCell>{floorplan.name}</TableCell>
+                          <TableCell>{floorplan.maskedAreaCount}</TableCell>
 
-                      <TableCell
-                        sx={{
-                          position: 'sticky',
-                          right: 0,
-                          background: 'white',
-                          zIndex: 2,
-                          gap: 1,
-                          alignItems: 'center',
-                          width: 150, // Fixed width
-                          minWidth: 150,
-                          maxWidth: 150,
-                        }}
-                      >
-                        <IconButton
-                          color="primary"
-                          size="small"
-                          onClick={() => handleOnClick(floorplan.id)}
-                        >
-                          <IconEdit size={20} />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                  )}
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              right: 0,
+                              background: 'white',
+                              zIndex: 2,
+                              gap: 1,
+                              alignItems: 'center',
+                              width: 150, // Fixed width
+                              minWidth: 150,
+                              maxWidth: 150,
+                            }}
+                          >
+                            <IconButton
+                              color="primary"
+                              size="small"
+                              onClick={() => handleOnClick(floorplan.id)}
+                            >
+                              <IconEdit size={20} />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                 </TableBody>
               </Table>
             </TableContainer>

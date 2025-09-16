@@ -31,6 +31,7 @@ import {
 } from 'src/store/apps/crud/floorplan';
 import toast from 'react-hot-toast';
 import { defaultFloorplanForm } from 'src/store/apps/defaultForm';
+import { set } from 'lodash';
 
 interface FormType {
   type?: string;
@@ -94,7 +95,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
       toast.error('Please fill in all required fields correctly.');
       return;
     }
-    setLoading(true);
+    setIsSaving(true);
     try {
       const data = new FormData();
       Object.keys(formData).forEach((key: string) => {
@@ -125,7 +126,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
       console.error('Error saving floorplan:', error);
     }
     setTimeout(() => {
-      setLoading(false);
+      setIsSaving(false);
     }, 1000);
   };
 
@@ -150,14 +151,24 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
       )}
       {type === 'add' && (
         <Tooltip title="Add Floorplan">
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<IconPlus size={20} />}
-            onClick={handleClickOpen}
-          >
-            Add Floor
-          </Button>
+          {isLoading ? (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+            >
+              <CircularProgress color='inherit' size={20} />
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+              onClick={handleClickOpen}
+            >
+              <IconPlus size={20} />
+            </Button>
+          )}
         </Tooltip>
       )}
 

@@ -176,7 +176,7 @@ const BlacklistList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {blaclistData.map((blacklist, index) => (
+                  {blaclistData.map((blacklist: blacklistType, index: any) => (
                     <TableRow key={blacklist.id}>
                       <TableCell
                         sx={{

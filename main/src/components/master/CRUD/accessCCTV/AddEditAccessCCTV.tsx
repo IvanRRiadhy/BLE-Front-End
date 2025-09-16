@@ -42,7 +42,7 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
     ...defaultAccessCCTVForm,
     ...cctv,
   });
-    const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
 
   const CCTVFilter = useSelector((state: RootState) => state.CCTVReducer.cctvFilter);
   const dispatch: AppDispatch = useDispatch();
@@ -83,7 +83,7 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
       toast.error('Please fill in all required fields correctly.');
       return;
     }
-    setLoading(true);
+    setIsSaving(true);
     try {
       let result;
       if (type === 'edit') {
@@ -105,7 +105,7 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
       console.error('Error saving application:', error);
     }
     setTimeout(() => {
-      setLoading(false);
+      setIsSaving(false);
     }, 1000);
   };
   const handleInputChange = (
@@ -127,14 +127,24 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
       )}
       {type === 'add' && (
         <Tooltip title="Add Access CCTV">
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<IconPlus size={20} />}
-            onClick={handleClickOpen}
-          >
-            Add Access CCTV
-          </Button>
+          {isLoading ? (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+            >
+              <CircularProgress color='inherit' size={20} />
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+              onClick={handleClickOpen}
+            >
+              <IconPlus size={20} />
+            </Button>
+          )}
         </Tooltip>
       )}
       {hasLoaded && (
@@ -187,9 +197,9 @@ const AddEditAccessCCTV = ({ type, cctv }: FormType) => {
               onClick={handleSave}
               variant="contained"
               sx={{ fontSize: '1rem', py: 1, px: 3 }}
-              disabled={isLoading}
+              disabled={isSaving}
             >
-              {isLoading ? <CircularProgress size={20} color="inherit" /> : 'Save'}
+              {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </DialogActions>
         </Dialog>

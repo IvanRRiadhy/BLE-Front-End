@@ -48,7 +48,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
     ...building,
   });
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
-
+  const [isSaving, setIsSaving] = React.useState(false);
   const buildingFilter = useSelector((state: RootState) => state.buildingReducer.buildingFilter);
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = async () => {
@@ -143,6 +143,8 @@ const AddEditBuilding = ({ type, building }: FormType) => {
       toast.error('Please fill in all required fields correctly.');
       return;
     }
+    
+    setIsSaving(true);
     try {
       const data = new FormData();
 
@@ -190,6 +192,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
     }
     setTimeout(() => {
       setError(false);
+      setIsSaving(false);
     }, 1000);
   };
   return (
@@ -206,10 +209,10 @@ const AddEditBuilding = ({ type, building }: FormType) => {
           <Button
             variant="contained"
             color="primary"
-            startIcon={<IconPlus size={20} />}
+            sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
             onClick={handleClickOpen}
           >
-            Add Building
+            <IconPlus size={20} />
           </Button>
         </Tooltip>
       )}
@@ -285,9 +288,9 @@ const AddEditBuilding = ({ type, building }: FormType) => {
               onClick={handleSave}
               variant="contained"
               sx={{ fontSize: '1rem', py: 1, px: 3 }}
-              disabled={isLoading}
+              disabled={isSaving}
             >
-              {isLoading ? <CircularProgress size={20} color="inherit" /> : 'Save'}
+              {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </DialogActions>
         </Dialog>

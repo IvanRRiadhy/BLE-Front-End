@@ -39,6 +39,7 @@ const AddEditBrand = ({ type, brand }: FormType) => {
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
 
   const brandFilter = useSelector((state: RootState) => state.brandReducer.brandFilter);
+  const isLoading = useSelector((state: RootState) => state.brandReducer.isLoading);
   const dispatch: AppDispatch = useDispatch();
 
   const handleClickOpen = () => {
@@ -77,7 +78,7 @@ const AddEditBrand = ({ type, brand }: FormType) => {
       toast.error('Please fill in all required fields correctly.');  
       return
     };
-    setLoading(true);
+    setIsSaving(true);
     try {
       let result;
       if (type === 'edit') {
@@ -99,7 +100,7 @@ const AddEditBrand = ({ type, brand }: FormType) => {
       console.error('Error saving Brand:', error);
     }
     setTimeout(() => {
-      setLoading(false);
+      setIsSaving(false);
     }, 1000);
   };
 
@@ -118,15 +119,25 @@ const AddEditBrand = ({ type, brand }: FormType) => {
         </Tooltip>
       )}
       {type === 'add' && (
-        <Tooltip title="Add Brand">
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<IconPlus size={20} />}
-            onClick={handleClickOpen}
-          >
-            Add Brand
-          </Button>
+        <Tooltip title="Add Access CCTV">
+          {isLoading ? (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+            >
+              <CircularProgress color='inherit' size={20} />
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+              onClick={handleClickOpen}
+            >
+              <IconPlus size={20} />
+            </Button>
+          )}
         </Tooltip>
       )}
 
@@ -184,7 +195,7 @@ const AddEditBrand = ({ type, brand }: FormType) => {
         </Dialog>
       )}
 
-      {loading && (
+      {isLoading && (
         <Dialog open={true} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h1" mb={5}>

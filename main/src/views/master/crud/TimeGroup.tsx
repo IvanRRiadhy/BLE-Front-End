@@ -1,29 +1,26 @@
-import  { useState } from 'react';
+import { useState } from 'react';
 import { Button, Box, Drawer, useMediaQuery, Theme } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
-// import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import AppCard from 'src/components/shared/AppCard';
-import TagFilter from '../../../components/master/Tag/member/tagFilter';
-import TagList from 'src/components/master/Tag/member/tagList';
-import MemberContent from 'src/components/master/Tag/member/memberContent';
-import TagSearch from 'src/components/master/Tag/member/tagSearch';
+import TimeGroupDetails from 'src/components/master/CRUD/timeGroup/TimeGroupContent';
+import TimeGroupList from 'src/components/master/CRUD/timeGroup/TimeGroupList';
+import TimeGroupSearch from 'src/components/master/CRUD/timeGroup/TimeGroupSearch';
 
 const drawerWidth = 240;
 const secdrawerWidth = 320;
 
-const MemberTag = () => {
+const TimeGroup = () => {
   const [isLeftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 
   return (
-    <PageContainer title="Member" description="this is Member Page">
+    <PageContainer title="Time Group" description="this is Time Group Page">
       <AppCard>
         {/* ------------------------------------------- */}
         {/* Left Part */}
         {/* ------------------------------------------- */}
-
         <Drawer
           open={isLeftSidebarOpen}
           onClose={() => setLeftSidebarOpen(false)}
@@ -34,24 +31,9 @@ const MemberTag = () => {
           }}
           variant={lgUp ? 'permanent' : 'temporary'}
         >
-          <TagFilter />
+          <TimeGroupSearch onClick={() => setLeftSidebarOpen(true)} />
+          <TimeGroupList />
         </Drawer>
-
-        {/* ------------------------------------------- */}
-        {/* Middle part */}
-        {/* ------------------------------------------- */}
-        <Box
-          sx={{
-            minWidth: secdrawerWidth,
-            width: { xs: '100%', md: secdrawerWidth, lg: secdrawerWidth },
-            flexShrink: 0,
-          }}
-        >
-          {/* <ContactSearch onClick={() => setLeftSidebarOpen(true)} /> */}
-          <TagSearch onClick={() => setLeftSidebarOpen(true)} />
-          <TagList />
-        </Box>
-        
         {/* ------------------------------------------- */}
         {/* Main part */}
         {/* ------------------------------------------- */}
@@ -67,27 +49,11 @@ const MemberTag = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          {/* back btn Part */}
-          {mdUp ? (
-            ''
-          ) : (
-            <Box sx={{ p: 3 }}>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                onClick={() => setRightSidebarOpen(false)}
-                sx={{ display: { xs: 'block', md: 'none', lg: 'none' } }}
-              >
-                Back{' '}
-              </Button>
-            </Box>
-          )}
-          <MemberContent />
+          <TimeGroupDetails />
         </Drawer>
       </AppCard>
     </PageContainer>
   );
 };
 
-export default MemberTag;
+export default TimeGroup;

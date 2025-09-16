@@ -46,7 +46,7 @@ type Props = {
 const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
   const dispatch: AppDispatch = useDispatch();
   const cardData = useSelector((state: RootState) => state.CardReducer.cards);
-
+  const filteredCard = cardData.filter((card) => card.isUsed === false);
   const [loading, setLoading] = useState(false);
   const [openReasonMenu, setOpenReasonMenu] = useState(false);
   const [openCardMenu, setOpenCardMenu] = useState(false);
@@ -263,7 +263,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
               <MenuItem value="" disabled>
                 Select Card to Assign
               </MenuItem>
-              {cardData.map((card: CardType) => (
+              {filteredCard.map((card: CardType) => (
                 <MenuItem key={card.id} value={card.id}>
                   {card.name} | {card.cardNumber}
                 </MenuItem>

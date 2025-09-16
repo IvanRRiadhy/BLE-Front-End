@@ -50,6 +50,7 @@ export interface OrganizationType {
 
 interface StateType {
     organizations: OrganizationType[];
+    organizationAll: OrganizationType[];
     organizationSearch: string;
     selectedOrganization?: OrganizationType | null;
     organizationTotalCount: number;
@@ -61,6 +62,7 @@ hasLoaded: boolean;
 
 const initialState: StateType = {
     organizations: [],
+    organizationAll: [],
     organizationSearch: "",
     selectedOrganization: null,
     organizationTotalCount: 0,
@@ -77,6 +79,9 @@ export const OrganizationSlice = createSlice({
     reducers: {
         GetOrganization: (state, action: PayloadAction<OrganizationType[]>) => {
             state.organizations = action.payload;
+        },
+        GetAllOrganization: (state, action: PayloadAction<OrganizationType[]>) => {
+            state.organizationAll = action.payload;
         },
         SelectOrganization: (state, action: PayloadAction<string>) => {
             const selected = state.organizations.find((organization: OrganizationType) => organization.id === action.payload);
@@ -146,6 +151,7 @@ export const selectOrganization = (organizationID: string) => async (dispatch: A
 
 export const {
     GetOrganization,
+    GetAllOrganization,
     SelectOrganization, 
     SearchOrganization,
     UpdateFilter
@@ -154,7 +160,7 @@ export const {
 export const fetchOrganizations = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices    .get(API_URL);
-        dispatch(GetOrganization(response.data?.collection?.data || []));
+        dispatch(GetAllOrganization(response.data?.collection?.data || []));
     } catch (err: any) {
         console.log("Error fetching organizations:", err);
     }

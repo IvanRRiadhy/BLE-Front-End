@@ -44,8 +44,11 @@ import RulesConnectorReducer from './apps/rules/RulesConnectors';
 import BeaconReducer from './apps/tracking/Beacon';
 import AlarmActiveReducer from './apps/tracking/Alarm';
 import AlarmUIReducer from './apps/monitoring/AlarmUI';
+import TimeGroupReducer from './apps/crud/timeGroup';
 import NotifyReducer from './apps/monitoring/NotifySlice';
 import UserReducer from './apps/crud/users';
+import CardAccessReducer from './apps/crud/cardAccess';
+import CardGroupReducer from './apps/crud/cardGroup';
 import SessionReducer from './apps/session';
 import { combineReducers } from 'redux';
 import {
@@ -97,9 +100,12 @@ const rootReducer = combineReducers({
   BeaconReducer: BeaconReducer,
   AlarmActiveReducer: AlarmActiveReducer,
   AlarmUIReducer: AlarmUIReducer,
+  TimeGroupReducer: TimeGroupReducer,
   NotifyReducer: NotifyReducer,
   userReducer: UserReducer,
   sessionReducer: SessionReducer,
+  CardAccessReducer: CardAccessReducer,
+  CardGroupReducer: CardGroupReducer,
 });
 
 const persistConfig = {

@@ -19,6 +19,7 @@ import {
   IconCropLandscape,
   IconBadgeTm,
   IconUsers,
+  IconCalendar,
 } from '@tabler/icons-react';
 import { uniqueId } from 'lodash';
 
@@ -184,6 +185,12 @@ const Menuitems = [
         icon: IconMapPin,
         href: '/master/membertag/'
       },
+      {
+        id:uniqueId(),
+        title: 'Time Group',
+        icon: IconCalendar,
+        href: '/master/timegroup/'
+      },
     // {
     //   id: uniqueId(),
     //   title: 'Application',
@@ -212,25 +219,26 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Visitor',
     icon: IconMapPin,
+    href: '/visitor/',
     children: [
 
             {
         id:uniqueId(),
         title: 'Visitor Data',
         icon: IconMapPin,
-        href: '/master/visitor/'
+        href: '/visitor/visitordata/'
       },
       {
         id:uniqueId(),
         title: 'Visitor Invitation',
         icon: IconMapPin,
-        href: '/master/visitortag/'
+        href: '/visitor/visitorinvitation/'
       },
             {
         id: uniqueId(),
         title: 'Blacklist',
         icon: IconBarrierBlock,
-        href: '/report/blacklist/',
+        href: '/visitor/blacklist/',
       },
     ]
   },

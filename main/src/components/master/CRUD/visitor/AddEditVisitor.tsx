@@ -52,7 +52,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
     ...visitor,
   });
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
-
+  const isLoading = useSelector((state: RootState) => state.visitorReducer.isLoading);
   const visitorFilter = useSelector((state: RootState) => state.visitorReducer.visitorFilter);
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = () => {
@@ -117,7 +117,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
       console.log('Form errors:', formErrors);
       return;
     }
-    setLoading(true);
+    setIsSaving(true);
     console.log(formData);
     try {
       const data = new FormData();
@@ -162,7 +162,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
       console.error('Error saving visitor data:', error);
     }
     setTimeout(() => {
-      setLoading(false);
+      setIsSaving(false);
     }, 1000);
   };
 
@@ -201,10 +201,25 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
         </Tooltip>
       )}
       {type === 'add' && (
-        <Tooltip title="Add Visitor">
-          <Button variant="contained"  color="primary" size="small"  onClick={handleClickOpen}>
-            <IconPlus size={20} />
-          </Button>
+        <Tooltip title="Add Visitor Data">
+          {isLoading ? (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+            >
+              <CircularProgress color="inherit" size={20} />
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+              onClick={handleClickOpen}
+            >
+              <IconPlus size={20} />
+            </Button>
+          )}
         </Tooltip>
       )}
 
@@ -222,7 +237,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="name">Name</CustomFormLabel>
                 <CustomTextField
                   id="name"
@@ -257,7 +272,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="identity-type">Identity Type</CustomFormLabel>
                 <CustomSelect
                   name="identityType"
@@ -325,7 +340,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
                 <CustomTextField
                   id="cardNumber"
@@ -335,7 +350,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="ble-card-number">Ble Card Number</CustomFormLabel>
                 <CustomTextField
                   id="bleCardNumber"
@@ -448,7 +463,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
         </Dialog>
       )}
 
-      {loading && (
+      {isLoading && (
         <Dialog open={true} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h1" mb={5}>

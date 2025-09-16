@@ -1,20 +1,25 @@
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
-import { Box, Fab, TextField, InputAdornment } from '@mui/material';
-import { UpdateFilter } from 'src/store/apps/crud/member';
+import { Box, Fab, TextField, InputAdornment, Button } from '@mui/material';
+import { AddNewTimeGroup, UpdateFilter } from 'src/store/apps/crud/timeGroup';
 import { IconMenu2, IconSearch } from '@tabler/icons-react';
+import { defaultTimeGroupForm } from 'src/store/apps/defaultForm';
 
 type Props = {
   onClick: (event: React.MouseEvent<HTMLElement>) => void;
 };
 
-const TagSearch = ({ onClick }: Props) => {
+const TimeGroupSearch = ({ onClick }: Props) => {
   const searchValue = useSelector(
-    (state: RootState) => state.memberReducer.memberFilter.SearchValue
+    (state: RootState) => state.TimeGroupReducer.timeGroupFilter.SearchValue,
   );
   const dispatch = useDispatch();
 
+  const handleAdd = () => {
+    dispatch(AddNewTimeGroup(defaultTimeGroupForm));
+  };
+
   return (
-    <Box display="flex" sx={{ p: 2 }} flexDirection="column">
+    <Box display="flex" sx={{ p: 2, gap: 2 }} flexDirection="column">
       <Fab
         onClick={onClick}
         color="primary"
@@ -41,12 +46,13 @@ const TagSearch = ({ onClick }: Props) => {
         value={searchValue}
         placeholder="Search by Name, Card Number, ID"
         variant="outlined"
-        onChange={(e) =>
-          dispatch(UpdateFilter({ SearchValue: e.target.value }))
-        }
+        onChange={(e) => dispatch(UpdateFilter({ SearchValue: e.target.value }))}
       />
+      <Button variant="contained" color="secondary" onClick={handleAdd}>
+        + Add TimeGroup
+      </Button>
     </Box>
   );
 };
 
-export default TagSearch;
+export default TimeGroupSearch;

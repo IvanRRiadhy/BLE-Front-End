@@ -1,0 +1,119 @@
+import axiosServices from "../../../utils/axios";
+import { createSlice } from "@reduxjs/toolkit";
+import { dispatch } from "src/store/Store";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import { MaskedAreaType } from "./maskedArea";
+import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
+
+
+const API_DT_URL = "/api/CardAccess/filter/";
+const API_URL = "/api/CardAccess/";
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    SearchValue: string,
+    filters: {
+    }
+}
+
+export type CardAccessType = {
+    id: string,
+    name: string,
+    accessNumber: string,
+    remarks: string,
+    maskedAreaId: string[],
+    maskedArea: MaskedAreaType[],
+    createdBy: string,
+    createdAt: string,
+    updatedBy: string,
+    updatedAt: string
+};
+
+interface StateType {
+    cardAccess: CardAccessType[],
+    cardAccessAll: CardAccessType[],
+    cardAccessTotalCount: number,
+    cardAccessFilteredCount: number,
+    cardAccessFilter: GetFilter,
+    isLoading: boolean,
+    hasLoaded: boolean
+    selectedCardAccess: CardAccessType | null,
+}
+
+const initialState: StateType = {
+    cardAccess: [],
+    cardAccessAll: [],
+    cardAccessTotalCount: 0,
+    cardAccessFilteredCount: 0,
+    cardAccessFilter: {
+        Draw: 0,
+        Start: 0,
+        Length: 0,
+        SortColumn: '',
+        SortDir: 'asc',
+        SearchValue: '',
+        filters: {}
+    },
+    isLoading: false,
+    hasLoaded: false,
+    selectedCardAccess: null
+}
+
+export const CardAccessSlice = createSlice ({
+
+    name: 'cardAccess',
+    initialState,
+    reducers: {
+        GetCardAccess: (state, action: PayloadAction<CardAccessType[]>) => {
+            state.cardAccess = action.payload
+        },
+        GetAllCardAccess: (state, action: PayloadAction<CardAccessType[]>) => {
+            state.cardAccessAll = action.payload
+        },
+        UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
+            state.cardAccessFilter = { ...state.cardAccessFilter, ...action.payload };
+        },
+        SelectCardAccess: (state, action: PayloadAction<string>) => {
+            const selected = state.cardAccess.find((cardAccess: CardAccessType) => cardAccess.id === action.payload);
+            state.selectedCardAccess = selected || null;
+        },
+    }   
+})
+
+export const {
+    GetCardAccess,
+    GetAllCardAccess,
+    UpdateFilter,
+    SelectCardAccess
+} = CardAccessSlice.actions
+
+export const fetchCardAccessDT = createAsyncThunk(
+    "cardAccess/fetchCardAccessDT",
+    async (filter: any, thunkAPI) => {
+        const started = Date.now();
+
+        const res = await retryUntilSuccess(
+          () => axiosServices.post(API_DT_URL, filter),
+          {
+            signal: thunkAPI.signal,     
+            timeoutMs: 2 * 60 * 1000,    
+            minDelay: 500,
+            maxDelay: 8000,
+          }
+        );
+
+        console.log("res: ", res);
+        dispatch(GetCardAccess(res.data.collection.data || []));
+        await ensureMinLatency(started, 500);
+
+        return res.data.collection;
+      }
+)
+
+export default CardAccessSlice.reducer

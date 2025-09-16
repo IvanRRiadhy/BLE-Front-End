@@ -25,7 +25,7 @@ import {
   editBlacklist,
   fetchBlacklistDT,
 } from 'src/store/apps/crud/blacklist';
-import { fetchMaskedAreaDT} from 'src/store/apps/crud/maskedArea';
+import { fetchMaskedAreaDT } from 'src/store/apps/crud/maskedArea';
 import { fetchVisitor } from 'src/store/apps/crud/visitor';
 import { defaultBlaclistForm, defaultMaskedAreaFilter } from 'src/store/apps/defaultForm';
 
@@ -49,14 +49,18 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
   const visitorData = useSelector((state: RootState) => state.visitorReducer.visitors);
   const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreas);
 
-  const visitorOptions = (visitorData ?? []).map((visitor) => ({ id: visitor.id, name: visitor.name }));
+  const visitorOptions = (visitorData ?? []).map((visitor) => ({
+    id: visitor.id,
+    name: visitor.name,
+  }));
   const areaOptions = (maskedAreaData ?? []).map((area) => ({ id: area.id, name: area.name }));
-
+  const isLoading = useSelector((state: RootState) => state.blacklistReducer.isLoading);
+  const hasLoaded = useSelector((state: RootState) => state.blacklistReducer.hasLoaded);
   const dispatch: AppDispatch = useDispatch();
 
   useEffect(() => {
     dispatch(fetchVisitor());
-    dispatch(fetchMaskedAreaDT({ ...defaultMaskedAreaFilter , filters: { RestrictedStatus: 1 } }));
+    dispatch(fetchMaskedAreaDT({ ...defaultMaskedAreaFilter, filters: { RestrictedStatus: 1 } }));
   }, [dispatch]);
   console.log(maskedAreaData);
 
@@ -84,22 +88,23 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
     setOpen(false);
   };
 
-    const validateForm = (): boolean => {
+  const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
     if (!formData.visitorId?.trim()) errors.visitorId = 'Visitor is required';
-    if (!formData.floorplanMaskedAreaId?.trim()) errors.floorplanMaskedAreaId = 'Floorplan Masked Area is required';
+    if (!formData.floorplanMaskedAreaId?.trim())
+      errors.floorplanMaskedAreaId = 'Floorplan Masked Area is required';
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const handleSave = async () => {
-    if (!validateForm()){
+    if (!validateForm()) {
       toast.error('Please fill in all required fields correctly.');
-      return
-    };
-    setLoading(true);
+      return;
+    }
+    setIsSaving(true);
     const data = new FormData();
 
     Object.entries(formData).forEach(([key, value]) => {
@@ -133,29 +138,29 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
       console.error('Error saving blacklist:', error);
     }
     setTimeout(() => {
-      setLoading(false);
+      setIsSaving(false);
     }, 1000);
   };
-const handleInputChange = (
-  e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
-) => {
-  const { value, name, id } = e.target as
-    | HTMLInputElement
-    | { value: string; name?: string; id?: string };
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
+  ) => {
+    const { value, name, id } = e.target as
+      | HTMLInputElement
+      | { value: string; name?: string; id?: string };
 
-  const key = (id || name) as string;
+    const key = (id || name) as string;
 
-  // update value
-  setFormData((prev) => ({ ...prev, [key]: value }));
+    // update value
+    setFormData((prev) => ({ ...prev, [key]: value }));
 
-  // clear error for the edited field (if any)
-  setFormErrors((prev) => {
-    if (!prev[key]) return prev;        // nothing to clear
-    const next = { ...prev };
-    delete next[key];
-    return next;
-  });
-};
+    // clear error for the edited field (if any)
+    setFormErrors((prev) => {
+      if (!prev[key]) return prev; // nothing to clear
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
 
   return (
     <>
@@ -166,16 +171,27 @@ const handleInputChange = (
           </IconButton>
         </Tooltip>
       )}
+
       {type === 'add' && (
         <Tooltip title="Add Blacklist">
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<IconPlus size={20} />}
-            onClick={handleClickOpen}
-          >
-            Add Blacklist
-          </Button>
+          {isLoading ? (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+            >
+              <CircularProgress color="inherit" size={20} />
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+              onClick={handleClickOpen}
+            >
+              <IconPlus size={20} />
+            </Button>
+          )}
         </Tooltip>
       )}
 
@@ -192,70 +208,73 @@ const handleInputChange = (
               Blacklist Details
             </Typography>
             <Divider />
-<Grid container spacing={5} mb={3}>
-  <Grid size={{ lg: 6, md: 12, sm: 12 }}>
-    <CustomFormLabel htmlFor="visitorId">Visitor</CustomFormLabel>
-    <Autocomplete
-      options={visitorOptions}
-      // show clear (x) button
-      disableClearable={false}
-      clearOnEscape
-      sx={{ m: 0 }}  // keep margins/padding unchanged
-      value={visitorOptions.find(o => o.id === formData.visitorId) ?? null}
-      onChange={(_, newVal) => {
-        const id = newVal?.id ?? '';
-        setFormData(prev => ({ ...prev, visitorId: id }));
-        // clear error for this field
-        setFormErrors(prev => {
-          if (!prev.visitorId) return prev;
-          const next = { ...prev }; delete next.visitorId; return next;
-        });
-      }}
-      isOptionEqualToValue={(opt, val) => opt.id === val.id}
-      getOptionLabel={(opt) => (typeof opt === 'string' ? opt : opt.name)}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          id="visitorId"
-          variant="outlined"
-          required
-          error={!!formErrors.visitorId}
-          helperText={formErrors.visitorId || ''}
-        />
-      )}
-    />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+                <CustomFormLabel htmlFor="visitorId">Visitor</CustomFormLabel>
+                <Autocomplete
+                  options={visitorOptions}
+                  // show clear (x) button
+                  disableClearable={false}
+                  clearOnEscape
+                  sx={{ m: 0 }} // keep margins/padding unchanged
+                  value={visitorOptions.find((o) => o.id === formData.visitorId) ?? null}
+                  onChange={(_, newVal) => {
+                    const id = newVal?.id ?? '';
+                    setFormData((prev) => ({ ...prev, visitorId: id }));
+                    // clear error for this field
+                    setFormErrors((prev) => {
+                      if (!prev.visitorId) return prev;
+                      const next = { ...prev };
+                      delete next.visitorId;
+                      return next;
+                    });
+                  }}
+                  isOptionEqualToValue={(opt, val) => opt.id === val.id}
+                  getOptionLabel={(opt) => (typeof opt === 'string' ? opt : opt.name)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      id="visitorId"
+                      variant="outlined"
+                      required
+                      error={!!formErrors.visitorId}
+                      helperText={formErrors.visitorId || ''}
+                    />
+                  )}
+                />
 
-    <CustomFormLabel htmlFor="floorplanMaskedAreaId">Area</CustomFormLabel>
-    <Autocomplete
-      options={areaOptions}
-      disableClearable={false}
-      clearOnEscape
-      sx={{ m: 0 }}
-      value={areaOptions.find(o => o.id === formData.floorplanMaskedAreaId) ?? null}
-      onChange={(_, newVal) => {
-        const id = newVal?.id ?? '';
-        setFormData(prev => ({ ...prev, floorplanMaskedAreaId: id }));
-        setFormErrors(prev => {
-          if (!prev.floorplanMaskedAreaId) return prev;
-          const next = { ...prev }; delete next.floorplanMaskedAreaId; return next;
-        });
-      }}
-      isOptionEqualToValue={(opt, val) => opt.id === val.id}
-      getOptionLabel={(opt) => (typeof opt === 'string' ? opt : opt.name)}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          id="floorplanMaskedAreaId"
-          variant="outlined"
-          required
-          error={!!formErrors.floorplanMaskedAreaId}
-          helperText={formErrors.floorplanMaskedAreaId || ''}
-        />
-      )}
-    />
-  </Grid>
-</Grid>
-
+                <CustomFormLabel htmlFor="floorplanMaskedAreaId">Area</CustomFormLabel>
+                <Autocomplete
+                  options={areaOptions}
+                  disableClearable={false}
+                  clearOnEscape
+                  sx={{ m: 0 }}
+                  value={areaOptions.find((o) => o.id === formData.floorplanMaskedAreaId) ?? null}
+                  onChange={(_, newVal) => {
+                    const id = newVal?.id ?? '';
+                    setFormData((prev) => ({ ...prev, floorplanMaskedAreaId: id }));
+                    setFormErrors((prev) => {
+                      if (!prev.floorplanMaskedAreaId) return prev;
+                      const next = { ...prev };
+                      delete next.floorplanMaskedAreaId;
+                      return next;
+                    });
+                  }}
+                  isOptionEqualToValue={(opt, val) => opt.id === val.id}
+                  getOptionLabel={(opt) => (typeof opt === 'string' ? opt : opt.name)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      id="floorplanMaskedAreaId"
+                      variant="outlined"
+                      required
+                      error={!!formErrors.floorplanMaskedAreaId}
+                      helperText={formErrors.floorplanMaskedAreaId || ''}
+                    />
+                  )}
+                />
+              </Grid>
+            </Grid>
           </DialogContent>
           <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
             <Button
@@ -277,7 +296,7 @@ const handleInputChange = (
         </Dialog>
       )}
 
-      {loading && (
+      {isLoading && (
         <Dialog open={true} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h1" mb={5}>

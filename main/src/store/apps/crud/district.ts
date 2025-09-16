@@ -50,6 +50,7 @@ export interface DistrictType {
 
 interface StateType {
     districts: DistrictType[];
+    districtAll: DistrictType[];
     districtSearch: string;
     selectedDistrict?: DistrictType | null;
     districtTotalCount: number;
@@ -61,6 +62,7 @@ hasLoaded: boolean;
 
 const initialState: StateType = {
     districts: [],
+    districtAll: [],
     districtSearch: "",
     selectedDistrict: null,
     districtTotalCount: 0,
@@ -77,6 +79,9 @@ export const DistrictSlice = createSlice({
     reducers: {
         GetDistricts: (state, action: PayloadAction<DistrictType[]>) => {
             state.districts = action.payload;
+        },
+        GetAllDistrict: (state, action: PayloadAction<DistrictType[]>) => {
+            state.districtAll = action.payload;
         },
         SelectDistrict: (state, action: PayloadAction<string>) => {
             const selected = state.districts.find((district: DistrictType) => district.id === action.payload);
@@ -165,12 +170,12 @@ export const selectDistrict = (districtID: string) => (dispatch: AppDispatch) =>
     }
 };
 
-export const { GetDistricts, SelectDistrict, SearchDistrict, UpdateFilter } = DistrictSlice.actions;
+export const { GetDistricts, GetAllDistrict, SelectDistrict, SearchDistrict, UpdateFilter } = DistrictSlice.actions;
 
 export const fetchDistricts = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
-        dispatch(GetDistricts(response.data?.collection?.data || []));
+        dispatch(GetAllDistrict(response.data?.collection?.data || []));
     } catch (err: any) {
         console.log("Error fetching districts:", err);
     }

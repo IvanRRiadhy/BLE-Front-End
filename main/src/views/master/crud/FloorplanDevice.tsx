@@ -56,7 +56,6 @@ const FloorplanDevice = () => {
       <Breadcrumb title="Floorplan Device Table" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => {
-          
           return(
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>
             <Box bgcolor={topcard.bgcolor + '.light'} textAlign="center">

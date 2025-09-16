@@ -86,6 +86,7 @@ const AddEditDepartment = ({ type, department }: FormType) => {
       return;
     }
     setLoading(true);
+    setIsSaving(true);
     try {
       let result;
       if (type === 'edit') {
@@ -108,6 +109,7 @@ const AddEditDepartment = ({ type, department }: FormType) => {
     }
     setTimeout(() => {
       setLoading(false);
+      setIsSaving(false);
     }, 1000);
   };
 
@@ -131,14 +133,24 @@ const AddEditDepartment = ({ type, department }: FormType) => {
       )}
       {type === 'add' && (
         <Tooltip title="Add Department">
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<IconPlus size={20} />}
-            onClick={handleClickOpen}
-          >
-            Add Department
-          </Button>
+          {isLoading ? (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+            >
+              <CircularProgress color='inherit' size={20} />
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+              onClick={handleClickOpen}
+            >
+              <IconPlus size={20} />
+            </Button>
+          )}
         </Tooltip>
       )}
 

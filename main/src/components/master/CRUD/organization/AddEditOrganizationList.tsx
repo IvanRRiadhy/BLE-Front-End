@@ -10,6 +10,7 @@ import {
   SelectChangeEvent,
   Typography,
   CircularProgress,
+  Tooltip,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
@@ -25,6 +26,7 @@ import {
   OrganizationType,
 } from 'src/store/apps/crud/organization';
 import { defaultOrganizationForm } from 'src/store/apps/defaultForm';
+import AddEditTimeGroup from '../timeGroup/TimeGroupContent';
 
 interface FormType {
   type?: string;
@@ -73,23 +75,24 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
     setOpen(false);
   };
 
-    const validateForm = (): boolean => {
+  const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
     if (!formData.code?.trim()) errors.code = 'Organization code is required';
     if (!formData.name?.trim()) errors.name = 'Organization name is required';
-    if (!formData.organizationHost?.trim()) errors.organizationHost = 'Organization host is required';
+    if (!formData.organizationHost?.trim())
+      errors.organizationHost = 'Organization host is required';
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const handleSave = async () => {
-        if (!validateForm()) {
-          toast.error('Please fill in all required fields correctly.');
-          return;
-        }
-    setLoading(true);
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields correctly.');
+      return;
+    }
+    setIsSaving(true);
     try {
       let result;
       if (type === 'edit') {
@@ -111,7 +114,7 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
       console.error('Error saving organization:', error);
     }
     setTimeout(() => {
-      setLoading(false);
+      setIsSaving(false);
     }, 1000);
   };
 
@@ -127,19 +130,33 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
   return (
     <>
       {type === 'edit' && (
-        <IconButton color="primary" size="small" onClick={handleClickOpen}>
-          <IconPencil size={20} />
-        </IconButton>
+        <Tooltip title="Edit Organization">
+          <IconButton color="primary" size="small" onClick={handleClickOpen}>
+            <IconPencil size={20} />
+          </IconButton>
+        </Tooltip>
       )}
       {type === 'add' && (
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<IconPlus size={20} />}
-          onClick={handleClickOpen}
-        >
-          Add Organization
-        </Button>
+        <Tooltip title="Add Organization">
+          {isLoading ? (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+            >
+              <CircularProgress color="inherit" size={20} />
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+              onClick={handleClickOpen}
+            >
+              <IconPlus size={20} />
+            </Button>
+          )}
+        </Tooltip>
       )}
 
       {!isLoading && (
@@ -174,7 +191,7 @@ const AddEditOrganization = ({ type, organization }: FormType) => {
                   helperText={formErrors.organizationHost}
                 />
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="organization-Name">Organization Name</CustomFormLabel>
                 <CustomTextField
                   id="name"
