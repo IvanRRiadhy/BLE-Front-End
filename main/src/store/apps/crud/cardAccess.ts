@@ -27,7 +27,7 @@ export type CardAccessType = {
     name: string,
     accessNumber: string,
     remarks: string,
-    maskedAreaId: string[],
+    maskedAreaIds: string[],
     maskedArea: MaskedAreaType[],
     createdBy: string,
     createdAt: string,
@@ -113,6 +113,15 @@ export const {
     SelectCardAccess
 } = CardAccessSlice.actions
 
+export const fetchCardAccess = () => async (dispatch: any) => {
+    try {
+            const res = await axiosServices.get(API_URL);
+    dispatch(GetAllCardAccess(res.data.collection.data || []));
+    } catch (error) {
+        console.error("Error fetching card access:", error);
+    }
+}
+
 export const fetchCardAccessDT = createAsyncThunk(
     "cardAccess/fetchCardAccessDT",
     async (filter: any, thunkAPI) => {
@@ -134,6 +143,48 @@ export const fetchCardAccessDT = createAsyncThunk(
 
         return res.data.collection;
       }
-)
+);
+
+export const addCardAccess = createAsyncThunk("cardAccess/addCardAccess", async (formData: FormData, { rejectWithValue }) => {
+    const started = Date.now();
+    try {
+        
+        const response = await axiosServices.post(API_URL, formData);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+        return response.data;
+    } catch (error: any) {
+        console.error("Error adding card access:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+        return rejectWithValue(error.response?.data || "Unknown error");
+    }
+});
+
+export const editCardAccess = createAsyncThunk("cardAccess/editCardAccess", async (formData: FormData, { rejectWithValue }) => {
+    const started = Date.now();
+    try {
+       const id = formData.get('id');
+        const response = await axiosServices.put(`${API_URL}${id}`, formData);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+        return response.data;
+    } catch (error: any) {
+        console.error("Error editing card access:", error);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+        return rejectWithValue(error.response?.data || "Unknown error");
+    }
+})
+
+export const deleteCardAccess = createAsyncThunk("cardAccess/deleteCardAccess", async (cardAccessId: string, { rejectWithValue }) => {
+    try {
+        await axiosServices.delete(`${API_URL}${cardAccessId}`);
+        return cardAccessId; // Return the deleted card access's ID to update the state
+    } catch (error: any) {
+        console.error("Error deleting card access:", error);
+        return rejectWithValue(error.response?.data || "Unknown error");
+    }
+});
 
 export default CardAccessSlice.reducer

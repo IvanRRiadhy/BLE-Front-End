@@ -25,14 +25,21 @@ import {
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import { CardGroupType, fetchCardGroupDT, UpdateFilter } from 'src/store/apps/crud/cardGroup';
+import {
+  CardGroupType,
+  deleteCardGroup,
+  fetchCardGroupDT,
+  UpdateFilter,
+} from 'src/store/apps/crud/cardGroup';
 import { defaultCardGroupFilter } from 'src/store/apps/defaultForm';
+import AddEditCardGroup from './AddEditCardGroup';
+import toast from 'react-hot-toast';
 
 const columns = [
   { label: 'Group Name', field: 'Name', sortAble: true },
   { label: 'Description', field: 'Remarks', sortAble: false },
   { label: 'Cards', field: '', sortAble: false },
-  { label: 'Access', field: '', sortAble: false },
+  { label: 'Accesses', field: '', sortAble: false },
 ];
 
 const SKELETON_ROWS = 5;
@@ -126,6 +133,9 @@ const CardGroupList = () => {
           <TableCell>
             <Skeleton variant="text" width={180} height={22} />
           </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={180} height={22} />
+          </TableCell>
 
           {/* right actions */}
           <TableCell
@@ -149,6 +159,38 @@ const CardGroupList = () => {
       ))}
     </>
   );
+
+  //Delete Pop-up
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedCardGroup, setSelectedCardGroup] = useState<CardGroupType | null>(null);
+  // Open delete confirmation dialog
+  const handleOpenDeleteDialog = (cardGroup: CardGroupType) => {
+    setSelectedCardGroup(cardGroup);
+    setDeleteDialogOpen(true);
+  };
+
+  // Close delete confirmation dialog
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setSelectedCardGroup(null);
+  };
+
+  // Confirm delete action
+  const handleConfirmDelete = async () => {
+    if (selectedCardGroup) {
+      try {
+        const result = await dispatch(deleteCardGroup(selectedCardGroup.id));
+        if (result && result.type && result.type.endsWith('/fulfilled')) {
+          await dispatch(fetchCardGroupDT(cardGroupFilter));
+          toast.success('Data Deleted');
+        }
+      } catch (error) {
+        toast.error('Delete Data Unsuccessful');
+        console.error('Error deleting floorplan:', error);
+      }
+    }
+    handleCloseDeleteDialog();
+  };
 
   return (
     <Grid container spacing={3}>
@@ -227,7 +269,11 @@ const CardGroupList = () => {
                           <TableCell>{cardGroup.name}</TableCell>
                           <TableCell>{cardGroup.remarks}</TableCell>
                           <TableCell>{cardGroup.cards?.length ?? 0}</TableCell>
-                          <TableCell>{cardGroup.cardAccess?.length ?? 0}</TableCell>
+                          <TableCell>
+                            {cardGroup.accessScope === 'Specific'
+                              ? cardGroup.cardAccesses?.length ?? 0
+                              : cardGroup.accessScope}
+                          </TableCell>
                           <TableCell
                             sx={{
                               position: 'sticky',
@@ -241,11 +287,11 @@ const CardGroupList = () => {
                               maxWidth: 150,
                             }}
                           >
-                            {/* <AddEditFloorplan type="edit" floorplan={floorplan} /> */}
+                            <AddEditCardGroup type="edit" cardGroup={cardGroup} />
                             <IconButton
                               color="error"
                               size="small"
-                              // onClick={() => handleOpenDeleteDialog(floorplan)}
+                              onClick={() => handleOpenDeleteDialog(cardGroup)}
                             >
                               <IconTrash size={20} />
                             </IconButton>
@@ -268,27 +314,28 @@ const CardGroupList = () => {
         </Box>
       </Grid>
       {/* Delete Confirmation Dialog */}
-      {/* <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-                <DialogTitle>Confirm Deletion</DialogTitle>
-                <DialogContent>
-                  <DialogContentText>
-                    Are you sure you want to delete the floor <strong>{selectedFloorplan?.name}</strong>?
-                  </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleCloseDeleteDialog} color="primary">
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleConfirmDelete}
-                    color={isLoading ? 'primary' : 'error'}
-                    disabled={isLoading}
-                    startIcon={isLoading ? <CircularProgress size={20} /> : null}
-                  >
-                    {isLoading ? 'Deleting...' : 'Delete'}
-                  </Button>
-                </DialogActions>
-              </Dialog> */}
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete the Card Group{' '}
+            <strong>{selectedCardGroup?.name}</strong>?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            color={isLoading ? 'primary' : 'error'}
+            disabled={isLoading}
+            startIcon={isLoading ? <CircularProgress size={20} /> : null}
+          >
+            {isLoading ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 };

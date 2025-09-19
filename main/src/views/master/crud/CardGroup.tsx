@@ -16,6 +16,7 @@ import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import CardGroupList from 'src/components/master/CRUD/cardGroup/CardGroupList';
+import AddEditCardGroup from 'src/components/master/CRUD/cardGroup/AddEditCardGroup';
 
 interface cardType {
   icon?: string;
@@ -93,7 +94,7 @@ const CardGroup = () => {
                 }}
               >
                 <ParentCard title="Card Group List" codeModel={[
-
+                    <AddEditCardGroup key="add" type="add" />
                   ]}>
                   <CardGroupList />
                 </ParentCard>

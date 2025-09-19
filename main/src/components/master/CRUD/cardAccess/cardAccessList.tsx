@@ -233,7 +233,7 @@ const CardAccessList = () => {
                           <TableCell>{cardAccess.name}</TableCell>
                           <TableCell>{cardAccess.remarks}</TableCell>
                           <TableCell>{cardAccess.accessNumber}</TableCell>
-                          <TableCell>{cardAccess.maskedArea?.length ?? 0}</TableCell>
+                          <TableCell>{cardAccess.maskedAreaIds?.length ?? 0}</TableCell>
                           <TableCell
                             sx={{
                               position: 'sticky',

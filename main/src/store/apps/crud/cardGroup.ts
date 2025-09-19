@@ -27,8 +27,9 @@ export type CardGroupType ={
     id: string,
     name: string,
     remarks: string,
+    accessScope: string, //all, specific, none
     cards: CardType[],
-    cardAccess: CardAccessType[],
+    cardAccesses: CardAccessType[],
     createdBy: string,
     createdAt: string,
     updatedBy: string,
@@ -105,6 +106,15 @@ export const CardGroupSlice = createSlice ({
 
 export const { GetCardGroup, GetAllCardGroup, UpdateFilter } = CardGroupSlice.actions
 
+export const fetchCardGroup = () => async (dispatch: any) => {
+    try {
+            const res = await axiosServices.get(API_URL);
+    dispatch(GetAllCardGroup(res.data.collection.data || []));
+    } catch (error) {
+        console.error("Error fetching card groups:", error);
+    }
+}
+
 export const fetchCardGroupDT = createAsyncThunk(
     "cardGroups/fetchCardGroupDT",
     async (filter: any, thunkAPI) => {
@@ -126,6 +136,66 @@ export const fetchCardGroupDT = createAsyncThunk(
 
         return res.data.collection;
       }
+)
+
+export const addCardGroup = createAsyncThunk(
+  "cardGroups/addCardGroup",
+  async (payload: {
+    name: string;
+    remarks: string;
+    accessScope: string;
+    cardIds: string[];
+    cardAccessIds: string[];
+  }, { rejectWithValue }) => {
+    const started = Date.now();
+    try {
+      const response = await axiosServices.post(API_URL, payload);
+      const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+export const editCardGroup = createAsyncThunk(
+  "cardGroups/editCardGroup",
+  async (payload: {
+    id: string;
+    name: string;
+    remarks: string;
+    accessScope: string;
+    cardIds: string[];
+    cardAccessIds: string[];
+  }, { rejectWithValue }) => {
+    const started = Date.now();
+    try {
+      const response = await axiosServices.put(`${API_URL}${payload.id}`, payload);
+      const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+
+
+export const deleteCardGroup = createAsyncThunk(
+    "cardGroups/deleteCardGroup",
+    async (cardGroupId: string, { rejectWithValue }) => {
+        const started = Date.now();
+        try {
+            await axiosServices.delete(`${API_URL}${cardGroupId}`);
+                            const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+            return cardGroupId; // Return the deleted cardGroup's ID to update the state
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
 )
 
 export default CardGroupSlice.reducer
