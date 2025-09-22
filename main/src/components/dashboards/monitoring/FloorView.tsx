@@ -811,8 +811,8 @@ useEffect(() => {
       )}
       {selectedBeacon &&
         (() => {
-          const member = memberList.find((m) => m.bleCardNumber === selectedBeacon.id);
-          const visitor = visitorList.find((v) => v.bleCardNumber === selectedBeacon.id);
+          const member = memberList.find((m: memberType) => m.bleCardNumber === selectedBeacon.id);
+          const visitor = visitorList.find((v: VisitorType) => v.bleCardNumber === selectedBeacon.id);
           const person = member || visitor;
 
           return (

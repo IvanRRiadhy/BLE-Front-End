@@ -13,7 +13,7 @@ import {
 } from 'src/store/customizer/CustomizerSlice';
 import MonitoringGrid from 'src/views/dashboard/MonitoringGrid.tsx';
 import { hideAlarmPopup } from 'src/store/apps/monitoring/AlarmUI';
-import AlarmPopup from 'src/layouts/full/AlarmPopup';
+import AlarmPopup from 'src/layouts/full/AlarmPopup'; 
 
 const Monitoring = () => {
   const dispatch = useDispatch();

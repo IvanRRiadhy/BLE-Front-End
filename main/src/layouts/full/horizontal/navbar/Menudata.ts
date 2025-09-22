@@ -177,7 +177,7 @@ const Menuitems = [
         id: uniqueId(),
         title: 'Card',
         icon: IconMapPin,
-        href: '/master/card',
+        // href: '/master/card',
         children: [
           {
             id: uniqueId(),
@@ -185,7 +185,7 @@ const Menuitems = [
             icon: IconMapPin,
             href: '/master/card/'
           },
-                    {
+          {
             id: uniqueId(),
             title: 'Card Group',
             icon: IconMapPin,

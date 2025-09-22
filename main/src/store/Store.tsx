@@ -49,6 +49,7 @@ import NotifyReducer from './apps/monitoring/NotifySlice';
 import UserReducer from './apps/crud/users';
 import CardAccessReducer from './apps/crud/cardAccess';
 import CardGroupReducer from './apps/crud/cardGroup';
+import AlarmSettingReducer from './apps/alarmsetting/alarmSettings';
 import SessionReducer from './apps/session';
 import { combineReducers } from 'redux';
 import {
@@ -106,6 +107,7 @@ const rootReducer = combineReducers({
   sessionReducer: SessionReducer,
   CardAccessReducer: CardAccessReducer,
   CardGroupReducer: CardGroupReducer,
+  AlarmSettingReducer: AlarmSettingReducer,
 });
 
 const persistConfig = {

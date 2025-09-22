@@ -29,6 +29,9 @@ const GatewayApp = Loadable(lazy(() => import('../views/master/gateway/gateway')
 const MemberTag = Loadable(lazy(() => import('../views/master/tag/memberTag')));
 const VisitorTag = Loadable(lazy(() => import('../views/master/tag/visitorTag')));
 
+/* ***Alarm Setting*** */
+const AlarmSetting = Loadable(lazy(() => import('../views/master/alarmSetting/MainList')));
+
 /* ****CRUD**** */
 const Application = Loadable(lazy(() => import('../views/master/crud/Application')));
 const Integration = Loadable(lazy(() => import('../views/master/crud/Integration')));
@@ -274,6 +277,9 @@ const Router = [
       { path: '/master/visitorcard', exact: true, element: <VisitorCard /> },
       { path: '/master/cardaccess', exact: true, element: <CardAccess /> },
       { path: '/master/cardgroup', exact: true, element: <CardGroup /> },
+
+      // ***Alarm Setting*** //
+      { path: '/alarmsetting/main', exact: true, element: <AlarmSetting /> },
 
       //Dashboard Evacuation
       { path: '/dashboards/evacuation', exact: true, element: <EvacuationDashboard /> },

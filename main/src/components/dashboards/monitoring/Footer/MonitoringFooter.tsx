@@ -8,7 +8,7 @@ const MonitoringFooter = () => {
   const customizer = useSelector((state: RootState) => state.customizer);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const footerRef = useRef<HTMLDivElement>(null); // Reference to the footer
-  const toggleHeight = customizer.isMonitorSidebar ? '50px' : '0px';
+  const toggleHeight = '50px';
   const focus = useSelector((state: RootState) => state.layoutReducer.focus);
 
   const sections = [
