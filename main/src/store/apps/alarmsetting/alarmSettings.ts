@@ -36,7 +36,9 @@ export type GetFilter = {
 export type AlarmSettingType = {
     id: string;
     name: string;
-    isActive: boolean;
+    remarks: string;
+    isEnabled: boolean;
+    alarmLevelPriority: "low" | "medium" | "high";
 };
 
 interface StateType {
@@ -78,10 +80,16 @@ export const AlarmSettingSlice = createSlice({
         UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
             state.alarmSettingFilter = { ...state.alarmSettingFilter, ...action.payload};
         },
-        ChangeActiveStatus: (state, action: PayloadAction<{id: string, isActive: boolean}>) => {
+        ChangeActiveStatus: (state, action: PayloadAction<{id: string, isEnabled: boolean}>) => {
             const index = state.alarmSettings.findIndex(alarmSetting => alarmSetting.id === action.payload.id);
             if (index !== -1) {
-                state.alarmSettings[index].isActive = action.payload.isActive;
+                state.alarmSettings[index].isEnabled = action.payload.isEnabled;
+            }
+        },
+        ChangePriorityStatus: (state, action: PayloadAction<{id: string, priority: "low" | "medium" | "high"}>) => {
+            const index = state.alarmSettings.findIndex(alarmSetting => alarmSetting.id === action.payload.id);
+            if (index !== -1) {
+                state.alarmSettings[index].alarmLevelPriority = action.payload.priority;
             }
         },
     },
@@ -96,7 +104,7 @@ export const AlarmSettingSlice = createSlice({
             state.hasLoaded = true;
     state.alarmSettingTotalCount = action.payload.length;
     state.alarmSettingFilteredCount = action.payload.length;
-    state.alarmSettingActiveCount = action.payload.filter(a => a.isActive).length;
+    state.alarmSettingActiveCount = action.payload.filter(a => a.isEnabled).length;
         })
         .addCase(fetchAlarmSettingsDT.rejected, (state) => {
             state.isLoading = false;
@@ -105,11 +113,11 @@ export const AlarmSettingSlice = createSlice({
     },
 });
 
-export const { GetAlarmSetting, UpdateFilter, ChangeActiveStatus } = AlarmSettingSlice.actions;
+export const { GetAlarmSetting, UpdateFilter, ChangeActiveStatus, ChangePriorityStatus } = AlarmSettingSlice.actions;
 
 export const fetchAlarmSettingsDT = createAsyncThunk(
     'alarmSetting/fetchAlarmSettiingsDT',
-    async (filter: GetFilter, thunkAPI) => {
+    async (filter: GetFilter, thunkAPI) => {    
         const started = Date.now();
         dispatch(GetAlarmSetting(AlarmSettingDummy));
         await ensureMinLatency(started, 500);
@@ -120,11 +128,11 @@ export const fetchAlarmSettingsDT = createAsyncThunk(
 
 export default AlarmSettingSlice.reducer;
 
-const AlarmSettingDummy = [
-    { id: "1", name: "GeoFencing", isActive: true },
-    { id: "2", name: "People Counting", isActive: false },
-    { id: "3", name: "Line Detection", isActive: true },
-    { id: "4", name: "Alarm A", isActive: false },
-    { id: "5", name: "Alarm B", isActive: true },
-    { id: "6", name: "Alarm C", isActive: false },
+const AlarmSettingDummy: AlarmSettingType[] = [
+    { id: "1", name: "GeoFencing", remarks: "Alarm for Geofencing", isEnabled: true, alarmLevelPriority: "high" },
+    { id: "2", name: "People Counting", remarks: "Alarm for People Counting", isEnabled: false, alarmLevelPriority: "medium" },
+    { id: "3", name: "Line Detection", remarks: "Alarm for Line Detection", isEnabled: true, alarmLevelPriority: "low" },
+    { id: "4", name: "Alarm A", remarks: "", isEnabled: false, alarmLevelPriority: "high" },
+    { id: "5", name: "Alarm B", remarks: "", isEnabled: true, alarmLevelPriority: "medium" },
+    { id: "6", name: "Alarm C", remarks: "", isEnabled: false, alarmLevelPriority: "low" },
 ]

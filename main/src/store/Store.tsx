@@ -50,6 +50,8 @@ import UserReducer from './apps/crud/users';
 import CardAccessReducer from './apps/crud/cardAccess';
 import CardGroupReducer from './apps/crud/cardGroup';
 import AlarmSettingReducer from './apps/alarmsetting/alarmSettings';
+import GeoFencingReducer from './apps/alarmsetting/geofencing';
+import PeopleCountingReducer from './apps/alarmsetting/peoplecounting';
 import SessionReducer from './apps/session';
 import { combineReducers } from 'redux';
 import {
@@ -108,6 +110,8 @@ const rootReducer = combineReducers({
   CardAccessReducer: CardAccessReducer,
   CardGroupReducer: CardGroupReducer,
   AlarmSettingReducer: AlarmSettingReducer,
+  GeoFencingReducer: GeoFencingReducer,
+  PeopleCountingReducer: PeopleCountingReducer,
 });
 
 const persistConfig = {

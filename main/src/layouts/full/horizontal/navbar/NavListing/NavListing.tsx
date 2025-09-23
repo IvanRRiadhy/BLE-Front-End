@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React from 'react';
-import Menudata from '../Menudata';
+import useMenuItems from '../Menudata';
 import { useLocation } from 'react-router';
 import { Box, List, Theme, useMediaQuery } from '@mui/material';
 import { useSelector } from 'src/store/Store';
@@ -11,6 +11,7 @@ import { RootState } from 'src/store/Store';
 
 const NavListing = () => {
   const { pathname } = useLocation();
+  const Menudata = useMenuItems();
   const pathDirect = pathname;
   const pathWithoutLastPart = pathname.slice(0, pathname.lastIndexOf('/'));
   const customizer = useSelector((state: RootState) => state.customizer);

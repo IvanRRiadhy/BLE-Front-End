@@ -11,19 +11,22 @@ import {
   TableRow,
   Typography,
   TablePagination,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
   Button,
   TableSortLabel,
   Skeleton,
-  CircularProgress,
   Switch,
+  Tooltip,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconEdit, IconTrash } from '@tabler/icons-react';
+import {
+  IconBrandTelegram,
+  IconChevronDown,
+  IconChevronUp,
+  IconEdit,
+  IconExternalLink,
+  IconSend,
+  IconTrash,
+} from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import toast from 'react-hot-toast';
 import {
@@ -32,17 +35,22 @@ import {
   GetAlarmSetting,
   UpdateFilter,
   ChangeActiveStatus,
+  ChangePriorityStatus,
 } from 'src/store/apps/alarmsetting/alarmSettings';
+import { useLocation, useNavigate } from 'react-router';
 
 const columns = [
   { label: 'Alarm Type', field: 'Name', sortAble: true },
-  { label: 'Status', field: 'IsActive', sortAble: false },
+  { label: 'Status', field: 'IsEnabled', sortAble: true },
+  { label: 'Level Priority', field: 'AlarmLevelPriority', sortAble: true },
 ];
 
 const SKELETON_ROWS = 5;
 
 const AlarmSettingList = () => {
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
   const alarmSettings = useSelector((state: RootState) => state.AlarmSettingReducer.alarmSettings);
   const alarmSettingFilter = useSelector(
     (state: RootState) => state.AlarmSettingReducer.alarmSettingFilter,
@@ -54,18 +62,9 @@ const AlarmSettingList = () => {
   );
 
   // Pagination State
-  const page = Math.floor(alarmSettingFilter.Start / alarmSettingFilter.Length);
-  const rowsPerPage = alarmSettingFilter.Length;
   const orderBy = alarmSettingFilter.SortColumn;
   const order = alarmSettingFilter.SortDir;
 
-  const handleChangePage = (_: unknown, newPage: number) => {
-    dispatch(UpdateFilter({ Start: newPage * alarmSettingFilter.Length }));
-  };
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newLength = parseInt(event.target.value, 10);
-    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
-  };
   const handleSort = (column: string) => {
     const isAsc = alarmSettingFilter.SortColumn === column && alarmSettingFilter.SortDir === 'asc';
     const isDesc =
@@ -94,8 +93,44 @@ const AlarmSettingList = () => {
     dispatch(fetchAlarmSettingsDT(alarmSettingFilter));
   }, [dispatch]);
 
+  const getRoute = (name: string): string => {
+    const basePath = `${window.location.origin}${location.pathname}`;
+    switch (name.toLowerCase()) {
+      case 'geofencing':
+        return `/alarmsetting/geofencing`;
+      case 'people counting':
+        return `/alarmsetting/peoplecounting`;
+      case 'firealarm':
+        return `/alarmsetting/firealarm`;
+      case 'cctv':
+        return `/alarmsetting/cctv`;
+      case 'wrongzone':
+        return `/alarmsetting/wrongzone`;
+      default:
+        toast.error('No route defined for this alarm type');
+        return "/alarmsetting";
+    }
+  };
+
   const handleToggleStatus = (id: string, currentStatus: boolean) => {
-    dispatch(ChangeActiveStatus({ id, isActive: !currentStatus }));
+    dispatch(ChangeActiveStatus({ id, isEnabled: !currentStatus }));
+  };
+
+  const handlePriorityUp = (alarm: AlarmSettingType) => {
+    if (alarm.alarmLevelPriority === 'high') {
+      toast.error('Alarm is already at highest priority');
+      return;
+    }
+    const newPriority = alarm.alarmLevelPriority === 'medium' ? 'high' : 'medium';
+    dispatch(ChangePriorityStatus({ id: alarm.id, priority: newPriority }));
+  };
+  const handlePriorityDown = (alarm: AlarmSettingType) => {
+    if (alarm.alarmLevelPriority === 'low') {
+      toast.error('Alarm is already at lowest priority');
+      return;
+    }
+    const newPriority = alarm.alarmLevelPriority === 'medium' ? 'low' : 'medium';
+    dispatch(ChangePriorityStatus({ id: alarm.id, priority: newPriority }));
   };
 
   const renderSkeletonRows = (rows: number) => (
@@ -204,7 +239,7 @@ const AlarmSettingList = () => {
                 </TableHead>
                 <TableBody key={'skeleton-body'}>
                   {!hasLoaded
-                    ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                    ? renderSkeletonRows( SKELETON_ROWS)
                     : alarmSettings.map((alarmSetting: AlarmSettingType, index: number) => (
                         <TableRow key={alarmSetting.id}>
                           <TableCell
@@ -220,28 +255,132 @@ const AlarmSettingList = () => {
                               justifyContent: 'center',
                             }}
                           >
-                            {index + 1 + page * rowsPerPage}
+                            {index + 1}
                           </TableCell>
-                          <TableCell>{alarmSetting.name}</TableCell>
+                          <TableCell>
+                            <Box display="flex" alignItems="center" gap={1}>
+                              <Typography variant="h6" fontWeight="bold">
+                                {alarmSetting.name}
+                              </Typography>
+                              {alarmSetting.remarks !== '' && (
+                                <Tooltip title={alarmSetting.remarks} arrow>
+                                  <IconButton size="small" sx={{ color: 'text.secondary', p: 0.5 }}>
+                                    <Typography
+                                      variant="body2"
+                                      fontWeight="bold"
+                                      sx={{
+                                        width: 18,
+                                        height: 18,
+                                        borderRadius: '50%',
+                                        border: '1px solid',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '0.75rem',
+                                        lineHeight: 1,
+                                      }}
+                                    >
+                                      ?
+                                    </Typography>
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                            </Box>
+                          </TableCell>
+
                           <TableCell>
                             <Box display="grid" gridTemplateColumns="80px auto" alignItems="center">
                               <Typography
                                 variant="body2"
-                                color={alarmSetting.isActive ? 'green' : 'text.secondary'}
+                                color={alarmSetting.isEnabled ? 'green' : 'text.secondary'}
                               >
-                                {alarmSetting.isActive ? 'Active' : 'Inactive'}
+                                {alarmSetting.isEnabled ? 'Active' : 'Inactive'}
                               </Typography>
                               <Switch
-                                checked={alarmSetting.isActive}
+                                checked={alarmSetting.isEnabled}
                                 onChange={() =>
-                                  handleToggleStatus(alarmSetting.id, alarmSetting.isActive)
+                                  handleToggleStatus(alarmSetting.id, alarmSetting.isEnabled)
                                 }
                                 color="primary"
                                 size="small"
                               />
                             </Box>
                           </TableCell>
-                          {/* <TableCell>{alarmSetting.districtHost}</TableCell> */}
+
+                          <TableCell>
+                            {alarmSetting.isEnabled && (
+                              <Box display="flex" alignItems="center" gap={1}>
+                                {/* Priority Badge */}
+                                {alarmSetting.alarmLevelPriority === 'high' && (
+                                  <Button
+                                    size="small"
+                                    variant="contained"
+                                    sx={{
+                                      backgroundColor: '#e53935',
+                                      color: 'white',
+                                      borderRadius: '16px',
+                                      textTransform: 'none',
+                                      fontWeight: 'bold',
+                                      px: 2,
+                                    }}
+                                    disableElevation
+                                  >
+                                    High
+                                  </Button>
+                                )}
+                                {alarmSetting.alarmLevelPriority === 'medium' && (
+                                  <Button
+                                    size="small"
+                                    variant="contained"
+                                    sx={{
+                                      backgroundColor: '#4da5f3ff',
+                                      color: 'white',
+                                      borderRadius: '16px',
+                                      textTransform: 'none',
+                                      fontWeight: 'bold',
+                                      px: 2,
+                                    }}
+                                    disableElevation
+                                  >
+                                    Medium
+                                  </Button>
+                                )}
+                                {alarmSetting.alarmLevelPriority === 'low' && (
+                                  <Button
+                                    size="small"
+                                    variant="contained"
+                                    sx={{
+                                      backgroundColor: '#6ae670ff',
+                                      color: 'white',
+                                      borderRadius: '16px',
+                                      textTransform: 'none',
+                                      fontWeight: 'bold',
+                                      px: 2,
+                                    }}
+                                    disableElevation
+                                  >
+                                    Low
+                                  </Button>
+                                )}
+
+                                {/* Up / Down Buttons */}
+                                <Box display="flex" flexDirection="column" alignItems="center">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handlePriorityUp(alarmSetting)}
+                                  >
+                                    <IconChevronUp size={16} />
+                                  </IconButton>
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handlePriorityDown(alarmSetting)}
+                                  >
+                                    <IconChevronDown size={16} />
+                                  </IconButton>
+                                </Box>
+                              </Box>
+                            )}
+                          </TableCell>
 
                           <TableCell
                             sx={{
@@ -249,7 +388,6 @@ const AlarmSettingList = () => {
                               right: 0,
                               background: 'white',
                               zIndex: 2,
-                              display: 'flex',
                               gap: 1,
                               alignItems: 'center',
                               width: 150, // Fixed width
@@ -257,30 +395,28 @@ const AlarmSettingList = () => {
                               maxWidth: 150,
                             }}
                           >
-                            {/* <AddEditDistrict type="edit" district={district} /> */}
-                            <IconButton
-                              color="error"
-                              size="small"
-                              //   onClick={() => handleOpenDeleteDialog(district)}
-                            >
-                              <IconEdit size={20} />
-                            </IconButton>
+                            {alarmSetting.isEnabled && (
+                              <Tooltip title="Go to Setting Page" arrow>
+                                <IconButton
+                                  color="primary"
+                                  size="small"
+                                  onClick={() => {
+                                    const route = getRoute(alarmSetting.name);
+                                    console.log('Navigate to:', route);
+                                    // if using react-router
+                                    navigate(route);
+                                  }}
+                                >
+                                  <IconExternalLink size={20} />
+                                </IconButton>
+                              </Tooltip>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
                 </TableBody>
               </Table>
             </TableContainer>
-            {/* Pagination */}
-            <TablePagination
-              component="div"
-              count={alarmSettingTotalCount}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              onPageChange={handleChangePage}
-              rowsPerPageOptions={[5, 10, 25]}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
           </BlankCard>
         </Box>
       </Grid>

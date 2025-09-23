@@ -15,8 +15,12 @@ import AppCard from 'src/components/shared/AppCard';
 import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
-import AlarmSettingList from 'src/components/master/Alarm Setting/AlarmSettingList';
-
+// import AddEditDevice from 'src/components/master/CRUD/floorplanDevice/addEditDevice';
+import FloorplanDeviceList2 from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceList2';
+import FloorplanDeviceImport from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceImport';
+import FloorplanDeviceExport from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceExport';
+import FloorplanFilter from 'src/components/master/CRUD/floorplan/FloorplanFilter';
+import GeoFencingList from 'src/components/master/Alarm Setting/Geofencing/geofencingList';
 interface cardType {
   icon?: string;
   title: string;
@@ -26,27 +30,29 @@ interface cardType {
 
 const drawerWidth = 320;
 
-const MainAlarmList = () => {
+const FloorplanDevice = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const alarmSettingActiveCount = useSelector(
-    (state: RootState) => state.AlarmSettingReducer.alarmSettingActiveCount,
+  const geoFencingCount = useSelector((state: RootState) => state.GeoFencingReducer.geoFencingAlarmActiveCount);
+  const hasLoaded = useSelector((state: RootState) => state.GeoFencingReducer.hasLoaded);
+  const deviceCount = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceAll.length,
   );
-  const hasLoaded = useSelector((state: RootState) => state.AlarmSettingReducer.hasLoaded);
   const { t } = useTranslation();
-
   const topCards: cardType[] = [
     {
-      title: 'Total Alarm Activated',
-      subtitle: alarmSettingActiveCount.toString(),
-      bgcolor: 'success',
+      title: 'Total Active GeoFencing Alarm',
+      subtitle: geoFencingCount.toString(),
+      bgcolor: 'primary',
     },
   ];
   return (
-    <PageContainer title="Alarm Setting" description="This is the Alarm Setting CRUD Page">
-      <Grid container spacing={3} my={3}>
-        {topCards.map((topcard, i) => (
+    <PageContainer title="GeoFencing Alarm" description="This is the GeoFencing Alarm CRUD Page">
+      <Breadcrumb title="GeoFencing Alarm Table" />
+      <Grid container spacing={3} mb={3}>
+        {topCards.map((topcard, i) => {
+          return(
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>
             <Box bgcolor={topcard.bgcolor + '.light'} textAlign="center">
               <CardContent>
@@ -77,7 +83,8 @@ const MainAlarmList = () => {
               </CardContent>
             </Box>
           </Grid>
-        ))}
+          )
+})}
       </Grid>
       <AppCard>
         <Drawer
@@ -92,13 +99,22 @@ const MainAlarmList = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Alarm List" codeModel={[]}>
-            <AlarmSettingList />
+          <ParentCard title="GeoFencing List" codeModel={[
+          ]}>
+            {/* <FloorplanDeviceList /> */}
+            <GeoFencingList />
           </ParentCard>
+          {/* <Box display="flex" flexDirection="row">
+            <AddEditDeviceSidebar
+              isMobileSidebarOpen={isMobileSidebarOpen}
+              onSidebarClose={() => setMobileSidebarOpen(false)}
+            />
+            <EditDeviceFloorView zoomable />
+          </Box> */}
         </Drawer>
       </AppCard>
     </PageContainer>
   );
 };
 
-export default MainAlarmList;
+export default FloorplanDevice;
