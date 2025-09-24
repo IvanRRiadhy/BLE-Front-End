@@ -71,8 +71,6 @@ const FloorView: React.FC<{
   const actFloorplan = floorplans.find(
     (floorplan: FloorplanType) => floorplan.id === activeFloorplan,
   );
-  const activeFloorData = floor.find((floor: floorType) => floor.id === actFloorplan?.floorId);
-
   const Areas: MaskedAreaType[] = useSelector(
     (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
   );
@@ -107,10 +105,10 @@ const FloorView: React.FC<{
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false); // State to track mouse hover
-  const floorplanImage = activeFloorData?.floorImage
-    ? activeFloorData.floorImage.startsWith('/Uploads/') // Check if the URL is already absolute
-      ? `${BASE_URL}${activeFloorData.floorImage}`
-      : activeFloorData.floorImage // Prepend BASE_URL for relative paths
+  const floorplanImage = actFloorplan?.floorplanImage
+    ? actFloorplan.floorplanImage.startsWith('/Uploads/') // Check if the URL is already absolute
+      ? `${BASE_URL}${actFloorplan.floorplanImage}`
+      : actFloorplan.floorplanImage // Prepend BASE_URL for relative paths
     : 'No Active Floorplan'; // Fallback to default image if not available
 
   const devices = useSelector(
@@ -175,7 +173,7 @@ const FloorView: React.FC<{
         console.error('Failed to load image:', floorplanImage);
       };
     }
-  }, [activeFloorData, floor]);
+  }, [actFloorplan, floor]);
 
   const calculateImageDimensions = (
     containerWidth: number,

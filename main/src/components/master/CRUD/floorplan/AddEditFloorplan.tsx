@@ -1,3 +1,4 @@
+import { BASE_URL } from 'src/utils/axios';
 import {
   Button,
   Dialog,
@@ -14,6 +15,7 @@ import {
   CircularProgress,
   Autocomplete,
   TextField,
+  FormHelperText,
 } from '@mui/material';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
@@ -41,6 +43,8 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
+  const [image, setImage] = React.useState<File | null>(null);
+  const [preview, setPreview] = React.useState<string | null>(floorplan?.floorplanImage || null);
   const [formData, setFormData] = React.useState({
     ...defaultFloorplanForm,
     ...floorplan,
@@ -76,14 +80,47 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
 
   const handleClose = () => {
     setOpen(false);
-    // console.log(floorData);
+    setImage(null);
+    setPreview(floorplan?.floorplanImage || null);
   };
+  useEffect(() => {
+    // Only run for edit mode and if floorplanImage is a string path
+    if (
+      type === 'edit' &&
+      floorplan?.floorplanImage &&
+      typeof floorplan.floorplanImage === 'string'
+    ) {
+      // Fetch the image from the server
+      fetch(`${BASE_URL}${floorplan.floorplanImage}`)
+        .then((res) => res.blob())
+        .then((blob) => {
+          // Create a File object from the Blob
+          const file = new File(
+            [blob],
+            floorplan.floorplanImage.split('/').pop() || 'floorplan.jpg',
+            {
+              type: blob.type,
+            },
+          );
+          setImage(file);
+          // Optionally set preview as well
+          setPreview(URL.createObjectURL(file));
+        })
+        .catch((err) => {
+          console.error('Failed to fetch floorplan image:', err);
+        });
+    }
+    // eslint-disable-next-line
+  }, [open]);
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
     if (!formData.name?.trim()) errors.name = 'Floorplan name is required';
     if (!formData.floorId?.trim()) errors.floorId = 'Floor is required';
+    if (!image) errors.floorplanImage = 'Floor Image is required';
+    if (!formData.floorX) errors.floorX = 'Floor Length is required';
+    if (!formData.floorY) errors.floorY = 'Floor Width is required';
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -97,14 +134,20 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
     setIsSaving(true);
     try {
       const data = new FormData();
-      Object.keys(formData).forEach((key: string) => {
-        const value = formData[key as keyof typeof formData];
-        if (typeof value === 'string' || value instanceof Blob) {
-          data.append(key, value);
-        } else {
-          console.error(`Invalid value type for key ${key}: ${typeof value}`);
+      Object.entries(formData).forEach(([key, value]) => {
+        if (
+          key !== 'floorplanImage' &&
+          key !== 'createdBy' &&
+          key !== 'createdAt' &&
+          key !== 'updatedBy' &&
+          key !== 'updatedAt'
+        ) {
+          data.append(key, value.toString());
         }
       });
+      if (image) {
+        data.append('floorplanImage', image);
+      }
       let result;
       if (type === 'edit') {
         result = await dispatch(editFloorplan(data)); // Dispatch update
@@ -136,7 +179,65 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
       | HTMLInputElement
       | { value: string; name: string; id?: string };
     console.log('Input Change:', { id, name, value });
-    setFormData((prev) => ({ ...prev, [id || name]: value }));
+    const key = id || name;
+
+    // Prepare new value for the field being changed
+    const newValue = value;
+    setFormData((prev) => {
+      // Prepare updated values for calculation
+      const updated = { ...prev, [key]: newValue };
+
+      // Only recalculate if floorX, floorY, pixelX, and pixelY are available
+      let meterPerPx = prev.meterPerPx;
+      if (key === 'floorX' || key === 'floorY') {
+        const floorX = Number(key === 'floorX' ? newValue : updated.floorX) || 0;
+        const floorY = Number(key === 'floorY' ? newValue : updated.floorY) || 0;
+        const pixelX = Number(updated.pixelX) || 0;
+        const pixelY = Number(updated.pixelY) || 0;
+        if (pixelX && pixelY && floorX && floorY) {
+          meterPerPx = (floorX / pixelX + floorY / pixelY) / 2;
+        }
+      }
+      console.log('Updated Form Data:', updated);
+      return {
+        ...updated,
+        meterPerPx,
+      };
+    });
+  };
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+        setImage(file);
+        const prepreview = URL.createObjectURL(file);
+        // console.log(prepreview);
+        setPreview(prepreview); // Preview selected image
+        // console.log(image);
+        // Calculate image dimensions
+        const img = new window.Image();
+        img.onload = () => {
+          const pixelX = img.width;
+          const pixelY = img.height;
+          // Calculate meterPerPx if floorX and floorY are set
+          const floorX = Number(formData.floorX) || 0;
+          const floorY = Number(formData.floorY) || 0;
+          let meterPerPx = 0;
+          if (pixelX && pixelY && floorX && floorY) {
+            meterPerPx = (floorX / pixelX + floorY / pixelY) / 2;
+          }
+          setFormData((prev) => ({
+            ...prev,
+            pixelX,
+            pixelY,
+            meterPerPx,
+          }));
+        };
+        img.src = prepreview;
+      } else {
+        alert('Please select a valid image file (PNG, JPG, JPEG)');
+      }
+    }
   };
 
   return (
@@ -156,7 +257,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
               color="primary"
               sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
             >
-              <CircularProgress color='inherit' size={20} />
+              <CircularProgress color="inherit" size={20} />
             </Button>
           ) : (
             <Button
@@ -192,6 +293,28 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                   error={!!formErrors.name}
                   helperText={formErrors.name}
                 />
+                <CustomFormLabel htmlFor="floorX">Floor Length (in meters)</CustomFormLabel>
+                <CustomTextField
+                  id="floorX"
+                  value={formData.floorX}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                  type="number"
+                  inputProps={{ step: 'any' }}
+                  error={!!formErrors.floorX}
+                  helperText={formErrors.floorX}
+                />
+                <CustomFormLabel htmlFor="Engine-id">Engine ID</CustomFormLabel>
+                <CustomTextField
+                  id="engineId"
+                  value={formData.engineId}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel>
                 <Autocomplete
                   options={floorData.map((f) => ({ label: f.name, id: f.id }))}
@@ -200,12 +323,12 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                       .map((f) => ({ label: f.name, id: f.id }))
                       .find((option: { id: string }) => option.id === formData.floorId) || null
                   }
-                  onChange={(_, newValue) =>{
+                  onChange={(_, newValue) => {
                     const id = newValue?.id ?? '';
                     setFormData((prev) => ({ ...prev, floorId: id }));
                     setFormErrors((prev) => {
-                      if(!prev.floorId) return prev;
-                      const next = {...prev};
+                      if (!prev.floorId) return prev;
+                      const next = { ...prev };
                       delete next.floorId;
                       return next;
                     });
@@ -226,6 +349,48 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                     />
                   )}
                 />
+                <CustomFormLabel htmlFor="floorY">Floor Width (in meters)</CustomFormLabel>
+                <CustomTextField
+                  id="floorY"
+                  value={formData.floorY}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                  type="number"
+                  inputProps={{ step: 'any' }}
+                  error={!!formErrors.floorY}
+                  helperText={formErrors.floorY}
+                />
+              </Grid>
+              <Grid size={{ lg: 12, md: 12, sm: 12 }}>
+                <Grid size={12}>
+                  <CustomFormLabel htmlFor="fp-image" error={!!formErrors.floorplanImage}>
+                    Floorplan Image
+                  </CustomFormLabel>
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/jpg"
+                    onChange={handleImageChange}
+                    required
+                    style={{
+                      border: formErrors.floorplanImage ? '1px solid red' : undefined,
+                      padding: '6px',
+                      borderRadius: '4px',
+                      width: '100%',
+                      marginTop: '5px',
+                    }}
+                  />
+                  {formErrors.floorplanImage && (
+                    <FormHelperText error>{formErrors.floorplanImage}</FormHelperText>
+                  )}
+                  {preview && (
+                    <img
+                      src={preview?.startsWith('blob:') ? preview : `${BASE_URL}${preview}`}
+                      alt="Floorplan Preview"
+                      style={{ width: '100%', marginTop: '10px', borderRadius: '5px' }}
+                    />
+                  )}
+                </Grid>
               </Grid>
             </Grid>
           </DialogContent>

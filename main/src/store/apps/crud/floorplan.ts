@@ -46,6 +46,13 @@ export interface FloorplanType {
     name: string,
     floorId: string,
     applicationId: string,
+    floorplanImage: string,
+    pixelX: number,
+    pixelY: number,
+    floorX: number,
+    floorY: number,
+    meterPerPx: number,
+        engineId: number,
     floor?: floorType,
     createdBy: string,
     createdAt: string,
@@ -204,7 +211,11 @@ export const fetchFloorplanDT = createAsyncThunk(
 export const addFloorplan = createAsyncThunk("floorplans/addFloorplan", async (formData: FormData, { rejectWithValue }) => {
     const started = Date.now();
     try {
-        const response = await axiosServices.post(Floorplan_API_URL, formData);
+        const response = await axiosServices.post(Floorplan_API_URL, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
         // console.log("Floorplan added: ", response.data);
                             const elapsed = Date.now() - started;
       if (elapsed < 500) await delay(500 - elapsed);
@@ -220,8 +231,13 @@ export const addFloorplan = createAsyncThunk("floorplans/addFloorplan", async (f
 export const editFloorplan = createAsyncThunk("floorplans/editFloorplan", async (formData: FormData, { rejectWithValue }) => {
     const started = Date.now();
     try {
+        
         const id = formData.get('id'); // Extract ID from FormData
-        const response = await axiosServices.put(`${Floorplan_API_URL}${id}`, formData);
+        const response = await axiosServices.put(`${Floorplan_API_URL}${id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
                             const elapsed = Date.now() - started;
       if (elapsed < 500) await delay(500 - elapsed);
         return response.data;

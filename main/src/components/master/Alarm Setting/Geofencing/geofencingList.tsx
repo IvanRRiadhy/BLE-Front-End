@@ -30,6 +30,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import {
   ChangeActiveStatus,
+  deleteGeoFencingAlarm,
   fetchGeoFencingAlarms,
   GeoFencingAlarmType,
   UpdateFilter,
@@ -103,6 +104,38 @@ const GeoFencingList = () => {
   const handleToggleStatus = (id: string, currentStatus: boolean) => {
     dispatch(ChangeActiveStatus({ id, isActive: !currentStatus }));
   };
+
+    //Delete Pop-up
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [selectedGeofence, setSelectedGeofence] = useState<GeoFencingAlarmType | null>(null);
+    // Open delete confirmation dialog
+    const handleOpenDeleteDialog = (geofence: GeoFencingAlarmType) => {
+      setSelectedGeofence(geofence);
+      setDeleteDialogOpen(true);
+    };
+  
+    // Close delete confirmation dialog
+    const handleCloseDeleteDialog = () => {
+      setDeleteDialogOpen(false);
+      setSelectedGeofence(null);
+    };
+  
+    // Confirm delete action
+    const handleConfirmDelete = async () => {
+      if (selectedGeofence) {
+        try {
+          const result = await dispatch(deleteGeoFencingAlarm(selectedGeofence.id));
+          if (result && result.type && result.type.endsWith('/fulfilled')) {
+            await dispatch(fetchGeoFencingAlarms(geoFencingAlarmFilter));
+            toast.success('Data Deleted');
+          }
+        } catch (error) {
+          toast.error('Delete Data Unsuccessful');
+          console.error('Error deleting GeoFence:', error);
+        }
+      }
+      handleCloseDeleteDialog();
+    };
 
   const renderSkeletonRows = (rows: number) => (
     <>
@@ -211,8 +244,8 @@ const GeoFencingList = () => {
                 <TableBody key={'skeleton-body'}>
                   {!hasLoaded
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
-                    : geoFencingAlarms.map((geofencing: GeoFencingAlarmType, index: number) => (
-                        <TableRow key={geofencing.id}>
+                    : geoFencingAlarms.map((geofence: GeoFencingAlarmType, index: number) => (
+                        <TableRow key={geofence.id}>
                           <TableCell
                             sx={{
                               position: 'sticky',
@@ -228,22 +261,22 @@ const GeoFencingList = () => {
                           >
                             {index + 1 + page * rowsPerPage}
                           </TableCell>
-                          <TableCell>{geofencing.name}</TableCell>
-                          <TableCell>{geofencing.remarks}</TableCell>
+                          <TableCell>{geofence.name}</TableCell>
+                          <TableCell>{geofence.remarks}</TableCell>
 
                           <TableCell>
                             <Box display="grid" gridTemplateColumns="80px auto" alignItems="center">
                               <Typography
                                 variant="body2"
-                                color={geofencing.isActive ? 'success.dark' : 'error.dark'}
+                                color={geofence.isActive ? 'success.dark' : 'error.dark'}
                               >
-                                {geofencing.isActive ? 'Active' : 'Inactive'}
+                                {geofence.isActive ? 'Active' : 'Inactive'}
                               </Typography>
-                              <Tooltip title={geofencing.isActive ? 'Disable' : 'Enable'} arrow>
+                              <Tooltip title={geofence.isActive ? 'Disable' : 'Enable'} arrow>
                                 <Switch
-                                  checked={geofencing.isActive}
+                                  checked={geofence.isActive}
                                   onChange={() =>
-                                    handleToggleStatus(geofencing.id, geofencing.isActive)
+                                    handleToggleStatus(geofence.id, geofence.isActive)
                                   }
                                   color="primary"
                                   size="small"
@@ -275,6 +308,15 @@ const GeoFencingList = () => {
                                 <IconPencil size={20} />
                               </IconButton>
                             </Tooltip>
+                                                        <Tooltip title="Delete" arrow>
+                              <IconButton
+                                color="primary"
+                                size="small"
+                                  onClick={() => handleOpenDeleteDialog(geofence)}
+                              >
+                                <IconTrash size={20} />
+                              </IconButton>
+                            </Tooltip>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -295,11 +337,11 @@ const GeoFencingList = () => {
         </Box>
       </Grid>
       {/* Delete Confirmation Dialog */}
-      {/* <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
               <DialogTitle>Confirm Deletion</DialogTitle>
               <DialogContent>
                 <DialogContentText>
-                  Are you sure you want to delete the distric <strong>{selectedDist?.name}</strong>?
+                  Are you sure you want to delete the GeoFence <strong>{selectedGeofence?.name}</strong>?
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
@@ -315,7 +357,7 @@ const GeoFencingList = () => {
                   {isLoading ? 'Deleting...' : 'Delete'}
                 </Button>
               </DialogActions>
-            </Dialog> */}
+            </Dialog>
     </Grid>
   );
 };

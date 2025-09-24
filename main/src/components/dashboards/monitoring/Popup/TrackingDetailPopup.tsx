@@ -127,9 +127,9 @@ const TrackingDetailPopup = ({
       (f) => f.id.toLowerCase() === track.floorplan_id.replace(/[{}]/g, '').toLowerCase(),
     );
     // console.log(floorplan);
-    const floorImage = floorplan?.floor?.floorImage ?? null;
-    // console.log(floorImage);
-    setActiveFloorImage(floorImage);
+    const floorplanImage = floorplan?.floorplanImage ?? null;
+    // console.log(floorplanImage);
+    setActiveFloorImage(floorplanImage);
     setFloorplanName(floorplan?.name ?? '');
     const pos = { x: track.pos_x * scale, y: track.pos_y * scale };
     setAnimatedPosition(pos);
@@ -144,8 +144,8 @@ const TrackingDetailPopup = ({
       (f) => f.id.toLowerCase() === track.floorplan_id.replace(/[{}]/g, '').toLowerCase(),
     );
 
-    const floorImage = floorplan?.floor?.floorImage ?? null;
-    setActiveFloorImage(floorImage);
+    const floorplanImage = floorplan?.floorplanImage ?? null;
+    setActiveFloorImage(floorplanImage);
   }, [selectedRowId, filteredTracking, floorplanData]);
 
   useEffect(() => {

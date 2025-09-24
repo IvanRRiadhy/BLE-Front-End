@@ -1,4 +1,3 @@
-import { BASE_URL } from 'src/utils/axios';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
@@ -35,9 +34,6 @@ import toast from 'react-hot-toast';
 const columns = [
   { label: 'Building Name', field: 'Building.Name', sortAble: true },
   { label: 'Floor Name', field: 'Name', sortAble: true },
-  { label: 'Floor Image', field: '', sortAble: false },
-  { label: 'Floor Dimension (meter)', field: '', sortAble: false },
-  { label: 'Engine Floor', field: 'EngineFloorId', sortAble: true },
 ];
 
 const SKELETON_ROWS = 5;
@@ -186,15 +182,6 @@ const FloorList = () => {
           <TableCell>
             <Skeleton variant="text" width={160} height={22} />
           </TableCell>
-          <TableCell>
-            <Skeleton variant="rectangular" width={80} height={60} />
-          </TableCell>
-          <TableCell>
-            <Skeleton variant="text" width={140} height={22} />
-          </TableCell>
-          <TableCell>
-            <Skeleton variant="text" width={120} height={22} />
-          </TableCell>
           {/* right actions */}
           <TableCell
             sx={{
@@ -295,19 +282,6 @@ const FloorList = () => {
                           </TableCell>
                           <TableCell>{floor.building?.name}</TableCell>
                           <TableCell>{floor.name}</TableCell>
-                          <TableCell>
-                            {floor.floorImage ? (
-                              <img
-                                src={`${BASE_URL}${floor.floorImage}`}
-                                alt="Floor"
-                                style={{ width: 80, height: 80, objectFit: 'cover' }}
-                              />
-                            ) : (
-                              'No Image'
-                            )}
-                          </TableCell>
-                          <TableCell>{`(${floor.floorX}, ${floor.floorY})`}</TableCell>
-                          <TableCell>{floor.engineFloorId}</TableCell>
                           <TableCell
                             sx={{
                               position: 'sticky',

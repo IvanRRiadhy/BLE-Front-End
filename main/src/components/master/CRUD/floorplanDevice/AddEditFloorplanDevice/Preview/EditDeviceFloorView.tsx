@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import { Box, Switch, FormControlLabel } from '@mui/material';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
-import { fetchFloors } from 'src/store/apps/crud/floor';
 import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import ZoomControls from 'src/components/shared/ZoomControls';
 import EditDeviceRenderer from './EditDeviceRenderer';
@@ -18,7 +17,6 @@ const EditDeviceFloorView: React.FC<{
   const activeFloorPlan = useSelector(
     (state: RootState) => state.floorplanReducer.selectedFloorplan,
   );
-  const activeFloorData = activeFloorPlan?.floor;
   const activeDevice = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.selectedFloorplanDevice,
   );
@@ -57,10 +55,10 @@ const EditDeviceFloorView: React.FC<{
   const [isDragging, setIsDragging] = useState('');
   const dragStart = useRef({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false); // State to track mouse hover
-  const floorplanImage = activeFloorData?.floorImage
-    ? activeFloorData.floorImage.startsWith('/Uploads/') // Check if the URL is already absolute
-      ? `${BASE_URL}${activeFloorData.floorImage}`
-      : activeFloorData.floorImage // Prepend BASE_URL for relative paths
+  const floorplanImage = activeFloorPlan?.floorplanImage
+    ? activeFloorPlan.floorplanImage.startsWith('/Uploads/') // Check if the URL is already absolute
+      ? `${BASE_URL}${activeFloorPlan.floorplanImage}`
+      : activeFloorPlan.floorplanImage // Prepend BASE_URL for relative paths
     : FloorplanHouse; // Fallback to default image if not available
   useEffect(() => {
     if (floorplanImage) {
@@ -97,11 +95,10 @@ const EditDeviceFloorView: React.FC<{
         console.error('Failed to load image:', floorplanImage);
       };
     }
-  }, [activeFloorData]);
+  }, [activeFloorPlan]);
 
   useEffect(() => {
     dispatch(fetchFloorplan());
-    dispatch(fetchFloors());
     dispatch(fetchFloorplanDevices());
     dispatch(fetchMaskedAreas());
   }, [dispatch]);
@@ -392,7 +389,7 @@ const EditDeviceFloorView: React.FC<{
                     imgSize.height,
                   )}
                   imageSrc={floorplanImage}
-                  scale={activeFloorData?.meterPerPx || 1}
+                  scale={activeFloorPlan?.meterPerPx || 1}
                   devices={filteredUnsavedDevices}
                   activeDevice={activeDevice}
                   setIsDragging={setIsDragging}

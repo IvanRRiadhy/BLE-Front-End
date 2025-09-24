@@ -44,13 +44,8 @@ export interface floorType {
     id: string,
     buildingId: string,
     name: string,
-    floorImage: string,
-    pixelX: number,
-    pixelY: number,
-    floorX: number,
-    floorY: number,
-    meterPerPx: number,
-    engineFloorId: number,
+    
+
     createdBy: string,
     createdAt: string,
     updatedBy: string,
@@ -214,11 +209,7 @@ export const addFloor = createAsyncThunk("floors/addFloor", async (formData: For
 //         for (const [key, value] of formData.entries()) {
 //   console.log(`${key}:`, value);
 // }
-        const response = await axiosServices.post(API_URL, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
+        const response = await axiosServices.post(API_URL, formData);
                             const elapsed = Date.now() - started;
       if (elapsed < 500) await delay(500 - elapsed);
         return response.data;
@@ -236,11 +227,7 @@ export const editFloor = createAsyncThunk("floors/editFloor", async (formData: F
         const id = formData.get('id'); // Extract ID from FormData
         // console.log("Form Data", JSON.stringify(Object.fromEntries(formData.entries())));
         formData.delete('id'); // Remove ID from FormData to avoid sending it again
-        const response = await axiosServices.put(`${API_URL}${id}`, formData,{
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
+        const response = await axiosServices.put(`${API_URL}${id}`, formData);
                             const elapsed = Date.now() - started;
       if (elapsed < 500) await delay(500 - elapsed);
         return response.data;

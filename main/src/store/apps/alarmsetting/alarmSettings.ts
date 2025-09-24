@@ -5,6 +5,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { ensureMinLatency } from "src/utils/retry";
 
+const API_URL = "/api/AlarmCategorySettings/";
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetCCTVResponse = {
