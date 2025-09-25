@@ -11,18 +11,15 @@ import Konva from 'konva';
 import React, { useEffect, useState } from 'react';
 import { Stage, Layer, Circle, Image as KonvaImage, Line } from 'react-konva';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
-import {
-  MaskedAreaType,
-  RevertMaskedArea,
-  SelectEditingMaskedArea,
-  SelectMaskedArea,
-  AddUnsavedMaskedArea,
-  DrawingMaskedArea,
-  EditMaskedAreaPosition,
-} from 'src/store/apps/crud/maskedArea';
+import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import earcut from 'earcut';
 import { uniqueId } from 'lodash';
 import { darken } from '@mui/material';
+import {
+  DrawGeoFence,
+  GeoFencingAlarmType,
+  UpdateSelectedGeoFencingAlarm,
+} from 'src/store/apps/alarmsetting/geofencing';
 
 type Nodes = {
   id: string;
@@ -31,84 +28,20 @@ type Nodes = {
   x_px: number;
   y_px: number;
 };
-// type AreaType = {
-//   id: string;
-//   name: string;
-//   color: string;
-//   nodes: Nodes[];
-// };
 
-// const Areas: AreaType[] = [
-//   {
-//     id: '1',
-//     name: 'Area1',
-//     color: '#f55549',
-//     nodes: [
-//       { id: uniqueId(), x: 100, y: 50, x_px: 100, y_px: 50 },
-//       { id: uniqueId(), x: 350, y: 50, x_px: 350, y_px: 50 },
-//       { id: uniqueId(), x: 400, y: 100, x_px: 400, y_px: 100 },
-//       { id: uniqueId(), x: 350, y: 250, x_px: 350, y_px: 250 },
-//       { id: uniqueId(), x: 100, y: 250, x_px: 100, y_px: 250 },
-//     ],
-//   },
-//   {
-//     id: '2',
-//     name: 'Area2',
-//     color: '#5cf740',
-//     nodes: [
-//       { id: uniqueId(), x: 150, y: 450, x_px: 150, y_px: 450 },
-//       { id: uniqueId(), x: 250, y: 450, x_px: 250, y_px: 450 },
-//       { id: uniqueId(), x: 250, y: 550, x_px: 250, y_px: 550 },
-//       { id: uniqueId(), x: 150, y: 550, x_px: 150, y_px: 550 },
-//     ],
-//   },
-//   {
-//     id: '3',
-//     name: 'Area3',
-//     color: '#3be8f5',
-//     nodes: [
-//       { id: uniqueId(), x: 500, y: 50, x_px: 500, y_px: 50 },
-//       { id: uniqueId(), x: 550, y: 50, x_px: 550, y_px: 50 },
-//       { id: uniqueId(), x: 550, y: 200, x_px: 550, y_px: 200 },
-//       { id: uniqueId(), x: 525, y: 350, x_px: 525, y_px: 350 },
-//       { id: uniqueId(), x: 500, y: 200, x_px: 500, y_px: 200 },
-//     ],
-//   },
-// ];
-
-// const Areas = [
-//   {
-//     name: 'Area1',
-//     color: 'yellow',
-//     nodes: [],
-//     x: [100, 350, 400, 350, 100],
-//     y: [50, 50, 100, 250, 250],
-//   },
-//   {
-//     name: 'Area2',
-//     color: 'blue',
-//     x: [150, 250, 250, 150],
-//     y: [450, 450, 550, 550],
-//   },
-//   {
-//     name: 'Area3',
-//     color: 'green',
-//     x: [500, 550, 550, 525, 500],
-//     y: [50, 50, 200, 350, 200],
-//   },
-// ];
-
-const EditAreaRenderer: React.FC<{
+const EditGeoFenceRenderer: React.FC<{
   width: number;
   height: number;
   originalWidth: number;
   originalHeight: number;
   imageSrc?: string;
   scale: number;
-  maskedAreas: MaskedAreaType[];
-  activeMaskedArea?: MaskedAreaType | null;
   setIsDragging: (isDragging: string) => void;
   setCursor: (cursor: string) => void;
+  activeGeoFence?: GeoFencingAlarmType;
+  otherGeoFences?: GeoFencingAlarmType[];
+  areas: MaskedAreaType[];
+  showAreas: boolean;
 }> = ({
   width,
   height,
@@ -116,52 +49,32 @@ const EditAreaRenderer: React.FC<{
   originalHeight,
   imageSrc,
   scale,
-  maskedAreas,
-  activeMaskedArea,
   setIsDragging,
   setCursor,
+  activeGeoFence,
+  otherGeoFences,
+  areas,
+  showAreas,
 }) => {
-  // const theme = useTheme();
   const stageRef = React.useRef<Konva.Stage>(null);
-
-  const dispatch = useDispatch();
-  // const [scales, setScale] = useState<number>(scale);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
+  const dispatch = useDispatch();
   const scaleX = originalWidth / width;
   const scaleY = originalHeight / height;
-  const [activeArea, setActiveArea] = useState(activeMaskedArea?.name || '');
+  const [activeGeoFenceArea, setActiveGeoFenceArea] = useState(activeGeoFence?.name || '');
   const [areaDragging, setAreaDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ dx: 0, dy: 0 });
   const [isColliding, setIsColliding] = useState(false);
-  const editingMaskedArea = useSelector(
-    (state: RootState) => state.maskedAreaReducer.editingMaskedArea,
-  );
-  const [editingArea, setEditingArea] = useState(editingMaskedArea?.name || '');
-  const unsavedArea: MaskedAreaType[] = useSelector(
-    (state: RootState) => state.maskedAreaReducer.unsavedMaskedAreas,
-  );
-  const selectedFloorplan = useSelector(
-    (state: RootState) => state.floorplanReducer.selectedFloorplan,
-  );
-  const filteredUnsavedArea = unsavedArea.filter(
-    (area) => area.floorplanId === selectedFloorplan?.id,
-  );
-  // const [areas, setAreas] = useState<AreaType[]>([]);
-  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [pendingAreaId, setPendingAreaId] = useState<string | null>(null);
-  const drawingMaskedArea = useSelector(
-    (state: RootState) => state.maskedAreaReducer.drawingMaskedArea,
+  const drawingGeoFence = useSelector(
+    (state: RootState) => state.GeoFencingReducer.drawingGeoFence,
   );
   const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null);
   const [drawingNodes, setDrawingNodes] = useState<Nodes[]>([]); // Track the nodes being drawn
 
-
   useEffect(() => {
-    setActiveArea(activeMaskedArea?.name || '');
-  }, [activeMaskedArea]);
-  useEffect(() => {
-    setEditingArea(editingMaskedArea?.name || '');
-  }, [editingMaskedArea]);
+    setActiveGeoFenceArea(activeGeoFence?.name || '');
+    console.log('Active GeoFence changed:', activeGeoFence?.areaShape);
+  }, [activeGeoFence]);
   const [cornerDragData, setCornerDragData] = useState<{
     areaName: string;
     cornerIndex: number;
@@ -258,7 +171,6 @@ const EditAreaRenderer: React.FC<{
 
     return true; // Collision detected
   };
-
   const checkPolygonCollision = (poly1: { nodes: Nodes[] }, poly2: { nodes: Nodes[] }): boolean => {
     const vertices1 = setPointsFromNodes(poly1.nodes);
     const vertices2 = setPointsFromNodes(poly2.nodes);
@@ -311,12 +223,11 @@ const EditAreaRenderer: React.FC<{
     return false; // No self-intersections
   };
   const checkCollisionWithOffset = (areaName: string, dx: number, dy: number): boolean => {
-    const currentArea = filteredUnsavedArea.find((a) => a.name === areaName);
-    if (!currentArea) return false;
+    if (!activeGeoFence) return false;
 
     const proposedArea = {
-      nodes: currentArea.nodes
-        ? currentArea.nodes.map((node) => ({
+      nodes: activeGeoFence.nodes
+        ? activeGeoFence.nodes.map((node) => ({
             ...node,
             x: node.x + dx * scale,
             y: node.y + dy * scale,
@@ -325,38 +236,30 @@ const EditAreaRenderer: React.FC<{
           }))
         : [],
     };
-
-    return filteredUnsavedArea.some((otherArea) => {
-      if (otherArea.name === areaName) return false;
+    if (otherGeoFences === undefined) return false;
+    return otherGeoFences.some((otherArea) => {
       if (!otherArea.nodes) return false; // Add this check
       return checkPolygonCollision(proposedArea, { nodes: otherArea.nodes });
     });
   };
 
-  const checkCornerDragCollision = (
-    areaName: string,
-    cornerIndex: number,
-    newX: number,
-    newY: number,
-  ): boolean => {
-    const currentArea = filteredUnsavedArea.find((a) => a.name === areaName);
-    if (!currentArea) return false;
+  const checkCornerDragCollision = (cornerIndex: number, newX: number, newY: number): boolean => {
+    if (!activeGeoFence) return false;
 
     const proposedArea = {
-      nodes: currentArea.nodes
-        ? currentArea.nodes.map((node, index) =>
+      nodes: activeGeoFence.nodes
+        ? activeGeoFence.nodes.map((node, index) =>
             index === cornerIndex ? { ...node, x: newX, y: newY } : node,
           )
         : [],
     };
 
-    return filteredUnsavedArea.some((otherArea) => {
-      if (otherArea.name === areaName) return false;
+    if (otherGeoFences === undefined) return false;
+    return otherGeoFences.some((otherArea) => {
       if (!otherArea.nodes) return false; // Add this check
       return checkPolygonCollision(proposedArea, { nodes: otherArea.nodes });
     });
   };
-
 
   // Function to check if two line segments intersect
   const doLineSegmentsIntersect = (
@@ -410,133 +313,34 @@ const EditAreaRenderer: React.FC<{
     return false;
   };
 
+  // const handleCanvasClick = () => {
+  //   if (!drawingGeoFence) return; // Only allow drawing if the drawing mode is active
+  //   const stage = stageRef.current;
+  //   if (!stage) return;
+  //   const pointerPosition = stage.getPointerPosition();
+  //   if (!pointerPosition) return;
 
-  const handleCanvasClick = () => {
-    if (!drawingMaskedArea) return; // Only allow drawing if the drawing mode is active
-    const stage = stageRef.current;
-    if (!stage) return;
-    const pointerPosition = stage.getPointerPosition();
-    if (!pointerPosition) return;
-
-    const { x, y } = pointerPosition;
-    const newNode = {
-      id: uniqueId(),
-      x: x * scaleX,
-      y: y * scaleX,
-      x_px: x * scaleX,
-      y_px: y * scaleY,
-    };
-
-    setDrawingNodes((prevNodes) => {
-      const updatedNodes = [...prevNodes, newNode];
-
-      // Check for collisions with existing areas
-      const collision = filteredUnsavedArea.some((area) => {
-        if (area.name === activeArea) return false; // Skip the current area
-        return checkPolygonCollision(
-          { nodes: area.nodes ? area.nodes : [] },
-          { nodes: updatedNodes },
-        );
-      });
-
-      if (collision) {
-        // console.log(drawingNodes);
-        alert(`Areas cannot overlap! Position reverted.`);
-        setDrawingNodes([]);
-        dispatch(DrawingMaskedArea('')); // Reset the drawing mode
-        dispatch(SelectMaskedArea('')); // Reset the selected area
-        dispatch(SelectEditingMaskedArea('')); // Reset the editing area
-        setActiveArea(''); // Clear the active area
-        // console.log(drawingNodes);
-        return []; // Revert to previous nodes
-      }
-
-      if (updatedNodes.length === 3) {
-        const newArea: MaskedAreaType = {
-          id: drawingMaskedArea,
-          name: drawingMaskedArea,
-          colorArea: '#363636',
-          areaShape: JSON.stringify(updatedNodes),
-          restrictedStatus: '',
-          wideArea: 0,
-          positionPxX: 0,
-          positionPxY: 0,
-          engineAreaId: 'ENG001',
-          nodes: updatedNodes,
-          floorId: selectedFloorplan?.floorId || '',
-          floorplanId: selectedFloorplan?.id || '',
-          createdBy: 'admin',
-          createdAt: new Date().toISOString(),
-          updatedBy: 'admin',
-          updatedAt: new Date().toISOString(),
-        };
-
-        const createNewArea = async () => {
-          await dispatch(AddUnsavedMaskedArea(newArea)); // Add the new area
-
-          setDrawingNodes([]); // Clear the drawing nodes
-          dispatch(DrawingMaskedArea('')); // Reset the drawing mode
-          return [];
-        };
-
-        createNewArea()
-          .then(() => {
-            dispatch(SelectMaskedArea(newArea.id)); // Select the new area
-            dispatch(SelectEditingMaskedArea(newArea.id)); // Set the new area as the editing area
-            setActiveArea(newArea.name); // Set the active area
-            console.log('New area created successfully!');
-          })
-          .catch((error) => {
-            console.error('Error creating new area:', error);
-          });
-      }
-
-      return updatedNodes;
-    }); // Add the new node to the drawing nodes
-  };
+  //   const { x, y } = pointerPosition;
+  //   const newNode = {
+  //     id: uniqueId(),
+  //     x: x * scaleX,
+  //     y: y * scaleX,
+  //     x_px: x * scaleX,
+  //     y_px: y * scaleY,
+  //   };
+  // }
 
   useEffect(() => {
-    if (drawingMaskedArea !== '') {
+    if (drawingGeoFence !== '') {
       setCursor('crosshair');
     } else {
       setCursor('default');
     }
-  }, [drawingMaskedArea]);
+  }, [drawingGeoFence]);
   // useEffect(() => {
-  //   if (filteredUnsavedArea.length > 0) {
-  //     handleSaveArea();
-  //   }
-  // }, [filteredUnsavedArea]);
-
-  const handleConfirmProceed = () => {
-    const active = maskedAreas?.find((area) => area.name === activeArea);
-    dispatch(RevertMaskedArea(active?.id || '')); // Revert the editing device to its original state
-    if (pendingAreaId) {
-      dispatch(SelectMaskedArea(pendingAreaId)); // Select the pending device
-      dispatch(SelectEditingMaskedArea(null));
-    }
-    setConfirmDialogOpen(false);
-    setPendingAreaId(null);
-  };
-  const handleCancelProceed = () => {
-    setConfirmDialogOpen(false); // Close the dialog
-    setPendingAreaId(null); // Clear the pending device ID
-  };
-  const handleOnClick = (id: string) => {
-    if (drawingMaskedArea) return; // Prevent clicking while drawing
-    const active = maskedAreas?.find((area) => area.id === id);
-    if (activeArea === active?.name) return;
-    if (editingArea) {
-      setPendingAreaId(id);
-      setConfirmDialogOpen(true);
-      setCursor('move');
-      return;
-    }
-    dispatch(SelectMaskedArea(id)); // Set the editingArea state to the clicked node's name
-  };
 
   const handleDragStart = (e: string) => {
-    if (drawingMaskedArea) return; // Prevent dragging while drawing
+    if (drawingGeoFence) return; // Prevent dragging while drawing
     setIsDragging(e);
     setDragOffset({ dx: 0, dy: 0 });
     setIsColliding(false);
@@ -548,8 +352,7 @@ const EditAreaRenderer: React.FC<{
   };
 
   const handleDragEnd = async (areaName: string) => {
-    const area = filteredUnsavedArea.find((a) => a.name === areaName);
-    if (area) {
+    if (activeGeoFence) {
       // console.log(`Nodes of ${areaName}:`, JSON.stringify(area.nodes, null, 2)); // Log nodes in JSON format
     }
     const collision = checkCollisionWithOffset(areaName, dragOffset.dx, dragOffset.dy);
@@ -592,10 +395,9 @@ const EditAreaRenderer: React.FC<{
   };
 
   const handleCornerDragStart = (areaName: string, cornerIndex: number) => {
-    const area = filteredUnsavedArea.find((a) => a.name === areaName);
-    if (!area) return;
+    if (!activeGeoFence) return;
 
-    const corner = area.nodes && area.nodes[cornerIndex];
+    const corner = activeGeoFence.nodes && activeGeoFence.nodes[cornerIndex];
     if (!corner) return;
     setCornerDragData({
       areaName,
@@ -607,50 +409,44 @@ const EditAreaRenderer: React.FC<{
   };
 
   const handleDragCorner = (areaName: string, cornerIndex: number, x: number, y: number) => {
-    const updatedAreas = filteredUnsavedArea.map((area) => {
-      if (area.name === areaName) {
-        const newNodes = [...(area.nodes || [])];
-        // console.log('x,y : ', newNodes[cornerIndex].x, newNodes[cornerIndex].y);
-        // console.log('pxX,pxY : ', newNodes[cornerIndex].x_px, newNodes[cornerIndex].y_px);
-        newNodes[cornerIndex] = {
-          ...newNodes[cornerIndex],
-          x: x * scale,
-          y: y * scale,
-          x_px: x,
-          y_px: y,
-        }; // Update the corner's position
-        // console.log('newNodes[cornerIndex] : ', newNodes[cornerIndex]);
-        return { ...area, nodes: newNodes, areaShape: JSON.stringify(newNodes) };
-      }
-      return area;
-    });
-    const updatedArea = updatedAreas.find((area) => area.name === areaName);
-    // console.log('updatedArea', updatedArea);
-    if (updatedArea) {
-      dispatch(EditMaskedAreaPosition(updatedArea));
+    const newNodes = [...(activeGeoFence?.nodes || [])];
+    newNodes[cornerIndex] = {
+      ...newNodes[cornerIndex],
+      x: x * scaleX,
+      y: y * scaleY,
+      x_px: x,
+      y_px: y,
+    }; // Update the corner's position
+    const updatedGeoFence = {
+      ...activeGeoFence,
+      nodes: newNodes,
+      areaShape: JSON.stringify(newNodes),
+    };
+    // console.log('updatedGeoFence', updatedGeoFence);
+    if (updatedGeoFence) {
+      dispatch(UpdateSelectedGeoFencingAlarm(updatedGeoFence));
     }
   };
-  const handleCornerDragMove = (areaName: string, cornerIndex: number, x: number, y: number) => {
+  const handleCornerDragMove = (cornerIndex: number, x: number, y: number) => {
     // Just store the proposed position, don't check yet
     const dPxX = x;
     const dPxY = y;
     // Still check for collisions with other areas during drag
-    const collision = checkCornerDragCollision(areaName, cornerIndex, dPxX, dPxY);
+    const collision = checkCornerDragCollision(cornerIndex, dPxX, dPxY);
     setIsColliding(collision);
   };
 
   const handleCornerDragEnd = (areaName: string, cornerIndex: number, x: number, y: number) => {
-    const area = filteredUnsavedArea.find((a) => a.name === areaName);
-    if (!area) return;
+    if (!activeGeoFence) return;
     const dPxX = x;
     const dPxY = y;
     // Create the proposed new polygon
-    const proposedNodes = area.nodes ? [...area.nodes] : [];
+    const proposedNodes = activeGeoFence.nodes ? [...activeGeoFence.nodes] : [];
     proposedNodes[cornerIndex] = { ...proposedNodes[cornerIndex], x: dPxX, y: dPxY };
 
     // Check for both collisions and self-intersections
-    const hasCollision = filteredUnsavedArea.some((otherArea) => {
-      if (otherArea.name === areaName) return false; // Exclude the area being dragged
+    if (otherGeoFences === undefined) return false;
+    const hasCollision = otherGeoFences.some((otherArea) => {
       if (!otherArea.nodes) return false; // Add this check
       return checkPolygonCollision({ nodes: proposedNodes }, { nodes: otherArea.nodes });
     });
@@ -659,7 +455,7 @@ const EditAreaRenderer: React.FC<{
       // Revert to original position
       if (cornerDragData) {
         // console.log(isColliding);
-        if (!area.nodes) return false;
+        if (!activeGeoFence.nodes) return false;
         // console.log(checkPolygonCollision({ nodes: proposedNodes }, { nodes: area.nodes }));
         // alert('Invalid position! Lines cannot intersect or overlap other areas.');
         handleDragCorner(
@@ -681,96 +477,89 @@ const EditAreaRenderer: React.FC<{
     setIsDragging('');
     // handleSaveArea();
   };
-  const handleDeleteCorner = (areaName: string, cornerIndex: number) => {
-    const updatedAreas = filteredUnsavedArea.map((area) => {
-      if (area.name === areaName) {
-        const newNodes = [...(area.nodes || [])];
-        newNodes.splice(cornerIndex, 1); // Remove the corner at the specified index
-        return { ...area, nodes: newNodes, areaShape: JSON.stringify(newNodes) };
-      }
-      return area;
-    });
 
-    const updatedArea = updatedAreas.find((area) => area.name === areaName);
-    if (updatedArea) {
-      dispatch(EditMaskedAreaPosition(updatedArea));
+  const handleDeleteCorner = (areaName: string, cornerIndex: number) => {
+    if (!activeGeoFence) return;
+    const newNodes = [...(activeGeoFence.nodes || [])];
+    newNodes.splice(cornerIndex, 1); // Remove the corner at the specified index
+    const updatedGeoFence = {
+      ...activeGeoFence,
+      nodes: newNodes,
+      areaShape: JSON.stringify(newNodes),
+    };
+    if (updatedGeoFence) {
+      dispatch(UpdateSelectedGeoFencingAlarm(updatedGeoFence));
     }
   };
 
   const handleDragArea = (areaName: string, dx: number, dy: number) => {
-    // console.log(dx, dy);
-    const updatedAreas = filteredUnsavedArea.map((area) =>
-      area.name === areaName
-        ? {
-            ...area,
-            nodes: area.nodes?.map((node) => ({
-              ...node,
-              x: node.x + dx * scale,
-              y: node.y + dy * scale,
-              x_px: node.x_px + dx,
-              y_px: node.y_px + dy,
-            })),
-            areaShape: JSON.stringify(
-              area.nodes?.map((node) => ({
-                ...node,
-                x: node.x + dx * scale,
-                y: node.y + dy * scale,
-                x_px: node.x_px + dx,
-                y_px: node.y_px + dy,
-              })),
-            ),
-          }
-        : area,
-    );
-
-    const updatedArea = updatedAreas.find((area) => area.name === areaName);
-    // console.log('updatedArea', updatedArea);
-    if (updatedArea) {
-      dispatch(EditMaskedAreaPosition(updatedArea));
+    if (!activeGeoFence) return;
+    const updatedGeoFence = {
+      ...activeGeoFence,
+      nodes: activeGeoFence.nodes?.map((node) => ({
+        ...node,
+        x: node.x + dx * scale,
+        y: node.y + dy * scale,
+        x_px: node.x_px + dx,
+        y_px: node.y_px + dy,
+      })),
+      areaShape: JSON.stringify(
+        activeGeoFence.nodes?.map((node) => ({
+          ...node,
+          x: node.x + dx * scale,
+          y: node.y + dy * scale,
+          x_px: node.x_px + dx,
+          y_px: node.y_px + dy,
+        })),
+      ),
+    };
+    // console.log('updatedGeoFence', updatedGeoFence);
+    if (updatedGeoFence) {
+      dispatch(UpdateSelectedGeoFencingAlarm(updatedGeoFence));
     }
   };
+
   const handleInsertCorner = (areaName: string, clickX: number, clickY: number) => {
-    const updatedAreas = filteredUnsavedArea.map((area) => {
-      if (area.name !== areaName) return area;
+    if (!activeGeoFence) return;
 
-      const { nodes } = area;
-      if (!nodes) return;
+    const { nodes } = activeGeoFence;
+    if (!nodes) return;
 
-      let insertIndex = -1;
-      let minDistance = Infinity;
+    let insertIndex = -1;
+    let minDistance = Infinity;
 
-      for (let i = 0; i < (nodes?.length || 0); i++) {
-        const nextIndex = (i + 1) % (nodes?.length || 0);
-        const distance = pointToSegmentDistance(
-          clickX,
-          clickY,
-          nodes[i].x_px,
-          nodes[i].y_px,
-          nodes[nextIndex].x_px,
-          nodes[nextIndex].y_px,
-        );
+    for (let i = 0; i < (nodes?.length || 0); i++) {
+      const nextIndex = (i + 1) % (nodes?.length || 0);
+      const distance = pointToSegmentDistance(
+        clickX,
+        clickY,
+        nodes[i].x_px,
+        nodes[i].y_px,
+        nodes[nextIndex].x_px,
+        nodes[nextIndex].y_px,
+      );
 
-        if (distance < minDistance) {
-          minDistance = distance;
-          insertIndex = nextIndex;
-        }
+      if (distance < minDistance) {
+        minDistance = distance;
+        insertIndex = nextIndex;
       }
+    }
 
-      const newNodes = [...(nodes || [])];
-      newNodes.splice(insertIndex, 0, {
-        id: uniqueId(),
-        x: clickX * scale,
-        y: clickY * scale,
-        x_px: clickX,
-        y_px: clickY,
-      });
-
-      return { ...area, nodes: newNodes };
+    const newNodes = [...(nodes || [])];
+    newNodes.splice(insertIndex, 0, {
+      id: uniqueId(),
+      x: clickX * scale,
+      y: clickY * scale,
+      x_px: clickX,
+      y_px: clickY,
     });
-
-    const updatedArea = updatedAreas.find((area) => area && area.name === areaName);
-    if (updatedArea) {
-      dispatch(EditMaskedAreaPosition(updatedArea));
+    const updatedGeoFence = {
+      ...activeGeoFence,
+      nodes: newNodes,
+      areaShape: JSON.stringify(newNodes),
+    };
+    if (updatedGeoFence) {
+      dispatch(UpdateSelectedGeoFencingAlarm(updatedGeoFence));
     }
   };
 
@@ -809,32 +598,20 @@ const EditAreaRenderer: React.FC<{
     const dy = py - yy;
     return Math.sqrt(dx * dx + dy * dy);
   }
-
   const handleRightClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     e.evt.preventDefault();
 
-    if (!drawingMaskedArea) return;
+    if (!drawingGeoFence) return;
 
     // Cancel drawing
     setDrawingNodes([]); // Clear current drawing nodes
-    dispatch(DrawingMaskedArea('')); // Reset drawing mode
-    dispatch(SelectMaskedArea('')); // Clear selection
-    dispatch(SelectEditingMaskedArea('')); // Clear editing
-    setActiveArea(''); // Reset active area
+    dispatch(DrawGeoFence('')); // Reset drawing mode
     console.log('Drawing cancelled by right click');
   };
 
   return (
     <>
-      <Stage
-        ref={stageRef}
-        width={width}
-        height={height}
-        style={{ position: 'absolute', top: 0, left: 0 }}
-        onMouseMove={handleMouseMove}
-        onClick={handleCanvasClick}
-        onContextMenu={handleRightClick}
-      >
+      <Stage width={width} height={height} style={{ position: 'absolute', top: 0, left: 0 }}>
         <Layer>
           {image && (
             <KonvaImage
@@ -848,57 +625,75 @@ const EditAreaRenderer: React.FC<{
               right={0}
             />
           )}
-          {filteredUnsavedArea.map((area: MaskedAreaType) => (
-            // console.log('area', area.nodes),
-            <React.Fragment key={area.id}>
-              {/* Render the area */}
+          {showAreas &&
+            areas.map((area) => (
               <Line
+                key={area.id}
                 points={area.nodes ? setPointsFromNodes(area.nodes) : []}
                 stroke={darken(area.colorArea, 0.5)}
                 strokeWidth={5}
                 lineJoin="round"
                 lineCap="round"
                 closed
-                fill={area.name === activeArea ? area.colorArea : undefined}
+                fill={area.colorArea}
+                opacity={0.1}
+              />
+            ))}
+          {otherGeoFences &&
+            otherGeoFences.map((area) => (
+              <Line
+                key={area.id}
+                points={area.nodes ? setPointsFromNodes(area.nodes) : []}
+                stroke={darken(area.color, 0.5)}
+                strokeWidth={5}
+                lineJoin="round"
+                lineCap="round"
+                closed
+                fill={area.color}
+                opacity={0.5}
+              />
+            ))}
+          {activeGeoFence && (
+            <React.Fragment key={activeGeoFence.id}>
+              <Line
+                points={activeGeoFence.nodes ? setPointsFromNodes(activeGeoFence.nodes) : []}
+                stroke={isColliding ? 'red' : darken(activeGeoFence.color, 0.5)}
+                strokeWidth={5}
+                lineJoin="round"
+                lineCap="round"
+                closed
+                fill={activeGeoFence.color }
                 opacity={0.7}
-                draggable={editingArea === area.name}
+                draggable
                 onMouseEnter={() => {
-                  if (editingArea === area.name) {
-                    if (!drawingMaskedArea) {
-                      setCursor('move');
-                    }
-                  } else {
-                    if (!drawingMaskedArea) {
-                      setCursor('pointer');
-                    }
-                  }
+                  if (!drawingGeoFence) setCursor('move');
                 }}
                 onMouseLeave={() => {
-                  if (!drawingMaskedArea) {
-                    setCursor('grab');
-                  }
+                  if (!drawingGeoFence) setCursor('grab');
                 }}
                 onMouseDown={(e) => {
-                  if (!drawingMaskedArea) {
-                    handleDragStart(area.name);
+                  if (!drawingGeoFence) {
+                    handleDragStart(activeGeoFence.name);
                     const isShiftPressed = e.evt.shiftKey;
                     const stage = e.target.getStage();
                     const mousePos = stage?.getPointerPosition();
-
                     if (isShiftPressed && mousePos) {
                       e.evt.preventDefault();
-                      handleInsertCorner(area.name, mousePos.x * scaleX, mousePos.y * scaleY);
+                      handleInsertCorner(activeGeoFence.name, mousePos.x, mousePos.y);
                     }
                   }
                 }}
                 onDblClick={(e) => {
                   const stage = e.target.getStage();
                   const mousePos = stage?.getPointerPosition();
-                  if (editingMaskedArea?.id == area.id) {
-                    if (mousePos) {
-                      e.evt.preventDefault();
-                      handleInsertCorner(area.name, mousePos.x * scaleX, mousePos.y * scaleY);
-                    }
+
+                  if (mousePos) {
+                    e.evt.preventDefault();
+                    handleInsertCorner(
+                      activeGeoFence.name,
+                      mousePos.x * scaleX,
+                      mousePos.y * scaleY,
+                    );
                   }
                 }}
                 onMouseUp={handleMouseUp}
@@ -907,16 +702,14 @@ const EditAreaRenderer: React.FC<{
                   handleDragMove(e.target.x() * scaleX, e.target.y() * scaleY);
                 }}
                 onDragEnd={(e) => {
-                  handleDragEnd(area.name);
+                  handleDragEnd(activeGeoFence.name);
                   e.target.x(0);
                   e.target.y(0);
                 }}
-                onClick={() => handleOnClick(area.id)}
               />
-              {/* Render corner circles if the area is being edited */}
-              {editingArea === area.name &&
-                !areaDragging &&
-                area.nodes?.map((node: any, index: any) => (
+              {!areaDragging &&
+                activeGeoFence.nodes &&
+                activeGeoFence.nodes.map((node, index) => (
                   <Circle
                     key={node.id}
                     x={node.x_px / scaleX}
@@ -926,7 +719,7 @@ const EditAreaRenderer: React.FC<{
                     draggable
                     strokeWidth={2}
                     onMouseEnter={(e) => {
-                      if (!drawingMaskedArea) {
+                      if (!drawingGeoFence) {
                         const shape = e.target as Konva.Circle;
                         shape.radius(10); // Increase radius on hover
                         shape.stroke('black'); // Add green outline
@@ -936,7 +729,7 @@ const EditAreaRenderer: React.FC<{
                       }
                     }}
                     onMouseLeave={(e) => {
-                      if (!drawingMaskedArea) {
+                      if (!drawingGeoFence) {
                         const shape = e.target as Konva.Circle;
                         shape.radius(7); // Reset radius
                         shape.stroke(''); // Remove outline
@@ -945,41 +738,35 @@ const EditAreaRenderer: React.FC<{
                         shape.getLayer()?.batchDraw(); // Redraw the layer for immediate effect
                       }
                     }}
-                    onDragStart={() => handleCornerDragStart(area.name, index)}
+                    onDragStart={() => handleCornerDragStart(activeGeoFence.name, index)}
                     onDragMove={(e) => {
                       handleDragCorner(
-                        area.name,
+                        activeGeoFence.name,
                         index,
                         e.target.x() * scaleX,
                         e.target.y() * scaleY,
                       );
-                      handleCornerDragMove(
-                        area.name,
-                        index,
-                        e.target.x() * scaleX,
-                        e.target.y() * scaleY,
-                      );
+                      handleCornerDragMove(index, e.target.x() * scaleX, e.target.y() * scaleY);
                     }}
-                    onMouseDown={() => handleDragStart(area.name)}
+                    onMouseDown={() => handleDragStart(activeGeoFence.name)}
                     onMouseUp={handleMouseUp}
                     onDragEnd={(e) => {
                       handleCornerDragEnd(
-                        area.name,
+                        activeGeoFence.name,
                         index,
                         e.target.x() * scaleX,
                         e.target.y() * scaleY,
                       );
-                      handleDragEnd(area.name); // Pass the area name
+                      handleDragEnd(activeGeoFence.name); // Pass the activeGeoFence name
                     }}
                     onContextMenu={(e) => {
                       e.evt.preventDefault(); // Prevent the default context menu from appearing
-                      handleDeleteCorner(area.name, index); // Call the function to delete the corner
+                      handleDeleteCorner(activeGeoFence.name, index); // Call the function to delete the corner
                     }}
                   />
                 ))}
             </React.Fragment>
-          ))}
-          {/* Render circles for drawing nodes */}
+          )}
           {drawingNodes.map((node) => (
             <Circle
               key={node.id}
@@ -1029,25 +816,8 @@ const EditAreaRenderer: React.FC<{
           )}
         </Layer>
       </Stage>
-      <Dialog open={confirmDialogOpen} onClose={handleCancelProceed} maxWidth="xs" fullWidth>
-        <DialogTitle>Confirm Action</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            You are still in editing mode. Any editing progress will be cancelled if you wish to
-            proceed. Do you want to continue?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCancelProceed} color="primary" variant="contained">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmProceed} color="error">
-            Proceed
-          </Button>
-        </DialogActions>
-      </Dialog>
     </>
   );
 };
 
-export default EditAreaRenderer;
+export default EditGeoFenceRenderer;

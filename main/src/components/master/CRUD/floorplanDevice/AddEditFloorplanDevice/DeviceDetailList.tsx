@@ -19,10 +19,7 @@ import { fetchAccessControls, AccessControlType } from 'src/store/apps/crud/acce
 import { fetchBleReaders, bleReaderType } from 'src/store/apps/crud/bleReader';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { DeviceType } from 'src/types/crud/input';
-// import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
-// import { BleNodeType, fetchNodes } from 'src/store/apps/crud/bleNode';
 import { fetchFloors } from 'src/store/apps/crud/floor';
-import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import { isEqual } from 'lodash';
 
 const DeviceDetailList = () => {
@@ -271,22 +268,6 @@ const DeviceDetailList = () => {
                     required
                   />
                 </Grid>
-                {/* <Grid size={12}>
-              <CustomFormLabel htmlFor="floorplan-id">Floor Plan</CustomFormLabel>
-              <CustomSelect
-                name="floorplanId"
-                value={formData.floorplanId || ''}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              >
-                {floorplanData.map((floorplan) => (
-                  <MenuItem key={floorplan.id} value={floorplan.id}>
-                    {floorplan.name}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
-            </Grid> */}
                 <Grid size={12}>
                   <CustomFormLabel htmlFor="masked-area-id">Masked Area</CustomFormLabel>
                   <CustomSelect
@@ -305,22 +286,6 @@ const DeviceDetailList = () => {
                     ))}
                   </CustomSelect>
                 </Grid>
-                {/* <Grid size={12}>
-              <CustomFormLabel htmlFor="app-id">Application</CustomFormLabel>
-              <CustomSelect
-                name="applicationId"
-                value={formData.applicationId || ''}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-              >
-                {appData.map((app) => (
-                  <MenuItem key={app.id} value={app.id}>
-                    {app.applicationName}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
-            </Grid> */}
                 <Grid size={12}>
                   <CustomFormLabel htmlFor="device-type">Device Type</CustomFormLabel>
                   <CustomSelect

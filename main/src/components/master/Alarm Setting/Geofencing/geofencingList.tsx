@@ -33,8 +33,10 @@ import {
   deleteGeoFencingAlarm,
   fetchGeoFencingAlarms,
   GeoFencingAlarmType,
+  SetSelectedGeoFencingAlarm,
   UpdateFilter,
 } from 'src/store/apps/alarmsetting/geofencing';
+import { useNavigate } from 'react-router';
 
 const columns = [
   { label: 'Name', field: 'Name', sortAble: true },
@@ -46,6 +48,7 @@ const SKELETON_ROWS = 5;
 
 const GeoFencingList = () => {
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const geoFencingAlarms = useSelector(
     (state: RootState) => state.GeoFencingReducer.geoFencingAlarms,
@@ -105,37 +108,44 @@ const GeoFencingList = () => {
     dispatch(ChangeActiveStatus({ id, isActive: !currentStatus }));
   };
 
-    //Delete Pop-up
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [selectedGeofence, setSelectedGeofence] = useState<GeoFencingAlarmType | null>(null);
-    // Open delete confirmation dialog
-    const handleOpenDeleteDialog = (geofence: GeoFencingAlarmType) => {
-      setSelectedGeofence(geofence);
-      setDeleteDialogOpen(true);
-    };
-  
-    // Close delete confirmation dialog
-    const handleCloseDeleteDialog = () => {
-      setDeleteDialogOpen(false);
-      setSelectedGeofence(null);
-    };
-  
-    // Confirm delete action
-    const handleConfirmDelete = async () => {
-      if (selectedGeofence) {
-        try {
-          const result = await dispatch(deleteGeoFencingAlarm(selectedGeofence.id));
-          if (result && result.type && result.type.endsWith('/fulfilled')) {
-            await dispatch(fetchGeoFencingAlarms(geoFencingAlarmFilter));
-            toast.success('Data Deleted');
-          }
-        } catch (error) {
-          toast.error('Delete Data Unsuccessful');
-          console.error('Error deleting GeoFence:', error);
+  //Delete Pop-up
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedGeofence, setSelectedGeofence] = useState<GeoFencingAlarmType | null>(null);
+  // Open delete confirmation dialog
+  const handleOpenDeleteDialog = (geofence: GeoFencingAlarmType) => {
+    setSelectedGeofence(geofence);
+    setDeleteDialogOpen(true);
+  };
+
+  // Close delete confirmation dialog
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setSelectedGeofence(null);
+  };
+
+  // Confirm delete action
+  const handleConfirmDelete = async () => {
+    if (selectedGeofence) {
+      try {
+        const result = await dispatch(deleteGeoFencingAlarm(selectedGeofence.id));
+        if (result && result.type && result.type.endsWith('/fulfilled')) {
+          await dispatch(fetchGeoFencingAlarms(geoFencingAlarmFilter));
+          toast.success('Data Deleted');
         }
+      } catch (error) {
+        toast.error('Delete Data Unsuccessful');
+        console.error('Error deleting GeoFence:', error);
       }
-      handleCloseDeleteDialog();
-    };
+    }
+    handleCloseDeleteDialog();
+  };
+
+  const handleEdit = (selectedGeofence: GeoFencingAlarmType) => {
+    dispatch(SetSelectedGeoFencingAlarm(selectedGeofence));
+    console.log("Selected geofencing alarm for editing:", JSON.stringify(selectedGeofence));
+    // window.location.href = '/alarmsetting/geofencing/edit';
+    navigate('/alarmsetting/geofencing/edit');
+  };
 
   const renderSkeletonRows = (rows: number) => (
     <>
@@ -303,16 +313,16 @@ const GeoFencingList = () => {
                               <IconButton
                                 color="primary"
                                 size="small"
-                                //   onClick={() => handleOpenDeleteDialog(district)}
+                                onClick={() => handleEdit(geofence)}
                               >
                                 <IconPencil size={20} />
                               </IconButton>
                             </Tooltip>
-                                                        <Tooltip title="Delete" arrow>
+                            <Tooltip title="Delete" arrow>
                               <IconButton
-                                color="primary"
+                                color="error"
                                 size="small"
-                                  onClick={() => handleOpenDeleteDialog(geofence)}
+                                onClick={() => handleOpenDeleteDialog(geofence)}
                               >
                                 <IconTrash size={20} />
                               </IconButton>
@@ -338,26 +348,26 @@ const GeoFencingList = () => {
       </Grid>
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-              <DialogTitle>Confirm Deletion</DialogTitle>
-              <DialogContent>
-                <DialogContentText>
-                  Are you sure you want to delete the GeoFence <strong>{selectedGeofence?.name}</strong>?
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseDeleteDialog} color="primary">
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleConfirmDelete}
-                  color={isLoading ? 'primary' : 'error'}
-                  disabled={isLoading}
-                  startIcon={isLoading ? <CircularProgress size={20} /> : null}
-                >
-                  {isLoading ? 'Deleting...' : 'Delete'}
-                </Button>
-              </DialogActions>
-            </Dialog>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete the GeoFence <strong>{selectedGeofence?.name}</strong>?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            color={isLoading ? 'primary' : 'error'}
+            disabled={isLoading}
+            startIcon={isLoading ? <CircularProgress size={20} /> : null}
+          >
+            {isLoading ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 };

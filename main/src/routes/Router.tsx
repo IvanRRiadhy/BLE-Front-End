@@ -32,6 +32,7 @@ const VisitorTag = Loadable(lazy(() => import('../views/master/tag/visitorTag'))
 /* ***Alarm Setting*** */
 const AlarmSetting = Loadable(lazy(() => import('../views/master/alarmSetting/MainList')));
 const GeoFencing = Loadable(lazy(() => import('../views/master/alarmSetting/GeoFencing/GeoFencing')));
+const GeoFencingEdit = Loadable(lazy(() => import('../views/master/alarmSetting/GeoFencing/GeoFencingEdit')));
 const PeopleCounting = Loadable(lazy(() => import('../views/master/alarmSetting/PeopleCounting/PeopleCounting')));
 
 /* ****CRUD**** */
@@ -283,6 +284,7 @@ const Router = [
       // ***Alarm Setting*** //
       { path: '/alarmsetting', exact: true, element: <AlarmSetting /> },
       { path: '/alarmsetting/geofencing', exact: true, element: <GeoFencing /> },
+      { path: '/alarmsetting/geofencing/edit', exact: true, element: <GeoFencingEdit /> },
       { path: '/alarmsetting/peoplecounting', exact: true, element: <PeopleCounting /> },
 
       //Dashboard Evacuation

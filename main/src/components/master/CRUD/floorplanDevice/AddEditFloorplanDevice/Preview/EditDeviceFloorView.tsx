@@ -372,12 +372,6 @@ const EditDeviceFloorView: React.FC<{
               transformOrigin: 'top left',
             }}
           >
-            {/* <Stage
-              width={containerRef.current ? containerRef.current.clientWidth : 800}
-              height={containerRef.current ? containerRef.current.clientHeight : 600}
-              style={{ position: 'absolute', top: 0, left: 0 }}
-            >
-              <Layer> */}
             {/* Render the image */}
             {image && imgSize && containerRef.current && (
               <>
@@ -398,8 +392,6 @@ const EditDeviceFloorView: React.FC<{
                 />
               </>
             )}
-            {/* </Layer>
-            </Stage> */}
           </Box>
         </Box>
       </Box>

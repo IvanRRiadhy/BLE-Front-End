@@ -23,6 +23,7 @@ import { CardRecordType, GetFilter as CardRecordFilter } from './crud/cardRecord
 import { TimeGroupType, GetFilter as TimeGroupFilter } from './crud/timeGroup';
 import { CardAccessType, GetFilter as CardAccessFilter } from './crud/cardAccess';
 import { CardGroupType, GetFilter as CardGroupFilter } from './crud/cardGroup';
+import { GeoFencingAlarmType, GetFilter as GeoFenceFilter } from './alarmsetting/geofencing';
 
 //#region AccessCCTV
 export const defaultAccessCCTVForm: CCTVType = {
@@ -604,4 +605,27 @@ export const defaultCardGroupFilter: CardGroupFilter = {
     
   }
 };
+//#endregion
+
+//#region GeoFence
+export const defaultGeoFencingForm: GeoFencingAlarmType = {
+  id: '',
+  name: '',
+  remarks: '',
+  areaShape: '',
+  colorArea: '',
+  behavior: '',
+  isActive: true,
+  floorplanId: ''
+};
+
+export const defaultGeoFencingFilter: GeoFenceFilter = {
+  Draw: 1,
+  Start: 0,
+  Length: 5,
+  SortColumn: 'UpdatedAt',
+  SortDir: 'desc',
+  SearchValue: '',
+}
+
 //#endregion

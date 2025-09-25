@@ -6,19 +6,32 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 import { Save } from "@mui/icons-material";
 import axios from "axios";
+import { defaultGeoFencingFilter } from "../defaultForm";
+import { FloorplanType } from "../crud/floorplan";
 
 const API_DT_URL = "/api/Geofence/filter/";
 const API_URL = "/api/Geofence/";
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+type Nodes = {
+    id: string;
+    x: number;
+    y: number;
+    x_px: number;
+    y_px: number;
+  };
 
 export type GeoFencingAlarmType = {
     id: string;
     name: string;
     remarks: string;
     areaShape: string;
-    colorArea: string;
+    color: string;
     behavior: string;
     isActive: boolean;
+    floorplanId: string;
+    floorplan?: FloorplanType;
+    nodes?: Nodes[];
 }
 
 export type GetGeoFencingResponse = {
@@ -56,18 +69,12 @@ interface StateType {
         geoFencingAlarmTotalCount: number;
     geoFencingAlarmFilteredCount: number;
     geoFencingAlarmActiveCount: number;
+    drawingGeoFence?: string; 
 };
 
 const initialState: StateType = {
     geoFencingAlarms: [],
-    geoFencingAlarmFilter: {
-        Draw: 0,
-        Start: 0,
-        Length: 10,
-        SortColumn: 'Name',
-        SortDir: 'asc',
-        SearchValue: '',
-    },
+    geoFencingAlarmFilter: defaultGeoFencingFilter,
     geoFencingAlarmAll: [],
     selectedGeoFencingAlarm: null,
     isLoading: false,
@@ -94,12 +101,15 @@ export const GeoFencingAlarmSlice = createSlice({
             }
         },  
         SetSelectedGeoFencingAlarm: (state, action: PayloadAction<GeoFencingAlarmType | null>) => {
+            console.log("Setting selected geofencing alarm:", action.payload);
             state.selectedGeoFencingAlarm = action.payload;
+            console.log("Selected geofencing alarm:", JSON.stringify(state.selectedGeoFencingAlarm));
         },
         UpdateSelectedGeoFencingAlarm: (state, action: PayloadAction<Partial<GeoFencingAlarmType>>) => {
             if (state.selectedGeoFencingAlarm) {
                 state.selectedGeoFencingAlarm = {...state.selectedGeoFencingAlarm, ...action.payload};
             }
+            console.log("Updated selected geofencing alarm:", JSON.stringify(state.selectedGeoFencingAlarm));
         },
         SaveSelectedGeoFencingAlarm: (state) => {
             if (state.selectedGeoFencingAlarm) {
@@ -109,6 +119,9 @@ export const GeoFencingAlarmSlice = createSlice({
                 }
             }
         },
+        DrawGeoFence: (state, action: PayloadAction<string>) => {
+            state.drawingGeoFence = action.payload;
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -136,39 +149,57 @@ export const {
     ChangeActiveStatus,
     SetSelectedGeoFencingAlarm,
     UpdateSelectedGeoFencingAlarm,
-    SaveSelectedGeoFencingAlarm
+    SaveSelectedGeoFencingAlarm,
+    DrawGeoFence
 } = GeoFencingAlarmSlice.actions;
 
 export const fetchGeoFencingAlarms = createAsyncThunk(
-    'geoFencingAlarm/fetchGeoFencingAlarms',
-    async (filter: GetFilter, thunkAPI) => {
-        const started = Date.now();
-        // dispatch(GetGeoFencingAlarms(geofencingDummyData));
-        const res = await retryUntilSuccess(
-            () => axiosServices.post(API_DT_URL, filter ),
-            {
-                signal: thunkAPI.signal,     
-                timeoutMs: 2 * 60 * 1000,    
-                minDelay: 500,
-                maxDelay: 8000,
-            }
-        )
-        console.log("GeoFencing Alarm Response:", res);
-    // 🔥 normalize isActive
-    const normalized = (res.data.collection.data || []).map((item: any) => ({
-      ...item,
-      isActive: item.isActive === 1, // 1 → true, 0 → false
-    }));
+  'geoFencingAlarm/fetchGeoFencingAlarms',
+  async (filter: GetFilter, thunkAPI) => {
+    const started = Date.now();
+    const res = await retryUntilSuccess(
+      () => axiosServices.post(API_DT_URL, filter),
+      {
+        signal: thunkAPI.signal,
+        timeoutMs: 2 * 60 * 1000,
+        minDelay: 500,
+        maxDelay: 8000,
+      }
+    );
+
+    console.log("GeoFencing Alarm Response:", res);
+
+    // 🔥 normalize isActive + parse areaShape into nodes
+    const normalized: GeoFencingAlarmType[] = (res.data.collection.data || []).map((item: any) => {
+      let nodes: Nodes[] | undefined = undefined;
+      try {
+        if (item.areaShape) {
+          const parsed = JSON.parse(item.areaShape);
+          if (Array.isArray(parsed)) {
+            nodes = parsed;
+          }
+        }
+      } catch (err) {
+        console.error("Invalid areaShape JSON:", item.areaShape, err);
+      }
+
+      return {
+        ...item,
+        isActive: item.isActive === 1, // 1 → true, 0 → false
+        nodes, // ✅ add parsed nodes
+      };
+    });
 
     dispatch(GetGeoFencingAlarms(normalized));
     await ensureMinLatency(started, 500);
 
     return {
       ...res.data.collection,
-      data: normalized, // keep normalized in the returned payload too
+      data: normalized,
     };
-    }
-)
+  }
+);
+
 
 export const addGeoFencingAlarm = createAsyncThunk(
     'geoFencingAlarm/addGeoFencingAlarm',
@@ -193,6 +224,9 @@ export const editGeoFencingAlarm = createAsyncThunk(
         try{
             const id = formData.get('id'); // Extract ID from FormData
             formData.delete('id'); // Remove ID from FormData to avoid sending it again
+            Object.keys(formData).forEach(key => {
+            console.log(`${key}: ${formData.get(key)}`);
+            });
             const res = await axiosServices.put(`${API_URL}${id}`, formData);
             const elapsed = Date.now() - started;
             if(elapsed < 500){
