@@ -21,6 +21,7 @@ import FloorplanDeviceImport from 'src/components/master/CRUD/floorplanDevice/fl
 import FloorplanDeviceExport from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceExport';
 import FloorplanFilter from 'src/components/master/CRUD/floorplan/FloorplanFilter';
 import GeoFencingList from 'src/components/master/Alarm Setting/Geofencing/geofencingList';
+import { AddGeoFencing } from 'src/components/master/Alarm Setting/Geofencing/AddGeoFencing';
 interface cardType {
   icon?: string;
   title: string;
@@ -47,6 +48,7 @@ const FloorplanDevice = () => {
       bgcolor: 'primary',
     },
   ];
+  
   return (
     <PageContainer title="GeoFencing Alarm" description="This is the GeoFencing Alarm CRUD Page">
       <Breadcrumb title="GeoFencing Alarm Table" />
@@ -100,6 +102,7 @@ const FloorplanDevice = () => {
           }}
         >
           <ParentCard title="GeoFencing List" codeModel={[
+            <AddGeoFencing key="AddGeoFencing" />,
           ]}>
             {/* <FloorplanDeviceList /> */}
             <GeoFencingList />

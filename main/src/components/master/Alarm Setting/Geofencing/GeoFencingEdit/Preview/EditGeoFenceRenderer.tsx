@@ -73,7 +73,7 @@ const EditGeoFenceRenderer: React.FC<{
 
   useEffect(() => {
     setActiveGeoFenceArea(activeGeoFence?.name || '');
-    console.log('Active GeoFence changed:', activeGeoFence?.areaShape);
+    // console.log('Active GeoFence changed:', activeGeoFence?.areaShape);
   }, [activeGeoFence]);
   const [cornerDragData, setCornerDragData] = useState<{
     areaName: string;
@@ -313,25 +313,61 @@ const EditGeoFenceRenderer: React.FC<{
     return false;
   };
 
-  // const handleCanvasClick = () => {
-  //   if (!drawingGeoFence) return; // Only allow drawing if the drawing mode is active
-  //   const stage = stageRef.current;
-  //   if (!stage) return;
-  //   const pointerPosition = stage.getPointerPosition();
-  //   if (!pointerPosition) return;
-
-  //   const { x, y } = pointerPosition;
-  //   const newNode = {
-  //     id: uniqueId(),
-  //     x: x * scaleX,
-  //     y: y * scaleX,
-  //     x_px: x * scaleX,
-  //     y_px: y * scaleY,
-  //   };
-  // }
+  const handleCanvasClick = () => {
+    if (!drawingGeoFence) return; // Only allow drawing if the drawing mode is active
+    const stage = stageRef.current;
+    if (!stage) return;
+    const pointerPosition = stage.getPointerPosition();
+    if (!pointerPosition) return;
+    console.log('drawingNodes before click:', drawingNodes);
+    const { x, y } = pointerPosition;
+    const newNode = {
+      id: uniqueId(),
+      x: x * scaleX,
+      y: y * scaleX,
+      x_px: x * scaleX,
+      y_px: y * scaleY,
+    };
+    if (!activeGeoFence) return;
+    setDrawingNodes((prevNodes) => {
+      const updatedNodes = [...prevNodes, newNode];
+      let collision = false;
+      if (otherGeoFences === undefined) {
+        collision = false;
+      } else {
+        collision = otherGeoFences.some((area) => {
+          return checkPolygonCollision(
+            { nodes: area.nodes ? area.nodes : [] },
+            { nodes: updatedNodes },
+          );
+        });
+      }
+      if (collision) {
+        // console.log(drawingNodes);
+        alert(`Areas cannot overlap! Position reverted.`);
+        setDrawingNodes([]);
+        dispatch(DrawGeoFence('')); // Reset the drawing mode
+        return []; // Revert to previous nodes
+      }
+      if (updatedNodes.length === 3) {
+        dispatch(
+          UpdateSelectedGeoFencingAlarm({
+            ...activeGeoFence,
+            nodes: updatedNodes,
+            areaShape: JSON.stringify(updatedNodes),
+          }),
+        );
+        setDrawingNodes([]);
+        dispatch(DrawGeoFence('')); // Exit drawing mode after completing the polygon
+      }
+      return updatedNodes;
+    });
+  };
 
   useEffect(() => {
+    if (drawingGeoFence === undefined) return;
     if (drawingGeoFence !== '') {
+      console.log('Drawing mode active for GeoFence ID:', drawingGeoFence);
       setCursor('crosshair');
     } else {
       setCursor('default');
@@ -373,7 +409,7 @@ const EditGeoFenceRenderer: React.FC<{
     }
 
     // Reset drag state
-    setIsDragging('');
+    // setIsDragging('');
     setAreaDragging(false);
     setDragOffset({ dx: 0, dy: 0 });
     setIsColliding(false);
@@ -390,11 +426,12 @@ const EditGeoFenceRenderer: React.FC<{
   };
 
   const handleMouseUp = () => {
-    setIsDragging('');
+    // setIsDragging('');
     setAreaDragging(false);
   };
 
   const handleCornerDragStart = (areaName: string, cornerIndex: number) => {
+    console.log('Started dragging corner', cornerIndex, 'of area', areaName);
     if (!activeGeoFence) return;
 
     const corner = activeGeoFence.nodes && activeGeoFence.nodes[cornerIndex];
@@ -474,7 +511,7 @@ const EditGeoFenceRenderer: React.FC<{
     // Reset drag state
     setCornerDragData(null);
     setIsColliding(false);
-    setIsDragging('');
+    // setIsDragging('');
     // handleSaveArea();
   };
 
@@ -611,7 +648,15 @@ const EditGeoFenceRenderer: React.FC<{
 
   return (
     <>
-      <Stage width={width} height={height} style={{ position: 'absolute', top: 0, left: 0 }}>
+      <Stage
+        ref={stageRef}
+        width={width}
+        height={height}
+        style={{ position: 'absolute', top: 0, left: 0 }}
+        onMouseMove={handleMouseMove}
+        onClick={handleCanvasClick}
+        onContextMenu={handleRightClick}
+      >
         <Layer>
           {image && (
             <KonvaImage
@@ -662,7 +707,7 @@ const EditGeoFenceRenderer: React.FC<{
                 lineJoin="round"
                 lineCap="round"
                 closed
-                fill={activeGeoFence.color }
+                fill={activeGeoFence.color}
                 opacity={0.7}
                 draggable
                 onMouseEnter={() => {
@@ -673,6 +718,7 @@ const EditGeoFenceRenderer: React.FC<{
                 }}
                 onMouseDown={(e) => {
                   if (!drawingGeoFence) {
+                    setIsDragging(activeGeoFence.name);
                     handleDragStart(activeGeoFence.name);
                     const isShiftPressed = e.evt.shiftKey;
                     const stage = e.target.getStage();
@@ -697,7 +743,10 @@ const EditGeoFenceRenderer: React.FC<{
                   }
                 }}
                 onMouseUp={handleMouseUp}
-                onDragStart={() => setAreaDragging(true)}
+                onDragStart={() => {
+                  setIsDragging(activeGeoFence.name);
+                  setAreaDragging(true);
+                }}
                 onDragMove={(e) => {
                   handleDragMove(e.target.x() * scaleX, e.target.y() * scaleY);
                 }}
@@ -705,6 +754,7 @@ const EditGeoFenceRenderer: React.FC<{
                   handleDragEnd(activeGeoFence.name);
                   e.target.x(0);
                   e.target.y(0);
+                  setIsDragging('');
                 }}
               />
               {!areaDragging &&
@@ -738,7 +788,10 @@ const EditGeoFenceRenderer: React.FC<{
                         shape.getLayer()?.batchDraw(); // Redraw the layer for immediate effect
                       }
                     }}
-                    onDragStart={() => handleCornerDragStart(activeGeoFence.name, index)}
+                    onDragStart={() => {
+                      setIsDragging(activeGeoFence.name);
+                      handleCornerDragStart(activeGeoFence.name, index);
+                    }}
                     onDragMove={(e) => {
                       handleDragCorner(
                         activeGeoFence.name,
@@ -748,7 +801,9 @@ const EditGeoFenceRenderer: React.FC<{
                       );
                       handleCornerDragMove(index, e.target.x() * scaleX, e.target.y() * scaleY);
                     }}
-                    onMouseDown={() => handleDragStart(activeGeoFence.name)}
+                    onMouseDown={() => {
+                      setIsDragging(activeGeoFence.name);
+                      handleDragStart(activeGeoFence.name)}}
                     onMouseUp={handleMouseUp}
                     onDragEnd={(e) => {
                       handleCornerDragEnd(
@@ -767,51 +822,60 @@ const EditGeoFenceRenderer: React.FC<{
                 ))}
             </React.Fragment>
           )}
-          {drawingNodes.map((node) => (
-            <Circle
-              key={node.id}
-              x={node.x_px / scaleX}
-              y={node.y_px / scaleY}
-              radius={7}
-              fill="blue" // Color for the drawing nodes
-              draggable={false} // Disable dragging for these circles
-              stroke="black"
-              strokeWidth={2}
-            />
-          ))}
-          {/* Render dashed lines connecting each node to the cursor */}
-          {drawingNodes.length > 0 && cursorPosition && (
+          {drawingGeoFence && (
             <>
               {drawingNodes.map((node) => (
-                <Line
-                  key={`line-to-cursor-${node.id}`}
-                  points={[node.x / scaleX, node.y / scaleX, cursorPosition.x, cursorPosition.y]} // Connect each node to the cursor
-                  stroke="blue"
+                <Circle
+                  key={node.id}
+                  x={node.x_px / scaleX}
+                  y={node.y_px / scaleY}
+                  radius={7}
+                  fill="blue" // Color for the drawing nodes
+                  draggable={false} // Disable dragging for these circles
+                  stroke="black"
                   strokeWidth={2}
-                  dash={[10, 5]} // Dashed line pattern
-                  closed={false}
                 />
               ))}
-              {drawingNodes.length > 1 &&
-                drawingNodes.map((node, index) => {
-                  if (index === drawingNodes.length - 1) return null; // Skip the last node
-                  const nextNode = drawingNodes[index + 1];
-                  return (
+              {/* Render dashed lines connecting each node to the cursor */}
+              {drawingNodes.length > 0 && cursorPosition && (
+                <>
+                  {drawingNodes.map((node) => (
                     <Line
-                      key={`line-to-next-${node.id}`}
+                      key={`line-to-cursor-${node.id}`}
                       points={[
-                        node.x_px / scaleX,
-                        node.y_px / scaleY,
-                        nextNode.x_px / scaleX,
-                        nextNode.y_px / scaleY,
-                      ]} // Connect each node to the next node
+                        node.x / scaleX,
+                        node.y / scaleX,
+                        cursorPosition.x,
+                        cursorPosition.y,
+                      ]} // Connect each node to the cursor
                       stroke="blue"
                       strokeWidth={2}
                       dash={[10, 5]} // Dashed line pattern
                       closed={false}
                     />
-                  );
-                })}
+                  ))}
+                  {drawingNodes.length > 1 &&
+                    drawingNodes.map((node, index) => {
+                      if (index === drawingNodes.length - 1) return null; // Skip the last node
+                      const nextNode = drawingNodes[index + 1];
+                      return (
+                        <Line
+                          key={`line-to-next-${node.id}`}
+                          points={[
+                            node.x_px / scaleX,
+                            node.y_px / scaleY,
+                            nextNode.x_px / scaleX,
+                            nextNode.y_px / scaleY,
+                          ]} // Connect each node to the next node
+                          stroke="blue"
+                          strokeWidth={2}
+                          dash={[10, 5]} // Dashed line pattern
+                          closed={false}
+                        />
+                      );
+                    })}
+                </>
+              )}
             </>
           )}
         </Layer>

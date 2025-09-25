@@ -6,7 +6,10 @@ import {
   SelectChangeEvent,
   Typography,
   Divider,
+  Tooltip,
+  IconButton,
 } from '@mui/material';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import React, { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
@@ -17,6 +20,8 @@ import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloors } from 'src/store/apps/crud/floor';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import {
+  addGeoFencingAlarm,
+  DrawGeoFence,
   editGeoFencingAlarm,
   fetchGeoFencingAlarms,
   SaveSelectedGeoFencingAlarm,
@@ -74,7 +79,11 @@ const GeoFencingDetailList = () => {
         }
       });
       let result;
-      result = await dispatch(editGeoFencingAlarm(formData));
+      if(geoFenceData.id.startsWith('GeoFence-')){
+        result = await dispatch(addGeoFencingAlarm(formData));
+      } else {
+        result = await dispatch(editGeoFencingAlarm(formData));
+      }
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchGeoFencingAlarms(defaultGeoFencingFilter));
         console.log('GeoFence Saved!');
@@ -125,9 +134,8 @@ const GeoFencingDetailList = () => {
         <Typography variant="h5" mb={2} fontWeight={700} textAlign="left">
           Geofence Details
         </Typography>
-        
       </Box>
-<Divider />
+      <Divider />
       <Box sx={{ minHeight: 0, overflow: 'auto' }}>
         <Box pl={3} pr={1}>
           <Grid container spacing={1}>
@@ -172,7 +180,30 @@ const GeoFencingDetailList = () => {
             </Grid>
             {geoFenceData?.floorplanId && (
               <Grid size={12}>
-                <CustomFormLabel>Masked Area (Optional)</CustomFormLabel>
+                <Box display="flex" alignItems="center">
+                  <CustomFormLabel>Masked Area (Optional)</CustomFormLabel>
+                  <Tooltip title="Use Area for GeoFence">
+                    <IconButton size="small" sx={{ color: 'text.secondary', p: 0.5 }}>
+                      <Typography
+                        variant="body2"
+                        fontWeight="bold"
+                        sx={{
+                          width: 18,
+                          height: 18,
+                          borderRadius: '50%',
+                          border: '1px solid',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.75rem',
+                          lineHeight: 1,
+                        }}
+                      >
+                        ?
+                      </Typography>
+                    </IconButton>
+                  </Tooltip>
+                </Box>
                 <CustomSelect
                   id="areaShape"
                   value={
@@ -204,6 +235,23 @@ const GeoFencingDetailList = () => {
                     </MenuItem>
                   ))}
                 </CustomSelect>
+
+                {geoFenceData?.areaShape === '' && (
+                  <Box mt={2} textAlign="center">
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      ----- OR -----
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => {
+                        console.log("geoFenceData: ", geoFenceData.id);
+                        dispatch(DrawGeoFence(geoFenceData.id))}}
+                    >
+                      Create New Area
+                    </Button>
+                  </Box>
+                )}
               </Grid>
             )}
 

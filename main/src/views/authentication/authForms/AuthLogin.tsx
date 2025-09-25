@@ -20,20 +20,20 @@ import CustomCheckbox from '../../../components/forms/theme-elements/CustomCheck
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
 import CustomFormLabel from '../../../components/forms/theme-elements/CustomFormLabel';
 import axiosServices from 'src/utils/axios';
+import { useDispatch } from 'src/store/Store';
+import { fetchAlarmSettingsDT } from 'src/store/apps/alarmsetting/alarmSettings';
+import { defaultAlarmSettingFilter } from 'src/store/apps/defaultForm';
 
 type NativeFormProps = React.ComponentPropsWithoutRef<'form'>;
 
 const MotionForm = motion(
-  React.forwardRef<HTMLFormElement, NativeFormProps & MotionProps>(function MF(
-    props,
-    ref
-  ) {
+  React.forwardRef<HTMLFormElement, NativeFormProps & MotionProps>(function MF(props, ref) {
     return <form ref={ref} {...props} />;
-  })
+  }),
 );
 
-const ADMIN_API_URL = '/api/Auth/login/';              // existing
-const VISITOR_API_URL = '/api/Auth/login/';   // TODO: set your actual visitor endpoint
+const ADMIN_API_URL = '/api/Auth/login/'; // existing
+const VISITOR_API_URL = '/api/Auth/login/'; // TODO: set your actual visitor endpoint
 
 type TabKey = 'admin' | 'visitor';
 
@@ -46,7 +46,7 @@ const slideVariants = {
 const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   const [activeTab, setActiveTab] = useState<TabKey>('admin');
   const [direction, setDirection] = useState(1); // for slide left/right
-
+  const dispatch = useDispatch();
   const [adminCreds, setAdminCreds] = useState({ username: '', password: '' });
   const [visitorCreds, setVisitorCreds] = useState({ username: '', password: '' }); // keep same fields for now
   const [loginError, setLoginError] = useState<string>('');
@@ -59,16 +59,14 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
     setLoginError('');
   };
 
-  const handleChange =
-    (tab: TabKey) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setLoginError('');
-      if (tab === 'admin') {
-        setAdminCreds({ ...adminCreds, [e.target.id]: e.target.value });
-      } else {
-        setVisitorCreds({ ...visitorCreds, [e.target.id]: e.target.value });
-      }
-    };
+  const handleChange = (tab: TabKey) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLoginError('');
+    if (tab === 'admin') {
+      setAdminCreds({ ...adminCreds, [e.target.id]: e.target.value });
+    } else {
+      setVisitorCreds({ ...visitorCreds, [e.target.id]: e.target.value });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,16 +85,19 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         if (data?.applicationId) localStorage.setItem('applicationId', data.applicationId);
         if (data?.levelPriority) localStorage.setItem('levelPriority', data.levelPriority);
         localStorage.setItem('welcomePopupShown', 'false');
-        if(isAdmin){
-        navigate('/');
+        if (isAdmin) {
+          
+          navigate('/');
         } else {
           navigate('/my-visit');
         }
-
       })
       .catch((err) => {
         setLoginError('Invalid username or password. Please try again.');
-        console.error('error: ', err?.response ? err.response.data?.collection.data ?? err.response.data : err?.message);
+        console.error(
+          'error: ',
+          err?.response ? err.response.data?.collection.data ?? err.response.data : err?.message,
+        );
       });
   };
 
@@ -114,7 +115,14 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
 
       <Box mt={3}>
         <Divider sx={{ mb: 2 }}>
-          <Typography component="span" color="textSecondary" variant="h6" fontWeight="400" position="relative" px={2}>
+          <Typography
+            component="span"
+            color="textSecondary"
+            variant="h6"
+            fontWeight="400"
+            position="relative"
+            px={2}
+          >
             Sign in
           </Typography>
         </Divider>
@@ -154,20 +162,22 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       )}
 
       {/* Animated form container */}
-<AnimatePresence mode="wait" custom={direction}>
-  <MotionForm
-    key={activeTab}
-    onSubmit={handleSubmit}
-    custom={direction}
-    variants={slideVariants}
-    initial="enter"
-    animate="center"
-    exit="exit"
-    transition={{ duration: 0.25, ease: 'easeOut' }}
-  >
+      <AnimatePresence mode="wait" custom={direction}>
+        <MotionForm
+          key={activeTab}
+          onSubmit={handleSubmit}
+          custom={direction}
+          variants={slideVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+        >
           <Stack>
             <Box>
-              <CustomFormLabel htmlFor="username">{activeTab === 'admin' ? 'Username' : 'Visitor Username'}</CustomFormLabel>
+              <CustomFormLabel htmlFor="username">
+                {activeTab === 'admin' ? 'Username' : 'Visitor Username'}
+              </CustomFormLabel>
               <CustomTextField
                 id="username"
                 variant="outlined"
@@ -190,7 +200,10 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
 
             <Stack justifyContent="space-between" direction="row" alignItems="center" my={2}>
               <FormGroup>
-                <FormControlLabel control={<CustomCheckbox defaultChecked />} label="Remember this Device" />
+                <FormControlLabel
+                  control={<CustomCheckbox defaultChecked />}
+                  label="Remember this Device"
+                />
               </FormGroup>
               <Typography
                 component={Link}
@@ -214,7 +227,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
               {activeTab === 'admin' ? 'Sign In as Admin' : 'Sign In as Visitor'}
             </Button>
           </Box>
-  </MotionForm>
+        </MotionForm>
       </AnimatePresence>
 
       {subtitle}

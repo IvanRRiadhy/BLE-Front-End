@@ -24,6 +24,7 @@ import { TimeGroupType, GetFilter as TimeGroupFilter } from './crud/timeGroup';
 import { CardAccessType, GetFilter as CardAccessFilter } from './crud/cardAccess';
 import { CardGroupType, GetFilter as CardGroupFilter } from './crud/cardGroup';
 import { GeoFencingAlarmType, GetFilter as GeoFenceFilter } from './alarmsetting/geofencing';
+import { GetFilter as AlarmSettingFilter } from './alarmsetting/alarmSettings';
 
 //#region AccessCCTV
 export const defaultAccessCCTVForm: CCTVType = {
@@ -607,13 +608,24 @@ export const defaultCardGroupFilter: CardGroupFilter = {
 };
 //#endregion
 
+//#region Alarm Setting
+export const defaultAlarmSettingFilter: AlarmSettingFilter = {
+  Draw: 1,
+  Start: 0,
+  Length: 5,
+  SortColumn: 'name',
+  SortDir: 'asc',
+  SearchValue: '',
+}
+//#endregion
+
 //#region GeoFence
 export const defaultGeoFencingForm: GeoFencingAlarmType = {
-  id: '',
+  id: `GeoFence-${new Date().getTime()}`,
   name: '',
   remarks: '',
   areaShape: '',
-  colorArea: '',
+  color: '#f55549',
   behavior: '',
   isActive: true,
   floorplanId: ''

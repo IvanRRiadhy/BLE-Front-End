@@ -1,4 +1,7 @@
  import axios from 'axios';
+import { fetchAlarmSettingsDT } from 'src/store/apps/alarmsetting/alarmSettings';
+import { defaultAlarmSettingFilter } from 'src/store/apps/defaultForm';
+import { useDispatch } from 'src/store/Store';
 
  export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -67,7 +70,7 @@ axiosServices.interceptors.response.use(
     return response;
   },
   async error => {
-          // const dispatch = useDispatch();
+          const dispatch = useDispatch();
     const originalRequest = error.config;
     if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true; // Mark the request as retried to avoid infinite loops.
@@ -90,7 +93,7 @@ axiosServices.interceptors.response.use(
         // localStorage.setItem('refreshToken', newRefreshToken);
         // Update the header for the retried request
         originalRequest.headers['Authorization'] = `Bearer ${token}`;
-
+        dispatch(fetchAlarmSettingsDT(defaultAlarmSettingFilter));
         axiosServices.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         console.log('Token refreshed successfully:', token);
         // console.log('originalRequest: ', originalRequest);

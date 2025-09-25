@@ -19,6 +19,8 @@ import { memberType } from 'src/store/apps/crud/member';
 import { VisitorType } from 'src/store/apps/crud/visitor';
 import { showAlarmPopup } from 'src/store/apps/monitoring/AlarmUI';
 import { pushItem, openPanel } from 'src/store/apps/monitoring/NotifySlice';
+import { fetchAlarmSettingsDT } from 'src/store/apps/alarmsetting/alarmSettings';
+import { defaultAlarmSettingFilter } from 'src/store/apps/defaultForm';
 
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
@@ -56,7 +58,9 @@ const FullLayout: FC = () => {
     if (v) return v.name;
     return bleNumber || 'Unknown';
   };
-
+  useEffect(() => {
+    dispatch(fetchAlarmSettingsDT(defaultAlarmSettingFilter));
+  }, []);
   // useEffect(() => {
   //   // Request notification permission
   //   if ('Notification' in window && Notification.permission !== 'granted') {

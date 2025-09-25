@@ -17,9 +17,8 @@ const EditGeoFenceFloorView = () => {
     (state: RootState) => state.GeoFencingReducer.selectedGeoFencingAlarm,
   );
   const activeFloorPlan = floorplans.find((fp) => fp.id === geoFenceData?.floorplanId);
-    const filteredArea = maskedAreas.filter((area) => area.floorplanId === activeFloorPlan?.id);
-    const [showArea, setShowArea] = useState(true);
-  
+  const filteredArea = maskedAreas.filter((area) => area.floorplanId === activeFloorPlan?.id);
+  const [showArea, setShowArea] = useState(true);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
@@ -60,7 +59,6 @@ const EditGeoFenceFloorView = () => {
           const offsetX = containerWidth / 4;
           const offsetY = containerHeight / 4;
 
-
           setTranslate({ x: offsetX, y: offsetY });
         }
       };
@@ -70,108 +68,108 @@ const EditGeoFenceFloorView = () => {
     }
   }, [activeFloorPlan]);
 
-    useEffect(() => {
-      dispatch(fetchFloorplan());
-      dispatch(fetchMaskedAreas());
-    }, [dispatch]);
+  useEffect(() => {
+    dispatch(fetchFloorplan());
+    dispatch(fetchMaskedAreas());
+  }, [dispatch]);
 
-      const calculateImageDimensions = (
-        containerWidth: number,
-        containerHeight: number,
-        imageWidth: number,
-        imageHeight: number,
-      ) => {
-        const containerRatio = containerWidth / containerHeight;
-        const imageRatio = imageWidth / imageHeight;
-    
-        if (imageRatio > containerRatio) {
-          // Image is wider than the container
-          return {
-            width: containerWidth,
-            height: containerWidth / imageRatio,
-            originalWidth: imageWidth,
-            originalHeight: imageHeight,
-          };
-        } else {
-          // Image is taller than the container
-          return {
-            width: containerHeight * imageRatio,
-            height: containerHeight,
-            originalWidth: imageWidth,
-            originalHeight: imageHeight,
-          };
-        }
+  const calculateImageDimensions = (
+    containerWidth: number,
+    containerHeight: number,
+    imageWidth: number,
+    imageHeight: number,
+  ) => {
+    const containerRatio = containerWidth / containerHeight;
+    const imageRatio = imageWidth / imageHeight;
+
+    if (imageRatio > containerRatio) {
+      // Image is wider than the container
+      return {
+        width: containerWidth,
+        height: containerWidth / imageRatio,
+        originalWidth: imageWidth,
+        originalHeight: imageHeight,
       };
-    
-      const handleZoom = (event: React.WheelEvent) => {
-        event.preventDefault(); // Prevent default scrolling behavior
-        if (containerRef.current && imgSize && imgSize.width > 1 && imgSize.height > 1) {
-          const delta = event.deltaY * -0.001; // Adjust zoom sensitivity
-          const rect = containerRef.current.getBoundingClientRect();
-          if (!imgSize || !containerRef.current) return;
-    
-          // Mouse position relative to the container
-          const mouseX = event.clientX - rect.left;
-          const mouseY = event.clientY - rect.top;
-          // Calculate the new scale
-          const containerWidth = containerRef.current.clientWidth;
-          const containerHeight = containerRef.current.clientHeight;
-    
-          const newScale = Math.min(Math.max(scale + delta, minScale), MAX_SCALE);
-    
-          //console.log('New Scale:', newScale); // Debug new scale
-          const scaledWidth = imgSize.width * newScale;
-          const scaledHeight = imgSize.height * newScale;
-    
-          // Calculate translation to keep zoom centered at mouse position
-          const offsetX = mouseX - (mouseX - translate.x) * (newScale / scale);
-          const offsetY = mouseY - (mouseY - translate.y) * (newScale / scale);
-    
-          const minX = Math.min(0, containerWidth - scaledWidth);
-          const minY = Math.min(0, containerHeight - scaledHeight);
-          // console.log('Unsaved Devices:', unsavedDevices);
-          // Update the scale
-          setScale(newScale);
-          setTranslate({
-            x: Math.max(minX, offsetX),
-            y: Math.max(minY, offsetY),
-          });
-          //console.log('New Scale:', newScale);
-          //console.log('New Translate:', translate);
-        }
+    } else {
+      // Image is taller than the container
+      return {
+        width: containerHeight * imageRatio,
+        height: containerHeight,
+        originalWidth: imageWidth,
+        originalHeight: imageHeight,
       };
-    
-      useEffect(() => {
-        const container = containerRef.current;
-        if (!container) return;
-    
-        const handleWheel = (event: WheelEvent) => {
-          if (!event.ctrlKey) return;
-          event.preventDefault();
-          handleZoom(event as unknown as React.WheelEvent);
-        };
-    
-        container.addEventListener('wheel', handleWheel, { passive: false });
-    
-        return () => {
-          container.removeEventListener('wheel', handleWheel);
-        };
-      }, [handleZoom]);
-    
-      useEffect(() => {
-        if (containerRef.current && imgSize && imgSize.width > 1 && imgSize.height > 1) {
-          // const containerWidth = containerRef.current.clientWidth;
-          // const containerHeight = containerRef.current.clientHeight;
-    
-          // const widthRatio = containerWidth / imgSize.width;
-          // const heightRatio = containerHeight / imgSize.height;
-          // setMinScale(Math.min(widthRatio, heightRatio));
-    
-          //console.log('Resetting scale to minScale:', minScale); // Debug scale reset
-          setScale(minScale);
-        }
-      }, [imgSize]); // Reset scale when imgSize changes
-    
+    }
+  };
+
+  const handleZoom = (event: React.WheelEvent) => {
+    event.preventDefault(); // Prevent default scrolling behavior
+    if (containerRef.current && imgSize && imgSize.width > 1 && imgSize.height > 1) {
+      const delta = event.deltaY * -0.001; // Adjust zoom sensitivity
+      const rect = containerRef.current.getBoundingClientRect();
+      if (!imgSize || !containerRef.current) return;
+
+      // Mouse position relative to the container
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+      // Calculate the new scale
+      const containerWidth = containerRef.current.clientWidth;
+      const containerHeight = containerRef.current.clientHeight;
+
+      const newScale = Math.min(Math.max(scale + delta, minScale), MAX_SCALE);
+
+      //console.log('New Scale:', newScale); // Debug new scale
+      const scaledWidth = imgSize.width * newScale;
+      const scaledHeight = imgSize.height * newScale;
+
+      // Calculate translation to keep zoom centered at mouse position
+      const offsetX = mouseX - (mouseX - translate.x) * (newScale / scale);
+      const offsetY = mouseY - (mouseY - translate.y) * (newScale / scale);
+
+      const minX = Math.min(0, containerWidth - scaledWidth);
+      const minY = Math.min(0, containerHeight - scaledHeight);
+      // console.log('Unsaved Devices:', unsavedDevices);
+      // Update the scale
+      setScale(newScale);
+      setTranslate({
+        x: Math.max(minX, offsetX),
+        y: Math.max(minY, offsetY),
+      });
+      //console.log('New Scale:', newScale);
+      //console.log('New Translate:', translate);
+    }
+  };
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey) return;
+      event.preventDefault();
+      handleZoom(event as unknown as React.WheelEvent);
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, [handleZoom]);
+
+  useEffect(() => {
+    if (containerRef.current && imgSize && imgSize.width > 1 && imgSize.height > 1) {
+      // const containerWidth = containerRef.current.clientWidth;
+      // const containerHeight = containerRef.current.clientHeight;
+
+      // const widthRatio = containerWidth / imgSize.width;
+      // const heightRatio = containerHeight / imgSize.height;
+      // setMinScale(Math.min(widthRatio, heightRatio));
+
+      //console.log('Resetting scale to minScale:', minScale); // Debug scale reset
+      setScale(minScale);
+    }
+  }, [imgSize]); // Reset scale when imgSize changes
+
   const handleMouseDown = (event: React.MouseEvent) => {
     if (cursor === 'grab') setCursor('grabbing');
     setIsPanning(true);
@@ -179,40 +177,41 @@ const EditGeoFenceFloorView = () => {
 
     // if (containerRef.current) containerRef.current.style.cursor = 'grabbing';
   };
-    
-      const handleMouseMove = (event: React.MouseEvent) => {
-        if (!isPanning || !containerRef.current || !imgSize ) return;
-        let pannable = true;
-        if(isDragging) pannable = false;
-        if (pannable) {
-          const containerWidth = containerRef.current.clientWidth;
-          const containerHeight = containerRef.current.clientHeight;
-    
-          const scaledWidth = imgSize.width * scale;
-          const scaledHeight = imgSize.height * scale;
-    
-          const minX = Math.min(-scaledWidth, containerWidth - scaledWidth); // Left boundary
-          const maxX = containerWidth; // Right boundary
-          const minY = Math.min(-scaledHeight, containerHeight - scaledHeight); // Top boundary
-          const maxY = containerHeight; // Bottom boundary
-    
-          const newX = event.clientX - dragStart.current.x;
-          const newY = event.clientY - dragStart.current.y;
-    
-          setTranslate({
-            x: Math.min(maxX, Math.max(minX, newX)), // Clamp X
-            y: Math.min(maxY, Math.max(minY, newY)), // Clamp Y
-          });
-        }
-      };
-    
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    if (!isPanning || !containerRef.current || !imgSize) return;
+    let pannable = true;
+    if(cursor === 'move') pannable = false;
+    if(isDragging) pannable = false;
+    // console.log('pannable: ', pannable);
+    if (pannable) {
+      const containerWidth = containerRef.current.clientWidth;
+      const containerHeight = containerRef.current.clientHeight;
+
+      const scaledWidth = imgSize.width * scale;
+      const scaledHeight = imgSize.height * scale;
+
+      const minX = Math.min(-scaledWidth, containerWidth - scaledWidth); // Left boundary
+      const maxX = containerWidth; // Right boundary
+      const minY = Math.min(-scaledHeight, containerHeight - scaledHeight); // Top boundary
+      const maxY = containerHeight; // Bottom boundary
+
+      const newX = event.clientX - dragStart.current.x;
+      const newY = event.clientY - dragStart.current.y;
+
+      setTranslate({
+        x: Math.min(maxX, Math.max(minX, newX)), // Clamp X
+        y: Math.min(maxY, Math.max(minY, newY)), // Clamp Y
+      });
+    }
+  };
+
   const handleMouseUp = () => {
     setIsPanning(false);
     if (cursor === 'grabbing') setCursor('grab'); // Reset cursor
   };
 
-
-        return (
+  return (
     <Box
       onMouseEnter={() => setIsHovered(true)} // Show ZoomControls on mouse enter
       onMouseLeave={() => setIsHovered(false)} // Hide ZoomControls on mouse leave
@@ -256,8 +255,7 @@ const EditGeoFenceFloorView = () => {
       {/* Zoomable Content */}
       <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
         {isHovered &&
-          !isPanning &&
-          ( // Only show ZoomControls when hovered
+          !isPanning && ( // Only show ZoomControls when hovered
             <ZoomControls
               scale={scale}
               setScale={setScale}

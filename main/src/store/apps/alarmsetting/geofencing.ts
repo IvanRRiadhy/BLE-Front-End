@@ -70,6 +70,7 @@ interface StateType {
     geoFencingAlarmFilteredCount: number;
     geoFencingAlarmActiveCount: number;
     drawingGeoFence?: string; 
+    isEditing?: boolean;
 };
 
 const initialState: StateType = {
@@ -82,6 +83,7 @@ const initialState: StateType = {
     geoFencingAlarmTotalCount: 0,
     geoFencingAlarmFilteredCount: 0,
     geoFencingAlarmActiveCount: 0,
+
 };
 
 export const GeoFencingAlarmSlice = createSlice({
@@ -101,15 +103,15 @@ export const GeoFencingAlarmSlice = createSlice({
             }
         },  
         SetSelectedGeoFencingAlarm: (state, action: PayloadAction<GeoFencingAlarmType | null>) => {
-            console.log("Setting selected geofencing alarm:", action.payload);
+            // console.log("Setting selected geofencing alarm:", action.payload);
             state.selectedGeoFencingAlarm = action.payload;
-            console.log("Selected geofencing alarm:", JSON.stringify(state.selectedGeoFencingAlarm));
+            // console.log("Selected geofencing alarm:", JSON.stringify(state.selectedGeoFencingAlarm));
         },
         UpdateSelectedGeoFencingAlarm: (state, action: PayloadAction<Partial<GeoFencingAlarmType>>) => {
             if (state.selectedGeoFencingAlarm) {
                 state.selectedGeoFencingAlarm = {...state.selectedGeoFencingAlarm, ...action.payload};
             }
-            console.log("Updated selected geofencing alarm:", JSON.stringify(state.selectedGeoFencingAlarm));
+            // console.log("Updated selected geofencing alarm:", JSON.stringify(state.selectedGeoFencingAlarm));
         },
         SaveSelectedGeoFencingAlarm: (state) => {
             if (state.selectedGeoFencingAlarm) {
@@ -121,7 +123,22 @@ export const GeoFencingAlarmSlice = createSlice({
         },
         DrawGeoFence: (state, action: PayloadAction<string>) => {
             state.drawingGeoFence = action.payload;
-        }
+        },
+        SetIsEditing: (state, action: PayloadAction<boolean>) => {
+            state.isEditing = action.payload;
+        },
+        CreateNewGeoFencingAlarm: (state) => {
+            state.selectedGeoFencingAlarm = {
+                id: `GeoFence-${new Date().getTime()}`,
+                name: '',
+                remarks: '',
+                areaShape: '',
+                color: '#f55549',
+                behavior: '',
+                isActive: true,
+                floorplanId: ''
+            };
+        }   
     },
     extraReducers: (builder) => {
         builder
@@ -150,7 +167,9 @@ export const {
     SetSelectedGeoFencingAlarm,
     UpdateSelectedGeoFencingAlarm,
     SaveSelectedGeoFencingAlarm,
-    DrawGeoFence
+    DrawGeoFence,
+    SetIsEditing,
+    CreateNewGeoFencingAlarm
 } = GeoFencingAlarmSlice.actions;
 
 export const fetchGeoFencingAlarms = createAsyncThunk(

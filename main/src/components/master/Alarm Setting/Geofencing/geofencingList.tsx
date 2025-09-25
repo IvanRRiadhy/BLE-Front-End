@@ -30,6 +30,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import {
   ChangeActiveStatus,
+  CreateNewGeoFencingAlarm,
   deleteGeoFencingAlarm,
   fetchGeoFencingAlarms,
   GeoFencingAlarmType,
@@ -146,6 +147,8 @@ const GeoFencingList = () => {
     // window.location.href = '/alarmsetting/geofencing/edit';
     navigate('/alarmsetting/geofencing/edit');
   };
+
+
 
   const renderSkeletonRows = (rows: number) => (
     <>
