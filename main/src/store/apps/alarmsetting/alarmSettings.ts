@@ -3,7 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch, RootState } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { ensureMinLatency } from "src/utils/retry";
+import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
+import { defaultAlarmSettingFilter } from "../defaultForm";
 
 const API_URL = "/api/AlarmCategorySettings/";
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -36,10 +37,11 @@ export type GetFilter = {
 
 export type AlarmSettingType = {
     id: string;
-    name: string;
+    alarmCategory: string;
     remarks: string;
     isEnabled: boolean;
-    alarmLevelPriority: "low" | "medium" | "high";
+    alarmLevelPriority: "Low" | "Medium" | "High";
+    alarmColor: string;
 };
 
 interface StateType {
@@ -55,14 +57,7 @@ interface StateType {
 
 const initialState: StateType = {
     alarmSettings: [],
-    alarmSettingFilter: {
-        Draw: 0,
-        Start: 0,
-        Length: 10,
-        SortColumn: 'Name',
-        SortDir: 'asc',
-        SearchValue: '',
-    },
+    alarmSettingFilter: defaultAlarmSettingFilter,
     alarmSettingAll: [],
     isLoading: false,
     hasLoaded: false,
@@ -87,7 +82,7 @@ export const AlarmSettingSlice = createSlice({
                 state.alarmSettings[index].isEnabled = action.payload.isEnabled;
             }
         },
-        ChangePriorityStatus: (state, action: PayloadAction<{id: string, priority: "low" | "medium" | "high"}>) => {
+        ChangePriorityStatus: (state, action: PayloadAction<{id: string, priority: "Low" | "Medium" | "High"}>) => {
             const index = state.alarmSettings.findIndex(alarmSetting => alarmSetting.id === action.payload.id);
             if (index !== -1) {
                 state.alarmSettings[index].alarmLevelPriority = action.payload.priority;
@@ -103,9 +98,11 @@ export const AlarmSettingSlice = createSlice({
         .addCase(fetchAlarmSettingsDT.fulfilled, (state, action) => {
             state.isLoading = false;
             state.hasLoaded = true;
-    state.alarmSettingTotalCount = action.payload.length;
-    state.alarmSettingFilteredCount = action.payload.length;
-    state.alarmSettingActiveCount = action.payload.filter(a => a.isEnabled).length;
+    state.alarmSettingTotalCount = action.payload.recordsTotal;
+    state.alarmSettingFilteredCount = action.payload.recordsFiltered;
+  state.alarmSettingActiveCount = (action.payload.data ?? []).filter(
+    (a: any) => a.isEnabled === 1 // API still sends 1/0 here
+  ).length;
         })
         .addCase(fetchAlarmSettingsDT.rejected, (state) => {
             state.isLoading = false;
@@ -120,20 +117,47 @@ export const fetchAlarmSettingsDT = createAsyncThunk(
     'alarmSetting/fetchAlarmSettiingsDT',
     async (filter: GetFilter, thunkAPI) => {    
         const started = Date.now();
-        dispatch(GetAlarmSetting(AlarmSettingDummy));
+            const res = await retryUntilSuccess(
+              () => axiosServices.post(`${API_URL}filter`, filter),
+              {
+                signal: thunkAPI.signal,
+                timeoutMs: 2 * 60 * 1000,
+                minDelay: 500,
+                maxDelay: 8000,
+              }
+            );
+        const normalized : AlarmSettingType[] = res.data.collection.data.map((item: any) => ({
+            ...item,
+            isEnabled: item.isEnabled === 1,
+        }));
+        console.log("Alarm Settings Response:", res.data.collection);
+        dispatch(GetAlarmSetting(normalized));
         await ensureMinLatency(started, 500);
-        return AlarmSettingDummy;
+        return res.data.collection;
     }
+)
+
+export const editAlarmSetting = createAsyncThunk(
+    'alarmSetting/editAlarmSetting',
+    async (data: AlarmSettingType, thunkAPI) => {
+    try {
+      const { id, isEnabled, ...rest } = data;
+
+      // 🔹 transform isEnabled (boolean → number)
+      const filteredData = {
+        ...rest,
+        isEnabled: isEnabled ? 1 : 0,
+      };
+
+      const response = await axiosServices.put(`${API_URL}${id}`, filteredData);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+    
 )
 
 
 export default AlarmSettingSlice.reducer;
 
-const AlarmSettingDummy: AlarmSettingType[] = [
-    { id: "1", name: "GeoFencing", remarks: "Alarm for Geofencing", isEnabled: true, alarmLevelPriority: "high" },
-    { id: "2", name: "People Counting", remarks: "Alarm for People Counting", isEnabled: false, alarmLevelPriority: "medium" },
-    { id: "3", name: "Line Detection", remarks: "Alarm for Line Detection", isEnabled: true, alarmLevelPriority: "low" },
-    { id: "4", name: "Alarm A", remarks: "", isEnabled: false, alarmLevelPriority: "high" },
-    { id: "5", name: "Alarm B", remarks: "", isEnabled: true, alarmLevelPriority: "medium" },
-    { id: "6", name: "Alarm C", remarks: "", isEnabled: false, alarmLevelPriority: "low" },
-]

@@ -36,6 +36,7 @@ import {
   UpdateFilter,
   ChangeActiveStatus,
   ChangePriorityStatus,
+  editAlarmSetting,
 } from 'src/store/apps/alarmsetting/alarmSettings';
 import { useLocation, useNavigate } from 'react-router';
 
@@ -62,9 +63,17 @@ const AlarmSettingList = () => {
   );
 
   // Pagination State
+const page = Math.floor(alarmSettingFilter.Start / alarmSettingFilter.Length);
+  const rowsPerPage = alarmSettingFilter.Length;
   const orderBy = alarmSettingFilter.SortColumn;
   const order = alarmSettingFilter.SortDir;
-
+  const handleChangePage = (_: unknown, newPage: number) => {
+    dispatch(UpdateFilter({ Start: newPage * alarmSettingFilter.Length }));
+  };
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newLength = parseInt(event.target.value, 10);
+    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+  };
   const handleSort = (column: string) => {
     const isAsc = alarmSettingFilter.SortColumn === column && alarmSettingFilter.SortDir === 'asc';
     const isDesc =
@@ -91,7 +100,7 @@ const AlarmSettingList = () => {
 
   useEffect(() => {
     dispatch(fetchAlarmSettingsDT(alarmSettingFilter));
-  }, [dispatch]);
+  }, [dispatch, alarmSettingFilter]);
 
   const getRoute = (name: string): string => {
     const basePath = `${window.location.origin}${location.pathname}`;
@@ -108,29 +117,64 @@ const AlarmSettingList = () => {
         return `/alarmsetting/wrongzone`;
       default:
         toast.error('No route defined for this alarm type');
-        return "/alarmsetting";
+        return '/alarmsetting';
     }
   };
 
-  const handleToggleStatus = (id: string, currentStatus: boolean) => {
-    dispatch(ChangeActiveStatus({ id, isEnabled: !currentStatus }));
+  const handleToggleStatus = async (alarm: AlarmSettingType) => {
+    const updatedAlarm = { ...alarm, isEnabled: !alarm.isEnabled };
+    console.log('Toggle Status Clicked:', alarm, 'New Status:', updatedAlarm.isEnabled);
+    try {
+      const res = await dispatch(editAlarmSetting(updatedAlarm));
+      if (res.type.endsWith('/fulfilled')) {
+        await dispatch(fetchAlarmSettingsDT(alarmSettingFilter));
+        toast.success('Alarm status updated successfully');
+      }
+    } catch (error) {
+      toast.error('Error updating alarm status');
+      console.error('Error updating alarm status:', error);
+    }
   };
 
-  const handlePriorityUp = (alarm: AlarmSettingType) => {
-    if (alarm.alarmLevelPriority === 'high') {
+  const handlePriorityUp = async (alarm: AlarmSettingType) => {
+    if (alarm.alarmLevelPriority === 'High') {
       toast.error('Alarm is already at highest priority');
       return;
     }
-    const newPriority = alarm.alarmLevelPriority === 'medium' ? 'high' : 'medium';
-    dispatch(ChangePriorityStatus({ id: alarm.id, priority: newPriority }));
+    const newPriority: 'Low' | 'Medium' | 'High' =
+      alarm.alarmLevelPriority === 'Medium' ? 'High' : 'Medium';
+    const updatedAlarm = { ...alarm, alarmLevelPriority: newPriority };
+    console.log('Priority Up Clicked:', alarm, 'New Priority:', newPriority);
+    try {
+      const res = await dispatch(editAlarmSetting(updatedAlarm));
+      if (res.type.endsWith('/fulfilled')) {
+        await dispatch(fetchAlarmSettingsDT(alarmSettingFilter));
+        toast.success('Alarm priority updated successfully');
+      }
+    } catch (error) {
+      toast.error('Error updating alarm priority');
+      console.error('Error updating alarm priority:', error);
+    }
   };
-  const handlePriorityDown = (alarm: AlarmSettingType) => {
-    if (alarm.alarmLevelPriority === 'low') {
+  const handlePriorityDown = async (alarm: AlarmSettingType) => {
+    if (alarm.alarmLevelPriority === 'Low') {
       toast.error('Alarm is already at lowest priority');
       return;
     }
-    const newPriority = alarm.alarmLevelPriority === 'medium' ? 'low' : 'medium';
-    dispatch(ChangePriorityStatus({ id: alarm.id, priority: newPriority }));
+    const newPriority: 'Low' | 'Medium' | 'High' =
+      alarm.alarmLevelPriority === 'Medium' ? 'Low' : 'Medium';
+    const updatedAlarm = { ...alarm, alarmLevelPriority: newPriority };
+    console.log('Priority Down Clicked:', alarm, 'New Priority:', newPriority);
+    try {
+      const res = await dispatch(editAlarmSetting(updatedAlarm));
+      if (res.type.endsWith('/fulfilled')) {
+        await dispatch(fetchAlarmSettingsDT(alarmSettingFilter));
+        toast.success('Alarm priority updated successfully');
+      }
+    } catch (error) {
+      toast.error('Error updating alarm priority');
+      console.error('Error updating alarm priority:', error);
+    }
   };
 
   const renderSkeletonRows = (rows: number) => (
@@ -239,7 +283,7 @@ const AlarmSettingList = () => {
                 </TableHead>
                 <TableBody key={'skeleton-body'}>
                   {!hasLoaded
-                    ? renderSkeletonRows( SKELETON_ROWS)
+                    ? renderSkeletonRows(SKELETON_ROWS)
                     : alarmSettings.map((alarmSetting: AlarmSettingType, index: number) => (
                         <TableRow key={alarmSetting.id}>
                           <TableCell
@@ -260,7 +304,7 @@ const AlarmSettingList = () => {
                           <TableCell>
                             <Box display="flex" alignItems="center" gap={1}>
                               <Typography variant="h6" fontWeight="bold">
-                                {alarmSetting.name}
+                                {alarmSetting.alarmCategory}
                               </Typography>
                               {alarmSetting.remarks !== '' && (
                                 <Tooltip title={alarmSetting.remarks} arrow>
@@ -298,9 +342,7 @@ const AlarmSettingList = () => {
                               </Typography>
                               <Switch
                                 checked={alarmSetting.isEnabled}
-                                onChange={() =>
-                                  handleToggleStatus(alarmSetting.id, alarmSetting.isEnabled)
-                                }
+                                onChange={() => handleToggleStatus(alarmSetting)}
                                 color="primary"
                                 size="small"
                               />
@@ -311,7 +353,7 @@ const AlarmSettingList = () => {
                             {alarmSetting.isEnabled && (
                               <Box display="flex" alignItems="center" gap={1}>
                                 {/* Priority Badge */}
-                                {alarmSetting.alarmLevelPriority === 'high' && (
+                                {alarmSetting.alarmLevelPriority === 'High' && (
                                   <Button
                                     size="small"
                                     variant="contained"
@@ -328,7 +370,7 @@ const AlarmSettingList = () => {
                                     High
                                   </Button>
                                 )}
-                                {alarmSetting.alarmLevelPriority === 'medium' && (
+                                {alarmSetting.alarmLevelPriority === 'Medium' && (
                                   <Button
                                     size="small"
                                     variant="contained"
@@ -345,7 +387,7 @@ const AlarmSettingList = () => {
                                     Medium
                                   </Button>
                                 )}
-                                {alarmSetting.alarmLevelPriority === 'low' && (
+                                {alarmSetting.alarmLevelPriority === 'Low' && (
                                   <Button
                                     size="small"
                                     variant="contained"
@@ -401,7 +443,7 @@ const AlarmSettingList = () => {
                                   color="primary"
                                   size="small"
                                   onClick={() => {
-                                    const route = getRoute(alarmSetting.name);
+                                    const route = getRoute(alarmSetting.alarmCategory);
                                     console.log('Navigate to:', route);
                                     // if using react-router
                                     navigate(route);
@@ -417,6 +459,16 @@ const AlarmSettingList = () => {
                 </TableBody>
               </Table>
             </TableContainer>
+                        {/* Pagination */}
+                        <TablePagination
+                          component="div"
+                          count={alarmSettingTotalCount}
+                          page={page}
+                          rowsPerPage={rowsPerPage}
+                          onPageChange={handleChangePage}
+                          rowsPerPageOptions={[5, 10, 25]}
+                          onRowsPerPageChange={handleChangeRowsPerPage}
+                        />
           </BlankCard>
         </Box>
       </Grid>

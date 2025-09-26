@@ -103,7 +103,7 @@ const GeoFencingList = () => {
 
   useEffect(() => {
     dispatch(fetchGeoFencingAlarms(geoFencingAlarmFilter));
-  }, [dispatch]);
+  }, [dispatch, geoFencingAlarmFilter]);
 
   const handleToggleStatus = (id: string, currentStatus: boolean) => {
     dispatch(ChangeActiveStatus({ id, isActive: !currentStatus }));

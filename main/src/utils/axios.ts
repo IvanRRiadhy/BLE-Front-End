@@ -93,9 +93,10 @@ axiosServices.interceptors.response.use(
         // localStorage.setItem('refreshToken', newRefreshToken);
         // Update the header for the retried request
         originalRequest.headers['Authorization'] = `Bearer ${token}`;
-        dispatch(fetchAlarmSettingsDT(defaultAlarmSettingFilter));
+
         axiosServices.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         console.log('Token refreshed successfully:', token);
+                dispatch(fetchAlarmSettingsDT(defaultAlarmSettingFilter));
         // console.log('originalRequest: ', originalRequest);
         // dispatch(setTokenAvailable(true)); // Dispatch an action to update the token state in the store.
         return axiosServices(originalRequest); // Retry the original request with the new access token.

@@ -29,10 +29,10 @@ const useMenuItems = () => {
   const alarmSettings = useSelector((state: any) => state.AlarmSettingReducer.alarmSettings);
 
   const isGeoFencingActive = alarmSettings.some(
-    (a: any) => a.name.toLowerCase() === "geofencing" && a.isEnabled
+    (a: any) => a.alarmCategory.toLowerCase() === "geofencing" && a.isEnabled
   );
   const isPeopleCountingActive = alarmSettings.some(
-    (a: any) => a.name.toLowerCase() === "people counting" && a.isEnabled
+    (a: any) => a.alarmCategory.toLowerCase() === "people counting" && a.isEnabled
   );
   const Menuitems = [
   {

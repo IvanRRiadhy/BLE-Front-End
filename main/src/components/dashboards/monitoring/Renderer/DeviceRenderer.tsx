@@ -12,6 +12,7 @@ import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { darken } from '@mui/material';
 import { setFocus } from 'src/store/apps/monitoring/layout';
 import polylabel from 'polylabel';
+import { GeoFencingAlarmType } from 'src/store/apps/alarmsetting/geofencing';
 
 type Nodes = {
   id: string;
@@ -42,7 +43,7 @@ function toCanvas(
   width: number,
   height: number,
   originalWidth: number,
-  originalHeight: number
+  originalHeight: number,
 ) {
   return {
     x: (x_px / originalWidth) * width,
@@ -59,8 +60,10 @@ type DeviceRendererProps = {
   imageSrc: string;
   devices: FloorplanDeviceType[];
   areas: MaskedAreaType[];
+  geofences: GeoFencingAlarmType[];
   showAreas: boolean;
   showGates: boolean;
+  showGeoFence: boolean;
   topic: string;
   detailDialogOpen?: boolean;
   setDetailDialogOpen?: (open: boolean) => void;
@@ -76,16 +79,41 @@ type DeviceRendererProps = {
 
 const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   const {
-    width, height, originalWidth, originalHeight,
-    imageSrc, devices, areas, showAreas, showGates, topic,
-    detailDialogOpen, setDetailDialogOpen, openTrackDetail, setOpenTrackDetail, onSelectBeacon, selectedBeaconId,
-    focusBeaconId, onFocusPosition,                                // NEW
+    width,
+    height,
+    originalWidth,
+    originalHeight,
+    imageSrc,
+    devices,
+    areas,
+    geofences,
+    showAreas,
+    showGates,
+    showGeoFence,
+    topic,
+    detailDialogOpen,
+    setDetailDialogOpen,
+    openTrackDetail,
+    setOpenTrackDetail,
+    onSelectBeacon,
+    selectedBeaconId,
+    focusBeaconId,
+    onFocusPosition, // NEW
   } = props;
   const dispatch = useDispatch();
   const [image, setImage] = useState<HTMLImageElement | undefined>(undefined);
-  const [animatedBeacons, setAnimatedBeacons] = useState<{ [id: string]: { x: number; y: number } }>({});
+  const [animatedBeacons, setAnimatedBeacons] = useState<{
+    [id: string]: { x: number; y: number };
+  }>({});
   const [lastSeenBeacons, setLastSeenBeacons] = useState<{
-    [id: string]: { x: number; y: number; lastSeen: number; area: string; floorplan: string; time: string };
+    [id: string]: {
+      x: number;
+      y: number;
+      lastSeen: number;
+      area: string;
+      floorplan: string;
+      time: string;
+    };
   }>({});
 
   const refreshTrigger = useSelector((state) => state.BeaconReducer.refreshTrigger);
@@ -93,7 +121,10 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
 
   // background image
   useEffect(() => {
-    if (!imageSrc) { setImage(undefined); return; }
+    if (!imageSrc) {
+      setImage(undefined);
+      return;
+    }
     const img = new window.Image();
     img.src = imageSrc;
     img.onload = () => setImage(img);
@@ -180,15 +211,22 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     setAnimatedBeacons({});
   }, [refreshTrigger, dispatch]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (!focusBeaconId || !onFocusPosition) return;
     const b = animatedBeacons[focusBeaconId];
     if (!b) return;
 
     const canvas = toCanvas(b.x, b.y, width, height, originalWidth, originalHeight);
     onFocusPosition(canvas);
-  }, [animatedBeacons, focusBeaconId, onFocusPosition, width, height, originalWidth, originalHeight]);
-
+  }, [
+    animatedBeacons,
+    focusBeaconId,
+    onFocusPosition,
+    width,
+    height,
+    originalWidth,
+    originalHeight,
+  ]);
 
   // compute static centers for each area
   const areaCenters = useMemo(() => {
@@ -248,7 +286,10 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
 
   const setPointsFromNodes = (nodes: Nodes[] | undefined): number[] => {
     if (!nodes?.length) return [];
-    return nodes.flatMap((n) => [(n.x_px / originalWidth) * width, (n.y_px / originalHeight) * height]);
+    return nodes.flatMap((n) => [
+      (n.x_px / originalWidth) * width,
+      (n.y_px / originalHeight) * height,
+    ]);
   };
 
   return (
@@ -283,6 +324,24 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
               onMouseEnter={() => setHoveredAreaId(area.id)}
               onMouseLeave={() => setHoveredAreaId((id) => (id === area.id ? null : id))}
               onClick={() => dispatch(setFocus({ type: 'area', id: area.id }))}
+            />
+          ))}
+        {showGeoFence &&
+          geofences.map((geofence: GeoFencingAlarmType) => (
+            <Line
+              key={geofence.id}
+              name="geofence"
+              points={setPointsFromNodes(geofence.nodes)}
+              stroke={darken(geofence.color, 0.5)}
+              strokeWidth={5}
+              lineJoin="round"
+              lineCap="round"
+              closed
+              fill={geofence.color}
+              opacity={0.5}
+              onMouseEnter={() => setHoveredAreaId(geofence.id)}
+              onMouseLeave={() => setHoveredAreaId((id) => (id === geofence.id ? null : id))}
+              onClick={() => dispatch(setFocus({ type: 'geofence', id: geofence.id }))}
             />
           ))}
 
@@ -322,10 +381,20 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
       {/* Hover label fixed at visual center */}
       <Layer listening={false}>
         {hoveredAreaId && areaCenters[hoveredAreaId] && (
-          <Label x={areaCenters[hoveredAreaId].x} y={areaCenters[hoveredAreaId].y} listening={false}>
-            <Tag fill="rgba(0,0,0,0.75)" cornerRadius={4} pointerDirection="down" pointerWidth={8} pointerHeight={6} />
+          <Label
+            x={areaCenters[hoveredAreaId].x}
+            y={areaCenters[hoveredAreaId].y}
+            listening={false}
+          >
+            <Tag
+              fill="rgba(0,0,0,0.75)"
+              cornerRadius={4}
+              pointerDirection="down"
+              pointerWidth={8}
+              pointerHeight={6}
+            />
             <Text
-              text={areas.find((a:MaskedAreaType) => a.id === hoveredAreaId)?.name || ''}
+              text={areas.find((a: MaskedAreaType) => a.id === hoveredAreaId)?.name || ''}
               fill="#fff"
               fontSize={16}
               padding={6}

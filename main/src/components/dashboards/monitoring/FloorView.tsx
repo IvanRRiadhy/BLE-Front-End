@@ -25,6 +25,7 @@ import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import BeaconDetailPopup from './Popup/BeaconDetailPopup';
 import TrackingDetailPopup from './Popup/TrackingDetailPopup';
 import { setFloorplan, setScreenDisplay } from 'src/store/apps/monitoring/layout';
+import { fetchGeoFencingAlarms, fetchGeoFencingAlarmsAll, GeoFencingAlarmType } from 'src/store/apps/alarmsetting/geofencing';
 
 const FOLLOW_SCALE = 1.5; // tweak as needed
 
@@ -54,6 +55,7 @@ const FloorView: React.FC<{
     dispatch(fetchFloors());
     dispatch(fetchFloorplanDevices());
     dispatch(fetchMaskedAreas());
+    dispatch(fetchGeoFencingAlarmsAll());
     dispatch(fetchMembers());
     dispatch(fetchVisitor());
   }, [dispatch]);
@@ -75,8 +77,13 @@ const FloorView: React.FC<{
     (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
   );
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorplan);
+  const GeoFenceArea: GeoFencingAlarmType[] = useSelector(
+    (state: RootState) => state.GeoFencingReducer.geoFencingAlarmAll,
+  )
+  const filteredGeoFenceArea = GeoFenceArea.filter((area) => area.floorplanId === activeFloorplan);
   const [showArea, setShowArea] = useState(true);
   const [showGates, setShowGates] = useState(true);
+  const [showGeoFence, setShowGeoFence] = useState(true);
   const [focusArea, setFocusArea] = useState<{
     minX: number;
     minY: number;
@@ -683,8 +690,10 @@ useEffect(() => {
                     devices={filteredDevices}
                     imageSrc={floorplanImage}
                     areas={filteredArea}
+                    geofences={filteredGeoFenceArea}
                     showAreas={showArea}
                     showGates={showGates}
+                    showGeoFence={showGeoFence}
                     topic={`tracking/${activeFloorplan.toUpperCase()}`}
                     onSelectBeacon={handleSelectBeacon}
                     detailDialogOpen={detailDialogOpen}

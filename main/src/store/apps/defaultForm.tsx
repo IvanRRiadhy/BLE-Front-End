@@ -83,7 +83,7 @@ export const defaultAlarmRecordFilter: AlarmRecordFilter = {
   Length: 5,
   SortColumn: 'Timestamp',
   SortDir: 'desc',
-  SearchValue: '',  
+  SearchValue: '',
   filters: {
     FloorplanMaskedAreaId: [],
     ReaderId: [],
@@ -94,16 +94,14 @@ export const defaultAlarmRecordFilter: AlarmRecordFilter = {
 
 //#region AlarmTrigger
 export const defaultAlarmTriggerFilter: AlarmTriggerFilter = {
-    Draw: 1,
+  Draw: 1,
   Start: 0,
   Length: 5,
   SortColumn: 'TriggerTime',
   SortDir: 'desc',
-  SearchValue: '', 
-  filters: {
-
-  }
-}
+  SearchValue: '',
+  filters: {},
+};
 //endregion
 
 //#region Blacklist
@@ -277,7 +275,7 @@ export const defaultFloorplanForm: FloorplanType = {
   floorX: 0,
   floorY: 0,
   meterPerPx: 0,
-    engineId: 0,
+  engineId: 0,
   applicationId: localStorage.getItem('applicationId') || '',
   createdBy: '',
   createdAt: '',
@@ -430,17 +428,17 @@ export const defaultTimeGroupForm: TimeGroupType = {
   id: '',
   name: 'Add Name',
   description: 'Add Description',
-  timeBlocks: [], 
+  timeBlocks: [],
 };
 
 export const defaultTimeGroupFilter: TimeGroupFilter = {
-    Draw: 1,
+  Draw: 1,
   Start: 0,
   Length: 5,
   SortColumn: 'name',
   SortDir: 'asc',
   SearchValue: '',
-}
+};
 //#endregion
 
 //#region TrackingTransaction
@@ -467,10 +465,10 @@ export const defaultTrxVisitorFilter: TrxVisitorFilter = {
   SortDir: 'desc',
   SearchValue: '',
   dateFilters: {
-    VisitorPeriodStart:{
+    VisitorPeriodStart: {
       DateFrom: null,
       DateTo: null,
-    }
+    },
   },
   filters: {},
 };
@@ -537,8 +535,7 @@ export const defaultCardFilter: CardFilter = {
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
   SearchValue: '',
-  filters: {
-  },
+  filters: {},
 };
 //#endregion
 
@@ -550,9 +547,8 @@ export const defaultCardRecordFilter: CardRecordFilter = {
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
   SearchValue: '',
-  filters: {
-  },
-}
+  filters: {},
+};
 //#endregion
 
 //#region Card Access
@@ -563,9 +559,8 @@ export const defaultCardAccessFilter: CardAccessFilter = {
   SortColumn: 'name',
   SortDir: 'asc',
   SearchValue: '',
-  filters: {
-  },
-}
+  filters: {},
+};
 
 export const defaultCardAccessForm: CardAccessType = {
   id: '',
@@ -578,7 +573,7 @@ export const defaultCardAccessForm: CardAccessType = {
   createdAt: '',
   updatedBy: '',
   updatedAt: '',
-}
+};
 
 //#endregion
 
@@ -602,9 +597,7 @@ export const defaultCardGroupFilter: CardGroupFilter = {
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
   SearchValue: '',
-  filters: {
-    
-  }
+  filters: {},
 };
 //#endregion
 
@@ -613,10 +606,10 @@ export const defaultAlarmSettingFilter: AlarmSettingFilter = {
   Draw: 1,
   Start: 0,
   Length: 5,
-  SortColumn: 'name',
+  SortColumn: 'AlarmCategory',
   SortDir: 'asc',
   SearchValue: '',
-}
+};
 //#endregion
 
 //#region GeoFence
@@ -628,7 +621,7 @@ export const defaultGeoFencingForm: GeoFencingAlarmType = {
   color: '#f55549',
   behavior: '',
   isActive: true,
-  floorplanId: ''
+  floorplanId: '',
 };
 
 export const defaultGeoFencingFilter: GeoFenceFilter = {
@@ -638,6 +631,6 @@ export const defaultGeoFencingFilter: GeoFenceFilter = {
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
   SearchValue: '',
-}
+};
 
 //#endregion

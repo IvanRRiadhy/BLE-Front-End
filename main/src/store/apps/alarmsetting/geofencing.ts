@@ -93,6 +93,9 @@ export const GeoFencingAlarmSlice = createSlice({
         GetGeoFencingAlarms: (state, action: PayloadAction<GeoFencingAlarmType[]>) => {
             state.geoFencingAlarms = action.payload;
         },
+        GetAllGeoFencingAlarms: (state, action: PayloadAction<GeoFencingAlarmType[]>) => {
+            state.geoFencingAlarmAll = action.payload;
+        },
         UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
             state.geoFencingAlarmFilter = {...state.geoFencingAlarmFilter, ...action.payload};
         },
@@ -162,6 +165,7 @@ export const GeoFencingAlarmSlice = createSlice({
 
 export const { 
     GetGeoFencingAlarms, 
+    GetAllGeoFencingAlarms,
     UpdateFilter, 
     ChangeActiveStatus,
     SetSelectedGeoFencingAlarm,
@@ -171,6 +175,15 @@ export const {
     SetIsEditing,
     CreateNewGeoFencingAlarm
 } = GeoFencingAlarmSlice.actions;
+
+export const fetchGeoFencingAlarmsAll = () => async (dispatch: AppDispatch) => {
+    try {
+        const response = await axiosServices.get(API_URL);
+        dispatch(GetAllGeoFencingAlarms(response.data.collection.data || []));
+    } catch (error) {
+        console.error('Error fetching GeoFencing Alarms:', error);
+    }
+};
 
 export const fetchGeoFencingAlarms = createAsyncThunk(
   'geoFencingAlarm/fetchGeoFencingAlarms',

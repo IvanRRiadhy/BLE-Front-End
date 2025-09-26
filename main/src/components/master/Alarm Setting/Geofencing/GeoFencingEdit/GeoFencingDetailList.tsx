@@ -136,7 +136,7 @@ const GeoFencingDetailList = () => {
         </Typography>
       </Box>
       <Divider />
-      <Box sx={{ minHeight: 0, overflow: 'auto' }}>
+      <Box sx={{ minHeight: 600, overflow: 'auto' }}>
         <Box pl={3} pr={1}>
           <Grid container spacing={1}>
             <Grid size={12}>

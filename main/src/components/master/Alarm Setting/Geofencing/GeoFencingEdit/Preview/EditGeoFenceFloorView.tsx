@@ -1,13 +1,16 @@
 import { BASE_URL } from 'src/utils/axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
-import { Box, Switch, FormControlLabel } from '@mui/material';
+import { Box, Switch, FormControlLabel, FormLabel, Divider, Typography } from '@mui/material';
 import ZoomControls from 'src/components/shared/ZoomControls';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { GeoFencingAlarmType } from 'src/store/apps/alarmsetting/geofencing';
-import { stat } from 'fs';
 import EditGeoFenceRenderer from './EditGeoFenceRenderer';
+import MouseDoubleClickIcon from 'src/assets/images/svgs/mouse-double-click-icon.svg';
+import MouseLeftClickIcon from 'src/assets/images/svgs/mouse-left-click-icon.svg';
+import MouseRightClickIcon from 'src/assets/images/svgs/mouse-right-click-icon.svg';
+import ShiftButtonIcon from 'src/assets/images/svgs/shift-button-icon.svg';
 
 const EditGeoFenceFloorView = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -18,6 +21,7 @@ const EditGeoFenceFloorView = () => {
   );
   const activeFloorPlan = floorplans.find((fp) => fp.id === geoFenceData?.floorplanId);
   const filteredArea = maskedAreas.filter((area) => area.floorplanId === activeFloorPlan?.id);
+  const drawGeoFence = useSelector((state: RootState) => state.GeoFencingReducer.drawingGeoFence);
   const [showArea, setShowArea] = useState(true);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -181,8 +185,8 @@ const EditGeoFenceFloorView = () => {
   const handleMouseMove = (event: React.MouseEvent) => {
     if (!isPanning || !containerRef.current || !imgSize) return;
     let pannable = true;
-    if(cursor === 'move') pannable = false;
-    if(isDragging) pannable = false;
+    if (cursor === 'move') pannable = false;
+    if (isDragging) pannable = false;
     // console.log('pannable: ', pannable);
     if (pannable) {
       const containerWidth = containerRef.current.clientWidth;
@@ -227,8 +231,124 @@ const EditGeoFenceFloorView = () => {
         cursor: cursor,
       }}
     >
-      {/* Sticky Overlay Toggle */}
       <Box
+        sx={{
+          position: 'absolute',
+          top: 12,
+          right: 12,
+          zIndex: 10,
+          width: 260,
+          backgroundColor: 'rgba(37, 31, 31, 0.47)', // darker semi-trans card
+          borderRadius: 2,
+          boxShadow: 3,
+          p: 2,
+          color: 'white',
+          fontSize: '0.875rem',
+          fontWeight: 500,
+        }}
+      >
+        {drawGeoFence ? (
+          <>
+            <Box mt={1} display="flex" alignItems="center" gap={1}>
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  bgcolor: 'white',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mr: 2,
+                }}
+              >
+                <img src={MouseLeftClickIcon} alt="Left Click" style={{ width: 28, height: 28 }} />
+              </Box>
+              <FormLabel sx={{ color: 'white', fontSize: '0.875rem', fontWeight: 600 }}>
+                Add 3 Points to create a new Area
+              </FormLabel>
+            </Box>
+
+            <Box mt={2} mb={2} display="flex" alignItems="center" gap={1}>
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  bgcolor: 'white',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mr: 2,
+                }}
+              >
+                <img
+                  src={MouseRightClickIcon}
+                  alt="Right Click"
+                  style={{ width: 28, height: 28 }}
+                />
+              </Box>
+              <FormLabel sx={{ color: 'white', fontSize: '0.875rem', fontWeight: 600 }}>
+                Cancel Add
+              </FormLabel>
+            </Box>
+
+            <Divider sx={{ borderColor: 'rgba(255,255,255,0.2)', mb: 2 }} />
+          </>
+        ) : (
+          <>
+            {/* Create Node */}
+
+            <Box display="flex" alignItems="center" mb={2}>
+              <Box display="flex" alignItems="center" gap={1} mr={2}>
+                <img src={MouseDoubleClickIcon} alt="Double Click" width={28} />
+                <Typography variant="body2" fontWeight={600}>
+                  or
+                </Typography>
+                <img src={ShiftButtonIcon} alt="Shift" width={28} />
+                <Typography variant="body2" fontWeight={600}>
+                  +
+                </Typography>
+                <img src={MouseLeftClickIcon} alt="Left Click" width={28} />
+              </Box>
+              <Typography variant="body2" fontWeight={600}>
+                Create Node
+              </Typography>
+            </Box>
+
+            {/* Delete Node */}
+            <Box display="flex" alignItems="center" mb={2}>
+              <img
+                src={MouseRightClickIcon}
+                alt="Right Click"
+                width={28}
+                style={{ marginRight: 12 }}
+              />
+              <Typography variant="body2" fontWeight={600}>
+                Delete Node
+              </Typography>
+            </Box>
+          </>
+        )}
+
+        <Divider sx={{ borderColor: 'rgba(255,255,255,0.2)', mb: 2 }} />
+
+        {/* Toggle */}
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showArea}
+              onChange={() => setShowArea((prev) => !prev)}
+              color="primary"
+            />
+          }
+          label="Show Areas"
+          sx={{ color: 'white' }}
+        />
+      </Box>
+
+      {/* Sticky Overlay Toggle */}
+      {/* <Box
         sx={{
           position: 'absolute',
           top: 12,
@@ -240,18 +360,7 @@ const EditGeoFenceFloorView = () => {
           boxShadow: 2,
           p: 1,
         }}
-      >
-        <FormControlLabel
-          control={
-            <Switch
-              checked={showArea}
-              onChange={() => setShowArea((prev) => !prev)}
-              color="primary"
-            />
-          }
-          label="Show Areas"
-        />
-      </Box>
+      ></Box> */}
       {/* Zoomable Content */}
       <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
         {isHovered &&
