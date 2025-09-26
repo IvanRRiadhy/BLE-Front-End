@@ -25,7 +25,11 @@ import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import BeaconDetailPopup from './Popup/BeaconDetailPopup';
 import TrackingDetailPopup from './Popup/TrackingDetailPopup';
 import { setFloorplan, setScreenDisplay } from 'src/store/apps/monitoring/layout';
-import { fetchGeoFencingAlarms, fetchGeoFencingAlarmsAll, GeoFencingAlarmType } from 'src/store/apps/alarmsetting/geofencing';
+import {
+  fetchGeoFencingAlarms,
+  fetchGeoFencingAlarmsAll,
+  GeoFencingAlarmType,
+} from 'src/store/apps/alarmsetting/geofencing';
 
 const FOLLOW_SCALE = 1.5; // tweak as needed
 
@@ -79,11 +83,11 @@ const FloorView: React.FC<{
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorplan);
   const GeoFenceArea: GeoFencingAlarmType[] = useSelector(
     (state: RootState) => state.GeoFencingReducer.geoFencingAlarmAll,
-  )
+  );
   const filteredGeoFenceArea = GeoFenceArea.filter((area) => area.floorplanId === activeFloorplan);
   const [showArea, setShowArea] = useState(true);
   const [showGates, setShowGates] = useState(true);
-  const [showGeoFence, setShowGeoFence] = useState(true);
+  const [showGeoFence, setShowGeoFence] = useState(false);
   const [focusArea, setFocusArea] = useState<{
     minX: number;
     minY: number;
@@ -410,7 +414,7 @@ const FloorView: React.FC<{
       lastSwitchedRef.current = transition.to;
     }
   }, [focusBeacon, beaconsByTopic, activeFloorplan, gridNumber, screenNumber, dispatch]);
-  
+
   // === FOLLOW CAMERA HOOK ===
   // 1) center on the focused beacon whenever we receive its canvas coords
   const handleFocusPosition = useCallback((pt: { x: number; y: number }) => {
@@ -431,53 +435,55 @@ const FloorView: React.FC<{
 
   // 2) auto-handoff floorplan when the beacon crosses floors (follow mode)
 
-// inside FloorView
-useEffect(() => {
-  if (!focusBeacon || !gridNumber || !screenNumber) return;
+  // inside FloorView
+  useEffect(() => {
+    if (!focusBeacon || !gridNumber || !screenNumber) return;
 
-  let to: string | null = null;
-  console.log("beaconsByTopic", beaconsByTopic);
-  console.log("FocusBeacon", focusBeacon);
-  for (const arr of Object.values(beaconsByTopic)) {
-    const hit = Array.isArray(arr)
-      ? arr.find((b: any) => {
-          const sameBeacon =
-            (b.beaconId && b.beaconId.toLowerCase() === String(focusBeacon).toLowerCase()) ||
-            (b.cardNumber && String(b.cardNumber) === String(focusBeacon)); // optional, if you ever follow by card #
-          // prefer explicit toFloorplanId
-          const explicitTo = b.toFloorplanId ?? b.toFlooplanId ?? null;
-          if (explicitTo) { to = explicitTo; return true; }
-          // fallback: parse TransM like "…to floorplan <UUID>"
-          if (b.TransM && typeof b.TransM === 'string') {
-            const m = b.TransM.match(/to floorplan\s+([0-9A-Fa-f-]{36})/);
-            if (m) { to = m[1]; return true; }
-          }
-          return false;
-        })
-      : undefined;
-      console.log(hit)
-    if (hit) break;
-  }
-  
-  if (to && to !== activeFloorplan && lastSwitchedRef.current !== to) {
-    dispatch(setFloorplan(gridNumber, screenNumber, to));
-    lastSwitchedRef.current = to;
-  }
-}, [focusBeacon, beaconsByTopic, activeFloorplan, gridNumber, screenNumber, dispatch]);
+    let to: string | null = null;
+    console.log('beaconsByTopic', beaconsByTopic);
+    console.log('FocusBeacon', focusBeacon);
+    for (const arr of Object.values(beaconsByTopic)) {
+      const hit = Array.isArray(arr)
+        ? arr.find((b: any) => {
+            const sameBeacon =
+              (b.beaconId && b.beaconId.toLowerCase() === String(focusBeacon).toLowerCase()) ||
+              (b.cardNumber && String(b.cardNumber) === String(focusBeacon)); // optional, if you ever follow by card #
+            // prefer explicit toFloorplanId
+            const explicitTo = b.toFloorplanId ?? b.toFlooplanId ?? null;
+            if (explicitTo) {
+              to = explicitTo;
+              return true;
+            }
+            // fallback: parse TransM like "…to floorplan <UUID>"
+            if (b.TransM && typeof b.TransM === 'string') {
+              const m = b.TransM.match(/to floorplan\s+([0-9A-Fa-f-]{36})/);
+              if (m) {
+                to = m[1];
+                return true;
+              }
+            }
+            return false;
+          })
+        : undefined;
+      console.log(hit);
+      if (hit) break;
+    }
+
+    if (to && to !== activeFloorplan && lastSwitchedRef.current !== to) {
+      dispatch(setFloorplan(gridNumber, screenNumber, to));
+      lastSwitchedRef.current = to;
+    }
+  }, [focusBeacon, beaconsByTopic, activeFloorplan, gridNumber, screenNumber, dispatch]);
 
   // === END FOLLOW CAMERA HOOK ===
 
-    const handleCancelFollowing = () => {
+  const handleCancelFollowing = () => {
     if (!gridNumber || !screenNumber) return;
     dispatch(
-      setScreenDisplay(
-        gridNumber,
-        screenNumber,
-        {
-          displayType: 0,
-          displayOutput: '',
-        }
-      )
+      setScreenDisplay(gridNumber, screenNumber, {
+        displayType: 0,
+        displayOutput: '',
+      }),
     );
   };
 
@@ -585,15 +591,21 @@ useEffect(() => {
             }
             label="Show Gateways"
           />
-         {Boolean(focusBeacon) && (
-           <Button
-             variant="contained"
-             color="error"
-             onClick={handleCancelFollowing}
-           >
-             Cancel Following
-           </Button>
-         )}
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showGeoFence}
+                onChange={() => setShowGeoFence((prev) => !prev)}
+                color="primary"
+              />
+            }
+            label="Show GeoFence Areas"
+          />
+          {Boolean(focusBeacon) && (
+            <Button variant="contained" color="error" onClick={handleCancelFollowing}>
+              Cancel Following
+            </Button>
+          )}
         </Box>
       )}
       {/* Zoomable Content */}
@@ -819,7 +831,9 @@ useEffect(() => {
       {selectedBeacon &&
         (() => {
           const member = memberList.find((m: memberType) => m.bleCardNumber === selectedBeacon.id);
-          const visitor = visitorList.find((v: VisitorType) => v.bleCardNumber === selectedBeacon.id);
+          const visitor = visitorList.find(
+            (v: VisitorType) => v.bleCardNumber === selectedBeacon.id,
+          );
           const person = member || visitor;
 
           return (
