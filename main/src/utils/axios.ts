@@ -1,7 +1,4 @@
  import axios from 'axios';
-import { fetchAlarmSettingsDT } from 'src/store/apps/alarmsetting/alarmSettings';
-import { defaultAlarmSettingFilter } from 'src/store/apps/defaultForm';
-import { useDispatch } from 'src/store/Store';
 
  export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -15,7 +12,6 @@ export const setSessionExpiredHandler = (handler: () => void) => {
     headers: {
         'Content-Type': 'application/json',
         'X-BIOPEOPLETRACKING-API-KEY': import.meta.env.VITE_API_KEY,
-
     },
  });
 
@@ -70,7 +66,6 @@ axiosServices.interceptors.response.use(
     return response;
   },
   async error => {
-          const dispatch = useDispatch();
     const originalRequest = error.config;
     if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true; // Mark the request as retried to avoid infinite loops.
@@ -96,7 +91,7 @@ axiosServices.interceptors.response.use(
 
         axiosServices.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         console.log('Token refreshed successfully:', token);
-                dispatch(fetchAlarmSettingsDT(defaultAlarmSettingFilter));
+                
         // console.log('originalRequest: ', originalRequest);
         // dispatch(setTokenAvailable(true)); // Dispatch an action to update the token state in the store.
         return axiosServices(originalRequest); // Retry the original request with the new access token.
