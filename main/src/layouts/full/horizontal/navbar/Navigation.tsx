@@ -1,4 +1,7 @@
-import { useMediaQuery, Box, Drawer, Container, Theme } from '@mui/material';
+import { useMediaQuery, Box, Drawer, Container, Theme, Button } from '@mui/material';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+
 import NavListing from './NavListing/NavListing';
 import Logo from '../../shared/logo/Logo';
 import { useSelector, useDispatch } from 'src/store/Store';
@@ -7,12 +10,44 @@ import SidebarItems from '../../vertical/sidebar/SidebarItems';
 import { RootState } from 'src/store/Store';
 import TimeDisplay from './TimeDisplay';
 import DashboardFilter from './DashboardFilter';
+import { useEffect } from 'react';
+import { fetchAlarmSetting, fetchAlarmSettingsDT } from 'src/store/apps/alarmsetting/alarmSettings';
 
 const Navigation = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const customizer = useSelector((state: RootState) => state.customizer);
   const dispatch = useDispatch();
   const isMain = useSelector((state: RootState) => state.customizer.isMainMenu);
+
+  useEffect(() => {
+    dispatch(fetchAlarmSetting());
+  },[dispatch]);
+
+  const handleScreenshot = async () => {
+    const element = document.querySelector('.page-wrapper'); // FullLayout wrapper for MainView
+    if (!element) return;
+
+    // Take screenshot of main view only
+    const canvas = await html2canvas(element as HTMLElement, { scale: 2 });
+    const imgData = canvas.toDataURL('image/png');
+
+    // Create A4 PDF
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    const imgWidth = pdfWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let position = 0;
+    if (imgHeight < pdfHeight) {
+      // Center vertically if smaller
+      position = (pdfHeight - imgHeight) / 2;
+    }
+
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    pdf.save('dashboard.pdf');
+  };
 
   if (lgUp) {
     return (
@@ -37,9 +72,23 @@ const Navigation = () => {
         >
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <NavListing />
-            <Box display="flex" alignItems="center" sx={{ gap: '5px' }}>
-              {isMain && <DashboardFilter />}
-              <TimeDisplay />
+
+            {/* Right section */}
+            <Box display="flex" alignItems="center" sx={{ gap: 2 }}>
+              {/* Fixed button group */}
+              {isMain && (
+                <Box display="flex" alignItems="center" sx={{ gap: 1 }}>
+                  <DashboardFilter />
+                  <Button variant="outlined" size="small" onClick={handleScreenshot}>
+                    Screenshot
+                  </Button>
+                </Box>
+              )}
+
+              {/* Let TimeDisplay take space but not affect the button group */}
+              <Box sx={{ flexShrink: 0 }}>
+                <TimeDisplay />
+              </Box>
             </Box>
           </Box>
         </Container>
