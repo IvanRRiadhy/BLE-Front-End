@@ -81,6 +81,7 @@ const TimeGroupList = () => {
                   manySelectTimeGroups={manySelectTimeGroups}
                   setManySelectTimeGroups={setManySelectTimeGroups}
                   onTimeGroupClick={() => {
+                    console.log("Selected Time Group: ", timeGroup);
                     dispatch(SelectTimeGroup(timeGroup));
                   }}
                   active={active?.id === timeGroup.id}

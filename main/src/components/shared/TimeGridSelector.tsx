@@ -8,10 +8,17 @@ import {
   IconChecklist,
   IconSquareOff,
 } from '@tabler/icons-react';
-import { fetchTimeGroupDT, TimeBlockType } from 'src/store/apps/crud/timeGroup';
 import { useDispatch, useSelector } from 'src/store/Store';
-import { CancelNewTimeGroup, saveNewTimeGroup } from 'src/store/apps/crud/timeGroup';
-import { defaultTimeGroupForm } from 'src/store/apps/defaultForm';
+import {
+  fetchTimeGroupDT,
+  TimeBlockType,
+  TimeGroupType,
+  UpdateSelectedTimeGroup,
+  CancelNewTimeGroup,
+  saveNewTimeGroup,
+  editTimeGroup,
+} from 'src/store/apps/crud/timeGroup';
+import { defaultTimeGroupFilter } from 'src/store/apps/defaultForm';
 
 const daysOfWeek: TimeBlockType['dayOfWeek'][] = [
   'Sunday',
@@ -28,19 +35,18 @@ interface TimeGridSelectorProps {
   initialData?: TimeBlockType[];
 }
 
-export const TimeGridSelector = ({
-  onSelectionChange,
-  initialData = [],
-}: TimeGridSelectorProps) => {
+export const TimeGridSelector = ({ onSelectionChange, initialData = [] }: TimeGridSelectorProps) => {
   const dispatch = useDispatch();
-  const isNewTimeGroup = useSelector((state: any) => state.TimeGroupReducer.isNewTimeGroup);
-  const selectedTimeGroup = useSelector((state: any) => state.TimeGroupReducer.selectedTimeGroup);
   const theme = useTheme();
+
+  const isNewTimeGroup = useSelector((s: any) => s.TimeGroupReducer.isNewTimeGroup);
+  const selectedTimeGroup = useSelector((s: any) => s.TimeGroupReducer.selectedTimeGroup);
+
   const [selectedCells, setSelectedCells] = useState<Record<string, boolean>>({});
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectionMode, setSelectionMode] = useState<'add' | 'remove'>('add');
 
-  // Generate 24 hourly slots
+  // 24 slots
   const timeSlots = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0') + ':00');
 
   // Group slots into 4-hour chunks
@@ -49,24 +55,82 @@ export const TimeGridSelector = ({
     return { indices: [start, start + 1, start + 2, start + 3] };
   });
 
-  // ================== Init from props ==================
+  // ---------------- Helpers ----------------
+  const makeBlock = (
+    dayIndex: number,
+    startHour: number,
+    endHour: number,
+    existingBlocks: TimeBlockType[],
+  ): TimeBlockType => {
+    const startTime = `${timeSlots[startHour]}:00`;
+    const endTime = `${timeSlots[endHour] || '24:00'}:00`;
+
+    const match = existingBlocks.find(
+      (b) =>
+        daysOfWeek.indexOf(b.dayOfWeek) === dayIndex &&
+        b.startTime === startTime &&
+        b.endTime === endTime,
+    );
+
+    return {
+      id: match ? match.id : `block-${dayIndex}-${startHour}`, // keep old id or temp
+      dayOfWeek: daysOfWeek[dayIndex],
+      startTime,
+      endTime,
+    };
+  };
+
+  const convertCellsToBlocks = useCallback(
+    (cells: Record<string, boolean>, existingBlocks: TimeBlockType[] = []): TimeBlockType[] => {
+      const blocks: TimeBlockType[] = [];
+      const dayGroups: Record<number, number[]> = {};
+
+      Object.keys(cells).forEach((cellId) => {
+        const [dStr, hStr] = cellId.split('-');
+        const d = parseInt(dStr, 10);
+        const h = parseInt(hStr, 10);
+        if (!dayGroups[d]) dayGroups[d] = [];
+        dayGroups[d].push(h);
+      });
+
+      Object.entries(dayGroups).forEach(([dStr, hours]) => {
+        const d = parseInt(dStr, 10);
+        const sorted = hours.sort((a, b) => a - b);
+        let start = sorted[0];
+        for (let i = 1; i < sorted.length; i++) {
+          if (sorted[i] !== sorted[i - 1] + 1) {
+            blocks.push(makeBlock(d, start, sorted[i - 1] + 1, existingBlocks));
+            start = sorted[i];
+          }
+        }
+        blocks.push(makeBlock(d, start, sorted[sorted.length - 1] + 1, existingBlocks));
+      });
+
+      return blocks;
+    },
+    [timeSlots],
+  );
+
+  const syncSelection = useCallback(
+    (cells: Record<string, boolean>) => {
+      const existing = selectedTimeGroup?.timeBlocks ?? [];
+      const blocks = convertCellsToBlocks(cells, existing);
+      onSelectionChange(blocks);
+      dispatch(UpdateSelectedTimeGroup({ timeBlocks: blocks }));
+    },
+    [convertCellsToBlocks, onSelectionChange, dispatch, selectedTimeGroup],
+  );
+
+  // ---------------- Init from props ----------------
   useEffect(() => {
     if (initialData.length > 0) {
       const newSelected: Record<string, boolean> = {};
       initialData.forEach((block) => {
+        if (!block.startTime || !block.endTime) return;
         const dayIndex = daysOfWeek.indexOf(block.dayOfWeek);
-
-        if (!block.startTime || !block.endTime) {
-          console.warn('Invalid time block:', block);
-          return; // skip this block instead of crashing
-        }
-
         const startHour = parseInt(block.startTime.split(':')[0], 10);
         const endHour = parseInt(block.endTime.split(':')[0], 10);
-
-        for (let h = startHour; h < endHour; h++) {
-          newSelected[`${dayIndex}-${h}`] = true;
-        }
+        for (let h = startHour; h < endHour; h++) newSelected[`${dayIndex}-${h}`] = true;
       });
       setSelectedCells(newSelected);
     } else {
@@ -74,7 +138,7 @@ export const TimeGridSelector = ({
     }
   }, [initialData]);
 
-  // ================== Mouse Events ==================
+  // ---------------- Mouse events ----------------
   const handleCellClick = useCallback(
     (dayIndex: number, timeIndex: number) => {
       const cellId = `${dayIndex}-${timeIndex}`;
@@ -82,10 +146,11 @@ export const TimeGridSelector = ({
         const updated = { ...prev };
         if (selectionMode === 'add') updated[cellId] = true;
         else delete updated[cellId];
+        syncSelection(updated);
         return updated;
       });
     },
-    [selectionMode],
+    [selectionMode, syncSelection],
   );
 
   const handleMouseDown = (dayIndex: number, timeIndex: number) => {
@@ -98,53 +163,41 @@ export const TimeGridSelector = ({
   };
 
   useEffect(() => {
-    const stopSelect = () => setIsSelecting(false);
-    document.addEventListener('mouseup', stopSelect);
-    document.addEventListener('mouseleave', stopSelect);
+    const stop = () => setIsSelecting(false);
+    document.addEventListener('mouseup', stop);
+    document.addEventListener('mouseleave', stop);
     return () => {
-      document.removeEventListener('mouseup', stopSelect);
-      document.removeEventListener('mouseleave', stopSelect);
+      document.removeEventListener('mouseup', stop);
+      document.removeEventListener('mouseleave', stop);
     };
   }, []);
 
-  // ================== Selection Helpers ==================
+  // ---------------- Bulk selection ----------------
   const totalCells = daysOfWeek.length * timeSlots.length;
   const isAllSelected = Object.keys(selectedCells).length === totalCells;
 
   const handleToggleAll = () => {
     if (isAllSelected) {
       setSelectedCells({});
-      onSelectionChange([]);
+      syncSelection({});
     } else {
       const newSelected: Record<string, boolean> = {};
-      daysOfWeek.forEach((_, d) =>
-        timeSlots.forEach((_, h) => {
-          newSelected[`${d}-${h}`] = true;
-        }),
-      );
-
-      const newBlocks: TimeBlockType[] = daysOfWeek.map((day) => ({
-        id: `block-${day}-all`,
-        dayOfWeek: day,
-        startTime: '00:00:00',
-        endTime: '24:00:00',
-        timeGroupId: '',
-      }));
-
+      daysOfWeek.forEach((_, d) => timeSlots.forEach((_, h) => (newSelected[`${d}-${h}`] = true)));
       setSelectedCells(newSelected);
-      onSelectionChange(newBlocks);
+      syncSelection(newSelected);
     }
   };
 
   const handleClearAll = () => {
     setSelectedCells({});
-    onSelectionChange([]);
+    syncSelection({});
   };
 
   const handleSelectAllDay = (dayIndex: number) => {
     setSelectedCells((prev) => {
       const updated = { ...prev };
       timeSlots.forEach((_, h) => (updated[`${dayIndex}-${h}`] = true));
+      syncSelection(updated);
       return updated;
     });
   };
@@ -153,62 +206,38 @@ export const TimeGridSelector = ({
     setSelectedCells((prev) => {
       const updated = { ...prev };
       timeSlots.forEach((_, h) => delete updated[`${dayIndex}-${h}`]);
+      syncSelection(updated);
       return updated;
     });
   };
+
+  // ---------------- Save & Cancel ----------------
   const handleSave = () => {
-    if (selectedTimeGroup) {
+    if (!selectedTimeGroup) return;
+
+    if (isNewTimeGroup) {
       dispatch(saveNewTimeGroup(selectedTimeGroup) as any);
-      dispatch(fetchTimeGroupDT({ ...defaultTimeGroupForm, Length: 999 }));
+    } else {
+      // build clean payload (strip fake ids)
+      const payload: TimeGroupType = {
+        ...selectedTimeGroup,
+        timeBlocks: selectedTimeGroup.timeBlocks.map((b: TimeBlockType) => ({
+          ...b,
+          id: b.id.startsWith('block-') ? '' : b.id, // remove temp ids
+        })),
+      };
+
+      dispatch(editTimeGroup(payload) as any);
     }
+
+    dispatch(fetchTimeGroupDT({ ...defaultTimeGroupFilter, Length: 999 }));
   };
+
   const handleCancel = () => {
     dispatch(CancelNewTimeGroup());
   };
 
-  // ================== Convert to timeBlocks ==================
-  const convertSelectionToTimeBlocks = useCallback(() => {
-    const blocks: TimeBlockType[] = [];
-    const dayGroups: Record<number, number[]> = {};
-
-    Object.keys(selectedCells).forEach((cellId) => {
-      const [dStr, hStr] = cellId.split('-');
-      const d = parseInt(dStr, 10);
-      const h = parseInt(hStr, 10);
-      if (!dayGroups[d]) dayGroups[d] = [];
-      dayGroups[d].push(h);
-    });
-
-    Object.entries(dayGroups).forEach(([dStr, hours]) => {
-      const d = parseInt(dStr, 10);
-      const sorted = hours.sort((a, b) => a - b);
-
-      let start = sorted[0];
-      for (let i = 1; i < sorted.length; i++) {
-        if (sorted[i] !== sorted[i - 1] + 1) {
-          blocks.push({
-            id: `block-${d}-${start}`,
-            dayOfWeek: daysOfWeek[d],
-            startTime: `${timeSlots[start]}:00`,
-            endTime: `${timeSlots[sorted[i - 1] + 1] || '24:00'}:00`,
-            timeGroupId: '',
-          });
-          start = sorted[i];
-        }
-      }
-      blocks.push({
-        id: `block-${d}-${start}`,
-        dayOfWeek: daysOfWeek[d],
-        startTime: `${timeSlots[start]}:00`,
-        endTime: `${timeSlots[sorted[sorted.length - 1] + 1] || '24:00'}:00`,
-        timeGroupId: '',
-      });
-    });
-
-    onSelectionChange(blocks);
-  }, [selectedCells, timeSlots, onSelectionChange]);
-
-  // ================== Render ==================
+  // ---------------- Render ----------------
   return (
     <Paper elevation={1} sx={{ p: 2, overflow: 'hidden' }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -217,9 +246,7 @@ export const TimeGridSelector = ({
         </Typography>
         <Box display="flex" gap={1}>
           <Chip
-            icon={
-              selectionMode === 'add' ? <IconSquareCheck size={16} /> : <IconSquare size={16} />
-            }
+            icon={selectionMode === 'add' ? <IconSquareCheck size={16} /> : <IconSquare size={16} />}
             label={selectionMode === 'add' ? 'Adding' : 'Removing'}
             onClick={() => setSelectionMode((prev) => (prev === 'add' ? 'remove' : 'add'))}
             color={selectionMode === 'add' ? 'primary' : 'default'}
@@ -236,11 +263,7 @@ export const TimeGridSelector = ({
           >
             {isAllSelected ? 'Remove All' : 'Select All'}
           </Button>
-          <Button
-            variant="contained"
-            onClick={isNewTimeGroup ? handleSave : convertSelectionToTimeBlocks}
-            size="small"
-          >
+          <Button variant="contained" onClick={handleSave} size="small">
             {isNewTimeGroup ? 'Save' : 'Apply'}
           </Button>
           {isNewTimeGroup && (
@@ -248,7 +271,6 @@ export const TimeGridSelector = ({
               Cancel
             </Button>
           )}
-
           <Button variant="outlined" color="error" onClick={handleClearAll} size="small">
             Clear
           </Button>

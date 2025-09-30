@@ -34,7 +34,6 @@ export type GetFilter = {
     SearchValue: string,
 };
 
-
 export type AlarmSettingType = {
     id: string;
     alarmCategory: string;
@@ -72,6 +71,9 @@ export const AlarmSettingSlice = createSlice({
     reducers: {
         GetAlarmSetting: (state, action: PayloadAction<AlarmSettingType[]>) => {
             state.alarmSettings = action.payload;
+        },
+        GetAlarmSettingAll: (state, action: PayloadAction<AlarmSettingType[]>) => {
+            state.alarmSettingAll = action.payload;
         },
         UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
             state.alarmSettingFilter = { ...state.alarmSettingFilter, ...action.payload};
@@ -111,7 +113,24 @@ export const AlarmSettingSlice = createSlice({
     },
 });
 
-export const { GetAlarmSetting, UpdateFilter, ChangeActiveStatus, ChangePriorityStatus } = AlarmSettingSlice.actions;
+export const { GetAlarmSetting, GetAlarmSettingAll, UpdateFilter, ChangeActiveStatus, ChangePriorityStatus } = AlarmSettingSlice.actions;
+
+export const fetchAlarmSetting = createAsyncThunk(
+    'alarmSetting/fetchAlarmSetting',
+    async (_, thunkAPI) => {
+        try {
+            const response = await axiosServices.get(API_URL);
+                    const normalized : AlarmSettingType[] = response.data.collection.data.map((item: any) => ({
+            ...item,
+            isEnabled: item.isEnabled === 1,
+        }));
+            dispatch(GetAlarmSettingAll(normalized));
+            return response.data.collection;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+)
 
 export const fetchAlarmSettingsDT = createAsyncThunk(
     'alarmSetting/fetchAlarmSettiingsDT',

@@ -15,21 +15,35 @@ import {
   Autocomplete,
   TextField,
   Box,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from '@mui/material';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
-import { IconPencil, IconPlus } from '@tabler/icons-react';
+import { IconInfoCircle, IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import toast from 'react-hot-toast';
-import { addCardAccess, CardAccessType, editCardAccess, fetchCardAccessDT } from 'src/store/apps/crud/cardAccess';
+import {
+  addCardAccess,
+  CardAccessType,
+  editCardAccess,
+  fetchCardAccessDT,
+} from 'src/store/apps/crud/cardAccess';
 import { defaultCardAccessForm } from 'src/store/apps/defaultForm';
 import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import AutocompleteFilter from 'src/layouts/full/horizontal/navbar/AutocompleteFilter';
 import { fetchFloors } from 'src/store/apps/crud/floor';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchBuildings } from 'src/store/apps/crud/building';
+import {
+  fetchTimeGroupDT,
+  fetchTimeGroups,
+  TimeBlockType,
+  TimeGroupType,
+} from 'src/store/apps/crud/timeGroup';
 
 interface FormType {
   type?: string;
@@ -55,11 +69,13 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
   const floors = useSelector((state: RootState) => state.floorReducer.floorAll);
   const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
   const buildings = useSelector((state: RootState) => state.buildingReducer.buildingAll);
+  const timeGroup = useSelector((state: RootState) => state.TimeGroupReducer.timeGroupAll);
   useEffect(() => {
     dispatch(fetchMaskedAreas());
     dispatch(fetchFloors());
     dispatch(fetchFloorplan());
     dispatch(fetchBuildings());
+    dispatch(fetchTimeGroups());
     // console.log(formData);
   }, [dispatch]);
 
@@ -91,45 +107,50 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
     return Object.keys(errors).length === 0;
   };
 
-    const handleSave = async () => {
-      if (!validateForm()) {
-        toast.error('Please fill in all required fields correctly.');
-        return;
+  const handleSave = async () => {
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields correctly.');
+      return;
+    }
+    setIsSaving(true);
+    try {
+      // const data = new FormData();
+      // Object.keys(formData).forEach((key: string) => {
+      //   const value = formData[key as keyof typeof formData];
+      //   if (value === null || value === undefined) return;
+
+      //   if (typeof value === 'string' || value instanceof Blob) {
+      //     data.append(key, value);
+      //   } else if (Array.isArray(value) || typeof value === 'object') {
+      //     data.append(key, JSON.stringify(value)); // serialize object/array
+      //   } else {
+      //     data.append(key, String(value)); // numbers/booleans fallback
+      //   }
+      // });
+      let result;
+      console.log('Data: ', formData);
+      if (type === 'edit') {
+        result = await dispatch(editCardAccess(formData)); // Dispatch update
       }
-      setIsSaving(true);
-      try {
-        const data = new FormData();
-        Object.keys(formData).forEach((key: string) => {
-          const value = formData[key as keyof typeof formData];
-          if (typeof value === 'string' || value instanceof Blob) {
-            data.append(key, value);
-          } else {
-            console.error(`Invalid value type for key ${key}: ${typeof value}`);
-          }
-        });
-        let result;
-        if (type === 'edit') {
-          result = await dispatch(editCardAccess(data)); // Dispatch update
-        }
-        if (type === 'add') {
-          result = await dispatch(addCardAccess(data));
-        }
-        if (result && result.type && result.type.endsWith('/fulfilled')) {
-          await dispatch(fetchCardAccessDT(cardAccessFilter));
-          console.log('Card Access Saved!');
-          toast.success('Data Saved');
-          handleClose();
-        } else {
-          toast.error('Saving Data Unsuccessful');
-        }
-      } catch (error) {
+      if (type === 'add') {
+        result = await dispatch(addCardAccess(formData));
+      }
+      if (result && result.type && result.type.endsWith('/fulfilled')) {
+        await dispatch(fetchCardAccessDT(cardAccessFilter));
+        console.log('Card Access Saved!');
+        toast.success('Data Saved');
+        handleClose();
+      } else {
         toast.error('Saving Data Unsuccessful');
-        console.error('Error saving Card Access:', error);
       }
-      setTimeout(() => {
-        setIsSaving(false);
-      }, 1000);
-    };
+    } catch (error) {
+      toast.error('Saving Data Unsuccessful');
+      console.error('Error saving Card Access:', error);
+    }
+    setTimeout(() => {
+      setIsSaving(false);
+    }, 1000);
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
@@ -174,7 +195,7 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
       )}
 
       {!isLoading && (
-        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="lg">
           <DialogTitle>
             <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
               {type === 'add' ? 'Add Card Access' : 'Edit Card Access'}
@@ -210,55 +231,237 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
                 />
               </Grid>
               <Grid
-                size={{ lg: 8, md: 12, sm: 12 }}
+                size={{ lg: 4, md: 12, sm: 12 }}
                 sx={{ display: 'flex', flexDirection: 'column' }}
               >
                 <CustomFormLabel>Allowed Area(s)</CustomFormLabel>
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                    Access
+                  </Typography>
+                  <RadioGroup
+                    row
+                    name="accessScope"
+                    value={formData.accessScope ?? 'Specific'} // default "specific"
+                    onChange={(e) => {
+                      const scope = e.target.value;
+                      setFormData((prev) => ({
+                        ...prev,
+                        accessScope: scope,
+                        maskedAreaIds: scope === 'Specific' ? prev.maskedAreaIds ?? [] : [], // clear if not specific
+                      }));
+                    }}
+                  >
+                    <FormControlLabel value="All" control={<Radio />} label="All" />
+                    <FormControlLabel value="Specific" control={<Radio />} label="Specific" />
+                    <FormControlLabel value="None" control={<Radio />} label="None" />
+                  </RadioGroup>
+                </Box>
+                {formData.accessScope === 'Specific' && (
+                  <>
+                    <Autocomplete
+                      multiple
+                      options={maskedAreas}
+                      getOptionLabel={(option: any) => option.name}
+                      filterSelectedOptions
+                      value={maskedAreas.filter((m) =>
+                        (formData.maskedAreaIds ?? []).includes(m.id),
+                      )}
+                      onChange={(_e, newValue) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          maskedAreaIds: newValue.map((m: any) => m.id),
+                        }));
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Type area name..."
+                          variant="outlined"
+                          fullWidth
+                        />
+                      )}
+                      renderTags={() => null}
+                      renderOption={(props, option: any) => {
+                        const floor = floors.find((f) => f.id === option.floorId);
+                        const building = floor
+                          ? buildings.find((b) => b.id === floor.buildingId)
+                          : null;
+                        const floorplan = floorplans.find((fp) => fp.id === option.floorplanId);
+
+                        return (
+                          <li {...props} key={option.id}>
+                            <Box>
+                              <Typography variant="body1" fontWeight={600}>
+                                {option.name}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {building?.name ?? 'Unknown Building'} &gt;{' '}
+                                {floor?.name ?? 'Unknown Floor'} &gt;{' '}
+                                {floorplan?.name ?? 'Unknown Floorplan'}
+                              </Typography>
+                            </Box>
+                          </li>
+                        );
+                      }}
+                    />
+
+                    {/* Bordered list for selected areas */}
+                    <Box
+                      sx={{
+                        mt: 1,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        borderRadius: 1,
+                        p: 1,
+                        flexGrow: 1,
+                        minHeight: 120,
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
+                    >
+                      {(formData.maskedAreaIds ?? []).length === 0 ? (
+                        <Typography variant="body1" color="text.secondary">
+                          Selected Area: None
+                        </Typography>
+                      ) : (
+                        (formData.maskedAreaIds ?? []).map((id) => {
+                          const ma = maskedAreas.find((m) => m.id === id);
+                          if (!ma) return null;
+
+                          const floor = floors.find((f) => f.id === ma.floorId);
+                          const floorplan = floorplans.find((fp) => fp.id === ma.floorplanId);
+                          const building = floor
+                            ? buildings.find((b) => b.id === floor.buildingId)
+                            : null;
+
+                          return (
+                            <Box
+                              key={id}
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                py: 0.5,
+                                px: 1,
+                                borderRadius: 0.5,
+                                '&:hover': { bgcolor: 'grey.100' },
+                              }}
+                            >
+                              <Box>
+                                <Typography variant="body1" fontWeight={600}>
+                                  {ma.name}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {building?.name ?? 'Unknown Building'} &gt;{' '}
+                                  {floor?.name ?? 'Unknown Floor'} &gt;{' '}
+                                  {floorplan?.name ?? 'Unknown Floorplan'}
+                                </Typography>
+                              </Box>
+                              <IconButton
+                                size="small"
+                                onClick={() =>
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    maskedAreaIds: (prev.maskedAreaIds ?? []).filter(
+                                      (fid) => fid !== id,
+                                    ),
+                                  }))
+                                }
+                              >
+                                ×
+                              </IconButton>
+                            </Box>
+                          );
+                        })
+                      )}
+                    </Box>
+                  </>
+                )}
+              </Grid>
+              <Grid
+                size={{ lg: 4, md: 12, sm: 12 }}
+                sx={{ display: 'flex', flexDirection: 'column' }}
+              >
+                <CustomFormLabel>Allowed Time(s)</CustomFormLabel>
 
                 <Autocomplete
                   multiple
-                  options={maskedAreas}
-                  getOptionLabel={(option: any) => option.name}
+                  options={timeGroup}
+                  getOptionLabel={(option: TimeGroupType) => option.name}
                   filterSelectedOptions
-                  value={maskedAreas.filter((m) => (formData.maskedAreaIds ?? []).includes(m.id))}
+                  value={timeGroup.filter((tg) => (formData.timeGroupIds ?? []).includes(tg.id))}
                   onChange={(_e, newValue) => {
                     setFormData((prev) => ({
                       ...prev,
-                      maskedAreaIds: newValue.map((m: any) => m.id),
+                      timeGroupIds: newValue.map((tg) => tg.id),
                     }));
                   }}
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      placeholder="Type area name..."
+                      placeholder="Type time group name..."
                       variant="outlined"
                       fullWidth
                     />
                   )}
                   renderTags={() => null}
-                  renderOption={(props, option: any) => {
-                    const floor = floors.find((f) => f.id === option.floorId);
-                    const building = floor
-                      ? buildings.find((b) => b.id === floor.buildingId)
-                      : null;
-                    const floorplan = floorplans.find((fp) => fp.id === option.floorplanId);
+                  renderOption={(props, option) => {
+                    const tooltipContent = (
+                      <Box>
+                        {option.timeBlocks?.length ? (
+                          option.timeBlocks.map((tb) => (
+                            <Typography
+                              key={tb.id}
+                              variant="caption"
+                              display="block"
+                              color="inherit"
+                            >
+                              {tb.dayOfWeek} : {tb.startTime} - {tb.endTime}
+                            </Typography>
+                          ))
+                        ) : (
+                          <Typography variant="caption" color="inherit">
+                            No time blocks
+                          </Typography>
+                        )}
+                      </Box>
+                    );
 
                     return (
                       <li {...props} key={option.id}>
-                        <Box>
-                          <Typography variant="body1" fontWeight={600}>{option.name}</Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {building?.name ?? 'Unknown Building'} &gt;{' '}
-                            {floor?.name ?? 'Unknown Floor'} &gt;{' '}
-                            {floorplan?.name ?? 'Unknown Floorplan'}
-                          </Typography>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            width: '100%',
+                          }}
+                        >
+                          {/* Left side: name + description */}
+                          <Box>
+                            <Typography variant="body1" fontWeight={600}>
+                              {option.name}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {option.description ?? 'No description'}
+                            </Typography>
+                          </Box>
+
+                          {/* Right side: Info button */}
+                          <Tooltip title={tooltipContent} arrow placement="left">
+                            <IconButton size="small" onClick={(e) => e.stopPropagation()}>
+                              <IconInfoCircle size={16} />
+                            </IconButton>
+                          </Tooltip>
                         </Box>
                       </li>
                     );
                   }}
                 />
 
-                {/* Bordered list for selected areas */}
+                {/* Bordered list for selected time groups */}
+
                 <Box
                   sx={{
                     mt: 1,
@@ -272,20 +475,35 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
                     flexDirection: 'column',
                   }}
                 >
-                  {(formData.maskedAreaIds ?? []).length === 0 ? (
+                  {(formData.timeGroupIds ?? []).length === 0 ? (
                     <Typography variant="body1" color="text.secondary">
-                      Selected Area: None
+                      Selected TimeGroup: None
                     </Typography>
                   ) : (
-                    (formData.maskedAreaIds ?? []).map((id) => {
-                      const ma = maskedAreas.find((m) => m.id === id);
-                      if (!ma) return null;
+                    (formData.timeGroupIds ?? []).map((id) => {
+                      const tg = timeGroup.find((t) => t.id === id);
+                      if (!tg) return null;
 
-                      const floor = floors.find((f) => f.id === ma.floorId);
-                      const floorplan = floorplans.find((fp) => fp.id === ma.floorplanId);
-                      const building = floor
-                        ? buildings.find((b) => b.id === floor.buildingId)
-                        : null;
+                      const tooltipContent = (
+                        <Box>
+                          {tg.timeBlocks?.length ? (
+                            tg.timeBlocks.map((tb) => (
+                              <Typography
+                                key={tb.id}
+                                variant="caption"
+                                display="block"
+                                color="inherit"
+                              >
+                                {tb.dayOfWeek} : {tb.startTime} - {tb.endTime}
+                              </Typography>
+                            ))
+                          ) : (
+                            <Typography variant="caption" color="inherit">
+                              No time blocks
+                            </Typography>
+                          )}
+                        </Box>
+                      );
 
                       return (
                         <Box
@@ -300,27 +518,37 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
                             '&:hover': { bgcolor: 'grey.100' },
                           }}
                         >
+                          {/* Left side: name + desc */}
                           <Box>
-                            <Typography variant="body1" fontWeight={600}>{ma.name}</Typography>
+                            <Typography variant="body1" fontWeight={600}>
+                              {tg.name}
+                            </Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {building?.name ?? 'Unknown Building'} &gt;{' '}
-                              {floor?.name ?? 'Unknown Floor'} &gt;{' '}
-                              {floorplan?.name ?? 'Unknown Floorplan'}
+                              {tg.description ?? 'No description'}
                             </Typography>
                           </Box>
-                          <IconButton
-                            size="small"
-                            onClick={() =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                maskedAreaIds: (prev.maskedAreaIds ?? []).filter(
-                                  (fid) => fid !== id,
-                                ),
-                              }))
-                            }
-                          >
-                            ×
-                          </IconButton>
+
+                          {/* Right side: (i) info + (x) remove */}
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Tooltip title={tooltipContent} arrow placement="top">
+                              <IconButton size="small">
+                                <IconInfoCircle size={16} />
+                              </IconButton>
+                            </Tooltip>
+                            <IconButton
+                              size="small"
+                              onClick={() =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  timeGroupIds: (prev.timeGroupIds ?? []).filter(
+                                    (fid) => fid !== id,
+                                  ),
+                                }))
+                              }
+                            >
+                              ×
+                            </IconButton>
+                          </Box>
                         </Box>
                       );
                     })
@@ -328,6 +556,33 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
                 </Box>
               </Grid>
             </Grid>
+          </DialogContent>
+          <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
+            <Button
+              onClick={handleClose}
+              variant="outlined"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              variant="contained"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+              disabled={isSaving}
+            >
+              {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+      {isLoading && (
+        <Dialog open={open} fullWidth maxWidth="sm">
+          <DialogContent sx={{ textAlign: 'center', py: 10 }}>
+            <Typography variant="h1" mb={5}>
+              Loading...{' '}
+            </Typography>
+            <CircularProgress size={50} color="primary" />
           </DialogContent>
         </Dialog>
       )}

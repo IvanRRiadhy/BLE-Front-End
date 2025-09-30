@@ -153,6 +153,11 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     };
   }, [dispatch, topic]);
 
+  useEffect(() => {
+    console.log(showGeoFence);
+    console.log(geofences);
+  },[showGeoFence]);
+
   // maintain beacon state
   useEffect(() => {
     if (!beaconData) return;
@@ -332,13 +337,13 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
               key={geofence.id}
               name="geofence"
               points={setPointsFromNodes(geofence.nodes)}
-              stroke={darken(geofence.color, 0.5)}
+              stroke={darken(geofence.color, 0.3)}
               strokeWidth={5}
               lineJoin="round"
               lineCap="round"
               closed
               fill={geofence.color}
-              opacity={0.5}
+              opacity={0.35}
               onMouseEnter={() => setHoveredAreaId(geofence.id)}
               onMouseLeave={() => setHoveredAreaId((id) => (id === geofence.id ? null : id))}
               onClick={() => dispatch(setFocus({ type: 'geofence', id: geofence.id }))}

@@ -26,13 +26,13 @@ import { uniqueId } from 'lodash';
 import { useSelector } from 'react-redux';
 
 const useMenuItems = () => {
-  const alarmSettings = useSelector((state: any) => state.AlarmSettingReducer.alarmSettings);
+  const alarmSettings = useSelector((state: any) => state.AlarmSettingReducer.alarmSettingAll);
 
   const isGeoFencingActive = alarmSettings.some(
-    (a: any) => a.alarmCategory.toLowerCase() === "geofencing" && a.isEnabled
+    (a: any) => a.alarmCategory.toLowerCase() === "geofence" && a.isEnabled
   );
   const isPeopleCountingActive = alarmSettings.some(
-    (a: any) => a.alarmCategory.toLowerCase() === "people counting" && a.isEnabled
+    (a: any) => a.alarmCategory.toLowerCase() === "overpopulating" && a.isEnabled
   );
   const Menuitems = [
   {

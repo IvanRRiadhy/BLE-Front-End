@@ -1,5 +1,5 @@
 import { BASE_URL } from 'src/utils/axios';
-import React, { use, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import {
   Box,

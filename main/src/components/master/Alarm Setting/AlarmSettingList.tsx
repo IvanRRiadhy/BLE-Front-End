@@ -105,9 +105,9 @@ const page = Math.floor(alarmSettingFilter.Start / alarmSettingFilter.Length);
   const getRoute = (name: string): string => {
     const basePath = `${window.location.origin}${location.pathname}`;
     switch (name.toLowerCase()) {
-      case 'geofencing':
+      case 'geofence':
         return `/alarmsetting/geofencing`;
-      case 'people counting':
+      case 'overPopulating':
         return `/alarmsetting/peoplecounting`;
       case 'firealarm':
         return `/alarmsetting/firealarm`;
@@ -116,6 +116,7 @@ const page = Math.floor(alarmSettingFilter.Start / alarmSettingFilter.Length);
       case 'wrongzone':
         return `/alarmsetting/wrongzone`;
       default:
+        console.log(name);
         toast.error('No route defined for this alarm type');
         return '/alarmsetting';
     }

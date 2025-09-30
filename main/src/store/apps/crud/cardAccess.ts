@@ -27,8 +27,10 @@ export type CardAccessType = {
     name: string,
     accessNumber: string,
     remarks: string,
+    accessScope: string,
     maskedAreaIds: string[],
     maskedArea: MaskedAreaType[],
+    timeGroupIds: string[],
     createdBy: string,
     createdAt: string,
     updatedBy: string,
@@ -145,7 +147,7 @@ export const fetchCardAccessDT = createAsyncThunk(
       }
 );
 
-export const addCardAccess = createAsyncThunk("cardAccess/addCardAccess", async (formData: FormData, { rejectWithValue }) => {
+export const addCardAccess = createAsyncThunk("cardAccess/addCardAccess", async (formData: CardAccessType, { rejectWithValue }) => {
     const started = Date.now();
     try {
         
@@ -161,11 +163,11 @@ export const addCardAccess = createAsyncThunk("cardAccess/addCardAccess", async 
     }
 });
 
-export const editCardAccess = createAsyncThunk("cardAccess/editCardAccess", async (formData: FormData, { rejectWithValue }) => {
+export const editCardAccess = createAsyncThunk("cardAccess/editCardAccess", async (formData: CardAccessType, { rejectWithValue }) => {
     const started = Date.now();
     try {
-       const id = formData.get('id');
-        const response = await axiosServices.put(`${API_URL}${id}`, formData);
+       const [id, updatedAt, updatedBy, createdAt, createdBy, ...filteredCardAccessData] = Object.values(formData);
+        const response = await axiosServices.put(`${API_URL}${id}`, filteredCardAccessData);
                             const elapsed = Date.now() - started;
       if (elapsed < 500) await delay(500 - elapsed);
         return response.data;

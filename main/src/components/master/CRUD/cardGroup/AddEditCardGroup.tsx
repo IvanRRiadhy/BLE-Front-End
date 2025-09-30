@@ -292,7 +292,6 @@ const AddEditCardGroup = ({ type, cardGroup }: FormType) => {
                 </Grid>
 
                 {/* Card Access Section */}
-                {/* Card Access Section */}
                 <Grid size={{ xs: 12, md: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
                   <CustomFormLabel>Card Access</CustomFormLabel>
 

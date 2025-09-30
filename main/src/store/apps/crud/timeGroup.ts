@@ -25,7 +25,6 @@ export type TimeBlockType = {
   dayOfWeek: "Sunday" | "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday";
   startTime: string;   // "HH:mm:ss"
   endTime: string;     // "HH:mm:ss"
-  timeGroupId: string;
 };
 
 export type TimeGroupType = {
@@ -37,6 +36,7 @@ export type TimeGroupType = {
 
 interface StateType {
     timeGroups: TimeGroupType[],
+    timeGroupAll: TimeGroupType[],
     timeGroupTotalCount: number,
     timeGroupFilteredCount: number,
     timeGroupFilter: GetFilter,
@@ -48,6 +48,7 @@ interface StateType {
 
 const initialState: StateType = {
     timeGroups: [],
+    timeGroupAll: [],
     timeGroupTotalCount: 0,
     timeGroupFilteredCount: 0,
     timeGroupFilter: { Draw: 0, Start: 0, Length: 10, SortColumn: '', SortDir: 'asc', SearchValue: '' },
@@ -63,6 +64,9 @@ export const TimeGroupSlice = createSlice({
   reducers: {
     GetTimeGroups: (state, action: PayloadAction<TimeGroupType[]>) => {
       state.timeGroups = action.payload;
+    },
+    GetAllTimeGroups: (state, action: PayloadAction<TimeGroupType[]>) => {
+      state.timeGroupAll = action.payload;
     },
     UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
       state.timeGroupFilter = { ...state.timeGroupFilter, ...action.payload };
@@ -99,10 +103,27 @@ CancelNewTimeGroup: (state) => {
         state.isNewTimeGroup = false;
       }
     },
+    UpdateSelectedTimeGroup: (state, action: PayloadAction<Partial<TimeGroupType>>) => {
+      if (state.selectedTimeGroup) {
+        state.selectedTimeGroup = {
+          ...state.selectedTimeGroup,
+          ...action.payload,
+        };
+      }
+    },
   },
 })
 
-export const { GetTimeGroups, UpdateFilter, SelectTimeGroup, AddNewTimeGroup, CancelNewTimeGroup, SaveNewTimeGroupSuccess } = TimeGroupSlice.actions;
+export const { GetTimeGroups,GetAllTimeGroups, UpdateFilter, SelectTimeGroup, AddNewTimeGroup, CancelNewTimeGroup, SaveNewTimeGroupSuccess, UpdateSelectedTimeGroup } = TimeGroupSlice.actions;
+
+export const fetchTimeGroups = () => async (dispatch: AppDispatch) => {
+  try {
+    const response = await axiosServices.get(API_URL);
+    dispatch(GetAllTimeGroups(response.data.collection.data || []));
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 export const fetchTimeGroupDT = createAsyncThunk(
   "timeGroups/fetchTimeGroupDT",
@@ -134,12 +155,12 @@ export const saveNewTimeGroup = createAsyncThunk(
     try {
       const { id, ...filteredTimeGroupData } = timeGroup;
       const response = await axiosServices.post(API_URL, filteredTimeGroupData);
-
+      console.log(response.data);
       const elapsed = Date.now() - started;
       if (elapsed < 500) await delay(500 - elapsed);
 
       // update redux store
-      thunkAPI.dispatch(SaveNewTimeGroupSuccess(response.data));
+      dispatch(SaveNewTimeGroupSuccess(response.data));
 
       return response.data;
     } catch (error) {
@@ -147,6 +168,52 @@ export const saveNewTimeGroup = createAsyncThunk(
     }
   }
 );
+
+export const editTimeGroup = createAsyncThunk(
+  "timeGroups/editTimeGroup",
+  async (timeGroup: TimeGroupType, { rejectWithValue }) => {
+    const started = Date.now();
+    try {
+      const payload = buildEditPayload(timeGroup);
+
+      console.log("Edit Payload", JSON.stringify(payload, null, 2));
+
+      const response = await axiosServices.put(`${API_URL}${timeGroup.id}`, payload, {
+        headers: { "Content-Type": "application/json" },
+      });
+      console.log("response", response.data);
+      const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+
+      return response.data;
+    } catch (error: any) {
+      const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+      return rejectWithValue(error.response?.data || "Unknown error");
+    }
+  }
+);
+
+const buildEditPayload = (tg: TimeGroupType) => {
+  return {
+    name: tg.name,
+    description: tg.description,
+        timeBlocks: tg.timeBlocks.map((b) => {
+          const normalized = {
+            ...b,
+            dayOfWeek: b.dayOfWeek.toLowerCase(), // 👈 force lowercase
+          };
+
+          // if id is empty or a temp id, exclude it
+          if (!b.id || b.id.startsWith("block-")) {
+            const { id, ...rest } = normalized;
+            return rest;
+          }
+
+          return normalized;
+        }),
+  };
+};
 
 
 export default TimeGroupSlice.reducer;

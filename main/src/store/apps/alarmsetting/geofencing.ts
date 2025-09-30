@@ -179,7 +179,26 @@ export const {
 export const fetchGeoFencingAlarmsAll = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
-        dispatch(GetAllGeoFencingAlarms(response.data.collection.data || []));
+            const normalized: GeoFencingAlarmType[] = (response.data.collection.data || []).map((item: any) => {
+      let nodes: Nodes[] | undefined = undefined;
+      try {
+        if (item.areaShape) {
+          const parsed = JSON.parse(item.areaShape);
+          if (Array.isArray(parsed)) {
+            nodes = parsed;
+          }
+        }
+      } catch (err) {
+        console.error("Invalid areaShape JSON:", item.areaShape, err);
+      }
+
+      return {
+        ...item,
+        isActive: item.isActive === 1, // 1 → true, 0 → false
+        nodes, // ✅ add parsed nodes
+      };
+    });
+        dispatch(GetAllGeoFencingAlarms(normalized || []));
     } catch (error) {
         console.error('Error fetching GeoFencing Alarms:', error);
     }

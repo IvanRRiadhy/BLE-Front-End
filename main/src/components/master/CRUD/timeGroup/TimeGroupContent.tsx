@@ -10,6 +10,7 @@ import {
   CancelNewTimeGroup,
   saveNewTimeGroup,
   fetchTimeGroupDT,
+  UpdateSelectedTimeGroup,
 } from 'src/store/apps/crud/timeGroup';
 import { defaultTimeGroupForm } from 'src/store/apps/defaultForm';
 
@@ -38,6 +39,7 @@ const TimeGroupDetails = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name, id } = e.target;
     setFormData((prev) => ({ ...prev, [id || name]: value }));
+    dispatch(UpdateSelectedTimeGroup({ [id || name]: value }));
   };
 
   const handleTimeGridChange = (blocks: TimeBlockType[]) => {

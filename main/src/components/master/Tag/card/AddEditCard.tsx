@@ -36,6 +36,8 @@ import { MaskedAreaType, fetchMaskedAreas } from 'src/store/apps/crud/maskedArea
 import toast from 'react-hot-toast';
 import { defaultCardForm } from 'src/store/apps/defaultForm';
 import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
+import { fetchCardGroup } from 'src/store/apps/crud/cardGroup';
+import { CardAccessType, fetchCardAccess } from 'src/store/apps/crud/cardAccess';
 interface formType {
   type?: string;
   card?: CardType;
@@ -126,6 +128,8 @@ const AddEditCard = ({ type, card }: formType) => {
   const floorData = useSelector((state: RootState) => state.floorReducer.floorAll);
   const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
   const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
+  const cardGroupData = useSelector((state: RootState) => state.CardGroupReducer.cardGroupAll);
+  const cardAccessData = useSelector((state: RootState) => state.CardAccessReducer.cardAccessAll);
   const buildingHierarchy = buildNestedHierarchy(
     buildingData,
     floorData,
@@ -140,6 +144,8 @@ const AddEditCard = ({ type, card }: formType) => {
     dispatch(fetchFloors());
     dispatch(fetchFloorplan());
     dispatch(fetchMaskedAreas());
+    dispatch(fetchCardGroup());
+    dispatch(fetchCardAccess());
   }, [dispatch]);
 
   const handleClickOpen = () => {
@@ -289,7 +295,7 @@ const AddEditCard = ({ type, card }: formType) => {
         </Tooltip>
       )}
       {!loading && (
-        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="lg">
           <DialogTitle>
             <Box display="flex" alignItems="center" justifyContent="space-between" m={2}>
               <Typography component="div" variant="h4" fontWeight={700}>
@@ -303,7 +309,7 @@ const AddEditCard = ({ type, card }: formType) => {
           </DialogTitle>
           <DialogContent>
             <Grid container spacing={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+              <Grid size={{ lg: 3, md: 12, sm: 12 }}>
                 <CustomFormLabel>Card Details</CustomFormLabel>
                 <CustomTextField
                   id="name"
@@ -345,7 +351,7 @@ const AddEditCard = ({ type, card }: formType) => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+              <Grid size={{ lg: 4.5, md: 12, sm: 12 }} > 
                 <CustomFormLabel>Card Type</CustomFormLabel>
                 <CustomSelect
                   id="cardType"
@@ -417,13 +423,14 @@ const AddEditCard = ({ type, card }: formType) => {
                 {!formData.isMultiMaskedArea && (
                   <div
                     style={{
+                      marginTop: 8,
                       border: '1px solid #ced4da',
                       borderRadius: 4,
                       padding: 8,
-                      minHeight: 180,
-                      maxHeight: 250,
+                      flexGrow: 1,
                       background: '#fafbfc',
                       display: 'flex',
+                      minHeight: 258,
                       flexDirection: 'column',
                       width: '100%',
                     }}
@@ -447,6 +454,106 @@ const AddEditCard = ({ type, card }: formType) => {
                     </div>
                   </div>
                 )}
+              </Grid>
+              <Grid size={{ lg: 4.5, md: 12, sm: 12 }}>
+                <CustomFormLabel>Card Group (--WIP--)</CustomFormLabel>
+                <CustomSelect
+                  id="cardType"
+                  name="cardType"
+                  value={formData.cardType}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                >
+                  {cardType.map((item) => (
+                    <MenuItem key={item.value} value={item.value} disabled={item.disabled}>
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </CustomSelect>
+                <CustomFormLabel>Card Access</CustomFormLabel>
+
+                <CustomSelect
+                  id="cardAccess"
+                  name="cardAccess"
+                  value=""
+                  onChange={(e: any) => {
+                    const selectedId = e.target.value;
+                    const selectedCA = cardAccessData.find((ca) => ca.id === selectedId);
+                    if (selectedCA) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        cardAccess: [...(prev.cardAccess ?? []), selectedCA],
+                      }));
+                    }
+                  }}
+                  fullWidth
+                  variant="outlined"
+                >
+                  <MenuItem value="" disabled>
+                    Select a Card Access
+                  </MenuItem>
+                  {cardAccessData
+                    .filter(
+                      (ca: CardAccessType) => !(formData.cardAccess ?? []).some((fca: any) => fca.id === ca.id),
+                    )
+                    .map((ca) => (
+                      <MenuItem key={ca.id} value={ca.id}>
+                        {ca.name}
+                      </MenuItem>
+                    ))}
+                </CustomSelect>
+
+                <Box
+                  sx={{
+                    mt: 1,
+                    flexGrow: 1,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: 1,
+                    p: 1,
+                    display: 'flex',
+                    minHeight: 258,
+                    flexDirection: 'column',
+                    bgcolor: '#fafbfc',
+                  }}
+                >
+                  {(formData.cardAccess ?? []).length === 0 ? (
+                    <Typography variant="body2" color="text.secondary">
+                      Selected Access: None
+                    </Typography>
+                  ) : (
+                    (formData.cardAccess ?? []).map((ca: any) => (
+                      <Box
+                        key={ca.id}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          py: 0.5,
+                          px: 1,
+                          borderRadius: 0.5,
+                          '&:hover': { bgcolor: 'grey.100' },
+                        }}
+                      >
+                        <Typography variant="body2">{ca.name}</Typography>
+                        <IconButton
+                          size="small"
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              cardAccess: (prev.cardAccess ?? []).filter(
+                                (fca: any) => fca.id !== ca.id,
+                              ),
+                            }))
+                          }
+                        >
+                          ×
+                        </IconButton>
+                      </Box>
+                    ))
+                  )}
+                </Box>
               </Grid>
             </Grid>
           </DialogContent>

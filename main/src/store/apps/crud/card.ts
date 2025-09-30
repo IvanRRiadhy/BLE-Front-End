@@ -5,6 +5,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { defaultCardFilter } from "../defaultForm";
 import { MaskedAreaType } from "./maskedArea";
+import { CardAccessType } from "./cardAccess";
 
 const API_URL = "/api/Card/";
 const API_DT_URL = "/api/Card/filter/";
@@ -49,6 +50,8 @@ export type CardType = {
     isMultiMaskedArea: boolean,
     registeredMaskedAreaId: string | null,
     registeredMaskedArea?: MaskedAreaType,
+    cardAccessId: string[],
+    cardAccess?: CardAccessType[],
     isUsed: boolean,
     lastUsed: string,
     statusCard: boolean,
