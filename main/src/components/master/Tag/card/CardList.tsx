@@ -25,6 +25,7 @@ import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Stor
 import { CardType, UpdateFilter, fetchCard, fetchCardDT } from 'src/store/apps/crud/card';
 import AddEditCard from './AddEditCard';
 import { defaultCardFilter } from 'src/store/apps/defaultForm';
+import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 
 const columns = [
   { label: 'Name', field: 'Name', sortAble: true },
@@ -39,6 +40,7 @@ const columns = [
 const CardList = () => {
   const dispatch: AppDispatch = useDispatch();
   const cardData: CardType[] = useSelector((state: RootState) => state.CardReducer.cards);
+  const areaData: MaskedAreaType[] = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
   const cardFilteredCount = useSelector((state: RootState) => state.CardReducer.cardFilteredCount);
   const cardFilter = useSelector((state: RootState) => state.CardReducer.cardFilter);
     const prevFilterRef = useRef(cardFilter);
@@ -133,6 +135,11 @@ const CardList = () => {
     handleCloseDeleteDialog();
   };
 
+  const GetAreaName = (areaId: string | null) => {
+    const area = areaData.find((x) => x.id === areaId);
+    return area?.name ?? 'Unknown Area';
+  };
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -185,7 +192,7 @@ const CardList = () => {
                       </TableCell>
                       <TableCell>{card.cardType}</TableCell>
                       <TableCell>{card.cardNumber}</TableCell>
-                      <TableCell>{card.isMultiMaskedArea ? 'Multi-Area' : card.registeredMaskedArea?.name}</TableCell>
+                      <TableCell>{card.isMultiMaskedArea ? 'Multi-Area' : GetAreaName(card.registeredMaskedAreaId)}</TableCell>
                       <TableCell>{card.isUsed ? 'Yes' : 'No'}</TableCell>
                       <TableCell>{card.lastUsed || 'N/A'}</TableCell>
                       <TableCell
