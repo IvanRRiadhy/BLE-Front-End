@@ -689,13 +689,13 @@ const EditGeoFenceRenderer: React.FC<{
               <Line
                 key={area.id}
                 points={area.nodes ? setPointsFromNodes(area.nodes) : []}
-                stroke={darken(area.color, 0.5)}
+                stroke={darken(area.color, 0.3)}
                 strokeWidth={5}
                 lineJoin="round"
                 lineCap="round"
                 closed
                 fill={area.color}
-                opacity={0.5}
+                opacity={0.35}
               />
             ))}
           {activeGeoFence && (

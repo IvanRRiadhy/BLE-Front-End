@@ -32,6 +32,7 @@ import {
   ChangeActiveStatus,
   CreateNewGeoFencingAlarm,
   deleteGeoFencingAlarm,
+  editGeoFencingAlarm,
   fetchGeoFencingAlarms,
   GeoFencingAlarmType,
   SetSelectedGeoFencingAlarm,
@@ -105,8 +106,22 @@ const GeoFencingList = () => {
     dispatch(fetchGeoFencingAlarms(geoFencingAlarmFilter));
   }, [dispatch, geoFencingAlarmFilter]);
 
-  const handleToggleStatus = (id: string, currentStatus: boolean) => {
-    dispatch(ChangeActiveStatus({ id, isActive: !currentStatus }));
+  const handleToggleStatus = async (geofence: GeoFencingAlarmType) => {
+    const updatedGeoFence = {
+      ...geofence,
+      isActive: !geofence.isActive,
+    };
+    console.log("Toggle Status Clicked: ", geofence, "New Status: ", updatedGeoFence.isActive);
+    try {
+      const res = await dispatch(editGeoFencingAlarm(updatedGeoFence));
+      if(res.type.endsWith('/fulfilled')) {
+        await dispatch(fetchGeoFencingAlarms(geoFencingAlarmFilter));
+        toast.success('Alarm status updated successfully');
+      }
+    } catch (error) {
+      toast.error('Error updating alarm status');
+      console.error('Error updating alarm status:', error);
+    }
   };
 
   //Delete Pop-up
@@ -289,7 +304,7 @@ const GeoFencingList = () => {
                                 <Switch
                                   checked={geofence.isActive}
                                   onChange={() =>
-                                    handleToggleStatus(geofence.id, geofence.isActive)
+                                    handleToggleStatus(geofence)
                                   }
                                   color="primary"
                                   size="small"

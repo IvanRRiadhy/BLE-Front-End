@@ -27,8 +27,8 @@ export type GeoFencingAlarmType = {
     remarks: string;
     areaShape: string;
     color: string;
-    behavior: string;
     isActive: boolean;
+    floorId: string;
     floorplanId: string;
     floorplan?: FloorplanType;
     nodes?: Nodes[];
@@ -57,6 +57,9 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     SearchValue: string,
+    filters?:{
+
+    }
 };
 
 interface StateType {
@@ -137,9 +140,9 @@ export const GeoFencingAlarmSlice = createSlice({
                 remarks: '',
                 areaShape: '',
                 color: '#f55549',
-                behavior: '',
                 isActive: true,
-                floorplanId: ''
+                floorplanId: '',
+                floorId: '',
             };
         }   
     },
@@ -254,10 +257,15 @@ export const fetchGeoFencingAlarms = createAsyncThunk(
 
 export const addGeoFencingAlarm = createAsyncThunk(
     'geoFencingAlarm/addGeoFencingAlarm',
-    async(formData: FormData, thunkAPI) => {
+    async(geoFence: GeoFencingAlarmType, thunkAPI) => {
         const started = Date.now();
         try{
-            const res = await axiosServices.post(API_URL, formData);
+            const { id, nodes, floorplan, ...rest } = geoFence;
+            const filteredData = {
+                ...rest,
+                isActive: rest.isActive ? 1 : 0,
+            };
+            const res = await axiosServices.post(API_URL, filteredData);
             const elapsed = Date.now() - started;
             if(elapsed < 500){
                 await delay(500 - elapsed);
@@ -270,15 +278,15 @@ export const addGeoFencingAlarm = createAsyncThunk(
 
 export const editGeoFencingAlarm = createAsyncThunk(
     'geoFencingAlarm/editGeoFencingAlarm',
-    async(formData: FormData, thunkAPI) => {
+    async(geoFence: GeoFencingAlarmType, thunkAPI) => {
         const started = Date.now();
         try{
-            const id = formData.get('id'); // Extract ID from FormData
-            formData.delete('id'); // Remove ID from FormData to avoid sending it again
-            Object.keys(formData).forEach(key => {
-            console.log(`${key}: ${formData.get(key)}`);
-            });
-            const res = await axiosServices.put(`${API_URL}${id}`, formData);
+            const { id, nodes, floorplan, ...rest } = geoFence;
+            const filteredData = {
+                ...rest,
+                isActive: rest.isActive ? 1 : 0,
+            };
+            const res = await axiosServices.put(`${API_URL}${id}`, filteredData);
             const elapsed = Date.now() - started;
             if(elapsed < 500){
                 await delay(500 - elapsed);

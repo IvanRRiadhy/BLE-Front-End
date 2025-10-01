@@ -619,14 +619,14 @@ export const defaultAlarmSettingFilter: AlarmSettingFilter = {
 
 //#region GeoFence
 export const defaultGeoFencingForm: GeoFencingAlarmType = {
-  id: `GeoFence-${new Date().getTime()}`,
+  id: ``,
   name: '',
   remarks: '',
   areaShape: '',
   color: '#f55549',
-  behavior: '',
   isActive: true,
   floorplanId: '',
+  floorId: '',
 };
 
 export const defaultGeoFencingFilter: GeoFenceFilter = {

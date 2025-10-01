@@ -5,12 +5,13 @@ import { Box, Switch, FormControlLabel, FormLabel, Divider, Typography } from '@
 import ZoomControls from 'src/components/shared/ZoomControls';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import { GeoFencingAlarmType } from 'src/store/apps/alarmsetting/geofencing';
+import { fetchGeoFencingAlarms, fetchGeoFencingAlarmsAll, GeoFencingAlarmType } from 'src/store/apps/alarmsetting/geofencing';
 import EditGeoFenceRenderer from './EditGeoFenceRenderer';
 import MouseDoubleClickIcon from 'src/assets/images/svgs/mouse-double-click-icon.svg';
 import MouseLeftClickIcon from 'src/assets/images/svgs/mouse-left-click-icon.svg';
 import MouseRightClickIcon from 'src/assets/images/svgs/mouse-right-click-icon.svg';
 import ShiftButtonIcon from 'src/assets/images/svgs/shift-button-icon.svg';
+import { defaultGeoFencingFilter } from 'src/store/apps/defaultForm';
 
 const EditGeoFenceFloorView = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -19,6 +20,7 @@ const EditGeoFenceFloorView = () => {
   const geoFenceData = useSelector(
     (state: RootState) => state.GeoFencingReducer.selectedGeoFencingAlarm,
   );
+  const otherGeoFence = useSelector((state: RootState) => state.GeoFencingReducer.geoFencingAlarms);
   const activeFloorPlan = floorplans.find((fp) => fp.id === geoFenceData?.floorplanId);
   const filteredArea = maskedAreas.filter((area) => area.floorplanId === activeFloorPlan?.id);
   const drawGeoFence = useSelector((state: RootState) => state.GeoFencingReducer.drawingGeoFence);
@@ -75,6 +77,7 @@ const EditGeoFenceFloorView = () => {
   useEffect(() => {
     dispatch(fetchFloorplan());
     dispatch(fetchMaskedAreas());
+    dispatch(fetchGeoFencingAlarms({...defaultGeoFencingFilter,Length: 0, filters: { FloorplanId: activeFloorPlan?.id }}));
   }, [dispatch]);
 
   const calculateImageDimensions = (
@@ -434,6 +437,7 @@ const EditGeoFenceFloorView = () => {
                   setIsDragging={setIsDragging}
                   setCursor={setCursor}
                   activeGeoFence={geoFenceData as GeoFencingAlarmType}
+                  otherGeoFences={otherGeoFence}
                   areas={filteredArea}
                   showAreas={showArea}
                 />
