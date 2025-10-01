@@ -1,9 +1,23 @@
-import { Grid2 as Grid, Divider, Typography, Box, Paper, Button, Stack } from '@mui/material';
+import {
+  Grid2 as Grid,
+  Divider,
+  Typography,
+  Box,
+  Paper,
+  Button,
+  Stack,
+  Autocomplete,
+  TextField,
+  Tooltip,
+  IconButton,
+} from '@mui/material';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { TimeGridSelector } from 'src/components/shared/TimeGridSelector';
 import { useDispatch, useSelector } from 'src/store/Store';
+import { CardAccessType, fetchCardAccess } from 'src/store/apps/crud/cardAccess';
 import {
   TimeGroupType,
   TimeBlockType,
@@ -18,11 +32,15 @@ const TimeGroupDetails = () => {
   const dispatch = useDispatch();
   const selectedTimeGroup = useSelector((state: any) => state.TimeGroupReducer.selectedTimeGroup);
   const isNewTimeGroup = useSelector((state: any) => state.TimeGroupReducer.isNewTimeGroup);
+  const cardAccess = useSelector((state: any) => state.CardAccessReducer.cardAccessAll);
 
   const [formData, setFormData] = useState<TimeGroupType>({
     ...defaultTimeGroupForm,
     ...selectedTimeGroup,
   });
+  useEffect(() => {
+    dispatch(fetchCardAccess());
+  }, [dispatch]);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [timeBlocks, setTimeBlocks] = useState<TimeBlockType[]>(formData.timeBlocks ?? []);
 
@@ -86,6 +104,121 @@ const TimeGroupDetails = () => {
                 minRows={3}
                 maxRows={5}
               />
+              <CustomFormLabel>Card Access</CustomFormLabel>
+              <Autocomplete
+                multiple
+                options={cardAccess}
+                getOptionLabel={(option: CardAccessType) => option.name}
+                filterSelectedOptions
+                value={cardAccess.filter((ca: CardAccessType) =>
+                  (formData.cardAccessIds ?? []).includes(ca.id),
+                )}
+                onChange={(_e, newValue) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    cardAccessIds: newValue.map((ca) => ca.id),
+                  }));
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder="Type Card Access name..."
+                    variant="outlined"
+                    fullWidth
+                  />
+                )}
+                renderTags={() => null}
+                renderOption={(props, option) => {
+                  return (
+                    <li {...props} key={option.id}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          width: '100%',
+                        }}
+                      >
+                        {/* Left side: name + description */}
+                        <Box>
+                          <Typography variant="body1" fontWeight={600}>
+                            {option.name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {option.remarks ?? 'No description'}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </li>
+                  );
+                }}
+              />
+              <Box
+                sx={{
+                  mt: 1,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 1,
+                  p: 1,
+                  flexGrow: 1,
+                  minHeight: 120,
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                {(formData.cardAccessIds ?? []).length === 0 ? (
+                  <Typography variant="body1" color="text.secondary">
+                    Selected Card Access: None
+                  </Typography>
+                ) : (
+                  (formData.cardAccessIds ?? []).map((id) => {
+                    const ca = cardAccess.find((ca: CardAccessType) => ca.id === id);
+                    if (!ca) return null;
+
+                    return (
+                      <Box
+                        key={id}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          py: 0.5,
+                          px: 1,
+                          borderRadius: 0.5,
+                          '&:hover': { bgcolor: 'grey.100' },
+                        }}
+                      >
+                        {/* Left side: name + desc */}
+                        <Box>
+                          <Typography variant="body1" fontWeight={600}>
+                            {ca.name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {ca.remarks ?? 'No description'}
+                          </Typography>
+                        </Box>
+
+                        {/* Right side: (i) info + (x) remove */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                cardAccessIds: (prev.cardAccessIds ?? []).filter(
+                                  (fid) => fid !== id,
+                                ),
+                              }))
+                            }
+                          >
+                            ×
+                          </IconButton>
+                        </Box>
+                      </Box>
+                    );
+                  })
+                )}
+              </Box>
             </Grid>
 
             <Grid size={{ lg: 9.5, md: 12, sm: 12 }}>

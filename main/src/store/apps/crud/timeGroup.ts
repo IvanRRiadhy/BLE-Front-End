@@ -8,6 +8,7 @@ import { uniqueId } from "lodash";
 
 const API_DT_URL = "/api/TimeGroup/filter/";
 const API_URL = "/api/TimeGroup/";
+const API_URL_TIME_BLOCK = "/api/TimeBlock/";
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 
@@ -32,6 +33,7 @@ export type TimeGroupType = {
   name: string;
   description: string;
   timeBlocks: TimeBlockType[];
+  cardAccessIds: string[];
 };
 
 interface StateType {

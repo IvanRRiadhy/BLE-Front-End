@@ -429,6 +429,7 @@ export const defaultTimeGroupForm: TimeGroupType = {
   name: 'Add Name',
   description: 'Add Description',
   timeBlocks: [],
+  cardAccessIds: [],
 };
 
 export const defaultTimeGroupFilter: TimeGroupFilter = {
