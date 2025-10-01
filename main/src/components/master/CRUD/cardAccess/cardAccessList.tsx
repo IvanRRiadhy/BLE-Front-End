@@ -25,11 +25,17 @@ import {
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import { CardAccessType, UpdateFilter, fetchCardAccessDT } from 'src/store/apps/crud/cardAccess';
+import {
+  CardAccessType,
+  UpdateFilter,
+  deleteCardAccess,
+  fetchCardAccessDT,
+} from 'src/store/apps/crud/cardAccess';
 
 // import AddEditCardAccess from './AddEditCardAccess';
 import { defaultCardAccessFilter } from 'src/store/apps/defaultForm';
 import AddEditCardAccess from './AddEditCardAccess';
+import toast from 'react-hot-toast';
 
 const columns = [
   { label: 'Access Name', field: 'Name', sortAble: true },
@@ -103,6 +109,39 @@ const CardAccessList = () => {
   useEffect(() => {
     dispatch(fetchCardAccessDT(cardAccessFilter));
   }, [cardAccessFilter, dispatch]);
+
+  //Delete Pop-up
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedCardAccess, setSelectedCardAccess] = useState<CardAccessType | null>(null);
+  // Open delete confirmation dialog
+  const handleOpenDeleteDialog = (ca: CardAccessType) => {
+    setSelectedCardAccess(ca);
+    setDeleteDialogOpen(true);
+  };
+
+  // Close delete confirmation dialog
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setSelectedCardAccess(null);
+  };
+
+  // Confirm delete action
+  const handleConfirmDelete = async () => {
+    if (selectedCardAccess) {
+      try {
+        const result = await dispatch(deleteCardAccess(selectedCardAccess.id));
+        if (result && result.type && result.type.endsWith('/fulfilled')) {
+          await dispatch(fetchCardAccessDT(cardAccessFilter));
+          toast.success('Data Deleted');
+        }
+      } catch (error) {
+        toast.error('Delete Data Unsuccessful');
+        console.error('Error deleting Card Access:', error);
+      }
+    }
+    handleCloseDeleteDialog();
+  };
+
   const renderSkeletonRows = (rows: number) => (
     <>
       {Array.from({ length: rows }).map((_, i) => (
@@ -252,7 +291,7 @@ const CardAccessList = () => {
                             <IconButton
                               color="error"
                               size="small"
-                              // onClick={() => handleOpenDeleteDialog(floorplan)}
+                              onClick={() => handleOpenDeleteDialog(cardAccess)}
                             >
                               <IconTrash size={20} />
                             </IconButton>
@@ -275,27 +314,28 @@ const CardAccessList = () => {
         </Box>
       </Grid>
       {/* Delete Confirmation Dialog */}
-      {/* <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-                <DialogTitle>Confirm Deletion</DialogTitle>
-                <DialogContent>
-                  <DialogContentText>
-                    Are you sure you want to delete the floor <strong>{selectedFloorplan?.name}</strong>?
-                  </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleCloseDeleteDialog} color="primary">
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleConfirmDelete}
-                    color={isLoading ? 'primary' : 'error'}
-                    disabled={isLoading}
-                    startIcon={isLoading ? <CircularProgress size={20} /> : null}
-                  >
-                    {isLoading ? 'Deleting...' : 'Delete'}
-                  </Button>
-                </DialogActions>
-              </Dialog> */}
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete the card access{' '}
+            <strong>{selectedCardAccess?.name}</strong>?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            color={isLoading ? 'primary' : 'error'}
+            disabled={isLoading}
+            startIcon={isLoading ? <CircularProgress size={20} /> : null}
+          >
+            {isLoading ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 };
