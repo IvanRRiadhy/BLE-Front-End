@@ -16,7 +16,12 @@ import {
   Skeleton,
   Switch,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
+import { SketchPicker } from 'react-color';
 import BlankCard from 'src/components/shared/BlankCard';
 import {
   IconBrandTelegram,
@@ -43,6 +48,7 @@ import { useLocation, useNavigate } from 'react-router';
 const columns = [
   { label: 'Alarm Type', field: 'Name', sortAble: true },
   { label: 'Status', field: 'IsEnabled', sortAble: true },
+  { label: 'Color', field: 'AlarmColor', sortAble: false },
   { label: 'Level Priority', field: 'AlarmLevelPriority', sortAble: true },
 ];
 
@@ -63,7 +69,7 @@ const AlarmSettingList = () => {
   );
 
   // Pagination State
-const page = Math.floor(alarmSettingFilter.Start / alarmSettingFilter.Length);
+  const page = Math.floor(alarmSettingFilter.Start / alarmSettingFilter.Length);
   const rowsPerPage = alarmSettingFilter.Length;
   const orderBy = alarmSettingFilter.SortColumn;
   const order = alarmSettingFilter.SortDir;
@@ -98,6 +104,11 @@ const page = Math.floor(alarmSettingFilter.Start / alarmSettingFilter.Length);
     }
   };
 
+  // state for color picker dialog
+  const [colorDialogOpen, setColorDialogOpen] = useState(false);
+  const [selectedAlarm, setSelectedAlarm] = useState<AlarmSettingType | null>(null);
+  const [tempColor, setTempColor] = useState<string>('');
+
   useEffect(() => {
     dispatch(fetchAlarmSettingsDT(alarmSettingFilter));
   }, [dispatch, alarmSettingFilter]);
@@ -107,7 +118,7 @@ const page = Math.floor(alarmSettingFilter.Start / alarmSettingFilter.Length);
     switch (name.toLowerCase()) {
       case 'geofence':
         return `/alarmsetting/geofencing`;
-      case 'overPopulating':
+      case 'overpopulating':
         return `/alarmsetting/peoplecounting`;
       case 'firealarm':
         return `/alarmsetting/firealarm`;
@@ -119,6 +130,28 @@ const page = Math.floor(alarmSettingFilter.Start / alarmSettingFilter.Length);
         console.log(name);
         toast.error('No route defined for this alarm type');
         return '/alarmsetting';
+    }
+  };
+
+  const handleOpenColorDialog = (alarm: AlarmSettingType) => {
+    setSelectedAlarm(alarm);
+    setTempColor(alarm.alarmColor || '#000000'); // default black if empty
+    setColorDialogOpen(true);
+  };
+
+  const handleApplyColor = async () => {
+    if (!selectedAlarm) return;
+    const updated = { ...selectedAlarm, alarmColor: tempColor };
+    try {
+      const res = await dispatch(editAlarmSetting(updated));
+      if (res.type.endsWith('/fulfilled')) {
+        await dispatch(fetchAlarmSettingsDT(alarmSettingFilter));
+        toast.success('Alarm color updated');
+        setColorDialogOpen(false);
+      }
+    } catch (err) {
+      toast.error('Failed to update color');
+      console.error(err);
     }
   };
 
@@ -307,6 +340,7 @@ const page = Math.floor(alarmSettingFilter.Start / alarmSettingFilter.Length);
                               <Typography variant="h6" fontWeight="bold">
                                 {alarmSetting.alarmCategory}
                               </Typography>
+
                               {alarmSetting.remarks !== '' && (
                                 <Tooltip title={alarmSetting.remarks} arrow>
                                   <IconButton size="small" sx={{ color: 'text.secondary', p: 0.5 }}>
@@ -348,6 +382,23 @@ const page = Math.floor(alarmSettingFilter.Start / alarmSettingFilter.Length);
                                 size="small"
                               />
                             </Box>
+                          </TableCell>
+
+                          {/* Color column */}
+                          <TableCell>
+                            {alarmSetting.isEnabled && (
+                              <Box
+                                onClick={() => handleOpenColorDialog(alarmSetting)}
+                                sx={{
+                                  width: 28,
+                                  height: 28,
+                                  borderRadius: '6px',
+                                  border: '1px solid #ccc',
+                                  backgroundColor: alarmSetting.alarmColor || '#ddd',
+                                  cursor: 'pointer',
+                                }}
+                              />
+                            )}
                           </TableCell>
 
                           <TableCell>
@@ -460,41 +511,32 @@ const page = Math.floor(alarmSettingFilter.Start / alarmSettingFilter.Length);
                 </TableBody>
               </Table>
             </TableContainer>
-                        {/* Pagination */}
-                        <TablePagination
-                          component="div"
-                          count={alarmSettingTotalCount}
-                          page={page}
-                          rowsPerPage={rowsPerPage}
-                          onPageChange={handleChangePage}
-                          rowsPerPageOptions={[5, 10, 25]}
-                          onRowsPerPageChange={handleChangeRowsPerPage}
-                        />
+            {/* Pagination */}
+            <TablePagination
+              component="div"
+              count={alarmSettingTotalCount}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              onPageChange={handleChangePage}
+              rowsPerPageOptions={[5, 10, 25]}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
           </BlankCard>
         </Box>
       </Grid>
-      {/* Delete Confirmation Dialog */}
-      {/* <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-          <DialogTitle>Confirm Deletion</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Are you sure you want to delete the distric <strong>{selectedDist?.name}</strong>?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseDeleteDialog} color="primary">
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirmDelete}
-              color={isLoading ? 'primary' : 'error'}
-              disabled={isLoading}
-              startIcon={isLoading ? <CircularProgress size={20} /> : null}
-            >
-              {isLoading ? 'Deleting...' : 'Delete'}
-            </Button>
-          </DialogActions>
-        </Dialog> */}
+      {/* Color Picker Dialog */}
+      <Dialog open={colorDialogOpen} onClose={() => setColorDialogOpen(false)}>
+        <DialogTitle>Pick a Color</DialogTitle>
+        <DialogContent>
+          <SketchPicker color={tempColor} onChangeComplete={(c: any) => setTempColor(c.hex)} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setColorDialogOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleApplyColor}>
+            Apply Change
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 };
