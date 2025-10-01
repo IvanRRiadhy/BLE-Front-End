@@ -481,13 +481,13 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
                     </Typography>
                   ) : (
                     (formData.timeGroupIds ?? []).map((id) => {
-                      const tg = timeGroup.find((t) => t.id === id);
+                      const tg = timeGroup.find((t: TimeGroupType) => t.id === id);
                       if (!tg) return null;
 
                       const tooltipContent = (
                         <Box>
                           {tg.timeBlocks?.length ? (
-                            tg.timeBlocks.map((tb) => (
+                            tg.timeBlocks.map((tb: TimeBlockType) => (
                               <Typography
                                 key={tb.id}
                                 variant="caption"

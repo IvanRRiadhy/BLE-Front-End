@@ -29,6 +29,7 @@ import { CardAccessType, UpdateFilter, fetchCardAccessDT } from 'src/store/apps/
 
 // import AddEditCardAccess from './AddEditCardAccess';
 import { defaultCardAccessFilter } from 'src/store/apps/defaultForm';
+import AddEditCardAccess from './AddEditCardAccess';
 
 const columns = [
   { label: 'Access Name', field: 'Name', sortAble: true },
@@ -247,7 +248,7 @@ const CardAccessList = () => {
                               maxWidth: 150,
                             }}
                           >
-                            {/* <AddEditFloorplan type="edit" floorplan={floorplan} /> */}
+                            <AddEditCardAccess cardAccess={cardAccess} type="edit" />
                             <IconButton
                               color="error"
                               size="small"
