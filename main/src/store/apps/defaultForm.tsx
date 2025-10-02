@@ -27,6 +27,7 @@ import { GeoFencingAlarmType, GetFilter as GeoFenceFilter } from './alarmsetting
 import { GetFilter as AlarmSettingFilter } from './alarmsetting/alarmSettings';
 import { OverPopulatingAlarmType, GetFilter as OverPopulatingFilter } from './alarmsetting/overpopulating';
 import { BoundaryAlarmType, GetFilter as BoundaryFilter } from './alarmsetting/boundary';
+import { StayOnAreaAlarmType, GetFilter as StayOnAreaFilter } from './alarmsetting/stayonarea';
 
 //#region AccessCCTV
 export const defaultAccessCCTVForm: CCTVType = {
@@ -679,6 +680,30 @@ export const defaultBoundaryForm: BoundaryAlarmType = {
 };
 
 export const defaultBoundaryFilter: BoundaryFilter = {
+  Draw: 1,
+  Start: 0,
+  Length: 5,
+  SortColumn: 'UpdatedAt',
+  SortDir: 'desc',
+  SearchValue: '',
+};
+
+//#endregion
+
+//#region StayOnArea
+export const defaultStayOnAreaForm: StayOnAreaAlarmType = {
+  id: ``,
+  name: '',
+  remarks: '',
+  areaShape: '',
+  color: '#70e3fdff',
+  isActive: true,
+  floorplanId: '',
+  floorId: '',
+  maxDuration: 0,
+};
+
+export const defaultStayOnAreaFilter: StayOnAreaFilter = {
   Draw: 1,
   Start: 0,
   Length: 5,
