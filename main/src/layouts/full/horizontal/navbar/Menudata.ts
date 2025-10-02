@@ -23,15 +23,13 @@ import {
   IconBell,
 } from '@tabler/icons-react';
 import { uniqueId } from 'lodash';
-import { useSelector } from 'react-redux';
+import { AlarmSettingType } from 'src/store/apps/alarmsetting/alarmSettings';
 
-const useMenuItems = () => {
-  const alarmSettings = useSelector((state: any) => state.AlarmSettingReducer.alarmSettingAll);
-
+const useMenuItems = (alarmSettings: AlarmSettingType[]) => {
   const isGeoFencingActive = alarmSettings.some(
     (a: any) => a.alarmCategory.toLowerCase() === "geofence" && a.isEnabled
   );
-  const isPeopleCountingActive = alarmSettings.some(
+  const isOverPopulatingActive = alarmSettings.some(
     (a: any) => a.alarmCategory.toLowerCase() === "overpopulating" && a.isEnabled
   );
   const Menuitems = [
@@ -268,13 +266,13 @@ const useMenuItems = () => {
               },
             ]
           : []),
-      ...(isPeopleCountingActive
+      ...(isOverPopulatingActive
           ? [
               {
                 id: uniqueId(),
-                title: "People Counting Alarm",
+                title: "OverPopulating Alarm",
                 icon: IconBellExclamation,
-                href: "/alarmsetting/peoplecounting/",
+                href: "/alarmsetting/overpopulating/",
               },
             ]
           : []),

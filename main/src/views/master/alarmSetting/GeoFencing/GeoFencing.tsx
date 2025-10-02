@@ -104,16 +104,8 @@ const FloorplanDevice = () => {
           <ParentCard title="GeoFencing List" codeModel={[
             <AddGeoFencing key="AddGeoFencing" />,
           ]}>
-            {/* <FloorplanDeviceList /> */}
             <GeoFencingList />
           </ParentCard>
-          {/* <Box display="flex" flexDirection="row">
-            <AddEditDeviceSidebar
-              isMobileSidebarOpen={isMobileSidebarOpen}
-              onSidebarClose={() => setMobileSidebarOpen(false)}
-            />
-            <EditDeviceFloorView zoomable />
-          </Box> */}
         </Drawer>
       </AppCard>
     </PageContainer>

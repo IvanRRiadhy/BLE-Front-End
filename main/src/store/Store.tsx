@@ -51,7 +51,7 @@ import CardAccessReducer from './apps/crud/cardAccess';
 import CardGroupReducer from './apps/crud/cardGroup';
 import AlarmSettingReducer from './apps/alarmsetting/alarmSettings';
 import GeoFencingReducer from './apps/alarmsetting/geofencing';
-import PeopleCountingReducer from './apps/alarmsetting/peoplecounting';
+import OverPopulatingReducer from './apps/alarmsetting/overpopulating';
 import SessionReducer from './apps/session';
 import { combineReducers } from 'redux';
 import {
@@ -111,7 +111,7 @@ const rootReducer = combineReducers({
   CardGroupReducer: CardGroupReducer,
   AlarmSettingReducer: AlarmSettingReducer,
   GeoFencingReducer: GeoFencingReducer,
-  PeopleCountingReducer: PeopleCountingReducer,
+  OverPopulatingReducer: OverPopulatingReducer,
 });
 
 const persistConfig = {
@@ -121,10 +121,7 @@ const persistConfig = {
 };
 
 // Create persisted root reducer
-const persistedReducer = persistReducer<ReturnType<typeof rootReducer>>(
-  persistConfig,
-  rootReducer
-);
+const persistedReducer = persistReducer<ReturnType<typeof rootReducer>>(persistConfig, rootReducer);
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
@@ -177,7 +174,6 @@ export const store = configureStore({
 
 export const persistor = persistStore(store);
 
-
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
@@ -186,4 +182,3 @@ export const useSelector: TypedUseSelectorHook<RootState> = useAppSelector;
 export const { dispatch } = store;
 
 export default store;
-

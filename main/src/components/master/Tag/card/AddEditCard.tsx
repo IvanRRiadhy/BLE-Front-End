@@ -22,7 +22,6 @@ import Checkbox from '@mui/material/Checkbox';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
 import QRCode from 'react-qr-code';
-import StatusCard from 'src/components/apps/ecommerce/productAdd/Status';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';

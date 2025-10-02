@@ -18,13 +18,15 @@ import { memberType, GetFilter as MemberFilter } from './crud/member';
 import { OrganizationType, GetFilter as OrganizationFilter } from './crud/organization';
 import { GetFilter as TrackingTransFilter } from './crud/trackingTrans';
 import { VisitorType, GetFilter as VisitorFilter } from './crud/visitor';
-import { TrxVisitorType, GetFilter as TrxVisitorFilter } from './crud/trxVisitor';
-import { CardRecordType, GetFilter as CardRecordFilter } from './crud/cardRecord';
+import { GetFilter as TrxVisitorFilter } from './crud/trxVisitor';
+import {  GetFilter as CardRecordFilter } from './crud/cardRecord';
 import { TimeGroupType, GetFilter as TimeGroupFilter } from './crud/timeGroup';
 import { CardAccessType, GetFilter as CardAccessFilter } from './crud/cardAccess';
 import { CardGroupType, GetFilter as CardGroupFilter } from './crud/cardGroup';
 import { GeoFencingAlarmType, GetFilter as GeoFenceFilter } from './alarmsetting/geofencing';
 import { GetFilter as AlarmSettingFilter } from './alarmsetting/alarmSettings';
+import { OverPopulatingAlarmType, GetFilter as OverPopulatingFilter } from './alarmsetting/overpopulating';
+import { BoundaryAlarmType, GetFilter as BoundaryFilter } from './alarmsetting/boundary';
 
 //#region AccessCCTV
 export const defaultAccessCCTVForm: CCTVType = {
@@ -527,7 +529,7 @@ export const defaultCardForm: CardType = {
   cardAccessId: [],
   cardAccess: [],
   lastUsed: '',
-  statusCard: false,
+  statusCard: 1,
   isUsed: false,
 };
 
@@ -630,6 +632,53 @@ export const defaultGeoFencingForm: GeoFencingAlarmType = {
 };
 
 export const defaultGeoFencingFilter: GeoFenceFilter = {
+  Draw: 1,
+  Start: 0,
+  Length: 5,
+  SortColumn: 'UpdatedAt',
+  SortDir: 'desc',
+  SearchValue: '',
+};
+
+//#endregion
+
+//#region OverPopulating
+export const defaultOverPopulatingForm: OverPopulatingAlarmType = {
+  id: ``,
+  name: '',
+  remarks: '',
+  areaShape: '',
+  color: '#eff549ff',
+  isActive: true,
+  floorplanId: '',
+  floorId: '',
+  maxCapacity: 0,
+};
+
+export const defaultOverPopulatingFilter: OverPopulatingFilter = {
+  Draw: 1,
+  Start: 0,
+  Length: 5,
+  SortColumn: 'UpdatedAt',
+  SortDir: 'desc',
+  SearchValue: '',
+};
+
+//#endregion
+//#region Boundary
+export const defaultBoundaryForm: BoundaryAlarmType = {
+  id: ``,
+  name: '',
+  remarks: '',
+  areaShape: '',
+  color: '#70e3fdff',
+  isActive: true,
+  floorplanId: '',
+  floorId: '',
+  maxCapacity: 0,
+};
+
+export const defaultBoundaryFilter: BoundaryFilter = {
   Draw: 1,
   Start: 0,
   Length: 5,

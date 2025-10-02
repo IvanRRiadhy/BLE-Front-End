@@ -21,6 +21,7 @@ import {
   Skeleton,
   CircularProgress,
   Switch,
+  Tooltip,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconEdit, IconPencil, IconTrash } from '@tabler/icons-react';
@@ -29,10 +30,15 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import {
   ChangeActiveStatus,
-  fetchPeopleCountingAlarms,
-  PeopleCountingAlarmType,
+  CreateNewOverPopulatingAlarm,
+  deleteOverPopulatingAlarm,
+  editOverPopulatingAlarm,
+  fetchOverPopulatingAlarms,
+  OverPopulatingAlarmType,
+  SetSelectedOverPopulatingAlarm,
   UpdateFilter,
-} from 'src/store/apps/alarmsetting/peoplecounting';
+} from 'src/store/apps/alarmsetting/overpopulating';
+import { useNavigate } from 'react-router';
 
 const columns = [
   { label: 'Name', field: 'Name', sortAble: true },
@@ -42,29 +48,30 @@ const columns = [
 
 const SKELETON_ROWS = 5;
 
-const PeopleCountingList = () => {
+const OverPopulatingList = () => {
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
   const { t } = useTranslation();
-  const peopleCountingAlarms = useSelector(
-    (state: RootState) => state.PeopleCountingReducer.peopleCountingAlarms,
+  const overPopulatingAlarms = useSelector(
+    (state: RootState) => state.OverPopulatingReducer.overPopulatingAlarms,
   );
-  const peopleCountingAlarmFilter = useSelector(
-    (state: RootState) => state.PeopleCountingReducer.peopleCountingAlarmFilter,
+  const overPopulatingAlarmFilter = useSelector(
+    (state: RootState) => state.OverPopulatingReducer.overPopulatingAlarmFilter,
   );
-  const isLoading = useSelector((state: RootState) => state.PeopleCountingReducer.isLoading);
-  const hasLoaded = useSelector((state: RootState) => state.PeopleCountingReducer.hasLoaded);
-  const peopleCountingAlarmTotalCount = useSelector(
-    (state: RootState) => state.PeopleCountingReducer.peopleCountingAlarmTotalCount,
+  const isLoading = useSelector((state: RootState) => state.OverPopulatingReducer.isLoading);
+  const hasLoaded = useSelector((state: RootState) => state.OverPopulatingReducer.hasLoaded);
+  const overPopulatingAlarmTotalCount = useSelector(
+    (state: RootState) => state.OverPopulatingReducer.overPopulatingAlarmTotalCount,
   );
 
   // Pagination State
-  const page = Math.floor(peopleCountingAlarmFilter.Start / peopleCountingAlarmFilter.Length);
-  const rowsPerPage = peopleCountingAlarmFilter.Length;
-  const orderBy = peopleCountingAlarmFilter.SortColumn;
-  const order = peopleCountingAlarmFilter.SortDir;
+  const page = Math.floor(overPopulatingAlarmFilter.Start / overPopulatingAlarmFilter.Length);
+  const rowsPerPage = overPopulatingAlarmFilter.Length;
+  const orderBy = overPopulatingAlarmFilter.SortColumn;
+  const order = overPopulatingAlarmFilter.SortDir;
 
   const handleChangePage = (_: unknown, newPage: number) => {
-    dispatch(UpdateFilter({ Start: newPage * peopleCountingAlarmFilter.Length }));
+    dispatch(UpdateFilter({ Start: newPage * overPopulatingAlarmFilter.Length }));
   };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newLength = parseInt(event.target.value, 10);
@@ -72,9 +79,9 @@ const PeopleCountingList = () => {
   };
   const handleSort = (column: string) => {
     const isAsc =
-      peopleCountingAlarmFilter.SortColumn === column && peopleCountingAlarmFilter.SortDir === 'asc';
+      overPopulatingAlarmFilter.SortColumn === column && overPopulatingAlarmFilter.SortDir === 'asc';
     const isDesc =
-      peopleCountingAlarmFilter.SortColumn === column && peopleCountingAlarmFilter.SortDir === 'desc';
+      overPopulatingAlarmFilter.SortColumn === column && overPopulatingAlarmFilter.SortDir === 'desc';
 
     if (isDesc) {
       dispatch(
@@ -96,12 +103,67 @@ const PeopleCountingList = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchPeopleCountingAlarms(peopleCountingAlarmFilter));
-  }, [dispatch]);
+    dispatch(fetchOverPopulatingAlarms(overPopulatingAlarmFilter));
+  }, [dispatch, overPopulatingAlarmFilter]);
 
-  const handleToggleStatus = (id: string, currentStatus: boolean) => {
-    dispatch(ChangeActiveStatus({ id, isActive: !currentStatus }));
+  const handleToggleStatus = async (overpopulate: OverPopulatingAlarmType) => {
+    const updatedGeoFence = {
+      ...overpopulate,
+      isActive: !overpopulate.isActive,
+    };
+    console.log("Toggle Status Clicked: ", overpopulate, "New Status: ", updatedGeoFence.isActive);
+    try {
+      const res = await dispatch(editOverPopulatingAlarm(updatedGeoFence));
+      if(res.type.endsWith('/fulfilled')) {
+        await dispatch(fetchOverPopulatingAlarms(overPopulatingAlarmFilter));
+        toast.success('Alarm status updated successfully');
+      }
+    } catch (error) {
+      toast.error('Error updating alarm status');
+      console.error('Error updating alarm status:', error);
+    }
   };
+
+  //Delete Pop-up
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedoverpopulating, setSelectedoverpopulating] = useState<OverPopulatingAlarmType | null>(null);
+  // Open delete confirmation dialog
+  const handleOpenDeleteDialog = (overpopulate: OverPopulatingAlarmType) => {
+    setSelectedoverpopulating(overpopulate);
+    setDeleteDialogOpen(true);
+  };
+
+  // Close delete confirmation dialog
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setSelectedoverpopulating(null);
+  };
+
+  // Confirm delete action
+  const handleConfirmDelete = async () => {
+    if (selectedoverpopulating) {
+      try {
+        const result = await dispatch(deleteOverPopulatingAlarm(selectedoverpopulating.id));
+        if (result && result.type && result.type.endsWith('/fulfilled')) {
+          await dispatch(fetchOverPopulatingAlarms(overPopulatingAlarmFilter));
+          toast.success('Data Deleted');
+        }
+      } catch (error) {
+        toast.error('Delete Data Unsuccessful');
+        console.error('Error deleting Alarm:', error);
+      }
+    }
+    handleCloseDeleteDialog();
+  };
+
+  const handleEdit = (selectedoverpopulating: OverPopulatingAlarmType) => {
+    dispatch(SetSelectedOverPopulatingAlarm(selectedoverpopulating));
+    console.log("Selected overpopulating alarm for editing:", JSON.stringify(selectedoverpopulating));
+    // window.location.href = '/alarmsetting/overpopulating/edit';
+    navigate('/alarmsetting/overpopulating/edit');
+  };
+
+
 
   const renderSkeletonRows = (rows: number) => (
     <>
@@ -210,8 +272,8 @@ const PeopleCountingList = () => {
                 <TableBody key={'skeleton-body'}>
                   {!hasLoaded
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
-                    : peopleCountingAlarms.map((geofencing: PeopleCountingAlarmType, index: number) => (
-                        <TableRow key={geofencing.id}>
+                    : overPopulatingAlarms.map((overpopulate: OverPopulatingAlarmType, index: number) => (
+                        <TableRow key={overpopulate.id}>
                           <TableCell
                             sx={{
                               position: 'sticky',
@@ -227,25 +289,27 @@ const PeopleCountingList = () => {
                           >
                             {index + 1 + page * rowsPerPage}
                           </TableCell>
-                          <TableCell>{geofencing.name}</TableCell>
-                          <TableCell>{geofencing.remarks}</TableCell>
+                          <TableCell>{overpopulate.name}</TableCell>
+                          <TableCell>{overpopulate.remarks}</TableCell>
 
                           <TableCell>
                             <Box display="grid" gridTemplateColumns="80px auto" alignItems="center">
                               <Typography
                                 variant="body2"
-                                color={geofencing.isActive ? 'green' : 'text.secondary'}
+                                color={overpopulate.isActive ? 'success.dark' : 'error.dark'}
                               >
-                                {geofencing.isActive ? 'Active' : 'Inactive'}
+                                {overpopulate.isActive ? 'Active' : 'Inactive'}
                               </Typography>
-                              <Switch
-                                checked={geofencing.isActive}
-                                onChange={() =>
-                                  handleToggleStatus(geofencing.id, geofencing.isActive)
-                                }
-                                color="primary"
-                                size="small"
-                              />
+                              <Tooltip title={overpopulate.isActive ? 'Disable' : 'Enable'} arrow>
+                                <Switch
+                                  checked={overpopulate.isActive}
+                                  onChange={() =>
+                                    handleToggleStatus(overpopulate)
+                                  }
+                                  color="primary"
+                                  size="small"
+                                />
+                              </Tooltip>
                             </Box>
                           </TableCell>
 
@@ -263,14 +327,24 @@ const PeopleCountingList = () => {
                               maxWidth: 150,
                             }}
                           >
-                            {/* <AddEditDistrict type="edit" district={district} /> */}
-                            <IconButton
-                              color="error"
-                              size="small"
-                              //   onClick={() => handleOpenDeleteDialog(district)}
-                            >
-                              <IconPencil size={20} />
-                            </IconButton>
+                            <Tooltip title="Edit" arrow>
+                              <IconButton
+                                color="primary"
+                                size="small"
+                                onClick={() => handleEdit(overpopulate)}
+                              >
+                                <IconPencil size={20} />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete" arrow>
+                              <IconButton
+                                color="error"
+                                size="small"
+                                onClick={() => handleOpenDeleteDialog(overpopulate)}
+                              >
+                                <IconTrash size={20} />
+                              </IconButton>
+                            </Tooltip>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -280,7 +354,7 @@ const PeopleCountingList = () => {
             {/* Pagination */}
             <TablePagination
               component="div"
-              count={peopleCountingAlarmTotalCount}
+              count={overPopulatingAlarmTotalCount}
               page={page}
               rowsPerPage={rowsPerPage}
               onPageChange={handleChangePage}
@@ -291,29 +365,29 @@ const PeopleCountingList = () => {
         </Box>
       </Grid>
       {/* Delete Confirmation Dialog */}
-      {/* <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-              <DialogTitle>Confirm Deletion</DialogTitle>
-              <DialogContent>
-                <DialogContentText>
-                  Are you sure you want to delete the distric <strong>{selectedDist?.name}</strong>?
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseDeleteDialog} color="primary">
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleConfirmDelete}
-                  color={isLoading ? 'primary' : 'error'}
-                  disabled={isLoading}
-                  startIcon={isLoading ? <CircularProgress size={20} /> : null}
-                >
-                  {isLoading ? 'Deleting...' : 'Delete'}
-                </Button>
-              </DialogActions>
-            </Dialog> */}
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete the Alarm <strong>{selectedoverpopulating?.name}</strong>?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            color={isLoading ? 'primary' : 'error'}
+            disabled={isLoading}
+            startIcon={isLoading ? <CircularProgress size={20} /> : null}
+          >
+            {isLoading ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 };
 
-export default PeopleCountingList;
+export default OverPopulatingList;

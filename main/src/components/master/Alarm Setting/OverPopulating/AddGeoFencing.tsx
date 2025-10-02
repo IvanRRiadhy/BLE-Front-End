@@ -2,21 +2,21 @@ import { Button, CircularProgress, Tooltip } from "@mui/material";
 import { IconPlus } from "@tabler/icons-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { CreateNewGeoFencingAlarm } from "src/store/apps/alarmsetting/geofencing";
+import { CreateNewOverPopulatingAlarm } from "src/store/apps/alarmsetting/overpopulating";
 import { AppDispatch,  useDispatch } from "src/store/Store";
 
 
-export const AddGeoFencing = () => {
+export const AddOverPopulating = () => {
     const dispatch: AppDispatch = useDispatch();
     const navigate = useNavigate();
-    const isLoading = useSelector((state: any) => state.GeoFencingReducer.isLoading);
+    const isLoading = useSelector((state: any) => state.OverPopulatingReducer.isLoading);
       const handleAddGeoFence = () => {
-    dispatch(CreateNewGeoFencingAlarm());
-    navigate('/alarmsetting/geofencing/edit');
+    dispatch(CreateNewOverPopulatingAlarm());
+    navigate('/alarmsetting/overpopulating/edit');
   }
 
   return (
-    <Tooltip title="Add GeoFence Alarm">
+    <Tooltip title="Add OverPopulating Alarm">
           {isLoading ? (
             <Button
               variant="contained"

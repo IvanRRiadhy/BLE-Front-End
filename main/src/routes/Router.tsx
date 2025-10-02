@@ -15,14 +15,15 @@ const MainMenuDash = Loadable(lazy(() => import('../views/dashboard/Main')));
 const MonitoringDash = Loadable(lazy(() => import('../views/dashboard/Monitoring')));
 const MonitoringConfig = Loadable(lazy(() => import('../views/dashboard/MonitoringConfig')));
 const MyVisitDashboard = Loadable(lazy(() => import('../views/MyVisit/MyVisitDashboard')));
-const WebView = Loadable(lazy(() => import('../components/dashboards/monitoring/FloorView')))
+const WebView = Loadable(lazy(() => import('../components/dashboards/monitoring/FloorView')));
 
 /* ****Invitation***** */
 const InvitationForm = Loadable(lazy(() => import('../components/InvitationForm/InvitationForm')));
 const InvitationInfo = Loadable(lazy(() => import('../components/InvitationForm/InvitationInfo')));
 const ThankYouPage = Loadable(lazy(() => import('../components/InvitationForm/ThankYouPage')));
-const InvitationPage = Loadable(lazy(() => import('../views/MyVisit/MyVisitInvitation/InvitationPage')));
-
+const InvitationPage = Loadable(
+  lazy(() => import('../views/MyVisit/MyVisitInvitation/InvitationPage')),
+);
 
 /* ***Master**** */
 const GatewayApp = Loadable(lazy(() => import('../views/master/gateway/gateway')));
@@ -31,9 +32,18 @@ const VisitorTag = Loadable(lazy(() => import('../views/master/tag/visitorTag'))
 
 /* ***Alarm Setting*** */
 const AlarmSetting = Loadable(lazy(() => import('../views/master/alarmSetting/MainList')));
-const GeoFencing = Loadable(lazy(() => import('../views/master/alarmSetting/GeoFencing/GeoFencing')));
-const GeoFencingEdit = Loadable(lazy(() => import('../views/master/alarmSetting/GeoFencing/GeoFencingEdit')));
-const PeopleCounting = Loadable(lazy(() => import('../views/master/alarmSetting/PeopleCounting/PeopleCounting')));
+const GeoFencing = Loadable(
+  lazy(() => import('../views/master/alarmSetting/GeoFencing/GeoFencing')),
+);
+const GeoFencingEdit = Loadable(
+  lazy(() => import('../views/master/alarmSetting/GeoFencing/GeoFencingEdit')),
+);
+const OverPopulating = Loadable(
+  lazy(() => import('../views/master/alarmSetting/OverPopulating/OverPopulating')),
+);
+const OverPopulatingEdit = Loadable(
+  lazy(() => import('../views/master/alarmSetting/OverPopulating/OverPopulatingEdit')),
+)
 
 /* ****CRUD**** */
 const Application = Loadable(lazy(() => import('../views/master/crud/Application')));
@@ -285,7 +295,8 @@ const Router = [
       { path: '/alarmsetting', exact: true, element: <AlarmSetting /> },
       { path: '/alarmsetting/geofencing', exact: true, element: <GeoFencing /> },
       { path: '/alarmsetting/geofencing/edit', exact: true, element: <GeoFencingEdit /> },
-      { path: '/alarmsetting/peoplecounting', exact: true, element: <PeopleCounting /> },
+      { path: '/alarmsetting/overpopulating', exact: true, element: <OverPopulating /> },
+      { path: '/alarmsetting/overpopulating/edit', exact: true, element: <OverPopulatingEdit /> },
 
       //Dashboard Evacuation
       { path: '/dashboards/evacuation', exact: true, element: <EvacuationDashboard /> },

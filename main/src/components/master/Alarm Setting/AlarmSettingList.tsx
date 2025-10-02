@@ -120,12 +120,12 @@ const AlarmSettingList = () => {
         return `/alarmsetting/geofencing`;
       case 'overpopulating':
         return `/alarmsetting/peoplecounting`;
-      case 'firealarm':
-        return `/alarmsetting/firealarm`;
-      case 'cctv':
-        return `/alarmsetting/cctv`;
-      case 'wrongzone':
-        return `/alarmsetting/wrongzone`;
+      case 'cardaccess':
+        return `/master/cardaccess`;
+      case 'boundary':
+        return `/alarmsetting/boundary`;
+      case 'stayonarea':
+        return `/alarmsetting/stayonarea`;
       default:
         console.log(name);
         toast.error('No route defined for this alarm type');

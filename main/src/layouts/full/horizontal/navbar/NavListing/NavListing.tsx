@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React from 'react';
+import React, { useEffect } from 'react';
 import useMenuItems from '../Menudata';
 import { useLocation } from 'react-router';
 import { Box, List, Theme, useMediaQuery } from '@mui/material';
@@ -11,12 +11,13 @@ import { RootState } from 'src/store/Store';
 
 const NavListing = () => {
   const { pathname } = useLocation();
-  const Menudata = useMenuItems();
+  const alarmSettings = useSelector((state:RootState) => state.AlarmSettingReducer.alarmSettings);
   const pathDirect = pathname;
   const pathWithoutLastPart = pathname.slice(0, pathname.lastIndexOf('/'));
   const customizer = useSelector((state: RootState) => state.customizer);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const hideMenu = lgUp ? customizer.isCollapse && !customizer.isSidebarHover : '';
+  const Menudata = useMenuItems(alarmSettings);
 
   return (
     <Box>

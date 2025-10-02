@@ -7,7 +7,7 @@ import { defaultCardFilter } from "../defaultForm";
 import { MaskedAreaType } from "./maskedArea";
 import { CardAccessType } from "./cardAccess";
 
-const API_URL = "/api/Card/";
+const API_URL = "/api/Card/v2";
 const API_DT_URL = "/api/Card/filter/";
 const ASSIGN_CARD_URL = "/api/CardRecord/";
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -54,7 +54,7 @@ export type CardType = {
     cardAccess?: CardAccessType[],
     isUsed: boolean,
     lastUsed: string,
-    statusCard: boolean,
+    statusCard: number,
 };
 
 interface StateType {
@@ -280,6 +280,7 @@ export const editCard = createAsyncThunk("card/editCard", async (formData: CardT
     const started = Date.now();
     try {
         const { id, ...data } = formData;
+        console.log("Edit Card: ", id,data)
         const response = await axiosServices.put(`${API_URL}${id}`, data);
                 const elapsed = Date.now() - started;
       if (elapsed < 500) await delay(500 - elapsed);

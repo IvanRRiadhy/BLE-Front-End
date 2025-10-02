@@ -20,20 +20,20 @@ import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloors } from 'src/store/apps/crud/floor';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import {
-  addGeoFencingAlarm,
-  DrawGeoFence,
-  editGeoFencingAlarm,
-  fetchGeoFencingAlarms,
-  SaveSelectedGeoFencingAlarm,
-  SetSelectedGeoFencingAlarm,
-  UpdateSelectedGeoFencingAlarm,
-} from 'src/store/apps/alarmsetting/geofencing';
+  addOverPopulatingAlarm,
+  DrawOverPopulating,
+  editOverPopulatingAlarm,
+  fetchOverPopulatingAlarms,
+  SaveSelectedOverPopulatingAlarm,
+  SetSelectedOverPopulatingAlarm,
+  UpdateSelectedOverPopulatingAlarm,
+} from 'src/store/apps/alarmsetting/overpopulating';
 import FloorplanSelect from 'src/components/shared/FloorplanSelect';
 import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
-import { defaultGeoFencingFilter } from 'src/store/apps/defaultForm';
+import { defaultOverPopulatingFilter } from 'src/store/apps/defaultForm';
 
-const GeoFencingDetailList = () => {
+const OverPopulatingDetailList = () => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
@@ -44,8 +44,8 @@ const GeoFencingDetailList = () => {
     dispatch(fetchMaskedAreas());
   }, [dispatch]);
 
-  const geoFenceData = useSelector(
-    (state: RootState) => state.GeoFencingReducer.selectedGeoFencingAlarm,
+  const overPopulateData = useSelector(
+    (state: RootState) => state.OverPopulatingReducer.selectedOverPopulatingAlarm,
   );
 
   const buildings = useSelector((state: RootState) => state.buildingReducer.buildingAll);
@@ -54,7 +54,7 @@ const GeoFencingDetailList = () => {
   const maskedAreas = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
 
   const filteredMaskedAreas = maskedAreas.filter(
-    (ma) => ma.floorplanId === geoFenceData?.floorplanId,
+    (ma: MaskedAreaType) => ma.floorplanId === overPopulateData?.floorplanId,
   );
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,16 +62,16 @@ const GeoFencingDetailList = () => {
   };
 
   const handleCancel = () => {
-    dispatch(SetSelectedGeoFencingAlarm(null));
-    navigate('/alarmsetting/geofencing');
+    dispatch(SetSelectedOverPopulatingAlarm(null));
+    navigate('/alarmsetting/overpopulating');
   };
 
   const handleSave = async () => {
-    if (!geoFenceData) return;
+    if (!overPopulateData) return;
     setIsSaving(true);
     try {
       const formData = new FormData();
-      Object.entries(geoFenceData).forEach(([key, value]) => {
+      Object.entries(overPopulateData).forEach(([key, value]) => {
         if (typeof value === 'boolean') {
           formData.append(key, value ? '1' : '0'); // ✅ convert bool → "1"/"0"
         } else if (value !== undefined && value !== null) {
@@ -79,14 +79,14 @@ const GeoFencingDetailList = () => {
         }
       });
       let result;
-      if(geoFenceData.id.startsWith('GeoFence-')){
-        result = await dispatch(addGeoFencingAlarm(geoFenceData));
+      if (overPopulateData.id.startsWith('OverPopulating-')) {
+        result = await dispatch(addOverPopulatingAlarm(overPopulateData));
       } else {
-        result = await dispatch(editGeoFencingAlarm(geoFenceData));
+        result = await dispatch(editOverPopulatingAlarm(overPopulateData));
       }
       if (result && result.type && result.type.endsWith('/fulfilled')) {
-        await dispatch(fetchGeoFencingAlarms(defaultGeoFencingFilter));
-        console.log('GeoFence Saved!');
+        await dispatch(fetchOverPopulatingAlarms(defaultOverPopulatingFilter));
+        console.log('OverPopulating Saved!');
         toast.success('Data Saved');
         handleClose();
       } else {
@@ -104,7 +104,7 @@ const GeoFencingDetailList = () => {
 
   const handleClose = () => {
     // setFormData({} as OrganizationType);
-    navigate('/alarmsetting/geofencing');
+    navigate('/alarmsetting/overpopulating');
   };
 
   // Define required fields
@@ -112,16 +112,16 @@ const GeoFencingDetailList = () => {
 
   // Validation function
   const isFormValid = () => {
-    if (geoFenceData === null) return false;
+    if (overPopulateData === null) return false;
     return requiredFields.every(
-      (field) => geoFenceData[field as keyof typeof geoFenceData]?.toString().trim() !== '',
+      (field) => overPopulateData[field as keyof typeof overPopulateData]?.toString().trim() !== '',
     );
   };
 
   const findFloorId = (fpId: string) => {
     const floor = floorplans.find((f) => f.id === fpId);
     return floor?.floorId;
-  }
+  };
 
   return (
     <Box
@@ -145,12 +145,12 @@ const GeoFencingDetailList = () => {
         <Box pl={3} pr={1}>
           <Grid container spacing={1}>
             <Grid size={12}>
-              <CustomFormLabel>GeoFence Alarm Name</CustomFormLabel>
+              <CustomFormLabel>OverPopulating Alarm Name</CustomFormLabel>
               <CustomTextField
                 id="name"
-                value={geoFenceData?.name || ''}
+                value={overPopulateData?.name || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  dispatch(UpdateSelectedGeoFencingAlarm({ name: e.target.value }));
+                  dispatch(UpdateSelectedOverPopulatingAlarm({ name: e.target.value }));
                 }}
                 variant="outlined"
                 fullWidth
@@ -161,9 +161,9 @@ const GeoFencingDetailList = () => {
               <CustomFormLabel>Details</CustomFormLabel>
               <CustomTextField
                 id="remarks"
-                value={geoFenceData?.remarks || ''}
+                value={overPopulateData?.remarks || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  dispatch(UpdateSelectedGeoFencingAlarm({ remarks: e.target.value }));
+                  dispatch(UpdateSelectedOverPopulatingAlarm({ remarks: e.target.value }));
                 }}
                 variant="outlined"
                 fullWidth
@@ -177,17 +177,22 @@ const GeoFencingDetailList = () => {
                 buildings={buildings}
                 floors={floors}
                 floorplans={floorplans}
-                value={geoFenceData?.floorplanId ?? ''} // or wherever you store floorplanId
+                value={overPopulateData?.floorplanId ?? ''} // or wherever you store floorplanId
                 onChange={(fpId) => {
-                  dispatch(UpdateSelectedGeoFencingAlarm({ floorplanId: fpId, floorId: findFloorId(fpId) }));
+                  dispatch(
+                    UpdateSelectedOverPopulatingAlarm({
+                      floorplanId: fpId,
+                      floorId: findFloorId(fpId),
+                    }),
+                  );
                 }}
               />
             </Grid>
-            {geoFenceData?.floorplanId && (
+            {overPopulateData?.floorplanId && (
               <Grid size={12}>
                 <Box display="flex" alignItems="center">
                   <CustomFormLabel>Masked Area (Optional)</CustomFormLabel>
-                  <Tooltip title="Use Area for GeoFence">
+                  <Tooltip title="Use Area for OverPopulating">
                     <IconButton size="small" sx={{ color: 'text.secondary', p: 0.5 }}>
                       <Typography
                         variant="body2"
@@ -212,7 +217,7 @@ const GeoFencingDetailList = () => {
                 <CustomSelect
                   id="areaShape"
                   value={
-                    filteredMaskedAreas.find((ma) => ma.areaShape === geoFenceData?.areaShape)
+                    filteredMaskedAreas.find((ma) => ma.areaShape === overPopulateData?.areaShape)
                       ?.id || ''
                   }
                   onChange={(e: React.ChangeEvent<{ value: unknown }>) => {
@@ -221,9 +226,9 @@ const GeoFencingDetailList = () => {
 
                     if (selectedArea) {
                       dispatch(
-                        UpdateSelectedGeoFencingAlarm({
-                          areaShape: selectedArea.areaShape, // ✅ set geofence's areaShape
-                          nodes: selectedArea.nodes, // ✅ set geofence's nodes
+                        UpdateSelectedOverPopulatingAlarm({
+                          areaShape: selectedArea.areaShape, // ✅ set overpopulate's areaShape
+                          nodes: selectedArea.nodes, // ✅ set overpopulate's nodes
                         }),
                       );
                     }
@@ -241,7 +246,7 @@ const GeoFencingDetailList = () => {
                   ))}
                 </CustomSelect>
 
-                {geoFenceData?.areaShape === '' && (
+                {overPopulateData?.areaShape === '' && (
                   <Box mt={2} textAlign="center">
                     <Typography variant="body2" color="text.secondary" gutterBottom>
                       ----- OR -----
@@ -250,8 +255,9 @@ const GeoFencingDetailList = () => {
                       variant="outlined"
                       color="primary"
                       onClick={() => {
-                        console.log("geoFenceData: ", geoFenceData.id);
-                        dispatch(DrawGeoFence(geoFenceData.id))}}
+                        console.log('overPopulateData: ', overPopulateData.id);
+                        dispatch(DrawOverPopulating(overPopulateData.id));
+                      }}
                     >
                       Create New Area
                     </Button>
@@ -267,10 +273,10 @@ const GeoFencingDetailList = () => {
               <input
                 type="color"
                 id="color"
-                value={geoFenceData?.color || '#000000'} // Default to black if no color is set
+                value={overPopulateData?.color || '#000000'} // Default to black if no color is set
                 onChange={(e) => {
                   const hexColor = e.target.value; // Get the selected color in hex format
-                  dispatch(UpdateSelectedGeoFencingAlarm({ color: hexColor })); // Update Redux state
+                  dispatch(UpdateSelectedOverPopulatingAlarm({ color: hexColor })); // Update Redux state
                   //   setFormData((prev) => ({ ...prev, color: hexColor })); // Update formData
                   // console.log(hexColor);
                 }}
@@ -281,6 +287,24 @@ const GeoFencingDetailList = () => {
                   borderRadius: '4px',
                   padding: '5px',
                   boxSizing: 'border-box',
+                }}
+              />
+            </Grid>
+            <Grid size={12}>
+              <CustomFormLabel>Area Max Capacity</CustomFormLabel>
+              <CustomTextField
+                id="maxCapacity"
+                value={overPopulateData?.maxCapacity || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  const value = e.target.value;
+                  const parsedValue = value.replace(/\D/g, ''); // Remove non-numeric characters
+                  dispatch(UpdateSelectedOverPopulatingAlarm({ maxCapacity: Number(parsedValue) }));
+                }}
+                variant="outlined"
+                fullWidth
+                required
+                inputProps={{
+                  inputMode: 'numeric',
                 }}
               />
             </Grid>
@@ -310,4 +334,4 @@ const GeoFencingDetailList = () => {
   );
 };
 
-export default GeoFencingDetailList;
+export default OverPopulatingDetailList;
