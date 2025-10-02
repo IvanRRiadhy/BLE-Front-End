@@ -5,7 +5,11 @@ import { Box, Switch, FormControlLabel, FormLabel, Divider, Typography } from '@
 import ZoomControls from 'src/components/shared/ZoomControls';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import { fetchStayOnAreaAlarms, fetchStayOnAreaAlarmsAll, StayOnAreaAlarmType } from 'src/store/apps/alarmsetting/stayonarea';
+import {
+  fetchStayOnAreaAlarms,
+  fetchStayOnAreaAlarmsAll,
+  StayOnAreaAlarmType,
+} from 'src/store/apps/alarmsetting/stayonarea';
 import EditStayOnAreaRenderer from './EditStayOnAreaRenderer';
 import MouseDoubleClickIcon from 'src/assets/images/svgs/mouse-double-click-icon.svg';
 import MouseLeftClickIcon from 'src/assets/images/svgs/mouse-left-click-icon.svg';
@@ -20,10 +24,14 @@ const EditStayOnAreaFloorView = () => {
   const stayOnAreaData = useSelector(
     (state: RootState) => state.StayOnAreaReducer.selectedStayOnAreaAlarm,
   );
-  const otherStayOnArea = useSelector((state: RootState) => state.StayOnAreaReducer.stayOnAreaAlarms);
+  const otherStayOnArea = useSelector((state: RootState) =>
+    state.StayOnAreaReducer.stayOnAreaAlarms.filter((alarm) => alarm.id !== stayOnAreaData?.id),
+  );
   const activeFloorPlan = floorplans.find((fp) => fp.id === stayOnAreaData?.floorplanId);
   const filteredArea = maskedAreas.filter((area) => area.floorplanId === activeFloorPlan?.id);
-  const drawStayOnArea = useSelector((state: RootState) => state.StayOnAreaReducer.drawingStayOnArea);
+  const drawStayOnArea = useSelector(
+    (state: RootState) => state.StayOnAreaReducer.drawingStayOnArea,
+  );
   const [showArea, setShowArea] = useState(true);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -77,7 +85,13 @@ const EditStayOnAreaFloorView = () => {
   useEffect(() => {
     dispatch(fetchFloorplan());
     dispatch(fetchMaskedAreas());
-    dispatch(fetchStayOnAreaAlarms({...defaultStayOnAreaFilter,Length: 0, filters: { FloorplanId: activeFloorPlan?.id }}));
+    dispatch(
+      fetchStayOnAreaAlarms({
+        ...defaultStayOnAreaFilter,
+        Length: 0,
+        filters: { FloorplanId: activeFloorPlan?.id },
+      }),
+    );
   }, [dispatch]);
 
   const calculateImageDimensions = (

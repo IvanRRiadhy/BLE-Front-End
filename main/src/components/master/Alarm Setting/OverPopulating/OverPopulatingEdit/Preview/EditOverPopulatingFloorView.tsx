@@ -5,7 +5,11 @@ import { Box, Switch, FormControlLabel, FormLabel, Divider, Typography } from '@
 import ZoomControls from 'src/components/shared/ZoomControls';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import { fetchOverPopulatingAlarms, fetchOverPopulatingAlarmsAll, OverPopulatingAlarmType } from 'src/store/apps/alarmsetting/overpopulating';
+import {
+  fetchOverPopulatingAlarms,
+  fetchOverPopulatingAlarmsAll,
+  OverPopulatingAlarmType,
+} from 'src/store/apps/alarmsetting/overpopulating';
 import EditOverPopulatingRenderer from './EditOverPopulatingRenderer';
 import MouseDoubleClickIcon from 'src/assets/images/svgs/mouse-double-click-icon.svg';
 import MouseLeftClickIcon from 'src/assets/images/svgs/mouse-left-click-icon.svg';
@@ -20,10 +24,16 @@ const EditOverPopulatingFloorView = () => {
   const overPopulatingData = useSelector(
     (state: RootState) => state.OverPopulatingReducer.selectedOverPopulatingAlarm,
   );
-  const otherOverPopulating = useSelector((state: RootState) => state.OverPopulatingReducer.overPopulatingAlarms);
+  const otherOverPopulating = useSelector((state: RootState) =>
+    state.OverPopulatingReducer.overPopulatingAlarms.filter(
+      (alarm) => alarm.id !== overPopulatingData?.id,
+    ),
+  );
   const activeFloorPlan = floorplans.find((fp) => fp.id === overPopulatingData?.floorplanId);
   const filteredArea = maskedAreas.filter((area) => area.floorplanId === activeFloorPlan?.id);
-  const drawOverPopulating = useSelector((state: RootState) => state.OverPopulatingReducer.drawingOverPopulating);
+  const drawOverPopulating = useSelector(
+    (state: RootState) => state.OverPopulatingReducer.drawingOverPopulating,
+  );
   const [showArea, setShowArea] = useState(true);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -77,7 +87,13 @@ const EditOverPopulatingFloorView = () => {
   useEffect(() => {
     dispatch(fetchFloorplan());
     dispatch(fetchMaskedAreas());
-    dispatch(fetchOverPopulatingAlarms({...defaultOverPopulatingFilter,Length: 0, filters: { FloorplanId: activeFloorPlan?.id }}));
+    dispatch(
+      fetchOverPopulatingAlarms({
+        ...defaultOverPopulatingFilter,
+        Length: 0,
+        filters: { FloorplanId: activeFloorPlan?.id },
+      }),
+    );
   }, [dispatch]);
 
   const calculateImageDimensions = (

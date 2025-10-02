@@ -5,7 +5,11 @@ import { Box, Switch, FormControlLabel, FormLabel, Divider, Typography } from '@
 import ZoomControls from 'src/components/shared/ZoomControls';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import { fetchGeoFencingAlarms, fetchGeoFencingAlarmsAll, GeoFencingAlarmType } from 'src/store/apps/alarmsetting/geofencing';
+import {
+  fetchGeoFencingAlarms,
+  fetchGeoFencingAlarmsAll,
+  GeoFencingAlarmType,
+} from 'src/store/apps/alarmsetting/geofencing';
 import EditGeoFenceRenderer from './EditGeoFenceRenderer';
 import MouseDoubleClickIcon from 'src/assets/images/svgs/mouse-double-click-icon.svg';
 import MouseLeftClickIcon from 'src/assets/images/svgs/mouse-left-click-icon.svg';
@@ -20,7 +24,9 @@ const EditGeoFenceFloorView = () => {
   const geoFenceData = useSelector(
     (state: RootState) => state.GeoFencingReducer.selectedGeoFencingAlarm,
   );
-  const otherGeoFence = useSelector((state: RootState) => state.GeoFencingReducer.geoFencingAlarms);
+  const otherGeoFence = useSelector((state: RootState) =>
+    state.GeoFencingReducer.geoFencingAlarms.filter((alarm) => alarm.id !== geoFenceData?.id),
+  );
   const activeFloorPlan = floorplans.find((fp) => fp.id === geoFenceData?.floorplanId);
   const filteredArea = maskedAreas.filter((area) => area.floorplanId === activeFloorPlan?.id);
   const drawGeoFence = useSelector((state: RootState) => state.GeoFencingReducer.drawingGeoFence);
@@ -77,7 +83,13 @@ const EditGeoFenceFloorView = () => {
   useEffect(() => {
     dispatch(fetchFloorplan());
     dispatch(fetchMaskedAreas());
-    dispatch(fetchGeoFencingAlarms({...defaultGeoFencingFilter,Length: 0, filters: { FloorplanId: activeFloorPlan?.id }}));
+    dispatch(
+      fetchGeoFencingAlarms({
+        ...defaultGeoFencingFilter,
+        Length: 0,
+        filters: { FloorplanId: activeFloorPlan?.id },
+      }),
+    );
   }, [dispatch]);
 
   const calculateImageDimensions = (
