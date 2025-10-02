@@ -3,28 +3,28 @@ import PageContainer from 'src/components/container/PageContainer';
 import AppCard from 'src/components/shared/AppCard';
 import { Box } from '@mui/material';
 import { RootState, useSelector } from 'src/store/Store';
-import EditGeoFenceFloorView from 'src/components/master/Alarm Setting/OverPopulating/OverPopulatingEdit/Preview/EditOverPopulatingFloorView';
+import EditOverPopulatingFloorView from 'src/components/master/Alarm Setting/OverPopulating/OverPopulatingEdit/Preview/EditOverPopulatingFloorView';
 import OverPopulatingSidebar from 'src/components/master/Alarm Setting/OverPopulating/OverPopulatingEdit/OverPopulatingSidebar';
 
 const OverPopulatingEdit = () => {
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(false);
-  const selectedGeoFence = useSelector(
+  const selectedOverPopulating = useSelector(
     (state: RootState) => state.OverPopulatingReducer.selectedOverPopulatingAlarm,
   );
 //   useEffect(() => {
-//     if (selectedGeoFence) {
+//     if (selectedOverPopulating) {
 //       setLoading(false);
 //     } else {
 //       setLoading(true);
 //     }
-//   }, [selectedGeoFence]);
-//   if (!selectedGeoFence && !loading) {
+//   }, [selectedOverPopulating]);
+//   if (!selectedOverPopulating && !loading) {
 //     window.location.href = '/master/alarmsetting/geofencing';
 //   }
   if (loading) {
     return (
-      <PageContainer title="Floorplan Device" description="this is floorplan device page">
+      <PageContainer title="OverPopulating" description="this is OverPopulating Edit page">
         <AppCard>
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
             Loading...
@@ -35,8 +35,8 @@ const OverPopulatingEdit = () => {
   }
 
     return (
-      <PageContainer title="Floorplan Device" description="this is floorplan device page">
-        {/* <Breadcrumb title="Floorplan Device Edit" subtitle="See the floorplan device" /> */}
+      <PageContainer title="OverPopulating" description="this is OverPopulating Edit page">
+        {/* <Breadcrumb title="OverPopulating Edit" subtitle="See the OverPopulating Edit" /> */}
         <AppCard>
           <Box
             display="flex"
@@ -52,7 +52,7 @@ const OverPopulatingEdit = () => {
           </Box>
   
           <Box flexGrow={1}>
-            <EditGeoFenceFloorView />
+            <EditOverPopulatingFloorView />
           </Box>
   
         </AppCard>

@@ -10,7 +10,7 @@ export const AddOverPopulating = () => {
     const dispatch: AppDispatch = useDispatch();
     const navigate = useNavigate();
     const isLoading = useSelector((state: any) => state.OverPopulatingReducer.isLoading);
-      const handleAddGeoFence = () => {
+      const handleAddOverPopulating = () => {
     dispatch(CreateNewOverPopulatingAlarm());
     navigate('/alarmsetting/overpopulating/edit');
   }
@@ -30,7 +30,7 @@ export const AddOverPopulating = () => {
               variant="contained"
               color="primary"
               sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
-              onClick={handleAddGeoFence}
+              onClick={handleAddOverPopulating}
             >
               <IconPlus size={20} />
             </Button>

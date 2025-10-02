@@ -52,6 +52,7 @@ import CardGroupReducer from './apps/crud/cardGroup';
 import AlarmSettingReducer from './apps/alarmsetting/alarmSettings';
 import GeoFencingReducer from './apps/alarmsetting/geofencing';
 import OverPopulatingReducer from './apps/alarmsetting/overpopulating';
+import StayOnAreaReducer from './apps/alarmsetting/stayonarea';
 import SessionReducer from './apps/session';
 import { combineReducers } from 'redux';
 import {
@@ -112,6 +113,7 @@ const rootReducer = combineReducers({
   AlarmSettingReducer: AlarmSettingReducer,
   GeoFencingReducer: GeoFencingReducer,
   OverPopulatingReducer: OverPopulatingReducer,
+  StayOnAreaReducer: StayOnAreaReducer,
 });
 
 const persistConfig = {

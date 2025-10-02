@@ -3,28 +3,28 @@ import PageContainer from 'src/components/container/PageContainer';
 import AppCard from 'src/components/shared/AppCard';
 import { Box } from '@mui/material';
 import { RootState, useSelector } from 'src/store/Store';
-import EditGeoFenceFloorView from 'src/components/master/Alarm Setting/Geofencing/GeoFencingEdit/Preview/EditGeoFenceFloorView';
-import GeoFencingSidebar from 'src/components/master/Alarm Setting/Geofencing/GeoFencingEdit/GeoFencingSidebar';
+import EditStayOnAreaFloorView from 'src/components/master/Alarm Setting/StayOnArea/StayOnAreaEdit/Preview/EditStayOnAreaFloorView';
+import StayOnAreaSidebar from 'src/components/master/Alarm Setting/StayOnArea/StayOnAreaEdit/StayOnAreaSidebar';
 
-const GeoFencingEdit = () => {
+const StayOnAreaEdit = () => {
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(false);
-  const selectedGeoFence = useSelector(
-    (state: RootState) => state.GeoFencingReducer.selectedGeoFencingAlarm,
+  const selectedStayOnArea = useSelector(
+    (state: RootState) => state.StayOnAreaReducer.selectedStayOnAreaAlarm,
   );
 //   useEffect(() => {
-//     if (selectedGeoFence) {
+//     if (selectedStayOnArea) {
 //       setLoading(false);
 //     } else {
 //       setLoading(true);
 //     }
-//   }, [selectedGeoFence]);
-//   if (!selectedGeoFence && !loading) {
+//   }, [selectedStayOnArea]);
+//   if (!selectedStayOnArea && !loading) {
 //     window.location.href = '/master/alarmsetting/geofencing';
 //   }
   if (loading) {
     return (
-      <PageContainer title="GeoFence" description="this is GeoFence Edit page">
+      <PageContainer title="Stay On Area" description="this is stay on area Edit page">
         <AppCard>
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
             Loading...
@@ -35,8 +35,8 @@ const GeoFencingEdit = () => {
   }
 
     return (
-      <PageContainer title="GeoFence" description="this is GeoFence Edit page">
-        {/* <Breadcrumb title="GeoFence Edit" subtitle="See the GeoFence Edit" /> */}
+      <PageContainer title="Stay On Area" description="this is Stay On Area Edit page">
+        {/* <Breadcrumb title="Stay On Area Edit" subtitle="See the stay on area edit" /> */}
         <AppCard>
           <Box
             display="flex"
@@ -45,14 +45,14 @@ const GeoFencingEdit = () => {
             maxHeight={715}
             sx={{ border: '1px solid', borderColor: 'divider' }}
           >
-            <GeoFencingSidebar
+            <StayOnAreaSidebar
               isEditingSidebarOpen={isMobileSidebarOpen}
               onEditingSidebarClose={() => setMobileSidebarOpen(false)}
             />
           </Box>
   
           <Box flexGrow={1}>
-            <EditGeoFenceFloorView />
+            <EditStayOnAreaFloorView />
           </Box>
   
         </AppCard>
@@ -60,4 +60,4 @@ const GeoFencingEdit = () => {
     );
 };
 
-export default GeoFencingEdit;
+export default StayOnAreaEdit;

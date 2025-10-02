@@ -32,6 +32,9 @@ const useMenuItems = (alarmSettings: AlarmSettingType[]) => {
   const isOverPopulatingActive = alarmSettings.some(
     (a: any) => a.alarmCategory.toLowerCase() === "overpopulating" && a.isEnabled
   );
+  const isStayOnAreaActive = alarmSettings.some(
+    (a: any) => a.alarmCategory.toLowerCase() === "stayonarea" && a.isEnabled
+  )
   const Menuitems = [
   {
     id: uniqueId(),
@@ -273,6 +276,16 @@ const useMenuItems = (alarmSettings: AlarmSettingType[]) => {
                 title: "OverPopulating Alarm",
                 icon: IconBellExclamation,
                 href: "/alarmsetting/overpopulating/",
+              },
+            ]
+          : []),
+                ...(isStayOnAreaActive
+          ? [
+              {
+                id: uniqueId(),
+                title: "Stay On Area Alarm",
+                icon: IconBellExclamation,
+                href: "/alarmsetting/stayonarea/",
               },
             ]
           : []),

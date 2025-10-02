@@ -43,6 +43,12 @@ const OverPopulating = Loadable(
 );
 const OverPopulatingEdit = Loadable(
   lazy(() => import('../views/master/alarmSetting/OverPopulating/OverPopulatingEdit')),
+);
+const StayOnArea = Loadable(
+  lazy(() => import('../views/master/alarmSetting/StayOnArea/StayOnArea')),
+);
+const StayOnAreaEdit = Loadable(
+  lazy(() => import('../views/master/alarmSetting/StayOnArea/StayOnAreaEdit')),
 )
 
 /* ****CRUD**** */
@@ -297,6 +303,8 @@ const Router = [
       { path: '/alarmsetting/geofencing/edit', exact: true, element: <GeoFencingEdit /> },
       { path: '/alarmsetting/overpopulating', exact: true, element: <OverPopulating /> },
       { path: '/alarmsetting/overpopulating/edit', exact: true, element: <OverPopulatingEdit /> },
+      { path: '/alarmsetting/stayonarea', exact: true, element: <StayOnArea /> },
+      { path: '/alarmsetting/stayonarea/edit', exact: true, element: <StayOnAreaEdit /> },
 
       //Dashboard Evacuation
       { path: '/dashboards/evacuation', exact: true, element: <EvacuationDashboard /> },

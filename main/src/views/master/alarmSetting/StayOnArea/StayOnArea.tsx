@@ -15,8 +15,8 @@ import AppCard from 'src/components/shared/AppCard';
 import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
-import OverPopulatingList from 'src/components/master/Alarm Setting/OverPopulating/overPopulatingList';
-import { AddOverPopulating } from 'src/components/master/Alarm Setting/OverPopulating/AddOverpopulating';
+import StayOnAreaList from 'src/components/master/Alarm Setting/StayOnArea/StayOnAreaList';
+import { AddStayOnArea } from 'src/components/master/Alarm Setting/StayOnArea/AddStayOnArea';
 interface cardType {
   icon?: string;
   title: string;
@@ -26,28 +26,28 @@ interface cardType {
 
 const drawerWidth = 320;
 
-const FloorplanDevice = () => {
+const StayOnArea = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const overPopulatingCount = useSelector(
-    (state: RootState) => state.OverPopulatingReducer.overPopulatingAlarmActiveCount,
+  const stayOnAreaCount = useSelector(
+    (state: RootState) => state.StayOnAreaReducer.stayOnAreaAlarmActiveCount,
   );
-  const hasLoaded = useSelector((state: RootState) => state.OverPopulatingReducer.hasLoaded);
+  const hasLoaded = useSelector((state: RootState) => state.StayOnAreaReducer.hasLoaded);
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
-      title: 'Total Active OverPopulating Alarm',
-      subtitle: overPopulatingCount.toString(),
+      title: 'Total Active StayOnArea Alarm',
+      subtitle: stayOnAreaCount.toString(),
       bgcolor: 'primary',
     },
   ];
   return (
     <PageContainer
-      title="OverPopulating Alarm"
-      description="This is the OverPopulating Alarm CRUD Page"
+      title="Stay On Area Alarm"
+      description="This is the Stay On Area Alarm CRUD Page"
     >
-      <Breadcrumb title="OverPopulating Alarm Table" />
+      <Breadcrumb title="Stay On Area Alarm Table" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => {
           return (
@@ -97,10 +97,10 @@ const FloorplanDevice = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="OverPopulating Alarm List" codeModel={[
-            <AddOverPopulating key = "add" />
+          <ParentCard title="Stay On Area Alarm List" codeModel={[
+            <AddStayOnArea key = "add" />
           ]}>
-            <OverPopulatingList />
+            <StayOnAreaList />
           </ParentCard>
         </Drawer>
       </AppCard>
@@ -108,4 +108,4 @@ const FloorplanDevice = () => {
   );
 };
 
-export default FloorplanDevice;
+export default StayOnArea;
