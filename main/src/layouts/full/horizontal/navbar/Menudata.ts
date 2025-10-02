@@ -34,6 +34,9 @@ const useMenuItems = (alarmSettings: AlarmSettingType[]) => {
   );
   const isStayOnAreaActive = alarmSettings.some(
     (a: any) => a.alarmCategory.toLowerCase() === "stayonarea" && a.isEnabled
+  );
+  const isBoundaryActive = alarmSettings.some(
+    (a: any) => a.alarmCategory.toLowerCase() === "boundary" && a.isEnabled
   )
   const Menuitems = [
   {
@@ -286,6 +289,16 @@ const useMenuItems = (alarmSettings: AlarmSettingType[]) => {
                 title: "Stay On Area Alarm",
                 icon: IconBellExclamation,
                 href: "/alarmsetting/stayonarea/",
+              },
+            ]
+          : []),
+                          ...(isBoundaryActive
+          ? [
+              {
+                id: uniqueId(),
+                title: "Boundary Alarm",
+                icon: IconBellExclamation,
+                href: "/alarmsetting/boundary/",
               },
             ]
           : []),

@@ -9,8 +9,8 @@ import axios from "axios";
 import { defaultBoundaryFilter } from "../defaultForm";
 import { FloorplanType } from "../crud/floorplan";
 
-const API_DT_URL = "/api/Overpopulating/filter/";
-const API_URL = "/api/Overpopulating/";
+const API_DT_URL = "/api/Boundary/filter/";
+const API_URL = "/api/Boundary/";
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 type Nodes = {
@@ -21,18 +21,23 @@ type Nodes = {
     y_px: number;
   };
 
+  type BoundaryNodes = {
+    a: Nodes[];
+    b: Nodes[];
+  }
+
 export type BoundaryAlarmType = {
     id: string;
     name: string;
     remarks: string;
     areaShape: string;
+    direction: string;
     color: string;
     isActive: boolean;
     floorId: string;
     floorplanId: string;
-    maxCapacity: number;
     floorplan?: FloorplanType;
-    nodes?: Nodes[];
+    nodes?: BoundaryNodes;
 }
 
 export type GetBoundaryResponse = {
@@ -73,7 +78,7 @@ interface StateType {
         boundaryAlarmTotalCount: number;
     boundaryAlarmFilteredCount: number;
     boundaryAlarmActiveCount: number;
-    drawingGeoFence?: string; 
+    drawingBoundary?: string; 
     isEditing?: boolean;
 };
 
@@ -128,23 +133,23 @@ export const BoundaryAlarmSlice = createSlice({
                 }
             }
         },
-        DrawGeoFence: (state, action: PayloadAction<string>) => {
-            state.drawingGeoFence = action.payload;
+        DrawBoundary: (state, action: PayloadAction<string>) => {
+            state.drawingBoundary = action.payload;
         },
         SetIsEditing: (state, action: PayloadAction<boolean>) => {
             state.isEditing = action.payload;
         },
         CreateNewBoundaryAlarm: (state) => {
             state.selectedBoundaryAlarm = {
-                id: `GeoFence-${new Date().getTime()}`,
+                id: `Boundary-${new Date().getTime()}`,
                 name: '',
                 remarks: '',
                 areaShape: '',
-                color: '#70e3fdff',
+                direction: '0',
+                color: '#45fc4eff',
                 isActive: true,
                 floorplanId: '',
                 floorId: '',
-                maxCapacity: 0,
             };
         }   
     },
@@ -176,7 +181,7 @@ export const {
     SetSelectedBoundaryAlarm,
     UpdateSelectedBoundaryAlarm,
     SaveSelectedBoundaryAlarm,
-    DrawGeoFence,
+    DrawBoundary,
     SetIsEditing,
     CreateNewBoundaryAlarm
 } = BoundaryAlarmSlice.actions;
@@ -185,14 +190,14 @@ export const fetchBoundaryAlarmsAll = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
             const normalized: BoundaryAlarmType[] = (response.data.collection.data || []).map((item: any) => {
-      let nodes: Nodes[] | undefined = undefined;
+      let nodes: BoundaryNodes  = {a: [], b: []};
       try {
-        if (item.areaShape) {
-          const parsed = JSON.parse(item.areaShape);
-          if (Array.isArray(parsed)) {
-            nodes = parsed;
-          }
-        }
+  if (item.areaShape) {
+    const parsed = JSON.parse(item.areaShape);
+    if (parsed && parsed.a && parsed.b) {
+      nodes = parsed as BoundaryNodes;
+    }
+  }
       } catch (err) {
         console.error("Invalid areaShape JSON:", item.areaShape, err);
       }

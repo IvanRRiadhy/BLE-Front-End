@@ -672,11 +672,11 @@ export const defaultBoundaryForm: BoundaryAlarmType = {
   name: '',
   remarks: '',
   areaShape: '',
-  color: '#70e3fdff',
+  direction: '0',
+  color: '#45fc4eff',
   isActive: true,
   floorplanId: '',
   floorId: '',
-  maxCapacity: 0,
 };
 
 export const defaultBoundaryFilter: BoundaryFilter = {

@@ -6,33 +6,31 @@ import ZoomControls from 'src/components/shared/ZoomControls';
 import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import {
-  fetchOverPopulatingAlarms,
-  fetchOverPopulatingAlarmsAll,
-  OverPopulatingAlarmType,
-} from 'src/store/apps/alarmsetting/overpopulating';
-import EditOverPopulatingRenderer from './EditOverPopulatingRenderer';
+  fetchBoundaryAlarms,
+  fetchBoundaryAlarmsAll,
+  BoundaryAlarmType,
+} from 'src/store/apps/alarmsetting/boundary';
+import EditBoundaryRenderer from './EditBoundaryRenderer';
 import MouseDoubleClickIcon from 'src/assets/images/svgs/mouse-double-click-icon.svg';
 import MouseLeftClickIcon from 'src/assets/images/svgs/mouse-left-click-icon.svg';
 import MouseRightClickIcon from 'src/assets/images/svgs/mouse-right-click-icon.svg';
 import ShiftButtonIcon from 'src/assets/images/svgs/shift-button-icon.svg';
-import { defaultOverPopulatingFilter } from 'src/store/apps/defaultForm';
+import { defaultBoundaryFilter } from 'src/store/apps/defaultForm';
 
-const EditOverPopulatingFloorView = () => {
+const EditBoundaryFloorView = () => {
   const dispatch: AppDispatch = useDispatch();
   const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
   const maskedAreas = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
-  const overPopulatingData = useSelector(
-    (state: RootState) => state.OverPopulatingReducer.selectedOverPopulatingAlarm,
+  const boundaryData = useSelector(
+    (state: RootState) => state.BoundaryReducer.selectedBoundaryAlarm,
   );
-  const otherOverPopulating = useSelector((state: RootState) =>
-    state.OverPopulatingReducer.overPopulatingAlarms.filter(
-      (alarm: OverPopulatingAlarmType) => alarm.id !== overPopulatingData?.id,
-    ),
+  const otherBoundary = useSelector((state: RootState) =>
+    state.BoundaryReducer.boundaryAlarms.filter((alarm: BoundaryAlarmType) => alarm.id !== boundaryData?.id),
   );
-  const activeFloorPlan = floorplans.find((fp: FloorplanType) => fp.id === overPopulatingData?.floorplanId);
+  const activeFloorPlan = floorplans.find((fp: FloorplanType) => fp.id === boundaryData?.floorplanId);
   const filteredArea = maskedAreas.filter((area: MaskedAreaType) => area.floorplanId === activeFloorPlan?.id);
-  const drawOverPopulating = useSelector(
-    (state: RootState) => state.OverPopulatingReducer.drawingOverPopulating,
+  const drawBoundary = useSelector(
+    (state: RootState) => state.BoundaryReducer.drawingBoundary,
   );
   const [showArea, setShowArea] = useState(true);
 
@@ -88,8 +86,8 @@ const EditOverPopulatingFloorView = () => {
     dispatch(fetchFloorplan());
     dispatch(fetchMaskedAreas());
     dispatch(
-      fetchOverPopulatingAlarms({
-        ...defaultOverPopulatingFilter,
+      fetchBoundaryAlarms({
+        ...defaultBoundaryFilter,
         Length: 0,
         filters: { FloorplanId: activeFloorPlan?.id },
       }),
@@ -266,7 +264,7 @@ const EditOverPopulatingFloorView = () => {
           fontWeight: 500,
         }}
       >
-        {drawOverPopulating ? (
+        {drawBoundary ? (
           <>
             <Box mt={1} display="flex" alignItems="center" gap={1}>
               <Box
@@ -441,7 +439,7 @@ const EditOverPopulatingFloorView = () => {
             {/* Render the image */}
             {image && imgSize && containerRef.current && (
               <>
-                <EditOverPopulatingRenderer
+                <EditBoundaryRenderer
                   {...calculateImageDimensions(
                     containerRef.current.clientWidth,
                     containerRef.current.clientHeight,
@@ -452,8 +450,8 @@ const EditOverPopulatingFloorView = () => {
                   scale={activeFloorPlan?.meterPerPx || 1}
                   setIsDragging={setIsDragging}
                   setCursor={setCursor}
-                  activeOverPopulating={overPopulatingData as OverPopulatingAlarmType}
-                  otherOverPopulatings={otherOverPopulating}
+                  activeBoundary={boundaryData as BoundaryAlarmType}
+                  otherBoundarys={otherBoundary}
                   areas={filteredArea}
                   showAreas={showArea}
                 />
@@ -466,4 +464,4 @@ const EditOverPopulatingFloorView = () => {
   );
 };
 
-export default EditOverPopulatingFloorView;
+export default EditBoundaryFloorView;

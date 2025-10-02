@@ -53,6 +53,7 @@ import AlarmSettingReducer from './apps/alarmsetting/alarmSettings';
 import GeoFencingReducer from './apps/alarmsetting/geofencing';
 import OverPopulatingReducer from './apps/alarmsetting/overpopulating';
 import StayOnAreaReducer from './apps/alarmsetting/stayonarea';
+import BoundaryReducer from './apps/alarmsetting/boundary';
 import SessionReducer from './apps/session';
 import { combineReducers } from 'redux';
 import {
@@ -114,6 +115,7 @@ const rootReducer = combineReducers({
   GeoFencingReducer: GeoFencingReducer,
   OverPopulatingReducer: OverPopulatingReducer,
   StayOnAreaReducer: StayOnAreaReducer,
+  BoundaryReducer: BoundaryReducer,
 });
 
 const persistConfig = {

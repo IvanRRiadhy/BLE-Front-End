@@ -725,7 +725,7 @@ const EditStayOnAreaRenderer: React.FC<{
                     const mousePos = stage?.getPointerPosition();
                     if (isShiftPressed && mousePos) {
                       e.evt.preventDefault();
-                      handleInsertCorner(activeStayOnArea.name, mousePos.x, mousePos.y);
+                      handleInsertCorner(activeStayOnArea.name, mousePos.x * scaleX, mousePos.y *scaleY);
                     }
                   }
                 }}

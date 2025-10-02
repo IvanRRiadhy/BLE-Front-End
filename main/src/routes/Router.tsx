@@ -49,7 +49,11 @@ const StayOnArea = Loadable(
 );
 const StayOnAreaEdit = Loadable(
   lazy(() => import('../views/master/alarmSetting/StayOnArea/StayOnAreaEdit')),
-)
+);
+const Boundary = Loadable(lazy(() => import('../views/master/alarmSetting/Boundary/Boundary')));
+const BoundaryEdit = Loadable(
+  lazy(() => import('../views/master/alarmSetting/Boundary/BoundaryEdit')),
+);
 
 /* ****CRUD**** */
 const Application = Loadable(lazy(() => import('../views/master/crud/Application')));
@@ -305,6 +309,8 @@ const Router = [
       { path: '/alarmsetting/overpopulating/edit', exact: true, element: <OverPopulatingEdit /> },
       { path: '/alarmsetting/stayonarea', exact: true, element: <StayOnArea /> },
       { path: '/alarmsetting/stayonarea/edit', exact: true, element: <StayOnAreaEdit /> },
+      { path: '/alarmsetting/boundary', exact: true, element: <Boundary /> },
+      { path: '/alarmsetting/boundary/edit', exact: true, element: <BoundaryEdit /> },
 
       //Dashboard Evacuation
       { path: '/dashboards/evacuation', exact: true, element: <EvacuationDashboard /> },

@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import { Box, Switch, FormControlLabel, FormLabel, Divider, Typography } from '@mui/material';
 import ZoomControls from 'src/components/shared/ZoomControls';
-import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
+import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import {
   fetchStayOnAreaAlarms,
@@ -25,10 +25,10 @@ const EditStayOnAreaFloorView = () => {
     (state: RootState) => state.StayOnAreaReducer.selectedStayOnAreaAlarm,
   );
   const otherStayOnArea = useSelector((state: RootState) =>
-    state.StayOnAreaReducer.stayOnAreaAlarms.filter((alarm) => alarm.id !== stayOnAreaData?.id),
+    state.StayOnAreaReducer.stayOnAreaAlarms.filter((alarm: StayOnAreaAlarmType) => alarm.id !== stayOnAreaData?.id),
   );
-  const activeFloorPlan = floorplans.find((fp) => fp.id === stayOnAreaData?.floorplanId);
-  const filteredArea = maskedAreas.filter((area) => area.floorplanId === activeFloorPlan?.id);
+  const activeFloorPlan = floorplans.find((fp: FloorplanType) => fp.id === stayOnAreaData?.floorplanId);
+  const filteredArea = maskedAreas.filter((area: MaskedAreaType) => area.floorplanId === activeFloorPlan?.id);
   const drawStayOnArea = useSelector(
     (state: RootState) => state.StayOnAreaReducer.drawingStayOnArea,
   );
