@@ -272,6 +272,10 @@ const AddEditCard = ({ type, card }: formType) => {
     });
   };
 
+  useEffect(() => {
+    console.log("Form Data Changed:", formData);
+  }, [formData]);
+
   return (
     <>
       {type === 'edit' && (
@@ -350,7 +354,7 @@ const AddEditCard = ({ type, card }: formType) => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid size={{ lg: 4.5, md: 12, sm: 12 }} > 
+              <Grid size={{ lg: 4.5, md: 12, sm: 12 }}>
                 <CustomFormLabel>Card Type</CustomFormLabel>
                 <CustomSelect
                   id="cardType"
@@ -473,28 +477,33 @@ const AddEditCard = ({ type, card }: formType) => {
                 <CustomFormLabel>Card Access</CustomFormLabel>
 
                 <CustomSelect
-                  id="cardAccess"
-                  name="cardAccess"
+                  id="cardAccessIds"
+                  name="cardAccessIds"
                   value=""
                   onChange={(e: any) => {
                     const selectedId = e.target.value;
                     const selectedCA = cardAccessData.find((ca) => ca.id === selectedId);
+                    console.log('Selected Card Access:', selectedCA);
+                    console.log('Card Accesses:', formData.cardAccesses);
                     if (selectedCA) {
                       setFormData((prev) => ({
                         ...prev,
-                        cardAccess: [...(prev.cardAccess ?? []), selectedCA],
+                        cardAccessIds: [...(prev.cardAccessIds ?? []), selectedId],
+                        cardAccesses: [...(prev.cardAccesses ?? []), selectedCA],
                       }));
                     }
                   }}
                   fullWidth
                   variant="outlined"
+                  displayEmpty
                 >
                   <MenuItem value="" disabled>
                     Select a Card Access
                   </MenuItem>
                   {cardAccessData
                     .filter(
-                      (ca: CardAccessType) => !(formData.cardAccess ?? []).some((fca: any) => fca.id === ca.id),
+                      (ca: CardAccessType) =>
+                        !(formData.cardAccesses ?? []).some((fca: any) => fca.id === ca.id),
                     )
                     .map((ca) => (
                       <MenuItem key={ca.id} value={ca.id}>
@@ -517,12 +526,12 @@ const AddEditCard = ({ type, card }: formType) => {
                     bgcolor: '#fafbfc',
                   }}
                 >
-                  {(formData.cardAccess ?? []).length === 0 ? (
+                  {(formData.cardAccesses ?? []).length === 0 ? (
                     <Typography variant="body2" color="text.secondary">
                       Selected Access: None
                     </Typography>
                   ) : (
-                    (formData.cardAccess ?? []).map((ca: any) => (
+                    (formData.cardAccesses ?? []).map((ca: any) => (
                       <Box
                         key={ca.id}
                         sx={{
@@ -541,7 +550,10 @@ const AddEditCard = ({ type, card }: formType) => {
                           onClick={() =>
                             setFormData((prev) => ({
                               ...prev,
-                              cardAccess: (prev.cardAccess ?? []).filter(
+                              cardAccessIds: (prev.cardAccessIds ?? []).filter(
+                                (fca: any) => fca !== ca.id,
+                              ),
+                              cardAccesses: (prev.cardAccesses ?? []).filter(
                                 (fca: any) => fca.id !== ca.id,
                               ),
                             }))

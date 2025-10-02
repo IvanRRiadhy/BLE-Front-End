@@ -7,7 +7,7 @@ import { defaultCardFilter } from "../defaultForm";
 import { MaskedAreaType } from "./maskedArea";
 import { CardAccessType } from "./cardAccess";
 
-const API_URL = "/api/Card/v2";
+const API_URL = "/api/Card/v2/";
 const API_DT_URL = "/api/Card/filter/";
 const ASSIGN_CARD_URL = "/api/CardRecord/";
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -50,8 +50,8 @@ export type CardType = {
     isMultiMaskedArea: boolean,
     registeredMaskedAreaId: string | null,
     registeredMaskedArea?: MaskedAreaType,
-    cardAccessId: string[],
-    cardAccess?: CardAccessType[],
+    cardAccessIds: string[],
+    cardAccesses?: CardAccessType[],
     isUsed: boolean,
     lastUsed: string,
     statusCard: number,
@@ -129,7 +129,7 @@ export const CardSlice = createSlice({
     const cardData: CardType[] = action.payload.data || [];
 
     // Update list
-    state.cards = cardData;
+    // state.cards = cardData;
     console.log("Fetch cards", action.payload);
     // Update counts
     state.cardFilteredCount = action.payload.recordsFiltered || 0;
@@ -214,19 +214,27 @@ export const fetchCardDT = createAsyncThunk(
         try {
             console.log("Filter:", filter);
             const response = await axiosServices.post(API_DT_URL, filter);
-            dispatch(GetCard(response.data.collection.data || []));
-            console.log(filter);
+            const normalizedData: CardType[] = (response.data.collection.data || []).map((item: any) => {
+                const cardAccesses = item.cardAccesses || [];
+                return {
+                    ...item,
+                    cardAccessIds: cardAccesses.map((cardAccess: any) => cardAccess.id),
+                } as CardType;
+            })  
+            dispatch(GetCard(normalizedData));
+            console.log("Response from fetchCardDT:", normalizedData);
+            // console.log(filter);
             if(filter.filters.IsUsed === true){
                 console.log("UpdateActiveCardCount", response.data.collection.recordsFiltered);
                 dispatch(UpdateActiveCardCount(response.data.collection.recordsFiltered));
-                dispatch(SetActiveCardData(response.data.collection.data || []));
+                dispatch(SetActiveCardData(normalizedData));
             };
             if(filter.filters.IsUsed === false){
                 console.log("UpdateNonActiveCardCount", response.data.collection.recordsFiltered);
                 dispatch(UpdateNonActiveCardCount(response.data.collection.recordsFiltered));
-                dispatch(SetNonActiveCardData(response.data.collection.data || []));
+                dispatch(SetNonActiveCardData(normalizedData));
             };
-            console.log("Fetch cards", response.data.collection);
+            // console.log("Fetch cards", response.data.collection);
             const elapsed = Date.now() - started;
             if (elapsed < 500) await delay(500 - elapsed);
             return response.data.collection;
