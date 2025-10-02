@@ -140,7 +140,7 @@ export const StayOnAreaAlarmSlice = createSlice({
                 name: '',
                 remarks: '',
                 areaShape: '',
-                color: '#eff549ff',
+                color: '#70e3fdff',
                 isActive: true,
                 floorplanId: '',
                 floorId: '',
