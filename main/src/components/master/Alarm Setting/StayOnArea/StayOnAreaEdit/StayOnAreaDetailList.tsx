@@ -63,7 +63,7 @@ const StayOnAreaDetailList = () => {
 
   const handleCancel = () => {
     dispatch(SetSelectedStayOnAreaAlarm(null));
-    navigate('/alarmsetting/overpopulating');
+    navigate('/alarmsetting/stayonarea');
   };
 
   const handleSave = async () => {
