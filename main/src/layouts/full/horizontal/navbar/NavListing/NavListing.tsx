@@ -11,7 +11,7 @@ import { RootState } from 'src/store/Store';
 
 const NavListing = () => {
   const { pathname } = useLocation();
-  const alarmSettings = useSelector((state:RootState) => state.AlarmSettingReducer.alarmSettings);
+  const alarmSettings = useSelector((state:RootState) => state.AlarmSettingReducer.alarmSettingAll);
   const pathDirect = pathname;
   const pathWithoutLastPart = pathname.slice(0, pathname.lastIndexOf('/'));
   const customizer = useSelector((state: RootState) => state.customizer);
