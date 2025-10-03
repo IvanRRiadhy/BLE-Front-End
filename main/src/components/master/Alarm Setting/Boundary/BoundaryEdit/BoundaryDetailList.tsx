@@ -44,9 +44,7 @@ const BoundaryDetailList = () => {
     dispatch(fetchMaskedAreas());
   }, [dispatch]);
 
-  const boundary = useSelector(
-    (state: RootState) => state.BoundaryReducer.selectedBoundaryAlarm,
-  );
+  const boundary = useSelector((state: RootState) => state.BoundaryReducer.selectedBoundaryAlarm);
 
   const buildings = useSelector((state: RootState) => state.buildingReducer.buildingAll);
   const floors = useSelector((state: RootState) => state.floorReducer.floorAll);
@@ -104,7 +102,7 @@ const BoundaryDetailList = () => {
 
   const handleClose = () => {
     // setFormData({} as OrganizationType);
-    navigate('/alarmsetting/overpopulating');
+    navigate('/alarmsetting/boundary');
   };
 
   // Define required fields
@@ -234,18 +232,18 @@ const BoundaryDetailList = () => {
             <Grid size={12}>
               <CustomFormLabel>Direction</CustomFormLabel>
               <CustomSelect
-                id="direction"
-                value={boundary?.direction || '0'} // default Both Direction
-                onChange={(e: SelectChangeEvent<string>) => {
-                  const value = e.target.value;
-                  dispatch(UpdateSelectedBoundaryAlarm({ direction: value }));
+                id="boundaryType"
+                value={boundary?.boundaryType ?? 0} // default Both Direction
+                onChange={(e: SelectChangeEvent<number>) => {
+                  const value = Number(e.target.value); // convert to number
+                  dispatch(UpdateSelectedBoundaryAlarm({ boundaryType: value }));
                 }}
                 variant="outlined"
                 fullWidth
               >
-                <MenuItem value="1">A to B</MenuItem>
-                <MenuItem value="2">B to A</MenuItem>
-                <MenuItem value="0">Both Direction</MenuItem>
+                <MenuItem value={1}>A to B</MenuItem>
+                <MenuItem value={2}>B to A</MenuItem>
+                <MenuItem value={0}>Both Direction</MenuItem>
               </CustomSelect>
             </Grid>
           </Grid>

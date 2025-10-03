@@ -65,6 +65,7 @@ export interface memberType {
     headMember2: string,
     applicationId: string,
     statusEmployee: string,
+    cardId: string,
     createdBy: string,
     createdAt: string,
     updatedBy: string,

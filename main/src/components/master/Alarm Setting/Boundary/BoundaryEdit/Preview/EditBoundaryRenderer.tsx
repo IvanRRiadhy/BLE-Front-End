@@ -492,8 +492,8 @@ const EditBoundaryRenderer: React.FC<{
                     // shorten line to middle 50% so arrow is smaller and centered
                     const { sx, sy, ex, ey } = shortenToMiddle(Ax, Ay, Bx, By, 0.5);
                     const { line1, line2 } = offsetLine(sx, sy, ex, ey, 15);
-                    switch (activeBoundary.direction) {
-                      case '0': // both ways
+                    switch (activeBoundary.boundaryType) {
+                      case 0: // both ways
                         return (
                           <>
                             {/* Arrow A → B with positive offset */}
@@ -516,7 +516,7 @@ const EditBoundaryRenderer: React.FC<{
                             />
                           </>
                         );
-                      case '1': // A → B
+                      case 1: // A → B
                         return (
                           <Arrow
                             points={line2}
@@ -527,7 +527,7 @@ const EditBoundaryRenderer: React.FC<{
                             pointerWidth={20}
                           />
                         );
-                      case '2': // B → A
+                      case 2: // B → A
                         return (
                           <Arrow
                             points={[line1[2], line1[3], line1[0], line1[1]]}

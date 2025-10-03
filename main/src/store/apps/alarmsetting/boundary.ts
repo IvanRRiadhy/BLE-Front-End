@@ -31,7 +31,7 @@ export type BoundaryAlarmType = {
     name: string;
     remarks: string;
     areaShape: string;
-    direction: string;
+    boundaryType: number;
     color: string;
     isActive: boolean;
     floorId: string;
@@ -145,7 +145,7 @@ export const BoundaryAlarmSlice = createSlice({
                 name: '',
                 remarks: '',
                 areaShape: '',
-                direction: '0',
+                boundaryType: 0,
                 color: '#45fc4eff',
                 isActive: true,
                 floorplanId: '',

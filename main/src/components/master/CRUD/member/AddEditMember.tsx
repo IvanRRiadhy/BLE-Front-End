@@ -392,7 +392,7 @@ const AddEditMember = ({ type, member }: FormType) => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              {/* <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
                 <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
                 <CustomTextField
                   id="cardNumber"
@@ -403,9 +403,9 @@ const AddEditMember = ({ type, member }: FormType) => {
                   error={!!formErrors.cardNumber}
                   helperText={formErrors.cardNumber}
                 />
-              </Grid>
+              </Grid> */}
               <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
-                <CustomFormLabel htmlFor="ble-card-number">Ble Card Number</CustomFormLabel>
+                <CustomFormLabel htmlFor="ble-card-number">Card Number</CustomFormLabel>
                   <Autocomplete
                     sx={{ flex: 1 }}
                     options={filteredCard.map((card: CardType) => ({ label: card.cardNumber, id: card.id }))}
