@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import Konva from 'konva';
 import React, { useEffect, useState } from 'react';
-import { Stage, Layer, Circle, Image as KonvaImage, Line, Group } from 'react-konva';
+import { Stage, Layer, Circle, Image as KonvaImage, Line, Group, Text, Arrow } from 'react-konva';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { uniqueId } from 'lodash';
@@ -86,7 +86,7 @@ const EditBoundaryRenderer: React.FC<{
     ]);
   };
 
-  const createAreasFromLine = (p1: Nodes, p2: Nodes, d = 150): { a: Nodes[]; b: Nodes[] } => {
+  const createAreasFromLine = (p1: Nodes, p2: Nodes, d = 150): BoundaryNodes => {
     const dx = p2.x - p1.x;
     const dy = p2.y - p1.y;
     const len = Math.sqrt(dx * dx + dy * dy);
@@ -97,45 +97,47 @@ const EditBoundaryRenderer: React.FC<{
     const offsetX = ux * d;
     const offsetY = uy * d;
 
-    const areaA = [
+    // area A (left/top side)
+    const a: Nodes[] = [
       {
         id: uniqueId(),
         x: p1.x - offsetX,
         y: p1.y - offsetY,
         x_px: p1.x - offsetX,
         y_px: p1.y - offsetY,
-      },
+      }, // top-left
       {
         id: uniqueId(),
         x: p2.x - offsetX,
         y: p2.y - offsetY,
         x_px: p2.x - offsetX,
         y_px: p2.y - offsetY,
-      },
-      { id: uniqueId(), x: p2.x, y: p2.y, x_px: p2.x, y_px: p2.y },
-      { id: uniqueId(), x: p1.x, y: p1.y, x_px: p1.x, y_px: p1.y },
+      }, // top-right
+      { id: uniqueId(), x: p2.x, y: p2.y, x_px: p2.x, y_px: p2.y }, // bottom-right
+      { id: uniqueId(), x: p1.x, y: p1.y, x_px: p1.x, y_px: p1.y }, // bottom-left
     ];
 
-    const areaB = [
-      { id: uniqueId(), x: p1.x, y: p1.y, x_px: p1.x, y_px: p1.y },
-      { id: uniqueId(), x: p2.x, y: p2.y, x_px: p2.x, y_px: p2.y },
+    // area B (right/bottom side)
+    const b: Nodes[] = [
+      { id: uniqueId(), x: p1.x, y: p1.y, x_px: p1.x, y_px: p1.y }, // top-left
+      { id: uniqueId(), x: p2.x, y: p2.y, x_px: p2.x, y_px: p2.y }, // top-right
       {
         id: uniqueId(),
         x: p2.x + offsetX,
         y: p2.y + offsetY,
         x_px: p2.x + offsetX,
         y_px: p2.y + offsetY,
-      },
+      }, // bottom-right
       {
         id: uniqueId(),
         x: p1.x + offsetX,
         y: p1.y + offsetY,
         x_px: p1.x + offsetX,
         y_px: p1.y + offsetY,
-      },
+      }, // bottom-left
     ];
 
-    return { a: areaA, b: areaB };
+    return { a, b };
   };
 
   const handleCanvasClick = () => {
@@ -212,45 +214,65 @@ const EditBoundaryRenderer: React.FC<{
     setAreaDragging(false);
   };
 
-  const handleDragCorner = (
-    areaName: string,
-    areaKey: keyof BoundaryNodes, // "a" | "b"
-    cornerIndex: number,
-    x: number,
-    y: number,
-  ) => {
+  const computeOffsetNodes = (p1: Nodes, p2: Nodes, d: number, side: 'a' | 'b'): Nodes[] => {
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    const len = Math.sqrt(dx * dx + dy * dy);
+
+    const ux = -dy / len;
+    const uy = dx / len;
+
+    const offsetX = ux * d;
+    const offsetY = uy * d;
+
+    if (side === 'a') {
+      // area A (offset negative)
+      return [
+        { ...p1, x: p1.x - offsetX, y: p1.y - offsetY, x_px: p1.x - offsetX, y_px: p1.y - offsetY },
+        { ...p2, x: p2.x - offsetX, y: p2.y - offsetY, x_px: p2.x - offsetX, y_px: p2.y - offsetY },
+        { ...p2 },
+        { ...p1 },
+      ];
+    } else {
+      // area B (offset positive)
+      return [
+        { ...p1 },
+        { ...p2 },
+        { ...p2, x: p2.x + offsetX, y: p2.y + offsetY, x_px: p2.x + offsetX, y_px: p2.y + offsetY },
+        { ...p1, x: p1.x + offsetX, y: p1.y + offsetY, x_px: p1.x + offsetX, y_px: p1.y + offsetY },
+      ];
+    }
+  };
+
+  const handleDragCorner = (cornerType: 'top' | 'bottom', x: number, y: number, d = 150) => {
     if (!activeBoundary?.nodes) return;
 
-    const newNodes: BoundaryNodes = {
-      a: [...activeBoundary.nodes.a],
-      b: [...activeBoundary.nodes.b],
-    };
+    // Copy existing points
+    const p1 = { ...activeBoundary.nodes.a[2] }; // top
+    const p2 = { ...activeBoundary.nodes.a[3] }; // bottom
 
-    newNodes[areaKey][cornerIndex] = {
-      ...newNodes[areaKey][cornerIndex],
-      x: x * scaleX,
-      y: y * scaleY,
-      x_px: x,
-      y_px: y,
-    };
+    if (cornerType === 'top') {
+      p1.x = x * scaleX;
+      p1.y = y * scaleY;
+      p1.x_px = x * scaleX;
+      p1.y_px = y * scaleY;
+    } else {
+      p2.x = x * scaleX;
+      p2.y = y * scaleY;
+      p2.x_px = x * scaleX;
+      p2.y_px = y * scaleY;
+    }
+
+    // Always rebuild polygons from these 2
+    const { a, b } = createAreasFromLine(p2, p1, d);
 
     const updatedBoundary = {
       ...activeBoundary,
-      nodes: newNodes,
-      areaShape: JSON.stringify(newNodes),
+      nodes: { a, b },
+      areaShape: JSON.stringify({ a, b }),
     };
 
     dispatch(UpdateSelectedBoundaryAlarm(updatedBoundary));
-  };
-
-  const handleCornerDragEnd = (
-    areaName: string,
-    areaKey: keyof BoundaryNodes,
-    cornerIndex: number,
-    x: number,
-    y: number,
-  ) => {
-    handleDragCorner(areaName, areaKey, cornerIndex, x, y);
   };
 
   const handleDragArea = (areaName: string, dx: number, dy: number, commit = false) => {
@@ -291,6 +313,40 @@ const EditBoundaryRenderer: React.FC<{
     if (!drawingBoundary) return;
     setDrawingNodes([]);
     dispatch(DrawBoundary(''));
+  };
+
+  const getCentroid = (nodes: Nodes[]): { x: number; y: number } => {
+    const len = nodes.length;
+    const sum = nodes.reduce((acc, n) => ({ x: acc.x + n.x_px, y: acc.y + n.y_px }), {
+      x: 0,
+      y: 0,
+    });
+    return { x: sum.x / len, y: sum.y / len };
+  };
+
+  const shortenToMiddle = (x1: number, y1: number, x2: number, y2: number, portion = 0.5) => {
+    // portion=0.5 means: draw only the middle 50% of the line
+    const mx1 = x1 + (x2 - x1) * (0.5 - portion / 2);
+    const my1 = y1 + (y2 - y1) * (0.5 - portion / 2);
+    const mx2 = x1 + (x2 - x1) * (0.5 + portion / 2);
+    const my2 = y1 + (y2 - y1) * (0.5 + portion / 2);
+
+    return { sx: mx1, sy: my1, ex: mx2, ey: my2 };
+  };
+
+  const offsetLine = (x1: number, y1: number, x2: number, y2: number, offset: number) => {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const len = Math.sqrt(dx * dx + dy * dy);
+
+    // perpendicular unit vector
+    const ux = -dy / len;
+    const uy = dx / len;
+
+    return {
+      line1: [x1 + ux * offset, y1 + uy * offset, x2 + ux * offset, y2 + uy * offset],
+      line2: [x1 - ux * offset, y1 - uy * offset, x2 - ux * offset, y2 - uy * offset],
+    };
   };
 
   return (
@@ -351,7 +407,7 @@ const EditBoundaryRenderer: React.FC<{
           <>
             <Group
               draggable
-                            onMouseEnter={() => {
+              onMouseEnter={() => {
                 if (!drawingBoundary) setCursor('move');
               }}
               onMouseLeave={() => {
@@ -399,126 +455,179 @@ const EditBoundaryRenderer: React.FC<{
                 fill={activeBoundary.color}
                 opacity={0.7}
               />
+              {activeBoundary.nodes?.a && activeBoundary.nodes?.b && (
+                <>
+                  {/* Labels */}
+                  <Text
+                    text="A"
+                    fontSize={48}
+                    fontStyle="bold"
+                    fill="black"
+                    x={getCentroid(activeBoundary.nodes.a).x / scaleX}
+                    y={getCentroid(activeBoundary.nodes.a).y / scaleY}
+                    align="center"
+                    verticalAlign="middle"
+                  />
+                  <Text
+                    text="B"
+                    fontSize={48}
+                    fontStyle="bold"
+                    fill="black"
+                    x={getCentroid(activeBoundary.nodes.b).x / scaleX}
+                    y={getCentroid(activeBoundary.nodes.b).y / scaleY}
+                    align="center"
+                    verticalAlign="middle"
+                  />
+
+                  {/* Arrows */}
+                  {(() => {
+                    const centerA = getCentroid(activeBoundary.nodes.a);
+                    const centerB = getCentroid(activeBoundary.nodes.b);
+
+                    const Ax = centerA.x / scaleX;
+                    const Ay = centerA.y / scaleY;
+                    const Bx = centerB.x / scaleX;
+                    const By = centerB.y / scaleY;
+
+                    // shorten line to middle 50% so arrow is smaller and centered
+                    const { sx, sy, ex, ey } = shortenToMiddle(Ax, Ay, Bx, By, 0.5);
+                    const { line1, line2 } = offsetLine(sx, sy, ex, ey, 15);
+                    switch (activeBoundary.direction) {
+                      case '0': // both ways
+                        return (
+                          <>
+                            {/* Arrow A → B with positive offset */}
+                            <Arrow
+                              points={line1}
+                              stroke="black"
+                              fill="black"
+                              strokeWidth={6}
+                              pointerLength={20}
+                              pointerWidth={20}
+                            />
+                            {/* Arrow B → A with negative offset */}
+                            <Arrow
+                              points={[line2[2], line2[3], line2[0], line2[1]]}
+                              stroke="black"
+                              fill="black"
+                              strokeWidth={6}
+                              pointerLength={20}
+                              pointerWidth={20}
+                            />
+                          </>
+                        );
+                      case '1': // A → B
+                        return (
+                          <Arrow
+                            points={line2}
+                            stroke="black"
+                            fill="black"
+                            strokeWidth={6}
+                            pointerLength={20}
+                            pointerWidth={20}
+                          />
+                        );
+                      case '2': // B → A
+                        return (
+                          <Arrow
+                            points={line2}
+                            stroke="black"
+                            fill="black"
+                            strokeWidth={6}
+                            pointerLength={20}
+                            pointerWidth={20}
+                          />
+                        );
+                      default:
+                        return null;
+                    }
+                  })()}
+                </>
+              )}
             </Group>
 
             {!areaDragging && activeBoundary.nodes && (
               <>
-                {activeBoundary.nodes.a.map((node, index) => (
-                  <Circle
-                    key={node.id}
-                    x={node.x_px / scaleX}
-                    y={node.y_px / scaleY}
-                    radius={7}
-                    fill="red"
-                    draggable
-                    strokeWidth={2}
-                    onMouseEnter={(e) => {
-                      if (!drawingBoundary) {
-                        const shape = e.target as Konva.Circle;
-                        shape.radius(10);
-                        shape.stroke('black');
-                        shape.strokeWidth(3);
-                        setCursor('move');
-                        shape.getLayer()?.batchDraw();
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!drawingBoundary) {
-                        const shape = e.target as Konva.Circle;
-                        shape.radius(7);
-                        shape.stroke('');
-                        shape.strokeWidth(1);
-                        setCursor('grab');
-                        shape.getLayer()?.batchDraw();
-                      }
-                    }}
-                    onDragStart={() => {
-                      setIsDragging(activeBoundary.name);
-                    }}
-                    onDragMove={(e) => {
-                      handleDragCorner(
-                        activeBoundary.name,
-                        'a',
-                        index,
-                        e.target.x() * scaleX,
-                        e.target.y() * scaleY,
-                      );
-                    }}
-                    onMouseDown={() => {
-                      setIsDragging(activeBoundary.name);
-                      handleDragStart(activeBoundary.name);
-                    }}
-                    onMouseUp={handleMouseUp}
-                    onDragEnd={(e) => {
-                      handleCornerDragEnd(
-                        activeBoundary.name,
-                        'a',
-                        index,
-                        e.target.x() * scaleX,
-                        e.target.y() * scaleY,
-                      );
-                      handleDragEnd(activeBoundary.name);
-                    }}
-                  />
-                ))}
-                {activeBoundary.nodes.b.map((node, index) => (
-                  <Circle
-                    key={node.id}
-                    x={node.x_px / scaleX}
-                    y={node.y_px / scaleY}
-                    radius={7}
-                    fill="red"
-                    draggable
-                    strokeWidth={2}
-                    onMouseEnter={(e) => {
-                      if (!drawingBoundary) {
-                        const shape = e.target as Konva.Circle;
-                        shape.radius(10);
-                        shape.stroke('black');
-                        shape.strokeWidth(3);
-                        setCursor('move');
-                        shape.getLayer()?.batchDraw();
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!drawingBoundary) {
-                        const shape = e.target as Konva.Circle;
-                        shape.radius(7);
-                        shape.stroke('');
-                        shape.strokeWidth(1);
-                        setCursor('grab');
-                        shape.getLayer()?.batchDraw();
-                      }
-                    }}
-                    onDragStart={() => {
-                      setIsDragging(activeBoundary.name);
-                    }}
-                    onDragMove={(e) => {
-                      handleDragCorner(
-                        activeBoundary.name,
-                        'b',
-                        index,
-                        e.target.x() * scaleX,
-                        e.target.y() * scaleY,
-                      );
-                    }}
-                    onMouseDown={() => {
-                      setIsDragging(activeBoundary.name);
-                      handleDragStart(activeBoundary.name);
-                    }}
-                    onMouseUp={handleMouseUp}
-                    onDragEnd={(e) => {
-                      handleCornerDragEnd(
-                        activeBoundary.name,
-                        'b',
-                        index,
-                        e.target.x() * scaleX,
-                        e.target.y() * scaleY,
-                      );
-                      handleDragEnd(activeBoundary.name);
-                    }}
-                  />
-                ))}
+                <Circle
+                  key="middle-top"
+                  x={activeBoundary.nodes.a[2].x_px / scaleX}
+                  y={activeBoundary.nodes.a[2].y_px / scaleY}
+                  radius={7}
+                  fill="red"
+                  draggable
+                  strokeWidth={2}
+                  onMouseEnter={(e) => {
+                    if (!drawingBoundary) {
+                      const shape = e.target as Konva.Circle;
+                      shape.radius(10);
+                      shape.stroke('black');
+                      shape.strokeWidth(3);
+                      setCursor('move');
+                      shape.getLayer()?.batchDraw();
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!drawingBoundary) {
+                      const shape = e.target as Konva.Circle;
+                      shape.radius(7);
+                      shape.stroke('');
+                      shape.strokeWidth(1);
+                      setCursor('grab');
+                      shape.getLayer()?.batchDraw();
+                    }
+                  }}
+                  onDragStart={() => {
+                    setIsDragging(activeBoundary.name);
+                  }}
+                  onMouseDown={() => {
+                    setIsDragging(activeBoundary.name);
+                    handleDragStart(activeBoundary.name);
+                  }}
+                  onMouseUp={handleMouseUp}
+                  onDragMove={(e) => {
+                    handleDragCorner('top', e.target.x(), e.target.y());
+                  }}
+                />
+                <Circle
+                  key="middle-bottom"
+                  x={activeBoundary.nodes.a[3].x_px / scaleX}
+                  y={activeBoundary.nodes.a[3].y_px / scaleY}
+                  radius={7}
+                  fill="red"
+                  draggable
+                  strokeWidth={2}
+                  onMouseEnter={(e) => {
+                    if (!drawingBoundary) {
+                      const shape = e.target as Konva.Circle;
+                      shape.radius(10);
+                      shape.stroke('black');
+                      shape.strokeWidth(3);
+                      setCursor('move');
+                      shape.getLayer()?.batchDraw();
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!drawingBoundary) {
+                      const shape = e.target as Konva.Circle;
+                      shape.radius(7);
+                      shape.stroke('');
+                      shape.strokeWidth(1);
+                      setCursor('grab');
+                      shape.getLayer()?.batchDraw();
+                    }
+                  }}
+                  onDragStart={() => {
+                    setIsDragging(activeBoundary.name);
+                  }}
+                  onMouseDown={() => {
+                    setIsDragging(activeBoundary.name);
+                    handleDragStart(activeBoundary.name);
+                  }}
+                  onMouseUp={handleMouseUp}
+                  onDragMove={(e) => {
+                    handleDragCorner('bottom', e.target.x(), e.target.y());
+                  }}
+                />
               </>
             )}
           </>

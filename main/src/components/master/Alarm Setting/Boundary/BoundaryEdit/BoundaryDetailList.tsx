@@ -44,7 +44,7 @@ const BoundaryDetailList = () => {
     dispatch(fetchMaskedAreas());
   }, [dispatch]);
 
-  const overPopulateData = useSelector(
+  const boundary = useSelector(
     (state: RootState) => state.BoundaryReducer.selectedBoundaryAlarm,
   );
 
@@ -54,7 +54,7 @@ const BoundaryDetailList = () => {
   const maskedAreas = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
 
   const filteredMaskedAreas = maskedAreas.filter(
-    (ma: MaskedAreaType) => ma.floorplanId === overPopulateData?.floorplanId,
+    (ma: MaskedAreaType) => ma.floorplanId === boundary?.floorplanId,
   );
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,11 +67,11 @@ const BoundaryDetailList = () => {
   };
 
   const handleSave = async () => {
-    if (!overPopulateData) return;
+    if (!boundary) return;
     setIsSaving(true);
     try {
       const formData = new FormData();
-      Object.entries(overPopulateData).forEach(([key, value]) => {
+      Object.entries(boundary).forEach(([key, value]) => {
         if (typeof value === 'boolean') {
           formData.append(key, value ? '1' : '0'); // ✅ convert bool → "1"/"0"
         } else if (value !== undefined && value !== null) {
@@ -79,10 +79,10 @@ const BoundaryDetailList = () => {
         }
       });
       let result;
-      if (overPopulateData.id.startsWith('Boundary-')) {
-        result = await dispatch(addBoundaryAlarm(overPopulateData));
+      if (boundary.id.startsWith('Boundary-')) {
+        result = await dispatch(addBoundaryAlarm(boundary));
       } else {
-        result = await dispatch(editBoundaryAlarm(overPopulateData));
+        result = await dispatch(editBoundaryAlarm(boundary));
       }
       if (result && result.type && result.type.endsWith('/fulfilled')) {
         await dispatch(fetchBoundaryAlarms(defaultBoundaryFilter));
@@ -112,9 +112,9 @@ const BoundaryDetailList = () => {
 
   // Validation function
   const isFormValid = () => {
-    if (overPopulateData === null) return false;
+    if (boundary === null) return false;
     return requiredFields.every(
-      (field) => overPopulateData[field as keyof typeof overPopulateData]?.toString().trim() !== '',
+      (field) => boundary[field as keyof typeof boundary]?.toString().trim() !== '',
     );
   };
 
@@ -148,7 +148,7 @@ const BoundaryDetailList = () => {
               <CustomFormLabel>Boundary Alarm Name</CustomFormLabel>
               <CustomTextField
                 id="name"
-                value={overPopulateData?.name || ''}
+                value={boundary?.name || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   dispatch(UpdateSelectedBoundaryAlarm({ name: e.target.value }));
                 }}
@@ -161,7 +161,7 @@ const BoundaryDetailList = () => {
               <CustomFormLabel>Details</CustomFormLabel>
               <CustomTextField
                 id="remarks"
-                value={overPopulateData?.remarks || ''}
+                value={boundary?.remarks || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   dispatch(UpdateSelectedBoundaryAlarm({ remarks: e.target.value }));
                 }}
@@ -177,7 +177,7 @@ const BoundaryDetailList = () => {
                 buildings={buildings}
                 floors={floors}
                 floorplans={floorplans}
-                value={overPopulateData?.floorplanId ?? ''} // or wherever you store floorplanId
+                value={boundary?.floorplanId ?? ''} // or wherever you store floorplanId
                 onChange={(fpId) => {
                   dispatch(
                     UpdateSelectedBoundaryAlarm({
@@ -188,16 +188,16 @@ const BoundaryDetailList = () => {
                 }}
               />
             </Grid>
-            {overPopulateData?.floorplanId && (
+            {boundary?.floorplanId && (
               <Grid size={12}>
-                {overPopulateData?.areaShape === '' && (
+                {boundary?.areaShape === '' && (
                   <Box mt={2} textAlign="center">
                     <Button
                       variant="outlined"
                       color="primary"
                       onClick={() => {
-                        console.log('overPopulateData: ', overPopulateData.id);
-                        dispatch(DrawBoundary(overPopulateData.id));
+                        console.log('boundary: ', boundary.id);
+                        dispatch(DrawBoundary(boundary.id));
                       }}
                     >
                       Create New Area
@@ -214,7 +214,7 @@ const BoundaryDetailList = () => {
               <input
                 type="color"
                 id="color"
-                value={overPopulateData?.color || '#000000'} // Default to black if no color is set
+                value={boundary?.color || '#000000'} // Default to black if no color is set
                 onChange={(e) => {
                   const hexColor = e.target.value; // Get the selected color in hex format
                   dispatch(UpdateSelectedBoundaryAlarm({ color: hexColor })); // Update Redux state
@@ -235,7 +235,7 @@ const BoundaryDetailList = () => {
               <CustomFormLabel>Direction</CustomFormLabel>
               <CustomSelect
                 id="direction"
-                value={overPopulateData?.direction || '0'} // default Both Direction
+                value={boundary?.direction || '0'} // default Both Direction
                 onChange={(e: SelectChangeEvent<string>) => {
                   const value = e.target.value;
                   dispatch(UpdateSelectedBoundaryAlarm({ direction: value }));
