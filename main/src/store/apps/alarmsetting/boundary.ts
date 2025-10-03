@@ -232,17 +232,26 @@ export const fetchBoundaryAlarms = createAsyncThunk(
 
     // 🔥 normalize isActive + parse areaShape into nodes
     const normalized: BoundaryAlarmType[] = (res.data.collection.data || []).map((item: any) => {
-      let nodes: Nodes[] | undefined = undefined;
-      try {
+      let nodes: BoundaryNodes | undefined = undefined;
+        try {
+            console.log("Area Shape:", item.areaShape);
         if (item.areaShape) {
-          const parsed = JSON.parse(item.areaShape);
-          if (Array.isArray(parsed)) {
-            nodes = parsed;
-          }
+            const parsed = JSON.parse(item.areaShape);
+            console.log("Area Shape Parsed:", parsed);
+            // ✅ new format
+            if (parsed && parsed.a && parsed.b) {
+            nodes = parsed as BoundaryNodes;
+            console.log("Area Shape Nodes:", nodes);
+            }
+            // ✅ fallback: old format (flat array)
+            else if (Array.isArray(parsed)) {
+            nodes = { a: parsed, b: [] }; // wrap old array into {a, b}
+            console.log("Area Shape Nodes:", nodes);
+            }
         }
-      } catch (err) {
+        } catch (err) {
         console.error("Invalid areaShape JSON:", item.areaShape, err);
-      }
+        }
 
       return {
         ...item,
@@ -250,7 +259,7 @@ export const fetchBoundaryAlarms = createAsyncThunk(
         nodes, // ✅ add parsed nodes
       };
     });
-
+    console.log("Boundary Alarm Response:", normalized);
     dispatch(GetBoundaryAlarms(normalized));
     await ensureMinLatency(started, 500);
 

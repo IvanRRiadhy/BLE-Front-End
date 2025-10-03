@@ -530,7 +530,7 @@ const EditBoundaryRenderer: React.FC<{
                       case '2': // B → A
                         return (
                           <Arrow
-                            points={line2}
+                            points={[line1[2], line1[3], line1[0], line1[1]]}
                             stroke="black"
                             fill="black"
                             strokeWidth={6}
