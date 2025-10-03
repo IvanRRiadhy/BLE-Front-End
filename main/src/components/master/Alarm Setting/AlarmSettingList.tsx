@@ -46,7 +46,7 @@ import {
 import { useLocation, useNavigate } from 'react-router';
 
 const columns = [
-  { label: 'Alarm Type', field: 'Name', sortAble: true },
+  { label: 'Alarm Type', field: 'AlarmCategory', sortAble: true },
   { label: 'Status', field: 'IsEnabled', sortAble: true },
   { label: 'Color', field: 'AlarmColor', sortAble: false },
   { label: 'Level Priority', field: 'AlarmLevelPriority', sortAble: true },
@@ -88,8 +88,8 @@ const AlarmSettingList = () => {
     if (isDesc) {
       dispatch(
         UpdateFilter({
-          SortColumn: 'UpdatedAt',
-          SortDir: 'desc',
+          SortColumn: 'AlarmCategory',
+          SortDir: 'asc',
           Start: 0,
         }),
       );

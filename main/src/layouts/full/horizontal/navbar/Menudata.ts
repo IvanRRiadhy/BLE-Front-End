@@ -476,12 +476,12 @@ const useMenuItems = (alarmSettings: AlarmSettingType[]) => {
   //           },
     ],
   },
-  {
-    id: uniqueId(),
-    title: 'My Visit',
-    icon: IconUsers,
-    href: '/my-visit/',
-  }
+  // {
+  //   id: uniqueId(),
+  //   title: 'My Visit',
+  //   icon: IconUsers,
+  //   href: '/my-visit/',
+  // }
 ];
 return Menuitems;
 }
