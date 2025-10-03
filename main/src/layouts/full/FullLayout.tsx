@@ -61,89 +61,89 @@ const FullLayout: FC = () => {
   useEffect(() => {
     dispatch(fetchAlarmSettingsDT(defaultAlarmSettingFilter));
   }, []);
-  // useEffect(() => {
-  //   // Request notification permission
-  //   if ('Notification' in window && Notification.permission !== 'granted') {
-  //     Notification.requestPermission().then((permission) => {
-  //       if (permission === 'granted') {
-  //         console.log('[Notifications] Permission granted');
-  //       } else {
-  //         console.warn('[Notifications] Permission denied');
-  //       }
-  //     });
-  //   }
+  useEffect(() => {
+    // Request notification permission
+    if ('Notification' in window && Notification.permission !== 'granted') {
+      Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+          console.log('[Notifications] Permission granted');
+        } else {
+          console.warn('[Notifications] Permission denied');
+        }
+      });
+    }
 
-  //   // Set up session expiration handler
-  //   setSessionExpiredHandler(() => setSessionExpired(true));
-  //   const savedEvac = localStorage.getItem('evacState');
-  //   if (savedEvac) {
-  //     dispatch(hydrateEvacState(JSON.parse(savedEvac)));
-  //   }
+    // Set up session expiration handler
+    setSessionExpiredHandler(() => setSessionExpired(true));
+    const savedEvac = localStorage.getItem('evacState');
+    if (savedEvac) {
+      dispatch(hydrateEvacState(JSON.parse(savedEvac)));
+    }
 
-  //   // NTFY subscription for alarms
-  //   const topic = '192.168.1.116:6099/tracking-ntfy';
-  //   console.log(`[NTFY] Subscribing to alarm topic "${topic}"`);
-  //   const unsubscribe = startNTFYclient(
-  //     (data: any) => {
-  //       const now = Date.now();
-  //       console.log(`[NTFY] Message from alarm topic "${topic}":`, data);
-  //       const alarmData = Array.isArray(data) ? data[0] : data;
-  //       // setLatestAlarm(alarmData);
-  //       // setOpenAlarmPopup(true);
-  //       dispatch(showAlarmPopup(alarmData));
-  //       window.dispatchEvent(new CustomEvent('app:new-alarm', { detail: { alarm: alarmData } }));
-  //  // Add to bell dialogue & open it
-  //  dispatch(pushItem({
-  //    id: `${alarmData?.beaconId ?? 'unknown'}-${Date.now()}`,
-  //    alarm: alarmData,
-  //    title: 'Alarm Triggered',
-  //    message: `Beacon ${getName(alarmData?.beaconId || 'Unknown')} · ${alarmData?.maskedAreaName ?? 'Unknown'} · ${alarmData?.floorplanName ?? 'Unknown'}`,
-  //  }));
-  //  dispatch(openPanel());
+    // NTFY subscription for alarms
+    const topic = '192.168.1.116:6099/tracking-ntfy';
+    console.log(`[NTFY] Subscribing to alarm topic "${topic}"`);
+    const unsubscribe = startNTFYclient(
+      (data: any) => {
+        const now = Date.now();
+        console.log(`[NTFY] Message from alarm topic "${topic}":`, data);
+        const alarmData = Array.isArray(data) ? data[0] : data;
+        // setLatestAlarm(alarmData);
+        // setOpenAlarmPopup(true);
+        dispatch(showAlarmPopup(alarmData));
+        window.dispatchEvent(new CustomEvent('app:new-alarm', { detail: { alarm: alarmData } }));
+   // Add to bell dialogue & open it
+   dispatch(pushItem({
+     id: `${alarmData?.beaconId ?? 'unknown'}-${Date.now()}`,
+     alarm: alarmData,
+     title: 'Alarm Triggered',
+     message: `Beacon ${getName(alarmData?.beaconId || 'Unknown')} · ${alarmData?.maskedAreaName ?? 'Unknown'} · ${alarmData?.floorplanName ?? 'Unknown'}`,
+   }));
+   dispatch(openPanel());
 
-  //       // Show browser notification if window is not focused
-  //       if (
-  //         'Notification' in window &&
-  //         Notification.permission === 'granted' &&
-  //         !document.hasFocus()
-  //       ) {
-  //         const title = 'Alarm Triggered!';
-  //         const body = `Beacon ${getName(alarmData.beaconId || 'Unknown')} is in ${
-  //           alarmData.maskedAreaName || 'Unknown Area'
-  //         } on ${alarmData.floorplanName || 'Unknown Floor'}.`;
-  //         const notification = new Notification(title, {
-  //           body,
-  //           icon: '/icon.png', // Replace with actual icon path
-  //         });
-  //         notification.onclick = () => {
-  //           window.focus();
-  //           notification.close();
-  //         };
-  //       }
+        // Show browser notification if window is not focused
+        if (
+          'Notification' in window &&
+          Notification.permission === 'granted' &&
+          !document.hasFocus()
+        ) {
+          const title = 'Alarm Triggered!';
+          const body = `Beacon ${getName(alarmData.beaconId || 'Unknown')} is in ${
+            alarmData.maskedAreaName || 'Unknown Area'
+          } on ${alarmData.floorplanName || 'Unknown Floor'}.`;
+          const notification = new Notification(title, {
+            body,
+            icon: '/icon.png', // Replace with actual icon path
+          });
+          notification.onclick = () => {
+            window.focus();
+            notification.close();
+          };
+        }
 
-  //       if (now - lastDispatchRef.current > 1500) {
-  //         lastDispatchRef.current = now;
-  //         dispatch(fetchAlarmTrigger());
-  //       }
-  //     },
-  //     topic,
-  //     { baseUrl: 'http://192.168.1.116:6099' },
-  //   );
+        if (now - lastDispatchRef.current > 1500) {
+          lastDispatchRef.current = now;
+          dispatch(fetchAlarmTrigger());
+        }
+      },
+      topic,
+      { baseUrl: 'http://192.168.1.116:6099' },
+    );
 
-  //   if (!unsubscribe) {
-  //     console.error(`[NTFY] Failed to subscribe to alarm topic "${topic}"`);
-  //   } else {
-  //     unsubscriberRef.current = unsubscribe;
-  //   }
+    if (!unsubscribe) {
+      console.error(`[NTFY] Failed to subscribe to alarm topic "${topic}"`);
+    } else {
+      unsubscriberRef.current = unsubscribe;
+    }
 
-  //   return () => {
-  //     setSessionExpiredHandler(() => {});
-  //     if (unsubscriberRef.current) {
-  //       unsubscriberRef.current();
-  //       unsubscriberRef.current = null;
-  //     }
-  //   };
-  // }, [dispatch, memberList, visitorList]);
+    return () => {
+      setSessionExpiredHandler(() => {});
+      if (unsubscriberRef.current) {
+        unsubscriberRef.current();
+        unsubscriberRef.current = null;
+      }
+    };
+  }, [dispatch, memberList, visitorList]);
   
   return (
     <>
