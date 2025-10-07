@@ -1,57 +1,28 @@
 import { Box, Grid2 as Grid, Typography, useTheme } from '@mui/material';
-import React from 'react';
-import { useEffect, useRef, useState } from 'react';
-// import { useSelector } from 'react-redux';
+import React, { useEffect, useRef, useState } from 'react';
 import FloorView from 'src/components/dashboards/monitoring/FloorView';
 import VideoPlayer from 'src/components/shared/VideoPlayer';
-import { screenOrderMap, screenSettings } from 'src/store/apps/monitoring/layout';
-// import { RootState } from 'src/store/Store';
+import { screenOrderMap, ScreenSettings } from 'src/store/apps/monitoring/layout';
+
+interface LayoutItem {
+  size: { xs: number; lg?: number };
+  floorId?: number;
+  zoomable?: boolean;
+  height?: string;
+  isColumn?: boolean;
+  children?: LayoutItem[];
+}
 
 interface MonitoringGridProps {
   grid: number;
   floorIds: Record<number, string[]>;
+  screenSettings: ScreenSettings[][];
+  screenDisplay: Record<number, any[]>;
+  screenType: Record<number, number[]>;
 }
 
-const videoJsOptions = {
-  autoplay: true,
-  controls: true,
-  responsive: true,
-  fluid: true, // pastikan false
-  // width: 2300,
-  // height: 2500,
-  sources: [
-    {
-      src: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
-      type: 'application/x-mpegURL',
-    },
-  ],
-  html5: {
-    hls: {
-      overrideNative: true,
-    },
-  },
-};
-
-// type LayoutItem =
-//   | {
-//       size: { xs: number; lg?: number };
-//       floorId: number;
-//       zoomable: boolean;
-//       height?: string;
-//     }
-//   | {
-//       size: { xs: number; lg?: number };
-//       isColumn: true;
-//       children: {
-//         size: { xs: number; lg?: number };
-//         floorId: number;
-//         zoomable: boolean;
-//         height: string;
-//       }[];
-//     };
-
-// Define layout rules for each grid type
-const layoutConfig = {
+// Layout configuration
+const layoutConfig: Record<number, LayoutItem[]> = {
   [1]: [{ size: { xs: 12 }, floorId: 0, zoomable: true, height: '80vh' }],
   [2]: [
     { size: { xs: 12, lg: 6 }, floorId: 0, zoomable: true, height: '80vh' },
@@ -139,34 +110,42 @@ const layoutConfig = {
   ],
 } as const;
 
-interface MonitoringGridProps {
-  grid: number;
-  floorIds: Record<number, string[]>;
-  screenSettings: screenSettings[][];
-  screenDisplay: Record<number, string[]>;
-  screenType: Record<number, number[]>;
-}
+// VideoPlayer default options
+const videoJsOptions = {
+  autoplay: true,
+  controls: true,
+  responsive: true,
+  fluid: true,
+  sources: [
+    {
+      src: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+      type: 'application/x-mpegURL',
+    },
+  ],
+  html5: { hls: { overrideNative: true } },
+};
 
-const MonitoringGrid = React.memo(
-  ({ grid, floorIds, screenSettings, screenDisplay, screenType }: MonitoringGridProps) => {
+const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
+  ({ grid, floorIds, screenSettings, screenDisplay, screenType }) => {
     const gridRef = useRef<HTMLDivElement>(null);
     const [gridDimensions, setGridDimensions] = useState({ width: 0, height: 0 });
     const theme = useTheme();
-    // const customizer = useSelector((state: RootState) => state.customizer);
+
     useEffect(() => {
       if (gridRef.current) {
         const { clientWidth, clientHeight } = gridRef.current;
         setGridDimensions({ width: clientWidth, height: clientHeight });
       }
-    }, [grid]);
+    }, [grid, floorIds[grid]?.length]);
+
     if (!floorIds[grid] || floorIds[grid].length === 0) {
       return (
         <Grid container>
           <Grid size={{ xs: 12 }}>
-            <Typography variant="h4" fontStyle="bold" fontWeight={900} mt={0.5}>
+            <Typography variant="h4" fontWeight={900} mt={0.5}>
               Monitoring Dashboard
             </Typography>
-            <Typography variant="h6" fontStyle="bold" fontWeight={900} mt={0.5}>
+            <Typography variant="h6" fontWeight={900} mt={0.5}>
               Please select a Grid
             </Typography>
           </Grid>
@@ -174,307 +153,89 @@ const MonitoringGrid = React.memo(
       );
     }
 
-    if (!(grid in layoutConfig)) return null;
-    const layout = layoutConfig[grid as keyof typeof layoutConfig];
+    const layout = layoutConfig[grid];
+    if (!layout) return null;
 
-    // const screenOrderMap: { [grid: number]: Array<[number, number?, number?]> } = {
-    //   1: [[0]],
-    //   2: [[0], [1]],
-    //   3: [[0], [1, 0], [1, 1]],
-    //   4: [
-    //     [0, 0],
-    //     [1, 0],
-    //     [0, 1],
-    //     [1, 1],
-    //   ],
-    //   5: [
-    //     [0, 0],
-    //     [1, 0],
-    //     [0, 1, 0],
-    //     [0, 1, 1],
-    //     [1, 1],
-    //   ],
-    //   6: [
-    //     [0, 0],
-    //     [1, 0],
-    //     [1, 1],
-    //     [0, 1, 0],
-    //     [0, 1, 1],
-    //     [1, 2],
-    //   ],
-    // };
-
-    function getScreenNumber(
-      grid: number,
-      index: number,
-      childIndex?: number,
-      grandChildIndex?: number,
-    ) {
-      const order = screenOrderMap[grid] || [];
-      for (let i = 0; i < order.length; i++) {
-        const [idx, cIdx, gIdx] = order[i];
-        if (
-          index === idx &&
-          (typeof cIdx === 'undefined' || childIndex === cIdx) &&
-          (typeof gIdx === 'undefined' || grandChildIndex === gIdx)
-        ) {
-          return i + 1; // 1-based screen number
+    // Recursive render function
+    const renderLayout = (items: LayoutItem[]): JSX.Element[] =>
+      items.map((item, index) => {
+        if (item.isColumn && item.children) {
+          return (
+            <Grid key={index} size={item.size}>
+              <Grid container direction="column" spacing={1}>
+                {renderLayout(item.children)}
+              </Grid>
+            </Grid>
+          );
         }
-      }
-      return 0;
-    }
+
+        const floorId = item.floorId!;
+        const order = screenOrderMap[grid] || [];
+        const screenNum =
+          order.findIndex(([i, c, g]: [number, number?, number?]) => i === index && !c && !g) + 1 ||
+          floorId + 1;
+
+        const bgColor = screenType[grid][floorId] === 2 ? 'black' : 'white';
+
+        return (
+          <Grid
+            key={index}
+            size={item.size}
+            sx={{
+              height: item.height || 'auto',
+              overflow: 'hidden',
+              border: '2px solid black',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: bgColor,
+              '&:hover': { borderColor: 'success.dark', borderWidth: '3px' },
+            }}
+          >
+            {screenType[grid][floorId] === 1 ? (
+              <FloorView
+                activeFloorplan={floorIds[grid][screenNum - 1]}
+                zoomable={item.zoomable ?? false}
+                containerWidth={gridDimensions.width}
+                containerHeight={gridDimensions.height}
+                screenSettings={screenSettings[grid][screenNum - 1]}
+                activeMaskedArea={screenDisplay[grid][floorId]}
+                gridNumber={grid}
+                screenNumber={screenNum}
+              />
+            ) : screenType[grid][floorId] === 2 ? (
+              <VideoPlayer options={videoJsOptions} />
+            ) : (
+              <FloorView
+                activeFloorplan={floorIds[grid][screenNum - 1]}
+                zoomable={item.zoomable ?? false}
+                containerWidth={gridDimensions.width}
+                containerHeight={gridDimensions.height}
+                screenSettings={screenSettings[grid][screenNum - 1]}
+                focusBeacon={screenDisplay[grid][floorId]}
+                gridNumber={grid}
+                screenNumber={screenNum}
+              />
+            )}
+          </Grid>
+        );
+      });
 
     return (
       <Box
         mt={0}
+        ref={gridRef}
         sx={{
           flexGrow: 1,
           margin: 0,
           padding: 0,
-          // marginLeft: `calc(${customizer.SidebarWidth}px)`,
           transition: theme.transitions.create('margin-left', {
             duration: theme.transitions.duration.shortest,
           }),
         }}
       >
-        <Grid container>
-          {layout.map((item, index) => {
-            if ('isColumn' in item && item.isColumn) {
-              return (
-                <Grid key={index} size={item.size}>
-                  <Grid container direction="column">
-                    {item.children.map((child, childIndex) => {
-                      // Check if child also has children
-                      if ('children' in child && Array.isArray(child.children)) {
-                        return (
-                          <Grid key={childIndex} size={child.size}>
-                            <Grid container>
-                              {child.children.map((grandChild, grandChildIndex) => {
-                                const screenNum = getScreenNumber(
-                                  grid,
-                                  index,
-                                  childIndex,
-                                  grandChildIndex,
-                                );
-                                return (
-                                  <Grid
-                                    key={grandChildIndex}
-                                    size={grandChild.size}
-                                    ref={gridRef}
-                                    sx={{
-                                      height: grandChild.height || 'auto',
-                                      overflow: 'hidden',
-                                      border: '2.5px solid black',
-                                      transition: 'border-color 0.3s ease, border-width 0.1s ease',
-                                      display: 'flex',
-                                      justifyContent: 'center',
-                                      alignItems: 'center',
-                                      backgroundColor:
-                                        screenType[grid][
-                                          (grandChild as { floorId: number }).floorId
-                                        ] === 2
-                                          ? 'black'
-                                          : 'white',
-                                      '&:hover': {
-                                        borderColor: 'success.dark',
-                                        borderWidth: '5px',
-                                      },
-                                    }}
-                                  >
-                                    {screenType[grid][
-                                      (grandChild as { floorId: number }).floorId
-                                    ] === 1 ? (
-                                      <FloorView
-                                        activeFloorplan={floorIds[grid][screenNum - 1]}
-                                        zoomable={grandChild.zoomable}
-                                        containerWidth={gridDimensions.width} // Pass width
-                                        containerHeight={gridDimensions.height} // Pass height
-                                        screenSettings={screenSettings[grid][screenNum - 1]}
-                                        activeMaskedArea={
-                                          screenDisplay[grid][
-                                            (grandChild as { floorId: number }).floorId
-                                          ]
-                                        }
-                                        gridNumber={grid}
-                                        screenNumber={screenNum}
-                                      />
-                                    ) : screenType[grid][
-                                        (grandChild as { floorId: number }).floorId
-                                      ] === 2 ? (
-                                      <VideoPlayer options={videoJsOptions} />
-                                    ) : screenType[grid][
-                                        (grandChild as { floorId: number }).floorId
-                                      ] === 3 ? (
-                                      <FloorView
-                                        activeFloorplan={floorIds[grid][screenNum - 1]}
-                                        zoomable={(grandChild as { zoomable: boolean }).zoomable}
-                                        containerWidth={gridDimensions.width}
-                                        containerHeight={gridDimensions.height}
-                                        screenSettings={screenSettings[grid][screenNum - 1]}
-                                        // NEW: follow a specific beaconId and know which cell we are
-                                        focusBeacon={
-                                          screenDisplay[grid][
-                                            (grandChild as { floorId: number }).floorId
-                                          ]
-                                        }
-                                        gridNumber={grid}
-                                        screenNumber={screenNum}
-                                      />
-                                    ) : (
-                                      <FloorView
-                                        activeFloorplan={floorIds[grid][screenNum - 1]}
-                                        zoomable={grandChild.zoomable}
-                                        containerWidth={gridDimensions.width} // Pass width
-                                        containerHeight={gridDimensions.height} // Pass height
-                                        screenSettings={screenSettings[grid][screenNum - 1]}
-                                        gridNumber={grid}
-                                        screenNumber={screenNum}
-                                      />
-                                    )}
-                                  </Grid>
-                                );
-                              })}
-                            </Grid>
-                          </Grid>
-                        );
-                      }
-                      const screenNum = getScreenNumber(grid, index, childIndex);
-                      // Normal child
-                      return (
-                        <Grid
-                          key={childIndex}
-                          size={child.size}
-                          ref={gridRef}
-                          sx={{
-                            height: (child as { height: string }).height || 'auto',
-                            overflow: 'hidden',
-                            border: '2.5px solid black',
-                            transition: 'border-color 0.3s ease, border-width 0.1s ease',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            backgroundColor:
-                              screenType[grid][(child as { floorId: number }).floorId] === 2
-                                ? 'black'
-                                : 'white',
-                            '&:hover': {
-                              borderColor: 'success.dark',
-                              borderWidth: '5px',
-                            },
-                          }}
-                        >
-                          {screenType[grid][(child as { floorId: number }).floorId] === 1 ? (
-                            <FloorView
-                              activeFloorplan={floorIds[grid][screenNum - 1]}
-                              zoomable={(child as { zoomable: boolean }).zoomable}
-                              containerWidth={gridDimensions.width} // Pass width
-                              containerHeight={gridDimensions.height} // Pass height
-                              screenSettings={screenSettings[grid][screenNum - 1]}
-                              activeMaskedArea={
-                                screenDisplay[grid][(child as { floorId: number }).floorId]
-                              }
-                              gridNumber={grid}
-                              screenNumber={screenNum}
-                            />
-                          ) : screenType[grid][(child as { floorId: number }).floorId] === 2 ? (
-                            <VideoPlayer options={videoJsOptions} />
-                          ) : screenType[grid][(child as { floorId: number }).floorId] === 3 ? (
-                            <FloorView
-                              activeFloorplan={floorIds[grid][screenNum - 1]}
-                              zoomable={(child as { zoomable: boolean }).zoomable}
-                              containerWidth={gridDimensions.width}
-                              containerHeight={gridDimensions.height}
-                              screenSettings={screenSettings[grid][screenNum - 1]}
-                              // NEW: follow a specific beaconId and know which cell we are
-                              focusBeacon={
-                                screenDisplay[grid][(child as { floorId: number }).floorId]
-                              }
-                              gridNumber={grid}
-                              screenNumber={screenNum}
-                            />
-                          ) : (
-                            <FloorView
-                              activeFloorplan={floorIds[grid][screenNum - 1]}
-                              zoomable={(child as { zoomable: boolean }).zoomable}
-                              containerWidth={gridDimensions.width} // Pass width
-                              containerHeight={gridDimensions.height} // Pass height
-                              screenSettings={screenSettings[grid][screenNum - 1]}
-                              gridNumber={grid}
-                              screenNumber={screenNum}
-                            />
-                          )}
-                        </Grid>
-                      );
-                    })}
-                  </Grid>
-                </Grid>
-              );
-            }
-            const screenNum = getScreenNumber(grid, index);
-            // Standard top-level item
-            return (
-              <Grid
-                key={index}
-                size={item.size}
-                ref={gridRef}
-                sx={{
-                  height: (item as { height: string }).height || 'auto',
-                  overflow: 'hidden',
-                  border: '2.5px solid black',
-                  transition: 'border-color 0.3s ease, border-width 0.1s ease',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  backgroundColor:
-                    screenType[grid][(item as { floorId: number }).floorId] === 2
-                      ? 'black'
-                      : 'white',
-                  '&:hover': {
-                    borderColor: 'success.dark',
-                    borderWidth: '5px',
-                  },
-                }}
-              >
-                {screenType[grid][(item as { floorId: number }).floorId] === 1 ? (
-                  <FloorView
-                    activeFloorplan={floorIds[grid][screenNum - 1]}
-                    zoomable={(item as { zoomable: boolean }).zoomable}
-                    containerWidth={gridDimensions.width} // Pass width
-                    containerHeight={gridDimensions.height} // Pass height
-                    screenSettings={screenSettings[grid][screenNum - 1]}
-                    activeMaskedArea={screenDisplay[grid][(item as { floorId: number }).floorId]}
-                    gridNumber={grid}
-                    screenNumber={screenNum}
-                  />
-                ) : screenType[grid][(item as { floorId: number }).floorId] === 2 ? (
-                  <VideoPlayer options={videoJsOptions} />
-                ) : screenType[grid][(item as { floorId: number }).floorId] === 3 ? (
-                  <FloorView
-                    activeFloorplan={floorIds[grid][screenNum - 1]}
-                    zoomable={(item as { zoomable: boolean }).zoomable}
-                    containerWidth={gridDimensions.width}
-                    containerHeight={gridDimensions.height}
-                    screenSettings={screenSettings[grid][screenNum - 1]}
-                    // NEW: follow a specific beaconId and know which cell we are
-                    focusBeacon={screenDisplay[grid][(item as { floorId: number }).floorId]}
-                    gridNumber={grid}
-                    screenNumber={screenNum}
-                  />
-                ) : (
-                  // <Typography>Video Player</Typography>
-                  <FloorView
-                    activeFloorplan={floorIds[grid][screenNum - 1]}
-                    zoomable={(item as { zoomable: boolean }).zoomable}
-                    containerWidth={gridDimensions.width} // Pass width
-                    containerHeight={gridDimensions.height} // Pass height
-                    screenSettings={screenSettings[grid][screenNum - 1]}
-                    gridNumber={grid}
-                    screenNumber={screenNum}
-                  />
-                )}
-              </Grid>
-            );
-          })}
+        <Grid container spacing={1}>
+          {renderLayout(layout)}
         </Grid>
       </Box>
     );

@@ -37,7 +37,6 @@ import { defaultAccessCCTVFilter } from 'src/store/apps/defaultForm';
 const columns = [
   { label: 'Name', field: 'Name', sortAble: true },
   { label: 'RTSP', field: 'Rtsp', sortAble: false },
-  { label: 'Integration', field: 'IntegrationType', sortAble: false },
 ];
 
 const SKELETON_ROWS = 5;
@@ -257,7 +256,6 @@ const AccessCCTVList = () => {
                         </TableCell>
                         <TableCell>{cctv.name}</TableCell>
                         <TableCell>{cctv.rtsp}</TableCell>
-                        <TableCell>{cctv.integration?.integrationType}</TableCell>
                         <TableCell
                           sx={{
                             position: 'sticky',

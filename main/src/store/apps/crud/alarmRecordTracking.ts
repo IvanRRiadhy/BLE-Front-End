@@ -7,6 +7,7 @@ import { bleReaderType } from "./bleReader";
 import { MaskedAreaType } from "./maskedArea";
 import { defaultAlarmRecordFilter } from "../defaultForm";
 import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
+import { AlarmTriggerType } from "./alarmTrigger";
 
 const API_URL = '/api/AlarmRecordTracking/';
 const API_DT_URL = '/api/AlarmRecordTracking/filter/';
@@ -66,6 +67,7 @@ export interface AlarmType {
     visitor?: masterVisitorType;
     reader?: bleReaderType;
     floorplanMaskedArea?: MaskedAreaType; 
+    alarmTriggers: AlarmTriggerType;
 };
 
 interface StateType {

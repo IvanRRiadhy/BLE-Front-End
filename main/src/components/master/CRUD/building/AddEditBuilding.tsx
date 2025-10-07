@@ -59,9 +59,11 @@ const AddEditBuilding = ({ type, building }: FormType) => {
         await dispatch(fetchBuildingDT(buildingFilter));
       }
       setFormData({ ...defaultBuildingForm, ...building });
+      
       setPreview(building?.image || null);
     } else {
       setFormData({ ...defaultBuildingForm });
+      setImage(null);
       setPreview(null);
     }
 
@@ -110,13 +112,13 @@ const AddEditBuilding = ({ type, building }: FormType) => {
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    const maxSize = 5 * 1024 * 1024;
+    const maxSize = 10 * 1024 * 1024;
     if (file) {
       if (file.size > maxSize) {
-        alert('File size exceeds 5MB. Please upload a smaller file.');
+        toast.error('File size exceeds 10MB. Please upload a smaller file.');
         return;
-      }
-      if (['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+      } else if (['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+        console.log(file);
         setImage(file);
         // console.log('Selected file:', file);
         setPreview(URL.createObjectURL(file)); // Preview selected image
@@ -160,6 +162,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
           data.append(key, value.toString());
         }
       });
+      console.log("Image: ", image);
       if (image) {
         data.append('image', image);
       }

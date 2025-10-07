@@ -1,79 +1,128 @@
-import { useSelector } from 'react-redux';
-import { RootState, useDispatch } from 'src/store/Store';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from 'src/store/Store';
 import PageContainer from 'src/components/container/PageContainer';
-// import { useTheme } from '@mui/material';
 import ConfigSidebar from 'src/components/dashboards/monitoring/config/ConfigSidebar';
-import { useEffect, useMemo, useState } from 'react';
-import { toggleHorizontal, toggleSidebar } from 'src/store/customizer/CustomizerSlice';
 import ConfigGrid from 'src/components/dashboards/monitoring/config/ConfigGrid';
+import { useEffect, useState, useMemo } from 'react';
+import { toggleHorizontal, toggleSidebar } from 'src/store/customizer/CustomizerSlice';
+import { Box, Grid2 as Grid } from '@mui/material';
+import { setSelectedFloorplan, setSelectedScreen} from 'src/store/apps/monitoring/layout';
 
 const Config = () => {
   const dispatch = useDispatch();
-  // const theme = useTheme();
-  const [selectedGrid, setSelectedGrid] = useState('1');
-  const [selectedScreen, setSelectedScreen] = useState('');
-  const [screenSettings, setScreenSettings] = useState<{
-    scale: number;
-    translateX: number;
-    translateY: number;
-  }>({
+
+  // --- Local preview state ---
+  const [previewGrid, setPreviewGrid] = useState(1);
+  const [previewScreens, setPreviewScreens] = useState<
+    { type: number; floorplanId?: string; displayOutput?: string }[]
+  >([]);
+  const selectedScreen = useSelector((state: RootState) => state.layoutReducer.selectedScreen);
+  const selectedFloorplanId = useSelector((state: RootState) => state.layoutReducer.selectedFloorplanId);
+
+  const [screenSettings, setScreenSettings] = useState({
     scale: 1,
     translateX: 0,
     translateY: 0,
   });
-  const floorIds = useSelector((state: RootState) => state.layoutReducer.floorplanId);
-  const screenDisplay = useSelector((state: RootState) => state.layoutReducer.screenDisplay);
-  // console.log(screenDisplay);
-  const floorIds2 = screenDisplay?.map((row: any) => row.map((item: any) => item.displayOutput)) ?? [];
-  const screenType = screenDisplay?.map((row: any) => row.map((item: any) => item.displayType)) ?? [];
 
-  const memoizedFloorIds = useMemo(() => floorIds, [floorIds]);
-  const memoizedFloorIds2 = useMemo(() => floorIds2, [floorIds2]);
-  const memoizedScreenType = useMemo(() => screenType, [screenType]);
-  const screenSettingsState = useSelector((state: RootState) => state.layoutReducer.screenSettings);
-  const wholeState = useSelector((state: RootState) => state.layoutReducer);
+  // --- Redux data ---
+  const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
+  const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
+  const activeLayout = layouts.find((l) => l.id === activeLayoutId);
+
+  // --- Lifecycle setup (hide sidebar, switch layout) ---
   useEffect(() => {
-    // Dispatch actions when the component is mounted
-    dispatch(toggleHorizontal(false)); // Enable horizontal layout
-    dispatch(toggleSidebar()); // Disable sidebar
-    console.log('Screen Settings: ', screenSettingsState);
-    console.log('Floor IDs: ', floorIds);
-    console.log('Whole State: ', wholeState);
-    console.log('Screen Display: ', floorIds2);
-    console.log('Screen Type: ', screenType);
-    // Optionally, clean up when the component is unmounted
+    dispatch(toggleHorizontal(false)); // horizontal off
+    dispatch(toggleSidebar()); // hide sidebar
     return () => {
-      dispatch(toggleHorizontal(true)); // Reset horizontal layout
-      dispatch(toggleSidebar()); // Reset sidebar
+      dispatch(toggleHorizontal(true)); // restore on cleanup
+      dispatch(toggleSidebar()); // restore sidebar
     };
   }, [dispatch]);
 
+  // --- Handle manual sidebar updates ---
+  const handleGridChange = (grid: number) => {
+    setPreviewGrid(grid);
+    setPreviewScreens((prev) => {
+      const next = [...prev];
+      next.length = grid;
+      return next.map((s) => s || { type: 0 });
+    });
+  };
+
+  const handleScreenUpdate = (
+    index: number,
+    preview: { type: number; floorplanId?: string; displayOutput?: string },
+  ) => {
+    setPreviewScreens((prev) => {
+      const next = [...prev];
+      next[index] = preview;
+      return next;
+    });
+  };
+
+  const SetSelectedScreen = (index: number | null, floorplanId?: string) => {
+    dispatch(setSelectedScreen(index));
+    dispatch(setSelectedFloorplan(floorplanId || null));
+    console.log(index, floorplanId);
+  };
+
+  // const setSelectedFloorplanId = (id: string | null) => {
+  //   dispatch(setSelectedFloorplan(id));
+  // };
+
+  // --- 🔄 Auto-update preview when layout or grid changes ---
+  useEffect(() => {
+    if (activeLayout) {
+      setPreviewGrid(activeLayout.grid);
+      const newScreens = Array.from({ length: activeLayout.grid }, (_, i) => {
+        const screen = activeLayout.screens[i];
+        if (!screen) return { type: 0 };
+
+        const { display } = screen;
+        return {
+          type: display?.displayType ?? 0,
+          floorplanId: screen.floorplanId ?? '',
+          displayOutput: display?.displayOutput ?? '',
+        };
+      });
+      setPreviewScreens(newScreens);
+    }
+  }, [activeLayout, activeLayout?.grid, layouts]);
+
+  // --- Memoized screen data for ConfigGrid ---
+  const memoizedScreens = useMemo(() => previewScreens, [previewScreens]);
+
   return (
-    <>
-      <PageContainer title="Monitoring Config" description="Monitoring Config">
-        <ConfigSidebar
-          setSelectedGrid={setSelectedGrid}
-          setSelectedScreens={setSelectedScreen}
-          previewSelectedScreen={selectedScreen}
-          screenSettings={screenSettings}
-        />
-        {/* <ConfigPreview
-          selectedGrid={parseInt(selectedGrid)}
-          selectedScreen={parseInt(selectedScreen)}
-          setSelectedScreen={setSelectedScreen}
-        /> */}
-        <ConfigGrid
-          grid={parseInt(selectedGrid)}
-          floorIds={memoizedFloorIds}
-          screenDisplay={memoizedFloorIds2}
-          screenType={memoizedScreenType}
-          selectedScreen={parseInt(selectedScreen)}
-          setSelectedScreen={setSelectedScreen}
-          screenSettings={screenSettingsState}
-          setScreenSettings={setScreenSettings}
-        />
-      </PageContainer>
-    </>
+    <PageContainer title="Monitoring Config" description="Monitoring Config">
+      <Box sx={{ flexGrow: 1, mt: 2 }}>
+        <Grid container spacing={2}>
+          {/* Sidebar on the left */}
+          <Grid size={{ xs: 12, md: 4, lg: 2 }}>
+            <ConfigSidebar
+              onGridChange={handleGridChange}
+              onScreenUpdate={handleScreenUpdate}
+              screenSettings={screenSettings}
+              selectedScreen={selectedScreen}
+              setSelectedScreen={SetSelectedScreen}
+              selectedFloorplanId={selectedFloorplanId}
+            />
+          </Grid>
+
+          {/* Grid preview area on the right */}
+          <Grid size={{ xs: 12, md: 8, lg: 10 }}>
+            <ConfigGrid
+              grid={previewGrid}
+              screens={memoizedScreens}
+              screenSettings={screenSettings}
+              setScreenSettings={setScreenSettings}
+              selectedScreen={selectedScreen}
+              onScreenSelect={SetSelectedScreen}
+            />
+          </Grid>
+        </Grid>
+      </Box>
+    </PageContainer>
   );
 };
 

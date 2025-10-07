@@ -1,6 +1,5 @@
 import {
   Box,
-  Grid2 as Grid,
   Typography,
   Drawer,
   SelectChangeEvent,
@@ -13,100 +12,97 @@ import { RootState, useDispatch } from 'src/store/Store';
 import { useTheme } from '@mui/material';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
-import React, { useEffect, useState } from 'react';
-// import { floorplanType } from 'src/types/tracking/floorplan';
-// import { fetchFloorplans } from 'src/store/apps/tracking/FloorPlanSlice';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import {
-  resetScreen,
-  setFloorplan,
-  setScreenDisplay,
-  setScreenSettings,
+  setActiveLayout,
+  addLayout,
+  updateLayoutGrid,
+  setFocus,
+  fetchMonitoringLayouts,
+  addMonitoringLayout,
+  setScreenFloorplan,
+  updateActiveLayoutInfo,
+  clearActiveLayout,
+  deleteMonitoringLayout,
+  editMonitoringLayout,
 } from 'src/store/apps/monitoring/layout';
-import { fetchFloorplan, fetchFloorplanDT, FloorplanType } from 'src/store/apps/crud/floorplan';
-import { fetchBuildings, BuildingType, fetchBuildingDT } from 'src/store/apps/crud/building';
-import { fetchFloorDT, fetchFloors, floorType } from 'src/store/apps/crud/floor';
-import {
-  fetchMaskedAreaDT,
-  fetchMaskedAreas,
-  MaskedAreaType,
-} from 'src/store/apps/crud/maskedArea';
+import { fetchFloorplanDT, FloorplanType } from 'src/store/apps/crud/floorplan';
+import { fetchBuildingDT, BuildingType } from 'src/store/apps/crud/building';
+import { fetchFloorDT, floorType } from 'src/store/apps/crud/floor';
+import { fetchMaskedAreaDT, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { CCTVType, fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
+import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 
-interface configSidebarProps {
-  setSelectedGrid: (grid: string) => void;
-  setSelectedScreens: (screen: string) => void;
-  previewSelectedScreen: string;
+interface ConfigSidebarProps {
+  onGridChange: (grid: number) => void;
+  onScreenUpdate: (
+    screenIndex: number,
+    preview: { type: number; floorplanId?: string; displayOutput?: string },
+  ) => void;
   screenSettings?: { scale: number; translateX: number; translateY: number };
+  selectedScreen: number | null;
+  setSelectedScreen: (index: number | null) => void;
+  selectedFloorplanId: string | null;
 }
 
-const filter = {
-  draw: 1,
-  start: 0,
-  length: 99,
-  sortColumn: '',
-  sortDir: 'asc',
-  SearchValue: '',
-};
+const filter = { draw: 1, start: 0, length: 99, sortColumn: '', sortDir: 'asc', SearchValue: '' };
 
-const ConfigSidebar: React.FC<configSidebarProps> = ({
-  setSelectedGrid,
-  setSelectedScreens,
-  previewSelectedScreen,
+const ConfigSidebar: React.FC<ConfigSidebarProps> = ({
+  onGridChange,
+  onScreenUpdate,
   screenSettings,
-}: configSidebarProps) => {
+  selectedScreen,
+  setSelectedScreen,
+  selectedFloorplanId,
+}) => {
   const theme = useTheme();
   const dispatch = useDispatch();
-  const floorplanLists: FloorplanType[] = useSelector(
-    (state: RootState) => state.floorplanReducer.floorplans,
-  );
-  const buildingLists: BuildingType[] = useSelector(
-    (state: RootState) => state.buildingReducer.buildings,
-  );
-  const floorLists: floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
-  const areaLists: MaskedAreaType[] = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreas,
-  );
-  const cctvLists: CCTVType[] = useSelector((state: RootState) => state.CCTVReducer.cctvs);
-  const floorplanDeviceLists: FloorplanDeviceType[] = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.floorplanDevices,
-  );
-  const customizer = useSelector((state: RootState) => state.customizer);
-  const floorplanId = useSelector((state: RootState) => state.layoutReducer.floorplanId);
-  const screenDisplay = useSelector((state: RootState) => state.layoutReducer.screenDisplay);
-  // const [buildingList, setBuildingList] = useState([
-  //   { id: '1', name: 'Building 1' },
-  //   { id: '2', name: 'Building 2' },
-  //   { id: '3', name: 'Building 3' },
-  //   { id: '4', name: 'Building 4' },
-  //   { id: '5', name: 'Building 5' },
-  // ]);
 
-  const [gridType, setGridType] = useState('1');
-  const [selectedScreen, setSelectedScreen] = useState(previewSelectedScreen || '');
+  // --- Redux data ---
+  const floorplanLists: FloorplanType[] = useSelector(
+    (s: RootState) => s.floorplanReducer.floorplans,
+  );
+  const buildingLists: BuildingType[] = useSelector((s: RootState) => s.buildingReducer.buildings);
+  const floorLists: floorType[] = useSelector((s: RootState) => s.floorReducer.floors);
+  const areaLists: MaskedAreaType[] = useSelector(
+    (s: RootState) => s.maskedAreaReducer.maskedAreas,
+  );
+  const cctvLists: CCTVType[] = useSelector((s: RootState) => s.CCTVReducer.cctvs);
+  const floorplanDeviceLists: FloorplanDeviceType[] = useSelector(
+    (s: RootState) => s.floorplanDeviceReducer.floorplanDevices,
+  );
+
+  const layouts = useSelector((s: RootState) => s.layoutReducer.layouts ?? []);
+  const activeLayoutId = useSelector((s: RootState) => s.layoutReducer.activeLayoutId);
+  const activeLayout = layouts.find((l) => l.id === activeLayoutId) || null;
+
+  // --- Local state ---
+  const [selectedLayout, setSelectedLayoutLocal] = useState(activeLayoutId || '');
   const [selectedBuilding, setSelectedBuilding] = useState('');
   const [selectedFloor, setSelectedFloor] = useState('');
   const [selectedFloorplan, setSelectedFloorplan] = useState('');
   const [selectedMaskedArea, setSelectedMaskedArea] = useState('');
   const [selectedCCTV, setSelectedCCTV] = useState('');
-  const filteredFloorplan = floorplanLists.filter(
-    (floorplan) => floorplan.floorId === selectedFloor,
-  );
-  const filteredFloor = floorLists.filter((floor) => floor.buildingId === selectedBuilding);
-  const filteredMaskedArea = areaLists.filter((area) => area.floorplanId === selectedFloorplan);
+
+  // --- Derived lists ---
+  const filteredFloor = floorLists.filter((f) => f.buildingId === selectedBuilding);
+  const filteredFloorplan = floorplanLists.filter((f) => f.floorId === selectedFloor);
+  const filteredMaskedArea = areaLists.filter((a) => a.floorplanId === selectedFloorplan);
   const filteredFloorplanDevice = floorplanDeviceLists.filter(
-    (device) => device.floorplanMaskedAreaId === selectedMaskedArea,
+    (d) => d.floorplanMaskedAreaId === selectedMaskedArea,
   );
   const filteredCCTV = cctvLists.filter((cctv) =>
-    filteredFloorplanDevice
-      .map((device) => device.type === 'Cctv' && device.accessCctvId)
-      .includes(cctv.id),
+    filteredFloorplanDevice.some((d) => d.type === 'Cctv' && d.accessCctvId === cctv.id),
   );
-  const handleChange = (event: SelectChangeEvent<string>) => {
-    setGridType(event.target.value); // Dispatch the selected grid value
-    setSelectedGrid(event.target.value);
-    setSelectedScreens('');
-    setSelectedScreen('');
+
+  // --- Handlers ---
+  const handleLayoutChange = (e: SelectChangeEvent<string>) => {
+    const layoutId = e.target.value;
+    setSelectedLayoutLocal(layoutId);
+    dispatch(setActiveLayout(layoutId));
+
+    setSelectedScreen(null);
     setSelectedBuilding('');
     setSelectedFloor('');
     setSelectedFloorplan('');
@@ -114,455 +110,420 @@ const ConfigSidebar: React.FC<configSidebarProps> = ({
     setSelectedCCTV('');
   };
 
-  const handleScreenChange = (event: SelectChangeEvent<string>) => {
-    setSelectedScreen(event.target.value); // Dispatch the selected screen value
-    setSelectedScreens(event.target.value);
-    console.log('APPOOKS');
-    if (floorplanId[parseInt(gridType)][parseInt(event.target.value) - 1] !== '') {
-      console.log(
-        'ASDQEW',
-        screenDisplay[parseInt(gridType)][parseInt(event.target.value) - 1].displayType,
-      );
-      if (screenDisplay[parseInt(gridType)][parseInt(event.target.value) - 1].displayType === 0) {
-        setSelectedFloorplan(floorplanId[parseInt(gridType)][parseInt(event.target.value) - 1]);
-      }
-      if (screenDisplay[parseInt(gridType)][parseInt(event.target.value) - 1].displayType === 1) {
-        setSelectedMaskedArea(
-          screenDisplay[parseInt(gridType)][parseInt(event.target.value) - 1].displayOutput,
-        );
-      }
-      if (screenDisplay[parseInt(gridType)][parseInt(event.target.value) - 1].displayType === 2) {
-        setSelectedCCTV(
-          screenDisplay[parseInt(gridType)][parseInt(event.target.value) - 1].displayOutput,
-        );
-      }
-    } else {
-      setSelectedBuilding('');
-      setSelectedFloor('');
-      setSelectedFloorplan('');
-      setSelectedMaskedArea('');
-      setSelectedCCTV('');
+  const handleCreateLayout = () => {
+    const newLayoutName = `Layout ${layouts.length + 1}`;
+    dispatch(addLayout({ name: newLayoutName, grid: 1 }));
+  };
+
+  const handleGridChange = (e: SelectChangeEvent<string>) => {
+    const grid = parseInt(e.target.value);
+    if (activeLayout) dispatch(updateLayoutGrid({ layoutId: activeLayout.id, grid }));
+    setSelectedScreen(null);
+    onGridChange(grid); // live preview update
+  };
+
+  const handleScreenChange = (e: SelectChangeEvent<string>) => {
+    const index = parseInt(e.target.value);
+    setSelectedScreen(index);
+    if (activeLayout) {
+      const screenId = activeLayout.screens[index].id;
+      dispatch(setFocus({ type: 'screen', id: screenId }));
     }
   };
-  const handleBuildingChange = (event: SelectChangeEvent<string>) => {
-    setSelectedBuilding(event.target.value); // Dispatch the selected building value
-    setSelectedFloor('');
-    setSelectedFloorplan('');
-    setSelectedMaskedArea('');
-    setSelectedCCTV('');
-  };
-  const handleFloorChange = (event: SelectChangeEvent<string>) => {
-    setSelectedFloor(event.target.value); // Dispatch the selected floor value
-    setSelectedFloorplan('');
-    setSelectedMaskedArea('');
-    setSelectedCCTV('');
-  };
-  const handleFloorplanChange = (event: SelectChangeEvent<string>) => {
-    setSelectedFloorplan(event.target.value); // Dispatch the selected floor value
-    setSelectedMaskedArea('');
-    setSelectedCCTV('');
-  };
-  const handleMaskedAreaChange = (event: SelectChangeEvent<string>) => {
-    setSelectedMaskedArea(event.target.value);
-    setSelectedCCTV('');
-  };
-  const handleCCTVChange = (event: SelectChangeEvent<string>) => {
-    setSelectedCCTV(event.target.value);
+
+  // When clicking Preview button
+  const handlePreview = () => {
+    if (selectedScreen === null) return;
+
+    const displayType =
+      selectedCCTV !== '' && selectedCCTV !== 'None'
+        ? 2
+        : selectedMaskedArea !== '' && selectedMaskedArea !== 'None'
+        ? 1
+        : 0;
+
+    const displayOutput =
+      selectedCCTV !== '' && selectedCCTV !== 'None'
+        ? selectedCCTV
+        : selectedMaskedArea !== '' && selectedMaskedArea !== 'None'
+        ? selectedMaskedArea
+        : selectedFloorplan;
+
+    onScreenUpdate(selectedScreen, {
+      type: displayType,
+      floorplanId: selectedFloorplan,
+      displayOutput,
+    });
   };
 
-  const handleSave = () => {
-    dispatch(resetScreen(parseInt(gridType), parseInt(selectedScreen)));
-    dispatch(setFloorplan(parseInt(gridType), parseInt(selectedScreen), selectedFloorplan));
-    dispatch(
-      setScreenSettings(parseInt(gridType), parseInt(selectedScreen), {
-        scale: screenSettings?.scale || 1,
-        translateX: screenSettings?.translateX || 0,
-        translateY: screenSettings?.translateY || 0,
-      }),
-    );
-    if (selectedMaskedArea !== '' && selectedMaskedArea !== 'None') {
-      if (selectedCCTV !== '' && selectedCCTV !== 'None') {
-        dispatch(
-          setScreenDisplay(parseInt(gridType), parseInt(selectedScreen), {
-            displayType: 2,
-            displayOutput: selectedCCTV,
-          }),
-        );
-      } else {
-        dispatch(
-          setScreenDisplay(parseInt(gridType), parseInt(selectedScreen), {
-            displayType: 1,
-            displayOutput: selectedMaskedArea,
-          }),
-        );
-      }
-    } else {
-      dispatch(
-        setScreenDisplay(parseInt(gridType), parseInt(selectedScreen), {
-          displayType: 0,
-          displayOutput: selectedFloorplan,
-        }),
-      );
-    }
-    dispatch(setFloorplan(parseInt(gridType), parseInt(selectedScreen), selectedFloorplan));
-    setSelectedScreens('');
-    setSelectedScreen('');
-    setSelectedBuilding('');
-    setSelectedFloor('');
-    setSelectedFloorplan('');
-    setSelectedMaskedArea('');
-    setSelectedCCTV('');
-  };
-
+  // --- Load reference data on mount ---
   useEffect(() => {
-    setSelectedScreen(previewSelectedScreen);
-  }, [previewSelectedScreen]);
-
-  useEffect(() => {
-    dispatch(
-      fetchFloorplanDT({
-        ...filter,
-        filter: {
-          FloorId: selectedFloor,
-        },
-      }),
-    );
+    dispatch(fetchMonitoringLayouts());
     dispatch(fetchBuildingDT(filter));
-    dispatch(
-      fetchFloorDT({
-        ...filter,
-        filter: {
-          BuildingId: selectedBuilding,
-        },
-      }),
-    );
-    dispatch(
-      fetchMaskedAreaDT({
-        ...filter,
-        filter: {
-          FloorId: selectedFloor,
-          FloorplanId: selectedFloorplan,
-        },
-      }),
-    );
+    dispatch(fetchFloorDT(filter));
+    dispatch(fetchFloorplanDT(filter));
+    dispatch(fetchMaskedAreaDT(filter));
     dispatch(fetchAccessCCTV());
   }, [dispatch]);
 
   useEffect(() => {
-    if (selectedScreen !== '') {
-      console.log(
-        'AAA',
-        screenDisplay[parseInt(gridType)][parseInt(selectedScreen) - 1].displayType,
-      );
-      if (screenDisplay[parseInt(gridType)][parseInt(selectedScreen) - 1].displayType === 0) {
-        setSelectedFloorplan(floorplanId[parseInt(gridType)]?.[parseInt(selectedScreen) - 1]);
-        setSelectedMaskedArea('');
-        setSelectedCCTV('');
-      } else if (
-        screenDisplay[parseInt(gridType)][parseInt(selectedScreen) - 1].displayType === 1
-      ) {
-        console.log('AAA');
-        setSelectedMaskedArea(
-          screenDisplay[parseInt(gridType)][parseInt(selectedScreen) - 1].displayOutput,
-        );
-        setSelectedCCTV('');
-      } else if (
-        screenDisplay[parseInt(gridType)][parseInt(selectedScreen) - 1].displayType === 2
-      ) {
-        console.log('BBBBB');
-        setSelectedCCTV(
-          screenDisplay[parseInt(gridType)][parseInt(selectedScreen) - 1].displayOutput,
-        );
-      } else {
-        setSelectedBuilding('');
-        setSelectedFloor('');
-        setSelectedFloorplan('');
-        setSelectedMaskedArea('');
-        setSelectedCCTV('');
-      }
+    if (activeLayoutId) {
+      setSelectedLayoutLocal(activeLayoutId);
     }
-  }, [selectedScreen, gridType, floorplanId]);
+  }, [activeLayoutId]);
+
+  // --- Auto-select first layout ---
+  useEffect(() => {
+    if (!activeLayoutId && layouts.length > 0) {
+      dispatch(setActiveLayout(layouts[0].id));
+      setSelectedLayoutLocal(layouts[0].id);
+    }
+  }, [layouts, activeLayoutId, dispatch]);
 
   useEffect(() => {
-    if (selectedCCTV !== '') {
-      const cctv = floorplanDeviceLists.find(
-        (device) => device.type === 'Cctv' && device.accessCctvId === selectedCCTV,
-      );
-      // console.log('selectedCCTV', selectedCCTV, cctv);
-      if (cctv) {
-        setSelectedMaskedArea(cctv.floorplanMaskedAreaId);
-      }
-    }
-  }, [selectedCCTV, cctvLists]);
+    console.log('selectedFloorplanId', selectedFloorplanId);
+    if (selectedFloorplanId && floorplanLists.length > 0) {
+      // 1️⃣ Find floorplan
+      const fp = floorplanLists.find((f) => f.id === selectedFloorplanId);
+      if (fp) {
+        setSelectedFloorplan(fp.id);
 
-  useEffect(() => {
-    if (selectedMaskedArea !== '') {
-      const maskedArea = areaLists.find((maskedArea) => maskedArea.id === selectedMaskedArea);
-      if (maskedArea) {
-        setSelectedFloorplan(maskedArea.floorplanId);
-      }
-    }
-  }, [selectedMaskedArea, areaLists]);
+        // 2️⃣ Find floor
+        const floor = floorLists.find((fl) => fl.id === fp.floorId);
+        if (floor) {
+          setSelectedFloor(floor.id);
 
-  useEffect(() => {
-    if (selectedFloorplan !== '') {
-      const floorplan = floorplanLists.find((floorplan) => floorplan.id === selectedFloorplan);
-      if (floorplan) {
-        setSelectedFloor(floorplan.floorId);
+          // 3️⃣ Find building
+          const building = buildingLists.find((b) => b.id === floor.buildingId);
+          if (building) {
+            setSelectedBuilding(building.id);
+          }
+        }
       }
+    } else {
+      // reset if no floorplan selected
+      setSelectedBuilding('');
+      setSelectedFloor('');
+      setSelectedFloorplan('');
     }
-  }, [selectedFloorplan, floorplanLists]);
+  }, [selectedFloorplanId, floorplanLists, floorLists, buildingLists]);
 
-  useEffect(() => {
-    if (selectedFloor !== '') {
-      const floor = floorLists.find((floor) => floor.id === selectedFloor);
-      if (floor) {
-        setSelectedBuilding(floor.buildingId);
-      }
-    }
-  }, [selectedFloor, floorLists]);
-
+  // --- JSX ---
   return (
     <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
       <Box
         sx={{
-          width: customizer.SidebarWidth,
-          flexShrink: 0,
-          marginTop: `calc(${customizer.TopbarHeight}px)`,
-          position: 'relative',
+          width: '100%',
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          // p: 2,
+          boxShadow: 2,
+          height: 'calc(100vh - 120px)', // keeps it nicely within viewport under header
+          overflowY: 'auto',
         }}
       >
-        <Drawer
-          anchor="left"
-          open
-          variant="permanent"
-          PaperProps={{
-            sx: {
-              transition: theme.transitions.create('width', {
-                duration: theme.transitions.duration.shortest,
-              }),
-              width: customizer.SidebarWidth,
-              boxSizing: 'border-box',
-              marginTop: `calc(${customizer.TopbarHeight}px)`,
-              //marginLeft: customizer.isCollapse ? 0 : `${customizer.SidebarWidth}px`,
-            },
-          }}
-        >
-          <Typography variant="h4" color="primary" fontWeight={'bold'} sx={{ padding: 4 }}>
-            Grid Configuration
-          </Typography>
-          <Box
-            sx={{
-              height: `calc(90% - ${customizer.TopbarHeight}px)`,
-              overflowY: 'auto',
-            }}
-          >
-            <Divider />
-            <Grid container mb={2} sx={{ padding: 2, paddingTop: 0 }}>
-              <Grid size={{ lg: 12, md: 12, sm: 12 }} >
-                <CustomFormLabel htmlFor="grid-type">
-                  Grid Type {<span style={{ color: 'red' }}>*</span>}
-                </CustomFormLabel>
-                <CustomSelect
-                  name="gridType"
-                  value={gridType}
-                  onChange={handleChange}
-                  fullWidth
-                  variant="outlined"
-                >
-                  <MenuItem value="" disabled>
-                    -- Select Grid Type --
-                  </MenuItem>
-                  <MenuItem value="1">1 Grid</MenuItem>
-                  <MenuItem value="2">2 Grid</MenuItem>
-                  <MenuItem value="3">3 Grid</MenuItem>
-                  <MenuItem value="4">4 Grid</MenuItem>
-                  <MenuItem value="5">5 Grid</MenuItem>
-                  <MenuItem value="6">6 Grid</MenuItem>
-                </CustomSelect>
-                {gridType !== '' && (
-                  <>
-                    <CustomFormLabel htmlFor="screen">
-                      Screen {<span style={{ color: 'red' }}>*</span>}
-                    </CustomFormLabel>
-                    <CustomSelect
-                      name="screen"
-                      value={selectedScreen}
-                      onChange={handleScreenChange}
-                      fullWidth
-                      variant="outlined"
-                    >
-                      <MenuItem value="" disabled>
-                        -- Select Screen --
-                      </MenuItem>
-                      {Array.from({ length: parseInt(gridType) }, (_, i) => (
-                        <MenuItem key={i} value={i + 1}>
-                          Screen {i + 1}
-                        </MenuItem>
-                      ))}
-                    </CustomSelect>
-                  </>
-                )}
-                {selectedScreen !== '' && (
-                  <>
-                    <CustomFormLabel htmlFor="building">
-                      Building {<span style={{ color: 'red' }}>*</span>}
-                    </CustomFormLabel>
-                    <CustomSelect
-                      name="building"
-                      value={selectedBuilding}
-                      onChange={handleBuildingChange}
-                      fullWidth
-                      variant="outlined"
-                    >
-                      <MenuItem value="" disabled>
-                        -- Select Building --
-                      </MenuItem>
-                      {buildingLists.map((building) => (
-                        <MenuItem key={building.id} value={building.id}>
-                          {building.name}
-                        </MenuItem>
-                      ))}
-                    </CustomSelect>
-                  </>
-                )}
-                {selectedBuilding !== '' && (
-                  <>
-                    <CustomFormLabel htmlFor="floor">
-                      Floor {<span style={{ color: 'red' }}>*</span>}
-                    </CustomFormLabel>
-                    <CustomSelect
-                      name="floor"
-                      value={selectedFloor}
-                      onChange={handleFloorChange}
-                      fullWidth
-                      variant="outlined"
-                    >
-                      <MenuItem value="" disabled>
-                        -- Select Floor --
-                      </MenuItem>
-                      {filteredFloor.map((floor) => (
-                        <MenuItem key={floor.id} value={floor.id}>
-                          {floor.name}
-                        </MenuItem>
-                      ))}
-                    </CustomSelect>
-                  </>
-                )}
-                {selectedFloor !== '' && (
-                  <>
-                    <CustomFormLabel htmlFor="floor-plan">
-                      Floor Plan {<span style={{ color: 'red' }}>*</span>}
-                    </CustomFormLabel>
-                    <CustomSelect
-                      name="floorplan"
-                      value={selectedFloorplan}
-                      onChange={handleFloorplanChange}
-                      fullWidth
-                      variant="outlined"
-                    >
-                      <MenuItem value="" disabled>
-                        -- Select Floor --
-                      </MenuItem>
-                      {filteredFloorplan.map((floorplan) => (
-                        <MenuItem key={floorplan.id} value={floorplan.id}>
-                          {floorplan.name}
-                        </MenuItem>
-                      ))}
-                    </CustomSelect>
-                    {selectedFloorplan !== '' && (
-                      <>
-                        <CustomFormLabel htmlFor="masked-area">
-                          Masked Area (optional)
-                        </CustomFormLabel>
-                        <CustomSelect
-                          name="masked-area"
-                          value={selectedMaskedArea}
-                          onChange={handleMaskedAreaChange}
-                          fullWidth
-                          variant="outlined"
-                        >
-                          <MenuItem value="" disabled>
-                            -- Select Masked Area --
-                          </MenuItem>
-                          <MenuItem value="None">None</MenuItem>
-                          {filteredMaskedArea.map((maskedArea) => (
-                            <MenuItem key={maskedArea.id} value={maskedArea.id}>
-                              {maskedArea.name}
-                            </MenuItem>
-                          ))}
-                        </CustomSelect>
-                      </>
-                    )}
-                    {selectedMaskedArea !== '' && selectedMaskedArea !== 'None' && (
-                      <>
-                        <CustomFormLabel htmlFor="masked-area">CCTV (optional)</CustomFormLabel>
-                        <CustomSelect
-                          name="masked-area"
-                          value={selectedCCTV}
-                          onChange={handleCCTVChange}
-                          fullWidth
-                          variant="outlined"
-                        >
-                          <MenuItem value="" disabled>
-                            -- Select CCTV --
-                          </MenuItem>
-                          <MenuItem value="None">None</MenuItem>
-                          {filteredCCTV.map((cctv) => (
-                            <MenuItem key={cctv.id} value={cctv.id}>
-                              {cctv.name}
-                            </MenuItem>
-                          ))}
-                        </CustomSelect>
-                      </>
-                    )}
-                    <Box
-                      sx={{
-                        position: 'sticky',
-                        bottom: 0,
-                        backgroundColor: theme.palette.background.paper,
-                        zIndex: 2,
-                        padding: 2,
-                        borderTop: `1px solid ${theme.palette.divider}`,
-                        display: 'flex',
-                        gap: 1,
-                      }}
-                    >
-                      <Button
-                        onClick={handleSave}
-                        variant="contained"
-                        sx={{ fontSize: '1rem', py: 1, px: 3, flex: 1 }}
-                        disabled={selectedFloorplan === ''}
-                      >
-                        Save
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          dispatch(resetScreen(parseInt(gridType), parseInt(selectedScreen)));
+        <Typography variant="h4" color="primary" fontWeight="bold" sx={{ padding: 2 }}>
+          Layout Configuration
+        </Typography>
+        <Divider />
+        <Box sx={{ padding: 2, overflowY: 'auto', height: 'calc(100% - 64px)' }}>
+          {/* Layout selector */}
+          <CustomFormLabel>Layout</CustomFormLabel>
+          <CustomSelect value={selectedLayout} onChange={handleLayoutChange} fullWidth>
+            <MenuItem value="" disabled>
+              -- Select Layout --
+            </MenuItem>
+            {layouts.map((l) => (
+              <MenuItem key={l.id} value={l.id}>
+                {l.name}
+              </MenuItem>
+            ))}
+          </CustomSelect>
+          <Button variant="outlined" onClick={handleCreateLayout} sx={{ mt: 1, mb: 2 }}>
+            Create New Layout
+          </Button>
 
-                          // Reset local state as well
-                          setSelectedScreens('');
-                          setSelectedScreen('');
-                          setSelectedBuilding('');
-                          setSelectedFloor('');
-                          setSelectedFloorplan('');
-                          setSelectedMaskedArea('');
-                          setSelectedCCTV('');
-                        }}
-                        variant="outlined"
-                        color="error"
-                        sx={{ fontSize: '1rem', py: 1, px: 3, flex: 1 }}
-                        disabled={selectedScreen === ''}
-                      >
-                        Remove
-                      </Button>
-                    </Box>
-                  </>
-                )}
-              </Grid>
-            </Grid>
+          {activeLayout && (
+            <>
+              <CustomFormLabel>Layout Name</CustomFormLabel>
+              <CustomTextField
+                fullWidth
+                value={activeLayout.name}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  dispatch(updateActiveLayoutInfo({ name: e.target.value }))
+                }
+                placeholder="Enter layout name"
+                sx={{ mb: 2 }}
+              />
+
+              <CustomFormLabel>Layout Description</CustomFormLabel>
+              <CustomTextField
+                fullWidth
+                multiline
+                rows={2}
+                value={activeLayout.description ?? ''}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  dispatch(updateActiveLayoutInfo({ description: e.target.value }))
+                }
+                placeholder="Enter layout description"
+                sx={{ mb: 3 }}
+              />
+            </>
+          )}
+
+          {/* Grid selector */}
+          {activeLayout && (
+            <>
+              <CustomFormLabel>Grid</CustomFormLabel>
+              <CustomSelect value={String(activeLayout.grid)} onChange={handleGridChange} fullWidth>
+                {Array.from({ length: 6 }, (_, i) => (
+                  <MenuItem key={i + 1} value={String(i + 1)}>
+                    {i + 1} Screen{i + 1 > 1 ? 's' : ''}
+                  </MenuItem>
+                ))}
+              </CustomSelect>
+            </>
+          )}
+
+          {/* Screen selector */}
+          {activeLayout && (
+            <>
+              <CustomFormLabel>Screen</CustomFormLabel>
+              <CustomSelect
+                value={selectedScreen !== null ? String(selectedScreen) : ''}
+                onChange={(e: SelectChangeEvent<string>) => {
+                  const index = parseInt(e.target.value);
+                  setSelectedScreen(index);
+                  handleScreenChange(e); // keep existing logic if you want it to update Redux focus
+                }}
+                fullWidth
+              >
+                <MenuItem value="" disabled>
+                  -- Select Screen --
+                </MenuItem>
+                {activeLayout.screens.map((_, idx) => (
+                  <MenuItem key={idx} value={String(idx)}>
+                    Screen {idx + 1}
+                  </MenuItem>
+                ))}
+              </CustomSelect>
+            </>
+          )}
+
+          {/* Floorplan / MaskedArea / CCTV */}
+          {selectedScreen !== null && (
+            <>
+              {/* Building */}
+              <CustomFormLabel>Building</CustomFormLabel>
+              <CustomSelect
+                value={selectedBuilding}
+                onChange={(e: SelectChangeEvent<string>) => {
+                  const buildingId = e.target.value;
+                  setSelectedBuilding(buildingId);
+
+                  // Reset dependent fields when building changes
+                  setSelectedFloor('');
+                  setSelectedFloorplan('');
+                  setSelectedMaskedArea('');
+                  setSelectedCCTV('');
+                }}
+                fullWidth
+              >
+                <MenuItem value="" disabled>
+                  -- Select Building --
+                </MenuItem>
+                {buildingLists.map((b) => (
+                  <MenuItem key={b.id} value={b.id}>
+                    {b.name}
+                  </MenuItem>
+                ))}
+              </CustomSelect>
+
+              {/* Floor - only show after building selected */}
+              {selectedBuilding && (
+                <>
+                  <CustomFormLabel>Floor</CustomFormLabel>
+                  <CustomSelect
+                    value={selectedFloor}
+                    onChange={(e: SelectChangeEvent<string>) => {
+                      const floorId = e.target.value;
+                      setSelectedFloor(floorId);
+
+                      // Reset lower levels
+                      setSelectedFloorplan('');
+                      setSelectedMaskedArea('');
+                      setSelectedCCTV('');
+                    }}
+                    fullWidth
+                  >
+                    <MenuItem value="" disabled>
+                      -- Select Floor --
+                    </MenuItem>
+                    {filteredFloor.map((f) => (
+                      <MenuItem key={f.id} value={f.id}>
+                        {f.name}
+                      </MenuItem>
+                    ))}
+                  </CustomSelect>
+                </>
+              )}
+
+              {/* Floorplan - only show after floor selected */}
+              {selectedFloor && (
+                <>
+                  <CustomFormLabel>Floorplan</CustomFormLabel>
+                  <CustomSelect
+                    value={selectedFloorplan}
+                    onChange={(e: SelectChangeEvent<string>) => {
+                      const newFloorplanId = e.target.value;
+                      setSelectedFloorplan(newFloorplanId);
+
+                      // Reset lower levels
+                      setSelectedMaskedArea('');
+                      setSelectedCCTV('');
+
+                      // Also update Redux layout state for the selected screen
+                      if (activeLayout && selectedScreen !== null) {
+                        const screenId = activeLayout.screens[selectedScreen].id;
+                        dispatch(
+                          setScreenFloorplan({
+                            layoutId: activeLayout.id,
+                            screenId,
+                            floorplanId: newFloorplanId,
+                          }),
+                        );
+                      }
+                    }}
+                    fullWidth
+                  >
+                    <MenuItem value="" disabled>
+                      -- Select Floorplan --
+                    </MenuItem>
+                    {filteredFloorplan.map((fp) => (
+                      <MenuItem key={fp.id} value={fp.id}>
+                        {fp.name}
+                      </MenuItem>
+                    ))}
+                  </CustomSelect>
+                </>
+              )}
+
+              {/* Masked Area - only show after floorplan selected */}
+              {selectedFloorplan && (
+                <>
+                  <CustomFormLabel>Masked Area</CustomFormLabel>
+                  <CustomSelect
+                    value={selectedMaskedArea}
+                    onChange={(e: SelectChangeEvent<string>) => {
+                      const maskedId = e.target.value;
+                      setSelectedMaskedArea(maskedId);
+
+                      // Reset CCTV if masked area changes
+                      setSelectedCCTV('');
+                    }}
+                    fullWidth
+                  >
+                    <MenuItem value="None">None</MenuItem>
+                    {filteredMaskedArea.map((ma) => (
+                      <MenuItem key={ma.id} value={ma.id}>
+                        {ma.name}
+                      </MenuItem>
+                    ))}
+                  </CustomSelect>
+                </>
+              )}
+
+              {/* CCTV - only show after masked area selected */}
+              {selectedMaskedArea && (
+                <>
+                  <CustomFormLabel>CCTV</CustomFormLabel>
+                  <CustomSelect
+                    value={selectedCCTV}
+                    onChange={(e: SelectChangeEvent<string>) => setSelectedCCTV(e.target.value)}
+                    fullWidth
+                  >
+                    <MenuItem value="None">None</MenuItem>
+                    {filteredCCTV.map((c) => (
+                      <MenuItem key={c.id} value={c.id}>
+                        {c.name}
+                      </MenuItem>
+                    ))}
+                  </CustomSelect>
+                </>
+              )}
+            </>
+          )}
+          {/* --- Layout Action Buttons --- */}
+          <Box mt={2}>
+            {/* Row: Save + Clear */}
+            <Box display="flex" justifyContent="space-between" gap={1} mb={1}>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={() => {
+                  if (!activeLayout) return;
+
+                  // 🧠 Detect if layout is new or existing
+                  const isNewLayout = activeLayout.id.startsWith('layout-');
+
+                  if (isNewLayout) {
+                    console.log('🆕 Creating new layout...');
+                    dispatch(addMonitoringLayout(activeLayout));
+                  } else {
+                    console.log('✏️ Editing existing layout...');
+                    dispatch(editMonitoringLayout(activeLayout));
+                  }
+                }}
+              >
+                Save Layout
+              </Button>
+
+              <Button
+                variant="outlined"
+                color="warning"
+                fullWidth
+                onClick={() => {
+                  if (!activeLayoutId) return;
+                  dispatch(clearActiveLayout());
+
+                  // 🧹 Reset sidebar local states
+                  setSelectedBuilding('');
+                  setSelectedFloor('');
+                  setSelectedFloorplan('');
+                  setSelectedMaskedArea('');
+                  setSelectedCCTV('');
+                  setSelectedScreen(null);
+                }}
+              >
+                Clear Layout
+              </Button>
+            </Box>
+
+            {/* Row: Delete (full width) */}
+            <Button
+              variant="outlined"
+              color="error"
+              fullWidth
+              onClick={() => {
+                if (!activeLayoutId) return;
+                if (window.confirm('Are you sure you want to delete this layout?')) {
+                  dispatch(deleteMonitoringLayout(activeLayoutId));
+                }
+
+                // 🧹 Reset sidebar local states
+                setSelectedBuilding('');
+                setSelectedFloor('');
+                setSelectedFloorplan('');
+                setSelectedMaskedArea('');
+                setSelectedCCTV('');
+                setSelectedScreen(null);
+              }}
+            >
+              Delete Layout
+            </Button>
           </Box>
-        </Drawer>
+        </Box>
       </Box>
     </Box>
   );

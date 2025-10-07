@@ -50,6 +50,7 @@ export interface AlarmTriggerType {
     alarmRecordStatus: string;
     actionStatus: string;
     isActive: boolean;
+    alarmColor: string;
 };
 
 interface StateType {

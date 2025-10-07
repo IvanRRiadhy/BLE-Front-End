@@ -24,7 +24,7 @@ import { fetchMembers, memberType } from 'src/store/apps/crud/member';
 import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import BeaconDetailPopup from './Popup/BeaconDetailPopup';
 import TrackingDetailPopup from './Popup/TrackingDetailPopup';
-import { setFloorplan, setScreenDisplay } from 'src/store/apps/monitoring/layout';
+import {  setScreenDisplay } from 'src/store/apps/monitoring/layout';
 import {
   fetchGeoFencingAlarms,
   fetchGeoFencingAlarmsAll,
@@ -410,7 +410,7 @@ const FloorView: React.FC<{
       transition.to !== activeFloorplan &&
       lastSwitchedRef.current !== transition.to
     ) {
-      dispatch(setFloorplan(gridNumber, screenNumber, transition.to));
+      // dispatch(setFloorplan(gridNumber, screenNumber, transition.to));
       lastSwitchedRef.current = transition.to;
     }
   }, [focusBeacon, beaconsByTopic, activeFloorplan, gridNumber, screenNumber, dispatch]);
@@ -470,22 +470,22 @@ const FloorView: React.FC<{
     }
 
     if (to && to !== activeFloorplan && lastSwitchedRef.current !== to) {
-      dispatch(setFloorplan(gridNumber, screenNumber, to));
+      // dispatch(setFloorplan(gridNumber, screenNumber, to));
       lastSwitchedRef.current = to;
     }
   }, [focusBeacon, beaconsByTopic, activeFloorplan, gridNumber, screenNumber, dispatch]);
 
   // === END FOLLOW CAMERA HOOK ===
 
-  const handleCancelFollowing = () => {
-    if (!gridNumber || !screenNumber) return;
-    dispatch(
-      setScreenDisplay(gridNumber, screenNumber, {
-        displayType: 0,
-        displayOutput: '',
-      }),
-    );
-  };
+  // const handleCancelFollowing = () => {
+  //   if (!gridNumber || !screenNumber) return;
+  //   dispatch(
+  //     setScreenDisplay(gridNumber, screenNumber, {
+  //       displayType: 0,
+  //       displayOutput: '',
+  //     }),
+  //   );
+  // };
 
   if (floorplanImage === 'No Active Floorplan') {
     return (
@@ -602,7 +602,9 @@ const FloorView: React.FC<{
             label="Show GeoFence Areas"
           />
           {Boolean(focusBeacon) && (
-            <Button variant="contained" color="error" onClick={handleCancelFollowing}>
+            <Button variant="contained" color="error" 
+            // onClick={handleCancelFollowing}
+            >
               Cancel Following
             </Button>
           )}

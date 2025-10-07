@@ -221,8 +221,8 @@ const AlarmWarning = () => {
                               <Chip
                                 sx={{
                                   bgcolor:
-                                    alarmRecordStatusColormap[alarm.alarmRecordStatus] ||
-                                    'secondary.light',
+                                    alarm.alarmTriggers.alarmColor ||
+                                    'secondary.dark',
                                   color: 'white',
                                   borderRadius: '8px',
                                 }}

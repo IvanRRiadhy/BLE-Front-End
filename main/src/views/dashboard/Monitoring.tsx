@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material';
 import MonitoringSidebar from 'src/components/dashboards/monitoring/Sidebar/MonitoringSidebar';
 import MonitoringFooter from 'src/components/dashboards/monitoring/Footer/MonitoringFooter';
 import ToolbarMonitor from 'src/layouts/full/monitoringLayout/Toolbar';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   toggleHorizontal,
   setMonitorSidebar,
@@ -13,84 +13,119 @@ import {
 } from 'src/store/customizer/CustomizerSlice';
 import MonitoringGrid from 'src/views/dashboard/MonitoringGrid.tsx';
 import { hideAlarmPopup } from 'src/store/apps/monitoring/AlarmUI';
-import AlarmPopup from 'src/layouts/full/AlarmPopup'; 
+import AlarmPopup from 'src/layouts/full/AlarmPopup';
+import { ScreenSettings } from 'src/store/apps/monitoring/layout';
 
 const Monitoring = () => {
   const dispatch = useDispatch();
   const theme = useTheme();
-  const { latest, open } = useSelector((s: RootState) => s.AlarmUIReducer);
-  const grid = useSelector((state: RootState) => state.layoutReducer.grid); // Get the current grid value
-  const floorIds = useSelector((state: RootState) => state.layoutReducer.floorplanId); // Get the current floor IDs
-  const screenDisplay = useSelector((state: RootState) => state.layoutReducer.screenDisplay);
-  const floorIds2 = screenDisplay?.map((row) => row.map((item) => item.displayOutput)) ?? [];
-  const screenType = screenDisplay?.map((row) => row.map((item) => item.displayType)) ?? [];
 
-  const memoizedFloorIds = useMemo(() => floorIds, [floorIds]);
-  const memoizedFloorIds2 = useMemo(() => floorIds2, [floorIds2]);
-  const memoizedScreenType = useMemo(() => screenType, [screenType]);
-  const screenSettings = useSelector((state: RootState) => state.layoutReducer.screenSettings);
+  const { latest, open } = useSelector((s: RootState) => s.AlarmUIReducer);
+
+  const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
+  const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
+
+  const activeLayout = layouts.find((l) => l.id === activeLayoutId) || null;
+
+  // Local state for reactive grid (in case layout changes dynamically)
+  const [grid, setGrid] = useState<number>(activeLayout?.grid ?? 1);
+  const [screens, setScreens] = useState(activeLayout?.screens ?? []);
+
+  // Watch activeLayout changes → update grid and screens
+  useEffect(() => {
+    if (activeLayout) {
+      setGrid(activeLayout.grid);
+      setScreens(activeLayout.screens);
+    }
+  }, [activeLayout]);
+
+  // Transform layout data for MonitoringGrid props
+  const { floorIds, screenDisplay, screenType, screenSettings } = useMemo(() => {
+    const fIds: Record<number, string[]> = {};
+    const sDisplay: Record<number, string[]> = {};
+    const sType: Record<number, number[]> = {};
+    const sSettings: ScreenSettings[][] = [];
+
+    fIds[grid] = [];
+    sDisplay[grid] = [];
+    sType[grid] = [];
+    sSettings[grid] = [];
+
+    screens.forEach((s, idx) => {
+      fIds[grid][idx] = s.floorplanId ?? '';
+      sDisplay[grid][idx] = s.display.displayOutput ?? '';
+      sType[grid][idx] = s.display.displayType ?? 0;
+      sSettings[grid][idx] = s.settings;
+    });
+
+    return {
+      floorIds: fIds,
+      screenDisplay: sDisplay,
+      screenType: sType,
+      screenSettings: sSettings,
+    };
+  }, [screens, grid]);
+
   const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
     width: '100%',
     color: theme.palette.text.secondary,
   }));
-  useEffect(() => {
-    // Dispatch actions when the component is mounted
-    dispatch(toggleHorizontal(false)); // Enable horizontal layout
-    dispatch(setMonitorSidebar(true)); // Enable monitor sidebar
-    dispatch(toggleSidebar()); // Disable sidebar
 
-    // Optionally, clean up when the component is unmounted
+  // Handle sidebar visibility on page mount/unmount
+  useEffect(() => {
+    dispatch(toggleHorizontal(false));
+    dispatch(setMonitorSidebar(true));
+    dispatch(toggleSidebar());
+
     return () => {
-      dispatch(toggleHorizontal(true)); // Reset horizontal layout
-      dispatch(setMonitorSidebar(false)); // Reset monitor sidebar
-      dispatch(toggleSidebar()); // Reset sidebar
+      dispatch(toggleHorizontal(true));
+      dispatch(setMonitorSidebar(false));
+      dispatch(toggleSidebar());
     };
   }, [dispatch]);
-
-  useEffect(() => {
-    console.log(
-      `Monitoring: memoizedFloorIds: ${memoizedFloorIds}, memoizedFloorIds2: ${memoizedFloorIds2}, memoizedScreenType: ${memoizedScreenType}`
-    );
-  }, [memoizedFloorIds, memoizedFloorIds2, memoizedScreenType]);
 
   return (
     <>
       <ToolbarStyled>
         <ToolbarMonitor />
       </ToolbarStyled>
+
       <PageContainer
         title="Monitoring Dashboard"
         description="This is the Monitoring Dashboard page"
       >
         <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
           <MonitoringSidebar />
+
           <Box
             mt={0}
             sx={{
               flexGrow: 1,
               margin: 0,
               padding: 0,
-              // marginLeft: customizer.isMonitorSidebar
-              //   ? customizer.SidebarWidth
-              //   : customizer.MiniSidebarWidth,
               transition: theme.transitions.create('margin-left', {
                 duration: theme.transitions.duration.shortest,
               }),
             }}
           >
+            {/* The grid updates automatically based on the selected layout */}
             <MonitoringGrid
               grid={grid}
-              floorIds={memoizedFloorIds}
+              floorIds={floorIds}
               screenSettings={screenSettings}
-              screenDisplay={memoizedFloorIds2}
-              screenType={memoizedScreenType}
+              screenDisplay={screenDisplay}
+              screenType={screenType}
             />
-            {/* {renderLayout()} */}
           </Box>
         </Box>
       </PageContainer>
+
       <MonitoringFooter />
-      <AlarmPopup alarm={latest} open={open} onClose={() => dispatch(hideAlarmPopup())} />
+      <AlarmPopup
+        alarm={latest}
+        open={open}
+        onClose={() => dispatch(hideAlarmPopup())}
+      />
     </>
   );
 };

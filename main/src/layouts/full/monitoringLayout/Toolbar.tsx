@@ -1,48 +1,31 @@
-import { Box, Button, List, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  List,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Typography,
+} from '@mui/material';
 import { useState, useEffect } from 'react';
-import { useDispatch, AppDispatch, useSelector, RootState } from 'src/store/Store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from 'src/store/Store';
 import { setMonitorSidebar } from 'src/store/customizer/CustomizerSlice';
-import { setGrid } from 'src/store/apps/monitoring/layout';
+import { setActiveLayout, LayoutSet } from 'src/store/apps/monitoring/layout';
 
 const Toolbar = () => {
-  const [currentDateTime, setCurrentDateTime] = useState<string>(''); // Initialize with the current time in Indonesian format
-  const selectedGrid = useSelector((state: RootState) => state.layoutReducer.grid); // Get the current grid value from the store
   const dispatch: AppDispatch = useDispatch();
+
+  // Redux: Layouts and active layout
+  const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
+  const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
+  const activeLayout = layouts.find((l) => l.id === activeLayoutId) ?? null;
+
+  // Local: fullscreen + datetime
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-  const handleChange = (event: SelectChangeEvent<string>) => {
-    dispatch(setGrid(parseInt(event.target.value.charAt(0)))); // Dispatch the selected grid value
-  };
-  const toggleFullscreen = (isMax: boolean) => {
-    const element = document.documentElement; // Target the entire document for fullscreen
-    if (isMax && !document.fullscreenElement) {
-      dispatch(setMonitorSidebar(false)); // Hide the sidebar
-      // Enter fullscreen mode
-      if (element.requestFullscreen) {
-        element.requestFullscreen();
-      } else if ((element as any).webkitRequestFullscreen) {
-        (element as any).webkitRequestFullscreen(); // Safari
-      } else if ((element as any).msRequestFullscreen) {
-        (element as any).msRequestFullscreen(); // IE/Edge
-      }
-    }
-    if (!isMax && document.fullscreenElement) {
-      dispatch(setMonitorSidebar(true)); // Hide the sidebar
-      // Exit fullscreen mode
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if ((document as any).webkitExitFullscreen) {
-        (document as any).webkitExitFullscreen(); // Safari
-      } else if ((document as any).msExitFullscreen) {
-        (document as any).msExitFullscreen(); // IE/Edge
-      }
-    }
-    // console.log(isFullscreen);
-    // const header = document.querySelector('header'); // Assuming the header is a <header> element
-    // if (header) {
-    //   header.style.display = isFullscreen ? 'block' : 'none'; // Hide or show the header
-    // }
-  };
-  // Function to format date and time with colons
+  const [currentDateTime, setCurrentDateTime] = useState<string>('');
+
+  // 🕒 Format date and update every second
   const formatDateTime = () => {
     const now = new Date();
     return new Intl.DateTimeFormat('id-ID', {
@@ -53,31 +36,24 @@ const Toolbar = () => {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      hour12: false, // Use 24-hour format
+      hour12: false,
     })
       .format(now)
-      .replace(/\./g, ':'); // Replace dots with colons
+      .replace(/\./g, ':');
   };
 
-  // Update date and time every second
   useEffect(() => {
-    setCurrentDateTime(formatDateTime()); // Set initial time immediately
-    const interval = setInterval(() => {
-      setCurrentDateTime(formatDateTime());
-    }, 1000);
-
-    return () => clearInterval(interval); // Cleanup interval on component unmount
+    setCurrentDateTime(formatDateTime());
+    const interval = setInterval(() => setCurrentDateTime(formatDateTime()), 1000);
+    return () => clearInterval(interval);
   }, []);
 
+  // 🖥 Fullscreen handler
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement); // Update state based on fullscreenElement
-    };
-
+    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange); // Safari
-    document.addEventListener('msfullscreenchange', handleFullscreenChange); // IE/Edge
-
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', handleFullscreenChange);
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
@@ -85,40 +61,62 @@ const Toolbar = () => {
     };
   }, []);
 
+  const toggleFullscreen = (enable: boolean) => {
+    const element = document.documentElement;
+    if (enable && !document.fullscreenElement) {
+      dispatch(setMonitorSidebar(false));
+      element.requestFullscreen?.();
+      (element as any).webkitRequestFullscreen?.();
+      (element as any).msRequestFullscreen?.();
+    } else if (!enable && document.fullscreenElement) {
+      dispatch(setMonitorSidebar(true));
+      document.exitFullscreen?.();
+      (document as any).webkitExitFullscreen?.();
+      (document as any).msExitFullscreen?.();
+    }
+  };
+
+  // 🧭 Handle layout selection
+  const handleLayoutChange = (event: SelectChangeEvent<string>) => {
+    const layoutId = event.target.value;
+    dispatch(setActiveLayout(layoutId));
+  };
+
   return (
     <Box>
       <List
         sx={{
           p: 0,
-          display: 'flex', // Flex layout for horizontal alignment
-          gap: '20px', // Space between items
-          zIndex: '100',
-          alignItems: 'center', // Align items vertically
+          display: 'flex',
+          gap: '20px',
+          zIndex: 100,
+          alignItems: 'center',
         }}
       >
-        <Typography variant="h5" fontStyle="bold" fontWeight={900} mt={0.5}>
-          Grid :
+        {/* 🧱 Layout Selector */}
+        <Typography variant="h5" fontStyle="bold" fontWeight={900}>
+          Layout :
         </Typography>
-        {/* Dropdown for Grid Selection */}
+
         <Select
-          value={selectedGrid.toString()} // Convert number to string for Select value
-          onChange={handleChange}
+          value={activeLayoutId ?? ''}
+          onChange={handleLayoutChange}
           variant="outlined"
           size="small"
-          sx={{
-            minWidth: '100px', // Adjust width as needed
-            fontWeight: 'bold',
-            marginRight: '20px',
-          }}
+          sx={{ minWidth: '220px', fontWeight: 'bold' }}
+          displayEmpty
         >
-          <MenuItem value="1">1 Grid</MenuItem>
-          <MenuItem value="2">2 Grid</MenuItem>
-          <MenuItem value="3">3 Grid</MenuItem>
-          <MenuItem value="4">4 Grid</MenuItem> 
-          <MenuItem value="5">5 Grid</MenuItem>
-          <MenuItem value="6">6 Grid</MenuItem>
+          <MenuItem value="" disabled>
+            -- Select Layout --
+          </MenuItem>
+          {layouts.map((layout: LayoutSet) => (
+            <MenuItem key={layout.id} value={layout.id}>
+              {layout.name || 'Unnamed Layout'}
+            </MenuItem>
+          ))}
         </Select>
-        <Button>Refresh</Button>
+
+        {/* 🧭 Fullscreen Controls */}
         <Button
           color="success"
           variant={isFullscreen ? 'contained' : 'text'}
@@ -133,12 +131,11 @@ const Toolbar = () => {
         >
           Min
         </Button>
+
         <Button>Capture</Button>
 
-        {/* Right Section: Date and Time */}
+        {/* 🕒 Clock */}
         <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'flex-end' }}>
-          {' '}
-          {/* Push this section to the far right */}
           <Typography variant="body1" fontWeight="bold">
             {currentDateTime}
           </Typography>
