@@ -19,16 +19,21 @@ const Config = () => {
   const selectedScreen = useSelector((state: RootState) => state.layoutReducer.selectedScreen);
   const selectedFloorplanId = useSelector((state: RootState) => state.layoutReducer.selectedFloorplanId);
 
-  const [screenSettings, setScreenSettings] = useState({
-    scale: 1,
-    translateX: 0,
-    translateY: 0,
-  });
+  // const [screenSettings, setScreenSettings] = useState({
+  //   scale: 1,
+  //   translateX: 0,
+  //   translateY: 0,
+  // });
 
   // --- Redux data ---
   const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
   const activeLayout = layouts.find((l) => l.id === activeLayoutId);
+
+  const selectedScreenSettings =
+  selectedScreen !== null && activeLayout
+    ? activeLayout.screens[selectedScreen]?.settings ?? { scale: 1, translateX: 0, translateY: 0 }
+    : { scale: 1, translateX: 0, translateY: 0 };
 
   // --- Lifecycle setup (hide sidebar, switch layout) ---
   useEffect(() => {
@@ -102,7 +107,7 @@ const Config = () => {
             <ConfigSidebar
               onGridChange={handleGridChange}
               onScreenUpdate={handleScreenUpdate}
-              screenSettings={screenSettings}
+              screenSettings={selectedScreenSettings}
               selectedScreen={selectedScreen}
               setSelectedScreen={SetSelectedScreen}
               selectedFloorplanId={selectedFloorplanId}
@@ -114,10 +119,10 @@ const Config = () => {
             <ConfigGrid
               grid={previewGrid}
               screens={memoizedScreens}
-              screenSettings={screenSettings}
-              setScreenSettings={setScreenSettings}
+              screenSettings={selectedScreenSettings}
               selectedScreen={selectedScreen}
               onScreenSelect={SetSelectedScreen}
+              activeLayout={activeLayout}
             />
           </Grid>
         </Grid>

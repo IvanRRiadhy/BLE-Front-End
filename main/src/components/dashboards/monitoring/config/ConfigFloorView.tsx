@@ -9,6 +9,9 @@ import { floorType, fetchFloors } from 'src/store/apps/crud/floor';
 import { FloorplanType, fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { setScreenSettings } from 'src/store/apps/monitoring/layout';
+
+
 
 const ConfigFloorView: React.FC<{
   activeFloorplan: string;
@@ -17,8 +20,8 @@ const ConfigFloorView: React.FC<{
   containerHeight: number; // New prop
   activeMaskedArea?: string;
   screenSettings?: { scale: number; translateX: number; translateY: number };
-  setScreenSettings?: (settings: { scale: number; translateX: number; translateY: number }) => void;
-}> = ({ activeFloorplan, zoomable, activeMaskedArea, screenSettings, setScreenSettings }) => {
+  // setScreenSettings?: (settings: { scale: number; translateX: number; translateY: number }) => void;
+}> = ({ activeFloorplan, zoomable, activeMaskedArea, screenSettings }) => {
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchFloorplan());
@@ -53,7 +56,8 @@ const ConfigFloorView: React.FC<{
   useEffect(() => {
     // console.log('Active Floorplan:', floorplans);
   }, [actFloorplan]);
-
+const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
+const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
   const [scale, setScale] = useState(screenSettings?.scale || 1); // Initial scale set to 1
   const [image, setImage] = useState<HTMLImageElement | null>(null);
@@ -84,61 +88,24 @@ const ConfigFloorView: React.FC<{
   }, [devices, activeFloorplan]);
 
   useEffect(() => {
-    // console.log('floors:', floor);
-    // console.log('actFloorplan:', actFloorplan);
-    // console.log('activeFloorplan:', floorplans);
     if (floorplanImage) {
       const img = new Image();
       img.src = floorplanImage;
       img.onload = () => {
         setImage(img);
         setImgSize({ width: img.width, height: img.height });
-        // console.log(imgSize);
-        // Center the image when it is loaded
+
         if (containerRef.current) {
           const containerWidth = containerRef.current.clientWidth;
           const containerHeight = containerRef.current.clientHeight;
 
-          // setScale(finalScale); // Set the initial scale
 
-          // Calculate the initial translate values to center the image
-          // if (focusArea !== null) {
-          //   const scaleX = containerWidth / (focusArea.maxX - focusArea.minX);
-          //   const scaleY = containerHeight / (focusArea.maxY - focusArea.minY);
-          //   const targetScale = Math.min(scaleX, scaleY);
-          //   const offsetX = containerWidth / 2 - focusArea.centerX * targetScale;
-          //   const offsetY = containerHeight / 2 - focusArea.centerY * targetScale;
-
-          //   setScale(targetScale);
-          //   setTranslate({
-          //     x: screenSettings?.translateX || offsetX,
-          //     y: screenSettings?.translateY || offsetY,
-          //   });
-          // } else {
           const offsetX = containerWidth / 2;
           const offsetY = containerHeight / 2;
           setTranslate({
             x: screenSettings?.translateX || offsetX,
             y: screenSettings?.translateY || offsetY,
           });
-          // }
-
-          // console.log('Container Width:', containerWidth);
-          // console.log('Container Height:', containerHeight);
-          // console.log('Image Width:', img.width);
-          // console.log('Image Height:', img.height);
-          // console.log('Min Scale:', minScale);
-          // console.log('OffsetX:', offsetX);
-          // console.log('OffsetY:', offsetY);
-
-          // console.log(screenSettings);
-          // if (screenSettings?.translateX === 0) {
-          //   setTranslate({ x: offsetX, y: screenSettings?.translateY });
-          // }
-          // if (screenSettings?.translateY === 0) {
-          //   setTranslate({ x: screenSettings?.translateX, y: offsetY });
-          // }
-          // setTranslate({ x: offsetX, y: offsetY });
         }
       };
       img.onerror = () => {
@@ -146,33 +113,6 @@ const ConfigFloorView: React.FC<{
       };
     }
   }, [actFloorplan, floor]);
-
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     if (containerRef.current && imgSize && imgSize.width > 1 && imgSize.height > 1) {
-  //       const containerWidth = containerRef.current.clientWidth;
-  //       const containerHeight = containerRef.current.clientHeight;
-
-  //       const widthRatio = containerWidth / imgSize.width;
-  //       const heightRatio = containerHeight / imgSize.height;
-
-  //       // Calculate minScale based on the larger ratio
-  //       const minScale = Math.min(widthRatio, heightRatio);
-
-  //       // Adjust the current scale if it's below the new minimum scale
-  //       setScale((prevScale) => Math.max(prevScale, minScale));
-  //     }
-  //   };
-
-  //   window.addEventListener('resize', handleResize);
-
-  //   // Only call handleResize if imgSize is valid
-  //   if (imgSize && imgSize.width > 1 && imgSize.height > 1) {
-  //     handleResize();
-  //   }
-
-  //   return () => window.removeEventListener('resize', handleResize);
-  // }, [imgSize]);
 
   const calculateImageDimensions = (
     containerWidth: number,
@@ -303,16 +243,16 @@ const ConfigFloorView: React.FC<{
     }
   }, [imgSize]); // Reset scale when imgSize changes
 
-  useEffect(() => {
-    // console.log('Translate : ', translate);
-    if (setScreenSettings) {
-      setScreenSettings({
-        scale,
-        translateX: translate.x,
-        translateY: translate.y,
-      });
-    }
-  }, [scale, translate, setScreenSettings]);
+  // useEffect(() => {
+  //   // console.log('Translate : ', translate);
+  //   if (setScreenSettings) {
+  //     setScreenSettings({
+  //       scale,
+  //       translateX: translate.x,
+  //       translateY: translate.y,
+  //     });
+  //   }
+  // }, [scale, translate, setScreenSettings]);
 
   useEffect(() => {
     if (!activeMaskedArea) {
@@ -362,6 +302,63 @@ const ConfigFloorView: React.FC<{
 
     if (containerRef.current) containerRef.current.style.cursor = 'grabbing';
   };
+
+  useEffect(() => {
+  if (screenSettings) {
+    setScale(screenSettings.scale);
+    setTranslate({
+      x: screenSettings.translateX,
+      y: screenSettings.translateY,
+    });
+  }
+}, [screenSettings]);
+
+// 🧠 Prevent infinite re-renders by remembering last sent values
+const lastSent = useRef<{ scale: number; x: number; y: number } | null>(null);
+
+useEffect(() => {
+  if (!activeLayoutId || !activeFloorplan) return;
+
+  const activeLayout = layouts.find((l) => l.id === activeLayoutId);
+  if (!activeLayout) return;
+
+  const screen = activeLayout.screens.find((s) => s.floorplanId === activeFloorplan);
+  if (!screen) return;
+
+  const current = { scale, x: translate.x, y: translate.y };
+
+  // ✅ Skip dispatch if nothing changed since last run
+  if (
+    lastSent.current &&
+    lastSent.current.scale === current.scale &&
+    lastSent.current.x === current.x &&
+    lastSent.current.y === current.y
+  ) {
+    return;
+  }
+
+  // ✅ Remember last state to prevent repeat loops
+  lastSent.current = current;
+
+  // ✅ Throttle Redux updates to avoid flooding
+  const timeout = setTimeout(() => {
+    dispatch(
+      setScreenSettings({
+        layoutId: activeLayout.id,
+        screenId: screen.id,
+        settings: {
+          scale: current.scale,
+          translateX: current.x,
+          translateY: current.y,
+        },
+      }),
+    );
+  }, 150); // 150ms debounce is smooth for zoom/pan
+
+  return () => clearTimeout(timeout);
+}, [scale, translate.x, translate.y, activeLayoutId, activeFloorplan, layouts, dispatch]);
+
+
 
   const handleMouseMove = (event: React.MouseEvent) => {
     if (!isDragging || !containerRef.current || !imgSize || !zoomable) return;

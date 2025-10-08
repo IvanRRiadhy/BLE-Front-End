@@ -222,7 +222,7 @@ const AlarmWarning = () => {
                                 sx={{
                                   bgcolor:
                                     alarm.alarmTriggers.alarmColor ||
-                                    'secondary.dark',
+                                    'error.dark',
                                   color: 'white',
                                   borderRadius: '8px',
                                 }}

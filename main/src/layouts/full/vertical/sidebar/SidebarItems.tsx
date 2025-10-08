@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React from 'react';
-import Menuitems from './MenuItems';
+import getMenuItems from './MenuItems';
 import { useLocation } from 'react-router';
 import { Box, List, useMediaQuery } from '@mui/material';
 import { useSelector, useDispatch } from 'src/store/Store';
@@ -19,6 +19,8 @@ const SidebarItems = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const hideMenu: any = lgUp ? customizer.isCollapse && !customizer.isSidebarHover : '';
   const dispatch = useDispatch();
+  const alarmSettings = useSelector((state: RootState) => state.AlarmSettingReducer.alarmSettingAll);
+  const Menuitems = getMenuItems(alarmSettings);
 
   return (
     <Box sx={{ px: 3 }}>

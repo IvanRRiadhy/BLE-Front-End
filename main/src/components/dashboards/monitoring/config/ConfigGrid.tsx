@@ -1,9 +1,9 @@
 import { Box, Grid2 as Grid, Typography, useTheme } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
-import { RootState, useSelector } from 'src/store/Store';
+import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import ConfigFloorView from './ConfigFloorView';
 import VideoPlayer from 'src/components/shared/VideoPlayer';
-import { ScreenSettings } from 'src/store/apps/monitoring/layout';
+import { LayoutSet, ScreenSettings, setScreenSettings } from 'src/store/apps/monitoring/layout';
 
 interface ScreenPreview {
   type: number; // 0 = Floorplan, 1 = Masked Area, 2 = CCTV
@@ -15,9 +15,10 @@ interface ConfigGridProps {
   grid: number;
   screens: ScreenPreview[];
   screenSettings?: { scale: number; translateX: number; translateY: number };
-  setScreenSettings?: (settings: { scale: number; translateX: number; translateY: number }) => void;
+  // setScreenSettings?: (settings: { scale: number; translateX: number; translateY: number }) => void;
   selectedScreen?: number | null;
   onScreenSelect?: (index: number, floorplanId?: string) => void;
+  activeLayout?: LayoutSet | null;
 }
 
 const videoJsOptions = {
@@ -38,10 +39,11 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
   grid,
   screens,
   screenSettings,
-  setScreenSettings,
   selectedScreen,
   onScreenSelect,
+  activeLayout,
 }) => {
+  const dispatch: AppDispatch = useDispatch();
   const theme = useTheme();
   const gridRef = useRef<HTMLDivElement>(null);
   const customizer = useSelector((state: RootState) => state.customizer);
@@ -60,6 +62,21 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
     const floorplanId = screen?.floorplanId || '';
     if (onScreenSelect) onScreenSelect(index, floorplanId);
   };
+
+useEffect(() => {
+  if (!activeLayout) return;
+
+  activeLayout.screens.forEach((screen) => {
+    dispatch(
+      setScreenSettings({
+        layoutId: activeLayout.id,
+        screenId: screen.id,
+        settings: screen.settings,
+      })
+    );
+  });
+}, [activeLayout]);
+  
 
   const toRoman = (num: number) => ['I', 'II', 'III', 'IV', 'V', 'VI'][num - 1] || num.toString();
 
@@ -91,7 +108,6 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
         containerWidth={gridDimensions.width}
         containerHeight={gridDimensions.height}
         screenSettings={screenSettings}
-        setScreenSettings={setScreenSettings}
       />
     );
   };
