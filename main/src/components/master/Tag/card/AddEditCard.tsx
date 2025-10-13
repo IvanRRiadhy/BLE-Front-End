@@ -222,12 +222,12 @@ const AddEditCard = ({ type, card }: formType) => {
 
   function getAreaPath(areaId: string): string {
     if (!areaId) return 'None';
-    const area = maskedAreaData.find((a) => a.id === areaId);
+    const area = maskedAreaData.find((a: MaskedAreaType) => a.id === areaId);
     if (!area) return 'Unknown Area';
 
-    const floorplan = floorplanData.find((fp) => fp.id === area.floorplanId);
-    const floor = floorplan ? floorData.find((f) => f.id === floorplan.floorId) : null;
-    const building = floor ? buildingData.find((b) => b.id === floor.buildingId) : null;
+    const floorplan = floorplanData.find((fp: FloorplanType) => fp.id === area.floorplanId);
+    const floor = floorplan ? floorData.find((f: floorType) => f.id === floorplan.floorId) : null;
+    const building = floor ? buildingData.find((b: BuildingType) => b.id === floor.buildingId) : null;
 
     const pathParts = [
       area.name,

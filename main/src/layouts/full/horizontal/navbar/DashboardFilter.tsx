@@ -26,6 +26,8 @@ const DashboardFilter = () => {
   const [resetToken, setResetToken] = useState(0);
 
   const handleClickOpen = () => {
+    console.log("Dashboard Filter: ", dashboardFilter);
+    console.log("Filter: ", appliedFilter);
     setOpen(true);
   };
   const handleClose = () => {
@@ -38,10 +40,10 @@ const DashboardFilter = () => {
   const maskedAreaList = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
   const dashboardFilter = useSelector((state: RootState) => state.customizer.dashboardFilter);
   const [appliedFilter, setAppliedFilter] = useState<FilterState>({
-    BuildingId: [],
-    FloorId: [],
-    FloorplanId: [],
-    MaskedAreaId: [],
+    BuildingId: dashboardFilter?.BuildingId ?? [],
+    FloorId: dashboardFilter?.FloorId ?? [],
+    FloorplanId: dashboardFilter?.FloorplanId ?? [],
+    MaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId ?? [],
   });
   useEffect(() => {
     dispatch(fetchBuildings());
@@ -137,9 +139,6 @@ const DashboardFilter = () => {
         >
           Filter
         </Typography>
-        <Typography variant="body2" gutterBottom sx={{ mb: 2 }} color="error.dark">
-          *Leave empty to skip filter
-        </Typography>
         <Grid container spacing={2}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
             <AutocompleteFilter
@@ -147,6 +146,7 @@ const DashboardFilter = () => {
               floors={floorList}
               floorplans={floorplanList}
               maskedAreas={maskedAreaList}
+              initial={appliedFilter}
               onChangeFilter={handleFilterChange}
               resetToken={resetToken}
             />

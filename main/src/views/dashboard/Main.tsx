@@ -164,30 +164,30 @@ const Modern = () => {
       }),
     );
   }, [dispatch, dashboardFilter]);
-  const trackingTotalCount: number = useSelector(
-    (state: RootState) => state.trackingTransReducer.trackingTransTotalCount ?? 0,
+  const trackingFilteredCount: number = useSelector(
+    (state: RootState) => state.trackingTransReducer.trackingTransFilteredCount ?? 0,
   );
-  const blacklistTotalCount: number = useSelector(
-    (state: RootState) => state.blacklistReducer.blacklistTotalCount ?? 0,
+  const blacklistFilteredCount: number = useSelector(
+    (state: RootState) => state.blacklistReducer.blacklistFilteredCount ?? 0,
   );
   const blacklistData: blacklistType[] = useSelector(
     (state: RootState) => state.blacklistReducer.blacklists,
   );
   const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
-  const maskedAreaTotalCount: number = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreaTotalCount ?? 0,
+  const maskedAreaFilteredCount: number = useSelector(
+    (state: RootState) => state.maskedAreaReducer.maskedAreaFilteredCount ?? 0,
   );
   const maskedAreaData: MaskedAreaType[] = useSelector(
     (state: RootState) => state.maskedAreaReducer.maskedAreas,
   );
-  const bleReaderTotalCount: number = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceTotalCount ?? 0,
+  const bleReaderFilteredCount: number = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceFilteredCount ?? 0,
   );
   const bleReaderData: FloorplanDeviceType[] = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.floorplanDevices,
   );
-  const alarmTotalCount: number = useSelector(
-    (state: RootState) => state.alarmReducer.alarmRecordTotalCount ?? 0,
+  const alarmFilteredCount: number = useSelector(
+    (state: RootState) => state.alarmReducer.alarmRecordFilteredCount ?? 0,
   );
   const alarmFilteredData: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
@@ -236,10 +236,10 @@ const Modern = () => {
           >
             <TopCards
               ActiveBeaconCount={activeTag}
-              ActiveGatewayCount={bleReaderTotalCount}
-              AreaCount={maskedAreaTotalCount}
-              BlacklistCount={blacklistTotalCount}
-              AlarmCount={alarmTotalCount}
+              ActiveGatewayCount={bleReaderFilteredCount}
+              AreaCount={maskedAreaFilteredCount}
+              BlacklistCount={blacklistFilteredCount}
+              AlarmCount={alarmFilteredCount}
               NonActiveBeaconCount={nonActiveTag}
               FirstActiveBeacon={activeTagData?.flat().map((item) => item.name)}
               FirstActiveGateway={bleReaderData?.flat().map((item) => item.name)}

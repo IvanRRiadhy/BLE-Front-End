@@ -33,12 +33,14 @@ import {
 import AddEditTrackingTransaction from './AddEditTrackingTransaction';
 import { useTranslation } from 'react-i18next';
 import { defaultTrackingTransFilter } from 'src/store/apps/defaultForm';
+import { fetchMembers, memberType } from 'src/store/apps/crud/member';
+import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 
 const columns = [
   { label: 'Transaction Time', field: 'TransTime', sortAble: true },
   { label: 'Reader', field: 'Reader.Name', sortAble: true },
-  { label: 'Floorplan', field: 'Floorplan.Name', sortAble: true },
-  { label: 'Card ', field: 'CardId', sortAble: true },
+  { label: 'Area', field: 'FloorplanMaskedArea.Name', sortAble: true },
+  { label: 'Person', field: '', sortAble: false },
   { label: 'Coordinate', field: '', sortAble: false },
   { label: 'Alarm Status', field: 'AlarmStatus', sortAble: true },
   { label: 'Battery', field: 'Battery', sortAble: true },
@@ -51,6 +53,8 @@ const TrackingTransactionList = () => {
   const trackingTransData = useSelector(
     (state: RootState) => state.trackingTransReducer.trackingTrans,
   );
+  const memberData = useSelector((state: RootState) => state.memberReducer.memberAll);
+  const visitorData = useSelector((state: RootState) => state.visitorReducer.visitors);
   const trackingTransTotalCount = useSelector(
     (state: RootState) => state.trackingTransReducer.trackingTransTotalCount,
   );
@@ -106,6 +110,8 @@ const TrackingTransactionList = () => {
 
   useEffect(() => {
     dispatch(fetchTrackingTransDT(trackingTransFilter));
+    dispatch(fetchMembers());
+    dispatch(fetchVisitor());
   }, [trackingTransFilter, dispatch]);
 
   //Delete Pop-up
@@ -146,6 +152,18 @@ const TrackingTransactionList = () => {
         hour12: false,
       },
     )}`;
+  };
+
+  const getHolderName = (id: string) => {
+    const member = memberData.find((member: memberType) => member.id === id);
+    if (member) {
+      return member.name;
+    }
+    const visitor = visitorData.find((visitor: VisitorType) => visitor.id === id);
+    if (visitor) {
+      return visitor.name;
+    }
+    return 'Unknown';
   };
 
   const renderSkeletonRows = (rows: number) => (
@@ -256,8 +274,8 @@ const TrackingTransactionList = () => {
                       </TableCell>
                       <TableCell>{formatTime(trackingTrans.transTime)}</TableCell>
                       <TableCell>{trackingTrans.reader?.name}</TableCell>
-                      <TableCell>{trackingTrans.floorplanMaskedArea?.name}</TableCell>
-                      <TableCell>{trackingTrans.cardId}</TableCell>
+                      <TableCell>{trackingTrans.floorplanMaskedArea?.name ?? "Unknown Area"}</TableCell>
+                      <TableCell>{getHolderName(trackingTrans.memberId ?? trackingTrans.visitorId ?? "")}</TableCell>
                       <TableCell>{`(${trackingTrans.coordinateX}, ${trackingTrans.coordinateY})`}</TableCell>
                       <TableCell>{trackingTrans.alarmStatus}</TableCell>
                       <TableCell>{trackingTrans.battery}</TableCell>

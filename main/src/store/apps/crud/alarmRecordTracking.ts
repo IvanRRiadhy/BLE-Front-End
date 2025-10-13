@@ -2,12 +2,13 @@ import axiosServices from "../../../utils/axios";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { masterVisitorType } from "./visitor";
+import { masterVisitorType, VisitorType } from "./visitor";
 import { bleReaderType } from "./bleReader";
 import { MaskedAreaType } from "./maskedArea";
 import { defaultAlarmRecordFilter } from "../defaultForm";
 import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 import { AlarmTriggerType } from "./alarmTrigger";
+import { memberType } from "./member";
 
 const API_URL = '/api/AlarmRecordTracking/';
 const API_DT_URL = '/api/AlarmRecordTracking/filter/';
@@ -46,7 +47,8 @@ export type GetFilter = {
 export interface AlarmType {
     id: string;
     timestamp: string;
-    visitorId: string;
+    visitorId?: string;
+    memberId?: string;
     readerId: string;
     floorplanMaskedAreaId: string;
     applicationId: string;
@@ -64,7 +66,8 @@ export interface AlarmType {
     waitingBy: string;
     investigatedBy: string;
     investigatedResult: string;
-    visitor?: masterVisitorType;
+    member?: memberType;
+    visitor?: VisitorType;
     reader?: bleReaderType;
     floorplanMaskedArea?: MaskedAreaType; 
     alarmTriggers: AlarmTriggerType;
@@ -172,13 +175,13 @@ export const fetchAlarmDT = createAsyncThunk(
         await ensureMinLatency(started, 500);
         return rejectWithValue("Filter contains 'Empty', skipping request");
       }
-
+      console.log("Filters: ", filter)
       // Retry-able request with cancellation
       const response = await retryUntilSuccess(
         () => axiosServices.post(`${API_DT_URL}`, filter),
         { signal } // uses thunkAPI.signal to cancel if needed
       );
-
+      console.log("Alarm records fetched successfully: ", response.data);
       // Update list in store
       dispatch(GetAlarms(response.data.collection.data || []));
 

@@ -59,7 +59,7 @@ const initialState: StateType = {
     alarmSettingFilter: defaultAlarmSettingFilter,
     alarmSettingAll: [],
     isLoading: false,
-    hasLoaded: false,
+    hasLoaded: true,
     alarmSettingTotalCount: 0,
     alarmSettingFilteredCount: 0,
     alarmSettingActiveCount: 0,
@@ -94,12 +94,12 @@ export const AlarmSettingSlice = createSlice({
     extraReducers: (builder) => {
         builder
         .addCase(fetchAlarmSettingsDT.pending, (state) => {
-            state.isLoading = true;
-            state.hasLoaded = false;
+            // state.isLoading = true;
+            // state.hasLoaded = false;
         })
         .addCase(fetchAlarmSettingsDT.fulfilled, (state, action) => {
-            state.isLoading = false;
-            state.hasLoaded = true;
+            // state.isLoading = false;
+            // state.hasLoaded = true;
     state.alarmSettingTotalCount = action.payload.recordsTotal;
     state.alarmSettingFilteredCount = action.payload.recordsFiltered;
   state.alarmSettingActiveCount = (action.payload.data ?? []).filter(
@@ -107,8 +107,8 @@ export const AlarmSettingSlice = createSlice({
   ).length;
         })
         .addCase(fetchAlarmSettingsDT.rejected, (state) => {
-            state.isLoading = false;
-            state.hasLoaded = false;
+            // state.isLoading = false;
+            // state.hasLoaded = false;
         });
     },
 });

@@ -293,7 +293,7 @@ const VisitorContent = () => {
     : undefined;
   const chipColor = statusValue !== undefined ? visitorStatusColorMap[statusValue] : 'default';
 
-  console.log(statusValue, chipColor);
+  // console.log(statusValue, chipColor);
   // console.log(`${BASE_URL}${visitorDetail?.faceImage}`)
   // ;
   const status = trxVisitorDetail?.status;

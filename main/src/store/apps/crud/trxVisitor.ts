@@ -28,6 +28,7 @@ export type GetFilter = {
     }
     filters:{
         Status?: number,
+        Gender?: number,
     }
 }
 

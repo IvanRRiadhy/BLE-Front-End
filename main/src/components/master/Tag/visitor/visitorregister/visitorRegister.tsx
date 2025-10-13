@@ -423,7 +423,7 @@ const VisitorRegister = () => {
                     </div>
                   </div>
                   {/* Member Input */}
-                  <CustomFormLabel> Purpose Visit </CustomFormLabel>
+                  <CustomFormLabel> Purpose Visit (member) </CustomFormLabel>
                   {/* <CustomSelect
                     name="selectedMember"
                     value={selectedMember?.id || ''}

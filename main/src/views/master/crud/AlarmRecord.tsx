@@ -97,7 +97,10 @@ const AlarmRecord = () => {
         >
           <ParentCard
             title="Alarm Record List"
-            codeModel={[<AlarmRecordImport key={'import'} />, <AlarmExport key={'export'} />]}
+            codeModel={[
+            // <AlarmRecordImport key={'import'} />, 
+            <AlarmExport key={'export'} />
+          ]}
           >
             <AlarmRecordList />
           </ParentCard>

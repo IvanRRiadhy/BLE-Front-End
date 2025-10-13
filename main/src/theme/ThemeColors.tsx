@@ -29,7 +29,7 @@ const ThemeColors = [
       },
       background: {
         default: '#f8fffc',
-        dark: '#ffffff',
+        dark: '#000000',
         paper: '#ffffff',
       },
     },

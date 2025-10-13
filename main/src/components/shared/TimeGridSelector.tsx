@@ -17,6 +17,7 @@ import {
   CancelNewTimeGroup,
   saveNewTimeGroup,
   editTimeGroup,
+  addTimeBlock,
 } from 'src/store/apps/crud/timeGroup';
 import { defaultTimeGroupFilter } from 'src/store/apps/defaultForm';
 
@@ -35,7 +36,10 @@ interface TimeGridSelectorProps {
   initialData?: TimeBlockType[];
 }
 
-export const TimeGridSelector = ({ onSelectionChange, initialData = [] }: TimeGridSelectorProps) => {
+export const TimeGridSelector = ({
+  onSelectionChange,
+  initialData = [],
+}: TimeGridSelectorProps) => {
   const dispatch = useDispatch();
   const theme = useTheme();
 
@@ -215,19 +219,32 @@ export const TimeGridSelector = ({ onSelectionChange, initialData = [] }: TimeGr
   const handleSave = () => {
     if (!selectedTimeGroup) return;
 
+    const payload: TimeGroupType = {
+      ...selectedTimeGroup,
+      timeBlocks: selectedTimeGroup.timeBlocks.map((b: TimeBlockType) => ({
+        ...b,
+        id: b.id.startsWith('block-') ? '' : b.id, // remove temp ids
+      })),
+    };
+
+    const newTimeBlocks = selectedTimeGroup.timeBlocks.filter((b: TimeBlockType) =>
+      b.id.startsWith('block-'),
+    );
+
     if (isNewTimeGroup) {
       dispatch(saveNewTimeGroup(selectedTimeGroup) as any);
     } else {
-      // build clean payload (strip fake ids)
-      const payload: TimeGroupType = {
-        ...selectedTimeGroup,
-        timeBlocks: selectedTimeGroup.timeBlocks.map((b: TimeBlockType) => ({
-          ...b,
-          id: b.id.startsWith('block-') ? '' : b.id, // remove temp ids
-        })),
-      };
-
-      dispatch(editTimeGroup(payload) as any);
+      const editPayload = { ...payload };
+      if (newTimeBlocks.length > 0) {
+        const addPayload = newTimeBlocks.map((b: TimeBlockType) => ({
+          dayOfWeek: b.dayOfWeek.toLowerCase(),
+          startTime: b.startTime,
+          endTime: b.endTime,
+          TimeGroupId: selectedTimeGroup.id,
+        }));
+        dispatch(addTimeBlock(addPayload) as any);
+      }
+      dispatch(editTimeGroup(editPayload) as any);
     }
 
     dispatch(fetchTimeGroupDT({ ...defaultTimeGroupFilter, Length: 999 }));
@@ -246,7 +263,9 @@ export const TimeGridSelector = ({ onSelectionChange, initialData = [] }: TimeGr
         </Typography>
         <Box display="flex" gap={1}>
           <Chip
-            icon={selectionMode === 'add' ? <IconSquareCheck size={16} /> : <IconSquare size={16} />}
+            icon={
+              selectionMode === 'add' ? <IconSquareCheck size={16} /> : <IconSquare size={16} />
+            }
             label={selectionMode === 'add' ? 'Adding' : 'Removing'}
             onClick={() => setSelectionMode((prev) => (prev === 'add' ? 'remove' : 'add'))}
             color={selectionMode === 'add' ? 'primary' : 'default'}

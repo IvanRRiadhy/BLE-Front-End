@@ -70,8 +70,14 @@ export const orgType: inputDataType[] = [
   export const genderIconMap: Record<string, any> = {
   Male: IconGenderMale,
   Female: IconGenderFemale,
-  Other: IconCircleX, // or any icon you want for "Rather not say"
+  RatherNotSay: IconCircleX, // or any icon you want for "Rather not say"
 };
+
+export const genderEnumMap: Record<string, number> = {
+  Male: 0,
+  Female: 1,
+  RatherNotSay: 2,
+}
   
   export const statusEmployee: inputDataType[] = [
     { label: "Please select Status", value: '', disabled: true},

@@ -248,7 +248,7 @@ export const fetchBleReaderDT = createAsyncThunk(
         maxDelay: 8000,
       }
     );
-
+    console.log("Ble Reader: ", res);
     dispatch(GetBleReader(res.data.collection.data || []));
     await ensureMinLatency(started, 500);
     return res.data.collection;

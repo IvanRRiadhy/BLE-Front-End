@@ -20,19 +20,6 @@ import { fetchBrands } from 'src/store/apps/crud/brand';
 import { defaultBleReaderFilter } from 'src/store/apps/defaultForm';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 
-type DummyFilter = {
-  Draw: number;
-  Start: number;
-  Length: number;
-  SortColumn: string;
-  SortDir: 'asc' | 'desc';
-  SearchValue: string;
-  filters: {
-    BrandId: string[];
-    EngineReaderId: string[];
-  };
-};
-
 const BleReaderFilter = () => {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
@@ -42,21 +29,10 @@ const BleReaderFilter = () => {
   const handleClose = () => {
     setOpen(false);
   };
-  const brandList = useSelector((state: RootState) => state.brandReducer.brands);
+  const brandList = useSelector((state: RootState) => state.brandReducer.brandAll);
   const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
   const [appliedFilter, setAppliedFilter] = useState(defaultBleReaderFilter.filters);
-  const [testing, setTesting] = useState<DummyFilter>({
-    Draw: 1,
-    Start: 0,
-    Length: 10,
-    SortColumn: 'name',
-    SortDir: 'asc',
-    SearchValue: '',
-    filters: {
-      BrandId: [],
-      EngineReaderId: [],
-    },
-  });
+
   useEffect(() => {
     dispatch(fetchBrands());
     // setAppliedFilter(bleReaderFilter.filters);
@@ -118,24 +94,6 @@ const BleReaderFilter = () => {
         </Typography>
 
         <Grid container spacing={3}>
-          {/* <Grid size={12}>
-            <CustomFormLabel htmlFor="brandName">
-              <Typography variant="caption">Brand Name :</Typography>
-            </CustomFormLabel>
-            <CustomSelect
-              name="BrandId"
-              value={appliedFilter.BrandId || ''}
-              onChange={handleInputChange}
-              fullWidth
-              variant="outlined"
-            >
-              {brandList.map((brand: any) => (
-                <MenuItem key={brand.id} value={brand.id}>
-                  {brand.name}
-                </MenuItem>
-              ))}
-            </CustomSelect>
-          </Grid> */}
           <Grid size={12}>
             <CustomFormLabel htmlFor="brandName">
               <Typography variant="caption">Multi-Brand Name :</Typography>

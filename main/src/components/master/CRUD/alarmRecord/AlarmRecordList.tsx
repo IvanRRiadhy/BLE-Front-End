@@ -22,10 +22,10 @@ import { defaultAlarmRecordFilter } from 'src/store/apps/defaultForm';
 const columns = [
   { label: 'Time', field: 'Timestamp', sortAble: true },
   { label: 'Visitor Name', field: 'Visitor.Name', sortAble: true },
+    { label: 'Area Name', field: 'Area.Name', sortAble: true },
   { label: 'Reader', field: 'Reader', sortAble: true },
   { label: 'Alarm Status', field: 'AlarmStatus', sortAble: true },
   { label: 'Action Status', field: 'ActionStatus', sortAble: true },
-  { label: 'Area Name', field: 'Area.Name', sortAble: true },
 ];
 
 const SKELETON_ROWS = 5;
@@ -210,11 +210,12 @@ const AlarmRecordList = () => {
                         {index + 1 + page * rowsPerPage}
                       </TableCell>
                       <TableCell>{formatTime(alarmRecordData.timestamp)}</TableCell>
-                      <TableCell>{alarmRecordData.visitor?.name}</TableCell>
-                      <TableCell>{alarmRecordData.reader?.name}</TableCell>
+                      <TableCell>{alarmRecordData.visitor?.name ?? alarmRecordData.member?.name ?? "Unregistered Person"}</TableCell>
+                      <TableCell>{alarmRecordData.floorplanMaskedArea?.name ?? "Unknown Area"}</TableCell>
+                      <TableCell>{alarmRecordData.reader?.name ?? "Unknown Device"}</TableCell>
                       <TableCell>{alarmRecordData.alarmRecordStatus}</TableCell>
                       <TableCell>{alarmRecordData.actionStatus}</TableCell>
-                      <TableCell>{alarmRecordData.floorplanMaskedArea?.name}</TableCell>
+                      
                     </TableRow>
                   ))
                   )}

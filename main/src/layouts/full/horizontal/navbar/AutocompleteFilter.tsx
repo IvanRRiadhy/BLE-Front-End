@@ -99,13 +99,16 @@ const AutocompleteFilter: React.FC<Props> = ({
   });
 
   React.useEffect(() => {
+    // Skip reset if token is undefined on first mount
+    if (resetToken === undefined) return;
+
     const cleared: FilterState = { BuildingId: [], FloorId: [], FloorplanId: [], MaskedAreaId: [] };
     setSelectedKeys(new Set());
-    lastEmittedRef.current = cleared; // keep ref in sync
+    lastEmittedRef.current = cleared;
     onChangeFilter(cleared);
     setQuery('');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetToken]);
+
 
   // cascade helpers
   const getDescendants = React.useCallback(
@@ -138,45 +141,45 @@ const AutocompleteFilter: React.FC<Props> = ({
     !allChecked(key) && getDescendants(key).some((k) => selectedKeys.has(k));
 
   // emit expanded FilterState
-  const toFilterState = React.useCallback((): FilterState => {
-    const BuildingId: string[] = [];
-    const FloorId: string[] = [];
-    const FloorplanId: string[] = [];
-    const MaskedAreaId: string[] = [];
+    const toFilterState = React.useCallback((): FilterState => {
+      const BuildingId: string[] = [];
+      const FloorId: string[] = [];
+      const FloorplanId: string[] = [];
+      const MaskedAreaId: string[] = [];
 
-    for (const key of selectedKeys) {
-      const { type, id } = parseKey(key);
-      if (type === 'B') BuildingId.push(id);
-      else if (type === 'F') FloorId.push(id);
-      else if (type === 'FP') FloorplanId.push(id);
-      else if (type === 'MA') MaskedAreaId.push(id);
-    }
+      for (const key of selectedKeys) {
+        const { type, id } = parseKey(key);
+        if (type === 'B') BuildingId.push(id);
+        else if (type === 'F') FloorId.push(id);
+        else if (type === 'FP') FloorplanId.push(id);
+        else if (type === 'MA') MaskedAreaId.push(id);
+      }
 
-    const addUnique = <T,>(arr: T[], v: T) => {
-      if (!arr.includes(v)) arr.push(v);
-    };
+      const addUnique = <T,>(arr: T[], v: T) => {
+        if (!arr.includes(v)) arr.push(v);
+      };
 
-    for (const bId of BuildingId) {
-      for (const f of floorsByBuilding.get(bId) ?? []) {
-        addUnique(FloorId, f.id);
-        for (const fp of fpsByFloor.get(f.id) ?? []) {
+      for (const bId of BuildingId) {
+        for (const f of floorsByBuilding.get(bId) ?? []) {
+          addUnique(FloorId, f.id);
+          for (const fp of fpsByFloor.get(f.id) ?? []) {
+            addUnique(FloorplanId, fp.id);
+            for (const ma of masByFp.get(fp.id) ?? []) addUnique(MaskedAreaId, ma.id);
+          }
+        }
+      }
+      for (const fId of [...FloorId]) {
+        for (const fp of fpsByFloor.get(fId) ?? []) {
           addUnique(FloorplanId, fp.id);
           for (const ma of masByFp.get(fp.id) ?? []) addUnique(MaskedAreaId, ma.id);
         }
       }
-    }
-    for (const fId of [...FloorId]) {
-      for (const fp of fpsByFloor.get(fId) ?? []) {
-        addUnique(FloorplanId, fp.id);
-        for (const ma of masByFp.get(fp.id) ?? []) addUnique(MaskedAreaId, ma.id);
+      for (const fpId of [...FloorplanId]) {
+        for (const ma of masByFp.get(fpId) ?? []) addUnique(MaskedAreaId, ma.id);
       }
-    }
-    for (const fpId of [...FloorplanId]) {
-      for (const ma of masByFp.get(fpId) ?? []) addUnique(MaskedAreaId, ma.id);
-    }
 
-    return { BuildingId, FloorId, FloorplanId, MaskedAreaId };
-  }, [selectedKeys, floorsByBuilding, fpsByFloor, masByFp]);
+      return { BuildingId, FloorId, FloorplanId, MaskedAreaId };
+    }, [selectedKeys, floorsByBuilding, fpsByFloor, masByFp]);
 
   function equalFilter(a: FilterState, b: FilterState) {
     const eqArr = (x: string[], y: string[]) =>
@@ -217,6 +220,10 @@ const AutocompleteFilter: React.FC<Props> = ({
     }
     console.log('Filter changed:', next);
   }, [selectedKeys, toFilterState]);
+
+  React.useEffect(() => {
+    console.log('Initial Filter: ', initial);
+  }, [open]);
   // summary chips (string)
   const summary = React.useMemo(() => {
     const chips: string[] = [];
@@ -445,16 +452,37 @@ const AutocompleteFilter: React.FC<Props> = ({
     return tree;
   }, [currentFilter, buildingById, floorById, floorplanById, maskedAreaById]);
 
+  React.useEffect(() => {
+  if (!initial) return;
+
+  // Wait until all data are loaded before applying
+  const allLoaded =
+    buildings.length > 0 && floors.length > 0 && floorplans.length > 0 && maskedAreas.length > 0;
+  if (!allLoaded) return;
+
+  const pre = new Set<string>();
+  initial.BuildingId?.forEach((id) => pre.add(kB(id)));
+  initial.FloorId?.forEach((id) => pre.add(kF(id)));
+  initial.FloorplanId?.forEach((id) => pre.add(kFP(id)));
+  initial.MaskedAreaId?.forEach((id) => pre.add(kMA(id)));
+
+  setSelectedKeys(pre);
+  lastEmittedRef.current = toFilterState();
+  console.log('✅ Initial filter applied:', initial);
+}, [initial, buildings, floors, floorplans, maskedAreas]);
+
   return (
-    <>
-      {/* Anchor input (typeable) */}
+    <Box sx={{ position: 'relative' }}>
+      {/* Anchor & Input */}
       <Box ref={anchorRef}>
         <TextField
           fullWidth
-          // label="Filter by Area"
           placeholder="Building / Floor / Floorplan / Area"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            if (!open) setOpen(true);
+          }}
           onFocus={() => setOpen(true)}
           onClick={() => setOpen(true)}
           InputProps={{
@@ -465,66 +493,52 @@ const AutocompleteFilter: React.FC<Props> = ({
             ),
           }}
         />
-        {displayTree.size > 0 && (
-          <Box sx={{ mt: 1 }}>
-            <Typography variant="body1" fontWeight={700} mb={1}>
-              Selected Areas : 
-            </Typography>
-            {[...displayTree.entries()].map(([bId, bNode]) => (
-              <Box key={bId} sx={{ mb: 0.75 }}>
-                <Typography variant="body1" fontWeight={700}>
-                  {bNode.name}
-                </Typography>
-
-                {[...bNode.floors.entries()].map(([fId, fNode]) => (
-                  <Box key={fId} sx={{ pl: 2, mt: 0.25 }}>
-                    <Typography variant="body1" fontWeight={500}>
-                      {fNode.name}
-                    </Typography>
-
-                    {[...fNode.floorplans.entries()].map(([fpId, fpNode]) => (
-                      <Box key={fpId} sx={{ pl: 2, mt: 0.25 }}>
-                        <Typography variant="body2" fontWeight={500}>{fpNode.name}</Typography>
-
-                        {fpNode.areas.length > 0 && (
-                          <Box sx={{ pl: 2, mt: 0.25 }}>
-                            {fpNode.areas.map((a) => (
-                              <Typography variant="body2" key={a.id}>
-                                {a.name}
-                              </Typography>
-                            ))}
-                          </Box>
-                        )}
-                      </Box>
-                    ))}
-                  </Box>
-                ))} 
-              </Box>
-            ))}
-          </Box>
-        )}
       </Box>
 
-      {/* Dropdown */}
+      {/* Dropdown Popper — positioned ABOVE the Selected Areas */}
       <Popper
         open={open}
         anchorEl={anchorRef.current}
         placement="bottom-start"
-        style={{ zIndex: 1300 }}
+        modifiers={[
+          {
+            name: 'offset',
+            options: { offset: [0, -8] }, // 🔼 overlaps content below
+          },
+          {
+            name: 'preventOverflow',
+            options: { boundary: 'viewport' },
+          },
+          {
+            name: 'flip',
+            enabled: false, // keep it below the input
+          },
+        ]}
+        sx={{
+          zIndex: 2000, // 🧱 ensure it's above everything else
+          pointerEvents: 'auto',
+        }}
       >
-        <ClickAwayListener onClickAway={() => setOpen(false)}>
+        <ClickAwayListener
+          onClickAway={(event) => {
+            if (anchorRef.current && anchorRef.current.contains(event.target as Node)) return;
+            setOpen(false);
+          }}
+        >
           <Paper
             elevation={8}
             sx={{
               p: 1,
-              mt: 0.5,
+              mt: -1, // 👈 this helps overlap the “Selected Areas” block
               minWidth: 360,
               maxWidth: 520,
               maxHeight: 420,
               overflow: 'auto',
               bgcolor: 'background.paper',
               borderRadius: 2,
+              boxShadow: 8,
             }}
+            onMouseDown={(e) => e.preventDefault()} // keep focus on input
           >
             <SimpleTreeView
               expandedItems={expanded}
@@ -622,7 +636,55 @@ const AutocompleteFilter: React.FC<Props> = ({
           </Paper>
         </ClickAwayListener>
       </Popper>
-    </>
+
+      {/* Selected Areas (under Popper, will be overlapped visually) */}
+      {displayTree.size > 0 && (
+        <Box
+          sx={{
+            mt: 1,
+            position: 'relative',
+            zIndex: 1, // 👇 lower than Popper (so Popper overlaps this)
+          }}
+        >
+          <Typography variant="body1" fontWeight={700} mb={1}>
+            Selected Areas :
+          </Typography>
+          {[...displayTree.entries()].map(([bId, bNode]) => (
+            <Box key={bId} sx={{ mb: 0.75 }}>
+              <Typography variant="body1" fontWeight={700}>
+                {bNode.name}
+              </Typography>
+
+              {[...bNode.floors.entries()].map(([fId, fNode]) => (
+                <Box key={fId} sx={{ pl: 2, mt: 0.25 }}>
+                  <Typography variant="body1" fontWeight={500}>
+                    {fNode.name}
+                  </Typography>
+
+                  {[...fNode.floorplans.entries()].map(([fpId, fpNode]) => (
+                    <Box key={fpId} sx={{ pl: 2, mt: 0.25 }}>
+                      <Typography variant="body2" fontWeight={500}>
+                        {fpNode.name}
+                      </Typography>
+
+                      {fpNode.areas.length > 0 && (
+                        <Box sx={{ pl: 2, mt: 0.25 }}>
+                          {fpNode.areas.map((a) => (
+                            <Typography variant="body2" key={a.id}>
+                              {a.name}
+                            </Typography>
+                          ))}
+                        </Box>
+                      )}
+                    </Box>
+                  ))}
+                </Box>
+              ))}
+            </Box>
+          ))}
+        </Box>
+      )}
+    </Box>
   );
 };
 

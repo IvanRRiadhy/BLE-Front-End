@@ -14,6 +14,7 @@ import { IconMail, IconCircleX, IconClearAll } from '@tabler/icons-react';
 import {
   gender,
   genderIconMap,
+  genderEnumMap,
   visitorStatus,
   visitorStatusEnumMap,
   visitorStatusIconMap,
@@ -125,8 +126,18 @@ const VisitorFilter = () => {
     const currentFilters = { ...trxVisitorFilter };
 
     switch (category) {
-      case 'gender': {
-        console.log('Gender Filter : ', filter);
+      // case 'gender': {
+      //   console.log('Gender Filter : ', filter);
+      //   const mappedValue = genderEnumMap[filter];
+      //   if (mappedValue === undefined) return;
+      //   const currentValue = currentFilters.Gender;
+      //   const newValue = currentValue === mappedValue ? undefined : mappedValue;
+      //   console.log("Adding gender: ", newValue);
+      //   dispatch(UpdateFilter({ filters: { ...currentFilters, Gender: newValue } }));
+      //   break;
+      // }
+      case 'all': {
+        dispatch(UpdateFilter({ filters: {} }));
         break;
       }
       case 'status': {

@@ -196,6 +196,25 @@ export const editTimeGroup = createAsyncThunk(
   }
 );
 
+export const addTimeBlock = createAsyncThunk(
+  "timeGroups/addTimeBlock",
+  async (timeBlock: { dayOfWeek: string; startTime: string; endTime: string; TimeGroupId: string }, { rejectWithValue }) => {
+    const started = Date.now();
+    console.log("addTimeBlock", timeBlock);
+    try {
+      const response = await axiosServices.post(API_URL_TIME_BLOCK, timeBlock);
+      const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+      console.log("response", response.data);
+      return response.data;
+    } catch (error: any) {
+      const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+      return rejectWithValue(error.response?.data || "Unknown error");
+    }
+  }
+);
+
 const buildEditPayload = (tg: TimeGroupType) => {
   return {
     name: tg.name,

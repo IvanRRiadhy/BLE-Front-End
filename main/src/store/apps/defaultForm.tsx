@@ -614,7 +614,7 @@ export const defaultCardGroupFilter: CardGroupFilter = {
 export const defaultAlarmSettingFilter: AlarmSettingFilter = {
   Draw: 1,
   Start: 0,
-  Length: 5,
+  Length: 10,
   SortColumn: 'AlarmCategory',
   SortDir: 'asc',
   SearchValue: '',

@@ -351,7 +351,7 @@ const useMenuItems = (alarmSettings: AlarmSettingType[]) => {
       },
             {
         id: uniqueId(),
-        title: 'Alarm Triger',
+        title: 'Alarm Trigger',
         icon: IconBellExclamation,
         href: '/report/alarmTrigger/',
       },

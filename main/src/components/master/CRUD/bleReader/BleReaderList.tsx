@@ -56,6 +56,9 @@ const BleReaderList = () => {
   const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
   const prevFilterRef = useRef(bleReaderFilter);
   const brandData = useSelector((state: RootState) => state.brandReducer.brandAll);
+  const bleReaderFilterCount = useSelector(
+    (state: RootState) => state.bleReaderReducer.bleReaderFilterCount,
+  )
   const bleReaderTotalCount = useSelector(
     (state: RootState) => state.bleReaderReducer.bleReaderTotalCount,
   );
@@ -453,7 +456,7 @@ const BleReaderList = () => {
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
-                count={bleReaderTotalCount}
+                count={bleReaderFilterCount}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}

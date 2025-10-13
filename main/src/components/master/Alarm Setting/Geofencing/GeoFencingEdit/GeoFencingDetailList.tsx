@@ -16,7 +16,7 @@ import CustomTextField from 'src/components/forms/theme-elements/CustomTextField
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import { fetchBuildings } from 'src/store/apps/crud/building';
-import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
+import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import { fetchFloors } from 'src/store/apps/crud/floor';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import {
@@ -119,7 +119,7 @@ const GeoFencingDetailList = () => {
   };
 
   const findFloorId = (fpId: string) => {
-    const floor = floorplans.find((f) => f.id === fpId);
+    const floor = floorplans.find((f: FloorplanType) => f.id === fpId);
     return floor?.floorId;
   }
 

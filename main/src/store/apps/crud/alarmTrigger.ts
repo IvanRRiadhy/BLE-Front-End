@@ -4,6 +4,8 @@ import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { defaultAlarmTriggerFilter } from "../defaultForm";
 import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
+import { FloorplanType } from "./floorplan";
+import { CardType } from "./card";
 
 const API_DT_URL = "/api/AlarmTriggers/filter";
 const API_URL = "/api/AlarmTriggers/";
@@ -51,6 +53,8 @@ export interface AlarmTriggerType {
     actionStatus: string;
     isActive: boolean;
     alarmColor: string;
+    floorplan?: FloorplanType;
+    card?: CardType;
 };
 
 interface StateType {
@@ -161,7 +165,7 @@ export const fetchAlarmTriggerDT = createAsyncThunk(
         maxDelay: 8000,
       }
     );
-
+    console.log("Alarm Trigger: ", res);
     dispatch(GetAlarmTriggers(res.data.collection.data || []));
     await ensureMinLatency(started, 500);
     return res.data.collection;

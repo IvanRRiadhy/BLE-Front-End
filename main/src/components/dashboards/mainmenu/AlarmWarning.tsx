@@ -22,6 +22,7 @@ import { AlarmType, fetchAlarmDT, UpdateFilter } from 'src/store/apps/crud/alarm
 import { alarmRecordStatusColormap } from 'src/types/crud/input';
 import DashboardCard from 'src/components/shared/DashboardCard';
 import { defaultAlarmRecordFilter } from 'src/store/apps/defaultForm';
+import { AlarmSettingType } from 'src/store/apps/alarmsetting/alarmSettings';
 
 const columns = [
   { label: 'Visitor Name', field: 'Visitor.Name', sortAble: true },
@@ -37,12 +38,23 @@ const AlarmWarning = () => {
   const alarmRecordData: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
   );
-  // const alarmRecordTotalCount: number = useSelector(
-  //   (state: RootState) => state.alarmReducer.alarmRecordTotalCount,
-  // );
+  const alarmSettings: AlarmSettingType[] = useSelector(
+    (state: RootState) => state.AlarmSettingReducer.alarmSettingAll,
+  );
+  const filteredAlarmRecord: AlarmType[] = alarmRecordData.filter((item) => {
+    const matchingSetting = alarmSettings.find(
+      (setting) =>
+        setting.alarmCategory.toLowerCase() === item.alarmTriggers.alarmRecordStatus.toLowerCase(),
+    );
+    return matchingSetting && matchingSetting.isEnabled;
+  });
+  const alarmRecordTotalCount: number = useSelector(
+    (state: RootState) => state.alarmReducer.alarmRecordTotalCount,
+  );
   const AlarmRecordFilteredCount: number = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordFilteredCount,
   );
+  const DashboardFilter = useSelector((state: RootState) => state.customizer.dashboardFilter);
   const AlarmRecordFilter = useSelector((state: RootState) => state.alarmReducer.alarmRecordFilter);
   const hasLoaded = useSelector((state: RootState) => state.alarmReducer.hasLoaded);
   const { t } = useTranslation();
@@ -60,7 +72,16 @@ const AlarmWarning = () => {
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
   useEffect(() => {
-    dispatch(UpdateFilter({ ...defaultAlarmRecordFilter }));
+    dispatch(
+      UpdateFilter({
+        ...defaultAlarmRecordFilter,
+        filters: {
+          FloorplanMaskedAreaId: DashboardFilter?.FloorplanMaskedAreaId || [],
+          ReaderId: defaultAlarmRecordFilter.filters.ReaderId,
+          VisitorId: defaultAlarmRecordFilter.filters.VisitorId,
+        },
+      }),
+    );
   }, [dispatch]);
 
   useEffect(() => {
@@ -191,7 +212,7 @@ const AlarmWarning = () => {
                       renderSkeletonRows(SKELETON_ROWS)
                     ) : (
                       <>
-                        {alarmRecordData.map((alarm) => (
+                        {filteredAlarmRecord.map((alarm) => (
                           <TableRow key={alarm.id}>
                             <TableCell
                               sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
@@ -220,9 +241,7 @@ const AlarmWarning = () => {
                             <TableCell>
                               <Chip
                                 sx={{
-                                  bgcolor:
-                                    alarm.alarmTriggers.alarmColor ||
-                                    'error.dark',
+                                  bgcolor: alarm.alarmTriggers.alarmColor || 'secondary.dark',
                                   color: 'white',
                                   borderRadius: '8px',
                                 }}
@@ -253,7 +272,7 @@ const AlarmWarning = () => {
                         {Array.from({
                           length:
                             rowsPerPage -
-                            Math.min(rowsPerPage, alarmRecordData.length - page * rowsPerPage),
+                            Math.min(rowsPerPage, filteredAlarmRecord.length - page * rowsPerPage),
                         }).map((_, idx: number) => (
                           <TableRow key={`empty-row-${idx}`} style={{ height: 63 }}>
                             <TableCell colSpan={5} />
@@ -269,7 +288,7 @@ const AlarmWarning = () => {
           {/* Pagination */}
           <TablePagination
             component="div"
-            count={AlarmRecordFilteredCount}
+            count={filteredAlarmRecord.length > 0 ? alarmRecordTotalCount : 1}
             page={page}
             rowsPerPage={rowsPerPage}
             onPageChange={handleChangePage}

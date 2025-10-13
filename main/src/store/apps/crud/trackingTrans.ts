@@ -6,6 +6,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { MaskedAreaType } from "./maskedArea";
 import { bleReaderType } from "./bleReader";
 import { defaultTrackingTransFilter } from "../defaultForm";
+import { CardType } from "./card";
 
 const API_URL = "/api/TrackingTransaction/";
 const API_DT_URL = "/api/TrackingTransaction/filter/";
@@ -52,9 +53,12 @@ export interface trackingTransType {
     coordinatePxX: number,
     coordinatePxY: number,
     alarmStatus: string,
-    battery: number
+    battery: number,
     floorplanMaskedArea?: MaskedAreaType,
-    reader?: bleReaderType
+    reader?: bleReaderType,
+    card?: CardType,
+    visitorId?: string,
+    memberId?: string,
 }
 
 interface StateType {

@@ -93,7 +93,7 @@ const visitor = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Visitor List" codeModel={<AddEditVisitor type="add" />}>
+          <ParentCard title="Visitor List" codeModel={[]}>
             <VisitorList />
           </ParentCard>
         </Drawer>
