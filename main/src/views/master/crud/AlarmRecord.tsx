@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import AlarmRecordList from 'src/components/master/CRUD/alarmRecord/AlarmRecordList';
 import AlarmRecordImport from 'src/components/master/CRUD/alarmRecord/AlarmRecordImport';
 import AlarmExport from 'src/components/master/CRUD/alarmRecord/AlarmRecordExport';
+import AlarmRecordFilter from 'src/components/master/CRUD/alarmRecord/AlarmRecordFilter';
 
 interface cardType {
   icon?: string;
@@ -98,8 +99,8 @@ const AlarmRecord = () => {
           <ParentCard
             title="Alarm Record List"
             codeModel={[
-            // <AlarmRecordImport key={'import'} />, 
-            <AlarmExport key={'export'} />
+            <AlarmExport key={'export'} />,
+            <AlarmRecordFilter key={'filter'} />,
           ]}
           >
             <AlarmRecordList />

@@ -141,45 +141,58 @@ const AutocompleteFilter: React.FC<Props> = ({
     !allChecked(key) && getDescendants(key).some((k) => selectedKeys.has(k));
 
   // emit expanded FilterState
-    const toFilterState = React.useCallback((): FilterState => {
-      const BuildingId: string[] = [];
-      const FloorId: string[] = [];
-      const FloorplanId: string[] = [];
-      const MaskedAreaId: string[] = [];
+const toFilterState = React.useCallback((): FilterState => {
+  const BuildingId: string[] = [];
+  const FloorId: string[] = [];
+  const FloorplanId: string[] = [];
+  const MaskedAreaId: string[] = [];
 
-      for (const key of selectedKeys) {
-        const { type, id } = parseKey(key);
-        if (type === 'B') BuildingId.push(id);
-        else if (type === 'F') FloorId.push(id);
-        else if (type === 'FP') FloorplanId.push(id);
-        else if (type === 'MA') MaskedAreaId.push(id);
-      }
+  const addUnique = <T,>(arr: T[], v: T) => {
+    if (!arr.includes(v)) arr.push(v);
+  };
 
-      const addUnique = <T,>(arr: T[], v: T) => {
-        if (!arr.includes(v)) arr.push(v);
-      };
+  for (const key of selectedKeys) {
+    const { type, id } = parseKey(key);
 
-      for (const bId of BuildingId) {
-        for (const f of floorsByBuilding.get(bId) ?? []) {
-          addUnique(FloorId, f.id);
-          for (const fp of fpsByFloor.get(f.id) ?? []) {
-            addUnique(FloorplanId, fp.id);
-            for (const ma of masByFp.get(fp.id) ?? []) addUnique(MaskedAreaId, ma.id);
-          }
-        }
-      }
-      for (const fId of [...FloorId]) {
-        for (const fp of fpsByFloor.get(fId) ?? []) {
-          addUnique(FloorplanId, fp.id);
-          for (const ma of masByFp.get(fp.id) ?? []) addUnique(MaskedAreaId, ma.id);
-        }
-      }
-      for (const fpId of [...FloorplanId]) {
-        for (const ma of masByFp.get(fpId) ?? []) addUnique(MaskedAreaId, ma.id);
-      }
+    if (type === 'B') addUnique(BuildingId, id);
+    else if (type === 'F') addUnique(FloorId, id);
+    else if (type === 'FP') addUnique(FloorplanId, id);
+    else if (type === 'MA') addUnique(MaskedAreaId, id);
+  }
 
-      return { BuildingId, FloorId, FloorplanId, MaskedAreaId };
-    }, [selectedKeys, floorsByBuilding, fpsByFloor, masByFp]);
+  // 🔹 Remove full downward cascade — only cascade UP to ensure parents exist
+  for (const maId of MaskedAreaId) {
+    const ma = maskedAreas.find((m) => m.id === maId);
+    if (!ma) continue;
+
+    const fpId = ma.floorplanId;
+    if (fpId) addUnique(FloorplanId, fpId);
+
+    const fp = floorplans.find((f) => f.id === fpId);
+    const fId = ma.floorId || fp?.floorId;
+    if (fId) addUnique(FloorId, fId);
+
+    const fl = floors.find((fl) => fl.id === fId);
+    if (fl?.buildingId) addUnique(BuildingId, fl.buildingId);
+  }
+
+  for (const fpId of FloorplanId) {
+    const fp = floorplans.find((f) => f.id === fpId);
+    if (!fp) continue;
+    const f = floors.find((fl) => fl.id === fp.floorId);
+    if (f) {
+      addUnique(FloorId, f.id);
+      if (f.buildingId) addUnique(BuildingId, f.buildingId);
+    }
+  }
+
+  for (const fId of FloorId) {
+    const fl = floors.find((fl) => fl.id === fId);
+    if (fl?.buildingId) addUnique(BuildingId, fl.buildingId);
+  }
+
+  return { BuildingId, FloorId, FloorplanId, MaskedAreaId };
+}, [selectedKeys, maskedAreas, floorplans, floors]);
 
   function equalFilter(a: FilterState, b: FilterState) {
     const eqArr = (x: string[], y: string[]) =>
@@ -639,13 +652,21 @@ const AutocompleteFilter: React.FC<Props> = ({
 
       {/* Selected Areas (under Popper, will be overlapped visually) */}
       {displayTree.size > 0 && (
-        <Box
-          sx={{
-            mt: 1,
-            position: 'relative',
-            zIndex: 1, // 👇 lower than Popper (so Popper overlaps this)
-          }}
-        >
+  <Box
+    sx={{
+      mt: 1,
+      position: 'relative',
+      zIndex: 1, // ensure Popper appears above
+      maxHeight: 150, // 👈 you can adjust this to your liking (e.g., 120–160px)
+      overflowY: 'auto', // 👈 make it scrollable
+      px: 1, // add a bit of padding for scrollbar space
+      mb: 5,
+      borderRadius: 1,
+      // border: '1px solid',
+      // borderColor: 'divider',
+      backgroundColor: (theme) => theme.palette.background.paper,
+    }}
+  >
           <Typography variant="body1" fontWeight={700} mb={1}>
             Selected Areas :
           </Typography>
@@ -684,6 +705,7 @@ const AutocompleteFilter: React.FC<Props> = ({
           ))}
         </Box>
       )}
+      
     </Box>
   );
 };

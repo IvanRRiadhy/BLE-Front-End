@@ -293,7 +293,7 @@ export const ExportFloorplan = createAsyncThunk(
                 headers:{
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`,
-          'X-API-KEY-TRACKING-PEOPLE':
+          'X-BIOPEOPLETRACKING-API-KEY':
             'FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK',
         },
             });

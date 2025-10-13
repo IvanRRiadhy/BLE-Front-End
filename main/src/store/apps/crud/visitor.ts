@@ -107,6 +107,7 @@ export type VisitorType = {
 interface StateType {
     // visitors: masterVisitorType[];
     visitors: VisitorType[];
+    visitorAll: VisitorType[];
     visitorSearch: string;
     selectedVisitor?: VisitorType;
     currentFilter: string,
@@ -120,6 +121,7 @@ interface StateType {
 const initialState: StateType = {
     // visitors: [],
     visitors: [],
+    visitorAll: [],
     visitorSearch: "",
     selectedVisitor: undefined,
     currentFilter: "show_all",
@@ -137,10 +139,9 @@ export const VisitorSlice = createSlice({
       GetVisitor(state, action: PayloadAction<VisitorType[]>)  {
         state.visitors = action.payload;
       },
-    //   GetVisitors(state, action: PayloadAction<VisitorType[]>) {
-    //     state.newVisitor = action.payload;
-    //     console.log("Get Visitors", JSON.stringify(state.newVisitor, null, 2));
-    // },
+      GetAllVisitor(state, action: PayloadAction<VisitorType[]>)  {
+        state.visitorAll = action.payload;
+      },
       SelectVisitor(state, action: PayloadAction<string>) {
         const selected = state.visitors.find((visitor: VisitorType) => visitor.id === action.payload);
         state.selectedVisitor = selected || undefined;
@@ -202,7 +203,7 @@ UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
 
 export const {
     GetVisitor,
-    // GetVisitors,
+    GetAllVisitor,
     SelectVisitor,
     SearchVisitor,
     SetVisibilityFilter,
@@ -212,7 +213,7 @@ export const {
 export const fetchVisitor = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
-        dispatch(GetVisitor(response.data?.collection?.data || []));
+        dispatch(GetAllVisitor(response.data?.collection?.data || []));
         console.log("Fetch Visitors", response.data?.collection || []);
     } catch (err) {
         console.log("Error: ", err);

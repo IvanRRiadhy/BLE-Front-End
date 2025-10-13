@@ -455,8 +455,7 @@ export const defaultTrackingTransFilter: TrackingTransFilter = {
   SortDir: 'desc',
   SearchValue: '',
   filters: {
-    FloorplanMaskedAreaId: [],
-    ReaderId: [],
+
   },
 };
 //#endregion

@@ -8,14 +8,13 @@ import { RootState } from 'src/store/Store';
 
 type Props = {
   title: string;
-  footer?: string | any;
-  codeModel?: any | any[]
-  children: any;
+  footer?: string | React.ReactNode;
+  codeModel?: React.ReactNode | React.ReactNode[];
+  children: React.ReactNode;
 };
 
 const ParentCard = ({ title, children, footer, codeModel }: Props) => {
   const customizer = useSelector((state: RootState) => state.customizer);
-
   const theme = useTheme();
   const borderColor = theme.palette.divider;
 
@@ -25,17 +24,47 @@ const ParentCard = ({ title, children, footer, codeModel }: Props) => {
       elevation={customizer.isCardShadow ? 9 : 0}
       variant={!customizer.isCardShadow ? 'outlined' : undefined}
     >
-      <CardHeader title={title} action={codeModel} />
+      <CardHeader
+        title={title}
+        // ✅ Wrap actions in a right-aligned inline-flex box
+        action={
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: 1.5,
+              flexWrap: 'wrap', // allows wrapping on smaller screens
+            }}
+          >
+            {Array.isArray(codeModel)
+              ? codeModel.map((item, idx) => (
+                  <Box key={idx} sx={{ display: 'inline-flex', alignItems: 'center' }}>
+                    {item}
+                  </Box>
+                ))
+              : codeModel}
+          </Box>
+        }
+        sx={{
+          px: 3,
+          py: 2,
+          '& .MuiCardHeader-action': {
+            alignSelf: 'center',
+            marginTop: 0,
+          },
+        }}
+      />
+
       <Divider />
 
       <CardContent>{children}</CardContent>
-      {footer ? (
+
+      {footer && (
         <>
           <Divider />
           <Box p={3}>{footer}</Box>
         </>
-      ) : (
-        ''
       )}
     </Card>
   );

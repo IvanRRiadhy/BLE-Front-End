@@ -288,7 +288,7 @@ const AlarmWarning = () => {
           {/* Pagination */}
           <TablePagination
             component="div"
-            count={filteredAlarmRecord.length > 0 ? alarmRecordTotalCount : 1}
+            count={AlarmRecordFilteredCount}
             page={page}
             rowsPerPage={rowsPerPage}
             onPageChange={handleChangePage}

@@ -77,20 +77,55 @@ const DashboardFilter = () => {
     }
     return { data, empty: data.length === 0 };
   }
-  const handleApplyFilter = () => {
-    // appliedFilter already expanded by AutocompleteFilter
-    dispatch(
-      setDashboardFilter({
-        BuildingId: appliedFilter.BuildingId,
-        FloorId: appliedFilter.FloorId.length ? appliedFilter.FloorId : ['Empty'],
-        FloorplanId: appliedFilter.FloorplanId.length ? appliedFilter.FloorplanId : ['Empty'],
-        FloorplanMaskedAreaId: appliedFilter.MaskedAreaId.length
-          ? appliedFilter.MaskedAreaId
-          : ['Empty'],
-      }),
-    );
-    setOpen(false);
-  };
+const handleApplyFilter = () => {
+  let finalFloorIds: string[] = [];
+  let finalFloorplanIds: string[] = [];
+
+  // 🧠 If there are masked areas selected, collect their parent floor/floorplan
+  if (appliedFilter.MaskedAreaId.length > 0) {
+    for (const maId of appliedFilter.MaskedAreaId) {
+      const ma = maskedAreaList.find((m) => m.id === maId);
+      if (ma) {
+        const fpId = ma.floorplanId;
+        if (fpId && !finalFloorplanIds.includes(fpId)) finalFloorplanIds.push(fpId);
+
+        // Prefer ma.floorId, fallback to floorplan.floorId
+        let fId = ma.floorId;
+        if (!fId) {
+          const fp = floorplanList.find((f) => f.id === fpId);
+          fId = fp?.floorId ?? '';
+        }
+        if (fId && !finalFloorIds.includes(fId)) finalFloorIds.push(fId);
+      }
+    }
+  } else {
+    // 🧩 If no MaskedArea is selected, use the existing ones or empty
+    finalFloorIds = appliedFilter.FloorId;
+    finalFloorplanIds = appliedFilter.FloorplanId;
+  }
+
+  // 🧩 Send to Redux with the updated floor/floorplan sets
+  dispatch(
+    setDashboardFilter({
+      BuildingId: appliedFilter.BuildingId,
+      FloorId: finalFloorIds.length ? finalFloorIds : ['Empty'],
+      FloorplanId: finalFloorplanIds.length ? finalFloorplanIds : ['Empty'],
+      FloorplanMaskedAreaId: appliedFilter.MaskedAreaId.length
+        ? appliedFilter.MaskedAreaId
+        : ['Empty'],
+    }),
+  );
+
+  console.log('Dashboard Filter Set:', {
+    BuildingId: appliedFilter.BuildingId,
+    FloorId: finalFloorIds,
+    FloorplanId: finalFloorplanIds,
+    FloorplanMaskedAreaId: appliedFilter.MaskedAreaId,
+  });
+
+  setOpen(false);
+};
+
 
 
   const handleResetFilter = () => {
@@ -140,7 +175,7 @@ const DashboardFilter = () => {
           Filter
         </Typography>
         <Grid container spacing={2}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+          <Box sx={{ width: '100%' }}>
             <AutocompleteFilter
               buildings={buildingList}
               floors={floorList}

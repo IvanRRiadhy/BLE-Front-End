@@ -21,7 +21,7 @@ import { defaultAlarmRecordFilter } from 'src/store/apps/defaultForm';
 
 const columns = [
   { label: 'Time', field: 'Timestamp', sortAble: true },
-  { label: 'Visitor Name', field: 'Visitor.Name', sortAble: true },
+  { label: 'Person', field: 'Visitor.Name', sortAble: true },
     { label: 'Area Name', field: 'Area.Name', sortAble: true },
   { label: 'Reader', field: 'Reader', sortAble: true },
   { label: 'Alarm Status', field: 'AlarmStatus', sortAble: true },
@@ -227,7 +227,7 @@ const AlarmRecordList = () => {
         {/* Pagination */}
         <TablePagination
           component="div"
-          count={alarmRecordTotalCount}
+          count={AlarmRecordFilteredCount}
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}

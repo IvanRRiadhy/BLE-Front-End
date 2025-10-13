@@ -7,6 +7,8 @@ import { MaskedAreaType } from "./maskedArea";
 import { bleReaderType } from "./bleReader";
 import { defaultTrackingTransFilter } from "../defaultForm";
 import { CardType } from "./card";
+import { VisitorType } from "./visitor";
+import { memberType } from "./member";
 
 const API_URL = "/api/TrackingTransaction/";
 const API_DT_URL = "/api/TrackingTransaction/filter/";
@@ -19,9 +21,17 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     SearchValue: string,
+    dateFilters?: {
+        TransTime?: {
+            DateFrom?: string | null,
+            DateTo?: string | null,
+        }
+    }
     filters: {
-        FloorplanMaskedAreaId: string[],
-        ReaderId: string[],
+        FloorplanMaskedAreaId?: string[],
+        ReaderId?: string[],
+        VisitorId?: string[],
+        MemberId?: string[]
     }
 }
 
@@ -59,6 +69,8 @@ export interface trackingTransType {
     card?: CardType,
     visitorId?: string,
     memberId?: string,
+    visitor?: VisitorType,
+    member?: memberType
 }
 
 interface StateType {
@@ -69,6 +81,7 @@ interface StateType {
     trackingTransTotalCount: number;
     trackingTransFilteredCount: number;
     trackingTransFilter: GetFilter;
+    lastFilter?: GetFilter;
 isLoading: boolean;
 hasLoaded: boolean;
 }
@@ -129,14 +142,48 @@ export const TrackingTransSlice = createSlice({
         .addCase(deleteTrackingTrans.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
         })
-        .addCase(fetchTrackingTransDT.pending, (state) => {
+        .addCase(fetchTrackingTransDT.pending, (state, action) => {
+            const newFilter = action.meta.arg as GetFilter;
+            const prevFilter = state.lastFilter;
+
+            // If no previous filter (first load), always reset
+            if (!prevFilter) {
+                state.isLoading = true;
+                state.hasLoaded = false;
+                return;
+            }
+
+            // Detect only sorting change
+            const onlySortingChanged =
+                prevFilter.SortColumn !== newFilter.SortColumn ||
+                prevFilter.SortDir !== newFilter.SortDir;
+
+            const filtersUnchanged =
+                JSON.stringify({
+                ...prevFilter,
+                SortColumn: undefined,
+                SortDir: undefined,
+                }) ===
+                JSON.stringify({
+                ...newFilter,
+                SortColumn: undefined,
+                SortDir: undefined,
+                });
+
+            const isOnlySortChange = onlySortingChanged && filtersUnchanged;
+
+            // ✅ If sorting only, keep hasLoaded true
             state.isLoading = true;
+            if (!isOnlySortChange) {
+                state.hasLoaded = false;
+            }
         })
         .addCase(fetchTrackingTransDT.fulfilled, (state, action) => {
             state.trackingTransTotalCount = action.payload.recordsTotal;
             state.trackingTransFilteredCount = action.payload.recordsFiltered;
                 state.isLoading = false;
                 state.hasLoaded = true;
+                state.lastFilter = { ...state.trackingTransFilter };
         })
         .addCase(fetchTrackingTransDT.rejected, (_state, action) => {
             console.error("Error fetching tracking transactions: ", action.payload);
@@ -163,7 +210,7 @@ export const fetchTrackingTrans = () => async (dispatch: AppDispatch) => {
 
 export const fetchTrackingTransDT = createAsyncThunk(
     "trackingTrans/fetchTrackingTransDT", 
-    async (filter: any, { rejectWithValue }) => {
+    async (filter: any, { getState, rejectWithValue }) => {
         const started = Date.now();
         try {
             if (
@@ -171,25 +218,21 @@ export const fetchTrackingTransDT = createAsyncThunk(
                 Object.values(filter.filters).some(
                     (arr: any) => Array.isArray(arr) && arr.includes("Empty")
                 )   
-        ) {
-            // console.log("Filter contains 'Empty', skipping request");
-            // Option 1: just return null (success, no data)
-            // return null;
-            // Option 2: reject, if you want to treat as error
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-            return rejectWithValue("Filter contains 'Empty', skipping request");
-        }
+            ) {
+                const elapsed = Date.now() - started;
+                if (elapsed < 500) await delay(500 - elapsed);
+                return rejectWithValue("Filter contains 'Empty', skipping request");
+            }
             const response = await axiosServices.post(API_DT_URL, filter);
             console.log("Fetch trackingTrans", response.data.collection);
             dispatch(GetTrackingTrans(response.data.collection.data || []));
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
+            const elapsed = Date.now() - started;
+            if (elapsed < 500) await delay(500 - elapsed);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching trackingTrans:", error);
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
+            const elapsed = Date.now() - started;
+            if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
@@ -241,5 +284,44 @@ export const deleteTrackingTrans = createAsyncThunk("trackingTrans/deleteTrackin
         throw error;
     }
 });
+
+
+
+
+
+export const ExportTrackingTrans = createAsyncThunk(
+    "trackingTrans/exportTrackingTrans",
+    async (filter: "pdf" | "excel", { rejectWithValue }) => {
+        const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    const API_KEY = import.meta.env.VITE_API_KEY;
+        const url = `${BASE_URL}${API_URL}export/${filter}`;
+        const accessToken = localStorage.getItem("token");
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers:{
+          'Authorization': `Bearer ${accessToken}`,
+          'X-BIOPEOPLETRACKING-API-KEY': API_KEY,
+        },
+            });
+            if(!response.ok) throw new Error('Export failed');
+            // console.log('Response content-type:', response.headers.get('content-type'));
+
+                  const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = filter === 'pdf' ? 'trackingtrans.pdf' : 'trackingtrans.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+      return true; // Indicate success
+        }catch (error: any) {
+      console.error("Error exporting trackingtrans:", error);
+      return rejectWithValue(error.message || "Unknown error");
+    }
+    }
+);
 
 export default TrackingTransSlice.reducer;

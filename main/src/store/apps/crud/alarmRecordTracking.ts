@@ -36,10 +36,17 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     SearchValue: string,
+    dateFilters?:{
+        TimeStamp?: {
+            DateFrom?: string | null,
+            DateTo?: string | null,
+        }
+    }
     filters: {
-        FloorplanMaskedAreaId: string[],
-        ReaderId: string[],
-        VisitorId: string[],
+        FloorplanMaskedAreaId?: string[],
+        ReaderId?: string[],
+        VisitorId?: string[],
+        MemberId?: string[],
     }
 }
 
@@ -225,7 +232,7 @@ export const ExportAlarm = createAsyncThunk(
                 headers:{
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`,
-          'X-API-KEY-TRACKING-PEOPLE':
+          'X-BIOPEOPLETRACKING-API-KEY':
             'FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK',
         },
             });

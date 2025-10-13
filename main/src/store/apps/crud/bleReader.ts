@@ -56,6 +56,7 @@ export interface bleReaderType {
 
 interface StateType {
     bleReaders: bleReaderType[];
+    bleReaderAll: bleReaderType[];
     unsavedReaders: bleReaderType[];
     bleReaderSearch: string;
     selectedBleReader?: bleReaderType | null;
@@ -69,6 +70,7 @@ interface StateType {
 
 const initialState: StateType = {
     bleReaders: [],
+    bleReaderAll: [],
     unsavedReaders: [],
     bleReaderSearch: "",
     selectedBleReader: null,
@@ -87,6 +89,9 @@ export const BleReaderSlice = createSlice({
         GetBleReader: (state, action: PayloadAction<bleReaderType[]>) => {
             state.bleReaders = action.payload;
             state.unsavedReaders = action.payload;
+        },
+        GetAllBleReader: (state, action: PayloadAction<bleReaderType[]>) => {
+          state.bleReaderAll = action.payload;  
         },
         // SetBleReaderCount: (state, action: PayloadAction<number[]>) => {
         //     state.bleReaderTotalCount = action.payload[0];
@@ -216,6 +221,7 @@ UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
 
 export const {
     GetBleReader,
+    GetAllBleReader,
     SelectBleReader,
     SearchBleReader,
     SetEditBleReader,
@@ -227,7 +233,7 @@ export const {
 export const fetchBleReaders = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
-        dispatch(GetBleReader(response.data?.collection?.data || []));
+        dispatch(GetAllBleReader(response.data?.collection?.data || []));
 
         // console.log("Ble reader: ", response.data?.collection?.data || []);
     } catch (error) {

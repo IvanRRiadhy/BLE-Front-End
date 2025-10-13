@@ -25,6 +25,10 @@ export type GetFilter = {
             DateFrom?: string | null,
             DateTo?: string | null,
         },
+        VisitorPeriodEnd?: {
+            DateFrom?: string | null,
+            DateTo?: string | null,
+        },
     }
     filters:{
         Status?: number,

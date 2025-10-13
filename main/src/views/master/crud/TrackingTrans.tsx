@@ -17,6 +17,8 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import TrackingTransactionList from 'src/components/master/CRUD/trackingTransaction/TrackingTransactionList';
 import AddEditTrackingTransaction from 'src/components/master/CRUD/trackingTransaction/AddEditTrackingTransaction';
+import TrackingTransactionFilter from 'src/components/master/CRUD/trackingTransaction/TrackingTransactionFilter';
+import TrackingTransExport from 'src/components/master/CRUD/trackingTransaction/TrackingTransactionExport';
 
 interface cardType {
   icon?: string;
@@ -32,7 +34,7 @@ const TrackingTrans = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const trackingTransCount = useSelector(
-    (state: RootState) => state.trackingTransReducer.trackingTransTotalCount,
+    (state: RootState) => state.trackingTransReducer.trackingTransFilteredCount,
   );
   const hasLoaded = useSelector((state: RootState) => state.trackingTransReducer.hasLoaded);
   const { t } = useTranslation();
@@ -98,7 +100,10 @@ const TrackingTrans = () => {
         >
           <ParentCard
             title="Tracking Transaction List"
-            // codeModel={<AddEditTrackingTransaction type="add" />}
+            codeModel={[
+              <TrackingTransExport key="export" />,
+              <TrackingTransactionFilter key="filter" />,
+            ]}
           >
             <TrackingTransactionList />
           </ParentCard>

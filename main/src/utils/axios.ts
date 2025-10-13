@@ -76,7 +76,7 @@ axiosServices.interceptors.response.use(
         const response = await axios.post(`${BASE_URL}/api/Auth/refresh/`, {
           refreshToken,
           headers: {
-                    'X-API-KEY-TRACKING-PEOPLE': import.meta.env.VITE_API_KEY,
+                    'X-BIOPEOPLETRACKING-API-KEY': import.meta.env.VITE_API_KEY,
           }
         });
         const res = response.data.collection.data; // Extract the collection from the response.

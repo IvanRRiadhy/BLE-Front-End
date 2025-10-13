@@ -254,7 +254,7 @@ const TrackingTransactionList = () => {
                   {!hasLoaded ? (
                     renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                   ) : (
-                    trackingTransData.map((trackingTrans: trackingTransType, index) => (
+                    trackingTransData.map((trackingTrans: trackingTransType, index: number) => (
                     <TableRow key={trackingTrans.id}>
                       <TableCell
                         sx={{
@@ -275,7 +275,7 @@ const TrackingTransactionList = () => {
                       <TableCell>{formatTime(trackingTrans.transTime)}</TableCell>
                       <TableCell>{trackingTrans.reader?.name}</TableCell>
                       <TableCell>{trackingTrans.floorplanMaskedArea?.name ?? "Unknown Area"}</TableCell>
-                      <TableCell>{getHolderName(trackingTrans.memberId ?? trackingTrans.visitorId ?? "")}</TableCell>
+                      <TableCell>{trackingTrans.member?.name ?? trackingTrans.visitor?.name ?? "Unknown Visitor"}</TableCell>
                       <TableCell>{`(${trackingTrans.coordinateX}, ${trackingTrans.coordinateY})`}</TableCell>
                       <TableCell>{trackingTrans.alarmStatus}</TableCell>
                       <TableCell>{trackingTrans.battery}</TableCell>
@@ -288,7 +288,7 @@ const TrackingTransactionList = () => {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={trackingTransTotalCount}
+              count={trackingTransFilteredCount}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}
