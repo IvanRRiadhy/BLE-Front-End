@@ -79,19 +79,29 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       .post(url, creds)
       .then((res) => {
         const data = res?.data?.collection?.data ?? res?.data;
-        // store common things (adjust if visitor payload differs)
+
+        // ✅ store token and role BEFORE navigating
         if (data?.token) localStorage.setItem('token', data.token);
         if (data?.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
         if (data?.applicationId) localStorage.setItem('applicationId', data.applicationId);
-        if (data?.levelPriority) localStorage.setItem('levelPriority', data.levelPriority);
-        localStorage.setItem('welcomePopupShown', 'false');
-        if (isAdmin) {
-          
-          navigate('/');
-        } else {
-          navigate('/my-visit');
+        if (data?.levelPriority) {
+          localStorage.setItem('levelPriority', data.levelPriority.trim());
+          console.log('levelPriority stored:', data.levelPriority); // 👀 check value
         }
+
+        localStorage.setItem('welcomePopupShown', 'false');
+        console.log('levelPriority stored:', localStorage.getItem('levelPriority'));
+        // ✅ ensure localStorage committed before navigation
+        setTimeout(() => {
+          if (isAdmin) {
+            console.log('Admin logged in');
+            window.location.href = '/dashboards/mainmenu';
+          } else {
+            window.location.href = '/my-visit';
+          }
+        }, 300);
       })
+
       .catch((err) => {
         setLoginError('Invalid username or password. Please try again.');
         console.error(

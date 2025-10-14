@@ -168,7 +168,7 @@ export const fetchAlarm = () => async (dispatch: AppDispatch) => {
 export const fetchAlarmDT = createAsyncThunk(
   "alarmRecordTrackings/fetchAlarmDT",
   async (filter: any, thunkAPI) => {
-    const { dispatch, signal, rejectWithValue } = thunkAPI;
+    const { dispatch, rejectWithValue } = thunkAPI;
     const started = Date.now();
 
     try {
@@ -185,8 +185,7 @@ export const fetchAlarmDT = createAsyncThunk(
       console.log("Filters: ", filter)
       // Retry-able request with cancellation
       const response = await retryUntilSuccess(
-        () => axiosServices.post(`${API_DT_URL}`, filter),
-        { signal } // uses thunkAPI.signal to cancel if needed
+        () => axiosServices.post(`${API_DT_URL}`, filter)
       );
       console.log("Alarm records fetched successfully: ", response.data);
       // Update list in store

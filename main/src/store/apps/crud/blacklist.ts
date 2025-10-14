@@ -8,8 +8,8 @@ import { MaskedAreaType } from "./maskedArea";
 import { defaultBlaclistFilter } from "../defaultForm";
 import { stat } from "fs";
 
-const API_URL = '/api/VisitorBlacklistArea/';
-const API_DT_URL = '/api/VisitorBlacklistArea/filter/';
+const API_URL = '/api/BlacklistArea/';
+const API_DT_URL = '/api/BlacklistArea/filter/';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type GetFilter = {

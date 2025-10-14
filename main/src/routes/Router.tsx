@@ -4,6 +4,7 @@ import React, { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 import VisitorCard from 'src/views/master/tag/VisitorCard';
+import ProtectedRoute from './ProtectedRoute';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -260,167 +261,155 @@ const PagePricing = Loadable(lazy(() => import('../views/pages/frontend-pages/Pr
 const BlogPage = Loadable(lazy(() => import('../views/pages/frontend-pages/Blog')));
 const BlogPost = Loadable(lazy(() => import('../views/pages/frontend-pages/BlogPost')));
 
+const roleAccessRules: Record<string, string[]> = {
+  System: ['*'], // all routes
+  SuperAdmin: ['*', '!/master/application'], // all except application
+  PrimaryAdmin: ['/dashboards/', '/report/', '/visitor/visitorinvitation'],
+  Primary: ['/dashboards/monitoring'],
+  Secondary: ['/my-visit/'],
+  UserCreated: ['/my-visit/'],
+};
+
+const withAuth = (element: JSX.Element, path: string): JSX.Element => {
+  const userRole = localStorage.getItem('levelPriority');
+  const normalize = (p: string) => (p || '').replace(/\/+$/, ''); // remove trailing slash
+
+  // 🚨 if no role found
+  if (!userRole) {
+    console.warn('[AuthGuard] No role, redirecting to login.');
+    return <Navigate to="/auth/login" replace />;
+  }
+
+  const rules = roleAccessRules[userRole];
+  if (!rules) {
+    console.warn(`[AuthGuard] Unknown role: ${userRole}`);
+    return <Navigate to="/auth/login" replace />;
+  }
+
+  // ✅ Handle full-access roles
+  if (rules.includes('*')) {
+    // check exceptions like !/master/application
+    const denied = rules
+      .filter((r) => r.startsWith('!'))
+      .some((r) => normalize(path).startsWith(normalize(r.slice(1))));
+    if (denied) {
+      console.warn(`[AuthGuard] ${userRole} denied path: ${path}`);
+      return <Navigate to="/dashboards/mainmenu" replace />;
+    }
+    return element;
+  }
+
+  // ✅ Handle restricted roles
+  const allowed = rules.some((r) => normalize(path).startsWith(normalize(r)));
+  if (allowed) {
+    return element;
+  }
+
+  console.warn(`[AuthGuard] ${userRole} not allowed to access ${path}`);
+  return <Navigate to="/dashboards/mainmenu" replace />;
+};
+
+
+
 const Router = [
   {
     path: '/',
     element: <FullLayout />,
     children: [
       { path: '/', element: <Navigate to="/dashboards/mainmenu" /> },
-      { path: '/dashboards/mainmenu', exact: true, element: <MainMenuDash /> },
-      { path: '/dashboards/monitoring', exact: true, element: <MonitoringDash /> },
-      { path: '/dashboards/monitoring/viewer', exact: true, element: <MonitoringDash /> },
-      { path: '/dashboards/monitoring/config', exact: true, element: <MonitoringConfig /> },
+
+      // dashboards
+      {
+        path: '/dashboards/mainmenu',
+        exact: true,
+        element: withAuth(<MainMenuDash />, '/dashboards/mainmenu'),
+      },
+      {
+        path: '/dashboards/monitoring',
+        exact: true,
+        element: withAuth(<MonitoringDash />, '/dashboards/monitoring'),
+      },
+      {
+        path: '/dashboards/monitoring/viewer',
+        exact: true,
+        element: withAuth(<MonitoringDash />, '/dashboards/monitoring/viewer'),
+      },
+      {
+        path: '/dashboards/monitoring/config',
+        exact: true,
+        element: withAuth(<MonitoringConfig />, '/dashboards/monitoring/config'),
+      },
+      {
+        path: '/dashboards/evacuation',
+        exact: true,
+        element: withAuth(<EvacuationDashboard />, '/dashboards/evacuation'),
+      },
+
+      // master
+      {
+        path: '/master/organization',
+        exact: true,
+        element: withAuth(<Organization />, '/master/organization'),
+      },
+      {
+        path: '/master/department',
+        exact: true,
+        element: withAuth(<Department />, '/master/department'),
+      },
+      {
+        path: '/master/district',
+        exact: true,
+        element: withAuth(<District />, '/master/district'),
+      },
+      { path: '/master/building', exact: true, element: withAuth(<Building />, '/master/building') },
+      { path: '/master/floor', exact: true, element: withAuth(<Floor />, '/master/floor') },
+      { path: '/master/floorplan', exact: true, element: withAuth(<Floorplan />, '/master/floorplan') },
+      { path: '/master/floorplanmaskedarea', exact: true, element: withAuth(<FloorplanMaskedArea />, '/master/floorplanmaskedarea') },
+      { path: '/master/floorplanmaskedarea/edit', exact: true, element: withAuth(<MaskedAreaEdit />, '/master/floorplanmaskedarea/edit') },
+      { path: '/master/brand', exact: true, element: withAuth(<Brand />, '/master/brand') },
+      { path: '/master/accesscctv', exact: true, element: withAuth(<AccessCCTV />, '/master/accesscctv') },
+      { path: '/master/accesscontrol', exact: true, element: withAuth(<AccessControl />, '/master/accesscontrol') },
+      { path: '/master/blereader', exact: true, element: withAuth(<BleReader />, '/master/blereader') },
+      { path: '/master/device', exact: true, element: withAuth(<FloorplanDevice />, '/master/device') },
+      { path: '/master/device/edit', exact: true, element: withAuth(<FloorplanDeviceEdit />, '/master/device/edit') },
+      { path: '/master/rules/edit', exact: true, element: withAuth(<RulesEdit />, '/master/rules/edit') },
+      { path: '/master/member', exact: true, element: withAuth(<Member />, '/master/member') },
+      { path: '/master/card', exact: true, element: withAuth(<Card />, '/master/card') },
+      { path: '/master/timegroup', exact: true, element: withAuth(<TimeGroup />, '/master/timegroup') },
+      { path: '/master/visitorcard', exact: true, element: withAuth(<VisitorCard />, '/master/visitorcard') },
+      { path: '/master/cardaccess', exact: true, element: withAuth(<CardAccess />, '/master/cardaccess') },
+      { path: '/master/cardgroup', exact: true, element: withAuth(<CardGroup />, '/master/cardgroup') },
+
+      { path: '/master/membertag', exact: true, element: withAuth(<MemberTag />, '/master/membertag') },
       // { path: '/master/floorplan', exact: true, element: <Floorplan /> },
       { path: '/master/gateway', exact: true, element: <GatewayApp /> },
-      { path: '/master/membertag', exact: true, element: <MemberTag /> },
-      { path: '/visitor/visitorinvitation', exact: true, element: <VisitorTag /> },
-      { path: '/master/application', element: <Application /> },
-      { path: '/master/integration', exact: true, element: <Integration /> },
-      { path: '/master/accesscctv', exact: true, element: <AccessCCTV /> },
-      { path: '/master/accesscontrol', exact: true, element: <AccessControl /> },
-      { path: '/master/brand', exact: true, element: <Brand /> },
-      { path: '/master/department', exact: true, element: <Department /> },
-      { path: '/master/district', exact: true, element: <District /> },
-      { path: '/master/organization', exact: true, element: <Organization /> },
-      { path: '/master/floorplanmaskedarea', exact: true, element: <FloorplanMaskedArea /> },
-      { path: '/master/blereader', exact: true, element: <BleReader /> },
-      { path: '/master/floor', exact: true, element: <Floor /> },
-      { path: '/master/member', exact: true, element: <Member /> },
-      { path: '/report/trackingtransaction', exact: true, element: <TrackingTransaction /> },
-      { path: '/visitor/visitordata', exact: true, element: <Visitor /> },
-      { path: '/visitor/blacklist', exact: true, element: <Blacklist /> },
-      { path: '/master/building', exact: true, element: <Building /> },
-      { path: '/master/device', exact: true, element: <FloorplanDevice /> },
-      { path: '/report/alarmrecord', exact: true, element: <AlarmRecord /> },
-      { path: '/report/alarmtrigger', exact: true, element: <AlarmTrigger /> },
-      { path: '/report/cardrecord', exact: true, element: <CardRecord /> },
-      { path: '/master/floorplan', exact: true, element: <Floorplan /> },
-      { path: '/master/card', exact: true, element: <Card /> },
-      { path: '/master/timegroup', exact: true, element: <TimeGroup /> },
-      { path: '/master/visitorcard', exact: true, element: <VisitorCard /> },
-      { path: '/master/cardaccess', exact: true, element: <CardAccess /> },
-      { path: '/master/cardgroup', exact: true, element: <CardGroup /> },
+
+      // Visitor
+      { path: '/visitor/visitordata', exact: true, element: withAuth(<Visitor />, '/visitor/visitordata') },
+      { path: '/visitor/blacklist', exact: true, element: withAuth(<Blacklist />, '/visitor/blacklist') },
+      { path: '/visitor/visitorinvitation', exact: true, element: withAuth(<VisitorTag />, '/visitor/visitorinvitation') },
+
+      // Report
+      { path: '/report/trackingtransaction', exact: true, element: withAuth(<TrackingTransaction />, '/report/trackingtransaction') },
+      { path: '/report/alarmrecord', exact: true, element: withAuth(<AlarmRecord />, '/report/alarmrecord') },
+      { path: '/report/alarmtrigger', exact: true, element: withAuth(<AlarmTrigger />, '/report/alarmtrigger') },
+      { path: '/report/cardrecord', exact: true, element: withAuth(<CardRecord />, '/report/cardrecord') },
 
       // ***Alarm Setting*** //
-      { path: '/alarmsetting', exact: true, element: <AlarmSetting /> },
-      { path: '/alarmsetting/geofencing', exact: true, element: <GeoFencing /> },
-      { path: '/alarmsetting/geofencing/edit', exact: true, element: <GeoFencingEdit /> },
-      { path: '/alarmsetting/overpopulating', exact: true, element: <OverPopulating /> },
-      { path: '/alarmsetting/overpopulating/edit', exact: true, element: <OverPopulatingEdit /> },
-      { path: '/alarmsetting/stayonarea', exact: true, element: <StayOnArea /> },
-      { path: '/alarmsetting/stayonarea/edit', exact: true, element: <StayOnAreaEdit /> },
-      { path: '/alarmsetting/boundary', exact: true, element: <Boundary /> },
-      { path: '/alarmsetting/boundary/edit', exact: true, element: <BoundaryEdit /> },
+      { path: '/alarmsetting', exact: true, element: withAuth(<AlarmSetting />, '/alarmsetting') },
+      { path: '/alarmsetting/geofencing', exact: true, element: withAuth(<GeoFencing />, '/alarmsetting/geofencing') },
+      { path: '/alarmsetting/geofencing/edit', exact: true, element: withAuth(<GeoFencingEdit />, '/alarmsetting/geofencing/edit') },
+      { path: '/alarmsetting/overpopulating', exact: true, element: withAuth(<OverPopulating />, '/alarmsetting/overpopulating') },
+      { path: '/alarmsetting/overpopulating/edit', exact: true, element: withAuth(<OverPopulatingEdit />, '/alarmsetting/overpopulating/edit') },
+      { path: '/alarmsetting/stayonarea', exact: true, element: withAuth(<StayOnArea />, '/alarmsetting/stayonarea') },
+      { path: '/alarmsetting/stayonarea/edit', exact: true, element: withAuth(<StayOnAreaEdit />, '/alarmsetting/stayonarea/edit') },
+      { path: '/alarmsetting/boundary', exact: true, element: withAuth(<Boundary />, '/alarmsetting/boundary') },
+      { path: '/alarmsetting/boundary/edit', exact: true, element: withAuth(<BoundaryEdit />, '/alarmsetting/boundary/edit') },
 
-      //Dashboard Evacuation
-      { path: '/dashboards/evacuation', exact: true, element: <EvacuationDashboard /> },
-
-      { path: '/master/user', exact: true, element: <User /> },
-
-      { path: '/apps/contacts', element: <Contacts /> },
-
-      { path: '/master/device/edit', exact: true, element: <FloorplanDeviceEdit /> },
-      { path: '/master/floorplanmaskedarea/edit', exact: true, element: <MaskedAreaEdit /> },
-      { path: '/master/rules/edit', exact: true, element: <RulesEdit /> },
-      // { path: '/apps/blog/posts', element: <Blog /> },
-      // { path: '/frontend-pages/blog/detail/:id', element: <BlogDetail /> },
-      { path: '/apps/chats', element: <Chats /> },
-      { path: '/apps/email', element: <Email /> },
-      { path: '/apps/notes', element: <Notes /> },
-      { path: '/apps/tickets', element: <Tickets /> },
-      { path: '/apps/ecommerce/shop', element: <Ecommerce /> },
-      { path: '/apps/ecommerce/eco-product-list', element: <EcomProductList /> },
-      { path: '/apps/ecommerce/eco-checkout', element: <EcomProductCheckout /> },
-      { path: '/apps/ecommerce/add-product', element: <EcommerceAddProduct /> },
-      { path: '/apps/ecommerce/edit-product', element: <EcommerceEditProduct /> },
-      { path: '/apps/ecommerce/detail/:id', element: <EcommerceDetail /> },
-      { path: '/apps/followers', element: <Followers /> },
-      { path: '/apps/friends', element: <Friends /> },
-      { path: '/apps/gallery', element: <Gallery /> },
-      { path: '/apps/kanban', element: <Kanban /> },
-      { path: '/apps/tracking', element: <Tracking /> },
-      { path: '/apps/invoice/list', element: <InvoiceList /> },
-      { path: '/apps/invoice/create', element: <InvoiceCreate /> },
-      { path: '/apps/invoice/detail/:id', element: <InvoiceDetail /> },
-      { path: '/apps/invoice/edit/:id', element: <InvoiceEdit /> },
-      { path: '/user-profile', element: <UserProfile /> },
-      { path: '/apps/calendar', element: <Calendar /> },
-      { path: '/ui-components/alert', element: <MuiAlert /> },
-      { path: '/ui-components/accordion', element: <MuiAccordion /> },
-      { path: '/ui-components/avatar', element: <MuiAvatar /> },
-      { path: '/ui-components/chip', element: <MuiChip /> },
-      { path: '/ui-components/dialog', element: <MuiDialog /> },
-      { path: '/ui-components/list', element: <MuiList /> },
-      { path: '/ui-components/popover', element: <MuiPopover /> },
-      { path: '/ui-components/rating', element: <MuiRating /> },
-      { path: '/ui-components/tabs', element: <MuiTabs /> },
-      { path: '/ui-components/tooltip', element: <MuiTooltip /> },
-      { path: '/ui-components/transfer-list', element: <MuiTransferList /> },
-      { path: '/ui-components/typography', element: <MuiTypography /> },
-      { path: '/pages/casl', element: <RollbaseCASL /> },
-      { path: '/pages/pricing', element: <Pricing /> },
-      { path: '/pages/faq', element: <Faq /> },
-      { path: '/pages/account-settings', element: <AccountSetting /> },
-      { path: '/tables/basic', element: <BasicTable /> },
-      { path: '/tables/enhanced', element: <EnhanceTable /> },
-      { path: '/tables/pagination', element: <PaginationTable /> },
-      { path: '/tables/fixed-header', element: <FixedHeaderTable /> },
-      { path: '/tables/collapsible', element: <CollapsibleTable /> },
-      { path: '/tables/search', element: <SearchTable /> },
-      { path: '/forms/form-elements/autocomplete', element: <MuiAutoComplete /> },
-      { path: '/forms/form-elements/button', element: <MuiButton /> },
-      { path: '/forms/form-elements/checkbox', element: <MuiCheckbox /> },
-      { path: '/forms/form-elements/radio', element: <MuiRadio /> },
-      { path: '/forms/form-elements/slider', element: <MuiSlider /> },
-      { path: '/forms/form-elements/date-time', element: <MuiDateTime /> },
-      { path: '/forms/form-elements/switch', element: <MuiSwitch /> },
-      { path: '/forms/form-elements/switch', element: <MuiSwitch /> },
-      { path: '/forms/form-layouts', element: <FormLayouts /> },
-      { path: '/forms/form-custom', element: <FormCustom /> },
-      { path: '/forms/form-wizard', element: <FormWizard /> },
-      { path: '/forms/form-validation', element: <FormValidation /> },
-      { path: '/forms/form-horizontal', element: <FormHorizontal /> },
-      { path: '/forms/form-vertical', element: <FormVertical /> },
-      { path: '/forms/form-tiptap', element: <TiptapEditor /> },
-      { path: '/charts/area-chart', element: <AreaChart /> },
-      { path: '/charts/line-chart', element: <LineChart /> },
-      { path: '/charts/gredient-chart', element: <GredientChart /> },
-      { path: '/charts/candlestick-chart', element: <CandlestickChart /> },
-      { path: '/charts/column-chart', element: <ColumnChart /> },
-      { path: '/charts/doughnut-pie-chart', element: <DoughnutChart /> },
-      { path: '/charts/radialbar-chart', element: <RadialbarChart /> },
-      { path: '/widgets/cards', element: <WidgetCards /> },
-      { path: '/widgets/banners', element: <WidgetBanners /> },
-      { path: '/widgets/charts', element: <WidgetCharts /> },
-      { path: '/react-tables/basic', element: <ReactBasicTable /> },
-      { path: '/react-tables/column-visiblity', element: <ReactColumnVisibilityTable /> },
-      { path: '/react-tables/drag-drop', element: <ReactDragDropTable /> },
-      { path: '/react-tables/dense', element: <ReactDenseTable /> },
-      { path: '/react-tables/editable', element: <ReactEditableTable /> },
-      { path: '/react-tables/empty', element: <ReactEmptyTable /> },
-      { path: '/react-tables/expanding', element: <ReactExpandingTable /> },
-      { path: '/react-tables/filter', element: <ReactFilterTable /> },
-      { path: '/react-tables/pagination', element: <ReactPaginationTable /> },
-      { path: '/react-tables/row-selection', element: <ReactRowSelectionTable /> },
-      { path: '/react-tables/sorting', element: <ReactSortingTable /> },
-      { path: '/react-tables/sticky', element: <ReactStickyTable /> },
-
-      { path: '/muicharts/barcharts', element: <BarCharts /> },
-      { path: '/muicharts/gaugecharts', element: <GaugeCharts /> },
-      { path: '/muicharts/linecharts/area', element: <AreaCharts /> },
-      { path: '/muicharts/linecharts/line', element: <LineCharts /> },
-      { path: '/muicharts/piecharts', element: <PieCharts /> },
-      { path: '/muicharts/scattercharts', element: <ScatterCharts /> },
-      { path: '/muicharts/sparklinecharts', element: <SparklineCharts /> },
-
-      {
-        path: '/mui-trees/simpletree/simpletree-customization',
-        element: <SimpletreeCustomization />,
-      },
-      { path: '/mui-trees/simpletree/simpletree-expansion', element: <SimpletreeExpansion /> },
-      { path: '/mui-trees/simpletree/simpletree-focus', element: <SimpletreeFocus /> },
-      { path: '/mui-trees/simpletree/simpletree-items', element: <SimpletreeItems /> },
-      { path: '/mui-trees/simpletree/simpletree-selection', element: <SimpletreeSelection /> },
+      //Restricted
+      { path: '/master/application', element: withAuth(<Application />, '/master/application') },
+      { path: '/master/integration', exact: true, element: withAuth(<Integration />, '/master/integration') },
+      { path: '/master/user', exact: true, element: withAuth(<User />, '/master/user') },
 
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
@@ -429,8 +418,8 @@ const Router = [
     path: '/',
     element: <MyVisitLayout />,
     children: [
-      { path: '/my-visit', element: <MyVisitDashboard /> },
-      { path: '/my-visit/invite', element: <InvitationPage /> },
+      { path: '/my-visit', element: withAuth(<MyVisitDashboard />, '/my-visit') },
+      { path: '/my-visit/invite', element: withAuth(<InvitationPage />, '/my-visit/invite') },
     ],
   },
   {
@@ -448,14 +437,6 @@ const Router = [
       { path: '/auth/two-steps', element: <TwoSteps /> },
       { path: '/auth/two-steps2', element: <TwoSteps2 /> },
       { path: '/auth/maintenance', element: <Maintenance /> },
-      { path: '/landingpage', element: <Landingpage /> },
-      { path: '/frontend-pages/homepage', element: <Homepage /> },
-      { path: '/frontend-pages/about', element: <About /> },
-      { path: '/frontend-pages/contact', element: <Contact /> },
-      { path: '/frontend-pages/portfolio', element: <Portfolio /> },
-      { path: '/frontend-pages/pricing', element: <PagePricing /> },
-      { path: '/frontend-pages/blog', element: <BlogPage /> },
-      { path: '/frontend-pages/blog/detail/:id', element: <BlogPost /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
       //Invitation Form
       { path: '/visitor-form', exact: true, element: <InvitationForm /> },
