@@ -194,7 +194,7 @@ const BlacklistList = () => {
                         {' '}
                         {index + 1 + page * rowsPerPage}
                       </TableCell>
-                      <TableCell>{blacklist.visitor?.name}</TableCell>
+                      <TableCell>{blacklist.member?.name ?? blacklist.visitor?.name ?? "Unknown Person"}</TableCell>
                       <TableCell>{blacklist.floorplanMaskedArea?.name}</TableCell>
 
                       <TableCell

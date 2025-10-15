@@ -18,9 +18,12 @@ import {
   Backdrop,
   CircularProgress,
   MenuItem,
+  IconButton,
+  Tooltip,
+  useTheme,
 } from '@mui/material';
 import {VisitorType } from 'src/store/apps/crud/visitor';
-
+import IconClose from 'src/assets/images/frontend-pages/icons/icon-close.svg';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 
 import { useTranslation } from 'react-i18next';
@@ -56,6 +59,7 @@ const visitorStatusColorMap: Record<number, ChipColor> = {
 
 const VisitorContent = () => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const trxVisitorDetail = useSelector(
     (state: RootState) => state.TrxVisitorReducer.SelectedTrxVisitor,
   );
@@ -339,18 +343,59 @@ const VisitorContent = () => {
       {visitorDetail && trxVisitorDetail ? (
         <>
           {/* Header Part */}
-          <Box
-            p={3}
-            py={2}
-            display={'flex'}
-            alignItems={'center'}
-            sx={{
-              backgroundColor: (theme) =>
-                chipColor !== 'default' ? theme.palette[chipColor].main : theme.palette.grey[300],
-            }}
-          >
-            <Typography variant="h4">Visitor Details</Typography>
-          </Box>
+<Box
+  p={3}
+  py={2}
+  display="flex"
+  alignItems="center"
+  justifyContent="space-between"
+  sx={{
+    borderRadius: '8px',
+    boxShadow: 3,
+    mb: 1,
+    background:
+      chipColor !== 'default'
+        ? `linear-gradient(90deg, ${
+            theme.palette[chipColor].dark ?? theme.palette[chipColor].main
+          } 0%, ${theme.palette[chipColor].main} 100%)`
+        : 'linear-gradient(90deg, #90a4ae 0%, #b0bec5 100%)', // neutral fallback
+  }}
+>
+  {/* Left side: title + status */}
+  <Typography
+    variant="h5"
+    fontWeight={700}
+    color="#fff"
+    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+  >
+    Visitor Details
+
+  </Typography>
+
+  {/* Right side: Close button */}
+  <Tooltip title="Close">
+    <IconButton
+      onClick={() => dispatch(SelectTrxVisitor(''))}
+      size="small"
+      sx={{
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        border: '1px solid rgba(0,0,0,0.15)',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
+        transition: 'all 0.2s ease',
+        '& img': {
+          filter: 'invert(1) drop-shadow(0 0 2px rgba(0,0,0,0.5))',
+        },
+        '&:hover': {
+          backgroundColor: 'rgba(255,255,255,0.35)',
+          transform: 'scale(1.1)',
+        },
+      }}
+    >
+      <img src={IconClose} alt="close" style={{ width: 18, height: 18 }} />
+    </IconButton>
+  </Tooltip>
+</Box>
+
           <Divider />
 
           {/* Table Part */}

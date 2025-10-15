@@ -40,6 +40,7 @@ interface StateType {
     userTotalCount: number;
     userFilteredCount: number;
     userFilter: GetFilter;
+    lastFilter?: GetFilter;
 isLoading: boolean;
 hasLoaded: boolean;
 }

@@ -33,10 +33,18 @@ const MainAlarmList = () => {
   const alarmSettingActiveCount = useSelector(
     (state: RootState) => state.AlarmSettingReducer.alarmSettingActiveCount,
   );
+  const alarmSettingFilteredCount = useSelector(
+    (state: RootState) => state.AlarmSettingReducer.alarmSettingFilteredCount,
+  )
   const hasLoaded = useSelector((state: RootState) => state.AlarmSettingReducer.hasLoaded);
   const { t } = useTranslation();
 
   const topCards: cardType[] = [
+        {
+      title: 'Total Alarm Available',
+      subtitle: alarmSettingFilteredCount.toString(),
+      bgcolor: 'secondary',
+    },
     {
       title: 'Total Alarm Activated',
       subtitle: alarmSettingActiveCount.toString(),

@@ -13,9 +13,11 @@ import {
   CircularProgress,
   Autocomplete,
   TextField,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
@@ -26,6 +28,7 @@ import {
   fetchBlacklistDT,
 } from 'src/store/apps/crud/blacklist';
 import { fetchMaskedAreaDT } from 'src/store/apps/crud/maskedArea';
+import { fetchMembers } from 'src/store/apps/crud/member';
 import { fetchVisitor } from 'src/store/apps/crud/visitor';
 import { defaultBlaclistForm, defaultMaskedAreaFilter } from 'src/store/apps/defaultForm';
 
@@ -35,34 +38,33 @@ interface FormType {
 }
 
 const AddEditBlacklist = ({ type, blacklist }: FormType) => {
-  const [open, setOpen] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
-  const [isSaving, setIsSaving] = React.useState(false);
-  const [formData, setFormData] = React.useState<blacklistType>({
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [useMember, setUseMember] = useState(false); // 🔥 switch between Visitor and Member
+  const [formData, setFormData] = useState<blacklistType>({
     ...defaultBlaclistForm,
     ...blacklist,
   });
-  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const blacklistFilter = useSelector((state: RootState) => state.blacklistReducer.blacklistFilter);
-
-  const visitorData = useSelector((state: RootState) => state.visitorReducer.visitors);
+  const visitorData = useSelector((state: RootState) => state.visitorReducer.visitorAll);
+  const memberData = useSelector((state: RootState) => state.memberReducer.memberAll);
   const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreas);
-
-  const visitorOptions = (visitorData ?? []).map((visitor) => ({
-    id: visitor.id,
-    name: visitor.name,
-  }));
-  const areaOptions = (maskedAreaData ?? []).map((area) => ({ id: area.id, name: area.name }));
   const isLoading = useSelector((state: RootState) => state.blacklistReducer.isLoading);
-  const hasLoaded = useSelector((state: RootState) => state.blacklistReducer.hasLoaded);
+
   const dispatch: AppDispatch = useDispatch();
 
   useEffect(() => {
     dispatch(fetchVisitor());
+    dispatch(fetchMembers());
     dispatch(fetchMaskedAreaDT({ ...defaultMaskedAreaFilter, filters: { RestrictedStatus: 1 } }));
   }, [dispatch]);
-  console.log(maskedAreaData);
+
+  const visitorOptions = (visitorData ?? []).map((v) => ({ id: v.id, name: v.name }));
+  const memberOptions = (memberData ?? []).map((m) => ({ id: m.id, name: m.name }));
+  const areaOptions = (maskedAreaData ?? []).map((a) => ({ id: a.id, name: a.name }));
 
   const handleClickOpen = () => {
     setLoading(true);
@@ -84,14 +86,17 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
     }, 100);
   };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const handleClose = () => setOpen(false);
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
-    if (!formData.visitorId?.trim()) errors.visitorId = 'Visitor is required';
+    if (useMember) {
+      if (!formData.memberId?.trim()) errors.memberId = 'Member is required';
+    } else {
+      if (!formData.visitorId?.trim()) errors.visitorId = 'Visitor is required';
+    }
+
     if (!formData.floorplanMaskedAreaId?.trim())
       errors.floorplanMaskedAreaId = 'Floorplan Masked Area is required';
 
@@ -104,62 +109,45 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
       toast.error('Please fill in all required fields correctly.');
       return;
     }
+
     setIsSaving(true);
     const data = new FormData();
 
     Object.entries(formData).forEach(([key, value]) => {
-      if (
-        key !== 'createdBy' &&
-        key !== 'createdAt' &&
-        key !== 'updatedBy' &&
-        key !== 'updatedAt'
-      ) {
-        data.append(key, value.toString());
+      if (!['createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key)) {
+        data.append(key, value?.toString() ?? '');
       }
     });
+
     try {
       let result;
-      if (type === 'edit') {
-        result = await dispatch(editBlacklist(data)); // Dispatch update
-      }
-      if (type === 'add') {
-        result = await dispatch(addBlacklist(data));
-      }
-      if (result && result.type && result.type.endsWith('/fulfilled')) {
+      if (type === 'edit') result = await dispatch(editBlacklist(data));
+      if (type === 'add') result = await dispatch(addBlacklist(data));
+
+      if (result?.type?.endsWith('/fulfilled')) {
         await dispatch(fetchBlacklistDT(blacklistFilter));
-        console.log('Blaclist Saved!');
         toast.success('Data Saved');
         handleClose();
-      } else {
-        toast.error('Saving Data Unsuccessful');
-      }
+      } else toast.error('Saving Data Unsuccessful');
     } catch (error) {
       toast.error('Saving Data Unsuccessful');
       console.error('Error saving blacklist:', error);
     }
-    setTimeout(() => {
-      setIsSaving(false);
-    }, 1000);
+
+    setTimeout(() => setIsSaving(false), 1000);
   };
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
-  ) => {
-    const { value, name, id } = e.target as
-      | HTMLInputElement
-      | { value: string; name?: string; id?: string };
 
-    const key = (id || name) as string;
+  const handleSwitchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = event.target.checked;
+    setUseMember(checked);
 
-    // update value
-    setFormData((prev) => ({ ...prev, [key]: value }));
-
-    // clear error for the edited field (if any)
-    setFormErrors((prev) => {
-      if (!prev[key]) return prev; // nothing to clear
-      const next = { ...prev };
-      delete next[key];
-      return next;
-    });
+    // 🔥 Clear both selections when switching
+    setFormData((prev) => ({
+      ...prev,
+      visitorId: '',
+      memberId: '',
+    }));
+    setFormErrors({});
   };
 
   return (
@@ -175,11 +163,7 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
       {type === 'add' && (
         <Tooltip title="Add Blacklist">
           {isLoading ? (
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
-            >
+            <Button variant="contained" color="primary" sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}>
               <CircularProgress color="inherit" size={20} />
             </Button>
           ) : (
@@ -208,40 +192,83 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
               Blacklist Details
             </Typography>
             <Divider />
-            <Grid container spacing={5} mb={3}>
+
+            <FormControlLabel
+              control={
+                <Switch checked={useMember} onChange={handleSwitchChange} color="primary" />
+              }
+              label={useMember ? 'Select Member' : 'Select Visitor'}
+              sx={{ mt: 2 }}
+            />
+
+            <Grid container spacing={5} mb={3} mt={2}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
-                <CustomFormLabel htmlFor="visitorId">Visitor</CustomFormLabel>
-                <Autocomplete
-                  options={visitorOptions}
-                  // show clear (x) button
-                  disableClearable={false}
-                  clearOnEscape
-                  sx={{ m: 0 }} // keep margins/padding unchanged
-                  value={visitorOptions.find((o) => o.id === formData.visitorId) ?? null}
-                  onChange={(_, newVal) => {
-                    const id = newVal?.id ?? '';
-                    setFormData((prev) => ({ ...prev, visitorId: id }));
-                    // clear error for this field
-                    setFormErrors((prev) => {
-                      if (!prev.visitorId) return prev;
-                      const next = { ...prev };
-                      delete next.visitorId;
-                      return next;
-                    });
-                  }}
-                  isOptionEqualToValue={(opt, val) => opt.id === val.id}
-                  getOptionLabel={(opt) => (typeof opt === 'string' ? opt : opt.name)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      id="visitorId"
-                      variant="outlined"
-                      required
-                      error={!!formErrors.visitorId}
-                      helperText={formErrors.visitorId || ''}
+                {/* 🔄 Conditionally render either Visitor or Member Autocomplete */}
+                {!useMember ? (
+                  <>
+                    <CustomFormLabel htmlFor="visitorId">Visitor</CustomFormLabel>
+                    <Autocomplete
+                      options={visitorOptions}
+                      disableClearable={false}
+                      clearOnEscape
+                      sx={{ m: 0 }}
+                      value={visitorOptions.find((o) => o.id === formData.visitorId) ?? null}
+                      onChange={(_, newVal) => {
+                        const id = newVal?.id ?? '';
+                        setFormData((prev) => ({ ...prev, visitorId: id }));
+                        setFormErrors((prev) => {
+                          const next = { ...prev };
+                          delete next.visitorId;
+                          return next;
+                        });
+                      }}
+                      isOptionEqualToValue={(opt, val) => opt.id === val.id}
+                      getOptionLabel={(opt) => (typeof opt === 'string' ? opt : opt.name)}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          id="visitorId"
+                          variant="outlined"
+                          required
+                          error={!!formErrors.visitorId}
+                          helperText={formErrors.visitorId || ''}
+                        />
+                      )}
                     />
-                  )}
-                />
+                  </>
+                ) : (
+                  <>
+                    <CustomFormLabel htmlFor="memberId">Member</CustomFormLabel>
+                    <Autocomplete
+                      options={memberOptions}
+                      disableClearable={false}
+                      clearOnEscape
+                      sx={{ m: 0 }}
+                      value={memberOptions.find((o) => o.id === formData.memberId) ?? null}
+                      onChange={(_, newVal) => {
+                        const id = newVal?.id ?? '';
+                        setFormData((prev) => ({ ...prev, memberId: id }));
+                        setFormErrors((prev) => {
+                          const next = { ...prev };
+                          delete next.memberId;
+                          return next;
+                        });
+                      }}
+                      isOptionEqualToValue={(opt, val) => opt.id === val.id}
+                      getOptionLabel={(opt) => (typeof opt === 'string' ? opt : opt.name)}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          id="memberId"
+                          variant="outlined"
+                          required
+                          error={!!formErrors.memberId}
+                          helperText={formErrors.memberId || ''}
+                        />
+                      )}
+                    />
+                  </>
+                )}
 
                 <CustomFormLabel htmlFor="floorplanMaskedAreaId">Area</CustomFormLabel>
                 <Autocomplete
@@ -254,7 +281,6 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
                     const id = newVal?.id ?? '';
                     setFormData((prev) => ({ ...prev, floorplanMaskedAreaId: id }));
                     setFormErrors((prev) => {
-                      if (!prev.floorplanMaskedAreaId) return prev;
                       const next = { ...prev };
                       delete next.floorplanMaskedAreaId;
                       return next;
@@ -276,12 +302,9 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
               </Grid>
             </Grid>
           </DialogContent>
+
           <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
-            <Button
-              onClick={handleClose}
-              variant="outlined"
-              sx={{ fontSize: '1rem', py: 1, px: 3 }}
-            >
+            <Button onClick={handleClose} variant="outlined" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
               Cancel
             </Button>
             <Button
@@ -293,17 +316,6 @@ const AddEditBlacklist = ({ type, blacklist }: FormType) => {
               {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </DialogActions>
-        </Dialog>
-      )}
-
-      {isLoading && (
-        <Dialog open={true} fullWidth maxWidth="sm">
-          <DialogContent sx={{ textAlign: 'center', py: 10 }}>
-            <Typography variant="h1" mb={5}>
-              Loading...{' '}
-            </Typography>
-            <CircularProgress size={50} color="primary" />
-          </DialogContent>
         </Dialog>
       )}
     </>

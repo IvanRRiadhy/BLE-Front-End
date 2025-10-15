@@ -41,11 +41,11 @@ const TagList = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(UpdateFilter({...defaultMemberFilter, Length: 999}));
+    dispatch(UpdateFilter({...defaultMemberFilter, Length: 0}));
     setLoading(true);
     try {
       console.log('Fetching on Start');
-      dispatch(fetchMemberDT({...defaultMemberFilter, Length: 999}));
+      dispatch(fetchMemberDT({...defaultMemberFilter, Length: 0}));
     } catch (error) {
       console.error('Error fetching Member data:', error);
     }
@@ -55,7 +55,7 @@ const TagList = () => {
   }, [dispatch]);
   useEffect(() => {
     console.log('Fetching on Filter');
-    dispatch(fetchMemberDT({...memberFilter, Length: 999}));
+    dispatch(fetchMemberDT({...memberFilter, Length: 0}));
   }, [memberFilter, dispatch]);
 
 

@@ -42,6 +42,7 @@ interface StateType {
     timeGroupTotalCount: number,
     timeGroupFilteredCount: number,
     timeGroupFilter: GetFilter,
+    lastFilter?: GetFilter;
     isLoading: boolean,
     hasLoaded: boolean,
     selectedTimeGroup: TimeGroupType | null,

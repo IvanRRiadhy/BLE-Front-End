@@ -64,6 +64,7 @@ interface StateType {
     bleReaderTotalCount: number;
     bleReaderFilterCount: number;
     bleReaderFilter: GetFilter;
+    lastFilter?: GetFilter;
     isLoading: boolean;
     hasLoaded: boolean;
 }
@@ -196,16 +197,49 @@ UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
             console.error("Delete failed: ", action.payload);
             _state.isLoading = false;
         })
-        .addCase(fetchBleReaderDT.pending, (state) => {
-            state.isLoading = true;
-            state.hasLoaded = false;
-        })
+        .addCase(fetchBleReaderDT.pending, (state, action) => {
+                             const newFilter = action.meta.arg as GetFilter;
+                                        const prevFilter = state.lastFilter;
+                            
+                                        // If no previous filter (first load), always reset
+                                        if (!prevFilter) {
+                                            state.isLoading = true;
+                                            state.hasLoaded = false;
+                                            return;
+                                        }
+                            
+                                        // Detect only sorting change
+                                        const onlySortingChanged =
+                                            prevFilter.SortColumn !== newFilter.SortColumn ||
+                                            prevFilter.SortDir !== newFilter.SortDir;
+                            
+                                        const filtersUnchanged =
+                                            JSON.stringify({
+                                            ...prevFilter,
+                                            SortColumn: undefined,
+                                            SortDir: undefined,
+                                            }) ===
+                                            JSON.stringify({
+                                            ...newFilter,
+                                            SortColumn: undefined,
+                                            SortDir: undefined,
+                                            });
+                            
+                                        const isOnlySortChange = onlySortingChanged && filtersUnchanged;
+                            
+                                        // ✅ If sorting only, keep hasLoaded true
+                                        state.isLoading = true;
+                                        if (!isOnlySortChange) {
+                                            state.hasLoaded = false;
+                                        }
+                                    })
         .addCase(fetchBleReaderDT.fulfilled, (state, action) => {
             // console.log("Ble reader DT: ", action.payload.recordsTotal);
     state.bleReaderTotalCount = action.payload.recordsTotal;
     state.bleReaderFilterCount = action.payload.recordsFiltered;
             state.isLoading = false;
             state.hasLoaded = true;
+            state.lastFilter = { ...state.bleReaderFilter };
   })
   .addCase(fetchBleReaderDT.rejected, (_state, action) => {
             console.error("Error fetching bleReaders: ", action.payload);

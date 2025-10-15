@@ -3,10 +3,11 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { masterVisitorType } from "./visitor";
+import { masterVisitorType, VisitorType } from "./visitor";
 import { MaskedAreaType } from "./maskedArea";
 import { defaultBlaclistFilter } from "../defaultForm";
 import { stat } from "fs";
+import { memberType } from "./member";
 
 const API_URL = '/api/BlacklistArea/';
 const API_DT_URL = '/api/BlacklistArea/filter/';
@@ -20,8 +21,9 @@ export type GetFilter = {
     SortDir: 'asc' | 'desc',
     SearchValue: string,
     filters: {
-        FloorplanMaskedAreaId: string[],
-        VisitorId: string[],
+        FloorplanMaskedAreaId?: string[],
+        VisitorId?: string[],
+        MemberId?: string[]
     }
 }
 
@@ -45,8 +47,10 @@ export type GetBlacklistResponse = {
 export interface blacklistType {
     id: string,
     floorplanMaskedAreaId: string,
-    visitorId: string,
-    visitor?: masterVisitorType,
+    visitorId?: string,
+    visitor?: VisitorType,
+    memberId?: string,
+    member?: memberType,
     floorplanMaskedArea?: MaskedAreaType,
     createdBy: string,
     createdAt: string,
@@ -61,6 +65,7 @@ interface StateType {
     blacklistTotalCount: number;
     blacklistFilteredCount: number;
     blacklistFilter: GetFilter;
+    lastFilter?: GetFilter;
 isLoading: boolean;
 hasLoaded: boolean;
 }
@@ -135,15 +140,48 @@ export const BlacklistSlice = createSlice({
             console.error("Delete failed: ", action.payload);
             _state.isLoading = false;
         })
-        .addCase(fetchBlacklistDT.pending, (state) => {
-            state.isLoading = true;
-            state.hasLoaded = false;
-        })
+        .addCase(fetchBlacklistDT.pending, (state, action) => {
+                             const newFilter = action.meta.arg as GetFilter;
+                                        const prevFilter = state.lastFilter;
+                            
+                                        // If no previous filter (first load), always reset
+                                        if (!prevFilter) {
+                                            state.isLoading = true;
+                                            state.hasLoaded = false;
+                                            return;
+                                        }
+                            
+                                        // Detect only sorting change
+                                        const onlySortingChanged =
+                                            prevFilter.SortColumn !== newFilter.SortColumn ||
+                                            prevFilter.SortDir !== newFilter.SortDir;
+                            
+                                        const filtersUnchanged =
+                                            JSON.stringify({
+                                            ...prevFilter,
+                                            SortColumn: undefined,
+                                            SortDir: undefined,
+                                            }) ===
+                                            JSON.stringify({
+                                            ...newFilter,
+                                            SortColumn: undefined,
+                                            SortDir: undefined,
+                                            });
+                            
+                                        const isOnlySortChange = onlySortingChanged && filtersUnchanged;
+                            
+                                        // ✅ If sorting only, keep hasLoaded true
+                                        state.isLoading = true;
+                                        if (!isOnlySortChange) {
+                                            state.hasLoaded = false;
+                                        }
+                                    })
         .addCase(fetchBlacklistDT.fulfilled, (state, action) => {
             state.blacklistTotalCount = action.payload.recordsTotal;
             state.blacklistFilteredCount = action.payload.recordsFiltered;
                 state.isLoading = false;
                 state.hasLoaded = true;
+                state.lastFilter = { ...state.blacklistFilter };
         })
         .addCase(fetchBlacklistDT.rejected, (_state, action) => {
             console.error("Error fetching blacklists: ", action.payload);

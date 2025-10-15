@@ -52,6 +52,7 @@ export type CardType = {
     registeredMaskedArea?: MaskedAreaType,
     cardAccessIds: string[],
     cardAccesses?: CardAccessType[],
+    
     isUsed: boolean,
     lastUsed: string,
     statusCard: number,
@@ -62,6 +63,7 @@ interface StateType {
     cardAll: CardType[];
     cardSearch: string;
     cardFilter: GetFilter;
+    lastFilter?: GetFilter;
 isLoading: boolean;
 hasLoaded: boolean;
     cardTotalCount: number;
@@ -121,10 +123,42 @@ export const CardSlice = createSlice({
     extraReducers: (builder) => {
         builder
 
-        .addCase(fetchCardDT.pending, (state) => {
-            state.isLoading = true;
-            state.hasLoaded = false;
-        })
+        .addCase(fetchCardDT.pending, (state, action) => {
+                             const newFilter = action.meta.arg as GetFilter;
+                                        const prevFilter = state.lastFilter;
+                            
+                                        // If no previous filter (first load), always reset
+                                        if (!prevFilter) {
+                                            state.isLoading = true;
+                                            state.hasLoaded = false;
+                                            return;
+                                        }
+                            
+                                        // Detect only sorting change
+                                        const onlySortingChanged =
+                                            prevFilter.SortColumn !== newFilter.SortColumn ||
+                                            prevFilter.SortDir !== newFilter.SortDir;
+                            
+                                        const filtersUnchanged =
+                                            JSON.stringify({
+                                            ...prevFilter,
+                                            SortColumn: undefined,
+                                            SortDir: undefined,
+                                            }) ===
+                                            JSON.stringify({
+                                            ...newFilter,
+                                            SortColumn: undefined,
+                                            SortDir: undefined,
+                                            });
+                            
+                                        const isOnlySortChange = onlySortingChanged && filtersUnchanged;
+                            
+                                        // ✅ If sorting only, keep hasLoaded true
+                                        state.isLoading = true;
+                                        if (!isOnlySortChange) {
+                                            state.hasLoaded = false;
+                                        }
+                                    })
 .addCase(fetchCardDT.fulfilled, (state, action) => {
     const cardData: CardType[] = action.payload.data || [];
 
@@ -137,7 +171,7 @@ export const CardSlice = createSlice({
 
         state.isLoading = false;
         state.hasLoaded = true;
-
+state.lastFilter = { ...state.cardFilter };
 })
             .addCase(fetchCardDT.rejected, (state, action) => {
                 console.error("Error fetching card data:", action.error, state);

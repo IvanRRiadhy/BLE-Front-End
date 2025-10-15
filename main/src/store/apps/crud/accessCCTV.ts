@@ -55,6 +55,7 @@ interface StateType {
     cctvTotalCount: number;
     cctvFilteredCount: number;
     cctvFilter: GetFilter;
+    lastFilter?: GetFilter;
 isLoading: boolean;
 hasLoaded: boolean;
 }
@@ -134,15 +135,48 @@ export const CCTVSlice = createSlice({
             console.error("Delete failed: ", action.payload);
             _state.isLoading = false;
         })
-        .addCase(fetchAccessCCTVDT.pending, (state) => {
-            state.isLoading = true;
-            state.hasLoaded = false;
-        })
+        .addCase(fetchAccessCCTVDT.pending, (state, action) => {
+                     const newFilter = action.meta.arg as GetFilter;
+                                const prevFilter = state.lastFilter;
+                    
+                                // If no previous filter (first load), always reset
+                                if (!prevFilter) {
+                                    state.isLoading = true;
+                                    state.hasLoaded = false;
+                                    return;
+                                }
+                    
+                                // Detect only sorting change
+                                const onlySortingChanged =
+                                    prevFilter.SortColumn !== newFilter.SortColumn ||
+                                    prevFilter.SortDir !== newFilter.SortDir;
+                    
+                                const filtersUnchanged =
+                                    JSON.stringify({
+                                    ...prevFilter,
+                                    SortColumn: undefined,
+                                    SortDir: undefined,
+                                    }) ===
+                                    JSON.stringify({
+                                    ...newFilter,
+                                    SortColumn: undefined,
+                                    SortDir: undefined,
+                                    });
+                    
+                                const isOnlySortChange = onlySortingChanged && filtersUnchanged;
+                    
+                                // ✅ If sorting only, keep hasLoaded true
+                                state.isLoading = true;
+                                if (!isOnlySortChange) {
+                                    state.hasLoaded = false;
+                                }
+                            })
         .addCase(fetchAccessCCTVDT.fulfilled, (state, action) => {
             state.cctvTotalCount = action.payload.recordsTotal;
             state.cctvFilteredCount = action.payload.recordsFiltered;
                 state.isLoading = false;
                 state.hasLoaded = true;
+                state.lastFilter = { ...state.cctvFilter };
         })
         .addCase(fetchAccessCCTVDT.rejected, (_state, action) => {
             console.error("Fetch failed: ", action.payload);

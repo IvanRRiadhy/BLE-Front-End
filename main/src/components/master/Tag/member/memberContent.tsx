@@ -19,8 +19,16 @@ import {
   DialogContentText,
   Backdrop,
   CircularProgress,
+  TextField,
 } from '@mui/material';
-import { memberType, deleteMember, SelectMember, fetchMembers } from 'src/store/apps/crud/member';
+import {
+  memberType,
+  deleteMember,
+  SelectMember,
+  fetchMembers,
+  blockMember,
+  fetchMemberDT,
+} from 'src/store/apps/crud/member';
 import AddEditMember from '../../CRUD/member/AddEditMember';
 import { IconTrash } from '@tabler/icons-react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
@@ -37,6 +45,7 @@ const MemberContent = () => {
   const memberDetail: memberType | undefined = useSelector(
     (state: RootState) => state.memberReducer.selectedMember,
   );
+  const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
   const districtData = useSelector((state: RootState) => state.districtReducer.districts);
   const departmentData = useSelector((state: RootState) => state.departmentReducer.departments);
   const organizationData = useSelector(
@@ -106,6 +115,52 @@ const MemberContent = () => {
     handleCloseDeleteDialog();
   };
 
+  //Block Member
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
+  const [targetMember, setTargetMember] = useState<memberType | null>(null);
+
+  const openBlockDialog = (member: memberType) => {
+    setTargetMember(member);
+    setBlockDialogOpen(true);
+  };
+
+  const closeBlockDialog = () => {
+    setBlockDialogOpen(false);
+    setTargetMember(null);
+  };
+
+  const handleConfirmBlock = async () => {
+    if (!targetMember) return;
+    const newBlockState = !targetMember.isBlock; // toggle true/false
+
+    try {
+      setLoading(true);
+      const result = await dispatch(
+        blockMember({ memberId: targetMember.id, IsBlock: newBlockState }),
+      );
+      if (result && result.type && result.type.endsWith('/fulfilled')) {
+        toast.success(
+          `Member "${targetMember.name}" ${newBlockState ? 'blocked' : 'unblocked'} successfully.`,
+        );
+        await dispatch(
+          fetchMemberDT({
+            ...memberFilter,
+            length: 0,
+          }),
+        );
+        dispatch(SelectMember(memberDetail?.id || ''));
+      } else {
+        toast.error(`Failed to ${newBlockState ? 'block' : 'unblock'} member.`);
+      }
+    } catch (error) {
+      console.error('Error toggling block status:', error);
+      toast.error('Something went wrong while updating block status.');
+    } finally {
+      setLoading(false);
+      closeBlockDialog();
+    }
+  };
+
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
 
@@ -121,24 +176,122 @@ const MemberContent = () => {
       {memberDetail ? (
         <>
           {/* Header Part */}
-          <Box p={3} py={2} display={'flex'} alignItems={'center'}>
-            <Typography variant="h4">Member Details</Typography>
-            <Stack gap={0} direction="row" ml={'auto'}>
-              <Tooltip title="Edit">
-                <AddEditMember member={memberDetail} type="edit" />
+          <Box
+            p={3}
+            py={2}
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{
+              background: memberDetail.isBlock
+                ? 'linear-gradient(90deg, #e53935 0%, #ef5350 100%)' // vivid red
+                : 'linear-gradient(90deg, #1e88e5 0%, #42a5f5 100%)', // vivid blue
+              borderRadius: '8px',
+              boxShadow: 3,
+              mb: 1,
+            }}
+          >
+            {/* Left Section */}
+            <Typography
+              variant="h5"
+              fontWeight={700}
+              color="#fff"
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              Member Details
+              {memberDetail.isBlock && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    backgroundColor: 'rgba(0,0,0,0.25)',
+                    color: '#fff',
+                    borderRadius: 1,
+                    px: 1,
+                    py: 0.25,
+                    fontWeight: 600,
+                  }}
+                >
+                  BLOCKED
+                </Typography>
+              )}
+            </Typography>
+
+            {/* Right Section */}
+            <Stack direction="row" alignItems="center" spacing={1.2}>
+              {/* Edit */}
+              <Tooltip title="Edit Member">
+                <span>
+                  <IconButton
+                    size="small"
+                    sx={{
+                      backgroundColor: 'rgba(255,255,255,0.2)',
+                      border: '1px solid rgba(0,0,0,0.15)',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
+                      transition: 'all 0.2s ease',
+                      '& svg': {
+                        color: '#fff',
+                        filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))',
+                      },
+                      '&:hover': {
+                        backgroundColor: 'rgba(255,255,255,0.35)',
+                        transform: 'scale(1.1)',
+                      },
+                    }}
+                  >
+                    <AddEditMember member={memberDetail} type="edit" />
+                  </IconButton>
+                </span>
               </Tooltip>
-              <Tooltip title="Delete">
-                <IconButton onClick={() => handleOpenDeleteDialog(memberDetail)}>
-                  <IconTrash size="18" stroke={1.3} />
+
+              {/* Delete */}
+              <Tooltip title="Delete Member">
+                <IconButton
+                  onClick={() => handleOpenDeleteDialog(memberDetail)}
+                  size="small"
+                  sx={{
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    border: '1px solid rgba(0,0,0,0.15)',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
+                    transition: 'all 0.2s ease',
+                    '& svg': {
+                      color: '#fff',
+                      filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))',
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.35)',
+                      transform: 'scale(1.1)',
+                    },
+                  }}
+                >
+                  <IconTrash size="18" stroke={1.6} />
                 </IconButton>
               </Tooltip>
+
+              {/* Close */}
               <Tooltip title="Close">
-                <IconButton onClick={() => dispatch(SelectMember(''))}>
-                  <img src={IconClose} alt={IconClose} />
+                <IconButton
+                  onClick={() => dispatch(SelectMember(''))}
+                  size="small"
+                  sx={{
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    border: '1px solid rgba(0,0,0,0.15)',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
+                    transition: 'all 0.2s ease',
+                    '& img': {
+                      filter: 'invert(1) drop-shadow(0 0 2px rgba(0,0,0,0.5))',
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.35)',
+                      transform: 'scale(1.1)',
+                    },
+                  }}
+                >
+                  <img src={IconClose} alt="close" style={{ width: 18, height: 18 }} />
                 </IconButton>
               </Tooltip>
             </Stack>
           </Box>
+
           <Divider />
           {/* Table Part */}
 
@@ -157,12 +310,41 @@ const MemberContent = () => {
               justifyContent="center"
               mb={5}
               mr={5}
+              sx={{ position: 'relative' }}
             >
               <Avatar
                 alt="Member Profile"
                 src={`${BASE_URL}${memberDetail.faceImage}`}
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
+              <Box
+                sx={{
+                  position: { xs: 'static', md: 'absolute' },
+                  top: { md: 0 },
+                  left: { md: 0 },
+                  zIndex: 2,
+                }}
+              >
+                <Stack spacing={1} direction="column" alignItems="flex-start">
+                  <Button
+                    size="large"
+                    variant="contained"
+                    color={memberDetail.isBlock ? 'success' : 'error'}
+                    onClick={() => openBlockDialog(memberDetail)}
+                    sx={{
+                      boxShadow: 2,
+                      width: '12vw',
+                      height: 50,
+                      backgroundColor: memberDetail.isBlock ? '#66bb6a' : '#f08080',
+                      '&:hover': {
+                        backgroundColor: memberDetail.isBlock ? '#4caf50' : '#e57373',
+                      },
+                    }}
+                  >
+                    {memberDetail.isBlock ? 'Unblock Member' : 'Block Member'}
+                  </Button>
+                </Stack>
+              </Box>
               <Typography variant="h4" fontWeight={800}>
                 {memberDetail.name}
               </Typography>
@@ -229,6 +411,46 @@ const MemberContent = () => {
               </Grid>
             </Grid>
           </Box>
+          {/* Block / Unblock Dialog */}
+          <Dialog open={blockDialogOpen} onClose={closeBlockDialog} fullWidth maxWidth="xs">
+            <DialogTitle>{targetMember?.isBlock ? 'Unblock Member' : 'Block Member'}</DialogTitle>
+
+            <DialogContent>
+              {!targetMember?.isBlock && (
+                <>
+                  <DialogContentText>
+                    Are you sure you want to block <strong>{targetMember?.name}</strong>?
+                  </DialogContentText>
+                </>
+              )}
+
+              {targetMember?.isBlock && (
+                <DialogContentText>
+                  Are you sure you want to unblock <strong>{targetMember?.name}</strong>?
+                </DialogContentText>
+              )}
+            </DialogContent>
+
+            <DialogActions>
+              <Button onClick={closeBlockDialog} color="primary">
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmBlock}
+                color={targetMember?.isBlock ? 'success' : 'error'}
+                variant="contained"
+                disabled={loading}
+              >
+                {loading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : targetMember?.isBlock ? (
+                  'Unblock'
+                ) : (
+                  'Block'
+                )}
+              </Button>
+            </DialogActions>
+          </Dialog>
         </>
       ) : (
         <Box p={3} height="50vh" display={'flex'} justifyContent="center" alignItems={'center'}>

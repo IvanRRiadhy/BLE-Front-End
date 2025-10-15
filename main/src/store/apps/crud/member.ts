@@ -66,6 +66,8 @@ export interface memberType {
     applicationId: string,
     statusEmployee: string,
     cardId: string,
+    isBlock: boolean,
+    blockAt: string,
     createdBy: string,
     createdAt: string,
     updatedBy: string,
@@ -81,6 +83,7 @@ interface StateType {
     memberTotalCount: number;
     memberFilteredCount: number;
     memberFilter: GetFilter;
+    lastFilter?: GetFilter;
 isLoading: boolean;
 hasLoaded: boolean;
 }
@@ -145,14 +148,48 @@ export const MemberSlice = createSlice({
             .addCase(deleteMember.rejected, (_state, action) => {
                 console.error("Delete failed: ", action.payload);
             })
-            .addCase(fetchMemberDT.pending, (state) => {
-                state.isLoading = true;
-            })
+            .addCase(fetchMemberDT.pending, (state, action) => {
+                        const newFilter = action.meta.arg as GetFilter;
+                        const prevFilter = state.lastFilter;
+            
+                        // If no previous filter (first load), always reset
+                        if (!prevFilter) {
+                            state.isLoading = true;
+                            state.hasLoaded = false;
+                            return;
+                        }
+            
+                        // Detect only sorting change
+                        const onlySortingChanged =
+                            prevFilter.SortColumn !== newFilter.SortColumn ||
+                            prevFilter.SortDir !== newFilter.SortDir;
+            
+                        const filtersUnchanged =
+                            JSON.stringify({
+                            ...prevFilter,
+                            SortColumn: undefined,
+                            SortDir: undefined,
+                            }) ===
+                            JSON.stringify({
+                            ...newFilter,
+                            SortColumn: undefined,
+                            SortDir: undefined,
+                            });
+            
+                        const isOnlySortChange = onlySortingChanged && filtersUnchanged;
+            
+                        // ✅ If sorting only, keep hasLoaded true
+                        state.isLoading = true;
+                        if (!isOnlySortChange) {
+                            state.hasLoaded = false;
+                        }
+                    })
             .addCase(fetchMemberDT.fulfilled, (state, action) => {
                 state.memberTotalCount = action.payload.recordsTotal;
                 state.memberFilteredCount = action.payload.recordsFiltered;
                     state.isLoading = false;
                     state.hasLoaded = true;
+                    state.lastFilter = { ...state.memberFilter };
             })
             .addCase(fetchMemberDT.rejected, (_state, action) => {
                 console.error("Fetch failed: ", action.payload);
@@ -241,6 +278,27 @@ export const editMember = createAsyncThunk("member/editMember", async (formData:
     }
 });
 
+export const blockMember = createAsyncThunk(
+  'member/blockMember',
+  async ({ memberId, IsBlock }: { memberId: string; IsBlock: boolean }) => {
+    const started = Date.now();
+    try {
+        console.log("Blocking member: ",memberId, IsBlock);
+      const response = await axiosServices.put(`${API_URL}Block/${memberId}`, {
+        IsBlock,
+      });
+      console.log('Response Block: ', response.data);
+      const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+      return response.data;
+    } catch (error) {
+      console.error('Error blocking member:', error);
+      const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+      throw error;
+    }
+  },
+);
 export const deleteMember = createAsyncThunk("member/deleteMember", async (memberId: string) => {
     const started = Date.now();
     try {

@@ -114,6 +114,7 @@ interface StateType {
     visitorTotalCount: number,
     visitorFilteredCount: number,
     visitorFilter: GetFilter,
+    lastFilter?: GetFilter;
     isLoading: boolean;
     hasLoaded: boolean;
 }
@@ -180,15 +181,48 @@ UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
         .addCase(deleteVisitor.rejected, (_state, action) => {
             console.error("Delete failed: ", action.payload);
         })
-        .addCase(fetchVisitorDT.pending, (state) => {
-            state.isLoading = true;
-            state.hasLoaded = false;
-        })
+        .addCase(fetchVisitorDT.pending, (state, action) => {
+                    const newFilter = action.meta.arg as GetFilter;
+                    const prevFilter = state.lastFilter;
+        
+                    // If no previous filter (first load), always reset
+                    if (!prevFilter) {
+                        state.isLoading = true;
+                        state.hasLoaded = false;
+                        return;
+                    }
+        
+                    // Detect only sorting change
+                    const onlySortingChanged =
+                        prevFilter.SortColumn !== newFilter.SortColumn ||
+                        prevFilter.SortDir !== newFilter.SortDir;
+        
+                    const filtersUnchanged =
+                        JSON.stringify({
+                        ...prevFilter,
+                        SortColumn: undefined,
+                        SortDir: undefined,
+                        }) ===
+                        JSON.stringify({
+                        ...newFilter,
+                        SortColumn: undefined,
+                        SortDir: undefined,
+                        });
+        
+                    const isOnlySortChange = onlySortingChanged && filtersUnchanged;
+        
+                    // ✅ If sorting only, keep hasLoaded true
+                    state.isLoading = true;
+                    if (!isOnlySortChange) {
+                        state.hasLoaded = false;
+                    }
+                })
         .addCase(fetchVisitorDT.fulfilled, (state, action) => {
             state.visitorTotalCount = action.payload.recordsTotal;
             state.visitorFilteredCount = action.payload.recordsFiltered;
                 state.isLoading = false;
                 state.hasLoaded = true;
+                state.lastFilter = { ...state.visitorFilter };
         })
         .addCase(fetchVisitorDT.rejected, (_state, action) => {
             console.error("Error fetching visitors: ", action.payload);

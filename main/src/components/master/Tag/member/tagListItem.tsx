@@ -11,6 +11,7 @@ import {
   ListItemAvatar,
   // useTheme,
   Checkbox,
+  Chip,
 } from '@mui/material';
 
 import { memberType } from 'src/store/apps/crud/member';
@@ -71,6 +72,14 @@ const TagListItem = ({
               {member?.personId}
             </Typography>
           </Box>
+          {/* Status chip */}
+          {member?.isBlock && (
+            <Chip
+            label="Blocked"
+            color="error"
+            sx={{ height: '24px', fontSize: '0.75rem', fontWeight: 500 }}
+            />
+          )}
         </Stack>
       </ListItemText>
       {/* Checkbox for Multi-Select */}

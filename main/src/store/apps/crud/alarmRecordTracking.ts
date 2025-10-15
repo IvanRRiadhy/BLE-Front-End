@@ -87,7 +87,8 @@ interface StateType {
     selectedAlarmRecordTracking?: AlarmType | null;
     alarmRecordTotalCount: number;
     alarmRecordFilteredCount: number;
-    alarmRecordFilter: GetFilter
+    alarmRecordFilter: GetFilter;
+    lastFilter?: GetFilter;
 isLoading: boolean;
 hasLoaded: boolean;
 };
@@ -129,22 +130,55 @@ export const AlarmSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-        .addCase(fetchAlarmDT.pending, (state) => {
-            state.isLoading = true;
-            state.hasLoaded = false;
-        })
+        .addCase(fetchAlarmDT.pending, (state, action) => {
+             const newFilter = action.meta.arg as GetFilter;
+                        const prevFilter = state.lastFilter;
+            
+                        // If no previous filter (first load), always reset
+                        if (!prevFilter) {
+                            state.isLoading = true;
+                            state.hasLoaded = false;
+                            return;
+                        }
+            
+                        // Detect only sorting change
+                        const onlySortingChanged =
+                            prevFilter.SortColumn !== newFilter.SortColumn ||
+                            prevFilter.SortDir !== newFilter.SortDir;
+            
+                        const filtersUnchanged =
+                            JSON.stringify({
+                            ...prevFilter,
+                            SortColumn: undefined,
+                            SortDir: undefined,
+                            }) ===
+                            JSON.stringify({
+                            ...newFilter,
+                            SortColumn: undefined,
+                            SortDir: undefined,
+                            });
+            
+                        const isOnlySortChange = onlySortingChanged && filtersUnchanged;
+            
+                        // ✅ If sorting only, keep hasLoaded true
+                        state.isLoading = true;
+                        if (!isOnlySortChange) {
+                            state.hasLoaded = false;
+                        }
+                    })
         .addCase(fetchAlarmDT.fulfilled, (state, action) => {
             state.alarmRecordTotalCount = action.payload.recordsTotal;
             state.alarmRecordFilteredCount = action.payload.recordsFiltered;
                 state.isLoading = false;
                 state.hasLoaded = true;
+                state.lastFilter = { ...state.alarmRecordFilter };
         })
         .addCase(fetchAlarmDT.rejected, (_state, action) => {
             console.error("Error fetching Alarm: ", action.payload);
             // _state.alarmRecordTotalCount = 0;
             _state.alarmRecordFilteredCount = 0;
                 _state.isLoading = false;
-                _state.hasLoaded = false;
+                _state.hasLoaded = true;
         });
     }
 });

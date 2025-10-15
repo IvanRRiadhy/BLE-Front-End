@@ -244,7 +244,7 @@ const AddEditMember = ({ type, member }: FormType) => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="person-id">person ID</CustomFormLabel>
                 <CustomTextField
                   id="personId"
@@ -304,7 +304,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="organization-id">Organization ID</CustomFormLabel>
                 <Box display="flex" alignItems="center" gap={1}>
                   <Autocomplete
@@ -392,7 +392,7 @@ const AddEditMember = ({ type, member }: FormType) => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              {/* <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              {/* <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
                 <CustomTextField
                   id="cardNumber"
@@ -404,7 +404,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                   helperText={formErrors.cardNumber}
                 />
               </Grid> */}
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="ble-card-number">Card Number</CustomFormLabel>
                   <Autocomplete
                     sx={{ flex: 1 }}
@@ -450,7 +450,7 @@ const AddEditMember = ({ type, member }: FormType) => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="name">Name</CustomFormLabel>
                 <CustomTextField
                   id="name"
@@ -498,7 +498,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                   ))}
                 </CustomSelect>
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
                 <CustomFormLabel htmlFor="phone">Phone</CustomFormLabel>
                 <CustomTextField
                   id="phone"

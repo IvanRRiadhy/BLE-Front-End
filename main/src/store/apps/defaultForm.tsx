@@ -383,6 +383,8 @@ export const defaultMemberForm: memberType = {
   headMember2: '',
   applicationId: localStorage.getItem('applicationId') || '',
   statusEmployee: '',
+  isBlock: false,
+  blockAt: '',
   createdBy: '',
   createdAt: '',
   updatedBy: '',
@@ -613,7 +615,7 @@ export const defaultCardGroupFilter: CardGroupFilter = {
 export const defaultAlarmSettingFilter: AlarmSettingFilter = {
   Draw: 1,
   Start: 0,
-  Length: 10,
+  Length: 0,
   SortColumn: 'AlarmCategory',
   SortDir: 'asc',
   SearchValue: '',

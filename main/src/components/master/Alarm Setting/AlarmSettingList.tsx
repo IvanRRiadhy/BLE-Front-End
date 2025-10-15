@@ -512,7 +512,7 @@ const AlarmSettingList = () => {
               </Table>
             </TableContainer>
             {/* Pagination */}
-            <TablePagination
+            {/* <TablePagination
               component="div"
               count={alarmSettingTotalCount}
               page={page}
@@ -520,7 +520,7 @@ const AlarmSettingList = () => {
               onPageChange={handleChangePage}
               rowsPerPageOptions={[5, 10, 25]}
               onRowsPerPageChange={handleChangeRowsPerPage}
-            />
+            /> */}
           </BlankCard>
         </Box>
       </Grid>

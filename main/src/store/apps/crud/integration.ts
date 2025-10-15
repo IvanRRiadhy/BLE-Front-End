@@ -60,6 +60,7 @@ interface StateType {
     IntegrationTotalCount: number;
     IntegrationFilteredCount: number;
     IntegrationFilter: GetFilter;
+    lastFilter?: GetFilter;
 isLoading: boolean;
 hasLoaded: boolean;
 }

@@ -26,7 +26,7 @@ import { AlarmSettingType } from 'src/store/apps/alarmsetting/alarmSettings';
 
 const columns = [
   { label: 'Visitor Name', field: 'Visitor.Name', sortAble: true },
-  { label: 'Alarm Status', field: 'AlarmRecordStatus', sortAble: true },
+  { label: 'Alarm Status', field: 'AlarmRecordStatus', sortAble: false },
   { label: 'Area Name', field: 'FloorplanMaskedArea.Name', sortAble: true },
   { label: 'Time', field: 'Timestamp', sortAble: true },
 ];

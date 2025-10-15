@@ -58,7 +58,7 @@ export type CardRecordType = {
     checkoutMaskedArea: string,
     checkinMaskedArea: string,
 
-    visitorType: string,
+    visitorActiveStatus: string,
     cardId1: string,
     mstMemberId1: string,
     visitorId1: string,
@@ -70,6 +70,7 @@ interface StateType {
     cardRecordAll: CardRecordType[];
     cardRecordSearch: string;
     cardRecordFilter: GetFilter;
+    lastFilter?: GetFilter;
 isLoading: boolean;
 hasLoaded: boolean;
     cardRecordTotalCount: number;
@@ -100,15 +101,48 @@ export const CardRecordSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-        .addCase(fetchCardRecordDt.pending, (state) => {
-            state.isLoading = true;
-            state.hasLoaded = false;
-        })
+        .addCase(fetchCardRecordDt.pending, (state, action) => {
+                    const newFilter = action.meta.arg as GetFilter;
+                    const prevFilter = state.lastFilter;
+        
+                    // If no previous filter (first load), always reset
+                    if (!prevFilter) {
+                        state.isLoading = true;
+                        state.hasLoaded = false;
+                        return;
+                    }
+        
+                    // Detect only sorting change
+                    const onlySortingChanged =
+                        prevFilter.SortColumn !== newFilter.SortColumn ||
+                        prevFilter.SortDir !== newFilter.SortDir;
+        
+                    const filtersUnchanged =
+                        JSON.stringify({
+                        ...prevFilter,
+                        SortColumn: undefined,
+                        SortDir: undefined,
+                        }) ===
+                        JSON.stringify({
+                        ...newFilter,
+                        SortColumn: undefined,
+                        SortDir: undefined,
+                        });
+        
+                    const isOnlySortChange = onlySortingChanged && filtersUnchanged;
+        
+                    // ✅ If sorting only, keep hasLoaded true
+                    state.isLoading = true;
+                    if (!isOnlySortChange) {
+                        state.hasLoaded = false;
+                    }
+                })
         .addCase(fetchCardRecordDt.fulfilled, (state, action) => {
             state.cardRecordTotalCount = action.payload.recordsTotal;
             state.cardRecordFilteredCount = action.payload.recordsFiltered;
                 state.isLoading = false;
                 state.hasLoaded = true;
+                state.lastFilter = { ...state.cardRecordFilter };
         })
         .addCase(fetchCardRecordDt.rejected, (state, action) => {
             console.error("Error fetching card records:", action.error);
@@ -139,7 +173,7 @@ export const fetchCardRecordDt = createAsyncThunk(
         maxDelay: 8000,
       }
     );
-
+    console.log("Card Record: ", res.data.collection);
     dispatch(GetCardRecord(res.data.collection.data || []));
     await ensureMinLatency(started, 500);
     return res.data.collection;

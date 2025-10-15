@@ -225,7 +225,7 @@ const CardRecordList = () => {
                               ' - ' +
                               cardRecord.checkoutMaskedArea}
                           </TableCell>
-                          <TableCell>{cardRecord.visitorType}</TableCell>
+                          <TableCell>{cardRecord.visitorActiveStatus}</TableCell>
                         </TableRow>
                       ))
                       )}
