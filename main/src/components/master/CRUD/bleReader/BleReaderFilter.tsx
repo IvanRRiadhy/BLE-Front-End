@@ -50,7 +50,7 @@ const BleReaderFilter = () => {
   };
 
   const handleApplyFilter = () => {
-    dispatch(UpdateFilter({ filters: appliedFilter }));
+    dispatch(UpdateFilter({ Start: 0, filters: appliedFilter }));
   };
 
   const handleResetFilter = () => {

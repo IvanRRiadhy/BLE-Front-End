@@ -168,7 +168,7 @@ const AlarmRecordFilter = () => {
 
   // --- Reset & Apply ---
   const handleApplyFilter = () => {
-    dispatch(UpdateFilter({ filters: filterState }));
+    dispatch(UpdateFilter({Start: 0, filters: filterState }));
     setOpen(false);
   };
 

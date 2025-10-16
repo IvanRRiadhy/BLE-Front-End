@@ -207,15 +207,6 @@ const renderLayout = (items: LayoutItem[], parentIsColumn = false): JSX.Element[
             },
           }}
         >
-          <Typography
-            variant="subtitle1"
-            fontWeight={700}
-            alignSelf="flex-start"
-            mb={1}
-            color="text.secondary"
-          >
-            Screen {screenNum}
-          </Typography>
 
           {screenType[grid][floorId] === 1 ? (
             <FloorView

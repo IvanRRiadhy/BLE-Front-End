@@ -1,72 +1,104 @@
 import {
   Box,
   Button,
-  Checkbox,
   Drawer,
   Grid2 as Grid,
-  ListItemIcon,
-  ListItemText,
-  MenuItem,
   Typography,
 } from '@mui/material';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
 import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
-import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { fetchBuildings } from 'src/store/apps/crud/building';
 import { UpdateFilter } from 'src/store/apps/crud/floor';
 import { defaultFloorFilter } from 'src/store/apps/defaultForm';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
-import BuildingList from '../building/BuildingList';
-import { CheckBox } from '@mui/icons-material';
+import AutocompleteFilter from 'src/layouts/full/horizontal/navbar/AutocompleteFilter';
 
 const FloorFilter = () => {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const [resetToken, setResetToken] = useState(0);
 
   const buildingList = useSelector((state: RootState) => state.buildingReducer.buildingAll);
   const floorFilter = useSelector((state: RootState) => state.floorReducer.floorFilter);
+
+  // Local copy of filters
   const [appliedFilter, setAppliedFilter] = useState(floorFilter.filters);
+
+  // --- stable lockedInitial (to prevent clearing) ---
+  const [lockedInitial, setLockedInitial] = useState<{
+    BuildingId: string[];
+    FloorId: string[];
+    FloorplanId: string[];
+    MaskedAreaId: string[];
+  } | null>(null);
+
+  // --- Fetch + Sync ---
   useEffect(() => {
     dispatch(fetchBuildings());
-    setAppliedFilter(floorFilter.filters);
   }, [dispatch]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: string }>,
-  ) => {
-    console.log(appliedFilter)
-    const { name, value } = e.target;
-    if (value.includes('all')) {
-      setAppliedFilter((prev) => ({
-        ...prev,
-        BuildingId: appliedFilter.BuildingId?.length
-          ? []
-          : buildingList.map((building) => building.id),
-      }));
-      return;
+  useEffect(() => {
+    setAppliedFilter(floorFilter.filters);
+
+    // Lock the first non-empty filter for AutocompleteFilter
+    if (
+      floorFilter.filters?.BuildingId?.length > 0 &&
+      !lockedInitial
+    ) {
+      setLockedInitial({
+        BuildingId: floorFilter.filters.BuildingId ?? [],
+        FloorId: [],
+        FloorplanId: [],
+        MaskedAreaId: [],
+      });
     }
-    if (name) {
-      setAppliedFilter({ ...appliedFilter, [name]: value });
-    }
+  }, [floorFilter.filters, lockedInitial]);
+
+  // --- Drawer Controls ---
+  const handleClickOpen = () => {
+    // Lock snapshot when opening (even if empty)
+    setLockedInitial({
+      BuildingId: appliedFilter.BuildingId ?? [],
+      FloorId: [],
+      FloorplanId: [],
+      MaskedAreaId: [],
+    });
+    setOpen(true);
   };
+  const handleClose = () => setOpen(false);
+
+  // --- Building change handler ---
+  const handleBuildingChange = (filter: {
+    BuildingId: string[];
+    FloorId: string[];
+    FloorplanId: string[];
+    MaskedAreaId: string[];
+  }) => {
+    setAppliedFilter((prev) => ({
+      ...prev,
+      BuildingId: filter.BuildingId ?? [],
+    }));
+  };
+
+  // --- Apply & Reset ---
   const handleApplyFilter = () => {
-    dispatch(UpdateFilter({ filters: appliedFilter }));
+    dispatch(UpdateFilter({Start: 0, filters: appliedFilter }));
+    setOpen(false);
   };
+
   const handleResetFilter = () => {
     setAppliedFilter(defaultFloorFilter.filters);
+    setLockedInitial(null);
+    setResetToken((t) => t + 1);
     dispatch(UpdateFilter({ filters: defaultFloorFilter.filters }));
+    setOpen(false);
   };
 
   return (
     <>
+      {/* Filter Button */}
       <Button
         onClick={handleClickOpen}
         size="medium"
@@ -79,7 +111,8 @@ const FloorFilter = () => {
           Filter
         </Typography>
       </Button>
-      {/* Right-side sliding Drawer (non-modal) */}
+
+      {/* Drawer */}
       <Drawer
         anchor="right"
         open={open}
@@ -101,57 +134,30 @@ const FloorFilter = () => {
         </Typography>
 
         <Grid container spacing={3}>
+          {/* 🏢 Building Filter (AutocompleteFilter) */}
           <Grid size={12}>
-            <CustomFormLabel htmlFor="BuildingId">
+            <CustomFormLabel>
               <Typography variant="caption">Building :</Typography>
             </CustomFormLabel>
-            <CustomSelect
-              name="BuildingId"
-              value={appliedFilter.BuildingId}
-              onChange={handleInputChange}
-              fullWidth
-              variant="outlined"
-              multiple
-              renderValue={(selected: string[]) => {
-                if (selected.length === 0) return 'All Buildings';
-                return buildingList
-                  .filter((building) => selected.includes(building.id))
-                  .map((building) => building.name)
-                  .join(', ');
+
+            <AutocompleteFilter
+              buildings={buildingList}
+              floors={[]}                // disable deeper levels
+              floorplans={[]}
+              maskedAreas={[]}
+              initial={lockedInitial ?? {
+                BuildingId: appliedFilter.BuildingId ?? [],
+                FloorId: [],
+                FloorplanId: [],
+                MaskedAreaId: [],
               }}
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    maxHeight: 200, // Set the maximum height of the dropdown menu
-                    width: 100, // Adjust the width of the dropdown menu
-                  },
-                },
-              }}
-            >
-              <MenuItem value="all">
-                <ListItemIcon>
-                  <Checkbox
-                    checked={appliedFilter.BuildingId?.length === buildingList.length}
-                    indeterminate={
-                      appliedFilter.BuildingId?.length > 0 &&
-                      appliedFilter.BuildingId?.length < buildingList.length
-                    }
-                  />
-                </ListItemIcon>
-                <ListItemText primary="All Buildings" />
-              </MenuItem>
-              {buildingList.map((building) => (
-                <MenuItem key={building.id} value={building.id}>
-                  <ListItemIcon>
-                    <Checkbox checked={appliedFilter.BuildingId?.includes(building.id)} />
-                  </ListItemIcon>
-                  {building.name}
-                </MenuItem>
-              ))}
-            </CustomSelect>
+              onChangeFilter={handleBuildingChange}
+              resetToken={resetToken}
+            />
           </Grid>
         </Grid>
 
+        {/* Footer Buttons */}
         <Box mt={3}>
           <Grid container justifyContent="space-between">
             <Grid size={3}>
@@ -159,10 +165,7 @@ const FloorFilter = () => {
                 variant="outlined"
                 color="error"
                 fullWidth
-                onClick={() => {
-                  handleResetFilter();
-                  handleClose();
-                }}
+                onClick={handleResetFilter}
               >
                 Reset
               </Button>
@@ -172,10 +175,7 @@ const FloorFilter = () => {
                 variant="contained"
                 color="primary"
                 fullWidth
-                onClick={() => {
-                  handleApplyFilter();
-                  handleClose();
-                }}
+                onClick={handleApplyFilter}
                 disabled={isEqual(appliedFilter, floorFilter.filters)}
               >
                 Apply

@@ -55,12 +55,7 @@ const TrackingTransactionFilter = () => {
   const [open, setOpen] = useState(false);
   const [resetToken, setResetToken] = useState(0);
 
-  // --- Time Filter ---
-  const [timeRange, setTimeRange] = useState<TimeRangeKey>('any');
-  const [startTime, setStartTime] = useState<Dayjs | null>(null);
-  const [endTime, setEndTime] = useState<Dayjs | null>(null);
-
-  // Redux filter state
+  // Redux filter
   const trackingTransFilter = useSelector(
     (state: RootState) => state.trackingTransReducer.trackingTransFilter,
   );
@@ -74,14 +69,44 @@ const TrackingTransactionFilter = () => {
   const buildingData = useSelector((state: RootState) => state.buildingReducer.buildingAll);
   const bleReaderData = useSelector((state: RootState) => state.bleReaderReducer.bleReaderAll);
 
-  // Local UI filter state
+  // --- Local UI filter state ---
   const [filterState, setFilterState] = useState<FilterState>({
     VisitorId: trackingTransFilter?.filters?.VisitorId ?? [],
     MemberId: trackingTransFilter?.filters?.MemberId ?? [],
     ReaderId: trackingTransFilter?.filters?.ReaderId ?? [],
     FloorplanMaskedAreaId: trackingTransFilter?.filters?.FloorplanMaskedAreaId ?? [],
   });
-const [searchValue, setSearchValue] = useState(trackingTransFilter.SearchValue ?? '');
+
+  // --- Time Filter Local State (not dispatched yet) ---
+  const [timeRange, setTimeRange] = useState<TimeRangeKey>('any');
+  const [startTime, setStartTime] = useState<Dayjs | null>(null);
+  const [endTime, setEndTime] = useState<Dayjs | null>(null);
+
+  // Keep last applied time filter (for comparison)
+  const [appliedTimeFilter, setAppliedTimeFilter] = useState({
+    timeRange: 'any' as TimeRangeKey,
+    startTime: null as Dayjs | null,
+    endTime: null as Dayjs | null,
+  });
+
+  const [searchValue, setSearchValue] = useState(trackingTransFilter.SearchValue ?? '');
+  const [lockedInitialArea, setLockedInitialArea] = useState<{
+    BuildingId: string[];
+    FloorId: string[];
+    FloorplanId: string[];
+    MaskedAreaId: string[];
+  } | null>(null);
+
+  // --- Fetch data once ---
+  useEffect(() => {
+    dispatch(fetchVisitor());
+    dispatch(fetchBleReaders());
+    dispatch(fetchMembers());
+    dispatch(fetchMaskedAreas());
+    dispatch(fetchFloorplan());
+    dispatch(fetchFloors());
+    dispatch(fetchBuildings());
+  }, [dispatch]);
 
   // --- Sync with Redux ---
   useEffect(() => {
@@ -96,18 +121,7 @@ const [searchValue, setSearchValue] = useState(trackingTransFilter.SearchValue ?
     }
   }, [trackingTransFilter]);
 
-  // --- Fetch Data ---
-  useEffect(() => {
-    dispatch(fetchVisitor());
-    dispatch(fetchBleReaders());
-    dispatch(fetchMembers());
-    dispatch(fetchMaskedAreas());
-    dispatch(fetchFloorplan());
-    dispatch(fetchFloors());
-    dispatch(fetchBuildings());
-  }, [dispatch]);
-
-  // --- Time Range Helpers ---
+  // --- Helper for time range ---
   const getRange = (key: TimeRangeKey): { start?: Dayjs; end?: Dayjs } => {
     const now = dayjs();
     switch (key) {
@@ -122,43 +136,33 @@ const [searchValue, setSearchValue] = useState(trackingTransFilter.SearchValue ?
     }
   };
 
-  const setFilters = (start?: Dayjs | null, end?: Dayjs | null) => {
-    if (!start || !end) {
-      dispatch(UpdateFilter({ filters: filterState, dateFilters: {} }));
-      return;
-    }
-    dispatch(
-      UpdateFilter({
-        filters: filterState,
-        dateFilters: {
-          TransTime: {
-            DateFrom: start.toISOString(),
-            DateTo: end.toISOString(),
-          },
-        },
-      }),
-    );
-  };
-
-  // --- React to timeRange changes ---
-  useEffect(() => {
-    if (timeRange === 'custom') return;
-    const { start, end } = getRange(timeRange);
-    setStartTime(start ?? null);
-    setEndTime(end ?? null);
-    setFilters(start ?? null, end ?? null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeRange]);
-
-  useEffect(() => {
-    if (timeRange !== 'custom') return;
-    if (startTime && endTime) setFilters(startTime, endTime);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeRange, startTime, endTime]);
-
-  // --- Other Filters ---
+  // --- Handlers ---
   const handleApplyFilter = () => {
-    dispatch(UpdateFilter({ filters: filterState }));
+    const timeFilter = (() => {
+      if (timeRange === 'any' || (!startTime && !endTime)) return {};
+      let range = getRange(timeRange);
+      if (timeRange === 'custom' && startTime && endTime) {
+        range = { start: startTime, end: endTime };
+      }
+      if (range.start && range.end) {
+        return {
+          TransTime: {
+            DateFrom: range.start.toISOString(),
+            DateTo: range.end.toISOString(),
+          },
+        };
+      }
+      return {};
+    })();
+
+    dispatch(UpdateFilter({Start: 0, filters: filterState, dateFilters: timeFilter }));
+    setAppliedTimeFilter({ timeRange, startTime, endTime });
+    setLockedInitialArea({
+      BuildingId: [],
+      FloorId: [],
+      FloorplanId: [],
+      MaskedAreaId: filterState.FloorplanMaskedAreaId,
+    });
     setOpen(false);
   };
 
@@ -173,6 +177,7 @@ const [searchValue, setSearchValue] = useState(trackingTransFilter.SearchValue ?
     setTimeRange('any');
     setStartTime(null);
     setEndTime(null);
+    setAppliedTimeFilter({ timeRange: 'any', startTime: null, endTime: null });
     setResetToken((n) => n + 1);
     dispatch(UpdateFilter({ filters: defaults, dateFilters: {} }));
     setOpen(false);
@@ -195,10 +200,10 @@ const [searchValue, setSearchValue] = useState(trackingTransFilter.SearchValue ?
       MaskedAreaId: string[];
     }) => {
       const { FloorplanMaskedAreaId } = extractAreaFilter(areaFilter);
-      setFilterState((prev) => ({
-        ...prev,
-        FloorplanMaskedAreaId,
-      }));
+      setFilterState((prev) => {
+        if (isEqual(prev.FloorplanMaskedAreaId, FloorplanMaskedAreaId)) return prev;
+        return { ...prev, FloorplanMaskedAreaId };
+      });
     },
     [],
   );
@@ -207,63 +212,61 @@ const [searchValue, setSearchValue] = useState(trackingTransFilter.SearchValue ?
     setFilterState((prev) => ({ ...prev, [field]: [] }));
   };
 
+  // --- Debounced search ---
   useEffect(() => {
-//   if (searchValue.trim().length < 3 && searchValue.trim().length !== 0) return;
+    const delayDebounce = setTimeout(() => {
+      dispatch(
+        UpdateFilter({
+          ...trackingTransFilter,
+          SearchValue: searchValue.trim(),
+        }),
+      );
+    }, 1000);
 
-  const delayDebounce = setTimeout(() => {
-    dispatch(
-      UpdateFilter({
-        ...trackingTransFilter,
-        SearchValue: searchValue.trim(),
-      }),
-    );
-  }, 1000); // 1 seconds after last input
-
-  return () => clearTimeout(delayDebounce);
-}, [searchValue]);
+    return () => clearTimeout(delayDebounce);
+  }, [searchValue]);
 
   return (
     <>
       {/* Trigger Button */}
-<Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-  {/* Filter Button */}
-  <Button
-    onClick={() => setOpen(true)}
-    size="medium"
-    variant="outlined"
-    startIcon={<IconAdjustmentsHorizontal />}
-    color="info"
-    sx={{ height: 36 }}
-  >
-    <Typography variant="caption" fontSize={'0.7rem'}>
-      Filter
-    </Typography>
-  </Button>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Button
+          onClick={() => setOpen(true)}
+          size="medium"
+          variant="outlined"
+          startIcon={<IconAdjustmentsHorizontal />}
+          color="info"
+          sx={{ height: 36 }}
+        >
+          <Typography variant="caption" fontSize={'0.7rem'}>
+            Filter
+          </Typography>
+        </Button>
 
-  {/* Search Bar */}
-  <TextField
-    placeholder="Search..."
-    variant="outlined"
-    size="small"
-    value={searchValue}
-    onChange={(e) => setSearchValue(e.target.value)}
-    sx={{ width: 220 }}
-    InputProps={{
-      startAdornment: (
-        <InputAdornment position="start">
-          <IconSearch size={18} />
-        </InputAdornment>
-      ),
-      endAdornment: searchValue.length > 0 && (
-        <InputAdornment position="end">
-          <IconButton size="small" onClick={() => setSearchValue('')}>
-            <IconX size={16} />
-          </IconButton>
-        </InputAdornment>
-      ),
-    }}
-  />
-</Box>
+        {/* Search Bar */}
+        <TextField
+          placeholder="Search..."
+          variant="outlined"
+          size="small"
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          sx={{ width: 220 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <IconSearch size={18} />
+              </InputAdornment>
+            ),
+            endAdornment: searchValue.length > 0 && (
+              <InputAdornment position="end">
+                <IconButton size="small" onClick={() => setSearchValue('')}>
+                  <IconX size={16} />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Box>
 
       {/* Drawer */}
       <Drawer
@@ -271,11 +274,7 @@ const [searchValue, setSearchValue] = useState(trackingTransFilter.SearchValue ?
         open={open}
         onClose={() => setOpen(false)}
         PaperProps={{
-          sx: {
-            width: 360,
-            padding: 3,
-            backgroundColor: 'background.paper',
-          },
+          sx: { width: 360, padding: 3, backgroundColor: 'background.paper' },
         }}
       >
         <Typography
@@ -481,16 +480,20 @@ const [searchValue, setSearchValue] = useState(trackingTransFilter.SearchValue ?
                 floors={floorData}
                 floorplans={floorplanData}
                 maskedAreas={areaData}
-                initial={{
-                  BuildingId: [],
-                  FloorId: [],
-                  FloorplanId: [],
-                  MaskedAreaId: filterState.FloorplanMaskedAreaId,
-                }}
+                initial={
+                  lockedInitialArea ?? {
+                    BuildingId: [],
+                    FloorId: [],
+                    FloorplanId: [],
+                    MaskedAreaId: [],
+                  }
+                }
                 onChangeFilter={handleAreaChange}
                 resetToken={resetToken}
               />
             </Grid>
+
+
           </Grid>
         </Box>
 
@@ -521,7 +524,10 @@ const [searchValue, setSearchValue] = useState(trackingTransFilter.SearchValue ?
                 color="primary"
                 fullWidth
                 onClick={handleApplyFilter}
-                disabled={isEqual(filterState, trackingTransFilter.filters)}
+                disabled={
+                  isEqual(filterState, trackingTransFilter.filters) &&
+                  isEqual(appliedTimeFilter, { timeRange, startTime, endTime })
+                }
               >
                 Apply
               </Button>

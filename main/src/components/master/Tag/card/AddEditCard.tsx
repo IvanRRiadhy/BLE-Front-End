@@ -318,7 +318,7 @@ const AddEditCard = ({ type, card }: formType) => {
                   id="name"
                   name="name"
                   label="Name"
-                  placeholder={formData.name}
+                  value={formData.name}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -327,7 +327,7 @@ const AddEditCard = ({ type, card }: formType) => {
                 <CustomTextField
                   id="remarks"
                   name="remarks"
-                  placeholder={formData.remarks}
+                  value={formData.remarks}
                   onChange={handleInputChange}
                   fullWidth
                   multiline
@@ -339,7 +339,7 @@ const AddEditCard = ({ type, card }: formType) => {
                 <CustomTextField
                   id="dmac"
                   name="dmac"
-                  placeholder={formData.dmac}
+                  value={formData.dmac}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -348,7 +348,7 @@ const AddEditCard = ({ type, card }: formType) => {
                 <CustomTextField
                   id="cardNumber"
                   name="cardNumber"
-                  placeholder={formData.cardNumber}
+                  value={formData.cardNumber}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"

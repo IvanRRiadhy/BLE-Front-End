@@ -188,7 +188,6 @@ const MemberContent = () => {
                 : 'linear-gradient(90deg, #1e88e5 0%, #42a5f5 100%)', // vivid blue
               borderRadius: '8px',
               boxShadow: 3,
-              mb: 1,
             }}
           >
             {/* Left Section */}

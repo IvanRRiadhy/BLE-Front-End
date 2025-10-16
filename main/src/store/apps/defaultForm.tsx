@@ -88,9 +88,6 @@ export const defaultAlarmRecordFilter: AlarmRecordFilter = {
   SortDir: 'desc',
   SearchValue: '',
   filters: {
-    FloorplanMaskedAreaId: [],
-    ReaderId: [],
-    VisitorId: [],
   },
 };
 //#endregion

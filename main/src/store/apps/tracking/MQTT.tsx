@@ -18,7 +18,7 @@ export function startMQTTclient(messagecallback: any, topic: string) {
   if (typeof messagecallback === 'function') {
     if (!messageCallbacks[topic]) messageCallbacks[topic] = [];
     if (!messageCallbacks[topic].includes(messagecallback)) {
-      messageCallbacks[topic].push(messagecallback);
+      messageCallbacks[topic].push(messagecallback);  
     }
   }
 
