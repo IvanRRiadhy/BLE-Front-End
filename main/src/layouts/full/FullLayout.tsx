@@ -21,6 +21,8 @@ import { showAlarmPopup } from 'src/store/apps/monitoring/AlarmUI';
 import { pushItem, openPanel } from 'src/store/apps/monitoring/NotifySlice';
 import { fetchAlarmSettingsDT } from 'src/store/apps/alarmsetting/alarmSettings';
 import { defaultAlarmSettingFilter } from 'src/store/apps/defaultForm';
+import { AlarmType } from 'src/store/apps/tracking/Alarm';
+import AlarmPopup from './AlarmPopup';
 
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
@@ -37,7 +39,6 @@ const PageWrapper = styled('div')(() => ({
   backgroundColor: '#ffffffff',
 }));
 
-
 const FullLayout: FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const customizer = useSelector((state: RootState) => state.customizer);
@@ -49,6 +50,9 @@ const FullLayout: FC = () => {
   const [sessionExpired, setSessionExpired] = useState(false);
   const lastDispatchRef = useRef(0);
   const unsubscriberRef = useRef<(() => void) | null>(null);
+
+  const [latestAlarm, setLatestAlarm] = useState<AlarmType | null>(null);
+  const [openAlarmPopup, setOpenAlarmPopup] = useState(false);
 
   // Resolve display name from beacon/card ID
   const getName = (bleNumber: string) => {
@@ -81,25 +85,31 @@ const FullLayout: FC = () => {
     }
 
     // NTFY subscription for alarms
-    const topic = '192.168.1.116:6099/tracking-ntfy';
+    const topic = '192.168.1.116:6099/alarm-ntfy';
     console.log(`[NTFY] Subscribing to alarm topic "${topic}"`);
     const unsubscribe = startNTFYclient(
       (data: any) => {
         const now = Date.now();
         console.log(`[NTFY] Message from alarm topic "${topic}":`, data);
         const alarmData = Array.isArray(data) ? data[0] : data;
-        // setLatestAlarm(alarmData);
+        setLatestAlarm(alarmData);
         // setOpenAlarmPopup(true);
-        dispatch(showAlarmPopup(alarmData));
-        window.dispatchEvent(new CustomEvent('app:new-alarm', { detail: { alarm: alarmData } }));
-   // Add to bell dialogue & open it
-   dispatch(pushItem({
-     id: `${alarmData?.beaconId ?? 'unknown'}-${Date.now()}`,
-     alarm: alarmData,
-     title: 'Alarm Triggered',
-     message: `Beacon ${getName(alarmData?.beaconId || 'Unknown')} · ${alarmData?.maskedAreaName ?? 'Unknown'} · ${alarmData?.floorplanName ?? 'Unknown'}`,
-   }));
-   dispatch(openPanel());
+        // dispatch(showAlarmPopup(alarmData));
+        // document.dispatchEvent(new CustomEvent('app:new-alarm', { detail: { alarm: alarmData } }));
+        // window.dispatchEvent(new CustomEvent('app:new-alarm', { detail: { alarm: alarmData } }));
+        window.postMessage({ type: 'app:new-alarm', detail: { alarm: alarmData } }, '*');
+        // Add to bell dialogue & open it
+        dispatch(
+          pushItem({
+            id: `${alarmData?.beaconId ?? 'unknown'}-${Date.now()}`,
+            alarm: alarmData,
+            title: 'Alarm Triggered',
+            message: `Beacon ${getName(alarmData?.beaconId || 'Unknown')} · ${
+              alarmData?.maskedAreaName ?? 'Unknown'
+            } · ${alarmData?.floorplanName ?? 'Unknown'}`,
+          }),
+        );
+        dispatch(openPanel());
 
         // Show browser notification if window is not focused
         if (
@@ -144,7 +154,7 @@ const FullLayout: FC = () => {
       }
     };
   }, [dispatch, memberList, visitorList]);
-  
+
   return (
     <>
       {/* <AlarmPopup alarm={latestAlarm} open={openAlarmPopup} onClose={() => setOpenAlarmPopup(false)} /> */}

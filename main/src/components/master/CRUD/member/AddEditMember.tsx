@@ -410,7 +410,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                     sx={{ flex: 1 }}
                     options={filteredCard.map((card: CardType) => ({ label: card.cardNumber, id: card.id }))}
                     value={
-                      filteredCard
+                      cardData
                         .map((d) => ({ label: d.cardNumber, id: d.id }))
                         .find((d) => d.id === formData.cardNumber) || null
                     }

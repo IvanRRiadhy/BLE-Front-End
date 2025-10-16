@@ -243,7 +243,7 @@ const AddEditCard = ({ type, card }: formType) => {
     const ids = new Set<string>();
     if (!areaId) return ids;
 
-    const area = maskedAreaData.find((a) => a.id === areaId);
+    const area = maskedAreaData.find((a: MaskedAreaType) => a.id === areaId);
     if (!area) return ids;
 
     ids.add(area.id);

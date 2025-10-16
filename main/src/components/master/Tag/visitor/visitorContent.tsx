@@ -13,7 +13,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-
   DialogActions,
   Backdrop,
   CircularProgress,
@@ -22,7 +21,7 @@ import {
   Tooltip,
   useTheme,
 } from '@mui/material';
-import {VisitorType } from 'src/store/apps/crud/visitor';
+import { VisitorType } from 'src/store/apps/crud/visitor';
 import IconClose from 'src/assets/images/frontend-pages/icons/icon-close.svg';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 
@@ -40,7 +39,7 @@ import toast from 'react-hot-toast';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { defaultCardFilter, defaultTrxVisitorFilter } from 'src/store/apps/defaultForm';
 import { createPortal } from 'react-dom';
-import {  CardType,  fetchCardDT } from 'src/store/apps/crud/card';
+import { CardType, fetchCardDT } from 'src/store/apps/crud/card';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import VisitorActions from './visitorActions';
 type ChipColor = 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
@@ -84,7 +83,6 @@ const VisitorContent = () => {
       console.error('Error fetching data:', error);
     }
   }, [dispatch]);
-
 
   const getOrganizationDisplay = (
     organization?: string,
@@ -291,7 +289,6 @@ const VisitorContent = () => {
     setOpenCardMenu(false);
   };
 
-
   const statusValue = trxVisitorDetail?.status
     ? visitorStatusEnumMap[trxVisitorDetail.status]
     : undefined;
@@ -316,9 +313,10 @@ const VisitorContent = () => {
       primary: {
         label: 'Check-in Visitor',
         color: 'success',
-        onClick: () =>{ 
-          dispatch(fetchCardDT({ ...defaultCardFilter, length: 0, fiters: { IsUsed: false } }))
-          setOpenCardMenu(true)},
+        onClick: () => {
+          dispatch(fetchCardDT({ ...defaultCardFilter, length: 0, fiters: { IsUsed: false } }));
+          setOpenCardMenu(true);
+        },
       },
       secondary: { label: 'Deny Visitor', color: 'error', onClick: () => setOpenReasonMenu(true) },
     },
@@ -343,58 +341,56 @@ const VisitorContent = () => {
       {visitorDetail && trxVisitorDetail ? (
         <>
           {/* Header Part */}
-<Box
-  p={3}
-  py={2}
-  display="flex"
-  alignItems="center"
-  justifyContent="space-between"
-  sx={{
-    borderRadius: '8px',
-    boxShadow: 3,
-    mb: 1,
-    background:
-      chipColor !== 'default'
-        ? `linear-gradient(90deg, ${
-            theme.palette[chipColor].dark ?? theme.palette[chipColor].main
-          } 0%, ${theme.palette[chipColor].main} 100%)`
-        : 'linear-gradient(90deg, #90a4ae 0%, #b0bec5 100%)', // neutral fallback
-  }}
->
-  {/* Left side: title + status */}
-  <Typography
-    variant="h5"
-    fontWeight={700}
-    color="#fff"
-    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-  >
-    Visitor Details
+          <Box
+            p={3}
+            py={2}
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{
+              borderRadius: '8px',
+              boxShadow: 3,
+              background:
+                chipColor !== 'default'
+                  ? `linear-gradient(90deg, ${
+                      theme.palette[chipColor].dark ?? theme.palette[chipColor].main
+                    } 0%, ${theme.palette[chipColor].main} 100%)`
+                  : 'linear-gradient(90deg, #90a4ae 0%, #b0bec5 100%)', // neutral fallback
+            }}
+          >
+            {/* Left side: title + status */}
+            <Typography
+              variant="h5"
+              fontWeight={700}
+              color="#fff"
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              Visitor Details
+            </Typography>
 
-  </Typography>
-
-  {/* Right side: Close button */}
-  <Tooltip title="Close">
-    <IconButton
-      onClick={() => dispatch(SelectTrxVisitor(''))}
-      size="small"
-      sx={{
-        backgroundColor: 'rgba(255,255,255,0.2)',
-        border: '1px solid rgba(0,0,0,0.15)',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
-        transition: 'all 0.2s ease',
-        '& img': {
-          filter: 'invert(1) drop-shadow(0 0 2px rgba(0,0,0,0.5))',
-        },
-        '&:hover': {
-          backgroundColor: 'rgba(255,255,255,0.35)',
-          transform: 'scale(1.1)',
-        },
-      }}
-    >
-      <img src={IconClose} alt="close" style={{ width: 18, height: 18 }} />
-    </IconButton>
-  </Tooltip>
-</Box>
+            {/* Right side: Close button */}
+            <Tooltip title="Close">
+              <IconButton
+                onClick={() => dispatch(SelectTrxVisitor(''))}
+                size="small"
+                sx={{
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  border: '1px solid rgba(0,0,0,0.15)',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
+                  transition: 'all 0.2s ease',
+                  '& img': {
+                    filter: 'invert(1) drop-shadow(0 0 2px rgba(0,0,0,0.5))',
+                  },
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.35)',
+                    transform: 'scale(1.1)',
+                  },
+                }}
+              >
+                <img src={IconClose} alt="close" style={{ width: 18, height: 18 }} />
+              </IconButton>
+            </Tooltip>
+          </Box>
 
           <Divider />
 
@@ -422,7 +418,7 @@ const VisitorContent = () => {
                 src={`${BASE_URL}${trxVisitorDetail.visitor?.faceImage}`}
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
-                            <VisitorActions trxVisitorDetail={trxVisitorDetail} floating />
+              <VisitorActions trxVisitorDetail={trxVisitorDetail} floating />
 
               <Typography variant="h4" fontWeight={800}>
                 {trxVisitorDetail.visitor?.name}
@@ -430,7 +426,7 @@ const VisitorContent = () => {
             </Box>
 
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
                 <Typography>{trxVisitorDetail.visitor?.email}</Typography>
                 <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
@@ -444,7 +440,7 @@ const VisitorContent = () => {
                   )}
                 </Typography>
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="phone">Phone</CustomFormLabel>
                 <Typography>{trxVisitorDetail.visitor?.phone}</Typography>
                 <CustomFormLabel htmlFor="gender">Gender</CustomFormLabel>
@@ -458,13 +454,13 @@ const VisitorContent = () => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="arrival">Arrival</CustomFormLabel>
                 <Typography>{formatTime(trxVisitorDetail.visitorPeriodStart)}</Typography>
                 <CustomFormLabel htmlFor="end">End</CustomFormLabel>
                 <Typography>{formatTime(trxVisitorDetail.visitorPeriodEnd)}</Typography>
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="accepted">Accepted</CustomFormLabel>
                 <Typography>{trxVisitorDetail.isInvitationAccepted ? 'Yes' : 'No'}</Typography>
               </Grid>
@@ -474,11 +470,11 @@ const VisitorContent = () => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="person-id">Person ID</CustomFormLabel>
                 <Typography>{trxVisitorDetail.visitor?.personId}</Typography>
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="identity-Id">Identity ID</CustomFormLabel>
                 <Typography>{trxVisitorDetail.visitor?.identityId}</Typography>
               </Grid>
@@ -488,13 +484,13 @@ const VisitorContent = () => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
-                <Typography>{trxVisitorDetail.visitor?.cardNumber ?? "Not Assigned"}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.cardNumber ?? 'Not Assigned'}</Typography>
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="ble-card-number">Ble Card Number</CustomFormLabel>
-                <Typography>{trxVisitorDetail.visitor?.bleCardNumber ?? "Not Assigned"}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.bleCardNumber ?? 'Not Assigned'}</Typography>
               </Grid>
             </Grid>
           </Box>
@@ -517,7 +513,7 @@ const VisitorContent = () => {
           Assign Card
         </DialogTitle>
         <DialogContent>
-          <Grid size={12}  p={1}>
+          <Grid size={12} p={1}>
             <CustomSelect
               name="selectedCard"
               value={selectedCard || ''}
@@ -565,7 +561,7 @@ const VisitorContent = () => {
           Reason
         </DialogTitle>
         <DialogContent>
-          <Grid size={12}  p={1}>
+          <Grid size={12} p={1}>
             <CustomTextField
               id="reason"
               label="Reason"

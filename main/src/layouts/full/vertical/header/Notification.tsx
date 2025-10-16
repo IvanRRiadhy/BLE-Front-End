@@ -160,29 +160,51 @@ const Notifications = () => {
   // - menu is CLOSED
   // - window IS FOCUSED (browser Notification already covers unfocused scenario)
   useEffect(() => {
-    const onNewAlarm = (e: Event) => {
-      const detail = (e as CustomEvent).detail?.alarm;
+    const onNewAlarm = (e: MessageEvent) => {
+      if (e.data?.type !== 'app:new-alarm') return;
+      const detail = e.data.detail.alarm;
+      console.log("Listening for 'app:new-alarm' events", e, detail);
+      console.log(document.hasFocus(), anchorEl);
       if (!detail) return;
       if (anchorEl) return; // menu open → don't show bubble
-      if (!document.hasFocus()) return; // only when window focused
-
+      // if (!document.hasFocus()) return; // only when window focused
+      console.log("Alarm message: ", detail.message);
+      let alarmData: any;
+      try {
+        alarmData = JSON.parse(detail.message);
+      } catch (err) {
+        console.warn('Failed to parse alarm message', err, detail.message);
+        return;
+      }
+      console.log('alarmData: ', alarmData);
       const bd: BubbleData = {
-        title: getName(detail?.beaconId || ''),
-        subtitle: `${detail?.beaconId || ''} · ${detail?.maskedAreaName ?? 'Unknown'} · ${
-          detail?.floorplanName ?? 'Unknown'
+        title: alarmData.visitorName || alarmData.MemberName || alarmData.cardName || 'Unknown',
+        subtitle: `${alarmData.cardName ?? ''} · ${alarmData.maskedAreaName ?? 'Unknown'} · ${
+          alarmData.floorplanName ?? 'Unknown'
         }`,
-        status: getStatusText(detail?.actionStatus ?? 'Idle'),
+        status: getStatusText(
+          alarmData.action?.toLowerCase() === 'idle' ? 'Idle' : alarmData.action ?? 'Idle',
+        ),
       };
+      console.log("Bubble Data: ", bd);
+      // Compute bubble position safely
+      const pos = computeBubblePos();
+      if (!pos) {
+        console.warn('Bell icon not mounted yet, cannot position bubble');
+        return;
+      }
+
       setBubble(bd);
-      setBubblePos(computeBubblePos());
+      setBubblePos(pos);
+      console.log('Current bubble state', bubble, bubblePos);
 
       if (hideTimer.current) window.clearTimeout(hideTimer.current);
       hideTimer.current = window.setTimeout(() => setBubble(null), AUTOHIDE_MS);
     };
 
-    window.addEventListener('app:new-alarm' as any, onNewAlarm);
+    window.addEventListener('message', onNewAlarm);
     return () => {
-      window.removeEventListener('app:new-alarm' as any, onNewAlarm);
+      window.removeEventListener('message' as any, onNewAlarm);
       if (hideTimer.current) {
         window.clearTimeout(hideTimer.current);
         hideTimer.current = null;
@@ -220,7 +242,36 @@ const Notifications = () => {
           <IconBellRinging size="21" stroke="1.5" />
         </Badge>
       </IconButton>
-
+      <IconButton
+        size="large"
+        aria-label="trigger Alarm"
+        color="error"
+        aria-controls="msgs-menu"
+        aria-haspopup="true"
+        sx={{ color: anchorEl ? 'error.main' : 'text.secondary' }}
+        onClick={() => {
+          window.dispatchEvent(
+            new CustomEvent('app:new-alarm', {
+              detail: {
+                alarm: {
+                  message: JSON.stringify({
+                    alarmName: 'Alarm detected for BC572905DB80',
+                    visitorName: 'Adi Sucipto',
+                    cardName: 'BC572905DB80',
+                    maskedAreaName: 'demo lobbyasd',
+                    floorplanName: 'Deemo',
+                    action: 'idle',
+                  }),
+                },
+              },
+            }),
+          );
+        }}
+      >
+        <Badge badgeContent={"!"} color="error">
+          <IconBellRinging size="21" stroke="1.5" />
+        </Badge>
+      </IconButton>
       {/* Anchored bubble – shows ONLY when menu is closed AND window is focused */}
       <Fade in={Boolean(bubble) && !anchorEl} timeout={200} unmountOnExit>
         <Paper

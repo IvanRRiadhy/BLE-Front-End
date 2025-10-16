@@ -200,7 +200,8 @@ export const addCardAccess = createAsyncThunk("cardAccess/addCardAccess", async 
 export const editCardAccess = createAsyncThunk("cardAccess/editCardAccess", async (formData: CardAccessType, { rejectWithValue }) => {
     const started = Date.now();
     try {
-       const [id, updatedAt, updatedBy, createdAt, createdBy, ...filteredCardAccessData] = Object.values(formData);
+       const {id, updatedAt, updatedBy, createdAt, createdBy, ...filteredCardAccessData} = formData;
+       console.log("filteredCardAccessData: ", filteredCardAccessData, formData);
         const response = await axiosServices.put(`${API_URL}${id}`, filteredCardAccessData);
                             const elapsed = Date.now() - started;
       if (elapsed < 500) await delay(500 - elapsed);
