@@ -1,5 +1,5 @@
 import React from 'react';
-import TrackingPositionFloorView from 'src/components/master/CRUD/trackingTransaction/Preview/TrackingPositionFloorView';
+import TrackingPositionFloorView from 'src/components/master/Reports/trackingTransaction/Preview/TrackingPositionFloorView';
 import { Dialog, Box, IconButton, Typography } from '@mui/material';
 import { IconX } from '@tabler/icons-react';
 import { AlarmTriggerType } from 'src/store/apps/crud/alarmTrigger';

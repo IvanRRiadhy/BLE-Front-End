@@ -15,10 +15,10 @@ import AppCard from 'src/components/shared/AppCard';
 import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
-import TrackingTransactionList from 'src/components/master/CRUD/trackingTransaction/TrackingTransactionList';
-import AddEditTrackingTransaction from 'src/components/master/CRUD/trackingTransaction/AddEditTrackingTransaction';
-import TrackingTransactionFilter from 'src/components/master/CRUD/trackingTransaction/TrackingTransactionFilter';
-import TrackingTransExport from 'src/components/master/CRUD/trackingTransaction/TrackingTransactionExport';
+import TrackingTransactionList from 'src/components/master/Reports/trackingTransaction/TrackingTransactionList';
+import AddEditTrackingTransaction from 'src/components/master/Reports/trackingTransaction/AddEditTrackingTransaction';
+import TrackingTransactionFilter from 'src/components/master/Reports/trackingTransaction/TrackingTransactionFilter';
+import TrackingTransExport from 'src/components/master/Reports/trackingTransaction/TrackingTransactionExport';
 
 interface cardType {
   icon?: string;

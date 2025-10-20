@@ -15,7 +15,7 @@ import AppCard from 'src/components/shared/AppCard';
 import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
-import CardRecordList from 'src/components/master/CRUD/cardRecord/CardRecordList';
+import CardRecordList from 'src/components/master/Reports/cardRecord/CardRecordList';
 
 interface cardType {
   icon?: string;

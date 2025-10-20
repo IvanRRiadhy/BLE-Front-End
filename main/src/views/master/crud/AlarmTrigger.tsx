@@ -15,7 +15,7 @@ import AppCard from 'src/components/shared/AppCard';
 import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
-import AlarmTriggerList from 'src/components/master/CRUD/alarmTrigger/AlarmTriggerList';
+import AlarmTriggerList from 'src/components/master/Reports/alarmTrigger/AlarmTriggerList';
 
 interface cardType {
   icon?: string;

@@ -15,10 +15,10 @@ import AppCard from 'src/components/shared/AppCard';
 import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
-import AlarmRecordList from 'src/components/master/CRUD/alarmRecord/AlarmRecordList';
-import AlarmRecordImport from 'src/components/master/CRUD/alarmRecord/AlarmRecordImport';
-import AlarmExport from 'src/components/master/CRUD/alarmRecord/AlarmRecordExport';
-import AlarmRecordFilter from 'src/components/master/CRUD/alarmRecord/AlarmRecordFilter';
+import AlarmRecordList from 'src/components/master/Reports/alarmRecord/AlarmRecordList';
+import AlarmRecordImport from 'src/components/master/Reports/alarmRecord/AlarmRecordImport';
+import AlarmExport from 'src/components/master/Reports/alarmRecord/AlarmRecordExport';
+import AlarmRecordFilter from 'src/components/master/Reports/alarmRecord/AlarmRecordFilter';
 
 interface cardType {
   icon?: string;
