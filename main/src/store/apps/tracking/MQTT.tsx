@@ -1,12 +1,12 @@
 import mqtt from 'mqtt';
 
 // const Topic = "D2D3032D-77C9-4DAE-91B2-CC3770668D01";
-const Broker_URL = "ws://192.168.1.223:9005";
+const Broker_URL = 'ws://192.168.1.116:9005';
 
 const options = {
-  clientId: "Klien1",
-  username: "gNWx6jIp9X",
-  password: "Fx6co2iTPy",
+  clientId: 'Klien1',
+  username: 'gNWx6jIp9X',
+  password: 'Fx6co2iTPy',
 };
 
 let client: mqtt.MqttClient | null = null;
@@ -18,14 +18,14 @@ export function startMQTTclient(messagecallback: any, topic: string) {
   if (typeof messagecallback === 'function') {
     if (!messageCallbacks[topic]) messageCallbacks[topic] = [];
     if (!messageCallbacks[topic].includes(messagecallback)) {
-      messageCallbacks[topic].push(messagecallback);  
+      messageCallbacks[topic].push(messagecallback);
     }
   }
 
   if (!client) {
     client = mqtt.connect(Broker_URL, options);
 
-    client.on("connect", () => {
+    client.on('connect', () => {
       // console.log("Connected to MQTT broker", topic);
       // Subscribe to all topics that have callbacks
       Object.keys(messageCallbacks).forEach((t) => {
@@ -37,25 +37,25 @@ export function startMQTTclient(messagecallback: any, topic: string) {
       });
     });
 
-    client.on("error", (err) => {
-      console.log("MQTT error:", err);
+    client.on('error', (err) => {
+      console.log('MQTT error:', err);
     });
 
-    client.on("message", (msgTopic, message) => {
+    client.on('message', (msgTopic, message) => {
       const message_str = message.toString();
       let data: unknown;
       try {
         data = JSON.parse(message_str);
-        console.log("Received message on topic", msgTopic, ":", data);
-        (messageCallbacks[msgTopic] || []).forEach(cb => cb(data));
+        console.log('Received message on topic', msgTopic, ':', data);
+        (messageCallbacks[msgTopic] || []).forEach((cb) => cb(data));
       } catch (e) {
-        console.warn("Invalid JSON received on topic", msgTopic, ":", message_str);
+        console.warn('Invalid JSON received on topic', msgTopic, ':', message_str);
       }
     });
   } else {
     // If already connected, subscribe to new topic if needed
     if (!subscribedTopics.has(topic)) {
-        console.log(subscribedTopics, topic);
+      console.log(subscribedTopics, topic);
       client.subscribe(topic, (err) => {
         if (!err) subscribedTopics.add(topic);
       });
@@ -66,7 +66,7 @@ export function startMQTTclient(messagecallback: any, topic: string) {
   return () => {
     if (messageCallbacks[topic]) {
       // console.log("Unsubscribing from topic", topic);
-      messageCallbacks[topic] = messageCallbacks[topic].filter(cb => cb !== messagecallback);
+      messageCallbacks[topic] = messageCallbacks[topic].filter((cb) => cb !== messagecallback);
       if (messageCallbacks[topic].length === 0) {
         // Optionally unsubscribe from topic if no callbacks left
         client?.unsubscribe(topic);

@@ -69,26 +69,31 @@ const FloorplanMaskedArea = Loadable(lazy(() => import('../views/master/crud/Mas
 const BleReader = Loadable(lazy(() => import('../views/master/crud/BleReader')));
 const Floor = Loadable(lazy(() => import('../views/master/crud/Floor')));
 const Member = Loadable(lazy(() => import('../views/master/crud/Member')));
-const TrackingTransaction = Loadable(lazy(() => import('../views/master/crud/TrackingTrans')));
+
 const Visitor = Loadable(lazy(() => import('../views/master/crud/Visitor')));
 const Blacklist = Loadable(lazy(() => import('../views/master/crud/Blacklist')));
 const Building = Loadable(lazy(() => import('../views/master/crud/Building')));
 const FloorplanDevice = Loadable(lazy(() => import('../views/master/crud/FloorplanDevice')));
-const AlarmRecord = Loadable(lazy(() => import('../views/master/crud/AlarmRecord')));
-const AlarmTrigger = Loadable(lazy(() => import('../views/master/crud/AlarmTrigger')));
-const CardRecord = Loadable(lazy(() => import('../views/master/crud/CardRecord')));
+
 const Card = Loadable(lazy(() => import('../views/master/tag/card')));
 const TimeGroup = Loadable(lazy(() => import('../views/master/crud/TimeGroup')));
 const Floorplan = Loadable(lazy(() => import('../views/master/crud/Floorplan')));
 const User = Loadable(lazy(() => import('../views/master/user/User')));
 const CardAccess = Loadable(lazy(() => import('../views/master/crud/CardAccess')));
 const CardGroup = Loadable(lazy(() => import('../views/master/crud/CardGroup')));
-
 const FloorplanDeviceEdit = Loadable(
   lazy(() => import('../views/master/crud/FloorplanDeviceEdit')),
 );
 const MaskedAreaEdit = Loadable(lazy(() => import('../views/master/crud/MaskedAreaEdit')));
 const RulesEdit = Loadable(lazy(() => import('../views/master/rules/rulesEdit')));
+
+/* ****Reports**** */
+const TrackingTransaction = Loadable(lazy(() => import('../views/Reports/TrackingTrans')));
+const AlarmRecord = Loadable(lazy(() => import('../views/Reports/AlarmRecord')));
+const AlarmTrigger = Loadable(lazy(() => import('../views/Reports/AlarmTrigger')));
+const CardRecord = Loadable(lazy(() => import('../views/Reports/CardRecord')));
+const TestRecord = Loadable(lazy(() => import('../views/Reports/TestRecord')));
+
 
 /* ****Apps***** */
 // const Blog = Loadable(lazy(() => import('../views/apps/blog/Blog')));
@@ -394,6 +399,7 @@ const Router = [
       { path: '/report/alarmrecord', exact: true, element: withAuth(<AlarmRecord />, '/report/alarmrecord') },
       { path: '/report/alarmtrigger', exact: true, element: withAuth(<AlarmTrigger />, '/report/alarmtrigger') },
       { path: '/report/cardrecord', exact: true, element: withAuth(<CardRecord />, '/report/cardrecord') },
+      { path: '/report/testrecord', exact: true, element: withAuth(<TestRecord />, '/report/testrecord') },
 
       // ***Alarm Setting*** //
       { path: '/alarmsetting', exact: true, element: withAuth(<AlarmSetting />, '/alarmsetting') },
