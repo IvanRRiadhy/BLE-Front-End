@@ -14,7 +14,8 @@ import ShiftButtonIcon from 'src/assets/images/svgs/shift-button-icon.svg';
 
 const EditAreaFloorView: React.FC<{
   zoomable: boolean;
-}> = ({ zoomable }) => {
+  preview?: boolean;
+}> = ({ zoomable, preview = false }) => {
   const dispatch: AppDispatch = useDispatch();
   const activeFloorPlan = useSelector(
     (state: RootState) => state.floorplanReducer.selectedFloorplan,
@@ -62,14 +63,13 @@ const EditAreaFloorView: React.FC<{
     if (floorplanImage) {
       const img = new Image();
       img.src = floorplanImage;
-      img.onload = () => {
-        setImage(img);
-        setImgSize({ width: img.width, height: img.height });
+img.onload = () => {
+  setImage(img);
+  setImgSize({ width: img.width, height: img.height });
 
-        // Center the image when it is loaded
-        if (containerRef.current) {
-          const containerWidth = containerRef.current.clientWidth;
-          const containerHeight = containerRef.current.clientHeight;
+  if (containerRef.current) {
+    const containerWidth = containerRef.current.clientWidth;
+    const containerHeight = containerRef.current.clientHeight;
 
           // setScale(finalScale); // Set the initial scale
 
@@ -192,8 +192,12 @@ const EditAreaFloorView: React.FC<{
       setScale(minScale);
     }
   }, [imgSize]); // Reset scale when imgSize changes
+  useEffect(() => {
+  if (!zoomable) setCursor('default');
+}, [zoomable]);
 
   const handleMouseDown = (event: React.MouseEvent) => {
+    if (!zoomable) return;
     if (cursor === 'grab') setCursor('grabbing');
     setIsPanning(true);
     dragStart.current = { x: event.clientX - translate.x, y: event.clientY - translate.y };
@@ -505,6 +509,7 @@ const EditAreaFloorView: React.FC<{
                   activeMaskedArea={activeMaskedArea}
                   setIsDragging={setIsDragging}
                   setCursor={setCursor}
+                  preview={preview}
                 />
               </>
             )}
@@ -513,7 +518,7 @@ const EditAreaFloorView: React.FC<{
           </Box>
         </Box>
       </Box>
-    </Box>
+    </Box>  
   );
 };
 

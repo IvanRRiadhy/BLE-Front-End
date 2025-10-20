@@ -21,7 +21,7 @@ import {
   Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconTrash } from '@tabler/icons-react';
+import { IconEye, IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import {
   deleteTrackingTrans,
@@ -35,13 +35,14 @@ import { useTranslation } from 'react-i18next';
 import { defaultTrackingTransFilter } from 'src/store/apps/defaultForm';
 import { fetchMembers, memberType } from 'src/store/apps/crud/member';
 import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor';
+import TrackingPositionPreviewDialog from './Preview/TrackingPositionPreviewDialog';
 
 const columns = [
   { label: 'Transaction Time', field: 'TransTime', sortAble: true },
   { label: 'Reader', field: 'Reader.Name', sortAble: true },
   { label: 'Area', field: 'FloorplanMaskedArea.Name', sortAble: true },
   { label: 'Person', field: '', sortAble: false },
-  { label: 'Coordinate', field: '', sortAble: false },
+  { label: 'Position', field: '', sortAble: false },
   { label: 'Alarm Status', field: 'AlarmStatus', sortAble: true },
   { label: 'Battery', field: 'Battery', sortAble: true },
 ];
@@ -166,6 +167,20 @@ const TrackingTransactionList = () => {
     return 'Unknown';
   };
 
+  //Position Preview
+  const [openPositionDialog, setOpenPositionDialog] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<trackingTransType | null>(null);
+
+  const handleOpenPositionDialog = (transaction: trackingTransType) => {
+    setSelectedTransaction(transaction);
+    setOpenPositionDialog(true);
+  };
+
+  const handleClosePositionDialog = () => {
+    setOpenPositionDialog(false);
+    setSelectedTransaction(null);
+  };
+
   const renderSkeletonRows = (rows: number) => (
     <>
       {Array.from({ length: rows }).map((_, i) => (
@@ -202,7 +217,7 @@ const TrackingTransactionList = () => {
           <TableCell>
             <Skeleton variant="text" width={120} height={22} />
           </TableCell>
-                    <TableCell>
+          <TableCell>
             <Skeleton variant="text" width={120} height={22} />
           </TableCell>
         </TableRow>
@@ -251,37 +266,49 @@ const TrackingTransactionList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {!hasLoaded ? (
-                    renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
-                  ) : (
-                    trackingTransData.map((trackingTrans: trackingTransType, index: number) => (
-                    <TableRow key={trackingTrans.id}>
-                      <TableCell
-                        sx={{
-                          position: 'sticky',
-                          left: 0,
-                          background: 'white',
-                          zIndex: 1,
-                          width: 35, // Fixed width
-                          minWidth: 35,
-                          maxWidth: 35,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        {' '}
-                        {index + 1 + page * rowsPerPage}{' '}
-                      </TableCell>
-                      <TableCell>{formatTime(trackingTrans.transTime)}</TableCell>
-                      <TableCell>{trackingTrans.reader?.name}</TableCell>
-                      <TableCell>{trackingTrans.floorplanMaskedArea?.name ?? "Unknown Area"}</TableCell>
-                      <TableCell>{trackingTrans.member?.name ?? trackingTrans.visitor?.name ?? "Unknown Visitor"}</TableCell>
-                      <TableCell>{`(${trackingTrans.coordinateX}, ${trackingTrans.coordinateY})`}</TableCell>
-                      <TableCell>{trackingTrans.alarmStatus}</TableCell>
-                      <TableCell>{trackingTrans.battery}</TableCell>
-                    </TableRow>
-                  ))
-                  )}
+                  {!hasLoaded
+                    ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                    : trackingTransData.map((trackingTrans: trackingTransType, index: number) => (
+                        <TableRow key={trackingTrans.id}>
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              left: 0,
+                              background: 'white',
+                              zIndex: 1,
+                              width: 35, // Fixed width
+                              minWidth: 35,
+                              maxWidth: 35,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            {' '}
+                            {index + 1 + page * rowsPerPage}{' '}
+                          </TableCell>
+                          <TableCell>{formatTime(trackingTrans.transTime)}</TableCell>
+                          <TableCell>{trackingTrans.reader?.name}</TableCell>
+                          <TableCell>
+                            {trackingTrans.floorplanMaskedArea?.name ?? 'Unknown Area'}
+                          </TableCell>
+                          <TableCell>
+                            {trackingTrans.member?.name ??
+                              trackingTrans.visitor?.name ??
+                              'Unknown Visitor'}
+                          </TableCell>
+                          <TableCell>
+                            <IconButton
+                              color="primary"
+                              size="small"
+                              onClick={() => handleOpenPositionDialog(trackingTrans)}
+                            >
+                              <IconEye size={20} />
+                            </IconButton>
+                          </TableCell>
+                          <TableCell>{trackingTrans.alarmStatus}</TableCell>
+                          <TableCell>{trackingTrans.battery}</TableCell>
+                        </TableRow>
+                      ))}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -294,6 +321,12 @@ const TrackingTransactionList = () => {
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
+            {openPositionDialog && selectedTransaction && (
+              <TrackingPositionPreviewDialog
+                transaction={selectedTransaction}
+                onClose={handleClosePositionDialog}
+              />
+            )}
           </BlankCard>
         </Box>
       </Grid>

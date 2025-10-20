@@ -92,9 +92,9 @@ const DeviceDetailList = () => {
   const CCTVData: CCTVType[] = useSelector((state: RootState) => state.CCTVReducer.cctvs);
   const accessControlData: AccessControlType[] = useSelector(
     (state: RootState) => state.accessControlReducer.accessControls,
-  );
+  );  
   const bleReaderData: bleReaderType[] = useSelector(
-    (state: RootState) => state.bleReaderReducer.bleReaders,
+    (state: RootState) => state.bleReaderReducer.bleReaderAll,
   );
   // const bleNodeData = useSelector((state: RootState) => state.bleNodeReducer.bleNodes);
   // const [testNode, setTestNode] = useState<BleNodeType[]>([]);

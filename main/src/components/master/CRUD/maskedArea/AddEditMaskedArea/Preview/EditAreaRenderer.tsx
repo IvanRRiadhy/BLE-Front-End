@@ -109,6 +109,7 @@ const EditAreaRenderer: React.FC<{
   activeMaskedArea?: MaskedAreaType | null;
   setIsDragging: (isDragging: string) => void;
   setCursor: (cursor: string) => void;
+  preview?: boolean;
 }> = ({
   width,
   height,
@@ -120,6 +121,7 @@ const EditAreaRenderer: React.FC<{
   activeMaskedArea,
   setIsDragging,
   setCursor,
+  preview = false,
 }) => {
   // const theme = useTheme();
   const stageRef = React.useRef<Konva.Stage>(null);
@@ -154,7 +156,6 @@ const EditAreaRenderer: React.FC<{
   );
   const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null);
   const [drawingNodes, setDrawingNodes] = useState<Nodes[]>([]); // Track the nodes being drawn
-
 
   useEffect(() => {
     setActiveArea(activeMaskedArea?.name || '');
@@ -357,7 +358,6 @@ const EditAreaRenderer: React.FC<{
     });
   };
 
-
   // Function to check if two line segments intersect
   const doLineSegmentsIntersect = (
     x1: number,
@@ -409,7 +409,6 @@ const EditAreaRenderer: React.FC<{
 
     return false;
   };
-
 
   const handleCanvasClick = () => {
     if (!drawingMaskedArea) return; // Only allow drawing if the drawing mode is active
@@ -859,11 +858,18 @@ const EditAreaRenderer: React.FC<{
                 lineJoin="round"
                 lineCap="round"
                 closed
-                fill={area.name === activeArea ? area.colorArea : undefined}
+                fill={
+                  preview
+                    ? area.colorArea // 🟢 fill all areas in preview mode
+                    : area.name === activeArea
+                    ? area.colorArea
+                    : undefined
+                }
                 opacity={0.7}
-                draggable={editingArea === area.name}
+                draggable={!preview && editingArea === area.name}
                 onMouseEnter={() => {
                   if (editingArea === area.name) {
+                    if (preview) return;
                     if (!drawingMaskedArea) {
                       setCursor('move');
                     }
@@ -874,7 +880,7 @@ const EditAreaRenderer: React.FC<{
                   }
                 }}
                 onMouseLeave={() => {
-                  if (!drawingMaskedArea) {
+                  if (!preview &&!drawingMaskedArea) {
                     setCursor('grab');
                   }
                 }}

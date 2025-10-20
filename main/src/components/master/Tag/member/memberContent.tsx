@@ -30,14 +30,14 @@ import {
   fetchMemberDT,
 } from 'src/store/apps/crud/member';
 import AddEditMember from '../../CRUD/member/AddEditMember';
-import { IconTrash } from '@tabler/icons-react';
+import { IconTrash, IconSquareRoundedX, IconX } from '@tabler/icons-react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import { DepartmentType, fetchDepartments } from 'src/store/apps/crud/department';
 import { DistrictType, fetchDistricts } from 'src/store/apps/crud/district';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
 import { ApplicationType, fetchApplications } from 'src/store/apps/crud/application';
 import { useTranslation } from 'react-i18next';
-import IconClose from 'src/assets/images/frontend-pages/icons/icon-close.svg';
+// import IconClose from 'src/assets/images/frontend-pages/icons/icon-close.svg';
 import toast from 'react-hot-toast';
 
 const MemberContent = () => {
@@ -276,8 +276,9 @@ const MemberContent = () => {
                     border: '1px solid rgba(0,0,0,0.15)',
                     boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
                     transition: 'all 0.2s ease',
-                    '& img': {
-                      filter: 'invert(1) drop-shadow(0 0 2px rgba(0,0,0,0.5))',
+                    '& svg': {
+                      color: '#fff',
+                      filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))',
                     },
                     '&:hover': {
                       backgroundColor: 'rgba(255,255,255,0.35)',
@@ -285,7 +286,7 @@ const MemberContent = () => {
                     },
                   }}
                 >
-                  <img src={IconClose} alt="close" style={{ width: 18, height: 18 }} />
+                  <IconX size="18" stroke={1.6} />
                 </IconButton>
               </Tooltip>
             </Stack>

@@ -24,11 +24,12 @@ import {
   SelectFloorplan,
   UpdateFilter,
 } from 'src/store/apps/crud/floorplan';
-import { IconEdit } from '@tabler/icons-react';
+import { IconEdit, IconEye } from '@tabler/icons-react';
 import { useNavigate } from 'react-router';
 import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
 import { fetchFloorplanDevices } from 'src/store/apps/crud/floorplanDevice';
 import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
+import FloorplanPreviewDialog from './FloorplanPreviewDialog';
 
 const columns = [
   { label: 'Building', field: 'Floor.Name', sortAble: true },
@@ -151,6 +152,9 @@ const MaskedAreaList2 = () => {
     </>
   );
 
+  //Floorplan Preview
+  const [previewFloorplanId, setPreviewFloorplanId] = useState<string | null>(null);
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -203,7 +207,16 @@ const MaskedAreaList2 = () => {
                             {getbuildingName(floorplan.floor?.buildingId || '')}
                           </TableCell>
                           <TableCell>{floorplan.floor?.name}</TableCell>
-                          <TableCell>{floorplan.name}</TableCell>
+                          <TableCell>
+                            {floorplan.name}{' '}
+                            <IconButton
+                              color="secondary"
+                              size="small"
+                              onClick={() => setPreviewFloorplanId(floorplan.id)}
+                            >
+                              <IconEye size={20} />
+                            </IconButton>
+                          </TableCell>
                           <TableCell>{floorplan.maskedAreaCount}</TableCell>
 
                           <TableCell
@@ -241,6 +254,12 @@ const MaskedAreaList2 = () => {
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
+            {previewFloorplanId && (
+              <FloorplanPreviewDialog
+                floorplanId={previewFloorplanId}
+                onClose={() => setPreviewFloorplanId(null)}
+              />
+            )}
           </BlankCard>
         </Box>
       </Grid>

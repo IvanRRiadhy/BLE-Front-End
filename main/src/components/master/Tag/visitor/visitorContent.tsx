@@ -24,7 +24,7 @@ import {
 import { VisitorType } from 'src/store/apps/crud/visitor';
 import IconClose from 'src/assets/images/frontend-pages/icons/icon-close.svg';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
-
+import {  IconX } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { visitorStatusEnumMap } from 'src/types/crud/input';
 import {
@@ -42,6 +42,9 @@ import { createPortal } from 'react-dom';
 import { CardType, fetchCardDT } from 'src/store/apps/crud/card';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import VisitorActions from './visitorActions';
+import VisitorTrackingPopup from './VisitorTrackingPopup';
+import VisitorTrackingHistoryPopup from './VisitorTrackingHistoryPopup';
+
 type ChipColor = 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
 
 // Map enum value to MUI Chip color
@@ -336,6 +339,9 @@ const VisitorContent = () => {
 
   const currentActions = status ? actionMap[status] : undefined;
 
+  //Tracking History
+  const [openTrackHistory, setOpenTrackHistory] = useState(false);
+
   return (
     <>
       {visitorDetail && trxVisitorDetail ? (
@@ -374,20 +380,21 @@ const VisitorContent = () => {
                 onClick={() => dispatch(SelectTrxVisitor(''))}
                 size="small"
                 sx={{
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                  border: '1px solid rgba(0,0,0,0.15)',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
-                  transition: 'all 0.2s ease',
-                  '& img': {
-                    filter: 'invert(1) drop-shadow(0 0 2px rgba(0,0,0,0.5))',
-                  },
-                  '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,0.35)',
-                    transform: 'scale(1.1)',
-                  },
-                }}
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    border: '1px solid rgba(0,0,0,0.15)',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
+                    transition: 'all 0.2s ease',
+                    '& svg': {
+                      color: '#fff',
+                      filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))',
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.35)',
+                      transform: 'scale(1.1)',
+                    },
+                  }}
               >
-                <img src={IconClose} alt="close" style={{ width: 18, height: 18 }} />
+                <IconX size="18" stroke={1.6} />
               </IconButton>
             </Tooltip>
           </Box>
@@ -423,6 +430,14 @@ const VisitorContent = () => {
               <Typography variant="h4" fontWeight={800}>
                 {trxVisitorDetail.visitor?.name}
               </Typography>
+              <Button
+                variant="contained"
+                color="info"
+                sx={{ mt: 2 }}
+                onClick={() => setOpenTrackHistory(true)}
+              >
+                Tracking History
+              </Button>
             </Box>
 
             <Grid container spacing={5} mb={3}>
@@ -581,6 +596,13 @@ const VisitorContent = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      {trxVisitorDetail.visitor && (
+        <VisitorTrackingHistoryPopup
+          open={openTrackHistory}
+          onClose={() => setOpenTrackHistory(false)}
+          visitor={trxVisitorDetail.visitor}
+        />
+      )}
       {loading &&
         createPortal(
           <Backdrop

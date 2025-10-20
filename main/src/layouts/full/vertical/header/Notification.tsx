@@ -14,6 +14,8 @@ import {
   Paper,
   Fade,
   useTheme,
+  alpha,
+  darken,
 } from '@mui/material';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import { actionStatus } from 'src/types/crud/input';
@@ -28,6 +30,7 @@ type BubbleData = {
   title: string;
   subtitle: string;
   status: string;
+  color: string;
 };
 
 const AUTOHIDE_MS = 6000;
@@ -40,13 +43,14 @@ const Notifications = () => {
   // Bubble state
   const [bubble, setBubble] = useState<BubbleData | null>(null);
   const [bubblePos, setBubblePos] = useState<{ top: number; left: number } | null>(null);
+  const [visibleBubble, setVisibleBubble] = useState<BubbleData | null>(null);
   const hideTimer = useRef<number | null>(null);
 
   const openMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
   const closeMenu = () => {
     setAnchorEl(null);
     // also close bubble when opening menu
-    setBubble(null);
+    removeBubble();
     if (hideTimer.current) {
       window.clearTimeout(hideTimer.current);
       hideTimer.current = null;
@@ -96,6 +100,11 @@ const Notifications = () => {
     pruned.sort((a, b) => toMs(b.triggerTime) - toMs(a.triggerTime));
     return pruned;
   }, [alarmTriggers, nowMs]);
+
+  const removeBubble = () => {
+    setBubble(null);
+    setTimeout(() => setVisibleBubble(null), 250);
+  };
 
   const getName = (bleNumber: string) => {
     const m = memberList.find((x) => x.bleCardNumber === bleNumber);
@@ -168,7 +177,7 @@ const Notifications = () => {
       if (!detail) return;
       if (anchorEl) return; // menu open → don't show bubble
       // if (!document.hasFocus()) return; // only when window focused
-      console.log("Alarm message: ", detail.message);
+      console.log('Alarm message: ', detail.message);
       let alarmData: any;
       try {
         alarmData = JSON.parse(detail.message);
@@ -185,8 +194,9 @@ const Notifications = () => {
         status: getStatusText(
           alarmData.action?.toLowerCase() === 'idle' ? 'Idle' : alarmData.action ?? 'Idle',
         ),
+        color: alarmData.color ?? '#c62828',
       };
-      console.log("Bubble Data: ", bd);
+      console.log('Bubble Data: ', bd);
       // Compute bubble position safely
       const pos = computeBubblePos();
       if (!pos) {
@@ -195,11 +205,14 @@ const Notifications = () => {
       }
 
       setBubble(bd);
+      setVisibleBubble(bd);
       setBubblePos(pos);
       console.log('Current bubble state', bubble, bubblePos);
 
       if (hideTimer.current) window.clearTimeout(hideTimer.current);
-      hideTimer.current = window.setTimeout(() => setBubble(null), AUTOHIDE_MS);
+      hideTimer.current = window.setTimeout(() => {
+        removeBubble();
+      }, AUTOHIDE_MS);
     };
 
     window.addEventListener('message', onNewAlarm);
@@ -250,8 +263,9 @@ const Notifications = () => {
         aria-haspopup="true"
         sx={{ color: anchorEl ? 'error.main' : 'text.secondary' }}
         onClick={() => {
-          window.dispatchEvent(
-            new CustomEvent('app:new-alarm', {
+          window.postMessage(
+            {
+              type: 'app:new-alarm',
               detail: {
                 alarm: {
                   message: JSON.stringify({
@@ -264,11 +278,27 @@ const Notifications = () => {
                   }),
                 },
               },
-            }),
+            },
+            '*',
           );
+          //   new CustomEvent('app:new-alarm', {
+          //     detail: {
+          //       alarm: {
+          //         message: JSON.stringify({
+          //           alarmName: 'Alarm detected for BC572905DB80',
+          //           visitorName: 'Adi Sucipto',
+          //           cardName: 'BC572905DB80',
+          //           maskedAreaName: 'demo lobbyasd',
+          //           floorplanName: 'Deemo',
+          //           action: 'idle',
+          //         }),
+          //       },
+          //     },
+          //   }),
+          // );
         }}
       >
-        <Badge badgeContent={"!"} color="error">
+        <Badge badgeContent={'!'} color="error">
           <IconBellRinging size="21" stroke="1.5" />
         </Badge>
       </IconButton>
@@ -283,12 +313,16 @@ const Notifications = () => {
           }}
           onMouseLeave={() => {
             if (!hideTimer.current)
-              hideTimer.current = window.setTimeout(() => setBubble(null), AUTOHIDE_MS);
+              hideTimer.current = window.setTimeout(() => {
+                removeBubble();
+              }, AUTOHIDE_MS);
           }}
-          onClick={() => setBubble(null)}
+          onClick={() => {
+            removeBubble();
+          }}
           elevation={8}
           sx={{
-            position: 'fixed', // FIX: anchor to viewport
+            position: 'fixed',
             top: bubblePos?.top ?? 64,
             left: bubblePos ? bubblePos.left : undefined,
             right: bubblePos ? undefined : 24,
@@ -296,10 +330,26 @@ const Notifications = () => {
             px: 2,
             py: 1.25,
             borderRadius: 3,
-            background: 'linear-gradient(to bottom, #c62828, #b71c1c)',
             color: 'white',
-            border: '2px solid #ffcccc',
             zIndex: 2000,
+
+            // 🌈 Dynamic gradient using MUI darken + alpha
+            background: visibleBubble?.color
+              ? `linear-gradient(to bottom right, 
+          ${alpha(visibleBubble.color, 0.95)}, 
+          ${darken(visibleBubble.color, 0.25)})`
+              : 'linear-gradient(to bottom right, #c62828, #b71c1c)',
+
+            // Border slightly transparent version of the main color
+            border: visibleBubble?.color
+              ? `2px solid ${alpha(visibleBubble.color, 0.6)}`
+              : '2px solid rgba(255, 204, 204, 0.5)',
+
+            // Soft glow in the same tone
+            boxShadow: visibleBubble?.color
+              ? `0 4px 20px ${alpha(visibleBubble.color, 0.6)}`
+              : '0 4px 20px rgba(0,0,0,0.25)',
+
             '&::before': {
               content: '""',
               position: 'absolute',
@@ -307,11 +357,13 @@ const Notifications = () => {
               right: 28,
               borderWidth: '0 8px 8px 8px',
               borderStyle: 'solid',
-              borderColor: 'transparent transparent #c62828 transparent',
+              borderColor: `transparent transparent ${
+                visibleBubble?.color ? darken(visibleBubble.color, 0.1) : '#c62828'
+              } transparent`,
             },
           }}
         >
-          {bubble && (
+          {visibleBubble && (
             <Stack
               direction="row"
               justifyContent="space-between"
@@ -323,10 +375,10 @@ const Notifications = () => {
                   Alarm Triggered
                 </Typography>
                 <Typography variant="h6" fontWeight={800} noWrap>
-                  {bubble.title}
+                  {visibleBubble.title}
                 </Typography>
                 <Typography variant="body2" sx={{ opacity: 0.9 }} noWrap>
-                  {bubble.subtitle}
+                  {visibleBubble.subtitle}
                 </Typography>
               </Box>
             </Stack>
