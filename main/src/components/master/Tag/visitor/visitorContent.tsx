@@ -24,7 +24,7 @@ import {
 import { VisitorType } from 'src/store/apps/crud/visitor';
 import IconClose from 'src/assets/images/frontend-pages/icons/icon-close.svg';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
-import {  IconX } from '@tabler/icons-react';
+import { IconX } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { visitorStatusEnumMap } from 'src/types/crud/input';
 import {
@@ -74,18 +74,7 @@ const VisitorContent = () => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   // const theme = useTheme();
-
-  useEffect(() => {
-    setLoading(true);
-    try {
-      dispatch(fetchCardDT({ ...defaultCardFilter, length: 0, fiters: { IsUsed: false } }));
-      setTimeout(() => {
-        setLoading(false);
-      }, 500);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  }, [dispatch]);
+const [localCardData, setLocalCardData] = useState<CardType[]>([]);
 
   const getOrganizationDisplay = (
     organization?: string,
@@ -317,8 +306,8 @@ const VisitorContent = () => {
         label: 'Check-in Visitor',
         color: 'success',
         onClick: () => {
-          dispatch(fetchCardDT({ ...defaultCardFilter, length: 0, fiters: { IsUsed: false } }));
-          setOpenCardMenu(true);
+          console.log("Opening Card Menu");
+          handleOpenCardMenu();
         },
       },
       secondary: { label: 'Deny Visitor', color: 'error', onClick: () => setOpenReasonMenu(true) },
@@ -338,6 +327,35 @@ const VisitorContent = () => {
   };
 
   const currentActions = status ? actionMap[status] : undefined;
+
+  //Assign Card
+  const handleOpenCardMenu = async () => {
+    console.log('🟡 handleOpenCardMenu called');
+    setLoading(true);
+    try {
+      // Fetch and wait for Redux to finish updating
+      const result = await dispatch(
+        fetchCardDT({ ...defaultCardFilter, length: 0, filters: { IsUsed: false } }),
+      ).unwrap();
+
+      // Log for verification
+      console.log('Fetched cards:', result);
+
+      // Optional: verify data is present
+      if (result?.collection?.length > 0) {
+        console.log("Res", result.collection.data);
+        setLocalCardData(result.collection.data || []);
+        setOpenCardMenu(true);
+      } else {
+        toast.error('No available cards found.');
+      }
+    } catch (error) {
+      console.error('Error loading cards:', error);
+      toast.error('Failed to load cards.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   //Tracking History
   const [openTrackHistory, setOpenTrackHistory] = useState(false);
@@ -380,19 +398,19 @@ const VisitorContent = () => {
                 onClick={() => dispatch(SelectTrxVisitor(''))}
                 size="small"
                 sx={{
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                    border: '1px solid rgba(0,0,0,0.15)',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
-                    transition: 'all 0.2s ease',
-                    '& svg': {
-                      color: '#fff',
-                      filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))',
-                    },
-                    '&:hover': {
-                      backgroundColor: 'rgba(255,255,255,0.35)',
-                      transform: 'scale(1.1)',
-                    },
-                  }}
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  border: '1px solid rgba(0,0,0,0.15)',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
+                  transition: 'all 0.2s ease',
+                  '& svg': {
+                    color: '#fff',
+                    filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))',
+                  },
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.35)',
+                    transform: 'scale(1.1)',
+                  },
+                }}
               >
                 <IconX size="18" stroke={1.6} />
               </IconButton>
@@ -523,36 +541,51 @@ const VisitorContent = () => {
       )}
 
       {/* Card Assign Pop-up */}
-      <Dialog open={openCardMenu} onClose={handleCloseCardMenu} fullWidth maxWidth="sm">
+      {/* <Dialog open={openCardMenu} onClose={handleCloseCardMenu} fullWidth maxWidth="sm">
         <DialogTitle mb={2} p={2}>
           Assign Card
         </DialogTitle>
         <DialogContent>
           <Grid size={12} p={1}>
-            <CustomSelect
-              name="selectedCard"
-              value={selectedCard || ''}
-              onChange={(e: any) => setSelectedCard(e.target.value)}
-              fullWidth
-              variant="outlined"
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    maxHeight: 200, // Set the maximum height of the dropdown menu
-                    width: 100, // Adjust the width of the dropdown menu
+            {loading ? (
+              <Box py={3} display="flex" justifyContent="center">
+                <CircularProgress size={24} />
+              </Box>
+            ) : localCardData.length === 0 ? (
+              <Typography variant="body2" color="error">
+                No available cards to assign.
+              </Typography>
+            ) : (
+              <CustomSelect
+                key={localCardData.length} // <-- forces re-render when localCardData changes
+                name="selectedCard"
+                value={selectedCard || ''}
+                onChange={(e: any) => setSelectedCard(e.target.value)}
+                fullWidth
+                variant="outlined"
+                displayEmpty
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 200,
+                      width: 'auto',
+                    },
                   },
-                },
-              }}
-            >
-              <MenuItem value="" disabled>
-                Select Card to Assign
-              </MenuItem>
-              {cardData.map((card) => (
-                <MenuItem key={card.id} value={card.id}>
-                  {card.name} | {card.cardNumber}
+                }}
+              >
+                <MenuItem value="" disabled>
+                  Select Card to Assign
                 </MenuItem>
-              ))}
-            </CustomSelect>
+                {localCardData.map((card) => {
+                  console.log('Card Data: ', card);
+                  return (
+                    <MenuItem key={card.id} value={card.id}>
+                      {card.name} | {card.cardNumber}
+                    </MenuItem>
+                  );
+                })}
+              </CustomSelect>
+            )}
           </Grid>
         </DialogContent>
         <DialogActions>
@@ -568,7 +601,7 @@ const VisitorContent = () => {
             Assign Card
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
 
       {/* Reason Pop-up */}
       <Dialog open={openReasonMenu} onClose={handleCloseReasonMenu} fullWidth maxWidth="sm">

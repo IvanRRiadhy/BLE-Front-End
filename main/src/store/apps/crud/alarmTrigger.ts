@@ -180,7 +180,7 @@ export const fetchAlarmTrigger = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
         dispatch(GetAllAlarmTrigger(response.data.collection.data || []));
-        console.log("Response: ", response);
+        // console.log("Response: ", response);
     } catch (err: any) {
         console.log("Error: ", err);
     }
@@ -199,7 +199,7 @@ export const fetchAlarmTriggerDT = createAsyncThunk(
         maxDelay: 8000,
       }
     );
-    console.log("Alarm Trigger: ", res);
+    // console.log("Alarm Trigger: ", res);
     dispatch(GetAlarmTriggers(res.data.collection.data || []));
     await ensureMinLatency(started, 500);
     return res.data.collection;

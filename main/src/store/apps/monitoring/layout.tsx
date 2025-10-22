@@ -7,15 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const API_URL = '/api/MonitoringConfig/';
 
-// export type screenSettings = {
-//   scale: number;
-//   translateX: number;
-//   translateY: number;
-// };
-// export type screenDisplay = {
-//   displayType: number; //0: floorplan, 1: masked area, 2: cctv
-//   displayOutput: string;
-// };
+
 export const screenOrderMap: { [grid: number]: Array<[number, number?, number?]> } = {
   1: [[0]],
   2: [[0], [1]],
@@ -42,96 +34,110 @@ export const screenOrderMap: { [grid: number]: Array<[number, number?, number?]>
     [1, 2],
   ],
 };
+export interface LayoutItem {
+  size: { xs: number; lg?: number };
+  floorId?: number;
+  height?: string;
+  isColumn?: boolean;
+  children?: LayoutItem[];
+}
 
-// interface Statetype {
-//   grid: number;
-//   floorplanId: string[][];
-//   focus: { type: string; id: string };
-//   screenDisplay: screenDisplay[][];
-//   screenSettings: screenSettings[][];
-// }
+export const gridLayoutConfig: Record<number, LayoutItem[]> = {
+  1: [{ size: { xs: 12 }, floorId: 0, height: '78vh' }],
 
-// const initialState: Statetype = {
-//   grid: 1,
-//   focus: { type: '', id: '' },
-//   floorplanId: [
-//     [],
-//     [''],
-//     ['', ''],
-//     ['', '', ''],
-//     ['', '', '', ''],
-//     ['', '', '', '', ''],
-//     ['', '', '', '', '', ''],
-//   ],
-//   screenDisplay: [
-//     [],
-//     [{ displayType: 0, displayOutput: '' }],
-//     [
-//       { displayType: 0, displayOutput: '' },
-//       { displayType: 0, displayOutput: '' },
-//     ],
-//     [
-//       { displayType: 0, displayOutput: '' },
-//       { displayType: 0, displayOutput: '' },
-//       { displayType: 0, displayOutput: '' },
-//     ],
-//     [
-//       { displayType: 0, displayOutput: '' },
-//       { displayType: 0, displayOutput: '' },
-//       { displayType: 0, displayOutput: '' },
-//       { displayType: 0, displayOutput: '' },
-//     ],
-//     [
-//       { displayType: 0, displayOutput: '' },
-//       { displayType: 0, displayOutput: '' },
-//       { displayType: 0, displayOutput: '' },
-//       { displayType: 0, displayOutput: '' },
-//       { displayType: 0, displayOutput: '' },
-//     ],
-//     [
-//       { displayType: 0, displayOutput: '' },
-//       { displayType: 0, displayOutput: '' },
-//       { displayType: 0, displayOutput: '' },
-//       { displayType: 0, displayOutput: '' },
-//       { displayType: 0, displayOutput: '' },
-//       { displayType: 0, displayOutput: '' },
-//     ],
-//   ],
-//   screenSettings: [
-//     [],
-//     [{ scale: 1, translateX: 0, translateY: 0 }],
-//     [
-//       { scale: 1, translateX: 0, translateY: 0 },
-//       { scale: 1, translateX: 0, translateY: 0 },
-//     ],
-//     [
-//       { scale: 1, translateX: 0, translateY: 0 },
-//       { scale: 1, translateX: 0, translateY: 0 },
-//       { scale: 1, translateX: 0, translateY: 0 },
-//     ],
-//     [
-//       { scale: 1, translateX: 0, translateY: 0 },
-//       { scale: 1, translateX: 0, translateY: 0 },
-//       { scale: 1, translateX: 0, translateY: 0 },
-//       { scale: 1, translateX: 0, translateY: 0 },
-//     ],
-//     [
-//       { scale: 1, translateX: 0, translateY: 0 },
-//       { scale: 1, translateX: 0, translateY: 0 },
-//       { scale: 1, translateX: 0, translateY: 0 },
-//       { scale: 1, translateX: 0, translateY: 0 },
-//       { scale: 1, translateX: 0, translateY: 0 },
-//     ],
-//     [
-//       { scale: 1, translateX: 0, translateY: 0 },
-//       { scale: 1, translateX: 0, translateY: 0 },
-//       { scale: 1, translateX: 0, translateY: 0 },
-//       { scale: 1, translateX: 0, translateY: 0 },
-//       { scale: 1, translateX: 0, translateY: 0 },
-//       { scale: 1, translateX: 0, translateY: 0 },
-//     ],
-//   ],
-// };
+  2: [
+    { size: { xs: 12, lg: 6 }, floorId: 0, height: '78vh' },
+    { size: { xs: 12, lg: 6 }, floorId: 1, height: '78vh' },
+  ],
+
+  3: [
+    { size: { xs: 12, lg: 6 }, floorId: 0, height: '78vh' },
+    {
+      size: { xs: 12, lg: 6 },
+      isColumn: true,
+      children: [
+        { size: { xs: 12 }, floorId: 1, height: '38.5vh' },
+        { size: { xs: 12 }, floorId: 2, height: '38.5vh' },
+      ],
+    },
+  ],
+
+  4: [
+    {
+      size: { xs: 12, lg: 6 },
+      isColumn: true,
+      children: [
+        { size: { xs: 12 }, floorId: 0, height: '38.5vh' },
+        { size: { xs: 12 }, floorId: 1, height: '38.5vh' },
+      ],
+    },
+    {
+      size: { xs: 12, lg: 6 },
+      isColumn: true,
+      children: [
+        { size: { xs: 12 }, floorId: 2, height: '38.5vh' },
+        { size: { xs: 12 }, floorId: 3, height: '38.5vh' },
+      ],
+    },
+  ],
+
+  5: [
+    {
+      size: { xs: 12, lg: 8 },
+      isColumn: true,
+      children: [
+        { size: { xs: 12 }, floorId: 0, height: '50vh' },
+        {
+          size: { xs: 12 },
+          isColumn: false,
+          children: [
+            { size: { xs: 12, lg: 6 }, floorId: 2, height: '27vh' },
+            { size: { xs: 12, lg: 6 }, floorId: 3, height: '27vh' },
+          ],
+        },
+      ],
+    },
+    {
+      size: { xs: 12, lg: 4 },
+      isColumn: true,
+      children: [
+        { size: { xs: 12 }, floorId: 1, height: '38.5vh' },
+        { size: { xs: 12 }, floorId: 4, height: '38.5vh' },
+      ],
+    },
+  ],
+
+  6: [
+    {
+      size: { xs: 12, lg: 8 },
+      isColumn: true,
+      children: [
+        { size: { xs: 12 }, floorId: 0, height: '50vh' },
+        {
+          size: { xs: 12 },
+          isColumn: false,
+          children: [
+            { size: { xs: 12, lg: 6 }, floorId: 3, height: '27vh' },
+            { size: { xs: 12, lg: 6 }, floorId: 4, height: '27vh' },
+          ],
+        },
+      ],
+    },
+    {
+      size: { xs: 12, lg: 4 },
+      isColumn: true,
+      children: [
+        { size: { xs: 12 }, floorId: 1, height: '24.5vh' },
+        { size: { xs: 12 }, floorId: 2, height: '24.5vh' },
+        { size: { xs: 12 }, floorId: 5, height: '27vh' },
+      ],
+    },
+  ],
+};
+
+
+
+
 
 export type ScreenSettings = {
   scale: number;
@@ -320,25 +326,38 @@ export const LayoutSlice = createSlice({
         }));
       }
     },
+    // Swap selected screen with the first screen (index 0)
+    swapScreen: (state, action: PayloadAction<number>) => {
+      const activeLayout = state.layouts.find((l) => l.id === state.activeLayoutId);
+      if (!activeLayout) return;
+
+      const targetIndex = action.payload - 1;
+      if (targetIndex < 0 || targetIndex >= activeLayout.screens.length) return;
+      console.log('Swapping screens before:', JSON.stringify(activeLayout.screens));
+      // Swap the two screens
+      const temp = activeLayout.screens[0];
+      activeLayout.screens[0] = activeLayout.screens[targetIndex];
+      activeLayout.screens[targetIndex] = temp;
+      console.log('Swapping screens after:', JSON.stringify(activeLayout.screens));
+    },
   },
   extraReducers: (builder) => {
-  builder
-  .addCase(editMonitoringLayout.fulfilled, (state, action) => {
-    const updatedLayout = action.payload;
-    const index = state.layouts.findIndex((l) => l.id === updatedLayout.id);
-    if (index !== -1) {
-      state.layouts[index] = updatedLayout;
-    }
-  })
-  .addCase(deleteMonitoringLayout.fulfilled, (state, action) => {
-    const deletedId = action.payload;
-    state.layouts = state.layouts.filter((l) => l.id !== deletedId);
-    if (state.activeLayoutId === deletedId) {
-      state.activeLayoutId = null;
-    }
-  });
-},
-
+    builder
+      .addCase(editMonitoringLayout.fulfilled, (state, action) => {
+        const updatedLayout = action.payload;
+        const index = state.layouts.findIndex((l) => l.id === updatedLayout.id);
+        if (index !== -1) {
+          state.layouts[index] = updatedLayout;
+        }
+      })
+      .addCase(deleteMonitoringLayout.fulfilled, (state, action) => {
+        const deletedId = action.payload;
+        state.layouts = state.layouts.filter((l) => l.id !== deletedId);
+        if (state.activeLayoutId === deletedId) {
+          state.activeLayoutId = null;
+        }
+      });
+  },
 });
 
 export const {
@@ -357,6 +376,7 @@ export const {
   setSelectedFloorplan,
   updateActiveLayoutInfo,
   clearActiveLayout,
+  swapScreen,
 } = LayoutSlice.actions;
 
 export const fetchMonitoringLayouts = () => async (dispatch: AppDispatch) => {
@@ -441,7 +461,7 @@ export const editMonitoringLayout = createAsyncThunk(
       throw new Error(err);
     }
   },
-)
+);
 
 export const deleteMonitoringLayout = createAsyncThunk(
   'layout/deleteMonitoringLayout',

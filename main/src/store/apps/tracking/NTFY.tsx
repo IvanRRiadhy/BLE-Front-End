@@ -32,7 +32,7 @@ export function startNTFYclient(onMessage: Callback, topic: string, opts: NtfyOp
   if (!CALLBACKS[topic].includes(onMessage)) CALLBACKS[topic].push(onMessage);
 
   if (!CONTROLLERS[topic]) {
-    console.log(`[NTFY] Subscribing to topic "${topic}" at ${sseUrl}`);
+    // console.log(`[NTFY] Subscribing to topic "${topic}" at ${sseUrl}`);
     const es = new EventSource(sseUrl);
 
     es.addEventListener('open', () => {
@@ -40,13 +40,13 @@ export function startNTFYclient(onMessage: Callback, topic: string, opts: NtfyOp
     });
 
     es.addEventListener('message', (e: MessageEvent) => {
-      console.log(`[NTFY] Message from topic "${topic}":`, e.data);
+      // console.log(`[NTFY] Message from topic "${topic}":`, e.data);
       try { (CALLBACKS[topic] || []).forEach(cb => cb(JSON.parse(e.data))); }
       catch { (CALLBACKS[topic] || []).forEach(cb => cb(e.data)); }
     });
 
     es.addEventListener('error', (err) => {
-      console.error(`[NTFY] Error on topic "${topic}":`, err);
+      // console.error(`[NTFY] Error on topic "${topic}":`, err);
       try { es.close(); } finally { delete CONTROLLERS[topic]; }
     });
 

@@ -6,7 +6,7 @@ import ConfigGrid from 'src/components/dashboards/monitoring/config/ConfigGrid';
 import { useEffect, useState, useMemo } from 'react';
 import { toggleHorizontal, toggleSidebar } from 'src/store/customizer/CustomizerSlice';
 import { Box, Grid2 as Grid } from '@mui/material';
-import { setSelectedFloorplan, setSelectedScreen} from 'src/store/apps/monitoring/layout';
+import { setSelectedFloorplan, setSelectedScreen } from 'src/store/apps/monitoring/layout';
 
 const Config = () => {
   const dispatch = useDispatch();
@@ -17,7 +17,9 @@ const Config = () => {
     { type: number; floorplanId?: string; displayOutput?: string }[]
   >([]);
   const selectedScreen = useSelector((state: RootState) => state.layoutReducer.selectedScreen);
-  const selectedFloorplanId = useSelector((state: RootState) => state.layoutReducer.selectedFloorplanId);
+  const selectedFloorplanId = useSelector(
+    (state: RootState) => state.layoutReducer.selectedFloorplanId,
+  );
 
   // const [screenSettings, setScreenSettings] = useState({
   //   scale: 1,
@@ -31,9 +33,9 @@ const Config = () => {
   const activeLayout = layouts.find((l) => l.id === activeLayoutId);
 
   const selectedScreenSettings =
-  selectedScreen !== null && activeLayout
-    ? activeLayout.screens[selectedScreen]?.settings ?? { scale: 1, translateX: 0, translateY: 0 }
-    : { scale: 1, translateX: 0, translateY: 0 };
+    selectedScreen !== null && activeLayout
+      ? activeLayout.screens[selectedScreen]?.settings ?? { scale: 1, translateX: 0, translateY: 0 }
+      : { scale: 1, translateX: 0, translateY: 0 };
 
   // --- Lifecycle setup (hide sidebar, switch layout) ---
   useEffect(() => {
@@ -119,7 +121,13 @@ const Config = () => {
             <ConfigGrid
               grid={previewGrid}
               screens={memoizedScreens}
-              screenSettings={selectedScreenSettings}
+              screenSettings={
+                activeLayout
+                  ? activeLayout.screens.map(
+                      (s) => s?.settings ?? { scale: 1, translateX: 0, translateY: 0 },
+                    )
+                  : []
+              }
               selectedScreen={selectedScreen}
               onScreenSelect={SetSelectedScreen}
               activeLayout={activeLayout}

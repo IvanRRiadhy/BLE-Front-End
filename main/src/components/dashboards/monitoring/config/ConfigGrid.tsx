@@ -3,7 +3,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import ConfigFloorView from './ConfigFloorView';
 import VideoPlayer from 'src/components/shared/VideoPlayer';
-import { LayoutSet, ScreenSettings, setScreenSettings } from 'src/store/apps/monitoring/layout';
+import {
+  LayoutSet,
+  setScreenSettings,
+  ScreenSettings,
+  LayoutItem,
+  gridLayoutConfig,
+} from 'src/store/apps/monitoring/layout';
 
 interface ScreenPreview {
   type: number; // 0 = Floorplan, 1 = Masked Area, 2 = CCTV
@@ -14,8 +20,7 @@ interface ScreenPreview {
 interface ConfigGridProps {
   grid: number;
   screens: ScreenPreview[];
-  screenSettings?: { scale: number; translateX: number; translateY: number };
-  // setScreenSettings?: (settings: { scale: number; translateX: number; translateY: number }) => void;
+  screenSettings?: ScreenSettings[];
   selectedScreen?: number | null;
   onScreenSelect?: (index: number, floorplanId?: string) => void;
   activeLayout?: LayoutSet | null;
@@ -46,8 +51,6 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
   const dispatch: AppDispatch = useDispatch();
   const theme = useTheme();
   const gridRef = useRef<HTMLDivElement>(null);
-  const customizer = useSelector((state: RootState) => state.customizer);
-  // const [selectedScreen, setSelectedScreen] = useState<number | null>(null);
   const [gridDimensions, setGridDimensions] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
@@ -57,26 +60,24 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
     }
   }, [grid]);
 
+  useEffect(() => {
+    if (!activeLayout) return;
+    activeLayout.screens.forEach((screen) => {
+      dispatch(
+        setScreenSettings({
+          layoutId: activeLayout.id,
+          screenId: screen.id,
+          settings: screen.settings,
+        }),
+      );
+    });
+  }, [activeLayout, dispatch]);
+
   const handleScreenClick = (index: number) => {
     const screen = screens[index];
     const floorplanId = screen?.floorplanId || '';
     if (onScreenSelect) onScreenSelect(index, floorplanId);
   };
-
-useEffect(() => {
-  if (!activeLayout) return;
-
-  activeLayout.screens.forEach((screen) => {
-    dispatch(
-      setScreenSettings({
-        layoutId: activeLayout.id,
-        screenId: screen.id,
-        settings: screen.settings,
-      })
-    );
-  });
-}, [activeLayout]);
-  
 
   const toRoman = (num: number) => ['I', 'II', 'III', 'IV', 'V', 'VI'][num - 1] || num.toString();
 
@@ -101,17 +102,19 @@ useEffect(() => {
           Masked Area: {screen.displayOutput || 'N/A'}
         </Typography>
       );
+
     return (
       <ConfigFloorView
         activeFloorplan={screen.floorplanId || ''}
         zoomable={selectedScreen === i}
         containerWidth={gridDimensions.width}
         containerHeight={gridDimensions.height}
-        screenSettings={screenSettings}
+        screenSettings={screenSettings?.[i]}
       />
     );
   };
 
+  // ---------- Explicit layouts to match the "second image" visual ----------
   const screenBox = (index: number, height: string) => {
     const screen = screens[index];
     return (
@@ -143,110 +146,56 @@ useEffect(() => {
     );
   };
 
-  const renderLayout = () => {
-    switch (grid) {
-      case 1:
-        return <Grid container>{screenBox(0, '80vh')}</Grid>;
-      case 2:
+  const renderLayout = (items: LayoutItem[]): JSX.Element[] =>
+    items.map((item, index) => {
+      if (item.children) {
         return (
-          <Grid container>
-            <Grid size={{ xs: 12, lg: 6 }}>{screenBox(0, '80vh')}</Grid>
-            <Grid size={{ xs: 12, lg: 6 }}>{screenBox(1, '80vh')}</Grid>
-          </Grid>
-        );
-      case 3:
-        return (
-          <Grid container>
-            <Grid size={{ xs: 12, lg: 6 }}>{screenBox(0, '80vh')}</Grid>
-            <Grid size={{ xs: 12, lg: 6 }}>
-              <Grid container direction="column">
-                {screenBox(1, '40vh')}
-                {screenBox(2, '40vh')}
-              </Grid>
+          <Grid key={index} size={item.size}>
+            <Grid container direction={item.isColumn ? 'column' : 'row'} spacing={1.5}>
+              {renderLayout(item.children)}
             </Grid>
           </Grid>
         );
-      case 4:
-        return (
-          <Grid container>
-            <Grid size={{ xs: 12, lg: 6 }}>
-              <Grid container direction="column">
-                {screenBox(0, '40vh')}
-                {screenBox(2, '40vh')}
-              </Grid>
-            </Grid>
-            <Grid size={{ xs: 12, lg: 6 }}>
-              <Grid container direction="column">
-                {screenBox(1, '40vh')}
-                {screenBox(3, '40vh')}
-              </Grid>
-            </Grid>
-          </Grid>
-        );
-      case 5:
-        return (
-          <Grid container>
-            <Grid size={{ xs: 12, lg: 8 }}>
-              <Grid container direction="column">
-                {screenBox(0, '53vh')}
-                <Grid container>
-                  <Grid size={{ xs: 12, lg: 6 }}>{screenBox(2, '27vh')}</Grid>
-                  <Grid size={{ xs: 12, lg: 6 }}>{screenBox(3, '27vh')}</Grid>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid size={{ xs: 12, lg: 4 }}>
-              <Grid container direction="column">
-                {screenBox(1, '40vh')}
-                {screenBox(4, '40vh')}
-              </Grid>
-            </Grid>
-          </Grid>
-        );
-      case 6:
-        return (
-          <Grid container>
-            <Grid size={{ xs: 12, lg: 8 }}>
-              <Grid container direction="column">
-                {screenBox(0, '53vh')}
-                <Grid container>
-                  <Grid size={{ xs: 12, lg: 6 }}>{screenBox(3, '27vh')}</Grid>
-                  <Grid size={{ xs: 12, lg: 6 }}>{screenBox(4, '27vh')}</Grid>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid size={{ xs: 12, lg: 4 }}>
-              <Grid container direction="column">
-                {screenBox(1, '26.5vh')}
-                {screenBox(2, '26.5vh')}
-                {screenBox(5, '27vh')}
-              </Grid>
-            </Grid>
-          </Grid>
-        );
-      default:
-        return (
-          <Typography variant="h6" fontWeight={700} textAlign="center" mt={4}>
-            Invalid grid layout
-          </Typography>
-        );
-    }
-  };
+      }
+
+      const screenIndex = item.floorId!;
+      const screen = screens[screenIndex];
+
+      return (
+        <Grid key={index} size={item.size}>
+          <Box
+            onClick={() => handleScreenClick(screenIndex)}
+            sx={{
+              height: item.height,
+              borderRadius: 2,
+              overflow: 'hidden',
+              border: `${selectedScreen === screenIndex ? '5px' : '2.5px'} solid ${
+                selectedScreen === screenIndex
+                  ? theme.palette.success.dark
+                  : theme.palette.grey[800]
+              }`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: '0.3s',
+              '&:hover': {
+                borderColor: theme.palette.success.main,
+                backgroundColor: theme.palette.success.light,
+              },
+            }}
+          >
+            {renderContent(screen, screenIndex)}
+          </Box>
+        </Grid>
+      );
+    });
 
   return (
-    <Box
-      ref={gridRef}
-      mt={0}
-      sx={{
-        flexGrow: 1,
-        // ml: `calc(${customizer.SidebarWidth}px)`,
-        width: `100%`,
-        transition: theme.transitions.create('margin-left', {
-          duration: theme.transitions.duration.shortest,
-        }),
-      }}
-    >
-      {renderLayout()}
+    <Box ref={gridRef}>
+      <Grid container spacing={1.5}>
+        {renderLayout(gridLayoutConfig[grid])}
+      </Grid>
     </Box>
   );
 };

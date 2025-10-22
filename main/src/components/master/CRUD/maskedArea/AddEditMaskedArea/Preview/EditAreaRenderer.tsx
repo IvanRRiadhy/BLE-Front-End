@@ -411,7 +411,7 @@ const EditAreaRenderer: React.FC<{
   };
 
   const handleCanvasClick = () => {
-    if (!drawingMaskedArea) return; // Only allow drawing if the drawing mode is active
+    if (!drawingMaskedArea) return;
     const stage = stageRef.current;
     if (!stage) return;
     const pointerPosition = stage.getPointerPosition();
@@ -421,77 +421,53 @@ const EditAreaRenderer: React.FC<{
     const newNode = {
       id: uniqueId(),
       x: x * scaleX,
-      y: y * scaleX,
+      y: y * scaleY,
       x_px: x * scaleX,
       y_px: y * scaleY,
     };
 
     setDrawingNodes((prevNodes) => {
-      const updatedNodes = [...prevNodes, newNode];
+      // If clicking the first node -> complete the area
+      if (prevNodes.length >= 3) {
+        const first = prevNodes[0];
+        const dist = Math.hypot(first.x_px - newNode.x_px, first.y_px - newNode.y_px);
+        if (dist < 15) {
+          // tolerance radius for "closing" polygon
+          const newArea: MaskedAreaType = {
+            id: drawingMaskedArea,
+            name: drawingMaskedArea,
+            colorArea: '#363636',
+            areaShape: JSON.stringify(prevNodes),
+            restrictedStatus: '',
+            wideArea: 0,
+            positionPxX: 0,
+            positionPxY: 0,
+            engineAreaId: 'ENG001',
+            nodes: prevNodes,
+            floorId: selectedFloorplan?.floorId || '',
+            floorplanId: selectedFloorplan?.id || '',
+            createdBy: 'admin',
+            createdAt: new Date().toISOString(),
+            updatedBy: 'admin',
+            updatedAt: new Date().toISOString(),
+          };
 
-      // Check for collisions with existing areas
-      const collision = filteredUnsavedArea.some((area) => {
-        if (area.name === activeArea) return false; // Skip the current area
-        return checkPolygonCollision(
-          { nodes: area.nodes ? area.nodes : [] },
-          { nodes: updatedNodes },
-        );
-      });
+          (async () => {
+            await dispatch(AddUnsavedMaskedArea(newArea));
+            dispatch(DrawingMaskedArea(''));
+            dispatch(SelectMaskedArea(newArea.id));
+            dispatch(SelectEditingMaskedArea(newArea.id));
+            setActiveArea(newArea.name);
+            setDrawingNodes([]);
+          })();
 
-      if (collision) {
-        // console.log(drawingNodes);
-        alert(`Areas cannot overlap! Position reverted.`);
-        setDrawingNodes([]);
-        dispatch(DrawingMaskedArea('')); // Reset the drawing mode
-        dispatch(SelectMaskedArea('')); // Reset the selected area
-        dispatch(SelectEditingMaskedArea('')); // Reset the editing area
-        setActiveArea(''); // Clear the active area
-        // console.log(drawingNodes);
-        return []; // Revert to previous nodes
-      }
-
-      if (updatedNodes.length === 3) {
-        const newArea: MaskedAreaType = {
-          id: drawingMaskedArea,
-          name: drawingMaskedArea,
-          colorArea: '#363636',
-          areaShape: JSON.stringify(updatedNodes),
-          restrictedStatus: '',
-          wideArea: 0,
-          positionPxX: 0,
-          positionPxY: 0,
-          engineAreaId: 'ENG001',
-          nodes: updatedNodes,
-          floorId: selectedFloorplan?.floorId || '',
-          floorplanId: selectedFloorplan?.id || '',
-          createdBy: 'admin',
-          createdAt: new Date().toISOString(),
-          updatedBy: 'admin',
-          updatedAt: new Date().toISOString(),
-        };
-
-        const createNewArea = async () => {
-          await dispatch(AddUnsavedMaskedArea(newArea)); // Add the new area
-
-          setDrawingNodes([]); // Clear the drawing nodes
-          dispatch(DrawingMaskedArea('')); // Reset the drawing mode
           return [];
-        };
-
-        createNewArea()
-          .then(() => {
-            dispatch(SelectMaskedArea(newArea.id)); // Select the new area
-            dispatch(SelectEditingMaskedArea(newArea.id)); // Set the new area as the editing area
-            setActiveArea(newArea.name); // Set the active area
-            console.log('New area created successfully!');
-          })
-          .catch((error) => {
-            console.error('Error creating new area:', error);
-          });
+        }
       }
 
-      return updatedNodes;
-    }); // Add the new node to the drawing nodes
+      // Otherwise, add a new node
+      return [...prevNodes, newNode];
+    });
   };
 
   useEffect(() => {
@@ -880,7 +856,7 @@ const EditAreaRenderer: React.FC<{
                   }
                 }}
                 onMouseLeave={() => {
-                  if (!preview &&!drawingMaskedArea) {
+                  if (!preview && !drawingMaskedArea) {
                     setCursor('grab');
                   }
                 }}
@@ -986,34 +962,56 @@ const EditAreaRenderer: React.FC<{
             </React.Fragment>
           ))}
           {/* Render circles for drawing nodes */}
-          {drawingNodes.map((node) => (
-            <Circle
-              key={node.id}
-              x={node.x_px / scaleX}
-              y={node.y_px / scaleY}
-              radius={7}
-              fill="blue" // Color for the drawing nodes
-              draggable={false} // Disable dragging for these circles
-              stroke="black"
-              strokeWidth={2}
-            />
-          ))}
+          {/* Render nodes while drawing */}
+          {drawingNodes.length > 0 && (
+            <>
+              {/* 🔵 First Node — main interactive node */}
+              <Circle
+                key={drawingNodes[0].id}
+                x={drawingNodes[0].x_px / scaleX}
+                y={drawingNodes[0].y_px / scaleY}
+                radius={8}
+                fill="blue"
+                stroke="black"
+                strokeWidth={2}
+                onMouseEnter={(e) => {
+                  const shape = e.target as Konva.Circle;
+                  shape.radius(12);
+                  shape.fill('green'); // highlight when ready to close
+                  setCursor('pointer');
+                  shape.getLayer()?.batchDraw();
+                }}
+                onMouseLeave={(e) => {
+                  const shape = e.target as Konva.Circle;
+                  shape.radius(8);
+                  shape.fill('blue'); // back to default
+                  setCursor('crosshair');
+                  shape.getLayer()?.batchDraw();
+                }}
+              />
+
+              {/* ⚫ Other Nodes — small black dots */}
+              {drawingNodes.slice(1).map((node) => (
+                <Circle
+                  key={node.id}
+                  x={node.x_px / scaleX}
+                  y={node.y_px / scaleY}
+                  radius={4} // quarter the size (~¼ of 8px radius)
+                  fill="black"
+                  opacity={0.8}
+                  listening={false} // make non-interactable (ignores hover/click)
+                />
+              ))}
+            </>
+          )}
+
           {/* Render dashed lines connecting each node to the cursor */}
           {drawingNodes.length > 0 && cursorPosition && (
             <>
-              {drawingNodes.map((node) => (
-                <Line
-                  key={`line-to-cursor-${node.id}`}
-                  points={[node.x / scaleX, node.y / scaleX, cursorPosition.x, cursorPosition.y]} // Connect each node to the cursor
-                  stroke="blue"
-                  strokeWidth={2}
-                  dash={[10, 5]} // Dashed line pattern
-                  closed={false}
-                />
-              ))}
+              {/* Solid dashed lines connecting existing nodes */}
               {drawingNodes.length > 1 &&
                 drawingNodes.map((node, index) => {
-                  if (index === drawingNodes.length - 1) return null; // Skip the last node
+                  if (index === drawingNodes.length - 1) return null;
                   const nextNode = drawingNodes[index + 1];
                   return (
                     <Line
@@ -1023,14 +1021,45 @@ const EditAreaRenderer: React.FC<{
                         node.y_px / scaleY,
                         nextNode.x_px / scaleX,
                         nextNode.y_px / scaleY,
-                      ]} // Connect each node to the next node
+                      ]}
                       stroke="blue"
                       strokeWidth={2}
-                      dash={[10, 5]} // Dashed line pattern
+                      dash={[10, 5]}
                       closed={false}
                     />
                   );
                 })}
+
+              {/* Dashed line from LAST node → cursor */}
+              {drawingNodes.length > 0 && (
+                <Line
+                  points={[
+                    drawingNodes[drawingNodes.length - 1].x_px / scaleX,
+                    drawingNodes[drawingNodes.length - 1].y_px / scaleY,
+                    cursorPosition.x,
+                    cursorPosition.y,
+                  ]}
+                  stroke="blue"
+                  strokeWidth={2}
+                  dash={[10, 5]}
+                />
+              )}
+
+              {/* Optional: dashed line from FIRST node → cursor */}
+              {drawingNodes.length > 2 && (
+                <Line
+                  points={[
+                    drawingNodes[0].x_px / scaleX,
+                    drawingNodes[0].y_px / scaleY,
+                    cursorPosition.x,
+                    cursorPosition.y,
+                  ]}
+                  stroke="blue"
+                  strokeWidth={1.5}
+                  dash={[4, 6]}
+                  opacity={0.5} // make it fainter
+                />
+              )}
             </>
           )}
         </Layer>

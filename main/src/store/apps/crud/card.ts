@@ -164,7 +164,7 @@ export const CardSlice = createSlice({
 
     // Update list
     // state.cards = cardData;
-    console.log("Fetch cards", action.payload);
+    // console.log("Fetch cards", action.payload);
     // Update counts
     state.cardFilteredCount = action.payload.recordsFiltered || 0;
     state.cardTotalCount = action.payload.recordsTotal || 0;
@@ -256,7 +256,7 @@ export const fetchCardDT = createAsyncThunk(
                 } as CardType;
             })  
             dispatch(GetCard(normalizedData));
-            console.log("Response from fetchCardDT:", normalizedData);
+            // console.log("Response from fetchCardDT:", normalizedData);
             // console.log(filter);
             if(filter.filters.IsUsed === true){
                 console.log("UpdateActiveCardCount", response.data.collection.recordsFiltered);

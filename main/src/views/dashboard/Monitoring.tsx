@@ -14,7 +14,7 @@ import {
 import MonitoringGrid from 'src/views/dashboard/MonitoringGrid.tsx';
 import { hideAlarmPopup } from 'src/store/apps/monitoring/AlarmUI';
 import AlarmPopup from 'src/layouts/full/AlarmPopup';
-import { ScreenSettings } from 'src/store/apps/monitoring/layout';
+import { fetchMonitoringLayouts, ScreenSettings } from 'src/store/apps/monitoring/layout';
 
 const Monitoring = () => {
   const dispatch = useDispatch();
@@ -76,6 +76,7 @@ const Monitoring = () => {
     dispatch(toggleHorizontal(false));
     dispatch(setMonitorSidebar(true));
     dispatch(toggleSidebar());
+    dispatch(fetchMonitoringLayouts());
 
     return () => {
       dispatch(toggleHorizontal(true));

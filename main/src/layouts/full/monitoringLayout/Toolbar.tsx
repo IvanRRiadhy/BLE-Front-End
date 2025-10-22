@@ -19,7 +19,7 @@ const Toolbar = () => {
   // Redux: Layouts and active layout
   const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
-  const activeLayout = layouts.find((l) => l.id === activeLayoutId) ?? null;
+  const activeLayout = layouts.find((l: LayoutSet) => l.id === activeLayoutId) ?? null;
 
   // Local: fullscreen + datetime
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
@@ -41,6 +41,7 @@ const Toolbar = () => {
       .format(now)
       .replace(/\./g, ':');
   };
+
 
   useEffect(() => {
     setCurrentDateTime(formatDateTime());

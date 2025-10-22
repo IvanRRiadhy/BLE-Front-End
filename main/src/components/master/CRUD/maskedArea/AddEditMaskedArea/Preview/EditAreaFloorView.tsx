@@ -63,13 +63,13 @@ const EditAreaFloorView: React.FC<{
     if (floorplanImage) {
       const img = new Image();
       img.src = floorplanImage;
-img.onload = () => {
-  setImage(img);
-  setImgSize({ width: img.width, height: img.height });
+      img.onload = () => {
+        setImage(img);
+        setImgSize({ width: img.width, height: img.height });
 
-  if (containerRef.current) {
-    const containerWidth = containerRef.current.clientWidth;
-    const containerHeight = containerRef.current.clientHeight;
+        if (containerRef.current) {
+          const containerWidth = containerRef.current.clientWidth;
+          const containerHeight = containerRef.current.clientHeight;
 
           // setScale(finalScale); // Set the initial scale
 
@@ -193,8 +193,8 @@ img.onload = () => {
     }
   }, [imgSize]); // Reset scale when imgSize changes
   useEffect(() => {
-  if (!zoomable) setCursor('default');
-}, [zoomable]);
+    if (!zoomable) setCursor('default');
+  }, [zoomable]);
 
   const handleMouseDown = (event: React.MouseEvent) => {
     if (!zoomable) return;
@@ -403,7 +403,7 @@ img.onload = () => {
               <img src={MouseLeftClickIcon} alt="Left Click" style={{ width: 36, height: 36 }} />
             </Box>
             <FormLabel sx={{ color: 'white', fontSize: '0.875rem', fontWeight: 600 }}>
-              Add 3 Points to create a new Area
+              Create Point
             </FormLabel>
           </Box>
           <Box mt={5} mb={1} display="flex" alignItems="center" gap={1}>
@@ -518,7 +518,7 @@ img.onload = () => {
           </Box>
         </Box>
       </Box>
-    </Box>  
+    </Box>
   );
 };
 

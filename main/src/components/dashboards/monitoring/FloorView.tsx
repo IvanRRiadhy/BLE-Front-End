@@ -24,7 +24,7 @@ import { fetchMembers, memberType } from 'src/store/apps/crud/member';
 import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import BeaconDetailPopup from './Popup/BeaconDetailPopup';
 import TrackingDetailPopup from './Popup/TrackingDetailPopup';
-import {  setScreenDisplay } from 'src/store/apps/monitoring/layout';
+import { setScreenDisplay, setScreenSettings, swapScreen } from 'src/store/apps/monitoring/layout';
 import {
   fetchGeoFencingAlarms,
   fetchGeoFencingAlarmsAll,
@@ -69,7 +69,8 @@ const FloorView: React.FC<{
   const memberList = useSelector((state: RootState) => state.memberReducer.members);
   const visitorList = useSelector((state: RootState) => state.visitorReducer.visitors);
   const [open, setOpen] = useState(false);
-
+  const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
+  const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
   // console.log('testing', useSelector((state: RootState) => state.floorReducer.floors));
   const containerRef = useRef<HTMLDivElement>(null);
   const floor = useSelector((state: RootState) => state.floorReducer.floorAll);
@@ -106,6 +107,7 @@ const FloorView: React.FC<{
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
   const [scale, setScale] = useState(screenSettings.scale); // Initial scale set to 1
   const [image, setImage] = useState<HTMLImageElement | null>(null);
+
   //const MIN_SCALE = 1; // Minimum scale to prevent the image from becoming too small
   const MAX_SCALE = 4; // Maximum scale to prevent the image from becoming too large
   const [minScale] = useState(0.5);
@@ -185,6 +187,74 @@ const FloorView: React.FC<{
       };
     }
   }, [actFloorplan, floor]);
+
+  useEffect(() => {
+    if (!screenSettings) return;
+
+    const duration = 200; // ms
+    const startTime = performance.now();
+
+    const startScale = scale;
+    const startX = translate.x;
+    const startY = translate.y;
+
+    const animate = (now: number) => {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+      setScale(startScale + (screenSettings.scale - startScale) * ease);
+      setTranslate({
+        x: startX + (screenSettings.translateX - startX) * ease,
+        y: startY + (screenSettings.translateY - startY) * ease,
+      });
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+
+    requestAnimationFrame(animate);
+  }, [screenSettings.scale, screenSettings.translateX, screenSettings.translateY]);
+
+  const lastSent = useRef<{ scale: number; x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (!activeLayoutId || !activeFloorplan) return;
+
+    const activeLayout = layouts.find((l) => l.id === activeLayoutId);
+    if (!activeLayout) return;
+
+    const screen = activeLayout.screens.find((s) => s.floorplanId === activeFloorplan);
+    if (!screen) return;
+
+    const current = { scale, x: translate.x, y: translate.y };
+
+    // ✅ Skip dispatch if nothing changed since last run
+    if (
+      lastSent.current &&
+      lastSent.current.scale === current.scale &&
+      lastSent.current.x === current.x &&
+      lastSent.current.y === current.y
+    ) {
+      return;
+    }
+
+    // ✅ Remember last state to prevent repeat loops
+    lastSent.current = current;
+
+    // ✅ Throttle Redux updates to avoid flooding
+    const timeout = setTimeout(() => {
+      dispatch(
+        setScreenSettings({
+          layoutId: activeLayout.id,
+          screenId: screen.id,
+          settings: {
+            scale: current.scale,
+            translateX: current.x,
+            translateY: current.y,
+          },
+        }),
+      );
+    }, 150); // 150ms debounce is smooth for zoom/pan
+
+    return () => clearTimeout(timeout);
+  }, [scale, translate.x, translate.y, activeLayoutId, activeFloorplan, layouts]);
 
   const calculateImageDimensions = (
     containerWidth: number,
@@ -536,6 +606,11 @@ const FloorView: React.FC<{
     setOpen(false);
     setDummyAlarm(undefined);
   };
+  const handleParentClick = () => {
+    if (!zoomable) {
+      dispatch(swapScreen(screenNumber));
+    }
+  };
 
   return (
     <Box
@@ -554,7 +629,7 @@ const FloorView: React.FC<{
       }}
     >
       {/* Sticky Overlay Toggle */}
-      {isHovered && !isDragging && (
+      {isHovered && !isDragging && zoomable && (
         <Box
           sx={{
             position: 'absolute',
@@ -602,8 +677,10 @@ const FloorView: React.FC<{
             label="Show GeoFence Areas"
           />
           {Boolean(focusBeacon) && (
-            <Button variant="contained" color="error" 
-            // onClick={handleCancelFollowing}
+            <Button
+              variant="contained"
+              color="error"
+              // onClick={handleCancelFollowing}
             >
               Cancel Following
             </Button>
@@ -611,7 +688,10 @@ const FloorView: React.FC<{
         </Box>
       )}
       {/* Zoomable Content */}
-      <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
+      <Box
+        onClick={handleParentClick}
+        sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}
+      >
         {isHovered &&
           !isDragging &&
           zoomable && ( // Only show ZoomControls when hovered

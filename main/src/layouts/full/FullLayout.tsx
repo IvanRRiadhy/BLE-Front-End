@@ -90,7 +90,7 @@ const FullLayout: FC = () => {
     const unsubscribe = startNTFYclient(
       (data: any) => {
         const now = Date.now();
-        console.log(`[NTFY] Message from alarm topic "${topic}":`, data);
+        // console.log(`[NTFY] Message from alarm topic "${topic}":`, data);
         const alarmData = Array.isArray(data) ? data[0] : data;
         setLatestAlarm(alarmData);
         // setOpenAlarmPopup(true);

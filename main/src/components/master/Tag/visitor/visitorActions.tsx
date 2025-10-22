@@ -55,7 +55,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
 
   // Preload available cards (unused) whenever the card dialog is needed
   useEffect(() => {
-    dispatch(fetchCardDT({ ...defaultCardFilter, length: 0, fiters: { IsUsed: false } }));
+    dispatch(fetchCardDT({ ...defaultCardFilter, length: 0 }));
   }, [dispatch]);
 
   const refreshAndReselect = async () => {
@@ -177,8 +177,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
         label: 'Check-in Visitor',
         color: 'success',
         onClick: () => {
-          dispatch(fetchCardDT({ ...defaultCardFilter, length: 0, fiters: { IsUsed: false } }));
-          setOpenCardMenu(true);
+          handleOpenCardMenu();
         },
       },
       secondary: { label: 'Deny Visitor', color: 'error', onClick: () => setOpenReasonMenu(true) },
@@ -198,6 +197,35 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
   };
 
   const currentActions = trxVisitorDetail?.status ? actionMap[trxVisitorDetail.status] : undefined;
+
+    const handleOpenCardMenu = async () => {
+    console.log('🟡 handleOpenCardMenu called');
+    setLoading(true);
+    try {
+      // Fetch and wait for Redux to finish updating
+      const result = await dispatch(
+        fetchCardDT({ ...defaultCardFilter, length: 0 }),
+      ).unwrap();
+
+      // Log for verification
+      console.log('Fetched cards:', result);
+
+      // Optional: verify data is present
+      if (result?.data?.length > 0) {
+        console.log("Res", result.data);
+        // setLocalCardData(result.collection.data || []);
+        setOpenCardMenu(true);
+      } else {
+        console.log('Fetched cards:', result);
+        toast.error('No available cards found.');
+      }
+    } catch (error) {
+      console.error('Error loading cards:', error);
+      toast.error('Failed to load cards.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -241,7 +269,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
       {/* Card Assign Dialog */}
       <Dialog open={openCardMenu} onClose={() => setOpenCardMenu(false)} fullWidth maxWidth="sm">
         <DialogTitle mb={2} p={2}>
-          Assign Card
+          Assigns Card
         </DialogTitle>
         <DialogContent>
           <Grid size={12}  p={1}>
@@ -263,11 +291,14 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
               <MenuItem value="" disabled>
                 Select Card to Assign
               </MenuItem>
-              {filteredCard.map((card: CardType) => (
+              {filteredCard.map((card: CardType) => {
+                console.log('Available card:', card);
+                return (
                 <MenuItem key={card.id} value={card.id}>
                   {card.name} | {card.cardNumber}
                 </MenuItem>
-              ))}
+              )
+              })}
             </CustomSelect>
           </Grid>
         </DialogContent>

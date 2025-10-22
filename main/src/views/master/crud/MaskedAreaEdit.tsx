@@ -19,7 +19,7 @@ const FloorplanDeviceEdit = () => {
     window.location.href = '/master/floorplanmaskedarea/';
   }
   return (
-    <PageContainer title="Floorplan Device" description="this is floorplan device page">
+    <PageContainer title="Floorplan Area" description="this is floorplan area page">
       {/* <Breadcrumb title="Floorplan Device Edit" subtitle="See the floorplan device" /> */}
       <AppCard>
         <Box

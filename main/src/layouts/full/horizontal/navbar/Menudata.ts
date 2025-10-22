@@ -178,6 +178,7 @@ const useMenuItems = (alarmSettings: AlarmSettingType[]) => {
         { id: uniqueId(), title: 'Alarm Notification', icon: IconBellExclamation, href: '/report/alarmRecord/' },
         { id: uniqueId(), title: 'Alarm Trigger', icon: IconBellExclamation, href: '/report/alarmTrigger/' },
         { id: uniqueId(), title: 'Card Record', icon: IconBarrierBlock, href: '/report/cardrecord/' },
+        { id: uniqueId(), title: 'Test Record', icon: IconCalendar, href: '/report/testrecord/' },
       ],
     },
   ];
