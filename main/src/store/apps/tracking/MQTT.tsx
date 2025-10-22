@@ -5,8 +5,8 @@ const Broker_URL = 'ws://192.168.1.116:9005';
 
 const options = {
   clientId: 'Klien1',
-  username: 'gNWx6jIp9X',
-  password: 'Fx6co2iTPy',
+  username: 'bio_mqtt',
+  password: 'P@ssw0rd',
 };
 
 let client: mqtt.MqttClient | null = null;
