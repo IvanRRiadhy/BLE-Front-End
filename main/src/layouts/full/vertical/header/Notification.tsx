@@ -1,36 +1,34 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   IconButton,
   Box,
   Badge,
   Menu,
-  MenuItem,
   Typography,
   Button,
-  Chip,
   Stack,
   Paper,
-  Fade,
   useTheme,
   alpha,
   darken,
 } from '@mui/material';
-import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import { actionStatus } from 'src/types/crud/input';
+import { motion, AnimatePresence } from 'framer-motion';
 import { IconBellRinging } from '@tabler/icons-react';
+import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import { Link } from 'react-router';
+import { actionStatus } from 'src/types/crud/input';
 import { memberType } from 'src/store/apps/crud/member';
 import { VisitorType } from 'src/store/apps/crud/visitor';
 import { RootState, useSelector } from 'src/store/Store';
 import { AlarmTriggerType } from 'src/store/apps/crud/alarmTrigger';
 
 type BubbleData = {
+  id: string;
   title: string;
   subtitle: string;
   status: string;
   color: string;
+  createdAt: number;
 };
 
 const AUTOHIDE_MS = 6000;
@@ -39,154 +37,77 @@ const Notifications = () => {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const bellRef = useRef<HTMLButtonElement | null>(null);
+  const [bubbles, setBubbles] = useState<BubbleData[]>([]);
+  const hideTimers = useRef<Record<string, number>>({});
 
-  // Bubble state
-  const [bubble, setBubble] = useState<BubbleData | null>(null);
-  const [bubblePos, setBubblePos] = useState<{ top: number; left: number } | null>(null);
-  const [visibleBubble, setVisibleBubble] = useState<BubbleData | null>(null);
-  const hideTimer = useRef<number | null>(null);
+  const openMenu = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
+  const closeMenu = () => setAnchorEl(null);
 
-  const openMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
-  const closeMenu = () => {
-    setAnchorEl(null);
-    // also close bubble when opening menu
-    removeBubble();
-    if (hideTimer.current) {
-      window.clearTimeout(hideTimer.current);
-      hideTimer.current = null;
-    }
-  };
-
-  // --- helpers ---
-  const ONE_HOUR_MS = 60 * 60 * 1000;
-  const toMs = (v: any) => {
-    // accepts number | string | Date
-    if (v instanceof Date) return v.getTime();
-    const n = typeof v === 'number' ? v : Date.parse(v);
-    return Number.isFinite(n) ? n : 0;
-  };
-
-  // Keep a ticking "now" so the 1h filter updates over time (every 60s)
   const [nowMs, setNowMs] = useState(Date.now());
   useEffect(() => {
     const id = window.setInterval(() => setNowMs(Date.now()), 60_000);
     return () => window.clearInterval(id);
   }, []);
 
-  // Redux data
   const alarmTriggers: AlarmTriggerType[] = useSelector(
     (state: RootState) => state.alarmTriggerReducer.alarmTriggerAll || [],
   );
   const memberList: memberType[] = useSelector((s: RootState) => s.memberReducer.members);
   const visitorList: VisitorType[] = useSelector((s: RootState) => s.visitorReducer.visitors);
 
-  // --- filter + sort at the Trigger level ---
+  const ONE_HOUR_MS = 60 * 60 * 1000;
+  const toMs = (v: any) => (v instanceof Date ? v.getTime() : Date.parse(v));
+
   const filteredSortedTriggers = useMemo(() => {
-    console.log(alarmTriggers);
     const pruned = alarmTriggers.filter((t) => {
-      const active =
-        (t as any).isActive === true ||
-        // fallback: treat your mapped "Active" status as active too
-        t.actionStatus === 'Idle';
-
+      const active = (t as any).isActive === true || t.actionStatus === 'Idle';
       if (active) return true;
-
-      // inactive: keep only if within 1 hour of triggerTime
       const tMs = toMs((t as any).triggerTime);
       return tMs > 0 ? nowMs - tMs <= ONE_HOUR_MS : false;
     });
-
-    // newest first by triggerTime
     pruned.sort((a, b) => toMs(b.triggerTime) - toMs(a.triggerTime));
     return pruned;
   }, [alarmTriggers, nowMs]);
 
-  const removeBubble = () => {
-    setBubble(null);
-    setTimeout(() => setVisibleBubble(null), 250);
-  };
-
-  const getName = (bleNumber: string) => {
-    const m = memberList.find((x) => x.bleCardNumber === bleNumber);
-    if (m) return m.name;
-    const v = visitorList.find((x) => x.bleCardNumber === bleNumber);
-    if (v) return v.name;
-    return bleNumber || 'Unknown';
-  };
+  const getName = (ble: string) =>
+    memberList.find((x) => x.bleCardNumber === ble)?.name ||
+    visitorList.find((x) => x.bleCardNumber === ble)?.name ||
+    ble ||
+    'Unknown';
 
   const getStatusText = (status: string) => {
-    const statusItem = actionStatus.find((s) => s.value === status);
-    if (!statusItem) return 'Unknown';
+    const s = actionStatus.find((x) => x.value === status);
+    if (!s) return 'Unknown';
     switch (status) {
-      case 'Idle':
-        return 'Active';
-      case 'Done':
-        return 'Done';
-      case 'NoAction':
-        return 'No Action';
-      case 'Waiting':
-        return 'Waiting';
-      case 'Investigated':
-        return 'Investigated';
-      case 'DoneInvestigated':
-        return 'Done Investigated';
-      case 'PostponeInvestigated':
-        return 'Postpone Investigated';
-      default:
-        return statusItem.label;
+      case 'Idle': return 'Active';
+      case 'Done': return 'Done';
+      default: return s.label;
     }
   };
-  const activeTriggers = alarmTriggers.filter((t) => t.actionStatus === 'Idle');
 
-  // Prepare list for dropdown (your original layout)
-  const notifications = useMemo(
-    () =>
-      filteredSortedTriggers.map((trigger) => ({
-        // keep your existing mapping
-        title: getName(trigger.beaconId),
-        subtitle: `${trigger.beaconId}`,
-        status: getStatusText(trigger.actionStatus),
-        // you can pass through triggerTime if you want to show it later
-        triggerTime: trigger.triggerTime,
-        isActive: (trigger as any).isActive === true || trigger.actionStatus === 'Idle',
-      })),
-    [filteredSortedTriggers, memberList, visitorList],
-  );
-
-  const activeNotifications = notifications.filter((n) => n.isActive);
-
-  // Helper: compute anchored bubble position from bell icon
-  const computeBubblePos = () => {
+  const computeBubblePos = (index: number) => {
     if (!bellRef.current) return null;
     const rect = bellRef.current.getBoundingClientRect();
-    return {
-      top: Math.round(rect.bottom + 5),
-      left: Math.round(rect.right - 345), // bubble width is 360
-    };
+    const baseTop = rect.bottom + 8;
+    const spacing = 85; // bubble height + gap
+    return { top: baseTop + index * spacing, left: rect.right - 370 };
   };
 
-  // Listen for "app:new-alarm" events from FullLayout; show bubble only when:
-  // - menu is CLOSED
-  // - window IS FOCUSED (browser Notification already covers unfocused scenario)
+  // 🔔 Handle new alarms
   useEffect(() => {
     const onNewAlarm = (e: MessageEvent) => {
       if (e.data?.type !== 'app:new-alarm') return;
       const detail = e.data.detail.alarm;
-      console.log("Listening for 'app:new-alarm' events", e, detail);
-      console.log(document.hasFocus(), anchorEl);
       if (!detail) return;
-      if (anchorEl) return; // menu open → don't show bubble
-      // if (!document.hasFocus()) return; // only when window focused
-      console.log('Alarm message: ', detail.message);
       let alarmData: any;
       try {
         alarmData = JSON.parse(detail.message);
-      } catch (err) {
-        console.warn('Failed to parse alarm message', err, detail.message);
+      } catch {
         return;
       }
-      console.log('alarmData: ', alarmData);
+
       const bd: BubbleData = {
+        id: crypto.randomUUID(),
         title: alarmData.visitorName || alarmData.MemberName || alarmData.cardName || 'Unknown',
         subtitle: `${alarmData.cardName ?? ''} · ${alarmData.maskedAreaName ?? 'Unknown'} · ${
           alarmData.floorplanName ?? 'Unknown'
@@ -194,74 +115,53 @@ const Notifications = () => {
         status: getStatusText(
           alarmData.action?.toLowerCase() === 'idle' ? 'Idle' : alarmData.action ?? 'Idle',
         ),
-        color: alarmData.color ?? '#c62828',
+        color: alarmData.color ?? '#d32f2f',
+        createdAt: Date.now(),
       };
-      console.log('Bubble Data: ', bd);
-      // Compute bubble position safely
-      const pos = computeBubblePos();
-      if (!pos) {
-        console.warn('Bell icon not mounted yet, cannot position bubble');
-        return;
-      }
 
-      setBubble(bd);
-      setVisibleBubble(bd);
-      setBubblePos(pos);
-      console.log('Current bubble state', bubble, bubblePos);
+      setBubbles((prev) => [...prev, bd]);
 
-      if (hideTimer.current) window.clearTimeout(hideTimer.current);
-      hideTimer.current = window.setTimeout(() => {
-        removeBubble();
+      // auto-hide this one
+      const timerId = window.setTimeout(() => {
+        setBubbles((prev) => prev.filter((b) => b.id !== bd.id));
+        delete hideTimers.current[bd.id];
       }, AUTOHIDE_MS);
+      hideTimers.current[bd.id] = timerId;
     };
 
     window.addEventListener('message', onNewAlarm);
     return () => {
-      window.removeEventListener('message' as any, onNewAlarm);
-      if (hideTimer.current) {
-        window.clearTimeout(hideTimer.current);
-        hideTimer.current = null;
-      }
+      window.removeEventListener('message', onNewAlarm);
+      Object.values(hideTimers.current).forEach((t) => window.clearTimeout(t));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [anchorEl, memberList, visitorList]);
+  }, [memberList, visitorList]);
 
-  // Recompute position on resize/scroll while bubble is open (so it stays “attached” to the bell)
-  useEffect(() => {
-    if (!bubble) return;
-    const update = () => setBubblePos(computeBubblePos());
-    window.addEventListener('resize', update);
-    window.addEventListener('scroll', update, { passive: true });
-    update();
-    return () => {
-      window.removeEventListener('resize', update);
-      window.removeEventListener('scroll', update);
-    };
-  }, [bubble]);
+  // 🧊 Bubble animation variants
+  const bubbleVariants = {
+    hidden: { opacity: 0, y: 25, scale: 0.98 },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 260, damping: 20 } },
+    exit: { opacity: 0, y: -15, scale: 0.96, transition: { duration: 0.25 } },
+  };
 
   return (
     <Box sx={{ position: 'relative' }}>
+      {/* Notification Bell */}
       <IconButton
         ref={bellRef}
         size="large"
-        aria-label="show new notifications"
         color="error"
-        aria-controls="msgs-menu"
-        aria-haspopup="true"
-        sx={{ color: anchorEl ? 'error.main' : 'text.secondary' }}
         onClick={openMenu}
+        sx={{ color: anchorEl ? 'error.main' : 'text.secondary' }}
       >
-        <Badge badgeContent={activeNotifications.length} color="error">
+        <Badge badgeContent={bubbles.length} color="error">
           <IconBellRinging size="21" stroke="1.5" />
         </Badge>
       </IconButton>
+
+      {/* Test trigger button */}
       <IconButton
         size="large"
-        aria-label="trigger Alarm"
         color="error"
-        aria-controls="msgs-menu"
-        aria-haspopup="true"
-        sx={{ color: anchorEl ? 'error.main' : 'text.secondary' }}
         onClick={() => {
           window.postMessage(
             {
@@ -269,10 +169,9 @@ const Notifications = () => {
               detail: {
                 alarm: {
                   message: JSON.stringify({
-                    alarmName: 'Alarm detected for BC572905DB80',
                     visitorName: 'Adi Sucipto',
                     cardName: 'BC572905DB80',
-                    maskedAreaName: 'demo lobbyasd',
+                    maskedAreaName: 'Demo Lobby',
                     floorplanName: 'Deemo',
                     action: 'idle',
                   }),
@@ -281,112 +180,89 @@ const Notifications = () => {
             },
             '*',
           );
-          //   new CustomEvent('app:new-alarm', {
-          //     detail: {
-          //       alarm: {
-          //         message: JSON.stringify({
-          //           alarmName: 'Alarm detected for BC572905DB80',
-          //           visitorName: 'Adi Sucipto',
-          //           cardName: 'BC572905DB80',
-          //           maskedAreaName: 'demo lobbyasd',
-          //           floorplanName: 'Deemo',
-          //           action: 'idle',
-          //         }),
-          //       },
-          //     },
-          //   }),
-          // );
         }}
       >
-        <Badge badgeContent={'!'} color="error">
+        <Badge badgeContent="!" color="error">
           <IconBellRinging size="21" stroke="1.5" />
         </Badge>
       </IconButton>
-      {/* Anchored bubble – shows ONLY when menu is closed AND window is focused */}
-      <Fade in={Boolean(bubble) && !anchorEl} timeout={200} unmountOnExit>
-        <Paper
-          onMouseEnter={() => {
-            if (hideTimer.current) {
-              window.clearTimeout(hideTimer.current);
-              hideTimer.current = null;
-            }
-          }}
-          onMouseLeave={() => {
-            if (!hideTimer.current)
-              hideTimer.current = window.setTimeout(() => {
-                removeBubble();
-              }, AUTOHIDE_MS);
-          }}
-          onClick={() => {
-            removeBubble();
-          }}
-          elevation={8}
-          sx={{
-            position: 'fixed',
-            top: bubblePos?.top ?? 64,
-            left: bubblePos ? bubblePos.left : undefined,
-            right: bubblePos ? undefined : 24,
-            width: 360,
-            px: 2,
-            py: 1.25,
-            borderRadius: 3,
-            color: 'white',
-            zIndex: 2000,
 
-            // 🌈 Dynamic gradient using MUI darken + alpha
-            background: visibleBubble?.color
-              ? `linear-gradient(to bottom right, 
-          ${alpha(visibleBubble.color, 0.95)}, 
-          ${darken(visibleBubble.color, 0.25)})`
-              : 'linear-gradient(to bottom right, #c62828, #b71c1c)',
-
-            // Border slightly transparent version of the main color
-            border: visibleBubble?.color
-              ? `2px solid ${alpha(visibleBubble.color, 0.6)}`
-              : '2px solid rgba(255, 204, 204, 0.5)',
-
-            // Soft glow in the same tone
-            boxShadow: visibleBubble?.color
-              ? `0 4px 20px ${alpha(visibleBubble.color, 0.6)}`
-              : '0 4px 20px rgba(0,0,0,0.25)',
-
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: -8,
-              right: 28,
-              borderWidth: '0 8px 8px 8px',
-              borderStyle: 'solid',
-              borderColor: `transparent transparent ${
-                visibleBubble?.color ? darken(visibleBubble.color, 0.1) : '#c62828'
-              } transparent`,
-            },
-          }}
-        >
-          {visibleBubble && (
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="flex-start"
-              spacing={1.5}
+      {/* 🎨 Animated Bubble Stack */}
+      <AnimatePresence>
+        {bubbles.map((b, i) => {
+          const pos = computeBubblePos(i);
+          const isTop = i === 0; // Only top bubble gets triangle
+          return (
+            <motion.div
+              key={b.id}
+              variants={bubbleVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              layout
+              style={{
+                position: 'fixed',
+                top: pos?.top ?? 64,
+                left: pos ? pos.left : undefined,
+                zIndex: 2000,
+                width: 360,
+              }}
             >
-              <Box sx={{ pr: 1.5, minWidth: 0 }}>
-                <Typography variant="subtitle2" sx={{ opacity: 0.75 }}>
-                  Alarm Triggered
-                </Typography>
-                <Typography variant="h6" fontWeight={800} noWrap>
-                  {visibleBubble.title}
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9 }} noWrap>
-                  {visibleBubble.subtitle}
-                </Typography>
-              </Box>
-            </Stack>
-          )}
-        </Paper>
-      </Fade>
+              <Paper
+                onClick={() => {
+                  if (hideTimers.current[b.id]) {
+                    window.clearTimeout(hideTimers.current[b.id]);
+                    delete hideTimers.current[b.id];
+                  }
+                  setBubbles((prev) => prev.filter((x) => x.id !== b.id));
+                }}
+                elevation={6}
+                sx={{
+                  position: 'relative',
+                  px: 2,
+                  py: 1.5,
+                  borderRadius: 3,
+                  color: 'white',
+                  cursor: 'pointer',
+                  background: `linear-gradient(135deg, ${alpha(b.color, 0.95)}, ${darken(
+                    b.color,
+                    0.25,
+                  )})`,
+                  border: `1px solid ${alpha(b.color, 0.4)}`,
+                  boxShadow: `0 8px 30px ${alpha(b.color, 0.5)}`,
+                  backdropFilter: 'blur(6px)',
+                  overflow: 'visible',
+                  ...(isTop && {
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: -8,
+                      right: 24,
+                      borderWidth: '0 8px 8px 8px',
+                      borderStyle: 'solid',
+                      borderColor: `transparent transparent ${darken(b.color, 0.1)} transparent`,
+                    },
+                  }),
+                }}
+              >
+                <Stack spacing={0.5}>
+                  <Typography variant="subtitle2" sx={{ opacity: 0.75 }}>
+                    Alarm Triggered
+                  </Typography>
+                  <Typography variant="h6" fontWeight={700}>
+                    {b.title}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    {b.subtitle}
+                  </Typography>
+                </Stack>
+              </Paper>
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
 
-      {/* Original dropdown menu (unchanged) */}
+      {/* Menu (unchanged minimal) */}
       <Menu
         id="msgs-menu"
         anchorEl={anchorEl}
@@ -397,88 +273,14 @@ const Notifications = () => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         sx={{ '& .MuiMenu-paper': { width: '360px' } }}
       >
-        <Stack
-          direction="row"
-          py={2}
-          px={4}
-          justifyContent="space-between"
-          alignItems="center"
-          sx={{
-            background: 'linear-gradient(to right, #c62828, #b71c1c)',
-            color: 'white',
-          }}
-        >
-          <Typography variant="h6">Alarm</Typography>
-          <Chip
-            label={`${activeNotifications.length} new`}
-            color="error"
-            size="small"
-            sx={{
-              backgroundColor: '#ff7961',
-              color: 'white',
-              fontWeight: 'bold',
-            }}
-          />
-        </Stack>
-
         <Scrollbar sx={{ height: '385px' }}>
-          {notifications.map((n, index) => (
-            <Box key={index}>
-              <MenuItem
-                sx={{
-                  py: 2,
-                  px: 4,
-                  backgroundColor: n.isActive ? '#ffebee' : 'inherit', // light red for active
-                  '&:hover': {
-                    backgroundColor: n.isActive ? '#ffcdd2' : '#f5f5f5',
-                  },
-                }}
-              >
-                <Stack direction="row" spacing={2} justifyContent="space-between" width="100%">
-                  <Box>
-                    <Typography
-                      variant="h6"
-                      color="textPrimary"
-                      fontWeight={600}
-                      noWrap
-                      sx={{ width: '200px' }}
-                    >
-                      {n.title}
-                    </Typography>
-                    <Typography
-                      color="textSecondary"
-                      variant="subtitle2"
-                      sx={{ width: '200px' }}
-                      noWrap
-                    >
-                      {n.subtitle}
-                    </Typography>
-                  </Box>
-                  <Chip
-                    label={n.status}
-                    color={
-                      n.status === 'Done' ? 'success' : n.status === 'Active' ? 'error' : 'default'
-                    }
-                    size="small"
-                    sx={{ fontWeight: 'bold' }}
-                  />
-                </Stack>
-              </MenuItem>
-            </Box>
-          ))}
+          <Box p={3}>
+            <Typography variant="h6">All Notifications</Typography>
+            <Button to="/report/alarmtrigger" component={Link} fullWidth variant="outlined">
+              View All
+            </Button>
+          </Box>
         </Scrollbar>
-
-        <Box p={3} pb={1}>
-          <Button
-            to="/report/alarmtrigger"
-            variant="outlined"
-            component={Link}
-            color="primary"
-            fullWidth
-          >
-            See all Notifications
-          </Button>
-        </Box>
       </Menu>
     </Box>
   );
