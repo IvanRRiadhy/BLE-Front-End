@@ -50,6 +50,7 @@ interface StateType {
     area: string;
     floorplan: string;
     time: string;
+    dmac: string;
   };
 }
 
@@ -64,6 +65,7 @@ const initialState: StateType = {
     area: '',
     floorplan: '',
     time: '',
+    dmac: '',
   },
 };
 

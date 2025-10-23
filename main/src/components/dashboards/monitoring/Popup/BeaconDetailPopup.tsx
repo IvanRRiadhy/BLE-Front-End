@@ -17,13 +17,14 @@ import { DepartmentType, fetchDepartments } from 'src/store/apps/crud/department
 import { DistrictType, fetchDistricts } from 'src/store/apps/crud/district';
 import { memberType } from 'src/store/apps/crud/member';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
-import { masterVisitorType, VisitorType } from 'src/store/apps/crud/visitor';
+import { VisitorType } from 'src/store/apps/crud/visitor';
 import { SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import { setScreenDisplay } from 'src/store/apps/monitoring/layout';
-
+import { publishMQTT, startMQTTclient } from 'src/store/apps/tracking/MQTT'; // ✅ use your existing MQTT file
 
 type BeaconDetailPopupProps = {
+  dmac?: string;
   bleNumber: string;
   memberDetail?: memberType;
   visitorDetail?: VisitorType;
@@ -33,12 +34,11 @@ type BeaconDetailPopupProps = {
   detailDialogOpen: boolean;
   setDetailDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setOpenTrackDetail: React.Dispatch<React.SetStateAction<boolean>>;
-  grid?: number;
-  screen?: number;
+  screenId?: string; // 🆕 use screenId instead of grid/screen
 };
 
-
 const BeaconDetailPopup = ({
+  dmac,
   bleNumber,
   memberDetail,
   visitorDetail,
@@ -48,20 +48,27 @@ const BeaconDetailPopup = ({
   detailDialogOpen,
   setDetailDialogOpen,
   setOpenTrackDetail,
-  grid,
-  screen,
+  screenId,
 }: BeaconDetailPopupProps) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  const handleClose = () => {
-    setDetailDialogOpen(false);
-    dispatch(SetSelectedBeacon({ active: false }));
-  };
+
   const organizationData = useSelector(
     (state: RootState) => state.organizationReducer.organizations,
   );
   const districtData = useSelector((state: RootState) => state.districtReducer.districts);
   const departmentData = useSelector((state: RootState) => state.departmentReducer.departments);
+
+  const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
+  const activeLayout = useSelector((state: RootState) =>
+    state.layoutReducer.layouts.find((l) => l.id === state.layoutReducer.activeLayoutId),
+  );
+
+  const handleClose = () => {
+    setDetailDialogOpen(false);
+    dispatch(SetSelectedBeacon({ active: false }));
+  };
+
   useEffect(() => {
     dispatch(fetchOrganizations());
     dispatch(fetchDistricts());
@@ -79,37 +86,46 @@ const BeaconDetailPopup = ({
     const district = districtData.find((dst: DistrictType) => dst.id === districtId);
     return district ? district.name : 'Unknown District';
   };
+
   const getDepartmentName = (departmentId: string) => {
     const department = departmentData.find((dpt: DepartmentType) => dpt.id === departmentId);
     return department ? department.name : 'Unknown Department';
   };
-  // console.log(memberDetail, area, floorplan, time);
+
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
-
-    // Extract the weekday
     const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
     const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-
     return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()}`;
   };
 
+const handleFollowOnThisScreen = () => {
+  if (!activeLayoutId || !screenId) {
+    console.warn('No active layout or screenId found.');
+    return;
+  }
 
-    const handleFollowOnThisScreen = () => {
-      console.log("Grid, Screen :", grid, screen);
-    if (typeof grid !== 'number' || typeof screen !== 'number') return;
-    dispatch(
-      setScreenDisplay(
-        grid,
-        screen,
-        {
-          displayType: 3,          // Follow Beacon
-          displayOutput: bleNumber // the target beaconId
-        }
-      )
-    );
-    handleClose();
-  };
+  // ✅ Use shared MQTT client instead of creating a new one
+  const topic = `highlight/card/${bleNumber}`;
+  const payload = 'Start';
+
+  publishMQTT(topic, payload);
+  console.log('Published Start message to', topic);
+
+  // 🧭 Update layout reducer for Follow Mode
+  dispatch(
+    setScreenDisplay({
+      layoutId: activeLayoutId,
+      screenId,
+      display: {
+        displayType: 3, // Follow Mode
+        displayOutput: bleNumber, // Beacon DMAC
+      },
+    }),
+  );
+
+  handleClose();
+};
 
   return (
     <Dialog fullWidth maxWidth={'md'} open={detailDialogOpen} onClose={handleClose}>
@@ -119,10 +135,11 @@ const BeaconDetailPopup = ({
         </Typography>
         <Divider />
       </DialogTitle>
+
       <DialogContent>
         <Grid container spacing={3} mb={2} p={2}>
           <Grid container size={12} direction={'row'} mb={2}>
-            <Grid size={12} display={'flex'} justifyContent={'center'} >
+            <Grid size={12} display={'flex'} justifyContent={'center'} position="relative">
               <Avatar
                 alt="Member Profile"
                 src={`${BASE_URL}${
@@ -130,14 +147,14 @@ const BeaconDetailPopup = ({
                 }`}
                 sx={{ width: '128px', height: '128px', ml: 2 }}
               />
-               <Button
+              <Button
                 variant="contained"
                 color="primary"
                 size="small"
                 onClick={handleFollowOnThisScreen}
                 sx={{
                   position: 'absolute',
-                  right: 0,            // stick to the right-most side
+                  right: 0,
                   top: '50%',
                   transform: 'translateY(-50%)',
                   borderRadius: 2,
@@ -150,6 +167,7 @@ const BeaconDetailPopup = ({
               </Button>
             </Grid>
           </Grid>
+
           <Grid container size={12} direction={'row'}>
             <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
               <Typography component="div" variant="h6" fontWeight={700}>
@@ -345,6 +363,7 @@ const BeaconDetailPopup = ({
           </Grid>
         </Grid>
       </DialogContent>
+
       <DialogActions
         sx={{
           position: 'sticky',

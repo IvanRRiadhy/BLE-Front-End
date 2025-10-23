@@ -70,7 +70,12 @@ const FloorView: React.FC<{
   const visitorList = useSelector((state: RootState) => state.visitorReducer.visitors);
   const [open, setOpen] = useState(false);
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
+
   const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
+  const activeLayout = layouts.find((l) => l.id === activeLayoutId);
+  const activeScreen = activeLayout?.screens.find((s) => s.floorplanId === activeFloorplan);
+  const isFollowing = activeScreen?.display?.displayType === 3;
+  const screenId = activeLayout?.screens.find((s) => s.floorplanId === activeFloorplan)?.id;
   // console.log('testing', useSelector((state: RootState) => state.floorReducer.floors));
   const containerRef = useRef<HTMLDivElement>(null);
   const floor = useSelector((state: RootState) => state.floorReducer.floorAll);
@@ -89,6 +94,8 @@ const FloorView: React.FC<{
   const [showArea, setShowArea] = useState(true);
   const [showGates, setShowGates] = useState(true);
   const [showGeoFence, setShowGeoFence] = useState(false);
+  const [showOtherBeacons, setShowOtherBeacons] = useState(true);
+
   const [focusArea, setFocusArea] = useState<{
     minX: number;
     minY: number;
@@ -102,6 +109,7 @@ const FloorView: React.FC<{
   }, [floor]);
   useEffect(() => {
     // console.log('Active Floorplan:', floorplans);
+    console.log('Active Layout', activeLayout);
   }, [actFloorplan]);
 
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
@@ -140,6 +148,7 @@ const FloorView: React.FC<{
     area: string;
     floorplan: string;
     time: string;
+    dmac: string;
   }) => {
     dispatch(SetSelectedBeacon({ active: true, ...info }));
   };
@@ -147,6 +156,7 @@ const FloorView: React.FC<{
     if (selectedBeacon.active) {
       setDetailDialogOpen(true);
     }
+    console.log('selectedBeacon changed: ', selectedBeacon);
   }, [selectedBeacon]);
 
   useEffect(() => {
@@ -503,9 +513,7 @@ const FloorView: React.FC<{
     setTranslate({ x: nextTranslateX, y: nextTranslateY });
   }, []);
 
-  // 2) auto-handoff floorplan when the beacon crosses floors (follow mode)
 
-  // inside FloorView
   useEffect(() => {
     if (!focusBeacon || !gridNumber || !screenNumber) return;
 
@@ -547,15 +555,48 @@ const FloorView: React.FC<{
 
   // === END FOLLOW CAMERA HOOK ===
 
-  // const handleCancelFollowing = () => {
-  //   if (!gridNumber || !screenNumber) return;
-  //   dispatch(
-  //     setScreenDisplay(gridNumber, screenNumber, {
-  //       displayType: 0,
-  //       displayOutput: '',
-  //     }),
-  //   );
-  // };
+  const handleCancelFollowing = () => {
+    // Find layout + screen info
+    const layoutState = useSelector((state: RootState) => state.layoutReducer);
+    const activeLayout = layoutState.layouts.find((l) => l.id === layoutState.activeLayoutId);
+    const screenId = activeLayout?.screens.find((s) => s.floorplanId === activeFloorplan)?.id;
+
+    if (!activeLayout?.id || !screenId) {
+      console.warn('No active layout or screen found for cancel follow.');
+      return;
+    }
+
+    // 1️⃣ Publish "Stop" to MQTT
+    if (selectedBeacon?.id) {
+      const topic = `highlight/card/${selectedBeacon.id}`;
+      const payload = JSON.stringify({ message: 'Stop' });
+      import('mqtt').then(({ connect }) => {
+        const client = connect('ws://192.168.1.116:9005', {
+          clientId: `CancelFollow-${Math.random().toString(16).substr(2, 8)}`,
+          username: 'bio_mqtt',
+          password: 'P@ssw0rd',
+        });
+        client.on('connect', () => {
+          client.publish(topic, payload, { qos: 0, retain: false }, () => {
+            console.log('Published STOP to', topic);
+            client.end();
+          });
+        });
+      });
+    }
+
+    // 2️⃣ Reset screen display back to normal floorplan
+    dispatch(
+      setScreenDisplay({
+        layoutId: activeLayout.id,
+        screenId,
+        display: {
+          displayType: 0,
+          displayOutput: '', // back to default floorplan view
+        },
+      }),
+    );
+  };
 
   if (floorplanImage === 'No Active Floorplan') {
     return (
@@ -676,14 +717,30 @@ const FloorView: React.FC<{
             }
             label="Show GeoFence Areas"
           />
-          {Boolean(focusBeacon) && (
-            <Button
-              variant="contained"
-              color="error"
-              // onClick={handleCancelFollowing}
-            >
-              Cancel Following
-            </Button>
+          {Boolean(focusBeacon) && isFollowing && (
+            <>
+              {/* <Button
+                variant="contained"
+                color={showOtherBeacons ? 'secondary' : 'primary'}
+                onClick={() => setShowOtherBeacons((prev) => !prev)}
+              >
+                {showOtherBeacons ? 'Hide Others' : 'Show Others'}
+              </Button> */}
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={showOtherBeacons}
+                    onChange={() => setShowOtherBeacons((prev) => !prev)}
+                    color="primary"
+                  />
+                }
+                label="Show Other People"
+              />
+
+              <Button variant="contained" color="error" onClick={handleCancelFollowing}>
+                Cancel Following
+              </Button>
+            </>
           )}
         </Box>
       )}
@@ -796,7 +853,9 @@ const FloorView: React.FC<{
                     setOpenTrackDetail={setOpenTrackDetail}
                     selectedBeaconId={selectedBeacon?.id ?? null}
                     focusBeaconId={focusBeacon || undefined}
+                    focusDmac={selectedBeacon?.dmac ?? undefined}
                     onFocusPosition={handleFocusPosition}
+                    showOtherBeacons={showOtherBeacons}
                   />
                 </Box>
               );
@@ -921,6 +980,7 @@ const FloorView: React.FC<{
           return (
             <>
               <BeaconDetailPopup
+                dmac={selectedBeacon.dmac}
                 bleNumber={selectedBeacon.id}
                 memberDetail={member}
                 visitorDetail={visitor}
@@ -930,8 +990,7 @@ const FloorView: React.FC<{
                 area={selectedBeacon.area}
                 floorplan={selectedBeacon.floorplan}
                 time={selectedBeacon.time}
-                grid={gridNumber}
-                screen={screenNumber}
+                screenId={screenId}
               />
               {person && (
                 <TrackingDetailPopup

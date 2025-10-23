@@ -46,7 +46,7 @@ export function startMQTTclient(messagecallback: any, topic: string) {
       let data: unknown;
       try {
         data = JSON.parse(message_str);
-        console.log('Received message on topic', msgTopic, ':', data);
+        // console.log('Received message on topic', msgTopic, ':', data);
         (messageCallbacks[msgTopic] || []).forEach((cb) => cb(data));
       } catch (e) {
         console.warn('Invalid JSON received on topic', msgTopic, ':', message_str);
@@ -76,3 +76,22 @@ export function startMQTTclient(messagecallback: any, topic: string) {
     }
   };
 }
+export function unsubscribeAllMQTT() {
+  if (!client) return;
+
+  Object.keys(messageCallbacks).forEach((topic) => {
+    client?.unsubscribe(topic);
+    delete messageCallbacks[topic];
+  });
+  subscribedTopics.clear();
+
+  console.log('[MQTT] All topics unsubscribed');
+};
+
+export function publishMQTT(topic: string, payload: any) {
+  if (!client) {
+    console.warn('MQTT client not ready');
+    return;
+  }
+  client.publish(topic, typeof payload === 'string' ? payload : JSON.stringify(payload));
+};

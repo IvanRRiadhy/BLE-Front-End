@@ -146,7 +146,7 @@ export type ScreenSettings = {
 };
 
 export type ScreenDisplay = {
-  displayType: number; // 0: floorplan, 1: masked area, 2: CCTV
+  displayType: number; // 0: floorplan, 1: masked area, 2: CCTV, 3: Beacon Follow
   displayOutput: string;
 };
 

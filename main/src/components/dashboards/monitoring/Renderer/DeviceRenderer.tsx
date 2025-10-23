@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Stage, Layer, Image as KonvaImage, Text, Line, Label, Tag, Group } from 'react-konva';
-import { useSelector, useDispatch } from 'src/store/Store';
+import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import { fetchBeacon, RefreshBeaconState } from 'src/store/apps/tracking/Beacon';
 import BeaconRenderer from './BeaconRenderer';
 import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
@@ -10,9 +10,11 @@ import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
 import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { darken } from '@mui/material';
-import { setFocus } from 'src/store/apps/monitoring/layout';
+import { setFocus, setScreenFloorplan } from 'src/store/apps/monitoring/layout';
 import polylabel from 'polylabel';
 import { GeoFencingAlarmType } from 'src/store/apps/alarmsetting/geofencing';
+import { startMQTTclient } from 'src/store/apps/tracking/MQTT';
+import { BASE_URL } from 'src/utils/axios';
 
 type Nodes = {
   id: string;
@@ -70,11 +72,19 @@ type DeviceRendererProps = {
   openTrackDetail?: boolean;
   setOpenTrackDetail?: (open: boolean) => void;
   selectedBeaconId?: string;
-  onSelectBeacon: (info: { id: string; area: string; floorplan: string; time: string }) => void;
+  onSelectBeacon: (info: {
+    id: string;
+    area: string;
+    floorplan: string;
+    time: string;
+    dmac: string;
+  }) => void;
 
   // NEW:
   focusBeaconId?: string;
   onFocusPosition?: (pt: { x: number; y: number }) => void;
+  focusDmac?: string;
+  showOtherBeacons?: boolean;
 };
 
 const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
@@ -98,7 +108,9 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     onSelectBeacon,
     selectedBeaconId,
     focusBeaconId,
+    focusDmac,
     onFocusPosition, // NEW
+    showOtherBeacons,
   } = props;
   const dispatch = useDispatch();
   const [image, setImage] = useState<HTMLImageElement | undefined>(undefined);
@@ -113,22 +125,56 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
       area: string;
       floorplan: string;
       time: string;
+      dmac: string;
     };
   }>({});
 
   const refreshTrigger = useSelector((state) => state.BeaconReducer.refreshTrigger);
   const beaconData = useSelector((state) => state.BeaconReducer.beaconsByTopic[topic]);
+  const [highlightTopic, setHighlightTopic] = useState<string | null>(null);
+  const [highlightedFloorplan, setHighlightedFloorplan] = useState<string | null>(null);
+  const [highlightedArea, setHighlightedArea] = useState<string | null>(null);
+  const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
+
+  // layout info to know what this screen is displaying
+  const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
+  const layouts = useSelector((state: RootState) =>
+    state.layoutReducer.layouts.find((l) => l.id === activeLayoutId),
+  );
+  const thisScreen = layouts?.screens.find((s) => s.display.displayOutput === focusBeaconId);
 
   // background image
-  useEffect(() => {
-    if (!imageSrc) {
-      setImage(undefined);
-      return;
-    }
-    const img = new window.Image();
-    img.src = imageSrc;
-    img.onload = () => setImage(img);
-  }, [imageSrc]);
+useEffect(() => {
+  if (
+    !highlightedFloorplan ||
+    !activeLayoutId ||
+    !thisScreen?.id ||
+    thisScreen.display.displayType !== 3 ||  // ✅ only update follow-mode screen
+    thisScreen.display.displayOutput !== focusBeaconId // ✅ only update matching beacon
+  ) return;
+
+  console.log(
+    `[DeviceRenderer] Changing floorplan for FOLLOW screen ${thisScreen.id} → ${highlightedFloorplan}`
+  );
+
+  dispatch(
+    setScreenFloorplan({
+      layoutId: activeLayoutId,
+      screenId: thisScreen.id,
+      floorplanId: highlightedFloorplan,
+    }),
+  );
+}, [highlightedFloorplan, activeLayoutId, thisScreen?.id, dispatch, focusBeaconId]);
+
+  // useEffect(() => {
+  //   const newFloor = floorplans.find((f) => f.id === highlightedFloorplan);
+  //   if (!newFloor?.floorplanImage) return;
+  //   const img = new Image();
+  //   img.src = newFloor.floorplanImage.startsWith('/Uploads/')
+  //     ? `${BASE_URL}${newFloor.floorplanImage}`
+  //     : newFloor.floorplanImage;
+  //   img.onload = () => setImage(img);
+  // }, [highlightedFloorplan]);
 
   // load device icons
   const useDeviceIcon = (src: string) => {
@@ -156,7 +202,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   useEffect(() => {
     console.log(showGeoFence);
     console.log(geofences);
-  },[showGeoFence]);
+  }, [showGeoFence]);
 
   // maintain beacon state
   useEffect(() => {
@@ -173,6 +219,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
           area: b.maskedAreaName,
           floorplan: b.floorplanName,
           time: b.time,
+          dmac: b.dmac,
         };
       });
       for (const id of Object.keys(updated)) {
@@ -232,6 +279,26 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     originalWidth,
     originalHeight,
   ]);
+
+  useEffect(() => {
+    if (!focusBeaconId) return;
+
+    const topic = `highlight/positions/${focusBeaconId}`;
+    console.log(`[MQTT] Subscribing to highlight topic: ${topic}`);
+
+    const unsubscribe = startMQTTclient((msg: any) => {
+      if (msg?.floorplanId) {
+        console.log('[Highlight Update]', msg);
+        setHighlightedFloorplan(msg.floorplanId.toLowerCase());
+        setHighlightedArea(msg.area || null);
+      }
+    }, topic);
+
+    return () => {
+      console.log(`[MQTT] Unsubscribing from ${topic}`);
+      unsubscribe();
+    };
+  }, [focusBeaconId]);
 
   // compute static centers for each area
   const areaCenters = useMemo(() => {
@@ -354,33 +421,36 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
         {showGates && devices.map((d: FloorplanDeviceType) => renderDeviceShape(d))}
 
         {/* Beacons */}
-        {Object.entries(lastSeenBeacons).map(([beaconId, beacon]) => {
-          const anim = animatedBeacons[beaconId] || beacon;
-          return (
-            <BeaconRenderer
-              key={`beacon-${beaconId}`}
-              id={beaconId}
-              x={(anim.x / originalWidth) * width}
-              y={(anim.y / originalHeight) * height}
-              area={beacon.area}
-              floorplan={beacon.floorplan}
-              time={beacon.time}
-              clickable
-              detailDialogOpen={detailDialogOpen}
-              setDetailDialogOpen={setDetailDialogOpen}
-              openTrackDetail={openTrackDetail}
-              setOpenTrackDetail={setOpenTrackDetail}
-              onClick={() =>
-                onSelectBeacon({
-                  id: beaconId,
-                  area: beacon.area,
-                  floorplan: beacon.floorplan,
-                  time: beacon.time,
-                })
-              }
-            />
-          );
-        })}
+        {Object.entries(lastSeenBeacons)
+          .filter(([beaconId]) => showOtherBeacons || beaconId === focusBeaconId)
+          .map(([beaconId, beacon]) => {
+            const anim = animatedBeacons[beaconId] || beacon;
+            return (
+              <BeaconRenderer
+                key={`beacon-${beaconId}`}
+                id={beaconId}
+                x={(anim.x / originalWidth) * width}
+                y={(anim.y / originalHeight) * height}
+                area={beacon.area}
+                floorplan={beacon.floorplan}
+                time={beacon.time}
+                clickable
+                detailDialogOpen={detailDialogOpen}
+                setDetailDialogOpen={setDetailDialogOpen}
+                openTrackDetail={openTrackDetail}
+                setOpenTrackDetail={setOpenTrackDetail}
+                onClick={() =>
+                  onSelectBeacon({
+                    id: beaconId,
+                    area: beacon.area,
+                    floorplan: beacon.floorplan,
+                    time: beacon.time,
+                    dmac: beacon.dmac,
+                  })
+                }
+              />
+            );
+          })}
       </Layer>
 
       {/* Hover label fixed at visual center */}
