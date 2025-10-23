@@ -27,6 +27,10 @@ import {
 } from 'src/store/apps/crud/trxVisitor';
 import { defaultTrxVisitorFilter } from 'src/store/apps/defaultForm';
 import { createPortal } from 'react-dom';
+import { fetchBuildings } from 'src/store/apps/crud/building';
+import { fetchFloors } from 'src/store/apps/crud/floor';
+import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
+import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 
 const SKELETON_ROWS = 5;
 
@@ -44,6 +48,10 @@ const TestRecordList = () => {
     setLoading(true);
     try {
       dispatch(fetchTrxVisitorDT({ ...defaultTrxVisitorFilter, Length: 999 }));
+      // dispatch(fetchBuildings());
+      // dispatch(fetchFloors());
+      // dispatch(fetchFloorplan());
+      // dispatch(fetchMaskedAreas());
     } catch (error) {
       console.error('Error fetching visitors:', error);
     }

@@ -179,11 +179,12 @@ export const TrackingTransSlice = createSlice({
             }
         })
         .addCase(fetchTrackingTransDT.fulfilled, (state, action) => {
+            state.trackingTrans = action.payload.data || [];
             state.trackingTransTotalCount = action.payload.recordsTotal;
             state.trackingTransFilteredCount = action.payload.recordsFiltered;
-                state.isLoading = false;
-                state.hasLoaded = true;
-                state.lastFilter = { ...state.trackingTransFilter };
+            state.isLoading = false;
+            state.hasLoaded = true;
+            state.lastFilter = state.trackingTransFilter;
         })
         .addCase(fetchTrackingTransDT.rejected, (_state, action) => {
             console.error("Error fetching tracking transactions: ", action.payload);
@@ -209,34 +210,38 @@ export const fetchTrackingTrans = () => async (dispatch: AppDispatch) => {
 };
 
 export const fetchTrackingTransDT = createAsyncThunk(
-    "trackingTrans/fetchTrackingTransDT", 
-    async (filter: any, { getState, rejectWithValue }) => {
-        const started = Date.now();
-        try {
-            if (
-                filter?.filters &&
-                Object.values(filter.filters).some(
-                    (arr: any) => Array.isArray(arr) && arr.includes("Empty")
-                )   
-            ) {
-                const elapsed = Date.now() - started;
-                if (elapsed < 500) await delay(500 - elapsed);
-                return rejectWithValue("Filter contains 'Empty', skipping request");
-            }
-            const response = await axiosServices.post(API_DT_URL, filter);
-            console.log("Fetch trackingTrans", response.data.collection);
-            dispatch(GetTrackingTrans(response.data.collection.data || []));
-            const elapsed = Date.now() - started;
-            if (elapsed < 500) await delay(500 - elapsed);
-            return response.data.collection;
-        } catch (error: any) {
-            console.error("Error fetching trackingTrans:", error);
-            const elapsed = Date.now() - started;
-            if (elapsed < 500) await delay(500 - elapsed);
-            return rejectWithValue(error.response?.data || "Unknown error");
-        }
+  "trackingTrans/fetchTrackingTransDT",
+  async (filter: any, { rejectWithValue }) => {
+    const started = Date.now();
+    try {
+      if (
+        filter?.filters &&
+        Object.values(filter.filters).some(
+          (arr: any) => Array.isArray(arr) && arr.includes("Empty")
+        )
+      ) {
+        const elapsed = Date.now() - started;
+        if (elapsed < 500) await delay(500 - elapsed);
+        return rejectWithValue("Filter contains 'Empty', skipping request");
+      }
+
+      const response = await axiosServices.post(API_DT_URL, filter);
+      console.log("✅ Fetch trackingTrans:", response.data.collection);
+
+      // ⚠️ DO NOT DISPATCH here! return data instead.
+      const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+
+      return response.data.collection; // returns to the fulfilled case
+    } catch (error: any) {
+      console.error("❌ Error fetching trackingTrans:", error);
+      const elapsed = Date.now() - started;
+      if (elapsed < 500) await delay(500 - elapsed);
+      return rejectWithValue(error.response?.data || "Unknown error");
     }
-)
+  }
+);
+
 
 export const addTrackingTrans = createAsyncThunk("trackingTrans/addTrackingTrans", async (trackingTrans: trackingTransType) => {
     const started = Date.now();

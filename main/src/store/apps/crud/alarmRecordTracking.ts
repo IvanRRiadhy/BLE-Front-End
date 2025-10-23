@@ -37,7 +37,7 @@ export type GetFilter = {
     SortDir: 'asc' | 'desc',
     SearchValue: string,
     dateFilters?:{
-        TimeStamp?: {
+        Timestamp?: {
             DateFrom?: string | null,
             DateTo?: string | null,
         }
@@ -167,11 +167,12 @@ export const AlarmSlice = createSlice({
                         }
                     })
         .addCase(fetchAlarmDT.fulfilled, (state, action) => {
+            state.alarmRecordTrackings = action.payload.data || [];
             state.alarmRecordTotalCount = action.payload.recordsTotal;
             state.alarmRecordFilteredCount = action.payload.recordsFiltered;
-                state.isLoading = false;
-                state.hasLoaded = true;
-                state.lastFilter = { ...state.alarmRecordFilter };
+            state.isLoading = false;
+            state.hasLoaded = true;
+            state.lastFilter = state.alarmRecordFilter;
         })
         .addCase(fetchAlarmDT.rejected, (_state, action) => {
             console.error("Error fetching Alarm: ", action.payload);
@@ -202,7 +203,7 @@ export const fetchAlarm = () => async (dispatch: AppDispatch) => {
 export const fetchAlarmDT = createAsyncThunk(
   "alarmRecordTrackings/fetchAlarmDT",
   async (filter: any, thunkAPI) => {
-    const { dispatch, rejectWithValue } = thunkAPI;
+    const { rejectWithValue } = thunkAPI;
     const started = Date.now();
 
     try {
@@ -223,8 +224,6 @@ export const fetchAlarmDT = createAsyncThunk(
       );
       console.log("Alarm records fetched successfully: ", response.data);
       // Update list in store
-      dispatch(GetAlarms(response.data.collection.data || []));
-
       await ensureMinLatency(started, 500);
       return response.data.collection; // { data, draw, recordsTotal, recordsFiltered }
     } catch (error: any) {
