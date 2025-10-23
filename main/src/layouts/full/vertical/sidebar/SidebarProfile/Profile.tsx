@@ -34,14 +34,14 @@ export const Profile = () => {
     >
       {!hideMenu ? (
         <>
-          <Avatar alt="Remy Sharp" src={img1} />
+          {/* <Avatar alt="Remy Sharp" src={img1} /> */}
 
-    <Box
+    {/* <Box
       display={'flex'}
       alignItems="center"
       gap={2}
       sx={{ m: 3, p: 2, bgcolor: `${'secondary.light'}` }}
-    >
+    > */}
       <Avatar alt="Remy Sharp" src={img1} />
       <Box>
         <Typography variant="h6">Tommy</Typography>
@@ -55,7 +55,7 @@ export const Profile = () => {
           </IconButton>
         </Tooltip>
       </Box>
-    </Box>
+    {/* </Box> */}
         </>
       ) : (
         ''

@@ -32,7 +32,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
 
   // Resolve display name from beacon/card ID
   const getName = (bleNumber: string) => {
-    console.log("bleNumber: ",bleNumber);
+    // console.log("bleNumber: ",bleNumber);
     const m = memberList.find((x) => x.bleCardNumber === bleNumber);
     if (m) return m.name;
     const v = visitorList.find((x) => x.bleCardNumber === bleNumber);

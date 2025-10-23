@@ -16,8 +16,6 @@ import { floorType } from 'src/store/apps/crud/floor';
 import { FloorplanType } from 'src/store/apps/crud/floorplan';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 
-
-
 // === Type definitions ===
 type DisplayTree = Map<
   string,
@@ -63,6 +61,7 @@ type Props = {
   initial?: Partial<FilterState>;
   onChangeFilter: (f: FilterState) => void;
   resetToken?: number;
+  hideSelectedAreas?: boolean;
 };
 
 // === Component ===
@@ -74,8 +73,8 @@ const AutocompleteFilter: React.FC<Props> = ({
   initial,
   onChangeFilter,
   resetToken,
+  hideSelectedAreas,
 }) => {
-  
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState('');
   const anchorRef = React.useRef<HTMLDivElement | null>(null);
@@ -116,62 +115,61 @@ const AutocompleteFilter: React.FC<Props> = ({
   // === State ===
   const [expanded, setExpanded] = React.useState<string[]>([]);
   const [selectedKeys, setSelectedKeys] = React.useState<Set<string>>(new Set());
-// --- Track readiness ---
-const [dataReady, setDataReady] = React.useState(false);
-const initialApplied = React.useRef(false);
+  // --- Track readiness ---
+  const [dataReady, setDataReady] = React.useState(false);
+  const initialApplied = React.useRef(false);
 
-// Detect when all data is ready
+  // Detect when all data is ready
 
-const hasInitialData = React.useMemo(() => {
-  if (!initial) return false;
-  return (
-    (initial.BuildingId?.length ?? 0) > 0 ||
-    (initial.FloorId?.length ?? 0) > 0 ||
-    (initial.FloorplanId?.length ?? 0) > 0 ||
-    (initial.MaskedAreaId?.length ?? 0) > 0
-  );
-}, [initial]);
-React.useEffect(() => {
-  const ready =
-    buildings.length > 0 &&
-    (!hasFloors || floors.length > 0) &&
-    (!hasFloorplans || floorplans.length > 0) &&
-    (!hasMaskedAreas || maskedAreas.length > 0);
+  const hasInitialData = React.useMemo(() => {
+    if (!initial) return false;
+    return (
+      (initial.BuildingId?.length ?? 0) > 0 ||
+      (initial.FloorId?.length ?? 0) > 0 ||
+      (initial.FloorplanId?.length ?? 0) > 0 ||
+      (initial.MaskedAreaId?.length ?? 0) > 0
+    );
+  }, [initial]);
+  React.useEffect(() => {
+    const ready =
+      buildings.length > 0 &&
+      (!hasFloors || floors.length > 0) &&
+      (!hasFloorplans || floorplans.length > 0) &&
+      (!hasMaskedAreas || maskedAreas.length > 0);
 
-  if (ready) setDataReady(true);
-}, [buildings, floors, floorplans, maskedAreas, hasFloors, hasFloorplans, hasMaskedAreas]);
+    if (ready) setDataReady(true);
+  }, [buildings, floors, floorplans, maskedAreas, hasFloors, hasFloorplans, hasMaskedAreas]);
 
-// Apply initial once dataReady becomes true
-React.useEffect(() => {
-  if (!dataReady || !hasInitialData || initialApplied.current || !initial) return;
+  // Apply initial once dataReady becomes true
+  React.useEffect(() => {
+    if (!dataReady || !hasInitialData || initialApplied.current || !initial) return;
 
-  console.log('🟢 Applying initial filter now (final fix):', initial);
+    console.log('🟢 Applying initial filter now (final fix):', initial);
 
-  const pre = new Set<string>();
-  (initial.BuildingId ?? []).forEach((id) => pre.add(kB(id)));
-  (initial.FloorId ?? []).forEach((id) => pre.add(kF(id)));
-  (initial.FloorplanId ?? []).forEach((id) => pre.add(kFP(id)));
-  (initial.MaskedAreaId ?? []).forEach((id) => pre.add(kMA(id)));
+    const pre = new Set<string>();
+    (initial.BuildingId ?? []).forEach((id) => pre.add(kB(id)));
+    (initial.FloorId ?? []).forEach((id) => pre.add(kF(id)));
+    (initial.FloorplanId ?? []).forEach((id) => pre.add(kFP(id)));
+    (initial.MaskedAreaId ?? []).forEach((id) => pre.add(kMA(id)));
 
-  setSelectedKeys(pre);
+    setSelectedKeys(pre);
 
-  const expandedKeys: string[] = [];
-  (initial.BuildingId ?? []).forEach((id) => expandedKeys.push(kB(id)));
-  (initial.FloorId ?? []).forEach((id) => expandedKeys.push(kF(id)));
-  (initial.FloorplanId ?? []).forEach((id) => expandedKeys.push(kFP(id)));
-  setExpanded([...new Set(expandedKeys)]);
+    const expandedKeys: string[] = [];
+    (initial.BuildingId ?? []).forEach((id) => expandedKeys.push(kB(id)));
+    (initial.FloorId ?? []).forEach((id) => expandedKeys.push(kF(id)));
+    (initial.FloorplanId ?? []).forEach((id) => expandedKeys.push(kFP(id)));
+    setExpanded([...new Set(expandedKeys)]);
 
-  onChangeFilter({
-    BuildingId: initial.BuildingId ?? [],
-    FloorId: initial.FloorId ?? [],
-    FloorplanId: initial.FloorplanId ?? [],
-    MaskedAreaId: initial.MaskedAreaId ?? [],
-  });
+    onChangeFilter({
+      BuildingId: initial.BuildingId ?? [],
+      FloorId: initial.FloorId ?? [],
+      FloorplanId: initial.FloorplanId ?? [],
+      MaskedAreaId: initial.MaskedAreaId ?? [],
+    });
 
-  initialApplied.current = true;
-  console.log('✅ Initial selection fully applied (after data + initial ready)');
-}, [dataReady, hasInitialData, initial, onChangeFilter]);
-
+    initialApplied.current = true;
+    console.log('✅ Initial selection fully applied (after data + initial ready)');
+  }, [dataReady, hasInitialData, initial, onChangeFilter]);
 
   // === Reset handler ===
   const prevReset = React.useRef<number>();
@@ -311,8 +309,7 @@ React.useEffect(() => {
       if (!fpId) return { bNode, fNode };
       const fp = floorplanById.get(fpId);
       if (!fp) return { bNode, fNode };
-      if (!fNode.floorplans.has(fpId))
-        fNode.floorplans.set(fpId, { name: fp.name, areas: [] });
+      if (!fNode.floorplans.has(fpId)) fNode.floorplans.set(fpId, { name: fp.name, areas: [] });
       const fpNode = fNode.floorplans.get(fpId)!;
       return { bNode, fNode, fpNode };
     };
@@ -373,16 +370,88 @@ React.useEffect(() => {
     );
   }
 
+  // --- 🧠 Compute compressed display selection ---
+// --- 🧠 Compute compressed display selection with icons ---
+const computeDisplaySelection = React.useCallback(() => {
+  const selected = new Set(selectedKeys);
+
+  const isAllAreasSelectedForFp = (fpId: string) => {
+    const mas = masByFp.get(fpId) ?? [];
+    return mas.length > 0 && mas.every((ma) => selected.has(kMA(ma.id)));
+  };
+
+  const isAllFpSelectedForFloor = (floorId: string) => {
+    const fps = fpsByFloor.get(floorId) ?? [];
+    return fps.length > 0 && fps.every((fp) => selected.has(kFP(fp.id)) || isAllAreasSelectedForFp(fp.id));
+  };
+
+  const isAllFloorsSelectedForBuilding = (bId: string) => {
+    const fls = floorsByBuilding.get(bId) ?? [];
+    return fls.length > 0 && fls.every((fl) => selected.has(kF(fl.id)) || isAllFpSelectedForFloor(fl.id));
+  };
+
+  const displayNames: string[] = [];
+
+  for (const b of buildings) {
+    const bKey = kB(b.id);
+    if (selected.has(bKey) || isAllFloorsSelectedForBuilding(b.id)) {
+      displayNames.push(`🏢 ${b.name}`);
+      continue;
+    }
+
+    const fls = floorsByBuilding.get(b.id) ?? [];
+    for (const fl of fls) {
+      const fKey = kF(fl.id);
+      if (selected.has(fKey) || isAllFpSelectedForFloor(fl.id)) {
+        displayNames.push(`⬜ ${fl.name}`);
+        continue;
+      }
+
+      const fps = fpsByFloor.get(fl.id) ?? [];
+      for (const fp of fps) {
+        const fpKey = kFP(fp.id);
+        if (selected.has(fpKey) || isAllAreasSelectedForFp(fp.id)) {
+          displayNames.push(`🗺️ ${fp.name}`);
+          continue;
+        }
+
+        const mas = masByFp.get(fp.id) ?? [];
+        for (const ma of mas) {
+          const maKey = kMA(ma.id);
+          if (selected.has(maKey)) {
+            displayNames.push(`📍 ${ma.name}`);
+          }
+        }
+      }
+    }
+  }
+
+  // Compact display: show max 3 names + ellipsis if more
+  return displayNames.slice(0, 3).join(', ') + (displayNames.length > 3 ? '…' : '');
+}, [selectedKeys, buildings, floorsByBuilding, fpsByFloor, masByFp]);
+
   return (
     <Box sx={{ position: 'relative' }}>
       <Box ref={anchorRef}>
         <TextField
           fullWidth
           placeholder="Building / Floor / Floorplan / Area"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          spellCheck={false}
+          autoComplete="off"
+          inputProps={{
+            title: '', // remove browser tooltip
+            readOnly: true, // prevent manual typing
+          }}
+          value={
+            hideSelectedAreas ? (selectedKeys.size > 0 ? computeDisplaySelection() : '') : ''
+          }
           onFocus={() => setOpen(true)}
           onClick={() => setOpen(true)}
+          sx={{
+            '& input': {
+              cursor: 'pointer',
+            },
+          }}
           InputProps={{
             startAdornment: (
               <Box sx={{ display: 'flex', alignItems: 'center', pl: 1 }}>
@@ -393,14 +462,17 @@ React.useEffect(() => {
         />
       </Box>
 
-      <Popper open={open} anchorEl={anchorRef.current} placement="bottom-start" sx={{ zIndex: 2000 }}>
+      <Popper
+        open={open}
+        anchorEl={anchorRef.current}
+        placement="bottom-start"
+        sx={{ zIndex: 2000 }}
+      >
         <ClickAwayListener onClickAway={() => setOpen(false)}>
           <Paper sx={{ p: 1, mt: 1, minWidth: 300, maxHeight: 420, overflowY: 'auto' }}>
             <SimpleTreeView
               expandedItems={expanded}
-              onExpandedItemsChange={(_e, ids) =>
-                setExpanded(Array.isArray(ids) ? ids : [ids])
-              }
+              onExpandedItemsChange={(_e, ids) => setExpanded(Array.isArray(ids) ? ids : [ids])}
             >
               {buildings.map((b) => {
                 const bKey = kB(b.id);
@@ -410,9 +482,12 @@ React.useEffect(() => {
                     key={bKey}
                     itemId={bKey}
                     label={
-                      <Box onClick={() => toggleNode(bKey)} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        onClick={() => toggleNode(bKey)}
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                      >
                         <Checkbox checked={allChecked(bKey)} indeterminate={someChecked(bKey)} />
-                        <Typography>🏢 {b.name}</Typography>
+                        <Typography title="">🏢 {b.name}</Typography>
                       </Box>
                     }
                   >
@@ -425,9 +500,15 @@ React.useEffect(() => {
                             key={fKey}
                             itemId={fKey}
                             label={
-                              <Box onClick={() => toggleNode(fKey)} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Checkbox checked={allChecked(fKey)} indeterminate={someChecked(fKey)} />
-                                <Typography>⬜ {f.name}</Typography>
+                              <Box
+                                onClick={() => toggleNode(fKey)}
+                                sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                              >
+                                <Checkbox
+                                  checked={allChecked(fKey)}
+                                  indeterminate={someChecked(fKey)}
+                                />
+                                <Typography title="">⬜ {f.name}</Typography>
                               </Box>
                             }
                           >
@@ -440,9 +521,15 @@ React.useEffect(() => {
                                     key={fpKey}
                                     itemId={fpKey}
                                     label={
-                                      <Box onClick={() => toggleNode(fpKey)} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <Checkbox checked={allChecked(fpKey)} indeterminate={someChecked(fpKey)} />
-                                        <Typography>🗺️ {fp.name}</Typography>
+                                      <Box
+                                        onClick={() => toggleNode(fpKey)}
+                                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                                      >
+                                        <Checkbox
+                                          checked={allChecked(fpKey)}
+                                          indeterminate={someChecked(fpKey)}
+                                        />
+                                        <Typography title="">🗺️ {fp.name}</Typography>
                                       </Box>
                                     }
                                   >
@@ -454,9 +541,16 @@ React.useEffect(() => {
                                             key={maKey}
                                             itemId={maKey}
                                             label={
-                                              <Box onClick={() => toggleNode(maKey)} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                              <Box
+                                                onClick={() => toggleNode(maKey)}
+                                                sx={{
+                                                  display: 'flex',
+                                                  alignItems: 'center',
+                                                  gap: 1,
+                                                }}
+                                              >
                                                 <Checkbox checked={selectedKeys.has(maKey)} />
-                                                <Typography>📍 {ma.name}</Typography>
+                                                <Typography title="">📍 {ma.name}</Typography>
                                               </Box>
                                             }
                                           />
@@ -477,7 +571,7 @@ React.useEffect(() => {
       </Popper>
 
       {/* === Selected Hierarchical Display === */}
-      {displayTree.size > 0 && (
+      {!hideSelectedAreas && displayTree.size > 0 && (
         <Box
           sx={{
             mt: 1,
