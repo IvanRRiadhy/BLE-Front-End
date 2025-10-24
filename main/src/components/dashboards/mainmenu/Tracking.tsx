@@ -323,6 +323,7 @@ const allowedVisitorMonthTotal = trackingFiltered.filter((item) => {
       ],
     },
   ];
+  
 
   // console.log(JSON.stringify(seriescolumnchart, null, 2));
   // console.log(JSON.stringify(optionscolumnchart, null, 2));

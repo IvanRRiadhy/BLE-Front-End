@@ -51,6 +51,7 @@ interface StateType {
     floorplan: string;
     time: string;
     dmac: string;
+    sourceScreenId?: number;
   };
 }
 

@@ -79,7 +79,7 @@ type DeviceRendererProps = {
     time: string;
     dmac: string;
   }) => void;
-
+screenId: string;
   // NEW:
   focusBeaconId?: string;
   onFocusPosition?: (pt: { x: number; y: number }) => void;
@@ -111,6 +111,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     focusDmac,
     onFocusPosition, // NEW
     showOtherBeacons,
+    screenId,
   } = props;
   const dispatch = useDispatch();
   const [image, setImage] = useState<HTMLImageElement | undefined>(undefined);
@@ -141,7 +142,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   const layouts = useSelector((state: RootState) =>
     state.layoutReducer.layouts.find((l) => l.id === activeLayoutId),
   );
-  const thisScreen = layouts?.screens.find((s) => s.display.displayOutput === focusBeaconId);
+  const thisScreen = layouts?.screens.find((s) => s.id === screenId);
 
   // background image
 useEffect(() => {
@@ -149,12 +150,15 @@ useEffect(() => {
     !highlightedFloorplan ||
     !activeLayoutId ||
     !thisScreen?.id ||
-    thisScreen.display.displayType !== 3 ||  // ✅ only update follow-mode screen
-    thisScreen.display.displayOutput !== focusBeaconId // ✅ only update matching beacon
-  ) return;
+    thisScreen.display.displayType !== 3
+  )
+    return;
+
+  // ✅ Only the follow screen for this beacon updates floorplan
+  if (thisScreen.display.displayOutput?.toLowerCase() !== focusBeaconId?.toLowerCase()) return;
 
   console.log(
-    `[DeviceRenderer] Changing floorplan for FOLLOW screen ${thisScreen.id} → ${highlightedFloorplan}`
+    `[DeviceRenderer] Screen ${thisScreen.display.displayOutput} switching to floorplan ${highlightedFloorplan}`,
   );
 
   dispatch(
@@ -164,17 +168,8 @@ useEffect(() => {
       floorplanId: highlightedFloorplan,
     }),
   );
-}, [highlightedFloorplan, activeLayoutId, thisScreen?.id, dispatch, focusBeaconId]);
+}, [highlightedFloorplan, activeLayoutId, thisScreen, dispatch, focusBeaconId]);
 
-  // useEffect(() => {
-  //   const newFloor = floorplans.find((f) => f.id === highlightedFloorplan);
-  //   if (!newFloor?.floorplanImage) return;
-  //   const img = new Image();
-  //   img.src = newFloor.floorplanImage.startsWith('/Uploads/')
-  //     ? `${BASE_URL}${newFloor.floorplanImage}`
-  //     : newFloor.floorplanImage;
-  //   img.onload = () => setImage(img);
-  // }, [highlightedFloorplan]);
 
   // load device icons
   const useDeviceIcon = (src: string) => {
@@ -280,25 +275,29 @@ useEffect(() => {
     originalHeight,
   ]);
 
-  useEffect(() => {
-    if (!focusBeaconId) return;
+useEffect(() => {
+  if (!focusBeaconId) return;
 
-    const topic = `highlight/positions/${focusBeaconId}`;
-    console.log(`[MQTT] Subscribing to highlight topic: ${topic}`);
+  const topic = `highlight/positions/${focusBeaconId}`;
+  console.log(`[MQTT] Subscribing to highlight topic: ${topic}`);
 
-    const unsubscribe = startMQTTclient((msg: any) => {
-      if (msg?.floorplanId) {
-        console.log('[Highlight Update]', msg);
-        setHighlightedFloorplan(msg.floorplanId.toLowerCase());
-        setHighlightedArea(msg.area || null);
-      }
-    }, topic);
+  const unsubscribe = startMQTTclient((msg: any) => {
+    if (!msg?.floorplanId || !msg?.beaconId) return;
+    const payloadId = msg.beaconId;
+        // console.log('[Highlight Update]', msg);
 
-    return () => {
-      console.log(`[MQTT] Unsubscribing from ${topic}`);
-      unsubscribe();
-    };
-  }, [focusBeaconId]);
+    // ✅ only accept updates from this beacon
+    if (payloadId !== focusBeaconId) return;
+
+    setHighlightedFloorplan(msg.floorplanId);
+    setHighlightedArea(msg.area || null);
+  }, topic);
+
+  return () => {
+    console.log(`[MQTT] Unsubscribing from ${topic}`);
+    unsubscribe();
+  };
+}, [focusBeaconId]);
 
   // compute static centers for each area
   const areaCenters = useMemo(() => {

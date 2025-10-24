@@ -6,6 +6,7 @@ import { LayoutItem, ScreenSettings, gridLayoutConfig } from 'src/store/apps/mon
 
 interface MonitoringGridProps {
   grid: number;
+  screenId: Record<number, string[]>;
   floorIds: Record<number, string[]>;
   screenSettings: ScreenSettings[][];
   screenDisplay: Record<number, any[]>;
@@ -27,7 +28,7 @@ const videoJsOptions = {
 };
 
 const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
-  ({ grid, floorIds, screenSettings, screenDisplay, screenType }) => {
+  ({ grid, screenId, floorIds, screenSettings, screenDisplay, screenType }) => {
     const gridRef = useRef<HTMLDivElement>(null);
     const [gridDimensions, setGridDimensions] = useState({ width: 0, height: 0 });
     const theme = useTheme();
@@ -88,6 +89,7 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
                   focusBeacon={screenDisplay[grid][idx]}
                   gridNumber={grid}
                   screenNumber={idx + 1}
+                  screenId={screenId[grid][idx]}
                 />
               )}
             </Paper>

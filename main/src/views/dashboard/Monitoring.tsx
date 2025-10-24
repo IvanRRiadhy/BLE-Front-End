@@ -40,18 +40,21 @@ const Monitoring = () => {
   }, [activeLayout]);
 
   // Transform layout data for MonitoringGrid props
-  const { floorIds, screenDisplay, screenType, screenSettings } = useMemo(() => {
+  const { screenId, floorIds, screenDisplay, screenType, screenSettings } = useMemo(() => {
+    const sIds: Record<number, string[]> = {};
     const fIds: Record<number, string[]> = {};
     const sDisplay: Record<number, string[]> = {};
     const sType: Record<number, number[]> = {};
     const sSettings: ScreenSettings[][] = [];
 
+    sIds[grid] = [];
     fIds[grid] = [];
     sDisplay[grid] = [];
     sType[grid] = [];
     sSettings[grid] = [];
 
     screens.forEach((s, idx) => {
+      sIds[grid][idx] = s.id;
       fIds[grid][idx] = s.floorplanId ?? '';
       sDisplay[grid][idx] = s.display.displayOutput ?? '';
       sType[grid][idx] = s.display.displayType ?? 0;
@@ -59,6 +62,7 @@ const Monitoring = () => {
     });
 
     return {
+      screenId: sIds,
       floorIds: fIds,
       screenDisplay: sDisplay,
       screenType: sType,
@@ -111,6 +115,7 @@ const Monitoring = () => {
           >
             {/* The grid updates automatically based on the selected layout */}
             <MonitoringGrid
+              screenId={screenId}
               grid={grid}
               floorIds={floorIds}
               screenSettings={screenSettings}

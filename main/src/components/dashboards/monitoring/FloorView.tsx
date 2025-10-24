@@ -43,6 +43,7 @@ const FloorView: React.FC<{
   focusBeacon?: string;
   gridNumber: number;
   screenNumber: number;
+  screenId: string;
   screenSettings: { scale: number; translateX: number; translateY: number };
 }> = ({
   activeFloorplan,
@@ -52,6 +53,7 @@ const FloorView: React.FC<{
   focusBeacon,
   gridNumber,
   screenNumber,
+  screenId,
 }) => {
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
@@ -75,7 +77,7 @@ const FloorView: React.FC<{
   const activeLayout = layouts.find((l) => l.id === activeLayoutId);
   const activeScreen = activeLayout?.screens.find((s) => s.floorplanId === activeFloorplan);
   const isFollowing = activeScreen?.display?.displayType === 3;
-  const screenId = activeLayout?.screens.find((s) => s.floorplanId === activeFloorplan)?.id;
+  // const screenId = activeLayout?.screens.find((s) => s.floorplanId === activeFloorplan)?.id;
   // console.log('testing', useSelector((state: RootState) => state.floorReducer.floors));
   const containerRef = useRef<HTMLDivElement>(null);
   const floor = useSelector((state: RootState) => state.floorReducer.floorAll);
@@ -143,21 +145,23 @@ const FloorView: React.FC<{
   const trackingBeacon = useSelector((state: RootState) => state.BeaconReducer.trackingBeacon);
   const selectedBeacon = useSelector((state: RootState) => state.BeaconReducer.selectedBeacon);
 
-  const handleSelectBeacon = (info: {
-    id: string;
-    area: string;
-    floorplan: string;
-    time: string;
-    dmac: string;
-  }) => {
-    dispatch(SetSelectedBeacon({ active: true, ...info }));
-  };
-  useEffect(() => {
-    if (selectedBeacon.active) {
-      setDetailDialogOpen(true);
-    }
-    console.log('selectedBeacon changed: ', selectedBeacon);
-  }, [selectedBeacon]);
+const handleSelectBeacon = (info: {
+  id: string;
+  area: string;
+  floorplan: string;
+  time: string;
+}) => {
+  dispatch(SetSelectedBeacon({ active: true, sourceScreenId: screenNumber, ...info }));
+};
+useEffect(() => {
+  if (
+    selectedBeacon.active &&
+    selectedBeacon.sourceScreenId === screenNumber // ✅ only this screen opens popup
+  ) {
+    setDetailDialogOpen(true);
+  }
+}, [selectedBeacon, screenNumber]);
+
 
   useEffect(() => {
     const filteredDevices = devices.filter(
@@ -555,48 +559,57 @@ const FloorView: React.FC<{
 
   // === END FOLLOW CAMERA HOOK ===
 
-  const handleCancelFollowing = () => {
-    // Find layout + screen info
-    const layoutState = useSelector((state: RootState) => state.layoutReducer);
-    const activeLayout = layoutState.layouts.find((l) => l.id === layoutState.activeLayoutId);
-    const screenId = activeLayout?.screens.find((s) => s.floorplanId === activeFloorplan)?.id;
+const layoutState = useSelector((state: RootState) => state.layoutReducer);
+const activeLayouts = layoutState.layouts.find((l) => l.id === layoutState.activeLayoutId);
 
-    if (!activeLayout?.id || !screenId) {
-      console.warn('No active layout or screen found for cancel follow.');
-      return;
-    }
+const handleCancelFollowing = () => {
+  if (!activeLayouts?.id || !screenNumber) {
+    console.warn('No active layout or screen found for cancel follow.');
+    return;
+  }
 
-    // 1️⃣ Publish "Stop" to MQTT
-    if (selectedBeacon?.id) {
-      const topic = `highlight/card/${selectedBeacon.id}`;
-      const payload = JSON.stringify({ message: 'Stop' });
-      import('mqtt').then(({ connect }) => {
-        const client = connect('ws://192.168.1.116:9005', {
-          clientId: `CancelFollow-${Math.random().toString(16).substr(2, 8)}`,
-          username: 'bio_mqtt',
-          password: 'P@ssw0rd',
-        });
-        client.on('connect', () => {
-          client.publish(topic, payload, { qos: 0, retain: false }, () => {
-            console.log('Published STOP to', topic);
-            client.end();
-          });
+  // 1️⃣ Publish "Stop" to MQTT
+  if (selectedBeacon?.id) {
+    const topic = `highlight/card/${selectedBeacon.id}`;
+    const payload = JSON.stringify({ message: 'Stop' });
+
+    import('mqtt').then(({ connect }) => {
+      const client = connect('ws://192.168.1.116:9005', {
+        clientId: `Klien1-${Math.random().toString(16).substr(2, 8)}`,
+        username: 'bio_mqtt',
+        password: 'P@ssw0rd',
+      });
+
+      client.on('connect', () => {
+        client.publish(topic, payload, { qos: 0, retain: false }, () => {
+          console.log('✅ Published STOP to', topic);
+          client.end();
         });
       });
-    }
+    });
+  }
 
-    // 2️⃣ Reset screen display back to normal floorplan
-    dispatch(
-      setScreenDisplay({
-        layoutId: activeLayout.id,
-        screenId,
-        display: {
-          displayType: 0,
-          displayOutput: '', // back to default floorplan view
-        },
-      }),
-    );
-  };
+  // 2️⃣ Reset this screen’s display back to default
+  const screen = activeLayouts.screens[screenNumber - 1]; // 🔹 uses screen index
+  if (!screen) {
+    console.warn('Screen not found for screenNumber:', screenNumber);
+    return;
+  }
+
+  dispatch(
+    setScreenDisplay({
+      layoutId: activeLayouts.id,
+      screenId: screen.id,
+      display: {
+        displayType: 0,
+        displayOutput: '',
+      },
+    }),
+  );
+
+  console.log(`🧭 Screen ${screen.id} reset to default floorplan mode`);
+};
+
 
   if (floorplanImage === 'No Active Floorplan') {
     return (
@@ -856,6 +869,7 @@ const FloorView: React.FC<{
                     focusDmac={selectedBeacon?.dmac ?? undefined}
                     onFocusPosition={handleFocusPosition}
                     showOtherBeacons={showOtherBeacons}
+                    screenId={screenId ?? ''}
                   />
                 </Box>
               );

@@ -66,7 +66,7 @@ const BeaconDetailPopup = ({
 
   const handleClose = () => {
     setDetailDialogOpen(false);
-    dispatch(SetSelectedBeacon({ active: false }));
+    dispatch(SetSelectedBeacon({ active: false, sourceScreenid: null }));
   };
 
   useEffect(() => {
@@ -111,7 +111,7 @@ const handleFollowOnThisScreen = () => {
 
   publishMQTT(topic, payload);
   console.log('Published Start message to', topic);
-
+  console.log('Following beacon', bleNumber, 'on layout', activeLayoutId, 'screen', screenId);
   // 🧭 Update layout reducer for Follow Mode
   dispatch(
     setScreenDisplay({
