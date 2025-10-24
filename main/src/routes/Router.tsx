@@ -6,6 +6,7 @@ import Loadable from '../layouts/full/shared/loadable/Loadable';
 import VisitorCard from 'src/views/master/tag/VisitorCard';
 import ProtectedRoute from './ProtectedRoute';
 
+
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
@@ -93,6 +94,7 @@ const AlarmRecord = Loadable(lazy(() => import('../views/Reports/AlarmRecord')))
 const AlarmTrigger = Loadable(lazy(() => import('../views/Reports/AlarmTrigger')));
 const CardRecord = Loadable(lazy(() => import('../views/Reports/CardRecord')));
 const TestRecord = Loadable(lazy(() => import('../views/Reports/TestRecord')));
+const TestReport = Loadable(lazy(() => import('../views/Reports/TestReport')));
 
 
 /* ****Apps***** */
@@ -400,6 +402,7 @@ const Router = [
       { path: '/report/alarmtrigger', exact: true, element: withAuth(<AlarmTrigger />, '/report/alarmtrigger') },
       { path: '/report/cardrecord', exact: true, element: withAuth(<CardRecord />, '/report/cardrecord') },
       { path: '/report/testrecord', exact: true, element: withAuth(<TestRecord />, '/report/testrecord') },
+      { path: '/report/visitorreport/filter', exact: true, element: withAuth(<TestReport />, '/report/visitorreport/filter') },
 
       // ***Alarm Setting*** //
       { path: '/alarmsetting', exact: true, element: withAuth(<AlarmSetting />, '/alarmsetting') },

@@ -450,7 +450,7 @@ export const defaultTrackingTransFilter: TrackingTransFilter = {
   Draw: 1,
   Start: 0,
   Length: 5,
-  SortColumn: 'TransTime',
+  SortColumn: 'Transtime',
   SortDir: 'desc',
   SearchValue: '',
   filters: {
