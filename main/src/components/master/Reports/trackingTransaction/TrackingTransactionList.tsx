@@ -36,9 +36,17 @@ import { defaultTrackingTransFilter } from 'src/store/apps/defaultForm';
 import { fetchMembers, memberType } from 'src/store/apps/crud/member';
 import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import TrackingPositionPreviewDialog from './Preview/TrackingPositionPreviewDialog';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+import 'dayjs/locale/id';
+
+dayjs.extend(utc);
+dayjs.extend(localizedFormat);
+dayjs.locale('id');
 
 const columns = [
-  { label: 'Transaction Time', field: 'TransTime', sortAble: true },
+  { label: 'Transaction Time', field: 'Transtime', sortAble: true },
   { label: 'Reader', field: 'Reader.Name', sortAble: true },
   { label: 'Area', field: 'FloorplanMaskedArea.Name', sortAble: true },
   { label: 'Person', field: '', sortAble: false },
@@ -86,10 +94,10 @@ const TrackingTransactionList = () => {
     const isDesc =
       trackingTransFilter.SortColumn === column && trackingTransFilter.SortDir === 'desc';
 
-    if (isDesc) {
+    if (isDesc && column !== 'Transtime') {
       dispatch(
         UpdateFilter({
-          SortColumn: 'TransTime',
+          SortColumn: 'Transtime',
           SortDir: 'desc',
           Start: 0,
         }),
@@ -139,20 +147,17 @@ const TrackingTransactionList = () => {
   };
 
   const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
+    if (!isoString) return '-';
 
-    // Extract the weekday
-    const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
-    const month = t(date.toLocaleString('en-GB', { month: 'short' }));
+    const localTime = dayjs.utc(isoString).local(); // Convert UTC → Local
 
-    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
-      'en-GB',
-      {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      },
-    )}`;
+    const weekday = localTime.format('dddd'); // e.g. Kamis
+    const day = localTime.format('DD');
+    const month = localTime.format('MMM'); // e.g. Okt
+    const year = localTime.format('YYYY');
+    const time = localTime.format('HH:mm:ss');
+
+    return `${weekday}, ${day} ${month} ${year} — ${time}`;
   };
 
   const getHolderName = (id: string) => {

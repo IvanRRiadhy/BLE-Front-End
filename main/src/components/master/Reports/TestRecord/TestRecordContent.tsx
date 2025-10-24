@@ -45,6 +45,7 @@ const VisitorContent = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const didInit = useRef(false);
+  const language = useSelector((state: RootState) => state.customizer.isLanguage);
 
   const [viewMode, setViewMode] = useState<'alarm' | 'tracking'>('tracking');
   const [loading, setLoading] = useState(false);
@@ -218,13 +219,55 @@ const VisitorContent = () => {
     if (!visitorDetail) return;
     handleFetchFilteredData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, rowsPerPage, viewMode]);
+  }, [page, rowsPerPage, viewMode, visitorDetail]);
 
   const handleAreaFilterChange = (f: typeof areaFilter) => {
-  if (JSON.stringify(f) !== JSON.stringify(areaFilter)) {
-    setAreaFilter(f);
-  }
-};
+    if (JSON.stringify(f) !== JSON.stringify(areaFilter)) {
+      setAreaFilter(f);
+    }
+  };
+
+  //Time Format
+  const formatVisitorPeriod = (
+    startString?: string | null,
+    endString?: string | null,
+    language?: string,
+  ) => {
+    if (!startString || !endString) return '-';
+
+    const getLanguageLabel = () => {
+      switch (language) {
+        case 'en':
+          return 'en-US';
+        case 'id':
+          return 'id-ID';
+        default:
+          return 'en-US';
+      }
+    };
+
+    const locale = getLanguageLabel();
+    const startDate = new Date(startString);
+    const endDate = new Date(endString);
+
+    const formatter = new Intl.DateTimeFormat(locale, {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    });
+
+    const startFormatted = formatter.format(startDate).replace(/\./g, ':');
+    const endFormatted = formatter.format(endDate).replace(/\./g, ':');
+
+    const untilWord = locale === 'id-ID' ? 'hingga' : 'until';
+
+    return `${startFormatted} ${untilWord} ${endFormatted}`;
+  };
 
   return (
     <Box px={3} height="80vh" display="flex" flexDirection="column">
@@ -248,7 +291,11 @@ const VisitorContent = () => {
                     {trxVisitorDetail?.agenda ?? '-'}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {trxVisitorDetail?.visitorPeriodStart} — {trxVisitorDetail?.visitorPeriodEnd}
+                    {formatVisitorPeriod(
+                      trxVisitorDetail?.visitorPeriodStart,
+                      trxVisitorDetail?.visitorPeriodEnd,
+                      language,
+                    )}
                   </Typography>
                   <Chip
                     label={trxVisitorDetail?.status || 'Unknown'}
@@ -350,7 +397,7 @@ const VisitorContent = () => {
               floors={floors}
               floorplans={floorplans}
               maskedAreas={maskedAreas}
-              initial={stableInitial.current} 
+              initial={stableInitial.current}
               onChangeFilter={handleAreaFilterChange}
               hideSelectedAreas
             />

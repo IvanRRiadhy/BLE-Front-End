@@ -352,6 +352,72 @@ const AutocompleteFilter: React.FC<Props> = ({
     ? 'Selected Floors'
     : 'Selected Buildings';
 
+  // --- 🧠 Compute compressed display selection ---
+  // --- 🧠 Compute compressed display selection with icons ---
+  const computeDisplaySelection = React.useCallback(() => {
+    const selected = new Set(selectedKeys);
+
+    const isAllAreasSelectedForFp = (fpId: string) => {
+      const mas = masByFp.get(fpId) ?? [];
+      return mas.length > 0 && mas.every((ma) => selected.has(kMA(ma.id)));
+    };
+
+    const isAllFpSelectedForFloor = (floorId: string) => {
+      const fps = fpsByFloor.get(floorId) ?? [];
+      return (
+        fps.length > 0 &&
+        fps.every((fp) => selected.has(kFP(fp.id)) || isAllAreasSelectedForFp(fp.id))
+      );
+    };
+
+    const isAllFloorsSelectedForBuilding = (bId: string) => {
+      const fls = floorsByBuilding.get(bId) ?? [];
+      return (
+        fls.length > 0 &&
+        fls.every((fl) => selected.has(kF(fl.id)) || isAllFpSelectedForFloor(fl.id))
+      );
+    };
+
+    const displayNames: string[] = [];
+
+    for (const b of buildings) {
+      const bKey = kB(b.id);
+      if (selected.has(bKey) || isAllFloorsSelectedForBuilding(b.id)) {
+        displayNames.push(`🏢 ${b.name}`);
+        continue;
+      }
+
+      const fls = floorsByBuilding.get(b.id) ?? [];
+      for (const fl of fls) {
+        const fKey = kF(fl.id);
+        if (selected.has(fKey) || isAllFpSelectedForFloor(fl.id)) {
+          displayNames.push(`⬜ ${fl.name}`);
+          continue;
+        }
+
+        const fps = fpsByFloor.get(fl.id) ?? [];
+        for (const fp of fps) {
+          const fpKey = kFP(fp.id);
+          if (selected.has(fpKey) || isAllAreasSelectedForFp(fp.id)) {
+            displayNames.push(`🗺️ ${fp.name}`);
+            continue;
+          }
+
+          const mas = masByFp.get(fp.id) ?? [];
+          for (const ma of mas) {
+            const maKey = kMA(ma.id);
+            if (selected.has(maKey)) {
+              displayNames.push(`📍 ${ma.name}`);
+            }
+          }
+        }
+      }
+    }
+
+    // Compact display: show max 3 names + ellipsis if more
+    return displayNames.slice(0, 3).join(', ') + (displayNames.length > 3 ? '…' : '');
+  }, [selectedKeys, buildings, floorsByBuilding, fpsByFloor, masByFp]);
+
   // === UI ===
   if (disabled) {
     return (
@@ -370,66 +436,6 @@ const AutocompleteFilter: React.FC<Props> = ({
     );
   }
 
-  // --- 🧠 Compute compressed display selection ---
-// --- 🧠 Compute compressed display selection with icons ---
-const computeDisplaySelection = React.useCallback(() => {
-  const selected = new Set(selectedKeys);
-
-  const isAllAreasSelectedForFp = (fpId: string) => {
-    const mas = masByFp.get(fpId) ?? [];
-    return mas.length > 0 && mas.every((ma) => selected.has(kMA(ma.id)));
-  };
-
-  const isAllFpSelectedForFloor = (floorId: string) => {
-    const fps = fpsByFloor.get(floorId) ?? [];
-    return fps.length > 0 && fps.every((fp) => selected.has(kFP(fp.id)) || isAllAreasSelectedForFp(fp.id));
-  };
-
-  const isAllFloorsSelectedForBuilding = (bId: string) => {
-    const fls = floorsByBuilding.get(bId) ?? [];
-    return fls.length > 0 && fls.every((fl) => selected.has(kF(fl.id)) || isAllFpSelectedForFloor(fl.id));
-  };
-
-  const displayNames: string[] = [];
-
-  for (const b of buildings) {
-    const bKey = kB(b.id);
-    if (selected.has(bKey) || isAllFloorsSelectedForBuilding(b.id)) {
-      displayNames.push(`🏢 ${b.name}`);
-      continue;
-    }
-
-    const fls = floorsByBuilding.get(b.id) ?? [];
-    for (const fl of fls) {
-      const fKey = kF(fl.id);
-      if (selected.has(fKey) || isAllFpSelectedForFloor(fl.id)) {
-        displayNames.push(`⬜ ${fl.name}`);
-        continue;
-      }
-
-      const fps = fpsByFloor.get(fl.id) ?? [];
-      for (const fp of fps) {
-        const fpKey = kFP(fp.id);
-        if (selected.has(fpKey) || isAllAreasSelectedForFp(fp.id)) {
-          displayNames.push(`🗺️ ${fp.name}`);
-          continue;
-        }
-
-        const mas = masByFp.get(fp.id) ?? [];
-        for (const ma of mas) {
-          const maKey = kMA(ma.id);
-          if (selected.has(maKey)) {
-            displayNames.push(`📍 ${ma.name}`);
-          }
-        }
-      }
-    }
-  }
-
-  // Compact display: show max 3 names + ellipsis if more
-  return displayNames.slice(0, 3).join(', ') + (displayNames.length > 3 ? '…' : '');
-}, [selectedKeys, buildings, floorsByBuilding, fpsByFloor, masByFp]);
-
   return (
     <Box sx={{ position: 'relative' }}>
       <Box ref={anchorRef}>
@@ -442,9 +448,7 @@ const computeDisplaySelection = React.useCallback(() => {
             title: '', // remove browser tooltip
             readOnly: true, // prevent manual typing
           }}
-          value={
-            hideSelectedAreas ? (selectedKeys.size > 0 ? computeDisplaySelection() : '') : ''
-          }
+          value={hideSelectedAreas ? (selectedKeys.size > 0 ? computeDisplaySelection() : '') : ''}
           onFocus={() => setOpen(true)}
           onClick={() => setOpen(true)}
           sx={{

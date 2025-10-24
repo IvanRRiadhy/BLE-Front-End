@@ -36,7 +36,8 @@ import 'dayjs/locale/id';
 import { DateTimePicker, renderTimeViewClock } from '@mui/x-date-pickers';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
 dayjs.extend(localizedFormat);
 dayjs.extend(weekOfYear);
 dayjs.locale('id');
@@ -137,25 +138,38 @@ const TrackingTransactionFilter = () => {
   };
 
   // --- Handlers ---
-  const handleApplyFilter = () => {
-    const timeFilter = (() => {
-      if (timeRange === 'any' || (!startTime && !endTime)) return {};
-      let range = getRange(timeRange);
-      if (timeRange === 'custom' && startTime && endTime) {
-        range = { start: startTime, end: endTime };
-      }
-      if (range.start && range.end) {
-        return {
-          TransTime: {
-            DateFrom: range.start.toISOString(),
-            DateTo: range.end.toISOString(),
-          },
-        };
-      }
-      return {};
-    })();
+  const handleApplyFilter = useCallback(() => {
+    const now = dayjs();
 
-    dispatch(UpdateFilter({Start: 0, filters: filterState, dateFilters: timeFilter }));
+    // Determine range based on selected timeRange
+    let range: { start?: Dayjs; end?: Dayjs } = {};
+    if (timeRange === 'today') range = { start: now.startOf('day'), end: now.endOf('day') };
+    else if (timeRange === 'week') range = { start: now.startOf('week'), end: now.endOf('week') };
+    else if (timeRange === 'month')
+      range = { start: now.startOf('month'), end: now.endOf('month') };
+    else if (timeRange === 'custom' && startTime && endTime)
+      range = { start: startTime, end: endTime };
+    console.log('Local Start:', range.start?.format());
+    console.log('UTC Start:', dayjs(range.start).utc().format());
+    // Convert local times → UTC before sending
+    const timeFilter =
+      range.start && range.end
+        ? {
+            TransTime: {
+              DateFrom: dayjs(range.start).utc().toISOString(),
+              DateTo: dayjs(range.end).utc().toISOString(),
+            },
+          }
+        : {};
+
+    dispatch(
+      UpdateFilter({
+        Start: 0,
+        filters: filterState,
+        dateFilters: timeFilter,
+      }),
+    );
+
     setAppliedTimeFilter({ timeRange, startTime, endTime });
     setLockedInitialArea({
       BuildingId: [],
@@ -164,7 +178,7 @@ const TrackingTransactionFilter = () => {
       MaskedAreaId: filterState.FloorplanMaskedAreaId,
     });
     setOpen(false);
-  };
+  }, [dispatch, filterState, timeRange, startTime, endTime]);
 
   const handleResetFilter = () => {
     const defaults = defaultTrackingTransFilter.filters;
@@ -492,8 +506,6 @@ const TrackingTransactionFilter = () => {
                 resetToken={resetToken}
               />
             </Grid>
-
-
           </Grid>
         </Box>
 
@@ -526,7 +538,11 @@ const TrackingTransactionFilter = () => {
                 onClick={handleApplyFilter}
                 disabled={
                   isEqual(filterState, trackingTransFilter.filters) &&
-                  isEqual(appliedTimeFilter, { timeRange, startTime, endTime })
+                  appliedTimeFilter.timeRange === timeRange &&
+                  (appliedTimeFilter.startTime?.toISOString() ?? null) ===
+                    (startTime?.toISOString() ?? null) &&
+                  (appliedTimeFilter.endTime?.toISOString() ?? null) ===
+                    (endTime?.toISOString() ?? null)
                 }
               >
                 Apply
