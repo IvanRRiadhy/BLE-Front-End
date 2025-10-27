@@ -79,9 +79,12 @@ const Notifications = () => {
     const s = actionStatus.find((x) => x.value === status);
     if (!s) return 'Unknown';
     switch (status) {
-      case 'Idle': return 'Active';
-      case 'Done': return 'Done';
-      default: return s.label;
+      case 'Idle':
+        return 'Active';
+      case 'Done':
+        return 'Done';
+      default:
+        return s.label;
     }
   };
 
@@ -92,6 +95,12 @@ const Notifications = () => {
     const spacing = 85; // bubble height + gap
     return { top: baseTop + index * spacing, left: rect.right - 370 };
   };
+
+  const notificationAudio = useMemo(() => {
+    const audio = new Audio('/sfx/AlarmNotification/Calm-Warning.wav');
+    audio.volume = 0.6; // adjust volume if needed
+    return audio;
+  }, []);
 
   // 🔔 Handle new alarms
   useEffect(() => {
@@ -121,6 +130,12 @@ const Notifications = () => {
 
       setBubbles((prev) => [...prev, bd]);
 
+      // Play notification sound
+      notificationAudio.currentTime = 0; // rewind if it's still playing
+      notificationAudio.play().catch((err) => {
+        console.warn('Audio playback prevented:', err);
+      });
+
       // auto-hide this one
       const timerId = window.setTimeout(() => {
         setBubbles((prev) => prev.filter((b) => b.id !== bd.id));
@@ -139,7 +154,12 @@ const Notifications = () => {
   // 🧊 Bubble animation variants
   const bubbleVariants = {
     hidden: { opacity: 0, y: 25, scale: 0.98 },
-    visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 260, damping: 20 } },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { type: 'spring', stiffness: 260, damping: 20 },
+    },
     exit: { opacity: 0, y: -15, scale: 0.96, transition: { duration: 0.25 } },
   };
 
