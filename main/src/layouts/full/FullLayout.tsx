@@ -94,7 +94,7 @@ const FullLayout: FC = () => {
         const alarmData = Array.isArray(data) ? data[0] : data;
         setLatestAlarm(alarmData);
         // setOpenAlarmPopup(true);
-        // dispatch(showAlarmPopup(alarmData));
+        dispatch(showAlarmPopup(alarmData));
         // document.dispatchEvent(new CustomEvent('app:new-alarm', { detail: { alarm: alarmData } }));
         // window.dispatchEvent(new CustomEvent('app:new-alarm', { detail: { alarm: alarmData } }));
         window.postMessage({ type: 'app:new-alarm', detail: { alarm: alarmData } }, '*');

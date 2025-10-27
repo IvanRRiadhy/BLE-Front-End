@@ -44,7 +44,6 @@ const AreaDistribution = () => {
   };
     const areaColors = generateColors(AreaList.length);
     return (
-        <DashboardCard title='Area Distribution' subtitle='Area Distribution' >
             <Box sx={{height: 380}}>
                 <ResponsiveContainer>
                     <PieChart>
@@ -66,7 +65,6 @@ const AreaDistribution = () => {
                     </PieChart>
                 </ResponsiveContainer>
             </Box>
-        </DashboardCard>
     );
 };
 

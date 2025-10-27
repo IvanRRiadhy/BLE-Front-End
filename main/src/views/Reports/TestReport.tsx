@@ -16,7 +16,6 @@ const TestReport = () => {
       <AppCard>
         <Box
           sx={{
-            m:5,
             p: 3,
             minWidth: '100%',
             width: '100%',

@@ -100,32 +100,42 @@ const BeaconDetailPopup = ({
   };
 
 const handleFollowOnThisScreen = () => {
-  if (!activeLayoutId || !screenId) {
-    console.warn('No active layout or screenId found.');
+  if (!activeLayoutId || !activeLayout) {
+    console.warn('No active layout found.');
     return;
   }
 
-  // ✅ Use shared MQTT client instead of creating a new one
+  // 🟢 Always use the FIRST screen of the active layout
+  const firstScreen = activeLayout.screens[0];
+  if (!firstScreen) {
+    console.warn('No screens available in active layout.');
+    return;
+  }
+
   const topic = `highlight/card/${bleNumber}`;
   const payload = 'Start';
 
+  // ✅ Publish Start via shared MQTT client
   publishMQTT(topic, payload);
-  console.log('Published Start message to', topic);
-  console.log('Following beacon', bleNumber, 'on layout', activeLayoutId, 'screen', screenId);
-  // 🧭 Update layout reducer for Follow Mode
+  console.log(
+    `Published Start message to ${topic} for beacon ${bleNumber} → screen ${firstScreen.id}`
+  );
+
+  // ✅ Switch first screen into Follow Mode
   dispatch(
     setScreenDisplay({
       layoutId: activeLayoutId,
-      screenId,
+      screenId: firstScreen.id,
       display: {
         displayType: 3, // Follow Mode
-        displayOutput: bleNumber, // Beacon DMAC
+        displayOutput: bleNumber, // DMAC of beacon
       },
     }),
   );
 
   handleClose();
 };
+
 
   return (
     <Dialog fullWidth maxWidth={'md'} open={detailDialogOpen} onClose={handleClose}>

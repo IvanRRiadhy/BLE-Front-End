@@ -29,7 +29,6 @@ const BeaconList = [
 
 const BeaconDistribution = () => {
   return (
-    <DashboardCard title="Beacon Distribution" subtitle="Beacon Distribution" >
       <Box  sx={{ height: 380 }}>
         <ResponsiveContainer>
           <PieChart>
@@ -55,7 +54,6 @@ const BeaconDistribution = () => {
           </PieChart>
         </ResponsiveContainer>
       </Box>
-    </DashboardCard>
   );
 };
 

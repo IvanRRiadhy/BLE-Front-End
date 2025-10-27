@@ -26,6 +26,8 @@ import { fetchFloorDT, floorType } from 'src/store/apps/crud/floor';
 import BeaconDistribution from 'src/components/dashboards/mainmenu/BeaconDistribution';
 import AreaDistribution from 'src/components/dashboards/mainmenu/AreaDistribution';
 import { CardType, fetchCardDT } from 'src/store/apps/crud/card';
+import DynamicSwitcherCard from 'src/components/dashboards/mainmenu/DynamicCardSwitcher';
+import ChartSwitcher from 'src/components/dashboards/mainmenu/ChartSwitcher';
 
 const filter = {
   Draw: 1,
@@ -260,15 +262,44 @@ const Modern = () => {
               <TrackingGraph alarmData={alarmAllData} trackingData={trackingData} />
             </Grid>
 
-            {/* Alarm Warning */}
             <Grid size={{ xs: 12, lg: 3 }} sx={{ display: 'flex', flexDirection: 'column' }}>
-              <AlarmWarning />
+              <DynamicSwitcherCard
+                defaultType="Alarm"
+                availableTypes={['Alarm', 'Blacklist', 'Tracking', 'Visitor']}
+                componentProps={{
+                  Alarm: {},
+                  Blacklist: {
+                    filterFloorplanId: dashboardFilter?.FloorplanId ?? [],
+                  },
+                  Tracking: {},
+                  Visitor: {},
+                }}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, lg: 3 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+              <ChartSwitcher
+                availableCharts={['Beacon', 'Area']}
+                chartProps={{
+                  Beacon: {
+                    outerRadius: 100,
+                    innerRadius: 80,
+                    data: [
+                      { name: 'Employee', value: 73, color: '#43a047' },
+                      { name: 'Visitor', value: 25, color: '#bdff52ff' },
+                    ],
+                  },
+                  Area: {
+                    outerRadius: 90,
+                    label: 'Area Usage',
+                    data: [
+                      { name: 'Area 1', value: 21 },
+                      { name: 'Area 2', value: 17 },
+                    ],
+                  },
+                }}
+              />
             </Grid>
 
-            {/* Blacklist */}
-            <Grid size={{ xs: 12, lg: 3 }} sx={{ display: 'flex', flexDirection: 'column' }}>
-              <BlacklistTable filterFloorplanId={dashboardFilter?.FloorplanId ?? []} />
-            </Grid>
             <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
               <HeatmapFloorplan
                 TrackingList={trackingData}

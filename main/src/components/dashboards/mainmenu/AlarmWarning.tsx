@@ -165,7 +165,6 @@ const AlarmWarning = () => {
   );
 
   return (
-    <DashboardCard title={t('Alarm Warning')}>
       <Grid container spacing={3}>
         <Grid size={12}>
           <Box
@@ -283,21 +282,20 @@ const AlarmWarning = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
+              {/* Pagination */}
+              <TablePagination
+                component="div"
+                count={AlarmRecordFilteredCount}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                onPageChange={handleChangePage}
+                rowsPerPageOptions={[5]}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
             </BlankCard>
           </Box>
-          {/* Pagination */}
-          <TablePagination
-            component="div"
-            count={AlarmRecordFilteredCount}
-            page={page}
-            rowsPerPage={rowsPerPage}
-            onPageChange={handleChangePage}
-            rowsPerPageOptions={[5]}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
         </Grid>
       </Grid>
-    </DashboardCard>
   );
 };
 

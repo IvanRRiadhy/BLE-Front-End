@@ -2,8 +2,16 @@ import React, { useEffect } from 'react';
 import {
   Box,
   Grid2 as Grid,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Typography, TablePagination, TableSortLabel, Skeleton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  TablePagination,
+  TableSortLabel,
+  Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
@@ -16,7 +24,7 @@ import isEqual from 'lodash/isEqual';
 
 const columns = [
   { label: 'Blacklisted Visitor', field: 'Visitor.Name', sortAble: true },
-  { label: 'Blacklisted Area',    field: 'MaskedArea.Name', sortAble: true },
+  { label: 'Blacklisted Area', field: 'MaskedArea.Name', sortAble: true },
 ];
 
 interface BlacklistTableProps {
@@ -29,7 +37,9 @@ const Blacklist: React.FC<BlacklistTableProps> = ({ filterFloorplanId }) => {
   const dispatch: AppDispatch = useDispatch();
 
   const blaclistData = useSelector((s: RootState) => s.blacklistReducer.blacklists);
-  const blacklistFilteredCount = useSelector((s: RootState) => s.blacklistReducer.blacklistFilteredCount);
+  const blacklistFilteredCount = useSelector(
+    (s: RootState) => s.blacklistReducer.blacklistFilteredCount,
+  );
   const blacklistFilter = useSelector((s: RootState) => s.blacklistReducer.blacklistFilter);
   const hasLoaded = useSelector((s: RootState) => s.blacklistReducer.hasLoaded); // <-- flag
 
@@ -47,7 +57,7 @@ const Blacklist: React.FC<BlacklistTableProps> = ({ filterFloorplanId }) => {
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
   const handleSort = (column: string) => {
-    const isAsc  = blacklistFilter.SortColumn === column && blacklistFilter.SortDir === 'asc';
+    const isAsc = blacklistFilter.SortColumn === column && blacklistFilter.SortDir === 'asc';
     const isDesc = blacklistFilter.SortColumn === column && blacklistFilter.SortDir === 'desc';
 
     if (isDesc) {
@@ -60,9 +70,11 @@ const Blacklist: React.FC<BlacklistTableProps> = ({ filterFloorplanId }) => {
   useEffect(() => {
     const currentFloorplanId = blacklistFilter.filters?.FloorplanMaskedAreaId || [];
     if (!isEqual(currentFloorplanId, filterFloorplanId)) {
-      dispatch(UpdateFilter({
-        filters: { ...blacklistFilter.filters, FloorplanMaskedAreaId: filterFloorplanId },
-      }));
+      dispatch(
+        UpdateFilter({
+          filters: { ...blacklistFilter.filters, FloorplanMaskedAreaId: filterFloorplanId },
+        }),
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterFloorplanId, blacklistFilter.filters]);
@@ -102,16 +114,27 @@ const Blacklist: React.FC<BlacklistTableProps> = ({ filterFloorplanId }) => {
   );
 
   return (
-    <DashboardCard title="Blacklist">
       <Grid container spacing={3}>
         <Grid size={12}>
-          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 440, maxHeight: 440, overflow: 'auto', maxWidth: '100%' }}>
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: 440,
+              maxHeight: 440,
+              overflow: 'auto',
+              maxWidth: '100%',
+            }}
+          >
             <BlankCard>
               <TableContainer>
                 <Table aria-label="blacklist table" sx={{ whiteSpace: 'nowrap' }}>
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
+                      <TableCell
+                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}
+                      >
                         <Typography variant="h6"> </Typography>
                       </TableCell>
                       {columns.map((col) => (
@@ -140,7 +163,9 @@ const Blacklist: React.FC<BlacklistTableProps> = ({ filterFloorplanId }) => {
                       <>
                         {blaclistData.map((blacklist, index) => (
                           <TableRow key={blacklist.id}>
-                            <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}>
+                            <TableCell
+                              sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                            >
                               {index + 1 + page * rowsPerPage}
                             </TableCell>
                             <TableCell>
@@ -148,13 +173,21 @@ const Blacklist: React.FC<BlacklistTableProps> = ({ filterFloorplanId }) => {
                                 <Typography variant="subtitle2" fontWeight={600}>
                                   {blacklist.visitor?.name || 'Unknown Visitor'}
                                 </Typography>
-                                <Typography color="textSecondary" fontSize="12px" variant="subtitle2">
+                                <Typography
+                                  color="textSecondary"
+                                  fontSize="12px"
+                                  variant="subtitle2"
+                                >
                                   {blacklist.visitor?.cardNumber || 'No Card Number'}
                                 </Typography>
                               </Box>
                             </TableCell>
                             <TableCell>
-                              <Typography color="textSecondary" variant="subtitle2" fontWeight={400}>
+                              <Typography
+                                color="textSecondary"
+                                variant="subtitle2"
+                                fontWeight={400}
+                              >
                                 {blacklist.floorplanMaskedArea?.name || 'Unknown Area'}
                               </Typography>
                             </TableCell>
@@ -163,7 +196,9 @@ const Blacklist: React.FC<BlacklistTableProps> = ({ filterFloorplanId }) => {
 
                         {/* keep table height stable */}
                         {Array.from({
-                          length: rowsPerPage - Math.min(rowsPerPage, blaclistData.length - page * rowsPerPage),
+                          length:
+                            rowsPerPage -
+                            Math.min(rowsPerPage, blaclistData.length - page * rowsPerPage),
                         }).map((_, idx) => (
                           <TableRow key={`empty-row-${idx}`} style={{ height: 63 }}>
                             <TableCell colSpan={4} />
@@ -173,22 +208,20 @@ const Blacklist: React.FC<BlacklistTableProps> = ({ filterFloorplanId }) => {
                     )}
                   </TableBody>
                 </Table>
+                <TablePagination
+                  component="div"
+                  count={hasLoaded ? blacklistFilteredCount : rowsPerPage} // avoid jumpy pager while loading
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                  onPageChange={handleChangePage}
+                  rowsPerPageOptions={[5]}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
               </TableContainer>
             </BlankCard>
           </Box>
-
-          <TablePagination
-            component="div"
-            count={hasLoaded ? blacklistFilteredCount : rowsPerPage} // avoid jumpy pager while loading
-            page={page}
-            rowsPerPage={rowsPerPage}
-            onPageChange={handleChangePage}
-            rowsPerPageOptions={[5]}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
         </Grid>
       </Grid>
-    </DashboardCard>
   );
 };
 

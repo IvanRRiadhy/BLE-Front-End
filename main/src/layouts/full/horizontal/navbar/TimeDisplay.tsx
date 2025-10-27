@@ -1,24 +1,23 @@
 import { useEffect, useState } from 'react';
-import { Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useSelector } from 'src/store/Store';
-// import { useTranslation } from 'react-i18next';
 
 const TimeDisplay = () => {
-    const [currentDateTime, setCurrentDateTime] = useState<string>('');
-    //   const { t } = useTranslation();
-    const language = useSelector((state) => state.customizer.isLanguage);
-    const getLanguageLabel = () => {
-        // console.log(language);
-      switch (language) {
-        case 'en':
-          return 'en-US';
-        case 'id':
-          return 'id-ID';
-        default:
-          return 'en-US';
-      }
+  const [currentDateTime, setCurrentDateTime] = useState<string>('');
+  const language = useSelector((state) => state.customizer.isLanguage);
+
+  const getLanguageLabel = () => {
+    switch (language) {
+      case 'en':
+        return 'en-US';
+      case 'id':
+        return 'id-ID';
+      default:
+        return 'en-US';
     }
-    const formatDateTime = () => {
+  };
+
+  const formatDateTime = () => {
     const now = new Date();
     return new Intl.DateTimeFormat(getLanguageLabel(), {
       weekday: 'long',
@@ -28,27 +27,40 @@ const TimeDisplay = () => {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      hour12: false, // Use 24-hour format
+      hour12: false,
     })
       .format(now)
-      .replace(/\./g, ':'); // Replace dots with colons
+      .replace(/\./g, ':');
   };
-//   useEffect(() =>{
-//     console.log(language);
-//   },[language])
 
-    useEffect(() => {
-    setCurrentDateTime(formatDateTime()); // Set initial time immediately
-    const interval = setInterval(() => {
-      setCurrentDateTime(formatDateTime());
-    }, 1000);
-
-    return () => clearInterval(interval); // Cleanup interval on component unmount
+  useEffect(() => {
+    setCurrentDateTime(formatDateTime());
+    const interval = setInterval(() => setCurrentDateTime(formatDateTime()), 1000);
+    return () => clearInterval(interval);
   }, [language]);
+
   return (
-    <Typography variant="body1" sx={{ whiteSpace: 'nowrap', fontWeight: 500 }}>
-      {currentDateTime}
-    </Typography>
+    <Box
+      sx={{
+        minWidth: '280px',        // ✅ keeps stable width (no shifting)
+        textAlign: 'left',        // ✅ ensures text expands to the right
+        whiteSpace: 'nowrap',     // ✅ prevents wrapping
+        display: 'flex',          // ✅ for precise horizontal layout
+        justifyContent: 'flex-start', // ✅ keeps it pinned left inside box
+      }}
+    >
+      <Typography
+        variant="body1"
+        sx={{
+          fontWeight: 500,
+          fontSize: '0.95rem',
+          color: 'text.primary',
+          letterSpacing: 0.3,
+        }}
+      >
+        {currentDateTime}
+      </Typography>
+    </Box>
   );
 };
 

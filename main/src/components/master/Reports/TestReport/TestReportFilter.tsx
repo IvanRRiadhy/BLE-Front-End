@@ -20,9 +20,10 @@ import { fetchBuildings } from 'src/store/apps/crud/building';
 import { fetchFloors } from 'src/store/apps/crud/floor';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
+import { fetchMembers } from 'src/store/apps/crud/member';
 
 const VisitorReportFilter = () => {
-    const didInit = useRef(false);
+  const didInit = useRef(false);
   // Redux Data
   const buildings = useSelector((state: RootState) => state.buildingReducer.buildingAll);
   const floors = useSelector((state: RootState) => state.floorReducer.floorAll);
@@ -56,15 +57,22 @@ const VisitorReportFilter = () => {
     });
   };
 
-  useEffect(() => {
-  if (didInit.current) return;
-  didInit.current = true;
+  const handleAreaFilterChange = (f: typeof areaFilter) => {
+    if (JSON.stringify(f) !== JSON.stringify(areaFilter)) {
+      setAreaFilter(f);
+    }
+  };
 
-  dispatch(fetchBuildings());
-  dispatch(fetchFloors());
-  dispatch(fetchFloorplan());
-  dispatch(fetchMaskedAreas());
-}, [dispatch]);
+  useEffect(() => {
+    if (didInit.current) return;
+    didInit.current = true;
+
+    dispatch(fetchBuildings());
+    dispatch(fetchFloors());
+    dispatch(fetchFloorplan());
+    dispatch(fetchMaskedAreas());
+    dispatch(fetchMembers());
+  }, [dispatch]);
 
   return (
     <Box p={2}>
@@ -78,7 +86,7 @@ const VisitorReportFilter = () => {
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
-          maxWidth: 700,
+          maxWidth: '100%',
           mx: 'auto',
         }}
       >
@@ -101,32 +109,30 @@ const VisitorReportFilter = () => {
             </FormControl>
           </Grid>
 
-          {timeType === 'Custom' && (
-            <>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <TextField
-                  label="Start Date"
-                  type="date"
-                  fullWidth
-                  size="small"
-                  InputLabelProps={{ shrink: true }}
-                  value={dateRange.from}
-                  onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <TextField
-                  label="End Date"
-                  type="date"
-                  fullWidth
-                  size="small"
-                  InputLabelProps={{ shrink: true }}
-                  value={dateRange.to}
-                  onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-                />
-              </Grid>
-            </>
-          )}
+          <Grid size={{ xs: 12, md: 4 }}>
+            <TextField
+              label="Start Date"
+              type="date"
+              fullWidth
+              size="small"
+              InputLabelProps={{ shrink: true }}
+              value={timeType === 'Custom' ? dateRange.from : ""}
+              disabled={timeType !== 'Custom'}
+              onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <TextField
+              label="End Date"
+              type="date"
+              fullWidth
+              size="small"
+              InputLabelProps={{ shrink: true }}
+              value={timeType === 'Custom' ? dateRange.to : ""}
+              disabled={timeType !== 'Custom'}
+              onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+            />
+          </Grid>
         </Grid>
 
         {/* Filter Options */}
@@ -138,7 +144,7 @@ const VisitorReportFilter = () => {
                 label="Visitor Status"
                 value={visitorStatusValue}
                 onChange={(e) => setVisitorStatusValue(e.target.value)}
-                size="small"
+                // size="small"
               >
                 {visitorStatus.map((v) => (
                   <MenuItem key={v.value} value={v.value} disabled={v.disabled}>
@@ -156,7 +162,7 @@ const VisitorReportFilter = () => {
               floorplans={floorplans}
               maskedAreas={maskedAreas}
               initial={areaFilter}
-              onChangeFilter={(f) => setAreaFilter(f)}
+              onChangeFilter={handleAreaFilterChange}
               hideSelectedAreas
             />
           </Grid>
@@ -168,7 +174,7 @@ const VisitorReportFilter = () => {
                 label="Host"
                 value={host}
                 onChange={(e) => setHost(e.target.value)}
-                size="small"
+                // size="small"
               >
                 <MenuItem value="">Select Host</MenuItem>
                 {members.map((m) => (
