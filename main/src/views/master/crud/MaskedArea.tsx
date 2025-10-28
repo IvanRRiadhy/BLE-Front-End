@@ -56,7 +56,7 @@ const MaskedArea = () => {
       title="Floorplan Masked Area"
       description="This is the Floorplan Masked Area CRUD Page"
     >
-      <Breadcrumb title="Floorplan Masked Area Table" />
+      <Breadcrumb title="Floorplan Masked Area" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => {
           return(

@@ -46,14 +46,14 @@ const FloorplanDevice = () => {
       bgcolor: 'primary',
     },
     {
-      title: 'Total Floorplan Devices',
+      title: 'Total Devices Mapped',
       subtitle: deviceCount.toString(),
       bgcolor: 'success',
     },
   ];
   return (
-    <PageContainer title="Floorplan Device" description="This is the Floorplan Device CRUD Page">
-      <Breadcrumb title="Floorplan Device Table" />
+    <PageContainer title="Device Mapping" description="This is the Device Mapping CRUD Page">
+      <Breadcrumb title="Device Mapping" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => {
           return(

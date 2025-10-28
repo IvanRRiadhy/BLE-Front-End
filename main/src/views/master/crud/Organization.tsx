@@ -46,7 +46,7 @@ const Organization = () => {
   ];
   return (
     <PageContainer title="Organization" description="This is the Organization CRUD Page">
-      <Breadcrumb title="Organization Table" />
+      <Breadcrumb title="Organization" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

@@ -41,7 +41,7 @@ const member = () => {
   ];
   return (
     <PageContainer title="Member" description="This is the Member CRUD Page">
-      <Breadcrumb title="Member Table" />
+      <Breadcrumb title="Member" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

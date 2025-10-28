@@ -47,7 +47,7 @@ const BleReader = () => {
   ];
   return (
     <PageContainer title="Ble Reader" description="This is the Ble Reader CRUD Page">
-      <Breadcrumb title="Ble Reader Table" />
+      <Breadcrumb title="Ble Reader" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

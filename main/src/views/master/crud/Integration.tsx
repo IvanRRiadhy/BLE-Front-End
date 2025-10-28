@@ -43,7 +43,7 @@ const Integration = () => {
 
   return (
     <PageContainer title="Integration" description="This is the Integration CRUD Page">
-      <Breadcrumb title="Integration Table" />
+      <Breadcrumb title="Integration" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

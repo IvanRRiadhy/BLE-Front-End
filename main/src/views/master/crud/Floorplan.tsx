@@ -47,7 +47,7 @@ const Floorplan = () => {
   ];
   return (
     <PageContainer title="Floorplan " description="This is the Floorplan CRUD Page">
-      <Breadcrumb title="Floorplan Table" />
+      <Breadcrumb title="Floorplan" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

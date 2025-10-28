@@ -44,7 +44,7 @@ const Brand = () => {
   ];
   return (
     <PageContainer title="Brand" description="This is the Brand CRUD Page">
-      <Breadcrumb title="Brand Table" />
+      <Breadcrumb title="Brand" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

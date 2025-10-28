@@ -46,7 +46,7 @@ const Floor = () => {
   ];
   return (
     <PageContainer title="Floor" description="This is the Floor CRUD Page">
-      <Breadcrumb title="Floor Table" />
+      <Breadcrumb title="Floor" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>
