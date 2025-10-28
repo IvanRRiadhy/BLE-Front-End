@@ -32,10 +32,11 @@ const Toolbar = () => {
       setLoading(true);
       try {
         const res = await dispatch(fetchVisitor() as any); // ✅ adjust thunk name if different
-        const visitors = res.payload?.collection?.data ?? res.payload ?? [];
-        const filtered = visitors.filter(
+        // const visitors = res.payload?.collection?.data ?? res.payload ?? [];
+        const filtered = res.filter(
           (v: VisitorType) => v.bleCardNumber && v.bleCardNumber.trim() !== '',
         );
+        console.log('Loaded visitors with BLE:', filtered);
         setVisitorList(filtered);
       } catch (e) {
         console.error('Failed to load visitors', e);

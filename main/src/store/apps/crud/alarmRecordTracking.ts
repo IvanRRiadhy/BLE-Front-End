@@ -42,6 +42,7 @@ export type GetFilter = {
             DateTo?: string | null,
         }
     }
+    timeReport?: string,
     filters: {
         FloorplanMaskedAreaId?: string[],
         ReaderId?: string[],

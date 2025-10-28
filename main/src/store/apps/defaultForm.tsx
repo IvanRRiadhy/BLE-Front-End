@@ -87,6 +87,7 @@ export const defaultAlarmRecordFilter: AlarmRecordFilter = {
   SortColumn: 'Timestamp',
   SortDir: 'desc',
   SearchValue: '',
+  timeReport: "daily",
   filters: {
   },
 };
@@ -136,7 +137,7 @@ export const defaultBleReaderForm: bleReaderType = {
   name: '',
   gmac: '',
   ip: '',
-  engineReaderId: '',
+  // engineReaderId: '',
   createdBy: '',
   createdAt: '',
   updatedBy: '',
@@ -453,6 +454,7 @@ export const defaultTrackingTransFilter: TrackingTransFilter = {
   SortColumn: 'Transtime',
   SortDir: 'desc',
   SearchValue: '',
+  timeReport: "daily",
   filters: {
 
   },

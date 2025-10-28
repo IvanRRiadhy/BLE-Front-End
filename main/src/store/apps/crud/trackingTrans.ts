@@ -27,6 +27,7 @@ export type GetFilter = {
             DateTo?: string | null,
         }
     }
+    timeReport?: string,
     filters: {
         FloorplanMaskedAreaId?: string[],
         ReaderId?: string[],
@@ -231,7 +232,7 @@ export const fetchTrackingTransDT = createAsyncThunk(
       // ⚠️ DO NOT DISPATCH here! return data instead.
       const elapsed = Date.now() - started;
       if (elapsed < 500) await delay(500 - elapsed);
-
+      console.log("✅ Fetch trackingTrans:", response.data.collection);
       return response.data.collection; // returns to the fulfilled case
     } catch (error: any) {
       console.error("❌ Error fetching trackingTrans:", error);

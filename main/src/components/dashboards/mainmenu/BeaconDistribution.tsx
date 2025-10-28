@@ -36,8 +36,8 @@ const BeaconDistribution = () => {
               data={BeaconList}
               dataKey="value"
               nameKey="name"
-              startAngle={180}
-              endAngle={0}
+              // startAngle={180}
+              // endAngle={0}
               cx="50%"
               cy="65%"
               innerRadius={80}

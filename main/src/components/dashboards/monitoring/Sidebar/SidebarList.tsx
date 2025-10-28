@@ -117,7 +117,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
           id,
           device: 'Alarm',
           target: getName(a.beaconId),
-          floor: a.floorplanId || 'Unknown Floor',
+          floor: a.floorplan?.name || 'Unknown Floor',
           area: 'Unknown Area',
           alarmType: a.isInRestrictedArea ? 'Restricted' : undefined,
           status: a.isActive ? 'Active' : 'Inactive',

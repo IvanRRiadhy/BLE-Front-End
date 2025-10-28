@@ -154,17 +154,17 @@ const Modern = () => {
         },
       }),
     );
-    dispatch(
-      fetchAlarmDT({
-        ...filter,
-        SortColumn: 'Timestamp',
-        Length: alarmRowsPerPage,
-        Start: alarmPage * alarmRowsPerPage,
-        filters: {
-          FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || [],
-        },
-      }),
-    );
+    // dispatch(
+    //   fetchAlarmDT({
+    //     ...filter,
+    //     SortColumn: 'Timestamp',
+    //     Length: alarmRowsPerPage,
+    //     Start: alarmPage * alarmRowsPerPage,
+    //     filters: {
+    //       FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || [],
+    //     },
+    //   }),
+    // );
   }, [dispatch, dashboardFilter]);
   const trackingFilteredCount: number = useSelector(
     (state: RootState) => state.trackingTransReducer.trackingTransFilteredCount ?? 0,
@@ -200,12 +200,6 @@ const Modern = () => {
   const alarmAllData: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackingAll,
   );
-  // const maskedAreaData: MaskedAreaType[] = useSelector(
-  //   (state: RootState) => state.maskedAreaReducer.maskedAreas,
-  // );
-  // const bleReaderData: bleReaderType[] = useSelector(
-  //   (state: RootState) => state.bleReaderReducer.bleReaders,
-  // );
   const alarmData: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
   );
@@ -265,7 +259,7 @@ const Modern = () => {
             <Grid size={{ xs: 12, lg: 3 }} sx={{ display: 'flex', flexDirection: 'column' }}>
               <DynamicSwitcherCard
                 defaultType="Alarm"
-                availableTypes={['Alarm', 'Blacklist', 'Tracking', 'Visitor']}
+                availableTypes={['Alarm', 'Blacklist']}
                 componentProps={{
                   Alarm: {},
                   Blacklist: {
@@ -278,7 +272,7 @@ const Modern = () => {
             </Grid>
             <Grid size={{ xs: 12, lg: 3 }} sx={{ display: 'flex', flexDirection: 'column' }}>
               <ChartSwitcher
-                availableCharts={['Beacon', 'Area']}
+                availableCharts={['Beacon', 'Area', 'Tracking', 'Visitor']}
                 chartProps={{
                   Beacon: {
                     outerRadius: 100,
@@ -309,12 +303,6 @@ const Modern = () => {
                 imageWidth={800}
                 imageHeight={200}
               />
-            </Grid>
-            <Grid size={{ xs: 12, lg: 3 }} sx={{ display: 'flex', flexDirection: 'column' }}>
-              <BeaconDistribution />
-            </Grid>
-            <Grid size={{ xs: 12, lg: 3 }} sx={{ display: 'flex', flexDirection: 'column' }}>
-              <AreaDistribution />
             </Grid>
           </Grid>
         </Grid>

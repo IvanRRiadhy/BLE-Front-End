@@ -54,6 +54,7 @@ import GeoFencingReducer from './apps/alarmsetting/geofencing';
 import OverPopulatingReducer from './apps/alarmsetting/overpopulating';
 import StayOnAreaReducer from './apps/alarmsetting/stayonarea';
 import BoundaryReducer from './apps/alarmsetting/boundary';
+import EngineReducer from './apps/crud/engine';
 import SessionReducer from './apps/session';
 import { combineReducers } from 'redux';
 import {
@@ -96,6 +97,7 @@ const rootReducer = combineReducers({
   layoutReducer: layoutReducer,
   floorplanReducer: FloorplanReducer,
   CardReducer: CardReducer,
+  EngineReducer: EngineReducer,
   VisitorCardReducer: VisitorCardReducer,
   CardRecordReducer: CardRecordReducer,
   TrxVisitorReducer: TrxVisitorReducer,
@@ -116,6 +118,7 @@ const rootReducer = combineReducers({
   OverPopulatingReducer: OverPopulatingReducer,
   StayOnAreaReducer: StayOnAreaReducer,
   BoundaryReducer: BoundaryReducer,
+
 });
 
 const persistConfig = {

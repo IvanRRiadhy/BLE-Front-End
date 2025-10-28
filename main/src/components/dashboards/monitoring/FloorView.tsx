@@ -172,8 +172,8 @@ useEffect(() => {
 
   useEffect(() => {
     dispatch(RefreshTrigger());
-
-    if (floorplanImage) {
+    console.log("FloorplanImage: ", floorplanImage);
+    if (floorplanImage && floorplanImage !== 'No Active Floorplan') {
       const img = new Image();
       img.src = floorplanImage;
       img.onload = () => {
@@ -611,6 +611,25 @@ const handleCancelFollowing = () => {
 };
 
 
+  const getName = (bleNuber: string) => {
+    let name = '';
+    name =
+      memberList.find((member: memberType) => member.bleCardNumber === bleNuber)?.name ??
+      visitorList.find((visitor: VisitorType) => visitor.bleCardNumber === bleNuber)?.name ??
+      'Unknown Person';
+    return name;
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setDummyAlarm(undefined);
+  };
+  const handleParentClick = () => {
+    if (!zoomable) {
+      dispatch(swapScreen(screenNumber));
+    }
+  };
+
   if (floorplanImage === 'No Active Floorplan') {
     return (
       <Grid
@@ -636,35 +655,6 @@ const handleCancelFollowing = () => {
     );
   }
 
-  const handleFetchDummyBeacon = async () => {
-    try {
-      const response = await axiosServices.get(`${ALARM_URL}/dummy-beacon`);
-      console.log('Dummy Beacon Data:', response.data);
-      setDummyAlarm(response.data);
-      setOpen(true);
-    } catch (error) {
-      console.error('Error fetching dummy beacon:', error);
-    }
-  };
-
-  const getName = (bleNuber: string) => {
-    let name = '';
-    name =
-      memberList.find((member: memberType) => member.bleCardNumber === bleNuber)?.name ??
-      visitorList.find((visitor: VisitorType) => visitor.bleCardNumber === bleNuber)?.name ??
-      'Unknown Person';
-    return name;
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setDummyAlarm(undefined);
-  };
-  const handleParentClick = () => {
-    if (!zoomable) {
-      dispatch(swapScreen(screenNumber));
-    }
-  };
 
   return (
     <Box
@@ -759,7 +749,7 @@ const handleCancelFollowing = () => {
       )}
       {/* Zoomable Content */}
       <Box
-        onClick={handleParentClick}
+        onDoubleClick={handleParentClick}
         sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}
       >
         {isHovered &&
@@ -851,8 +841,9 @@ const handleCancelFollowing = () => {
                 >
                   <DeviceRenderer
                     {...dims}
+                    meterPx={actFloorplan?.meterPerPx ?? 1}
                     devices={filteredDevices}
-                    imageSrc={floorplanImage}
+                    imageSrc={image}
                     areas={filteredArea}
                     geofences={filteredGeoFenceArea}
                     showAreas={showArea}

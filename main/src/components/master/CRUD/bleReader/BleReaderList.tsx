@@ -44,7 +44,7 @@ const columns = [
   { label: 'Name', field: 'Name', sortAble: true },
   { label: 'IP', field: 'Ip', sortAble: true },
   { label: 'GMAC', field: 'Gmac', sortAble: false },
-  { label: 'Engine Reader', field: 'EngineFloorId', sortAble: true },
+  // { label: 'Engine Reader', field: 'EngineFloorId', sortAble: true },
 ];
 
 const SKELETON_ROWS = 5;
@@ -52,7 +52,7 @@ const SKELETON_ROWS = 5;
 const BleReaderList = () => {
   const dispatch: AppDispatch = useDispatch();
   const bleReaderData = useSelector((state: RootState) => state.bleReaderReducer.bleReaders);
-  const currentPageIds = React.useMemo(() => bleReaderData.map((x) => x.id), [bleReaderData]);
+  const currentPageIds = React.useMemo(() => bleReaderData.map((x: bleReaderType) => x.id), [bleReaderData]);
   const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
   const prevFilterRef = useRef(bleReaderFilter);
   const brandData = useSelector((state: RootState) => state.brandReducer.brandAll);
@@ -205,7 +205,7 @@ const BleReaderList = () => {
     return brand ? brand.name : 'Unknown Brand';
   };
 
-  const selectedData = bleReaderData.filter((x) => selectedIds.has(x.id));
+  const selectedData = bleReaderData.filter((x: bleReaderType) => selectedIds.has(x.id));
 
         const renderSkeletonRows = (rows: number) => (
           <>
@@ -328,21 +328,21 @@ const BleReaderList = () => {
                       >
                         <Checkbox
                           indeterminate={
-                            currentPageIds.some((id) => selectedIds.has(id)) &&
-                            !currentPageIds.every((id) => selectedIds.has(id))
+                            currentPageIds.some((id: string) => selectedIds.has(id)) &&
+                            !currentPageIds.every((id: string) => selectedIds.has(id))
                           }
                           checked={
                             currentPageIds.length > 0 &&
-                            currentPageIds.every((id) => selectedIds.has(id))
+                            currentPageIds.every((id: string) => selectedIds.has(id))
                           }
                           onChange={(e) => {
                             const checked = e.target.checked;
                             setSelectedIds((prev) => {
                               const updated = new Set(prev);
                               if (checked) {
-                                currentPageIds.forEach((id) => updated.add(id));
+                                currentPageIds.forEach((id: string) => updated.add(id));
                               } else {
-                                currentPageIds.forEach((id) => updated.delete(id));
+                                currentPageIds.forEach((id: string) => updated.delete(id));
                               }
                               return updated;
                             });
@@ -385,7 +385,7 @@ const BleReaderList = () => {
                     {!hasLoaded ? (
                       renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     ) : (
-                      bleReaderData.map((bleReader: bleReaderType, index) => (
+                      bleReaderData.map((bleReader: bleReaderType, index: number) => (
                       <TableRow key={index}>
                         <TableCell
                           sx={{
@@ -424,7 +424,7 @@ const BleReaderList = () => {
                         <TableCell>{bleReader.name}</TableCell>
                         <TableCell>{bleReader.ip}</TableCell>
                         <TableCell>{bleReader.gmac}</TableCell>
-                        <TableCell>{bleReader.engineReaderId}</TableCell>
+                        {/* <TableCell>{bleReader.engineReaderId}</TableCell> */}
                         <TableCell
                           sx={{
                             position: 'sticky',

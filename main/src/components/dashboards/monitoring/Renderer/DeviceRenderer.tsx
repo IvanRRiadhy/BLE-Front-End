@@ -59,7 +59,8 @@ type DeviceRendererProps = {
   height: number;
   originalWidth: number;
   originalHeight: number;
-  imageSrc: string;
+  meterPx: number;
+  imageSrc: HTMLImageElement;
   devices: FloorplanDeviceType[];
   areas: MaskedAreaType[];
   geofences: GeoFencingAlarmType[];
@@ -93,6 +94,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     height,
     originalWidth,
     originalHeight,
+    meterPx,
     imageSrc,
     devices,
     areas,
@@ -217,9 +219,9 @@ useEffect(() => {
           dmac: b.dmac,
         };
       });
-      for (const id of Object.keys(updated)) {
-        if (now - updated[id].lastSeen > 10000) delete updated[id];
-      }
+      // for (const id of Object.keys(updated)) {
+      //   if (now - updated[id].lastSeen > 10000) delete updated[id];
+      // }
       return updated;
     });
   }, [beaconData]);
@@ -233,11 +235,18 @@ useEffect(() => {
         setAnimatedBeacons((s) => ({ ...s, [beaconId]: point }));
         return;
       }
-      const duration = 100;
+
+      
       const startX = prev.x;
       const startY = prev.y;
       const endX = point.x;
       const endY = point.y;
+      const distX = endX - startX;
+      const distY = endY - startY;
+      const distance = Math.sqrt(distX * distX + distY * distY);
+      const speed = 2 / meterPx;
+      const duration = Math.max(500, (distance / speed) * 500);
+      console.log(`Animating beacon ${beaconId} over ${distance}m in ${duration}ms`);
       const startTime = performance.now();
       function animate(now: number) {
         const t = Math.min(1, (now - startTime) / duration);
@@ -376,7 +385,7 @@ useEffect(() => {
       }}
     >
       <Layer>
-        {image && <KonvaImage name="background" image={image} width={width} height={height} />}
+        {imageSrc && <KonvaImage name="background" image={imageSrc} width={width} height={height} />}
 
         {/* Areas */}
         {showAreas &&

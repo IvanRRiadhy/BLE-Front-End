@@ -112,6 +112,7 @@ const TrackingTransactionFilter = () => {
   // --- Sync with Redux ---
   useEffect(() => {
     const f = trackingTransFilter.filters;
+    const t = trackingTransFilter.timeReport as TimeRangeKey ?? 'any';
     if (!isEqual(f, filterState)) {
       setFilterState({
         VisitorId: f?.VisitorId ?? [],
@@ -119,6 +120,9 @@ const TrackingTransactionFilter = () => {
         ReaderId: f?.ReaderId ?? [],
         FloorplanMaskedAreaId: f?.FloorplanMaskedAreaId ?? [],
       });
+    }
+    if (!isEqual(t, timeRange)) {
+      setTimeRange(t);
     }
   }, [trackingTransFilter]);
 
@@ -165,6 +169,7 @@ const TrackingTransactionFilter = () => {
     dispatch(
       UpdateFilter({
         Start: 0,
+        timeReport: timeRange,
         filters: filterState,
         dateFilters: timeFilter,
       }),

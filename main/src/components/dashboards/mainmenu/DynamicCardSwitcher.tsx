@@ -45,7 +45,7 @@ const DynamicSwitcherCard: React.FC<DynamicSwitcherCardProps> = ({
         return <Blacklist {...(componentProps['Blacklist'] || {})} />;
       default:
         return (
-          <Box p={2}>
+          <Box p={2} sx={{width: '100%'}}>
             <Typography variant="body1" color="text.secondary">
               {currentType} section coming soon...
             </Typography>
@@ -110,13 +110,13 @@ const DynamicSwitcherCard: React.FC<DynamicSwitcherCardProps> = ({
                 height: 14,
                 borderRadius: '50%',
                 backgroundColor:
-                  idx === currentIndex ? '#0D47A1' : 'rgba(0,0,0,0.2)',
+                  idx === currentIndex ? 'primary.main' : 'rgba(0,0,0,0.2)',
                 transition: 'all 0.3s ease',
                 transform: idx === currentIndex ? 'scale(1.1)' : 'scale(1)',
                 '&:hover': {
                   backgroundColor:
                     idx === currentIndex
-                      ? '#0D47A1'
+                      ? 'primary.main'
                       : 'rgba(0,0,0,0.35)',
                 },
               }}

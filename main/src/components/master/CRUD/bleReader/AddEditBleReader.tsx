@@ -88,7 +88,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
     if (!formData.ip?.trim()) errors.ip = 'Reader IP is required';
     if (!formData.gmac?.trim()) errors.gmac = 'Reader MAC is required';
     if (!formData.brandId) errors.brandId = 'Reader Brand is required';
-    if (!formData.engineReaderId) errors.engineReaderId = 'Reader Engine is required';
+    // if (!formData.engineReaderId) errors.engineReaderId = 'Reader Engine is required';
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -234,7 +234,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                 />
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
-                <CustomFormLabel htmlFor="reader-id">Engine Reader ID</CustomFormLabel>
+                {/* <CustomFormLabel htmlFor="reader-id">Engine Reader ID</CustomFormLabel>
                 <CustomTextField
                   id="engineReaderId"
                   value={formData.engineReaderId}
@@ -243,7 +243,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                   variant="outlined"
                   error={!!formErrors.engineReaderId}
                   helperText={formErrors.engineReaderId}
-                />
+                /> */}
                 <CustomFormLabel htmlFor="ble-gmac">GMAC</CustomFormLabel>
                 <CustomTextField
                   id="gmac"

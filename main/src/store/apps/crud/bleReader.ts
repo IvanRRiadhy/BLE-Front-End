@@ -47,7 +47,7 @@ export interface bleReaderType {
     name: string,
     gmac: string,
     ip: string,
-    engineReaderId: string,
+    // engineReaderId: string,
     createdBy: string,
     createdAt: string,
     updatedBy: string,

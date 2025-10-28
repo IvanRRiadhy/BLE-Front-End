@@ -33,6 +33,7 @@ import {
 } from 'src/store/apps/crud/floorplan';
 import toast from 'react-hot-toast';
 import { defaultFloorplanForm } from 'src/store/apps/defaultForm';
+import { EngineType } from 'src/store/apps/crud/engine';
 
 interface FormType {
   type?: string;
@@ -55,11 +56,14 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
-    dispatch(fetchFloors());
+    
     // console.log(formData);
   }, [dispatch]);
 
   const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floorAll);
+  const engineData: EngineType[] = useSelector(
+    (state: RootState) => state.EngineReducer.engines,
+  );
 
   const handleClickOpen = () => {
     setLoading(true);

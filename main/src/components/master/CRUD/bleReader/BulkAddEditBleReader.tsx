@@ -54,7 +54,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
     brandId: false,
     name: false,
     ip: false,
-    engineReaderId: false,
+    // engineReaderId: false,
     gmac: false,
     id: false,
     createdBy: false,
@@ -75,7 +75,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
       brandId: false,
       name: false,
       ip: false,
-      engineReaderId: false,
+      // engineReaderId: false,
       gmac: false,
       id: false,
       createdBy: false,
@@ -167,8 +167,8 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
       if (!ip) e.ip = 'Reader IP is required';
       // else if (!ipRegex.test(ip)) e.ip = 'Invalid IPv4 address';
 
-      const engine = r.engineReaderId?.toString().trim() ?? '';
-      if (!engine) e.engineReaderId = 'Reader Engine is required';
+      // const engine = r.engineReaderId?.toString().trim() ?? '';
+      // if (!engine) e.engineReaderId = 'Reader Engine is required';
 
       const gmac = r.gmac?.trim() ?? '';
       if (!gmac) e.gmac = 'Reader MAC is required';
@@ -238,7 +238,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
     };
   };
 
-  const brandById = (id?: string) => brands.find((b) => b.id === id) ?? null;
+  const brandById = (id?: string) => brands.find((b: BrandType) => b.id === id) ?? null;
 
   return (
     <>
@@ -417,7 +417,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                 </TableCell>
 
                 {/* Engine Reader ID */}
-                <TableCell>
+                {/* <TableCell>
                   <Typography fontWeight={600}>Engine Reader ID</Typography>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <input
@@ -447,7 +447,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                       slotProps={{ input: { title: columnDefaults.engineReaderId || '' } }}
                     />
                   </div>
-                </TableCell>
+                </TableCell> */}
 
                 {/* GMAC */}
                 <TableCell>
@@ -622,7 +622,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                       />
                     </div>
                   </TableCell>
-                  <TableCell>
+                  {/* <TableCell>
                     <div
                       style={{
                         display: 'flex',
@@ -657,7 +657,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         slotProps={{ input: { title: row.engineReaderId || '' } }}
                       />
                     </div>
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell>
                     <div
                       style={{

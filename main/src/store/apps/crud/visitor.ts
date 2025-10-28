@@ -249,6 +249,7 @@ export const fetchVisitor = () => async (dispatch: AppDispatch) => {
         const response = await axiosServices.get(API_URL);
         dispatch(GetAllVisitor(response.data?.collection?.data || []));
         console.log("Fetch Visitors", response.data?.collection || []);
+        return response.data.collection.data || [];
     } catch (err) {
         console.log("Error: ", err);
     }

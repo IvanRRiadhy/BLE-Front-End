@@ -36,6 +36,8 @@ import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
 import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
 import { BASE_URL } from 'src/utils/axios';
+import { fetchFloors } from 'src/store/apps/crud/floor';
+import { fetchEngines } from 'src/store/apps/crud/engine';
 const columns = [
   { label: 'Floorplan Name', field: 'Name', sortAble: true },
   { label: 'Floor Name', field: 'Floor.Name', sortAble: true },
@@ -111,6 +113,8 @@ const FloorplanList = () => {
       setLoading(true);
       dispatch(fetchFloorplanDT(defaultFloorplanFilter));
       dispatch(fetchBuildings());
+      dispatch(fetchFloors());
+      dispatch(fetchEngines());
     } catch (error) {
       console.error('Error fetching floorplan data:', error);
     }
@@ -329,7 +333,7 @@ const FloorplanList = () => {
                           </TableCell>
                           <TableCell>{`(${floorplan.floorX}, ${floorplan.floorY})`}</TableCell>
 
-                          <TableCell>{floorplan.engineId}</TableCell>
+                          <TableCell>{floorplan.engine?.name}</TableCell>
                           <TableCell
                             sx={{
                               position: 'sticky',

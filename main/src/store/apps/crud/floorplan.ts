@@ -7,6 +7,7 @@ import { FloorplanDeviceType } from "./floorplanDevice";
 import { MaskedAreaType } from "./maskedArea";
 import { defaultFloorplanFilter } from "../defaultForm";
 import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
+import { EngineType } from "./engine";
 
 const Floorplan_API_URL = '/api/MstFloorplan/';
 const Floorplan_DT_URL = '/api/MstFloorplan/filter/';
@@ -62,6 +63,7 @@ export interface FloorplanType {
     deviceCount?: number,
     maskedAreas?: MaskedAreaType[],
     maskedAreaCount?: number
+    engine?: EngineType;
 }
 
 interface StateType {
