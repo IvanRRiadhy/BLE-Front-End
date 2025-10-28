@@ -189,7 +189,7 @@ const Notifications = () => {
               detail: {
                 alarm: {
                   message: JSON.stringify({
-                    visitorName: 'Adi Sucipto',
+                    visitorName: 'Alvonso Cenanda',
                     cardName: 'BC572905DB80',
                     maskedAreaName: 'Demo Lobby',
                     floorplanName: 'Deemo',
