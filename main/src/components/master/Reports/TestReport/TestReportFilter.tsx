@@ -13,17 +13,29 @@ import {
 } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { dispatch, RootState } from 'src/store/Store';
-import AutocompleteFilter from 'src/layouts/full/horizontal/navbar/AutocompleteFilter';
 import dayjs from 'dayjs';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+
 import { visitorStatus } from 'src/types/crud/input';
 import { fetchBuildings } from 'src/store/apps/crud/building';
 import { fetchFloors } from 'src/store/apps/crud/floor';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import { fetchMembers } from 'src/store/apps/crud/member';
+import trackingJson from './DummyData/TrackingTransactionDummyData.json';
+import alarmJson from './DummyData/AlarmDummyData.json';
+import VisitorReportDialog from './VisitorReportDialog';
 
+// ⬇️ activate plugins
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 const VisitorReportFilter = () => {
   const didInit = useRef(false);
+
+  // ✅ Switch for testing mode
+  const isTesting = true;
+
   // Redux Data
   const buildings = useSelector((state: RootState) => state.buildingReducer.buildingAll);
   const floors = useSelector((state: RootState) => state.floorReducer.floorAll);
@@ -31,53 +43,94 @@ const VisitorReportFilter = () => {
   const maskedAreas = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
   const members = useSelector((state: RootState) => state.memberReducer.memberAll);
 
-  // State
+  const [openReport, setOpenReport] = useState(false);
+  const [filteredTracking, setFilteredTracking] = useState<any[]>([]);
+  const [filteredAlarm, setFilteredAlarm] = useState<any[]>([]);
+
+  // Dummy Data (Testing Mode)
+  const [trackingData, setTrackingData] = useState<any[]>([]);
+  const [alarmData, setAlarmData] = useState<any[]>([]);
+
+  // Filter state
   const [timeType, setTimeType] = useState<'Daily' | 'Weekly' | 'Monthly' | 'Custom'>('Daily');
   const [dateRange, setDateRange] = useState({
     from: dayjs().format('YYYY-MM-DD'),
     to: dayjs().format('YYYY-MM-DD'),
   });
   const [visitorStatusValue, setVisitorStatusValue] = useState('');
-  const [areaFilter, setAreaFilter] = useState({
-    BuildingId: [] as string[],
-    FloorId: [] as string[],
-    FloorplanId: [] as string[],
-    MaskedAreaId: [] as string[],
-  });
+  const [areaValue, setAreaValue] = useState('');
   const [host, setHost] = useState('');
 
-  // Handlers
-  const handleGenerate = () => {
-    console.log({
-      timeType,
-      dateRange,
-      visitorStatusValue,
-      areaFilter,
-      host,
-    });
-  };
+  // Hardcoded dummy areas
+  const dummyAreas = ['Meeting Room', 'Pantry', 'Rooftop', 'Parking Lot', 'Lobby'];
 
-  const handleAreaFilterChange = (f: typeof areaFilter) => {
-    if (JSON.stringify(f) !== JSON.stringify(areaFilter)) {
-      setAreaFilter(f);
+  // 🧭 Handlers
+  const handleGenerate = () => {
+    if (isTesting) {
+      let fromDate = dayjs(dateRange.from).startOf('day');
+      let toDate = dayjs(dateRange.to).endOf('day');
+
+      if (timeType === 'Weekly') {
+        fromDate = fromDate.startOf('week').add(1, 'day'); // Monday
+        toDate = fromDate.add(6, 'day').endOf('day');
+      } else if (timeType === 'Monthly') {
+        fromDate = fromDate.startOf('month');
+        toDate = fromDate.endOf('month');
+      }
+
+      const withinRange = (d: dayjs.Dayjs) => d.isSameOrAfter(fromDate) && d.isSameOrBefore(toDate);
+
+      const filteredT = trackingData.filter((t) => {
+        const enter = dayjs(t.EnterTime);
+        return (
+          (!visitorStatusValue || t.VisitorStatus === visitorStatusValue) &&
+          (!areaValue || t.AreaName === areaValue) &&
+          (!host || t.HostName === host) &&
+          withinRange(enter)
+        );
+      });
+
+      const filteredA = alarmData.filter((a) => {
+        const trig = dayjs(a.AlarmTriggered);
+        return (
+          (!areaValue || a.AreaName === areaValue) &&
+          (!host || a.HostName === host) &&
+          withinRange(trig)
+        );
+      });
+
+      setFilteredTracking(filteredT);
+      setFilteredAlarm(filteredA);
+      setOpenReport(true);
     }
   };
 
+  // 🧱 Load Data
   useEffect(() => {
     if (didInit.current) return;
     didInit.current = true;
 
-    dispatch(fetchBuildings());
-    dispatch(fetchFloors());
-    dispatch(fetchFloorplan());
-    dispatch(fetchMaskedAreas());
-    dispatch(fetchMembers());
-  }, [dispatch]);
+    if (!isTesting) {
+      dispatch(fetchBuildings());
+      dispatch(fetchFloors());
+      dispatch(fetchFloorplan());
+      dispatch(fetchMaskedAreas());
+      dispatch(fetchMembers());
+    } else {
+      // ✅ Load dummy JSON data
+      setTrackingData(trackingJson);
+      setAlarmData(alarmJson);
+      console.log('Loaded dummy data from import:', {
+        tracking: trackingJson.length,
+        alarm: alarmJson.length,
+      });
+    }
+  }, [isTesting]);
 
   return (
     <Box p={2}>
       <Typography variant="h6" fontWeight={700} textAlign="center" mb={2}>
-        Visitor Report Filter
+        Visitor Report Filter {isTesting && '(Dummy Mode)'}
       </Typography>
 
       <Card
@@ -116,7 +169,7 @@ const VisitorReportFilter = () => {
               fullWidth
               size="small"
               InputLabelProps={{ shrink: true }}
-              value={timeType === 'Custom' ? dateRange.from : ""}
+              value={timeType === 'Custom' ? dateRange.from : ''}
               disabled={timeType !== 'Custom'}
               onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
             />
@@ -128,7 +181,7 @@ const VisitorReportFilter = () => {
               fullWidth
               size="small"
               InputLabelProps={{ shrink: true }}
-              value={timeType === 'Custom' ? dateRange.to : ""}
+              value={timeType === 'Custom' ? dateRange.to : ''}
               disabled={timeType !== 'Custom'}
               onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
             />
@@ -144,7 +197,6 @@ const VisitorReportFilter = () => {
                 label="Visitor Status"
                 value={visitorStatusValue}
                 onChange={(e) => setVisitorStatusValue(e.target.value)}
-                // size="small"
               >
                 {visitorStatus.map((v) => (
                   <MenuItem key={v.value} value={v.value} disabled={v.disabled}>
@@ -156,32 +208,45 @@ const VisitorReportFilter = () => {
           </Grid>
 
           <Grid size={{ xs: 12, md: 4 }}>
-            <AutocompleteFilter
-              buildings={buildings}
-              floors={floors}
-              floorplans={floorplans}
-              maskedAreas={maskedAreas}
-              initial={areaFilter}
-              onChangeFilter={handleAreaFilterChange}
-              hideSelectedAreas
-            />
+            {isTesting ? (
+              <FormControl fullWidth>
+                <InputLabel>Area</InputLabel>
+                <Select
+                  label="Area"
+                  value={areaValue}
+                  onChange={(e) => setAreaValue(e.target.value)}
+                >
+                  <MenuItem value="">Select Area</MenuItem>
+                  {dummyAreas.map((area) => (
+                    <MenuItem key={area} value={area}>
+                      {area}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                <i>Real AutocompleteFilter will appear in production mode.</i>
+              </Typography>
+            )}
           </Grid>
 
           <Grid size={{ xs: 12, md: 4 }}>
             <FormControl fullWidth>
               <InputLabel>Host</InputLabel>
-              <Select
-                label="Host"
-                value={host}
-                onChange={(e) => setHost(e.target.value)}
-                // size="small"
-              >
+              <Select label="Host" value={host} onChange={(e) => setHost(e.target.value)}>
                 <MenuItem value="">Select Host</MenuItem>
-                {members.map((m) => (
-                  <MenuItem key={m.id} value={m.id}>
-                    {m.name}
-                  </MenuItem>
-                ))}
+                {isTesting
+                  ? ['Zygarde', 'Yveltal', 'Xerneas'].map((h) => (
+                      <MenuItem key={h} value={h}>
+                        {h}
+                      </MenuItem>
+                    ))
+                  : members.map((m) => (
+                      <MenuItem key={m.id} value={m.id}>
+                        {m.name}
+                      </MenuItem>
+                    ))}
               </Select>
             </FormControl>
           </Grid>
@@ -213,6 +278,12 @@ const VisitorReportFilter = () => {
           </Grid>
         </Grid>
       </Card>
+      <VisitorReportDialog
+        open={openReport}
+        onClose={() => setOpenReport(false)}
+        trackingLogs={filteredTracking}
+        alarmLogs={filteredAlarm}
+      />
     </Box>
   );
 };
