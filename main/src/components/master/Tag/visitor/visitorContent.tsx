@@ -20,6 +20,7 @@ import {
   IconButton,
   Tooltip,
   useTheme,
+  Chip,
 } from '@mui/material';
 import { VisitorType } from 'src/store/apps/crud/visitor';
 import IconClose from 'src/assets/images/frontend-pages/icons/icon-close.svg';
@@ -74,7 +75,7 @@ const VisitorContent = () => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   // const theme = useTheme();
-const [localCardData, setLocalCardData] = useState<CardType[]>([]);
+  const [localCardData, setLocalCardData] = useState<CardType[]>([]);
 
   const getOrganizationDisplay = (
     organization?: string,
@@ -306,7 +307,7 @@ const [localCardData, setLocalCardData] = useState<CardType[]>([]);
         label: 'Check-in Visitor',
         color: 'success',
         onClick: () => {
-          console.log("Opening Card Menu");
+          console.log('Opening Card Menu');
           handleOpenCardMenu();
         },
       },
@@ -343,7 +344,7 @@ const [localCardData, setLocalCardData] = useState<CardType[]>([]);
 
       // Optional: verify data is present
       if (result?.collection?.length > 0) {
-        console.log("Res", result.collection.data);
+        console.log('Res', result.collection.data);
         setLocalCardData(result.collection.data || []);
         setOpenCardMenu(true);
       } else {
@@ -420,7 +421,6 @@ const [localCardData, setLocalCardData] = useState<CardType[]>([]);
           <Divider />
 
           {/* Table Part */}
-
           <Box
             sx={{
               overflow: 'auto',
@@ -436,7 +436,7 @@ const [localCardData, setLocalCardData] = useState<CardType[]>([]);
               alignItems="center"
               justifyContent="center"
               mb={3}
-              sx={{ position: 'relative' }} // <-- make this the positioning context
+              sx={{ position: 'relative' }}
             >
               <Avatar
                 alt="Visitor Face"
@@ -446,7 +446,7 @@ const [localCardData, setLocalCardData] = useState<CardType[]>([]);
               <VisitorActions trxVisitorDetail={trxVisitorDetail} floating />
 
               <Typography variant="h4" fontWeight={800}>
-                {trxVisitorDetail.visitor?.name}
+                {trxVisitorDetail.visitor?.name || 'Not provided'}
               </Typography>
               <Button
                 variant="contained"
@@ -457,47 +457,87 @@ const [localCardData, setLocalCardData] = useState<CardType[]>([]);
                 Tracking History
               </Button>
             </Box>
+            <Typography variant="h5" fontWeight={600} mb={2} mt={2}>
+              Visit Details
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+                <CustomFormLabel htmlFor="arrival">Arrival</CustomFormLabel>
+                <Typography>
+                  {formatTime(trxVisitorDetail.visitorPeriodStart) || 'Not provided'}
+                </Typography>
 
+                <CustomFormLabel htmlFor="end">End</CustomFormLabel>
+                <Typography>
+                  {formatTime(trxVisitorDetail.visitorPeriodEnd) || 'Not provided'}
+                </Typography>
+              </Grid>
+
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+                <CustomFormLabel htmlFor="accepted">Accepted</CustomFormLabel>
+                {trxVisitorDetail.isInvitationAccepted !== undefined ? (
+                  <Chip
+                    label={trxVisitorDetail.isInvitationAccepted ? 'Accepted' : 'Not Accepted'}
+                    color={trxVisitorDetail.isInvitationAccepted ? 'success' : 'error'}
+                    variant="filled"
+                    sx={{ fontWeight: 600, borderRadius: '6px' }}
+                  />
+                ) : (
+                  <Chip
+                    label="Not provided"
+                    variant="outlined"
+                    color="default"
+                    sx={{
+                      fontStyle: 'italic',
+                      fontWeight: 500,
+                      borderRadius: '6px',
+                    }}
+                  />
+                )}
+                <CustomFormLabel htmlFor="status">Status</CustomFormLabel>
+                <Chip
+                  label={trxVisitorDetail.visitor?.isVip ? 'VIP Guest' : 'Normal Guest'}
+                  color={trxVisitorDetail.visitor?.isVip ? 'warning' : 'default'}
+                  variant="filled"
+                  sx={{
+                    fontWeight: 600,
+                    borderRadius: '6px',
+                  }}
+                />
+              </Grid>
+            </Grid>
+            <Typography variant="h5" fontWeight={600} mb={2} mt={2}>
+              Visitor Details
+            </Typography>
+            <Divider />
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
-                <Typography>{trxVisitorDetail.visitor?.email}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.email || 'Not provided'}</Typography>
+
                 <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
-                <Typography>{trxVisitorDetail.visitor?.address}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.address || 'Not provided'}</Typography>
+
                 <CustomFormLabel htmlFor="organization">Organization</CustomFormLabel>
                 <Typography>
                   {getOrganizationDisplay(
                     trxVisitorDetail.visitor?.organizationName,
                     trxVisitorDetail.visitor?.departmentName,
                     trxVisitorDetail.visitor?.districtName,
-                  )}
+                  ) || 'Not provided'}
                 </Typography>
               </Grid>
+
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="phone">Phone</CustomFormLabel>
-                <Typography>{trxVisitorDetail.visitor?.phone}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.phone || 'Not provided'}</Typography>
+
                 <CustomFormLabel htmlFor="gender">Gender</CustomFormLabel>
-                <Typography>{trxVisitorDetail.visitor?.gender}</Typography>
-                <CustomFormLabel htmlFor="status">Status</CustomFormLabel>
-                <Typography>{trxVisitorDetail.visitor?.isVip ? 'VIP' : 'Normal'}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.gender || 'Not provided'}</Typography>
               </Grid>
             </Grid>
-            <Typography variant="h5" fontWeight={600} mb={2} mt={2}>
-              Visit Time
-            </Typography>
-            <Divider />
-            <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
-                <CustomFormLabel htmlFor="arrival">Arrival</CustomFormLabel>
-                <Typography>{formatTime(trxVisitorDetail.visitorPeriodStart)}</Typography>
-                <CustomFormLabel htmlFor="end">End</CustomFormLabel>
-                <Typography>{formatTime(trxVisitorDetail.visitorPeriodEnd)}</Typography>
-              </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
-                <CustomFormLabel htmlFor="accepted">Accepted</CustomFormLabel>
-                <Typography>{trxVisitorDetail.isInvitationAccepted ? 'Yes' : 'No'}</Typography>
-              </Grid>
-            </Grid>
+
             <Typography variant="h5" fontWeight={600} mb={2} mt={2}>
               IDs
             </Typography>
@@ -505,13 +545,14 @@ const [localCardData, setLocalCardData] = useState<CardType[]>([]);
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="person-id">Person ID</CustomFormLabel>
-                <Typography>{trxVisitorDetail.visitor?.personId}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.personId || 'Not provided'}</Typography>
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="identity-Id">Identity ID</CustomFormLabel>
-                <Typography>{trxVisitorDetail.visitor?.identityId}</Typography>
+                <Typography>{trxVisitorDetail.visitor?.identityId || 'Not provided'}</Typography>
               </Grid>
             </Grid>
+
             <Typography variant="h5" fontWeight={600} mb={2} mt={2}>
               Card Details
             </Typography>
@@ -519,89 +560,31 @@ const [localCardData, setLocalCardData] = useState<CardType[]>([]);
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
-                <Typography>{trxVisitorDetail.visitor?.cardNumber ?? 'Not Assigned'}</Typography>
+                <Typography>
+                  {trxVisitorDetail.visitor?.cardNumber ?? trxVisitorDetail.status === 'Checkout'
+                    ? 'Card returned'
+                    : 'Not assigned'}
+                </Typography>
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="ble-card-number">Ble Card Number</CustomFormLabel>
-                <Typography>{trxVisitorDetail.visitor?.bleCardNumber ?? 'Not Assigned'}</Typography>
+                <Typography>
+                  {trxVisitorDetail.visitor?.bleCardNumber ?? trxVisitorDetail.status === 'Checkout'
+                    ? 'Card returned'
+                    : 'Not assigned'}
+                </Typography>
               </Grid>
             </Grid>
           </Box>
         </>
       ) : (
         <Box p={3} height="50vh" display={'flex'} justifyContent="center" alignItems={'center'}>
-          {/* ------------------------------------------- */}
-          {/* If no Contact  */}
-          {/* ------------------------------------------- */}
           <Box>
             <Typography variant="h4">Please Select a Visitor</Typography>
             <br />
           </Box>
         </Box>
       )}
-
-      {/* Card Assign Pop-up */}
-      {/* <Dialog open={openCardMenu} onClose={handleCloseCardMenu} fullWidth maxWidth="sm">
-        <DialogTitle mb={2} p={2}>
-          Assign Card
-        </DialogTitle>
-        <DialogContent>
-          <Grid size={12} p={1}>
-            {loading ? (
-              <Box py={3} display="flex" justifyContent="center">
-                <CircularProgress size={24} />
-              </Box>
-            ) : localCardData.length === 0 ? (
-              <Typography variant="body2" color="error">
-                No available cards to assign.
-              </Typography>
-            ) : (
-              <CustomSelect
-                key={localCardData.length} // <-- forces re-render when localCardData changes
-                name="selectedCard"
-                value={selectedCard || ''}
-                onChange={(e: any) => setSelectedCard(e.target.value)}
-                fullWidth
-                variant="outlined"
-                displayEmpty
-                MenuProps={{
-                  PaperProps: {
-                    style: {
-                      maxHeight: 200,
-                      width: 'auto',
-                    },
-                  },
-                }}
-              >
-                <MenuItem value="" disabled>
-                  Select Card to Assign
-                </MenuItem>
-                {localCardData.map((card) => {
-                  console.log('Card Data: ', card);
-                  return (
-                    <MenuItem key={card.id} value={card.id}>
-                      {card.name} | {card.cardNumber}
-                    </MenuItem>
-                  );
-                })}
-              </CustomSelect>
-            )}
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseCardMenu} color="error" variant="outlined">
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              handleCheckin();
-            }}
-            color="primary"
-          >
-            Assign Card
-          </Button>
-        </DialogActions>
-      </Dialog> */}
 
       {/* Reason Pop-up */}
       <Dialog open={openReasonMenu} onClose={handleCloseReasonMenu} fullWidth maxWidth="sm">
@@ -629,6 +612,7 @@ const [localCardData, setLocalCardData] = useState<CardType[]>([]);
           </Button>
         </DialogActions>
       </Dialog>
+
       {trxVisitorDetail.visitor && (
         <VisitorTrackingHistoryPopup
           open={openTrackHistory}
@@ -636,6 +620,7 @@ const [localCardData, setLocalCardData] = useState<CardType[]>([]);
           visitor={trxVisitorDetail.visitor}
         />
       )}
+
       {loading &&
         createPortal(
           <Backdrop
