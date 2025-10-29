@@ -167,6 +167,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
     {
       primary?: { label: string; color: 'success' | 'warning' | 'error'; onClick: () => void };
       secondary?: { label: string; color: 'error' | 'warning' | 'success'; onClick: () => void };
+      tertiary?: { label: string; color: 'primary'; onClick: () => void };
     }
   > = {
     Preregist: {
@@ -185,6 +186,13 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
     Checkin: {
       primary: { label: 'Check-out Visitor', color: 'warning', onClick: handleCheckout },
       secondary: { label: 'Block Visitor', color: 'error', onClick: () => setOpenReasonMenu(true) },
+      tertiary: {
+        label: 'Extend Visit',
+        color: 'primary',
+        onClick: () => {
+          console.log('Extend Visit');
+        },
+      },
     },
     Unblock: {
       primary: { label: 'Check-out Visitor', color: 'warning', onClick: handleCheckout },
@@ -198,21 +206,19 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
 
   const currentActions = trxVisitorDetail?.status ? actionMap[trxVisitorDetail.status] : undefined;
 
-    const handleOpenCardMenu = async () => {
+  const handleOpenCardMenu = async () => {
     console.log('🟡 handleOpenCardMenu called');
     setLoading(true);
     try {
       // Fetch and wait for Redux to finish updating
-      const result = await dispatch(
-        fetchCardDT({ ...defaultCardFilter, length: 0 }),
-      ).unwrap();
+      const result = await dispatch(fetchCardDT({ ...defaultCardFilter, length: 0 })).unwrap();
 
       // Log for verification
       console.log('Fetched cards:', result);
 
       // Optional: verify data is present
       if (result?.data?.length > 0) {
-        console.log("Res", result.data);
+        console.log('Res', result.data);
         // setLocalCardData(result.collection.data || []);
         setOpenCardMenu(true);
       } else {
@@ -246,7 +252,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
                 variant="contained"
                 color={currentActions.primary.color}
                 onClick={currentActions.primary.onClick}
-                sx={{ boxShadow: 2, width: "12vw", height: 50 }}
+                sx={{ boxShadow: 2, width: '12vw', height: 50 }}
               >
                 {currentActions.primary.label}
               </Button>
@@ -257,9 +263,20 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
                 variant="contained"
                 color={currentActions.secondary.color}
                 onClick={currentActions.secondary.onClick}
-                sx={{ boxShadow: 2, width: "12vw", height: 50 }}
+                sx={{ boxShadow: 2, width: '12vw', height: 50 }}
               >
                 {currentActions.secondary.label}
+              </Button>
+            )}
+            {currentActions.tertiary && (
+              <Button
+                size="large"
+                variant="contained"
+                color={currentActions.tertiary.color}
+                onClick={currentActions.tertiary.onClick}
+                sx={{ boxShadow: 2, width: '12vw', height: 50 }}
+              >
+                {currentActions.tertiary.label}
               </Button>
             )}
           </Stack>
@@ -272,7 +289,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
           Assigns Card
         </DialogTitle>
         <DialogContent>
-          <Grid size={12}  p={1}>
+          <Grid size={12} p={1}>
             <CustomSelect
               name="selectedCard"
               value={selectedCard || ''}
@@ -294,10 +311,10 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
               {filteredCard.map((card: CardType) => {
                 console.log('Available card:', card);
                 return (
-                <MenuItem key={card.id} value={card.id}>
-                  {card.name} | {card.cardNumber}
-                </MenuItem>
-              )
+                  <MenuItem key={card.id} value={card.id}>
+                    {card.name} | {card.cardNumber}
+                  </MenuItem>
+                );
               })}
             </CustomSelect>
           </Grid>
@@ -323,7 +340,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
           Reason
         </DialogTitle>
         <DialogContent>
-          <Grid size={12}  p={1}>
+          <Grid size={12} p={1}>
             <CustomTextField
               id="reason"
               label="Reason"
