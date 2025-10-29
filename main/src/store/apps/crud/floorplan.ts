@@ -53,7 +53,7 @@ export interface FloorplanType {
     floorX: number,
     floorY: number,
     meterPerPx: number,
-        engineId: number,
+        engineId: string,
     floor?: floorType,
     createdBy: string,
     createdAt: string,

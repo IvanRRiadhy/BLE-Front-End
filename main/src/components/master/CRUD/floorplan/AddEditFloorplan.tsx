@@ -33,7 +33,7 @@ import {
 } from 'src/store/apps/crud/floorplan';
 import toast from 'react-hot-toast';
 import { defaultFloorplanForm } from 'src/store/apps/defaultForm';
-import { EngineType } from 'src/store/apps/crud/engine';
+import { EngineType, fetchEngines } from 'src/store/apps/crud/engine';
 
 interface FormType {
   type?: string;
@@ -56,14 +56,13 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
-    
+    dispatch(fetchFloors());
+    dispatch(fetchEngines());
     // console.log(formData);
   }, [dispatch]);
 
-  const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floorAll);
-  const engineData: EngineType[] = useSelector(
-    (state: RootState) => state.EngineReducer.engines,
-  );
+  const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floorAll || []);
+  const engineData: EngineType[] = useSelector((state: RootState) => state.EngineReducer.engines || []);
 
   const handleClickOpen = () => {
     setLoading(true);
@@ -309,23 +308,47 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                   error={!!formErrors.floorX}
                   helperText={formErrors.floorX}
                 />
-                <CustomFormLabel htmlFor="Engine-id">Engine ID</CustomFormLabel>
-                <CustomTextField
-                  id="engineId"
-                  value={formData.engineId}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
+                <CustomFormLabel htmlFor="Engine-id">Engine</CustomFormLabel>
+                <Autocomplete
+                  options={engineData.map((e) => ({ label: e.name, id: e.id }))} // 👈 Use engineData
+                  value={
+                    engineData
+                      .map((e) => ({ label: e.name, id: e.id }))
+                      .find((option) => option.id === formData.engineId) || null
+                  }
+                  onChange={(_, newValue) => {
+                    const id = newValue?.id ?? '';
+                    setFormData((prev) => ({ ...prev, engineId: id }));
+                  }}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      id="engineId"
+                      variant="outlined"
+                      fullWidth
+                      placeholder="Select Engine"
+                    />
+                  )}
                 />
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel>
                 <Autocomplete
-                  options={floorData.map((f) => ({ label: f.name, id: f.id }))}
+                  options={floorData.map((f) => ({
+                    label: f.name,
+                    id: f.id,
+                    buildingName: f.building?.name ?? 'Unknown Building',
+                  }))}
                   value={
                     floorData
-                      .map((f) => ({ label: f.name, id: f.id }))
-                      .find((option: { id: string }) => option.id === formData.floorId) || null
+                      .map((f) => ({
+                        label: f.name,
+                        id: f.id,
+                        buildingName: f.building?.name ?? 'Unknown Building',
+                      }))
+                      .find((option) => option.id === formData.floorId) || null
                   }
                   onChange={(_, newValue) => {
                     const id = newValue?.id ?? '';
@@ -341,6 +364,16 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                   getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
                   clearOnEscape
                   disableClearable={false}
+                  renderOption={(props, option) => (
+                    <li {...props} key={option.id}>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Typography variant="body1">{option.label}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {option.buildingName}
+                        </Typography>
+                      </div>
+                    </li>
+                  )}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -353,6 +386,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                     />
                   )}
                 />
+
                 <CustomFormLabel htmlFor="floorY">Floor Width (in meters)</CustomFormLabel>
                 <CustomTextField
                   id="floorY"

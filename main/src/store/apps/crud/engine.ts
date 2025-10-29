@@ -48,7 +48,7 @@ export const fetchEngines = () => async (dispatch: AppDispatch) => {
         maxDelay: 8000,
       });
         console.log("✅ Fetch engines:", response.data.collection);
-        dispatch(GetEngines(response.data.collection));
+        dispatch(GetEngines(response.data.collection.data || []));
     } catch (error) {
         console.error("❌ Error fetching engines:", error);
     }

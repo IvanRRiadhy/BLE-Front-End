@@ -44,7 +44,7 @@ const columns = [
   { label: 'Building Name', field: '', sortAble: false },
   { label: 'Floorplan Image', field: '', sortAble: false },
   { label: 'Floorplan Dimension (meter)', field: '', sortAble: false },
-  { label: 'Engine Id', field: 'EngineId', sortAble: true },
+  { label: 'Engine', field: 'Engine.Name', sortAble: true },
 ];
 
 const SKELETON_ROWS = 5;
