@@ -525,14 +525,110 @@ const AlarmSettingList = () => {
         </Box>
       </Grid>
       {/* Color Picker Dialog */}
-      <Dialog open={colorDialogOpen} onClose={() => setColorDialogOpen(false)}>
-        <DialogTitle>Pick a Color</DialogTitle>
+      <Dialog
+        open={colorDialogOpen}
+        onClose={() => setColorDialogOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            p: 1,
+            minWidth: 300,
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 600, textAlign: 'center', pb: 1 }}>Pick a Color</DialogTitle>
+
         <DialogContent>
-          <SketchPicker color={tempColor} onChangeComplete={(c: any) => setTempColor(c.hex)} />
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(5, 1fr)',
+              justifyItems: 'center',
+              gap: 2,
+              p: 1,
+            }}
+          >
+            {[
+              '#FF4D4F', // Bright Red
+              '#B22222', // Crimson
+              '#D633FF', // Magenta
+              '#5D3FD3', // Indigo
+              '#0047FF', // Deep Blue
+              '#00CFFF', // Cyan
+              '#228B22', // Dark Green
+              '#FFCC00', // Yellow
+              '#C8B560', // Khaki
+              '#FF7A00', // Orange
+            ].map((color) => (
+              <Box
+                key={color}
+                sx={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: '50%',
+                  backgroundColor: color,
+                  border: tempColor === color ? '3px solid #000' : '2px solid rgba(0,0,0,0.2)',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s ease',
+                  boxShadow:
+                    tempColor === color ? '0 0 0 4px rgba(0,0,0,0.1)' : '0 2px 6px rgba(0,0,0,0.1)',
+                  '&:hover': {
+                    transform: 'scale(1.15)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                  },
+                }}
+                onClick={() => setTempColor(color)}
+              />
+            ))}
+          </Box>
+
+          {/* Selected color preview */}
+          <Box
+            sx={{
+              mt: 2,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 1,
+            }}
+          >
+            <Box
+              sx={{
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                backgroundColor: tempColor,
+                border: '1px solid #aaa',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+              }}
+            />
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+              {tempColor}
+            </Typography>
+          </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setColorDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleApplyColor}>
+
+        <DialogActions sx={{ justifyContent: 'center', p: 2 }}>
+          <Button
+            onClick={() => setColorDialogOpen(false)}
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              px: 2.5,
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleApplyColor}
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              px: 2.5,
+              background: 'linear-gradient(45deg, #355CFF, #00CFFF)',
+            }}
+          >
             Apply Change
           </Button>
         </DialogActions>

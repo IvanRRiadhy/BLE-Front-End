@@ -145,13 +145,11 @@ const AreaDetailList = () => {
           Edit Masked Area Details
         </Typography>
       </Box>
-    <Box sx={{ minHeight: 0, overflow: 'auto' }}>
+      <Box sx={{ minHeight: 0, overflow: 'auto' }}>
         <Box pl={3} pr={1}>
           <Grid container spacing={1}>
             <Grid size={12}>
-              <CustomFormLabel htmlFor="area-name" required>
-                Area Name
-              </CustomFormLabel>
+              <CustomFormLabel htmlFor="area-name">Area Name</CustomFormLabel>
               <CustomTextField
                 id="name"
                 value={formData.name}
@@ -175,28 +173,84 @@ const AreaDetailList = () => {
                 </Grid> */}
             <Grid size={12}>
               <Grid size={12}>
-                <CustomFormLabel htmlFor="area-color" required>
-                  Area Color
-                </CustomFormLabel>
-                <input
-                  type="color"
-                  id="colorArea"
-                  value={formData.colorArea}
-                  onChange={(e) => {
-                    const hexColor = e.target.value; // Get the selected color in hex format
-                    setFormData((prev) => ({ ...prev, colorArea: hexColor })); // Update formData
-                    // console.log(hexColor);
-                  }}
-                  style={{
-                    width: '100%',
-                    height: '40px',
+                <CustomFormLabel htmlFor="area-color">Area Color</CustomFormLabel>
+
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 1,
+                    p: 1,
                     border: '1px solid #ccc',
-                    borderRadius: '4px',
-                    padding: '5px',
-                    boxSizing: 'border-box',
+                    borderRadius: 1,
+                    backgroundColor: '#f9f9f9',
+                    justifyContent: 'space-between',
                   }}
-                />
+                >
+                  {[
+                    '#FF4D4F', // Bright Red
+                    '#B22222', // Crimson
+                    '#D633FF', // Magenta
+                    '#5D3FD3', // Indigo
+                    '#0047FF', // Deep Blue
+                    '#00CFFF', // Cyan
+                    '#228B22', // Dark Green
+                    '#FFCC00', // Yellow
+                    '#C8B560', // Khaki
+                    '#FF7A00', // Orange
+                  ].map((color) => (
+                    <Box
+                      key={color}
+                      onClick={() => setFormData((prev) => ({ ...prev, colorArea: color }))}
+                      sx={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        backgroundColor: color,
+                        border:
+                          formData.colorArea === color
+                            ? '3px solid #000'
+                            : '2px solid rgba(0,0,0,0.2)',
+                        transition: 'all 0.25s ease',
+                        boxShadow:
+                          formData.colorArea === color
+                            ? '0 0 0 3px rgba(0,0,0,0.15)'
+                            : '0 1px 4px rgba(0,0,0,0.1)',
+                        '&:hover': {
+                          transform: 'scale(1.12)',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                        },
+                      }}
+                    />
+                  ))}
+                </Box>
+
+                {/* Optional: show selected color hex */}
+                <Box
+                  sx={{
+                    mt: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: '50%',
+                      backgroundColor: formData.colorArea,
+                      border: '1px solid #aaa',
+                    }}
+                  />
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    {formData.colorArea}
+                  </Typography>
+                </Box>
               </Grid>
+
               <Grid size={12}>
                 <CustomFormLabel htmlFor="area-restriction">Area Restriction</CustomFormLabel>
                 <CustomSelect
@@ -261,16 +315,16 @@ const AreaDetailList = () => {
         </Box>
       </Box>
 
-    <Box
-      p={2}
-      bottom={0}
-      sx={{
-        borderTop: '1px solid',
-        borderColor: 'divider',
-        bgcolor: '#fafafa',
-               m: 0,
-      }}
-    >
+      <Box
+        p={2}
+        bottom={0}
+        sx={{
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          bgcolor: '#fafafa',
+          m: 0,
+        }}
+      >
         <Box display="flex" justifyContent="space-between">
           <Button variant="outlined" onClick={handleCancel}>
             Cancel
