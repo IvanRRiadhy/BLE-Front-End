@@ -9,9 +9,8 @@ import {
   Typography,
   Stack,
   ListItemAvatar,
-  Chip
+  Chip,
 } from '@mui/material';
-import { VisitorType } from 'src/store/apps/crud/visitor';
 import { TrxVisitorType } from 'src/store/apps/crud/trxVisitor';
 import { visitorStatusEnumMap } from 'src/types/crud/input';
 
@@ -23,55 +22,99 @@ type Props = {
 
 // Map enum value to MUI Chip color
 const visitorStatusColorMap: Record<number, any> = {
-  0: 'default',   // grey : Waiting
-  1: 'success',   // green : Checkin
-  2: 'default',   // grey : Checkout
-  3: 'warning',   // yellow : Deny
-  4: 'error',     // red : Block
-  5: 'success',   // green : Unblock
-  6: 'primary', // light blue : Precheckin
-  7: 'secondary',      // blue : Preregist
+  0: 'default',   // Waiting
+  1: 'success',   // Checkin
+  2: 'default',   // Checkout
+  3: 'warning',   // Deny
+  4: 'error',     // Block
+  5: 'success',   // Unblock
+  6: 'primary',   // Precheckin
+  7: 'secondary', // Preregist
 };
 
 const TrxVisitorListItem = ({ onTagClick, trx, active }: Props) => {
   const customizer = useSelector((state) => state.customizer);
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   const br = `${customizer.borderRadius}px`;
+
   const statusValue = trx?.status ? visitorStatusEnumMap[trx.status] : undefined;
   const chipColor = statusValue !== undefined ? visitorStatusColorMap[statusValue] : 'default';
 
-  return (
-    <ListItemButton sx={{ mb: 1 }} selected={active} onClick={onTagClick}>
-      <ListItemAvatar>
-        <Avatar alt="Visitor Face" src={`${BASE_URL}${trx?.visitor?.faceImage}`} />
-      </ListItemAvatar>
-      <ListItemText>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          {/* Left info */}
-          <Box mr="auto">
-            <Typography variant="subtitle1" noWrap fontWeight={600} sx={{ maxWidth: '200px' }}>
-              {trx?.visitor?.name}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap>
-              {trx?.visitor?.bleCardNumber}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap>
-              {trx?.visitor?.personId}
-            </Typography>
-          </Box>
+  // helper to truncate manually if needed (for safety)
+  const truncateText = (text?: string, maxLength = 12) => {
+    if (!text) return '';
+    return text.length > maxLength ? text.substring(0, maxLength - 3) + '...' : text;
+  };
 
-          {/* Status chip */}
-          {trx?.status && (
-            <Chip
-              label={trx.status}
-              size="small"
-              color={chipColor}
-            />
-          )}
-        </Stack>
-      </ListItemText>
+  return (
+    <ListItemButton
+      sx={{
+        mb: 1,
+        borderRadius: br,
+        '&:hover': { backgroundColor: 'rgba(0,0,0,0.03)' },
+      }}
+      selected={active}
+      onClick={onTagClick}
+    >
+      <ListItemAvatar>
+        <Avatar
+          alt="Visitor Face"
+          src={`${BASE_URL}${trx?.visitor?.faceImage}`}
+        />
+      </ListItemAvatar>
+
+      <ListItemText
+        primary={
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Box mr="auto" sx={{ minWidth: 0 }}> {/* ensures flex shrink */}
+              <Typography
+                variant="subtitle1"
+                fontWeight={600}
+                sx={{
+                  maxWidth: 180,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+                title={trx?.visitor?.name}
+              >
+                {truncateText(trx?.visitor?.name, 20)}
+              </Typography>
+
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  maxWidth: 180,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+                title={trx?.visitor?.bleCardNumber}
+              >
+                {truncateText(trx?.visitor?.bleCardNumber, 16)}
+              </Typography>
+
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  maxWidth: 180,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+                title={trx?.visitor?.personId}
+              >
+                {truncateText(trx?.visitor?.personId, 20)}
+              </Typography>
+            </Box>
+
+            {trx?.status && (
+              <Chip label={trx.status} size="small" color={chipColor} />
+            )}
+          </Stack>
+        }
+      />
     </ListItemButton>
   );
 };
