@@ -76,7 +76,6 @@ const AlarmTriggerList = () => {
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
 
-
   useEffect(() => {
     dispatch(UpdateFilter(defaultAlarmTriggerFilter));
   }, [dispatch]);
@@ -128,6 +127,19 @@ const AlarmTriggerList = () => {
     <>
       {Array.from({ length: rows }).map((_, i) => (
         <TableRow key={`skeleton-${i}`}>
+          <TableCell
+            sx={{
+              position: 'sticky',
+              left: 0,
+              background: 'white',
+              zIndex: 1,
+              width: 35,
+              minWidth: 35,
+              maxWidth: 35,
+            }}
+          >
+            <Skeleton variant="text" width={18} />
+          </TableCell>
           {columns.map((_, index) => (
             <TableCell key={index}>
               <Skeleton variant="text" width={160} height={22} />
