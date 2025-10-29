@@ -237,7 +237,7 @@ export const fetchFloorplanDT = createAsyncThunk(
         maxDelay: 8000,
       }
     );
-
+    console.log("Floorplan DT Data:", res.data);
     dispatch(GetFloorplan(res.data.collection.data || []));
     await ensureMinLatency(started, 500);
     return res.data.collection;

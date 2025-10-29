@@ -10,7 +10,7 @@ import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
 import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { darken } from '@mui/material';
-import { setFocus, setScreenFloorplan } from 'src/store/apps/monitoring/layout';
+import { LayoutSet, ScreenItem, setFocus, setScreenFloorplan } from 'src/store/apps/monitoring/layout';
 import polylabel from 'polylabel';
 import { GeoFencingAlarmType } from 'src/store/apps/alarmsetting/geofencing';
 import { startMQTTclient } from 'src/store/apps/tracking/MQTT';
@@ -142,9 +142,9 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   // layout info to know what this screen is displaying
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
   const layouts = useSelector((state: RootState) =>
-    state.layoutReducer.layouts.find((l) => l.id === activeLayoutId),
+    state.layoutReducer.layouts.find((l: LayoutSet ) => l.id === activeLayoutId),
   );
-  const thisScreen = layouts?.screens.find((s) => s.id === screenId);
+  const thisScreen = layouts?.screens.find((s: ScreenItem) => s.id === screenId);
 
   // background image
 useEffect(() => {
@@ -246,7 +246,7 @@ useEffect(() => {
       const distance = Math.sqrt(distX * distX + distY * distY);
       const speed = 2 / meterPx;
       const duration = Math.max(500, (distance / speed) * 500);
-      console.log(`Animating beacon ${beaconId} over ${distance}m in ${duration}ms`);
+      // console.log(`Animating beacon ${beaconId} over ${distance}m in ${duration}ms`);
       const startTime = performance.now();
       function animate(now: number) {
         const t = Math.min(1, (now - startTime) / duration);

@@ -199,7 +199,7 @@ export const fetchAlarmTriggerDT = createAsyncThunk(
         maxDelay: 8000,
       }
     );
-    // console.log("Alarm Trigger: ", res);
+    console.log("Alarm Trigger: ", res);
     dispatch(GetAlarmTriggers(res.data.collection.data || []));
     await ensureMinLatency(started, 500);
     return res.data.collection;
