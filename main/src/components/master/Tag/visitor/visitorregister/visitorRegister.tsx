@@ -146,6 +146,8 @@ const VisitorRegister = () => {
   const [selectedMember, setSelectedMember] = useState<memberType>({} as memberType);
   const [selectedMaskedArea, setSelectedMaskedArea] = useState<string | null>(null);
 
+  const [emailErrors, setEmailErrors] = useState<Record<number, string>>({});
+
   const [searchVisitor, setSearchVisitor] = useState('');
   const [notes, setNotes] = useState('');
   const [open, setOpen] = useState(false);
@@ -299,16 +301,48 @@ const VisitorRegister = () => {
   const handleChangeVisitorField = (index: number, field: keyof VisitorType, value: string) => {
     setSelectedVisitor((prev) => {
       const updated = [...prev];
-      updated[index] = {
-        ...updated[index],
-        [field]: value,
-      };
+      const currentVisitor = updated[index];
+
+      // Update the value
+      updated[index] = { ...currentVisitor, [field]: value };
+
+      // Only validate manual email inputs (no ID)
+      if (field === 'email' && !currentVisitor.id) {
+        const emailExists = visitorList.some((v) => v.email?.toLowerCase() === value.toLowerCase());
+
+        setEmailErrors((prevErrors) => ({
+          ...prevErrors,
+          [index]: emailExists ? 'Email has been registered' : '',
+        }));
+      } else if (field === 'email' && currentVisitor.id) {
+        // If editing an existing visitor (selected from list) → clear error
+        setEmailErrors((prevErrors) => {
+          const next = { ...prevErrors };
+          delete next[index];
+          return next;
+        });
+      }
+
       return updated;
     });
   };
-  const handleRemoveRow = (indexToRemove: number) => {
-    setSelectedVisitor((prev) => prev.filter((_, index) => index !== indexToRemove));
-  };
+
+const handleRemoveRow = (indexToRemove: number) => {
+  setSelectedVisitor((prev) => {
+    const updated = prev.filter((_, index) => index !== indexToRemove);
+
+    setEmailErrors((prev) =>
+      updated.reduce((acc, _, newIndex) => {
+        const oldIndex = newIndex >= indexToRemove ? newIndex + 1 : newIndex;
+        if (prev[oldIndex]) acc[newIndex] = prev[oldIndex];
+        return acc;
+      }, {} as Record<number, string>)
+    );
+
+    return updated;
+  });
+};
+
   const handleCloseMenu = () => {
     setOpenMenu(false);
     setAnchorEl(null);
@@ -382,6 +416,7 @@ const VisitorRegister = () => {
                             fullWidth: true,
                           },
                         }}
+                        minDateTime={startTime ?? undefined}
                       />
                     </Grid>
                   </LocalizationProvider>
@@ -424,27 +459,6 @@ const VisitorRegister = () => {
                   </div>
                   {/* Member Input */}
                   <CustomFormLabel> Purpose Visit (member) </CustomFormLabel>
-                  {/* <CustomSelect
-                    name="selectedMember"
-                    value={selectedMember?.id || ''}
-                    onChange={(event: ChangeEvent<{ value: unknown }>) => {
-                      const memberId = event.target.value;
-                      const selected = members.find((m) => m.id === memberId);
-                      setSelectedMember(selected || ({} as memberType));
-                    }}
-                    fullWidth
-                    variant="outlined"
-                  >
-                    <MenuItem value="" disabled>
-                      Select Member
-                    </MenuItem>
-                    {members.map((member) => (
-                      <MenuItem key={member.id} value={member.id}>
-                        {member.name}
-                      </MenuItem>
-                    ))}
-                  </CustomSelect> */}
-
                   <Autocomplete<memberType>
                     options={members} // use the actual member objects
                     value={selectedMember || null} // same selected state as CustomSelect
@@ -584,15 +598,28 @@ const VisitorRegister = () => {
                                       />
                                     </TableCell>
                                     <TableCell>
-                                      <TextField
-                                        value={visitor.email || ''}
-                                        onChange={(e) =>
-                                          handleChangeVisitorField(index, 'email', e.target.value)
-                                        }
-                                        fullWidth
-                                        disabled={isRegistered}
-                                      />
+                                      <Box sx={{ position: 'relative' }}>
+                                        <TextField
+                                          value={visitor.email || ''}
+                                          onChange={(e) =>
+                                            handleChangeVisitorField(index, 'email', e.target.value)
+                                          }
+                                          fullWidth
+                                          disabled={isRegistered}
+                                          error={!!emailErrors[index]}
+                                          helperText={emailErrors[index] || ' '} // 👈 keep a blank line when no error
+                                          FormHelperTextProps={{
+                                            sx: {
+                                              minHeight: '20px', // 👈 reserve consistent space
+                                              margin: 0,
+                                              position: 'absolute',
+                                              bottom: -20,
+                                            },
+                                          }}
+                                        />
+                                      </Box>
                                     </TableCell>
+
                                     <TableCell>
                                       <Switch
                                         checked={!!visitor.isVip}
@@ -699,6 +726,13 @@ const VisitorRegister = () => {
                   return [v];
                 }
                 return [...prev, v];
+              });
+              setEmailErrors((prev) => {
+                const newErrors = { ...prev };
+                Object.keys(newErrors).forEach((key) => {
+                  if (v.email && newErrors[Number(key)]) delete newErrors[Number(key)];
+                });
+                return newErrors;
               });
               handleCloseMenu();
             }}
