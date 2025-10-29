@@ -28,6 +28,7 @@ import AreaDistribution from 'src/components/dashboards/mainmenu/AreaDistributio
 import { CardType, fetchCardDT } from 'src/store/apps/crud/card';
 import DynamicSwitcherCard from 'src/components/dashboards/mainmenu/DynamicCardSwitcher';
 import ChartSwitcher from 'src/components/dashboards/mainmenu/ChartSwitcher';
+import { fetchDashboardTopCards } from 'src/store/apps/dashboard/Dashboard';
 
 const filter = {
   Draw: 1,
@@ -90,19 +91,24 @@ const Modern = () => {
   // }, [dashboardFilter]);
 
   useEffect(() => {
-    // Fetch initial data for the dashboard
+    //Test new API
     dispatch(
-      // fetchTrackingTransDT({
-      //   ...filter,
-      //   length: 0,
-      //   filters: {
-      //     FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || [],
-      //     ReaderId: [],
-      //   },
-      // }),
-      fetchTrackingTrans(),
+      fetchDashboardTopCards()
     );
-    dispatch(fetchAlarm());
+
+    // Fetch initial data for the dashboard
+    // dispatch(
+    //   // fetchTrackingTransDT({
+    //   //   ...filter,
+    //   //   length: 0,
+    //   //   filters: {
+    //   //     FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || [],
+    //   //     ReaderId: [],
+    //   //   },
+    //   // }),
+    //   fetchTrackingTrans(),
+    // );
+    // dispatch(fetchAlarm());
     dispatch(
       fetchCardDT({
         ...filter,
@@ -169,27 +175,39 @@ const Modern = () => {
   const trackingFilteredCount: number = useSelector(
     (state: RootState) => state.trackingTransReducer.trackingTransFilteredCount ?? 0,
   );
-  const blacklistFilteredCount: number = useSelector(
-    (state: RootState) => state.blacklistReducer.blacklistFilteredCount ?? 0,
+  // const blacklistFilteredCount: number = useSelector(
+  //   (state: RootState) => state.blacklistReducer.blacklistFilteredCount ?? 0,
+  // );
+    const blacklistFilteredCount: number = useSelector(
+    (state: RootState) => state.DashboardReducer.topCards.data?.blacklistCount ?? 0,
   );
   const blacklistData: blacklistType[] = useSelector(
     (state: RootState) => state.blacklistReducer.blacklists,
   );
   const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
-  const maskedAreaFilteredCount: number = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreaFilteredCount ?? 0,
+  // const maskedAreaFilteredCount: number = useSelector(
+  //   (state: RootState) => state.maskedAreaReducer.maskedAreaFilteredCount ?? 0,
+  // );
+    const maskedAreaFilteredCount: number = useSelector(
+    (state: RootState) => state.DashboardReducer.topCards.data?.areaCount ?? 0,
   );
   const maskedAreaData: MaskedAreaType[] = useSelector(
     (state: RootState) => state.maskedAreaReducer.maskedAreas,
   );
-  const bleReaderFilteredCount: number = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceFilteredCount ?? 0,
+  // const bleReaderFilteredCount: number = useSelector(
+  //   (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceFilteredCount ?? 0,
+  // );
+    const bleReaderFilteredCount: number = useSelector(
+    (state: RootState) => state.DashboardReducer.topCards.data?.activeGatewayCount ?? 0,
   );
   const bleReaderData: FloorplanDeviceType[] = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.floorplanDevices,
   );
-  const alarmFilteredCount: number = useSelector(
-    (state: RootState) => state.alarmReducer.alarmRecordFilteredCount ?? 0,
+  // const alarmFilteredCount: number = useSelector(
+  //   (state: RootState) => state.alarmReducer.alarmRecordFilteredCount ?? 0,
+  // );
+    const alarmFilteredCount: number = useSelector(
+    (state: RootState) => state.DashboardReducer.topCards.data?.alarmCount ?? 0,
   );
   const alarmFilteredData: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
@@ -203,17 +221,26 @@ const Modern = () => {
   const alarmData: AlarmType[] = useSelector(
     (state: RootState) => state.alarmReducer.alarmRecordTrackings,
   );
-  const activeTag: number = useSelector(
-    (state: RootState) => state.CardReducer.cardActiveCount ?? 0,
+  // const activeTag: number = useSelector(
+  //   (state: RootState) => state.CardReducer.cardActiveCount ?? 0,
+  // );
+  // const nonActiveTag: number = useSelector(
+  //   (state: RootState) => state.CardReducer.cardNonActiveCount ?? 0,
+  // );
+    const activeTag: number = useSelector(
+    (state: RootState) => state.DashboardReducer.topCards.data?.activeBeaconCount ?? 0,
   );
   const nonActiveTag: number = useSelector(
-    (state: RootState) => state.CardReducer.cardNonActiveCount ?? 0,
+    (state: RootState) => state.DashboardReducer.topCards.data?.nonActiveBeaconCount ?? 0,
   );
   const activeTagData: CardType[] = useSelector(
     (state: RootState) => state.CardReducer.cardActiveData,
   );
   const nonActiveTagData: CardType[] = useSelector(
     (state: RootState) => state.CardReducer.cardNonActiveData,
+  );
+  const topCardsLoaded: boolean = useSelector(
+    (state: RootState) => state.DashboardReducer.topCards.hasLoaded,
   );
   // console.log(
   //   'MaskedArea Data: ',
@@ -247,6 +274,7 @@ const Modern = () => {
                 ?.flat()
                 .map((item) => item.visitor?.name ?? 'Unknown Visitor')}
               FirstNonActiveBeacon={nonActiveTagData?.flat().map((item) => item.name)}
+              hasLoaded={topCardsLoaded}
             />
           </Grid>
           {/* column */}

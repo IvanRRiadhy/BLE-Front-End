@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import { fetchBlacklistDT, UpdateFilter } from 'src/store/apps/crud/blacklist';
+import { blacklistType, fetchBlacklistDT, UpdateFilter } from 'src/store/apps/crud/blacklist';
 import { fetchVisitor } from 'src/store/apps/crud/visitor';
 import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
@@ -161,7 +161,7 @@ const Blacklist: React.FC<BlacklistTableProps> = ({ filterFloorplanId }) => {
                       renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     ) : (
                       <>
-                        {blaclistData.map((blacklist, index) => (
+                        {blaclistData.map((blacklist: blacklistType, index) => (
                           <TableRow key={blacklist.id}>
                             <TableCell
                               sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}

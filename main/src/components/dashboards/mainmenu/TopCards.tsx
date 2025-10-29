@@ -76,6 +76,7 @@ interface TopCardsProps {
   FirstBlacklist: string[];
   FirstAlarm: string[];
   FirstNonActiveBeacon: string[];
+  hasLoaded?: boolean;
 }
 
 const TopCards: React.FC<TopCardsProps> = ({
@@ -91,6 +92,7 @@ const TopCards: React.FC<TopCardsProps> = ({
   FirstBlacklist,
   FirstAlarm,
   FirstNonActiveBeacon,
+  hasLoaded,
 }) => {
   const { t } = useTranslation();
   // const [data, setData] = useState(['100', '50', '25', '15', '25', '20', '15']);
@@ -173,7 +175,7 @@ const TopCards: React.FC<TopCardsProps> = ({
                   </Tooltip>
                 </Box>
                 
-                {isLoaded ? (
+                {hasLoaded ? (
                   <Typography color={numberColor} variant="h4" fontWeight={600} fontSize={25}>
                     {counts[i]}
                   </Typography>
