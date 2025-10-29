@@ -88,7 +88,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
           localStorage.setItem('levelPriority', data.levelPriority.trim());
           console.log('levelPriority stored:', data.levelPriority); // 👀 check value
         }
-
+        localStorage.setItem('response', JSON.stringify(data));
         localStorage.setItem('welcomePopupShown', 'false');
         console.log('levelPriority stored:', localStorage.getItem('levelPriority'));
         // ✅ ensure localStorage committed before navigation

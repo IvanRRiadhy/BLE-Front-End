@@ -234,9 +234,6 @@ const BleReaderList = () => {
                 <TableCell>
                   <Skeleton variant="text" width={120} height={22} />
                 </TableCell>
-                                <TableCell>
-                  <Skeleton variant="text" width={160} height={22} />
-                </TableCell>
                 <TableCell>
                   <Skeleton variant="text" width={120} height={22} />
                 </TableCell>

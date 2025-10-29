@@ -268,7 +268,7 @@ export const fetchVisitorDT = createAsyncThunk(
         maxDelay: 8000,
       }
     );
-
+    console.log("Fetch Visitors DT", res.data?.collection || []);
     dispatch(GetVisitor(res.data.collection.data || []));
     await ensureMinLatency(started, 500);
     return res.data.collection;
@@ -285,7 +285,7 @@ export const fetchVisitorbyId = (id: string) => async (dispatch: AppDispatch) =>
         return(response.data.collection.data || []);
 
     } catch (err) {
-                            const elapsed = Date.now() - started;
+        const elapsed = Date.now() - started;
       if (elapsed < 500) await delay(500 - elapsed);
         console.log("Error: ", err);
     }
