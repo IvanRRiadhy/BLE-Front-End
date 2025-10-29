@@ -8,6 +8,7 @@ import {
   TextField,
   Autocomplete,
   CircularProgress,
+  createFilterOptions,
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from 'src/store/Store';
@@ -15,6 +16,7 @@ import { setActiveLayout, setScreenDisplay } from 'src/store/apps/monitoring/lay
 import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor'; // ✅ adjust path
 import { publishMQTT } from 'src/store/apps/tracking/MQTT';
 import TimeDisplay from '../horizontal/navbar/TimeDisplay';
+import { uniqueId } from 'lodash';
 
 const Toolbar = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -85,7 +87,9 @@ const Toolbar = () => {
     setSelectedVisitor(null); // clear search
   };
 
-  
+  const filter = createFilterOptions<VisitorType>({
+    stringify: (option) => `${option.name} ${option.bleCardNumber}`,
+  });
 
   return (
     <Box sx={{ width: '100%', px: 2, py: 1 }}>
@@ -138,6 +142,7 @@ const Toolbar = () => {
             loading={loading}
             getOptionLabel={(option) => option.name}
             isOptionEqualToValue={(option, value) => option.id === value.id}
+            filterOptions={filter}
             sx={{ width: 300 }}
             renderInput={(params) => (
               <TextField
@@ -157,7 +162,7 @@ const Toolbar = () => {
               />
             )}
             renderOption={(props, option) => (
-              <li {...props}>
+              <li {...props} key={option.id || uniqueId()}>
                 <Box>
                   <Typography fontWeight={700}>{option.name}</Typography>
                   <Typography variant="body2" color="text.secondary">
