@@ -173,7 +173,7 @@ const AlarmWarning = () => {
               display: 'flex',
               flexDirection: 'column',
               minHeight: 440,
-              maxHeight: 440,
+              maxHeight: 480,
               overflow: 'auto',
               maxWidth: '100%',
             }}
