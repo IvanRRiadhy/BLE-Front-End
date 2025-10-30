@@ -214,7 +214,7 @@ export const editAlarmTrigger = createAsyncThunk(
         const started = Date.now();
         try {
             console.log("Editing AlarmTrigger:", dmac, actionStatus);
-            const response = await axiosServices.put(`${API_URL}tag/${dmac}`, actionStatus);
+            const response = await axiosServices.put(`${API_URL}tag/${dmac}`, {actionStatus});
             console.log(response);
             const elapsed = Date.now() - started;
             if (elapsed < 500) await delay(500 - elapsed);

@@ -23,6 +23,7 @@ import {
   MenuItem,
   Tooltip,
   Divider,
+  Chip,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { useTranslation } from 'react-i18next';
@@ -36,7 +37,7 @@ import {
 import { defaultAlarmTriggerFilter } from 'src/store/apps/defaultForm';
 import { IconEye, IconSettings } from '@tabler/icons-react';
 import AlarmPositionPreviewDialog from './AlarmPositionPreviewDialog';
-import { actionStatus } from 'src/types/crud/input';
+import { actionStatus, actionStatusColormap } from 'src/types/crud/input';
 import toast from 'react-hot-toast';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 
@@ -167,6 +168,7 @@ const AlarmTriggerList = () => {
       );
       if (result && (result as any).type?.endsWith('/fulfilled')) {
         toast.success('Action dispatched successfully');
+        dispatch(fetchAlarmTriggerDT(AlarmTriggerFilter));
       } else {
         toast.error('Error dispatching action');
         console.error('Error dispatching action:', result);
@@ -178,6 +180,11 @@ const AlarmTriggerList = () => {
       setLoading(false);
       handleCloseActionDialog();
     }
+  };
+
+  const formatActionLabel = (value: string) => {
+    if (!value) return '-';
+    return value.replace(/([a-z])([A-Z])/g, '$1 $2'); // Adds space before capital letters
   };
 
   const renderSkeletonRows = (rows: number) => (
@@ -290,10 +297,67 @@ const AlarmTriggerList = () => {
                             </IconButton>
                           </TableCell>
 
-                          <TableCell>{row.alarmRecordStatus}</TableCell>
-                          <TableCell>{yesNo(row.isInRestrictedArea)}</TableCell>
-                          <TableCell>{row.actionStatus}</TableCell>
-                          <TableCell>{yesNo(row.isActive)}</TableCell>
+                          <TableCell>
+                            {/* {formatActionLabel(row.alarmRecordStatus)} */}
+                            <Chip
+                              sx={{
+                                bgcolor: row.alarmColor || 'secondary.dark',
+                                color: 'white',
+                                borderRadius: '8px',
+                                minWidth: '50px',
+                              }}
+                              size="small"
+                              label={formatActionLabel(row.alarmRecordStatus)}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            {/* {yesNo(row.isInRestrictedArea)} */}
+                            <Chip
+                              sx={{
+                                bgcolor: row.isInRestrictedArea ? 'error.dark' : 'primary.main',
+                                color: 'white',
+                                borderRadius: '8px',
+                                minWidth: '50px',
+                              }}
+                              size="small"
+                              label={yesNo(row.isInRestrictedArea)}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            {row.actionStatus ? (
+                              <Box
+                                component="span"
+                                sx={{
+                                  display: 'inline-block',
+                                  px: 1.5,
+                                  py: 0.25,
+                                  borderRadius: '16px',
+                                  fontSize: '0.8rem',
+                                  fontWeight: 600,
+                                  color: 'white',
+                                  textTransform: 'capitalize',
+                                  backgroundColor: actionStatusColormap[row.actionStatus] || 'grey',
+                                }}
+                              >
+                                {formatActionLabel(row.actionStatus)}
+                              </Box>
+                            ) : (
+                              '-'
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {/* {yesNo(row.isActive)} */}
+                            <Chip
+                              sx={{
+                                bgcolor: row.isActive ? 'error.dark' : 'success.main',
+                                color: 'white',
+                                borderRadius: '8px',
+                                minWidth: '50px',
+                              }}
+                              size="small"
+                              label={yesNo(row.isActive)}
+                            />
+                          </TableCell>
                           <TableCell
                             sx={{
                               position: 'sticky',
@@ -346,11 +410,9 @@ const AlarmTriggerList = () => {
           </BlankCard>
           {/* ⚙️ Apply Action Dialog */}
           <Dialog open={openActionDialog} onClose={handleCloseActionDialog} fullWidth maxWidth="sm">
-            <DialogTitle my={1} p={2}>
-              Apply Action to Alarm
-            </DialogTitle>
-            <Divider />
+            <DialogTitle>Apply Action to Alarm</DialogTitle>
             <DialogContent sx={{ mt: 1 }}>
+              {/* Alarm Info */}
               <Typography variant="body2" color="text.secondary" mb={1}>
                 Alarm DMAC:
               </Typography>
@@ -358,60 +420,92 @@ const AlarmTriggerList = () => {
                 {selectedAlarmTrigger?.beaconId?.toUpperCase() || '-'}
               </Typography>
 
-              <Typography variant="subtitle2" color="text.secondary" mb={1}>
-                Select Action Status
-              </Typography>
+              {/* If alarm is inactive */}
+              {!selectedAlarmTrigger?.isActive ? (
+                <Box
+                  sx={{
+                    border: '1px dashed',
+                    borderColor: 'error.main',
+                    borderRadius: 2,
+                    p: 2,
+                    backgroundColor: 'rgba(255, 0, 0, 0.05)',
+                  }}
+                >
+                  <Typography variant="h6" color="error" fontWeight={600}>
+                    Alarm is no longer active
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" mt={0.5}>
+                    You cannot apply any new actions to an inactive alarm.
+                  </Typography>
+                </Box>
+              ) : (
+                <>
+                  {/* If alarm is active, show chip-style status selector */}
+                  <Typography variant="subtitle2" color="text.secondary" mb={1}>
+                    Select Action Status
+                  </Typography>
 
-              <Box display="flex" flexWrap="wrap" gap={1}>
-                {actionStatus
-                  .filter((item) => !item.disabled)
-                  .map((item) => {
-                    const isActive =
-                      selectedAlarmTrigger?.actionStatus?.toLowerCase() ===
-                      item.value.toLowerCase();
+                  <Box display="flex" flexWrap="wrap" gap={1}>
+                    {actionStatus
+                      .filter((item) => !item.disabled)
+                      .map((item) => {
+                        const isActiveStatus =
+                          selectedAlarmTrigger?.actionStatus?.toLowerCase() ===
+                          item.value.toLowerCase();
 
-                    const isSelected = selectedAction?.toLowerCase() === item.value.toLowerCase();
+                        const isSelected =
+                          selectedAction?.toLowerCase() === item.value.toLowerCase();
 
-                    return (
-                      <Button
-                        key={item.value}
-                        variant="outlined"
-                        disabled={isActive}
-                        onClick={() => setSelectedAction(item.value)}
-                        sx={{
-                          borderRadius: '20px',
-                          textTransform: 'none',
-                          px: 2,
-                          py: 0.75,
-                          border: '1px solid',
-                          borderColor: isSelected ? 'primary.main' : 'rgba(0,0,0,0.23)',
-                          backgroundColor: isSelected ? 'primary.main' : 'transparent',
-                          color: isSelected ? 'white' : isActive ? 'text.disabled' : 'text.primary',
-                          '&:hover': {
-                            backgroundColor: isSelected ? 'primary.dark' : 'rgba(0,0,0,0.05)',
-                          },
-                          transition: 'all 0.15s ease-in-out',
-                        }}
-                      >
-                        {item.label}
-                      </Button>
-                    );
-                  })}
-              </Box>
+                        return (
+                          <Button
+                            key={item.value}
+                            variant="outlined"
+                            disabled={isActiveStatus}
+                            onClick={() => setSelectedAction(item.value)}
+                            sx={{
+                              borderRadius: '20px',
+                              textTransform: 'none',
+                              px: 2,
+                              py: 0.75,
+                              border: '1px solid',
+                              borderColor: isSelected ? 'primary.main' : 'rgba(0,0,0,0.23)',
+                              backgroundColor: isSelected ? 'primary.main' : 'transparent',
+                              color: isSelected
+                                ? 'white'
+                                : isActiveStatus
+                                ? 'text.disabled'
+                                : 'text.primary',
+                              '&:hover': {
+                                backgroundColor: isSelected ? 'primary.dark' : 'rgba(0,0,0,0.05)',
+                              },
+                              transition: 'all 0.15s ease-in-out',
+                            }}
+                          >
+                            {item.label}
+                          </Button>
+                        );
+                      })}
+                  </Box>
+                </>
+              )}
             </DialogContent>
 
             <DialogActions>
               <Button onClick={handleCloseActionDialog} color="error" variant="outlined">
-                Cancel
+                Close
               </Button>
-              <Button
-                onClick={handleApplyAction}
-                color="primary"
-                variant="contained"
-                disabled={!selectedAction || !selectedAlarmTrigger}
-              >
-                Confirm
-              </Button>
+
+              {/* Only show confirm if alarm is active */}
+              {selectedAlarmTrigger?.isActive && (
+                <Button
+                  onClick={handleApplyAction}
+                  color="primary"
+                  variant="contained"
+                  disabled={!selectedAction || !selectedAlarmTrigger}
+                >
+                  Confirm
+                </Button>
+              )}
             </DialogActions>
           </Dialog>
         </Box>
