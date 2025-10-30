@@ -214,7 +214,7 @@ const InvitationInfo = () => {
       </Box>
     );
   }
-  if(!visitorInfo){
+  if(!visitorInfo && !loading){
     return (
           <Box
       sx={{

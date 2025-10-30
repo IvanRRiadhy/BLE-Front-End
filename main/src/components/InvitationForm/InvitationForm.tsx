@@ -117,23 +117,23 @@ const VisitorFormPage = () => {
     }
   };
 
-    const validateForm = (): boolean => {
+  const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
     if (!formData.name?.trim()) errors.name = 'Full name is required';
     if (!formData.identityType?.trim()) errors.identityType = 'Identity Type is required';
-    if(!formData.identityId?.trim()) errors.identityId = 'Identity ID is required';
-    if(!formData.faceImage) errors.faceImage = 'Photo is required';
+    if (!formData.identityId?.trim()) errors.identityId = 'Identity ID is required';
+    if (!formData.faceImage) errors.faceImage = 'Photo is required';
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async () => {
-        if (!validateForm()) {
-          toast.error('Please fill in all required fields correctly.');
-          return;
-        }
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields correctly.');
+      return;
+    }
     setIsSaving(true);
     setLoading(true);
     // Prepare FormData
@@ -370,10 +370,12 @@ const VisitorFormPage = () => {
             <Divider />
             <Box mt={2}>
               <input type="file" accept="image/*" onChange={handleImageChange} />
-              {formErrors.faceImage && <FormHelperText error>{formErrors.faceImage}</FormHelperText>}
+              {formErrors.faceImage && (
+                <FormHelperText error>{formErrors.faceImage}</FormHelperText>
+              )}
               {preview && (
                 <img
-                  src={`${BASE_URL}${preview}`}
+                  src={preview.startsWith('blob:') ? preview : `${BASE_URL}${preview}`}
                   alt="Preview"
                   style={{ width: '100%', borderRadius: 8, marginTop: 10 }}
                 />
