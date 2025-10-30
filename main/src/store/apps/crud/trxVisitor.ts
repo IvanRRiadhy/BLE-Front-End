@@ -71,6 +71,7 @@ export type TrxVisitorType = {
     invitationCreatedAt: string,
     visitorPeriodStart: string,
     visitorPeriodEnd: string,
+    extendedVisitorTime: number,
     vehiclePlateNumber: string,
     isInvitationAccepted: boolean,
     invitationCode: string,
@@ -291,6 +292,21 @@ export const visitorCheckOut = createAsyncThunk(
             return response.data;
         } catch (error) {
             console.error("Error checking out visitor:", error);
+            throw error;
+        }
+    }
+);
+
+export const visitorExtend = createAsyncThunk(
+    "TrxVisitor/visitorExtend",
+    async ({ trxVisitorId, ExtendedVisitorTime }: { trxVisitorId: string; ExtendedVisitorTime: number }) => {
+        try{
+            console.log("Extending Visitor ", trxVisitorId, " by ", ExtendedVisitorTime, " minutes");
+            const response = await axiosServices.post(`${API_URL}${trxVisitorId}/extend`, { ExtendedVisitorTime });
+            console.log("response", response.data);
+            return response.data;
+        } catch (error) {
+            console.error("Error extending visitor period:", error);
             throw error;
         }
     }

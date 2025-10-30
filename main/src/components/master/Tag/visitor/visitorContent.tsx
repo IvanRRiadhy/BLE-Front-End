@@ -443,7 +443,13 @@ const VisitorContent = () => {
                 src={`${BASE_URL}${trxVisitorDetail.visitor?.faceImage}`}
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
-              <VisitorActions trxVisitorDetail={trxVisitorDetail} floating />
+              <VisitorActions
+                trxVisitorDetail={{
+                  ...trxVisitorDetail,
+                  name: trxVisitorDetail.visitor?.name ?? 'Unknown Visitor',
+                }}
+                floating
+              />
 
               <Typography variant="h4" fontWeight={800}>
                 {trxVisitorDetail.visitor?.name || 'Not provided'}

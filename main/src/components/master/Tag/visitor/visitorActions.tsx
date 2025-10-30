@@ -13,6 +13,9 @@ import {
   Stack,
   Backdrop,
   CircularProgress,
+  Chip,
+  Typography,
+  Divider,
 } from '@mui/material';
 import toast from 'react-hot-toast';
 
@@ -23,6 +26,7 @@ import {
   UpdateFilter,
   visitorCheckIn,
   visitorCheckOut,
+  visitorExtend,
   visitorStatusChange,
 } from 'src/store/apps/crud/trxVisitor';
 import { defaultCardFilter, defaultTrxVisitorFilter } from 'src/store/apps/defaultForm';
@@ -35,6 +39,10 @@ import { createPortal } from 'react-dom';
 type TrxVisitorDetailLike = {
   id: string;
   status: 'Preregist' | 'Precheckin' | 'Checkin' | 'Unblock' | 'Block' | string;
+  name: string;
+  visitorPeriodStart: string;
+  visitorPeriodEnd: string;
+  agenda: string;
 };
 
 type Props = {
@@ -43,6 +51,16 @@ type Props = {
   floating?: boolean;
 };
 
+const durationChoice = [
+  { label: '30 Minutes', value: 30 },
+  { label: '45 Minutes', value: 45 },
+  { label: '60 Minutes', value: 60 },
+  { label: '90 Minutes', value: 90 },
+  { label: '120 Minutes', value: 120 },
+  { label: '150 Minutes', value: 150 },
+  { label: '180 Minutes', value: 180 },
+];
+
 const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
   const dispatch: AppDispatch = useDispatch();
   const cardData = useSelector((state: RootState) => state.CardReducer.cards);
@@ -50,8 +68,10 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
   const [loading, setLoading] = useState(false);
   const [openReasonMenu, setOpenReasonMenu] = useState(false);
   const [openCardMenu, setOpenCardMenu] = useState(false);
+  const [openExtendMenu, setOpenExtendMenu] = useState(false);
   const [reason, setReason] = useState('');
   const [selectedCard, setSelectedCard] = useState<string>('');
+  const [selectedDuration, setSelectedDuration] = useState<number | ''>('');
 
   // Preload available cards (unused) whenever the card dialog is needed
   useEffect(() => {
@@ -91,6 +111,37 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
     } catch (error) {
       console.error('Error checking in visitor:', error);
       toast.error('Error checking in visitor');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExtend = async (duration: number) => {
+    setLoading(true);
+    if (!trxVisitorDetail?.id) {
+      setLoading(false);
+      toast.error('Visitor not found');
+      return;
+    }
+    if (duration <= 0) {
+      setLoading(false);
+      toast.error('Invalid duration');
+      return;
+    }
+    try {
+      // Extend logic here
+      const result = await dispatch(
+        visitorExtend({ trxVisitorId: trxVisitorDetail.id, ExtendedVisitorTime: duration }),
+      );
+      if (result && (result as any).type?.endsWith('/fulfilled')) {
+        toast.success('Visit duration extended successfully');
+        await refreshAndReselect();
+      } else {
+        toast.error('Error extending visit duration');
+      }
+    } catch (error) {
+      console.error('Error extending visitor visit:', error);
+      toast.error('Error extending visitor visit');
     } finally {
       setLoading(false);
     }
@@ -189,9 +240,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
       tertiary: {
         label: 'Extend Visit',
         color: 'primary',
-        onClick: () => {
-          console.log('Extend Visit');
-        },
+        onClick: () => setOpenExtendMenu(true),
       },
     },
     Unblock: {
@@ -231,6 +280,23 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const formatDateTime = (dateString: string) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-GB', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    })
+      .format(date)
+      .replace(/\./g, ':');
   };
 
   return (
@@ -359,6 +425,124 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
             Cancel
           </Button>
           <Button onClick={handleConfirmReason} color="error">
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Extend Duration Dialog */}
+      <Dialog
+        open={openExtendMenu}
+        onClose={() => setOpenExtendMenu(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle my={1} p={2}>
+          Extend Visit Duration
+        </DialogTitle>
+            <Divider />
+        <DialogContent>
+          <Grid container spacing={2}>
+            {/* LEFT: Visit Information */}
+            <Grid size={{ xs: 12, md: 6 }} p={1}>
+              <Stack spacing={1.5}>
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary" fontWeight={800}>
+                    Visitor Name
+                  </Typography>
+                  <Typography variant="body1">
+                    {trxVisitorDetail.name || '-'}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary" fontWeight={800}>
+                    Visit Start
+                  </Typography>
+                  <Typography variant="body1">
+                    {formatDateTime(trxVisitorDetail.visitorPeriodStart)}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary" fontWeight={800}>
+                    Visit End
+                  </Typography>
+                  <Typography variant="body1">
+                    {formatDateTime(trxVisitorDetail.visitorPeriodEnd)}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary" fontWeight={800}>
+                    Visit End (After Extend)
+                  </Typography>
+                  <Typography variant="body1" fontWeight={600} color="primary.dark">
+                    {(() => {
+                      const end = new Date(trxVisitorDetail.visitorPeriodEnd);
+                      const extended = new Date(
+                        end.getTime() + (Number(selectedDuration) || 0) * 60000,
+                      );
+                      return isNaN(extended.getTime())
+                        ? '-'
+                        : formatDateTime(extended.toISOString());
+                    })()}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Grid>
+
+            {/* RIGHT: Duration Selection */}
+            <Grid size={{ xs: 12, md: 6 }} p={1}>
+              <Stack spacing={1}>
+                <Typography variant="subtitle2" color="text.secondary" fontWeight={800} mb={1} >
+                  Select Duration
+                </Typography>
+                <Stack direction="row" flexWrap="wrap" gap={1}>
+                  {durationChoice.map((choice) => (
+                    <Chip
+                      key={choice.value}
+                      label={choice.label}
+                      clickable
+                      onClick={() => setSelectedDuration(choice.value)}
+                      sx={{
+                        borderRadius: '20px',
+                        fontWeight: 500,
+                        px: 1.5,
+                        py: 0.5,
+                        border: '1px solid',
+                        borderColor:
+                          selectedDuration === choice.value ? 'primary.main' : 'rgba(0,0,0,0.23)',
+                        color: selectedDuration === choice.value ? 'white' : 'text.primary',
+                        backgroundColor:
+                          selectedDuration === choice.value ? 'primary.main' : 'transparent',
+                        '&:hover': {
+                          backgroundColor:
+                            selectedDuration === choice.value ? 'primary.dark' : 'rgba(0,0,0,0.05)',
+                        },
+                        transition: 'all 0.15s ease-in-out',
+                      }}
+                    />
+                  ))}
+                </Stack>
+              </Stack>
+            </Grid>
+          </Grid>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenExtendMenu(false)} color="error" variant="outlined">
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              if (!selectedDuration) return toast.error('Please select duration');
+              handleExtend(Number(selectedDuration));
+              setOpenExtendMenu(false);
+            }}
+            color="primary"
+            variant="contained"
+          >
             Confirm
           </Button>
         </DialogActions>
