@@ -361,6 +361,17 @@ const VisitorContent = () => {
   //Tracking History
   const [openTrackHistory, setOpenTrackHistory] = useState(false);
 
+  //Format
+  const formatDuration = (minutes: number) => {
+    if (!minutes || minutes <= 0) return '';
+    const hrs = Math.floor(minutes / 60);
+    const mins = Math.floor(minutes % 60);
+    const secs = 0;
+
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `+${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+  };
+
   return (
     <>
       {visitorDetail && trxVisitorDetail ? (
@@ -470,13 +481,20 @@ const VisitorContent = () => {
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="arrival">Arrival</CustomFormLabel>
-                <Typography>
-                  {formatTime(trxVisitorDetail.visitorPeriodStart) || 'Not provided'}
-                </Typography>
+                <Typography>{formatTime(trxVisitorDetail.visitorPeriodStart)}</Typography>
 
                 <CustomFormLabel htmlFor="end">End</CustomFormLabel>
                 <Typography>
-                  {formatTime(trxVisitorDetail.visitorPeriodEnd) || 'Not provided'}
+                  {formatTime(trxVisitorDetail.visitorPeriodEnd)}{' '}
+                  {trxVisitorDetail.extendedVisitorTime &&
+                    trxVisitorDetail.extendedVisitorTime > 0 && (
+                      <Typography
+                        component="span"
+                        sx={{ color: 'error.main', fontWeight: 600, ml: 0.5 }}
+                      >
+                        ({formatDuration(trxVisitorDetail.extendedVisitorTime)})
+                      </Typography>
+                    )}
                 </Typography>
               </Grid>
 
@@ -567,17 +585,19 @@ const VisitorContent = () => {
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
                 <Typography>
-                  {trxVisitorDetail.visitor?.cardNumber ?? trxVisitorDetail.status === 'Checkout'
-                    ? 'Card returned'
-                    : 'Not assigned'}
+                  {trxVisitorDetail.visitor?.cardNumber ? 
+                  trxVisitorDetail.visitor?.cardNumber : trxVisitorDetail.status === 'Checkout' ?
+                  'Card returned' :
+                  'Not provided'}
                 </Typography>
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="ble-card-number">Ble Card Number</CustomFormLabel>
                 <Typography>
-                  {trxVisitorDetail.visitor?.bleCardNumber ?? trxVisitorDetail.status === 'Checkout'
-                    ? 'Card returned'
-                    : 'Not assigned'}
+                  {trxVisitorDetail.visitor?.bleCardNumber ? 
+                  trxVisitorDetail.visitor?.bleCardNumber : trxVisitorDetail.status === 'Checkout' ?
+                  'Card returned' :
+                  'Not provided'}
                 </Typography>
               </Grid>
             </Grid>

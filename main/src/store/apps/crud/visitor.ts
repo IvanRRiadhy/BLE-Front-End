@@ -379,9 +379,9 @@ export const fillFormVisitor = createAsyncThunk(
         const started = Date.now();
         try {
             console.log(code,visitorId, applicationId, trxVisitorId);
-for (const [key, value] of formData.entries()) {
-  console.log(key, value);
-}
+            for (const [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
             const response = await axiosServices.post(`${FILL_FORM_URL}`, formData, {
                 params:{
                     code: code,
