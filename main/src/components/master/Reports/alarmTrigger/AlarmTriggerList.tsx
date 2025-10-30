@@ -22,18 +22,23 @@ import {
   InputLabel,
   MenuItem,
   Tooltip,
+  Divider,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { useTranslation } from 'react-i18next';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import {
   AlarmTriggerType,
+  editAlarmTrigger,
   fetchAlarmTriggerDT,
   UpdateFilter,
 } from 'src/store/apps/crud/alarmTrigger';
 import { defaultAlarmTriggerFilter } from 'src/store/apps/defaultForm';
-import { IconEye } from '@tabler/icons-react';
+import { IconEye, IconSettings } from '@tabler/icons-react';
 import AlarmPositionPreviewDialog from './AlarmPositionPreviewDialog';
+import { actionStatus } from 'src/types/crud/input';
+import toast from 'react-hot-toast';
+import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 
 const columns = [
   { label: 'Time', field: 'TriggerTime', sortAble: true },
@@ -61,6 +66,7 @@ const AlarmTriggerList = () => {
   );
   const { t } = useTranslation();
   const hasLoaded = useSelector((state: RootState) => state.alarmTriggerReducer.hasLoaded);
+  const [loading, setLoading] = useState(false);
 
   // Pagination
   const page = Math.floor(AlarmTriggerFilter.Start / AlarmTriggerFilter.Length);
@@ -123,6 +129,57 @@ const AlarmTriggerList = () => {
     setSelectedAlarmTrigger(null);
   };
 
+  // Alarm Action
+  const [openActionDialog, setOpenActionDialog] = useState(false);
+  const [selectedAction, setSelectedAction] = useState<string>('');
+
+  const handleOpenActionDialog = () => {
+    setSelectedAction('');
+    setOpenActionDialog(true);
+  };
+
+  const handleCloseActionDialog = () => {
+    setOpenActionDialog(false);
+    setSelectedAction('');
+  };
+
+  const handleApplyAction = async () => {
+    setLoading(true);
+    if (!selectedAlarmTrigger) {
+      setLoading(false);
+      handleCloseActionDialog();
+      toast.error('Please select an alarm');
+      return;
+    }
+    if (!selectedAction) {
+      setLoading(false);
+      handleCloseActionDialog();
+      toast.error('Please select an action status');
+      return;
+    }
+
+    try {
+      const result = await dispatch(
+        editAlarmTrigger({
+          dmac: selectedAlarmTrigger.beaconId.toUpperCase(),
+          actionStatus: selectedAction.toLowerCase(),
+        }),
+      );
+      if (result && (result as any).type?.endsWith('/fulfilled')) {
+        toast.success('Action dispatched successfully');
+      } else {
+        toast.error('Error dispatching action');
+        console.error('Error dispatching action:', result);
+      }
+    } catch (error: any) {
+      toast.error('Error dispatching action');
+      console.error('Error dispatching action', error);
+    } finally {
+      setLoading(false);
+      handleCloseActionDialog();
+    }
+  };
+
   const renderSkeletonRows = (rows: number) => (
     <>
       {Array.from({ length: rows }).map((_, i) => (
@@ -183,6 +240,20 @@ const AlarmTriggerList = () => {
                         )}
                       </TableCell>
                     ))}
+                    {/* Right Sticky Empty Column */}
+                    <TableCell
+                      sx={{
+                        position: 'sticky',
+                        right: 0,
+                        background: 'white',
+                        zIndex: 2,
+                        width: 150, // Fixed width
+                        minWidth: 150,
+                        maxWidth: 150,
+                      }}
+                    >
+                      <Typography variant="h6"> Actions </Typography>
+                    </TableCell>
                   </TableRow>
                 </TableHead>
 
@@ -223,6 +294,31 @@ const AlarmTriggerList = () => {
                           <TableCell>{yesNo(row.isInRestrictedArea)}</TableCell>
                           <TableCell>{row.actionStatus}</TableCell>
                           <TableCell>{yesNo(row.isActive)}</TableCell>
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              right: 0,
+                              background: 'white',
+                              zIndex: 2,
+                              gap: 1,
+                              alignItems: 'center',
+                              width: 150, // Fixed width
+                              minWidth: 150,
+                              maxWidth: 150,
+                            }}
+                          >
+                            <Tooltip title="Apply Action">
+                              <IconButton
+                                color="primary"
+                                onClick={() => {
+                                  setSelectedAlarmTrigger(row);
+                                  handleOpenActionDialog();
+                                }}
+                              >
+                                <IconSettings size={20} />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
                         </TableRow>
                       ))}
                 </TableBody>
@@ -248,6 +344,76 @@ const AlarmTriggerList = () => {
               />
             )}
           </BlankCard>
+          {/* ⚙️ Apply Action Dialog */}
+          <Dialog open={openActionDialog} onClose={handleCloseActionDialog} fullWidth maxWidth="sm">
+            <DialogTitle my={1} p={2}>
+              Apply Action to Alarm
+            </DialogTitle>
+            <Divider />
+            <DialogContent sx={{ mt: 1 }}>
+              <Typography variant="body2" color="text.secondary" mb={1}>
+                Alarm DMAC:
+              </Typography>
+              <Typography variant="body1" fontWeight={600} mb={2}>
+                {selectedAlarmTrigger?.beaconId?.toUpperCase() || '-'}
+              </Typography>
+
+              <Typography variant="subtitle2" color="text.secondary" mb={1}>
+                Select Action Status
+              </Typography>
+
+              <Box display="flex" flexWrap="wrap" gap={1}>
+                {actionStatus
+                  .filter((item) => !item.disabled)
+                  .map((item) => {
+                    const isActive =
+                      selectedAlarmTrigger?.actionStatus?.toLowerCase() ===
+                      item.value.toLowerCase();
+
+                    const isSelected = selectedAction?.toLowerCase() === item.value.toLowerCase();
+
+                    return (
+                      <Button
+                        key={item.value}
+                        variant="outlined"
+                        disabled={isActive}
+                        onClick={() => setSelectedAction(item.value)}
+                        sx={{
+                          borderRadius: '20px',
+                          textTransform: 'none',
+                          px: 2,
+                          py: 0.75,
+                          border: '1px solid',
+                          borderColor: isSelected ? 'primary.main' : 'rgba(0,0,0,0.23)',
+                          backgroundColor: isSelected ? 'primary.main' : 'transparent',
+                          color: isSelected ? 'white' : isActive ? 'text.disabled' : 'text.primary',
+                          '&:hover': {
+                            backgroundColor: isSelected ? 'primary.dark' : 'rgba(0,0,0,0.05)',
+                          },
+                          transition: 'all 0.15s ease-in-out',
+                        }}
+                      >
+                        {item.label}
+                      </Button>
+                    );
+                  })}
+              </Box>
+            </DialogContent>
+
+            <DialogActions>
+              <Button onClick={handleCloseActionDialog} color="error" variant="outlined">
+                Cancel
+              </Button>
+              <Button
+                onClick={handleApplyAction}
+                color="primary"
+                variant="contained"
+                disabled={!selectedAction || !selectedAlarmTrigger}
+              >
+                Confirm
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Box>
       </Grid>
     </Grid>

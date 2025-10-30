@@ -207,13 +207,14 @@ export const fetchAlarmTriggerDT = createAsyncThunk(
     
 )
 
+
 export const editAlarmTrigger = createAsyncThunk(
     "alarmTriggers/editAlarmTrigger",
-    async (data: any, {rejectWithValue}) => {
+    async ({dmac, actionStatus} : {dmac: string, actionStatus: string}, {rejectWithValue}) => {
         const started = Date.now();
         try {
-            const { id, ...rest } = data;
-            const response = await axiosServices.put(`${API_URL}${id}`, rest);
+            console.log("Editing AlarmTrigger:", dmac, actionStatus);
+            const response = await axiosServices.put(`${API_URL}tag/${dmac}`, actionStatus);
             console.log(response);
             const elapsed = Date.now() - started;
             if (elapsed < 500) await delay(500 - elapsed);
