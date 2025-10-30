@@ -18,7 +18,7 @@ import {
   Divider,
   CircularProgress,
 } from '@mui/material';
-import * as XLSX from 'xlsx';
+// import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import ExcelJS from 'exceljs';
 import html2canvas from 'html2canvas';
@@ -193,46 +193,55 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
   };
 
   // 🧩 Helper: export CSV (two files zipped together if needed)
-  const handleExportCSV = () => {
-    if (trackingLogs.length === 0 && alarmLogs.length === 0) {
-      alert('No data available to export.');
-      return;
-    }
+const handleExportCSV = () => {
+  if (trackingLogs.length === 0 && alarmLogs.length === 0) {
+    alert('No data available to export.');
+    return;
+  }
 
-    const trackingCsv = XLSX.utils.sheet_to_csv(
-      XLSX.utils.json_to_sheet(
-        trackingLogs.map((t) => ({
-          Visitor: t.VisitorName,
-          Area: t.AreaName,
-          'Enter Time': formatDateTime(t.EnterTime),
-          'Exit Time': formatDateTime(t.ExitTime),
-          Status: t.VisitorStatus,
-          Host: t.HostName,
-        })),
-      ),
+  const toCsv = (data: any[]) => {
+    if (!data.length) return '';
+    const headers = Object.keys(data[0]);
+    const rows = data.map((row) =>
+      headers.map((h) => `"${(row[h] ?? '').toString().replace(/"/g, '""')}"`).join(','),
     );
-
-    const alarmCsv = XLSX.utils.sheet_to_csv(
-      XLSX.utils.json_to_sheet(
-        alarmLogs.map((a) => ({
-          Visitor: a.VisitorName,
-          Area: a.AreaName,
-          'Alarm Triggered': formatDateTime(a.AlarmTriggered),
-          'Alarm Done': formatDateTime(a.AlarmDone),
-          Status: a.VisitorStatus,
-          Host: a.HostName,
-          Category: a.AlarmCategory,
-        })),
-      ),
-    );
-
-    const combinedCsv =
-      '--- Tracking Logs ---\n' + trackingCsv + '\n\n--- Alarm Logs ---\n' + alarmCsv;
-
-    const blob = new Blob([combinedCsv], { type: 'text/csv;charset=utf-8;' });
-    const fileName = `VisitorReport_${new Date().toISOString().split('T')[0]}.csv`;
-    saveAs(blob, fileName);
+    return [headers.join(','), ...rows].join('\n');
   };
+
+  const trackingData = trackingLogs.map((t) => ({
+    Visitor: t.VisitorName,
+    Area: t.AreaName,
+    'Enter Time': formatDateTime(t.EnterTime),
+    'Exit Time': formatDateTime(t.ExitTime),
+    Status: t.VisitorStatus,
+    Host: t.HostName,
+  }));
+
+  const alarmData = alarmLogs.map((a) => ({
+    Visitor: a.VisitorName,
+    Area: a.AreaName,
+    'Alarm Triggered': formatDateTime(a.AlarmTriggered),
+    'Alarm Done': formatDateTime(a.AlarmDone),
+    Status: a.VisitorStatus,
+    Host: a.HostName,
+    Category: a.AlarmCategory,
+  }));
+
+  const trackingCsv = toCsv(trackingData);
+  const alarmCsv = toCsv(alarmData);
+
+  const combinedCsv =
+    '--- Tracking Logs ---\n' +
+    trackingCsv +
+    '\n\n--- Alarm Logs ---\n' +
+    alarmCsv;
+
+  const blob = new Blob([combinedCsv], {
+    type: 'text/csv;charset=utf-8;',
+  });
+  const fileName = `VisitorReport_${new Date().toISOString().split('T')[0]}.csv`;
+  saveAs(blob, fileName);
+};
 
   const computeExcelAnalytics = (trackingLogs: any[], alarmLogs: any[]) => {
     const countBy = (arr: any[], key: string) => {
