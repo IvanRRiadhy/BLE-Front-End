@@ -54,7 +54,7 @@ const Notifications = () => {
   );
   const memberList: memberType[] = useSelector((s: RootState) => s.memberReducer.members);
   const visitorList: VisitorType[] = useSelector((s: RootState) => s.visitorReducer.visitors);
-
+const MAX_BUBBLES = 4;
   const ONE_HOUR_MS = 60 * 60 * 1000;
   const toMs = (v: any) => (v instanceof Date ? v.getTime() : Date.parse(v));
 
@@ -128,7 +128,11 @@ const Notifications = () => {
         createdAt: Date.now(),
       };
 
-      setBubbles((prev) => [...prev, bd]);
+      setBubbles((prev) => {
+        const next = [...prev, bd];
+        if (next.length > MAX_BUBBLES) next.shift(); // remove oldest
+        return next;
+      });
 
       // Play notification sound
       notificationAudio.currentTime = 0; // rewind if it's still playing

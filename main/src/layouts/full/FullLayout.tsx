@@ -93,7 +93,7 @@ const FullLayout: FC = () => {
         // console.log(`[NTFY] Message from alarm topic "${topic}":`, data);
         const alarmData = Array.isArray(data) ? data[0] : data;
         setLatestAlarm(alarmData);
-        // setOpenAlarmPopup(true);
+        setOpenAlarmPopup(true);
         dispatch(showAlarmPopup(alarmData));
         // document.dispatchEvent(new CustomEvent('app:new-alarm', { detail: { alarm: alarmData } }));
         // window.dispatchEvent(new CustomEvent('app:new-alarm', { detail: { alarm: alarmData } }));
@@ -218,7 +218,11 @@ const FullLayout: FC = () => {
                 flexGrow: 1,
               }}
             >
-              <Box sx={{ minHeight: 'calc(100vh - 170px)' }}>
+              <Box 
+              sx={{ 
+                minHeight: 'calc(100vh - 170px)', 
+                py: customizer.isHorizontal ? 1 : 0
+                }}>
                 <ScrollToTop>
                   <Outlet />
                 </ScrollToTop>

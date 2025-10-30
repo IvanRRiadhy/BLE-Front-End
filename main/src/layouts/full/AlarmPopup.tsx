@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Dialog, Box, Button, Typography } from '@mui/material';
 import axiosServices from 'src/utils/axios';
 import { useDispatch, useSelector } from 'src/store/Store';
@@ -29,6 +29,10 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
   const dispatch = useDispatch();
   const memberList: memberType[] = useSelector((s: RootState) => s.memberReducer.members);
   const visitorList: VisitorType[] = useSelector((s: RootState) => s.visitorReducer.visitors);
+
+  useEffect(() => {
+    console.log("Alarm: ", alarm);
+  }, [alarm]);
 
   // Resolve display name from beacon/card ID
   const getName = (bleNumber: string) => {
