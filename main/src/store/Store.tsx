@@ -3,16 +3,16 @@ import { persistStore, persistReducer } from 'redux-persist';
 import { PersistPartial } from 'redux-persist/es/persistReducer';
 import storage from 'redux-persist/lib/storage';
 import CustomizerReducer from './customizer/CustomizerSlice';
-import EcommerceReducer from './apps/eCommerce/ECommerceSlice';
-import ChatsReducer from './apps/chat/ChatSlice';
-import NotesReducer from './apps/notes/NotesSlice';
-import EmailReducer from './apps/email/EmailSlice';
-import TicketReducer from './apps/tickets/TicketSlice';
-import ContactsReducer from './apps/contacts/ContactSlice';
-import UserProfileReducer from './apps/userProfile/UserProfileSlice';
-import GatesReducer from './apps/tracking/GatesSlice';
-import FloorplanReducer2 from './apps/tracking/FloorPlanSlice';
-import BlogReducer from './apps/blog/BlogSlice';
+// import EcommerceReducer from './apps/eCommerce/ECommerceSlice';
+// import ChatsReducer from './apps/chat/ChatSlice';
+// import NotesReducer from './apps/notes/NotesSlice';
+// import EmailReducer from './apps/email/EmailSlice';
+// import TicketReducer from './apps/tickets/TicketSlice';
+// import ContactsReducer from './apps/contacts/ContactSlice';
+// import UserProfileReducer from './apps/userProfile/UserProfileSlice';
+// import GatesReducer from './apps/tracking/GatesSlice';
+// import FloorplanReducer2 from './apps/tracking/FloorPlanSlice';
+// import BlogReducer from './apps/blog/BlogSlice';
 import applicationReducer from './apps/crud/application';
 import integrationReducer from './apps/crud/integration';
 import CCTVReducer from './apps/crud/accessCCTV';
@@ -66,16 +66,16 @@ import {
 
 const rootReducer = combineReducers({
   customizer: CustomizerReducer,
-  ecommerceReducer: EcommerceReducer,
-  chatReducer: ChatsReducer,
-  emailReducer: EmailReducer,
-  notesReducer: NotesReducer,
-  contactsReducer: ContactsReducer,
-  ticketReducer: TicketReducer,
-  userpostsReducer: UserProfileReducer,
-  blogReducer: BlogReducer,
-  gateReducer: GatesReducer,
-  floorplanReducer2: FloorplanReducer2,
+  // ecommerceReducer: EcommerceReducer,
+  // chatReducer: ChatsReducer,
+  // emailReducer: EmailReducer,
+  // notesReducer: NotesReducer,
+  // contactsReducer: ContactsReducer,
+  // ticketReducer: TicketReducer,
+  // userpostsReducer: UserProfileReducer,
+  // blogReducer: BlogReducer,
+  // gateReducer: GatesReducer,
+  // floorplanReducer2: FloorplanReducer2,
   applicationReducer: applicationReducer,
   integrationReducer: integrationReducer,
   CCTVReducer: CCTVReducer,

@@ -53,14 +53,14 @@ const MainAlarmList = () => {
   ];
   return (
     <PageContainer title="Alarm Setting" description="This is the Alarm Setting CRUD Page">
-      <Grid container spacing={3} my={3}>
+      <Grid container spacing={3} my={2}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>
             <Box bgcolor={topcard.bgcolor + '.light'} textAlign="center">
               <CardContent>
                 <Typography
                   color={topcard.bgcolor + '.dark'}
-                  mt={1}
+                  // mt={1}
                   variant="subtitle1"
                   fontWeight={600}
                   fontSize={13}

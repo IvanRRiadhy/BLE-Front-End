@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { lazy, useEffect, useRef, useState } from 'react';
 import {
   Box,
   Grid2 as Grid,
@@ -31,7 +31,6 @@ import {
   fetchFloorplanDT,
 } from 'src/store/apps/crud/floorplan';
 // import { useTranslation } from 'react-i18next';
-import AddEditFloorplan from './AddEditFloorplan';
 import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
 import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
@@ -46,6 +45,7 @@ const columns = [
   { label: 'Floorplan Dimension (meter)', field: '', sortAble: false },
   { label: 'Engine', field: 'Engine.Name', sortAble: true },
 ];
+const AddEditFloorplan = lazy(() => import('./AddEditFloorplan'));
 
 const SKELETON_ROWS = 5;
 
@@ -109,18 +109,17 @@ const FloorplanList = () => {
 
   useEffect(() => {
     dispatch(UpdateFilter(defaultFloorplanFilter));
-    try {
-      setLoading(true);
-      dispatch(fetchFloorplanDT(defaultFloorplanFilter));
-      dispatch(fetchBuildings());
-      dispatch(fetchFloors());
-      dispatch(fetchEngines());
-    } catch (error) {
-      console.error('Error fetching floorplan data:', error);
-    }
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
+    setLoading(true);
+
+    Promise.all([
+      dispatch(fetchFloorplanDT(defaultFloorplanFilter)).finally(() => {
+        requestIdleCallback(() => {
+          dispatch(fetchEngines());
+        });
+      }),
+      dispatch(fetchBuildings()),
+      dispatch(fetchFloors()),
+    ]).finally(() => setLoading(false));
   }, [dispatch]);
 
   useEffect(() => {
@@ -325,6 +324,7 @@ const FloorplanList = () => {
                               <img
                                 src={`${BASE_URL}${floorplan.floorplanImage}`}
                                 alt="Floor"
+                                loading='lazy'
                                 style={{ width: 80, height: 80, objectFit: 'cover' }}
                               />
                             ) : (

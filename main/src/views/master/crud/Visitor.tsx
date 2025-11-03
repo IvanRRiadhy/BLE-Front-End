@@ -45,24 +45,24 @@ const visitor = () => {
   ];
   return (
     <PageContainer title="Visitor" description="This is the Visitor CRUD Page">
-      <Breadcrumb title="Visitor" />
+      {/* <Breadcrumb title="Visitor" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
-          <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>
+          <Grid key={i} size={{ xs: 12, sm: 4, lg: 1.5 }}>
             <Box bgcolor={topcard.bgcolor + '.light'} textAlign="center">
               <CardContent>
                 <Typography
                   color={topcard.bgcolor + '.dark'}
-                  mt={1}
+                  // mt={1}
                   variant="subtitle1"
                   fontWeight={600}
-                  fontSize={13}
+                  fontSize={12}
                 >
                   {t(`${topcard.title}`)}
                 </Typography>
                 {!hasLoaded ? (
                   <CircularProgress
-                    size={24}
+                    size={12}
                     style={{ marginTop: 10, color: topcard.bgcolor + '.main' }}
                   />
                 ) : (
@@ -70,7 +70,7 @@ const visitor = () => {
                     color={topcard.bgcolor + '.main'}
                     variant="h4"
                     fontWeight={600}
-                    fontSize={25}
+                    fontSize={20}
                   >
                     {topcard.subtitle}
                   </Typography>

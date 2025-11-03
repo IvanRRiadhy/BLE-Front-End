@@ -28,7 +28,7 @@ import AreaDistribution from 'src/components/dashboards/mainmenu/AreaDistributio
 import { CardType, fetchCardDT } from 'src/store/apps/crud/card';
 import DynamicSwitcherCard from 'src/components/dashboards/mainmenu/DynamicCardSwitcher';
 import ChartSwitcher from 'src/components/dashboards/mainmenu/ChartSwitcher';
-import { fetchDashboardTopCards } from 'src/store/apps/dashboard/Dashboard';
+import { fetchCardCount, fetchDashboardTopCards } from 'src/store/apps/dashboard/Dashboard';
 
 const filter = {
   Draw: 1,
@@ -95,6 +95,7 @@ const Modern = () => {
     dispatch(
       fetchDashboardTopCards()
     );
+    dispatch(fetchCardCount());
 
     // Fetch initial data for the dashboard
     // dispatch(

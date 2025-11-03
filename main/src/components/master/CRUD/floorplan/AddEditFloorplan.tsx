@@ -55,11 +55,11 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
 
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   const dispatch: AppDispatch = useDispatch();
-  useEffect(() => {
-    dispatch(fetchFloors());
-    dispatch(fetchEngines());
-    // console.log(formData);
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchFloors());
+  //   dispatch(fetchEngines());
+  //   // console.log(formData);
+  // }, [dispatch]);
 
   const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floorAll || []);
   const engineData: EngineType[] = useSelector((state: RootState) => state.EngineReducer.engines || []);

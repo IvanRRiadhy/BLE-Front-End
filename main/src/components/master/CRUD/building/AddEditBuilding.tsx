@@ -248,7 +248,6 @@ const AddEditBuilding = ({ type, building }: FormType) => {
               <Grid size={6}>
                 <CustomFormLabel
                   htmlFor="building-image"
-                  required
                   sx={formErrors.image ? { color: 'error.main' } : undefined}
                 >
                   Building Image

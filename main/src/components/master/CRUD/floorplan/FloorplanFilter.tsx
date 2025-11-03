@@ -7,14 +7,16 @@ import {
 } from '@mui/material';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
 import { isEqual } from 'lodash';
-import { useEffect, useState } from 'react';
+import { lazy, useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import { fetchBuildings } from 'src/store/apps/crud/building';
 import { fetchFloors } from 'src/store/apps/crud/floor';
 import { UpdateFilter } from 'src/store/apps/crud/floorplan';
 import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
-import AutocompleteFilter from 'src/layouts/full/horizontal/navbar/AutocompleteFilter';
+// import AutocompleteFilter from 'src/layouts/full/horizontal/navbar/AutocompleteFilter';
+
+const AutocompleteFilter = lazy(() => import('src/layouts/full/horizontal/navbar/AutocompleteFilter'));
 
 const FloorplanFilter = () => {
   const dispatch = useDispatch();
@@ -40,10 +42,10 @@ const FloorplanFilter = () => {
   } | null>(null);
 
   // --- Fetch Data ---
-  useEffect(() => {
-    dispatch(fetchBuildings());
-    dispatch(fetchFloors());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchBuildings());
+  //   dispatch(fetchFloors());
+  // }, [dispatch]);
 
   // --- Sync filters + lock initial ---
   useEffect(() => {
