@@ -21,39 +21,62 @@ import DashboardCard from 'src/components/shared/DashboardCard';
 const EmployeeBeacon = 73;
 const VisitorBeacon = 74;
 
+interface BeaconDistributionProps {
+  data: { name: string; value: number; color?: string }[];
+  outerRadius?: number;
+  innerRadius?: number;
+}
+
 const BeaconList = [
   { name: 'Employee Beacon', value: 73, color: '#43a047' },
   { name: 'Visitor Beacon', value: 25, color: '#ff5252' },
   { name: 'Unknown Beacon', value: 2, color: '#afafaf' },
 ];
 
-const BeaconDistribution = () => {
-  return (
-      <Box  sx={{ height: 380 }}>
-        <ResponsiveContainer>
-          <PieChart>
-            <Pie
-              data={BeaconList}
-              dataKey="value"
-              nameKey="name"
-              // startAngle={180}
-              // endAngle={0}
-              cx="50%"
-              cy="65%"
-              innerRadius={80}
-              outerRadius={100}
-            //   fill="#8884d8"
-              label={({ name, value }) => `${name}: ${value} Card`}
-            >
-              {BeaconList.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            <Legend />
-            <Tooltip />
-          </PieChart>
-        </ResponsiveContainer>
+const BeaconDistribution: React.FC<BeaconDistributionProps> = ({
+  data = [],
+  outerRadius = 100,
+  innerRadius = 80,
+}) => {
+  if (data.length === 1 && data[0].name === 'Loading...') {
+    return (
+      <Box
+        sx={{
+          height: 380,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 18,
+          color: 'text.secondary',
+        }}
+      >
+        Loading beacon data...
       </Box>
+    );
+  }
+  return (
+    <Box sx={{ height: 380 }}>
+      <ResponsiveContainer>
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            cx="50%"
+            cy="65%"
+            innerRadius={innerRadius}
+            outerRadius={outerRadius}
+            label={({ name, value }) => `${name}: ${value}`}
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.color || '#8884d8'} />
+            ))}
+          </Pie>
+          <Legend />
+          <Tooltip />
+        </PieChart>
+      </ResponsiveContainer>
+    </Box>
   );
 };
 

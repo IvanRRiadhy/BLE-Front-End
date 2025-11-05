@@ -9,6 +9,13 @@ export default defineConfig({
   server: {
     host: true,
     port: 3000,
+    allowedHosts:[
+      'memphis-existing-decent-engineering.trycloudflare.com',
+      '.trycloudflare.com',
+    ],
+    headers: {
+      'referrer-policy': 'same-origin',
+    }
   },
   resolve: {
     alias: {

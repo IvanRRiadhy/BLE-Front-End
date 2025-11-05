@@ -412,17 +412,19 @@ const AddEditMember = ({ type, member }: FormType) => {
                     value={
                       cardData
                         .map((d) => ({ label: d.cardNumber, id: d.id }))
-                        .find((d) => d.id === formData.cardNumber) || null
+                        .find((d) => d.id === formData.cardId) || null
                     }
                     onChange={(_, newValue) => {
-                      const id = newValue?.label ?? '';
-                      setFormData((prev) => ({ ...prev, cardNumber: id }));
+                      const id = newValue?.id ?? '';
+                      const number = newValue?.label ?? '';
+                      setFormData((prev) => ({ ...prev, cardNumber: number, cardId: id }));
                       setFormErrors((prev) => {
                         if (!prev.cardNumber) return prev;
                         const next = { ...prev };
                         delete next.cardNumber;
                         return next;
                       });
+                      console.log("AA", formData.cardId);
                     }}
                     isOptionEqualToValue={(option, value) => option.id === value.id}
                     getOptionLabel={(option) =>

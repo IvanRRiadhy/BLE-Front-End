@@ -17,6 +17,7 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import DepartmentList from 'src/components/master/CRUD/department/DepartmentList';
 import AddEditDepartment from 'src/components/master/CRUD/department/AddEditDepartment';
+import { useDepartmentStatus } from 'src/hooks/useDepartment';
 
 interface cardType {
   icon?: string;
@@ -31,8 +32,8 @@ const Department = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const departmentCount = useSelector((state: RootState) => state.departmentReducer.departmentTotalCount);
-  const hasLoaded = useSelector((state: RootState) => state.departmentReducer.hasLoaded);
+
+  const { totalCount: departmentCount, hasLoaded } = useDepartmentStatus();
   const { t } = useTranslation();
 
   const topCards: cardType[] = [
@@ -44,7 +45,7 @@ const Department = () => {
   ];
   return (
     <PageContainer title="Department" description="This is the Department CRUD Page">
-      <Breadcrumb title="Department" />
+      {/* <Breadcrumb title="Department" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

@@ -10,7 +10,6 @@ import {
   CircularProgress,
 } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
-import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import AppCard from 'src/components/shared/AppCard';
 import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
@@ -20,6 +19,8 @@ import AddEditFloorplan from 'src/components/master/CRUD/floorplan/AddEditFloorp
 import FloorplanFilter from 'src/components/master/CRUD/floorplan/FloorplanFilter';
 import FloorplanImport from 'src/components/master/CRUD/floorplan/FloorplanImport';
 import FloorplanExport from 'src/components/master/CRUD/floorplan/FloorplanExport';
+import { useFloorplanStatus } from 'src/hooks/useFloorplan';
+
 
 interface cardType {
   icon?: string;
@@ -35,8 +36,8 @@ const Floorplan = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 
-  const floorplanCount = useSelector((state: RootState) => state.floorplanReducer.floorplanTotalCount);
-  const hasLoaded = useSelector((state: RootState) => state.floorplanReducer.hasLoaded);
+const { totalCount: floorplanCount, hasLoaded, isFetching } = useFloorplanStatus();
+
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
@@ -47,7 +48,6 @@ const Floorplan = () => {
   ];
   return (
     <PageContainer title="Floorplan " description="This is the Floorplan CRUD Page">
-      {/* <Breadcrumb title="Floorplan" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

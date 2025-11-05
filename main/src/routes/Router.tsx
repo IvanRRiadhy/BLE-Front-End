@@ -4,7 +4,6 @@ import React, { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 import VisitorCard from 'src/views/master/tag/VisitorCard';
-import ProtectedRoute from './ProtectedRoute';
 
 
 /* ***Layouts**** */
@@ -97,150 +96,10 @@ const TestRecord = Loadable(lazy(() => import('../views/Reports/TestRecord')));
 const TestReport = Loadable(lazy(() => import('../views/Reports/TestReport')));
 
 
-/* ****Apps***** */
-// const Blog = Loadable(lazy(() => import('../views/apps/blog/Blog')));
-// const BlogDetail = Loadable(lazy(() => import('../views/apps/blog/BlogPost')));
-const Contacts = Loadable(lazy(() => import('../views/apps/contacts/Contacts')));
-const Chats = Loadable(lazy(() => import('../views/apps/chat/Chat')));
-const Notes = Loadable(lazy(() => import('../views/apps/notes/Notes')));
-const Tickets = Loadable(lazy(() => import('../views/apps/tickets/Tickets')));
-const Ecommerce = Loadable(lazy(() => import('../views/apps/eCommerce/Ecommerce')));
-const EcommerceDetail = Loadable(lazy(() => import('../views/apps/eCommerce/EcommerceDetail')));
-const EcommerceAddProduct = Loadable(
-  lazy(() => import('../views/apps/eCommerce/EcommerceAddProduct')),
-);
-const EcommerceEditProduct = Loadable(
-  lazy(() => import('../views/apps/eCommerce/EcommerceEditProduct')),
-);
-const EcomProductList = Loadable(lazy(() => import('../views/apps/eCommerce/EcomProductList')));
-const EcomProductCheckout = Loadable(
-  lazy(() => import('../views/apps/eCommerce/EcommerceCheckout')),
-);
-const Calendar = Loadable(lazy(() => import('../views/apps/calendar/BigCalendar')));
-const UserProfile = Loadable(lazy(() => import('../views/apps/user-profile/UserProfile')));
-const Followers = Loadable(lazy(() => import('../views/apps/user-profile/Followers')));
-const Friends = Loadable(lazy(() => import('../views/apps/user-profile/Friends')));
-const Gallery = Loadable(lazy(() => import('../views/apps/user-profile/Gallery')));
-const Email = Loadable(lazy(() => import('../views/apps/email/Email')));
-const InvoiceList = Loadable(lazy(() => import('../views/apps/invoice/List')));
-const InvoiceCreate = Loadable(lazy(() => import('../views/apps/invoice/Create')));
-const InvoiceDetail = Loadable(lazy(() => import('../views/apps/invoice/Detail')));
-const InvoiceEdit = Loadable(lazy(() => import('../views/apps/invoice/Edit')));
-const Kanban = Loadable(lazy(() => import('../views/apps/kanban/Kanban')));
-const Tracking = Loadable(lazy(() => import('../views/apps/Tracking/Tracking')));
-
 // Evacuation
 const EvacuationDashboard = Loadable(
   lazy(() => import('../views/dashboard/Evacuation/Evacuation')),
 );
-
-// ui components
-const MuiAlert = Loadable(lazy(() => import('../views/ui-components/MuiAlert')));
-const MuiAccordion = Loadable(lazy(() => import('../views/ui-components/MuiAccordion')));
-const MuiAvatar = Loadable(lazy(() => import('../views/ui-components/MuiAvatar')));
-const MuiChip = Loadable(lazy(() => import('../views/ui-components/MuiChip')));
-const MuiDialog = Loadable(lazy(() => import('../views/ui-components/MuiDialog')));
-const MuiList = Loadable(lazy(() => import('../views/ui-components/MuiList')));
-const MuiPopover = Loadable(lazy(() => import('../views/ui-components/MuiPopover')));
-const MuiRating = Loadable(lazy(() => import('../views/ui-components/MuiRating')));
-const MuiTabs = Loadable(lazy(() => import('../views/ui-components/MuiTabs')));
-const MuiTooltip = Loadable(lazy(() => import('../views/ui-components/MuiTooltip')));
-const MuiTransferList = Loadable(lazy(() => import('../views/ui-components/MuiTransferList')));
-const MuiTypography = Loadable(lazy(() => import('../views/ui-components/MuiTypography')));
-
-// form elements
-const MuiAutoComplete = Loadable(
-  lazy(() => import('../views/forms/form-elements/MuiAutoComplete')),
-);
-const MuiButton = Loadable(lazy(() => import('../views/forms/form-elements/MuiButton')));
-const MuiCheckbox = Loadable(lazy(() => import('../views/forms/form-elements/MuiCheckbox')));
-const MuiRadio = Loadable(lazy(() => import('../views/forms/form-elements/MuiRadio')));
-const MuiSlider = Loadable(lazy(() => import('../views/forms/form-elements/MuiSlider')));
-const MuiDateTime = Loadable(lazy(() => import('../views/forms/form-elements/MuiDateTime')));
-const MuiSwitch = Loadable(lazy(() => import('../views/forms/form-elements/MuiSwitch')));
-
-// forms
-const FormLayouts = Loadable(lazy(() => import('../views/forms/FormLayouts')));
-const FormCustom = Loadable(lazy(() => import('../views/forms/FormCustom')));
-const FormHorizontal = Loadable(lazy(() => import('../views/forms/FormHorizontal')));
-const FormVertical = Loadable(lazy(() => import('../views/forms/FormVertical')));
-const FormWizard = Loadable(lazy(() => import('../views/forms/FormWizard')));
-const FormValidation = Loadable(lazy(() => import('../views/forms/FormValidation')));
-const TiptapEditor = Loadable(lazy(() => import('../views/forms/from-tiptap/TiptapEditor')));
-
-// pages
-const RollbaseCASL = Loadable(lazy(() => import('../views/pages/rollbaseCASL/RollbaseCASL')));
-const Faq = Loadable(lazy(() => import('../views/pages/faq/Faq')));
-const Pricing = Loadable(lazy(() => import('../views/pages/pricing/Pricing')));
-const AccountSetting = Loadable(
-  lazy(() => import('../views/pages/account-setting/AccountSetting')),
-);
-
-// charts
-const AreaChart = Loadable(lazy(() => import('../views/charts/AreaChart')));
-const CandlestickChart = Loadable(lazy(() => import('../views/charts/CandlestickChart')));
-const ColumnChart = Loadable(lazy(() => import('../views/charts/ColumnChart')));
-const DoughnutChart = Loadable(lazy(() => import('../views/charts/DoughnutChart')));
-const GredientChart = Loadable(lazy(() => import('../views/charts/GredientChart')));
-const RadialbarChart = Loadable(lazy(() => import('../views/charts/RadialbarChart')));
-const LineChart = Loadable(lazy(() => import('../views/charts/LineChart')));
-
-// tables
-const BasicTable = Loadable(lazy(() => import('../views/tables/BasicTable')));
-const EnhanceTable = Loadable(lazy(() => import('../views/tables/EnhanceTable')));
-const PaginationTable = Loadable(lazy(() => import('../views/tables/PaginationTable')));
-const FixedHeaderTable = Loadable(lazy(() => import('../views/tables/FixedHeaderTable')));
-const CollapsibleTable = Loadable(lazy(() => import('../views/tables/CollapsibleTable')));
-const SearchTable = Loadable(lazy(() => import('../views/tables/SearchTable')));
-
-//react tables
-const ReactBasicTable = Loadable(lazy(() => import('../views/react-tables/basic/page')));
-const ReactColumnVisibilityTable = Loadable(
-  lazy(() => import('../views/react-tables/columnvisibility/page')),
-);
-const ReactDenseTable = Loadable(lazy(() => import('../views/react-tables/dense/page')));
-const ReactDragDropTable = Loadable(lazy(() => import('../views/react-tables/drag-drop/page')));
-const ReactEditableTable = Loadable(lazy(() => import('../views/react-tables/editable/page')));
-const ReactEmptyTable = Loadable(lazy(() => import('../views/react-tables/empty/page')));
-const ReactExpandingTable = Loadable(lazy(() => import('../views/react-tables/expanding/page')));
-const ReactFilterTable = Loadable(lazy(() => import('../views/react-tables/filtering/page')));
-const ReactPaginationTable = Loadable(lazy(() => import('../views/react-tables/pagination/page')));
-const ReactRowSelectionTable = Loadable(
-  lazy(() => import('../views/react-tables/row-selection/page')),
-);
-const ReactSortingTable = Loadable(lazy(() => import('../views/react-tables/sorting/page')));
-const ReactStickyTable = Loadable(lazy(() => import('../views/react-tables/sticky/page')));
-
-//mui charts
-const BarCharts = Loadable(lazy(() => import('../views/muicharts/barcharts/page')));
-const GaugeCharts = Loadable(lazy(() => import('../views/muicharts/gaugecharts/page')));
-const AreaCharts = Loadable(lazy(() => import('../views/muicharts/linecharts/area/page')));
-const LineCharts = Loadable(lazy(() => import('../views/muicharts/linecharts/line/page')));
-const PieCharts = Loadable(lazy(() => import('../views/muicharts/piecharts/page')));
-const ScatterCharts = Loadable(lazy(() => import('../views/muicharts/scattercharts/page')));
-const SparklineCharts = Loadable(lazy(() => import('../views/muicharts/sparklinecharts/page')));
-
-//mui charts
-const SimpletreeCustomization = Loadable(
-  lazy(() => import('../views/mui-trees/simpletree/simpletree-customization/page')),
-);
-const SimpletreeExpansion = Loadable(
-  lazy(() => import('../views/mui-trees/simpletree/simpletree-expansion/page')),
-);
-const SimpletreeFocus = Loadable(
-  lazy(() => import('../views/mui-trees/simpletree/simpletree-focus/page')),
-);
-const SimpletreeItems = Loadable(
-  lazy(() => import('../views/mui-trees/simpletree/simpletree-items/page')),
-);
-const SimpletreeSelection = Loadable(
-  lazy(() => import('../views/mui-trees/simpletree/simpletree-selection/page')),
-);
-
-// widget
-const WidgetCards = Loadable(lazy(() => import('../views/widgets/cards/WidgetCards')));
-const WidgetBanners = Loadable(lazy(() => import('../views/widgets/banners/WidgetBanners')));
-const WidgetCharts = Loadable(lazy(() => import('../views/widgets/charts/WidgetCharts')));
 
 // authentication
 const Login = Loadable(lazy(() => import('../views/authentication/auth1/Login')));
@@ -255,18 +114,6 @@ const TwoSteps = Loadable(lazy(() => import('../views/authentication/auth1/TwoSt
 const TwoSteps2 = Loadable(lazy(() => import('../views/authentication/auth2/TwoSteps2')));
 const Error = Loadable(lazy(() => import('../views/authentication/Error')));
 const Maintenance = Loadable(lazy(() => import('../views/authentication/Maintenance')));
-
-// landingpage
-const Landingpage = Loadable(lazy(() => import('../views/pages/landingpage/Landingpage')));
-
-// front end pages
-const Homepage = Loadable(lazy(() => import('../views/pages/frontend-pages/Homepage')));
-const About = Loadable(lazy(() => import('../views/pages/frontend-pages/About')));
-const Contact = Loadable(lazy(() => import('../views/pages/frontend-pages/Contact')));
-const Portfolio = Loadable(lazy(() => import('../views/pages/frontend-pages/Portfolio')));
-const PagePricing = Loadable(lazy(() => import('../views/pages/frontend-pages/Pricing')));
-const BlogPage = Loadable(lazy(() => import('../views/pages/frontend-pages/Blog')));
-const BlogPost = Loadable(lazy(() => import('../views/pages/frontend-pages/BlogPost')));
 
 const roleAccessRules: Record<string, string[]> = {
   System: ['*'], // all routes

@@ -33,6 +33,7 @@ import {
 import AddEditDepartment from './AddEditDepartment';
 import { defaultDepartmentFilter } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
+import { useDeleteDepartment, useDepartmentList } from 'src/hooks/useDepartment';
 // import { useTranslation } from 'react-i18next';
 
 const columns = [
@@ -45,18 +46,22 @@ const SKELETON_ROWS = 5;
 
 const DepartmentList = () => {
   const dispatch: AppDispatch = useDispatch();
-  const departmentData: DepartmentType[] = useSelector(
-    (state: RootState) => state.departmentReducer.departments,
-  );
-  const departmentTotalCount = useSelector(
-    (state: RootState) => state.departmentReducer.departmentTotalCount,
-  );
+  // const departmentData: DepartmentType[] = useSelector(
+  //   (state: RootState) => state.departmentReducer.departments,
+  // );
+  // const departmentTotalCount = useSelector(
+  //   (state: RootState) => state.departmentReducer.departmentTotalCount,
+  // );
   // const departmentFilteredCount = useSelector(
   //   (state: RootState) => state.departmentReducer.departmentFilteredCount,
   // );
   const departmentFilter = useSelector(
     (state: RootState) => state.departmentReducer.departmentFilter,
   );
+  const { data, isLoading: queryLoading } = useDepartmentList(departmentFilter);
+  const departmentData = data?.data || [];
+  const departmentTotalCount = data?.recordsTotal || 0;
+  const departmentFilteredCount = data?.recordsFiltered || 0;
   const prevFilterRef = useRef(departmentFilter);
   // const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -98,39 +103,40 @@ const DepartmentList = () => {
     }
   };
 
-  useEffect(() => {
-    dispatch(UpdateFilter(defaultDepartmentFilter));
-    try {
-      setLoading(true);
-      dispatch(fetchDepartmentDT(defaultDepartmentFilter));
-    } catch (error) {
-      console.error('Error fetching department data:', error);
-    }
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(UpdateFilter(defaultDepartmentFilter));
+  //   try {
+  //     setLoading(true);
+  //     dispatch(fetchDepartmentDT(defaultDepartmentFilter));
+  //   } catch (error) {
+  //     console.error('Error fetching department data:', error);
+  //   }
+  //   setTimeout(() => {
+  //     setLoading(false);
+  //   }, 500);
+  // }, [dispatch]);
 
-  useEffect(() => {
-    const prevFilter = prevFilterRef.current;
-    const isStartorLengthChanged =
-      prevFilter.Start !== departmentFilter.Start || prevFilter.Length !== departmentFilter.Length;
-    if (isStartorLengthChanged) {
-      setLoading(true);
-    }
-    dispatch(fetchDepartmentDT(departmentFilter)).finally(() => {
-      if (isStartorLengthChanged) {
-        setTimeout(() => {
-          setLoading(false);
-        }, 500);
-      }
-    });
-    prevFilterRef.current = departmentFilter;
-  }, [departmentFilter, dispatch]);
+  // useEffect(() => {
+  //   const prevFilter = prevFilterRef.current;
+  //   const isStartorLengthChanged =
+  //     prevFilter.Start !== departmentFilter.Start || prevFilter.Length !== departmentFilter.Length;
+  //   if (isStartorLengthChanged) {
+  //     setLoading(true);
+  //   }
+  //   dispatch(fetchDepartmentDT(departmentFilter)).finally(() => {
+  //     if (isStartorLengthChanged) {
+  //       setTimeout(() => {
+  //         setLoading(false);
+  //       }, 500);
+  //     }
+  //   });
+  //   prevFilterRef.current = departmentFilter;
+  // }, [departmentFilter, dispatch]);
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedDept, setSelectedDept] = useState<DepartmentType | null>(null);
+  const deleteMutation = useDeleteDepartment();
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (dept: DepartmentType) => {
     setSelectedDept(dept);
@@ -147,15 +153,22 @@ const DepartmentList = () => {
   const handleConfirmDelete = async () => {
     if (selectedDept) {
       setLoading(true);
+      // try {
+      //   const result = await dispatch(deleteDepartment(selectedDept.id));
+      //   if (result && result.type && result.type.endsWith('/fulfilled')) {
+      //     await dispatch(fetchDepartmentDT(departmentFilter));
+      //     toast.success('Data Deleted');
+      //   }
+      // } catch (error) {
+      //   toast.error('Delete Data Unsuccessful');
+      //   console.error('Error deleting department:', error);
+      // }
       try {
-        const result = await dispatch(deleteDepartment(selectedDept.id));
-        if (result && result.type && result.type.endsWith('/fulfilled')) {
-          await dispatch(fetchDepartmentDT(departmentFilter));
-          toast.success('Data Deleted');
-        }
+        await deleteMutation.mutateAsync(selectedDept.id);
+        toast.success('Data Deleted');
       } catch (error) {
-        toast.error('Delete Data Unsuccessful');
-        console.error('Error deleting department:', error);
+        toast.error('Delete failed');
+        console.error(error);
       }
       setTimeout(() => {
         setLoading(false);
@@ -269,7 +282,7 @@ const DepartmentList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {!hasLoaded
+                  {queryLoading
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : departmentData.map((department, index) => (
                         <TableRow key={department.id}>
@@ -322,7 +335,7 @@ const DepartmentList = () => {
             {/* Pagination */}
             <TablePagination
               component="div"
-              count={departmentTotalCount}
+              count={departmentFilteredCount}
               page={page}
               rowsPerPage={rowsPerPage}
               onPageChange={handleChangePage}

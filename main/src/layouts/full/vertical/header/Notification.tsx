@@ -21,6 +21,7 @@ import { memberType } from 'src/store/apps/crud/member';
 import { VisitorType } from 'src/store/apps/crud/visitor';
 import { RootState, useSelector } from 'src/store/Store';
 import { AlarmTriggerType } from 'src/store/apps/crud/alarmTrigger';
+import { uniqueId } from 'lodash';
 
 type BubbleData = {
   id: string;
@@ -116,7 +117,7 @@ const MAX_BUBBLES = 4;
       }
 
       const bd: BubbleData = {
-        id: crypto.randomUUID(),
+        id: uniqueId(),
         title: alarmData.visitorName || alarmData.MemberName || alarmData.cardName || 'Unknown',
         subtitle: `${alarmData.cardName ?? ''} · ${alarmData.maskedAreaName ?? 'Unknown'} · ${
           alarmData.floorplanName ?? 'Unknown'

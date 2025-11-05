@@ -29,6 +29,7 @@ import {
   fetchBuildings,
 } from 'src/store/apps/crud/building';
 import { defaultBuildingForm } from 'src/store/apps/defaultForm';
+import { useAddBuilding, useEditBuilding } from 'src/hooks/useBuilding';
 
 interface FormType {
   type?: string;
@@ -48,9 +49,14 @@ const AddEditBuilding = ({ type, building }: FormType) => {
     ...building,
   });
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
-  const [isSaving, setIsSaving] = React.useState(false);
+      const addMutation = useAddBuilding();
+    const editMutation = useEditBuilding();
+
+    const isSaving = addMutation.isPending || editMutation.isPending;
+
   const buildingFilter = useSelector((state: RootState) => state.buildingReducer.buildingFilter);
   const dispatch: AppDispatch = useDispatch();
+
   const handleClickOpen = async () => {
     setFormErrors({});
     if (type === 'edit') {
@@ -80,7 +86,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
   };
   useEffect(() => {
     // Only run for edit mode and if floorImage is a string path
-    if (type === 'edit' && building?.image && typeof building.image === 'string') {
+    if (type === 'edit' && open && building?.image && typeof building.image === 'string') {
       // Fetch the image from the server
       fetch(`${BASE_URL}${building.image}`)
         .then((res) => res.blob())
@@ -140,63 +146,33 @@ const AddEditBuilding = ({ type, building }: FormType) => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSave = async () => {
+const handleSave = async () => {
     if (!validateForm()) {
-      toast.error('Please fill in all required fields correctly.');
+      toast.error('Please fill in all required fields.');
       return;
     }
-    
-    setIsSaving(true);
+
+    const data = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      if (!['image', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key)) {
+        data.append(key, value?.toString() ?? '');
+      }
+    });
+    if (image) data.append('image', image);
+
     try {
-      const data = new FormData();
-
-      Object.entries(formData).forEach(([key, value]) => {
-        if (
-          key !== 'applicationId' &&
-          key !== 'image' &&
-          key !== 'createdBy' &&
-          key !== 'createdAt' &&
-          key !== 'updatedBy' &&
-          key !== 'updatedAt'
-        ) {
-          data.append(key, value.toString());
-        }
-      });
-      console.log("Image: ", image);
-      if (image) {
-        data.append('image', image);
-      }
-      // Object.entries(formData).forEach(([key, value]) => {
-      //   console.log(key, typeof value);
-      // });
-      let result;
-      if (type === 'edit') {
-        result = await dispatch(editBuilding(data));
-      }
       if (type === 'add') {
-        result = await dispatch(addBuilding(data));
-      }
-
-      // Check if the action was fulfilled
-      if (result && result.type && result.type.endsWith('/fulfilled')) {
-        console.log('Building saved successfully');
-        await dispatch(fetchBuildingDT(buildingFilter));
-        toast.success('Data Saved');
-          handleClose();
+        await addMutation.mutateAsync(data);
+        toast.success('Building added successfully!');
       } else {
-        toast.error('Saving Data Unsuccessful');
-
-        setError(true);
+        await editMutation.mutateAsync(data);
+        toast.success('Building updated successfully!');
       }
+      handleClose();
     } catch (error) {
-      toast.error('Saving Data Unsuccessful');
-      console.error('Error saving Building:', error);
-      setError(true);
+      console.error('Error saving building:', error);
+      toast.error('Failed to save building.');
     }
-    setTimeout(() => {
-      setError(false);
-      setIsSaving(false);
-    }, 1000);
   };
   return (
     <>
@@ -219,7 +195,6 @@ const AddEditBuilding = ({ type, building }: FormType) => {
           </Button>
         </Tooltip>
       )}
-      {!isLoading && (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>
             <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
@@ -296,8 +271,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
             </Button>
           </DialogActions>
         </Dialog>
-      )}
-      {isLoading && (
+      {/* {isLoading && (
         <Dialog open={open} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h1" mb={5}>
@@ -306,7 +280,7 @@ const AddEditBuilding = ({ type, building }: FormType) => {
             <CircularProgress size={50} color="primary" />
           </DialogContent>
         </Dialog>
-      )}
+      )} */}
     </>
   );
 };

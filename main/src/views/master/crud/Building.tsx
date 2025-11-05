@@ -19,6 +19,7 @@ import BuildingList from 'src/components/master/CRUD/building/BuildingList';
 import AddEditBuilding from 'src/components/master/CRUD/building/AddEditBuilding';
 import BuildingImport from 'src/components/master/CRUD/building/BuildingImport';
 import BuildingExport from 'src/components/master/CRUD/building/BuildingExport';
+import { useBuildingStatus } from 'src/hooks/useBuilding';
 
 interface cardType {
   icon?: string;
@@ -34,8 +35,7 @@ const Building = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const { t } = useTranslation();
-  const buildingCount = useSelector((state: RootState) => state.buildingReducer.buildingTotalCount);
-  const hasLoaded = useSelector((state: RootState) => state.buildingReducer.hasLoaded);
+  const { totalCount: buildingCount, hasLoaded, isFetching} = useBuildingStatus();
   const topCards: cardType[] = [
     {
       title: 'Total Buildings',
@@ -46,7 +46,7 @@ const Building = () => {
 
   return (
     <PageContainer title="Building" description="This is the Building CRUD Page">
-      <Breadcrumb title="Building" />
+      {/* <Breadcrumb title="Building" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

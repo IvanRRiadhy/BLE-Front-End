@@ -26,14 +26,14 @@ import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Stor
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
 import {
   FloorplanType,
-  fetchFloorplan,
-  addFloorplan,
-  editFloorplan,
   fetchFloorplanDT,
 } from 'src/store/apps/crud/floorplan';
 import toast from 'react-hot-toast';
 import { defaultFloorplanForm } from 'src/store/apps/defaultForm';
 import { EngineType, fetchEngines } from 'src/store/apps/crud/engine';
+import { useAddFloorplan, useEditFloorplan } from 'src/hooks/useFloorplan';
+import { useAllFloors } from 'src/hooks/useFloor';
+import { useAllEngines } from 'src/hooks/useEngine';
 
 interface FormType {
   type?: string;
@@ -42,7 +42,6 @@ interface FormType {
 
 const AddEditFloorplan = ({ type, floorplan }: FormType) => {
   const [open, setOpen] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const [image, setImage] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(floorplan?.floorplanImage || null);
@@ -51,7 +50,8 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
     ...floorplan,
   });
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
-  const isLoading = useSelector((state: RootState) => state.floorplanReducer.isLoading);
+    const addMutation = useAddFloorplan();
+  const editMutation = useEditFloorplan();
 
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   const dispatch: AppDispatch = useDispatch();
@@ -61,11 +61,10 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
   //   // console.log(formData);
   // }, [dispatch]);
 
-  const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floorAll || []);
-  const engineData: EngineType[] = useSelector((state: RootState) => state.EngineReducer.engines || []);
+  const { data: floorData = [], isLoading: floorLoading } = useAllFloors();
+  const { data: engineData = [], isLoading: engineLoading } = useAllEngines();
 
   const handleClickOpen = () => {
-    setLoading(true);
     setFormErrors({});
     if (type === 'edit' && floorplan) {
       if (!floorplan.id) {
@@ -76,7 +75,6 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
       setFormData({ ...defaultFloorplanForm });
     }
     setTimeout(() => {
-      setLoading(false);
       setOpen(true);
     }, 100);
   };
@@ -90,10 +88,12 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
     // Only run for edit mode and if floorplanImage is a string path
     if (
       type === 'edit' &&
+      open &&
       floorplan?.floorplanImage &&
       typeof floorplan.floorplanImage === 'string'
     ) {
       // Fetch the image from the server
+      // console.log("fetching floorplan image");
       fetch(`${BASE_URL}${floorplan.floorplanImage}`)
         .then((res) => res.blob())
         .then((blob) => {
@@ -131,48 +131,33 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
 
   const handleSave = async () => {
     if (!validateForm()) {
-      toast.error('Please fill in all required fields correctly.');
+      toast.error('Please fill in all required fields.');
       return;
     }
-    setIsSaving(true);
+
+    const data = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      if (
+        !['floorplanImage', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key)
+      ) {
+        data.append(key, value?.toString() ?? '');
+      }
+    });
+    if (image) data.append('floorplanImage', image);
+
     try {
-      const data = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        if (
-          key !== 'floorplanImage' &&
-          key !== 'createdBy' &&
-          key !== 'createdAt' &&
-          key !== 'updatedBy' &&
-          key !== 'updatedAt'
-        ) {
-          data.append(key, value.toString());
-        }
-      });
-      if (image) {
-        data.append('floorplanImage', image);
-      }
-      let result;
-      if (type === 'edit') {
-        result = await dispatch(editFloorplan(data)); // Dispatch update
-      }
       if (type === 'add') {
-        result = await dispatch(addFloorplan(data));
-      }
-      if (result && result.type && result.type.endsWith('/fulfilled')) {
-        await dispatch(fetchFloorplanDT(floorplanFilter));
-        console.log('Floorplan Saved!');
-        toast.success('Data Saved');
-        handleClose();
+        await addMutation.mutateAsync(data);
+        toast.success('Floorplan added successfully!');
       } else {
-        toast.error('Saving Data Unsuccessful');
+        await editMutation.mutateAsync(data);
+        toast.success('Floorplan updated successfully!');
       }
+      handleClose();
     } catch (error) {
-      toast.error('Saving Data Unsuccessful');
-      console.error('Error saving floorplan:', error);
+      console.error('Save failed:', error);
+      toast.error('Failed to save floorplan.');
     }
-    setTimeout(() => {
-      setIsSaving(false);
-    }, 1000);
   };
 
   const handleInputChange = (
@@ -181,7 +166,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
     const { value, name, id } = e.target as
       | HTMLInputElement
       | { value: string; name: string; id?: string };
-    console.log('Input Change:', { id, name, value });
+    // console.log('Input Change:', { id, name, value });
     const key = id || name;
 
     // Prepare new value for the field being changed
@@ -201,7 +186,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
           meterPerPx = (floorX / pixelX + floorY / pixelY) / 2;
         }
       }
-      console.log('Updated Form Data:', updated);
+      // console.log('Updated Form Data:', updated);
       return {
         ...updated,
         meterPerPx,
@@ -243,6 +228,17 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
     }
   };
 
+    const floorOptions = floorData.map((f) => ({
+    label: f.name,
+    id: f.id,
+    buildingName: f.building?.name ?? 'Unknown Building',
+  }));
+
+  const engineOptions = engineData.map((e) => ({
+    label: e.name,
+    id: e.id,
+  }));
+
   return (
     <>
       {type === 'edit' && (
@@ -254,15 +250,6 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
       )}
       {type === 'add' && (
         <Tooltip title="Add Floorplan">
-          {isLoading ? (
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
-            >
-              <CircularProgress color="inherit" size={20} />
-            </Button>
-          ) : (
             <Button
               variant="contained"
               color="primary"
@@ -271,11 +258,8 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
             >
               <IconPlus size={20} />
             </Button>
-          )}
         </Tooltip>
       )}
-
-      {!isLoading && (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>
             <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
@@ -310,18 +294,14 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                 />
                 <CustomFormLabel htmlFor="Engine-id">Engine</CustomFormLabel>
                 <Autocomplete
-                  options={engineData.map((e) => ({ label: e.name, id: e.id }))} // 👈 Use engineData
-                  value={
-                    engineData
-                      .map((e) => ({ label: e.name, id: e.id }))
-                      .find((option) => option.id === formData.engineId) || null
-                  }
-                  onChange={(_, newValue) => {
-                    const id = newValue?.id ?? '';
-                    setFormData((prev) => ({ ...prev, engineId: id }));
-                  }}
+                loading={engineLoading}
+                  options={engineOptions} // 👈 Use engineData
+                  value={engineOptions.find((e) => e.id === formData.engineId) || null}
+                  onChange={(_, newValue) =>
+                  setFormData((prev) => ({ ...prev, engineId: newValue?.id ?? '' }))
+                }
                   isOptionEqualToValue={(option, value) => option.id === value.id}
-                  getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                  getOptionLabel={(option) => option.label}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -336,20 +316,9 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel>
                 <Autocomplete
-                  options={floorData.map((f) => ({
-                    label: f.name,
-                    id: f.id,
-                    buildingName: f.building?.name ?? 'Unknown Building',
-                  }))}
-                  value={
-                    floorData
-                      .map((f) => ({
-                        label: f.name,
-                        id: f.id,
-                        buildingName: f.building?.name ?? 'Unknown Building',
-                      }))
-                      .find((option) => option.id === formData.floorId) || null
-                  }
+                loading={floorLoading}
+                  options={floorOptions}
+                  value={floorOptions.find((f) => f.id === formData.floorId) || null}
                   onChange={(_, newValue) => {
                     const id = newValue?.id ?? '';
                     setFormData((prev) => ({ ...prev, floorId: id }));
@@ -361,7 +330,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                     });
                   }}
                   isOptionEqualToValue={(option, value) => option.id === value.id}
-                  getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                  getOptionLabel={(option) => option.label}
                   clearOnEscape
                   disableClearable={false}
                   renderOption={(props, option) => (
@@ -450,9 +419,8 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
             </Button>
           </DialogActions>
         </Dialog>
-      )}
 
-      {isLoading && (
+      {/* {isLoading && (
         <Dialog open={open} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
             <Typography variant="h1" mb={5}>
@@ -461,9 +429,10 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
             <CircularProgress size={50} color="primary" />
           </DialogContent>
         </Dialog>
-      )}
+      )} */}
     </>
   );
 };
 
 export default AddEditFloorplan;
+

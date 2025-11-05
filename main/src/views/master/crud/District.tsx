@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import DistrictList from 'src/components/master/CRUD/district/DistrictList';
 import AddEditDistrict from 'src/components/master/CRUD/district/AddEditDistrict';
 import BulkAddEditDistrict from 'src/components/master/CRUD/district/BulkAddEditDistrict';
+import { useDistrictStatus } from 'src/hooks/useDistrict';
 
 interface cardType {
   icon?: string;
@@ -32,8 +33,7 @@ const District = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const districtCount = useSelector((state: RootState) => state.districtReducer.districtTotalCount);
-  const hasLoaded = useSelector((state: RootState) => state.districtReducer.hasLoaded);
+  const { totalCount: districtCount, hasLoaded } = useDistrictStatus();
   const { t } = useTranslation();
 
   const topCards: cardType[] = [
@@ -45,7 +45,7 @@ const District = () => {
   ];
   return (
     <PageContainer title="District" description="This is the District CRUD Page">
-      <Breadcrumb title="District" />
+      {/* <Breadcrumb title="District" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

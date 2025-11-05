@@ -38,7 +38,7 @@ import VisitorCardReducer from './apps/crud/visitorCard';
 import CardRecordReducer from './apps/crud/cardRecord';
 import TrxVisitorReducer from './apps/crud/trxVisitor';
 import layoutReducer from './apps/monitoring/layout';
-import BleNodeReducer from './apps/crud/bleNode';
+// import BleNodeReducer from './apps/crud/bleNode';
 import RulesNodeReducer from './apps/rules/RulesNodes';
 import RulesConnectorReducer from './apps/rules/RulesConnectors';
 import BeaconReducer from './apps/tracking/Beacon';
@@ -102,7 +102,7 @@ const rootReducer = combineReducers({
   VisitorCardReducer: VisitorCardReducer,
   CardRecordReducer: CardRecordReducer,
   TrxVisitorReducer: TrxVisitorReducer,
-  bleNodeReducer: BleNodeReducer,
+  // bleNodeReducer: BleNodeReducer,
   RulesNodeReducer: RulesNodeReducer,
   RulesConnectorReducer: RulesConnectorReducer,
   BeaconReducer: BeaconReducer,

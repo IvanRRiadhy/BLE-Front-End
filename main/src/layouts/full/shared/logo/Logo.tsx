@@ -47,7 +47,7 @@ const Logo: FC = () => {
         alt="Logo"
         loading="lazy"
         decoding="async"
-        fetchPriority="high"
+        // fetchpriority="high"
       />
     </LinkStyled>
   );

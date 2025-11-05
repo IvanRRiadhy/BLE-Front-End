@@ -29,6 +29,8 @@ import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import AddEditFloor from './AddEditFloor';
 import { defaultFloorFilter } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
+import { useFloorList } from 'src/hooks/useFloor';
+import { useDeleteFloorplan } from 'src/hooks/useFloorplan';
 // import { useTranslation } from 'react-i18next';
 
 const columns = [
@@ -40,12 +42,18 @@ const SKELETON_ROWS = 5;
 
 const FloorList = () => {
   const dispatch: AppDispatch = useDispatch();
-  const floorData = useSelector((state: RootState) => state.floorReducer.floors);
-  const floorTotalCount = useSelector((state: RootState) => state.floorReducer.floorTotalCount);
+  // const floorData = useSelector((state: RootState) => state.floorReducer.floors);
+  // const floorTotalCount = useSelector((state: RootState) => state.floorReducer.floorTotalCount);
   // const floorFilteredCount = useSelector(
   //   (state: RootState) => state.floorReducer.floorFilteredCount,
   // );
   const floorFilter = useSelector((state: RootState) => state.floorReducer.floorFilter);
+  // const { data: floorData = [], isLoading: queryLoading, isFetching } = useFloorList(floorFilter);
+  const { data, isLoading: queryLoading } = useFloorList(floorFilter);
+  const floorData = data?.data || [];
+  const floorTotalCount = data?.recordsTotal || 0;
+  const floorFilteredCount = data?.recordsFiltered || 0;
+
   const prevFilterRef = useRef(floorFilter);
   // const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -125,6 +133,7 @@ const FloorList = () => {
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedFloor, setSelectedFloor] = useState<floorType | null>(null);
+  const deleteMutation = useDeleteFloorplan();
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (floor: floorType) => {
     setSelectedFloor(floor);
@@ -140,20 +149,27 @@ const FloorList = () => {
   // Confirm delete action
   const handleConfirmDelete = async () => {
     if (selectedFloor) {
-      setLoading(true);
+      // setLoading(true);
+      // try {
+      //   const result = await dispatch(deleteFloor(selectedFloor.id));
+      //   if (result && result.type && result.type.endsWith('/fulfilled')) {
+      //     await dispatch(fetchFloorDT(floorFilter));
+      //     toast.success('Data Deleted');
+      //   }
+      // } catch (error) {
+      //   toast.error('Delete Data Unsuccessful');
+      //   console.error('Error deleting floor:', error);
+      // }
+      // setTimeout(() => {
+      //   setLoading(false);
+      // }, 1000);
       try {
-        const result = await dispatch(deleteFloor(selectedFloor.id));
-        if (result && result.type && result.type.endsWith('/fulfilled')) {
-          await dispatch(fetchFloorDT(floorFilter));
-          toast.success('Data Deleted');
-        }
+        await deleteMutation.mutateAsync(selectedFloor.id);
+        toast.success('Data Deleted');
       } catch (error) {
-        toast.error('Delete Data Unsuccessful');
-        console.error('Error deleting floor:', error);
+        toast.error('Delete failed');
+        console.error(error);
       }
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
     }
     handleCloseDeleteDialog();
   };
@@ -261,7 +277,7 @@ const FloorList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {!hasLoaded
+                  {queryLoading
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : floorData.map((floor: floorType, index: number) => (
                         <TableRow key={index}>
@@ -312,7 +328,7 @@ const FloorList = () => {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={floorTotalCount}
+              count={floorFilteredCount}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

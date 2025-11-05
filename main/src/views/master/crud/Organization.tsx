@@ -17,6 +17,7 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import OrganizationList from 'src/components/master/CRUD/organization/OrganizationList';
 import AddEditOrganization from 'src/components/master/CRUD/organization/AddEditOrganizationList';
+import { useOrganizationStatus } from 'src/hooks/useOrganization';
 
 interface cardType {
   icon?: string;
@@ -31,10 +32,7 @@ const Organization = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const organizationCount = useSelector(
-    (state: RootState) => state.organizationReducer.organizationTotalCount,
-  );
-  const hasLoaded = useSelector((state: RootState) => state.organizationReducer.hasLoaded);
+  const { filteredCount: organizationCount, hasLoaded } = useOrganizationStatus();
   const { t } = useTranslation();
 
   const topCards: cardType[] = [

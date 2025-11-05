@@ -23,6 +23,7 @@ import { alarmRecordStatusColormap } from 'src/types/crud/input';
 import DashboardCard from 'src/components/shared/DashboardCard';
 import { defaultAlarmRecordFilter } from 'src/store/apps/defaultForm';
 import { AlarmSettingType } from 'src/store/apps/alarmsetting/alarmSettings';
+import { AlarmTriggerType } from 'src/store/apps/crud/alarmTrigger';
 
 const columns = [
   { label: 'Visitor Name', field: 'Visitor.Name', sortAble: true },
@@ -35,16 +36,16 @@ const SKELETON_ROWS = 5;
 
 const AlarmWarning = () => {
   const dispatch: AppDispatch = useDispatch();
-  const alarmRecordData: AlarmType[] = useSelector(
-    (state: RootState) => state.alarmReducer.alarmRecordTrackings,
+  const alarmRecordData: AlarmTriggerType[] = useSelector(
+    (state: RootState) => state.alarmTriggerReducer.alarmTriggerAll,
   );
   const alarmSettings: AlarmSettingType[] = useSelector(
     (state: RootState) => state.AlarmSettingReducer.alarmSettingAll,
   );
-  const filteredAlarmRecord: AlarmType[] = alarmRecordData.filter((item) => {
+  const filteredAlarmRecord: AlarmTriggerType[] = alarmRecordData.filter((item) => {
     const matchingSetting = alarmSettings.find(
       (setting) =>
-        setting.alarmCategory.toLowerCase() === item.alarmTriggers.alarmRecordStatus.toLowerCase(),
+        setting.alarmCategory.toLowerCase() === item.alarmRecordStatus.toLowerCase(),
     );
     return matchingSetting && matchingSetting.isEnabled;
   });
@@ -216,23 +217,23 @@ const AlarmWarning = () => {
                             <TableCell
                               sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
                             >
-                              <Avatar
+                              {/* <Avatar
                                 src={alarm.visitor?.faceImage}
                                 alt={alarm.visitor?.faceImage}
                                 sx={{ width: 40, height: 40 }}
-                              />
+                              /> */}
                             </TableCell>
                             <TableCell>
                               <Box>
                                 <Typography variant="subtitle2" fontWeight={600}>
-                                  {alarm.visitor?.name || 'Unknown Visitor'}
+                                  {alarm.beaconId || 'Unknown Visitor'}
                                 </Typography>
                                 <Typography
                                   color="textSecondary"
                                   fontSize="12px"
                                   variant="subtitle2"
                                 >
-                                  {alarm.visitor?.cardNumber || 'No Card Number'}
+                                  {alarm.beaconId || 'No Card Number'}
                                 </Typography>
                               </Box>
                             </TableCell>
@@ -240,7 +241,7 @@ const AlarmWarning = () => {
                             <TableCell>
                               <Chip
                                 sx={{
-                                  bgcolor: alarm.alarmTriggers.alarmColor || 'secondary.dark',
+                                  bgcolor: alarm.alarmColor || 'secondary.dark',
                                   color: 'white',
                                   borderRadius: '8px',
                                 }}
@@ -254,7 +255,7 @@ const AlarmWarning = () => {
                                 variant="subtitle2"
                                 fontWeight={400}
                               >
-                                {alarm.floorplanMaskedArea?.name || 'Unknown Area'}
+                                {alarm.floorplanId || 'Unknown Area'}
                               </Typography>
                             </TableCell>
                             <TableCell>
@@ -263,7 +264,7 @@ const AlarmWarning = () => {
                                 variant="subtitle2"
                                 fontWeight={400}
                               >
-                                {alarm.timestamp ? formatTime(alarm.timestamp) : 'Unknown Time'}
+                                {alarm.triggerTime ? formatTime(alarm.triggerTime) : 'Unknown Time'}
                               </Typography>
                             </TableCell>
                           </TableRow>

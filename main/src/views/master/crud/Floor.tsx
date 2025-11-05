@@ -20,6 +20,7 @@ import AddEditFloor from 'src/components/master/CRUD/floor/AddEditFloor';
 import FloorFilter from 'src/components/master/CRUD/floor/FloorFilter';
 import FloorImport from 'src/components/master/CRUD/floor/FloorImport';
 import FloorExport from 'src/components/master/CRUD/floor/FloorExport';
+import { useFloorStatus } from 'src/hooks/useFloor';
 
 interface cardType {
   icon?: string;
@@ -34,8 +35,7 @@ const Floor = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const floorCount = useSelector((state: RootState) => state.floorReducer.floorTotalCount);
-  const hasLoaded = useSelector((state: RootState) => state.floorReducer.hasLoaded);
+  const { totalCount: floorCount, hasLoaded, isFetching} = useFloorStatus();
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {

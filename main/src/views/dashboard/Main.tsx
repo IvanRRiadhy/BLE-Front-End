@@ -28,7 +28,14 @@ import AreaDistribution from 'src/components/dashboards/mainmenu/AreaDistributio
 import { CardType, fetchCardDT } from 'src/store/apps/crud/card';
 import DynamicSwitcherCard from 'src/components/dashboards/mainmenu/DynamicCardSwitcher';
 import ChartSwitcher from 'src/components/dashboards/mainmenu/ChartSwitcher';
-import { fetchCardCount, fetchDashboardTopCards } from 'src/store/apps/dashboard/Dashboard';
+import {
+  CountCardType,
+  DashboardAreaAccessType,
+  DashboardAreaChartType,
+  fetchAreaChart,
+  fetchCardCount,
+  fetchDashboardTopCards,
+} from 'src/store/apps/dashboard/Dashboard';
 
 const filter = {
   Draw: 1,
@@ -92,10 +99,18 @@ const Modern = () => {
 
   useEffect(() => {
     //Test new API
-    dispatch(
-      fetchDashboardTopCards()
-    );
+    dispatch(fetchDashboardTopCards());
     dispatch(fetchCardCount());
+    dispatch(fetchAreaChart({
+      TimeRange: 'today',
+      from: null,
+      to: null,
+      operatorName: null,
+      visitorId: null,
+      buildingId: null,
+      floorId: null,
+      floorplanMaskedAreaId: null
+    }));
 
     // Fetch initial data for the dashboard
     // dispatch(
@@ -179,7 +194,7 @@ const Modern = () => {
   // const blacklistFilteredCount: number = useSelector(
   //   (state: RootState) => state.blacklistReducer.blacklistFilteredCount ?? 0,
   // );
-    const blacklistFilteredCount: number = useSelector(
+  const blacklistFilteredCount: number = useSelector(
     (state: RootState) => state.DashboardReducer.topCards.data?.blacklistCount ?? 0,
   );
   const blacklistData: blacklistType[] = useSelector(
@@ -189,7 +204,7 @@ const Modern = () => {
   // const maskedAreaFilteredCount: number = useSelector(
   //   (state: RootState) => state.maskedAreaReducer.maskedAreaFilteredCount ?? 0,
   // );
-    const maskedAreaFilteredCount: number = useSelector(
+  const maskedAreaFilteredCount: number = useSelector(
     (state: RootState) => state.DashboardReducer.topCards.data?.areaCount ?? 0,
   );
   const maskedAreaData: MaskedAreaType[] = useSelector(
@@ -198,7 +213,7 @@ const Modern = () => {
   // const bleReaderFilteredCount: number = useSelector(
   //   (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceFilteredCount ?? 0,
   // );
-    const bleReaderFilteredCount: number = useSelector(
+  const bleReaderFilteredCount: number = useSelector(
     (state: RootState) => state.DashboardReducer.topCards.data?.activeGatewayCount ?? 0,
   );
   const bleReaderData: FloorplanDeviceType[] = useSelector(
@@ -207,7 +222,7 @@ const Modern = () => {
   // const alarmFilteredCount: number = useSelector(
   //   (state: RootState) => state.alarmReducer.alarmRecordFilteredCount ?? 0,
   // );
-    const alarmFilteredCount: number = useSelector(
+  const alarmFilteredCount: number = useSelector(
     (state: RootState) => state.DashboardReducer.topCards.data?.alarmCount ?? 0,
   );
   const alarmFilteredData: AlarmType[] = useSelector(
@@ -228,7 +243,7 @@ const Modern = () => {
   // const nonActiveTag: number = useSelector(
   //   (state: RootState) => state.CardReducer.cardNonActiveCount ?? 0,
   // );
-    const activeTag: number = useSelector(
+  const activeTag: number = useSelector(
     (state: RootState) => state.DashboardReducer.topCards.data?.activeBeaconCount ?? 0,
   );
   const nonActiveTag: number = useSelector(
@@ -243,10 +258,27 @@ const Modern = () => {
   const topCardsLoaded: boolean = useSelector(
     (state: RootState) => state.DashboardReducer.topCards.hasLoaded,
   );
-  // console.log(
-  //   'MaskedArea Data: ',
-  //   maskedAreaData.flat().map((item) => item.name),
-  // );
+  const cardCountData: CountCardType | null = useSelector(
+    (state: RootState) => state.DashboardReducer.CardCount.data,
+  );
+  const cardCountLoaded: boolean = useSelector(
+    (state: RootState) => state.DashboardReducer.CardCount.hasLoaded,
+  );
+  const areaChartData: DashboardAreaChartType[] | null = useSelector(
+    (state: RootState) => state.DashboardReducer.areaChart.data,
+  );
+  const areaChartLoaded: boolean = useSelector(
+    (state: RootState) => state.DashboardReducer.areaChart.hasLoaded,
+  );
+  const trackingGraphData: DashboardAreaAccessType | null = useSelector(
+    (state: RootState) => state.DashboardReducer.trackingGraph.data,
+  );
+  const trackingGraphLoaded: boolean = useSelector(
+    (state: RootState) => state.DashboardReducer.trackingGraph.hasLoaded,
+  )
+  useEffect(() => {
+    console.log("Area Chart Data",areaChartData, areaChartLoaded);
+  }, [areaChartData, areaChartLoaded]);
   return (
     <PageContainer title="Dashboard" description="this is Dashboard page">
       <Box>
@@ -303,21 +335,45 @@ const Modern = () => {
               <ChartSwitcher
                 availableCharts={['Beacon', 'Area', 'Tracking', 'Visitor']}
                 chartProps={{
-                  Beacon: {
-                    outerRadius: 100,
-                    innerRadius: 80,
-                    data: [
-                      { name: 'Employee', value: 73, color: '#43a047' },
-                      { name: 'Visitor', value: 25, color: '#bdff52ff' },
-                    ],
-                  },
+                  // ✅ Beacon chart waits for cardCountLoaded
+                  Beacon:
+                    cardCountLoaded && cardCountData
+                      ? {
+                          outerRadius: 100,
+                          innerRadius: 80,
+                          data: [
+                            {
+                              name: 'Employee',
+                              value: cardCountData.memberCardCount ?? 0,
+                              color: '#43a047',
+                            },
+                            {
+                              name: 'Visitor',
+                              value: cardCountData.visitorCardCount ?? 0,
+                              color: '#0f39c5ff',
+                            },
+                            {
+                              name: 'Unassigned',
+                              value:
+                                (cardCountData.totalCardCount ?? 0) -
+                                ((cardCountData.visitorCardCount ?? 0) +
+                                  (cardCountData.memberCardCount ?? 0)),
+                              color: '#9e9e9e',
+                            },
+                          ],
+                        }
+                      : {
+                          // 🕓 Placeholder (shows while loading)
+                          outerRadius: 100,
+                          innerRadius: 80,
+                          data: [{ name: 'Loading...', value: 1, color: '#ccc' }],
+                        },
+
+                  // ✅ Area still always displays its dummy data
                   Area: {
                     outerRadius: 90,
                     label: 'Area Usage',
-                    data: [
-                      { name: 'Area 1', value: 21 },
-                      { name: 'Area 2', value: 17 },
-                    ],
+                    data: areaChartData,
                   },
                 }}
               />

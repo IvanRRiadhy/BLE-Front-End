@@ -34,6 +34,7 @@ import {
 import AddEditBuilding from './AddEditBuilding';
 import { defaultBuildingFilter } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
+import { useBuildingList, useDeleteBuilding } from 'src/hooks/useBuilding';
 
 const columns = [
   { label: 'Building Name', field: 'name', sortAble: true },
@@ -42,20 +43,27 @@ const columns = [
 
 const SKELETON_ROWS = 5;
 
-
-
 const BuildingList = () => {
   const dispatch: AppDispatch = useDispatch();
-  const buildingData: BuildingType[] = useSelector(
-    (state: RootState) => state.buildingReducer.buildings,
-  );
-  const buildingTotalCount = useSelector(
-    (state: RootState) => state.buildingReducer.buildingTotalCount,
-  );
+  // const buildingData: BuildingType[] = useSelector(
+  //   (state: RootState) => state.buildingReducer.buildings,
+  // );
+  // const buildingTotalCount = useSelector(
+  //   (state: RootState) => state.buildingReducer.buildingTotalCount,
+  // );
   // const buildingFilteredCount = useSelector(
   //   (state: RootState) => state.buildingReducer.buildingFilteredCount,
   // );
   const buildingFilter = useSelector((state: RootState) => state.buildingReducer.buildingFilter);
+  // const {
+  //   data: buildingData = [],
+  //   isLoading: queryLoading,
+  //   isFetching,
+  // } = useBuildingList(buildingFilter);
+  const { data, isLoading: queryLoading } = useBuildingList(buildingFilter);
+  const buildingData = data?.data || [];
+  const buildingTotalCount = data?.recordsTotal || 0;
+  const buildingFilteredCount = data?.recordsFiltered || 0;
   const isLoading = useSelector((state => state.buildingReducer.isLoading));
   const hasLoaded = useSelector(state => state.buildingReducer.hasLoaded);
   // Pagination State
@@ -94,21 +102,22 @@ const BuildingList = () => {
     }
   };
 
-  useEffect(() => {
-    dispatch(UpdateFilter(defaultBuildingFilter));
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(UpdateFilter(defaultBuildingFilter));
+  // }, [dispatch]);
 
-  useEffect(() => {
-    try {
-      dispatch(fetchBuildingDT(buildingFilter));
-    } catch (error) {
-      console.error('Error fetching building data:', error);
-    }
-  }, [buildingFilter, dispatch]);
+  // useEffect(() => {
+  //   try {
+  //     dispatch(fetchBuildingDT(buildingFilter));
+  //   } catch (error) {
+  //     console.error('Error fetching building data:', error);
+  //   }
+  // }, [buildingFilter, dispatch]);
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingType | null>(null);
+  const deleteMutation = useDeleteBuilding();
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (building: BuildingType) => {
     setSelectedBuilding(building);
@@ -124,26 +133,43 @@ const BuildingList = () => {
   // Confirm delete action
   const handleConfirmDelete = async () => {
     if (selectedBuilding) {
+      // try {
+      //   const result = await dispatch(deleteBuilding(selectedBuilding.id));
+      //   if (result && result.type && result.type.endsWith('/fulfilled')) {
+      //     await dispatch(fetchBuildingDT(buildingFilter));
+      //     toast.success('Data Deleted');
+      //   }
+      // } catch (error) {
+      //   toast.error('Delete Data Unsuccessful');
+      //   console.error('Error deleting Building:', error);
+      // }
       try {
-        const result = await dispatch(deleteBuilding(selectedBuilding.id));
-        if (result && result.type && result.type.endsWith('/fulfilled')) {
-          await dispatch(fetchBuildingDT(buildingFilter));
-          toast.success('Data Deleted');
-        }
+        await deleteMutation.mutateAsync(selectedBuilding.id);
+        toast.success('Data Deleted');
       } catch (error) {
-        toast.error('Delete Data Unsuccessful');
-        console.error('Error deleting Building:', error);
+        toast.error('Delete failed');
+        console.error(error);
       }
     }
     handleCloseDeleteDialog();
   };
 
-    const renderSkeletonRows = (rows: number) => (
+  const renderSkeletonRows = (rows: number) => (
     <>
       {Array.from({ length: rows }).map((_, i) => (
         <TableRow key={`skeleton-${i}`}>
           {/* sticky index cell */}
-          <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1, width: 35, minWidth: 35, maxWidth: 35 }}>
+          <TableCell
+            sx={{
+              position: 'sticky',
+              left: 0,
+              background: 'white',
+              zIndex: 1,
+              width: 35,
+              minWidth: 35,
+              maxWidth: 35,
+            }}
+          >
             <Skeleton variant="text" width={18} />
           </TableCell>
           {/* Building Name */}
@@ -155,7 +181,17 @@ const BuildingList = () => {
             <Skeleton variant="rectangular" width={80} height={60} />
           </TableCell>
           {/* Actions (right sticky) */}
-          <TableCell sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2, width: 150, minWidth: 150, maxWidth: 150 }}>
+          <TableCell
+            sx={{
+              position: 'sticky',
+              right: 0,
+              background: 'white',
+              zIndex: 2,
+              width: 150,
+              minWidth: 150,
+              maxWidth: 150,
+            }}
+          >
             <Box display="flex" gap={1}>
               <Skeleton variant="rounded" width={90} height={32} />
               {/* <Skeleton variant="circular" width={32} height={32} /> */}
@@ -169,63 +205,61 @@ const BuildingList = () => {
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
-
-            <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-              <BlankCard>
-                <TableContainer>
-                  <Table aria-label="simple-table" sx={{ whiteSpace: 'nowrap' }}>
-                    <TableHead>
-                      <TableRow>
-                        {/* Left Sticky Empty Column */}
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            left: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            width: 35, // Fixed width
-                            minWidth: 35,
-                            maxWidth: 35,
-                          }}
-                        >
-                          <Typography variant="h6"></Typography>
-                        </TableCell>
-                        {columns.map((col) => (
-                          <TableCell key={col.label}>
-                            {col.sortAble && col.field ? (
-                              <TableSortLabel
-                                active={orderBy === col.field}
-                                direction={orderBy === col.field ? order : 'asc'}
-                                onClick={() => handleSort(col.field)}
-                              >
-                                <Typography variant="h6">{col.label}</Typography>
-                              </TableSortLabel>
-                            ) : (
-                              <Typography variant="h6">{col.label}</Typography>
-                            )}
-                          </TableCell>
-                        ))}
-                        {/* Right Sticky Empty Column */}
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            width: 150, // Fixed width
-                            minWidth: 150,
-                            maxWidth: 150,
-                          }}
-                        >
-                          <Typography variant="h6"> Actions </Typography>
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {!hasLoaded ? (
-                        renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
-                        ): (
-                          buildingData.map((building, index) => (
+        <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
+          <BlankCard>
+            <TableContainer>
+              <Table aria-label="simple-table" sx={{ whiteSpace: 'nowrap' }}>
+                <TableHead>
+                  <TableRow>
+                    {/* Left Sticky Empty Column */}
+                    <TableCell
+                      sx={{
+                        position: 'sticky',
+                        left: 0,
+                        background: 'white',
+                        zIndex: 2,
+                        width: 35, // Fixed width
+                        minWidth: 35,
+                        maxWidth: 35,
+                      }}
+                    >
+                      <Typography variant="h6"></Typography>
+                    </TableCell>
+                    {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
+                          >
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
+                      </TableCell>
+                    ))}
+                    {/* Right Sticky Empty Column */}
+                    <TableCell
+                      sx={{
+                        position: 'sticky',
+                        right: 0,
+                        background: 'white',
+                        zIndex: 2,
+                        width: 150, // Fixed width
+                        minWidth: 150,
+                        maxWidth: 150,
+                      }}
+                    >
+                      <Typography variant="h6"> Actions </Typography>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {queryLoading
+                    ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                    : buildingData.map((building, index) => (
                         <TableRow key={index}>
                           <TableCell
                             sx={{
@@ -277,24 +311,22 @@ const BuildingList = () => {
                             </IconButton>
                           </TableCell>
                         </TableRow>
-                      ))
-                        )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-                {/* Pagination */}
-                <TablePagination
-                  component="div"
-                  count={buildingTotalCount}
-                  page={page}
-                  rowsPerPage={rowsPerPage}
-                  onPageChange={handleChangePage}
-                  rowsPerPageOptions={[5, 10, 25]}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                />
-              </BlankCard>
-            </Box>
-
+                      ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            {/* Pagination */}
+            <TablePagination
+              component="div"
+              count={buildingFilteredCount}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              onPageChange={handleChangePage}
+              rowsPerPageOptions={[5, 10, 25]}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </BlankCard>
+        </Box>
       </Grid>
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>

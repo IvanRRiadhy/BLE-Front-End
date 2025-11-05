@@ -17,20 +17,35 @@ import {
 } from '@mui/material';
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
 import DashboardCard from 'src/components/shared/DashboardCard';
+import { DashboardAreaChartType } from 'src/store/apps/dashboard/Dashboard';
 
-const AreaList =[
-    {name: 'Area 1', value: 21, color: '#43a047'},
-    {name: 'Area 2', value: 17, color: '#ff5252'},
-    {name: 'Area 3', value: 4, color: '#afafaf'},
-    {name: 'Area 4', value: 19, color: '#43a047'},
-    {name: 'Area 5', value: 26, color: '#ff5252'},
-    {name: 'Area 6', value: 11, color: '#afafaf'},
-    {name: 'Area 7', value: 27, color: '#43a047'},
-    {name: 'Area 8', value: 2, color: '#ff5252'},
+const AreaList = [
+  { name: 'Area 1', value: 21, color: '#43a047' },
+  { name: 'Area 2', value: 17, color: '#ff5252' },
+  { name: 'Area 3', value: 4, color: '#afafaf' },
+  { name: 'Area 4', value: 19, color: '#43a047' },
+  { name: 'Area 5', value: 26, color: '#ff5252' },
+  { name: 'Area 6', value: 11, color: '#afafaf' },
+  { name: 'Area 7', value: 27, color: '#43a047' },
+  { name: 'Area 8', value: 2, color: '#ff5252' },
 ];
 
-const AreaDistribution = () => {
-      const generateColors = (count: number): string[] => {
+interface AreaDistributionProps {
+  data: DashboardAreaChartType[];
+  outerRadius?: number;
+  label?: string;
+}
+
+const AreaDistribution: React.FC<AreaDistributionProps> = ({
+  data = [],
+  outerRadius = 80,
+  label = 'Area Usage',
+}) => {
+    const chartData = data.map(d => ({
+    name: d.areaName ?? 'Unknown Area',
+    value: d.totalRecords ?? 0,
+  }));
+  const generateColors = (count: number): string[] => {
     const colors = [];
     const saturation = 70;
     const lightness = 50;
@@ -42,30 +57,31 @@ const AreaDistribution = () => {
 
     return colors;
   };
-    const areaColors = generateColors(AreaList.length);
-    return (
-            <Box sx={{height: 380}}>
-                <ResponsiveContainer>
-                    <PieChart>
-                        <Pie
-                        data={AreaList}
-                        dataKey={"value"}
-                        nameKey={"name"}
-                        cx={"50%"}
-                        cy={"50%"}
-                        outerRadius={80}
-                        label={({ name, value }) => `${name}: ${value} Card`}
-                        >
-                            {AreaList.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={areaColors[index]} />
-                            ))}
-                        </Pie>
-                        <Legend />
-                        <Tooltip />
-                    </PieChart>
-                </ResponsiveContainer>
-            </Box>
-    );
+  const areaColors = generateColors(chartData.length);
+
+  return (
+    <Box sx={{ height: 380 }}>
+      <ResponsiveContainer>
+        <PieChart>
+          <Pie
+            data={chartData}
+            dataKey="value"
+            nameKey="name"
+            cx="50%"
+            cy="50%"
+            outerRadius={outerRadius}
+            label={({ name, value }) => `${name}: ${value}`}
+          >
+            {chartData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={areaColors[index]} />
+            ))}
+          </Pie>
+          <Legend />
+          <Tooltip />
+        </PieChart>
+      </ResponsiveContainer>
+    </Box>
+  );
 };
 
 export default AreaDistribution;

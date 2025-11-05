@@ -15,15 +15,17 @@ import { AlarmType } from 'src/store/apps/crud/alarmRecordTracking';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import { DashboardAreaAccessType } from 'src/store/apps/dashboard/Dashboard';
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 
 interface TrackingGraphProps {
   trackingData: trackingTransType[];
   alarmData: AlarmType[];
+  dashboardData?: DashboardAreaAccessType;
 }
 
-const TrackingGraph: React.FC<TrackingGraphProps> = ({ trackingData = [], alarmData = [] }) => {
+const TrackingGraph: React.FC<TrackingGraphProps> = ({ trackingData = [], alarmData = [], dashboardData }) => {
   function getCountsByDay(data: any[], dateField: string) {
     const counts = Array(7).fill(0);
     data.forEach((item) => {
@@ -140,7 +142,7 @@ const alarmFiltered = React.useMemo(
 
   function buildContinuousSeriesByDay(
     records: any[],
-    dateField: string,
+    dateField: string, 
     start: string,
     end: string,
   ) {

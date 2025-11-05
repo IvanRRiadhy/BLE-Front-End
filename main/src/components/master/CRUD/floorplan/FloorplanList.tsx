@@ -30,6 +30,7 @@ import {
   deleteFloorplan,
   fetchFloorplanDT,
 } from 'src/store/apps/crud/floorplan';
+import { useFloorplanList, useDeleteFloorplan } from 'src/hooks/useFloorplan';
 // import { useTranslation } from 'react-i18next';
 import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
@@ -51,20 +52,28 @@ const SKELETON_ROWS = 5;
 
 const FloorplanList = () => {
   const dispatch: AppDispatch = useDispatch();
-  const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
+
   const buildingData: BuildingType[] = useSelector(
     (state: RootState) => state.buildingReducer.buildingAll,
   );
-  const floorplanTotalCount = useSelector(
-    (state: RootState) => state.floorplanReducer.floorplanTotalCount,
-  );
+  // const floorplanTotalCount = useSelector(
+  //   (state: RootState) => state.floorplanReducer.floorplanTotalCount,
+  // );
   // const floorplanFilteredCount = useSelector(
   //   (state: RootState) => state.floorplanReducer.floorplanFilteredCount,
   // );
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
-  const prevFilterRef = useRef(floorplanFilter);
+  // const {
+  //   data: floorplanData = [],
+  //   isLoading: queryLoading,
+  //   isFetching,
+  // } = useFloorplanList(floorplanFilter);
+  
+  const { data, isLoading: queryLoading } = useFloorplanList(floorplanFilter);
+  const floorplanData = data?.data || [];
+  const floorplanTotalCount = data?.recordsTotal || 0;
+  const floorplanFilteredCount = data?.recordsFiltered || 0;
   // const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
   const isLoading = useSelector((state: RootState) => state.floorplanReducer.isLoading);
   const hasLoaded = useSelector((state: RootState) => state.floorplanReducer.hasLoaded);
   // Pagination State
@@ -107,42 +116,56 @@ const FloorplanList = () => {
   //   console.log("Floorplan Data:", floorplanData);
   // }, [floorplanData]);
 
-  useEffect(() => {
-    dispatch(UpdateFilter(defaultFloorplanFilter));
-    setLoading(true);
+  // useEffect(() => {
+  //   dispatch(UpdateFilter(defaultFloorplanFilter));
+  //   setLoading(true);
 
-    Promise.all([
-      dispatch(fetchFloorplanDT(defaultFloorplanFilter)).finally(() => {
-        requestIdleCallback(() => {
-          dispatch(fetchEngines());
-        });
-      }),
-      dispatch(fetchBuildings()),
-      dispatch(fetchFloors()),
-    ]).finally(() => setLoading(false));
-  }, [dispatch]);
+  //   Promise.all([
+  //     dispatch(fetchFloorplanDT(defaultFloorplanFilter)).finally(() => {
+  //       requestIdleCallback(() => {
+  //         dispatch(fetchEngines());
+  //       });
+  //     }),
+  //     dispatch(fetchBuildings()),
+  //     dispatch(fetchFloors()),
+  //   ]).finally(() => setLoading(false));
+  // }, [dispatch]);
 
   useEffect(() => {
-    const prevFilter = prevFilterRef.current;
-    const isStartorLengthChanged =
-      prevFilter.Start !== floorplanFilter.Start || prevFilter.Length !== floorplanFilter.Length;
-    if (isStartorLengthChanged) {
-      setLoading(true);
-    }
-    dispatch(fetchFloorplanDT(floorplanFilter)).finally(() => {
-      if (isStartorLengthChanged) {
-        setTimeout(() => {
-          setLoading(false);
-        }, 500);
-      }
-    });
-    console.log('floorplan: ', floorplanData);
-    prevFilterRef.current = floorplanFilter;
-  }, [floorplanFilter, dispatch]);
+  Promise.all([
+    dispatch(fetchBuildings()),
+    dispatch(fetchFloors()),
+    dispatch(fetchEngines())
+  ]);
+}, [dispatch]);
+
+useEffect(() => {
+console.log("Floorplan Data:", floorplanData);
+},[floorplanData]);
+
+
+  // useEffect(() => {
+  //   const prevFilter = prevFilterRef.current;
+  //   const isStartorLengthChanged =
+  //     prevFilter.Start !== floorplanFilter.Start || prevFilter.Length !== floorplanFilter.Length;
+  //   if (isStartorLengthChanged) {
+  //     setLoading(true);
+  //   }
+  //   dispatch(fetchFloorplanDT(floorplanFilter)).finally(() => {
+  //     if (isStartorLengthChanged) {
+  //       setTimeout(() => {
+  //         setLoading(false);
+  //       }, 500);
+  //     }
+  //   });
+  //   console.log('floorplan: ', floorplanData);
+  //   prevFilterRef.current = floorplanFilter;
+  // }, [floorplanFilter, dispatch]);
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedFloorplan, setSelectedFloorplan] = useState<FloorplanType | null>(null);
+  const deleteMutation = useDeleteFloorplan();
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (floorplan: FloorplanType) => {
     setSelectedFloorplan(floorplan);
@@ -158,20 +181,27 @@ const FloorplanList = () => {
   // Confirm delete action
   const handleConfirmDelete = async () => {
     if (selectedFloorplan) {
-      setLoading(true);
+      //   setLoading(true);
+      //   try {
+      //     const result = await dispatch(deleteFloorplan(selectedFloorplan.id));
+      //     if (result && result.type && result.type.endsWith('/fulfilled')) {
+      //       await dispatch(fetchFloorplanDT(floorplanFilter));
+      //       toast.success('Data Deleted');
+      //     }
+      //   } catch (error) {
+      //     toast.error('Delete Data Unsuccessful');
+      //     console.error('Error deleting floorplan:', error);
+      //   }
+      //   setTimeout(() => {
+      //     setLoading(false);
+      //   }, 1000);
       try {
-        const result = await dispatch(deleteFloorplan(selectedFloorplan.id));
-        if (result && result.type && result.type.endsWith('/fulfilled')) {
-          await dispatch(fetchFloorplanDT(floorplanFilter));
-          toast.success('Data Deleted');
-        }
+        await deleteMutation.mutateAsync(selectedFloorplan.id);
+        toast.success('Data Deleted');
       } catch (error) {
-        toast.error('Delete Data Unsuccessful');
-        console.error('Error deleting floorplan:', error);
+        toast.error('Delete failed');
+        console.error(error);
       }
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
     }
     handleCloseDeleteDialog();
   };
@@ -294,7 +324,7 @@ const FloorplanList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {!hasLoaded
+                  {queryLoading
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : floorplanData.map((floorplan: FloorplanType, index: number) => (
                         <TableRow key={index}>
@@ -324,7 +354,7 @@ const FloorplanList = () => {
                               <img
                                 src={`${BASE_URL}${floorplan.floorplanImage}`}
                                 alt="Floor"
-                                loading='lazy'
+                                loading="lazy"
                                 style={{ width: 80, height: 80, objectFit: 'cover' }}
                               />
                             ) : (
@@ -364,7 +394,7 @@ const FloorplanList = () => {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={floorplanTotalCount}
+              count={floorplanFilteredCount}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

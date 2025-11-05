@@ -6,6 +6,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { ensureMinLatency, retryUntilSuccess } from 'src/utils/retry';
 
 const API_URL = '/api/Dashboard/';
+const API_TrackingAnalytic_URL = '/api/TrackingAnalytics/';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -73,7 +74,7 @@ export interface DashboardState {
     error: string | null;
   };
   trackingGraph: {
-    data: DashboardAreaChartType | null;
+    data: DashboardAreaAccessType | null;
     isLoading: boolean;
     hasLoaded: boolean;
     error: string | null;
@@ -169,7 +170,8 @@ export const DashboardSlice = createSlice({
       .addCase(fetchCardCount.fulfilled, (state, action) => {
         state.CardCount.isLoading = false;
         state.CardCount.hasLoaded = true;
-        state.CardCount.data = action.payload;
+        console.log('Card Count:', action.payload.data);
+        state.CardCount.data = action.payload.data;
       })
       .addCase(fetchCardCount.rejected, (state, action) => {
         state.CardCount.isLoading = false;
@@ -200,15 +202,15 @@ export const fetchAreaChart = createAsyncThunk(
   'dashboard/fetchAreaChart',
   async (filter: DashboardAreaChartFilter, thunkAPI) => {
     const started = Date.now();
-    const res = await retryUntilSuccess(() => axiosServices.post(`${API_URL}area`, filter), {
+    const res = await retryUntilSuccess(() => axiosServices.post(`${API_TrackingAnalytic_URL}area`, filter), {
       signal: thunkAPI.signal,
       timeoutMs: 2 * 60 * 1000,
       minDelay: 500,
       maxDelay: 8000,
     });
-    console.log('Dashboard Area Chart Data:', res.data);
+    console.log('Dashboard Area Chart Data:', res.data.data);
     await ensureMinLatency(started, 500);
-    return res.data;
+    return res.data.data;
   },
 );
 
@@ -217,7 +219,7 @@ export const fetchTrackingGraph = createAsyncThunk(
   async (filter: DashboardAreaAccessFilter, thunkAPI) => {
     const started = Date.now();
     const res = await retryUntilSuccess(
-      () => axiosServices.post(`${API_URL}area-accessed`, filter),
+      () => axiosServices.post(`${API_TrackingAnalytic_URL}area-accessed`, filter),
       {
         signal: thunkAPI.signal,
         timeoutMs: 2 * 60 * 1000,
