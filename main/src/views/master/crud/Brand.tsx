@@ -17,6 +17,7 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import BrandList from 'src/components/master/CRUD/brand/BrandList';
 import AddEditBrand from 'src/components/master/CRUD/brand/AddEditBrand';
+import { useBrandStatus } from 'src/hooks/useBrand';
 
 interface cardType {
   icon?: string;
@@ -31,8 +32,7 @@ const Brand = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const brandCount = useSelector((state: RootState) => state.brandReducer.brandTotalCount);
-  const hasLoaded = useSelector((state: RootState) => state.brandReducer.hasLoaded);
+  const { filteredCount: brandCount, hasLoaded } = useBrandStatus();
   const { t } = useTranslation();
 
   const topCards: cardType[] = [
@@ -44,7 +44,7 @@ const Brand = () => {
   ];
   return (
     <PageContainer title="Brand" description="This is the Brand CRUD Page">
-      <Breadcrumb title="Brand" />
+      {/* <Breadcrumb title="Brand" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

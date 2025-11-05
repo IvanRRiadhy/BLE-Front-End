@@ -170,7 +170,7 @@ export const defaultBrandFilter: BrandFilter = {
   Start: 0,
   Length: 5,
   SortColumn: 'Name',
-  SortDir: 'desc',
+  SortDir: 'asc',
   SearchValue: '',
 };
 //#endregion
