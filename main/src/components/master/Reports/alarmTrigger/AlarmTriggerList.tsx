@@ -267,7 +267,7 @@ const AlarmTriggerList = () => {
                 <TableBody>
                   {!hasLoaded
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
-                    : alarmTriggerData.map((row, index) => (
+                    : alarmTriggerData.map((row: AlarmTriggerType, index: number) => (
                         <TableRow key={index}>
                           <TableCell
                             sx={{

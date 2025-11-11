@@ -26,39 +26,48 @@ import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
-import { addCard, editCard, fetchCard, CardType, fetchCardDT } from 'src/store/apps/crud/card';
+import { CardType } from 'src/store/apps/crud/card';
 import { cardType } from 'src/types/crud/input';
-import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
-import { floorType, fetchFloors } from 'src/store/apps/crud/floor';
-import { FloorplanType, fetchFloorplan } from 'src/store/apps/crud/floorplan';
-import { MaskedAreaType, fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
+import { BuildingType } from 'src/store/apps/crud/building';
+import { floorType } from 'src/store/apps/crud/floor';
+import { FloorplanType } from 'src/store/apps/crud/floorplan';
+import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import toast from 'react-hot-toast';
 import { defaultCardForm } from 'src/store/apps/defaultForm';
 import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
-import { fetchCardGroup } from 'src/store/apps/crud/cardGroup';
-import { CardAccessType, fetchCardAccess } from 'src/store/apps/crud/cardAccess';
+import { CardAccessType } from 'src/store/apps/crud/cardAccess';
+import { useAddCard, useEditCard } from 'src/hooks/useCard';
+import { useAllBuilding } from 'src/hooks/useBuilding';
+import { useAllFloors } from 'src/hooks/useFloor';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';import { useAllCardAccess } from 'src/hooks/useCardAccess';
+
 interface formType {
   type?: string;
   card?: CardType;
 }
+
 type AreaNode = MaskedAreaType & {
   nodeType: 'area';
   maskedAreas?: never;
   floors?: never;
   floorplans?: never;
 };
+
 type FloorplanNode = FloorplanType & {
   nodeType: 'floorplan';
   maskedAreas: AreaNode[];
   floorplans?: never;
   floors?: never;
 };
+
 type FloorNode = floorType & {
   nodeType: 'floor';
   floorplans: FloorplanNode[];
   maskedAreas?: never;
   floors?: never;
 };
+
 type BuildingNode = BuildingType & {
   nodeType: 'building';
   floors: FloorNode[];
@@ -123,12 +132,18 @@ const AddEditCard = ({ type, card }: formType) => {
   });
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
 
-  const buildingData = useSelector((state: RootState) => state.buildingReducer.buildingAll);
-  const floorData = useSelector((state: RootState) => state.floorReducer.floorAll);
-  const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
-  const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
-  const cardGroupData = useSelector((state: RootState) => state.CardGroupReducer.cardGroupAll);
-  const cardAccessData = useSelector((state: RootState) => state.CardAccessReducer.cardAccessAll);
+  // React Query hooks for data fetching
+  const { data: buildingData = [] } = useAllBuilding();
+  const { data: floorData = [] } = useAllFloors();
+  const { data: floorplanData = [] } = useAllFloorplans();
+  const { data: maskedAreaData = [] } = useAllMaskedAreas();
+  // const { data: cardGroupData = [] } = useAllCardGroups();
+  const { data: cardAccessData = [] } = useAllCardAccess();
+
+  // React Query mutations
+  const addMutation = useAddCard();
+  const editMutation = useEditCard();
+
   const buildingHierarchy = buildNestedHierarchy(
     buildingData,
     floorData,
@@ -136,24 +151,10 @@ const AddEditCard = ({ type, card }: formType) => {
     maskedAreaData,
   );
 
-  const cardFilter = useSelector((state: RootState) => state.CardReducer.cardFilter);
-
-  useEffect(() => {
-    dispatch(fetchBuildings());
-    dispatch(fetchFloors());
-    dispatch(fetchFloorplan());
-    dispatch(fetchMaskedAreas());
-    dispatch(fetchCardGroup());
-    dispatch(fetchCardAccess());
-  }, [dispatch]);
-
   const handleClickOpen = () => {
     setLoading(true);
     setFormErrors({});
     if (type === 'edit' && card) {
-      if (!card.id) {
-        dispatch(fetchCardDT(cardFilter));
-      }
       setFormData({ ...defaultCardForm, ...card });
     } else {
       setFormData({ ...defaultCardForm });
@@ -176,6 +177,7 @@ const AddEditCard = ({ type, card }: formType) => {
       | { value: string; name: string; id?: string };
     setFormData((prev) => ({ ...prev, [id || name]: value }));
   };
+
   const getAreaName = (areaId: string) => {
     const area = maskedAreaData.find((area: MaskedAreaType) => area.id === areaId);
     return area ? area.name : 'Unknown area';
@@ -194,30 +196,25 @@ const AddEditCard = ({ type, card }: formType) => {
           : formData.registeredMaskedAreaId ?? '',
       };
 
-      // if you have Date fields, serialize explicitly (optional)
-      // payload.lastUsed = formData.lastUsed ? new Date(formData.lastUsed).toISOString() : null;
-
-      const result =
-        type === 'edit'
-          ? await dispatch(editCard(payload)) // <- send JSON
-          : await dispatch(addCard(payload)); // <- send JSON
-
-      if (result && result.type?.endsWith('/fulfilled')) {
-        await dispatch(fetchCardDT(cardFilter));
-        toast.success('Data Saved');
-        setTimeout(() => {
-          handleClose();
-        }, 1000);
+      if (type === 'edit') {
+        await editMutation.mutateAsync(payload);
+        toast.success('Card updated successfully');
       } else {
-        toast.error('Saving Data Unsuccessful');
+        await addMutation.mutateAsync(payload);
+        toast.success('Card added successfully');
       }
+
+      setTimeout(() => {
+        handleClose();
+      }, 1000);
     } catch (err) {
       console.error(err);
       toast.error('Saving Data Unsuccessful');
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
     }
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
   };
 
   function getAreaPath(areaId: string): string {
@@ -254,14 +251,16 @@ const AddEditCard = ({ type, card }: formType) => {
       const floor = floorData.find((f) => f.id === floorplan.floorId);
       if (floor) {
         ids.add(floor.id);
-        const building = buildingData.find((b) => b.id === floor.buildingId);
+        const building = buildingData.find((b: BuildingType) => b.id === floor.buildingId);
         if (building) ids.add(building.id);
       }
     }
 
     return ids;
   }
+
   const selectedAncestorIds = getSelectedAncestorIds(formData.registeredMaskedAreaId ?? '');
+  
   const setRegisteredArea: React.Dispatch<React.SetStateAction<string>> = (value) => {
     setFormData((prev) => {
       const next =
@@ -272,9 +271,9 @@ const AddEditCard = ({ type, card }: formType) => {
     });
   };
 
-  useEffect(() => {
-    console.log("Form Data Changed:", formData);
-  }, [formData]);
+  // useEffect(() => {
+  //   console.log("Form Data Changed:", formData);
+  // }, [formData]);
 
   return (
     <>
@@ -482,7 +481,7 @@ const AddEditCard = ({ type, card }: formType) => {
                   value=""
                   onChange={(e: any) => {
                     const selectedId = e.target.value;
-                    const selectedCA = cardAccessData.find((ca) => ca.id === selectedId);
+                    const selectedCA = cardAccessData.find((ca: CardAccessType) => ca.id === selectedId);
                     console.log('Selected Card Access:', selectedCA);
                     console.log('Card Accesses:', formData.cardAccesses);
                     if (selectedCA) {
@@ -505,7 +504,7 @@ const AddEditCard = ({ type, card }: formType) => {
                       (ca: CardAccessType) =>
                         !(formData.cardAccesses ?? []).some((fca: any) => fca.id === ca.id),
                     )
-                    .map((ca) => (
+                    .map((ca: CardAccessType) => (
                       <MenuItem key={ca.id} value={ca.id}>
                         {ca.name}
                       </MenuItem>
@@ -579,9 +578,10 @@ const AddEditCard = ({ type, card }: formType) => {
             <Button
               onClick={() => handleSave()}
               variant="contained"
+              disabled={loading}
               sx={{ fontSize: '1rem', py: 1, px: 3 }}
             >
-              Save
+              {loading ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </DialogActions>
         </Dialog>

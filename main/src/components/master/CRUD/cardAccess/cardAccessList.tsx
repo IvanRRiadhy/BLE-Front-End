@@ -36,6 +36,7 @@ import {
 import { defaultCardAccessFilter } from 'src/store/apps/defaultForm';
 import AddEditCardAccess from './AddEditCardAccess';
 import toast from 'react-hot-toast';
+import { useCardAccessList } from 'src/hooks/useCardAccess';
 
 const columns = [
   { label: 'Access Name', field: 'Name', sortAble: true },
@@ -48,16 +49,13 @@ const SKELETON_ROWS = 5;
 
 const CardAccessList = () => {
   const dispatch: AppDispatch = useDispatch();
-  const cardAccessData = useSelector((state: RootState) => state.CardAccessReducer.cardAccess);
-  const cardAccessTotalCount = useSelector(
-    (state: RootState) => state.CardAccessReducer.cardAccessTotalCount,
-  );
-  const cardAccessFilteredCount = useSelector(
-    (state: RootState) => state.CardAccessReducer.cardAccessFilteredCount,
-  );
   const cardAccessFilter = useSelector(
     (state: RootState) => state.CardAccessReducer.cardAccessFilter,
   );
+  const { data, isLoading: queryLoading } = useCardAccessList(cardAccessFilter);
+  const cardAccessData = data?.data || [];
+  const cardAccessTotalCount = data?.recordsTotal || 0;
+  const cardAccessFilteredCount = data?.recordsFiltered || 0;
   const isLoading = useSelector((state: RootState) => state.CardAccessReducer.isLoading);
   const hasLoaded = useSelector((state: RootState) => state.CardAccessReducer.hasLoaded);
 
@@ -251,7 +249,7 @@ const CardAccessList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {!hasLoaded
+                  {queryLoading
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : cardAccessData.map((cardAccess: CardAccessType, index: number) => (
                         <TableRow key={index}>
@@ -304,7 +302,7 @@ const CardAccessList = () => {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={cardAccessTotalCount}
+              count={cardAccessFilteredCount}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

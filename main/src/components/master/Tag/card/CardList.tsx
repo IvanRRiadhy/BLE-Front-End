@@ -26,6 +26,7 @@ import { CardType, UpdateFilter, fetchCard, fetchCardDT } from 'src/store/apps/c
 import AddEditCard from './AddEditCard';
 import { defaultCardFilter } from 'src/store/apps/defaultForm';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { useCardList } from 'src/hooks/useCard';
 
 const columns = [
   { label: 'Name', field: 'Name', sortAble: true },
@@ -39,10 +40,13 @@ const columns = [
 
 const CardList = () => {
   const dispatch: AppDispatch = useDispatch();
-  const cardData: CardType[] = useSelector((state: RootState) => state.CardReducer.cards);
-  const areaData: MaskedAreaType[] = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
-  const cardFilteredCount = useSelector((state: RootState) => state.CardReducer.cardFilteredCount);
+  // const cardData: CardType[] = useSelector((state: RootState) => state.CardReducer.cards);
+  // const areaData: MaskedAreaType[] = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
+  // const cardFilteredCount = useSelector((state: RootState) => state.CardReducer.cardFilteredCount);
   const cardFilter = useSelector((state: RootState) => state.CardReducer.cardFilter);
+  const { data, isLoading: queryLoading} = useCardList(cardFilter);
+  const cardData = data?.data || [];
+  const cardFilteredCount = data?.recordsFiltered || 0;
     const prevFilterRef = useRef(cardFilter);
     // const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
@@ -135,11 +139,6 @@ const CardList = () => {
     handleCloseDeleteDialog();
   };
 
-  const GetAreaName = (areaId: string | null) => {
-    const area = areaData.find((x) => x.id === areaId);
-    return area?.name ?? 'Unknown Area';
-  };
-
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -192,7 +191,7 @@ const CardList = () => {
                       </TableCell>
                       <TableCell>{card.cardType}</TableCell>
                       <TableCell>{card.cardNumber}</TableCell>
-                      <TableCell>{card.isMultiMaskedArea ? 'Multi-Area' : GetAreaName(card.registeredMaskedAreaId)}</TableCell>
+                      <TableCell>{card.isMultiMaskedArea ? 'Multi-Area' : 'Single-Area'}</TableCell>
                       <TableCell>{card.isUsed ? 'Yes' : 'No'}</TableCell>
                       <TableCell>{card.lastUsed || 'N/A'}</TableCell>
                       <TableCell

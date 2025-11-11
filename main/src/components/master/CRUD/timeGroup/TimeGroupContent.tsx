@@ -17,30 +17,33 @@ import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { TimeGridSelector } from 'src/components/shared/TimeGridSelector';
 import { useDispatch, useSelector } from 'src/store/Store';
-import { CardAccessType, fetchCardAccess } from 'src/store/apps/crud/cardAccess';
+import { CardAccessType } from 'src/store/apps/crud/cardAccess';
 import {
   TimeGroupType,
   TimeBlockType,
   CancelNewTimeGroup,
-  saveNewTimeGroup,
-  fetchTimeGroupDT,
   UpdateSelectedTimeGroup,
 } from 'src/store/apps/crud/timeGroup';
 import { defaultTimeGroupForm } from 'src/store/apps/defaultForm';
+import { useAllCardAccess } from 'src/hooks/useCardAccess';
+import { useAddTimeGroup, useEditTimeGroup } from 'src/hooks/useTimeGroup';
+import toast from 'react-hot-toast';
 
 const TimeGroupDetails = () => {
   const dispatch = useDispatch();
   const selectedTimeGroup = useSelector((state: any) => state.TimeGroupReducer.selectedTimeGroup);
   const isNewTimeGroup = useSelector((state: any) => state.TimeGroupReducer.isNewTimeGroup);
-  const cardAccess = useSelector((state: any) => state.CardAccessReducer.cardAccessAll);
+  
+  // React Query hooks
+  const { data: cardAccess = [] } = useAllCardAccess();
+  const addMutation = useAddTimeGroup();
+  const editMutation = useEditTimeGroup();
 
   const [formData, setFormData] = useState<TimeGroupType>({
     ...defaultTimeGroupForm,
     ...selectedTimeGroup,
   });
-  useEffect(() => {
-    dispatch(fetchCardAccess());
-  }, [dispatch]);
+  
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [timeBlocks, setTimeBlocks] = useState<TimeBlockType[]>(formData.timeBlocks ?? []);
 
@@ -66,16 +69,78 @@ const TimeGroupDetails = () => {
       ...prev,
       timeBlocks: blocks,
     }));
-    console.log('FormData: ', formData);
+    // Also update Redux state if needed
+    dispatch(UpdateSelectedTimeGroup({ timeBlocks: blocks }));
+  };
+
+  const handleSave = async () => {
+    // Validate form
+    if (!formData.name?.trim()) {
+      setFormErrors({ name: 'Name is required' });
+      toast.error('Please enter a name for the time group');
+      return;
+    }
+
+    if (timeBlocks.length === 0) {
+      toast.error('Please add at least one time block');
+      return;
+    }
+
+    setFormErrors({});
+
+    try {
+      if (isNewTimeGroup) {
+        // Add new time group
+        await addMutation.mutateAsync({
+          ...formData,
+          timeBlocks,
+        });
+        toast.success('Time group created successfully');
+      } else {
+        // Edit existing time group
+        await editMutation.mutateAsync({
+          ...formData,
+          timeBlocks,
+        });
+        toast.success('Time group updated successfully');
+      }
+    } catch (error) {
+      console.error('Error saving time group:', error);
+      toast.error('Failed to save time group');
+    }
+  };
+
+  const handleCancel = () => {
+    if (isNewTimeGroup) {
+      dispatch(CancelNewTimeGroup());
+    }
+    // Reset form to selected time group data
+    if (selectedTimeGroup) {
+      setFormData({
+        ...defaultTimeGroupForm,
+        ...selectedTimeGroup,
+      });
+      setTimeBlocks(selectedTimeGroup.timeBlocks ?? []);
+    }
   };
 
   return (
     <Paper elevation={0} sx={{ p: 3 }}>
       {selectedTimeGroup ? (
         <>
-          <Typography component="div" variant="h4" mb={2} fontWeight={700}>
-            Time Group Details
-          </Typography>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography component="div" variant="h4" fontWeight={700}>
+              Time Group Details
+            </Typography>
+            <Stack direction="row" spacing={1}>
+              <Button variant="outlined" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button variant="contained" onClick={handleSave}>
+                Save
+              </Button>
+            </Stack>
+          </Box>
           <Divider sx={{ mb: 3 }} />
 
           <Grid container spacing={5}>
@@ -104,6 +169,7 @@ const TimeGroupDetails = () => {
                 minRows={3}
                 maxRows={5}
               />
+              
               <CustomFormLabel>Card Access</CustomFormLabel>
               <Autocomplete
                 multiple
@@ -114,10 +180,12 @@ const TimeGroupDetails = () => {
                   (formData.cardAccessIds ?? []).includes(ca.id),
                 )}
                 onChange={(_e, newValue) => {
+                  const newCardAccessIds = newValue.map((ca) => ca.id);
                   setFormData((prev) => ({
                     ...prev,
-                    cardAccessIds: newValue.map((ca) => ca.id),
+                    cardAccessIds: newCardAccessIds,
                   }));
+                  dispatch(UpdateSelectedTimeGroup({ cardAccessIds: newCardAccessIds }));
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -198,22 +266,22 @@ const TimeGroupDetails = () => {
                           </Typography>
                         </Box>
 
-                        {/* Right side: (i) info + (x) remove */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <IconButton
-                            size="small"
-                            onClick={() =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                cardAccessIds: (prev.cardAccessIds ?? []).filter(
-                                  (fid) => fid !== id,
-                                ),
-                              }))
-                            }
-                          >
-                            ×
-                          </IconButton>
-                        </Box>
+                        {/* Right side: (x) remove */}
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            const newCardAccessIds = (formData.cardAccessIds ?? []).filter(
+                              (fid) => fid !== id,
+                            );
+                            setFormData((prev) => ({
+                              ...prev,
+                              cardAccessIds: newCardAccessIds,
+                            }));
+                            dispatch(UpdateSelectedTimeGroup({ cardAccessIds: newCardAccessIds }));
+                          }}
+                        >
+                          ×
+                        </IconButton>
                       </Box>
                     );
                   })
