@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Grid2 as Grid,
@@ -24,445 +24,305 @@ import {
   CircularProgress,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconPencil, IconTrash, IconX } from '@tabler/icons-react';
-import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import {
-  bleReaderType,
-  deleteBleReader,
-  fetchBleReaderDT,
-  UpdateFilter,
-} from 'src/store/apps/crud/bleReader';
-import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
-import AddEditBleReader from './AddEditBleReader';
+import { IconTrash, IconX } from '@tabler/icons-react';
 import { defaultBleReaderFilter } from 'src/store/apps/defaultForm';
-import toast from 'react-hot-toast';
+import AddEditBleReader from './AddEditBleReader';
 import BulkAddEditBleReader from './BulkAddEditBleReader';
-// import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
+import { useReaderList, useDeleteReader } from 'src/hooks/useReader';
+import { useAllBrands } from 'src/hooks/useBrand'; // optional if you migrate brand too
 
 const columns = [
   { label: 'Brand Name', field: 'Brand.Name', sortAble: true },
   { label: 'Name', field: 'Name', sortAble: true },
   { label: 'IP', field: 'Ip', sortAble: true },
   { label: 'GMAC', field: 'Gmac', sortAble: false },
-  // { label: 'Engine Reader', field: 'EngineFloorId', sortAble: true },
 ];
 
 const SKELETON_ROWS = 5;
 
 const BleReaderList = () => {
-  const dispatch: AppDispatch = useDispatch();
-  const bleReaderData = useSelector((state: RootState) => state.bleReaderReducer.bleReaders);
-  const currentPageIds = React.useMemo(() => bleReaderData.map((x: bleReaderType) => x.id), [bleReaderData]);
-  const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
-  const prevFilterRef = useRef(bleReaderFilter);
-  const brandData = useSelector((state: RootState) => state.brandReducer.brandAll);
-  const bleReaderFilterCount = useSelector(
-    (state: RootState) => state.bleReaderReducer.bleReaderFilterCount,
-  )
-  const bleReaderTotalCount = useSelector(
-    (state: RootState) => state.bleReaderReducer.bleReaderTotalCount,
-  );
-  // const bleReaderFilterCount = useSelector(
-  //   (state: RootState) => state.bleReaderReducer.bleReaderFilterCount,
-  // );
-  // const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
-  const isLoading = useSelector((state: RootState) => state.bleReaderReducer.isLoading);
-  const hasLoaded = useSelector((state: RootState) => state.bleReaderReducer.hasLoaded);
-  // Pagination State
-  const page = Math.floor(bleReaderFilter.Start / bleReaderFilter.Length);
-  const rowsPerPage = bleReaderFilter.Length;
-  const orderBy = bleReaderFilter.SortColumn;
-  const order = bleReaderFilter.SortDir;
+  // 🔹 Local filter state (instead of Redux)
+  const [filter, setFilter] = useState(defaultBleReaderFilter);
 
-  const handleChangePage = (_: unknown, newPage: number) => {
-    dispatch(UpdateFilter({ Start: newPage * bleReaderFilter.Length }));
-  };
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newLength = parseInt(event.target.value, 10);
-    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
-  };
+  // 🔹 React Query hooks
+  const { data, isFetching, isLoading, isFetched, refetch } = useReaderList(filter);
+  const deleteMutation = useDeleteReader();
+  const { data: brandData = [] } = useAllBrands?.() || { data: [] };
 
-  useEffect(() => {
-    dispatch(UpdateFilter(defaultBleReaderFilter));
-    try {
-      setLoading(true);
-      dispatch(fetchBleReaderDT(defaultBleReaderFilter));
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-    dispatch(fetchBrands());
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
-  }, [dispatch]);
+  // 🔹 Derived values
+  const bleReaderData = data?.data || [];
+  const totalCount = data?.recordsFiltered || 0;
+  const currentPageIds = useMemo(() => bleReaderData.map((x) => x.id), [bleReaderData]);
 
-  useEffect(() => {
-    const prevFilter = prevFilterRef.current;
-
-    const isStartOrLengthChanged =
-      prevFilter.Start !== bleReaderFilter.Start || prevFilter.Length !== bleReaderFilter.Length;
-
-    // Only show loading if Start or Length changed (pagination),
-    // but NOT if only SortColumn/SortDir changed
-    if (isStartOrLengthChanged) {
-      setLoading(true);
-    }
-
-    dispatch(fetchBleReaderDT(bleReaderFilter)).finally(() => {
-      if (isStartOrLengthChanged) {
-        setTimeout(() => setLoading(false), 500);
-      }
-    });
-
-    // Update previous filter
-    prevFilterRef.current = bleReaderFilter;
-  }, [bleReaderFilter, dispatch]);
-
-  //Delete Pop-up
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedBle, setSelectedBle] = useState<bleReaderType | null>(null);
+  // 🔹 Multi-select
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
 
-  // Open delete confirmation dialog
-  const handleOpenDeleteDialog = (ble: bleReaderType) => {
-    setPendingDeleteIds([ble.id]);
-    setSelectedBle(ble);
+  // 🔹 Pagination and sorting
+  const page = Math.floor(filter.Start / filter.Length);
+  const rowsPerPage = filter.Length;
+  const orderBy = filter.SortColumn;
+  const order = filter.SortDir;
+
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setFilter((prev) => ({ ...prev, Start: newPage * prev.Length }));
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newLength = parseInt(event.target.value, 10);
+    setFilter((prev) => ({ ...prev, Length: newLength, Start: 0 }));
+  };
+
+  const handleSort = (column: string) => {
+    const isAsc = filter.SortColumn === column && filter.SortDir === 'asc';
+    const isDesc = filter.SortColumn === column && filter.SortDir === 'desc';
+
+    if (isDesc) {
+      setFilter((prev) => ({
+        ...prev,
+        SortColumn: 'UpdatedAt',
+        SortDir: 'desc',
+        Start: 0,
+      }));
+    } else {
+      setFilter((prev) => ({
+        ...prev,
+        SortColumn: column,
+        SortDir: isAsc ? 'desc' : 'asc',
+        Start: 0,
+      }));
+    }
+  };
+
+  // 🔹 Delete handling
+  const handleOpenDeleteDialog = (ids: string[] | string) => {
+    setPendingDeleteIds(Array.isArray(ids) ? ids : [ids]);
     setDeleteDialogOpen(true);
   };
 
-  // Close delete confirmation dialog
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
-    setSelectedBle(null);
+    setPendingDeleteIds([]);
   };
 
-  // Confirm delete action
   const handleConfirmDelete = async () => {
     if (pendingDeleteIds.length === 0) return;
-
-    setLoading(true);
-    setDeleteDialogOpen(false);
-
-    const results = await Promise.allSettled(
-      pendingDeleteIds.map((id) => dispatch(deleteBleReader(id))),
-    );
-
-    const successes = results.filter((r) => r.status === 'fulfilled');
-    const failures = results.filter((r) => r.status === 'rejected');
-
-    if (successes.length > 0) {
-      toast.success(`${successes.length} Ble Reader deleted successfully`, {
-        position: 'top-right',
-      });
-    }
-    if (failures.length > 0) {
-      toast.error(`${failures.length} Ble Reader failed to delete`);
-      console.error('Failed deletions:', failures);
-    }
-
-    setPendingDeleteIds([]);
-    setSelectedBle(null);
-    setSelectedIds(new Set());
-
-    await dispatch(fetchBleReaderDT(bleReaderFilter));
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
-  };
-
-  // const handleSort = (column: string) => {
-  //   const isAsc = orderBy === column && order === 'asc';
-  //   setOrder(isAsc ? 'desc' : 'asc');
-  //   setOrderBy(column);
-  // };
-  const handleSort = (column: string) => {
-    const isAsc = bleReaderFilter.SortColumn === column && bleReaderFilter.SortDir === 'asc';
-    const isDesc = bleReaderFilter.SortColumn === column && bleReaderFilter.SortDir === 'desc';
-
-    if (isDesc) {
-      dispatch(
-        UpdateFilter({
-          SortColumn: 'UpdatedAt',
-          SortDir: 'desc',
-          Start: 0,
-        }),
-      );
-    } else {
-      dispatch(
-        UpdateFilter({
-          SortColumn: column,
-          SortDir: isAsc ? 'desc' : 'asc',
-          Start: 0,
-        }),
-      );
+    try {
+      for (const id of pendingDeleteIds) {
+        await deleteMutation.mutateAsync(id);
+      }
+      toast.success(`${pendingDeleteIds.length} BLE Reader(s) deleted`);
+      await refetch(); // refresh list
+      setSelectedIds(new Set());
+    } catch (error) {
+      toast.error('Failed to delete reader(s)');
+    } finally {
+      setDeleteDialogOpen(false);
     }
   };
 
   const getBrandName = (brandID: string) => {
-    const brand = brandData.find((b: BrandType) => b.id === brandID);
+    const brand = brandData.find((b: any) => b.id === brandID);
     return brand ? brand.name : 'Unknown Brand';
   };
 
-  const selectedData = bleReaderData.filter((x: bleReaderType) => selectedIds.has(x.id));
+  // 🔹 Skeleton loader rows
+  const renderSkeletonRows = (rows: number) =>
+    Array.from({ length: rows }).map((_, i) => (
+      <TableRow key={`skeleton-${i}`}>
+        <TableCell
+          sx={{
+            position: 'sticky',
+            left: 0,
+            background: 'white',
+            zIndex: 1,
+            width: 35,
+            minWidth: 35,
+            maxWidth: 35,
+          }}
+        >
+          <Skeleton variant="rounded" width={30} height={32} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={180} height={22} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={160} height={22} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={120} height={22} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={120} height={22} />
+        </TableCell>
+        <TableCell
+          sx={{
+            position: 'sticky',
+            right: 0,
+            background: 'white',
+            zIndex: 2,
+            width: 150,
+            minWidth: 150,
+            maxWidth: 150,
+          }}
+        >
+          <Skeleton variant="rounded" width={100} height={32} />
+        </TableCell>
+      </TableRow>
+    ));
 
-        const renderSkeletonRows = (rows: number) => (
-          <>
-            {Array.from({ length: rows }).map((_, i) => (
-              <TableRow key={`skeleton-${i}`}>
-                {/* sticky index */}
-                <TableCell
-                  sx={{
-                    position: 'sticky',
-                    left: 0,
-                    background: 'white',
-                    zIndex: 1,
-                    width: 35,
-                    minWidth: 35,
-                    maxWidth: 35,
-                  }}
-                >
-                  <Skeleton variant="rounded" width={30} height={32} />
-                </TableCell>
-                <TableCell>
-                  <Skeleton variant="text" width={180} height={22} />
-                </TableCell>
-                <TableCell>
-                  <Skeleton variant="text" width={160} height={22} />
-                </TableCell>
-                <TableCell>
-                  <Skeleton variant="text" width={120} height={22} />
-                </TableCell>
-                <TableCell>
-                  <Skeleton variant="text" width={120} height={22} />
-                </TableCell>
-                {/* right actions */}
-                <TableCell
-                  sx={{
-                    position: 'sticky',
-                    right: 0,
-                    background: 'white',
-                    zIndex: 2,
-                    width: 150,
-                    minWidth: 150,
-                    maxWidth: 150,
-                  }}
-                >
-                  <Box display="flex" gap={1}>
-                    <Skeleton variant="rounded" width={90} height={32} />
-                    {/* <Skeleton variant="circular" width={32} height={32} />
-                    <Skeleton variant="circular" width={32} height={32} /> */}
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
-          </>
-        );
+  // 🔹 For BulkEdit selected rows
+  const selectedData = bleReaderData.filter((x) => selectedIds.has(x.id));
 
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-            <BlankCard>
-              {selectedIds.size > 0 && (
-                <Box
-                  sx={{
-                    backgroundColor: 'primary.main',
-                    color: 'white',
-                    px: 2,
-                    py: 1,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    borderTopLeftRadius: 8,
-                    borderTopRightRadius: 8,
-                  }}
-                >
-                  <Typography>{selectedIds.size} item(s) selected</Typography>
-                  <Box display="flex" gap={1}>
-                    <BulkAddEditBleReader
-                      type="edit"
-                      initialData={selectedData}
-                      setSelectedIds={setSelectedIds}
-                    />
-                    <Tooltip title="Multi-Delete">
-                      <IconButton
-                        color="default"
-                        onClick={() => {
-                          setPendingDeleteIds(Array.from(selectedIds));
-                          setDeleteDialogOpen(true);
-                        }}
-                      >
-                        <IconTrash size={20} />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Cancel">
-                      <IconButton color="default" onClick={() => setSelectedIds(new Set())}>
-                        <IconX size={20} />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
+          <BlankCard>
+            {/* --- Bulk Action Bar --- */}
+            {selectedIds.size > 0 && (
+              <Box
+                sx={{
+                  backgroundColor: 'primary.main',
+                  color: 'white',
+                  px: 2,
+                  py: 1,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderTopLeftRadius: 8,
+                  borderTopRightRadius: 8,
+                }}
+              >
+                <Typography>{selectedIds.size} item(s) selected</Typography>
+                <Box display="flex" gap={1}>
+                  <BulkAddEditBleReader
+                    type="edit"
+                    initialData={selectedData}
+                    setSelectedIds={setSelectedIds}
+                  />
+                  <Tooltip title="Multi-Delete">
+                    <IconButton
+                      color="default"
+                      onClick={() => handleOpenDeleteDialog(Array.from(selectedIds))}
+                    >
+                      <IconTrash size={20} />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Cancel">
+                    <IconButton color="default" onClick={() => setSelectedIds(new Set())}>
+                      <IconX size={20} />
+                    </IconButton>
+                  </Tooltip>
                 </Box>
-              )}
+              </Box>
+            )}
 
-              <TableContainer>
-                <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
-                  <TableHead>
-                    <TableRow>
-                      {/* Left Sticky Empty Column */}
-                      <TableCell
-                        padding="checkbox"
-                        sx={{
-                          position: 'sticky',
-                          left: 0,
-                          background: 'white',
-                          zIndex: 2,
-                          width: 80, // Fixed width
-                          minWidth: 80,
-                          maxWidth: 80,
+            {/* --- Table --- */}
+            <TableContainer>
+              <Table sx={{ whiteSpace: 'nowrap' }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell padding="checkbox" sx={{ width: 80 }}>
+                      <Checkbox
+                        indeterminate={
+                          currentPageIds.some((id) => selectedIds.has(id)) &&
+                          !currentPageIds.every((id) => selectedIds.has(id))
+                        }
+                        checked={
+                          currentPageIds.length > 0 &&
+                          currentPageIds.every((id) => selectedIds.has(id))
+                        }
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setSelectedIds((prev) => {
+                            const updated = new Set(prev);
+                            if (checked) currentPageIds.forEach((id) => updated.add(id));
+                            else currentPageIds.forEach((id) => updated.delete(id));
+                            return updated;
+                          });
                         }}
-                      >
-                        <Checkbox
-                          indeterminate={
-                            currentPageIds.some((id: string) => selectedIds.has(id)) &&
-                            !currentPageIds.every((id: string) => selectedIds.has(id))
-                          }
-                          checked={
-                            currentPageIds.length > 0 &&
-                            currentPageIds.every((id: string) => selectedIds.has(id))
-                          }
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            setSelectedIds((prev) => {
-                              const updated = new Set(prev);
-                              if (checked) {
-                                currentPageIds.forEach((id: string) => updated.add(id));
-                              } else {
-                                currentPageIds.forEach((id: string) => updated.delete(id));
-                              }
-                              return updated;
-                            });
-                          }}
-                        />
-                      </TableCell>
-                      {/* Main Table Header */}
-                      {columns.map((col) => (
-                        <TableCell key={col.label}>
-                          {col.sortAble && col.field ? (
-                            <TableSortLabel
-                              active={orderBy === col.field}
-                              direction={orderBy === col.field ? order : 'asc'}
-                              onClick={() => handleSort(col.field)}
-                            >
-                              <Typography variant="h6">{col.label}</Typography>
-                            </TableSortLabel>
-                          ) : (
-                            <Typography variant="h6">{col.label}</Typography>
-                          )}
-                        </TableCell>
-                      ))}
-                      {/* Right Sticky Empty Column */}
-                      <TableCell
-                        sx={{
-                          position: 'sticky',
-                          right: 0,
-                          background: 'white',
-                          zIndex: 2,
-                          width: 150, // Fixed width
-                          minWidth: 150,
-                          maxWidth: 150,
-                        }}
-                      >
-                        <Typography variant="h6"> Actions </Typography>
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {!hasLoaded ? (
-                      renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
-                    ) : (
-                      bleReaderData.map((bleReader: bleReaderType, index: number) => (
-                      <TableRow key={index}>
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            left: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: 1,
-                            width: 80, // Fixed width
-                            minWidth: 80,
-                            maxWidth: 80,
+                      />
+                    </TableCell>
 
-                          }}
-                        >
-                          <Checkbox
-                            checked={selectedIds.has(bleReader.id)}
-                            onChange={(e) => {
-                              const checked = e.target.checked;
-                              setSelectedIds((prev) => {
-                                const updated = new Set(prev);
-                                if (checked) {
-                                  updated.add(bleReader.id);
-                                } else {
-                                  updated.delete(bleReader.id);
-                                }
-                                return updated;
-                              });
-                            }}
-                          />
-                          {index + 1 + page * rowsPerPage}
-                        </TableCell>
-                        <TableCell>{getBrandName(bleReader.brandId)}</TableCell>
-                        <TableCell>{bleReader.name}</TableCell>
-                        <TableCell>{bleReader.ip}</TableCell>
-                        <TableCell>{bleReader.gmac}</TableCell>
-                        {/* <TableCell>{bleReader.engineReaderId}</TableCell> */}
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            gap: 1,
-                            alignItems: 'center',
-                            width: 150, // Fixed width
-                            minWidth: 150,
-                            maxWidth: 150,
-                          }}
-                        >
-                          <AddEditBleReader type="edit" bleReader={bleReader} />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(bleReader)}
+                    {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
                           >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={bleReaderFilterCount}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </BlankCard>
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
+                      </TableCell>
+                    ))}
+
+                    <TableCell sx={{ width: 150 }}>
+                      <Typography variant="h6">Actions</Typography>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {isLoading || isFetching
+                    ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                    : bleReaderData.map((ble, index) => (
+                        <TableRow key={ble.id}>
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedIds.has(ble.id)}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setSelectedIds((prev) => {
+                                  const updated = new Set(prev);
+                                  if (checked) updated.add(ble.id);
+                                  else updated.delete(ble.id);
+                                  return updated;
+                                });
+                              }}
+                            />
+                            {index + 1 + page * rowsPerPage}
+                          </TableCell>
+                          <TableCell>{getBrandName(ble.brandId)}</TableCell>
+                          <TableCell>{ble.name}</TableCell>
+                          <TableCell>{ble.ip}</TableCell>
+                          <TableCell>{ble.gmac}</TableCell>
+                          <TableCell>
+                            <AddEditBleReader type="edit" bleReader={ble} />
+                            <IconButton
+                              color="error"
+                              onClick={() => handleOpenDeleteDialog(ble.id)}
+                            >
+                              <IconTrash size={20} />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            {/* --- Pagination --- */}
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={totalCount}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </BlankCard>
         </Box>
       </Grid>
-      {/* Delete Confirmation Dialog */}
+
+      {/* --- Delete Confirmation --- */}
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
@@ -479,16 +339,14 @@ const BleReaderList = () => {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">
-            Cancel
-          </Button>
+          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
           <Button
             onClick={handleConfirmDelete}
-            color={isLoading ? 'primary' : 'error'}
-            disabled={isLoading}
-            startIcon={isLoading ? <CircularProgress size={20} /> : null}
+            color="error"
+            disabled={deleteMutation.isPending}
+            startIcon={deleteMutation.isPending ? <CircularProgress size={18} /> : undefined}
           >
-            {isLoading ? 'Deleting...' : 'Delete'}
+            {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

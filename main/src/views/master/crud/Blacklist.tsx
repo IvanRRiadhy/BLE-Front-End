@@ -17,6 +17,7 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import BlacklistList from 'src/components/master/CRUD/blacklist/BlacklistList';
 import AddEditBlacklist from 'src/components/master/CRUD/blacklist/AddEditBlacklist';
+import { useBlacklistStatus } from 'src/hooks/useBlacklist';
 
 interface cardType {
   icon?: string;
@@ -31,10 +32,7 @@ const Blacklist = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const blacklistCount = useSelector(
-    (state: RootState) => state.blacklistReducer.blacklistTotalCount,
-  );
-  const hasLoaded = useSelector((state: RootState) => state.blacklistReducer.hasLoaded);
+  const {filteredCount: blacklistCount, hasLoaded} = useBlacklistStatus();
   const { t } = useTranslation();
 
   const topCards: cardType[] = [
@@ -46,7 +44,6 @@ const Blacklist = () => {
   ];
   return (
     <PageContainer title="Blacklist" description="This is the Blacklist CRUD Page">
-      <Breadcrumb title="Blacklist" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

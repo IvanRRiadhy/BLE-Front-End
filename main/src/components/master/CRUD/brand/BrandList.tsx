@@ -174,6 +174,9 @@ const BrandList = () => {
           <TableCell>
             <Skeleton variant="text" width={180} height={22} />
           </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={180} height={22} />
+          </TableCell>
           {/* right actions */}
           <TableCell
             sx={{

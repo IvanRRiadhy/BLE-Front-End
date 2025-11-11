@@ -17,6 +17,7 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import VisitorList from 'src/components/master/CRUD/visitor/VisitorList';
 import AddEditVisitor from 'src/components/master/CRUD/visitor/AddEditVisitor';
+import { useVisitorStatus } from 'src/hooks/useVisitor';
 
 interface cardType {
   icon?: string;
@@ -31,10 +32,7 @@ const visitor = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const visitorTotalCount = useSelector(
-    (state: RootState) => state.visitorReducer.visitorTotalCount,
-  );
-  const hasLoaded = useSelector((state: RootState) => state.visitorReducer.hasLoaded);
+  const {filteredCount: visitorTotalCount, hasLoaded} = useVisitorStatus();
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {

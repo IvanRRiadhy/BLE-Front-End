@@ -9,7 +9,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-  TablePagination,
+  TablePagination,  
   TableSortLabel,
   Skeleton,
   IconButton,

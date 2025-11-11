@@ -242,7 +242,7 @@ export const selectAccessCCTV =
                 dispatch(GetAccessCCTV(response.data?.collection?.data || []));
                                   const elapsed = Date.now() - started;
       if (elapsed < 500) await delay(500 - elapsed);
-                // console.log("Fetch cctvs", response.data.collection);
+                console.log("Fetch cctvs", response.data.collection);
                 return response.data.collection;
             } catch (error: any) {
                                   const elapsed = Date.now() - started;

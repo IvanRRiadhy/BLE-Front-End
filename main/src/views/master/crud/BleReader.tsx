@@ -21,6 +21,7 @@ import BleReaderFilter from 'src/components/master/CRUD/bleReader/BleReaderFilte
 import BleReaderExport from 'src/components/master/CRUD/bleReader/BleReaderExport';
 import BleReaderImport from 'src/components/master/CRUD/bleReader/BleReaderImport';
 import BulkAddEditBleReader from 'src/components/master/CRUD/bleReader/BulkAddEditBleReader';
+import { useReaderStatus } from 'src/hooks/useReader';
 
 interface cardType {
   icon?: string;
@@ -35,9 +36,8 @@ const BleReader = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const bleReaderCount = useSelector((state: RootState) => state.bleReaderReducer.bleReaderTotalCount);
-  const hasLoaded = useSelector((state: RootState) => state.bleReaderReducer.hasLoaded);
-  const { t } = useTranslation();
+  const { filteredCount: bleReaderCount, hasLoaded } = useReaderStatus();
+    const { t } = useTranslation();
   const topCards: cardType[] = [
     {
       title: 'Total BLE Readers',
@@ -47,7 +47,7 @@ const BleReader = () => {
   ];
   return (
     <PageContainer title="Ble Reader" description="This is the Ble Reader CRUD Page">
-      <Breadcrumb title="Ble Reader" />
+      {/* <Breadcrumb title="Ble Reader" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

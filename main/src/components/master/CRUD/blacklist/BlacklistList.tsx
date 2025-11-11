@@ -18,6 +18,7 @@ import {
   DialogActions,
   Button,
   TableSortLabel,
+  Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
@@ -33,6 +34,7 @@ import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import AddEditBlacklist from './AddEditBlacklist';
 import { defaultBlaclistFilter } from 'src/store/apps/defaultForm';
+import { useBlacklistList } from 'src/hooks/useBlacklist';
 
 const columns = [
   { label: 'Blacklisted Visitor', field: 'Visitor.Name', sortAble: true },
@@ -41,13 +43,18 @@ const columns = [
 
 const BlacklistList = () => {
   const dispatch: AppDispatch = useDispatch();
-  const blaclistData = useSelector((state: RootState) => state.blacklistReducer.blacklists);
-  const blacklistTotalCount = useSelector((state: RootState) => state.blacklistReducer.blacklistTotalCount);
+  // const blaclistData = useSelector((state: RootState) => state.blacklistReducer.blacklists);
+  // const blacklistTotalCount = useSelector((state: RootState) => state.blacklistReducer.blacklistTotalCount);
   // const blacklistFilteredCount = useSelector(
   //   (state: RootState) => state.blacklistReducer.blacklistFilteredCount,
   // );
   const blacklistFilter = useSelector((state: RootState) => state.blacklistReducer.blacklistFilter);
+  const { data, isLoading: queryLoading } = useBlacklistList(blacklistFilter);
   const hasLoaded = useSelector((state: RootState) => state.blacklistReducer.hasLoaded);
+
+  const blacklistData = data?.data || ([] as blacklistType[]);
+  const blacklistTotalCount = data?.recordsTotal || 0;
+  const blacklistFilteredCount = data?.recordsFiltered || 0;
   // Pagination State
   const page = Math.floor(blacklistFilter.Start / blacklistFilter.Length);
   const rowsPerPage = blacklistFilter.Length;
@@ -121,6 +128,44 @@ const BlacklistList = () => {
     handleCloseDeleteDialog();
   };
 
+  const renderSkeletonRows = (rows: number) =>
+    Array.from({ length: rows }).map((_, i) => (
+      <TableRow key={`skeleton-${i}`}>
+        <TableCell
+          sx={{
+            position: 'sticky',
+            left: 0,
+            background: 'white',
+            zIndex: 1,
+            width: 35,
+            minWidth: 35,
+            maxWidth: 35,
+          }}
+        >
+          <Skeleton variant="rounded" width={30} height={32} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={180} height={22} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={160} height={22} />
+        </TableCell>
+        <TableCell
+          sx={{
+            position: 'sticky',
+            right: 0,
+            background: 'white',
+            zIndex: 2,
+            width: 150,
+            minWidth: 150,
+            maxWidth: 150,
+          }}
+        >
+          <Skeleton variant="rounded" width={100} height={32} />
+        </TableCell>
+      </TableRow>
+    ));
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -176,52 +221,58 @@ const BlacklistList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {blaclistData.map((blacklist: blacklistType, index: any) => (
-                    <TableRow key={blacklist.id}>
-                      <TableCell
-                        sx={{
-                          position: 'sticky',
-                          left: 0,
-                          background: 'white',
-                          zIndex: 1,
-                          width: 35, // Fixed width
-                          minWidth: 35,
-                          maxWidth: 35,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        {' '}
-                        {index + 1 + page * rowsPerPage}
-                      </TableCell>
-                      <TableCell>{blacklist.member?.name ?? blacklist.visitor?.name ?? "Unknown Person"}</TableCell>
-                      <TableCell>{blacklist.floorplanMaskedArea?.name}</TableCell>
-
-                      <TableCell
-                        sx={{
-                          position: 'sticky',
-                          right: 0,
-                          background: 'white',
-                          zIndex: 2,
-                          display: 'flex',
-                          gap: 1,
-                          alignItems: 'center',
-                          width: 150, // Fixed width
-                          minWidth: 150,
-                          maxWidth: 150,
-                        }}
-                      >
-                        <AddEditBlacklist type="edit" blacklist={blacklist} />
-                        <IconButton
-                          color="error"
-                          size="small"
-                          onClick={() => handleOpenDeleteDialog(blacklist)}
+                  {queryLoading ? (
+                    <></>
+                  ) : (
+                    blacklistData.map((blacklist: blacklistType, index: any) => (
+                      <TableRow key={blacklist.id}>
+                        <TableCell
+                          sx={{
+                            position: 'sticky',
+                            left: 0,
+                            background: 'white',
+                            zIndex: 1,
+                            width: 35, // Fixed width
+                            minWidth: 35,
+                            maxWidth: 35,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
                         >
-                          <IconTrash size={20} />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                          {' '}
+                          {index + 1 + page * rowsPerPage}
+                        </TableCell>
+                        <TableCell>
+                          {blacklist.member?.name ?? blacklist.visitor?.name ?? 'Unknown Person'}
+                        </TableCell>
+                        <TableCell>{blacklist.floorplanMaskedArea?.name}</TableCell>
+
+                        <TableCell
+                          sx={{
+                            position: 'sticky',
+                            right: 0,
+                            background: 'white',
+                            zIndex: 2,
+                            display: 'flex',
+                            gap: 1,
+                            alignItems: 'center',
+                            width: 150, // Fixed width
+                            minWidth: 150,
+                            maxWidth: 150,
+                          }}
+                        >
+                          <AddEditBlacklist type="edit" blacklist={blacklist} />
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={() => handleOpenDeleteDialog(blacklist)}
+                          >
+                            <IconTrash size={20} />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -230,7 +281,7 @@ const BlacklistList = () => {
         {/* Pagination */}
         <TablePagination
           component="div"
-          count={blacklistTotalCount}
+          count={blacklistFilteredCount}
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}

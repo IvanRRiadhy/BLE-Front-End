@@ -39,19 +39,30 @@ import { ApplicationType, fetchApplications } from 'src/store/apps/crud/applicat
 import { useTranslation } from 'react-i18next';
 // import IconClose from 'src/assets/images/frontend-pages/icons/icon-close.svg';
 import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
+import { PaginatedResponse } from 'src/hooks/useMember';
 
 const MemberContent = () => {
   const { t } = useTranslation();
-  const memberDetail: memberType | undefined = useSelector(
-    (state: RootState) => state.memberReducer.selectedMember,
+  const queryClient = useQueryClient();
+  const selectedMemberId: string = useSelector(
+    (state: RootState) => state.memberReducer.selectedMemberId || '',
   );
+
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
   const districtData = useSelector((state: RootState) => state.districtReducer.districts);
   const departmentData = useSelector((state: RootState) => state.departmentReducer.departments);
   const organizationData = useSelector(
     (state: RootState) => state.organizationReducer.organizations,
   );
+  // Get cached data for the member list
+  const memberCache = queryClient.getQueryData<PaginatedResponse<memberType>>([
+    'member-list',
+    memberFilter,
+  ]);
 
+  // Resolve the selected member directly from cache
+  const memberDetail = memberCache?.data.find((m) => m.id === selectedMemberId);
   const dispatch = useDispatch();
   // const theme = useTheme();
   const [loading, setLoading] = useState(false);
@@ -100,19 +111,34 @@ const MemberContent = () => {
       setLoading(true);
       try {
         const result = await dispatch(deleteMember(selectedMember.id));
+
         if (result && result.type && result.type.endsWith('/fulfilled')) {
-          await dispatch(fetchMembers());
-          toast.success('Data Deleted');
+          // ✅ Update cache manually
+          queryClient.setQueryData<PaginatedResponse<memberType>>(
+            ['member-list', memberFilter],
+            (oldCache) =>
+              oldCache
+                ? {
+                    ...oldCache,
+                    data: oldCache.data.filter((m) => m.id !== selectedMember.id),
+                    recordsTotal: oldCache.recordsTotal - 1,
+                    recordsFiltered: oldCache.recordsFiltered - 1,
+                  }
+                : oldCache,
+          );
+
+          toast.success('Member deleted successfully');
+        } else {
+          toast.error('Delete failed');
         }
       } catch (error) {
+        console.error('Error deleting member:', error);
         toast.error('Delete Data Unsuccessful');
-        console.error('Error deleting floor:', error);
-      }
-      setTimeout(() => {
+      } finally {
         setLoading(false);
-      }, 1000);
+        handleCloseDeleteDialog();
+      }
     }
-    handleCloseDeleteDialog();
   };
 
   //Block Member
@@ -131,24 +157,32 @@ const MemberContent = () => {
 
   const handleConfirmBlock = async () => {
     if (!targetMember) return;
-    const newBlockState = !targetMember.isBlock; // toggle true/false
+    const newBlockState = !targetMember.isBlock;
 
     try {
       setLoading(true);
       const result = await dispatch(
         blockMember({ memberId: targetMember.id, IsBlock: newBlockState }),
       );
+
       if (result && result.type && result.type.endsWith('/fulfilled')) {
+        // ✅ Update the cache inline
+        queryClient.setQueryData<PaginatedResponse<memberType>>(
+          ['member-list', memberFilter],
+          (oldCache) =>
+            oldCache
+              ? {
+                  ...oldCache,
+                  data: oldCache.data.map((m) =>
+                    m.id === targetMember.id ? { ...m, isBlock: newBlockState } : m,
+                  ),
+                }
+              : oldCache,
+        );
+
         toast.success(
           `Member "${targetMember.name}" ${newBlockState ? 'blocked' : 'unblocked'} successfully.`,
         );
-        await dispatch(
-          fetchMemberDT({
-            ...memberFilter,
-            length: 0,
-          }),
-        );
-        dispatch(SelectMember(memberDetail?.id || ''));
       } else {
         toast.error(`Failed to ${newBlockState ? 'block' : 'unblock'} member.`);
       }
@@ -219,27 +253,7 @@ const MemberContent = () => {
             <Stack direction="row" alignItems="center" spacing={1.2}>
               {/* Edit */}
               <Tooltip title="Edit Member">
-                <span>
-                  <IconButton
-                    size="small"
-                    sx={{
-                      backgroundColor: 'rgba(255,255,255,0.2)',
-                      border: '1px solid rgba(0,0,0,0.15)',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
-                      transition: 'all 0.2s ease',
-                      '& svg': {
-                        color: '#fff',
-                        filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))',
-                      },
-                      '&:hover': {
-                        backgroundColor: 'rgba(255,255,255,0.35)',
-                        transform: 'scale(1.1)',
-                      },
-                    }}
-                  >
-                    <AddEditMember member={memberDetail} type="edit" />
-                  </IconButton>
-                </span>
+                <AddEditMember member={memberDetail} type="edit" />
               </Tooltip>
 
               {/* Delete */}
@@ -351,7 +365,7 @@ const MemberContent = () => {
             </Box>
 
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} display="flex" flexDirection={'column'}>
                 <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
                 <Typography>{memberDetail.email}</Typography>
                 <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
@@ -363,7 +377,7 @@ const MemberContent = () => {
                 <CustomFormLabel htmlFor="exit-Date">Exit Date</CustomFormLabel>
                 <Typography>{formatDate(memberDetail.exitDate)}</Typography>
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} display="flex" flexDirection={'column'}>
                 <CustomFormLabel htmlFor="phone">Phone</CustomFormLabel>
                 <Typography>{memberDetail.phone}</Typography>
                 <CustomFormLabel htmlFor="gender">Gender</CustomFormLabel>
@@ -381,19 +395,20 @@ const MemberContent = () => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} display="flex" flexDirection={'column'}>
                 <CustomFormLabel htmlFor="person-id">Person ID</CustomFormLabel>
                 <Typography>{memberDetail.personId}</Typography>
                 <CustomFormLabel htmlFor="department-Id">Department Name</CustomFormLabel>
-                <Typography>{getDepartmentName(memberDetail.departmentId)}</Typography>
+                <Typography>{memberDetail.department?.name}</Typography>
                 <CustomFormLabel htmlFor="identity-Id">Identity ID</CustomFormLabel>
                 <Typography>{memberDetail.identityId}</Typography>
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              ``
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} display="flex" flexDirection={'column'}>
                 <CustomFormLabel htmlFor="organization-id">Organization Name</CustomFormLabel>
-                <Typography>{getOrganizationName(memberDetail.organizationId)}</Typography>
+                <Typography>{memberDetail.organization?.name}</Typography>
                 <CustomFormLabel htmlFor="district-id">District Name</CustomFormLabel>
-                <Typography>{getDistrictName(memberDetail.districtId)}</Typography>
+                <Typography>{memberDetail.district?.name}</Typography>
               </Grid>
             </Grid>
             <Typography variant="h5" fontWeight={600} mb={2} mt={2}>
@@ -401,11 +416,11 @@ const MemberContent = () => {
             </Typography>
             <Divider />
             <Grid container spacing={5}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} display="flex" flexDirection={'column'}>
                 <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
                 <Typography>{memberDetail.cardNumber}</Typography>
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} display="flex" flexDirection={'column'}>
                 <CustomFormLabel htmlFor="ble-card-number">Ble Card Number</CustomFormLabel>
                 <Typography>{memberDetail.bleCardNumber}</Typography>
               </Grid>

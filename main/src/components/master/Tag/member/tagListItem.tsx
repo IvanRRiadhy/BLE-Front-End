@@ -9,43 +9,38 @@ import {
   Typography,
   Stack,
   ListItemAvatar,
-  // useTheme,
   Checkbox,
   Chip,
 } from '@mui/material';
-
 import { memberType } from 'src/store/apps/crud/member';
-
+import { RootState } from 'src/store/Store';
 
 type Props = {
   onTagClick: (event: React.MouseEvent<HTMLElement>) => void;
-  member?: memberType;
+  member: memberType; // make required for clarity
   manySelect?: boolean;
-  setManySelectMembers?: (members: memberType[]) => void; // Improved typing
-  manySelectMembers?: memberType[]; // Track selected members
-  active: any;
+  setManySelectMembers?: (members: memberType[]) => void;
+  manySelectMembers?: memberType[];
+  active: boolean;
 };
 
-const TagListItem = ({
+const TagListItem: React.FC<Props> = ({
   onTagClick,
   member,
-  manySelect,
+  manySelect = false,
   setManySelectMembers,
-  manySelectMembers = [], // Default empty array for safety
+  manySelectMembers = [],
   active,
-}: Props) => {
-  const customizer = useSelector((state) => state.customizer);
+}) => {
+  const customizer = useSelector((state: RootState) => state.customizer);
+  const borderRadius = `${customizer.borderRadius}px`;
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const br = `${customizer.borderRadius}px`;
+  // Determine if this member is selected in multi-select mode
+  const isChecked = manySelectMembers.some((m) => m.id === member.id);
 
-  // const theme = useTheme();
-
-  const isChecked = manySelectMembers.some((m) => m.id === member?.id);
-
-  const handleCheckboxChange = () => {
-    if (!setManySelectMembers || !member) return;
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation(); // prevent triggering onTagClick
+    if (!setManySelectMembers) return;
 
     if (isChecked) {
       setManySelectMembers(manySelectMembers.filter((m) => m.id !== member.id));
@@ -55,35 +50,60 @@ const TagListItem = ({
   };
 
   return (
-    <ListItemButton sx={{ mb: 1 }} selected={active} onClick={onTagClick}>
+    <ListItemButton
+      sx={{
+        mb: 1,
+        borderRadius,
+        '&.Mui-selected': {
+          backgroundColor: 'action.selected',
+        },
+      }}
+      selected={active}
+      onClick={onTagClick}
+    >
       <ListItemAvatar>
-        <Avatar alt="Member Face" src={`${BASE_URL}${member?.faceImage}`} />
+        <Avatar
+          alt={member.name || 'Member Face'}
+          src={member.faceImage ? `${BASE_URL}${member.faceImage}` : undefined}
+        />
       </ListItemAvatar>
-      <ListItemText>
-        <Stack direction="row" gap="10px" alignItems="center">
-          <Box mr="auto">
-            <Typography variant="subtitle1" noWrap fontWeight={600} sx={{ maxWidth: '200px' }}>
-              {member?.name}
+
+      <ListItemText
+        disableTypography
+        primary={
+          <Typography
+            variant="subtitle1"
+            component="div"
+            noWrap
+            fontWeight={600}
+            sx={{ maxWidth: '200px' }}
+          >
+            {member.name || 'Unnamed Member'}
+          </Typography>
+        }
+        secondary={
+          <>
+            <Typography variant="body2" component="div" color="text.secondary" noWrap>
+              {member.bleCardNumber || '-'}
             </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap>
-              {member?.bleCardNumber}
+            <Typography variant="body2" component="div" color="text.secondary" noWrap>
+              {member.personId || '-'}
             </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap>
-              {member?.personId}
-            </Typography>
-          </Box>
-          {/* Status chip */}
-          {member?.isBlock && (
-            <Chip
+          </>
+        }
+      />
+
+      <Stack direction="row" spacing={1} alignItems="center">
+        {member.isBlock && (
+          <Chip
             label="Blocked"
             color="error"
-            sx={{ height: '24px', fontSize: '0.75rem', fontWeight: 500 }}
-            />
-          )}
-        </Stack>
-      </ListItemText>
-      {/* Checkbox for Multi-Select */}
-      {manySelect && <Checkbox edge="end" checked={isChecked} onChange={handleCheckboxChange} />}
+            size="small"
+            sx={{ fontSize: '0.75rem', fontWeight: 500 }}
+          />
+        )}
+        {manySelect && <Checkbox edge="end" checked={isChecked} onChange={handleCheckboxChange} />}
+      </Stack>
     </ListItemButton>
   );
 };

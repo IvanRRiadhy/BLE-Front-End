@@ -30,6 +30,8 @@ export function useOrganizationList(filter: GetFilter) {
       } satisfies PaginatedResponse<OrganizationType>;
     },
     placeholderData: keepPreviousData,
+    staleTime: 60_000, // data dianggap fresh 1 menit
+        gcTime: 5 * 60_000, // cache disimpan 5 menit
   });
 }
 

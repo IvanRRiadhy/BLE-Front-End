@@ -5,6 +5,9 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { defaultMemberFilter } from "../defaultForm";
 import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
+import { OrganizationType } from "./organization";
+import { DepartmentType } from "./department";
+import { DistrictType } from "./district";
 
 const API_URL = "/api/MstMember/";
 const API_DT_URL = "/api/MstMember/filter/";
@@ -47,6 +50,9 @@ export interface memberType {
     organizationId: string,
     departmentId: string,
     districtId: string,
+    organization?: OrganizationType,
+    department?: DepartmentType,
+    district?: DistrictType,
     identityId: string,
     cardNumber: string,
     bleCardNumber: string,
@@ -79,6 +85,7 @@ interface StateType {
     memberAll: memberType[];
     memberSearch: string;
     selectedMember?: memberType;
+    selectedMemberId?: string;
     curentFilter: string;
     memberTotalCount: number;
     memberFilteredCount: number;
@@ -93,6 +100,7 @@ const initialState: StateType = {
     memberAll: [],
     memberSearch: "",
     selectedMember: undefined,
+    selectedMemberId: "",
     curentFilter: "show_all",
     memberTotalCount: 0,
     memberFilteredCount: 0,
@@ -112,14 +120,10 @@ export const MemberSlice = createSlice({
             state.memberAll = action.payload;
         },
         SelectMember(state, action: PayloadAction<string>) {
-            const selected = state.members.find((member: memberType) => member.id === action.payload);
-            state.selectedMember = selected || undefined;
+            state.selectedMemberId = action.payload;
         },
         SearchMember(state, action: PayloadAction<string>) {
             state.memberSearch = action.payload;
-        },
-        SetVisibilityFilter(state: StateType, action: PayloadAction<string>) {
-            state.curentFilter = action.payload;
         },
         UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
           state.memberFilter = { ...state.memberFilter, ...action.payload };
@@ -201,7 +205,7 @@ export const MemberSlice = createSlice({
     },
 });
 
-export const { GetMember, GetAllMember, SelectMember, SearchMember, SetVisibilityFilter, UpdateFilter } = MemberSlice.actions;
+export const { GetMember, GetAllMember, SelectMember, SearchMember, UpdateFilter } = MemberSlice.actions;
 
 export const fetchMembers = () => async (dispatch: AppDispatch) => {
     try {

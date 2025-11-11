@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import AccessCCTVList from 'src/components/master/CRUD/accessCCTV/AccessCCTVList';
 import AddEditAccessCCTV from 'src/components/master/CRUD/accessCCTV/AddEditAccessCCTV';
 import AccessCCTVFilter from 'src/components/master/CRUD/accessCCTV/AccessCCTVFilter';
+import { useCCTVStatus } from 'src/hooks/useCCTV';
 
 interface cardType {
   icon?: string;
@@ -32,8 +33,7 @@ const AccessCCTV = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const cctvCount = useSelector((state: RootState) => state.CCTVReducer.cctvTotalCount);
-  const hasLoaded = useSelector((state: RootState) => state.CCTVReducer.hasLoaded);
+  const { filteredCount: cctvCount, hasLoaded } = useCCTVStatus();
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
@@ -44,7 +44,7 @@ const AccessCCTV = () => {
   ];
   return (
     <PageContainer title="Access CCTV" description="This is the Access CCTV CRUD Page">
-      <Breadcrumb title="Access CCTV" />
+      {/* <Breadcrumb title="Access CCTV" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

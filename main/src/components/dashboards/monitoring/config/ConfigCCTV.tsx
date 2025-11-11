@@ -1,4 +1,4 @@
-import VideoPlayer from "src/components/shared/VideoPlayer";
+// import VideoPlayer from "src/components/shared/VideoPlayer";
 
 
 
@@ -23,7 +23,7 @@ const ConfigCCTV = (rtsp: string) => {
     },
   },
 };
-  return <VideoPlayer options={videoJsOptions} />;
+  // return <VideoPlayer options={videoJsOptions} />;
 };
 
 export default ConfigCCTV;

@@ -1,7 +1,7 @@
 import { Box, Grid2 as Grid, Typography, useTheme, Paper } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 import FloorView from 'src/components/dashboards/monitoring/FloorView';
-import VideoPlayer from 'src/components/shared/VideoPlayer';
+// import VideoPlayer from 'src/components/shared/VideoPlayer';
 import { LayoutItem, ScreenSettings, gridLayoutConfig } from 'src/store/apps/monitoring/layout';
 
 interface MonitoringGridProps {
@@ -77,7 +77,8 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
           <Grid key={index} size={item.size}>
             <Paper elevation={3} sx={{ height: item.height, p: 1.5, borderRadius: 2 }}>
               {type === 2 ? (
-                <VideoPlayer options={videoJsOptions} />
+                // <VideoPlayer options={videoJsOptions} />
+                <></>
               ) : (
                 <FloorView
                   activeFloorplan={floorplanId}

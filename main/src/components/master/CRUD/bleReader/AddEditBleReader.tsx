@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   Dialog,
@@ -6,94 +7,82 @@ import {
   DialogTitle,
   Divider,
   Grid2 as Grid,
-  IconButton,
   Typography,
-  MenuItem,
-  SelectChangeEvent,
   Tooltip,
   CircularProgress,
   Autocomplete,
   TextField,
+  Box,
+  IconButton,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
-import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
-import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
-import {
-  addBleReader,
-  bleReaderType,
-  editBleReader,
-  fetchBleReaderDT,
-  fetchBleReaders,
-} from 'src/store/apps/crud/bleReader';
-import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
+import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
+import { bleReaderType } from 'src/hooks/useReader';
 import { defaultBleReaderForm } from 'src/store/apps/defaultForm';
+import { useAddReader, useEditReader, useReaderList } from 'src/hooks/useReader';
+import { useAllBrands } from 'src/hooks/useBrand'; // Optional: if your Brand API is cached
+import { useQueryClient } from '@tanstack/react-query';
 
 interface FormType {
-  type?: string;
+  type?: 'add' | 'edit';
   bleReader?: bleReaderType;
 }
 
 const AddEditBleReader = ({ type, bleReader }: FormType) => {
-  const [open, setOpen] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
-  const [isSaving, setIsSaving] = React.useState(false);
-  const [formData, setFormData] = React.useState<bleReaderType>({
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formData, setFormData] = useState<bleReaderType>({
     ...defaultBleReaderForm,
     ...bleReader,
   });
-  const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
-  const isLoading = useSelector((state: RootState) => state.bleReaderReducer.isLoading);
-  const hasLoaded = useSelector((state: RootState) => state.bleReaderReducer.hasLoaded);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  const brands: BrandType[] = useSelector((state: RootState) => state.brandReducer.brandAll);
-  const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
-  const dispatch: AppDispatch = useDispatch();
-  useEffect(() => {
-    dispatch(fetchBrands());
-  }, [dispatch]);
+  const addMutation = useAddReader();
+  const editMutation = useEditReader();
+  const queryClient = useQueryClient();
 
+  const { data: brandData = [] } = useAllBrands?.() || { data: [] };
+  const filter = queryClient.getQueryData(['ble-reader-list']) as any;
+
+  // ────────────────────────────────
+  // Open dialog and initialize form
+  // ────────────────────────────────
   const handleClickOpen = () => {
     setLoading(true);
     setFormErrors({});
     if (type === 'edit' && bleReader) {
-      if (!bleReader.id) {
-        dispatch(fetchBleReaderDT(bleReaderFilter));
-      }
-      setFormData({
-        ...defaultBleReaderForm,
-        ...bleReader,
-      });
+      setFormData({ ...defaultBleReaderForm, ...bleReader });
     } else {
       setFormData({ ...defaultBleReaderForm });
     }
-    console.log('Form Data : ', formData);
     setTimeout(() => {
       setLoading(false);
       setOpen(true);
     }, 100);
   };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const handleClose = () => setOpen(false);
 
+  // ────────────────────────────────
+  // Validation
+  // ────────────────────────────────
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
-
     if (!formData.name?.trim()) errors.name = 'Reader Name is required';
     if (!formData.ip?.trim()) errors.ip = 'Reader IP is required';
     if (!formData.gmac?.trim()) errors.gmac = 'Reader MAC is required';
     if (!formData.brandId) errors.brandId = 'Reader Brand is required';
-    // if (!formData.engineReaderId) errors.engineReaderId = 'Reader Engine is required';
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
+  // ────────────────────────────────
+  // Save Logic (Add/Edit)
+  // ────────────────────────────────
   const handleSave = async () => {
     if (!validateForm()) {
       toast.error('Please fill in all required fields correctly.');
@@ -101,41 +90,54 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
     }
     setIsSaving(true);
     try {
-      let result;
+      let result = {};
       if (type === 'edit') {
-        result = await dispatch(editBleReader(formData)); // Dispatch update
-      }
-      if (type === 'add') {
-        result = await dispatch(addBleReader(formData));
-      }
-      if (result && result.type && result.type.endsWith('/fulfilled')) {
-        await dispatch(fetchBleReaderDT(bleReaderFilter));
-        console.log('BLE Reader Saved!');
-        toast.success('Data Saved');
-        handleClose();
+        result = await editMutation.mutateAsync(formData);
+        // Optimistically update cache
+        queryClient.setQueryData(['ble-reader-list', filter], (old: any) => {
+          if (!old) return old;
+          return {
+            ...old,
+            data: old.data.map((r: bleReaderType) =>
+              r.id === formData.id ? { ...r, ...formData } : r,
+            ),
+          };
+        });
       } else {
-        toast.error('Saving Data Unsuccessful');
+        result = await addMutation.mutateAsync(formData);
+        // Optimistically append to cache
+        queryClient.setQueryData(['ble-reader-list', filter], (old: any) => {
+          if (!old) return old;
+          return { ...old, data: [...old.data, result] };
+        });
       }
+
+      toast.success('BLE Reader saved successfully!');
+      handleClose();
     } catch (error) {
-      toast.error('Saving Data Unsuccessful');
-      console.error('Error saving BLE reader:', error);
-    }
-    setTimeout(() => {
+      console.error('Error saving BLE Reader:', error);
+      toast.error('Saving data failed.');
+    } finally {
       setIsSaving(false);
-    }, 1000);
+    }
   };
 
+  // ────────────────────────────────
+  // Input change
+  // ────────────────────────────────
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
+    e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
-    const { value, name, id } = e.target as
-      | HTMLInputElement
-      | { value: string; name: string; id?: string };
-    setFormData((prev) => ({ ...prev, [id || name]: value }));
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
+  // ────────────────────────────────
+  // Component UI
+  // ────────────────────────────────
   return (
     <>
+      {/* ────────────── Edit Button ────────────── */}
       {type === 'edit' && (
         <Tooltip title="Edit BLE Reader">
           <IconButton color="primary" size="small" onClick={handleClickOpen}>
@@ -143,45 +145,40 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
           </IconButton>
         </Tooltip>
       )}
+
+      {/* ────────────── Add Button ────────────── */}
       {type === 'add' && (
         <Tooltip title="Add BLE Reader">
-          {isLoading ? (
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
-            >
-              <CircularProgress color='inherit' size={20} />
-            </Button>
-          ) : (
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
-              onClick={handleClickOpen}
-            >
-              <IconPlus size={20} />
-            </Button>
-          )}
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+            onClick={handleClickOpen}
+          >
+            {isSaving ? <CircularProgress color="inherit" size={20} /> : <IconPlus size={20} />}
+          </Button>
         </Tooltip>
       )}
 
-      {!isLoading && (
+      {/* ────────────── Dialog Form ────────────── */}
+      {!loading && (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>
             <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
-              {type === 'add' ? 'Add Ble Reader' : 'Edit Ble Reader'}
+              {type === 'add' ? 'Add BLE Reader' : 'Edit BLE Reader'}
             </Typography>
             <Divider />
           </DialogTitle>
+
           <DialogContent>
             <Grid container spacing={5} mb={3}>
+              {/* Brand */}
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="brand-id">Brand</CustomFormLabel>
                 <Autocomplete
-                  options={brands.map((b) => ({ id: b.id, label: b.name }))}
+                  options={brandData.map((b) => ({ id: b.id, label: b.name }))}
                   value={
-                    brands
+                    brandData
                       .map((b) => ({ id: b.id, label: b.name }))
                       .find((o) => o.id === formData.brandId) ?? null
                   }
@@ -197,8 +194,6 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                   }}
                   isOptionEqualToValue={(opt, val) => opt.id === val.id}
                   getOptionLabel={(opt) => (typeof opt === 'string' ? opt : opt.label)}
-                  clearOnEscape
-                  disableClearable={false}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -211,7 +206,6 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                     />
                   )}
                 />
-
                 <CustomFormLabel htmlFor="ble-name">Name</CustomFormLabel>
                 <CustomTextField
                   id="name"
@@ -233,17 +227,9 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                   helperText={formErrors.ip}
                 />
               </Grid>
+
+              {/* GMAC */}
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
-                {/* <CustomFormLabel htmlFor="reader-id">Engine Reader ID</CustomFormLabel>
-                <CustomTextField
-                  id="engineReaderId"
-                  value={formData.engineReaderId}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  error={!!formErrors.engineReaderId}
-                  helperText={formErrors.engineReaderId}
-                /> */}
                 <CustomFormLabel htmlFor="ble-gmac">GMAC</CustomFormLabel>
                 <CustomTextField
                   id="gmac"
@@ -257,19 +243,16 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
               </Grid>
             </Grid>
           </DialogContent>
-          <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
-            <Button
-              onClick={handleClose}
-              variant="outlined"
-              sx={{ fontSize: '1rem', py: 1, px: 3 }}
-            >
+
+          <DialogActions sx={{ justifyContent: 'space-between', px: 3, pb: 2 }}>
+            <Button onClick={handleClose} variant="outlined">
               Cancel
             </Button>
             <Button
               onClick={handleSave}
               variant="contained"
-              sx={{ fontSize: '1rem', py: 1, px: 3 }}
               disabled={isSaving}
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
             >
               {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
@@ -277,10 +260,11 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
         </Dialog>
       )}
 
-      {isLoading && (
-        <Dialog open={open} fullWidth maxWidth="sm">
+      {/* ────────────── Loading Placeholder ────────────── */}
+      {loading && (
+        <Dialog open fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>
-            <Typography variant="h1" mb={5}>
+            <Typography variant="h5" mb={5}>
               Loading...
             </Typography>
             <CircularProgress size={50} color="primary" />

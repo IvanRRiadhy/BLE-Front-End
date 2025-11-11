@@ -1,13 +1,13 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
-import { BrandType, GetFilter } from 'src/store/apps/crud/brand';
 import { RootState, useSelector } from 'src/store/Store';
+import { memberType, GetFilter } from 'src/store/apps/crud/member';
 
 // -----------------------------------------------------------------------------
 // ✅ API URLs
 // -----------------------------------------------------------------------------
-const API_URL = '/api/MstBrand/';
-const API_DT_URL = '/api/MstBrand/filter/';
+const API_URL = '/api/MstMember/';
+const API_DT_URL = '/api/MstMember/filter/';
 
 // ✅ Shared paginated response interface
 export interface PaginatedResponse<T> {
@@ -18,20 +18,20 @@ export interface PaginatedResponse<T> {
 }
 
 // -----------------------------------------------------------------------------
-// ✅ FETCH LIST (for DataTables / Pagination)
+// ✅ FETCH LIST (for DataTables with pagination/filter)
 // -----------------------------------------------------------------------------
-export function useBrandList(filter: GetFilter) {
+export function useMemberList(filter: GetFilter) {
   return useQuery({
-    queryKey: ['brand-list', filter],
+    queryKey: ['member-list', filter],
     queryFn: async () => {
       const res = await axiosServices.post(API_DT_URL, filter);
       const col = res.data.collection;
       return {
-        data: col.data as BrandType[],
+        data: col.data as memberType[],
         draw: col.draw,
         recordsTotal: col.recordsTotal,
         recordsFiltered: col.recordsFiltered,
-      } satisfies PaginatedResponse<BrandType>;
+      } satisfies PaginatedResponse<memberType>;
     },
     placeholderData: keepPreviousData,
     staleTime: 60_000, // data dianggap fresh 1 menit
@@ -40,62 +40,84 @@ export function useBrandList(filter: GetFilter) {
 }
 
 // -----------------------------------------------------------------------------
-// ✅ FETCH ALL (for dropdowns, selectors, etc.)
+// ✅ FETCH ALL MEMBERS (for dropdowns, etc.)
 // -----------------------------------------------------------------------------
-export function useAllBrands() {
+export function useAllMembers() {
   return useQuery({
-    queryKey: ['brand-all'],
+    queryKey: ['member-all'],
     queryFn: async () => {
       const res = await axiosServices.get(API_URL);
-      return res.data.collection.data as BrandType[];
+      return res.data.collection.data as memberType[];
     },
     placeholderData: [],
   });
 }
 
 // -----------------------------------------------------------------------------
-// ✅ ADD BRAND (POST JSON)
+// ✅ ADD MEMBER (POST with FormData)
 // -----------------------------------------------------------------------------
-export function useAddBrand() {
+export function useAddMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (brand: Partial<BrandType>) => {
-      const { id, ...cleanData } = brand;
-      const res = await axiosServices.post(API_URL, cleanData);
+    mutationFn: async (formData: FormData) => {
+      formData.delete('id');
+      const res = await axiosServices.post(API_URL, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['brand-list'] });
-      queryClient.invalidateQueries({ queryKey: ['brand-all'] });
+      queryClient.invalidateQueries({ queryKey: ['member-list'] });
+      queryClient.invalidateQueries({ queryKey: ['member-all'] });
     },
   });
 }
 
 // -----------------------------------------------------------------------------
-// ✅ EDIT BRAND (PUT JSON)
+// ✅ EDIT MEMBER (PUT with FormData)
 // -----------------------------------------------------------------------------
-export function useEditBrand() {
+export function useEditMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (brand: Partial<BrandType>) => {
-      if (!brand.id) throw new Error('Brand ID is required for editing.');
-      const { id, ...cleanData } = brand;
-      const res = await axiosServices.put(`${API_URL}${id}`, cleanData);
+    mutationFn: async (formData: FormData) => {
+      const id = formData.get('id');
+      formData.delete('id');
+      const res = await axiosServices.put(`${API_URL}${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['brand-list'] });
-      queryClient.invalidateQueries({ queryKey: ['brand-all'] });
+      queryClient.invalidateQueries({ queryKey: ['member-list'] });
+      queryClient.invalidateQueries({ queryKey: ['member-all'] });
     },
   });
 }
 
 // -----------------------------------------------------------------------------
-// ✅ DELETE BRAND
+// ✅ BLOCK / UNBLOCK MEMBER
 // -----------------------------------------------------------------------------
-export function useDeleteBrand() {
+export function useBlockMember() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ memberId, isBlock }: { memberId: string; isBlock: boolean }) => {
+      const res = await axiosServices.put(`${API_URL}Block/${memberId}`, { IsBlock: isBlock });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['member-list'] });
+      queryClient.invalidateQueries({ queryKey: ['member-all'] });
+    },
+  });
+}
+
+// -----------------------------------------------------------------------------
+// ✅ DELETE MEMBER
+// -----------------------------------------------------------------------------
+export function useDeleteMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -104,8 +126,8 @@ export function useDeleteBrand() {
       return id;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['brand-list'] });
-      queryClient.invalidateQueries({ queryKey: ['brand-all'] });
+      queryClient.invalidateQueries({ queryKey: ['member-list'] });
+      queryClient.invalidateQueries({ queryKey: ['member-all'] });
     },
   });
 }
@@ -113,9 +135,9 @@ export function useDeleteBrand() {
 // -----------------------------------------------------------------------------
 // ✅ PAGINATION STATUS (for TopCards, etc.)
 // -----------------------------------------------------------------------------
-export function useBrandStatus() {
-  const filter = useSelector((state: RootState) => state.brandReducer.brandFilter);
-  const query = useBrandList(filter);
+export function useMemberStatus() {
+  const filter = useSelector((state: RootState) => state.memberReducer.memberFilter);
+  const query = useMemberList(filter);
 
   return {
     isLoading: query.isLoading,

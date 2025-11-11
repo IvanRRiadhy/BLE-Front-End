@@ -19,6 +19,7 @@ import {
   Button,
   CircularProgress,
   TableSortLabel,
+  Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
@@ -33,34 +34,39 @@ import {
 } from 'src/store/apps/crud/visitor';
 import AddEditVisitor from './AddEditVisitor';
 import { defaultVisitorFilter } from 'src/store/apps/defaultForm';
+import { useVisitorList } from 'src/hooks/useVisitor';
 
 const columns = [
   { label: 'Visitor Name', field: 'Name', sortAble: true },
   { label: 'Person ID', field: 'PersonId', sortAble: true },
   { label: 'Identity Id', field: 'IdentityId', sortAble: true },
-    { label: 'Card Number', field: 'CardNumber', sortAble: true },
+  { label: 'Card Number', field: 'CardNumber', sortAble: true },
   { label: 'BLE Card Number', field: 'BleCardNumber', sortAble: true },
   { label: 'Phone Number', field: 'phone', sortAble: false },
-      { label: 'Email', field: 'Email', sortAble: false },
+  { label: 'Email', field: 'Email', sortAble: false },
   { label: 'Gender', field: 'Gender', sortAble: false },
   { label: 'Address', field: 'Address', sortAble: false },
 ];
 
 const VisitorList = () => {
   const dispatch: AppDispatch = useDispatch();
-  const visitorData = useSelector((state: RootState) => state.visitorReducer.visitors);
-  const visitorTotalCount = useSelector(
-    (state: RootState) => state.visitorReducer.visitorTotalCount,
-  );
+  // const visitorData = useSelector((state: RootState) => state.visitorReducer.visitors);
+  // const visitorTotalCount = useSelector(
+  //   (state: RootState) => state.visitorReducer.visitorTotalCount,
+  // );
   // const visitorFilteredCount = useSelector(
   //   (state: RootState) => state.visitorReducer.visitorFilteredCount,
   // );
   const visitorFilter = useSelector((state: RootState) => state.visitorReducer.visitorFilter);
   const prevFilterRef = useRef(visitorFilter);
   // const { t } = useTranslation();
+  const { data, isLoading: queryLoading } = useVisitorList(visitorFilter);
   const [loading, setLoading] = useState(false);
   const isLoading = useSelector((state: RootState) => state.visitorReducer.isLoading);
   const hasLoaded = useSelector((state: RootState) => state.visitorReducer.hasLoaded);
+  const visitorData = data?.data ?? [];
+  const visitorTotalCount = data?.recordsTotal ?? 0;
+  const visitorFilteredCount = data?.recordsFiltered ?? 0;
   // Pagination State
   const page = Math.floor(visitorFilter.Start / visitorFilter.Length);
   const rowsPerPage = visitorFilter.Length;
@@ -146,15 +152,69 @@ const VisitorList = () => {
     handleCloseDeleteDialog();
   };
 
+  const renderSkeletonRows = (rows: number) =>
+    Array.from({ length: rows }).map((_, i) => (
+      <TableRow key={`skeleton-${i}`}>
+        <TableCell
+          sx={{
+            position: 'sticky',
+            left: 0,
+            background: 'white',
+            zIndex: 1,
+            width: 35,
+            minWidth: 35,
+            maxWidth: 35,
+          }}
+        >
+          <Skeleton variant="rounded" width={30} height={32} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={180} height={22} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={160} height={22} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={180} height={22} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={160} height={22} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={180} height={22} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={160} height={22} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={180} height={22} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={160} height={22} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={180} height={22} />
+        </TableCell>
+        <TableCell
+          sx={{
+            position: 'sticky',
+            right: 0,
+            background: 'white',
+            zIndex: 2,
+            width: 150,
+            minWidth: 150,
+            maxWidth: 150,
+          }}
+        >
+          <Skeleton variant="rounded" width={100} height={32} />
+        </TableCell>
+      </TableRow>
+    ));
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
-          {!hasLoaded ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <CircularProgress />
-            </Box>
-          ) : (
             <BlankCard>
               <TableContainer>
                 <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
@@ -206,64 +266,66 @@ const VisitorList = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {visitorData.map((visitor: VisitorType, index: number) => (
-                      <TableRow key={visitor.id}>
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            left: 0,
-                            background: 'white',
-                            zIndex: 1,
-                            width: 35, // Fixed width
-                            minWidth: 35,
-                            maxWidth: 35,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          {index + 1 + page * rowsPerPage}
-                        </TableCell>
-                        <TableCell>{visitor.name}</TableCell>
-                        <TableCell>{visitor.personId}</TableCell>
-                        <TableCell>{visitor.identityId}</TableCell>
-                        <TableCell>{visitor.cardNumber}</TableCell>
-                        <TableCell>{visitor.bleCardNumber}</TableCell>
+                    {queryLoading
+                      ? renderSkeletonRows(rowsPerPage)
+                      : visitorData.map((visitor: VisitorType, index: number) => (
+                          <TableRow key={visitor.id}>
+                            <TableCell
+                              sx={{
+                                position: 'sticky',
+                                left: 0,
+                                background: 'white',
+                                zIndex: 1,
+                                width: 35, // Fixed width
+                                minWidth: 35,
+                                maxWidth: 35,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                            >
+                              {index + 1 + page * rowsPerPage}
+                            </TableCell>
+                            <TableCell>{visitor.name}</TableCell>
+                            <TableCell>{visitor.personId}</TableCell>
+                            <TableCell>{visitor.identityId}</TableCell>
+                            <TableCell>{visitor.cardNumber}</TableCell>
+                            <TableCell>{visitor.bleCardNumber}</TableCell>
 
-                        <TableCell>{visitor.phone}</TableCell>
-                        <TableCell>{visitor.email}</TableCell>
-                        <TableCell>{visitor.gender}</TableCell>
-                        <TableCell>{visitor.address}</TableCell>
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            gap: 1,
-                            alignItems: 'center',
-                            width: 150, // Fixed width
-                            minWidth: 150,
-                            maxWidth: 150,
-                          }}
-                        >
-                          <AddEditVisitor type="edit" visitor={visitor} />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(visitor)}
-                          >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                            <TableCell>{visitor.phone}</TableCell>
+                            <TableCell>{visitor.email}</TableCell>
+                            <TableCell>{visitor.gender}</TableCell>
+                            <TableCell>{visitor.address}</TableCell>
+                            <TableCell
+                              sx={{
+                                position: 'sticky',
+                                right: 0,
+                                background: 'white',
+                                zIndex: 2,
+                                gap: 1,
+                                alignItems: 'center',
+                                width: 150, // Fixed width
+                                minWidth: 150,
+                                maxWidth: 150,
+                              }}
+                            >
+                              <AddEditVisitor type="edit" visitor={visitor} />
+                              <IconButton
+                                color="error"
+                                size="small"
+                                onClick={() => handleOpenDeleteDialog(visitor)}
+                              >
+                                <IconTrash size={20} />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        ))}
                   </TableBody>
                 </Table>
               </TableContainer>
               {/* Pagination */}
               <TablePagination
                 component="div"
-                count={visitorTotalCount}
+                count={visitorFilteredCount}
                 page={page}
                 rowsPerPage={rowsPerPage}
                 onPageChange={handleChangePage}
@@ -271,7 +333,6 @@ const VisitorList = () => {
                 onRowsPerPageChange={handleChangeRowsPerPage}
               />
             </BlankCard>
-          )}
         </Box>
       </Grid>
       {/* Delete Confirmation Dialog */}

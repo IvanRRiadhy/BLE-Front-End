@@ -2,7 +2,7 @@ import { Box, Grid2 as Grid, Typography, useTheme } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import ConfigFloorView from './ConfigFloorView';
-import VideoPlayer from 'src/components/shared/VideoPlayer';
+// import VideoPlayer from 'src/components/shared/VideoPlayer';
 import {
   LayoutSet,
   setScreenSettings,
@@ -95,7 +95,7 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
       );
     }
 
-    if (screen.type === 2) return <VideoPlayer options={videoJsOptions} />;
+    // if (screen.type === 2) return <VideoPlayer options={videoJsOptions} />;
     if (screen.type === 1)
       return (
         <Typography variant="h6" color={selectedScreen === i ? 'success.dark' : 'text.primary'}>

@@ -3,8 +3,8 @@ import { useSelector } from 'src/store/Store';
 import { Link } from 'react-router';
 import { styled } from '@mui/material';
 import { RootState } from 'src/store/Store';
-import LogoImage from 'src/assets/images/logos/BI_Logo.webp';
-import LogoIcon from 'src/assets/images/logos/BI_Logo_Mini2.webp';
+import LogoImage from 'src/assets/images/logos/BI_Logo.png';
+import LogoIcon from 'src/assets/images/logos/BI_Logo_Mini2.png';
 
 // ✅ Style outside the component (no Redux dependencies here)
 const LinkStyled = styled(Link)(({ theme }) => ({
@@ -47,7 +47,7 @@ const Logo: FC = () => {
         alt="Logo"
         loading="lazy"
         decoding="async"
-        // fetchpriority="high"
+        // fetchPriority="high"
       />
     </LinkStyled>
   );

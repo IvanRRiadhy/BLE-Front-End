@@ -15,6 +15,8 @@ export function useAllEngines() {
             const res = await axiosServices.get(ENGINE_API_URL);
             return res.data.collection.data as EngineType[];
         },
-        placeholderData: [],
+        placeholderData: keepPreviousData,
+        staleTime: 60_000, // data dianggap fresh 1 menit
+        gcTime: 5 * 60_000, // cache disimpan 5 menit
     })
 }

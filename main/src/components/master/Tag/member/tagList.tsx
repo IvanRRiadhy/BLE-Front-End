@@ -17,90 +17,84 @@ import {
   Stack,
 } from '@mui/material';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
-import {
-  deleteMember,
-  fetchMemberDT,
-  fetchMembers,
-  memberType,
-  SelectMember,
-  UpdateFilter,
-} from 'src/store/apps/crud/member';
+import { SelectMember, UpdateFilter } from 'src/store/apps/crud/member';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import TagListItem from './tagListItem';
 import { defaultMemberFilter } from 'src/store/apps/defaultForm';
+import { memberType } from 'src/store/apps/crud/member';
+import { useMemberList, useDeleteMember } from 'src/hooks/useMember';
 
 const SKELETON_ROWS = 5;
 
 const TagList = () => {
-  const [isManySelect, setIsManySelect] = useState(false);
-  const [manySelectMembers, setManySelectMembers] = useState<memberType[]>([]);
-  const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
-  const [loading, setLoading] = useState(false);
-  const hasLoaded = useSelector((state: RootState) => state.memberReducer.hasLoaded);
-
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(UpdateFilter({...defaultMemberFilter, Length: 0}));
-    setLoading(true);
-    try {
-      console.log('Fetching on Start');
-      dispatch(fetchMemberDT({...defaultMemberFilter, Length: 0}));
-    } catch (error) {
-      console.error('Error fetching Member data:', error);
-    }
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
-  }, [dispatch]);
-  useEffect(() => {
-    console.log('Fetching on Filter');
-    dispatch(fetchMemberDT({...memberFilter, Length: 0}));
-  }, [memberFilter, dispatch]);
+  // 🔹 Redux filter and selected state
+  const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
+  const selectedMemberId = useSelector((state: RootState) => state.memberReducer.selectedMemberId);
 
 
+  // 🔹 React Query fetching
+  const { data, isLoading, isFetching, isFetched } = useMemberList({
+    ...memberFilter,
+    Length: 0, // show all for side list
+  });
+  
+  const deleteMutation = useDeleteMember();
 
-  const members = useSelector((state: RootState) => state.memberReducer.members);
-
-  const active = useSelector((state: RootState) => state.memberReducer.selectedMember);
+  // 🔹 State for bulk select
+  const [isManySelect, setIsManySelect] = useState(false);
+  const [manySelectMembers, setManySelectMembers] = useState<memberType[]>([]);
   const [isChecked, setIsChecked] = useState(false);
-
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const handleOpenDeleteDialog = () => {
-    setDeleteDialogOpen(true);
-  };
 
-  // Close delete confirmation dialog
-  const handleCloseDeleteDialog = () => {
-    setDeleteDialogOpen(false);
-    handleCancelClick();
-  };
+  // 🔹 Derived members list
+  const members = data?.data ?? [];
+const active = members?.find((member: memberType) => member.id === selectedMemberId);
+  // ---------------------------------------------------------------------------
+  // ✅ Initialization on mount
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    // Reset filter on mount (only once)
+    dispatch(UpdateFilter({ ...defaultMemberFilter, Length: 0 }));
+  }, [dispatch]);
 
-  // Confirm delete action
-  const handleConfirmDelete = () => {
-    if (manySelectMembers.length > 0) {
-      manySelectMembers.forEach((member) => {
-        dispatch(deleteMember(member.id));
-      });
+  // ---------------------------------------------------------------------------
+  // ✅ Delete Handlers
+  // ---------------------------------------------------------------------------
+  const handleOpenDeleteDialog = () => setDeleteDialogOpen(true);
+  const handleCloseDeleteDialog = () => setDeleteDialogOpen(false);
+
+  const handleConfirmDelete = async () => {
+    try {
+      for (const member of manySelectMembers) {
+        await deleteMutation.mutateAsync(member.id);
+      }
+      setManySelectMembers([]);
+      setIsManySelect(false);
+    } catch (err) {
+      console.error('Error deleting members:', err);
     }
     handleCloseDeleteDialog();
-    handleCancelClick();
+  };
+
+  // ---------------------------------------------------------------------------
+  // ✅ Bulk selection
+  // ---------------------------------------------------------------------------
+  const handleSelectAll = () => {
+    setIsChecked(!isChecked);
+    setManySelectMembers(!isChecked ? members : []);
   };
 
   const handleCancelClick = () => {
     setIsManySelect(false);
     setManySelectMembers([]);
   };
-  const handleSelectAll = () => {
-    setIsChecked(!isChecked);
-    if (isChecked) {
-      setManySelectMembers([]);
-    } else {
-      setManySelectMembers(members);
-    }
-  };
 
-    const renderSkeletonItems = (count: number) => (
+  // ---------------------------------------------------------------------------
+  // ✅ Render Skeleton Items
+  // ---------------------------------------------------------------------------
+  const renderSkeletonItems = (count: number) => (
     <>
       {Array.from({ length: count }).map((_, idx) => (
         <ListItemButton key={`skeleton-${idx}`} sx={{ mb: 1 }}>
@@ -121,12 +115,15 @@ const TagList = () => {
     </>
   );
 
+  // ---------------------------------------------------------------------------
+  // ✅ UI Rendering
+  // ---------------------------------------------------------------------------
   return (
     <>
       <Box
         display="flex"
         flexDirection="row"
-        justifyContent="content-between"
+        justifyContent="space-between"
         alignItems="center"
         gap={1}
         sx={{ ml: 2 }}
@@ -138,7 +135,7 @@ const TagList = () => {
               color="primary"
               size="small"
               sx={{ minWidth: '80px', py: 0.5 }}
-              onClick={() => handleCancelClick()}
+              onClick={handleCancelClick}
             >
               Cancel
             </Button>
@@ -147,7 +144,7 @@ const TagList = () => {
               color="error"
               size="small"
               sx={{ minWidth: '80px', py: 0.5 }}
-              onClick={() => handleOpenDeleteDialog()}
+              onClick={handleOpenDeleteDialog}
             >
               Delete
             </Button>
@@ -166,52 +163,44 @@ const TagList = () => {
       </Box>
 
       <List>
-        <Box
-          sx={{
-            height: { lg: 'calc(100vh - 260px)', md: '100vh' },
-            maxHeight: '800px',
-            overflow: 'auto',
-          }}
-        >
+        <Scrollbar sx={{}}>
           {isManySelect && (
-            <>
-              <Box
-                mr="auto"
-                display="flex"
-                flexDirection="row"
-                justifyContent="flex-end"
-                alignItems="center"
-                sx={{ mr: 2 }}
-              >
-                <Typography variant="body2" fontWeight={100}>
-                  Select All
-                </Typography>
-                <Checkbox edge="end" checked={isChecked} onChange={handleSelectAll} />
-              </Box>
-            </>
+            <Box
+              display="flex"
+              justifyContent="flex-end"
+              alignItems="center"
+              sx={{ mr: 2 }}
+            >
+              <Typography variant="body2" fontWeight={100}>
+                Select All
+              </Typography>
+              <Checkbox edge="end" checked={isChecked} onChange={handleSelectAll} />
+            </Box>
           )}
-          {hasLoaded ? (members.map((member) => (
-            <TagListItem
-              key={member.id}
-              active={member === active}
-              member={member}
-              manySelect={isManySelect}
-              setManySelectMembers={setManySelectMembers}
-              manySelectMembers={manySelectMembers}
-              onTagClick={() => {
-                dispatch(SelectMember(member.id));
-              }}
-            />
-          ))) : (
-            renderSkeletonItems(SKELETON_ROWS)
-          )}
-        </Box>
+
+          {isLoading || isFetching
+            ? renderSkeletonItems(SKELETON_ROWS)
+            : members.map((member) => (
+                <TagListItem
+                  key={member.id}
+                  active={member === active}
+                  member={member}
+                  manySelect={isManySelect}
+                  setManySelectMembers={setManySelectMembers}
+                  manySelectMembers={manySelectMembers}
+                  onTagClick={() => {dispatch(SelectMember(member.id))}}
+                />
+              ))}
+        </Scrollbar>
       </List>
+
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
-          <DialogContentText>Are you sure you want to delete these members?</DialogContentText>
+          <DialogContentText>
+            Are you sure you want to delete these members?
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDeleteDialog} color="primary">

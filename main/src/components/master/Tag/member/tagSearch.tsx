@@ -1,7 +1,9 @@
+import React from 'react';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import { Box, Fab, TextField, InputAdornment } from '@mui/material';
 import { UpdateFilter } from 'src/store/apps/crud/member';
 import { IconMenu2, IconSearch } from '@tabler/icons-react';
+import { useDebounce } from 'use-debounce';
 
 type Props = {
   onClick: (event: React.MouseEvent<HTMLElement>) => void;
@@ -12,6 +14,12 @@ const TagSearch = ({ onClick }: Props) => {
     (state: RootState) => state.memberReducer.memberFilter.SearchValue
   );
   const dispatch = useDispatch();
+  const [value, setValue] = React.useState(searchValue);
+  const [debouncedValue] = useDebounce(value, 500); // 500ms delay
+
+  React.useEffect(() => {
+    dispatch(UpdateFilter({ SearchValue: debouncedValue }));
+  }, [debouncedValue, dispatch]);
 
   return (
     <Box display="flex" sx={{ p: 2 }} flexDirection="column">
@@ -38,12 +46,10 @@ const TagSearch = ({ onClick }: Props) => {
         }}
         fullWidth
         size="small"
-        value={searchValue}
+        value={value}
         placeholder="Search by Name, Card Number, ID"
         variant="outlined"
-        onChange={(e) =>
-          dispatch(UpdateFilter({ SearchValue: e.target.value }))
-        }
+        onChange={(e) => setValue(e.target.value)}
       />
     </Box>
   );

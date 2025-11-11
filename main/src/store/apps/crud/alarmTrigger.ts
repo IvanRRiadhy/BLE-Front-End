@@ -153,7 +153,7 @@ export const AlarmTriggerSlice = createSlice({
             _state.alarmTriggerTotalCount = 0;
             _state.alarmTriggerFilteredCount = 0;
             _state.isLoading = false;
-            _state.hasLoaded = false;
+            _state.hasLoaded = false;           
         })
         .addCase(editAlarmTrigger.pending, (state) => {
             state.isLoading = true;

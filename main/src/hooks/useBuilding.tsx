@@ -34,7 +34,7 @@ export function useBuildingList(filter: GetFilter) {
 
 export function useAllBuilding() {
     return useQuery({
-        queryKey: ['building-list'],
+        queryKey: ['building-all'],
         queryFn: async () => {
             const response = await axiosServices.get(Building_API_URL);
             console.log('Building list fetched successfully: ', response.data);
@@ -56,6 +56,7 @@ export function useAddBuilding(){
         },
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['building-list']});
+            queryClient.invalidateQueries({queryKey: ['building-all']});
         },
     });
 }
@@ -72,6 +73,7 @@ export function useEditBuilding(){
         },
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['building-list']});
+            queryClient.invalidateQueries({queryKey: ['building-all']});
         },
     });
 }
@@ -85,6 +87,7 @@ export function useDeleteBuilding(){
         },
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['building-list']});
+            queryClient.invalidateQueries({queryKey: ['building-all']});
         },
     }); 
 }

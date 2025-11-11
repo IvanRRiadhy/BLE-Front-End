@@ -7,9 +7,6 @@ import {
   DialogTitle,
   Divider,
   Grid2 as Grid,
-  IconButton,
-  MenuItem,
-  SelectChangeEvent,
   Tooltip,
   Typography,
   CircularProgress,
@@ -17,6 +14,7 @@ import {
   Autocomplete,
   TextField,
   Box,
+  MenuItem,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
@@ -27,21 +25,20 @@ import { dispatch, RootState, useSelector } from 'src/store/Store';
 import {
   addMember,
   editMember,
-  fetchMemberDT,
-  fetchMembers,
   memberType,
 } from 'src/store/apps/crud/member';
 import { fetchDistricts, DistrictType } from 'src/store/apps/crud/district';
 import { fetchDepartments, DepartmentType } from 'src/store/apps/crud/department';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
-
+import { CardType, fetchCard } from 'src/store/apps/crud/card';
 import { gender, statusEmployee } from 'src/types/crud/input';
 import toast from 'react-hot-toast';
 import { defaultMemberForm } from 'src/store/apps/defaultForm';
 import AddEditDistrict from '../district/AddEditDistrict';
 import AddEditDepartment from '../department/AddEditDepartment';
 import AddEditOrganization from '../organization/AddEditOrganizationList';
-import { CardType, fetchCard } from 'src/store/apps/crud/card';
+import { useQueryClient } from '@tanstack/react-query';
+import { PaginatedResponse } from 'src/hooks/useMember';
 
 interface FormType {
   type?: string;
@@ -49,6 +46,7 @@ interface FormType {
 }
 
 const AddEditMember = ({ type, member }: FormType) => {
+  const queryClient = useQueryClient();
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
@@ -59,21 +57,14 @@ const AddEditMember = ({ type, member }: FormType) => {
     ...member,
   });
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
-  const isLoading = useSelector((state: RootState) => state.memberReducer.isLoading);
-  const districtData: DistrictType[] = useSelector(
-    (state: RootState) => state.districtReducer.districtAll,
-  );
-  const departmentData: DepartmentType[] = useSelector(
-    (state: RootState) => state.departmentReducer.departmentAll,
-  );
-  const organizationData: OrganizationType[] = useSelector(
-    (state: RootState) => state.organizationReducer.organizationAll,
-  );
-  const cardData: CardType[] = useSelector((state: RootState) => state.CardReducer.cardAll);
-  const filteredCard: CardType[] = cardData.filter((card) => card.isUsed === false);
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
+  const districtData = useSelector((state: RootState) => state.districtReducer.districtAll);
+  const departmentData = useSelector((state: RootState) => state.departmentReducer.departmentAll);
+  const organizationData = useSelector((state: RootState) => state.organizationReducer.organizationAll);
+  const cardData = useSelector((state: RootState) => state.CardReducer.cardAll);
+  const filteredCard: CardType[] = cardData.filter((card) => !card.isUsed);
+
   useEffect(() => {
-    dispatch(fetchMembers());
     dispatch(fetchDistricts());
     dispatch(fetchDepartments());
     dispatch(fetchOrganizations());
@@ -83,17 +74,7 @@ const AddEditMember = ({ type, member }: FormType) => {
   const handleClickOpen = () => {
     setLoading(true);
     setFormErrors({});
-    if (type === 'edit' && member) {
-      if (!member.id) {
-        dispatch(fetchMemberDT(memberFilter));
-      }
-      setFormData({
-        ...defaultMemberForm,
-        ...member,
-      });
-    } else {
-      setFormData({ ...defaultMemberForm });
-    }
+    setFormData({ ...defaultMemberForm, ...member });
     setTimeout(() => {
       setLoading(false);
       setOpen(true);
@@ -108,128 +89,129 @@ const AddEditMember = ({ type, member }: FormType) => {
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
-
     if (!formData.name?.trim()) errors.name = "Member's name is required";
-    if (!formData.cardNumber?.trim()) errors.cardNumber = "Member's Card Number is required";
-    if (!formData.bleCardNumber?.trim())
-      errors.bleCardNumber = "Member's BLE Card Number is required";
-    if (!formData.departmentId?.trim()) errors.departmentId = "Member's Department is required";
-    if (!formData.organizationId?.trim())
-      errors.organizationId = "Member's Organization is required";
-    if (!formData.districtId?.trim()) errors.districtId = "Member's District is required";
-    if (!formData.gender?.trim()) errors.gender = "Member's Gender is required";
-    if (!formData.phone?.trim()) errors.phone = "Member's Phone Number is required";
-    if (!image) errors.faceImage = "Member's Face Image is required";
-    if (!!formData.email?.trim() && !formData.email?.includes('@'))
-      errors.email = 'Valid Email is required';
-    if (!formData.personId?.trim()) errors.personId = "Member's ID is required";
-
+    if (!formData.cardNumber?.trim()) errors.cardNumber = "Card Number is required";
+    if (!formData.departmentId?.trim()) errors.departmentId = "Department is required";
+    if (!formData.organizationId?.trim()) errors.organizationId = "Organization is required";
+    if (!formData.districtId?.trim()) errors.districtId = "District is required";
+    if (!formData.gender?.trim()) errors.gender = "Gender is required";
+    if (!formData.phone?.trim()) errors.phone = "Phone Number is required";
+    if (!image && type === 'add') errors.faceImage = "Face Image is required";
+    if (!!formData.email?.trim() && !formData.email.includes('@')) errors.email = 'Valid Email required';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const handleSave = async () => {
     if (!validateForm()) {
-      toast.error('Please fill in all required fields correctly.');
+      toast.error('Please fill all required fields correctly.');
       return;
     }
     setIsSaving(true);
     try {
       const data = new FormData();
-
       Object.entries(formData).forEach(([key, value]) => {
-        if (
-          key !== 'faceImage' &&
-          key !== 'createdBy' &&
-          key !== 'createdAt' &&
-          key !== 'updatedBy' &&
-          key !== 'updatedAt'
-        ) {
-          data.append(key, value.toString());
-        }
+        if (!['faceImage', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key))
+          data.append(key, value?.toString() ?? '');
       });
-      console.log(JSON.stringify(data, null, 2));
-      if (image) {
-        data.append('faceImage', image);
-      }
+      if (image) data.append('faceImage', image);
+
       let result;
-      if (type === 'edit') {
-        result = await dispatch(editMember(data)); // Dispatch update
-      }
-      if (type === 'add') {
-        result = await dispatch(addMember(data));
-      }
-      if (result && result.type && result.type.endsWith('/fulfilled')) {
-        await dispatch(fetchMemberDT(memberFilter));
-        console.log('Member Data Saved!');
-        toast.success('Data Saved');
+      if (type === 'edit') result = await dispatch(editMember(data));
+      else result = await dispatch(addMember(data));
+
+      if (result && result.type.endsWith('/fulfilled')) {
+        // ✅ Update cache manually
+        queryClient.setQueryData<PaginatedResponse<memberType>>(
+          ['member-list', memberFilter],
+          (oldCache) => {
+            if (!oldCache) return oldCache;
+            const updatedData = type === 'edit'
+              ? oldCache.data.map((m) =>
+                  m.id === formData.id ? { ...m, ...formData } : m
+                )
+              : [...oldCache.data, result.payload];
+            return { ...oldCache, data: updatedData };
+          }
+        );
+
+        toast.success('Data saved successfully!');
         handleClose();
       } else {
-        toast.error('Saving Data Unsuccessful');
+        toast.error('Saving data failed.');
       }
     } catch (error) {
+      console.error('Error saving member:', error);
       toast.error('Saving Data Unsuccessful');
-      console.error('Error saving member data:', error);
-    }
-    setTimeout(() => {
+    } finally {
       setIsSaving(false);
-    }, 1000);
+    }
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
+    e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<{ value: unknown }>
   ) => {
-    const { value, name, id } = e.target as
-      | HTMLInputElement
-      | { value: string; name: string; id?: string };
+    const { value, name, id } = e.target as HTMLInputElement;
     setFormData((prev) => ({ ...prev, [id || name]: value }));
   };
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    const maxSize = 5 * 1024 * 1024;
-    if (file) {
-      if (file.size > maxSize) {
-        alert('File size exceeds 5MB. Please upload a smaller file.');
-        return;
-      }
-      if (['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
-        setImage(file);
-        setPreview(URL.createObjectURL(file)); // Preview selected image
-      } else {
-        alert('Please select a valid image file (PNG, JPG, JPEG)');
-      }
-    }
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) return alert('File size exceeds 5MB.');
+    if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type))
+      return alert('Invalid image type.');
+    setImage(file);
+    setPreview(URL.createObjectURL(file));
   };
 
   return (
     <>
       {type === 'edit' && (
         <Tooltip title="Edit Member">
-          <IconButton color="primary" size="small" onClick={handleClickOpen}>
-            <IconPencil size={20} />
-          </IconButton>
+          <Box
+            onClick={handleClickOpen}
+            sx={{
+              backgroundColor: 'rgba(255,255,255,0.2)',
+              border: '1px solid rgba(0,0,0,0.15)',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '50%',
+              width: 36,
+              height: 36,
+              cursor: 'pointer',
+              '& svg': {
+                color: '#fff',
+                filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))',
+              },
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.35)',
+                transform: 'scale(1.1)',
+              },
+            }}
+          >
+            <IconPencil size={18} stroke={1.6} />
+          </Box>
         </Tooltip>
       )}
+
       {type === 'add' && (
-        <Tooltip title="Add Organization">
-          {isLoading ? (
-            <Button variant="contained" color="primary" fullWidth>
-              <CircularProgress color="inherit" size={20} />
-            </Button>
-          ) : (
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<IconPlus size={20} />}
-              fullWidth
-              onClick={handleClickOpen}
-            >
-              Add Member
-            </Button>
-          )}
+        <Tooltip title="Add Member">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<IconPlus size={20} />}
+            fullWidth
+            onClick={handleClickOpen}
+          >
+            Add Member
+          </Button>
         </Tooltip>
       )}
+
       {!loading && (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
           <DialogTitle>
@@ -259,7 +241,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                 <Box display="flex" alignItems="center" gap={1}>
                   <Autocomplete
                     sx={{ flex: 1 }}
-                    options={departmentData.map((dept) => ({ label: dept.name, id: dept.id }))}
+                    options={departmentData.map((dept: DepartmentType) => ({ label: dept.name, id: dept.id }))}
                     value={
                       departmentData
                         .map((d) => ({ label: d.name, id: d.id }))
@@ -309,7 +291,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                 <Box display="flex" alignItems="center" gap={1}>
                   <Autocomplete
                     sx={{ flex: 1 }}
-                    options={organizationData.map((orgz) => ({ label: orgz.name, id: orgz.id }))}
+                    options={organizationData.map((orgz: OrganizationType) => ({ label: orgz.name, id: orgz.id }))}
                     value={
                       organizationData
                         .map((o) => ({ label: o.name, id: o.id }))
@@ -349,7 +331,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                 <Box display="flex" alignItems="center" gap={1}>
                   <Autocomplete
                     sx={{ flex: 1 }}
-                    options={districtData.map((dist) => ({ label: dist.name, id: dist.id }))}
+                    options={districtData.map((dist: DistrictType) => ({ label: dist.name, id: dist.id }))}
                     value={
                       districtData
                         .map((d) => ({ label: d.name, id: d.id }))
