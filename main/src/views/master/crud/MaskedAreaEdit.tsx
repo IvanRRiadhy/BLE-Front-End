@@ -20,7 +20,6 @@ const FloorplanDeviceEdit = () => {
   }
   return (
     <PageContainer title="Floorplan Area" description="this is floorplan area page">
-      {/* <Breadcrumb title="Floorplan Device Edit" subtitle="See the floorplan device" /> */}
       <AppCard>
         <Box
           display="flex"

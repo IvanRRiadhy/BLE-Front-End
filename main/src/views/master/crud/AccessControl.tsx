@@ -44,7 +44,6 @@ const AccessControl = () => {
   ];
   return (
     <PageContainer title="Access Control" description="This is the Access Control CRUD Page">
-      <Breadcrumb title="Access Control" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

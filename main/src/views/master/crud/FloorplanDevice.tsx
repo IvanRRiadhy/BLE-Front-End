@@ -53,7 +53,6 @@ const FloorplanDevice = () => {
   ];
   return (
     <PageContainer title="Device Mapping" description="This is the Device Mapping CRUD Page">
-      <Breadcrumb title="Device Mapping" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => {
           return(

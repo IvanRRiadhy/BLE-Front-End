@@ -44,7 +44,6 @@ const AccessCCTV = () => {
   ];
   return (
     <PageContainer title="Access CCTV" description="This is the Access CCTV CRUD Page">
-      {/* <Breadcrumb title="Access CCTV" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>
