@@ -94,7 +94,7 @@ const District = () => {
           }}
         >
           <ParentCard title="District List" codeModel={[
-            // <BulkAddEditDistrict key="bulkAdd" type="add" />,
+            <BulkAddEditDistrict key="bulkAdd" type="add" />,
             <AddEditDistrict key="add" type="add" />
             ]}>
             <DistrictList />

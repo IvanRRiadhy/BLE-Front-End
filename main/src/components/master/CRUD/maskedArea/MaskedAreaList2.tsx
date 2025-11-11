@@ -30,6 +30,10 @@ import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
 import { fetchFloorplanDevices } from 'src/store/apps/crud/floorplanDevice';
 import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
 import FloorplanPreviewDialog from './FloorplanPreviewDialog';
+import { useMaskedAreaStatus } from 'src/hooks/useMaskedArea';
+import { useAllBuilding } from 'src/hooks/useBuilding';
+import { UseQueryResult } from '@tanstack/react-query';
+import { useFloorplanList } from 'src/hooks/useFloorplan';
 
 const columns = [
   { label: 'Building', field: 'Floor.Name', sortAble: true },
@@ -42,17 +46,21 @@ const SKELETON_ROWS = 5;
 
 const MaskedAreaList2 = () => {
   const dispatch: AppDispatch = useDispatch();
-  const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
-  const buildingData: BuildingType[] = useSelector(
-    (state: RootState) => state.buildingReducer.buildingAll,
-  );
-  const floorplanTotalCount = useSelector(
-    (state: RootState) => state.floorplanReducer.floorplanTotalCount,
-  );
-  // const floorplanFilteredCount = useSelector(
-  //   (state: RootState) => state.floorplanReducer.floorplanFilteredCount,
+  // const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
+  // // const buildingData: BuildingType[] = useSelector(
+  // //   (state: RootState) => state.buildingReducer.buildingAll,
+  // // );
+  // const floorplanTotalCount = useSelector(
+  //   (state: RootState) => state.floorplanReducer.floorplanTotalCount,
   // );
+  
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
+
+  const buildingData: BuildingType[] = (useAllBuilding() as UseQueryResult<BuildingType[], Error>)['data'] || [];
+  const {data, isLoading: queryLoading} = useFloorplanList(floorplanFilter);
+  const floorplanData = data?.data || [];
+  const floorplanTotalCount = data?.recordsTotal || 0;
+  const floorplanFilteredCount = data?.recordsFiltered || 0;
   // const { t } = useTranslation();
   const navigate = useNavigate();
   const hasLoaded = useSelector((state: RootState) => state.floorplanReducer.hasLoaded);
@@ -197,7 +205,7 @@ const MaskedAreaList2 = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {!hasLoaded
+                  {queryLoading
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : floorplanData.map((floorplan: any, index) => (
                         <TableRow key={index}>
@@ -248,7 +256,7 @@ const MaskedAreaList2 = () => {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={floorplanTotalCount}
+              count={floorplanFilteredCount}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

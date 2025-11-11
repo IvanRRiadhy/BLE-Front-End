@@ -84,6 +84,21 @@ export function useAllReaders() {
 }
 
 // ---------------------------------------------------
+// ✅ Hook: Get all unassigned BleReaders (non-paginated)
+// ---------------------------------------------------
+
+export function useAllUnassignedReaders() {
+  return useQuery({
+    queryKey: ['ble-reader-all-unassigned'],
+    queryFn: async () => {
+      const response = await axiosServices.get(`${API_URL}unassigned`);
+      return response.data.collection.data as bleReaderType[];
+    },
+    placeholderData: [],
+  });
+}
+
+// ---------------------------------------------------
 // ✅ Hook: Add BleReader
 // ---------------------------------------------------
 

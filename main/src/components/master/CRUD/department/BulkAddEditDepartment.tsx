@@ -22,18 +22,18 @@ import {
   IconLock,
   IconLockOpen,
 } from '@tabler/icons-react';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useAddBatchDistrict, useEditDistrict } from 'src/hooks/useDistrict';
+import { useAddBatchDepartment, useEditDepartment } from 'src/hooks/useDepartment';
 import { useQueryClient } from '@tanstack/react-query';
-import type { DistrictType } from 'src/store/apps/crud/district';
+import type { DepartmentType } from 'src/store/apps/crud/department';
 
-// Default form for District
-const defaultDistrictForm: Partial<DistrictType> = {
+// Default form for Department
+const defaultDepartmentForm: Partial<DepartmentType> = {
   id: '',
   code: '',
   name: '',
-  districtHost: '',
+  departmentHost: '',
   applicationId: '',
   createdBy: '',
   createdAt: '',
@@ -43,24 +43,24 @@ const defaultDistrictForm: Partial<DistrictType> = {
 
 type Props = {
   type: 'add' | 'edit';
-  initialData?: DistrictType[];
+  initialData?: DepartmentType[];
   setSelectedIds?: React.Dispatch<React.SetStateAction<Set<string>>>;
 };
 
-const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
+const BulkAddEditDepartment = ({ type, initialData, setSelectedIds }: Props) => {
   const [openBulk, setOpenBulk] = useState(false);
-  const [rows, setRows] = useState<Partial<DistrictType>[]>([{ ...defaultDistrictForm }]);
+  const [rows, setRows] = useState<Partial<DepartmentType>[]>([{ ...defaultDepartmentForm }]);
   const [lockedCells, setLockedCells] = useState<
-    Record<number, Partial<Record<keyof DistrictType, boolean>>>
+    Record<number, Partial<Record<keyof DepartmentType, boolean>>>
   >({});
   const [lockedRows, setLockedRows] = useState<Record<number, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [rowErrors, setRowErrors] = useState<Record<number, Record<string, string>>>({});
-  const [columnDefaults, setColumnDefaults] = useState<Partial<DistrictType>>({});
-  const [useDefault, setUseDefault] = useState<Record<keyof DistrictType, boolean>>({
+  const [columnDefaults, setColumnDefaults] = useState<Partial<DepartmentType>>({});
+  const [useDefault, setUseDefault] = useState<Record<keyof DepartmentType, boolean>>({
     code: false,
     name: false,
-    districtHost: false,
+    departmentHost: false,
     applicationId: false,
     id: false,
     createdBy: false,
@@ -70,8 +70,8 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
   });
 
   const queryClient = useQueryClient();
-  const addBatchMutation = useAddBatchDistrict();
-  const editMutation = useEditDistrict();
+  const addBatchMutation = useAddBatchDepartment();
+  const editMutation = useEditDepartment();
 
   // ───────────────────────────────
   // Dialog controls
@@ -80,14 +80,14 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
     if (type === 'edit' && initialData && initialData.length > 0) {
       setRows(initialData);
     } else {
-      setRows([{ ...defaultDistrictForm }]);
+      setRows([{ ...defaultDepartmentForm }]);
     }
     setColumnDefaults({});
     setRowErrors({});
     setUseDefault({
       code: false,
       name: false,
-      districtHost: false,
+      departmentHost: false,
       applicationId: false,
       id: false,
       createdBy: false,
@@ -103,7 +103,7 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
   // ───────────────────────────────
   // Input / Lock handlers
   // ───────────────────────────────
-  const handleChange = (index: number, key: keyof DistrictType, value: string) => {
+  const handleChange = (index: number, key: keyof DepartmentType, value: string) => {
     setRows((prev) => prev.map((row, i) => (i === index ? { ...row, [key]: value } : row)));
     setRowErrors((prev) => {
       const newErrors = { ...prev };
@@ -116,9 +116,9 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
     setRows((prev) => [
       ...prev,
       {
-        ...defaultDistrictForm,
+        ...defaultDepartmentForm,
         ...Object.fromEntries(
-          Object.entries(columnDefaults).filter(([key]) => useDefault[key as keyof DistrictType]),
+          Object.entries(columnDefaults).filter(([key]) => useDefault[key as keyof DepartmentType]),
         ),
       },
     ]);
@@ -128,7 +128,7 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
     setRows((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const getCellStyle = (rowIndex: number, key: keyof DistrictType) => {
+  const getCellStyle = (rowIndex: number, key: keyof DepartmentType) => {
     const isLocked = lockedRows[rowIndex] || lockedCells[rowIndex]?.[key];
     return {
       backgroundColor: isLocked ? '#e3f2fd' : 'transparent',
@@ -144,7 +144,7 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
       const e: Record<string, string> = {};
       if (!r.code?.trim()) e.code = 'Code is required';
       if (!r.name?.trim()) e.name = 'Name is required';
-      if (!r.districtHost?.trim()) e.districtHost = 'District Host is required';
+      if (!r.departmentHost?.trim()) e.departmentHost = 'Department Host is required';
       if (Object.keys(e).length) errors[idx] = e;
     });
     setRowErrors(errors);
@@ -164,12 +164,11 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
 
     try {
       if (type === 'add') {
-        // Use batch API for adding multiple districts
+        // Use batch API for adding multiple departments
         await addBatchMutation.mutateAsync(rows);
-        toast.success(`${rows.length} district(s) added successfully`);
+        toast.success(`${rows.length} department(s) added successfully`);
       } else {
         // For edit, we still need to loop through individual updates
-        // since we don't have a batch edit API
         let successCount = 0;
         let failCount = 0;
 
@@ -187,18 +186,18 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
         await Promise.allSettled(promises);
 
         if (failCount === 0) {
-          toast.success(`${successCount} district(s) updated successfully`);
+          toast.success(`${successCount} department(s) updated successfully`);
         } else {
           if (successCount > 0) {
-            toast.success(`${successCount} district(s) updated, ${failCount} failed`);
+            toast.success(`${successCount} department(s) updated, ${failCount} failed`);
           }
-          toast.error(`${failCount} district(s) failed to update`);
+          toast.error(`${failCount} department(s) failed to update`);
         }
       }
 
       // Refresh cache
-      await queryClient.invalidateQueries({ queryKey: ['district-list'] });
-      await queryClient.invalidateQueries({ queryKey: ['district-all'] });
+      await queryClient.invalidateQueries({ queryKey: ['department-list'] });
+      await queryClient.invalidateQueries({ queryKey: ['department-all'] });
       
       if (setSelectedIds) setSelectedIds(new Set());
       handleClose();
@@ -216,14 +215,14 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
   return (
     <>
       {type === 'edit' && (
-        <Tooltip title="Bulk Edit District">
+        <Tooltip title="Bulk Edit Department">
           <IconButton color="default" size="small" onClick={handleClickOpen}>
             <IconPencil size={20} />
           </IconButton>
         </Tooltip>
       )}
       {type === 'add' && (
-        <Tooltip title="Bulk Add District">
+        <Tooltip title="Bulk Add Department">
           <Button
             variant="contained"
             color="primary"
@@ -239,7 +238,7 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
       <Dialog open={openBulk} onClose={handleClose} fullWidth maxWidth="lg">
         <DialogTitle>
           <Typography variant="h4" component="span" p={2} fontWeight={700}>
-            Bulk {type === 'add' ? 'Add' : 'Edit'} District
+            Bulk {type === 'add' ? 'Add' : 'Edit'} Department
           </Typography>
         </DialogTitle>
 
@@ -307,32 +306,33 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
                   </div>
                 </TableCell>
 
-                {/* DISTRICT HOST HEADER */}
+                {/* DEPARTMENT HOST HEADER */}
                 <TableCell>
-                  <Typography fontWeight={600}>District Host</Typography>
+                  <Typography fontWeight={600}>Department Host</Typography>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <input
                       type="checkbox"
-                      checked={useDefault.districtHost}
-                      onChange={(e) => setUseDefault({ ...useDefault, districtHost: e.target.checked })}
+                      checked={useDefault.departmentHost}
+                      onChange={(e) => setUseDefault({ ...useDefault, departmentHost: e.target.checked })}
                     />
                     <TextField
                       size="small"
-                      value={columnDefaults.districtHost || ''}
+                      value={columnDefaults.departmentHost || ''}
                       onChange={(e) => {
                         const val = e.target.value;
-                        setColumnDefaults((prev) => ({ ...prev, districtHost: val }));
-                        if (useDefault.districtHost)
+                        setColumnDefaults((prev) => ({ ...prev, departmentHost: val }));
+                        if (useDefault.departmentHost)
                           setRows((prev) =>
                             prev.map((r, i) =>
-                              lockedRows[i] || lockedCells[i]?.districtHost ? r : { ...r, districtHost: val },
+                              lockedRows[i] || lockedCells[i]?.departmentHost ? r : { ...r, departmentHost: val },
                             ),
                           );
                       }}
-                      disabled={!useDefault.districtHost}
+                      disabled={!useDefault.departmentHost}
                     />
                   </div>
                 </TableCell>
+
 
                 {/* ADD ROW BUTTON */}
                 <TableCell>
@@ -398,29 +398,30 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
                     </div>
                   </TableCell>
 
-                  {/* DISTRICT HOST */}
+                  {/* DEPARTMENT HOST */}
                   <TableCell>
-                    <div style={{ display: 'flex', alignItems: 'center', ...getCellStyle(idx, 'districtHost') }}>
+                    <div style={{ display: 'flex', alignItems: 'center', ...getCellStyle(idx, 'departmentHost') }}>
                       <IconButton
                         size="small"
                         onClick={() =>
                           setLockedCells((prev) => ({
                             ...prev,
-                            [idx]: { ...prev[idx], districtHost: !prev[idx]?.districtHost },
+                            [idx]: { ...prev[idx], departmentHost: !prev[idx]?.departmentHost },
                           }))
                         }
                       >
-                        {lockedCells[idx]?.districtHost ? <IconLock size={16} /> : <IconLockOpen size={16} />}
+                        {lockedCells[idx]?.departmentHost ? <IconLock size={16} /> : <IconLockOpen size={16} />}
                       </IconButton>
                       <TextField
-                        value={row.districtHost || ''}
-                        onChange={(e) => handleChange(idx, 'districtHost', e.target.value)}
+                        value={row.departmentHost || ''}
+                        onChange={(e) => handleChange(idx, 'departmentHost', e.target.value)}
                         fullWidth
-                        error={!!rowErrors[idx]?.districtHost}
-                        helperText={rowErrors[idx]?.districtHost}
+                        error={!!rowErrors[idx]?.departmentHost}
+                        helperText={rowErrors[idx]?.departmentHost}
                       />
                     </div>
                   </TableCell>
+
 
                   {/* ACTIONS */}
                   <TableCell>
@@ -434,7 +435,7 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
                             setLockedCells((prev) => ({
                               ...prev,
                               [idx]: isLocked
-                                ? { code: true, name: true, districtHost: true, applicationId: true }
+                                ? { code: true, name: true, departmentHost: true, applicationId: true }
                                 : {},
                             }));
                           }}
@@ -477,4 +478,4 @@ const BulkAddEditDistrict = ({ type, initialData, setSelectedIds }: Props) => {
   );
 };
 
-export default BulkAddEditDistrict;
+export default BulkAddEditDepartment;

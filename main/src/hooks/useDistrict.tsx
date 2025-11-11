@@ -80,7 +80,7 @@ export function useAddBatchDistrict() {
 
   return useMutation({
     mutationFn: async (districts: Partial<DistrictType>[]) => {
-      const cleaned = districts.map(({ id, createdBy, createdAt, updatedBy, updatedAt, ...rest }) => rest);
+      const cleaned = districts.map(({ id, createdBy, createdAt, updatedBy, updatedAt, applicationId, ...rest }) => rest);
       const res = await axiosServices.post(`${API_URL}batch/`, cleaned);
       return res.data;
     },

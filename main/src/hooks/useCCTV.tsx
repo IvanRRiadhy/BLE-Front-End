@@ -79,6 +79,21 @@ export function useAllCCTV() {
 }
 
 // ---------------------------------------------------
+// ✅ Hook: Get all unassigned CCTV (no pagination)
+// ---------------------------------------------------
+
+export function useAllUnassignedCCTV() {
+  return useQuery({
+    queryKey: ['cctv-list-all-unassigned'],
+    queryFn: async () => {
+      const response = await axiosServices.get(`${API_URL}unnasigned`);
+      return response.data.collection.data as CCTVType[];
+    },
+    placeholderData: [],
+  });
+}
+
+// ---------------------------------------------------
 // ✅ Hook: Add CCTV
 // ---------------------------------------------------
 

@@ -13,39 +13,58 @@ import {
 } from 'src/store/apps/crud/maskedArea';
 import { restrictedStatus } from 'src/types/crud/input';
 import isEqual from 'lodash/isEqual';
-import Scrollbar from 'src/components/custom-scroll/Scrollbar';
+
+// Define the form data type for better type safety
+interface AreaFormData {
+  id: string;
+  name: string;
+  colorArea: string;
+  areaShape: string;
+  restrictedStatus: string;
+  wideArea: number;
+  positionPxX: number;
+  positionPxY: number;
+  engineAreaId: string;
+  floorId: string;
+  floorplanId: string;
+  createdBy: string;
+  createdAt: string;
+  updatedBy: string;
+  updatedAt: string;
+}
 
 const AreaDetailList = () => {
-  // const [open, setOpen] = useState(false);
+  const dispatch: AppDispatch = useDispatch();
   const area = useSelector((state: RootState) => state.maskedAreaReducer.editingMaskedArea);
-  const [formData, setFormData] = useState({
-    id: area?.id || '',
-    name: area?.name || '',
-    colorArea: area?.colorArea || '',
-    areaShape: area?.areaShape || '',
-    restrictedStatus:
-      restrictedStatus.find((s) => s.value === (area?.restrictedStatus || ''))?.value || '',
-    wideArea: area?.wideArea || 0,
-    positionPxX: area?.positionPxX || 0,
-    positionPxY: area?.positionPxY || 0,
-    engineAreaId: area?.engineAreaId || '',
-    floorId: area?.floorId || '',
-    floorplanId: area?.floorplanId || '',
-    createdBy: area?.createdBy || '',
-    createdAt: area?.createdAt || '',
-    updatedBy: area?.updatedBy || '',
-    updatedAt: area?.updatedAt || '',
+  
+  // Initialize form data with area data or defaults
+  const [formData, setFormData] = useState<AreaFormData>({
+    id: '',
+    name: '',
+    colorArea: '#363636',
+    areaShape: '',
+    restrictedStatus: '',
+    wideArea: 0,
+    positionPxX: 0,
+    positionPxY: 0,
+    engineAreaId: '',
+    floorId: '',
+    floorplanId: '',
+    createdBy: '',
+    createdAt: '',
+    updatedBy: '',
+    updatedAt: '',
   });
 
+  // Update form data when area changes - optimized version
   useEffect(() => {
     if (area) {
-      // console.log('Area data changed:', area);
-      const newFormData = {
+      const newFormData: AreaFormData = {
         id: area.id || '',
-        name: formData.name || '',
-        colorArea: formData.colorArea || '',
+        name: area.name || '',
+        colorArea: area.colorArea || '#363636',
         areaShape: area.areaShape || '',
-        restrictedStatus: formData.restrictedStatus || '',
+        restrictedStatus: area.restrictedStatus || '',
         wideArea: area.wideArea || 0,
         positionPxX: area.positionPxX || 0,
         positionPxY: area.positionPxY || 0,
@@ -57,35 +76,35 @@ const AreaDetailList = () => {
         updatedBy: area.updatedBy || '',
         updatedAt: area.updatedAt || '',
       };
-      // console.log('Current Form Data:', formData);
-      // console.log('New Form Data:', newFormData);
+
+      // Only update if data actually changed
       if (!isEqual(formData, newFormData)) {
         setFormData(newFormData);
       }
     }
-  }, [area]);
-
-  const dispatch: AppDispatch = useDispatch();
+  }, [area]); // Remove formData from dependencies to avoid infinite loops
 
   const handleClose = () => {
-    // setOpen(false);
-    setFormData({
-      id: area?.id || '',
-      name: area?.name || '',
-      colorArea: area?.colorArea || '',
-      areaShape: area?.areaShape || '',
-      restrictedStatus: area?.restrictedStatus || '',
-      wideArea: area?.wideArea || 0,
-      positionPxX: area?.positionPxX || 0,
-      positionPxY: area?.positionPxY || 0,
-      engineAreaId: area?.engineAreaId || '',
-      floorId: area?.floorId || '',
-      floorplanId: area?.floorplanId || '',
-      createdBy: area?.createdBy || '',
-      createdAt: area?.createdAt || '',
-      updatedBy: area?.updatedBy || '',
-      updatedAt: area?.updatedAt || '',
-    });
+    // Reset to current area data or empty form
+    if (area) {
+      setFormData({
+        id: area.id || '',
+        name: area.name || '',
+        colorArea: area.colorArea || '#363636',
+        areaShape: area.areaShape || '',
+        restrictedStatus: area.restrictedStatus || '',
+        wideArea: area.wideArea || 0,
+        positionPxX: area.positionPxX || 0,
+        positionPxY: area.positionPxY || 0,
+        engineAreaId: area.engineAreaId || '',
+        floorId: area.floorId || '',
+        floorplanId: area.floorplanId || '',
+        createdBy: area.createdBy || '',
+        createdAt: area.createdAt || '',
+        updatedBy: area.updatedBy || '',
+        updatedAt: area.updatedAt || '',
+      });
+    }
     dispatch(SelectEditingMaskedArea(null));
     dispatch(SelectMaskedArea(null));
   };
@@ -96,37 +115,80 @@ const AreaDetailList = () => {
   // Validation function
   const isFormValid = () => {
     return requiredFields.every(
-      (field) => formData[field as keyof typeof formData]?.toString().trim() !== '',
+      (field) => formData[field as keyof AreaFormData]?.toString().trim() !== '',
     );
   };
 
   const handleSave = async () => {
+    if (!isFormValid()) return;
+
     try {
-      await dispatch(EditUnsavedMaskedArea(formData));
-      await dispatch(SaveMaskedArea(formData.id));
-      // console.log(formData);
-      // console.log('Masked Area saved successfully!', formData);
-      // await dispatch(GetUnsavedMaskedArea());
+      // Update the unsaved area in Redux store
+      dispatch(EditUnsavedMaskedArea(formData));
+      
+      // Mark as saved in Redux (this is local state management)
+      dispatch(SaveMaskedArea(formData.id));
+      
       handleClose();
     } catch (error) {
-      console.log('Error saving device: ', error);
+      console.error('Error saving masked area: ', error);
     }
   };
 
   const handleCancel = () => {
-    dispatch(RevertMaskedArea(formData.id));
+    if (formData.id) {
+      dispatch(RevertMaskedArea(formData.id));
+    }
     handleClose();
   };
 
-  const handleInputChange = async (
+  const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
   ) => {
     const { value, name, id } = e.target as
       | HTMLInputElement
       | { value: string; name: string; id?: string };
-    setFormData((prev) => ({ ...prev, [id || name]: value }));
-    // await dispatch(EditUnsavedMaskedArea(formData));
+    
+    const fieldName = (id || name) as keyof AreaFormData;
+    
+    setFormData(prev => ({ 
+      ...prev, 
+      [fieldName]: value 
+    }));
   };
+
+  // Color palette for the area
+  const colorPalette = [
+    '#FF4D4F', // Bright Red
+    '#B22222', // Crimson
+    '#D633FF', // Magenta
+    '#5D3FD3', // Indigo
+    '#0047FF', // Deep Blue
+    '#00CFFF', // Cyan
+    '#228B22', // Dark Green
+    '#FFCC00', // Yellow
+    '#C8B560', // Khaki
+    '#FF7A00', // Orange
+  ];
+
+  // If no area is selected for editing, don't render the component
+  if (!area) {
+    return (
+      <Box
+        sx={{
+          height: '80vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'background.paper',
+        }}
+      >
+        <Typography variant="h6" color="text.secondary">
+          No area selected for editing
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -136,18 +198,22 @@ const AreaDetailList = () => {
         minHeight: 0,
         gridTemplateRows: 'auto 1fr auto',
         overflow: 'hidden',
-        bgColor: 'background.paper',
+        bgcolor: 'background.paper',
         borderColor: 'divider',
       }}
     >
+      {/* Header */}
       <Box p={3} sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
         <Typography variant="h5" fontWeight={700} mb={2}>
           Edit Masked Area Details
         </Typography>
       </Box>
+
+      {/* Form Content */}
       <Box sx={{ minHeight: 0, overflow: 'auto' }}>
         <Box pl={3} pr={1}>
           <Grid container spacing={1}>
+            {/* Area Name */}
             <Grid size={12}>
               <CustomFormLabel htmlFor="area-name">Area Name</CustomFormLabel>
               <CustomTextField
@@ -156,180 +222,123 @@ const AreaDetailList = () => {
                 onChange={handleInputChange}
                 variant="outlined"
                 fullWidth
+                placeholder="Enter area name"
               />
             </Grid>
-            {/* <Grid size={12}>
-                  <CustomFormLabel htmlFor="area-shape" required>
-                    Area Shape
-                  </CustomFormLabel>
-                  <CustomTextField
-                    id="areaShape"
-                    value={formData.areaShape}
-                    onChange={handleInputChange}
-                    variant="outlined"
-                    fullWidth
-                    disabled
-                  />
-                </Grid> */}
+
+            {/* Color Selection */}
             <Grid size={12}>
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="area-color">Area Color</CustomFormLabel>
-
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: 1,
-                    p: 1,
-                    border: '1px solid #ccc',
-                    borderRadius: 1,
-                    backgroundColor: '#f9f9f9',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  {[
-                    '#FF4D4F', // Bright Red
-                    '#B22222', // Crimson
-                    '#D633FF', // Magenta
-                    '#5D3FD3', // Indigo
-                    '#0047FF', // Deep Blue
-                    '#00CFFF', // Cyan
-                    '#228B22', // Dark Green
-                    '#FFCC00', // Yellow
-                    '#C8B560', // Khaki
-                    '#FF7A00', // Orange
-                  ].map((color) => (
-                    <Box
-                      key={color}
-                      onClick={() => setFormData((prev) => ({ ...prev, colorArea: color }))}
-                      sx={{
-                        width: 34,
-                        height: 34,
-                        borderRadius: '50%',
-                        cursor: 'pointer',
-                        backgroundColor: color,
-                        border:
-                          formData.colorArea === color
-                            ? '3px solid #000'
-                            : '2px solid rgba(0,0,0,0.2)',
-                        transition: 'all 0.25s ease',
-                        boxShadow:
-                          formData.colorArea === color
-                            ? '0 0 0 3px rgba(0,0,0,0.15)'
-                            : '0 1px 4px rgba(0,0,0,0.1)',
-                        '&:hover': {
-                          transform: 'scale(1.12)',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                        },
-                      }}
-                    />
-                  ))}
-                </Box>
-
-                {/* Optional: show selected color hex */}
-                <Box
-                  sx={{
-                    mt: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    justifyContent: 'center',
-                  }}
-                >
+              <CustomFormLabel htmlFor="area-color">Area Color</CustomFormLabel>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1,
+                  p: 1,
+                  border: '1px solid #ccc',
+                  borderRadius: 1,
+                  backgroundColor: '#f9f9f9',
+                  justifyContent: 'space-between',
+                }}
+              >
+                {colorPalette.map((color) => (
                   <Box
+                    key={color}
+                    onClick={() => setFormData(prev => ({ ...prev, colorArea: color }))}
                     sx={{
-                      width: 24,
-                      height: 24,
+                      width: 34,
+                      height: 34,
                       borderRadius: '50%',
-                      backgroundColor: formData.colorArea,
-                      border: '1px solid #aaa',
+                      cursor: 'pointer',
+                      backgroundColor: color,
+                      border:
+                        formData.colorArea === color
+                          ? '3px solid #000'
+                          : '2px solid rgba(0,0,0,0.2)',
+                      transition: 'all 0.25s ease',
+                      boxShadow:
+                        formData.colorArea === color
+                          ? '0 0 0 3px rgba(0,0,0,0.15)'
+                          : '0 1px 4px rgba(0,0,0,0.1)',
+                      '&:hover': {
+                        transform: 'scale(1.12)',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                      },
                     }}
                   />
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {formData.colorArea}
-                  </Typography>
-                </Box>
-              </Grid>
+                ))}
+              </Box>
 
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="area-restriction">Area Restriction</CustomFormLabel>
-                <CustomSelect
-                  id="restrictedStatus"
-                  name="restrictedStatus"
-                  value={formData.restrictedStatus || ''}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  required
-                >
-                  {restrictedStatus.map((status) => (
-                    // console.log(status),
-                    <MenuItem
-                      key={status.value}
-                      value={status.value}
-                      disabled={status.disabled || false}
-                    >
-                      {status.label}
-                    </MenuItem>
-                  ))}
-                </CustomSelect>
-              </Grid>
-              {/* <Grid size={12}>
-                    <CustomFormLabel htmlFor="nodes" required>
-                      Area Nodes
-                    </CustomFormLabel>
-                    <Box
-                      sx={{
-                        maxHeight: '200px',
-                        overflowY: 'auto',
-                        border: '1px solid #ccc',
-                        borderRadius: '4px',
-                        padding: '10px',
-                        marginTop: '10px',
-                      }}
-                    >
-                      {formData.areaShape && (
-                        <>
-                          {JSON.parse(formData.areaShape).map((node: any, index: number) => (
-                            <Box
-                              key={node.id || index}
-                              sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                padding: '5px 0',
-                                borderBottom: '1px solid #eee',
-                              }}
-                            >
-                              <Typography variant="body2">
-                                Node{index + 1}: ID: {node.id}, (x: {node.x}, y: {node.y}) (x_px:{' '}
-                                {node.x_px}, y_px: {node.y_px})
-                              </Typography>
-                            </Box>
-                          ))}
-                        </>
-                      )}
-                    </Box>
-                  </Grid> */}
+              {/* Selected Color Display */}
+              <Box
+                sx={{
+                  mt: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  justifyContent: 'center',
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: '50%',
+                    backgroundColor: formData.colorArea,
+                    border: '1px solid #aaa',
+                  }}
+                />
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {formData.colorArea}
+                </Typography>
+              </Box>
+            </Grid>
+
+            {/* Restriction Status */}
+            <Grid size={12}>
+              <CustomFormLabel htmlFor="area-restriction">Area Restriction</CustomFormLabel>
+              <CustomSelect
+                id="restrictedStatus"
+                name="restrictedStatus"
+                value={formData.restrictedStatus}
+                onChange={handleInputChange}
+                fullWidth
+                variant="outlined"
+                required
+              >
+                {restrictedStatus.map((status) => (
+                  <MenuItem
+                    key={status.value}
+                    value={status.value}
+                    disabled={status.disabled || false}
+                  >
+                    {status.label}
+                  </MenuItem>
+                ))}
+              </CustomSelect>
             </Grid>
           </Grid>
         </Box>
       </Box>
 
+      {/* Footer Actions */}
       <Box
         p={2}
-        bottom={0}
         sx={{
           borderTop: '1px solid',
           borderColor: 'divider',
           bgcolor: '#fafafa',
-          m: 0,
         }}
       >
         <Box display="flex" justifyContent="space-between">
           <Button variant="outlined" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button variant="contained" onClick={handleSave} disabled={!isFormValid()}>
+          <Button 
+            variant="contained" 
+            onClick={handleSave} 
+            disabled={!isFormValid()}
+          >
             Save
           </Button>
         </Box>

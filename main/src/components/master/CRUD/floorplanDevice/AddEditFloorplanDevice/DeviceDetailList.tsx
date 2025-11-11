@@ -6,222 +6,209 @@ import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
   EditUnsavedDevice,
-  // fetchFloorplanDevices,
   FloorplanDeviceType,
   SelectEditingFloorplanDevice,
   SelectFloorplanDevice,
   RevertDevice,
   SaveDevice,
 } from 'src/store/apps/crud/floorplanDevice';
-import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
-import { CCTVType, fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
-import { fetchAccessControls, AccessControlType } from 'src/store/apps/crud/accessControl';
-import { fetchBleReaders, bleReaderType } from 'src/store/apps/crud/bleReader';
-import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { useMaskedAreaList } from 'src/hooks/useMaskedArea';
+import { useAllUnassignedCCTV } from 'src/hooks/useCCTV';
+import { useAllUnassignedReaders } from 'src/hooks/useReader';
 import { DeviceType } from 'src/types/crud/input';
-import { fetchFloors } from 'src/store/apps/crud/floor';
 import { isEqual } from 'lodash';
 
+// Define form data type for better type safety
+interface DeviceFormData {
+  id: string;
+  name: string;
+  type: string;
+  floorplanId: string;
+  accessCctvId: string;
+  readerId: string;
+  accessControlId: string;
+  posX: number;
+  posY: number;
+  posPxX: number;
+  posPxY: number;
+  floorplanMaskedAreaId: string;
+  applicationId: string;
+  deviceStatus: string;
+  createdBy: string;
+  createdAt: string;
+  updatedBy: string;
+  updatedAt: string;
+}
+
 const DeviceDetailList = () => {
-  // const [open, setOpen] = useState(false);
+  const dispatch: AppDispatch = useDispatch();
+  
+  // Redux state for UI management
   const device = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.editingFloorplanDevice,
   );
-  const [formData, setFormData] = useState({
-    id: device?.id || '',
-    name: device?.name || '',
-    type: device?.type || '',
-    floorplanId: device?.floorplanId || '',
-    accessCctvId: device?.accessCctvId || '',
-    readerId: device?.readerId || '',
-    accessControlId: device?.accessControlId || '',
-    posX: device?.posX || 0,
-    posY: device?.posY || 0,
-    posPxX: device?.posPxX || 0,
-    posPxY: device?.posPxY || 0,
-    floorplanMaskedAreaId: device?.floorplanMaskedAreaId || '',
-    applicationId: device?.applicationId || localStorage.getItem('applicationId') || '',
-    deviceStatus: device?.deviceStatus || '',
-    createdBy: device?.createdBy || '',
-    createdAt: device?.createdAt || '',
-    updatedBy: device?.updatedBy || '',
-    updatedAt: device?.updatedAt || '',
+  const activeFloorplan = useSelector(
+    (state: RootState) => state.floorplanReducer.selectedFloorplan,
+  );
+  const unsavedDevices = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.unsavedFloorplanDevices,
+  );
+
+  // React Query hooks for data fetching
+  const { data: maskedAreaResponse } = useMaskedAreaList({
+    Draw: 1,
+    Start: 0,
+    Length: 999,
+    SortColumn: '',
+    SortDir: 'asc' as const,
+    SearchValue: '',
+    filters: {
+      FloorplanId: activeFloorplan?.id ? [activeFloorplan.id] : [],
+      FloorId: [],
+    },
   });
+
+  const { data: CCTVData = [] } = useAllUnassignedCCTV();
+  const { data: bleReaderData = [] } = useAllUnassignedReaders();
+
+  // Form state
+  const [formData, setFormData] = useState<DeviceFormData>({
+    id: '',
+    name: '',
+    type: '',
+    floorplanId: '',
+    accessCctvId: '',
+    readerId: '',
+    accessControlId: '',
+    posX: 0,
+    posY: 0,
+    posPxX: 0,
+    posPxY: 0,
+    floorplanMaskedAreaId: '',
+    applicationId: localStorage.getItem('applicationId') || '',
+    deviceStatus: '',
+    createdBy: '',
+    createdAt: '',
+    updatedBy: '',
+    updatedAt: '',
+  });
+
+  const [otherReader, setOtherReader] = useState<FloorplanDeviceType[]>([]);
+
+  // Update form data when device changes
   useEffect(() => {
-    // console.log('device', device);
     if (device) {
-      const newFormData = {
-        id: device?.id || '',
-        name: formData.name || '',
-        type: formData.type || '',
-        floorplanId: formData.floorplanId || '',
-        accessCctvId: formData.accessCctvId || '',
-        readerId: formData.readerId || '',
-        accessControlId: formData.accessControlId || '',
-        posX: device?.posX || 0,
-        posY: device?.posY || 0,
-        posPxX: device?.posPxX || 0,
-        posPxY: device?.posPxY || 0,
-        floorplanMaskedAreaId: device?.floorplanMaskedAreaId || '',
-        applicationId: formData.applicationId || localStorage.getItem('applicationId') || '',
-        deviceStatus: formData.deviceStatus || '',
-        createdBy: formData.createdBy || '',
-        createdAt: formData.createdAt || '',
-        updatedBy: formData.updatedBy || '',
-        updatedAt: formData.updatedAt || '',
+      const newFormData: DeviceFormData = {
+        id: device.id || '',
+        name: device.name || '',
+        type: device.type || '',
+        floorplanId: device.floorplanId || '',
+        accessCctvId: device.accessCctvId || '',
+        readerId: device.readerId || '',
+        accessControlId: device.accessControlId || '',
+        posX: device.posX || 0,
+        posY: device.posY || 0,
+        posPxX: device.posPxX || 0,
+        posPxY: device.posPxY || 0,
+        floorplanMaskedAreaId: device.floorplanMaskedAreaId || '',
+        applicationId: device.applicationId || localStorage.getItem('applicationId') || '',
+        deviceStatus: device.deviceStatus || '',
+        createdBy: device.createdBy || '',
+        createdAt: device.createdAt || '',
+        updatedBy: device.updatedBy || '',
+        updatedAt: device.updatedAt || '',
       };
-      // console.log('newFormData', newFormData);
+
       if (!isEqual(formData, newFormData)) {
         setFormData(newFormData);
       }
     }
-    // console.log('formData', formData);
-  }, [device]);
+  }, [device]); // Remove formData from dependencies to avoid infinite loops
 
-  const dispatch: AppDispatch = useDispatch();
-  const floorplanData: FloorplanType[] = useSelector(
-    (state: RootState) => state.floorplanReducer.floorplans,
-  );
-  // const maskedAreaData: MaskedAreaType[] = useSelector((state: RootState) =>
-  //   state.maskedAreaReducer.maskedAreas.filter((area) => area.floorplanId === formData.floorplanId),
-  // );
-  const maskedAreaData: MaskedAreaType[] = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
-  );
-
-  const CCTVData: CCTVType[] = useSelector((state: RootState) => state.CCTVReducer.cctvs);
-  const accessControlData: AccessControlType[] = useSelector(
-    (state: RootState) => state.accessControlReducer.accessControls,
-  );
-  const bleReaderData: bleReaderType[] = useSelector(
-    (state: RootState) => state.bleReaderReducer.bleReaderAll,
-  );
-
-  // const bleNodeData = useSelector((state: RootState) => state.bleNodeReducer.bleNodes);
-  // const [testNode, setTestNode] = useState<BleNodeType[]>([]);
-  // const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
-  // const [selectedFloor, setSelectedFloor] = useState<floorType>();
-  // const [selectedFloorPlan, setSelectedFloorPlan] = useState<FloorplanType>();
-  const unsavedDevices = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.unsavedFloorplanDevices,
-  );
-  const [otherReader, setOtherReader] = useState<FloorplanDeviceType[]>([]); // State to hold other devices
-  // const [scales, setScale] = useState<number>(1);
-  // === Filter out already-registered items (but include the one belonging to the current device)
-  const usedCCTVIds = unsavedDevices
-    .filter((d) => d.type === 'Cctv' && d.id !== formData.id)
-    .map((d) => d.accessCctvId);
-
-  const usedAccessControlIds = unsavedDevices
-    .filter((d) => d.type === 'AccessDoor' && d.id !== formData.id)
-    .map((d) => d.accessControlId);
-
-  const usedBleReaderIds = unsavedDevices
-    .filter((d) => d.type === 'BleReader' && d.id !== formData.id)
-    .map((d) => d.readerId);
-
-  const availableCCTVs = CCTVData.filter(
-    (cctv) => !usedCCTVIds.includes(cctv.id) || cctv.id === formData.accessCctvId,
-  );
-
-  const availableAccessControls = accessControlData.filter(
-    (ctrl) => !usedAccessControlIds.includes(ctrl.id) || ctrl.id === formData.accessControlId,
-  );
-
-  const availableBleReaders = bleReaderData.filter(
-    (reader) => !usedBleReaderIds.includes(reader.id) || reader.id === formData.readerId,
-  );
+  // Update other readers when floorplan changes
   useEffect(() => {
-    // dispatch(fetchFloorplanDevices());
-    // dispatch(GetUnsavedFloorplanDevices());
-    // dispatch(fetchApplications());
-    dispatch(fetchAccessCCTV());
-    dispatch(fetchAccessControls());
-    dispatch(fetchBleReaders());
-    dispatch(fetchMaskedAreas());
-    dispatch(fetchFloorplan());
-    dispatch(fetchFloors());
-    // dispatch(fetchNodes());
-  }, [dispatch]);
-
-  useEffect(() => {
-    const selectedFloorplanData = floorplanData.find(
-      (floorplan) => floorplan.id === formData.floorplanId,
-    );
-    // const selectedFloorData = floorData.find((floor) => floor.id === selectedFloorPlan?.floorId);
-    // setSelectedFloor(selectedFloorData);
-    // setSelectedFloorPlan(selectedFloorplanData);
-    // if (selectedFloorData) {
-    //   setScale(selectedFloorData.meterPerPx || 1); // Set the scale based on the selected floor's scale
-    // }
-    if (selectedFloorplanData) {
+    if (activeFloorplan?.id) {
       const otherReaderData = unsavedDevices.filter(
         (reader: FloorplanDeviceType) =>
-          reader.floorplanId === selectedFloorplanData.id &&
+          reader.floorplanId === activeFloorplan.id &&
           reader.id !== formData.id &&
           reader.type === 'BleReader',
       );
       setOtherReader(otherReaderData);
     }
-  }, [formData.floorplanId]);
+  }, [activeFloorplan?.id, formData.id, unsavedDevices]);
 
-  // useEffect(() => {
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     posX: formData.posPxX * scales,
-  //     posY: formData.posPxY * scales,
-  //   }));
-  // }, [formData.posPxX, formData.posPxY, scales]);
+  // Filter out already-registered items (but include the one belonging to the current device)
+  const usedCCTVIds = unsavedDevices
+    .filter((d) => d.type === 'Cctv' && d.id !== formData.id)
+    .map((d) => d.accessCctvId);
 
-  // const [unsavedNodes, setUnsavedNodes] = useState<BleNodeType[]>([]);
+  const usedBleReaderIds = unsavedDevices
+    .filter((d) => d.type === 'BleReader' && d.id !== formData.id)
+    .map((d) => d.readerId);
+
+  // Since we're using unassigned hooks, we only need to filter by unsaved devices
+  const availableCCTVs = CCTVData.filter(
+    (cctv) => !usedCCTVIds.includes(cctv.id) || cctv.id === formData.accessCctvId,
+  );
+
+  const availableBleReaders = bleReaderData.filter(
+    (reader) => !usedBleReaderIds.includes(reader.id) || reader.id === formData.readerId,
+  );
+
+  // Derived data
+  const maskedAreaData = maskedAreaResponse?.data || [];
+
   // Define required fields
   const requiredFields = ['name', 'type', 'floorplanMaskedAreaId'];
 
   // Validation function
   const isFormValid = () => {
     return requiredFields.every(
-      (field) => formData[field as keyof typeof formData]?.toString().trim() !== '',
+      (field) => formData[field as keyof DeviceFormData]?.toString().trim() !== '',
     );
   };
 
-  // const handleClickOpen = () => {
-  //   console.log('bleNodeData', bleNodeData);
-  //   setOpen(true);
-  // };
-
   const handleClose = () => {
-    // setOpen(false);
-    setFormData({
-      id: device?.id || '',
-      name: device?.name || '',
-      type: device?.type || '',
-      floorplanId: device?.floorplanId || '',
-      accessCctvId: device?.accessCctvId || '',
-      readerId: device?.readerId || '',
-      accessControlId: device?.accessControlId || '',
-      posX: device?.posX || 0,
-      posY: device?.posY || 0,
-      posPxX: device?.posPxX || 0,
-      posPxY: device?.posPxY || 0,
-      floorplanMaskedAreaId: device?.floorplanMaskedAreaId || '',
-      applicationId: device?.applicationId || localStorage.getItem('applicationId') || '',
-      deviceStatus: device?.deviceStatus || '',
-      createdBy: device?.createdBy || '',
-      createdAt: device?.createdAt || '',
-      updatedBy: device?.updatedBy || '',
-      updatedAt: device?.updatedAt || '',
-    });
-    dispatch(SelectEditingFloorplanDevice(null)); // Reset the selected device in the store
-    dispatch(SelectFloorplanDevice(null)); // Reset the selected device in the store
+    // Reset to current device data or empty form
+    if (device) {
+      setFormData({
+        id: device.id || '',
+        name: device.name || '',
+        type: device.type || '',
+        floorplanId: device.floorplanId || '',
+        accessCctvId: device.accessCctvId || '',
+        readerId: device.readerId || '',
+        accessControlId: device.accessControlId || '',
+        posX: device.posX || 0,
+        posY: device.posY || 0,
+        posPxX: device.posPxX || 0,
+        posPxY: device.posPxY || 0,
+        floorplanMaskedAreaId: device.floorplanMaskedAreaId || '',
+        applicationId: device.applicationId || localStorage.getItem('applicationId') || '',
+        deviceStatus: device.deviceStatus || '',
+        createdBy: device.createdBy || '',
+        createdAt: device.createdAt || '',
+        updatedBy: device.updatedBy || '',
+        updatedAt: device.updatedAt || '',
+      });
+    }
+    dispatch(SelectEditingFloorplanDevice(null));
+    dispatch(SelectFloorplanDevice(null));
   };
 
   const handleSave = async () => {
-    try {
-      await dispatch(EditUnsavedDevice(formData));
-      await dispatch(SaveDevice(formData.id)); // Save the device
+    if (!isFormValid()) return;
 
+    try {
+      // Update the unsaved device in Redux store
+      dispatch(EditUnsavedDevice(formData));
+      
+      // Mark as saved in Redux (local state management)
+      dispatch(SaveDevice(formData.id));
+
+      // Calculate testNodes for BleReader (if applicable)
       if (formData.type === 'BleReader') {
-        // Calculate testNodes
         const newTestNodes: any[] = [];
         otherReader.forEach((otherReader) => {
           if (otherReader.id !== formData.id) {
@@ -231,18 +218,17 @@ const DeviceDetailList = () => {
             );
 
             newTestNodes.push({
-              id: `${formData.id}-${otherReader.id}`, // Unique ID for the testNode
+              id: `${formData.id}-${otherReader.id}`,
               startPos: `(${formData.posX}, ${formData.posY})`,
               endPos: `(${otherReader.posX}, ${otherReader.posY})`,
               distance,
             });
           }
         });
-
-        // setTestNode(newTestNodes); // Update the testNode state
-        // console.log('Test nodes created:', newTestNodes);
+        // You can store newTestNodes in state if needed
+        console.log('Test nodes created:', newTestNodes);
       }
-      console.log('Device saved successfully');
+
       handleClose();
     } catch (error) {
       console.error('Error saving device:', error);
@@ -250,7 +236,9 @@ const DeviceDetailList = () => {
   };
 
   const handleCancel = () => {
-    dispatch(RevertDevice(formData.id)); // Revert the unsaved device to its original state
+    if (formData.id) {
+      dispatch(RevertDevice(formData.id));
+    }
     handleClose();
   };
 
@@ -260,8 +248,34 @@ const DeviceDetailList = () => {
     const { value, name, id } = e.target as
       | HTMLInputElement
       | { value: string; name: string; id?: string };
-    setFormData((prev) => ({ ...prev, [id || name]: value }));
+    
+    const fieldName = (id || name) as keyof DeviceFormData;
+    
+    setFormData(prev => ({ 
+      ...prev, 
+      [fieldName]: value 
+    }));
   };
+
+  // If no device is selected for editing, don't render the component
+  if (!device) {
+    return (
+      <Box
+        sx={{
+          height: '80vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'background.paper',
+        }}
+      >
+        <Typography variant="h6" color="text.secondary">
+          No device selected for editing
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -270,18 +284,22 @@ const DeviceDetailList = () => {
         minHeight: 0,
         gridTemplateRows: 'auto 1fr auto',
         overflow: 'hidden',
-        bgColor: 'background.paper',
+        bgcolor: 'background.paper',
         borderColor: 'divider',
       }}
     >
+      {/* Header */}
       <Box p={3} sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
         <Typography variant="h5" fontWeight={700} mb={2}>
           Edit Device Details
         </Typography>
       </Box>
+
+      {/* Form Content */}
       <Box sx={{ minHeight: 0, overflow: 'auto' }}>
         <Box pl={3} pr={1}>
           <Grid container spacing={1}>
+            {/* Device Name */}
             <Grid size={12}>
               <CustomFormLabel htmlFor="device-name">Device Name</CustomFormLabel>
               <CustomTextField
@@ -291,13 +309,16 @@ const DeviceDetailList = () => {
                 variant="outlined"
                 fullWidth
                 required
+                placeholder="Enter device name"
               />
             </Grid>
+
+            {/* Masked Area */}
             <Grid size={12}>
               <CustomFormLabel htmlFor="masked-area-id">Masked Area</CustomFormLabel>
               <CustomSelect
                 name="floorplanMaskedAreaId"
-                value={formData.floorplanMaskedAreaId || ''}
+                value={formData.floorplanMaskedAreaId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
@@ -311,12 +332,15 @@ const DeviceDetailList = () => {
                 ))}
               </CustomSelect>
             </Grid>
+
+            {/* Device Type */}
             <Grid size={12}>
               <CustomFormLabel htmlFor="device-type">Device Type</CustomFormLabel>
               <CustomSelect
                 name="type"
-                value={formData.type || ''}
+                value={formData.type}
                 onChange={(e: SelectChangeEvent) => {
+                  // Update both Redux and local state
                   dispatch(EditUnsavedDevice({ ...formData, type: e.target.value }));
                   handleInputChange(e);
                 }}
@@ -324,23 +348,25 @@ const DeviceDetailList = () => {
                 variant="outlined"
                 required
               >
-                {DeviceType.map((device) => (
+                {DeviceType.map((deviceType) => (
                   <MenuItem
-                    key={device.value}
-                    value={device.value}
-                    disabled={device.disabled || false}
+                    key={deviceType.value}
+                    value={deviceType.value}
+                    disabled={deviceType.disabled || false}
                   >
-                    {device.label}
+                    {deviceType.label}
                   </MenuItem>
                 ))}
               </CustomSelect>
             </Grid>
+
+            {/* CCTV Selection (only for Cctv type) */}
             {formData.type === 'Cctv' && (
               <Grid size={12}>
                 <CustomFormLabel htmlFor="access-cctv-id">Access CCTV</CustomFormLabel>
                 <CustomSelect
                   name="accessCctvId"
-                  value={formData.accessCctvId || ''}
+                  value={formData.accessCctvId}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -353,30 +379,14 @@ const DeviceDetailList = () => {
                 </CustomSelect>
               </Grid>
             )}
-            {formData.type === 'AccessDoor' && (
-              <Grid size={12}>
-                <CustomFormLabel htmlFor="access-control-id">Access Control</CustomFormLabel>
-                <CustomSelect
-                  name="accessControlId"
-                  value={formData.accessControlId || ''}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                >
-                  {availableAccessControls.map((accessControl) => (
-                    <MenuItem key={accessControl.id} value={accessControl.id}>
-                      {accessControl.name}
-                    </MenuItem>
-                  ))}
-                </CustomSelect>
-              </Grid>
-            )}
+
+            {/* BLE Reader Selection (only for BleReader type) */}
             {formData.type === 'BleReader' && (
               <Grid size={12}>
                 <CustomFormLabel htmlFor="reader-id">BLE Reader</CustomFormLabel>
                 <CustomSelect
                   name="readerId"
-                  value={formData.readerId || ''}
+                  value={formData.readerId}
                   onChange={handleInputChange}
                   fullWidth
                   variant="outlined"
@@ -389,12 +399,13 @@ const DeviceDetailList = () => {
                 </CustomSelect>
               </Grid>
             )}
+
+            {/* Position Fields (read-only) */}
             <Grid size={6}>
               <CustomFormLabel htmlFor="pos-x">Position X</CustomFormLabel>
               <CustomTextField
                 id="posX"
                 value={formData.posX}
-                // onChange={handleInputChange}
                 variant="outlined"
                 fullWidth
                 disabled
@@ -405,7 +416,6 @@ const DeviceDetailList = () => {
               <CustomTextField
                 id="posY"
                 value={formData.posY}
-                // onChange={handleInputChange}
                 variant="outlined"
                 fullWidth
                 disabled
@@ -415,8 +425,7 @@ const DeviceDetailList = () => {
               <CustomFormLabel htmlFor="pos-px-x">Pos Pixel X</CustomFormLabel>
               <CustomTextField
                 id="posPxX"
-                placeholder={formData.posPxX}
-                // onChange={handleInputChange}
+                value={formData.posPxX}
                 variant="outlined"
                 fullWidth
                 disabled
@@ -426,8 +435,7 @@ const DeviceDetailList = () => {
               <CustomFormLabel htmlFor="pos-px-y">Pos Pixel Y</CustomFormLabel>
               <CustomTextField
                 id="posPxY"
-                placeholder={formData.posPxY}
-                // onChange={handleInputChange}
+                value={formData.posPxY}
                 variant="outlined"
                 fullWidth
                 disabled
@@ -436,21 +444,25 @@ const DeviceDetailList = () => {
           </Grid>
         </Box>
       </Box>
+
+      {/* Footer Actions */}
       <Box
         p={2}
-        bottom={0}
         sx={{
           borderTop: '1px solid',
           borderColor: 'divider',
           bgcolor: '#fafafa',
-          m: 0,
         }}
       >
         <Box display="flex" justifyContent="space-between">
           <Button variant="outlined" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button variant="contained" onClick={handleSave} disabled={!isFormValid()}>
+          <Button 
+            variant="contained" 
+            onClick={handleSave} 
+            disabled={!isFormValid()}
+          >
             Save
           </Button>
         </Box>

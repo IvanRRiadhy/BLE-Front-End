@@ -20,6 +20,8 @@ import FloorplanDeviceList2 from 'src/components/master/CRUD/floorplanDevice/flo
 import FloorplanDeviceImport from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceImport';
 import FloorplanDeviceExport from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceExport';
 import FloorplanFilter from 'src/components/master/CRUD/floorplan/FloorplanFilter';
+import { useFloorplanStatus } from 'src/hooks/useFloorplan';
+import { useFloorplanDeviceStatus } from 'src/hooks/useFloorplanDevice';
 interface cardType {
   icon?: string;
   title: string;
@@ -33,11 +35,8 @@ const FloorplanDevice = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const floorplanCount = useSelector((state: RootState) => state.floorplanReducer.floorplanTotalCount);
-  const hasLoaded = useSelector((state: RootState) => state.floorplanReducer.hasLoaded);
-  const deviceCount = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceAll.length,
-  );
+  const {filteredCount: floorplanCount, hasLoaded} = useFloorplanStatus();
+  const {allFloorplanDeviceCount: deviceCount} = useFloorplanDeviceStatus();
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {

@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import DepartmentList from 'src/components/master/CRUD/department/DepartmentList';
 import AddEditDepartment from 'src/components/master/CRUD/department/AddEditDepartment';
 import { useDepartmentStatus } from 'src/hooks/useDepartment';
+import BulkAddEditDepartment from 'src/components/master/CRUD/department/BulkAddEditDepartment';
 
 interface cardType {
   icon?: string;
@@ -93,7 +94,10 @@ const Department = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Department List" codeModel={<AddEditDepartment type="add" />}>
+          <ParentCard title="Department List" codeModel={[
+            <BulkAddEditDepartment key="bulkAdd" type="add" />,
+            <AddEditDepartment key="add" type="add" />
+            ]}>
             <DepartmentList />
           </ParentCard>
         </Drawer>

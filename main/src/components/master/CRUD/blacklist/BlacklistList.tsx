@@ -34,7 +34,8 @@ import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import AddEditBlacklist from './AddEditBlacklist';
 import { defaultBlaclistFilter } from 'src/store/apps/defaultForm';
-import { useBlacklistList } from 'src/hooks/useBlacklist';
+import { useBlacklistList, useDeleteBlacklist } from 'src/hooks/useBlacklist';
+import toast from 'react-hot-toast';
 
 const columns = [
   { label: 'Blacklisted Visitor', field: 'Visitor.Name', sortAble: true },
@@ -108,6 +109,7 @@ const BlacklistList = () => {
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedBList, setSelectedBList] = useState<blacklistType | null>(null);
+  const deleteMutation = useDeleteBlacklist();
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (bl: blacklistType) => {
     setSelectedBList(bl);
@@ -121,9 +123,15 @@ const BlacklistList = () => {
   };
 
   // Confirm delete action
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (selectedBList) {
-      dispatch(deleteBlacklist(selectedBList.id));
+      try {
+        await deleteMutation.mutateAsync(selectedBList.id);
+        toast.success('Data Deleted');
+      } catch (error) {
+        toast.error('Delete failed'); 
+        console.error(error);
+      }
     }
     handleCloseDeleteDialog();
   };
@@ -221,58 +229,56 @@ const BlacklistList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {queryLoading ? (
-                    <></>
-                  ) : (
-                    blacklistData.map((blacklist: blacklistType, index: any) => (
-                      <TableRow key={blacklist.id}>
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            left: 0,
-                            background: 'white',
-                            zIndex: 1,
-                            width: 35, // Fixed width
-                            minWidth: 35,
-                            maxWidth: 35,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          {' '}
-                          {index + 1 + page * rowsPerPage}
-                        </TableCell>
-                        <TableCell>
-                          {blacklist.member?.name ?? blacklist.visitor?.name ?? 'Unknown Person'}
-                        </TableCell>
-                        <TableCell>{blacklist.floorplanMaskedArea?.name}</TableCell>
-
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            right: 0,
-                            background: 'white',
-                            zIndex: 2,
-                            display: 'flex',
-                            gap: 1,
-                            alignItems: 'center',
-                            width: 150, // Fixed width
-                            minWidth: 150,
-                            maxWidth: 150,
-                          }}
-                        >
-                          <AddEditBlacklist type="edit" blacklist={blacklist} />
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleOpenDeleteDialog(blacklist)}
+                  {queryLoading
+                    ? renderSkeletonRows(rowsPerPage)
+                    : blacklistData.map((blacklist: blacklistType, index: any) => (
+                        <TableRow key={blacklist.id}>
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              left: 0,
+                              background: 'white',
+                              zIndex: 1,
+                              width: 35, // Fixed width
+                              minWidth: 35,
+                              maxWidth: 35,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
                           >
-                            <IconTrash size={20} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
+                            {' '}
+                            {index + 1 + page * rowsPerPage}
+                          </TableCell>
+                          <TableCell>
+                            {blacklist.member?.name ?? blacklist.visitor?.name ?? 'Unknown Person'}
+                          </TableCell>
+                          <TableCell>{blacklist.floorplanMaskedArea?.name}</TableCell>
+
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              right: 0,
+                              background: 'white',
+                              zIndex: 2,
+                              display: 'flex',
+                              gap: 1,
+                              alignItems: 'center',
+                              width: 150, // Fixed width
+                              minWidth: 150,
+                              maxWidth: 150,
+                            }}
+                          >
+                            <AddEditBlacklist type="edit" blacklist={blacklist} />
+                            <IconButton
+                              color="error"
+                              size="small"
+                              onClick={() => handleOpenDeleteDialog(blacklist)}
+                            >
+                              <IconTrash size={20} />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                 </TableBody>
               </Table>
             </TableContainer>

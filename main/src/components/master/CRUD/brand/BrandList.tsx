@@ -129,16 +129,6 @@ const BrandList = () => {
   const handleConfirmDelete = async () => {
     if (selectedBrand) {
       setLoading(true);
-      // try {
-      //   const result = await dispatch(deleteBrand(selectedBrand.id));
-      //   if (result && result.type && result.type.endsWith('/fulfilled')) {
-      //     await dispatch(fetchBrandDT(brandFilter));
-      //     toast.success('Data Deleted');
-      //   }
-      // } catch (error) {
-      //   toast.error('Delete Data Unsuccessful');
-      //   console.error('Error deleting Brand:', error);
-      // }
       try {
         await deleteMutation.mutateAsync(selectedBrand.id);
         toast.success('Data Deleted');

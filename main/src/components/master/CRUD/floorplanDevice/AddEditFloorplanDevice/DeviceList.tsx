@@ -3,12 +3,8 @@ import { useSelector, useDispatch, AppDispatch, RootState } from 'src/store/Stor
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import { fetchFloorplan, fetchFloorplanDT } from 'src/store/apps/crud/floorplan';
 import {
-  addFloorplanDevice,
   AddUnsavedDevice,
-  deleteFloorplanDevice,
   DeleteUnsavedDevice,
-  editFloorplanDevice,
-  fetchFloorplanDevices,
   FloorplanDeviceType,
   GetUnsavedFloorplanDevices,
   ResetState,
@@ -16,6 +12,12 @@ import {
   SelectEditingFloorplanDevice,
   SelectFloorplanDevice,
 } from 'src/store/apps/crud/floorplanDevice';
+import {
+  useFloorplanDeviceList,
+  useAddFloorplanDevice,
+  useEditFloorplanDevice,
+  useDeleteFloorplanDevice,
+} from 'src/hooks/useFloorplanDevice';
 import AddIcon from '@mui/icons-material/Add';
 import { Box } from '@mui/system';
 import {
@@ -39,19 +41,16 @@ import { useNavigate } from 'react-router';
 import { fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
 import { fetchAccessControls } from 'src/store/apps/crud/accessControl';
 import { fetchBleReaders } from 'src/store/apps/crud/bleReader';
-import { fetchFloorDT } from 'src/store/apps/crud/floor';
 import toast from 'react-hot-toast';
 
 const DeviceList = () => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
-  // const hasLoaded = useSelector((state: RootState) => state.floorplanDeviceReducer.hasLoaded);
+  
+  // Redux state for UI management
   const activeFloorplan = useSelector(
     (state: RootState) => state.floorplanReducer.selectedFloorplan,
-  );
-  const originalDevices = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.originalFloorplanDevices,
   );
   const selectedDevice = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.selectedFloorplanDevice,
@@ -62,25 +61,56 @@ const DeviceList = () => {
   const editingDevice = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.editingFloorplanDevice,
   );
-  const filteredUnsavedDevices = unsavedDevices.filter(
-    (device: FloorplanDeviceType) => device.floorplanId === activeFloorplan?.id,
-  );
-  const filteredOriginalDevices = originalDevices.filter(
-    (device: FloorplanDeviceType) => device.floorplanId === activeFloorplan?.id,
-  );
+  const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
+  
+  // Fix: Provide default empty arrays for potentially undefined values
   const deletedDevice = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.deletedFloorplanDevice,
-  );
+    (state: RootState) => state.floorplanDeviceReducer.deletedFloorplanDevice
+  ) || [];
   const addedDevice = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.addedFloorplanDevice,
-  );
+    (state: RootState) => state.floorplanDeviceReducer.addedFloorplanDevice
+  ) || [];
 
+  // External data from Redux (keep these as they're used for new device defaults)
   const firstCCTV = useSelector((state: RootState) => state.CCTVReducer.cctvs[0]);
   const firstAccessControl = useSelector(
     (state: RootState) => state.accessControlReducer.accessControls[0],
   );
   const firstBleReader = useSelector((state: RootState) => state.bleReaderReducer.bleReaders[0]);
-  const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
+
+  // React Query hooks for server state
+  const {
+    data: floorplanDevicesResponse,
+    isLoading: isDevicesLoading,
+    refetch: refetchFloorplanDevices,
+  } = useFloorplanDeviceList({
+    Draw: 1,
+    Start: 0,
+    Length: 999,
+    SortColumn: '',
+    SortDir: 'asc',
+    SearchValue: '',
+    filters: {
+      FloorplanId: activeFloorplan?.id ? [activeFloorplan.id] : [],
+      FloorplanMaskedAreaId: [],
+    },
+  });
+
+  // React Query mutations
+  const addMutation = useAddFloorplanDevice();
+  const editMutation = useEditFloorplanDevice();
+  const deleteMutation = useDeleteFloorplanDevice();
+
+  // Derived data from React Query
+  const floorplanDevicesData = floorplanDevicesResponse?.data || [];
+  const filteredOriginalDevices = floorplanDevicesData; // Already filtered by backend
+
+  // Filter unsaved devices for current floorplan (client-side for local changes)
+  const filteredUnsavedDevices = unsavedDevices.filter(
+    (device: FloorplanDeviceType) => device.floorplanId === activeFloorplan?.id,
+  );
+
+  // State for dialogs
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState('');
   const [pendingDeviceId, setPendingDeviceId] = useState<string | null>(null);
@@ -88,187 +118,214 @@ const DeviceList = () => {
   const [deleteDeviceId, setDeleteDeviceId] = useState<string | null>(null);
   const [cancelEditDialogOpen, setCancelEditDialogOpen] = useState(false);
 
+  // New device template
+  const newDevice: FloorplanDeviceType = {
+    id: `temp-${Date.now()}`,
+    name: 'New Device',
+    type: '',
+    floorplanId: activeFloorplan?.id || '',
+    accessCctvId: firstCCTV?.id || '',
+    readerId: firstBleReader?.id || '',
+    accessControlId: firstAccessControl?.id || '',
+    posX: 10,
+    posY: 10,
+    posPxX: 10,
+    posPxY: 10,
+    floorplanMaskedAreaId: '',
+    applicationId: activeFloorplan?.applicationId || localStorage.getItem('applicationId') || '',
+    deviceStatus: 'Active',
+    createdAt: new Date().toISOString(),
+    createdBy: 'admin',
+    updatedAt: new Date().toISOString(),
+    updatedBy: 'admin',
+  };
+
+  // Initialize unsaved devices when data loads
   useEffect(() => {
-    dispatch(fetchFloorplanDevices());
+    if (floorplanDevicesData.length > 0) {
+      dispatch(GetUnsavedFloorplanDevices());
+    }
+  }, [floorplanDevicesData, dispatch]);
+
+  // Fetch external data on mount
+  useEffect(() => {
     dispatch(fetchFloorplan());
     dispatch(fetchAccessCCTV());
     dispatch(fetchAccessControls());
     dispatch(fetchBleReaders());
   }, [dispatch]);
-  useEffect(() => {
-    dispatch(GetUnsavedFloorplanDevices());
-    // console.log('Unsaved devices fetched:', unsavedDevices);
-    // console.log('Original devices fetched:', originalDevices);
-  }, [originalDevices]);
-
-
-  const newDevice: FloorplanDeviceType = {
-    id: `temp-${Date.now()}`, // Generate a temporary unique ID
-    name: 'New Device',
-    type: '', // Default type, can be updated later
-    floorplanId: activeFloorplan?.id || '',
-    accessCctvId: firstCCTV?.id || '',
-    readerId: firstBleReader?.id || '',
-    accessControlId: firstAccessControl?.id || '',
-    posX: 10, // Default position
-    posY: 10, // Default position
-    posPxX: 10,
-    posPxY: 10,
-    floorplanMaskedAreaId: '',
-    applicationId: activeFloorplan?.applicationId || localStorage.getItem('applicationId') || '',
-    deviceStatus: 'Active', // Mark as unsaved
-    createdAt: new Date().toISOString(),
-    createdBy: 'admin', // Replace with actual user ID
-    updatedAt: new Date().toISOString(),
-    updatedBy: 'admin', // Replace with actual user ID
-  };
 
   const handleAddDeviceClick = () => {
     if (editingDevice) {
-      setPendingDeviceId(newDevice.id); // Store the device ID for later use
-      setDialogType('add'); // Set the dialog type to 'select'
-      setConfirmDialogOpen(true); // Open the confirmation dialog
+      setPendingDeviceId(newDevice.id);
+      setDialogType('add');
+      setConfirmDialogOpen(true);
       return;
     }
-    dispatch(AddUnsavedDevice(newDevice)); // Add the new device to the unsaved devices list
+    dispatch(AddUnsavedDevice(newDevice));
     dispatch(SelectFloorplanDevice(newDevice.id));
     dispatch(SelectEditingFloorplanDevice(newDevice.id));
-
-    // console.log('New device added:', newDevice);
   };
 
   const handleOnClick = (id: string) => {
-    if (selectedDevice?.id === id) return; // Prevent re-selecting the same device
+    if (selectedDevice?.id === id) return;
     if (editingDevice) {
-      setPendingDeviceId(id); // Store the device ID for later use
-      setDialogType('select'); // Set the dialog type to 'select'
-      setConfirmDialogOpen(true); // Open the confirmation dialog
+      setPendingDeviceId(id);
+      setDialogType('select');
+      setConfirmDialogOpen(true);
       return;
     }
     dispatch(SelectFloorplanDevice(id));
   };
+
   const handleConfirmProceed = () => {
-    dispatch(RevertDevice(editingDevice?.id || '')); // Revert the editing device to its original state
+    dispatch(RevertDevice(editingDevice?.id || ''));
     if (pendingDeviceId) {
       if (dialogType === 'add') {
-        dispatch(AddUnsavedDevice(newDevice)); // Add the new device to the unsaved devices list
+        dispatch(AddUnsavedDevice(newDevice));
         dispatch(SelectFloorplanDevice(newDevice.id));
         dispatch(SelectEditingFloorplanDevice(newDevice.id));
       }
       if (dialogType === 'select') {
-        dispatch(SelectFloorplanDevice(pendingDeviceId)); // Select the pending device
+        dispatch(SelectFloorplanDevice(pendingDeviceId));
         dispatch(SelectEditingFloorplanDevice(null));
       }
     }
-
-    setConfirmDialogOpen(false); // Close the dialog
-    setPendingDeviceId(null); // Clear the pending device ID
+    setConfirmDialogOpen(false);
+    setPendingDeviceId(null);
   };
 
   const handleCancelProceed = () => {
-    setConfirmDialogOpen(false); // Close the dialog
-    setPendingDeviceId(null); // Clear the pending device ID
+    setConfirmDialogOpen(false);
+    setPendingDeviceId(null);
   };
+
   const handleOnEditClick = (id: string) => {
     dispatch(SelectEditingFloorplanDevice(id));
   };
+
   const handleOpenDeleteDialog = (id: string) => {
     setDeleteDeviceId(id);
     setDeleteDialogOpen(true);
   };
+
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
     setDeleteDeviceId(null);
   };
+
   const handleConfirmDelete = () => {
     if (deleteDeviceId) {
-      dispatch(DeleteUnsavedDevice(deleteDeviceId)); // Delete the device from the unsaved devices list
+      dispatch(DeleteUnsavedDevice(deleteDeviceId));
     }
-    dispatch(SelectFloorplanDevice(null)); // Deselect the device
+    dispatch(SelectFloorplanDevice(null));
     dispatch(SelectEditingFloorplanDevice(null));
-    handleCloseDeleteDialog(); // Close the delete dialog
+    handleCloseDeleteDialog();
   };
 
   const handleOpenCancelEditingDialog = () => {
     setCancelEditDialogOpen(true);
   };
+
   const handleCloseCancelEditingDialog = () => {
     setCancelEditDialogOpen(false);
   };
+
   const handleCloseEditing = () => {
     dispatch(ResetState());
     navigate('/master/device');
   };
 
+  // OPTIMIZED Save Function using React Query mutations
   const handleSaveEdits = async () => {
     setIsSaving(true);
-    // Get the current state of devices
-    // const unsavedDevicesMap = new Map(filteredUnsavedDevices.map((device) => [device.id, device]));
-    const floorplanDevicesMap = new Map(
-      filteredOriginalDevices.map((device: FloorplanDeviceType) => [device.id, device]),
-    );
-    // 1. Edit devices: Check for devices with different fields
-    const devicesToEdit = filteredUnsavedDevices.filter((unsavedDevice: FloorplanDeviceType) => {
-      const originalDevice = floorplanDevicesMap.get(unsavedDevice.id);
-      return originalDevice && JSON.stringify(unsavedDevice) !== JSON.stringify(originalDevice);
-    });
-    // console.log('devicesToEdit', devicesToEdit);
+
     try {
-      let resultAdd, resultEdit, resultDelete;
-      // Call editFloorplanDevice for each device that needs editing
-      for (const device of devicesToEdit) {
-        resultEdit = await dispatch(editFloorplanDevice(device));
+      const originDevice = new Map(
+        filteredOriginalDevices.map((device: FloorplanDeviceType) => [device.id, device]),
+      );
+
+      // 1. Identify edited devices
+      const devicesToEdit = filteredUnsavedDevices.filter((unsavedDevice: FloorplanDeviceType) => {
+        const originalDevice = originDevice.get(unsavedDevice.id);
+        return originalDevice && JSON.stringify(unsavedDevice) !== JSON.stringify(originalDevice);
+      });
+
+      // Group operations by type
+      const operations = {
+        edits: devicesToEdit,
+        additions: addedDevice,
+        deletions: deletedDevice,
+      };
+
+      // Execute operations with better error handling
+      let successCount = 0;
+      let errorCount = 0;
+
+      // Process edits
+      for (const device of operations.edits) {
+        try {
+          await editMutation.mutateAsync(device);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to edit device ${device.id}:`, error);
+          errorCount++;
+        }
       }
 
-      // 2. Add devices: Check for devices in unsavedDevices but not in floorplanDevices
-      if (addedDevice) {
-        // console.log('addedDevice', addedDevice);
-        // Call addFloorplanDevice for each new device
-        for (const device of addedDevice) {
-          resultAdd = await dispatch(addFloorplanDevice(device));
+      // Process additions
+      for (const device of operations.additions) {
+        try {
+          await addMutation.mutateAsync(device);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to add device ${device.id}:`, error);
+          errorCount++;
         }
       }
 
-      // 3. Delete devices: Check for devices in floorplanDevices but not in unsavedDevices
-      if (deletedDevice) {
-        for (const device of deletedDevice) {
-          resultDelete = await dispatch(deleteFloorplanDevice(device.id));
+      // Process deletions
+      for (const device of operations.deletions) {
+        try {
+          await deleteMutation.mutateAsync(device.id);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to delete device ${device.id}:`, error);
+          errorCount++;
         }
       }
-      if (resultAdd || resultEdit || resultDelete) {
-        if (resultAdd) {
-          resultAdd?.type.endsWith('/fulfilled')
-            ? toast.success('Add successful')
-            : toast.error('Add unsuccessful');
-        }
-        if (resultEdit) {
-          resultEdit?.type.endsWith('/fulfilled')
-            ? toast.success('Edit successful')
-            : toast.error('Edit unsuccessful');
-        }
-        if (resultDelete) {
-          resultDelete?.type.endsWith('/fulfilled')
-            ? toast.success('Delete successful')
-            : toast.error('Delete unsuccessful');
-        }
 
-        // Call deleteFloorplanDevice for each device to delete
-        dispatch(fetchFloorplanDT(floorplanFilter));
-        // console.log('Save operation completed.');
-        handleCloseEditing(); // Navigate back to the device list
+      // Show appropriate toast message
+      if (errorCount === 0 && successCount > 0) {
+        toast.success(`Successfully completed ${successCount} operations`);
+      } else if (errorCount > 0) {
+        toast.error(`Completed ${successCount} operations, ${errorCount} failed`);
       } else {
-        dispatch(fetchFloorplanDT(floorplanFilter));
-        // console.log('Nothing Saved');
-        handleCloseEditing(); // Navigate back to the device list
+        toast.error('No changes to save');
       }
+
+      // Refetch data to ensure UI is in sync
+      await refetchFloorplanDevices();
+      dispatch(fetchFloorplanDT(floorplanFilter));
+
     } catch (error) {
-      toast.error('Saving Data Unsuccessful');
-      console.error('Error saving floorplan:', error);
+      console.error('Error during save operations:', error);
+      toast.error('Save operation failed');
+    } finally {
+      setTimeout(() => {
+        setIsSaving(false);
+        handleCloseEditing();
+      }, 1000);
     }
-    setTimeout(() => {
-      setIsSaving(false);
-    }, 1000);
   };
+
+  if (isDevicesLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -287,6 +344,7 @@ const DeviceList = () => {
           {activeFloorplan?.name}
         </Typography>
       </Box>
+      
       <Box>
         <Box display="flex" justifyContent="space-between" alignItems="center" px={2} mb={2}>
           <Typography variant="h6" mt={0}>
@@ -305,22 +363,22 @@ const DeviceList = () => {
           sx={{ height: { lg: 'calc(100vh - 370px)', sm: '100vh' }, maxHeight: 'fit-content' }}
         >
           {filteredUnsavedDevices.length > 0 ? (
-
-              filteredUnsavedDevices.map((device: FloorplanDeviceType) => (
-                <DeviceListItem
-                  key={device.id} 
-                  device={device}
-                  onListClick={() => handleOnClick(device.id)}
-                  onEditClick={() => handleOnEditClick(device.id)}
-                  onDeleteClick={() => handleOpenDeleteDialog(device.id)}
-                  active={device.id === selectedDevice?.id} // Replace with your logic to determine if the item is active
-                />
-              ))
-            ) : (
-              <Alert severity="info">No devices found for this floorplan.</Alert>
-            )}
+            filteredUnsavedDevices.map((device: FloorplanDeviceType) => (
+              <DeviceListItem
+                key={device.id} 
+                device={device}
+                onListClick={() => handleOnClick(device.id)}
+                onEditClick={() => handleOnEditClick(device.id)}
+                onDeleteClick={() => handleOpenDeleteDialog(device.id)}
+                active={device.id === selectedDevice?.id}
+              />
+            ))
+          ) : (
+            <Alert severity="info">No devices found for this floorplan.</Alert>
+          )}
         </Scrollbar>
       </Box>
+
       <Box
         p={2}
         bottom={0}
@@ -342,7 +400,8 @@ const DeviceList = () => {
           </Box>
         )}
       </Box>
-      {/*Confirmation Dialog */}
+
+      {/* Confirmation Dialogs */}
       <Dialog open={confirmDialogOpen} onClose={handleCancelProceed} maxWidth="xs" fullWidth>
         <DialogTitle>Confirm Action</DialogTitle>
         <DialogContent>
@@ -360,7 +419,7 @@ const DeviceList = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      {/* Delete Confirmation Dialog */}
+
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
@@ -377,7 +436,7 @@ const DeviceList = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      {/* Cancel Editing Confirmation Dialog */}
+
       <Dialog open={cancelEditDialogOpen} onClose={handleCloseCancelEditingDialog}>
         <DialogTitle>Cancel Edit?</DialogTitle>
         <DialogContent>
@@ -394,6 +453,7 @@ const DeviceList = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
       {isSaving &&
         createPortal(
           <Backdrop

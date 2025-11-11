@@ -3,11 +3,7 @@ import { useSelector, useDispatch, AppDispatch, RootState } from 'src/store/Stor
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import { fetchFloorplan, fetchFloorplanDT } from 'src/store/apps/crud/floorplan';
 import {
-  fetchMaskedAreas,
   MaskedAreaType,
-  addMaskedArea,
-  deleteMaskedArea,
-  editMaskedArea,
   DeleteUnsavedMaskedArea,
   RevertMaskedArea,
   SelectMaskedArea,
@@ -16,6 +12,12 @@ import {
   DrawingMaskedArea,
   ResetAreaState,
 } from 'src/store/apps/crud/maskedArea';
+import {
+  useMaskedAreaList,
+  useAddMaskedArea,
+  useEditMaskedArea,
+  useDeleteMaskedArea,
+} from 'src/hooks/useMaskedArea';
 import AddIcon from '@mui/icons-material/Add';
 import { Box } from '@mui/system';
 import {
@@ -39,25 +41,14 @@ import { useNavigate } from 'react-router';
 import { uniqueId } from 'lodash';
 import toast from 'react-hot-toast';
 
-const filter = {
-  draw: 1,
-  start: 0,
-  length: 99,
-  sortColumn: '',
-  sortDir: 'asc',
-  SearchValue: '',
-};
-
 const AreaList = () => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Redux state for UI management
   const activeFloorplan = useSelector(
     (state: RootState) => state.floorplanReducer.selectedFloorplan,
-  );
-  const maskedAreasData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
-  const originalAreas = useSelector(
-    (state: RootState) => state.maskedAreaReducer.originalMaskedAreas,
   );
   const selectedMaskedArea = useSelector(
     (state: RootState) => state.maskedAreaReducer.selectedMaskedArea,
@@ -68,20 +59,47 @@ const AreaList = () => {
   const editingMaskedArea = useSelector(
     (state: RootState) => state.maskedAreaReducer.editingMaskedArea,
   );
+  const drawingArea = useSelector((state: RootState) => state.maskedAreaReducer.drawingMaskedArea);
+  const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
+  
+  // Fix: Provide default empty arrays for potentially undefined values
+  const deletedArea = useSelector((state: RootState) => state.maskedAreaReducer.deletedMaskedArea) || [];
+  const addedArea = useSelector((state: RootState) => state.maskedAreaReducer.addedMaskedArea) || [];
+
+  // React Query hooks for server state
+  const {
+    data: maskedAreasResponse,
+    isLoading: isMaskedAreasLoading,
+    refetch: refetchMaskedAreas,
+  } = useMaskedAreaList({
+    Draw: 1,
+    Start: 0,
+    Length: 999,
+    SortColumn: '',
+    SortDir: 'asc',
+    SearchValue: '',
+    filters: {
+      FloorplanId: activeFloorplan?.id ? [activeFloorplan.id] : [],
+      FloorId: [],
+    },
+  });
+
+  // Mutations
+  const addMutation = useAddMaskedArea();
+  const editMutation = useEditMaskedArea();
+  const deleteMutation = useDeleteMaskedArea();
+
+  // Derived data from React Query
+  const maskedAreasData = maskedAreasResponse?.data || [];
+  const filteredMaskedArea = maskedAreasData;
+  const filteredOriginalAreas = maskedAreasData;
+
+  // Filter unsaved areas for current floorplan
   const filteredUnsavedMaksedArea = unsavedMaskedAreas.filter(
     (maskedArea: MaskedAreaType) => maskedArea.floorplanId === activeFloorplan?.id,
   );
-  const filteredMaskedArea = maskedAreasData.filter(
-    (maskedArea: MaskedAreaType) => maskedArea.floorplanId === activeFloorplan?.id,
-  );
 
-  const filteredOriginalAreas = originalAreas.filter(
-    (area: MaskedAreaType) => area.floorplanId === activeFloorplan?.id,
-  );
-  const drawingArea = useSelector((state: RootState) => state.maskedAreaReducer.drawingMaskedArea);
-  const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
-  const deletedArea = useSelector((state: RootState) => state.maskedAreaReducer.deletedMaskedArea);
-  const addedArea = useSelector((state: RootState) => state.maskedAreaReducer.addedMaskedArea);
+  // State for dialogs
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState('');
   const [pendingAreaId, setPendingAreaId] = useState<string | null>(null);
@@ -89,22 +107,12 @@ const AreaList = () => {
   const [deleteAreaId, setDeleteAreaId] = useState<string | null>(null);
   const [cancelEditDialogOpen, setCancelEditDialogOpen] = useState(false);
 
+  // Initialize unsaved areas when data loads
   useEffect(() => {
-    dispatch(fetchFloorplan());
-    dispatch(fetchMaskedAreas());
-    console.log("Active Floorplan: ", activeFloorplan);
-    console.log("Filtered Unsaved Masked Area: ", filteredUnsavedMaksedArea);
-  }, [dispatch]);
-  useEffect(() => {
-    dispatch(GetUnsavedMaskedArea());
-    // console.log("SOmething");
-  }, [originalAreas]);
-
-  // useEffect(() => {
-  //   console.log('Masked Area Data:', maskedAreasData);
-  //   console.log('Filtered Masked Area:', filteredMaskedArea);
-  //   console.log('Filtered Unsaved Masked Area:', filteredUnsavedMaksedArea);
-  // }, [maskedAreasData, filteredMaskedArea, filteredUnsavedMaksedArea]);
+    if (maskedAreasData.length > 0) {
+      dispatch(GetUnsavedMaskedArea());
+    }
+  }, [maskedAreasData, dispatch]);
 
   const newArea = {
     id: uniqueId('maskedArea_'),
@@ -126,46 +134,47 @@ const AreaList = () => {
 
   const handleAddAreaClick = () => {
     if (editingMaskedArea || drawingArea) {
-      setPendingAreaId(newArea.id); // Clear the pending device ID
-      setDialogType('add'); // Set the dialog type to 'add'
-      setConfirmDialogOpen(true); // Open the confirmation dialog
+      setPendingAreaId(newArea.id);
+      setDialogType('add');
+      setConfirmDialogOpen(true);
       return;
     }
     dispatch(SelectMaskedArea(''));
-    dispatch(DrawingMaskedArea(newArea.id)); // Add a new device
+    dispatch(DrawingMaskedArea(newArea.id));
   };
 
   const handleOnClick = (id: string) => {
-    if (selectedMaskedArea?.id === id) return; // Prevent re-selecting the same device
+    if (selectedMaskedArea?.id === id) return;
     if (editingMaskedArea || drawingArea) {
-      setPendingAreaId(id); // Store the device ID for later use
-      setDialogType('select'); // Set the dialog type to 'select'
-      setConfirmDialogOpen(true); // Open the confirmation dialog
+      setPendingAreaId(id);
+      setDialogType('select');
+      setConfirmDialogOpen(true);
       return;
     }
     dispatch(SelectMaskedArea(id));
   };
+
   const handleConfirmProceed = () => {
-    dispatch(RevertMaskedArea(editingMaskedArea?.id || '')); // Revert the editing device to its original state
+    dispatch(RevertMaskedArea(editingMaskedArea?.id || ''));
     dispatch(DrawingMaskedArea(''));
     if (pendingAreaId) {
       if (dialogType === 'add') {
         dispatch(DrawingMaskedArea(pendingAreaId));
       }
       if (dialogType === 'select') {
-        dispatch(SelectMaskedArea(pendingAreaId)); // Select the pending device
+        dispatch(SelectMaskedArea(pendingAreaId));
         dispatch(SelectEditingMaskedArea(null));
       }
     }
-
-    setConfirmDialogOpen(false); // Close the dialog
-    setPendingAreaId(null); // Clear the pending device ID
+    setConfirmDialogOpen(false);
+    setPendingAreaId(null);
   };
 
   const handleCancelProceed = () => {
-    setConfirmDialogOpen(false); // Close the dialog
-    setPendingAreaId(null); // Clear the pending device ID
+    setConfirmDialogOpen(false);
+    setPendingAreaId(null);
   };
+
   const handleOnEditClick = (id: string) => {
     dispatch(SelectEditingMaskedArea(id));
   };
@@ -174,104 +183,124 @@ const AreaList = () => {
     setDeleteAreaId(id);
     setDeleteDialogOpen(true);
   };
+
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
     setDeleteAreaId(null);
   };
+
   const handleConfirmDelete = () => {
     if (deleteAreaId) {
-      dispatch(DeleteUnsavedMaskedArea(deleteAreaId)); // Delete the device from the unsaved devices list
+      dispatch(DeleteUnsavedMaskedArea(deleteAreaId));
     }
-    dispatch(SelectMaskedArea(null)); // Deselect the device
+    dispatch(SelectMaskedArea(null));
     dispatch(SelectEditingMaskedArea(null));
-    handleCloseDeleteDialog(); // Close the delete dialog
+    handleCloseDeleteDialog();
   };
 
   const handleOpenCancelEditingDialog = () => {
     setCancelEditDialogOpen(true);
   };
+
   const handleCloseCancelEditingDialog = () => {
     setCancelEditDialogOpen(false);
   };
+
   const handleCloseEditing = () => {
     dispatch(ResetAreaState());
     navigate('/master/floorplanmaskedarea');
   };
 
+  // OPTIMIZED Save Function
   const handleSaveEdits = async () => {
     setIsSaving(true);
-    // const unsavedArea = new Map(filteredMaskedArea.map((area) => [area.id, area]));
-    const originArea = new Map(
-      filteredOriginalAreas.map((area: MaskedAreaType) => [area.id, area]),
-    );
-    // console.log('Origin Areas:', originArea);
-    // console.log('Filtered Masked Area:', filteredMaskedArea);
-    const areasToEdit = filteredMaskedArea.filter((unsavedArea: MaskedAreaType) => {
-      const originalArea = originArea.get(unsavedArea.id);
-      // console.log('Original Area:', originalArea);
-      // console.log('Unsaved Area:', unsavedArea);
-      // console.log(
-      //   'Is Area Edited:',
-      //   originalArea && JSON.stringify(unsavedArea) !== JSON.stringify(originalArea),
-      // );
-      return originalArea && JSON.stringify(unsavedArea) !== JSON.stringify(originalArea);
-    });
-    // console.log('Areas to Edit:', areasToEdit);
 
     try {
-      let resultAdd, resultEdit, resultDelete;
-      for (const area of areasToEdit) {
-        resultEdit = await dispatch(editMaskedArea(area));
+      const originArea = new Map(
+        filteredOriginalAreas.map((area: MaskedAreaType) => [area.id, area]),
+      );
+
+      // 1. Identify edited areas
+      const areasToEdit = filteredMaskedArea.filter((unsavedArea: MaskedAreaType) => {
+        const originalArea = originArea.get(unsavedArea.id);
+        return originalArea && JSON.stringify(unsavedArea) !== JSON.stringify(originalArea);
+      });
+
+      // Group operations by type
+      const operations = {
+        edits: areasToEdit,
+        additions: addedArea, // Now this is always an array (empty or with items)
+        deletions: deletedArea, // Now this is always an array (empty or with items)
+      };
+
+      // Execute operations with better error handling
+      let successCount = 0;
+      let errorCount = 0;
+
+      // Process edits
+      for (const area of operations.edits) {
+        try {
+          await editMutation.mutateAsync(area);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to edit area ${area.id}:`, error);
+          errorCount++;
+        }
       }
 
-      if (addedArea) {
-        // console.log('Areas to Add:', addedArea);
-        for (const area of addedArea) {
-          resultAdd = await dispatch(addMaskedArea(area));
+      // Process additions
+      for (const area of operations.additions) {
+        try {
+          await addMutation.mutateAsync(area);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to add area ${area.id}:`, error);
+          errorCount++;
         }
       }
 
-      //3. Delete Area
-      if (deletedArea) {
-        // console.log('Areas to Delete:', deletedArea);
-        for (const area of deletedArea) {
-          resultDelete = await dispatch(deleteMaskedArea(area.id));
+      // Process deletions
+      for (const area of operations.deletions) {
+        try {
+          await deleteMutation.mutateAsync(area.id);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to delete area ${area.id}:`, error);
+          errorCount++;
         }
       }
 
-      if (resultAdd || resultEdit || resultDelete) {
-        if (resultAdd) {
-          resultAdd?.type.endsWith('/fulfilled')
-            ? toast.success('Add successful')
-            : toast.error('Add unsuccessful');
-        }
-        if (resultEdit) {
-          resultEdit?.type.endsWith('/fulfilled')
-            ? toast.success('Data Saved')
-            : toast.error('Saving Data Unsuccessful');
-        }
-        if (resultDelete) {
-          resultDelete?.type.endsWith('/fulfilled')
-            ? toast.success('Delete successful')
-            : toast.error('Delete unsuccessful');
-        }
-
-        // Call deleteFloorplanDevice for each device to delete
-        dispatch(fetchFloorplanDT(floorplanFilter));
-        console.log('Save operation completed.');
+      // Show appropriate toast message
+      if (errorCount === 0 && successCount > 0) {
+        toast.success(`Successfully completed ${successCount} operations`);
+      } else if (errorCount > 0) {
+        toast.error(`Completed ${successCount} operations, ${errorCount} failed`);
       } else {
-        dispatch(fetchFloorplanDT(floorplanFilter));
-        console.log('Nothing Saved');
+        toast.error('No changes to save');
       }
+
+      // Refetch data to ensure UI is in sync
+      await refetchMaskedAreas();
+      dispatch(fetchFloorplanDT(floorplanFilter));
+
     } catch (error) {
-      toast.error('Saving Data Unsuccessful');
-      console.error('Error saving floorplan:', error);
+      console.error('Error during save operations:', error);
+      toast.error('Save operation failed');
+    } finally {
+      setTimeout(() => {
+        setIsSaving(false);
+        handleCloseEditing();
+      }, 1000);
     }
-    setTimeout(() => {
-      setIsSaving(false);
-      handleCloseEditing();
-    }, 1000);
   };
+
+  if (isMaskedAreasLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -315,7 +344,7 @@ const AreaList = () => {
                 onListClick={() => handleOnClick(area.id)}
                 onEditClick={() => handleOnEditClick(area.id)}
                 onDeleteClick={() => handleOpenDeleteDialog(area.id)}
-                active={area.id === selectedMaskedArea?.id} // Replace with your logic to determine if the item is active
+                active={area.id === selectedMaskedArea?.id}
               />
             ))
           ) : (
@@ -346,7 +375,7 @@ const AreaList = () => {
         )}
       </Box>
 
-      {/*Confirmation Dialog */}
+      {/* Confirmation Dialogs */}
       <Dialog open={confirmDialogOpen} onClose={handleCancelProceed} maxWidth="xs" fullWidth>
         <DialogTitle>Confirm Action</DialogTitle>
         <DialogContent>
@@ -364,7 +393,7 @@ const AreaList = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      {/* Delete Confirmation Dialog */}
+
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
@@ -381,7 +410,7 @@ const AreaList = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      {/* Cancel Editing Confirmation Dialog */}
+
       <Dialog open={cancelEditDialogOpen} onClose={handleCloseCancelEditingDialog}>
         <DialogTitle>Cancel Edit?</DialogTitle>
         <DialogContent>
@@ -398,6 +427,7 @@ const AreaList = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
       {isSaving &&
         createPortal(
           <Backdrop

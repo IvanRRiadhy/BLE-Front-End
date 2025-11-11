@@ -37,6 +37,9 @@ import { useNavigate } from 'react-router';
 import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
 import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
 import FloorplanPreviewDialog from '../maskedArea/FloorplanPreviewDialog';
+import { UseQueryResult } from '@tanstack/react-query';
+import { useAllBuilding } from 'src/hooks/useBuilding';
+import { useFloorplanList } from 'src/hooks/useFloorplan';
 
 const columns = [
   { label: 'Building', field: 'Floor.Name', sortAble: true },
@@ -49,17 +52,22 @@ const SKELETON_ROWS = 5;
 
 const FloorplanDeviceList2 = () => {
   const dispatch: AppDispatch = useDispatch();
-  const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
-  const buildingData: BuildingType[] = useSelector(
-    (state: RootState) => state.buildingReducer.buildingAll,
-  );
-  const floorplanTotalCount = useSelector(
-    (state: RootState) => state.floorplanReducer.floorplanTotalCount,
-  );
+  // const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
+  // const buildingData: BuildingType[] = useSelector(
+  //   (state: RootState) => state.buildingReducer.buildingAll,
+  // );
+  // const floorplanTotalCount = useSelector(
+  //   (state: RootState) => state.floorplanReducer.floorplanTotalCount,
+  // );
   // const floorplanFilteredCount = useSelector(
   //   (state: RootState) => state.floorplanReducer.floorplanFilteredCount,
   // );
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
+  const buildingData: BuildingType[] = (useAllBuilding() as UseQueryResult<BuildingType[], Error>)['data'] || [];
+  const { data, isLoading: queryLoading } = useFloorplanList(floorplanFilter);
+  const floorplanData = data?.data || [];
+  const floorplanTotalCount = data?.recordsTotal || 0;
+  const floorplanFilteredCount = data?.recordsFiltered || 0;
   // const { t } = useTranslation();
   const navigate = useNavigate();
   const hasLoaded = useSelector((state: RootState) => state.floorplanReducer.hasLoaded);
@@ -136,18 +144,8 @@ const FloorplanDeviceList2 = () => {
   };
 
   const handleOnClick = (id: string) => {
-    // console.log('id: ', id);
     dispatch(SelectFloorplan(id));
     navigate('/master/device/edit');
-    // console.log('selectedFloorPlan: ', selectedFloorPlan);
-    // const activeGateways = (selectedFloorPlan as floorplanType | null)?.gateways ?? [];
-    // gateways.map((gate) => {
-    //   if (activeGateways.includes(gate.id)) {
-    //     dispatch(SetActiveGate(gate.id, true));
-    //   } else {
-    //     dispatch(SetActiveGate(gate.id, false));
-    //   }
-    // });
   };
 
   const getbuildingName = (buildingId: string) => {
@@ -239,7 +237,7 @@ const FloorplanDeviceList2 = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {!hasLoaded
+                  {queryLoading
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : floorplanData.map((floorplan: FloorplanType, index) => (
                         <TableRow key={index}>
@@ -297,7 +295,7 @@ const FloorplanDeviceList2 = () => {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={floorplanTotalCount}
+              count={floorplanFilteredCount}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

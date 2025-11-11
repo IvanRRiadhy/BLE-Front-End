@@ -20,6 +20,8 @@ import MaskedAreaList2 from 'src/components/master/CRUD/maskedArea/MaskedAreaLis
 import MaskedAreaImport from 'src/components/master/CRUD/maskedArea/MaskedAreaImport';
 import MaskedAreaExport from 'src/components/master/CRUD/maskedArea/MaskedAreaExport';
 import FloorplanFilter from 'src/components/master/CRUD/floorplan/FloorplanFilter';
+import { useMaskedAreaStatus } from 'src/hooks/useMaskedArea';
+import { useFloorplanStatus } from 'src/hooks/useFloorplan';
 
 interface cardType {
   icon?: string;
@@ -34,10 +36,9 @@ const MaskedArea = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const floorplanCount = useSelector((state: RootState) => state.floorplanReducer.floorplanTotalCount);
-  
-  const maskedAreaCount = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll.length);
-  const hasLoaded = useSelector((state: RootState) => state.floorplanReducer.hasLoaded);
+  const {filteredCount: floorplanCount, hasLoaded} = useFloorplanStatus();
+  const {allMaskedAreaCount: maskedAreaCount} = useMaskedAreaStatus();
+  // const hasLoaded = useSelector((state: RootState) => state.floorplanReducer.hasLoaded);
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {

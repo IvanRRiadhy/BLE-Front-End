@@ -60,6 +60,7 @@ export function useAddFloorplan() {
     onSuccess: () => {
       // invalidate cached list to refetch
       queryClient.invalidateQueries({ queryKey: ['floorplan-list'] });
+      queryClient.invalidateQueries({ queryKey: ['floorplan-all'] });
     },
   });
 }
@@ -77,6 +78,7 @@ export function useEditFloorplan() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['floorplan-list'] });
+      queryClient.invalidateQueries({ queryKey: ['floorplan-all'] });
     },
   });
 }
@@ -91,6 +93,7 @@ export function useDeleteFloorplan() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['floorplan-list'] });
+      queryClient.invalidateQueries({ queryKey: ['floorplan-all'] });
     },
   });
 }
@@ -104,6 +107,7 @@ export function useFloorplanStatus() {
     isLoading: query.isLoading,
     isFetching: query.isFetching,
     hasLoaded: query.isFetched, // ✅ substitusi untuk redux.hasLoaded
-    totalCount: query.data?.recordsFiltered || 0,
+    totalCount: query.data?.recordsTotal || 0,
+    filteredCount: query.data?.recordsFiltered || 0,
   };
 }

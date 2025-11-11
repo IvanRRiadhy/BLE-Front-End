@@ -33,7 +33,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </Suspense>
 
         {/* (Optional) Devtools: bisa dibuka di pojok kanan bawah */}
-        <ReactQueryDevtools initialIsOpen={false}/>
+        {/* <ReactQueryDevtools initialIsOpen={false}/> */}
       </QueryClientProvider>
     </PersistGate>
   </Provider>
