@@ -4,7 +4,10 @@ const CONTROLLERS: Record<string, EventSource> = {};
 const CALLBACKS: Record<string, Callback[]> = {};
 const DEFAULT_BASE = 'http://192.168.1.116:6099';
 
-export interface NtfyOptions { baseUrl?: string; since?: string; }
+export interface NtfyOptions {
+  baseUrl?: string;
+  since?: string;
+}
 
 function resolveSseUrl(baseUrl: string, topic: string, since?: string) {
   let base = (baseUrl || DEFAULT_BASE).replace(/\/+$/, '');
@@ -41,23 +44,32 @@ export function startNTFYclient(onMessage: Callback, topic: string, opts: NtfyOp
 
     es.addEventListener('message', (e: MessageEvent) => {
       // console.log(`[NTFY] Message from topic "${topic}":`, e.data);
-      try { (CALLBACKS[topic] || []).forEach(cb => cb(JSON.parse(e.data))); }
-      catch { (CALLBACKS[topic] || []).forEach(cb => cb(e.data)); }
+      try {
+        (CALLBACKS[topic] || []).forEach((cb) => cb(JSON.parse(e.data)));
+      } catch {
+        (CALLBACKS[topic] || []).forEach((cb) => cb(e.data));
+      }
     });
 
     es.addEventListener('error', (err) => {
       // console.error(`[NTFY] Error on topic "${topic}":`, err);
-      try { es.close(); } finally { delete CONTROLLERS[topic]; }
+      try {
+        es.close();
+      } finally {
+        delete CONTROLLERS[topic];
+      }
     });
 
     CONTROLLERS[topic] = es;
   }
 
   return () => {
-    CALLBACKS[topic] = (CALLBACKS[topic] || []).filter(cb => cb !== onMessage);
+    CALLBACKS[topic] = (CALLBACKS[topic] || []).filter((cb) => cb !== onMessage);
     if (!CALLBACKS[topic]?.length) {
       console.log(`[NTFY] Unsubscribing from topic "${topic}"`);
-      try { CONTROLLERS[topic]?.close(); } finally {
+      try {
+        CONTROLLERS[topic]?.close();
+      } finally {
         delete CONTROLLERS[topic];
         delete CALLBACKS[topic];
       }

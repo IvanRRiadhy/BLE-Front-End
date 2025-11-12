@@ -218,11 +218,12 @@ const FullLayout: FC = () => {
                 flexGrow: 1,
               }}
             >
-              <Box 
-              sx={{ 
-                minHeight: 'calc(100vh - 170px)', 
-                py: customizer.isHorizontal ? 1 : 0
-                }}>
+              <Box
+                sx={{
+                  minHeight: 'calc(100vh - 170px)',
+                  py: customizer.isHorizontal ? 1 : 0,
+                }}
+              >
                 <ScrollToTop>
                   <Outlet />
                 </ScrollToTop>

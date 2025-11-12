@@ -145,23 +145,22 @@ const FloorView: React.FC<{
   const trackingBeacon = useSelector((state: RootState) => state.BeaconReducer.trackingBeacon);
   const selectedBeacon = useSelector((state: RootState) => state.BeaconReducer.selectedBeacon);
 
-const handleSelectBeacon = (info: {
-  id: string;
-  area: string;
-  floorplan: string;
-  time: string;
-}) => {
-  dispatch(SetSelectedBeacon({ active: true, sourceScreenId: screenNumber, ...info }));
-};
-useEffect(() => {
-  if (
-    selectedBeacon.active &&
-    selectedBeacon.sourceScreenId === screenNumber // ✅ only this screen opens popup
-  ) {
-    setDetailDialogOpen(true);
-  }
-}, [selectedBeacon, screenNumber]);
-
+  const handleSelectBeacon = (info: {
+    id: string;
+    area: string;
+    floorplan: string;
+    time: string;
+  }) => {
+    dispatch(SetSelectedBeacon({ active: true, sourceScreenId: screenNumber, ...info }));
+  };
+  useEffect(() => {
+    if (
+      selectedBeacon.active &&
+      selectedBeacon.sourceScreenId === screenNumber // ✅ only this screen opens popup
+    ) {
+      setDetailDialogOpen(true);
+    }
+  }, [selectedBeacon, screenNumber]);
 
   useEffect(() => {
     const filteredDevices = devices.filter(
@@ -172,7 +171,7 @@ useEffect(() => {
 
   useEffect(() => {
     dispatch(RefreshTrigger());
-    console.log("FloorplanImage: ", floorplanImage);
+    console.log('FloorplanImage: ', floorplanImage);
     if (floorplanImage && floorplanImage !== 'No Active Floorplan') {
       const img = new Image();
       img.src = floorplanImage;
@@ -517,7 +516,6 @@ useEffect(() => {
     setTranslate({ x: nextTranslateX, y: nextTranslateY });
   }, []);
 
-
   useEffect(() => {
     if (!focusBeacon || !gridNumber || !screenNumber) return;
 
@@ -559,57 +557,56 @@ useEffect(() => {
 
   // === END FOLLOW CAMERA HOOK ===
 
-const layoutState = useSelector((state: RootState) => state.layoutReducer);
-const activeLayouts = layoutState.layouts.find((l) => l.id === layoutState.activeLayoutId);
+  const layoutState = useSelector((state: RootState) => state.layoutReducer);
+  const activeLayouts = layoutState.layouts.find((l) => l.id === layoutState.activeLayoutId);
 
-const handleCancelFollowing = () => {
-  if (!activeLayouts?.id || !screenNumber) {
-    console.warn('No active layout or screen found for cancel follow.');
-    return;
-  }
+  const handleCancelFollowing = () => {
+    if (!activeLayouts?.id || !screenNumber) {
+      console.warn('No active layout or screen found for cancel follow.');
+      return;
+    }
 
-  // 1️⃣ Publish "Stop" to MQTT
-  if (selectedBeacon?.id) {
-    const topic = `highlight/card/${selectedBeacon.id}`;
-    const payload = JSON.stringify({ message: 'Stop' });
+    // 1️⃣ Publish "Stop" to MQTT
+    if (selectedBeacon?.id) {
+      const topic = `highlight/card/${selectedBeacon.id}`;
+      const payload = JSON.stringify({ message: 'Stop' });
 
-    import('mqtt').then(({ connect }) => {
-      const client = connect('ws://192.168.1.116:9005', {
-        clientId: `Klien1-${Math.random().toString(16).substr(2, 8)}`,
-        username: 'bio_mqtt',
-        password: 'P@ssw0rd',
-      });
+      import('mqtt').then(({ connect }) => {
+        const client = connect('ws://http://192.168.1.116:9005', {
+          clientId: `Klien1-${Math.random().toString(16).substr(2, 8)}`,
+          username: 'bio_mqtt',
+          password: 'P@ssw0rd',
+        });
 
-      client.on('connect', () => {
-        client.publish(topic, payload, { qos: 0, retain: false }, () => {
-          console.log('✅ Published STOP to', topic);
-          client.end();
+        client.on('connect', () => {
+          client.publish(topic, payload, { qos: 0, retain: false }, () => {
+            console.log('✅ Published STOP to', topic);
+            client.end();
+          });
         });
       });
-    });
-  }
+    }
 
-  // 2️⃣ Reset this screen’s display back to default
-  const screen = activeLayouts.screens[screenNumber - 1]; // 🔹 uses screen index
-  if (!screen) {
-    console.warn('Screen not found for screenNumber:', screenNumber);
-    return;
-  }
+    // 2️⃣ Reset this screen’s display back to default
+    const screen = activeLayouts.screens[screenNumber - 1]; // 🔹 uses screen index
+    if (!screen) {
+      console.warn('Screen not found for screenNumber:', screenNumber);
+      return;
+    }
 
-  dispatch(
-    setScreenDisplay({
-      layoutId: activeLayouts.id,
-      screenId: screen.id,
-      display: {
-        displayType: 0,
-        displayOutput: '',
-      },
-    }),
-  );
+    dispatch(
+      setScreenDisplay({
+        layoutId: activeLayouts.id,
+        screenId: screen.id,
+        display: {
+          displayType: 0,
+          displayOutput: '',
+        },
+      }),
+    );
 
-  console.log(`🧭 Screen ${screen.id} reset to default floorplan mode`);
-};
-
+    console.log(`🧭 Screen ${screen.id} reset to default floorplan mode`);
+  };
 
   const getName = (bleNuber: string) => {
     let name = '';
@@ -654,7 +651,6 @@ const handleCancelFollowing = () => {
       </Grid>
     );
   }
-
 
   return (
     <Box
