@@ -30,9 +30,7 @@ import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import 'dayjs/locale/id';
-import CustomClockInput from 'src/components/shared/CustomClockInput';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
-import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { TimeClockSlotProps } from '@mui/x-date-pickers/TimeClock';
 import dayjs, { Dayjs } from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
@@ -42,19 +40,28 @@ import advancedFormat from 'dayjs/plugin/advancedFormat';
 import utc from 'dayjs/plugin/utc';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { fetchVisitorDT, sendInvitation, VisitorType } from 'src/store/apps/crud/visitor';
-import { AppDispatch, RootState, useSelector } from 'src/store/Store';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
-import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
-import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
-import AddEditVisitor from 'src/components/master/CRUD/visitor/AddEditVisitor';
-import { fetchMembers, memberType } from 'src/store/apps/crud/member';
 import { DateTimePicker, renderTimeViewClock } from '@mui/x-date-pickers';
 import { defaultVisitorForm } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
+
+// Import React Query hooks
+import { useSendInvitation } from 'src/hooks/useVisitorTrx';
+import { useVisitorList } from 'src/hooks/useVisitor';
+import { useAllMembers } from 'src/hooks/useMember';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import { useAllBuilding } from 'src/hooks/useBuilding';
+import { useAllFloors } from 'src/hooks/useFloor';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
+
+// Import types
+import { VisitorType } from 'src/store/apps/crud/visitor';
+import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { BuildingType } from 'src/store/apps/crud/building';
+import { floorType } from 'src/store/apps/crud/floor';
+import { FloorplanType } from 'src/store/apps/crud/floorplan';
+import { memberType } from 'src/store/apps/crud/member';
+import { defaultVisitorFilter } from 'src/store/apps/defaultForm';
 
 dayjs.extend(utc);
 dayjs.extend(weekday);
@@ -62,6 +69,7 @@ dayjs.extend(localizedFormat);
 dayjs.extend(customParseFormat);
 dayjs.extend(advancedFormat);
 dayjs.locale('id');
+
 type AreaNode = MaskedAreaType & {
   nodeType: 'area';
   maskedAreas?: never;
@@ -133,26 +141,32 @@ function buildNestedHierarchy(
 }
 
 const VisitorRegister = () => {
-  const dispatch: AppDispatch = useDispatch();
+  // React Query hooks for data fetching
+  const [searchVisitor, setSearchVisitor] = useState('');
+  const { data: visitorData, refetch: refetchVisitors } = useVisitorList({ 
+    ...defaultVisitorFilter, 
+    Length: 999, 
+    SearchValue: searchVisitor 
+  });
+  const visitorList = visitorData?.data ?? [];
+  
+  const { data: members = [] } = useAllMembers();
+  const { data: buildingData = [] } = useAllBuilding();
+  const { data: floorData = [] } = useAllFloors();
+  const { data: floorplanData = [] } = useAllFloorplans();
+  const { data: maskedAreaData = [] } = useAllMaskedAreas();
+  
+  // Mutation for sending invitation
+  const { mutate: sendInvitation, isPending: isSaving } = useSendInvitation();
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const visitorList = useSelector((state: RootState) => state.visitorReducer.visitors);
-  const members = useSelector((state: RootState) => state.memberReducer.memberAll);
-  const buildingData = useSelector((state: RootState) => state.buildingReducer.buildingAll);
-  const floorData = useSelector((state: RootState) => state.floorReducer.floorAll);
-  const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
-  const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
-  const visitorFilter = useSelector((state: RootState) => state.visitorReducer.visitorFilter);
   const [selectedVisitor, setSelectedVisitor] = useState<VisitorType[]>([]);
   const [selectedMember, setSelectedMember] = useState<memberType>({} as memberType);
   const [selectedMaskedArea, setSelectedMaskedArea] = useState<string | null>(null);
-
   const [emailErrors, setEmailErrors] = useState<Record<number, string>>({});
-
-  const [searchVisitor, setSearchVisitor] = useState('');
   const [notes, setNotes] = useState('');
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [startTime, setStartTime] = useState<Dayjs | null>(dayjs());
   const [endTime, setEndTime] = useState<Dayjs | null>(dayjs());
   const [openMenu, setOpenMenu] = useState(false);
@@ -170,24 +184,23 @@ const VisitorRegister = () => {
     setNotes('');
     setStartTime(dayjs());
     setEndTime(dayjs());
-    dispatch(fetchVisitorDT({ ...visitorFilter, length: 999 }));
-    dispatch(fetchMembers());
-    dispatch(fetchMaskedAreas());
-    dispatch(fetchBuildings());
-    dispatch(fetchFloors());
-    dispatch(fetchFloorplan());
-    setTimeout(() => {
+    
+    // Refetch all data when dialog opens
+    Promise.all([
+      refetchVisitors(),
+      // Other refetches would happen automatically due to enabled queries
+    ]).finally(() => {
       setLoading(false);
       setOpen(true);
-    }, 100);
+    });
   };
+
   const handleClose = () => {
     setOpen(false);
   };
 
   const handleSave = async () => {
     setLoading(true);
-    setSaving(true);
 
     const startDate = toUtcFormatted(startTime);
     const endDate = toUtcFormatted(endTime);
@@ -203,28 +216,19 @@ const VisitorRegister = () => {
       PurposePerson: selectedMember.id,
       Agenda: notes,
     }));
-    let result;
-    try {
-      result = await dispatch(sendInvitation(payload));
-    } catch (error) {
-      console.error('Invitation failed', error);
-    }
 
-    if (result && result.type && result.type.endsWith('/fulfilled')) {
-      toast.success('Invitation sent successfully');
-      setTimeout(() => {
+    sendInvitation(payload, {
+      onSuccess: () => {
+        toast.success('Invitation sent successfully');
         setLoading(false);
-        setSaving(false);
         handleClose();
-      }, 1000);
-    } else {
-      toast.error('Invitation failed');
-    }
-
-    setTimeout(() => {
-      setLoading(false);
-      setSaving(false);
-    }, 1000);
+      },
+      onError: (error: any) => {
+        console.error('Invitation failed', error);
+        toast.error('Invitation failed');
+        setLoading(false);
+      },
+    });
   };
 
   const buildingHierarchy = buildNestedHierarchy(
@@ -236,12 +240,12 @@ const VisitorRegister = () => {
 
   function getAreaPath(areaId: string | null): string {
     if (!areaId) return 'None';
-    const area = maskedAreaData.find((a) => a.id === areaId);
+    const area = maskedAreaData.find((a: MaskedAreaType) => a.id === areaId);
     if (!area) return 'Unknown Area';
 
-    const floorplan = floorplanData.find((fp) => fp.id === area.floorplanId);
-    const floor = floorplan ? floorData.find((f) => f.id === floorplan.floorId) : null;
-    const building = floor ? buildingData.find((b) => b.id === floor.buildingId) : null;
+    const floorplan = floorplanData.find((fp: FloorplanType) => fp.id === area.floorplanId);
+    const floor = floorplan ? floorData.find((f: floorType) => f.id === floorplan.floorId) : null;
+    const building = floor ? buildingData.find((b: BuildingType) => b.id === floor.buildingId) : null;
 
     const pathParts = [
       area.name,
@@ -252,52 +256,57 @@ const VisitorRegister = () => {
 
     return pathParts.filter(Boolean).join('');
   }
+
   function getSelectedAncestorIds(areaId: string | null): Set<string> {
     const ids = new Set<string>();
     if (!areaId) return ids;
 
-    const area = maskedAreaData.find((a) => a.id === areaId);
+    const area = maskedAreaData.find((a: MaskedAreaType) => a.id === areaId);
     if (!area) return ids;
 
     ids.add(area.id);
 
-    const floorplan = floorplanData.find((fp) => fp.id === area.floorplanId);
+    const floorplan = floorplanData.find((fp: FloorplanType) => fp.id === area.floorplanId);
     if (floorplan) {
       ids.add(floorplan.id);
-      const floor = floorData.find((f) => f.id === floorplan.floorId);
+      const floor = floorData.find((f: floorType) => f.id === floorplan.floorId);
       if (floor) {
         ids.add(floor.id);
-        const building = buildingData.find((b) => b.id === floor.buildingId);
+        const building = buildingData.find((b: BuildingType) => b.id === floor.buildingId);
         if (building) ids.add(building.id);
       }
     }
 
     return ids;
   }
+
   const selectedAncestorIds = getSelectedAncestorIds(selectedMaskedArea);
 
   // IDs of already-selected (registered) visitors
   const selectedIds = useMemo(
-    () => new Set(selectedVisitor.filter((v) => !!v.id).map((v) => v.id as string)),
+    () => new Set(selectedVisitor.filter((v: VisitorType) => !!v.id).map((v: VisitorType) => v.id as string)),
     [selectedVisitor],
   );
 
   // Only show visitors not yet selected
   const availableVisitors = useMemo(
-    () => visitorList.filter((v) => !selectedIds.has(v.id)),
+    () => visitorList.filter((v: VisitorType) => !selectedIds.has(v.id)),
     [visitorList, selectedIds],
   );
 
   useEffect(() => {
-    dispatch(fetchVisitorDT({ ...visitorFilter, length: 999, SearchValue: searchVisitor }));
-  }, [searchVisitor]);
+    refetchVisitors();
+  }, [searchVisitor, refetchVisitors]);
+
   const isRegisteredVisitor = (visitor: VisitorType) => {
     return !!visitor.id; // registered visitors have a defined ID
   };
+
   const handleAddRow = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
     setOpenMenu(true);
   };
+
   const handleChangeVisitorField = (index: number, field: keyof VisitorType, value: string) => {
     setSelectedVisitor((prev) => {
       const updated = [...prev];
@@ -308,7 +317,7 @@ const VisitorRegister = () => {
 
       // Only validate manual email inputs (no ID)
       if (field === 'email' && !currentVisitor.id) {
-        const emailExists = visitorList.some((v) => v.email?.toLowerCase() === value.toLowerCase());
+        const emailExists = visitorList.some((v: VisitorType) => v.email?.toLowerCase() === value.toLowerCase());
 
         setEmailErrors((prevErrors) => ({
           ...prevErrors,
@@ -327,21 +336,21 @@ const VisitorRegister = () => {
     });
   };
 
-const handleRemoveRow = (indexToRemove: number) => {
-  setSelectedVisitor((prev) => {
-    const updated = prev.filter((_, index) => index !== indexToRemove);
+  const handleRemoveRow = (indexToRemove: number) => {
+    setSelectedVisitor((prev) => {
+      const updated = prev.filter((_, index) => index !== indexToRemove);
 
-    setEmailErrors((prev) =>
-      updated.reduce((acc, _, newIndex) => {
-        const oldIndex = newIndex >= indexToRemove ? newIndex + 1 : newIndex;
-        if (prev[oldIndex]) acc[newIndex] = prev[oldIndex];
-        return acc;
-      }, {} as Record<number, string>)
-    );
+      setEmailErrors((prev) =>
+        updated.reduce((acc, _, newIndex) => {
+          const oldIndex = newIndex >= indexToRemove ? newIndex + 1 : newIndex;
+          if (prev[oldIndex]) acc[newIndex] = prev[oldIndex];
+          return acc;
+        }, {} as Record<number, string>)
+      );
 
-    return updated;
-  });
-};
+      return updated;
+    });
+  };
 
   const handleCloseMenu = () => {
     setOpenMenu(false);
@@ -529,7 +538,7 @@ const handleRemoveRow = (indexToRemove: number) => {
                                     position: 'sticky',
                                     width: '35%',
                                     top: 0,
-                                    backgroundColor: '#fff', // or theme.palette.background.paper
+                                    backgroundColor: '#fff',
                                     zIndex: 2,
                                   }}
                                 >
@@ -541,7 +550,7 @@ const handleRemoveRow = (indexToRemove: number) => {
                                     position: 'sticky',
                                     width: '35%',
                                     top: 0,
-                                    backgroundColor: '#fff', // or theme.palette.background.paper
+                                    backgroundColor: '#fff',
                                     zIndex: 2,
                                   }}
                                 >
@@ -553,7 +562,7 @@ const handleRemoveRow = (indexToRemove: number) => {
                                     position: 'sticky',
                                     width: 15,
                                     top: 0,
-                                    backgroundColor: '#fff', // or theme.palette.background.paper
+                                    backgroundColor: '#fff',
                                     zIndex: 2,
                                   }}
                                 >
@@ -566,7 +575,7 @@ const handleRemoveRow = (indexToRemove: number) => {
                                     right: 0,
                                     width: 25,
                                     top: 0,
-                                    backgroundColor: '#fff', // or theme.palette.background.paper
+                                    backgroundColor: '#fff',
                                     zIndex: 2,
                                   }}
                                 >
@@ -607,10 +616,10 @@ const handleRemoveRow = (indexToRemove: number) => {
                                           fullWidth
                                           disabled={isRegistered}
                                           error={!!emailErrors[index]}
-                                          helperText={emailErrors[index] || ' '} // 👈 keep a blank line when no error
+                                          helperText={emailErrors[index] || ' '}
                                           FormHelperTextProps={{
                                             sx: {
-                                              minHeight: '20px', // 👈 reserve consistent space
+                                              minHeight: '20px',
                                               margin: 0,
                                               position: 'absolute',
                                               bottom: -20,
@@ -666,11 +675,12 @@ const handleRemoveRow = (indexToRemove: number) => {
               Cancel
             </Button>
             <Button
-              onClick={() => handleSave()}
+              onClick={handleSave}
               variant="contained"
+              disabled={isSaving}
               sx={{ fontSize: '1rem', py: 1, px: 3 }}
             >
-              Save
+              {isSaving ? 'Saving...' : 'Save'}
             </Button>
           </DialogActions>
         </Dialog>
@@ -713,7 +723,7 @@ const handleRemoveRow = (indexToRemove: number) => {
         </MenuItem>
 
         {/* Visitor List (filtered) */}
-        {availableVisitors.map((v) => (
+        {availableVisitors.map((v: VisitorType) => (
           <MenuItem
             key={v.id}
             onClick={() => {

@@ -10,69 +10,32 @@ import {
   ListItemText,
   Stack,
 } from '@mui/material';
-import { useSelector, useDispatch, RootState } from 'src/store/Store';
-import {
-  fetchVisitor,
-  fetchVisitorDT,
-  masterVisitorType,
-  SelectVisitor,
-} from 'src/store/apps/crud/visitor';
+import { createPortal } from 'react-dom';
+import { useTrxVisitorList, useAllTrxVisitor, useTrxVisitorStatus } from 'src/hooks/useVisitorTrx';
+import { defaultTrxVisitorFilter } from 'src/store/apps/defaultForm';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import TrxVisitorListItem from './trxVisitorListItem';
-import {
-  fetchTrxVisitor,
-  fetchTrxVisitorDT,
-  SelectTrxVisitor,
-  UpdateFilter,
-} from 'src/store/apps/crud/trxVisitor';
-import { defaultTrxVisitorFilter } from 'src/store/apps/defaultForm';
-import { createPortal } from 'react-dom';
+import { SelectTrxVisitor } from 'src/store/apps/crud/trxVisitor';
+import { useDispatch, useSelector } from 'src/store/Store';
 
 const SKELETON_ROWS = 5;
 
 const VisitorList = () => {
-  const visitorFilter = useSelector((state: RootState) => state.visitorReducer.visitorFilter);
-  const trxVisitorFilter = useSelector(
-    (state: RootState) => state.TrxVisitorReducer.TrxVisitorFilter,
-  );
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(false);
-  const hasLoaded = useSelector((state: RootState) => state.TrxVisitorReducer.hasLoaded);
+  
+  // Use React Query hooks instead of Redux
+  const { data: paginatedData, isLoading, isFetching } = useTrxVisitorList();
+  const { data: allVisitors } = useAllTrxVisitor();
+  const { hasLoaded } = useTrxVisitorStatus();
 
-  useEffect(() => {
-    dispatch(UpdateFilter({ ...defaultTrxVisitorFilter, Length: 999 }));
-    setLoading(true);
-    try {
-      dispatch(fetchTrxVisitorDT({ ...defaultTrxVisitorFilter, Length: 999 }));
-    } catch (error) {
-      console.error('Error fetching visitors:', error);
-    }
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
-  }, [dispatch]);
-  useEffect(() => {
-    setLoading(true);
-    try {
-      dispatch(fetchTrxVisitorDT({ ...trxVisitorFilter, Length: 999 }));
-    } catch (error) {
-      console.error('Error fetching visitors:', error);
-    } finally {
-      setTimeout(() => {
-        setLoading(false);
-      }, 500);
-    }
-  }, [trxVisitorFilter, dispatch]);
+  // Use either paginated data or all visitors based on your needs
+  const trxVisitors = useMemo(() => {
+    return paginatedData?.data || allVisitors || [];
+  }, [paginatedData, allVisitors]);
+  const selectedTrxVisitor = useSelector((state) => state.TrxVisitorReducer.SelectedTrxVisitor);
 
-  const visitors = useSelector((state: RootState) => state.visitorReducer.visitors);
-  const trxVisitors = useSelector((state: RootState) => state.TrxVisitorReducer.TrxVisitors);
 
-  const active = useSelector((state: RootState) => state.TrxVisitorReducer.SelectedTrxVisitor);
-  useEffect(() => {
-    console.log('active', active);
-  }, [active]);
-
-      const renderSkeletonItems = (count: number) => (
+  const renderSkeletonItems = (count: number) => (
     <>
       {Array.from({ length: count }).map((_, idx) => (
         <ListItemButton key={`skeleton-${idx}`} sx={{ mb: 1 }}>
@@ -93,6 +56,8 @@ const VisitorList = () => {
     </>
   );
 
+  const loading = isLoading || isFetching;
+
   return (
     <>
       <List>
@@ -103,16 +68,18 @@ const VisitorList = () => {
             overflow: 'auto',
           }}
         >
-          {hasLoaded ? (trxVisitors.map((trx) => (
-            <TrxVisitorListItem
-              key={trx.id}
-              active={trx.id === active.id}
-              trx={trx}
-              onTagClick={() => {
-                dispatch(SelectTrxVisitor(trx.id));
-              }}
-            />
-          ))) : (
+          {hasLoaded && trxVisitors.length > 0 ? (
+            trxVisitors.map((trx) => (
+              <TrxVisitorListItem
+                key={trx.id}
+                active={trx.id === selectedTrxVisitor?.id}
+                trx={trx}
+                onTagClick={() => {
+                  dispatch(SelectTrxVisitor(trx.id));
+                }}
+              />
+            ))
+          ) : (
             renderSkeletonItems(SKELETON_ROWS)
           )}
         </Box>

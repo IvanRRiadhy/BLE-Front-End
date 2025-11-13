@@ -30,7 +30,7 @@ export function useFloorList(filter: GetFilter) {
       } satisfies PaginatedResponse<floorType>;
     },
     placeholderData: keepPreviousData,
-    staleTime: 60_000, // data dianggap fresh 1 menit
+    staleTime: 5_000, // data dianggap fresh 1 menit
     gcTime: 5 * 60_000, // cache disimpan 5 menit
   });
 }
@@ -53,14 +53,14 @@ export function useAddFloor() {
 
   return useMutation({
     mutationFn: async (payload: Partial<floorType>) => {
-      const {id, ...filteredPayload} = payload
+      const { id, ...filteredPayload } = payload;
       const res = await axiosServices.post(FLOOR_API_URL, filteredPayload);
       return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['floor-list'] });
       queryClient.invalidateQueries({ queryKey: ['floors-all'] });
-    },  
+    },
   });
 }
 
@@ -71,7 +71,7 @@ export function useEditFloor() {
   return useMutation({
     mutationFn: async (payload: Partial<floorType>) => {
       if (!payload.id) throw new Error('Missing floor id');
-      const {id, ...filteredPayload} = payload
+      const { id, ...filteredPayload } = payload;
       const res = await axiosServices.put(`${FLOOR_API_URL}${id}`, filteredPayload);
       return res.data;
     },

@@ -14,7 +14,6 @@ import { LayoutSet, ScreenItem, setFocus, setScreenFloorplan } from 'src/store/a
 import polylabel from 'polylabel';
 import { GeoFencingAlarmType } from 'src/store/apps/alarmsetting/geofencing';
 import { startMQTTclient } from 'src/store/apps/tracking/MQTT';
-import { BASE_URL } from 'src/utils/axios';
 
 type Nodes = {
   id: string;
@@ -159,9 +158,9 @@ useEffect(() => {
   // ✅ Only the follow screen for this beacon updates floorplan
   if (thisScreen.display.displayOutput?.toLowerCase() !== focusBeaconId?.toLowerCase()) return;
 
-  console.log(
-    `[DeviceRenderer] Screen ${thisScreen.display.displayOutput} switching to floorplan ${highlightedFloorplan}`,
-  );
+  // console.log(
+  //   `[DeviceRenderer] Screen ${thisScreen.display.displayOutput} switching to floorplan ${highlightedFloorplan}`,
+  // );
 
   dispatch(
     setScreenFloorplan({
@@ -245,8 +244,8 @@ useEffect(() => {
       const distY = endY - startY;
       const distance = Math.sqrt(distX * distX + distY * distY);
       const speed = 2 / meterPx;
-      const duration = Math.max(500, (distance / speed) * 500);
-      // console.log(`Animating beacon ${beaconId} over ${distance}m in ${duration}ms`);
+      const duration = Math.min(Math.max(500, (distance / speed) * 500), 2000);
+      console.log(`Animating beacon ${beaconId} over ${distance}m in ${duration}ms`);
       const startTime = performance.now();
       function animate(now: number) {
         const t = Math.min(1, (now - startTime) / duration);

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import {
   Box,
   Button,
@@ -18,22 +17,19 @@ import {
   Divider,
 } from '@mui/material';
 import toast from 'react-hot-toast';
+import { createPortal } from 'react-dom';
 
-import { AppDispatch, RootState } from 'src/store/Store';
-import {
-  fetchTrxVisitorDT,
-  SelectTrxVisitor,
-  UpdateFilter,
-  visitorCheckIn,
-  visitorCheckOut,
-  visitorExtend,
-  visitorStatusChange,
-} from 'src/store/apps/crud/trxVisitor';
-import { defaultCardFilter, defaultTrxVisitorFilter } from 'src/store/apps/defaultForm';
-import { fetchCardDT, CardType } from 'src/store/apps/crud/card';
+// Import React Query hooks
+import { 
+  useCheckInVisitor, 
+  useCheckOutVisitor, 
+  useChangeVisitorStatus, 
+  useExtendVisitor,
+  useVisitorOperations 
+} from 'src/hooks/useVisitorTrx';
+import { useUnassignedCard } from 'src/hooks/useCard'; // Assuming this hook exists
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { createPortal } from 'react-dom';
 
 // Minimal type that this component needs
 type TrxVisitorDetailLike = {
@@ -62,10 +58,18 @@ const durationChoice = [
 ];
 
 const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
-  const dispatch: AppDispatch = useDispatch();
-  const cardData = useSelector((state: RootState) => state.CardReducer.cards);
-  const filteredCard = cardData.filter((card) => card.isUsed === false);
-  const [loading, setLoading] = useState(false);
+  // React Query mutations
+  const { mutate: checkInVisitor, isPending: isCheckingIn } = useCheckInVisitor();
+  const { mutate: checkOutVisitor, isPending: isCheckingOut } = useCheckOutVisitor();
+  const { mutate: changeVisitorStatus, isPending: isChangingStatus } = useChangeVisitorStatus();
+  const { mutate: extendVisitor, isPending: isExtending } = useExtendVisitor();
+
+  // Get unassigned cards
+  const { data: unassignedCards = [], isLoading: isLoadingCards } = useUnassignedCard();
+  useEffect(() => {
+    console.log(unassignedCards);
+  },[unassignedCards])
+
   const [openReasonMenu, setOpenReasonMenu] = useState(false);
   const [openCardMenu, setOpenCardMenu] = useState(false);
   const [openExtendMenu, setOpenExtendMenu] = useState(false);
@@ -73,134 +77,109 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
   const [selectedCard, setSelectedCard] = useState<string>('');
   const [selectedDuration, setSelectedDuration] = useState<number | ''>('');
 
-  // Preload available cards (unused) whenever the card dialog is needed
-  useEffect(() => {
-    dispatch(fetchCardDT({ ...defaultCardFilter, length: 0 }));
-  }, [dispatch]);
-
-  const refreshAndReselect = async () => {
-    dispatch(UpdateFilter(defaultTrxVisitorFilter));
-    await dispatch(fetchTrxVisitorDT(defaultTrxVisitorFilter));
-    dispatch(SelectTrxVisitor(trxVisitorDetail.id));
-  };
+  const loading = isCheckingIn || isCheckingOut || isChangingStatus || isExtending || isLoadingCards;
 
   const handleCheckin = async () => {
-    setLoading(true);
     if (!trxVisitorDetail?.id) {
-      setLoading(false);
       toast.error('Visitor not found');
       return;
     }
-    if (!cardData.some((card: CardType) => card.id === selectedCard)) {
-      setLoading(false);
+    if (!selectedCard) {
       toast.error('Please select a card');
       return;
     }
-    try {
-      const result = await dispatch(
-        visitorCheckIn({ TrxVisitorId: trxVisitorDetail.id, CardId: selectedCard }),
-      );
-      if (result && (result as any).type?.endsWith('/fulfilled')) {
-        toast.success('Visitor checked in successfully');
-        await refreshAndReselect();
-        setOpenCardMenu(false);
-        setSelectedCard('');
-      } else {
-        toast.error('Error checking in visitor');
+
+    checkInVisitor(
+      { TrxVisitorId: trxVisitorDetail.id, CardId: selectedCard },
+      {
+        onSuccess: () => {
+          toast.success('Visitor checked in successfully');
+          setOpenCardMenu(false);
+          setSelectedCard('');
+        },
+        onError: (error) => {
+          console.error('Error checking in visitor:', error);
+          toast.error('Error checking in visitor');
+        },
       }
-    } catch (error) {
-      console.error('Error checking in visitor:', error);
-      toast.error('Error checking in visitor');
-    } finally {
-      setLoading(false);
-    }
+    );
   };
 
   const handleExtend = async (duration: number) => {
-    setLoading(true);
     if (!trxVisitorDetail?.id) {
-      setLoading(false);
       toast.error('Visitor not found');
       return;
     }
     if (duration <= 0) {
-      setLoading(false);
       toast.error('Invalid duration');
       return;
     }
-    try {
-      // Extend logic here
-      const result = await dispatch(
-        visitorExtend({ trxVisitorId: trxVisitorDetail.id, ExtendedVisitorTime: duration }),
-      );
-      if (result && (result as any).type?.endsWith('/fulfilled')) {
-        toast.success('Visit duration extended successfully');
-        await refreshAndReselect();
-      } else {
-        toast.error('Error extending visit duration');
+
+    extendVisitor(
+      { trxVisitorId: trxVisitorDetail.id, ExtendedVisitorTime: duration },
+      {
+        onSuccess: () => {
+          toast.success('Visit duration extended successfully');
+          setOpenExtendMenu(false);
+          setSelectedDuration('');
+        },
+        onError: (error) => {
+          console.error('Error extending visitor visit:', error);
+          toast.error('Error extending visitor visit');
+        },
       }
-    } catch (error) {
-      console.error('Error extending visitor visit:', error);
-      toast.error('Error extending visitor visit');
-    } finally {
-      setLoading(false);
-    }
+    );
   };
 
   const handleCheckout = async () => {
-    setLoading(true);
     if (!trxVisitorDetail?.id) {
-      setLoading(false);
       toast.error('Visitor not found');
       return;
     }
-    try {
-      const result = await dispatch(visitorCheckOut(trxVisitorDetail.id));
-      if (result && (result as any).type?.endsWith('/fulfilled')) {
+
+    checkOutVisitor(trxVisitorDetail.id, {
+      onSuccess: () => {
         toast.success('Visitor checked out successfully');
-        await refreshAndReselect();
-      } else {
+      },
+      onError: (error) => {
+        console.error('Error checking out visitor:', error);
         toast.error('Error checking out visitor');
-      }
-    } catch (error) {
-      console.error('Error checking out visitor:', error);
-      toast.error('Error checking out visitor');
-    } finally {
-      setLoading(false);
-    }
+      },
+    });
   };
 
   const doStatusChange = async (status: 'denied' | 'blocked' | 'unblocked') => {
-    setLoading(true);
     if (!trxVisitorDetail?.id) {
-      setLoading(false);
       toast.error('Visitor not found');
       return;
     }
-    try {
-      const result = await dispatch(
-        visitorStatusChange({ trxVisitorId: trxVisitorDetail.id, status }),
-      );
-      if (result && (result as any).type?.endsWith('/fulfilled')) {
-        toast.success(
-          status === 'denied'
-            ? 'Visitor denied successfully'
-            : status === 'blocked'
-            ? 'Visitor blocked successfully'
-            : 'Visitor unblocked successfully',
-        );
-        await refreshAndReselect();
-      } else {
-        toast.error('Error updating visitor status');
+
+    changeVisitorStatus(
+      { 
+        trxVisitorId: trxVisitorDetail.id, 
+        status,
+        reason: status === 'denied' || status === 'blocked' ? reason : undefined 
+      },
+      {
+        onSuccess: () => {
+          toast.success(
+            status === 'denied'
+              ? 'Visitor denied successfully'
+              : status === 'blocked'
+              ? 'Visitor blocked successfully'
+              : 'Visitor unblocked successfully'
+          );
+          setOpenReasonMenu(false);
+          setReason('');
+        },
+        onError: (error) => {
+          console.error('Error updating visitor status:', error);
+          toast.error('Error updating visitor status');
+          setOpenReasonMenu(false);
+          setReason('');
+        },
       }
-    } catch (error) {
-      console.error('Error updating visitor status:', error);
-      toast.error('Error updating visitor status');
-    } finally {
-      setLoading(false);
-      setOpenReasonMenu(false);
-      setReason('');
-    }
+    );
   };
 
   const handleDeny = () => doStatusChange('denied');
@@ -211,6 +190,15 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
     // If status currently 'Checkin', it's a Block flow; otherwise Deny flow
     if (trxVisitorDetail.status === 'Checkin') handleBlock();
     else handleDeny();
+  };
+
+  const handleOpenCardMenu = () => {
+    console.log('🟡 handleOpenCardMenu called');
+    if (unassignedCards.length === 0) {
+      toast.error('No available cards found.');
+      return;
+    }
+    setOpenCardMenu(true);
   };
 
   const actionMap: Record<
@@ -228,9 +216,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
       primary: {
         label: 'Check-in Visitor',
         color: 'success',
-        onClick: () => {
-          handleOpenCardMenu();
-        },
+        onClick: handleOpenCardMenu,
       },
       secondary: { label: 'Deny Visitor', color: 'error', onClick: () => setOpenReasonMenu(true) },
     },
@@ -254,33 +240,6 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
   };
 
   const currentActions = trxVisitorDetail?.status ? actionMap[trxVisitorDetail.status] : undefined;
-
-  const handleOpenCardMenu = async () => {
-    console.log('🟡 handleOpenCardMenu called');
-    setLoading(true);
-    try {
-      // Fetch and wait for Redux to finish updating
-      const result = await dispatch(fetchCardDT({ ...defaultCardFilter, length: 0 })).unwrap();
-
-      // Log for verification
-      console.log('Fetched cards:', result);
-
-      // Optional: verify data is present
-      if (result?.data?.length > 0) {
-        console.log('Res', result.data);
-        // setLocalCardData(result.collection.data || []);
-        setOpenCardMenu(true);
-      } else {
-        console.log('Fetched cards:', result);
-        toast.error('No available cards found.');
-      }
-    } catch (error) {
-      console.error('Error loading cards:', error);
-      toast.error('Failed to load cards.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const formatDateTime = (dateString: string) => {
     if (!dateString) return '-';
@@ -318,6 +277,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
                 variant="contained"
                 color={currentActions.primary.color}
                 onClick={currentActions.primary.onClick}
+                disabled={loading}
                 sx={{ boxShadow: 2, width: '12vw', height: 50 }}
               >
                 {currentActions.primary.label}
@@ -329,6 +289,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
                 variant="contained"
                 color={currentActions.secondary.color}
                 onClick={currentActions.secondary.onClick}
+                disabled={loading}
                 sx={{ boxShadow: 2, width: '12vw', height: 50 }}
               >
                 {currentActions.secondary.label}
@@ -340,6 +301,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
                 variant="contained"
                 color={currentActions.tertiary.color}
                 onClick={currentActions.tertiary.onClick}
+                disabled={loading}
                 sx={{ boxShadow: 2, width: '12vw', height: 50 }}
               >
                 {currentActions.tertiary.label}
@@ -374,7 +336,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
               <MenuItem value="" disabled>
                 Select Card to Assign
               </MenuItem>
-              {filteredCard.map((card: CardType) => {
+              {unassignedCards.map((card) => {
                 console.log('Available card:', card);
                 return (
                   <MenuItem key={card.id} value={card.id}>
@@ -389,8 +351,8 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
           <Button onClick={() => setOpenCardMenu(false)} color="error" variant="outlined">
             Cancel
           </Button>
-          <Button onClick={handleCheckin} color="primary">
-            Assign Card
+          <Button onClick={handleCheckin} color="primary" disabled={isCheckingIn}>
+            {isCheckingIn ? 'Assigning...' : 'Assign Card'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -417,15 +379,15 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
             />
           </Grid>
           <DialogContentText sx={{ px: 1, pt: 1, color: 'text.secondary' }}>
-            This note will be saved in the visitor’s status history (optional).
+            This note will be saved in the visitor's status history (optional).
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenReasonMenu(false)} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleConfirmReason} color="error">
-            Confirm
+          <Button onClick={handleConfirmReason} color="error" disabled={isChangingStatus}>
+            {isChangingStatus ? 'Confirming...' : 'Confirm'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -440,7 +402,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
         <DialogTitle my={1} p={2}>
           Extend Visit Duration
         </DialogTitle>
-            <Divider />
+        <Divider />
         <DialogContent>
           <Grid container spacing={2}>
             {/* LEFT: Visit Information */}
@@ -538,12 +500,12 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
             onClick={() => {
               if (!selectedDuration) return toast.error('Please select duration');
               handleExtend(Number(selectedDuration));
-              setOpenExtendMenu(false);
             }}
             color="primary"
             variant="contained"
+            disabled={isExtending}
           >
-            Confirm
+            {isExtending ? 'Extending...' : 'Confirm'}
           </Button>
         </DialogActions>
       </Dialog>

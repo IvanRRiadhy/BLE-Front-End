@@ -29,8 +29,7 @@ import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
 import AddEditFloor from './AddEditFloor';
 import { defaultFloorFilter } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
-import { useFloorList } from 'src/hooks/useFloor';
-import { useDeleteFloorplan } from 'src/hooks/useFloorplan';
+import { useDeleteFloor, useFloorList } from 'src/hooks/useFloor';
 // import { useTranslation } from 'react-i18next';
 
 const columns = [
@@ -133,7 +132,7 @@ const FloorList = () => {
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedFloor, setSelectedFloor] = useState<floorType | null>(null);
-  const deleteMutation = useDeleteFloorplan();
+  const deleteMutation = useDeleteFloor();
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (floor: floorType) => {
     setSelectedFloor(floor);

@@ -34,8 +34,8 @@ export function useMemberList(filter: GetFilter) {
       } satisfies PaginatedResponse<memberType>;
     },
     placeholderData: keepPreviousData,
-    staleTime: 60_000, // data dianggap fresh 1 menit
-        gcTime: 5 * 60_000, // cache disimpan 5 menit
+    staleTime: 5_000, // data dianggap fresh 1 menit
+    gcTime: 5 * 60_000, // cache disimpan 5 menit
   });
 }
 

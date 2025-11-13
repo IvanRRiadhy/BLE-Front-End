@@ -193,8 +193,10 @@ const FloorView: React.FC<{
           });
           // console.log(screenSettings);
           // setTranslate({ x: offsetX, y: offsetY });
+          // alert('Screen Resolution: ' + containerHeight + 'x' + containerWidth + 'y');
         }
       };
+
       img.onerror = () => {
         console.error('Failed to load image:', floorplanImage);
       };
@@ -666,6 +668,7 @@ const FloorView: React.FC<{
         alignItems: 'center',
         overflow: 'hidden', // Allow scrolling
         // cursor: isDragging ? 'grabbing' : 'grab',
+        // bgcolor: '#f5f5f5',
       }}
     >
       {/* Sticky Overlay Toggle */}

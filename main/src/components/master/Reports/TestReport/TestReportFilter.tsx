@@ -10,6 +10,8 @@ import {
   Typography,
   FormControl,
   InputLabel,
+  Autocomplete,
+  Chip,
 } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { dispatch, RootState } from 'src/store/Store';
@@ -22,7 +24,7 @@ import { fetchBuildings } from 'src/store/apps/crud/building';
 import { fetchFloors } from 'src/store/apps/crud/floor';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
-import { fetchMembers } from 'src/store/apps/crud/member';
+import { fetchMembers, memberType } from 'src/store/apps/crud/member';
 import trackingJson from './DummyData/TrackingTransactionDummyData.json';
 import alarmJson from './DummyData/AlarmDummyData.json';
 import VisitorReportDialog from './VisitorReportDialog';
@@ -30,6 +32,10 @@ import VisitorReportDialog from './VisitorReportDialog';
 // ⬇️ activate plugins
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
+
+// Dummy visitor names
+const dummyVisitors = ['Alakazam', 'Bastiodon', 'Cacturne', 'Donphan', 'Espeon'];
+
 const VisitorReportFilter = () => {
   const didInit = useRef(false);
 
@@ -57,7 +63,7 @@ const VisitorReportFilter = () => {
     from: dayjs().format('YYYY-MM-DD'),
     to: dayjs().format('YYYY-MM-DD'),
   });
-  const [visitorStatusValue, setVisitorStatusValue] = useState('');
+  const [selectedVisitors, setSelectedVisitors] = useState<string[]>([]);
   const [areaValue, setAreaValue] = useState('');
   const [host, setHost] = useState('');
 
@@ -83,7 +89,7 @@ const VisitorReportFilter = () => {
       const filteredT = trackingData.filter((t) => {
         const enter = dayjs(t.EnterTime);
         return (
-          (!visitorStatusValue || t.VisitorStatus === visitorStatusValue) &&
+          (selectedVisitors.length === 0 || selectedVisitors.includes(t.VisitorName)) &&
           (!areaValue || t.AreaName === areaValue) &&
           (!host || t.HostName === host) &&
           withinRange(enter)
@@ -93,6 +99,7 @@ const VisitorReportFilter = () => {
       const filteredA = alarmData.filter((a) => {
         const trig = dayjs(a.AlarmTriggered);
         return (
+          (selectedVisitors.length === 0 || selectedVisitors.includes(a.VisitorName)) &&
           (!areaValue || a.AreaName === areaValue) &&
           (!host || a.HostName === host) &&
           withinRange(trig)
@@ -117,12 +124,23 @@ const VisitorReportFilter = () => {
       dispatch(fetchMaskedAreas());
       dispatch(fetchMembers());
     } else {
-      // ✅ Load dummy JSON data
-      setTrackingData(trackingJson);
-      setAlarmData(alarmJson);
+      // ✅ Load dummy JSON data and add visitor names
+      const trackingWithVisitors = trackingJson.map((item, index) => ({
+        ...item,
+        VisitorName: dummyVisitors[index % dummyVisitors.length], // Assign visitors cyclically
+      }));
+
+      const alarmWithVisitors = alarmJson.map((item, index) => ({
+        ...item,
+        VisitorName: dummyVisitors[index % dummyVisitors.length], // Assign visitors cyclically
+      }));
+
+      setTrackingData(trackingWithVisitors);
+      setAlarmData(alarmWithVisitors);
       console.log('Loaded dummy data from import:', {
-        tracking: trackingJson.length,
-        alarm: alarmJson.length,
+        tracking: trackingWithVisitors.length,
+        alarm: alarmWithVisitors.length,
+        visitors: dummyVisitors,
       });
     }
   }, [isTesting]);
@@ -190,21 +208,33 @@ const VisitorReportFilter = () => {
 
         {/* Filter Options */}
         <Grid container spacing={1} alignItems="center">
+          {/* Visitor Name Autocomplete */}
           <Grid size={{ xs: 12, md: 4 }}>
-            <FormControl fullWidth>
-              <InputLabel>Visitor Status</InputLabel>
-              <Select
-                label="Visitor Status"
-                value={visitorStatusValue}
-                onChange={(e) => setVisitorStatusValue(e.target.value)}
-              >
-                {visitorStatus.map((v) => (
-                  <MenuItem key={v.value} value={v.value} disabled={v.disabled}>
-                    {v.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              multiple
+              options={dummyVisitors}
+              value={selectedVisitors}
+              onChange={(event, newValue) => {
+                setSelectedVisitors(newValue);
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Visitor (by name)"
+                  placeholder="Select visitors..."
+                />
+              )}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                  <Chip
+                    label={option}
+                    size="small"
+                    {...getTagProps({ index })}
+                    key={option}
+                  />
+                ))
+              }
+            />
           </Grid>
 
           <Grid size={{ xs: 12, md: 4 }}>
@@ -242,7 +272,7 @@ const VisitorReportFilter = () => {
                         {h}
                       </MenuItem>
                     ))
-                  : members.map((m) => (
+                  : members.map((m: memberType) => (
                       <MenuItem key={m.id} value={m.id}>
                         {m.name}
                       </MenuItem>

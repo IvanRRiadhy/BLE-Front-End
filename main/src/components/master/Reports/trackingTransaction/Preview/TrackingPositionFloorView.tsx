@@ -2,8 +2,8 @@ import { BASE_URL } from 'src/utils/axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import { Box } from '@mui/material';
-import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
-import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
+import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import TrackingPositionRenderer from './TrackingPositionRenderer';
 
 interface TrackingPositionFloorViewProps {
@@ -31,8 +31,8 @@ const TrackingPositionFloorView: React.FC<TrackingPositionFloorViewProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
 
-  const activeFloorplan = floorplans.find((f) => f.id === floorplanId);
-  const filteredAreas = maskedAreas.filter((a) => a.floorplanId === floorplanId);
+  const activeFloorplan = floorplans.find((f: FloorplanType) => f.id === floorplanId);
+  const filteredAreas = maskedAreas.filter((a: MaskedAreaType) => a.floorplanId === floorplanId);
 
   const floorplanImage = activeFloorplan?.floorplanImage
     ? activeFloorplan.floorplanImage.startsWith('/Uploads/')

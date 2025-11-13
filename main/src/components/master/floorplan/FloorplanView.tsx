@@ -14,9 +14,9 @@ interface colorsType {
 
 const Tracking: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
-  const activeFloorplan = useSelector((state) =>
-    state.floorplanReducer2.floorplanContent.toString(),
-  );
+  // const activeFloorplan = useSelector((state) =>
+  //   state.floorplanReducer2.floorplanContent.toString(),
+  // );
 
   const filterFloors = (floors: floorplanType[], fSearch: string) => {
     if (fSearch !== '')
@@ -26,31 +26,31 @@ const Tracking: React.FC = () => {
     return floors;
   };
 
-  const floors = useSelector((state) =>
-    filterFloors(state.floorplanReducer2.floorplans, state.floorplanReducer2.floorplanSearch),
-  );
-  const activeFloorData = floors.find((floor) => floor.id === activeFloorplan);
+  // const floors = useSelector((state) =>
+  //   filterFloors(state.floorplanReducer2.floorplans, state.floorplanReducer2.floorplanSearch),
+  // );
+  // const activeFloorData = floors.find((floor) => floor.id === activeFloorplan);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
   const [scale, setScale] = useState(1);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
-  useEffect(() => {
-    if (activeFloorData?.imagesrc) {
-      const img = new Image();
-      img.src = activeFloorData.imagesrc;
-      img.onload = () => {
-        // console.log('Image Loaded:', img.width, img.height); // Debug image dimensions
-        setImage(img);
-        setImgSize({ width: img.width, height: img.height });
-      };
-      img.onerror = () => {
-        console.error('Failed to load image:', activeFloorData.imagesrc); // Debug image loading error
-      };
-    }
-    setTranslate({ x: 0, y: 0 });
-    setScale(1);
-  }, [activeFloorData]);
+  // useEffect(() => {
+  //   if (activeFloorData?.imagesrc) {
+  //     const img = new Image();
+  //     img.src = activeFloorData.imagesrc;
+  //     img.onload = () => {
+  //       // console.log('Image Loaded:', img.width, img.height); // Debug image dimensions
+  //       setImage(img);
+  //       setImgSize({ width: img.width, height: img.height });
+  //     };
+  //     img.onerror = () => {
+  //       console.error('Failed to load image:', activeFloorData.imagesrc); // Debug image loading error
+  //     };
+  //   }
+  //   setTranslate({ x: 0, y: 0 });
+  //   setScale(1);
+  // }, [activeFloorData]);
 
   //const MIN_SCALE = 1; // Minimum scale to prevent the image from becoming too small
   const MAX_SCALE = 2; // Maximum scale to prevent the image from becoming too large
@@ -236,7 +236,7 @@ const Tracking: React.FC = () => {
       {/* ------------------------------------------- */}
       {/* Header Part */}
       {/* ------------------------------------------- */}
-      <Box
+      {/* <Box
         p={3}
         sx={{
           backgroundColor: activeFloorData ? `${activeFloorData.color}.light` : 'white',
@@ -272,7 +272,7 @@ const Tracking: React.FC = () => {
             }
           />
         )}
-      </Box>
+      </Box> */}
 
       {/* Zoomable Content */}
       <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>

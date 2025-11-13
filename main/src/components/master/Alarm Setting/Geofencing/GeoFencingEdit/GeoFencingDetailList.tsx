@@ -3,63 +3,62 @@ import {
   Box,
   Grid2 as Grid,
   MenuItem,
-  SelectChangeEvent,
   Typography,
   Divider,
   Tooltip,
   IconButton,
 } from '@mui/material';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import React, { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
-import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
-import { fetchBuildings } from 'src/store/apps/crud/building';
-import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
-import { fetchFloors } from 'src/store/apps/crud/floor';
-import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { RootState, useDispatch, useSelector } from 'src/store/Store';
+import FloorplanSelect from 'src/components/shared/FloorplanSelect';
+import { useNavigate } from 'react-router';
+import toast from 'react-hot-toast';
+
+// Import React Query hooks
+import { useAllBuilding } from 'src/hooks/useBuilding';
+import { useAllFloors } from 'src/hooks/useFloor';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import { 
+  useAddGeoFencingAlarm,
+  useEditGeoFencingAlarm
+} from 'src/hooks/AlarmSetting/useGeofence';
+
+// Import Redux actions (for form state management)
 import {
-  addGeoFencingAlarm,
   DrawGeoFence,
-  editGeoFencingAlarm,
-  fetchGeoFencingAlarms,
   SaveSelectedGeoFencingAlarm,
   SetSelectedGeoFencingAlarm,
   UpdateSelectedGeoFencingAlarm,
 } from 'src/store/apps/alarmsetting/geofencing';
-import FloorplanSelect from 'src/components/shared/FloorplanSelect';
-import { useNavigate } from 'react-router';
-import toast from 'react-hot-toast';
-import { defaultGeoFencingFilter } from 'src/store/apps/defaultForm';
+import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { FloorplanType } from 'src/store/apps/crud/floorplan';
 
 const GeoFencingDetailList = () => {
-  const dispatch: AppDispatch = useDispatch();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
-  useEffect(() => {
-    dispatch(fetchBuildings());
-    dispatch(fetchFloors());
-    dispatch(fetchFloorplan());
-    dispatch(fetchMaskedAreas());
-  }, [dispatch]);
+
+  // Use React Query hooks for data fetching
+  const { data: buildings = [] } = useAllBuilding();
+  const { data: floors = [] } = useAllFloors();
+  const { data: floorplans = [] } = useAllFloorplans();
+  const { data: maskedAreas = [] } = useAllMaskedAreas();
+
+  // Use React Query mutations
+  const { mutate: addAlarm, isPending: isAdding } = useAddGeoFencingAlarm();
+  const { mutate: editAlarm, isPending: isEditing } = useEditGeoFencingAlarm();
 
   const geoFenceData = useSelector(
     (state: RootState) => state.GeoFencingReducer.selectedGeoFencingAlarm,
   );
 
-  const buildings = useSelector((state: RootState) => state.buildingReducer.buildingAll);
-  const floors = useSelector((state: RootState) => state.floorReducer.floorAll);
-  const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
-  const maskedAreas = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
-
   const filteredMaskedAreas = maskedAreas.filter(
     (ma) => ma.floorplanId === geoFenceData?.floorplanId,
   );
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // Handle input change logic here
-  };
 
   const handleCancel = () => {
     dispatch(SetSelectedGeoFencingAlarm(null));
@@ -69,41 +68,28 @@ const GeoFencingDetailList = () => {
   const handleSave = async () => {
     if (!geoFenceData) return;
     setIsSaving(true);
-    try {
-      const formData = new FormData();
-      Object.entries(geoFenceData).forEach(([key, value]) => {
-        if (typeof value === 'boolean') {
-          formData.append(key, value ? '1' : '0'); // ✅ convert bool → "1"/"0"
-        } else if (value !== undefined && value !== null) {
-          formData.append(key, value as any);
-        }
-      });
-      let result;
-      if(geoFenceData.id.startsWith('GeoFence-')){
-        result = await dispatch(addGeoFencingAlarm(geoFenceData));
-      } else {
-        result = await dispatch(editGeoFencingAlarm(geoFenceData));
-      }
-      if (result && result.type && result.type.endsWith('/fulfilled')) {
-        await dispatch(fetchGeoFencingAlarms(defaultGeoFencingFilter));
+
+    const saveOperation = geoFenceData.id.startsWith('GeoFence-') 
+      ? addAlarm 
+      : editAlarm;
+
+    saveOperation(geoFenceData, {
+      onSuccess: () => {
         console.log('GeoFence Saved!');
         toast.success('Data Saved');
         handleClose();
-      } else {
+      },
+      onError: (error: any) => {
         toast.error('Saving Data Unsuccessful');
-      }
-    } catch (error) {
-      toast.error('Saving Data Unsuccessful');
-      console.error('Error saving organization:', error);
-    } finally {
-      setTimeout(() => {
+        console.error('Error saving geo fence:', error);
+      },
+      onSettled: () => {
         setIsSaving(false);
-      }, 1000);
-    }
+      }
+    });
   };
 
   const handleClose = () => {
-    // setFormData({} as OrganizationType);
     navigate('/alarmsetting/geofencing');
   };
 
@@ -123,6 +109,8 @@ const GeoFencingDetailList = () => {
     return floor?.floorId;
   }
 
+  const saving = isSaving || isAdding || isEditing;
+
   return (
     <Box
       sx={{
@@ -136,8 +124,8 @@ const GeoFencingDetailList = () => {
       }}
     >
       <Box p={3} px={2} display="flex" justifyContent="flex-start" alignItems="center">
-        <Typography variant="h5" mb={2} fontWeight={700} textAlign="left">
-          Geofence Details
+        <Typography variant="h5" fontWeight={700} textAlign="left">
+           Details
         </Typography>
       </Box>
       <Divider />
@@ -155,6 +143,7 @@ const GeoFencingDetailList = () => {
                 variant="outlined"
                 fullWidth
                 required
+                disabled={saving}
               />
             </Grid>
             <Grid size={12}>
@@ -169,6 +158,7 @@ const GeoFencingDetailList = () => {
                 fullWidth
                 multiline
                 rows={4}
+                disabled={saving}
               />
             </Grid>
             <Grid size={12}>
@@ -177,10 +167,14 @@ const GeoFencingDetailList = () => {
                 buildings={buildings}
                 floors={floors}
                 floorplans={floorplans}
-                value={geoFenceData?.floorplanId ?? ''} // or wherever you store floorplanId
+                value={geoFenceData?.floorplanId ?? ''}
                 onChange={(fpId) => {
-                  dispatch(UpdateSelectedGeoFencingAlarm({ floorplanId: fpId, floorId: findFloorId(fpId) }));
+                  dispatch(UpdateSelectedGeoFencingAlarm({ 
+                    floorplanId: fpId, 
+                    floorId: findFloorId(fpId) 
+                  }));
                 }}
+                // disabled={saving}
               />
             </Grid>
             {geoFenceData?.floorplanId && (
@@ -212,24 +206,25 @@ const GeoFencingDetailList = () => {
                 <CustomSelect
                   id="areaShape"
                   value={
-                    filteredMaskedAreas.find((ma) => ma.areaShape === geoFenceData?.areaShape)
+                    filteredMaskedAreas.find((ma: MaskedAreaType) => ma.areaShape === geoFenceData?.areaShape)
                       ?.id || ''
                   }
                   onChange={(e: React.ChangeEvent<{ value: unknown }>) => {
                     const selectedId = e.target.value as string;
-                    const selectedArea = filteredMaskedAreas.find((ma) => ma.id === selectedId);
+                    const selectedArea = filteredMaskedAreas.find((ma: MaskedAreaType) => ma.id === selectedId);
 
                     if (selectedArea) {
                       dispatch(
                         UpdateSelectedGeoFencingAlarm({
-                          areaShape: selectedArea.areaShape, // ✅ set geofence's areaShape
-                          nodes: selectedArea.nodes, // ✅ set geofence's nodes
+                          areaShape: selectedArea.areaShape,
+                          nodes: selectedArea.nodes,
                         }),
                       );
                     }
                   }}
                   variant="outlined"
                   fullWidth
+                  disabled={saving}
                 >
                   <MenuItem value="">
                     <em>None</em>
@@ -251,7 +246,9 @@ const GeoFencingDetailList = () => {
                       color="primary"
                       onClick={() => {
                         console.log("geoFenceData: ", geoFenceData.id);
-                        dispatch(DrawGeoFence(geoFenceData.id))}}
+                        dispatch(DrawGeoFence(geoFenceData.id));
+                      }}
+                      disabled={saving}
                     >
                       Create New Area
                     </Button>
@@ -261,18 +258,16 @@ const GeoFencingDetailList = () => {
             )}
 
             <Grid size={12}>
-              <CustomFormLabel htmlFor="area-color" required>
+              <CustomFormLabel htmlFor="area-color">
                 Area Color
               </CustomFormLabel>
               <input
                 type="color"
                 id="color"
-                value={geoFenceData?.color || '#000000'} // Default to black if no color is set
+                value={geoFenceData?.color || '#000000'}
                 onChange={(e) => {
-                  const hexColor = e.target.value; // Get the selected color in hex format
-                  dispatch(UpdateSelectedGeoFencingAlarm({ color: hexColor })); // Update Redux state
-                  //   setFormData((prev) => ({ ...prev, color: hexColor })); // Update formData
-                  // console.log(hexColor);
+                  const hexColor = e.target.value;
+                  dispatch(UpdateSelectedGeoFencingAlarm({ color: hexColor }));
                 }}
                 style={{
                   width: '100%',
@@ -282,6 +277,7 @@ const GeoFencingDetailList = () => {
                   padding: '5px',
                   boxSizing: 'border-box',
                 }}
+                disabled={saving}
               />
             </Grid>
           </Grid>
@@ -298,11 +294,15 @@ const GeoFencingDetailList = () => {
         }}
       >
         <Box display="flex" justifyContent="space-between">
-          <Button variant="outlined" onClick={handleCancel}>
+          <Button variant="outlined" onClick={handleCancel} disabled={saving}>
             Cancel
           </Button>
-          <Button variant="contained" onClick={handleSave} disabled={!isFormValid()}>
-            Save
+          <Button 
+            variant="contained" 
+            onClick={handleSave} 
+            disabled={!isFormValid() || saving}
+          >
+            {saving ? 'Saving...' : 'Save'}
           </Button>
         </Box>
       </Box>

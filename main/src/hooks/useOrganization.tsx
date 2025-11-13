@@ -3,10 +3,8 @@ import axiosServices from 'src/utils/axios';
 import { OrganizationType, GetFilter } from 'src/store/apps/crud/organization';
 import { RootState, useSelector } from 'src/store/Store';
 
-
 const API_URL = '/api/MstOrganization/';
 const API_DT_URL = '/api/MstOrganization/filter/';
-
 
 export interface PaginatedResponse<T> {
   data: T[];
@@ -14,7 +12,6 @@ export interface PaginatedResponse<T> {
   recordsTotal: number;
   recordsFiltered: number;
 }
-
 
 export function useOrganizationList(filter: GetFilter) {
   return useQuery({
@@ -30,11 +27,10 @@ export function useOrganizationList(filter: GetFilter) {
       } satisfies PaginatedResponse<OrganizationType>;
     },
     placeholderData: keepPreviousData,
-    staleTime: 60_000, // data dianggap fresh 1 menit
-        gcTime: 5 * 60_000, // cache disimpan 5 menit
+    staleTime: 5_000, // data dianggap fresh 1 menit
+    gcTime: 5 * 60_000, // cache disimpan 5 menit
   });
 }
-
 
 export function useAllOrganizations() {
   return useQuery({
@@ -47,13 +43,13 @@ export function useAllOrganizations() {
   });
 }
 
-
 export function useAddOrganization() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (organization: Partial<OrganizationType>) => {
-      const { id, createdBy, createdAt, updatedBy, updatedAt, applicationId, ...cleanData } = organization;
+      const { id, createdBy, createdAt, updatedBy, updatedAt, applicationId, ...cleanData } =
+        organization;
       console.log(cleanData);
       const res = await axiosServices.post(API_URL, cleanData);
       return res.data;
@@ -64,7 +60,6 @@ export function useAddOrganization() {
     },
   });
 }
-
 
 export function useEditOrganization() {
   const queryClient = useQueryClient();
@@ -82,7 +77,6 @@ export function useEditOrganization() {
     },
   });
 }
-
 
 export function useDeleteOrganization() {
   const queryClient = useQueryClient();

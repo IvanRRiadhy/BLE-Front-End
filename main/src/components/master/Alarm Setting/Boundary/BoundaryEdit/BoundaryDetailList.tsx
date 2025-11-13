@@ -3,61 +3,60 @@ import {
   Box,
   Grid2 as Grid,
   MenuItem,
-  SelectChangeEvent,
   Typography,
   Divider,
   Tooltip,
   IconButton,
+  SelectChangeEvent,
 } from '@mui/material';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
-import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
-import { fetchBuildings } from 'src/store/apps/crud/building';
-import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
-import { fetchFloors } from 'src/store/apps/crud/floor';
-import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import {
-  addBoundaryAlarm,
-  DrawBoundary,
-  editBoundaryAlarm,
-  fetchBoundaryAlarms,
-  SaveSelectedBoundaryAlarm,
-  SetSelectedBoundaryAlarm,
-  UpdateSelectedBoundaryAlarm,
-} from 'src/store/apps/alarmsetting/boundary';
+import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import FloorplanSelect from 'src/components/shared/FloorplanSelect';
 import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
-import { defaultBoundaryFilter } from 'src/store/apps/defaultForm';
+
+// Import React Query hooks
+import { 
+
+  useAddBoundaryAlarm,
+  useEditBoundaryAlarm
+} from 'src/hooks/AlarmSetting/useBoundary';
+
+// Import external hooks for building/floor data
+import { useAllBuilding as useAllBuildings } from 'src/hooks/useBuilding';
+import { useAllFloors as useAllFloors } from 'src/hooks/useFloor';
+import { useAllFloorplans as useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useAllMaskedAreas as useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+
+// Import Redux actions for form state management
+import {
+  DrawBoundary,
+  SetSelectedBoundaryAlarm,
+  UpdateSelectedBoundaryAlarm,
+} from 'src/store/apps/alarmsetting/boundary';
 
 const BoundaryDetailList = () => {
-  const dispatch: AppDispatch = useDispatch();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [isSaving, setIsSaving] = useState(false);
-  useEffect(() => {
-    dispatch(fetchBuildings());
-    dispatch(fetchFloors());
-    dispatch(fetchFloorplan());
-    dispatch(fetchMaskedAreas());
-  }, [dispatch]);
+
+  // Use React Query hooks for data fetching
+  const { data: buildings = [] } = useAllBuildings();
+  const { data: floors = [] } = useAllFloors();
+  const { data: floorplans = [] } = useAllFloorplans();
+  const { data: maskedAreas = [] } = useAllMaskedAreas();
+
+  // Use React Query mutations
+  const { mutate: addAlarm, isPending: isAdding } = useAddBoundaryAlarm();
+  const { mutate: editAlarm, isPending: isEditing } = useEditBoundaryAlarm();
 
   const boundary = useSelector((state: RootState) => state.BoundaryReducer.selectedBoundaryAlarm);
 
-  const buildings = useSelector((state: RootState) => state.buildingReducer.buildingAll);
-  const floors = useSelector((state: RootState) => state.floorReducer.floorAll);
-  const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
-  const maskedAreas = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
-
   const filteredMaskedAreas = maskedAreas.filter(
-    (ma: MaskedAreaType) => ma.floorplanId === boundary?.floorplanId,
+    (ma) => ma.floorplanId === boundary?.floorplanId,
   );
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // Handle input change logic here
-  };
 
   const handleCancel = () => {
     dispatch(SetSelectedBoundaryAlarm(null));
@@ -66,42 +65,25 @@ const BoundaryDetailList = () => {
 
   const handleSave = async () => {
     if (!boundary) return;
-    setIsSaving(true);
-    try {
-      const formData = new FormData();
-      Object.entries(boundary).forEach(([key, value]) => {
-        if (typeof value === 'boolean') {
-          formData.append(key, value ? '1' : '0'); // ✅ convert bool → "1"/"0"
-        } else if (value !== undefined && value !== null) {
-          formData.append(key, value as any);
-        }
-      });
-      let result;
-      if (boundary.id.startsWith('Boundary-')) {
-        result = await dispatch(addBoundaryAlarm(boundary));
-      } else {
-        result = await dispatch(editBoundaryAlarm(boundary));
-      }
-      if (result && result.type && result.type.endsWith('/fulfilled')) {
-        await dispatch(fetchBoundaryAlarms(defaultBoundaryFilter));
+
+    const saveOperation = boundary.id.startsWith('Boundary-') 
+      ? addAlarm 
+      : editAlarm;
+
+    saveOperation(boundary, {
+      onSuccess: () => {
         console.log('Boundary Saved!');
         toast.success('Data Saved');
         handleClose();
-      } else {
+      },
+      onError: (error) => {
         toast.error('Saving Data Unsuccessful');
-      }
-    } catch (error) {
-      toast.error('Saving Data Unsuccessful');
-      console.error('Error saving alarm:', error);
-    } finally {
-      setTimeout(() => {
-        setIsSaving(false);
-      }, 1000);
-    }
+        console.error('Error saving boundary alarm:', error);
+      },
+    });
   };
 
   const handleClose = () => {
-    // setFormData({} as OrganizationType);
     navigate('/alarmsetting/boundary');
   };
 
@@ -117,9 +99,11 @@ const BoundaryDetailList = () => {
   };
 
   const findFloorId = (fpId: string) => {
-    const floor = floorplans.find((f: FloorplanType) => f.id === fpId);
+    const floor = floorplans.find((f) => f.id === fpId);
     return floor?.floorId;
   };
+
+  const saving = isAdding || isEditing;
 
   return (
     <Box
@@ -153,6 +137,7 @@ const BoundaryDetailList = () => {
                 variant="outlined"
                 fullWidth
                 required
+                disabled={saving}
               />
             </Grid>
             <Grid size={12}>
@@ -167,6 +152,7 @@ const BoundaryDetailList = () => {
                 fullWidth
                 multiline
                 rows={4}
+                disabled={saving}
               />
             </Grid>
             <Grid size={12}>
@@ -175,7 +161,7 @@ const BoundaryDetailList = () => {
                 buildings={buildings}
                 floors={floors}
                 floorplans={floorplans}
-                value={boundary?.floorplanId ?? ''} // or wherever you store floorplanId
+                value={boundary?.floorplanId ?? ''}
                 onChange={(fpId) => {
                   dispatch(
                     UpdateSelectedBoundaryAlarm({
@@ -197,6 +183,7 @@ const BoundaryDetailList = () => {
                         console.log('boundary: ', boundary.id);
                         dispatch(DrawBoundary(boundary.id));
                       }}
+                      disabled={saving}
                     >
                       Create New Area
                     </Button>
@@ -206,18 +193,16 @@ const BoundaryDetailList = () => {
             )}
 
             <Grid size={12}>
-              <CustomFormLabel htmlFor="area-color" required>
+              <CustomFormLabel htmlFor="area-color" >
                 Area Color
               </CustomFormLabel>
               <input
                 type="color"
                 id="color"
-                value={boundary?.color || '#000000'} // Default to black if no color is set
+                value={boundary?.color || '#000000'}
                 onChange={(e) => {
-                  const hexColor = e.target.value; // Get the selected color in hex format
-                  dispatch(UpdateSelectedBoundaryAlarm({ color: hexColor })); // Update Redux state
-                  //   setFormData((prev) => ({ ...prev, color: hexColor })); // Update formData
-                  // console.log(hexColor);
+                  const hexColor = e.target.value;
+                  dispatch(UpdateSelectedBoundaryAlarm({ color: hexColor }));
                 }}
                 style={{
                   width: '100%',
@@ -227,19 +212,21 @@ const BoundaryDetailList = () => {
                   padding: '5px',
                   boxSizing: 'border-box',
                 }}
+                disabled={saving}
               />
             </Grid>
             <Grid size={12}>
               <CustomFormLabel>Direction</CustomFormLabel>
               <CustomSelect
                 id="boundaryType"
-                value={boundary?.boundaryType ?? 0} // default Both Direction
+                value={boundary?.boundaryType ?? 0}
                 onChange={(e: SelectChangeEvent<number>) => {
-                  const value = Number(e.target.value); // convert to number
+                  const value = Number(e.target.value);
                   dispatch(UpdateSelectedBoundaryAlarm({ boundaryType: value }));
                 }}
                 variant="outlined"
                 fullWidth
+                disabled={saving}
               >
                 <MenuItem value={1}>A to B</MenuItem>
                 <MenuItem value={2}>B to A</MenuItem>
@@ -260,11 +247,15 @@ const BoundaryDetailList = () => {
         }}
       >
         <Box display="flex" justifyContent="space-between">
-          <Button variant="outlined" onClick={handleCancel}>
+          <Button variant="outlined" onClick={handleCancel} disabled={saving}>
             Cancel
           </Button>
-          <Button variant="contained" onClick={handleSave} disabled={!isFormValid()}>
-            Save
+          <Button 
+            variant="contained" 
+            onClick={handleSave} 
+            disabled={!isFormValid() || saving}
+          >
+            {saving ? 'Saving...' : 'Save'}
           </Button>
         </Box>
       </Box>

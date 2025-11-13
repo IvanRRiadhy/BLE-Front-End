@@ -12,16 +12,6 @@ const GeoFencingEdit = () => {
   const selectedGeoFence = useSelector(
     (state: RootState) => state.GeoFencingReducer.selectedGeoFencingAlarm,
   );
-//   useEffect(() => {
-//     if (selectedGeoFence) {
-//       setLoading(false);
-//     } else {
-//       setLoading(true);
-//     }
-//   }, [selectedGeoFence]);
-//   if (!selectedGeoFence && !loading) {
-//     window.location.href = '/master/alarmsetting/geofencing';
-//   }
   if (loading) {
     return (
       <PageContainer title="GeoFence" description="this is GeoFence Edit page">

@@ -75,7 +75,16 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
 
         return (
           <Grid key={index} size={item.size}>
-            <Paper elevation={3} sx={{ height: item.height, p: 1.5, borderRadius: 2 }}>
+            <Paper
+              elevation={3}
+              sx={{ 
+                height: item.height, 
+                p: 1.5, 
+                borderRadius: 2, 
+                bgcolor: '#e1e1e1', 
+                border: `2.5px solid #a1a1a1`
+              }}
+            >
               {type === 2 ? (
                 // <VideoPlayer options={videoJsOptions} />
                 <></>

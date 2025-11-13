@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Grid2 as Grid,
@@ -24,21 +24,26 @@ import {
   Tooltip,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconEdit, IconPencil, IconTrash } from '@tabler/icons-react';
-import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
+import { IconPencil, IconTrash } from '@tabler/icons-react';
+import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
+
+// Import React Query hooks
 import {
-  ChangeActiveStatus,
-  CreateNewBoundaryAlarm,
-  deleteBoundaryAlarm,
-  editBoundaryAlarm,
-  fetchBoundaryAlarms,
-  BoundaryAlarmType,
+  useBoundaryAlarms,
+  useEditBoundaryAlarm,
+  useDeleteBoundaryAlarm,
+  useToggleBoundaryAlarm,
+} from 'src/hooks/AlarmSetting/useBoundary';
+
+// Import Redux actions for filter and selection
+import {
   SetSelectedBoundaryAlarm,
   UpdateFilter,
 } from 'src/store/apps/alarmsetting/boundary';
-import { useNavigate } from 'react-router';
+import { BoundaryAlarmType } from 'src/store/apps/alarmsetting/boundary';
 
 const columns = [
   { label: 'Name', field: 'Name', sortAble: true },
@@ -49,20 +54,29 @@ const columns = [
 const SKELETON_ROWS = 5;
 
 const BoundaryList = () => {
-  const dispatch: AppDispatch = useDispatch();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const boundaryAlarms = useSelector(
-    (state: RootState) => state.BoundaryReducer.boundaryAlarms,
-  );
+  
+  // Get filter from Redux
   const boundaryAlarmFilter = useSelector(
     (state: RootState) => state.BoundaryReducer.boundaryAlarmFilter,
   );
-  const isLoading = useSelector((state: RootState) => state.BoundaryReducer.isLoading);
-  const hasLoaded = useSelector((state: RootState) => state.BoundaryReducer.hasLoaded);
-  const boundaryAlarmTotalCount = useSelector(
-    (state: RootState) => state.BoundaryReducer.boundaryAlarmTotalCount,
-  );
+
+  // Use React Query hooks
+  const { 
+    data: paginatedData, 
+    isLoading, 
+    isFetching,
+    isFetched: hasLoaded 
+  } = useBoundaryAlarms(boundaryAlarmFilter);
+  
+  const { mutate: editAlarm, isPending: isEditing } = useEditBoundaryAlarm();
+  const { mutate: deleteAlarm, isPending: isDeleting } = useDeleteBoundaryAlarm();
+  const { mutate: toggleAlarm, isPending: isToggling } = useToggleBoundaryAlarm();
+
+  const boundaryAlarms = paginatedData?.data || [];
+  const boundaryAlarmTotalCount = paginatedData?.recordsTotal || 0;
 
   // Pagination State
   const page = Math.floor(boundaryAlarmFilter.Start / boundaryAlarmFilter.Length);
@@ -73,10 +87,12 @@ const BoundaryList = () => {
   const handleChangePage = (_: unknown, newPage: number) => {
     dispatch(UpdateFilter({ Start: newPage * boundaryAlarmFilter.Length }));
   };
+
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newLength = parseInt(event.target.value, 10);
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
+
   const handleSort = (column: string) => {
     const isAsc =
       boundaryAlarmFilter.SortColumn === column && boundaryAlarmFilter.SortDir === 'asc';
@@ -102,67 +118,65 @@ const BoundaryList = () => {
     }
   };
 
-  useEffect(() => {
-    dispatch(fetchBoundaryAlarms(boundaryAlarmFilter));
-  }, [dispatch, boundaryAlarmFilter]);
-
   const handleToggleStatus = async (boundary: BoundaryAlarmType) => {
-    const updatedGeoFence = {
+    const updatedBoundary = {
       ...boundary,
       isActive: !boundary.isActive,
     };
-    console.log("Toggle Status Clicked: ", boundary, "New Status: ", updatedGeoFence.isActive);
-    try {
-      const res = await dispatch(editBoundaryAlarm(updatedGeoFence));
-      if(res.type.endsWith('/fulfilled')) {
-        await dispatch(fetchBoundaryAlarms(boundaryAlarmFilter));
-        toast.success('Alarm status updated successfully');
+    
+    console.log("Toggle Status Clicked: ", boundary, "New Status: ", updatedBoundary.isActive);
+    
+    toggleAlarm(
+      { id: boundary.id, isActive: updatedBoundary.isActive },
+      {
+        onSuccess: () => {
+          toast.success('Alarm status updated successfully');
+        },
+        onError: (error) => {
+          toast.error('Error updating alarm status');
+          console.error('Error updating alarm status:', error);
+        },
       }
-    } catch (error) {
-      toast.error('Error updating alarm status');
-      console.error('Error updating alarm status:', error);
-    }
+    );
   };
 
-  //Delete Pop-up
+  // Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedboundary, setSelectedStayonarea] = useState<BoundaryAlarmType | null>(null);
+  const [selectedBoundary, setSelectedBoundary] = useState<BoundaryAlarmType | null>(null);
+  
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (boundary: BoundaryAlarmType) => {
-    setSelectedStayonarea(boundary);
+    setSelectedBoundary(boundary);
     setDeleteDialogOpen(true);
   };
 
   // Close delete confirmation dialog
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
-    setSelectedStayonarea(null);
+    setSelectedBoundary(null);
   };
 
   // Confirm delete action
   const handleConfirmDelete = async () => {
-    if (selectedboundary) {
-      try {
-        const result = await dispatch(deleteBoundaryAlarm(selectedboundary.id));
-        if (result && result.type && result.type.endsWith('/fulfilled')) {
-          await dispatch(fetchBoundaryAlarms(boundaryAlarmFilter));
+    if (selectedBoundary) {
+      deleteAlarm(selectedBoundary.id, {
+        onSuccess: () => {
           toast.success('Data Deleted');
-        }
-      } catch (error) {
-        toast.error('Delete Data Unsuccessful');
-        console.error('Error deleting Alarm:', error);
-      }
+        },
+        onError: (error) => {
+          toast.error('Delete Data Unsuccessful');
+          console.error('Error deleting Alarm:', error);
+        },
+      });
     }
     handleCloseDeleteDialog();
   };
 
-  const handleEdit = (selectedboundary: BoundaryAlarmType) => {
-    dispatch(SetSelectedBoundaryAlarm(selectedboundary));
-    console.log("Selected boundary alarm for editing:", JSON.stringify(selectedboundary));
+  const handleEdit = (selectedBoundary: BoundaryAlarmType) => {
+    dispatch(SetSelectedBoundaryAlarm(selectedBoundary));
+    console.log("Selected boundary alarm for editing:", JSON.stringify(selectedBoundary));
     navigate('/alarmsetting/boundary/edit');
   };
-
-
 
   const renderSkeletonRows = (rows: number) => (
     <>
@@ -205,14 +219,14 @@ const BoundaryList = () => {
           >
             <Box display="flex" gap={1}>
               <Skeleton variant="rounded" width={90} height={32} />
-              {/* <Skeleton variant="circular" width={32} height={32} />
-                            <Skeleton variant="circular" width={32} height={32} /> */}
             </Box>
           </TableCell>
         </TableRow>
       ))}
     </>
   );
+
+  const loading = isLoading || isFetching || isEditing || isToggling;
 
   return (
     <Grid container spacing={3}>
@@ -230,7 +244,7 @@ const BoundaryList = () => {
                         left: 0,
                         background: 'white',
                         zIndex: 2,
-                        width: 35, // Fixed width
+                        width: 35,
                         minWidth: 35,
                         maxWidth: 35,
                       }}
@@ -259,7 +273,7 @@ const BoundaryList = () => {
                         right: 0,
                         background: 'white',
                         zIndex: 2,
-                        width: 150, // Fixed width
+                        width: 150,
                         minWidth: 150,
                         maxWidth: 150,
                       }}
@@ -269,7 +283,7 @@ const BoundaryList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody key={'skeleton-body'}>
-                  {!hasLoaded
+                  {!hasLoaded || loading
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : boundaryAlarms.map((boundary: BoundaryAlarmType, index: number) => (
                         <TableRow key={boundary.id}>
@@ -279,7 +293,7 @@ const BoundaryList = () => {
                               left: 0,
                               background: 'white',
                               zIndex: 1,
-                              width: 35, // Fixed width
+                              width: 35,
                               minWidth: 35,
                               maxWidth: 35,
                               alignItems: 'center',
@@ -302,11 +316,10 @@ const BoundaryList = () => {
                               <Tooltip title={boundary.isActive ? 'Disable' : 'Enable'} arrow>
                                 <Switch
                                   checked={boundary.isActive}
-                                  onChange={() =>
-                                    handleToggleStatus(boundary)
-                                  }
+                                  onChange={() => handleToggleStatus(boundary)}
                                   color="primary"
                                   size="small"
+                                  disabled={isToggling}
                                 />
                               </Tooltip>
                             </Box>
@@ -321,7 +334,7 @@ const BoundaryList = () => {
                               display: 'flex',
                               gap: 1,
                               alignItems: 'center',
-                              width: 150, // Fixed width
+                              width: 150,
                               minWidth: 150,
                               maxWidth: 150,
                             }}
@@ -331,6 +344,7 @@ const BoundaryList = () => {
                                 color="primary"
                                 size="small"
                                 onClick={() => handleEdit(boundary)}
+                                disabled={loading}
                               >
                                 <IconPencil size={20} />
                               </IconButton>
@@ -340,6 +354,7 @@ const BoundaryList = () => {
                                 color="error"
                                 size="small"
                                 onClick={() => handleOpenDeleteDialog(boundary)}
+                                disabled={loading}
                               >
                                 <IconTrash size={20} />
                               </IconButton>
@@ -368,7 +383,7 @@ const BoundaryList = () => {
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete the Alarm <strong>{selectedboundary?.name}</strong>?
+            Are you sure you want to delete the Alarm <strong>{selectedBoundary?.name}</strong>?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -377,11 +392,11 @@ const BoundaryList = () => {
           </Button>
           <Button
             onClick={handleConfirmDelete}
-            color={isLoading ? 'primary' : 'error'}
-            disabled={isLoading}
-            startIcon={isLoading ? <CircularProgress size={20} /> : null}
+            color={isDeleting ? 'primary' : 'error'}
+            disabled={isDeleting}
+            startIcon={isDeleting ? <CircularProgress size={20} /> : null}
           >
-            {isLoading ? 'Deleting...' : 'Delete'}
+            {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

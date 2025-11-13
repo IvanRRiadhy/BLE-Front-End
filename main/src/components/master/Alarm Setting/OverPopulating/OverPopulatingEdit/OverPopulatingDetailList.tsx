@@ -3,63 +3,60 @@ import {
   Box,
   Grid2 as Grid,
   MenuItem,
-  SelectChangeEvent,
   Typography,
   Divider,
   Tooltip,
   IconButton,
 } from '@mui/material';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
-import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
-import { fetchBuildings } from 'src/store/apps/crud/building';
-import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
-import { fetchFloors } from 'src/store/apps/crud/floor';
-import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import {
-  addOverPopulatingAlarm,
-  DrawOverPopulating,
-  editOverPopulatingAlarm,
-  fetchOverPopulatingAlarms,
-  SaveSelectedOverPopulatingAlarm,
-  SetSelectedOverPopulatingAlarm,
-  UpdateSelectedOverPopulatingAlarm,
-} from 'src/store/apps/alarmsetting/overpopulating';
+import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import FloorplanSelect from 'src/components/shared/FloorplanSelect';
 import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
-import { defaultOverPopulatingFilter } from 'src/store/apps/defaultForm';
+
+// Import React Query hooks
+import { useAllBuilding } from 'src/hooks/useBuilding';
+import { useAllFloors } from 'src/hooks/useFloor';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import { 
+  useAddOverPopulatingAlarm,
+  useEditOverPopulatingAlarm
+} from 'src/hooks/AlarmSetting/useOverPopulate';
+
+// Import Redux actions (for form state management)
+import {
+  DrawOverPopulating,
+  SetSelectedOverPopulatingAlarm,
+  UpdateSelectedOverPopulatingAlarm,
+} from 'src/store/apps/alarmsetting/overpopulating';
+import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 
 const OverPopulatingDetailList = () => {
-  const dispatch: AppDispatch = useDispatch();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
-  useEffect(() => {
-    dispatch(fetchBuildings());
-    dispatch(fetchFloors());
-    dispatch(fetchFloorplan());
-    dispatch(fetchMaskedAreas());
-  }, [dispatch]);
+
+  // Use React Query hooks for data fetching
+  const { data: buildings = [] } = useAllBuilding();
+  const { data: floors = [] } = useAllFloors();
+  const { data: floorplans = [] } = useAllFloorplans();
+  const { data: maskedAreas = [] } = useAllMaskedAreas();
+
+  // Use React Query mutations
+  const { mutate: addAlarm, isPending: isAdding } = useAddOverPopulatingAlarm();
+  const { mutate: editAlarm, isPending: isEditing } = useEditOverPopulatingAlarm();
 
   const overPopulateData = useSelector(
     (state: RootState) => state.OverPopulatingReducer.selectedOverPopulatingAlarm,
   );
 
-  const buildings = useSelector((state: RootState) => state.buildingReducer.buildingAll);
-  const floors = useSelector((state: RootState) => state.floorReducer.floorAll);
-  const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
-  const maskedAreas = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
-
   const filteredMaskedAreas = maskedAreas.filter(
     (ma: MaskedAreaType) => ma.floorplanId === overPopulateData?.floorplanId,
   );
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // Handle input change logic here
-  };
 
   const handleCancel = () => {
     dispatch(SetSelectedOverPopulatingAlarm(null));
@@ -69,52 +66,45 @@ const OverPopulatingDetailList = () => {
   const handleSave = async () => {
     if (!overPopulateData) return;
     setIsSaving(true);
-    try {
-      const formData = new FormData();
-      Object.entries(overPopulateData).forEach(([key, value]) => {
-        if (typeof value === 'boolean') {
-          formData.append(key, value ? '1' : '0'); // ✅ convert bool → "1"/"0"
-        } else if (value !== undefined && value !== null) {
-          formData.append(key, value as any);
-        }
-      });
-      let result;
-      if (overPopulateData.id.startsWith('OverPopulating-')) {
-        result = await dispatch(addOverPopulatingAlarm(overPopulateData));
-      } else {
-        result = await dispatch(editOverPopulatingAlarm(overPopulateData));
-      }
-      if (result && result.type && result.type.endsWith('/fulfilled')) {
-        await dispatch(fetchOverPopulatingAlarms(defaultOverPopulatingFilter));
+
+    const saveOperation = overPopulateData.id.startsWith('OverPopulating-') 
+      ? addAlarm 
+      : editAlarm;
+
+    saveOperation(overPopulateData, {
+      onSuccess: () => {
         console.log('OverPopulating Saved!');
         toast.success('Data Saved');
         handleClose();
-      } else {
+      },
+      onError: (error) => {
         toast.error('Saving Data Unsuccessful');
-      }
-    } catch (error) {
-      toast.error('Saving Data Unsuccessful');
-      console.error('Error saving organization:', error);
-    } finally {
-      setTimeout(() => {
+        console.error('Error saving over-populating alarm:', error);
+      },
+      onSettled: () => {
         setIsSaving(false);
-      }, 1000);
-    }
+      }
+    });
   };
 
   const handleClose = () => {
-    // setFormData({} as OrganizationType);
     navigate('/alarmsetting/overpopulating');
   };
 
   // Define required fields
-  const requiredFields = ['name', 'color', 'areaShape'];
+  const requiredFields = ['name', 'color', 'areaShape', 'maxCapacity'];
 
   // Validation function
   const isFormValid = () => {
     if (overPopulateData === null) return false;
     return requiredFields.every(
-      (field) => overPopulateData[field as keyof typeof overPopulateData]?.toString().trim() !== '',
+      (field) => {
+        const value = overPopulateData[field as keyof typeof overPopulateData];
+        if (field === 'maxCapacity') {
+          return value !== undefined && value !== null && Number(value) > 0;
+        }
+        return value?.toString().trim() !== '';
+      }
     );
   };
 
@@ -122,6 +112,8 @@ const OverPopulatingDetailList = () => {
     const floor = floorplans.find((f) => f.id === fpId);
     return floor?.floorId;
   };
+
+  const saving = isSaving || isAdding || isEditing;
 
   return (
     <Box
@@ -136,8 +128,8 @@ const OverPopulatingDetailList = () => {
       }}
     >
       <Box p={3} px={2} display="flex" justifyContent="flex-start" alignItems="center">
-        <Typography variant="h5" mb={2} fontWeight={700} textAlign="left">
-          Geofence Details
+        <Typography variant="h5" fontWeight={700} textAlign="left">
+           Details
         </Typography>
       </Box>
       <Divider />
@@ -155,6 +147,7 @@ const OverPopulatingDetailList = () => {
                 variant="outlined"
                 fullWidth
                 required
+                disabled={saving}
               />
             </Grid>
             <Grid size={12}>
@@ -169,6 +162,7 @@ const OverPopulatingDetailList = () => {
                 fullWidth
                 multiline
                 rows={4}
+                disabled={saving}
               />
             </Grid>
             <Grid size={12}>
@@ -177,7 +171,7 @@ const OverPopulatingDetailList = () => {
                 buildings={buildings}
                 floors={floors}
                 floorplans={floorplans}
-                value={overPopulateData?.floorplanId ?? ''} // or wherever you store floorplanId
+                value={overPopulateData?.floorplanId ?? ''}
                 onChange={(fpId) => {
                   dispatch(
                     UpdateSelectedOverPopulatingAlarm({
@@ -186,6 +180,7 @@ const OverPopulatingDetailList = () => {
                     }),
                   );
                 }}
+                // disabled={saving}
               />
             </Grid>
             {overPopulateData?.floorplanId && (
@@ -227,14 +222,15 @@ const OverPopulatingDetailList = () => {
                     if (selectedArea) {
                       dispatch(
                         UpdateSelectedOverPopulatingAlarm({
-                          areaShape: selectedArea.areaShape, // ✅ set overpopulate's areaShape
-                          nodes: selectedArea.nodes, // ✅ set overpopulate's nodes
+                          areaShape: selectedArea.areaShape,
+                          nodes: selectedArea.nodes,
                         }),
                       );
                     }
                   }}
                   variant="outlined"
                   fullWidth
+                  disabled={saving}
                 >
                   <MenuItem value="">
                     <em>None</em>
@@ -258,6 +254,7 @@ const OverPopulatingDetailList = () => {
                         console.log('overPopulateData: ', overPopulateData.id);
                         dispatch(DrawOverPopulating(overPopulateData.id));
                       }}
+                      disabled={saving}
                     >
                       Create New Area
                     </Button>
@@ -267,18 +264,16 @@ const OverPopulatingDetailList = () => {
             )}
 
             <Grid size={12}>
-              <CustomFormLabel htmlFor="area-color" required>
+              <CustomFormLabel htmlFor="area-color">
                 Area Color
               </CustomFormLabel>
               <input
                 type="color"
                 id="color"
-                value={overPopulateData?.color || '#000000'} // Default to black if no color is set
+                value={overPopulateData?.color || '#000000'}
                 onChange={(e) => {
-                  const hexColor = e.target.value; // Get the selected color in hex format
-                  dispatch(UpdateSelectedOverPopulatingAlarm({ color: hexColor })); // Update Redux state
-                  //   setFormData((prev) => ({ ...prev, color: hexColor })); // Update formData
-                  // console.log(hexColor);
+                  const hexColor = e.target.value;
+                  dispatch(UpdateSelectedOverPopulatingAlarm({ color: hexColor }));
                 }}
                 style={{
                   width: '100%',
@@ -288,6 +283,7 @@ const OverPopulatingDetailList = () => {
                   padding: '5px',
                   boxSizing: 'border-box',
                 }}
+                disabled={saving}
               />
             </Grid>
             <Grid size={12}>
@@ -297,7 +293,7 @@ const OverPopulatingDetailList = () => {
                 value={overPopulateData?.maxCapacity || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   const value = e.target.value;
-                  const parsedValue = value.replace(/\D/g, ''); // Remove non-numeric characters
+                  const parsedValue = value.replace(/\D/g, '');
                   dispatch(UpdateSelectedOverPopulatingAlarm({ maxCapacity: Number(parsedValue) }));
                 }}
                 variant="outlined"
@@ -306,6 +302,7 @@ const OverPopulatingDetailList = () => {
                 inputProps={{
                   inputMode: 'numeric',
                 }}
+                disabled={saving}
               />
             </Grid>
           </Grid>
@@ -322,11 +319,15 @@ const OverPopulatingDetailList = () => {
         }}
       >
         <Box display="flex" justifyContent="space-between">
-          <Button variant="outlined" onClick={handleCancel}>
+          <Button variant="outlined" onClick={handleCancel} disabled={saving}>
             Cancel
           </Button>
-          <Button variant="contained" onClick={handleSave} disabled={!isFormValid()}>
-            Save
+          <Button 
+            variant="contained" 
+            onClick={handleSave} 
+            disabled={!isFormValid() || saving}
+          >
+            {saving ? 'Saving...' : 'Save'}
           </Button>
         </Box>
       </Box>

@@ -25,20 +25,20 @@ import {
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconEdit, IconPencil, IconTrash } from '@tabler/icons-react';
-import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
+import { RootState, useSelector, useDispatch } from 'src/store/Store';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import {
-  ChangeActiveStatus,
-  CreateNewGeoFencingAlarm,
-  deleteGeoFencingAlarm,
-  editGeoFencingAlarm,
-  fetchGeoFencingAlarms,
-  GeoFencingAlarmType,
-  SetSelectedGeoFencingAlarm,
-  UpdateFilter,
-} from 'src/store/apps/alarmsetting/geofencing';
 import { useNavigate } from 'react-router';
+
+// Import React Query hooks
+import {
+  useGeoFencingAlarms,
+  useEditGeoFencingAlarm,
+  useDeleteGeoFencingAlarm,
+  useToggleGeoFencingAlarm,
+} from 'src/hooks/AlarmSetting/useGeofence';
+import { GeoFencingAlarmType } from 'src/store/apps/alarmsetting/geofencing';
+import { UpdateFilter } from 'src/store/apps/alarmsetting/geofencing';
 
 const columns = [
   { label: 'Name', field: 'Name', sortAble: true },
@@ -49,20 +49,29 @@ const columns = [
 const SKELETON_ROWS = 5;
 
 const GeoFencingList = () => {
-  const dispatch: AppDispatch = useDispatch();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const geoFencingAlarms = useSelector(
-    (state: RootState) => state.GeoFencingReducer.geoFencingAlarms,
-  );
+  
+  // Get filter from Redux
   const geoFencingAlarmFilter = useSelector(
     (state: RootState) => state.GeoFencingReducer.geoFencingAlarmFilter,
   );
-  const isLoading = useSelector((state: RootState) => state.GeoFencingReducer.isLoading);
-  const hasLoaded = useSelector((state: RootState) => state.GeoFencingReducer.hasLoaded);
-  const geoFencingAlarmTotalCount = useSelector(
-    (state: RootState) => state.GeoFencingReducer.geoFencingAlarmTotalCount,
-  );
+
+  // Use React Query hooks
+  const { 
+    data: paginatedData, 
+    isLoading, 
+    isFetching,
+    isFetched: hasLoaded 
+  } = useGeoFencingAlarms(geoFencingAlarmFilter);
+  
+  const { mutate: editAlarm, isPending: isEditing } = useEditGeoFencingAlarm();
+  const { mutate: deleteAlarm, isPending: isDeleting } = useDeleteGeoFencingAlarm();
+  const { mutate: toggleAlarm, isPending: isToggling } = useToggleGeoFencingAlarm();
+
+  const geoFencingAlarms = paginatedData?.data || [];
+  const geoFencingAlarmTotalCount = paginatedData?.recordsTotal || 0;
 
   // Pagination State
   const page = Math.floor(geoFencingAlarmFilter.Start / geoFencingAlarmFilter.Length);
@@ -73,10 +82,12 @@ const GeoFencingList = () => {
   const handleChangePage = (_: unknown, newPage: number) => {
     dispatch(UpdateFilter({ Start: newPage * geoFencingAlarmFilter.Length }));
   };
+
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newLength = parseInt(event.target.value, 10);
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
+
   const handleSort = (column: string) => {
     const isAsc =
       geoFencingAlarmFilter.SortColumn === column && geoFencingAlarmFilter.SortDir === 'asc';
@@ -102,31 +113,32 @@ const GeoFencingList = () => {
     }
   };
 
-  useEffect(() => {
-    dispatch(fetchGeoFencingAlarms(geoFencingAlarmFilter));
-  }, [dispatch, geoFencingAlarmFilter]);
-
   const handleToggleStatus = async (geofence: GeoFencingAlarmType) => {
     const updatedGeoFence = {
       ...geofence,
       isActive: !geofence.isActive,
     };
+    
     console.log("Toggle Status Clicked: ", geofence, "New Status: ", updatedGeoFence.isActive);
-    try {
-      const res = await dispatch(editGeoFencingAlarm(updatedGeoFence));
-      if(res.type.endsWith('/fulfilled')) {
-        await dispatch(fetchGeoFencingAlarms(geoFencingAlarmFilter));
-        toast.success('Alarm status updated successfully');
+    
+    toggleAlarm(
+      { id: geofence.id, isActive: updatedGeoFence.isActive },
+      {
+        onSuccess: () => {
+          toast.success('Alarm status updated successfully');
+        },
+        onError: (error: any) => {
+          toast.error('Error updating alarm status');
+          console.error('Error updating alarm status:', error);
+        },
       }
-    } catch (error) {
-      toast.error('Error updating alarm status');
-      console.error('Error updating alarm status:', error);
-    }
+    );
   };
 
-  //Delete Pop-up
+  // Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedGeofence, setSelectedGeofence] = useState<GeoFencingAlarmType | null>(null);
+  
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (geofence: GeoFencingAlarmType) => {
     setSelectedGeofence(geofence);
@@ -142,28 +154,28 @@ const GeoFencingList = () => {
   // Confirm delete action
   const handleConfirmDelete = async () => {
     if (selectedGeofence) {
-      try {
-        const result = await dispatch(deleteGeoFencingAlarm(selectedGeofence.id));
-        if (result && result.type && result.type.endsWith('/fulfilled')) {
-          await dispatch(fetchGeoFencingAlarms(geoFencingAlarmFilter));
+      deleteAlarm(selectedGeofence.id, {
+        onSuccess: () => {
           toast.success('Data Deleted');
-        }
-      } catch (error) {
-        toast.error('Delete Data Unsuccessful');
-        console.error('Error deleting GeoFence:', error);
-      }
+        },
+        onError: (error: any) => {
+          toast.error('Delete Data Unsuccessful');
+          console.error('Error deleting GeoFence:', error);
+        },
+      });
     }
     handleCloseDeleteDialog();
   };
 
   const handleEdit = (selectedGeofence: GeoFencingAlarmType) => {
-    dispatch(SetSelectedGeoFencingAlarm(selectedGeofence));
-    console.log("Selected geofencing alarm for editing:", JSON.stringify(selectedGeofence));
-    // window.location.href = '/alarmsetting/geofencing/edit';
-    navigate('/alarmsetting/geofencing/edit');
+    // You might want to move this to React Query cache or context
+    // For now, keeping Redux for selected item state
+    import('src/store/apps/alarmsetting/geofencing').then(({ SetSelectedGeoFencingAlarm }) => {
+      dispatch(SetSelectedGeoFencingAlarm(selectedGeofence));
+      console.log("Selected geofencing alarm for editing:", JSON.stringify(selectedGeofence));
+      navigate('/alarmsetting/geofencing/edit');
+    });
   };
-
-
 
   const renderSkeletonRows = (rows: number) => (
     <>
@@ -206,14 +218,14 @@ const GeoFencingList = () => {
           >
             <Box display="flex" gap={1}>
               <Skeleton variant="rounded" width={90} height={32} />
-              {/* <Skeleton variant="circular" width={32} height={32} />
-                            <Skeleton variant="circular" width={32} height={32} /> */}
             </Box>
           </TableCell>
         </TableRow>
       ))}
     </>
   );
+
+  const loading = isLoading || isFetching || isEditing || isToggling;
 
   return (
     <Grid container spacing={3}>
@@ -231,7 +243,7 @@ const GeoFencingList = () => {
                         left: 0,
                         background: 'white',
                         zIndex: 2,
-                        width: 35, // Fixed width
+                        width: 35,
                         minWidth: 35,
                         maxWidth: 35,
                       }}
@@ -260,7 +272,7 @@ const GeoFencingList = () => {
                         right: 0,
                         background: 'white',
                         zIndex: 2,
-                        width: 150, // Fixed width
+                        width: 150,
                         minWidth: 150,
                         maxWidth: 150,
                       }}
@@ -270,7 +282,7 @@ const GeoFencingList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody key={'skeleton-body'}>
-                  {!hasLoaded
+                  {!hasLoaded || loading
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : geoFencingAlarms.map((geofence: GeoFencingAlarmType, index: number) => (
                         <TableRow key={geofence.id}>
@@ -280,7 +292,7 @@ const GeoFencingList = () => {
                               left: 0,
                               background: 'white',
                               zIndex: 1,
-                              width: 35, // Fixed width
+                              width: 35,
                               minWidth: 35,
                               maxWidth: 35,
                               alignItems: 'center',
@@ -303,11 +315,10 @@ const GeoFencingList = () => {
                               <Tooltip title={geofence.isActive ? 'Disable' : 'Enable'} arrow>
                                 <Switch
                                   checked={geofence.isActive}
-                                  onChange={() =>
-                                    handleToggleStatus(geofence)
-                                  }
+                                  onChange={() => handleToggleStatus(geofence)}
                                   color="primary"
                                   size="small"
+                                  disabled={isToggling}
                                 />
                               </Tooltip>
                             </Box>
@@ -322,7 +333,7 @@ const GeoFencingList = () => {
                               display: 'flex',
                               gap: 1,
                               alignItems: 'center',
-                              width: 150, // Fixed width
+                              width: 150,
                               minWidth: 150,
                               maxWidth: 150,
                             }}
@@ -332,6 +343,7 @@ const GeoFencingList = () => {
                                 color="primary"
                                 size="small"
                                 onClick={() => handleEdit(geofence)}
+                                disabled={loading}
                               >
                                 <IconPencil size={20} />
                               </IconButton>
@@ -341,6 +353,7 @@ const GeoFencingList = () => {
                                 color="error"
                                 size="small"
                                 onClick={() => handleOpenDeleteDialog(geofence)}
+                                disabled={loading}
                               >
                                 <IconTrash size={20} />
                               </IconButton>
@@ -378,11 +391,11 @@ const GeoFencingList = () => {
           </Button>
           <Button
             onClick={handleConfirmDelete}
-            color={isLoading ? 'primary' : 'error'}
-            disabled={isLoading}
-            startIcon={isLoading ? <CircularProgress size={20} /> : null}
+            color={isDeleting ? 'primary' : 'error'}
+            disabled={isDeleting}
+            startIcon={isDeleting ? <CircularProgress size={20} /> : null}
           >
-            {isLoading ? 'Deleting...' : 'Delete'}
+            {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

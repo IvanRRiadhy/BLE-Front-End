@@ -30,7 +30,7 @@ export function useFloorplanList(filter: GetFilter) {
       } satisfies PaginatedResponse<FloorplanType>;
     },
     placeholderData: keepPreviousData,
-    staleTime: 60_000, // data dianggap fresh 1 menit
+    staleTime: 5_000, // data dianggap fresh 1 menit
     gcTime: 5 * 60_000, // cache disimpan 5 menit
   });
 }

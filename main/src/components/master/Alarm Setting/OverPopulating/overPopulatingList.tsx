@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Grid2 as Grid,
@@ -24,21 +24,25 @@ import {
   Tooltip,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconEdit, IconPencil, IconTrash } from '@tabler/icons-react';
-import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
+import { IconPencil, IconTrash } from '@tabler/icons-react';
+import { RootState, useSelector, useDispatch } from 'src/store/Store';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
+
+// Import React Query hooks
 import {
-  ChangeActiveStatus,
-  CreateNewOverPopulatingAlarm,
-  deleteOverPopulatingAlarm,
-  editOverPopulatingAlarm,
-  fetchOverPopulatingAlarms,
-  OverPopulatingAlarmType,
+  useOverPopulatingAlarms,
+  useToggleOverPopulatingAlarm,
+  useDeleteOverPopulatingAlarm,
+} from 'src/hooks/AlarmSetting/useOverPopulate';
+
+// Import Redux actions (for filter and selected item state)
+import {
   SetSelectedOverPopulatingAlarm,
   UpdateFilter,
 } from 'src/store/apps/alarmsetting/overpopulating';
-import { useNavigate } from 'react-router';
+import { OverPopulatingAlarmType } from 'src/store/apps/alarmsetting/overpopulating';
 
 const columns = [
   { label: 'Name', field: 'Name', sortAble: true },
@@ -49,20 +53,28 @@ const columns = [
 const SKELETON_ROWS = 5;
 
 const OverPopulatingList = () => {
-  const dispatch: AppDispatch = useDispatch();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const overPopulatingAlarms = useSelector(
-    (state: RootState) => state.OverPopulatingReducer.overPopulatingAlarms,
-  );
+  
+  // Get filter from Redux
   const overPopulatingAlarmFilter = useSelector(
     (state: RootState) => state.OverPopulatingReducer.overPopulatingAlarmFilter,
   );
-  const isLoading = useSelector((state: RootState) => state.OverPopulatingReducer.isLoading);
-  const hasLoaded = useSelector((state: RootState) => state.OverPopulatingReducer.hasLoaded);
-  const overPopulatingAlarmTotalCount = useSelector(
-    (state: RootState) => state.OverPopulatingReducer.overPopulatingAlarmTotalCount,
-  );
+
+  // Use React Query hooks
+  const { 
+    data: paginatedData, 
+    isLoading, 
+    isFetching,
+    isFetched: hasLoaded 
+  } = useOverPopulatingAlarms(overPopulatingAlarmFilter);
+  
+  const { mutate: toggleAlarm, isPending: isToggling } = useToggleOverPopulatingAlarm();
+  const { mutate: deleteAlarm, isPending: isDeleting } = useDeleteOverPopulatingAlarm();
+
+  const overPopulatingAlarms = paginatedData?.data || [];
+  const overPopulatingAlarmTotalCount = paginatedData?.recordsTotal || 0;
 
   // Pagination State
   const page = Math.floor(overPopulatingAlarmFilter.Start / overPopulatingAlarmFilter.Length);
@@ -73,10 +85,12 @@ const OverPopulatingList = () => {
   const handleChangePage = (_: unknown, newPage: number) => {
     dispatch(UpdateFilter({ Start: newPage * overPopulatingAlarmFilter.Length }));
   };
+
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newLength = parseInt(event.target.value, 10);
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
+
   const handleSort = (column: string) => {
     const isAsc =
       overPopulatingAlarmFilter.SortColumn === column && overPopulatingAlarmFilter.SortDir === 'asc';
@@ -102,68 +116,65 @@ const OverPopulatingList = () => {
     }
   };
 
-  useEffect(() => {
-    dispatch(fetchOverPopulatingAlarms(overPopulatingAlarmFilter));
-  }, [dispatch, overPopulatingAlarmFilter]);
-
   const handleToggleStatus = async (overpopulate: OverPopulatingAlarmType) => {
-    const updatedGeoFence = {
+    const updatedAlarm = {
       ...overpopulate,
       isActive: !overpopulate.isActive,
     };
-    console.log("Toggle Status Clicked: ", overpopulate, "New Status: ", updatedGeoFence.isActive);
-    try {
-      const res = await dispatch(editOverPopulatingAlarm(updatedGeoFence));
-      if(res.type.endsWith('/fulfilled')) {
-        await dispatch(fetchOverPopulatingAlarms(overPopulatingAlarmFilter));
-        toast.success('Alarm status updated successfully');
+    
+    console.log("Toggle Status Clicked: ", overpopulate, "New Status: ", updatedAlarm.isActive);
+    
+    toggleAlarm(
+      { id: overpopulate.id, isActive: updatedAlarm.isActive },
+      {
+        onSuccess: () => {
+          toast.success('Alarm status updated successfully');
+        },
+        onError: (error) => {
+          toast.error('Error updating alarm status');
+          console.error('Error updating alarm status:', error);
+        },
       }
-    } catch (error) {
-      toast.error('Error updating alarm status');
-      console.error('Error updating alarm status:', error);
-    }
+    );
   };
 
-  //Delete Pop-up
+  // Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedoverpopulating, setSelectedoverpopulating] = useState<OverPopulatingAlarmType | null>(null);
+  const [selectedOverpopulating, setSelectedOverpopulating] = useState<OverPopulatingAlarmType | null>(null);
+  
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (overpopulate: OverPopulatingAlarmType) => {
-    setSelectedoverpopulating(overpopulate);
+    setSelectedOverpopulating(overpopulate);
     setDeleteDialogOpen(true);
   };
 
   // Close delete confirmation dialog
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
-    setSelectedoverpopulating(null);
+    setSelectedOverpopulating(null);
   };
 
   // Confirm delete action
   const handleConfirmDelete = async () => {
-    if (selectedoverpopulating) {
-      try {
-        const result = await dispatch(deleteOverPopulatingAlarm(selectedoverpopulating.id));
-        if (result && result.type && result.type.endsWith('/fulfilled')) {
-          await dispatch(fetchOverPopulatingAlarms(overPopulatingAlarmFilter));
+    if (selectedOverpopulating) {
+      deleteAlarm(selectedOverpopulating.id, {
+        onSuccess: () => {
           toast.success('Data Deleted');
-        }
-      } catch (error) {
-        toast.error('Delete Data Unsuccessful');
-        console.error('Error deleting Alarm:', error);
-      }
+        },
+        onError: (error) => {
+          toast.error('Delete Data Unsuccessful');
+          console.error('Error deleting Alarm:', error);
+        },
+      });
     }
     handleCloseDeleteDialog();
   };
 
-  const handleEdit = (selectedoverpopulating: OverPopulatingAlarmType) => {
-    dispatch(SetSelectedOverPopulatingAlarm(selectedoverpopulating));
-    console.log("Selected overpopulating alarm for editing:", JSON.stringify(selectedoverpopulating));
-    // window.location.href = '/alarmsetting/overpopulating/edit';
+  const handleEdit = (selectedOverpopulating: OverPopulatingAlarmType) => {
+    dispatch(SetSelectedOverPopulatingAlarm(selectedOverpopulating));
+    console.log("Selected overpopulating alarm for editing:", JSON.stringify(selectedOverpopulating));
     navigate('/alarmsetting/overpopulating/edit');
   };
-
-
 
   const renderSkeletonRows = (rows: number) => (
     <>
@@ -206,14 +217,14 @@ const OverPopulatingList = () => {
           >
             <Box display="flex" gap={1}>
               <Skeleton variant="rounded" width={90} height={32} />
-              {/* <Skeleton variant="circular" width={32} height={32} />
-                            <Skeleton variant="circular" width={32} height={32} /> */}
             </Box>
           </TableCell>
         </TableRow>
       ))}
     </>
   );
+
+  const loading = isLoading || isFetching || isToggling;
 
   return (
     <Grid container spacing={3}>
@@ -231,7 +242,7 @@ const OverPopulatingList = () => {
                         left: 0,
                         background: 'white',
                         zIndex: 2,
-                        width: 35, // Fixed width
+                        width: 35,
                         minWidth: 35,
                         maxWidth: 35,
                       }}
@@ -260,7 +271,7 @@ const OverPopulatingList = () => {
                         right: 0,
                         background: 'white',
                         zIndex: 2,
-                        width: 150, // Fixed width
+                        width: 150,
                         minWidth: 150,
                         maxWidth: 150,
                       }}
@@ -270,7 +281,7 @@ const OverPopulatingList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody key={'skeleton-body'}>
-                  {!hasLoaded
+                  {!hasLoaded || loading
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : overPopulatingAlarms.map((overpopulate: OverPopulatingAlarmType, index: number) => (
                         <TableRow key={overpopulate.id}>
@@ -280,7 +291,7 @@ const OverPopulatingList = () => {
                               left: 0,
                               background: 'white',
                               zIndex: 1,
-                              width: 35, // Fixed width
+                              width: 35,
                               minWidth: 35,
                               maxWidth: 35,
                               alignItems: 'center',
@@ -303,11 +314,10 @@ const OverPopulatingList = () => {
                               <Tooltip title={overpopulate.isActive ? 'Disable' : 'Enable'} arrow>
                                 <Switch
                                   checked={overpopulate.isActive}
-                                  onChange={() =>
-                                    handleToggleStatus(overpopulate)
-                                  }
+                                  onChange={() => handleToggleStatus(overpopulate)}
                                   color="primary"
                                   size="small"
+                                  disabled={isToggling}
                                 />
                               </Tooltip>
                             </Box>
@@ -322,7 +332,7 @@ const OverPopulatingList = () => {
                               display: 'flex',
                               gap: 1,
                               alignItems: 'center',
-                              width: 150, // Fixed width
+                              width: 150,
                               minWidth: 150,
                               maxWidth: 150,
                             }}
@@ -332,6 +342,7 @@ const OverPopulatingList = () => {
                                 color="primary"
                                 size="small"
                                 onClick={() => handleEdit(overpopulate)}
+                                disabled={loading}
                               >
                                 <IconPencil size={20} />
                               </IconButton>
@@ -341,6 +352,7 @@ const OverPopulatingList = () => {
                                 color="error"
                                 size="small"
                                 onClick={() => handleOpenDeleteDialog(overpopulate)}
+                                disabled={loading}
                               >
                                 <IconTrash size={20} />
                               </IconButton>
@@ -369,7 +381,7 @@ const OverPopulatingList = () => {
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete the Alarm <strong>{selectedoverpopulating?.name}</strong>?
+            Are you sure you want to delete the Alarm <strong>{selectedOverpopulating?.name}</strong>?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -378,11 +390,11 @@ const OverPopulatingList = () => {
           </Button>
           <Button
             onClick={handleConfirmDelete}
-            color={isLoading ? 'primary' : 'error'}
-            disabled={isLoading}
-            startIcon={isLoading ? <CircularProgress size={20} /> : null}
+            color={isDeleting ? 'primary' : 'error'}
+            disabled={isDeleting}
+            startIcon={isDeleting ? <CircularProgress size={20} /> : null}
           >
-            {isLoading ? 'Deleting...' : 'Delete'}
+            {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

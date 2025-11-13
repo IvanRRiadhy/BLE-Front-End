@@ -12,16 +12,6 @@ const OverPopulatingEdit = () => {
   const selectedOverPopulating = useSelector(
     (state: RootState) => state.OverPopulatingReducer.selectedOverPopulatingAlarm,
   );
-//   useEffect(() => {
-//     if (selectedOverPopulating) {
-//       setLoading(false);
-//     } else {
-//       setLoading(true);
-//     }
-//   }, [selectedOverPopulating]);
-//   if (!selectedOverPopulating && !loading) {
-//     window.location.href = '/master/alarmsetting/geofencing';
-//   }
   if (loading) {
     return (
       <PageContainer title="OverPopulating" description="this is OverPopulating Edit page">
@@ -36,7 +26,6 @@ const OverPopulatingEdit = () => {
 
     return (
       <PageContainer title="OverPopulating" description="this is OverPopulating Edit page">
-        {/* <Breadcrumb title="OverPopulating Edit" subtitle="See the OverPopulating Edit" /> */}
         <AppCard>
           <Box
             display="flex"

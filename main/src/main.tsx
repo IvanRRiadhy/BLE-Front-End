@@ -16,9 +16,9 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false, // tidak refetch saat window aktif kembali
-      retry: 2,                    // otomatis retry 2x jika gagal
-      staleTime: 60_000,           // data dianggap fresh 1 menit
-      gcTime: 5 * 60_000,          // garbage collect cache setelah 5 menit
+      retry: 2, // otomatis retry 2x jika gagal
+      staleTime: 5_000, // data dianggap fresh 1 menit
+      gcTime: 5 * 60_000, // garbage collect cache setelah 5 menit
     },
   },
 });
@@ -36,5 +36,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         {/* <ReactQueryDevtools initialIsOpen={false}/> */}
       </QueryClientProvider>
     </PersistGate>
-  </Provider>
+  </Provider>,
 );

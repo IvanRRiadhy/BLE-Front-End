@@ -17,6 +17,7 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import OverPopulatingList from 'src/components/master/Alarm Setting/OverPopulating/overPopulatingList';
 import { AddOverPopulating } from 'src/components/master/Alarm Setting/OverPopulating/AddOverpopulating';
+import { useOverPopulatingAlarmStats } from 'src/hooks/AlarmSetting/useOverPopulate';
 interface cardType {
   icon?: string;
   title: string;
@@ -30,17 +31,19 @@ const FloorplanDevice = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const overPopulatingCount = useSelector(
-    (state: RootState) => state.OverPopulatingReducer.overPopulatingAlarmActiveCount,
-  );
-  const hasLoaded = useSelector((state: RootState) => state.OverPopulatingReducer.hasLoaded);
+  const {activeCount, inactiveCount, hasLoaded} = useOverPopulatingAlarmStats();
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
       title: 'Total Active OverPopulating Alarm',
-      subtitle: overPopulatingCount.toString(),
+      subtitle: activeCount.toString(),
       bgcolor: 'primary',
     },
+    {
+      title: 'Total Inactive OverPopulating Alarm',
+      subtitle: inactiveCount.toString(),
+      bgcolor: 'warning',
+    }
   ];
   return (
     <PageContainer

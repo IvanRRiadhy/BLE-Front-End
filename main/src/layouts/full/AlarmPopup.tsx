@@ -8,7 +8,7 @@ import { RootState } from 'src/store/Store';
 import { memberType } from 'src/store/apps/crud/member';
 import { VisitorType } from 'src/store/apps/crud/visitor';
 
-const deactivateAlarm = 'http://192.168.1.107:3300/deactivate-alarm';
+const deactivateAlarm = 'http://192.168.1.1167:3300/deactivate-alarm';
 
 const dataTableFilter = {
   draw: 1,
@@ -31,7 +31,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
   const visitorList: VisitorType[] = useSelector((s: RootState) => s.visitorReducer.visitors);
 
   useEffect(() => {
-    console.log("Alarm: ", alarm);
+    console.log('Alarm: ', alarm);
   }, [alarm]);
 
   // Resolve display name from beacon/card ID

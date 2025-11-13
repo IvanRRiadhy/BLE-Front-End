@@ -62,7 +62,7 @@ export function useTimeGroupList(filter: GetFilter) {
       } satisfies PaginatedResponse<TimeGroupType>;
     },
     placeholderData: keepPreviousData,
-    staleTime: 60_000,
+    staleTime: 5_000,
     gcTime: 5 * 60_000,
   });
 }

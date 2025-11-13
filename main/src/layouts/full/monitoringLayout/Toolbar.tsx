@@ -14,19 +14,37 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from 'src/store/Store';
 import { setActiveLayout, setScreenDisplay } from 'src/store/apps/monitoring/layout';
 import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor'; // ✅ adjust path
-import { publishMQTT } from 'src/store/apps/tracking/MQTT';
+import { publishMQTT, downloadAllLogs, getAllLoggedTopics } from 'src/store/apps/tracking/MQTT';
 import TimeDisplay from '../horizontal/navbar/TimeDisplay';
 import { uniqueId } from 'lodash';
+import DownloadIcon from '@mui/icons-material/Download';
 
 const Toolbar = () => {
   const dispatch: AppDispatch = useDispatch();
   const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
-  const activeLayout = layouts.find((l) => l.id === activeLayoutId) ?? null;
+  const activeLayout = layouts.find((l: any) => l.id === activeLayoutId) ?? null;
 
   const [visitorList, setVisitorList] = useState<VisitorType[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedVisitor, setSelectedVisitor] = useState<VisitorType | null>(null);
+  const [hasLogs, setHasLogs] = useState(false);
+
+  // Check if there are logs available
+  useEffect(() => {
+    const checkLogs = () => {
+      const topics = getAllLoggedTopics();
+      setHasLogs(topics.length > 0);
+    };
+
+    // Check initially
+    checkLogs();
+
+    // Check periodically (every 2 seconds) for new logs
+    const interval = setInterval(checkLogs, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // 🧠 Load visitors with BLE numbers
   useEffect(() => {
@@ -38,7 +56,7 @@ const Toolbar = () => {
         const filtered = res.filter(
           (v: VisitorType) => v.bleCardNumber && v.bleCardNumber.trim() !== '',
         );
-        console.log('Loaded visitors with BLE:', filtered);
+        // console.log('Loaded visitors with BLE:', filtered);
         setVisitorList(filtered);
       } catch (e) {
         console.error('Failed to load visitors', e);
@@ -87,6 +105,7 @@ const Toolbar = () => {
     setSelectedVisitor(null); // clear search
   };
 
+
   const filter = createFilterOptions<VisitorType>({
     stringify: (option) => `${option.name} ${option.bleCardNumber}`,
   });
@@ -132,46 +151,48 @@ const Toolbar = () => {
             Min
           </Button>
 
-          {/* 🔍 Visitor Search Autocomplete */}
-          <Autocomplete
-            value={selectedVisitor}
-            onChange={(e, newValue) => {
-              if (newValue) handleFollowVisitor(newValue);
-            }}
-            options={visitorList}
-            loading={loading}
-            getOptionLabel={(option) => option.name}
-            isOptionEqualToValue={(option, value) => option.id === value.id}
-            filterOptions={filter}
-            sx={{ width: 300 }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Search Visitor"
-                variant="outlined"
-                size="small"
-                InputProps={{
-                  ...params.InputProps,
-                  endAdornment: (
-                    <>
-                      {loading ? <CircularProgress color="inherit" size={16} /> : null}
-                      {params.InputProps.endAdornment}
+          {/* 🔍 Visitor Search Autocomplete and Download Logs Button */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Autocomplete
+              value={selectedVisitor}
+              onChange={(e, newValue) => {
+                if (newValue) handleFollowVisitor(newValue);
+              }}
+              options={visitorList}
+              loading={loading}
+              getOptionLabel={(option) => option.name}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              filterOptions={filter}
+              sx={{ width: 300 }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Search Visitor"
+                  variant="outlined"
+                  size="small"
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {loading ? <CircularProgress color="inherit" size={16} /> : null}
+                        {params.InputProps.endAdornment}
                     </>
-                  ),
-                }}
-              />
-            )}
-            renderOption={(props, option) => (
-              <li {...props} key={option.id || uniqueId()}>
-                <Box>
-                  <Typography fontWeight={700}>{option.name}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {option.bleCardNumber}
-                  </Typography>
-                </Box>
-              </li>
-            )}
-          />
+                    ),
+                  }}
+                />
+              )}
+              renderOption={(props, option) => (
+                <li {...props} key={option.id || uniqueId()}>
+                  <Box>
+                    <Typography fontWeight={700}>{option.name}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {option.bleCardNumber}
+                    </Typography>
+                  </Box>
+                </li>
+              )}
+            />
+          </Box>
         </Box>
 
         {/* Right side clock */}

@@ -17,6 +17,7 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import StayOnAreaList from 'src/components/master/Alarm Setting/StayOnArea/StayOnAreaList';
 import { AddStayOnArea } from 'src/components/master/Alarm Setting/StayOnArea/AddStayOnArea';
+import { useStayOnAreaAlarmStats } from 'src/hooks/AlarmSetting/useStayOnArea';
 interface cardType {
   icon?: string;
   title: string;
@@ -30,17 +31,19 @@ const StayOnArea = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const stayOnAreaCount = useSelector(
-    (state: RootState) => state.StayOnAreaReducer.stayOnAreaAlarmActiveCount,
-  );
-  const hasLoaded = useSelector((state: RootState) => state.StayOnAreaReducer.hasLoaded);
+  const { activeCount, inactiveCount, hasLoaded} = useStayOnAreaAlarmStats();
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
       title: 'Total Active StayOnArea Alarm',
-      subtitle: stayOnAreaCount.toString(),
+      subtitle: activeCount.toString(),
       bgcolor: 'primary',
     },
+    {
+      title: 'Total Inactive StayOnArea Alarm',
+      subtitle: inactiveCount.toString(),
+      bgcolor: 'warning',
+    }
   ];
   return (
     <PageContainer

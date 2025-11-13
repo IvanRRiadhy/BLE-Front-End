@@ -6,8 +6,8 @@ import { RootState, useSelector } from 'src/store/Store';
 // -----------------------------------------------------------------------------
 // ✅ API URLs
 // -----------------------------------------------------------------------------
-const API_DT_URL = "/api/AlarmTriggers/filter";
-const API_URL = "/api/AlarmTriggers/";
+const API_DT_URL = '/api/AlarmTriggers/filter';
+const API_URL = '/api/AlarmTriggers/';
 
 // ✅ Shared paginated response interface
 export interface PaginatedResponse<T> {
@@ -34,10 +34,10 @@ export function useAlarmTriggerList(filter: GetFilter) {
       } satisfies PaginatedResponse<AlarmTriggerType>;
     },
     placeholderData: keepPreviousData,
-    staleTime: 60_000, // data dianggap fresh 1 menit
-        gcTime: 5 * 60_000, // cache disimpan 5 menit
+    staleTime: 5_000, // data dianggap fresh 1 menit
+    gcTime: 5 * 60_000, // cache disimpan 5 menit
   });
-};
+}
 
 // -----------------------------------------------------------------------------
 // ✅ FETCH ALL (for dropdowns, selectors, etc.)
@@ -51,7 +51,7 @@ export function useAllAlarmTriggers() {
     },
     placeholderData: [],
   });
-};
+}
 
 // -----------------------------------------------------------------------------
 // ✅ ASSIGN ACTION (POST JSON)

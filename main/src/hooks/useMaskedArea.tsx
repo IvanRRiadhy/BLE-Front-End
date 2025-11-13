@@ -26,7 +26,7 @@ export function useMaskedAreaList(filter: GetFilter) {
     queryFn: async () => {
       const res = await axiosServices.post(API_DT_URL, filter);
       const col = res.data.collection;
-      
+
       // Parse nodes from areaShape string
       const dataWithParsedNodes = col.data.map((maskedArea: MaskedAreaType) => ({
         ...maskedArea,
@@ -41,7 +41,7 @@ export function useMaskedAreaList(filter: GetFilter) {
       } satisfies PaginatedResponse<MaskedAreaType>;
     },
     placeholderData: keepPreviousData,
-    staleTime: 60_000,
+    staleTime: 5_000,
     gcTime: 5 * 60_000,
   });
 }
@@ -55,7 +55,7 @@ export function useAllMaskedAreas() {
     queryFn: async () => {
       const res = await axiosServices.get(API_URL);
       const data = res.data.collection.data as MaskedAreaType[];
-      
+
       // Parse nodes from areaShape string
       return data.map((maskedArea: MaskedAreaType) => ({
         ...maskedArea,
@@ -74,18 +74,18 @@ export function useAddMaskedArea() {
 
   return useMutation({
     mutationFn: async (maskedArea: Partial<MaskedAreaType>) => {
-      const { 
-        id, 
-        createdAt, 
-        createdBy, 
-        updatedAt, 
-        updatedBy, 
-        generate, 
-        status, 
-        floor, 
+      const {
+        id,
+        createdAt,
+        createdBy,
+        updatedAt,
+        updatedBy,
+        generate,
+        status,
+        floor,
         floorplan,
         nodes,
-        ...cleanData 
+        ...cleanData
       } = maskedArea;
 
       // Stringify nodes back to areaShape if provided
@@ -115,19 +115,19 @@ export function useEditMaskedArea() {
   return useMutation({
     mutationFn: async (maskedArea: Partial<MaskedAreaType>) => {
       if (!maskedArea.id) throw new Error('Masked Area ID is required for editing.');
-      
-      const { 
-        id, 
-        createdAt, 
-        createdBy, 
-        updatedAt, 
-        updatedBy, 
-        generate, 
-        status, 
-        floor, 
+
+      const {
+        id,
+        createdAt,
+        createdBy,
+        updatedAt,
+        updatedBy,
+        generate,
+        status,
+        floor,
         floorplan,
         nodes,
-        ...cleanData 
+        ...cleanData
       } = maskedArea;
 
       // Stringify nodes back to areaShape if provided
@@ -200,18 +200,19 @@ export function useExportMaskedArea() {
     mutationFn: async (format: 'pdf' | 'excel') => {
       const url = `${API_URL}export/${format}`;
       const accessToken = localStorage.getItem('token');
-      
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-          'X-BIOPEOPLETRACKING-API-KEY': 'FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK',
+          Authorization: `Bearer ${accessToken}`,
+          'X-BIOPEOPLETRACKING-API-KEY':
+            'FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK',
         },
       });
-      
+
       if (!response.ok) throw new Error('Export failed');
-      
+
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -221,7 +222,7 @@ export function useExportMaskedArea() {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(downloadUrl);
-      
+
       return true;
     },
   });

@@ -174,6 +174,7 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
                   ? theme.palette.success.dark
                   : theme.palette.grey[800]
               }`,
+              bgcolor: '#f5f5f5',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

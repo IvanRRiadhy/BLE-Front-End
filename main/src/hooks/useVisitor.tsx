@@ -27,7 +27,7 @@ export function useVisitorList(filter: GetFilter) {
             } satisfies PaginatedResponse<VisitorType>;
         },
         placeholderData: keepPreviousData, // Keep old data during refetch
-        staleTime: 60_000, // fresh for 1 minute
+        staleTime: 5_000, // fresh for 1 minute
         gcTime: 5 * 60_000, // cache for 5 minutes
     })
 };

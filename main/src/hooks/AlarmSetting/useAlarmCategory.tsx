@@ -3,57 +3,57 @@ import axiosServices from 'src/utils/axios';
 import { AlarmSettingType, GetFilter } from 'src/store/apps/alarmsetting/alarmSettings';
 import { RootState, useSelector } from 'src/store/Store';
 
-const API_URL = "/api/AlarmCategorySettings/";
+const API_URL = '/api/AlarmCategorySettings/';
 
 export interface PaginatedResponse<T> {
   data: T[];
   draw: number;
   recordsTotal: number;
   recordsFiltered: number;
-};
+}
 
 export function useAlarmCategoryList(filter: GetFilter) {
-    return useQuery({
-        queryKey:['alarmcategory-list', filter],
-        queryFn: async () => {
-            const res = await axiosServices.post(`${API_URL}filter`, filter);
-            const collection = res.data.collection;
-            return {
-                data: collection.data as AlarmSettingType[],
-                draw: collection.draw,
-                recordsTotal: collection.recordsTotal,
-                recordsFiltered: collection.recordsFiltered,
-            } satisfies PaginatedResponse<AlarmSettingType>;
-        },
-        placeholderData: keepPreviousData, // Keep old data during refetch
-        staleTime: 60_000, // fresh for 1 minute
-        gcTime: 5 * 60_000, // cache for 5 minutes
-    })
-};
+  return useQuery({
+    queryKey: ['alarmcategory-list', filter],
+    queryFn: async () => {
+      const res = await axiosServices.post(`${API_URL}filter`, filter);
+      const collection = res.data.collection;
+      return {
+        data: collection.data as AlarmSettingType[],
+        draw: collection.draw,
+        recordsTotal: collection.recordsTotal,
+        recordsFiltered: collection.recordsFiltered,
+      } satisfies PaginatedResponse<AlarmSettingType>;
+    },
+    placeholderData: keepPreviousData, // Keep old data during refetch
+    staleTime: 5_000, // fresh for 1 minute
+    gcTime: 5 * 60_000, // cache for 5 minutes
+  });
+}
 
-export function useAllAlarmCategory(){
-    return useQuery({
-        queryKey: ['alarmcategory-all'],
-        queryFn: async () => {
-            const res = await axiosServices.get(`${API_URL}`);
-            const collection = res.data.collection;
-            return res.data.collection.data as AlarmSettingType[];
-        },
-        placeholderData: []
-    })
-};
+export function useAllAlarmCategory() {
+  return useQuery({
+    queryKey: ['alarmcategory-all'],
+    queryFn: async () => {
+      const res = await axiosServices.get(`${API_URL}`);
+      const collection = res.data.collection;
+      return res.data.collection.data as AlarmSettingType[];
+    },
+    placeholderData: [],
+  });
+}
 
-export function useEditAlarmCategory(){
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: async (AlarmCategory: Partial<AlarmSettingType>) => {
-            const { id, ...cleanData } = AlarmCategory;
-            const res = await axiosServices.put(`${API_URL}${id}`, cleanData);
-            return res.data;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['alarmcategory-list'] });
-            queryClient.invalidateQueries({ queryKey: ['alarmcategory-all'] });
-        }
-    })
+export function useEditAlarmCategory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (AlarmCategory: Partial<AlarmSettingType>) => {
+      const { id, ...cleanData } = AlarmCategory;
+      const res = await axiosServices.put(`${API_URL}${id}`, cleanData);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['alarmcategory-list'] });
+      queryClient.invalidateQueries({ queryKey: ['alarmcategory-all'] });
+    },
+  });
 }

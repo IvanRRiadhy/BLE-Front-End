@@ -16,17 +16,24 @@ import MouseLeftClickIcon from 'src/assets/images/svgs/mouse-left-click-icon.svg
 import MouseRightClickIcon from 'src/assets/images/svgs/mouse-right-click-icon.svg';
 import ShiftButtonIcon from 'src/assets/images/svgs/shift-button-icon.svg';
 import { defaultGeoFencingFilter } from 'src/store/apps/defaultForm';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import { useGeoFencingAlarms } from 'src/hooks/AlarmSetting/useGeofence';
 
 const EditGeoFenceFloorView = () => {
   const dispatch: AppDispatch = useDispatch();
-  const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
-  const maskedAreas = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
-  const geoFenceData = useSelector(
+    const geoFenceData = useSelector(
     (state: RootState) => state.GeoFencingReducer.selectedGeoFencingAlarm,
   );
-  const otherGeoFence = useSelector((state: RootState) =>
-    state.GeoFencingReducer.geoFencingAlarms.filter((alarm) => alarm.id !== geoFenceData?.id),
-  );
+const { data: floorplans = [] } = useAllFloorplans();
+const { data: maskedAreas = [] } = useAllMaskedAreas();
+const { data: geoFencingAlarmsData } = useGeoFencingAlarms({
+  ...defaultGeoFencingFilter,
+  filters: { FloorplanId: geoFenceData?.floorplanId } // Dynamic filter
+});
+
+const geoFencingAlarms = geoFencingAlarmsData?.data || [];
+const otherGeoFence = geoFencingAlarms.filter((alarm) => alarm.id !== geoFenceData?.id);
   const activeFloorPlan = floorplans.find((fp) => fp.id === geoFenceData?.floorplanId);
   const filteredArea = maskedAreas.filter((area) => area.floorplanId === activeFloorPlan?.id);
   const drawGeoFence = useSelector((state: RootState) => state.GeoFencingReducer.drawingGeoFence);
@@ -80,17 +87,6 @@ const EditGeoFenceFloorView = () => {
     }
   }, [activeFloorPlan]);
 
-  useEffect(() => {
-    dispatch(fetchFloorplan());
-    dispatch(fetchMaskedAreas());
-    dispatch(
-      fetchGeoFencingAlarms({
-        ...defaultGeoFencingFilter,
-        Length: 0,
-        filters: { FloorplanId: activeFloorPlan?.id },
-      }),
-    );
-  }, [dispatch]);
 
   const calculateImageDimensions = (
     containerWidth: number,
@@ -177,14 +173,6 @@ const EditGeoFenceFloorView = () => {
 
   useEffect(() => {
     if (containerRef.current && imgSize && imgSize.width > 1 && imgSize.height > 1) {
-      // const containerWidth = containerRef.current.clientWidth;
-      // const containerHeight = containerRef.current.clientHeight;
-
-      // const widthRatio = containerWidth / imgSize.width;
-      // const heightRatio = containerHeight / imgSize.height;
-      // setMinScale(Math.min(widthRatio, heightRatio));
-
-      //console.log('Resetting scale to minScale:', minScale); // Debug scale reset
       setScale(minScale);
     }
   }, [imgSize]); // Reset scale when imgSize changes
@@ -362,20 +350,6 @@ const EditGeoFenceFloorView = () => {
         />
       </Box>
 
-      {/* Sticky Overlay Toggle */}
-      {/* <Box
-        sx={{
-          position: 'absolute',
-          top: 12,
-          right: 12,
-          zIndex: 10,
-          width: '240px',
-          background: 'rgba(255,255,255,0.9)',
-          borderRadius: 2,
-          boxShadow: 2,
-          p: 1,
-        }}
-      ></Box> */}
       {/* Zoomable Content */}
       <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
         {isHovered &&
@@ -410,15 +384,6 @@ const EditGeoFenceFloorView = () => {
           }}
         >
           <Box
-            // onMouseEnter={() => {
-            //   if (!isPanning) {
-            //     document.body.style.cursor = 'grab'; // Ensure cursor resets when re-entering
-            //   }
-            // }}
-            // onMouseLeave={() => {
-            //   handleMouseUp(); // Ensure drag stops if mouse leaves container
-            //   document.body.style.cursor = ''; // Reset when leaving
-            // }}
             sx={{
               position: 'relative',
               top: 0,

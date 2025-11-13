@@ -58,7 +58,7 @@ export function useCCTVList(filter: GetFilter) {
       } satisfies PaginatedResponse<CCTVType>;
     },
     placeholderData: keepPreviousData, // Keep old data during refetch
-    staleTime: 60_000, // fresh for 1 minute
+    staleTime: 5_000, // fresh for 1 minute
     gcTime: 5 * 60_000, // cache retained 5 minutes
   });
 }
@@ -101,7 +101,8 @@ export function useAddCCTV() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (newCCTV: CCTVType) => {
-      const { id, integrationId, createdBy, createdAt, updatedBy, updatedAt, ...filteredData } = newCCTV;
+      const { id, integrationId, createdBy, createdAt, updatedBy, updatedAt, ...filteredData } =
+        newCCTV;
       const response = await axiosServices.post(API_URL, filteredData);
       return response.data;
     },
@@ -154,7 +155,9 @@ export function useDeleteCCTV() {
 // ---------------------------------------------------
 
 export function useCCTVStatus() {
-  const cctvFilter = useSelector((state: RootState) => state.CCTVReducer?.cctvFilter || defaultAccessCCTVFilter);
+  const cctvFilter = useSelector(
+    (state: RootState) => state.CCTVReducer?.cctvFilter || defaultAccessCCTVFilter,
+  );
   const query = useCCTVList(cctvFilter);
 
   return {

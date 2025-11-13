@@ -34,8 +34,8 @@ export function useDistrictList(filter: GetFilter) {
       } satisfies PaginatedResponse<DistrictType>;
     },
     placeholderData: keepPreviousData,
-    staleTime: 60_000, // data dianggap fresh 1 menit
-        gcTime: 5 * 60_000, // cache disimpan 5 menit
+    staleTime: 5_000, // data dianggap fresh 1 menit
+    gcTime: 5 * 60_000, // cache disimpan 5 menit
   });
 }
 
@@ -80,7 +80,9 @@ export function useAddBatchDistrict() {
 
   return useMutation({
     mutationFn: async (districts: Partial<DistrictType>[]) => {
-      const cleaned = districts.map(({ id, createdBy, createdAt, updatedBy, updatedAt, applicationId, ...rest }) => rest);
+      const cleaned = districts.map(
+        ({ id, createdBy, createdAt, updatedBy, updatedAt, applicationId, ...rest }) => rest,
+      );
       const res = await axiosServices.post(`${API_URL}batch/`, cleaned);
       return res.data;
     },

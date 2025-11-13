@@ -86,15 +86,15 @@ export const FloorplanSlice = createSlice({
 export const selectFloorPlan =
   (floorplanId: string) => (dispatch: AppDispatch, getState: () => RootState) => {
     const state = getState();
-    const gateways: gatesType[] = state.gateReducer.unsavedGates;
+    // const gateways: gatesType[] = state.gateReducer.unsavedGates;
 
-    const isAnyEditing = gateways.some((gate) => gate.isEditing);
+    // const isAnyEditing = gateways.some((gate) => gate.isEditing);
 
-    if (!isAnyEditing) {
-      dispatch(SelectFloorplan(floorplanId));
-    } else {
-      console.warn('Cannot switch floorplans while editing a gateway.');
-    }
+    // if (!isAnyEditing) {
+    //   dispatch(SelectFloorplan(floorplanId));
+    // } else {
+    //   console.warn('Cannot switch floorplans while editing a gateway.');
+    // }
   };
 
 export const { GetFloorplans, SelectFloorplan, SearchFloorplan, UpdateFloorplan, AddFloor } =

@@ -4,7 +4,8 @@ import { IconX } from '@tabler/icons-react';
 import EditAreaFloorView from './AddEditMaskedArea/Preview/EditAreaFloorView';
 import { useSelector } from 'react-redux';
 import { dispatch, RootState, useDispatch } from 'src/store/Store';
-import { selectFloorPlan } from 'src/store/apps/tracking/FloorPlanSlice';
+// import { selectFloorPlan } from 'src/store/apps/tracking/FloorPlanSlice';
+import {SelectFloorplan} from 'src/store/apps/crud/floorplan'
 
 // Get your Vite env base URL safely
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
@@ -38,7 +39,7 @@ const FloorplanPreviewDialog: React.FC<{ floorplanId: string; onClose: () => voi
       height *= ratio;
       setImageSize({ width, height });
     };
-    dispatch(selectFloorPlan(floorplanId));
+    dispatch(SelectFloorplan(floorplanId));
   }, [selected]);
 
   return (

@@ -16,19 +16,30 @@ import MouseLeftClickIcon from 'src/assets/images/svgs/mouse-left-click-icon.svg
 import MouseRightClickIcon from 'src/assets/images/svgs/mouse-right-click-icon.svg';
 import ShiftButtonIcon from 'src/assets/images/svgs/shift-button-icon.svg';
 import { defaultStayOnAreaFilter } from 'src/store/apps/defaultForm';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import { useStayOnAreaAlarms } from 'src/hooks/AlarmSetting/useStayOnArea';
 
 const EditStayOnAreaFloorView = () => {
   const dispatch: AppDispatch = useDispatch();
-  const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
-  const maskedAreas = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
+  const { data: floorplans = [] } = useAllFloorplans();
+  const { data: maskedAreas = [] } = useAllMaskedAreas();
   const stayOnAreaData = useSelector(
     (state: RootState) => state.StayOnAreaReducer.selectedStayOnAreaAlarm,
   );
-  const otherStayOnArea = useSelector((state: RootState) =>
-    state.StayOnAreaReducer.stayOnAreaAlarms.filter((alarm: StayOnAreaAlarmType) => alarm.id !== stayOnAreaData?.id),
+  const activeFloorPlan = floorplans.find(
+    (fp: FloorplanType) => fp.id === stayOnAreaData?.floorplanId,
   );
-  const activeFloorPlan = floorplans.find((fp: FloorplanType) => fp.id === stayOnAreaData?.floorplanId);
-  const filteredArea = maskedAreas.filter((area: MaskedAreaType) => area.floorplanId === activeFloorPlan?.id);
+  const { data: stayOnAreaAlarms } = useStayOnAreaAlarms({
+    ...defaultStayOnAreaFilter,
+    filters: { FloorplanId: activeFloorPlan?.id }, // Dynamic filter
+  });
+
+  const stayOnAreaAlarmData = stayOnAreaAlarms?.data || [];
+  const otherStayOnArea = stayOnAreaAlarmData.filter((alarm) => alarm.id !== stayOnAreaData?.id);
+  const filteredArea = maskedAreas.filter(
+    (area: MaskedAreaType) => area.floorplanId === activeFloorPlan?.id,
+  );
   const drawStayOnArea = useSelector(
     (state: RootState) => state.StayOnAreaReducer.drawingStayOnArea,
   );

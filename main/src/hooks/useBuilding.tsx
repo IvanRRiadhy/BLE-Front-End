@@ -27,7 +27,7 @@ export function useBuildingList(filter: GetFilter) {
             } satisfies PaginatedResponse<BuildingType>;
         },
         placeholderData: keepPreviousData, // ✅ TanStack v5 way
-        staleTime: 60_000, // data dianggap fresh 1 menit
+        staleTime: 5_000, // data dianggap fresh 5 detik
         gcTime: 5 * 60_000, // cache disimpan 5 menit
     });
 }

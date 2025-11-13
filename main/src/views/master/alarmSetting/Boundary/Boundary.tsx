@@ -17,6 +17,7 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import BoundaryList from 'src/components/master/Alarm Setting/Boundary/BoundaryList';
 import { AddBoundary } from 'src/components/master/Alarm Setting/Boundary/AddBoundary';
+import { useBoundaryAlarmStats } from 'src/hooks/AlarmSetting/useBoundary';
 interface cardType {
   icon?: string;
   title: string;
@@ -30,17 +31,19 @@ const Boundary = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  const boundaryCount = useSelector(
-    (state: RootState) => state.BoundaryReducer.boundaryAlarmActiveCount,
-  );
-  const hasLoaded = useSelector((state: RootState) => state.BoundaryReducer.hasLoaded);
+  const { activeCount, inactiveCount, hasLoaded} = useBoundaryAlarmStats();
   const { t } = useTranslation();
   const topCards: cardType[] = [
     {
       title: 'Total Active Boundary Alarm',
-      subtitle: boundaryCount.toString(),
+      subtitle: activeCount.toString(),
       bgcolor: 'primary',
     },
+    {
+      title: 'Total Inactive Boundary Alarm',
+      subtitle: inactiveCount.toString(),
+      bgcolor: 'warning',
+    }
   ];
   return (
     <PageContainer

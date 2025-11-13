@@ -63,7 +63,7 @@ export function useReaderList(filter: GetFilter) {
       } satisfies PaginatedResponse<bleReaderType>;
     },
     placeholderData: keepPreviousData,
-    staleTime: 60_000, // fresh for 1 minute
+    staleTime: 5_000, // fresh for 1 minute
     gcTime: 5 * 60_000, // cached for 5 minutes
   });
 }

@@ -16,20 +16,25 @@ import MouseLeftClickIcon from 'src/assets/images/svgs/mouse-left-click-icon.svg
 import MouseRightClickIcon from 'src/assets/images/svgs/mouse-right-click-icon.svg';
 import ShiftButtonIcon from 'src/assets/images/svgs/shift-button-icon.svg';
 import { defaultOverPopulatingFilter } from 'src/store/apps/defaultForm';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import { useOverPopulatingAlarms } from 'src/hooks/AlarmSetting/useOverPopulate';
 
 const EditOverPopulatingFloorView = () => {
   const dispatch: AppDispatch = useDispatch();
-  const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
-  const maskedAreas = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
+  const { data: floorplans = [] } = useAllFloorplans();
+  const { data: maskedAreas = [] } = useAllMaskedAreas();
   const overPopulatingData = useSelector(
     (state: RootState) => state.OverPopulatingReducer.selectedOverPopulatingAlarm,
   );
-  const otherOverPopulating = useSelector((state: RootState) =>
-    state.OverPopulatingReducer.overPopulatingAlarms.filter(
-      (alarm: OverPopulatingAlarmType) => alarm.id !== overPopulatingData?.id,
-    ),
-  );
   const activeFloorPlan = floorplans.find((fp: FloorplanType) => fp.id === overPopulatingData?.floorplanId);
+    const { data: overPopulatingAlarms } = useOverPopulatingAlarms({
+      ...defaultOverPopulatingFilter,
+      filters: { FloorplanId: activeFloorPlan?.id } // Dynamic filter
+    });
+    
+  const overPopulatingAlarmData = overPopulatingAlarms?.data || [];
+  const otherOverPopulating = overPopulatingAlarmData.filter((alarm) => alarm.id !== overPopulatingData?.id);
   const filteredArea = maskedAreas.filter((area: MaskedAreaType) => area.floorplanId === activeFloorPlan?.id);
   const drawOverPopulating = useSelector(
     (state: RootState) => state.OverPopulatingReducer.drawingOverPopulating,

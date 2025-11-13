@@ -1,13 +1,11 @@
 import { BASE_URL } from 'src/utils/axios';
 import React, { useEffect, useRef, useState } from 'react';
-import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
+import { useSelector, RootState } from 'src/store/Store';
 import { Box, Switch, FormControlLabel, FormLabel, Divider, Typography } from '@mui/material';
 import ZoomControls from 'src/components/shared/ZoomControls';
-import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
-import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import {  FloorplanType } from 'src/store/apps/crud/floorplan';
+import {  MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import {
-  fetchBoundaryAlarms,
-  fetchBoundaryAlarmsAll,
   BoundaryAlarmType,
 } from 'src/store/apps/alarmsetting/boundary';
 import EditBoundaryRenderer from './EditBoundaryRenderer';
@@ -16,17 +14,23 @@ import MouseLeftClickIcon from 'src/assets/images/svgs/mouse-left-click-icon.svg
 import MouseRightClickIcon from 'src/assets/images/svgs/mouse-right-click-icon.svg';
 import ShiftButtonIcon from 'src/assets/images/svgs/shift-button-icon.svg';
 import { defaultBoundaryFilter } from 'src/store/apps/defaultForm';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import { useBoundaryAlarms } from 'src/hooks/AlarmSetting/useBoundary';
 
 const EditBoundaryFloorView = () => {
-  const dispatch: AppDispatch = useDispatch();
-  const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
-  const maskedAreas = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
   const boundaryData = useSelector(
     (state: RootState) => state.BoundaryReducer.selectedBoundaryAlarm,
   );
-  const otherBoundary = useSelector((state: RootState) =>
-    state.BoundaryReducer.boundaryAlarms.filter((alarm: BoundaryAlarmType) => alarm.id !== boundaryData?.id),
-  );
+  const { data: floorplans = [] } = useAllFloorplans();
+  const { data: maskedAreas = [] } = useAllMaskedAreas();
+  const { data: boundaryAlarmData } = useBoundaryAlarms({
+    ...defaultBoundaryFilter,
+    filters: { FloorplanId: boundaryData?.floorplanId } // Dynamic filter
+  });
+  
+const boundaryAlarms = boundaryAlarmData?.data || [];
+const otherBoundary = boundaryAlarms.filter((alarm) => alarm.id !== boundaryData?.id);
   const activeFloorPlan = floorplans.find((fp: FloorplanType) => fp.id === boundaryData?.floorplanId);
   const filteredArea = maskedAreas.filter((area: MaskedAreaType) => area.floorplanId === activeFloorPlan?.id);
   const drawBoundary = useSelector(
@@ -81,18 +85,6 @@ const EditBoundaryFloorView = () => {
       };
     }
   }, [activeFloorPlan]);
-
-  useEffect(() => {
-    dispatch(fetchFloorplan());
-    dispatch(fetchMaskedAreas());
-    dispatch(
-      fetchBoundaryAlarms({
-        ...defaultBoundaryFilter,
-        Length: 0,
-        filters: { FloorplanId: activeFloorPlan?.id },
-      }),
-    );
-  }, [dispatch]);
 
   const calculateImageDimensions = (
     containerWidth: number,

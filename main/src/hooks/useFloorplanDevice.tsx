@@ -28,7 +28,7 @@ export function useFloorplanDeviceList(filter: GetFilter) {
       if (
         filter?.filters &&
         Object.values(filter.filters).some(
-          (arr: any) => Array.isArray(arr) && arr.includes("Empty")
+          (arr: any) => Array.isArray(arr) && arr.includes('Empty'),
         )
       ) {
         console.log("Filter contains 'Empty', skipping request");
@@ -51,7 +51,7 @@ export function useFloorplanDeviceList(filter: GetFilter) {
       } satisfies PaginatedResponse<FloorplanDeviceType>;
     },
     placeholderData: keepPreviousData,
-    staleTime: 60_000,
+    staleTime: 5_000,
     gcTime: 5 * 60_000,
   });
 }
@@ -78,17 +78,17 @@ export function useAddFloorplanDevice() {
 
   return useMutation({
     mutationFn: async (floorplanDevice: Partial<FloorplanDeviceType>) => {
-      const { 
-        id, 
-        createdAt, 
-        createdBy, 
-        updatedAt, 
-        updatedBy, 
-        accessCctv, 
-        reader, 
-        accessControl, 
+      const {
+        id,
+        createdAt,
+        createdBy,
+        updatedAt,
+        updatedBy,
+        accessCctv,
+        reader,
+        accessControl,
         floorplanMaskedArea,
-        ...cleanData 
+        ...cleanData
       } = floorplanDevice;
 
       const res = await axiosServices.post(API_URL, cleanData);
@@ -112,18 +112,18 @@ export function useEditFloorplanDevice() {
   return useMutation({
     mutationFn: async (floorplanDevice: Partial<FloorplanDeviceType>) => {
       if (!floorplanDevice.id) throw new Error('Floorplan Device ID is required for editing.');
-      
-      const { 
-        id, 
-        createdAt, 
-        createdBy, 
-        updatedAt, 
-        updatedBy, 
-        accessCctv, 
-        reader, 
-        accessControl, 
+
+      const {
+        id,
+        createdAt,
+        createdBy,
+        updatedAt,
+        updatedBy,
+        accessCctv,
+        reader,
+        accessControl,
         floorplanMaskedArea,
-        ...cleanData 
+        ...cleanData
       } = floorplanDevice;
 
       const res = await axiosServices.put(`${API_URL}${id}`, cleanData);
@@ -190,18 +190,19 @@ export function useExportFloorplanDevice() {
     mutationFn: async (format: 'pdf' | 'excel') => {
       const url = `${API_URL}export/${format}`;
       const accessToken = localStorage.getItem('token');
-      
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-          'X-BIOPEOPLETRACKING-API-KEY': 'FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK',
+          Authorization: `Bearer ${accessToken}`,
+          'X-BIOPEOPLETRACKING-API-KEY':
+            'FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK',
         },
       });
-      
+
       if (!response.ok) throw new Error('Export failed');
-      
+
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -211,7 +212,7 @@ export function useExportFloorplanDevice() {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(downloadUrl);
-      
+
       return true;
     },
   });
@@ -221,7 +222,9 @@ export function useExportFloorplanDevice() {
 // ✅ PAGINATION STATUS (for TopCards, etc.)
 // -----------------------------------------------------------------------------
 export function useFloorplanDeviceStatus() {
-  const filter = useSelector((state: RootState) => state.floorplanDeviceReducer.floorplanDeviceFilter);
+  const filter = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceFilter,
+  );
   const query = useFloorplanDeviceList(filter);
   const all = useAllFloorplanDevices();
 
@@ -243,11 +246,20 @@ export function useAddBatchFloorplanDevice() {
 
   return useMutation({
     mutationFn: async (devices: Partial<FloorplanDeviceType>[]) => {
-      const cleaned = devices.map(({ 
-        id, createdAt, createdBy, updatedAt, updatedBy, 
-        accessCctv, reader, accessControl, floorplanMaskedArea, 
-        ...rest 
-      }) => rest);
+      const cleaned = devices.map(
+        ({
+          id,
+          createdAt,
+          createdBy,
+          updatedAt,
+          updatedBy,
+          accessCctv,
+          reader,
+          accessControl,
+          floorplanMaskedArea,
+          ...rest
+        }) => rest,
+      );
 
       const res = await axiosServices.post(`${API_URL}batch/`, cleaned);
       return res.data;

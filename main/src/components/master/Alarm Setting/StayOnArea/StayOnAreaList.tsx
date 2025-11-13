@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Grid2 as Grid,
@@ -24,21 +24,26 @@ import {
   Tooltip,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconEdit, IconPencil, IconTrash } from '@tabler/icons-react';
-import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
+import { IconPencil, IconTrash } from '@tabler/icons-react';
+import { RootState, useSelector, useDispatch } from 'src/store/Store';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { StayOnAreaAlarmType } from 'src/store/apps/alarmsetting/stayonarea';
+import { useNavigate } from 'react-router';
+
+// Import React Query hooks
 import {
-  ChangeActiveStatus,
-  CreateNewStayOnAreaAlarm,
-  deleteStayOnAreaAlarm,
-  editStayOnAreaAlarm,
-  fetchStayOnAreaAlarms,
-  StayOnAreaAlarmType,
+  useStayOnAreaAlarms,
+  useEditStayOnAreaAlarm,
+  useDeleteStayOnAreaAlarm,
+  useToggleStayOnAreaAlarm,
+} from 'src/hooks/AlarmSetting/useStayOnArea';
+
+// Import Redux actions for filter and selection
+import {
   SetSelectedStayOnAreaAlarm,
   UpdateFilter,
 } from 'src/store/apps/alarmsetting/stayonarea';
-import { useNavigate } from 'react-router';
 
 const columns = [
   { label: 'Name', field: 'Name', sortAble: true },
@@ -49,20 +54,29 @@ const columns = [
 const SKELETON_ROWS = 5;
 
 const StayOnAreaList = () => {
-  const dispatch: AppDispatch = useDispatch();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const stayOnAreaAlarms = useSelector(
-    (state: RootState) => state.StayOnAreaReducer.stayOnAreaAlarms,
-  );
+  
+  // Get filter from Redux
   const stayOnAreaAlarmFilter = useSelector(
     (state: RootState) => state.StayOnAreaReducer.stayOnAreaAlarmFilter,
   );
-  const isLoading = useSelector((state: RootState) => state.StayOnAreaReducer.isLoading);
-  const hasLoaded = useSelector((state: RootState) => state.StayOnAreaReducer.hasLoaded);
-  const stayOnAreaAlarmTotalCount = useSelector(
-    (state: RootState) => state.StayOnAreaReducer.stayOnAreaAlarmTotalCount,
-  );
+
+  // Use React Query hooks
+  const { 
+    data: paginatedData, 
+    isLoading, 
+    isFetching,
+    isFetched: hasLoaded 
+  } = useStayOnAreaAlarms(stayOnAreaAlarmFilter);
+  
+  const { mutate: editAlarm, isPending: isEditing } = useEditStayOnAreaAlarm();
+  const { mutate: deleteAlarm, isPending: isDeleting } = useDeleteStayOnAreaAlarm();
+  const { mutate: toggleAlarm, isPending: isToggling } = useToggleStayOnAreaAlarm();
+
+  const stayOnAreaAlarms = paginatedData?.data || [];
+  const stayOnAreaAlarmTotalCount = paginatedData?.recordsTotal || 0;
 
   // Pagination State
   const page = Math.floor(stayOnAreaAlarmFilter.Start / stayOnAreaAlarmFilter.Length);
@@ -73,10 +87,12 @@ const StayOnAreaList = () => {
   const handleChangePage = (_: unknown, newPage: number) => {
     dispatch(UpdateFilter({ Start: newPage * stayOnAreaAlarmFilter.Length }));
   };
+
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newLength = parseInt(event.target.value, 10);
     dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
   };
+
   const handleSort = (column: string) => {
     const isAsc =
       stayOnAreaAlarmFilter.SortColumn === column && stayOnAreaAlarmFilter.SortDir === 'asc';
@@ -102,67 +118,65 @@ const StayOnAreaList = () => {
     }
   };
 
-  useEffect(() => {
-    dispatch(fetchStayOnAreaAlarms(stayOnAreaAlarmFilter));
-  }, [dispatch, stayOnAreaAlarmFilter]);
-
   const handleToggleStatus = async (stayonarea: StayOnAreaAlarmType) => {
-    const updatedGeoFence = {
+    const updatedAlarm = {
       ...stayonarea,
       isActive: !stayonarea.isActive,
     };
-    console.log("Toggle Status Clicked: ", stayonarea, "New Status: ", updatedGeoFence.isActive);
-    try {
-      const res = await dispatch(editStayOnAreaAlarm(updatedGeoFence));
-      if(res.type.endsWith('/fulfilled')) {
-        await dispatch(fetchStayOnAreaAlarms(stayOnAreaAlarmFilter));
-        toast.success('Alarm status updated successfully');
+    
+    console.log("Toggle Status Clicked: ", stayonarea, "New Status: ", updatedAlarm.isActive);
+    
+    toggleAlarm(
+      { id: stayonarea.id, isActive: updatedAlarm.isActive },
+      {
+        onSuccess: () => {
+          toast.success('Alarm status updated successfully');
+        },
+        onError: (error) => {
+          toast.error('Error updating alarm status');
+          console.error('Error updating alarm status:', error);
+        },
       }
-    } catch (error) {
-      toast.error('Error updating alarm status');
-      console.error('Error updating alarm status:', error);
-    }
+    );
   };
 
-  //Delete Pop-up
+  // Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedstayonarea, setSelectedStayonarea] = useState<StayOnAreaAlarmType | null>(null);
+  const [selectedStayOnArea, setSelectedStayOnArea] = useState<StayOnAreaAlarmType | null>(null);
+  
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (stayonarea: StayOnAreaAlarmType) => {
-    setSelectedStayonarea(stayonarea);
+    setSelectedStayOnArea(stayonarea);
     setDeleteDialogOpen(true);
   };
 
   // Close delete confirmation dialog
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
-    setSelectedStayonarea(null);
+    setSelectedStayOnArea(null);
   };
 
   // Confirm delete action
   const handleConfirmDelete = async () => {
-    if (selectedstayonarea) {
-      try {
-        const result = await dispatch(deleteStayOnAreaAlarm(selectedstayonarea.id));
-        if (result && result.type && result.type.endsWith('/fulfilled')) {
-          await dispatch(fetchStayOnAreaAlarms(stayOnAreaAlarmFilter));
+    if (selectedStayOnArea) {
+      deleteAlarm(selectedStayOnArea.id, {
+        onSuccess: () => {
           toast.success('Data Deleted');
-        }
-      } catch (error) {
-        toast.error('Delete Data Unsuccessful');
-        console.error('Error deleting Alarm:', error);
-      }
+        },
+        onError: (error) => {
+          toast.error('Delete Data Unsuccessful');
+          console.error('Error deleting Alarm:', error);
+        },
+      });
     }
     handleCloseDeleteDialog();
   };
 
-  const handleEdit = (selectedstayonarea: StayOnAreaAlarmType) => {
-    dispatch(SetSelectedStayOnAreaAlarm(selectedstayonarea));
-    console.log("Selected stay on area alarm for editing:", JSON.stringify(selectedstayonarea));
+  const handleEdit = (selectedStayOnArea: StayOnAreaAlarmType) => {
+    dispatch(SetSelectedStayOnAreaAlarm(selectedStayOnArea));
+    console.log("Selected stay on area alarm for editing:", JSON.stringify(selectedStayOnArea));
     navigate('/alarmsetting/stayonarea/edit');
   };
-
-
 
   const renderSkeletonRows = (rows: number) => (
     <>
@@ -205,14 +219,14 @@ const StayOnAreaList = () => {
           >
             <Box display="flex" gap={1}>
               <Skeleton variant="rounded" width={90} height={32} />
-              {/* <Skeleton variant="circular" width={32} height={32} />
-                            <Skeleton variant="circular" width={32} height={32} /> */}
             </Box>
           </TableCell>
         </TableRow>
       ))}
     </>
   );
+
+  const loading = isLoading || isFetching || isEditing || isToggling;
 
   return (
     <Grid container spacing={3}>
@@ -230,7 +244,7 @@ const StayOnAreaList = () => {
                         left: 0,
                         background: 'white',
                         zIndex: 2,
-                        width: 35, // Fixed width
+                        width: 35,
                         minWidth: 35,
                         maxWidth: 35,
                       }}
@@ -259,7 +273,7 @@ const StayOnAreaList = () => {
                         right: 0,
                         background: 'white',
                         zIndex: 2,
-                        width: 150, // Fixed width
+                        width: 150,
                         minWidth: 150,
                         maxWidth: 150,
                       }}
@@ -269,7 +283,7 @@ const StayOnAreaList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody key={'skeleton-body'}>
-                  {!hasLoaded
+                  {!hasLoaded || loading
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : stayOnAreaAlarms.map((stayonarea: StayOnAreaAlarmType, index: number) => (
                         <TableRow key={stayonarea.id}>
@@ -279,7 +293,7 @@ const StayOnAreaList = () => {
                               left: 0,
                               background: 'white',
                               zIndex: 1,
-                              width: 35, // Fixed width
+                              width: 35,
                               minWidth: 35,
                               maxWidth: 35,
                               alignItems: 'center',
@@ -302,11 +316,10 @@ const StayOnAreaList = () => {
                               <Tooltip title={stayonarea.isActive ? 'Disable' : 'Enable'} arrow>
                                 <Switch
                                   checked={stayonarea.isActive}
-                                  onChange={() =>
-                                    handleToggleStatus(stayonarea)
-                                  }
+                                  onChange={() => handleToggleStatus(stayonarea)}
                                   color="primary"
                                   size="small"
+                                  disabled={isToggling}
                                 />
                               </Tooltip>
                             </Box>
@@ -321,7 +334,7 @@ const StayOnAreaList = () => {
                               display: 'flex',
                               gap: 1,
                               alignItems: 'center',
-                              width: 150, // Fixed width
+                              width: 150,
                               minWidth: 150,
                               maxWidth: 150,
                             }}
@@ -331,6 +344,7 @@ const StayOnAreaList = () => {
                                 color="primary"
                                 size="small"
                                 onClick={() => handleEdit(stayonarea)}
+                                disabled={loading}
                               >
                                 <IconPencil size={20} />
                               </IconButton>
@@ -340,6 +354,7 @@ const StayOnAreaList = () => {
                                 color="error"
                                 size="small"
                                 onClick={() => handleOpenDeleteDialog(stayonarea)}
+                                disabled={loading}
                               >
                                 <IconTrash size={20} />
                               </IconButton>
@@ -368,7 +383,7 @@ const StayOnAreaList = () => {
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete the Alarm <strong>{selectedstayonarea?.name}</strong>?
+            Are you sure you want to delete the Alarm <strong>{selectedStayOnArea?.name}</strong>?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -377,11 +392,11 @@ const StayOnAreaList = () => {
           </Button>
           <Button
             onClick={handleConfirmDelete}
-            color={isLoading ? 'primary' : 'error'}
-            disabled={isLoading}
-            startIcon={isLoading ? <CircularProgress size={20} /> : null}
+            color={isDeleting ? 'primary' : 'error'}
+            disabled={isDeleting}
+            startIcon={isDeleting ? <CircularProgress size={20} /> : null}
           >
-            {isLoading ? 'Deleting...' : 'Delete'}
+            {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>
