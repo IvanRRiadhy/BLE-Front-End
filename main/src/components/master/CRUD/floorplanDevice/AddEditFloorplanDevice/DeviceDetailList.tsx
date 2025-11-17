@@ -70,6 +70,7 @@ const DeviceDetailList = () => {
 
   const { data: CCTVData = [] } = useAllUnassignedCCTV();
   const { data: bleReaderData = [] } = useAllUnassignedReaders();
+   console.log("bleReaderData", bleReaderData);
 
   // Form state
   const [formData, setFormData] = useState<DeviceFormData>({

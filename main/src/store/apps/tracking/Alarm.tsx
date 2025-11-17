@@ -3,7 +3,7 @@ import { AppDispatch } from 'src/store/Store';
 import { startMQTTclient } from './MQTT';
 import axiosServices from 'src/utils/axios';
 
-const ALARM_URL = 'http://192.168.1.116:3300';
+const ALARM_URL = 'http://192.168.1.10:3300';
 
 export interface AlarmType {
   beaconId: string;
@@ -34,6 +34,28 @@ export interface AlarmType {
   is_Active: boolean;
   floorplanName: string;
   maskedAreaName: string;
+}
+export interface MQTTAlarmType {
+  MemberName: string | null;
+  action: string;
+  alarmName: string;
+  cardAccesses: any;
+  cardId: string;
+  cardName: string;
+  cardDMAC: string;
+  color: string;
+  faceImage: string;
+  floorplanName: string;
+  maskedAreaId: string;
+  maskedAreaName: string;
+  period: {
+    start: string;
+    end: string;
+  };
+  priority: string; // Note the spelling matches the response
+  status: string;
+  triggerId: string;
+  visitorName: string;
 }
 
 interface StateType {

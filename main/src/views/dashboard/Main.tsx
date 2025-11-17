@@ -48,10 +48,6 @@ const filter = {
 
 const Modern = () => {
   const dashboardFilter = useSelector((state: RootState) => state.customizer.dashboardFilter);
-  const [alarmPage, setAlarmPage] = useState(0);
-  const [alarmRowsPerPage, setAlarmRowsPerPage] = useState(5);
-  const [blacklistPage, setBlacklistPage] = useState(0);
-  const [blacklistRowsPerPage, setBlacklistRowsPerPage] = useState(5);
   // const [filters, setFilters] = useState({
   //   ...filter,
   //   filter: dashboardFilter,

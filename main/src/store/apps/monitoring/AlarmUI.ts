@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AlarmType } from 'src/store/apps/tracking/Alarm';
+import { AlarmType, MQTTAlarmType } from 'src/store/apps/tracking/Alarm';
 
 type AlarmUiState = {
-  latest: AlarmType | null;
+  latest: MQTTAlarmType | null;
   open: boolean;
 };
 
@@ -12,7 +12,7 @@ const alarmUiSlice = createSlice({
   name: 'alarmUi',
   initialState,
   reducers: {
-    showAlarmPopup(state, action: PayloadAction<AlarmType>) {
+    showAlarmPopup(state, action: PayloadAction<MQTTAlarmType>) {
       state.latest = action.payload;
       state.open = true;
     },

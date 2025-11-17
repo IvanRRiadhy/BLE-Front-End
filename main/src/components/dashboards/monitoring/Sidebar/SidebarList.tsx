@@ -36,14 +36,6 @@ type ListType = {
   type: 'Alarm' | 'Tracking';
 };
 
-const dataTableFilter = {
-  draw: 1,
-  start: 0,
-  length: 999,
-  sortColumn: '',
-  sortDir: 'asc',
-  SearchValue: '',
-};
 
 const SidebarList = ({ filterType }: SidebarListProps) => {
   const dispatch = useDispatch();
@@ -56,13 +48,6 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
   const visitorList: VisitorType[] = useSelector((s: RootState) => s.visitorReducer.visitorAll);
   const beaconsByTopic = useSelector((s: RootState) => s.BeaconReducer.beaconsByTopic || {});
   const alarmTriggers = useSelector((s: RootState) => s.alarmTriggerReducer.alarmTriggers || []);
-  // const selectedGrid = useSelector((s: RootState) => s.layoutReducer.grid);
-  // const selectedFloorplan = useSelector((s: RootState) => s.layoutReducer.floorplanId);
-
-  // const floorplanIds: string[] = useMemo(() => {
-  //   const ids = selectedFloorplan?.[selectedGrid] ?? [];
-  //   return Array.isArray(ids) ? ids : [];
-  // }, [selectedFloorplan, selectedGrid]);
 
   const getName = (bleNumber: string) => {
     const m = memberList.find((x) => x.bleCardNumber === bleNumber);
@@ -93,26 +78,6 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
     dispatch(fetchMembers());
   }, [dispatch]);
 
-  // useEffect(() => {
-  //   dispatch(fetchVisitorDT(dataTableFilter));
-  //   dispatch(fetchMemberDT(dataTableFilter));
-  //   dispatch(fetchAlarmTriggerDT(dataTableFilter)); // Initial fetch for alarms
-
-  //   unsubscribersRef.current.forEach((u) => u());
-  //   unsubscribersRef.current = [];
-
-  //   for (const floorplanId of floorplanIds) {
-  //     const topic = `tracking/${floorplanId.toUpperCase()}`;
-  //     const u = dispatch(fetchBeacon(topic));
-  //     if (typeof u === 'function') unsubscribersRef.current.push(u);
-  //   }
-
-  //   return () => {
-  //     unsubscribersRef.current.forEach((u) => u());
-  //     unsubscribersRef.current = [];
-  //   };
-  // }, [dispatch, floorplanIds]);
-
   useEffect(() => {
     const rowsToAppend: ListType[] = [];
 
@@ -139,7 +104,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
       (beacons || []).forEach((b: any) => {
         const beaconId = b.beaconId || b.cardId || b.id || '';
         if (!beaconId) return;
-        console.log("beaconID :",beaconId)
+        // console.log("beaconID :",beaconId)
         const areaNow = b.maskedAreaName || b.areaName || '';
         if (!areaNow) return;
 

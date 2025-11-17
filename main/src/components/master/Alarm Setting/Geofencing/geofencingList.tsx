@@ -69,6 +69,7 @@ const GeoFencingList = () => {
   const { mutate: editAlarm, isPending: isEditing } = useEditGeoFencingAlarm();
   const { mutate: deleteAlarm, isPending: isDeleting } = useDeleteGeoFencingAlarm();
   const { mutate: toggleAlarm, isPending: isToggling } = useToggleGeoFencingAlarm();
+  const editMutation = useEditGeoFencingAlarm();
 
   const geoFencingAlarms = paginatedData?.data || [];
   const geoFencingAlarmTotalCount = paginatedData?.recordsTotal || 0;
@@ -120,19 +121,19 @@ const GeoFencingList = () => {
     };
     
     console.log("Toggle Status Clicked: ", geofence, "New Status: ", updatedGeoFence.isActive);
-    
-    toggleAlarm(
-      { id: geofence.id, isActive: updatedGeoFence.isActive },
-      {
-        onSuccess: () => {
-          toast.success('Alarm status updated successfully');
-        },
-        onError: (error: any) => {
-          toast.error('Error updating alarm status');
-          console.error('Error updating alarm status:', error);
-        },
-      }
-    );
+    editMutation.mutate(updatedGeoFence);
+    // editAlarm(
+    //   { id: geofence.id, isActive: updatedGeoFence.isActive },
+    //   {
+    //     onSuccess: () => {
+    //       toast.success('Alarm status updated successfully');
+    //     },
+    //     onError: (error: any) => {
+    //       toast.error('Error updating alarm status');
+    //       console.error('Error updating alarm status:', error);
+    //     },
+    //   }
+    // );
   };
 
   // Delete Pop-up

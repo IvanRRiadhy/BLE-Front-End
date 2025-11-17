@@ -26,14 +26,29 @@ import BeaconDetailPopup from './Popup/BeaconDetailPopup';
 import TrackingDetailPopup from './Popup/TrackingDetailPopup';
 import { setScreenDisplay, setScreenSettings, swapScreen } from 'src/store/apps/monitoring/layout';
 import {
-  fetchGeoFencingAlarms,
+  
   fetchGeoFencingAlarmsAll,
   GeoFencingAlarmType,
 } from 'src/store/apps/alarmsetting/geofencing';
+import { useAllMembers } from 'src/hooks/useMember';
+import { useAllVisitor } from 'src/hooks/useVisitor';
+import { useAllFloors } from 'src/hooks/useFloor';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import { useGeoFencingAlarmsAll } from 'src/hooks/AlarmSetting/useGeofence';
+import { useOverPopulatingAlarmsAll } from 'src/hooks/AlarmSetting/useOverPopulate';
+import { OverPopulatingAlarmType } from 'src/store/apps/alarmsetting/overpopulating';
+import { useStayOnAreaAlarmsAll } from 'src/hooks/AlarmSetting/useStayOnArea';
+import { StayOnAreaAlarmType } from 'src/store/apps/alarmsetting/stayonarea';
+import { useBoundaryAlarmsAll } from 'src/hooks/AlarmSetting/useBoundary';
+import { BoundaryAlarmType } from 'src/store/apps/alarmsetting/boundary';
+import { getConfig } from 'src/config';
+import { useAllFloorplanDevices } from 'src/hooks/useFloorplanDevice';
+
+const MQTT_URL = getConfig().MQTT_URL;
 
 const FOLLOW_SCALE = 1.5; // tweak as needed
 
-const ALARM_URL = 'http://192.168.1.116:3300';
 const FloorView: React.FC<{
   activeFloorplan: string;
   zoomable: boolean;
@@ -56,20 +71,13 @@ const FloorView: React.FC<{
   screenId,
 }) => {
   const dispatch: AppDispatch = useDispatch();
-  useEffect(() => {
-    dispatch(fetchFloorplan());
-    dispatch(fetchFloors());
-    dispatch(fetchFloorplanDevices());
-    dispatch(fetchMaskedAreas());
-    dispatch(fetchGeoFencingAlarmsAll());
-    dispatch(fetchMembers());
-    dispatch(fetchVisitor());
-  }, [dispatch]);
 
   //DUMMY
   const [dummyAlarm, setDummyAlarm] = useState<AlarmType>();
-  const memberList = useSelector((state: RootState) => state.memberReducer.members);
-  const visitorList = useSelector((state: RootState) => state.visitorReducer.visitors);
+  // const memberList = useSelector((state: RootState) => state.memberReducer.members);
+  // const visitorList = useSelector((state: RootState) => state.visitorReducer.visitors);
+  const {data: memberList = []} = useAllMembers();
+  const {data: visitorList = []} = useAllVisitor();
   const [open, setOpen] = useState(false);
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
 
@@ -80,22 +88,35 @@ const FloorView: React.FC<{
   // const screenId = activeLayout?.screens.find((s) => s.floorplanId === activeFloorplan)?.id;
   // console.log('testing', useSelector((state: RootState) => state.floorReducer.floors));
   const containerRef = useRef<HTMLDivElement>(null);
-  const floor = useSelector((state: RootState) => state.floorReducer.floorAll);
-  const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
+  // const floor = useSelector((state: RootState) => state.floorReducer.floorAll);
+  const {data: floor = []} = useAllFloors();
+  // const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
+  const {data: floorplans = []} = useAllFloorplans();
   const actFloorplan = floorplans.find(
     (floorplan: FloorplanType) => floorplan.id === activeFloorplan,
   );
-  const Areas: MaskedAreaType[] = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
-  );
+  // const Areas: MaskedAreaType[] = useSelector(
+  //   (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
+  // );
+  const { data: Areas = []} = useAllMaskedAreas();
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorplan);
-  const GeoFenceArea: GeoFencingAlarmType[] = useSelector(
-    (state: RootState) => state.GeoFencingReducer.geoFencingAlarmAll,
-  );
-  const filteredGeoFenceArea = GeoFenceArea.filter((area) => area.floorplanId === activeFloorplan);
+  // const GeoFenceArea: GeoFencingAlarmType[] = useSelector(
+  //   (state: RootState) => state.GeoFencingReducer.geoFencingAlarmAll,
+  // );
+  const {data: GeoFenceArea = []} = useGeoFencingAlarmsAll();
+  const filteredGeoFenceArea: GeoFencingAlarmType[] = GeoFenceArea.filter((area) => area.floorplanId === activeFloorplan);
+  const {data: OverPopulate = []} = useOverPopulatingAlarmsAll();
+  const filteredOverPopulateArea: OverPopulatingAlarmType[] = OverPopulate.filter((area) => area.floorplanId === activeFloorplan);
+  const {data: StayOnArea = []} = useStayOnAreaAlarmsAll();
+  const filteredStayOnArea: StayOnAreaAlarmType[] = StayOnArea.filter((area) => area.floorplanId === activeFloorplan);
+  const {data: Boundary = []} = useBoundaryAlarmsAll();
+  const filteredBoundaryArea: BoundaryAlarmType[] = Boundary.filter((area) => area.floorplanId === activeFloorplan);
   const [showArea, setShowArea] = useState(true);
   const [showGates, setShowGates] = useState(true);
   const [showGeoFence, setShowGeoFence] = useState(false);
+  const [showOverPopulate, setShowOverPopulate] = useState(false);
+  const [showStayOnArea, setShowStayOnArea] = useState(false);
+  const [showBoundary, setShowBoundary] = useState(false);
   const [showOtherBeacons, setShowOtherBeacons] = useState(true);
 
   const [focusArea, setFocusArea] = useState<{
@@ -137,7 +158,9 @@ const FloorView: React.FC<{
   const devices = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceAll,
   );
-  const [filteredDevices, setFilteredDevices] = useState<FloorplanDeviceType[]>([]);
+  // const [filteredDevices, setFilteredDevices] = useState<FloorplanDeviceType[]>([]);
+    const {data: Devices = []} = useAllFloorplanDevices();
+  const filteredDevices: FloorplanDeviceType[] = Devices.filter((area) => area.floorplanId === activeFloorplan);
 
   //Popup State
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -162,12 +185,12 @@ const FloorView: React.FC<{
     }
   }, [selectedBeacon, screenNumber]);
 
-  useEffect(() => {
-    const filteredDevices = devices.filter(
-      (device: FloorplanDeviceType) => device.floorplanId === activeFloorplan,
-    );
-    setFilteredDevices(filteredDevices);
-  }, [devices, activeFloorplan]);
+  // useEffect(() => {
+  //   const filteredDevices = devices.filter(
+  //     (device: FloorplanDeviceType) => device.floorplanId === activeFloorplan,
+  //   );
+  //   setFilteredDevices(filteredDevices);
+  // }, [devices, activeFloorplan]);
 
   useEffect(() => {
     dispatch(RefreshTrigger());
@@ -574,7 +597,7 @@ const FloorView: React.FC<{
       const payload = JSON.stringify({ message: 'Stop' });
 
       import('mqtt').then(({ connect }) => {
-        const client = connect('ws://http://192.168.1.116:9005', {
+        const client = connect(`${MQTT_URL}`, {
           clientId: `Klien1-${Math.random().toString(16).substr(2, 8)}`,
           username: 'bio_mqtt',
           password: 'P@ssw0rd',
@@ -613,8 +636,8 @@ const FloorView: React.FC<{
   const getName = (bleNuber: string) => {
     let name = '';
     name =
-      memberList.find((member: memberType) => member.bleCardNumber === bleNuber)?.name ??
-      visitorList.find((visitor: VisitorType) => visitor.bleCardNumber === bleNuber)?.name ??
+      memberList?.find((member: memberType) => member.bleCardNumber === bleNuber)?.name ??
+      visitorList?.find((visitor: VisitorType) => visitor.bleCardNumber === bleNuber)?.name ??
       'Unknown Person';
     return name;
   };
@@ -719,15 +742,38 @@ const FloorView: React.FC<{
             }
             label="Show GeoFence Areas"
           />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showOverPopulate}
+                onChange={() => setShowOverPopulate((prev) => !prev)}
+                color="primary"
+              />
+            }
+            label="Show Over Population Areas"
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showStayOnArea}
+                onChange={() => setShowStayOnArea((prev) => !prev)}
+                color="primary"
+              />
+            }
+            label="Show Stay on Areas"
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showBoundary}
+                onChange={() => setShowBoundary((prev) => !prev)}
+                color="primary"
+              />
+            }
+            label="Show Boundary Areas"
+          />
           {Boolean(focusBeacon) && isFollowing && (
             <>
-              {/* <Button
-                variant="contained"
-                color={showOtherBeacons ? 'secondary' : 'primary'}
-                onClick={() => setShowOtherBeacons((prev) => !prev)}
-              >
-                {showOtherBeacons ? 'Hide Others' : 'Show Others'}
-              </Button> */}
               <FormControlLabel
                 control={
                   <Switch
@@ -786,13 +832,6 @@ const FloorView: React.FC<{
             cursor: isDragging ? 'grabbing' : 'grab', // Change cursor on drag
           }}
         >
-          {/* <Stage
-              width={containerRef.current ? containerRef.current.clientWidth : 800}
-              height={containerRef.current ? containerRef.current.clientHeight : 600}
-              style={{ position: 'absolute', top: 0, left: 0 }}
-            >
-              <Layer> */}
-          {/* Render the image */}
           {image &&
             imgSize &&
             containerRef.current &&
@@ -844,10 +883,16 @@ const FloorView: React.FC<{
                     devices={filteredDevices}
                     imageSrc={image}
                     areas={filteredArea}
-                    geofences={filteredGeoFenceArea}
+                    GeoFenceAlarm={filteredGeoFenceArea}
+                    OverPopulateAlarm={filteredOverPopulateArea}
+                    StayOnAreaAlarm={filteredStayOnArea}
+                    BoundaryAlarm={filteredBoundaryArea}
                     showAreas={showArea}
                     showGates={showGates}
                     showGeoFence={showGeoFence}
+                    showOverPopulate={showOverPopulate}
+                    showStayOnArea={showStayOnArea}
+                    showBoundary={showBoundary}
                     topic={`tracking/${activeFloorplan.toUpperCase()}`}
                     onSelectBeacon={handleSelectBeacon}
                     detailDialogOpen={detailDialogOpen}
@@ -975,8 +1020,8 @@ const FloorView: React.FC<{
       )}
       {selectedBeacon &&
         (() => {
-          const member = memberList.find((m: memberType) => m.bleCardNumber === selectedBeacon.id);
-          const visitor = visitorList.find(
+          const member = memberList?.find((m: memberType) => m.bleCardNumber === selectedBeacon.id);
+          const visitor = visitorList?.find(
             (v: VisitorType) => v.bleCardNumber === selectedBeacon.id,
           );
           const person = member || visitor;

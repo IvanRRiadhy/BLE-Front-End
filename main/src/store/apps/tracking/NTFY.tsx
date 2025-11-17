@@ -1,8 +1,18 @@
 // src/store/apps/tracking/NTFY.ts
+
+import { getConfig } from 'src/config';
+
 type Callback = (data: any) => void;
 const CONTROLLERS: Record<string, EventSource> = {};
 const CALLBACKS: Record<string, Callback[]> = {};
-const DEFAULT_BASE = 'http://192.168.1.116:6099';
+
+// ❌ old: const DEFAULT_BASE = import.meta.env.VITE_NTFY_URL;
+// ✔ dynamic:
+export let DEFAULT_BASE = '';
+
+export function initializeNTFYConfig() {
+  DEFAULT_BASE = getConfig().NTFY_URL; // comes from /config.json
+}
 
 export interface NtfyOptions {
   baseUrl?: string;
@@ -35,7 +45,6 @@ export function startNTFYclient(onMessage: Callback, topic: string, opts: NtfyOp
   if (!CALLBACKS[topic].includes(onMessage)) CALLBACKS[topic].push(onMessage);
 
   if (!CONTROLLERS[topic]) {
-    // console.log(`[NTFY] Subscribing to topic "${topic}" at ${sseUrl}`);
     const es = new EventSource(sseUrl);
 
     es.addEventListener('open', () => {
@@ -43,16 +52,14 @@ export function startNTFYclient(onMessage: Callback, topic: string, opts: NtfyOp
     });
 
     es.addEventListener('message', (e: MessageEvent) => {
-      // console.log(`[NTFY] Message from topic "${topic}":`, e.data);
       try {
-        (CALLBACKS[topic] || []).forEach((cb) => cb(JSON.parse(e.data)));
+        (CALLBACKS[topic] || []).forEach(cb => cb(JSON.parse(e.data)));
       } catch {
-        (CALLBACKS[topic] || []).forEach((cb) => cb(e.data));
+        (CALLBACKS[topic] || []).forEach(cb => cb(e.data));
       }
     });
 
-    es.addEventListener('error', (err) => {
-      // console.error(`[NTFY] Error on topic "${topic}":`, err);
+    es.addEventListener('error', () => {
       try {
         es.close();
       } finally {
@@ -64,7 +71,7 @@ export function startNTFYclient(onMessage: Callback, topic: string, opts: NtfyOp
   }
 
   return () => {
-    CALLBACKS[topic] = (CALLBACKS[topic] || []).filter((cb) => cb !== onMessage);
+    CALLBACKS[topic] = (CALLBACKS[topic] || []).filter(cb => cb !== onMessage);
     if (!CALLBACKS[topic]?.length) {
       console.log(`[NTFY] Unsubscribing from topic "${topic}"`);
       try {

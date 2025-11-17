@@ -6,9 +6,10 @@ import { useSelector } from 'react-redux';
 import { dispatch, RootState, useDispatch } from 'src/store/Store';
 // import { selectFloorPlan } from 'src/store/apps/tracking/FloorPlanSlice';
 import {SelectFloorplan} from 'src/store/apps/crud/floorplan'
+import { getConfig } from 'src/config';
 
 // Get your Vite env base URL safely
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE_URL = getConfig().API_BASE_URL || '';
 
 const FloorplanPreviewDialog: React.FC<{ floorplanId: string; onClose: () => void }> = ({
   floorplanId,

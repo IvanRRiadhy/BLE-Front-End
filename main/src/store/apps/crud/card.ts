@@ -6,7 +6,9 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { defaultCardFilter } from "../defaultForm";
 import { MaskedAreaType } from "./maskedArea";
 import { CardAccessType } from "./cardAccess";
+import { BASE_URL } from "../../../utils/axios";
 
+const API_URL_V1 = "/api/Card/";
 const API_URL = "/api/Card/v2/";
 const API_DT_URL = "/api/Card/filter/";
 const ASSIGN_CARD_URL = "/api/CardRecord/";
@@ -354,7 +356,7 @@ export const ImportCard = createAsyncThunk(
     "card/importCard",
     async (formData: FormData, { rejectWithValue }) => {
         try {
-            const response = await axiosServices.post(`${API_URL}import`, formData, {
+            const response = await axiosServices.post(`${API_URL_V1}import`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
@@ -371,7 +373,7 @@ export const ImportCard = createAsyncThunk(
 export const ExportCard = createAsyncThunk(
     "card/exportCard",
     async (filter: "pdf" | "excel", { rejectWithValue }) => {
-        const url = `http://192.168.1.116:5000${API_URL}export/${filter}`;
+        const url = `${BASE_URL}${API_URL}export/${filter}`;
         const accessToken = localStorage.getItem("token");
         try {
             const response = await fetch(url, {

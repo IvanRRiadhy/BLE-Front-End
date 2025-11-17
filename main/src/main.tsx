@@ -6,10 +6,17 @@ import { store, persistor } from './store/Store';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
+
+import { loadRuntimeConfig } from './config';
+import { initializeAxiosBaseURL } from './utils/axios';
+
 import App from './App';
 import Spinner from './views/spinner/Spinner';
 import './utils/i18n';
 import './_mockApis';
+import { initializeMQTTConfig, updateMQTTBrokerURL } from './store/apps/tracking/MQTT';
+import { initializeEngineConfig } from './store/apps/crud/engine';
+import { initializeNTFYConfig } from './store/apps/tracking/NTFY';
 
 // ✅ Buat QueryClient instance global
 const queryClient = new QueryClient({
@@ -23,18 +30,26 @@ const queryClient = new QueryClient({
   },
 });
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <Provider store={store}>
-    <PersistGate loading={<Spinner />} persistor={persistor}>
-      {/* ✅ Tambahkan React Query Provider di luar Suspense */}
-      <QueryClientProvider client={queryClient}>
-        <Suspense fallback={<Spinner />}>
-          <App />
-        </Suspense>
+async function startApp() {
+await loadRuntimeConfig();
+initializeAxiosBaseURL();
+initializeMQTTConfig();
+updateMQTTBrokerURL();
+initializeEngineConfig();
+initializeNTFYConfig();
+  // 🟩 3. THEN render the app
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <Provider store={store}>
+      <PersistGate loading={<Spinner />} persistor={persistor}>
+        <QueryClientProvider client={queryClient}>
+          <Suspense fallback={<Spinner />}>
+            <App />
+          </Suspense>
+        </QueryClientProvider>
+      </PersistGate>
+    </Provider>,
+  );
+}
 
-        {/* (Optional) Devtools: bisa dibuka di pojok kanan bawah */}
-        {/* <ReactQueryDevtools initialIsOpen={false}/> */}
-      </QueryClientProvider>
-    </PersistGate>
-  </Provider>,
-);
+// 🟩 Start the application
+startApp();

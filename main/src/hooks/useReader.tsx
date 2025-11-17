@@ -92,6 +92,7 @@ export function useAllUnassignedReaders() {
     queryKey: ['ble-reader-all-unassigned'],
     queryFn: async () => {
       const response = await axiosServices.get(`${API_URL}unassigned`);
+      console.log("BLE Reader Data",response)
       return response.data.collection.data as bleReaderType[];
     },
     placeholderData: [],

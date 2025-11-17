@@ -32,7 +32,7 @@ export function useMaskedAreaList(filter: GetFilter) {
         ...maskedArea,
         nodes: maskedArea.areaShape ? JSON.parse(maskedArea.areaShape) : [],
       }));
-
+      console.log("dataWithParsedNodes", dataWithParsedNodes);
       return {
         data: dataWithParsedNodes as MaskedAreaType[],
         draw: col.draw,

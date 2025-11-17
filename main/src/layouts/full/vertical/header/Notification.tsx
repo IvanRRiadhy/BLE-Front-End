@@ -22,6 +22,9 @@ import { VisitorType } from 'src/store/apps/crud/visitor';
 import { RootState, useSelector } from 'src/store/Store';
 import { AlarmTriggerType } from 'src/store/apps/crud/alarmTrigger';
 import { uniqueId } from 'lodash';
+import { useAllAlarmTriggers } from 'src/hooks/useAlarmTrigger';
+import { useAllMembers } from 'src/hooks/useMember';
+import { useAllVisitor } from 'src/hooks/useVisitor';
 
 type BubbleData = {
   id: string;
@@ -50,11 +53,9 @@ const Notifications = () => {
     return () => window.clearInterval(id);
   }, []);
 
-  const alarmTriggers: AlarmTriggerType[] = useSelector(
-    (state: RootState) => state.alarmTriggerReducer.alarmTriggerAll || [],
-  );
-  const memberList: memberType[] = useSelector((s: RootState) => s.memberReducer.members);
-  const visitorList: VisitorType[] = useSelector((s: RootState) => s.visitorReducer.visitors);
+  const alarmTriggers: AlarmTriggerType[] = useAllAlarmTriggers().data || [];
+  const memberList: memberType[] = useAllMembers().data || [];
+  const visitorList: VisitorType[] = useAllVisitor().data || [];
 const MAX_BUBBLES = 4;
   const ONE_HOUR_MS = 60 * 60 * 1000;
   const toMs = (v: any) => (v instanceof Date ? v.getTime() : Date.parse(v));
@@ -103,19 +104,20 @@ const MAX_BUBBLES = 4;
     return audio;
   }, []);
 
-  // 🔔 Handle new alarms
+  // 🔔 Handle new alarms - UPDATED FOR MQTT DATA STRUCTURE
   useEffect(() => {
     const onNewAlarm = (e: MessageEvent) => {
       if (e.data?.type !== 'app:new-alarm') return;
-      const detail = e.data.detail.alarm;
-      if (!detail) return;
-      let alarmData: any;
-      try {
-        alarmData = JSON.parse(detail.message);
-      } catch {
+      
+      console.log('[Notifications] Received alarm message:', e.data);
+      
+      const alarmData = e.data.detail.alarm;
+      if (!alarmData) {
+        console.warn('[Notifications] No alarm data found in message');
         return;
       }
 
+      // Extract data directly from the MQTT object (no need to parse JSON string)
       const bd: BubbleData = {
         id: uniqueId(),
         title: alarmData.visitorName || alarmData.MemberName || alarmData.cardName || 'Unknown',
@@ -128,6 +130,8 @@ const MAX_BUBBLES = 4;
         color: alarmData.color ?? '#d32f2f',
         createdAt: Date.now(),
       };
+
+      console.log('[Notifications] Creating bubble:', bd);
 
       setBubbles((prev) => {
         const next = [...prev, bd];
@@ -183,7 +187,7 @@ const MAX_BUBBLES = 4;
         </Badge>
       </IconButton>
 
-      {/* Test trigger button */}
+      {/* Test trigger button - UPDATED FOR MQTT DATA STRUCTURE */}
       <IconButton
         size="large"
         color="error"
@@ -193,13 +197,12 @@ const MAX_BUBBLES = 4;
               type: 'app:new-alarm',
               detail: {
                 alarm: {
-                  message: JSON.stringify({
-                    visitorName: 'Alvonso Cenanda',
-                    cardName: 'BC572905DB80',
-                    maskedAreaName: 'Demo Lobby',
-                    floorplanName: 'Deemo',
-                    action: 'idle',
-                  }),
+                  visitorName: 'Kaori',
+                  cardName: '676986',
+                  maskedAreaName: 'MA-Lantai 2',
+                  floorplanName: 'FP Lantai 2',
+                  action: 'idle',
+                  color: '#ff4d4f'
                 },
               },
             },

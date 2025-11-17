@@ -86,7 +86,8 @@ export function useAllUnassignedCCTV() {
   return useQuery({
     queryKey: ['cctv-list-all-unassigned'],
     queryFn: async () => {
-      const response = await axiosServices.get(`${API_URL}unnasigned`);
+      const response = await axiosServices.get(`${API_URL}unassigned`);
+      console.log("CCTV Data",response)
       return response.data.collection.data as CCTVType[];
     },
     placeholderData: [],

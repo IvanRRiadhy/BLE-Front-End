@@ -159,6 +159,7 @@ export function useDeleteOverPopulatingAlarm() {
     },
     onSuccess: (_, deletedId) => {
       // Invalidate list queries
+      console.log('deletedId', deletedId);
       queryClient.invalidateQueries({ queryKey: ['over-populating-all'] });
       queryClient.invalidateQueries({ queryKey: ['over-populating-list'] });
       

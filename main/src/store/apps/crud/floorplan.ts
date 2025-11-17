@@ -1,4 +1,4 @@
-import axiosServices from "../../../utils/axios";
+import axiosServices, { BASE_URL } from "../../../utils/axios";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch } from "src/store/Store";
 import { createAsyncThunk } from "@reduxjs/toolkit";
@@ -321,7 +321,7 @@ export const ImportFloorplan = createAsyncThunk(
 export const ExportFloorplan = createAsyncThunk(
     "floorplans/exportFloorplan",
     async (filter: "pdf" | "excel", { rejectWithValue }) => {
-        const url = `http://192.168.1.116:5000${Floorplan_API_URL}export/${filter}`;
+        const url = `${BASE_URL}${Floorplan_API_URL}export/${filter}`;
         const accessToken = localStorage.getItem("token");
         try {
             const response = await fetch(url, {

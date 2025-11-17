@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -13,11 +13,10 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from 'src/store/Store';
 import { setActiveLayout, setScreenDisplay } from 'src/store/apps/monitoring/layout';
-import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor'; // ✅ adjust path
-import { publishMQTT, downloadAllLogs, getAllLoggedTopics } from 'src/store/apps/tracking/MQTT';
+import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor';
+import { publishMQTT } from 'src/store/apps/tracking/MQTT';
 import TimeDisplay from '../horizontal/navbar/TimeDisplay';
 import { uniqueId } from 'lodash';
-import DownloadIcon from '@mui/icons-material/Download';
 
 const Toolbar = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -28,23 +27,7 @@ const Toolbar = () => {
   const [visitorList, setVisitorList] = useState<VisitorType[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedVisitor, setSelectedVisitor] = useState<VisitorType | null>(null);
-  const [hasLogs, setHasLogs] = useState(false);
 
-  // Check if there are logs available
-  useEffect(() => {
-    const checkLogs = () => {
-      const topics = getAllLoggedTopics();
-      setHasLogs(topics.length > 0);
-    };
-
-    // Check initially
-    checkLogs();
-
-    // Check periodically (every 2 seconds) for new logs
-    const interval = setInterval(checkLogs, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   // 🧠 Load visitors with BLE numbers
   useEffect(() => {

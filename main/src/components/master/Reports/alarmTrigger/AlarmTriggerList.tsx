@@ -40,6 +40,7 @@ import AlarmPositionPreviewDialog from './AlarmPositionPreviewDialog';
 import { actionStatus, actionStatusColormap } from 'src/types/crud/input';
 import toast from 'react-hot-toast';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
+import { useAlarmTriggerList, useAssignActionAlarmTrigger } from 'src/hooks/useAlarmTrigger';
 
 const columns = [
   { label: 'Time', field: 'TriggerTime', sortAble: true },
@@ -56,15 +57,18 @@ const SKELETON_ROWS = 5;
 
 const AlarmTriggerList = () => {
   const dispatch: AppDispatch = useDispatch();
-  const alarmTriggerData = useSelector(
-    (state: RootState) => state.alarmTriggerReducer.alarmTriggers,
-  );
-  const alarmTriggerTotalCount = useSelector(
-    (state: RootState) => state.alarmTriggerReducer.alarmTriggerTotalCount,
-  );
+  // const alarmTriggerData = useSelector(
+  //   (state: RootState) => state.alarmTriggerReducer.alarmTriggers,
+  // );
+  // const alarmTriggerTotalCount = useSelector(
+  //   (state: RootState) => state.alarmTriggerReducer.alarmTriggerTotalCount,
+  // );
   const AlarmTriggerFilter = useSelector(
     (state: RootState) => state.alarmTriggerReducer.alarmTriggerFilter,
   );
+  const { data, isLoading : queryLoading} = useAlarmTriggerList(AlarmTriggerFilter);
+  const alarmTriggerData = data?.data ?? [];
+  const alarmTriggerFilteredCount = data?.recordsFiltered ?? 0;
   const { t } = useTranslation();
   const hasLoaded = useSelector((state: RootState) => state.alarmTriggerReducer.hasLoaded);
   const [loading, setLoading] = useState(false);
@@ -144,43 +148,39 @@ const AlarmTriggerList = () => {
     setSelectedAction('');
   };
 
-  const handleApplyAction = async () => {
-    setLoading(true);
-    if (!selectedAlarmTrigger) {
-      setLoading(false);
-      handleCloseActionDialog();
-      toast.error('Please select an alarm');
-      return;
-    }
-    if (!selectedAction) {
-      setLoading(false);
-      handleCloseActionDialog();
-      toast.error('Please select an action status');
-      return;
-    }
+  const assignActionMutation = useAssignActionAlarmTrigger();
 
-    try {
-      const result = await dispatch(
-        editAlarmTrigger({
-          dmac: selectedAlarmTrigger.beaconId.toUpperCase(),
-          actionStatus: selectedAction.toLowerCase(),
-        }),
-      );
-      if (result && (result as any).type?.endsWith('/fulfilled')) {
-        toast.success('Action dispatched successfully');
-        dispatch(fetchAlarmTriggerDT(AlarmTriggerFilter));
-      } else {
-        toast.error('Error dispatching action');
-        console.error('Error dispatching action:', result);
-      }
-    } catch (error: any) {
-      toast.error('Error dispatching action');
-      console.error('Error dispatching action', error);
-    } finally {
-      setLoading(false);
-      handleCloseActionDialog();
-    }
-  };
+const handleApplyAction = async () => {
+  if (!selectedAlarmTrigger) {
+    handleCloseActionDialog();
+    toast.error('Please select an alarm');
+    return;
+  }
+  if (!selectedAction) {
+    handleCloseActionDialog();
+    toast.error('Please select an action status');
+    return;
+  }
+
+  try {
+    const result = await assignActionMutation.mutateAsync({
+      dmac: selectedAlarmTrigger.beaconId.toUpperCase(),
+      actionStatus: selectedAction.toLowerCase(),
+    });
+    
+    // With React Query, if mutateAsync resolves, it means the mutation was successful
+    toast.success('Action dispatched successfully');
+    
+    // No need to manually refetch - the mutation's onSuccess already invalidates queries
+    // which will automatically trigger refetch of any active useAlarmTriggerList queries
+    
+  } catch (error: any) {
+    toast.error('Error dispatching action');
+    console.error('Error dispatching action', error);
+  } finally {
+    handleCloseActionDialog();
+  }
+};
 
   const formatActionLabel = (value: string) => {
     if (!value) return '-';
@@ -265,7 +265,7 @@ const AlarmTriggerList = () => {
                 </TableHead>
 
                 <TableBody>
-                  {!hasLoaded
+                  {(queryLoading || assignActionMutation.isPending)
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : alarmTriggerData.map((row: AlarmTriggerType, index: number) => (
                         <TableRow key={index}>
@@ -392,7 +392,7 @@ const AlarmTriggerList = () => {
             {/* Pagination */}
             <TablePagination
               component="div"
-              count={alarmTriggerTotalCount}
+              count={alarmTriggerFilteredCount}
               page={page}
               rowsPerPage={rowsPerPage}
               onPageChange={handleChangePage}
@@ -501,9 +501,9 @@ const AlarmTriggerList = () => {
                   onClick={handleApplyAction}
                   color="primary"
                   variant="contained"
-                  disabled={!selectedAction || !selectedAlarmTrigger}
+                  disabled={!selectedAction || !selectedAlarmTrigger || assignActionMutation.isPending}
                 >
-                  Confirm
+                  {assignActionMutation.isPending ? 'Applying...' : 'Apply Action'}
                 </Button>
               )}
             </DialogActions>

@@ -8,18 +8,19 @@ import {
   useMediaQuery,
   Toolbar,
   styled,
-  Stack,  
+  Stack,
   Theme,
 } from '@mui/material';
 
 import { useSelector, useDispatch } from 'src/store/Store';
 import { toggleMobileSidebar } from 'src/store/customizer/CustomizerSlice';
-import { IconMenu2 } from '@tabler/icons-react';
+import { IconMenu2, IconRestore } from '@tabler/icons-react';
 import Profile from 'src/layouts/full/vertical/header/Profile';
 import Language from 'src/layouts/full/vertical/header/Language';
 import Logo from 'src/layouts/full/shared/logo/Logo';
 import { RootState } from 'src/store/Store';
 import Notifications from '../../vertical/header/Notification';
+import { restartEngine } from 'src/store/apps/crud/engine';
 
 const Header = () => {
   const lgDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('lg'));
@@ -27,8 +28,6 @@ const Header = () => {
   // drawer
   const customizer = useSelector((state: RootState) => state.customizer);
   const dispatch = useDispatch();
-
-
 
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
     background: theme.palette.background.paper,
@@ -44,6 +43,15 @@ const Header = () => {
     width: '100%',
     color: `${theme.palette.text.secondary} !important`,
   }));
+
+  const handleClick = async () => {
+    try {
+      await dispatch(restartEngine('admin'));
+      // handle success
+    } catch (error) {
+      // handle error
+    }
+  };
 
   return (
     <AppBarStyled position="sticky" color="default" elevation={8}>
@@ -80,7 +88,9 @@ const Header = () => {
         ) : null} */}
         <Box flexGrow={1} />
         <Stack spacing={1} direction="row" alignItems="center">
-          
+          <IconButton size="large" color="inherit" onClick={handleClick}>
+            <IconRestore size="21" stroke="1.5" />
+          </IconButton>
           <Language />
           {/* ------------------------------------------- */}
           {/* Ecommerce Dropdown */}

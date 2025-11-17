@@ -5,8 +5,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { defaultBleReaderFilter } from "../defaultForm";
 import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
-
-
+import { BASE_URL } from "../../../utils/axios";
 const API_URL = "/api/MstBleReader/";
 const API_DT_URL = "/api/MstBleReader/filter/";
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -372,7 +371,7 @@ export const ImportBleReader = createAsyncThunk(
 export const ExportBleReader = createAsyncThunk(
   "bleReaders/ExportBleReader",
   async (filter: 'pdf' | 'excel', { rejectWithValue }) => {
-    const url = `http://192.168.1.116:5000${API_URL}export/${filter}`;
+    const url = `${BASE_URL}${API_URL}export/${filter}`;
     const accessToken = localStorage.getItem('token');
     try {
       const response = await fetch(url, {

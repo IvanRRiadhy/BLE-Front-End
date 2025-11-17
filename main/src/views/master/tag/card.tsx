@@ -19,6 +19,7 @@ import CardList from 'src/components/master/Tag/card/CardList';
 import AddEditCard from 'src/components/master/Tag/card/AddEditCard';
 import CardImport from 'src/components/master/Tag/card/CardImport';
 import CardExport from 'src/components/master/Tag/card/CardExport';
+import { useCardList, useCardStatus } from 'src/hooks/useCard';
 
 interface cardType {
   icon?: string;
@@ -34,8 +35,7 @@ const Card = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const { t } = useTranslation();
-  const cardCount = useSelector((state: RootState) => state.CardReducer.cardFilteredCount);
-  const hasLoaded = useSelector((state: RootState) => state.CardReducer.hasLoaded);
+  const { filteredCount: cardCount, hasLoaded} = useCardStatus();
   const topCards: cardType[] = [
     {
       title: 'Total Cards',

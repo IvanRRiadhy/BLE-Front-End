@@ -13,7 +13,7 @@ import { setSessionExpiredHandler } from 'src/utils/axios';
 import SessionExp from './shared/SessionExp';
 import { hydrateEvacState } from 'src/store/customizer/CustomizerSlice';
 import { Toaster } from 'react-hot-toast';
-import { startNTFYclient } from 'src/store/apps/tracking/NTFY';
+import { startMQTTclient } from 'src/store/apps/tracking/MQTT'; // Changed from NTFY to MQTT
 import { fetchAlarmTrigger } from 'src/store/apps/crud/alarmTrigger';
 import { memberType } from 'src/store/apps/crud/member';
 import { VisitorType } from 'src/store/apps/crud/visitor';
@@ -23,6 +23,7 @@ import { fetchAlarmSettingsDT } from 'src/store/apps/alarmsetting/alarmSettings'
 import { defaultAlarmSettingFilter } from 'src/store/apps/defaultForm';
 import { AlarmType } from 'src/store/apps/tracking/Alarm';
 import AlarmPopup from './AlarmPopup';
+import { getConfig } from 'src/config';
 
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
@@ -41,6 +42,8 @@ const PageWrapper = styled('div')(() => ({
 
 const FullLayout: FC = () => {
   const dispatch: AppDispatch = useDispatch();
+  const config = getConfig();
+  const topic = config.ALARM_TOPIC || 'tracking/engine/alarm'; // Use MQTT topic from config
   const customizer = useSelector((state: RootState) => state.customizer);
   const evacState = useSelector((state: RootState) => state.customizer.evacState);
   const theme = useTheme();
@@ -62,9 +65,11 @@ const FullLayout: FC = () => {
     if (v) return v.name;
     return bleNumber || 'Unknown';
   };
+
   useEffect(() => {
     dispatch(fetchAlarmSettingsDT(defaultAlarmSettingFilter));
   }, []);
+
   useEffect(() => {
     // Request notification permission
     if ('Notification' in window && Notification.permission !== 'granted') {
@@ -84,21 +89,20 @@ const FullLayout: FC = () => {
       dispatch(hydrateEvacState(JSON.parse(savedEvac)));
     }
 
-    // NTFY subscription for alarms
-    const topic = '192.168.1.116:6099/alarm-ntfy';
-    console.log(`[NTFY] Subscribing to alarm topic "${topic}"`);
-    const unsubscribe = startNTFYclient(
+    // MQTT subscription for alarms
+    console.log(`[MQTT] Subscribing to alarm topic "${topic}"`);
+    const unsubscribe = startMQTTclient(
       (data: any) => {
+        // ⭐ Same callback logic, but now receiving data from MQTT
         const now = Date.now();
-        // console.log(`[NTFY] Message from alarm topic "${topic}":`, data);
         const alarmData = Array.isArray(data) ? data[0] : data;
+        
+        console.log('[MQTT] Received alarm data:', alarmData);
+        
         setLatestAlarm(alarmData);
         setOpenAlarmPopup(true);
         dispatch(showAlarmPopup(alarmData));
-        // document.dispatchEvent(new CustomEvent('app:new-alarm', { detail: { alarm: alarmData } }));
-        // window.dispatchEvent(new CustomEvent('app:new-alarm', { detail: { alarm: alarmData } }));
         window.postMessage({ type: 'app:new-alarm', detail: { alarm: alarmData } }, '*');
-        // Add to bell dialogue & open it
         dispatch(
           pushItem({
             id: `${alarmData?.beaconId ?? 'unknown'}-${Date.now()}`,
@@ -111,7 +115,6 @@ const FullLayout: FC = () => {
         );
         dispatch(openPanel());
 
-        // Show browser notification if window is not focused
         if (
           'Notification' in window &&
           Notification.permission === 'granted' &&
@@ -121,10 +124,8 @@ const FullLayout: FC = () => {
           const body = `Beacon ${getName(alarmData.beaconId || 'Unknown')} is in ${
             alarmData.maskedAreaName || 'Unknown Area'
           } on ${alarmData.floorplanName || 'Unknown Floor'}.`;
-          const notification = new Notification(title, {
-            body,
-            icon: '/icon.png', // Replace with actual icon path
-          });
+
+          const notification = new Notification(title, { body, icon: '/icon.png' });
           notification.onclick = () => {
             window.focus();
             notification.close();
@@ -136,14 +137,14 @@ const FullLayout: FC = () => {
           dispatch(fetchAlarmTrigger());
         }
       },
-      topic,
-      { baseUrl: 'http://192.168.1.116:6099' },
+      topic, // MQTT topic
     );
 
     if (!unsubscribe) {
-      console.error(`[NTFY] Failed to subscribe to alarm topic "${topic}"`);
+      console.error(`[MQTT] Failed to subscribe to alarm topic "${topic}"`);
     } else {
       unsubscriberRef.current = unsubscribe;
+      console.log(`[MQTT] Successfully subscribed to topic "${topic}"`);
     }
 
     return () => {
@@ -151,9 +152,10 @@ const FullLayout: FC = () => {
       if (unsubscriberRef.current) {
         unsubscriberRef.current();
         unsubscriberRef.current = null;
+        console.log(`[MQTT] Unsubscribed from topic "${topic}"`);
       }
     };
-  }, [dispatch, memberList, visitorList]);
+  }, [dispatch, memberList, visitorList, topic]);
 
   return (
     <>

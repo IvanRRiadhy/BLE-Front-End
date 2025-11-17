@@ -9,6 +9,7 @@ import { defaultTrackingTransFilter } from "../defaultForm";
 import { CardType } from "./card";
 import { VisitorType } from "./visitor";
 import { memberType } from "./member";
+import { getConfig } from "src/config";
 
 const API_URL = "/api/TrackingTransaction/";
 const API_DT_URL = "/api/TrackingTransaction/filter/";
@@ -298,7 +299,7 @@ export const deleteTrackingTrans = createAsyncThunk("trackingTrans/deleteTrackin
 export const ExportTrackingTrans = createAsyncThunk(
     "trackingTrans/exportTrackingTrans",
     async (filter: "pdf" | "excel", { rejectWithValue }) => {
-        const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+        const BASE_URL = getConfig().API_BASE_URL;
     const API_KEY = import.meta.env.VITE_API_KEY;
         const url = `${BASE_URL}${API_URL}export/${filter}`;
         const accessToken = localStorage.getItem("token");

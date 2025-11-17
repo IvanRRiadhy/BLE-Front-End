@@ -11,13 +11,14 @@ import {
 
 import { useSelector, useDispatch } from 'src/store/Store';
 import { toggleMobileSidebar, hoverSidebar } from 'src/store/customizer/CustomizerSlice';
-import { IconMenu2 } from '@tabler/icons-react';
+import { IconMenu2, IconRestore } from '@tabler/icons-react';
 import Profile from '../vertical/header/Profile';
 import { RootState } from 'src/store/Store';
 import Logo from '../shared/logo/Logo';
 import NavListing from './Navigation/NavListing';
 import { useEffect, useState } from 'react';
 import Notification from '../vertical/header/Notification';
+import { restartEngine } from 'src/store/apps/crud/engine';
 
 const Header = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
@@ -56,6 +57,14 @@ const Header = () => {
       document.removeEventListener('msfullscreenchange', handleFullscreenChange);
     };
   }, []);
+    const handleClick = async () => {
+    try {
+      await dispatch(restartEngine("admin"));
+      // handle success
+    } catch (error) {
+      // handle error
+    }
+  };
 
   return (
     !isFullscreen && (
@@ -92,7 +101,11 @@ const Header = () => {
 
           <Box flexGrow={1} />
           <Stack spacing={1} direction="row" alignItems="center">
-
+          <IconButton size="large" color="inherit">
+            <IconRestore size="21" stroke="1.5"
+            onClick={handleClick}
+            />
+          </IconButton>
             <Profile />
           </Stack>
         </ToolbarStyled>

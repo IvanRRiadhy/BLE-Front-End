@@ -1,20 +1,27 @@
- import axios from 'axios';
+import axios from 'axios';
+import { getConfig } from 'src/config';
 
- export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+// ✔ USE THIS INSTEAD
+export let BASE_URL = '';
 
 let onSessionExpired: (() => void) | null = null;
 export const setSessionExpiredHandler = (handler: () => void) => {
   onSessionExpired = handler;
 };
 
- const axiosServices = axios.create({
-    baseURL: BASE_URL,
-    headers: {
-        'Content-Type': 'application/json',
-        'X-BIOPEOPLETRACKING-API-KEY': import.meta.env.VITE_API_KEY,
-    },
- });
+const axiosServices = axios.create({
+  headers: {
+    'Content-Type': 'application/json',
+    'X-BIOPEOPLETRACKING-API-KEY': import.meta.env.VITE_API_KEY,
+  },
+});
 
+// ✔ Set BASE_URL only after config.json is loaded
+export function initializeAxiosBaseURL() {
+  BASE_URL = getConfig().API_BASE_URL;
+  axiosServices.defaults.baseURL = BASE_URL;
+}
  axiosServices.interceptors.request.use(request => {
    const ApplicationId = localStorage.getItem('applicationId');
  const levelPriority = localStorage.getItem('levelPriority');

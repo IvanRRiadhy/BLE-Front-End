@@ -9,6 +9,7 @@ import { defaultAlarmRecordFilter } from "../defaultForm";
 import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 import { AlarmTriggerType } from "./alarmTrigger";
 import { memberType } from "./member";
+import { BASE_URL } from "../../../utils/axios";
 
 const API_URL = '/api/AlarmRecordTracking/';
 const API_DT_URL = '/api/AlarmRecordTracking/filter/';
@@ -257,7 +258,7 @@ export const ImportAlarm = createAsyncThunk(
 export const ExportAlarm = createAsyncThunk(
     "alarmRecordTrackings/exportAlarm",
     async (filter: "pdf" | "excel", { rejectWithValue }) => {
-        const url = `http://192.168.1.116:5000${API_URL}export/${filter}`;
+        const url = `${BASE_URL}${API_URL}export/${filter}`;
         const accessToken = localStorage.getItem("token");
         try {
             const response = await fetch(url, {

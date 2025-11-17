@@ -10,10 +10,18 @@ import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
 import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { darken } from '@mui/material';
-import { LayoutSet, ScreenItem, setFocus, setScreenFloorplan } from 'src/store/apps/monitoring/layout';
+import {
+  LayoutSet,
+  ScreenItem,
+  setFocus,
+  setScreenFloorplan,
+} from 'src/store/apps/monitoring/layout';
 import polylabel from 'polylabel';
 import { GeoFencingAlarmType } from 'src/store/apps/alarmsetting/geofencing';
 import { startMQTTclient } from 'src/store/apps/tracking/MQTT';
+import { OverPopulatingAlarmType } from 'src/store/apps/alarmsetting/overpopulating';
+import { StayOnAreaAlarmType } from 'src/store/apps/alarmsetting/stayonarea';
+import { BoundaryAlarmType } from 'src/store/apps/alarmsetting/boundary';
 
 type Nodes = {
   id: string;
@@ -62,10 +70,16 @@ type DeviceRendererProps = {
   imageSrc: HTMLImageElement;
   devices: FloorplanDeviceType[];
   areas: MaskedAreaType[];
-  geofences: GeoFencingAlarmType[];
+  GeoFenceAlarm: GeoFencingAlarmType[];
+  OverPopulateAlarm: OverPopulatingAlarmType[];
+  StayOnAreaAlarm: StayOnAreaAlarmType[];
+  BoundaryAlarm: BoundaryAlarmType[];
   showAreas: boolean;
   showGates: boolean;
   showGeoFence: boolean;
+  showOverPopulate: boolean;
+  showStayOnArea: boolean;
+  showBoundary: boolean;
   topic: string;
   detailDialogOpen?: boolean;
   setDetailDialogOpen?: (open: boolean) => void;
@@ -79,7 +93,7 @@ type DeviceRendererProps = {
     time: string;
     dmac: string;
   }) => void;
-screenId: string;
+  screenId: string;
   // NEW:
   focusBeaconId?: string;
   onFocusPosition?: (pt: { x: number; y: number }) => void;
@@ -97,10 +111,16 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     imageSrc,
     devices,
     areas,
-    geofences,
+    GeoFenceAlarm,
+    OverPopulateAlarm,
+    StayOnAreaAlarm,
+    BoundaryAlarm,
     showAreas,
     showGates,
     showGeoFence,
+    showOverPopulate,
+    showStayOnArea,
+    showBoundary,
     topic,
     detailDialogOpen,
     setDetailDialogOpen,
@@ -141,36 +161,35 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   // layout info to know what this screen is displaying
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
   const layouts = useSelector((state: RootState) =>
-    state.layoutReducer.layouts.find((l: LayoutSet ) => l.id === activeLayoutId),
+    state.layoutReducer.layouts.find((l: LayoutSet) => l.id === activeLayoutId),
   );
   const thisScreen = layouts?.screens.find((s: ScreenItem) => s.id === screenId);
 
   // background image
-useEffect(() => {
-  if (
-    !highlightedFloorplan ||
-    !activeLayoutId ||
-    !thisScreen?.id ||
-    thisScreen.display.displayType !== 3
-  )
-    return;
+  useEffect(() => {
+    if (
+      !highlightedFloorplan ||
+      !activeLayoutId ||
+      !thisScreen?.id ||
+      thisScreen.display.displayType !== 3
+    )
+      return;
 
-  // ✅ Only the follow screen for this beacon updates floorplan
-  if (thisScreen.display.displayOutput?.toLowerCase() !== focusBeaconId?.toLowerCase()) return;
+    // ✅ Only the follow screen for this beacon updates floorplan
+    if (thisScreen.display.displayOutput?.toLowerCase() !== focusBeaconId?.toLowerCase()) return;
 
-  // console.log(
-  //   `[DeviceRenderer] Screen ${thisScreen.display.displayOutput} switching to floorplan ${highlightedFloorplan}`,
-  // );
+    // console.log(
+    //   `[DeviceRenderer] Screen ${thisScreen.display.displayOutput} switching to floorplan ${highlightedFloorplan}`,
+    // );
 
-  dispatch(
-    setScreenFloorplan({
-      layoutId: activeLayoutId,
-      screenId: thisScreen.id,
-      floorplanId: highlightedFloorplan,
-    }),
-  );
-}, [highlightedFloorplan, activeLayoutId, thisScreen, dispatch, focusBeaconId]);
-
+    dispatch(
+      setScreenFloorplan({
+        layoutId: activeLayoutId,
+        screenId: thisScreen.id,
+        floorplanId: highlightedFloorplan,
+      }),
+    );
+  }, [highlightedFloorplan, activeLayoutId, thisScreen, dispatch, focusBeaconId]);
 
   // load device icons
   const useDeviceIcon = (src: string) => {
@@ -197,7 +216,7 @@ useEffect(() => {
 
   useEffect(() => {
     console.log(showGeoFence);
-    console.log(geofences);
+    console.log(GeoFenceAlarm);
   }, [showGeoFence]);
 
   // maintain beacon state
@@ -218,9 +237,9 @@ useEffect(() => {
           dmac: b.dmac,
         };
       });
-      // for (const id of Object.keys(updated)) {
-      //   if (now - updated[id].lastSeen > 10000) delete updated[id];
-      // }
+      for (const id of Object.keys(updated)) {
+        if (now - updated[id].lastSeen > 10000) delete updated[id];
+      }
       return updated;
     });
   }, [beaconData]);
@@ -235,7 +254,6 @@ useEffect(() => {
         return;
       }
 
-      
       const startX = prev.x;
       const startY = prev.y;
       const endX = point.x;
@@ -245,7 +263,7 @@ useEffect(() => {
       const distance = Math.sqrt(distX * distX + distY * distY);
       const speed = 2 / meterPx;
       const duration = Math.min(Math.max(500, (distance / speed) * 500), 2000);
-      console.log(`Animating beacon ${beaconId} over ${distance}m in ${duration}ms`);
+      // console.log(`Animating beacon ${beaconId} over ${distance}m in ${duration}ms`);
       const startTime = performance.now();
       function animate(now: number) {
         const t = Math.min(1, (now - startTime) / duration);
@@ -283,29 +301,29 @@ useEffect(() => {
     originalHeight,
   ]);
 
-useEffect(() => {
-  if (!focusBeaconId) return;
+  useEffect(() => {
+    if (!focusBeaconId) return;
 
-  const topic = `highlight/positions/${focusBeaconId}`;
-  console.log(`[MQTT] Subscribing to highlight topic: ${topic}`);
+    const topic = `highlight/positions/${focusBeaconId}`;
+    console.log(`[MQTT] Subscribing to highlight topic: ${topic}`);
 
-  const unsubscribe = startMQTTclient((msg: any) => {
-    if (!msg?.floorplanId || !msg?.beaconId) return;
-    const payloadId = msg.beaconId;
-        // console.log('[Highlight Update]', msg);
+    const unsubscribe = startMQTTclient((msg: any) => {
+      if (!msg?.floorplanId || !msg?.beaconId) return;
+      const payloadId = msg.beaconId;
+      // console.log('[Highlight Update]', msg);
 
-    // ✅ only accept updates from this beacon
-    if (payloadId !== focusBeaconId) return;
+      // ✅ only accept updates from this beacon
+      if (payloadId !== focusBeaconId) return;
 
-    setHighlightedFloorplan(msg.floorplanId);
-    setHighlightedArea(msg.area || null);
-  }, topic);
+      setHighlightedFloorplan(msg.floorplanId);
+      setHighlightedArea(msg.area || null);
+    }, topic);
 
-  return () => {
-    console.log(`[MQTT] Unsubscribing from ${topic}`);
-    unsubscribe();
-  };
-}, [focusBeaconId]);
+    return () => {
+      console.log(`[MQTT] Unsubscribing from ${topic}`);
+      unsubscribe();
+    };
+  }, [focusBeaconId]);
 
   // compute static centers for each area
   const areaCenters = useMemo(() => {
@@ -384,7 +402,9 @@ useEffect(() => {
       }}
     >
       <Layer>
-        {imageSrc && <KonvaImage name="background" image={imageSrc} width={width} height={height} />}
+        {imageSrc && (
+          <KonvaImage name="background" image={imageSrc} width={width} height={height} />
+        )}
 
         {/* Areas */}
         {showAreas &&
@@ -406,7 +426,7 @@ useEffect(() => {
             />
           ))}
         {showGeoFence &&
-          geofences.map((geofence: GeoFencingAlarmType) => (
+          GeoFenceAlarm.map((geofence: GeoFencingAlarmType) => (
             <Line
               key={geofence.id}
               name="geofence"
@@ -421,6 +441,42 @@ useEffect(() => {
               onMouseEnter={() => setHoveredAreaId(geofence.id)}
               onMouseLeave={() => setHoveredAreaId((id) => (id === geofence.id ? null : id))}
               onClick={() => dispatch(setFocus({ type: 'geofence', id: geofence.id }))}
+            />
+          ))}
+        {showOverPopulate &&
+          OverPopulateAlarm.map((overpopulate: OverPopulatingAlarmType) => (
+            <Line
+              key={overpopulate.id}
+              name="overpopulate"
+              points={setPointsFromNodes(overpopulate.nodes)}
+              stroke={darken(overpopulate.color, 0.3)}
+              strokeWidth={5}
+              lineJoin="round"
+              lineCap="round"
+              closed
+              fill={overpopulate.color}
+              opacity={0.35}
+              onMouseEnter={() => setHoveredAreaId(overpopulate.id)}
+              onMouseLeave={() => setHoveredAreaId((id) => (id === overpopulate.id ? null : id))}
+              onClick={() => dispatch(setFocus({ type: 'overpopulate', id: overpopulate.id }))}
+            />
+          ))}
+          {showStayOnArea &&
+          StayOnAreaAlarm.map((stayonarea: StayOnAreaAlarmType) => (
+            <Line
+              key={stayonarea.id}
+              name="stayonarea"
+              points={setPointsFromNodes(stayonarea.nodes)}
+              stroke={darken(stayonarea.color, 0.3)}
+              strokeWidth={5}
+              lineJoin="round"
+              lineCap="round"
+              closed
+              fill={stayonarea.color}
+              opacity={0.35}
+              onMouseEnter={() => setHoveredAreaId(stayonarea.id)}
+              onMouseLeave={() => setHoveredAreaId((id) => (id === stayonarea.id ? null : id))}
+              onClick={() => dispatch(setFocus({ type: 'stayonarea', id: stayonarea.id }))}
             />
           ))}
 

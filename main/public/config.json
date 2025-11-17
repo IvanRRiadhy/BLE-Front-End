@@ -1,0 +1,8 @@
+{
+  "API_BASE_URL": "http://192.168.1.10:5000",
+  "API_ENGINE_URL": "http://192.168.1.10:3300",
+  "MQTT_URL": "ws://192.168.1.10:9005",
+  "NTFY_URL": "http://192.168.1.10:6099",
+  "API_KEY": "FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK",
+  "NTFY_TOPIC": "alarm-ntfy"
+}

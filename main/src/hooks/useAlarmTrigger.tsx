@@ -76,10 +76,16 @@ export function useAssignActionAlarmTrigger() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (AlarmTrigger: Partial<AlarmTriggerType>) => {
-      const { id, ...cleanData } = AlarmTrigger;
-      const res = await axiosServices.put(`${API_URL}${id}`, cleanData);
-      return res.data;
+    mutationFn: async ({ dmac, actionStatus }: { dmac: string; actionStatus: string }) => {
+      try {
+        console.log("Editing AlarmTrigger:", dmac, actionStatus);
+        const response = await axiosServices.put(`${API_URL}tag/${dmac}`, { actionStatus });
+        console.log(response);
+        return response.data;
+      } catch (error: any) {
+        console.error("Error editing AlarmTrigger:", error);
+        throw error.response?.data || new Error("Unknown error");
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list'] });
