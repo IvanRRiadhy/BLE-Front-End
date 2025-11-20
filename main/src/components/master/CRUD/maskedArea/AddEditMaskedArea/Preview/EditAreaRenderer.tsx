@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  lighten,
   // useTheme,
 } from '@mui/material';
 import Konva from 'konva';
@@ -839,7 +840,7 @@ const EditAreaRenderer: React.FC<{
                     ? area.colorArea // 🟢 fill all areas in preview mode
                     : area.name === activeArea
                     ? area.colorArea
-                    : undefined
+                    : lighten(area.colorArea, 0.7)
                 }
                 opacity={0.7}
                 draggable={!preview && editingArea === area.name}

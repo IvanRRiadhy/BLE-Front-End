@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tansta
 import axiosServices from 'src/utils/axios';
 import { RootState, useSelector } from 'src/store/Store';
 import { defaultBleReaderFilter } from 'src/store/apps/defaultForm';
+import { json } from 'stream/consumers';
 
 // ---------------------------------------------------
 // ✅ API Constants
@@ -55,6 +56,7 @@ export function useReaderList(filter: GetFilter) {
     queryFn: async () => {
       const response = await axiosServices.post(API_DT_URL, filter);
       const collection = response.data.collection;
+      console.log("BLE Reader List Data:",collection, JSON.stringify(filter));
       return {
         data: collection.data as bleReaderType[],
         draw: collection.draw,

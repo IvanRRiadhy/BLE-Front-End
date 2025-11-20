@@ -12,7 +12,6 @@ import {
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import AppCard from 'src/components/shared/AppCard';
-import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import BoundaryList from 'src/components/master/Alarm Setting/Boundary/BoundaryList';
@@ -50,7 +49,7 @@ const Boundary = () => {
       title="Boundary Alarm"
       description="This is the Boundary Alarm CRUD Page"
     >
-      <Breadcrumb title="Boundary Alarm Table" />
+      {/* <Breadcrumb title="Boundary Alarm Table" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => {
           return (

@@ -50,7 +50,7 @@ const StayOnArea = () => {
       title="Stay On Area Alarm"
       description="This is the Stay On Area Alarm CRUD Page"
     >
-      <Breadcrumb title="Stay On Area Alarm Table" />
+      {/* <Breadcrumb title="Stay On Area Alarm Table" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => {
           return (

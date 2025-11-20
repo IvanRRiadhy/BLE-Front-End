@@ -31,6 +31,8 @@ import BulkAddEditBleReader from './BulkAddEditBleReader';
 import toast from 'react-hot-toast';
 import { useReaderList, useDeleteReader } from 'src/hooks/useReader';
 import { useAllBrands } from 'src/hooks/useBrand'; // optional if you migrate brand too
+import { RootState, useDispatch, useSelector } from 'src/store/Store';
+import { UpdateFilter } from 'src/store/apps/crud/bleReader';
 
 const columns = [
   { label: 'Brand Name', field: 'Brand.Name', sortAble: true },
@@ -42,11 +44,13 @@ const columns = [
 const SKELETON_ROWS = 5;
 
 const BleReaderList = () => {
+  const dispatch = useDispatch();
   // 🔹 Local filter state (instead of Redux)
   const [filter, setFilter] = useState(defaultBleReaderFilter);
+  const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
 
   // 🔹 React Query hooks
-  const { data, isFetching, isLoading, isFetched, refetch } = useReaderList(filter);
+  const { data, isFetching, isLoading, isFetched, refetch } = useReaderList(bleReaderFilter);
   const deleteMutation = useDeleteReader();
   const { data: brandData = [] } = useAllBrands?.() || { data: [] };
 
@@ -67,12 +71,12 @@ const BleReaderList = () => {
   const order = filter.SortDir;
 
   const handleChangePage = (_: unknown, newPage: number) => {
-    setFilter((prev) => ({ ...prev, Start: newPage * prev.Length }));
+    dispatch(UpdateFilter({ Start: newPage * bleReaderFilter.Length }));
   };
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newLength = parseInt(event.target.value, 10);
-    setFilter((prev) => ({ ...prev, Length: newLength, Start: 0 }));
+    dispatch(UpdateFilter({ Start: 0, Length: newLength }));
   };
 
   const handleSort = (column: string) => {
@@ -80,19 +84,21 @@ const BleReaderList = () => {
     const isDesc = filter.SortColumn === column && filter.SortDir === 'desc';
 
     if (isDesc) {
-      setFilter((prev) => ({
-        ...prev,
-        SortColumn: 'UpdatedAt',
-        SortDir: 'desc',
-        Start: 0,
-      }));
+      dispatch(
+        UpdateFilter({
+          SortColumn: 'UpdatedAt',
+          SortDir: 'desc',
+          Start: 0,
+        }),
+      );
     } else {
-      setFilter((prev) => ({
-        ...prev,
-        SortColumn: column,
-        SortDir: isAsc ? 'desc' : 'asc',
-        Start: 0,
-      }));
+      dispatch(
+        UpdateFilter({
+          SortColumn: column,
+          SortDir: isAsc ? 'desc' : 'asc',
+          Start: 0,
+        }),
+      );
     }
   };
 

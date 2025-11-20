@@ -10,6 +10,7 @@ import {
   Typography,
 } from '@mui/material';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
@@ -22,6 +23,7 @@ import { RootState, useDispatch, useSelector } from 'src/store/Store';
 
 const BleReaderFilter = () => {
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const handleClickOpen = () => {
     setOpen(true);
@@ -51,6 +53,7 @@ const BleReaderFilter = () => {
 
   const handleApplyFilter = () => {
     dispatch(UpdateFilter({ Start: 0, filters: appliedFilter }));
+    queryClient.invalidateQueries({ queryKey: ['ble-reader-list'] });
   };
 
   const handleResetFilter = () => {

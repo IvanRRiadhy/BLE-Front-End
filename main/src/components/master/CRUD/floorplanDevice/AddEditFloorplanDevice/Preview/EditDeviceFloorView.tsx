@@ -31,6 +31,7 @@ const EditDeviceFloorView: React.FC<{
   );
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorPlan?.id);
   const [showArea, setShowArea] = useState(true);
+  const [showEffectiveArea, setShowEffectiveArea] = useState(false);
 
   const [filteredUnsavedDevices, setFilteredUnsavedDevices] = useState<FloorplanDeviceType[]>([]);
 
@@ -312,6 +313,16 @@ const EditDeviceFloorView: React.FC<{
           }
           label="Show Areas"
         />
+                <FormControlLabel
+          control={
+            <Switch
+              checked={showEffectiveArea}
+              onChange={() => setShowEffectiveArea((prev) => !prev)}
+              color="primary"
+            />
+          }
+          label="Show Effective Area"
+        />
       </Box>
       {/* Zoomable Content */}
       <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
@@ -389,6 +400,7 @@ const EditDeviceFloorView: React.FC<{
                   setIsDragging={setIsDragging}
                   areas={filteredArea}
                   showAreas={showArea}
+                  showEffectiveArea={showEffectiveArea}
                 />
               </>
             )}

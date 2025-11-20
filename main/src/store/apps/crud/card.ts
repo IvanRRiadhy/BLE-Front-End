@@ -373,7 +373,7 @@ export const ImportCard = createAsyncThunk(
 export const ExportCard = createAsyncThunk(
     "card/exportCard",
     async (filter: "pdf" | "excel", { rejectWithValue }) => {
-        const url = `${BASE_URL}${API_URL}export/${filter}`;
+        const url = `${BASE_URL}${API_URL_V1}export/${filter}`;
         const accessToken = localStorage.getItem("token");
         try {
             const response = await fetch(url, {

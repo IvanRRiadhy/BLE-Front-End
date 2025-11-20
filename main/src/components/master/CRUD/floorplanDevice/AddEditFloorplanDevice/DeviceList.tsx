@@ -47,7 +47,7 @@ const DeviceList = () => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Redux state for UI management
   const activeFloorplan = useSelector(
     (state: RootState) => state.floorplanReducer.selectedFloorplan,
@@ -62,14 +62,12 @@ const DeviceList = () => {
     (state: RootState) => state.floorplanDeviceReducer.editingFloorplanDevice,
   );
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
-  
+
   // Fix: Provide default empty arrays for potentially undefined values
-  const deletedDevice = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.deletedFloorplanDevice
-  ) || [];
-  const addedDevice = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.addedFloorplanDevice
-  ) || [];
+  const deletedDevice =
+    useSelector((state: RootState) => state.floorplanDeviceReducer.deletedFloorplanDevice) || [];
+  const addedDevice =
+    useSelector((state: RootState) => state.floorplanDeviceReducer.addedFloorplanDevice) || [];
 
   // External data from Redux (keep these as they're used for new device defaults)
   const firstCCTV = useSelector((state: RootState) => state.CCTVReducer.cctvs[0]);
@@ -241,26 +239,61 @@ const DeviceList = () => {
     setIsSaving(true);
 
     try {
-      const originDevice = new Map(
-        filteredOriginalDevices.map((device: FloorplanDeviceType) => [device.id, device]),
-      );
+      // Get original devices from React Query cache (server state)
+      const originalDevices = filteredOriginalDevices;
 
-      // 1. Identify edited devices
-      const devicesToEdit = filteredUnsavedDevices.filter((unsavedDevice: FloorplanDeviceType) => {
-        const originalDevice = originDevice.get(unsavedDevice.id);
+      // Get current unsaved devices from Redux (client state with modifications)
+      const currentUnsavedDevices = filteredUnsavedDevices;
+
+      // Create a map of original devices for quick lookup
+      const originDeviceMap = new Map(
+        originalDevices.map((device: FloorplanDeviceType) => [device.id, device]),
+      );
+      console.log(originDeviceMap, currentUnsavedDevices)
+      // 1. Identify edited devices - compare unsaved devices with original devices
+      const devicesToEdit = currentUnsavedDevices.filter((unsavedDevice: FloorplanDeviceType) => {
+        const originalDevice = originDeviceMap.get(unsavedDevice.id);
+        // If device exists in original data and has changes
         return originalDevice && JSON.stringify(unsavedDevice) !== JSON.stringify(originalDevice);
+      });
+
+      // 2. Identify deleted devices - devices that are in original but not in unsaved
+      const devicesToDelete = originalDevices.filter((originalDevice: FloorplanDeviceType) => {
+        return !currentUnsavedDevices.find(
+          (unsavedDevice: FloorplanDeviceType) => unsavedDevice.id === originalDevice.id,
+        );
+      });
+
+      // 3. Identify added devices - devices that are in unsaved but not in original
+      const devicesToAdd = currentUnsavedDevices.filter((unsavedDevice: FloorplanDeviceType) => {
+        return !originDeviceMap.has(unsavedDevice.id);
       });
 
       // Group operations by type
       const operations = {
         edits: devicesToEdit,
-        additions: addedDevice,
-        deletions: deletedDevice,
+        additions: devicesToAdd,
+        deletions: devicesToDelete,
       };
+
+      console.log('Save Operations:', operations);
+      console.log('Original Devices:', originalDevices);
+      console.log('Current Unsaved Devices:', currentUnsavedDevices);
 
       // Execute operations with better error handling
       let successCount = 0;
       let errorCount = 0;
+
+      // Process deletions first (to avoid conflicts)
+      for (const device of operations.deletions) {
+        try {
+          await deleteMutation.mutateAsync(device.id);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to delete device ${device.id}:`, error);
+          errorCount++;
+        }
+      }
 
       // Process edits
       for (const device of operations.edits) {
@@ -273,24 +306,13 @@ const DeviceList = () => {
         }
       }
 
-      // Process additions
+      // Process additions last
       for (const device of operations.additions) {
         try {
           await addMutation.mutateAsync(device);
           successCount++;
         } catch (error) {
           console.error(`Failed to add device ${device.id}:`, error);
-          errorCount++;
-        }
-      }
-
-      // Process deletions
-      for (const device of operations.deletions) {
-        try {
-          await deleteMutation.mutateAsync(device.id);
-          successCount++;
-        } catch (error) {
-          console.error(`Failed to delete device ${device.id}:`, error);
           errorCount++;
         }
       }
@@ -307,7 +329,6 @@ const DeviceList = () => {
       // Refetch data to ensure UI is in sync
       await refetchFloorplanDevices();
       dispatch(fetchFloorplanDT(floorplanFilter));
-
     } catch (error) {
       console.error('Error during save operations:', error);
       toast.error('Save operation failed');
@@ -344,7 +365,7 @@ const DeviceList = () => {
           {activeFloorplan?.name}
         </Typography>
       </Box>
-      
+
       <Box>
         <Box display="flex" justifyContent="space-between" alignItems="center" px={2} mb={2}>
           <Typography variant="h6" mt={0}>
@@ -365,7 +386,7 @@ const DeviceList = () => {
           {filteredUnsavedDevices.length > 0 ? (
             filteredUnsavedDevices.map((device: FloorplanDeviceType) => (
               <DeviceListItem
-                key={device.id} 
+                key={device.id}
                 device={device}
                 onListClick={() => handleOnClick(device.id)}
                 onEditClick={() => handleOnEditClick(device.id)}

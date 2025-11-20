@@ -497,12 +497,7 @@ export const defaultVisitorForm: VisitorType = {
   districtName: '',
   departmentName: '',
   isVip: false,
-  isEmailVerified: false,
-  emailVerificationSendAt: '',
-  emailVerificationToken: '',
-  visitorPeriodStart: '',
-  visitorPeriodEnd: '',
-  isEmployee: false,
+  isBlacklist: false,
   faceImage: '',
   applicationId: localStorage.getItem('applicationId') || '',
 };

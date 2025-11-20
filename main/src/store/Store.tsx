@@ -57,6 +57,7 @@ import BoundaryReducer from './apps/alarmsetting/boundary';
 import EngineReducer from './apps/crud/engine';
 import DashboardReducer from './apps/dashboard/Dashboard';
 import VisitorFilterPresetReducer from './apps/crud/visitorFilterPreset';
+import VisitorSessionReducer from './apps/crud/visitorSession';
 import SessionReducer from './apps/session';
 import { combineReducers } from 'redux';
 import {
@@ -122,6 +123,7 @@ const rootReducer = combineReducers({
   BoundaryReducer: BoundaryReducer,
   DashboardReducer: DashboardReducer,
   VisitorFilterPresetReducer: VisitorFilterPresetReducer,
+  VisitorSessionReducer: VisitorSessionReducer,
 });
 
 const persistConfig = {

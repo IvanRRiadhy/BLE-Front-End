@@ -15,6 +15,7 @@ import { BuildingType } from 'src/store/apps/crud/building';
 import { floorType } from 'src/store/apps/crud/floor';
 import { FloorplanType } from 'src/store/apps/crud/floorplan';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { useState } from 'react';
 
 // === Type definitions ===
 type DisplayTree = Map<
@@ -76,8 +77,14 @@ const AutocompleteFilter: React.FC<Props> = ({
   hideSelectedAreas,
 }) => {
   const [open, setOpen] = React.useState(false);
+  const [clickAwayEnabled, setClickAwayEnabled] = useState(false);
   const [query, setQuery] = React.useState('');
   const anchorRef = React.useRef<HTMLDivElement | null>(null);
+
+  const openPopper = () => {
+    setOpen(true);
+    setTimeout(() => setClickAwayEnabled(true), 500); // enable after open
+  };
 
   const hasFloors = floors.length > 0;
   const hasFloorplans = floorplans.length > 0;
@@ -449,8 +456,8 @@ const AutocompleteFilter: React.FC<Props> = ({
             readOnly: true, // prevent manual typing
           }}
           value={hideSelectedAreas ? (selectedKeys.size > 0 ? computeDisplaySelection() : '') : ''}
-          onFocus={() => setOpen(true)}
-          onClick={() => setOpen(true)}
+          onClick={openPopper}
+          onFocus={openPopper}
           sx={{
             '& input': {
               cursor: 'pointer',
@@ -472,7 +479,14 @@ const AutocompleteFilter: React.FC<Props> = ({
         placement="bottom-start"
         sx={{ zIndex: 2000 }}
       >
-        <ClickAwayListener onClickAway={() => setOpen(false)}>
+        <ClickAwayListener
+          onClickAway={() => {
+            if (clickAwayEnabled) {
+              setOpen(false);
+              setClickAwayEnabled(false);
+            }
+          }}
+        >
           <Paper sx={{ p: 1, mt: 1, minWidth: 300, maxHeight: 420, overflowY: 'auto' }}>
             <SimpleTreeView
               expandedItems={expanded}

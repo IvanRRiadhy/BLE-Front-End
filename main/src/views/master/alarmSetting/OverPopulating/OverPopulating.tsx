@@ -50,7 +50,7 @@ const FloorplanDevice = () => {
       title="OverPopulating Alarm"
       description="This is the OverPopulating Alarm CRUD Page"
     >
-      <Breadcrumb title="OverPopulating Alarm Table" />
+      {/* <Breadcrumb title="OverPopulating Alarm Table" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => {
           return (

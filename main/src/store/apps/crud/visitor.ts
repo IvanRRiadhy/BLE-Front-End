@@ -92,16 +92,17 @@ export type VisitorType = {
     districtName: string,
     departmentName: string,
     isVip: boolean,
-    isEmailVerified: boolean,
-    emailVerificationSendAt: string,
-    emailVerificationToken: string,
-    visitorPeriodStart: string,
-    visitorPeriodEnd: string,
+    // isEmailVerified: boolean,
+    // emailVerificationSendAt: string,
+    // emailVerificationToken: string,
+    // visitorPeriodStart: string,
+    // visitorPeriodEnd: string,
     address:string,
     applicationId: string,
     identityId: string,
-    isEmployee: boolean,
+    // isEmployee: boolean,
     personId: string,
+    isBlacklist: boolean,
 }
 
 interface StateType {

@@ -197,5 +197,11 @@ export const visitorStatusEnumMap: Record<string, number> = {
     {label: "Please select Type", value: '', disabled: true},
     {label: "KTP", value: 'KTP'},
     {label: "Passport", value: 'Passport'},
-    {label: "NIK", value: 'NIK'},
+    {label: "SIM", value: 'SIM'},
+  ]
+
+  export const ReaderType: inputDataType[] = [
+    {label: "Please select Type", value: '', disabled: true},
+    {label: "Outdoor", value: 'outdoor'},
+    {label: "Indoor", value: 'indoor'},
   ]

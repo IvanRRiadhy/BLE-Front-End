@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Dialog, Box, IconButton, Typography, CircularProgress } from '@mui/material';
 import { IconX } from '@tabler/icons-react';
 import EditAreaFloorView from './AddEditMaskedArea/Preview/EditAreaFloorView';
-import { useSelector } from 'react-redux';
-import { dispatch, RootState, useDispatch } from 'src/store/Store';
+import { useDispatch } from 'src/store/Store';
 // import { selectFloorPlan } from 'src/store/apps/tracking/FloorPlanSlice';
 import {SelectFloorplan} from 'src/store/apps/crud/floorplan'
 import { getConfig } from 'src/config';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
 
 // Get your Vite env base URL safely
 const API_BASE_URL = getConfig().API_BASE_URL || '';
@@ -16,7 +16,7 @@ const FloorplanPreviewDialog: React.FC<{ floorplanId: string; onClose: () => voi
   onClose,
 }) => {
     const dispatch = useDispatch();
-  const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
+  const {data: floorplans = []} = useAllFloorplans();
   const selected = floorplans.find((f) => f.id === floorplanId);
   const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
 

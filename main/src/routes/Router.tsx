@@ -94,6 +94,7 @@ const AlarmTrigger = Loadable(lazy(() => import('../views/Reports/AlarmTrigger')
 const CardRecord = Loadable(lazy(() => import('../views/Reports/CardRecord')));
 const TestRecord = Loadable(lazy(() => import('../views/Reports/TestRecord')));
 const TestReport = Loadable(lazy(() => import('../views/Reports/TestReport')));
+const Investigate = Loadable(lazy(() => import('../views/Reports/Investigate')));
 
 
 // Evacuation
@@ -250,6 +251,7 @@ const Router = [
       { path: '/report/cardrecord', exact: true, element: withAuth(<CardRecord />, '/report/cardrecord') },
       { path: '/report/testrecord', exact: true, element: withAuth(<TestRecord />, '/report/testrecord') },
       { path: '/report/visitorreport/filter', exact: true, element: withAuth(<TestReport />, '/report/visitorreport/filter') },
+      { path: '/report/investigate', exact: true, element: withAuth(<Investigate />, '/report/investigate') },
 
       // ***Alarm Setting*** //
       { path: '/alarmsetting', exact: true, element: withAuth(<AlarmSetting />, '/alarmsetting') },

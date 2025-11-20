@@ -93,3 +93,15 @@ export function useAssignActionAlarmTrigger() {
     },
   });
 }
+
+export function useAlarmTriggerStatus(){
+  const filter = useSelector((state: RootState) => state.alarmTriggerReducer.alarmTriggerFilter);
+  const query = useAlarmTriggerList(filter);
+  return {
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    hasLoaded: query.isFetched,
+    totalCount: query.data?.recordsTotal || 0,
+    filteredCount: query.data?.recordsFiltered || 0,
+  };
+}
