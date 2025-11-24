@@ -26,8 +26,8 @@ import {
   deleteMember,
   SelectMember,
   fetchMembers,
-  blockMember,
   fetchMemberDT,
+  blacklistMember,
 } from 'src/store/apps/crud/member';
 import AddEditMember from '../../CRUD/member/AddEditMember';
 import { IconTrash, IconSquareRoundedX, IconX } from '@tabler/icons-react';
@@ -40,7 +40,11 @@ import { useTranslation } from 'react-i18next';
 // import IconClose from 'src/assets/images/frontend-pages/icons/icon-close.svg';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { PaginatedResponse } from 'src/hooks/useMember';
+import { PaginatedResponse, useBlacklistMember, useUnBlacklistMember } from 'src/hooks/useMember';
+import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
+import { useAllDistricts } from 'src/hooks/useDistrict';
+import { useAllDepartments } from 'src/hooks/useDepartment';
+import { useAllOrganizations } from 'src/hooks/useOrganization';
 
 const MemberContent = () => {
   const { t } = useTranslation();
@@ -50,11 +54,9 @@ const MemberContent = () => {
   );
 
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
-  const districtData = useSelector((state: RootState) => state.districtReducer.districts);
-  const departmentData = useSelector((state: RootState) => state.departmentReducer.departments);
-  const organizationData = useSelector(
-    (state: RootState) => state.organizationReducer.organizations,
-  );
+  const districtData = useAllDistricts();
+  const departmentData = useAllDepartments();
+  const organizationData = useAllOrganizations();
   // Get cached data for the member list
   const memberCache = queryClient.getQueryData<PaginatedResponse<memberType>>([
     'member-list',
@@ -72,23 +74,6 @@ const MemberContent = () => {
     dispatch(fetchDepartments());
     dispatch(fetchOrganizations());
   }, [dispatch]);
-
-  const getDepartmentName = (departmentId: string) => {
-    const department = departmentData.find((dpt: DepartmentType) => dpt.id === departmentId);
-    return department ? department.name : 'Unknown Department';
-  };
-
-  const getDistrictName = (districtId: string) => {
-    const district = districtData.find((dst: DistrictType) => dst.id === districtId);
-    return district ? district.name : 'Unknown District';
-  };
-
-  const getOrganizationName = (organizationId: string) => {
-    const organization = organizationData.find(
-      (org: OrganizationType) => org.id === organizationId,
-    );
-    return organization ? organization.name : 'Unknown Organization';
-  };
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<memberType | null>(null);
@@ -142,57 +127,73 @@ const MemberContent = () => {
   };
 
   //Block Member
-  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
+  const [blacklistDialogOpen, setBlacklistDialogOpen] = useState(false);
   const [targetMember, setTargetMember] = useState<memberType | null>(null);
+  const [reason, setReason] = useState<string>('');
+  const { mutateAsync: blacklistMutation, isPending: isBlacklistPending } = useBlacklistMember();
 
-  const openBlockDialog = (member: memberType) => {
+  const handleOpenBlacklistDialog = (member: memberType) => {
+    console.log('member to blacklist:', member);
     setTargetMember(member);
-    setBlockDialogOpen(true);
+    setBlacklistDialogOpen(true);
   };
 
-  const closeBlockDialog = () => {
-    setBlockDialogOpen(false);
+  const handleCloseBlacklistDialog = () => {
+    setBlacklistDialogOpen(false);
     setTargetMember(null);
   };
 
-  const handleConfirmBlock = async () => {
-    if (!targetMember) return;
-    const newBlockState = !targetMember.isBlock;
-
-    try {
-      setLoading(true);
-      const result = await dispatch(
-        blockMember({ memberId: targetMember.id, IsBlock: newBlockState }),
-      );
-
-      if (result && result.type && result.type.endsWith('/fulfilled')) {
-        // ✅ Update the cache inline
-        queryClient.setQueryData<PaginatedResponse<memberType>>(
-          ['member-list', memberFilter],
-          (oldCache) =>
-            oldCache
-              ? {
-                  ...oldCache,
-                  data: oldCache.data.map((m) =>
-                    m.id === targetMember.id ? { ...m, isBlock: newBlockState } : m,
-                  ),
-                }
-              : oldCache,
-        );
-
-        toast.success(
-          `Member "${targetMember.name}" ${newBlockState ? 'blocked' : 'unblocked'} successfully.`,
-        );
-      } else {
-        toast.error(`Failed to ${newBlockState ? 'block' : 'unblock'} member.`);
+  const handleConfirmBlacklist = async () => {
+    // if (targetMember) {
+    //   dispatch(blacklistVisitor(targetMember.id));
+    // }
+    if (targetMember && reason) {
+      try {
+        await blacklistMutation({
+          memberId: targetMember.id,
+          blacklistReason: reason,
+        });
+        toast.success('Member has been Blacklisted');
+      } catch (error) {
+        toast.error('Failed to blacklist member');
+        console.error(error);
       }
-    } catch (error) {
-      console.error('Error toggling block status:', error);
-      toast.error('Something went wrong while updating block status.');
-    } finally {
-      setLoading(false);
-      closeBlockDialog();
     }
+    handleCloseBlacklistDialog();
+  };
+
+  //UnBlacklist Popup
+  const [unblacklistDialogOpen, setUnblacklistDialogOpen] = useState(false);
+  const [selectedUList, setSelectedUList] = useState<memberType | null>(null);
+  const { mutateAsync: unblacklistMutation, isPending: isUnblacklistPending } =
+    useUnBlacklistMember();
+  // Open delete confirmation dialog
+  const handleOpenUnblacklistDialog = (mem: memberType) => {
+    setSelectedUList(mem);
+    setUnblacklistDialogOpen(true);
+  };
+
+  // Close delete confirmation dialog
+  const handleCloseUnblacklistDialog = () => {
+    setUnblacklistDialogOpen(false);
+    setSelectedUList(null);
+  };
+
+  // Confirm delete action
+  const handleConfirmUnblacklist = async () => {
+    // if (targetMember) {
+    //   dispatch(blacklistVisitor(targetMember.id));
+    // }
+    if (selectedUList) {
+      try {
+        await unblacklistMutation(selectedUList.id);
+        toast.success('Member has been Unblacklisted');
+      } catch (error) {
+        toast.error('Failed to unblacklist member');
+        console.error(error);
+      }
+    }
+    handleCloseUnblacklistDialog();
   };
 
   const formatDate = (isoString: string) => {
@@ -217,7 +218,7 @@ const MemberContent = () => {
             alignItems="center"
             justifyContent="space-between"
             sx={{
-              background: memberDetail.isBlock
+              background: memberDetail.isBlacklist
                 ? 'linear-gradient(90deg, #e53935 0%, #ef5350 100%)' // vivid red
                 : 'linear-gradient(90deg, #1e88e5 0%, #42a5f5 100%)', // vivid blue
               borderRadius: '8px',
@@ -232,7 +233,7 @@ const MemberContent = () => {
               sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
             >
               Member Details
-              {memberDetail.isBlock && (
+              {memberDetail.isBlacklist && (
                 <Typography
                   variant="caption"
                   sx={{
@@ -343,25 +344,51 @@ const MemberContent = () => {
                   <Button
                     size="large"
                     variant="contained"
-                    color={memberDetail.isBlock ? 'success' : 'error'}
-                    onClick={() => openBlockDialog(memberDetail)}
+                    color={memberDetail.isBlacklist ? 'success' : 'error'}
+                    onClick={() => {
+                      memberDetail.isBlacklist
+                        ? handleOpenUnblacklistDialog(memberDetail)
+                        : handleOpenBlacklistDialog(memberDetail);
+                    }}
                     sx={{
                       boxShadow: 2,
                       width: '12vw',
                       height: 50,
-                      backgroundColor: memberDetail.isBlock ? '#66bb6a' : '#f08080',
+                      backgroundColor: memberDetail.isBlacklist ? '#66bb6a' : '#f08080',
                       '&:hover': {
-                        backgroundColor: memberDetail.isBlock ? '#4caf50' : '#e57373',
+                        backgroundColor: memberDetail.isBlacklist ? '#4caf50' : '#e57373',
                       },
                     }}
                   >
-                    {memberDetail.isBlock ? 'Unblock Member' : 'Block Member'}
+                    {memberDetail.isBlacklist ? 'Unblacklist Member' : 'Block Member'}
                   </Button>
                 </Stack>
               </Box>
               <Typography variant="h4" fontWeight={800}>
                 {memberDetail.name}
               </Typography>
+              {/* 🚨 WARNING BOX FOR BLACKLISTED MEMBER */}
+              {memberDetail.isBlacklist && memberDetail.blacklistReason && (
+                <Box
+                  sx={{
+                    mt: 2,
+                    px: 3,
+                    py: 2,
+                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                    border: '1px solid #e53935',
+                    borderRadius: 2,
+                    width: '100%',
+                    maxWidth: 500,
+                  }}
+                >
+                  <Typography variant="subtitle1" fontWeight={700} color="#c62828">
+                    ⚠ Blacklist Reason
+                  </Typography>
+                  <Typography variant="body2" color="#7f0000" mt={1}>
+                    {memberDetail.blacklistReason}
+                  </Typography>
+                </Box>
+              )}
             </Box>
 
             <Grid container spacing={5} mb={3}>
@@ -403,7 +430,7 @@ const MemberContent = () => {
                 <CustomFormLabel htmlFor="identity-Id">Identity ID</CustomFormLabel>
                 <Typography>{memberDetail.identityId}</Typography>
               </Grid>
-              ``
+
               <Grid size={{ lg: 6, md: 12, sm: 12 }} display="flex" flexDirection={'column'}>
                 <CustomFormLabel htmlFor="organization-id">Organization Name</CustomFormLabel>
                 <Typography>{memberDetail.organization?.name}</Typography>
@@ -426,46 +453,6 @@ const MemberContent = () => {
               </Grid>
             </Grid>
           </Box>
-          {/* Block / Unblock Dialog */}
-          <Dialog open={blockDialogOpen} onClose={closeBlockDialog} fullWidth maxWidth="xs">
-            <DialogTitle>{targetMember?.isBlock ? 'Unblock Member' : 'Block Member'}</DialogTitle>
-
-            <DialogContent>
-              {!targetMember?.isBlock && (
-                <>
-                  <DialogContentText>
-                    Are you sure you want to block <strong>{targetMember?.name}</strong>?
-                  </DialogContentText>
-                </>
-              )}
-
-              {targetMember?.isBlock && (
-                <DialogContentText>
-                  Are you sure you want to unblock <strong>{targetMember?.name}</strong>?
-                </DialogContentText>
-              )}
-            </DialogContent>
-
-            <DialogActions>
-              <Button onClick={closeBlockDialog} color="primary">
-                Cancel
-              </Button>
-              <Button
-                onClick={handleConfirmBlock}
-                color={targetMember?.isBlock ? 'success' : 'error'}
-                variant="contained"
-                disabled={loading}
-              >
-                {loading ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : targetMember?.isBlock ? (
-                  'Unblock'
-                ) : (
-                  'Block'
-                )}
-              </Button>
-            </DialogActions>
-          </Dialog>
         </>
       ) : (
         <Box p={3} height="50vh" display={'flex'} justifyContent="center" alignItems={'center'}>
@@ -492,6 +479,70 @@ const MemberContent = () => {
           </Button>
           <Button onClick={handleConfirmDelete} color="error">
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Blacklist Confirmation Dialog */}
+      <Dialog
+        open={blacklistDialogOpen}
+        onClose={handleCloseBlacklistDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Confirm Blacklist</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to blacklist member <strong>{targetMember?.name}</strong>?
+          </DialogContentText>
+          <Grid size={12} mt={2}>
+            <CustomTextField
+              id="reason"
+              label="Reason"
+              multiline
+              fullWidth
+              value={reason}
+              onChange={(e: any) => setReason(e.target.value)}
+            />
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseBlacklistDialog} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmBlacklist}
+            color={isBlacklistPending ? 'primary' : 'error'}
+            disabled={isBlacklistPending}
+            startIcon={isBlacklistPending ? <CircularProgress size={20} /> : null}
+          >
+            {isBlacklistPending ? 'Blacklisting...' : 'Blacklist'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Unblacklist Confirmation Dialog */}
+      <Dialog
+        open={unblacklistDialogOpen}
+        onClose={handleCloseUnblacklistDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Confirm Unblacklist</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to unblacklist visitor <strong>{selectedUList?.name}</strong>?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseUnblacklistDialog} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmUnblacklist}
+            color={isUnblacklistPending ? 'primary' : 'error'}
+            disabled={isUnblacklistPending}
+            startIcon={isUnblacklistPending ? <CircularProgress size={20} /> : null}
+          >
+            {isUnblacklistPending ? 'Unblacklisting...' : 'Unblacklist'}
           </Button>
         </DialogActions>
       </Dialog>

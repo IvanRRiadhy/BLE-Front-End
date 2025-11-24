@@ -11,10 +11,11 @@ import {
   SelectFloorplanDevice,
   RevertDevice,
   SaveDevice,
+  DrawingDevicePath,
 } from 'src/store/apps/crud/floorplanDevice';
 import { useMaskedAreaList } from 'src/hooks/useMaskedArea';
 import { useAllUnassignedCCTV } from 'src/hooks/useCCTV';
-import { useAllUnassignedReaders } from 'src/hooks/useReader';
+import { useAllReaders, useAllUnassignedReaders } from 'src/hooks/useReader';
 import { DeviceType } from 'src/types/crud/input';
 import { isEqual } from 'lodash';
 
@@ -42,7 +43,7 @@ interface DeviceFormData {
 
 const DeviceDetailList = () => {
   const dispatch: AppDispatch = useDispatch();
-  
+
   // Redux state for UI management
   const device = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.editingFloorplanDevice,
@@ -53,6 +54,9 @@ const DeviceDetailList = () => {
   const unsavedDevices = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.unsavedFloorplanDevices,
   );
+    const drawingPath = useSelector(
+      (state: RootState) => state.floorplanDeviceReducer.drawingDevicePath,
+    );
 
   // React Query hooks for data fetching
   const { data: maskedAreaResponse } = useMaskedAreaList({
@@ -69,8 +73,10 @@ const DeviceDetailList = () => {
   });
 
   const { data: CCTVData = [] } = useAllUnassignedCCTV();
-  const { data: bleReaderData = [] } = useAllUnassignedReaders();
-   console.log("bleReaderData", bleReaderData);
+  const { data: bleReaderData = [] } = useAllReaders();
+  const { data: allUnassignedReaders = [] } = useAllUnassignedReaders();
+
+  console.log('bleReaderData', bleReaderData);
 
   // Form state
   const [formData, setFormData] = useState<DeviceFormData>({
@@ -95,7 +101,11 @@ const DeviceDetailList = () => {
   });
 
   const [otherReader, setOtherReader] = useState<FloorplanDeviceType[]>([]);
-
+  const currentReader = bleReaderData.find((r) => r.id === formData.readerId) || null;
+  const availableBleReaderOptions = [
+    ...(currentReader ? [currentReader] : []),
+    ...allUnassignedReaders.filter((r) => r.id !== formData.readerId),
+  ];
   // Update form data when device changes
   useEffect(() => {
     if (device) {
@@ -141,17 +151,17 @@ const DeviceDetailList = () => {
 
   // Filter out already-registered items (but include the one belonging to the current device)
   const usedCCTVIds = unsavedDevices
-    .filter((d) => d.type === 'Cctv' && d.id !== formData.id)
-    .map((d) => d.accessCctvId);
+    .filter((d: FloorplanDeviceType) => d.type === 'Cctv' && d.id !== formData.id)
+    .map((d: FloorplanDeviceType) => d.accessCctvId);
 
   const usedBleReaderIds = unsavedDevices
-    .filter((d) => d.type === 'BleReader' && d.id !== formData.id)
-    .map((d) => d.readerId);
+    .filter((d: FloorplanDeviceType) => d.type === 'BleReader' && d.id !== formData.id)
+    .map((d: FloorplanDeviceType) => d.readerId);
 
   // Since we're using unassigned hooks, we only need to filter by unsaved devices
   const availableCCTVs = CCTVData.filter(
     (cctv) => !usedCCTVIds.includes(cctv.id) || cctv.id === formData.accessCctvId,
-  );
+  );  
 
   const availableBleReaders = bleReaderData.filter(
     (reader) => !usedBleReaderIds.includes(reader.id) || reader.id === formData.readerId,
@@ -169,6 +179,11 @@ const DeviceDetailList = () => {
       (field) => formData[field as keyof DeviceFormData]?.toString().trim() !== '',
     );
   };
+
+  const handleAddPathing = () => {
+    if(!device) return;
+    dispatch(DrawingDevicePath(device.id));
+  }
 
   const handleClose = () => {
     // Reset to current device data or empty form
@@ -204,7 +219,7 @@ const DeviceDetailList = () => {
     try {
       // Update the unsaved device in Redux store
       dispatch(EditUnsavedDevice(formData));
-      
+
       // Mark as saved in Redux (local state management)
       dispatch(SaveDevice(formData.id));
 
@@ -249,12 +264,12 @@ const DeviceDetailList = () => {
     const { value, name, id } = e.target as
       | HTMLInputElement
       | { value: string; name: string; id?: string };
-    
+
     const fieldName = (id || name) as keyof DeviceFormData;
-    
-    setFormData(prev => ({ 
-      ...prev, 
-      [fieldName]: value 
+
+    setFormData((prev) => ({
+      ...prev,
+      [fieldName]: value,
     }));
   };
 
@@ -392,7 +407,7 @@ const DeviceDetailList = () => {
                   fullWidth
                   variant="outlined"
                 >
-                  {availableBleReaders.map((bleReader) => (
+                  {availableBleReaderOptions.map((bleReader) => (
                     <MenuItem key={bleReader.id} value={bleReader.id}>
                       {bleReader.name}
                     </MenuItem>
@@ -402,7 +417,7 @@ const DeviceDetailList = () => {
             )}
 
             {/* Position Fields (read-only) */}
-            <Grid size={6}>
+            {/* <Grid size={6}>
               <CustomFormLabel htmlFor="pos-x">Position X</CustomFormLabel>
               <CustomTextField
                 id="posX"
@@ -441,7 +456,22 @@ const DeviceDetailList = () => {
                 fullWidth
                 disabled
               />
-            </Grid>
+            </Grid> */}
+            {/* Add Pathing (only when there are other BLE readers) */}
+            {(formData.type === 'BleReader' && otherReader.length > 0) && (
+              <Grid size={12} mt={1}>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  fullWidth
+                  onClick={() => {
+                    handleAddPathing();
+                  }}
+                >
+                  Add Pathing
+                </Button>
+              </Grid>
+            )}
           </Grid>
         </Box>
       </Box>
@@ -459,11 +489,7 @@ const DeviceDetailList = () => {
           <Button variant="outlined" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button 
-            variant="contained" 
-            onClick={handleSave} 
-            disabled={!isFormValid()}
-          >
+          <Button variant="contained" onClick={handleSave} disabled={!isFormValid()}>
             Save
           </Button>
         </Box>

@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/store/Store';
-import { Box, Typography, Chip, Avatar, Grid2 as Grid } from '@mui/material';
+import { Box, Typography, Chip, Avatar, Grid2 as Grid, Skeleton } from '@mui/material';
 // import Grid from '@mui/material/Grid2';
 import { BASE_URL } from 'src/utils/axios';
 import { VisitorType } from 'src/store/apps/crud/visitor';
@@ -18,16 +18,69 @@ const InvestigateContent = () => {
   const visitorSessions = useSelector(
     (state: RootState) => state.VisitorSessionReducer.visitorSessions,
   );
+  const isLoading = useSelector(
+    (state: RootState) => state.VisitorSessionReducer.isLoading,
+  );
   const language = useSelector((state: RootState) => state.customizer.isLanguage);
 
   useEffect(() => {
     console.log('Visitor Sessions:', visitorSessions);
   }, [visitorSessions]);
 
-  if (!selectedVisitor) {
+  const InvestigateSkeleton = () => {
+  return (
+    <Box p={3}>
+      {/* Top Section Skeleton */}
+      <Box display="flex" gap={4} mb={3}>
+        
+        {/* Avatar Skeleton */}
+        <Skeleton variant="circular" width={160} height={160} />
+
+        {/* Visitor Fields Skeleton */}
+        <Box flexGrow={1}>
+          <Grid container spacing={2}>
+            {Array.from({ length: 12 }).map((_, i) => (
+              <Grid key={i} size={{ xs: 12, sm: 6, md: 3 }}>
+                <Skeleton width="40%" height={22} />
+                <Skeleton width="80%" height={18} />
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      </Box>
+
+      <Skeleton width={200} height={32} sx={{ mb: 2 }} />
+
+      {/* Track Cards Skeleton */}
+      <Grid container spacing={3}>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Grid key={i} size={{ xs: 12, sm: 6, md: 3, lg: 2 }}>
+            <Box
+              sx={{
+                border: '1px solid #CCC',
+                borderRadius: 1.5,
+                height: 180,
+                p: 1,
+              }}
+            >
+              <Skeleton variant="rounded" width="100%" height={100} />
+
+              <Skeleton width="90%" height={20} sx={{ mt: 1 }} />
+              <Skeleton width="100%" height={16} />
+            </Box>
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
+  );
+};
+
+if (isLoading) return <InvestigateSkeleton />;
+
+  if (!selectedVisitor.id) {
     return (
-      <Box p={3}>
-        <Typography variant="h6" color="text.secondary">
+      <Box p={3} textAlign="center" mt={5}>
+        <Typography variant="h4" color="text.secondary" align="center">
           No visitor selected. Please use the filter to choose a visitor.
         </Typography>
       </Box>
@@ -59,7 +112,7 @@ const InvestigateContent = () => {
     maxWidth: '100%', // important for Grid2
   };
 
-  return (
+  return visitorSessions && visitorSessions.length > 0 ? (
     <Box p={3}>
       {/* ================= TOP SECTION ================== */}
       <Box
@@ -264,6 +317,8 @@ const InvestigateContent = () => {
         })}
       </Grid>
     </Box>
+  ) : (
+    <></>
   );
 };
 

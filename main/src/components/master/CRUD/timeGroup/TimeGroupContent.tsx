@@ -73,56 +73,56 @@ const TimeGroupDetails = () => {
     dispatch(UpdateSelectedTimeGroup({ timeBlocks: blocks }));
   };
 
-  const handleSave = async () => {
-    // Validate form
-    if (!formData.name?.trim()) {
-      setFormErrors({ name: 'Name is required' });
-      toast.error('Please enter a name for the time group');
-      return;
-    }
+  // const handleSave = async () => {
+  //   // Validate form
+  //   if (!formData.name?.trim()) {
+  //     setFormErrors({ name: 'Name is required' });
+  //     toast.error('Please enter a name for the time group');
+  //     return;
+  //   }
 
-    if (timeBlocks.length === 0) {
-      toast.error('Please add at least one time block');
-      return;
-    }
+  //   if (timeBlocks.length === 0) {
+  //     toast.error('Please add at least one time block');
+  //     return;
+  //   }
 
-    setFormErrors({});
+  //   setFormErrors({});
 
-    try {
-      if (isNewTimeGroup) {
-        // Add new time group
-        await addMutation.mutateAsync({
-          ...formData,
-          timeBlocks,
-        });
-        toast.success('Time group created successfully');
-      } else {
-        // Edit existing time group
-        await editMutation.mutateAsync({
-          ...formData,
-          timeBlocks,
-        });
-        toast.success('Time group updated successfully');
-      }
-    } catch (error) {
-      console.error('Error saving time group:', error);
-      toast.error('Failed to save time group');
-    }
-  };
+  //   try {
+  //     if (isNewTimeGroup) {
+  //       // Add new time group
+  //       await addMutation.mutateAsync({
+  //         ...formData,
+  //         timeBlocks,
+  //       });
+  //       toast.success('Time group created successfully');
+  //     } else {
+  //       // Edit existing time group
+  //       await editMutation.mutateAsync({
+  //         ...formData,
+  //         timeBlocks,
+  //       });
+  //       toast.success('Time group updated successfully');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error saving time group:', error);
+  //     toast.error('Failed to save time group');
+  //   }
+  // };
 
-  const handleCancel = () => {
-    if (isNewTimeGroup) {
-      dispatch(CancelNewTimeGroup());
-    }
-    // Reset form to selected time group data
-    if (selectedTimeGroup) {
-      setFormData({
-        ...defaultTimeGroupForm,
-        ...selectedTimeGroup,
-      });
-      setTimeBlocks(selectedTimeGroup.timeBlocks ?? []);
-    }
-  };
+  // const handleCancel = () => {
+  //   if (isNewTimeGroup) {
+  //     dispatch(CancelNewTimeGroup());
+  //   }
+  //   // Reset form to selected time group data
+  //   if (selectedTimeGroup) {
+  //     setFormData({
+  //       ...defaultTimeGroupForm,
+  //       ...selectedTimeGroup,
+  //     });
+  //     setTimeBlocks(selectedTimeGroup.timeBlocks ?? []);
+  //   }
+  // };
 
   return (
     <Paper elevation={0} sx={{ p: 3 }}>
@@ -132,14 +132,14 @@ const TimeGroupDetails = () => {
             <Typography component="div" variant="h4" fontWeight={700}>
               Time Group Details
             </Typography>
-            <Stack direction="row" spacing={1}>
+            {/* <Stack direction="row" spacing={1}>
               <Button variant="outlined" onClick={handleCancel}>
                 Cancel
               </Button>
               <Button variant="contained" onClick={handleSave}>
                 Save
               </Button>
-            </Stack>
+            </Stack> */}
           </Box>
           <Divider sx={{ mb: 3 }} />
 

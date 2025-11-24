@@ -35,6 +35,7 @@ import {
   useOverPopulatingAlarms,
   useToggleOverPopulatingAlarm,
   useDeleteOverPopulatingAlarm,
+  useEditOverPopulatingAlarm,
 } from 'src/hooks/AlarmSetting/useOverPopulate';
 
 // Import Redux actions (for filter and selected item state)
@@ -72,6 +73,7 @@ const OverPopulatingList = () => {
   
   const { mutate: toggleAlarm, isPending: isToggling } = useToggleOverPopulatingAlarm();
   const { mutate: deleteAlarm, isPending: isDeleting } = useDeleteOverPopulatingAlarm();
+  const editMutation = useEditOverPopulatingAlarm();
 
   const overPopulatingAlarms = paginatedData?.data || [];
   const overPopulatingAlarmTotalCount = paginatedData?.recordsTotal || 0;
@@ -123,19 +125,19 @@ const OverPopulatingList = () => {
     };
     
     console.log("Toggle Status Clicked: ", overpopulate, "New Status: ", updatedAlarm.isActive);
-    
-    toggleAlarm(
-      { id: overpopulate.id, isActive: updatedAlarm.isActive },
-      {
-        onSuccess: () => {
-          toast.success('Alarm status updated successfully');
-        },
-        onError: (error) => {
-          toast.error('Error updating alarm status');
-          console.error('Error updating alarm status:', error);
-        },
-      }
-    );
+    editMutation.mutate(updatedAlarm);    
+    // toggleAlarm(
+    //   { id: overpopulate.id, isActive: updatedAlarm.isActive },
+    //   {
+    //     onSuccess: () => {
+    //       toast.success('Alarm status updated successfully');
+    //     },
+    //     onError: (error) => {
+    //       toast.error('Error updating alarm status');
+    //       console.error('Error updating alarm status:', error);
+    //     },
+    //   }
+    // );
   };
 
   // Delete Pop-up

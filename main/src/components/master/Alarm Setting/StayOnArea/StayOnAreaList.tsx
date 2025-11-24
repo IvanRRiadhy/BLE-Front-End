@@ -74,6 +74,7 @@ const StayOnAreaList = () => {
   const { mutate: editAlarm, isPending: isEditing } = useEditStayOnAreaAlarm();
   const { mutate: deleteAlarm, isPending: isDeleting } = useDeleteStayOnAreaAlarm();
   const { mutate: toggleAlarm, isPending: isToggling } = useToggleStayOnAreaAlarm();
+  const editMutation = useEditStayOnAreaAlarm();
 
   const stayOnAreaAlarms = paginatedData?.data || [];
   const stayOnAreaAlarmTotalCount = paginatedData?.recordsTotal || 0;
@@ -125,19 +126,19 @@ const StayOnAreaList = () => {
     };
     
     console.log("Toggle Status Clicked: ", stayonarea, "New Status: ", updatedAlarm.isActive);
-    
-    toggleAlarm(
-      { id: stayonarea.id, isActive: updatedAlarm.isActive },
-      {
-        onSuccess: () => {
-          toast.success('Alarm status updated successfully');
-        },
-        onError: (error) => {
-          toast.error('Error updating alarm status');
-          console.error('Error updating alarm status:', error);
-        },
-      }
-    );
+    editMutation.mutate(updatedAlarm);    
+    // toggleAlarm(
+    //   { id: stayonarea.id, isActive: updatedAlarm.isActive },
+    //   {
+    //     onSuccess: () => {
+    //       toast.success('Alarm status updated successfully');
+    //     },
+    //     onError: (error) => {
+    //       toast.error('Error updating alarm status');
+    //       console.error('Error updating alarm status:', error);
+    //     },
+    //   }
+    // );
   };
 
   // Delete Pop-up

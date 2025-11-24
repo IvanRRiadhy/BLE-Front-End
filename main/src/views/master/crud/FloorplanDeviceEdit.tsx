@@ -56,7 +56,7 @@ const FloorplanDeviceEdit = () => {
                   {editingDevice && (
           <Box
             position="absolute"
-            top={140}
+            // top={140}
             left={285}
             minHeight='80vh'
             maxHeight={"100%"}

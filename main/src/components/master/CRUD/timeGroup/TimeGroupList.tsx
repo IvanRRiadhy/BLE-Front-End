@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Box, List, Skeleton, ListItemButton, ListItemText, Stack } from '@mui/material';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import TimeGroupListItem from './TimeGroupListItem';
-import { SelectTimeGroup, TimeGroupType, UpdateFilter } from 'src/store/apps/crud/timeGroup';
+import { ResetNewTimeGroupState, SelectTimeGroup, TimeGroupType, UpdateFilter } from 'src/store/apps/crud/timeGroup';
 import { defaultTimeGroupFilter } from 'src/store/apps/defaultForm';
 import { useTimeGroupList } from 'src/hooks/useTimeGroup';
 
@@ -99,6 +99,7 @@ const TimeGroupList = () => {
                 onTimeGroupClick={() => {
                   console.log('Selected Time Group: ', timeGroup);
                   dispatch(SelectTimeGroup(timeGroup));
+                  dispatch(ResetNewTimeGroupState());
                 }}
                 active={active?.id === timeGroup.id}
               />

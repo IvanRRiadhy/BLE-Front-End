@@ -122,18 +122,6 @@ const GeoFencingList = () => {
     
     console.log("Toggle Status Clicked: ", geofence, "New Status: ", updatedGeoFence.isActive);
     editMutation.mutate(updatedGeoFence);
-    // editAlarm(
-    //   { id: geofence.id, isActive: updatedGeoFence.isActive },
-    //   {
-    //     onSuccess: () => {
-    //       toast.success('Alarm status updated successfully');
-    //     },
-    //     onError: (error: any) => {
-    //       toast.error('Error updating alarm status');
-    //       console.error('Error updating alarm status:', error);
-    //     },
-    //   }
-    // );
   };
 
   // Delete Pop-up

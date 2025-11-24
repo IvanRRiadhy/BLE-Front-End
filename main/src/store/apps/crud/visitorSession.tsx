@@ -113,6 +113,20 @@ export const VisitorSessionSlice = createSlice({
       state.visitorSessionFilter = { ...state.visitorSessionFilter, ...action.payload };
     }
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchVisitorSession.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchVisitorSession.fulfilled, (state) => {
+        state.isLoading = false;
+        state.hasLoaded = true;
+      })
+      .addCase(fetchVisitorSession.rejected, (state) => {
+        state.isLoading = false;
+        state.hasLoaded = false;
+      });
+  },
 });
 
 export const {

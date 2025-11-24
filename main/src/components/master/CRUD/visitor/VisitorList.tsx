@@ -105,14 +105,14 @@ const VisitorList = () => {
     }
   };
 
-  useEffect(() => {
-    dispatch(UpdateFilter(defaultVisitorFilter));
-    try {
-      dispatch(fetchVisitorDT(defaultVisitorFilter));
-    } catch (error) {
-      console.error('Error fetching organization data:', error);
-    }
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(UpdateFilter(defaultVisitorFilter));
+  //   try {
+  //     dispatch(fetchVisitorDT(defaultVisitorFilter));
+  //   } catch (error) {
+  //     console.error('Error fetching organization data:', error);
+  //   }
+  // }, [dispatch]);
 
   useEffect(() => {
     const prevFilter = prevFilterRef.current;

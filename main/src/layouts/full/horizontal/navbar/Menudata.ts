@@ -27,18 +27,18 @@ import { AlarmSettingType } from 'src/store/apps/alarmsetting/alarmSettings';
 
 const useMenuItems = (alarmSettings: AlarmSettingType[]) => {
   // 🔹 Determine active alarms
-  const isGeoFencingActive = alarmSettings.some(
-    (a) => a.alarmCategory.toLowerCase() === 'geofence' && a.isEnabled,
-  );
-  const isOverPopulatingActive = alarmSettings.some(
-    (a) => a.alarmCategory.toLowerCase() === 'overpopulating' && a.isEnabled,
-  );
-  const isStayOnAreaActive = alarmSettings.some(
-    (a) => a.alarmCategory.toLowerCase() === 'stayonarea' && a.isEnabled,
-  );
-  const isBoundaryActive = alarmSettings.some(
-    (a) => a.alarmCategory.toLowerCase() === 'boundary' && a.isEnabled,
-  );
+  const alarms = Array.isArray(alarmSettings) ? alarmSettings : [];
+
+const normalize = (v: any) => (typeof v === 'string' ? v.toLowerCase() : '');
+
+const isActive = (name: string) =>
+  alarms.some(a => normalize(a?.alarmCategory) === name && a?.isEnabled);
+
+const isGeoFencingActive = isActive('geofence');
+const isOverPopulatingActive = isActive('overpopulating');
+const isStayOnAreaActive = isActive('stayonarea');
+const isBoundaryActive = isActive('boundary');
+
 
   // 🔹 Define all menu items (before filtering)
   const Menuitems = [
@@ -110,8 +110,8 @@ const useMenuItems = (alarmSettings: AlarmSettingType[]) => {
           icon: IconDevices,
           children: [
             { id: uniqueId(), title: 'Brand', icon: IconBadgeTm, href: '/master/brand/' },
-            { id: uniqueId(), title: 'Access CCTV', icon: IconDeviceCctv, href: '/master/accesscctv/' },
-            { id: uniqueId(), title: 'Access Control --(WIP)--', icon: IconIdBadge, href: '/master/accesscontrol/' },
+            // { id: uniqueId(), title: 'Access CCTV', icon: IconDeviceCctv, href: '/master/accesscctv/' },
+            // { id: uniqueId(), title: 'Access Control --(WIP)--', icon: IconIdBadge, href: '/master/accesscontrol/' },
             { id: uniqueId(), title: 'Ble Reader', icon: IconDeviceIpad, href: '/master/blereader/' },
             { id: uniqueId(), title: 'Device Mapping', icon: IconDevices, href: '/master/device/' },
           ],
@@ -128,8 +128,8 @@ const useMenuItems = (alarmSettings: AlarmSettingType[]) => {
         },
         { id: uniqueId(), title: 'Member Data', icon: IconUsers, href: '/master/membertag/' },
         { id: uniqueId(), title: 'Time Group', icon: IconCalendar, href: '/master/timegroup/' },
-        { id: uniqueId(), title: 'Integration --(WIP)--', icon: IconLicense, href: '/master/integration/' },
-        { id: uniqueId(), title: 'Users --(WIP)--', icon: IconMapPin, href: '/master/user/' },
+        // { id: uniqueId(), title: 'Integration --(WIP)--', icon: IconLicense, href: '/master/integration/' },
+        // { id: uniqueId(), title: 'Users --(WIP)--', icon: IconMapPin, href: '/master/user/' },
         { id: uniqueId(), title: 'Application', icon: IconAppWindow, href: '/master/application/' },
       ],
     },
@@ -174,12 +174,12 @@ const useMenuItems = (alarmSettings: AlarmSettingType[]) => {
       icon: IconApps,
       href: '/report/',
       children: [
-        { id: uniqueId(), title: 'Tracking Transaction', icon: IconLiveView, href: '/report/trackingtransaction/' },
-        { id: uniqueId(), title: 'Alarm Notification', icon: IconBellExclamation, href: '/report/alarmRecord/' },
+        // { id: uniqueId(), title: 'Tracking Transaction', icon: IconLiveView, href: '/report/trackingtransaction/' },
+        // { id: uniqueId(), title: 'Alarm Notification', icon: IconBellExclamation, href: '/report/alarmRecord/' },
         { id: uniqueId(), title: 'Alarm Trigger', icon: IconBellExclamation, href: '/report/alarmTrigger/' },
         { id: uniqueId(), title: 'Card Record', icon: IconBarrierBlock, href: '/report/cardrecord/' },
-        { id: uniqueId(), title: 'Test Record', icon: IconCalendar, href: '/report/testrecord/' },
-        { id: uniqueId(), title: 'Visitor Report', icon: IconCalendar, href: '/report/visitorreport/filter/'},
+        // { id: uniqueId(), title: 'Test Record', icon: IconCalendar, href: '/report/testrecord/' },
+        // { id: uniqueId(), title: 'Visitor Report', icon: IconCalendar, href: '/report/visitorreport/filter/'},
         { id: uniqueId(), title: 'Investigate', icon: IconCalendar, href: '/report/investigate'},
       ],
     },

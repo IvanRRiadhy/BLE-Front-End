@@ -94,7 +94,7 @@ export function useDeleteCard() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      await axiosServices.delete(`${API_URL_V2}${id}`);
+      await axiosServices.delete(`${API_URL_V1}${id}`);
       return id;
     },
     onSuccess: () => {

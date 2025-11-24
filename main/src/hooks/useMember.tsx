@@ -99,12 +99,26 @@ export function useEditMember() {
 // -----------------------------------------------------------------------------
 // ✅ BLOCK / UNBLOCK MEMBER
 // -----------------------------------------------------------------------------
-export function useBlockMember() {
+export function useBlacklistMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ memberId, isBlock }: { memberId: string; isBlock: boolean }) => {
-      const res = await axiosServices.put(`${API_URL}Block/${memberId}`, { IsBlock: isBlock });
+    mutationFn: async ({ memberId, blacklistReason }: { memberId: string; blacklistReason: string }) => {
+      const res = await axiosServices.post(`${API_URL}${memberId}/blacklist`, { blacklistReason: blacklistReason });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['member-list'] });
+      queryClient.invalidateQueries({ queryKey: ['member-all'] });
+    },
+  });
+}
+export function useUnBlacklistMember() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ( memberId: string ) => {
+      const res = await axiosServices.post(`${API_URL}${memberId}/unblacklist`,{});
       return res.data;
     },
     onSuccess: () => {

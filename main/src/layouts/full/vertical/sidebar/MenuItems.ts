@@ -42,18 +42,19 @@ interface MenuitemsType {
  * Returns full menu items (static + dynamic alarm menus)
  */
 const getMenuItems = (alarmSettings: AlarmSettingType[]): MenuitemsType[] => {
-  const isGeoFencingActive = alarmSettings.some(
+  const isGeoFencingActive = alarmSettings?.some(
     (a) => a.alarmCategory.toLowerCase() === 'geofence' && a.isEnabled,
-  );
-  const isOverPopulatingActive = alarmSettings.some(
+  ) || false;
+  const isOverPopulatingActive = alarmSettings?.some(
     (a) => a.alarmCategory.toLowerCase() === 'overpopulating' && a.isEnabled,
-  );
-  const isStayOnAreaActive = alarmSettings.some(
+  ) || false;
+  const isStayOnAreaActive = alarmSettings?.some(
     (a) => a.alarmCategory.toLowerCase() === 'stayonarea' && a.isEnabled,
-  );
-  const isBoundaryActive = alarmSettings.some(
+  ) || false;
+  const isBoundaryActive = alarmSettings?.some(
     (a) => a.alarmCategory.toLowerCase() === 'boundary' && a.isEnabled,
-  );
+  ) || false;
+
 
   const Menuitems: MenuitemsType[] = [
     {
@@ -158,18 +159,18 @@ const getMenuItems = (alarmSettings: AlarmSettingType[]): MenuitemsType[] => {
           icon: IconBadgeTm,
           href: '/master/brand/',
         },
-        {
-          id: uniqueId(),
-          title: 'Access CCTV',
-          icon: IconDeviceCctv,
-          href: '/master/accesscctv/',
-        },
-        {
-          id: uniqueId(),
-          title: 'Access Control --(WIP)--',
-          icon: IconIdBadge,
-          href: '/master/accesscontrol/',
-        },
+        // {
+        //   id: uniqueId(),
+        //   title: 'Access CCTV',
+        //   icon: IconDeviceCctv,
+        //   href: '/master/accesscctv/',
+        // },
+        // {
+        //   id: uniqueId(),
+        //   title: 'Access Control --(WIP)--',
+        //   icon: IconIdBadge,
+        //   href: '/master/accesscontrol/',
+        // },
         {
           id: uniqueId(),
           title: 'Ble Reader',
@@ -221,18 +222,18 @@ const getMenuItems = (alarmSettings: AlarmSettingType[]): MenuitemsType[] => {
       icon: IconCalendar,
       href: '/master/timegroup/',
     },
-    {
-      id: uniqueId(),
-      title: 'Integration --(WIP)--',
-      icon: IconLicense,
-      href: '/master/integration/',
-    },
-    {
-      id: uniqueId(),
-      title: 'Users --(WIP)--',
-      icon: IconUsers,
-      href: '/master/user/',
-    },
+    // {
+    //   id: uniqueId(),
+    //   title: 'Integration --(WIP)--',
+    //   icon: IconLicense,
+    //   href: '/master/integration/',
+    // },
+    // {
+    //   id: uniqueId(),
+    //   title: 'Users --(WIP)--',
+    //   icon: IconUsers,
+    //   href: '/master/user/',
+    // },
 
     {
       navlabel: true,
@@ -315,12 +316,12 @@ const getMenuItems = (alarmSettings: AlarmSettingType[]): MenuitemsType[] => {
           icon: IconMapPin,
           href: '/visitor/visitorinvitation/',
         },
-        {
-          id: uniqueId(),
-          title: 'Blacklist',
-          icon: IconBarrierBlock,
-          href: '/visitor/blacklist/',
-        },
+        // {
+        //   id: uniqueId(),
+        //   title: 'Blacklist',
+        //   icon: IconBarrierBlock,
+        //   href: '/visitor/blacklist/',
+        // },
       ],
     },
 
@@ -328,18 +329,18 @@ const getMenuItems = (alarmSettings: AlarmSettingType[]): MenuitemsType[] => {
       navlabel: true,
       subheader: 'Report',
     },
-    {
-      id: uniqueId(),
-      title: 'Tracking Transaction',
-      icon: IconLiveView,
-      href: '/report/trackingtransaction/',
-    },
-    {
-      id: uniqueId(),
-      title: 'Alarm Notification',
-      icon: IconBellExclamation,
-      href: '/report/alarmRecord/',
-    },
+    // {
+    //   id: uniqueId(),
+    //   title: 'Tracking Transaction',
+    //   icon: IconLiveView,
+    //   href: '/report/trackingtransaction/',
+    // },
+    // {
+    //   id: uniqueId(),
+    //   title: 'Alarm Notification',
+    //   icon: IconBellExclamation,
+    //   href: '/report/alarmRecord/',
+    // },
     {
       id: uniqueId(),
       title: 'Alarm Trigger',

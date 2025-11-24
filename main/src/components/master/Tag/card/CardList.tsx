@@ -26,7 +26,8 @@ import { CardType, UpdateFilter, fetchCard, fetchCardDT } from 'src/store/apps/c
 import AddEditCard from './AddEditCard';
 import { defaultCardFilter } from 'src/store/apps/defaultForm';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import { useCardList } from 'src/hooks/useCard';
+import { useCardList, useDeleteCard } from 'src/hooks/useCard';
+import toast from 'react-hot-toast';
 
 const columns = [
   { label: 'Name', field: 'Name', sortAble: true },
@@ -44,12 +45,12 @@ const CardList = () => {
   // const areaData: MaskedAreaType[] = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
   // const cardFilteredCount = useSelector((state: RootState) => state.CardReducer.cardFilteredCount);
   const cardFilter = useSelector((state: RootState) => state.CardReducer.cardFilter);
-  const { data, isLoading: queryLoading} = useCardList(cardFilter);
+  const { data, isLoading: queryLoading } = useCardList(cardFilter);
   const cardData = data?.data || [];
   const cardFilteredCount = data?.recordsFiltered || 0;
-    const prevFilterRef = useRef(cardFilter);
-    // const { t } = useTranslation();
-    const [loading, setLoading] = useState(false);
+  const prevFilterRef = useRef(cardFilter);
+  // const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
   // Pagination State
   const page = Math.floor(cardFilter.Start / cardFilter.Length);
   const rowsPerPage = cardFilter.Length;
@@ -86,18 +87,18 @@ const CardList = () => {
     }
   };
 
-    useEffect(() => {
-      dispatch(UpdateFilter(defaultCardFilter));
-      try {
-        setLoading(true);
-        dispatch(fetchCardDT(defaultCardFilter));
-      } catch (error) {
-        console.log(error);
-      }
-      setTimeout(() => {
-        setLoading(false);
-      }, 500);
-    }, [dispatch]);
+  useEffect(() => {
+    dispatch(UpdateFilter(defaultCardFilter));
+    try {
+      setLoading(true);
+      dispatch(fetchCardDT(defaultCardFilter));
+    } catch (error) {
+      console.log(error);
+    }
+    setTimeout(() => {
+      setLoading(false);
+    }, 500);
+  }, [dispatch]);
 
   useEffect(() => {
     const prevFilter = prevFilterRef.current;
@@ -119,6 +120,7 @@ const CardList = () => {
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedCard, setselectedCard] = useState<CardType | null>(null);
+  const deleteMutation = useDeleteCard();
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (org: CardType) => {
     setselectedCard(org);
@@ -132,9 +134,15 @@ const CardList = () => {
   };
 
   // Confirm delete action
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (selectedCard) {
-      // dispatch(deleteOrganization(selectedCard.id));
+      try {
+        await deleteMutation.mutateAsync(selectedCard.id);
+        toast.success('Data Deleted');
+      } catch (error) {
+        toast.error('Delete failed');
+        console.error(error);
+      }
     }
     handleCloseDeleteDialog();
   };

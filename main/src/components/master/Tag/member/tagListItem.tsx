@@ -94,7 +94,7 @@ const TagListItem: React.FC<Props> = ({
       />
 
       <Stack direction="row" spacing={1} alignItems="center">
-        {member.isBlock && (
+        {member.isBlacklist && (
           <Chip
             label="Blocked"
             color="error"

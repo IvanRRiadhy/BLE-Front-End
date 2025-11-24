@@ -72,8 +72,9 @@ export interface memberType {
     applicationId: string,
     statusEmployee: string,
     cardId: string,
-    isBlock: boolean,
-    blockAt: string,
+    isBlacklist: boolean,
+    blacklistAt: string,
+    blacklistReason: string,
     createdBy: string,
     createdAt: string,
     updatedBy: string,
@@ -282,21 +283,21 @@ export const editMember = createAsyncThunk("member/editMember", async (formData:
     }
 });
 
-export const blockMember = createAsyncThunk(
-  'member/blockMember',
-  async ({ memberId, IsBlock }: { memberId: string; IsBlock: boolean }) => {
+export const blacklistMember = createAsyncThunk(
+  'member/blacklistMember',
+  async ({ memberId, blacklistReason }: { memberId: string; blacklistReason: string }) => {
     const started = Date.now();
     try {
-        console.log("Blocking member: ",memberId, IsBlock);
-      const response = await axiosServices.put(`${API_URL}Block/${memberId}`, {
-        IsBlock,
+        console.log("Blacklisting member: ",memberId, blacklistReason);
+      const response = await axiosServices.put(`${API_URL}${memberId}/blacklist`, {
+        blacklistReason,
       });
-      console.log('Response Block: ', response.data);
+      console.log('Response Blacklist: ', response.data);
       const elapsed = Date.now() - started;
       if (elapsed < 500) await delay(500 - elapsed);
       return response.data;
     } catch (error) {
-      console.error('Error blocking member:', error);
+      console.error('Error blacklisting member:', error);
       const elapsed = Date.now() - started;
       if (elapsed < 500) await delay(500 - elapsed);
       throw error;

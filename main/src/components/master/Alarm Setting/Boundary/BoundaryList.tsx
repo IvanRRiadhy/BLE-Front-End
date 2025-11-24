@@ -74,6 +74,7 @@ const BoundaryList = () => {
   const { mutate: editAlarm, isPending: isEditing } = useEditBoundaryAlarm();
   const { mutate: deleteAlarm, isPending: isDeleting } = useDeleteBoundaryAlarm();
   const { mutate: toggleAlarm, isPending: isToggling } = useToggleBoundaryAlarm();
+  const editMutation = useEditBoundaryAlarm();
 
   const boundaryAlarms = paginatedData?.data || [];
   const boundaryAlarmTotalCount = paginatedData?.recordsTotal || 0;
@@ -125,19 +126,20 @@ const BoundaryList = () => {
     };
     
     console.log("Toggle Status Clicked: ", boundary, "New Status: ", updatedBoundary.isActive);
-    
-    toggleAlarm(
-      { id: boundary.id, isActive: updatedBoundary.isActive },
-      {
-        onSuccess: () => {
-          toast.success('Alarm status updated successfully');
-        },
-        onError: (error) => {
-          toast.error('Error updating alarm status');
-          console.error('Error updating alarm status:', error);
-        },
-      }
-    );
+    editMutation.mutate(updatedBoundary)
+
+    // toggleAlarm(
+    //   { id: boundary.id, isActive: updatedBoundary.isActive },
+    //   {
+    //     onSuccess: () => {
+    //       toast.success('Alarm status updated successfully');
+    //     },
+    //     onError: (error) => {
+    //       toast.error('Error updating alarm status');
+    //       console.error('Error updating alarm status:', error);
+    //     },
+    //   }
+    // );
   };
 
   // Delete Pop-up

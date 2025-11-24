@@ -14,6 +14,21 @@ const API_URL = '/api/FloorplanDevice/';
 const API_DT_URL = '/api/FloorplanDevice/filter/';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+export type PathNodeType = {
+    id: string,
+    posX: number,
+    posY: number,
+    posPxX: number,
+    posPxY: number,
+    deviceId?: string,
+}
+
+export type PathsType = {
+    id: string,
+    deviceId: string,
+    paths: PathNodeType[],
+}
+
 export type GetFilter = {
         Draw: number,
     Start: number,
@@ -68,6 +83,7 @@ export interface FloorplanDeviceType {
     reader?: bleReaderType,
     accessControl?: AccessControlType,
     floorplanMaskedArea?: MaskedAreaType,
+    devicePath?: PathsType[],
 };
 
 interface StateType {
@@ -80,6 +96,7 @@ interface StateType {
     editingFloorplanDevice?: FloorplanDeviceType | null;
     deletedFloorplanDevice?: FloorplanDeviceType[];
     addedFloorplanDevice?: FloorplanDeviceType[];
+    drawingDevicePath?: string;
     floorplanDeviceTotalCount: number;
     floorplanDeviceFilteredCount: number;
     floorplanDeviceFilter: GetFilter;
@@ -98,6 +115,7 @@ const initialState: StateType = {
     editingFloorplanDevice: null,
     deletedFloorplanDevice: [],
     addedFloorplanDevice: [],
+    drawingDevicePath: '',
     floorplanDeviceTotalCount: 0,
     floorplanDeviceFilteredCount: 0,
     floorplanDeviceFilter: defaultFloorplanDeviceFilter,
@@ -246,6 +264,9 @@ export const FloorplanDeviceSlice = createSlice({
             state.selectedFloorplanDevice = null;
             state.editingFloorplanDevice = null;
         },
+        DrawingDevicePath: (state, action: PayloadAction<string>) => {
+            state.drawingDevicePath = action.payload;
+        },
     },
 
     extraReducers: (builder) => {
@@ -343,6 +364,7 @@ export const {
     SaveDevice,
     ResetState,
     editDevicePosition,
+    DrawingDevicePath,
 } = FloorplanDeviceSlice.actions;
 
 export const fetchFloorplanDevices = () => async (dispatch: AppDispatch) => {

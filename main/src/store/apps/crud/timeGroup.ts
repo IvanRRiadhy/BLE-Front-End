@@ -114,10 +114,13 @@ CancelNewTimeGroup: (state) => {
         };
       }
     },
+    ResetNewTimeGroupState: (state) => {
+      state.isNewTimeGroup = false;
+    }
   },
 })
 
-export const { GetTimeGroups,GetAllTimeGroups, UpdateFilter, SelectTimeGroup, AddNewTimeGroup, CancelNewTimeGroup, SaveNewTimeGroupSuccess, UpdateSelectedTimeGroup } = TimeGroupSlice.actions;
+export const { GetTimeGroups,GetAllTimeGroups, UpdateFilter, SelectTimeGroup, AddNewTimeGroup, CancelNewTimeGroup, SaveNewTimeGroupSuccess, UpdateSelectedTimeGroup, ResetNewTimeGroupState } = TimeGroupSlice.actions;
 
 export const fetchTimeGroups = () => async (dispatch: AppDispatch) => {
   try {

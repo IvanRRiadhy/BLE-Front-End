@@ -20,6 +20,8 @@ import {
   addTimeBlock,
 } from 'src/store/apps/crud/timeGroup';
 import { defaultTimeGroupFilter } from 'src/store/apps/defaultForm';
+import { useAddTimeGroup, useEditTimeGroup, useAddTimeBlock } from 'src/hooks/useTimeGroup';
+import toast from 'react-hot-toast';
 
 const daysOfWeek: TimeBlockType['dayOfWeek'][] = [
   'Sunday',
@@ -49,6 +51,11 @@ export const TimeGridSelector = ({
   const [selectedCells, setSelectedCells] = useState<Record<string, boolean>>({});
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectionMode, setSelectionMode] = useState<'add' | 'remove'>('add');
+
+  const addTG = useAddTimeGroup();
+const editTG = useEditTimeGroup();
+const addBlock = useAddTimeBlock();
+
 
   // 24 slots
   const timeSlots = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0') + ':00');
@@ -216,39 +223,69 @@ export const TimeGridSelector = ({
   };
 
   // ---------------- Save & Cancel ----------------
-  const handleSave = () => {
-    if (!selectedTimeGroup) return;
 
-    const payload: TimeGroupType = {
-      ...selectedTimeGroup,
-      timeBlocks: selectedTimeGroup.timeBlocks.map((b: TimeBlockType) => ({
-        ...b,
-        id: b.id.startsWith('block-') ? '' : b.id, // remove temp ids
-      })),
-    };
+const handleSave = async () => {
+  if (!selectedTimeGroup) return;
 
-    const newTimeBlocks = selectedTimeGroup.timeBlocks.filter((b: TimeBlockType) =>
-      b.id.startsWith('block-'),
-    );
+  const normalizedBlocks = selectedTimeGroup.timeBlocks.map((b: TimeBlockType) => ({
+    ...b,
+    dayOfWeek: b.dayOfWeek.toLowerCase(),
+    id: b.id.startsWith("block-") ? "" : b.id, // remove temp id
+  }));
 
+  try {
     if (isNewTimeGroup) {
-      dispatch(saveNewTimeGroup(selectedTimeGroup) as any);
+      // --------------------------------------
+      // CREATE NEW TIME GROUP (same as old saveNewTimeGroup)
+      // --------------------------------------
+      await addTG.mutateAsync({
+        ...selectedTimeGroup,
+        timeBlocks: normalizedBlocks,
+      });
+
+      toast.success("Time group created successfully");
     } else {
-      const editPayload = { ...payload };
-      if (newTimeBlocks.length > 0) {
-        const addPayload = newTimeBlocks.map((b: TimeBlockType) => ({
+      // --------------------------------------
+      // EDIT EXISTING TIME GROUP
+      // --------------------------------------
+
+      // 1. Identify brand new blocks that must be created separately
+      const newBlocks = selectedTimeGroup.timeBlocks.filter((b: TimeBlockType) =>
+        b.id.startsWith("block-")
+      );
+
+      // 2. Prepare payload for editing main group
+      const editPayload = {
+        id: selectedTimeGroup.id,
+        name: selectedTimeGroup.name,
+        description: selectedTimeGroup.description,
+        cardAccessIds: selectedTimeGroup.cardAccessIds,
+        timeBlocks: normalizedBlocks, // without temp ids
+      };
+
+      // First update the group (same as old editTimeGroup)
+      await editTG.mutateAsync(editPayload);
+
+      // 3. Add new time blocks (same as old addTimeBlock)
+      for (const b of newBlocks) {
+        const addPayload = {
           dayOfWeek: b.dayOfWeek.toLowerCase(),
           startTime: b.startTime,
           endTime: b.endTime,
           TimeGroupId: selectedTimeGroup.id,
-        }));
-        dispatch(addTimeBlock(addPayload) as any);
-      }
-      dispatch(editTimeGroup(editPayload) as any);
-    }
+        };
 
-    dispatch(fetchTimeGroupDT({ ...defaultTimeGroupFilter, Length: 999 }));
-  };
+        await addBlock.mutateAsync(addPayload);
+      }
+
+      toast.success("Time group updated successfully");
+    }
+  } catch (err) {
+    console.error("Failed to save:", err);
+    toast.error("Failed to save time group");
+  }
+};
+
 
   const handleCancel = () => {
     dispatch(CancelNewTimeGroup());
