@@ -40,7 +40,7 @@ const FloorplanPreviewDialog: React.FC<{ floorplanId: string; onClose: () => voi
       height *= ratio;
       setImageSize({ width, height });
     };
-    dispatch(SelectFloorplan(floorplanId));
+    dispatch(SelectFloorplan(selected));
   }, [selected]);
 
   return (

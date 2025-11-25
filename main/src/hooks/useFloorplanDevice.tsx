@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
-import { FloorplanDeviceType, GetFilter } from 'src/store/apps/crud/floorplanDevice';
+import { FloorplanDeviceType, GetFilter, PathsType } from 'src/store/apps/crud/floorplanDevice';
 import { RootState, useSelector } from 'src/store/Store';
 
 // -----------------------------------------------------------------------------
@@ -43,8 +43,39 @@ export function useFloorplanDeviceList(filter: GetFilter) {
       const res = await axiosServices.post(API_DT_URL, filter);
       const col = res.data.collection;
 
+      // ----------------------------
+      // 🔥 PARSE PATH HERE
+      // ----------------------------
+      console.log("Raw device data with paths:", col.data);
+      const parsedDevices = col.data.map((dev: FloorplanDeviceType) => {
+        let devicePath: PathsType[] = [];
+        // console.log("Parsing device path for device ID:", dev.id, "Path string:", dev.path);
+        if (dev.path) {
+          try {
+            const parsed = JSON.parse(dev.path);
+            console.log("Parsed device path:", parsed);
+            // If backend returns a single PathsType
+            if (!Array.isArray(parsed)) {
+              devicePath = [parsed];
+            }
+            // If backend supports multiple paths
+            else {
+              devicePath = parsed;
+            }
+          } catch (err) {
+            console.error("❌ Failed parsing device path JSON:", dev.path, err);
+            devicePath = [];
+          }
+        }
+
+        return {
+          ...dev,
+          devicePath, // <------ parsed, safe
+        };
+      });
+      console.log("Devices after parsing paths:", parsedDevices);
       return {
-        data: col.data as FloorplanDeviceType[],
+        data: parsedDevices as FloorplanDeviceType[],
         draw: col.draw,
         recordsTotal: col.recordsTotal,
         recordsFiltered: col.recordsFiltered,
@@ -56,19 +87,52 @@ export function useFloorplanDeviceList(filter: GetFilter) {
   });
 }
 
+
 // -----------------------------------------------------------------------------
 // ✅ FETCH ALL (for dropdowns, selectors, etc.)
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// ✅ FETCH ALL FLOORPLAN DEVICES (with parsed paths)
 // -----------------------------------------------------------------------------
 export function useAllFloorplanDevices() {
   return useQuery({
     queryKey: ['floorplan-device-all'],
     queryFn: async () => {
       const res = await axiosServices.get(API_URL);
-      return res.data.collection.data as FloorplanDeviceType[];
+      const rawDevices = res.data.collection.data as FloorplanDeviceType[];
+
+      console.log("Raw ALL device data with paths:", rawDevices);
+
+      const parsedDevices = rawDevices.map((dev: FloorplanDeviceType) => {
+        let devicePath: PathsType[] = [];
+
+        if (dev.path) {
+          try {
+            const parsed = JSON.parse(dev.path);
+            console.log("Parsed ALL device path:", parsed);
+
+            // If backend returns only 1 path object
+            if (!Array.isArray(parsed)) devicePath = [parsed];
+            else devicePath = parsed; // Already array
+          } catch (err) {
+            console.error("❌ Failed to parse ALL device path JSON:", dev.path, err);
+            devicePath = [];
+          }
+        }
+
+        return {
+          ...dev,
+          devicePath,
+        };
+      });
+
+      console.log("ALL devices after parsing paths:", parsedDevices);
+      return parsedDevices as FloorplanDeviceType[];
     },
     placeholderData: [],
   });
 }
+
 
 // -----------------------------------------------------------------------------
 // ✅ ADD FLOORPLAN DEVICE (POST JSON)
@@ -112,7 +176,7 @@ export function useEditFloorplanDevice() {
   return useMutation({
     mutationFn: async (floorplanDevice: Partial<FloorplanDeviceType>) => {
       if (!floorplanDevice.id) throw new Error('Floorplan Device ID is required for editing.');
-
+      console.log('Editing Floorplan Device:', floorplanDevice);
       const {
         id,
         createdAt,
@@ -127,6 +191,7 @@ export function useEditFloorplanDevice() {
       } = floorplanDevice;
 
       const res = await axiosServices.put(`${API_URL}${id}`, cleanData);
+      // console.log('Edit response:', res.data);
       return res.data;
     },
     onSuccess: () => {

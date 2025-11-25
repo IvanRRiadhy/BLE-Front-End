@@ -70,10 +70,10 @@ const VisitorTrackingHistoryPopup = ({ open, onClose, visitor }: VisitorTracking
       SortDir: 'desc',
       SearchValue: '',
       dateFilters: {
-        TransTime: {
-          DateFrom: visitor.visitorPeriodStart,
-          DateTo: visitor.visitorPeriodEnd,
-        },
+        // TransTime: {
+        //   DateFrom: visitor.visitorPeriodStart,
+        //   DateTo: visitor.visitorPeriodEnd,
+        // },
       },
       filters: {
         VisitorId: [visitor.id],

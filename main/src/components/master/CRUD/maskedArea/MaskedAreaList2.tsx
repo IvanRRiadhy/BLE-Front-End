@@ -21,6 +21,7 @@ import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import {
   fetchFloorplan,
   fetchFloorplanDT,
+  FloorplanType,
   SelectFloorplan,
   UpdateFilter,
 } from 'src/store/apps/crud/floorplan';
@@ -110,9 +111,9 @@ const MaskedAreaList2 = () => {
     dispatch(fetchFloorplanDT(floorplanFilter));
   }, [dispatch, floorplanFilter]);
 
-  const handleOnClick = (id: string) => {
-    // console.log('id: ', id);
-    dispatch(SelectFloorplan(id));
+  const handleOnClick = (floorplanToEdit: FloorplanType) => {
+    // console.log('floorplanToEdit: ', floorplanToEdit);
+    dispatch(SelectFloorplan(floorplanToEdit));
     navigate('/master/floorplanmaskedarea/edit');
   };
 
@@ -243,7 +244,7 @@ const MaskedAreaList2 = () => {
                             <IconButton
                               color="primary"
                               size="small"
-                              onClick={() => handleOnClick(floorplan.id)}
+                              onClick={() => handleOnClick(floorplan)}
                             >
                               <IconEdit size={20} />
                             </IconButton>

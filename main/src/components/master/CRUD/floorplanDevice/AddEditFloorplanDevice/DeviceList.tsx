@@ -94,6 +94,12 @@ const DeviceList = () => {
     },
   });
 
+  useEffect(() => {
+    console.log("Floorplan Devices Response:", floorplanDevicesResponse);
+  }, [floorplanDevicesResponse]);
+
+
+
   // React Query mutations
   const addMutation = useAddFloorplanDevice();
   const editMutation = useEditFloorplanDevice();
@@ -102,12 +108,16 @@ const DeviceList = () => {
   // Derived data from React Query
   const floorplanDevicesData = floorplanDevicesResponse?.data || [];
   const filteredOriginalDevices = floorplanDevicesData; // Already filtered by backend
-
+  //98e73270-40b4-427c-bf99-ebd5e46394bf
   // Filter unsaved devices for current floorplan (client-side for local changes)
   const filteredUnsavedDevices = unsavedDevices.filter(
     (device: FloorplanDeviceType) => device.floorplanId === activeFloorplan?.id,
   );
-
+    useEffect(() => {
+    console.log("Unsaved Devices Response:", unsavedDevices);
+    console.log("Filtered Unsaved Devices:", filteredUnsavedDevices);
+    console.log("Active Floorplan ID:", activeFloorplan);
+  }, [unsavedDevices]);
   // State for dialogs
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState('');
@@ -162,7 +172,7 @@ const DeviceList = () => {
     }
     dispatch(AddUnsavedDevice(newDevice));
     dispatch(SelectFloorplanDevice(newDevice.id));
-    dispatch(SelectEditingFloorplanDevice(newDevice.id));
+    dispatch(SelectEditingFloorplanDevice(newDevice));
   };
 
   const handleOnClick = (id: string) => {
@@ -182,7 +192,7 @@ const DeviceList = () => {
       if (dialogType === 'add') {
         dispatch(AddUnsavedDevice(newDevice));
         dispatch(SelectFloorplanDevice(newDevice.id));
-        dispatch(SelectEditingFloorplanDevice(newDevice.id));
+        dispatch(SelectEditingFloorplanDevice(newDevice));
       }
       if (dialogType === 'select') {
         dispatch(SelectFloorplanDevice(pendingDeviceId));
@@ -198,8 +208,8 @@ const DeviceList = () => {
     setPendingDeviceId(null);
   };
 
-  const handleOnEditClick = (id: string) => {
-    dispatch(SelectEditingFloorplanDevice(id));
+  const handleOnEditClick = (deviceToEdit: FloorplanDeviceType) => {
+    dispatch(SelectEditingFloorplanDevice(deviceToEdit));
   };
 
   const handleOpenDeleteDialog = (id: string) => {
@@ -389,7 +399,7 @@ const DeviceList = () => {
                 key={device.id}
                 device={device}
                 onListClick={() => handleOnClick(device.id)}
-                onEditClick={() => handleOnEditClick(device.id)}
+                onEditClick={() => handleOnEditClick(device)}
                 onDeleteClick={() => handleOpenDeleteDialog(device.id)}
                 active={device.id === selectedDevice?.id}
               />

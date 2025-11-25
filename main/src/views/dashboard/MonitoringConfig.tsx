@@ -80,24 +80,22 @@ const Config = () => {
 
   // --- 🔄 Auto-update preview when layout or grid changes ---
   useEffect(() => {
-    if (activeLayout) {
-      setPreviewGrid(activeLayout.grid);
-      const newScreens = Array.from({ length: activeLayout.grid }, (_, i) => {
-        const screen = activeLayout.screens[i];
-        if (!screen) return { type: 0 };
+    if (!activeLayout) return;
 
-        const { display } = screen;
-        return {
-          type: display?.displayType ?? 0,
-          floorplanId: screen.floorplanId ?? '',
-          displayOutput: display?.displayOutput ?? '',
-        };
-      });
-      setPreviewScreens(newScreens);
-    }
-  }, [activeLayout, activeLayout?.grid, layouts]);
+    const newScreens = activeLayout.screens.map((screen) => ({
+      type: screen.display?.displayType ?? 0,
+      floorplanId: screen.floorplanId ?? '',
+      displayOutput: screen.display?.displayOutput ?? '',
+    }));
 
-  // --- Memoized screen data for ConfigGrid ---
+    // layout type stays fixed (grid stays 7)
+    setPreviewGrid(activeLayout.grid);
+
+    // screens dynamically expand
+    setPreviewScreens(newScreens);
+  }, [activeLayout]);
+
+  // --- Memoized screen data for ConfigGrid ---z
   const memoizedScreens = useMemo(() => previewScreens, [previewScreens]);
 
   return (

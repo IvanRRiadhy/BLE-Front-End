@@ -49,11 +49,11 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
 
     try {
       // Use React Query mutation with correct parameters
-      await assignActionMutation.mutateAsync({
+      const result = await assignActionMutation.mutateAsync({
         dmac: alarm.cardName.toUpperCase(), // Using cardName as dmac
         actionStatus: selectedAction.toLowerCase(),
       });
-
+      console.log('Assign Action Result:', result);
       // If we reach here, the mutation was successful
       toast.success('Action applied successfully');
 

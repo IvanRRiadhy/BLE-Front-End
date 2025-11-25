@@ -109,7 +109,7 @@ const MAX_BUBBLES = 4;
     const onNewAlarm = (e: MessageEvent) => {
       if (e.data?.type !== 'app:new-alarm') return;
       
-      console.log('[Notifications] Received alarm message:', e.data);
+      // console.log('[Notifications] Received alarm message:', e.data);
       
       const alarmData = e.data.detail.alarm;
       if (!alarmData) {
@@ -131,7 +131,7 @@ const MAX_BUBBLES = 4;
         createdAt: Date.now(),
       };
 
-      console.log('[Notifications] Creating bubble:', bd);
+      // console.log('[Notifications] Creating bubble:', bd);
 
       setBubbles((prev) => {
         const next = [...prev, bd];

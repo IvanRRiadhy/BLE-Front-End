@@ -23,6 +23,7 @@ import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { deleteMaskedArea, fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import AddEditMaskedArea from './AddEditMaskedArea';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 // import { useTranslation } from 'react-i18next';
 
 const MaskedAreaList = () => {
@@ -42,11 +43,12 @@ const MaskedAreaList = () => {
     setPage(0);
   };
   const dispatch: AppDispatch = useDispatch();
-  const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreas);
+  // const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreas);
+  const {data : maskedAreaData = []} = useAllMaskedAreas();
 
-  useEffect(() => {
-    dispatch(fetchMaskedAreas());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchMaskedAreas());
+  // }, [dispatch]);
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

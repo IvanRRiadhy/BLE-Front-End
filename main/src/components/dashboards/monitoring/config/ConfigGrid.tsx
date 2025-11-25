@@ -9,6 +9,8 @@ import {
   ScreenSettings,
   LayoutItem,
   gridLayoutConfig,
+  updateActiveLayoutInfo,
+  setSelectedScreen,
 } from 'src/store/apps/monitoring/layout';
 
 interface ScreenPreview {
@@ -49,6 +51,16 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
   activeLayout,
 }) => {
   const dispatch: AppDispatch = useDispatch();
+  screens = screens ?? [];
+  if (grid === 7 && screens.length === 0) {
+    screens = [
+      {
+        type: 0,
+        floorplanId: '',
+        displayOutput: '',
+      },
+    ];
+  }
   const theme = useTheme();
   const gridRef = useRef<HTMLDivElement>(null);
   const [gridDimensions, setGridDimensions] = useState({ width: 0, height: 0 });
@@ -79,7 +91,8 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
     if (onScreenSelect) onScreenSelect(index, floorplanId);
   };
 
-  const toRoman = (num: number) => ['I', 'II', 'III', 'IV', 'V', 'VI'][num - 1] || num.toString();
+  const toRoman = (num: number) =>
+    ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'][num - 1] || num.toString();
 
   const renderContent = (screen: ScreenPreview | undefined, i: number) => {
     if (!screen || (screen.type === 0 && !screen.floorplanId && !screen.displayOutput)) {
@@ -146,8 +159,53 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
     );
   };
 
+  const handleAddMiniScreen = () => {
+    if (!activeLayout) return;
+
+    const oldScreens = activeLayout.screens ?? [];
+
+    const newScreens = [
+      ...oldScreens,
+      {
+        id: crypto.randomUUID(),
+        type: 0,
+        floorplanId: '',
+        display: { displayType: 0, displayOutput: '' },
+        settings: { scale: 1, translateX: 0, translateY: 0 },
+      },
+    ];
+    console.log('Adding new screen. New screens array:', newScreens);
+    dispatch(
+      updateActiveLayoutInfo({
+        screens: newScreens,
+      }),
+    );
+  };
+
+  const handleRemoveMiniScreen = (screenIndex: number) => {
+    if (!activeLayout) return;
+
+    // Prevent deleting the main big screen (index 0)
+    if (screenIndex === 0) return;
+
+    const newScreens = activeLayout.screens.filter((_, i) => i !== screenIndex);
+
+    dispatch(
+      updateActiveLayoutInfo({
+        screens: newScreens,
+      }),
+    );
+
+    if (selectedScreen === screenIndex) {
+      setSelectedScreen(null);
+    }
+  };
+
   const renderLayout = (items: LayoutItem[]): JSX.Element[] =>
     items.map((item, index) => {
+      // ------------------------------------------------------
+      // 1. NESTED CHILDREN (existing behavior)
+      // ------------------------------------------------------
       if (item.children) {
         return (
           <Grid key={index} size={item.size}>
@@ -158,6 +216,101 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
         );
       }
 
+      // ------------------------------------------------------
+      // 2. SCROLLABLE MINI-SCREEN ROW FOR TYPE 7
+      // ------------------------------------------------------
+      if (!screens || !Array.isArray(screens)) {
+        return <></>;
+      }
+      if (item.isScrollableRow) {
+        const miniScreens = screens.slice(1) ?? [];
+
+        return (
+          <Grid key={index} size={item.size}>
+            <Box
+              sx={{
+                display: 'flex',
+                overflowX: 'auto',
+                gap: 1.5,
+                pb: 1,
+              }}
+            >
+              {miniScreens.slice(1).map((_, miniIndex) => (
+                <Box
+                  key={miniIndex}
+                  onClick={() => handleScreenClick(miniIndex + 1)}
+                  sx={{
+                    minWidth: 180,
+                    height: '15vh',
+                    flexShrink: 0,
+                    borderRadius: 2,
+                    border: selectedScreen === miniIndex + 1 ? '4px solid green' : '2px solid #777',
+                    bgcolor: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {/* Mini screen preview */}
+                  {renderContent(screens[miniIndex + 1], miniIndex + 1)}
+
+                  {/* Delete button */}
+                  <Box
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveMiniScreen(miniIndex + 1);
+                    }}
+                    sx={{
+                      position: 'absolute',
+                      top: 4,
+                      right: 4,
+                      width: 22,
+                      height: 22,
+                      bgcolor: 'red',
+                      color: 'white',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 14,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    ✕
+                  </Box>
+                </Box>
+              ))}
+
+              {/* Add new screen button */}
+              <Box
+                onClick={handleAddMiniScreen}
+                sx={{
+                  minWidth: 180,
+                  height: '15vh',
+                  flexShrink: 0,
+                  borderRadius: 2,
+                  border: '2px dashed #aaa',
+                  bgcolor: '#fafafa',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  fontSize: 40,
+                  color: '#777',
+                }}
+              >
+                +
+              </Box>
+            </Box>
+          </Grid>
+        );
+      }
+
+      // ------------------------------------------------------
+      // 3. NORMAL SCREEN BOX (existing behavior)
+      // ------------------------------------------------------
       const screenIndex = item.floorId!;
       const screen = screens[screenIndex];
 
@@ -174,12 +327,17 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
                   ? theme.palette.success.dark
                   : theme.palette.grey[800]
               }`,
-              bgcolor: '#f5f5f5',
+              bgcolor:
+                screen?.type === 2
+                  ? 'black'
+                  : screen?.type === 1
+                  ? theme.palette.grey[200]
+                  : 'white',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              transition: '0.3s',
+              transition: '0.3s ease',
               '&:hover': {
                 borderColor: theme.palette.success.main,
                 backgroundColor: theme.palette.success.light,

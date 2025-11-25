@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 const API_URL = '/api/MonitoringConfig/';
 
-
 export const screenOrderMap: { [grid: number]: Array<[number, number?, number?]> } = {
   1: [[0]],
   2: [[0], [1]],
@@ -40,6 +39,7 @@ export interface LayoutItem {
   height?: string;
   isColumn?: boolean;
   children?: LayoutItem[];
+  isScrollableRow?: boolean;
 }
 
 export const gridLayoutConfig: Record<number, LayoutItem[]> = {
@@ -133,11 +133,27 @@ export const gridLayoutConfig: Record<number, LayoutItem[]> = {
       ],
     },
   ],
+  7: [
+    {
+      size: { xs: 12 }, // full width wrapper
+      isColumn: true,
+      children: [
+        // Large main screen
+        {
+          size: { xs: 12 },
+          floorId: 0,
+          height: '60vh',
+        },
+
+        // Dynamic horizontal scroll list of screens
+        {
+          size: { xs: 12 },
+          isScrollableRow: true, // <-- our custom flag
+        },
+      ],
+    },
+  ],
 };
-
-
-
-
 
 export type ScreenSettings = {
   scale: number;
@@ -307,14 +323,22 @@ export const LayoutSlice = createSlice({
     },
     updateActiveLayoutInfo: (
       state,
-      action: PayloadAction<{ name?: string; description?: string }>,
+      action: PayloadAction<{
+        name?: string;
+        description?: string;
+        screens?: ScreenItem[];
+        grid?: number;
+      }>,
     ) => {
       const activeLayout = state.layouts.find((l) => l.id === state.activeLayoutId);
-      if (activeLayout) {
-        if (typeof action.payload.name !== 'undefined') activeLayout.name = action.payload.name;
-        if (typeof action.payload.description !== 'undefined')
-          activeLayout.description = action.payload.description;
-      }
+      if (!activeLayout) return;
+
+      if (typeof action.payload.name !== 'undefined') activeLayout.name = action.payload.name;
+      if (typeof action.payload.description !== 'undefined')
+        activeLayout.description = action.payload.description;
+
+      if (typeof action.payload.screens !== 'undefined')
+        activeLayout.screens = action.payload.screens;
     },
     clearActiveLayout: (state) => {
       const activeLayout = state.layouts.find((l) => l.id === state.activeLayoutId);

@@ -102,11 +102,11 @@ export const FloorplanSlice = createSlice({
         GetAllFloorplan: (state, action) => {
             state.floorplanAll = action.payload;
         },
-        SelectFloorplan: (state, action) => {
-            const selected = state.floorplans.find(
-                (floorplan: FloorplanType) => floorplan.id === action.payload
-            );
-            state.selectedFloorplan = selected || null;
+        SelectFloorplan: (state, action: PayloadAction<FloorplanType | null>) => {
+            // const selected = state.floorplans.find(
+            //     (floorplan: FloorplanType) => floorplan.id === action.payload
+            // );
+            state.selectedFloorplan = action.payload || null;
         },
         SearchFloorplan: (state, action) => {
             state.floorplanSearch = action.payload;

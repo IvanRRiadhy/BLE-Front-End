@@ -20,7 +20,7 @@ export function useVisitorList(filter: GetFilter) {
     queryFn: async () => {
       const response = await axiosServices.post(API_DT_URL, filter);
       const collection = response.data.collection;
-      console.log('Fetch Visitors', collection);
+      // console.log('Fetch Visitors', collection);
       return {
         data: collection.data as VisitorType[],
         draw: collection.draw,
@@ -39,7 +39,7 @@ export function useAllVisitor() {
     queryKey: ['visitor-all'],
     queryFn: async () => {
       const response = await axiosServices.get(API_URL);
-      console.log(response.data.collection.data);
+      // console.log(response.data.collection.data);
       return response.data.collection.data as VisitorType[];
     },
     placeholderData: [],

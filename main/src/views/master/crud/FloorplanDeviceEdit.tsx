@@ -13,6 +13,9 @@ const FloorplanDeviceEdit = () => {
   const editingDevice = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.editingFloorplanDevice,
   );
+  const drawingPath = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.drawingDevicePath,
+  )
   const selectedFloorplan = useSelector(
     (state: RootState) => state.floorplanReducer.selectedFloorplan,
   );
@@ -53,7 +56,7 @@ const FloorplanDeviceEdit = () => {
             isMobileSidebarOpen={isMobileSidebarOpen}
             onSidebarClose={() => setMobileSidebarOpen(false)}
           />
-                  {editingDevice && (
+                  {(editingDevice && !drawingPath) && (
           <Box
             position="absolute"
             // top={140}

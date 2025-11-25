@@ -37,7 +37,7 @@ export function useAllBuilding() {
         queryKey: ['building-all'],
         queryFn: async () => {
             const response = await axiosServices.get(Building_API_URL);
-            console.log('Building list fetched successfully: ', response.data);
+            // console.log('Building list fetched successfully: ', response.data);
             return response.data.collection.data as BuildingType[];
         },
         placeholderData: [],
@@ -51,7 +51,7 @@ export function useAddBuilding(){
             const response = await axiosServices.post(Building_API_URL, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-            console.log('Building added successfully: ', response.data);
+            // console.log('Building added successfully: ', response.data);
             return response.data;
         },
         onSuccess: () => {

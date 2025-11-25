@@ -19,6 +19,8 @@ import {
   PathsType,
   PathNodeType,
   DrawingDevicePath,
+  editDevicePath,
+  addDevicePathPair,
 } from 'src/store/apps/crud/floorplanDevice';
 import borderFaceRecog from 'src/assets/images/svgs/devices/FACE READER ICON.png';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
@@ -69,8 +71,8 @@ const EditDeviceRenderer: React.FC<{
   const drawingPath = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.drawingDevicePath,
   );
-const isDrawingPath = Boolean(drawingPath);
-
+  const isDrawingPath = Boolean(drawingPath);
+  const editingPaths = editingDevice?.devicePath ?? [];
   const [pathNodes, setPathNodes] = useState<PathNodeType[]>([]);
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
 
@@ -104,6 +106,10 @@ const isDrawingPath = Boolean(drawingPath);
     img.src = imageSrc;
     img.onload = () => setBgImage(img);
   }, [imageSrc]);
+  useEffect(() => {
+    console.log('Editing Device changed:', editingDevice);
+    console.log('Drawing Path changed:', editingPaths);
+  }, [editingDevice]);
 
   const pxToScreenX = (px: number) => (px / originalWidth) * width;
   const pxToScreenY = (px: number) => (px / originalHeight) * height;
@@ -164,11 +170,7 @@ const isDrawingPath = Boolean(drawingPath);
     setPathNodes([
       {
         id: crypto.randomUUID(),
-        posX: startDev.posX,
-        posY: startDev.posY,
-        posPxX: startDev.posPxX,
-        posPxY: startDev.posPxY,
-        deviceId: startDev.id,
+        deviceId: startDev.id, // ❗ remove pos assignment
       },
     ]);
   }, [drawingPath]);
@@ -364,105 +366,141 @@ const isDrawingPath = Boolean(drawingPath);
   }, [devices, areas, width, height, originalWidth, originalHeight, scale, getRadius, jetColorMap]);
 
   // render device icons (icons above heatmap)
-const renderDeviceIcon = (device: FloorplanDeviceType) => {
-  const isActive = activeDevice?.id === device.id;
-  const isEditing = editingDevice?.id === device.id;
-
-  let icon: CanvasImageSource | undefined = iconUnknown;
-  switch (device.type) {
-    case 'Cctv':
-      icon = iconCCTV;
-      break;
-    case 'BleReader':
-      icon = iconGateway;
-      break;
-    case 'AccessDoor':
-      icon = iconFaceRecog;
-      break;
-    default:
-      icon = iconUnknown;
-  }
-
-  const x = (device.posPxX / originalWidth) * width;
-  const y = (device.posPxY / originalHeight) * height;
-
-  // 🔵 Override behavior while drawing a path
-  const handlePathClick = () => {
-    if (!isDrawingPath) return;
-
-    // Ignore clicking the starting device again
-    if (device.id === drawingPath) return;
-
-    // Finish path
-    const finalNode = {
-      id: crypto.randomUUID(),
-      posX: device.posX,
-      posY: device.posY,
-      posPxX: device.posPxX,
-      posPxY: device.posPxY,
-      deviceId: device.id,
-    };
-
-    console.log("FINAL PATH:", [...pathNodes, finalNode]);
-
-    setPathNodes([]);
-    dispatch(DrawingDevicePath('')); // clear Redux drawing mode
-  };
-
-  // 🟡 Normal mode click handler
-  const handleNormalClick = () => {
-    if (isDrawingPath) return; // just in case
+  const renderDeviceIcon = (device: FloorplanDeviceType) => {
     const isActive = activeDevice?.id === device.id;
-    if (isActive) return;
+    const isEditing = editingDevice?.id === device.id;
 
-    if (editingDevice) {
-      setPendingDeviceId(device.id);
-      setConfirmDialogOpen(true);
-      return;
+    let icon: CanvasImageSource | undefined = iconUnknown;
+    switch (device.type) {
+      case 'Cctv':
+        icon = iconCCTV;
+        break;
+      case 'BleReader':
+        icon = iconGateway;
+        break;
+      case 'AccessDoor':
+        icon = iconFaceRecog;
+        break;
+      default:
+        icon = iconUnknown;
     }
-    dispatch(SelectFloorplanDevice(device.id));
+
+    const x = (device.posPxX / originalWidth) * width;
+    const y = (device.posPxY / originalHeight) * height;
+
+    // 🔵 Override behavior while drawing a path
+const handlePathClick = () => {
+  if (!isDrawingPath) return;
+  if (device.id === drawingPath) return;
+
+  const finalNode: PathNodeType = {
+    id: crypto.randomUUID(),
+    deviceId: device.id,
   };
 
-  return (
-    <React.Fragment key={device.id}>
-      {/* ---------- DEVICE ICON ---------- */}
-      <KonvaImage
-        image={icon}
-        x={x - 18}
-        y={y - 18}
-        width={36}
-        height={36}
-        onClick={isDrawingPath ? undefined : handleNormalClick}
-        draggable={isEditing && !isDrawingPath}
-        onMouseDown={() => !isDrawingPath && setIsDragging(device.id)}
-        onDragEnd={(e) => !isDrawingPath && handleDragEnd(e, device)}
-        stroke={isActive ? 'lightgreen' : 'transparent'}
-        strokeWidth={isActive ? 5 : 0}
-      />
+  const forwardNodes = [...pathNodes, finalNode];
 
-      {/* ---------- DRAWING-PATH MODE OVERLAY ---------- */}
-      {isDrawingPath && device.id !== drawingPath && (
-        <Circle
-          x={x}
-          y={y}
-          radius={26}
-          stroke="yellow"
-          strokeWidth={4}
-          opacity={0.75}
-          onClick={handlePathClick}
-        />
-      )}
-    </React.Fragment>
-  );
+  if (!editingDevice) return;
+
+  // Build forward path for editingDevice
+  const forward = {
+    deviceId: editingDevice.id,
+    paths: forwardNodes,
+  };
+
+  // Build reversed path for target device
+  const reversedNodes = [...forwardNodes].reverse().map((n) => ({ ...n }));
+
+  // Fix device positions (swap deviceId references)
+  reversedNodes.forEach((node, index) => {
+    const orig = forwardNodes[forwardNodes.length - 1 - index];
+    node.deviceId = orig.deviceId;
+    node.posPxX = orig.posPxX;
+    node.posPxY = orig.posPxY;
+  });
+
+  const backward = {
+    deviceId: device.id,
+    paths: reversedNodes,
+  };
+
+  dispatch(addDevicePathPair({ forward, backward }));
+
+  setPathNodes([]);
+  dispatch(DrawingDevicePath(""));
 };
 
+
+    // 🟡 Normal mode click handler
+    const handleNormalClick = () => {
+      if (isDrawingPath) return; // just in case
+      const isActive = activeDevice?.id === device.id;
+      if (isActive) return;
+
+      if (editingDevice) {
+        setPendingDeviceId(device.id);
+        setConfirmDialogOpen(true);
+        return;
+      }
+      dispatch(SelectFloorplanDevice(device.id));
+    };
+
+    return (
+      <React.Fragment key={device.id}>
+        {/* ---------- DEVICE ICON ---------- */}
+        <KonvaImage
+          image={icon}
+          x={x - 18}
+          y={y - 18}
+          width={36}
+          height={36}
+          onClick={isDrawingPath ? undefined : handleNormalClick}
+          draggable={isEditing && !isDrawingPath}
+          onMouseDown={() => !isDrawingPath && setIsDragging(device.id)}
+          onDragEnd={(e) => !isDrawingPath && handleDragEnd(e, device)}
+          stroke={isActive ? 'lightgreen' : 'transparent'}
+          strokeWidth={isActive ? 5 : 0}
+        />
+
+        {/* ---------- DRAWING-PATH MODE OVERLAY ---------- */}
+        {isDrawingPath && device.id !== drawingPath && (
+          <Circle
+            x={x}
+            y={y}
+            radius={26}
+            stroke="yellow"
+            strokeWidth={4}
+            opacity={0.75}
+            onClick={handlePathClick}
+          />
+        )}
+      </React.Fragment>
+    );
+  };
+
+  const getNodeScreenPos = (node: PathNodeType): { x: number; y: number } => {
+    if (node.deviceId) {
+      const dev = devices?.find((d) => d.id === node.deviceId);
+      if (dev) {
+        return {
+          x: pxToScreenX(dev.posPxX),
+          y: pxToScreenY(dev.posPxY),
+        };
+      }
+    }
+
+    // fallback to raw position nodes
+    return {
+      x: pxToScreenX(node.posPxX ?? 0),
+      y: pxToScreenY(node.posPxY ?? 0),
+    };
+  };
 
   return (
     <>
       <Stage
         width={width}
         height={height}
-        
         onMouseMove={(e) => {
           const pos = e.target.getStage()?.getPointerPosition();
           if (pos) setCursorPos({ x: pos.x, y: pos.y });
@@ -516,15 +554,13 @@ const renderDeviceIcon = (device: FloorplanDeviceType) => {
             pathNodes.map((n, i) => {
               if (i === pathNodes.length - 1) return null;
               const next = pathNodes[i + 1];
+              const p1 = getNodeScreenPos(n);
+              const p2 = getNodeScreenPos(next);
+
               return (
                 <Line
                   key={`seg-${i}`}
-                  points={[
-                    pxToScreenX(n.posPxX),
-                    pxToScreenY(n.posPxY),
-                    pxToScreenX(next.posPxX),
-                    pxToScreenY(next.posPxY),
-                  ]}
+                  points={[p1.x, p1.y, p2.x, p2.y]}
                   stroke="yellow"
                   strokeWidth={3}
                 />
@@ -535,8 +571,8 @@ const renderDeviceIcon = (device: FloorplanDeviceType) => {
           {pathNodes.length > 0 && cursorPos && (
             <Line
               points={[
-                pxToScreenX(pathNodes[pathNodes.length - 1].posPxX),
-                pxToScreenY(pathNodes[pathNodes.length - 1].posPxY),
+                getNodeScreenPos(pathNodes[pathNodes.length - 1]).x,
+                getNodeScreenPos(pathNodes[pathNodes.length - 1]).y,
                 cursorPos.x,
                 cursorPos.y,
               ]}
@@ -548,23 +584,87 @@ const renderDeviceIcon = (device: FloorplanDeviceType) => {
           )}
 
           {/* Render nodes */}
-          {pathNodes.map((n, idx) => (
-            <Circle
-              key={n.id}
-              x={pxToScreenX(n.posPxX)}
-              y={pxToScreenY(n.posPxY)}
-              radius={idx === 0 ? 8 : 5}
-              fill={idx === 0 ? 'green' : 'black'}
-              stroke="white"
-              strokeWidth={idx === 0 ? 2 : 1}
-            />
-          ))}
+          {pathNodes.map((n, idx) => {
+            const p = getNodeScreenPos(n);
+            return (
+              <Circle
+                key={n.id}
+                x={p.x}
+                y={p.y}
+                radius={idx === 0 ? 8 : 5}
+                fill={idx === 0 ? 'green' : 'black'}
+                stroke="white"
+                strokeWidth={idx === 0 ? 2 : 1}
+              />
+            );
+          })}
         </Layer>
+        <Layer listening={false}>
+          {editingPaths.map((pathObj) =>
+            pathObj.paths.map((node, i) => {
+              if (i === pathObj.paths.length - 1) return null;
+              const next = pathObj.paths[i + 1];
+              const p1 = getNodeScreenPos(node);
+              const p2 = getNodeScreenPos(next);
 
+              return (
+                <Line
+                  key={`saved-${pathObj.id}-${i}`}
+                  points={[p1.x, p1.y, p2.x, p2.y]}
+                  stroke="#00e5ff"
+                  strokeWidth={4}
+                />
+              );
+            }),
+          )}
+
+          {editingPaths.flatMap((pathObj) =>
+            pathObj.paths.map((node, idx) => {
+              const p = getNodeScreenPos(node);
+              return (
+                <Circle
+                  key={`saved-node-${pathObj.id}-${node.id}`}
+                  x={p.x}
+                  y={p.y}
+                  radius={idx === 0 ? 8 : 5}
+                  fill={idx === 0 ? 'cyan' : 'white'}
+                  stroke="black"
+                  strokeWidth={idx === 0 ? 2 : 1}
+                />
+              );
+            }),
+          )}
+        </Layer>
         {/* Icons layer */}
         <Layer>{devices?.map((d) => renderDeviceIcon(d))}</Layer>
       </Stage>
 
+ {/* Debug Info Panel */}
+    <div style={{
+      position: 'absolute',
+      top: 10,
+      left: 10,
+      background: 'rgba(0, 0, 0, 0.8)',
+      color: 'white',
+      padding: '10px',
+      borderRadius: '5px',
+      fontFamily: 'monospace',
+      fontSize: '14px',
+      zIndex: 1000,
+      pointerEvents: 'none'
+    }}>
+      <div>Canvas: {width} × {height}</div>
+      <div>Original: {originalWidth} × {originalHeight}</div>
+      <div>Scale: {scale}</div>
+      <div>Devices: {devices?.length || 0}</div>
+      <div>Areas: {areas?.length || 0}</div>
+      {cursorPos && (
+        <div>Cursor: {Math.round(cursorPos.x)}, {Math.round(cursorPos.y)}</div>
+      )}
+      {drawingPath && (
+        <div style={{ color: 'yellow' }}>Drawing Path: {drawingPath}</div>
+      )}
+    </div>
       {/* Confirm dialog */}
       <Dialog
         open={confirmDialogOpen}

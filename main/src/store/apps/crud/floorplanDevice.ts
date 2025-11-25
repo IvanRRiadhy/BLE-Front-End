@@ -15,13 +15,13 @@ const API_DT_URL = '/api/FloorplanDevice/filter/';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export type PathNodeType = {
-    id: string,
-    posX: number,
-    posY: number,
-    posPxX: number,
-    posPxY: number,
-    deviceId?: string,
-}
+  id: string;
+  posX?: number;
+  posY?: number;
+  posPxX?: number;
+  posPxY?: number;
+  deviceId?: string;
+};
 
 export type PathsType = {
     id: string,
@@ -83,6 +83,7 @@ export interface FloorplanDeviceType {
     reader?: bleReaderType,
     accessControl?: AccessControlType,
     floorplanMaskedArea?: MaskedAreaType,
+    path?: string,
     devicePath?: PathsType[],
 };
 
@@ -138,6 +139,8 @@ export const FloorplanDeviceSlice = createSlice({
         },
         GetUnsavedFloorplanDevices: (state) => {
             state.unsavedFloorplanDevices = state.floorplanDeviceAll;
+            console.log("Unsaved Devices: ", JSON.stringify(state.unsavedFloorplanDevices, null, 2));
+            console.log("All Devices: ", JSON.stringify(state.floorplanDeviceAll, null, 2));
         },
         SelectFloorplanDevice: (state, action) => {
             const selected = state.unsavedFloorplanDevices.find(
@@ -145,11 +148,13 @@ export const FloorplanDeviceSlice = createSlice({
             );
             state.selectedFloorplanDevice = selected || null;
         },
-        SelectEditingFloorplanDevice: (state, action) => {
-            const selected = state.unsavedFloorplanDevices.find(
-                (floorplanDevice: FloorplanDeviceType) => floorplanDevice.id === action.payload
-            );
-            state.editingFloorplanDevice = selected || null;
+        SelectEditingFloorplanDevice: (state, action: PayloadAction<FloorplanDeviceType | null>) => {
+            // const selected = state.unsavedFloorplanDevices.find(
+            //     (floorplanDevice: FloorplanDeviceType) => floorplanDevice.id === action.payload
+            // );
+            // console.log("Unsaved Devices: ", JSON.stringify(state.unsavedFloorplanDevices, null, 2));
+            // console.log("Selected Editing Device: ", JSON.stringify(selected));
+            state.editingFloorplanDevice = action.payload || null;
         },
 
         SearchFloorplanDevice: (state, action) => {
@@ -267,6 +272,59 @@ export const FloorplanDeviceSlice = createSlice({
         DrawingDevicePath: (state, action: PayloadAction<string>) => {
             state.drawingDevicePath = action.payload;
         },
+        editDevicePath: (state, action: PayloadAction<FloorplanDeviceType>) => {
+            const index = state.unsavedFloorplanDevices.findIndex(
+                (device) => device.id === action.payload.id
+            );
+
+            if (index !== -1) {
+                state.unsavedFloorplanDevices[index] = {
+                ...state.unsavedFloorplanDevices[index],
+                path: action.payload.path,
+                devicePath: action.payload.devicePath,   // <-- ADD THIS
+                };
+
+                console.log("Editing Device Path: ", action.payload);
+
+                if (state.editingFloorplanDevice) {
+                    state.editingFloorplanDevice = {
+                        ...state.editingFloorplanDevice,
+                        path: action.payload.path,
+                        devicePath: action.payload.devicePath, // <-- ADD THIS
+                    };
+                }
+            }
+        },
+        addDevicePathPair: (state, action) => {
+  const { forward, backward } = action.payload;
+
+  const apply = (targetId: string, newPaths: PathNodeType[]) => {
+    const deviceIndex = state.unsavedFloorplanDevices.findIndex(d => d.id === targetId);
+    if (deviceIndex !== -1) {
+      const dev = state.unsavedFloorplanDevices[deviceIndex];
+
+      const updatedDevicePath = [...(dev.devicePath ?? []), {
+        id: crypto.randomUUID(),
+        deviceId: targetId,
+        paths: newPaths,
+      }];
+
+      dev.devicePath = updatedDevicePath;
+      dev.path = JSON.stringify(updatedDevicePath);
+
+      // update editingFloorplanDevice if this device is currently being edited
+      if (state.editingFloorplanDevice?.id === targetId) {
+        state.editingFloorplanDevice.devicePath = updatedDevicePath;
+        state.editingFloorplanDevice.path = JSON.stringify(updatedDevicePath);
+      }
+    }
+  };
+
+  // apply forward and backward updates
+  apply(forward.deviceId, forward.paths);
+  apply(backward.deviceId, backward.paths);
+},
+
     },
 
     extraReducers: (builder) => {
@@ -365,6 +423,8 @@ export const {
     ResetState,
     editDevicePosition,
     DrawingDevicePath,
+    editDevicePath,
+    addDevicePathPair,
 } = FloorplanDeviceSlice.actions;
 
 export const fetchFloorplanDevices = () => async (dispatch: AppDispatch) => {

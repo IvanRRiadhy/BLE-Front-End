@@ -8,6 +8,7 @@ import ZoomControls from 'src/components/shared/ZoomControls';
 import EditDeviceRenderer from './EditDeviceRenderer';
 import FloorplanHouse from 'src/assets/images/masters/Floorplan/Floorplan-House.png';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 
 const EditDeviceFloorView: React.FC<{
   zoomable: boolean;
@@ -26,9 +27,10 @@ const EditDeviceFloorView: React.FC<{
   const editingDevice = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.editingFloorplanDevice,
   );
-  const Areas: MaskedAreaType[] = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
-  );
+  // const Areas: MaskedAreaType[] = useSelector(
+  //   (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
+  // );
+  const {data: Areas = []} = useAllMaskedAreas();
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorPlan?.id);
   const [showArea, setShowArea] = useState(true);
   const [showEffectiveArea, setShowEffectiveArea] = useState(false);
@@ -98,11 +100,11 @@ const EditDeviceFloorView: React.FC<{
     }
   }, [activeFloorPlan]);
 
-  useEffect(() => {
-    dispatch(fetchFloorplan());
-    dispatch(fetchFloorplanDevices());
-    dispatch(fetchMaskedAreas());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchFloorplan());
+  //   dispatch(fetchFloorplanDevices());
+  //   dispatch(fetchMaskedAreas());
+  // }, [dispatch]);
   // useEffect(() => {
   //   const handleResize = () => {
   //     if (containerRef.current && imgSize && imgSize.width > 1 && imgSize.height > 1) {
@@ -142,16 +144,20 @@ const EditDeviceFloorView: React.FC<{
     if (imageRatio > containerRatio) {
       // Image is wider than the container
       return {
-        width: containerWidth,
-        height: containerWidth / imageRatio,
+        // width: containerWidth,
+        // height: containerWidth / imageRatio,
+        width: imageWidth,
+        height: imageHeight,
         originalWidth: imageWidth,
         originalHeight: imageHeight,
       };
     } else {
       // Image is taller than the container
       return {
-        width: containerHeight * imageRatio,
-        height: containerHeight,
+        // width: containerHeight * imageRatio,
+        // height: containerHeight,
+        width: imageWidth,
+        height: imageHeight,
         originalWidth: imageWidth,
         originalHeight: imageHeight,
       };

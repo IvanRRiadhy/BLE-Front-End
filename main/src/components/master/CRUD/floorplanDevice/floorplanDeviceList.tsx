@@ -22,9 +22,11 @@ import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 // import { useTranslation } from 'react-i18next';
-import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
+import { fetchFloorplanDevices, FloorplanDeviceType, GetAllFloorplanDevices } from 'src/store/apps/crud/floorplanDevice';
+import { useAllFloorplanDevices } from 'src/hooks/useFloorplanDevice';
 
 const FloorplanDeviceList = () => {
+  const dispatch: AppDispatch = useDispatch();
   // const { t } = useTranslation();
   // Pagination State
   const [page, setPage] = useState(0);
@@ -40,14 +42,19 @@ const FloorplanDeviceList = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-  const dispatch: AppDispatch = useDispatch();
+  // const dispatch: AppDispatch = useDispatch();
 
+  // useEffect(() => {
+  //   dispatch(fetchFloorplanDevices());
+  // }, [dispatch]);
+  // const deviceData = useSelector(
+  //   (state: RootState) => state.floorplanDeviceReducer.floorplanDevices,
+  // );
+  const {data: deviceData = []} = useAllFloorplanDevices();
   useEffect(() => {
-    dispatch(fetchFloorplanDevices());
-  }, [dispatch]);
-  const deviceData = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.floorplanDevices,
-  );
+    console.log("Floorplan Devices Data:", deviceData);
+    dispatch(GetAllFloorplanDevices(deviceData));
+  }, [deviceData]);
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

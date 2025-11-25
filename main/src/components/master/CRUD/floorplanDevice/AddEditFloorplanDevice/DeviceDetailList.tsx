@@ -54,9 +54,9 @@ const DeviceDetailList = () => {
   const unsavedDevices = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.unsavedFloorplanDevices,
   );
-    const drawingPath = useSelector(
-      (state: RootState) => state.floorplanDeviceReducer.drawingDevicePath,
-    );
+  const drawingPath = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.drawingDevicePath,
+  );
 
   // React Query hooks for data fetching
   const { data: maskedAreaResponse } = useMaskedAreaList({
@@ -76,7 +76,7 @@ const DeviceDetailList = () => {
   const { data: bleReaderData = [] } = useAllReaders();
   const { data: allUnassignedReaders = [] } = useAllUnassignedReaders();
 
-  console.log('bleReaderData', bleReaderData);
+  // console.log('bleReaderData', bleReaderData);
 
   // Form state
   const [formData, setFormData] = useState<DeviceFormData>({
@@ -148,6 +148,23 @@ const DeviceDetailList = () => {
       setOtherReader(otherReaderData);
     }
   }, [activeFloorplan?.id, formData.id, unsavedDevices]);
+  const pathDestinations = React.useMemo(() => {
+    if (!device?.devicePath?.length) return [];
+
+    return device.devicePath.map((pathObj) => {
+      const lastNode = pathObj.paths[pathObj.paths.length - 1];
+      const targetDeviceId = lastNode?.deviceId;
+
+      // find BLE reader by deviceId
+      const targetReader = otherReader.find((d) => d.id === targetDeviceId);
+
+      return {
+        id: pathObj.id,
+        targetDeviceId,
+        targetDeviceName: targetReader?.name ?? '(Unknown Reader)',
+      };
+    });
+  }, [device?.devicePath, otherReader]);
 
   // Filter out already-registered items (but include the one belonging to the current device)
   const usedCCTVIds = unsavedDevices
@@ -161,7 +178,7 @@ const DeviceDetailList = () => {
   // Since we're using unassigned hooks, we only need to filter by unsaved devices
   const availableCCTVs = CCTVData.filter(
     (cctv) => !usedCCTVIds.includes(cctv.id) || cctv.id === formData.accessCctvId,
-  );  
+  );
 
   const availableBleReaders = bleReaderData.filter(
     (reader) => !usedBleReaderIds.includes(reader.id) || reader.id === formData.readerId,
@@ -181,9 +198,9 @@ const DeviceDetailList = () => {
   };
 
   const handleAddPathing = () => {
-    if(!device) return;
+    if (!device) return;
     dispatch(DrawingDevicePath(device.id));
-  }
+  };
 
   const handleClose = () => {
     // Reset to current device data or empty form
@@ -224,26 +241,26 @@ const DeviceDetailList = () => {
       dispatch(SaveDevice(formData.id));
 
       // Calculate testNodes for BleReader (if applicable)
-      if (formData.type === 'BleReader') {
-        const newTestNodes: any[] = [];
-        otherReader.forEach((otherReader) => {
-          if (otherReader.id !== formData.id) {
-            const distance = Math.sqrt(
-              Math.pow(otherReader.posX - formData.posX, 2) +
-                Math.pow(otherReader.posY - formData.posY, 2),
-            );
+      // if (formData.type === 'BleReader') {
+      //   const newTestNodes: any[] = [];
+      //   otherReader.forEach((otherReader) => {
+      //     if (otherReader.id !== formData.id) {
+      //       const distance = Math.sqrt(
+      //         Math.pow(otherReader.posX - formData.posX, 2) +
+      //           Math.pow(otherReader.posY - formData.posY, 2),
+      //       );
 
-            newTestNodes.push({
-              id: `${formData.id}-${otherReader.id}`,
-              startPos: `(${formData.posX}, ${formData.posY})`,
-              endPos: `(${otherReader.posX}, ${otherReader.posY})`,
-              distance,
-            });
-          }
-        });
-        // You can store newTestNodes in state if needed
-        console.log('Test nodes created:', newTestNodes);
-      }
+      //       newTestNodes.push({
+      //         id: `${formData.id}-${otherReader.id}`,
+      //         startPos: `(${formData.posX}, ${formData.posY})`,
+      //         endPos: `(${otherReader.posX}, ${otherReader.posY})`,
+      //         distance,
+      //       });
+      //     }
+      //   });
+      //   // You can store newTestNodes in state if needed
+      //   console.log('Test nodes created:', newTestNodes);
+      // }
 
       handleClose();
     } catch (error) {
@@ -312,7 +329,7 @@ const DeviceDetailList = () => {
       </Box>
 
       {/* Form Content */}
-      <Box sx={{ minHeight: 0, overflow: 'auto' }}>
+      <Box sx={{ minHeight: 0, overflow: 'auto', mb: 2 }}>
         <Box pl={3} pr={1}>
           <Grid container spacing={1}>
             {/* Device Name */}
@@ -458,7 +475,7 @@ const DeviceDetailList = () => {
               />
             </Grid> */}
             {/* Add Pathing (only when there are other BLE readers) */}
-            {(formData.type === 'BleReader' && otherReader.length > 0) && (
+            {formData.type === 'BleReader' && otherReader.length > 0 && (
               <Grid size={12} mt={1}>
                 <Button
                   variant="contained"
@@ -472,6 +489,62 @@ const DeviceDetailList = () => {
                 </Button>
               </Grid>
             )}
+            {/* ===== PATH LIST TABLE ===== */}
+            {formData.type === 'BleReader' &&
+              device?.devicePath &&
+              device.devicePath.length > 0 && (
+                <Grid size={12} mt={2}>
+                  <Typography variant="h6" fontWeight={600} mb={1}>
+                    Connected Paths
+                  </Typography>
+
+                  <Box
+                    sx={{
+                      border: '1px solid #DDD',
+                      borderRadius: 1,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ background: '#f5f5f5' }}>
+                          <th
+                            style={{
+                              padding: '8px',
+                              borderBottom: '1px solid #DDD',
+                              textAlign: 'left',
+                            }}
+                          >
+                            #
+                          </th>
+                          <th
+                            style={{
+                              padding: '8px',
+                              borderBottom: '1px solid #DDD',
+                              textAlign: 'left',
+                            }}
+                          >
+                            Destination Reader
+                          </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {pathDestinations.map((p, index) => (
+                          <tr key={p.id}>
+                            <td style={{ padding: '8px', borderBottom: '1px solid #EEE' }}>
+                              {index + 1}
+                            </td>
+                            <td style={{ padding: '8px', borderBottom: '1px solid #EEE' }}>
+                              {p.targetDeviceName}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </Box>
+                </Grid>
+              )}
           </Grid>
         </Box>
       </Box>
