@@ -22,11 +22,7 @@ import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { dispatch, RootState, useSelector } from 'src/store/Store';
-import {
-  addMember,
-  editMember,
-  memberType,
-} from 'src/store/apps/crud/member';
+import { addMember, editMember, memberType } from 'src/store/apps/crud/member';
 import { fetchDistricts, DistrictType } from 'src/store/apps/crud/district';
 import { fetchDepartments, DepartmentType } from 'src/store/apps/crud/department';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
@@ -39,6 +35,7 @@ import AddEditDepartment from '../department/AddEditDepartment';
 import AddEditOrganization from '../organization/AddEditOrganizationList';
 import { useQueryClient } from '@tanstack/react-query';
 import { PaginatedResponse } from 'src/hooks/useMember';
+import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 
 interface FormType {
   type?: string;
@@ -60,7 +57,9 @@ const AddEditMember = ({ type, member }: FormType) => {
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
   const districtData = useSelector((state: RootState) => state.districtReducer.districtAll);
   const departmentData = useSelector((state: RootState) => state.departmentReducer.departmentAll);
-  const organizationData = useSelector((state: RootState) => state.organizationReducer.organizationAll);
+  const organizationData = useSelector(
+    (state: RootState) => state.organizationReducer.organizationAll,
+  );
   const cardData = useSelector((state: RootState) => state.CardReducer.cardAll);
   const filteredCard: CardType[] = cardData.filter((card) => !card.isUsed);
 
@@ -90,14 +89,15 @@ const AddEditMember = ({ type, member }: FormType) => {
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
     if (!formData.name?.trim()) errors.name = "Member's name is required";
-    if (!formData.cardNumber?.trim()) errors.cardNumber = "Card Number is required";
-    if (!formData.departmentId?.trim()) errors.departmentId = "Department is required";
-    if (!formData.organizationId?.trim()) errors.organizationId = "Organization is required";
-    if (!formData.districtId?.trim()) errors.districtId = "District is required";
-    if (!formData.gender?.trim()) errors.gender = "Gender is required";
-    if (!formData.phone?.trim()) errors.phone = "Phone Number is required";
-    if (!image && type === 'add') errors.faceImage = "Face Image is required";
-    if (!!formData.email?.trim() && !formData.email.includes('@')) errors.email = 'Valid Email required';
+    if (!formData.cardNumber?.trim()) errors.cardNumber = 'Card Number is required';
+    if (!formData.departmentId?.trim()) errors.departmentId = 'Department is required';
+    if (!formData.organizationId?.trim()) errors.organizationId = 'Organization is required';
+    if (!formData.districtId?.trim()) errors.districtId = 'District is required';
+    if (!formData.gender?.trim()) errors.gender = 'Gender is required';
+    if (!formData.phone?.trim()) errors.phone = 'Phone Number is required';
+    if (!image && type === 'add') errors.faceImage = 'Face Image is required';
+    if (!!formData.email?.trim() && !formData.email.includes('@'))
+      errors.email = 'Valid Email required';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -126,13 +126,12 @@ const AddEditMember = ({ type, member }: FormType) => {
           ['member-list', memberFilter],
           (oldCache) => {
             if (!oldCache) return oldCache;
-            const updatedData = type === 'edit'
-              ? oldCache.data.map((m) =>
-                  m.id === formData.id ? { ...m, ...formData } : m
-                )
-              : [...oldCache.data, result.payload];
+            const updatedData =
+              type === 'edit'
+                ? oldCache.data.map((m) => (m.id === formData.id ? { ...m, ...formData } : m))
+                : [...oldCache.data, result.payload];
             return { ...oldCache, data: updatedData };
-          }
+          },
         );
 
         toast.success('Data saved successfully!');
@@ -149,7 +148,7 @@ const AddEditMember = ({ type, member }: FormType) => {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<{ value: unknown }>
+    e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<{ value: unknown }>,
   ) => {
     const { value, name, id } = e.target as HTMLInputElement;
     setFormData((prev) => ({ ...prev, [id || name]: value }));
@@ -226,8 +225,8 @@ const AddEditMember = ({ type, member }: FormType) => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
-                <CustomFormLabel htmlFor="person-id">person ID</CustomFormLabel>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+                <CustomFormLabel htmlFor="person-id">Person ID</CustomFormLabel>
                 <CustomTextField
                   id="personId"
                   value={formData.personId}
@@ -237,18 +236,21 @@ const AddEditMember = ({ type, member }: FormType) => {
                   error={!!formErrors.personId}
                   helperText={formErrors.personId}
                 />
-                <CustomFormLabel htmlFor="department-Id">Department ID</CustomFormLabel>
+                <CustomFormLabel htmlFor="department">Department</CustomFormLabel>
                 <Box display="flex" alignItems="center" gap={1}>
-                  <Autocomplete
-                    sx={{ flex: 1 }}
-                    options={departmentData.map((dept: DepartmentType) => ({ label: dept.name, id: dept.id }))}
+                  <CustomAutocomplete<{ label: string; id: string }>
+                    label="Department"
+                    options={departmentData.map((dept: DepartmentType) => ({
+                      label: dept.name,
+                      id: dept.id,
+                    }))}
                     value={
                       departmentData
                         .map((d) => ({ label: d.name, id: d.id }))
                         .find((d) => d.id === formData.departmentId) || null
                     }
-                    onChange={(_, newValue) => {
-                      const id = newValue?.id ?? '';
+                    onChange={(val) => {
+                      const id = val?.id ?? '';
                       setFormData((prev) => ({ ...prev, departmentId: id }));
                       setFormErrors((prev) => {
                         if (!prev.departmentId) return prev;
@@ -257,27 +259,17 @@ const AddEditMember = ({ type, member }: FormType) => {
                         return next;
                       });
                     }}
-                    isOptionEqualToValue={(option, value) => option.id === value.id}
-                    getOptionLabel={(option) =>
-                      typeof option === 'string' ? option : option.label
-                    }
-                    clearOnEscape
-                    disableClearable={false}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        id="departmentId"
-                        variant="outlined"
-                        fullWidth
-                        required
-                        error={!!formErrors.departmentId}
-                        helperText={formErrors.departmentId}
-                      />
-                    )}
+                    getOptionLabel={(o) => o.label}
+                    isOptionEqualToValue={(a, b) => a.id === b.id}
+                    required
+                    error={!!formErrors.departmentId}
+                    helperText={formErrors.departmentId}
+                    sx={{ flex: 1 }}
                   />
+
                   <AddEditDepartment type="add" />
                 </Box>
-                <CustomFormLabel htmlFor="identity-Id">Identity ID</CustomFormLabel>
+                <CustomFormLabel htmlFor="identity-Id">Identity</CustomFormLabel>
                 <CustomTextField
                   id="identityId"
                   value={formData.identityId}
@@ -286,19 +278,22 @@ const AddEditMember = ({ type, member }: FormType) => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
-                <CustomFormLabel htmlFor="organization-id">Organization ID</CustomFormLabel>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+                <CustomFormLabel htmlFor="organization">Organization</CustomFormLabel>
                 <Box display="flex" alignItems="center" gap={1}>
-                  <Autocomplete
-                    sx={{ flex: 1 }}
-                    options={organizationData.map((orgz: OrganizationType) => ({ label: orgz.name, id: orgz.id }))}
+                  <CustomAutocomplete<{ label: string; id: string }>
+                    label="Organization"
+                    options={organizationData.map((orgz: OrganizationType) => ({
+                      label: orgz.name,
+                      id: orgz.id,
+                    }))}
                     value={
                       organizationData
                         .map((o) => ({ label: o.name, id: o.id }))
                         .find((o) => o.id === formData.organizationId) || null
                     }
-                    onChange={(_, newValue) => {
-                      const id = newValue?.id ?? '';
+                    onChange={(val) => {
+                      const id = val?.id ?? '';
                       setFormData((prev) => ({ ...prev, organizationId: id }));
                       setFormErrors((prev) => {
                         if (!prev.organizationId) return prev;
@@ -307,38 +302,31 @@ const AddEditMember = ({ type, member }: FormType) => {
                         return next;
                       });
                     }}
-                    isOptionEqualToValue={(option, value) => option.id === value.id}
-                    getOptionLabel={(option) =>
-                      typeof option === 'string' ? option : option.label
-                    }
-                    clearOnEscape
-                    disableClearable={false}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        id="organizationId"
-                        variant="outlined"
-                        fullWidth
-                        required
-                        error={!!formErrors.organizationId}
-                        helperText={formErrors.organizationId}
-                      />
-                    )}
-                  />
-                  <AddEditOrganization  type="add" />
-                </Box>
-                <CustomFormLabel htmlFor="district-id">District ID</CustomFormLabel>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <Autocomplete
+                    getOptionLabel={(o) => o.label}
+                    isOptionEqualToValue={(a, b) => a.id === b.id}
+                    required
+                    error={!!formErrors.organizationId}
+                    helperText={formErrors.organizationId}
                     sx={{ flex: 1 }}
-                    options={districtData.map((dist: DistrictType) => ({ label: dist.name, id: dist.id }))}
+                  />
+
+                  <AddEditOrganization type="add" />
+                </Box>
+                <CustomFormLabel htmlFor="district">District</CustomFormLabel>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <CustomAutocomplete<{ label: string; id: string }>
+                    label="District"
+                    options={districtData.map((dist: DistrictType) => ({
+                      label: dist.name,
+                      id: dist.id,
+                    }))}
                     value={
                       districtData
                         .map((d) => ({ label: d.name, id: d.id }))
                         .find((d) => d.id === formData.districtId) || null
                     }
-                    onChange={(_, newValue) => {
-                      const id = newValue?.id ?? '';
+                    onChange={(val) => {
+                      const id = val?.id ?? '';
                       setFormData((prev) => ({ ...prev, districtId: id }));
                       setFormErrors((prev) => {
                         if (!prev.districtId) return prev;
@@ -347,23 +335,12 @@ const AddEditMember = ({ type, member }: FormType) => {
                         return next;
                       });
                     }}
-                    isOptionEqualToValue={(option, value) => option.id === value.id}
-                    getOptionLabel={(option) =>
-                      typeof option === 'string' ? option : option.label
-                    }
-                    clearOnEscape
-                    disableClearable={false}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        id="districtId"
-                        variant="outlined"
-                        fullWidth
-                        required
-                        error={!!formErrors.districtId}
-                        helperText={formErrors.districtId}
-                      />
-                    )}
+                    getOptionLabel={(o) => o.label}
+                    isOptionEqualToValue={(a, b) => a.id === b.id}
+                    required
+                    error={!!formErrors.districtId}
+                    helperText={formErrors.districtId}
+                    sx={{ flex: 1 }}
                   />
                   <AddEditDistrict type="add" />
                 </Box>
@@ -386,47 +363,38 @@ const AddEditMember = ({ type, member }: FormType) => {
                   helperText={formErrors.cardNumber}
                 />
               </Grid> */}
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="ble-card-number">Card Number</CustomFormLabel>
-                  <Autocomplete
-                    sx={{ flex: 1 }}
-                    options={filteredCard.map((card: CardType) => ({ label: card.cardNumber, id: card.id }))}
-                    value={
-                      cardData
-                        .map((d) => ({ label: d.cardNumber, id: d.id }))
-                        .find((d) => d.id === formData.cardId) || null
-                    }
-                    onChange={(_, newValue) => {
-                      const id = newValue?.id ?? '';
-                      const number = newValue?.label ?? '';
-                      setFormData((prev) => ({ ...prev, cardNumber: number, cardId: id }));
-                      setFormErrors((prev) => {
-                        if (!prev.cardNumber) return prev;
-                        const next = { ...prev };
-                        delete next.cardNumber;
-                        return next;
-                      });
-                      console.log("AA", formData.cardId);
-                    }}
-                    isOptionEqualToValue={(option, value) => option.id === value.id}
-                    getOptionLabel={(option) =>
-                      typeof option === 'string' ? option : option.label
-                    }
-                    clearOnEscape
-                    disableClearable={false}
-                    noOptionsText="No Available BLE Card"
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        id="cardNumber"
-                        variant="outlined"
-                        fullWidth
-                        required
-                        error={!!formErrors.cardNumber}
-                        helperText={formErrors.cardNumber}
-                      />
-                    )}
-                  />
+                <CustomAutocomplete<{ label: string; id: string }>
+                  label="Card Number"
+                  options={filteredCard.map((card: CardType) => ({
+                    label: card.cardNumber,
+                    id: card.id,
+                  }))}
+                  value={
+                    cardData
+                      .map((c) => ({ label: c.cardNumber, id: c.id }))
+                      .find((c) => c.id === formData.cardId) || null
+                  }
+                  onChange={(val) => {
+                    const id = val?.id ?? '';
+                    const number = val?.label ?? '';
+                    setFormData((prev) => ({ ...prev, cardId: id, cardNumber: number }));
+                    setFormErrors((prev) => {
+                      if (!prev.cardNumber) return prev;
+                      const next = { ...prev };
+                      delete next.cardNumber;
+                      return next;
+                    });
+                  }}
+                  getOptionLabel={(o) => o.label}
+                  isOptionEqualToValue={(a, b) => a.id === b.id}
+                  // noOptionsText="No Available BLE Card"
+                  required
+                  error={!!formErrors.cardNumber}
+                  helperText={formErrors.cardNumber}
+                  sx={{ flex: 1 }}
+                />
               </Grid>
             </Grid>
             <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
@@ -434,7 +402,7 @@ const AddEditMember = ({ type, member }: FormType) => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="name">Name</CustomFormLabel>
                 <CustomTextField
                   id="name"
@@ -482,7 +450,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                   ))}
                 </CustomSelect>
               </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }} >
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="phone">Phone</CustomFormLabel>
                 <CustomTextField
                   id="phone"

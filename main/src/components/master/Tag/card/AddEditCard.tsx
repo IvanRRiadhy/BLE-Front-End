@@ -40,7 +40,9 @@ import { useAddCard, useEditCard } from 'src/hooks/useCard';
 import { useAllBuilding } from 'src/hooks/useBuilding';
 import { useAllFloors } from 'src/hooks/useFloor';
 import { useAllFloorplans } from 'src/hooks/useFloorplan';
-import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';import { useAllCardAccess } from 'src/hooks/useCardAccess';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import { useAllCardAccess } from 'src/hooks/useCardAccess';
+import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 
 interface formType {
   type?: string;
@@ -224,7 +226,9 @@ const AddEditCard = ({ type, card }: formType) => {
 
     const floorplan = floorplanData.find((fp: FloorplanType) => fp.id === area.floorplanId);
     const floor = floorplan ? floorData.find((f: floorType) => f.id === floorplan.floorId) : null;
-    const building = floor ? buildingData.find((b: BuildingType) => b.id === floor.buildingId) : null;
+    const building = floor
+      ? buildingData.find((b: BuildingType) => b.id === floor.buildingId)
+      : null;
 
     const pathParts = [
       area.name,
@@ -260,7 +264,7 @@ const AddEditCard = ({ type, card }: formType) => {
   }
 
   const selectedAncestorIds = getSelectedAncestorIds(formData.registeredMaskedAreaId ?? '');
-  
+
   const setRegisteredArea: React.Dispatch<React.SetStateAction<string>> = (value) => {
     setFormData((prev) => {
       const next =
@@ -303,9 +307,9 @@ const AddEditCard = ({ type, card }: formType) => {
               <Typography component="div" variant="h4" fontWeight={700}>
                 {type === 'add' ? 'Add Card' : 'Edit Card'}
               </Typography>
-              <Button variant="outlined" onClick={() => setQrOpen(true)}>
+              {/* <Button variant="outlined" onClick={() => setQrOpen(true)}>
                 Show QR Code
-              </Button>
+              </Button> */}
             </Box>
             <Divider />
           </DialogTitle>
@@ -475,41 +479,27 @@ const AddEditCard = ({ type, card }: formType) => {
                 </CustomSelect>
                 <CustomFormLabel>Card Access</CustomFormLabel>
 
-                <CustomSelect
-                  id="cardAccessIds"
-                  name="cardAccessIds"
-                  value=""
-                  onChange={(e: any) => {
-                    const selectedId = e.target.value;
-                    const selectedCA = cardAccessData.find((ca: CardAccessType) => ca.id === selectedId);
-                    console.log('Selected Card Access:', selectedCA);
-                    console.log('Card Accesses:', formData.cardAccesses);
-                    if (selectedCA) {
-                      setFormData((prev) => ({
-                        ...prev,
-                        cardAccessIds: [...(prev.cardAccessIds ?? []), selectedId],
-                        cardAccesses: [...(prev.cardAccesses ?? []), selectedCA],
-                      }));
-                    }
+                <CustomAutocomplete<CardAccessType>
+                  label="Select Card Access"
+                  options={cardAccessData.filter(
+                    (ca) =>
+                      !(formData.cardAccesses ?? []).some(
+                        (fca: CardAccessType) => fca.id === ca.id,
+                      ),
+                  )}
+                  value={null} // always null so user can add repeatedly
+                  onChange={(item) => {
+                    if (!item) return;
+                    setFormData((prev) => ({
+                      ...prev,
+                      cardAccessIds: [...(prev.cardAccessIds ?? []), item.id],
+                      cardAccesses: [...(prev.cardAccesses ?? []), item],
+                    }));
                   }}
-                  fullWidth
-                  variant="outlined"
-                  displayEmpty
-                >
-                  <MenuItem value="" disabled>
-                    Select a Card Access
-                  </MenuItem>
-                  {cardAccessData
-                    .filter(
-                      (ca: CardAccessType) =>
-                        !(formData.cardAccesses ?? []).some((fca: any) => fca.id === ca.id),
-                    )
-                    .map((ca: CardAccessType) => (
-                      <MenuItem key={ca.id} value={ca.id}>
-                        {ca.name}
-                      </MenuItem>
-                    ))}
-                </CustomSelect>
+                  getOptionLabel={(o) => o?.name ?? ''}
+                  isOptionEqualToValue={(a, b) => a.id === b.id}
+                  // placeholder="Select a Card Access"
+                />
 
                 <Box
                   sx={{
@@ -586,7 +576,7 @@ const AddEditCard = ({ type, card }: formType) => {
           </DialogActions>
         </Dialog>
       )}
-      <Dialog open={qrOpen} onClose={() => setQrOpen(false)} maxWidth="xs" fullWidth>
+      {/* <Dialog open={qrOpen} onClose={() => setQrOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle m={2}>Card QR Code</DialogTitle>
         <Divider />
         <DialogContent
@@ -601,7 +591,7 @@ const AddEditCard = ({ type, card }: formType) => {
         <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
           <Button onClick={() => setQrOpen(false)}>Close</Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
       {loading && (
         <Dialog open={true} fullWidth maxWidth="sm">
           <DialogContent sx={{ textAlign: 'center', py: 10 }}>

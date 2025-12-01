@@ -64,18 +64,36 @@ const DeviceListItem = ({ onListClick, onEditClick, onDeleteClick, device, activ
       <ListItemAvatar>
         <Avatar alt={device?.name || 'Device'} src={iconDevice} />
       </ListItemAvatar>
-      <ListItemText>
-        <Stack direction="row" gap="10px" alignItems="center">
-          <Box mr="auto">
-            <Typography variant="subtitle1" fontWeight={600} sx={{ maxWidth: '150px' }}>
-              {device?.name}
-            </Typography>
-            <Typography variant="body2" noWrap color="text.secondary">
-              {device?.type}
-            </Typography>
-          </Box>
-        </Stack>
-      </ListItemText>
+      <ListItemText
+        primary={
+          <Typography
+            variant="subtitle1"
+            fontWeight={600}
+            sx={{
+              maxWidth: '150px',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {device?.name}
+          </Typography>
+        }
+        secondary={
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              maxWidth: '150px',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {device?.type}
+          </Typography>
+        }
+      />
       {active && !isEditing && (
         <>
           <IconButton

@@ -10,7 +10,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
-import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
+// import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import AppCard from 'src/components/shared/AppCard';
 import { RootState, useSelector } from 'src/store/Store';
 import ParentCard from 'src/components/shared/ParentCard';
@@ -48,7 +48,7 @@ const CardRecord = () => {
 
   return (
     <PageContainer title="Card Record" description="This is the Card Record CRUD Page">
-      <Breadcrumb title="Card Record Table" />
+      {/* <Breadcrumb title="Card Record Table" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

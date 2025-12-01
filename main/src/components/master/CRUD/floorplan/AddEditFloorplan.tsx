@@ -24,16 +24,14 @@ import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
-import {
-  FloorplanType,
-  fetchFloorplanDT,
-} from 'src/store/apps/crud/floorplan';
+import { FloorplanType, fetchFloorplanDT } from 'src/store/apps/crud/floorplan';
 import toast from 'react-hot-toast';
 import { defaultFloorplanForm } from 'src/store/apps/defaultForm';
 import { EngineType, fetchEngines } from 'src/store/apps/crud/engine';
 import { useAddFloorplan, useEditFloorplan } from 'src/hooks/useFloorplan';
 import { useAllFloors } from 'src/hooks/useFloor';
 import { useAllEngines } from 'src/hooks/useEngine';
+import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 
 interface FormType {
   type?: string;
@@ -50,7 +48,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
     ...floorplan,
   });
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
-    const addMutation = useAddFloorplan();
+  const addMutation = useAddFloorplan();
   const editMutation = useEditFloorplan();
 
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
@@ -137,9 +135,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
 
     const data = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
-      if (
-        !['floorplanImage', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key)
-      ) {
+      if (!['floorplanImage', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key)) {
         data.append(key, value?.toString() ?? '');
       }
     });
@@ -228,7 +224,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
     }
   };
 
-    const floorOptions = floorData.map((f) => ({
+  const floorOptions = floorData.map((f) => ({
     label: f.name,
     id: f.id,
     buildingName: f.building?.name ?? 'Unknown Building',
@@ -250,175 +246,165 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
       )}
       {type === 'add' && (
         <Tooltip title="Add Floorplan">
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
-              onClick={handleClickOpen}
-            >
-              <IconPlus size={20} />
-            </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ p: 0.5, minWidth: 40, minHeight: 40 }}
+            onClick={handleClickOpen}
+          >
+            <IconPlus size={20} />
+          </Button>
         </Tooltip>
       )}
-        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-          <DialogTitle>
-            <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
-              {type === 'add' ? 'Add Floorplan' : 'Edit Floorplan'}
-            </Typography>
-            <Divider />
-          </DialogTitle>
-          <DialogContent>
-            <Grid container spacing={5} mb={3}>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
-                <CustomFormLabel htmlFor="floorplan-Name">Floorplan Name</CustomFormLabel>
-                <CustomTextField
-                  id="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  error={!!formErrors.name}
-                  helperText={formErrors.name}
-                />
-                <CustomFormLabel htmlFor="floorX">Floor Length (in meters)</CustomFormLabel>
-                <CustomTextField
-                  id="floorX"
-                  value={formData.floorX}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  type="number"
-                  inputProps={{ step: 'any' }}
-                  error={!!formErrors.floorX}
-                  helperText={formErrors.floorX}
-                />
-                <CustomFormLabel htmlFor="Engine-id">Engine</CustomFormLabel>
-                <Autocomplete
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+        <DialogTitle>
+          <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
+            {type === 'add' ? 'Add Floorplan' : 'Edit Floorplan'}
+          </Typography>
+          <Divider />
+        </DialogTitle>
+        <DialogContent>
+          <Grid container spacing={5} mb={3}>
+            <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+              <CustomFormLabel htmlFor="floorplan-Name">Floorplan Name</CustomFormLabel>
+              <CustomTextField
+                id="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                fullWidth
+                variant="outlined"
+                error={!!formErrors.name}
+                helperText={formErrors.name}
+              />
+              <CustomFormLabel htmlFor="floorX">Floor Length (in meters)</CustomFormLabel>
+              <CustomTextField
+                id="floorX"
+                value={formData.floorX}
+                onChange={handleInputChange}
+                fullWidth
+                variant="outlined"
+                type="number"
+                inputProps={{ step: 'any' }}
+                error={!!formErrors.floorX}
+                helperText={formErrors.floorX}
+              />
+              <CustomFormLabel htmlFor="Engine-id">Engine</CustomFormLabel>
+              <CustomAutocomplete
+                label="Engine"
+                options={engineOptions}
+                value={engineOptions.find((e) => e.id === formData.engineId) || null}
+                onChange={(val) => setFormData((prev) => ({ ...prev, engineId: val?.id ?? '' }))}
+                getOptionLabel={(o) => o.label}
+                isOptionEqualToValue={(a, b) => a.id === b.id}
                 loading={engineLoading}
-                  options={engineOptions} // 👈 Use engineData
-                  value={engineOptions.find((e) => e.id === formData.engineId) || null}
-                  onChange={(_, newValue) =>
-                  setFormData((prev) => ({ ...prev, engineId: newValue?.id ?? '' }))
-                }
-                  isOptionEqualToValue={(option, value) => option.id === value.id}
-                  getOptionLabel={(option) => option.label}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      id="engineId"
-                      variant="outlined"
-                      fullWidth
-                      placeholder="Select Engine"
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
-                <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel>
-                <Autocomplete
+                sx={{ width: '100%' }}
+              />
+            </Grid>
+            <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+              {/* <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel> */}
+              <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel>
+              <CustomAutocomplete
+                label="Floor"
+                options={floorOptions}
+                value={floorOptions.find((f) => f.id === formData.floorId) || null}
+                onChange={(val) => {
+                  const id = val?.id ?? '';
+                  setFormData((prev) => ({ ...prev, floorId: id }));
+                  setFormErrors((prev) => {
+                    const next = { ...prev };
+                    delete next.floorId;
+                    return next;
+                  });
+                }}
+                getOptionLabel={(opt) => opt.label}
+                isOptionEqualToValue={(a, b) => a.id === b.id}
+                required
+                error={!!formErrors.floorId}
+                helperText={formErrors.floorId}
                 loading={floorLoading}
-                  options={floorOptions}
-                  value={floorOptions.find((f) => f.id === formData.floorId) || null}
-                  onChange={(_, newValue) => {
-                    const id = newValue?.id ?? '';
-                    setFormData((prev) => ({ ...prev, floorId: id }));
-                    setFormErrors((prev) => {
-                      if (!prev.floorId) return prev;
-                      const next = { ...prev };
-                      delete next.floorId;
-                      return next;
-                    });
-                  }}
-                  isOptionEqualToValue={(option, value) => option.id === value.id}
-                  getOptionLabel={(option) => option.label}
-                  clearOnEscape
-                  disableClearable={false}
-                  renderOption={(props, option) => (
-                    <li {...props} key={option.id}>
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <Typography variant="body1">{option.label}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {option.buildingName}
-                        </Typography>
-                      </div>
-                    </li>
-                  )}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      id="floorId"
-                      variant="outlined"
-                      fullWidth
-                      required
-                      error={!!formErrors.floorId}
-                      helperText={formErrors.floorId}
-                    />
-                  )}
-                />
+                renderOption={(props: any, option: (typeof floorOptions)[number]) => (
+                  <li {...props} key={option.id}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <Typography variant="body1">{option.label}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {option.buildingName}
+                      </Typography>
+                    </div>
+                  </li>
+                )}
+                sx={{ width: '100%' }}
+              />
 
-                <CustomFormLabel htmlFor="floorY">Floor Width (in meters)</CustomFormLabel>
-                <CustomTextField
-                  id="floorY"
-                  value={formData.floorY}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  type="number"
-                  inputProps={{ step: 'any' }}
-                  error={!!formErrors.floorY}
-                  helperText={formErrors.floorY}
+              <CustomFormLabel htmlFor="floorY">Floor Width (in meters)</CustomFormLabel>
+              <CustomTextField
+                id="floorY"
+                value={formData.floorY}
+                onChange={handleInputChange}
+                fullWidth
+                variant="outlined"
+                type="number"
+                inputProps={{ step: 'any' }}
+                error={!!formErrors.floorY}
+                helperText={formErrors.floorY}
+              />
+            </Grid>
+            <Grid size={{ lg: 12, md: 12, sm: 12 }}>
+              <Grid size={12}>
+                <CustomFormLabel htmlFor="fp-image" error={!!formErrors.floorplanImage}>
+                  Floorplan Image
+                </CustomFormLabel>
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg, image/jpg"
+                  onChange={handleImageChange}
+                  required
+                  style={{
+                    border: formErrors.floorplanImage ? '1px solid red' : undefined,
+                    padding: '6px',
+                    borderRadius: '4px',
+                    width: '100%',
+                    marginTop: '5px',
+                  }}
                 />
-              </Grid>
-              <Grid size={{ lg: 12, md: 12, sm: 12 }}>
-                <Grid size={12}>
-                  <CustomFormLabel htmlFor="fp-image" error={!!formErrors.floorplanImage}>
-                    Floorplan Image
-                  </CustomFormLabel>
-                  <input
-                    type="file"
-                    accept="image/png, image/jpeg, image/jpg"
-                    onChange={handleImageChange}
-                    required
-                    style={{
-                      border: formErrors.floorplanImage ? '1px solid red' : undefined,
-                      padding: '6px',
-                      borderRadius: '4px',
-                      width: '100%',
-                      marginTop: '5px',
-                    }}
-                  />
-                  {formErrors.floorplanImage && (
-                    <FormHelperText error>{formErrors.floorplanImage}</FormHelperText>
-                  )}
-                  {preview && (
+                {formErrors.floorplanImage && (
+                  <FormHelperText error>{formErrors.floorplanImage}</FormHelperText>
+                )}
+                {preview && (
+                  <>
                     <img
                       src={preview?.startsWith('blob:') ? preview : `${BASE_URL}${preview}`}
                       alt="Floorplan Preview"
                       style={{ width: '100%', marginTop: '10px', borderRadius: '5px' }}
                     />
-                  )}
-                </Grid>
+
+                    {/* Pixel Dimensions */}
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mt: 1, textAlign: 'center', fontStyle: 'italic' }}
+                    >
+                      Image Size: {formData.pixelX || 0}px × {formData.pixelY || 0}px
+                    </Typography>
+                  </>
+                )}
               </Grid>
             </Grid>
-          </DialogContent>
-          <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
-            <Button
-              onClick={handleClose}
-              variant="outlined"
-              sx={{ fontSize: '1rem', py: 1, px: 3 }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              variant="contained"
-              sx={{ fontSize: '1rem', py: 1, px: 3 }}
-              disabled={isSaving}
-            >
-              {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
-            </Button>
-          </DialogActions>
-        </Dialog>
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
+          <Button onClick={handleClose} variant="outlined" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            variant="contained"
+            sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            disabled={isSaving}
+          >
+            {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* {isLoading && (
         <Dialog open={open} fullWidth maxWidth="sm">
@@ -435,4 +421,3 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
 };
 
 export default AddEditFloorplan;
-

@@ -34,7 +34,7 @@ const AreaDetailSidebar = ({ isEditingSidebarOpen, onEditingSidebarClose }: Prop
         }}
         open={isEditingSidebarOpen}
         onClose={onEditingSidebarClose}
-        variant={lgUp ? 'persistent' : 'temporary'}
+        variant="permanent"
       >
         <AreaDetailList />
       </Drawer>

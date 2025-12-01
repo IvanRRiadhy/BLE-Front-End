@@ -27,7 +27,7 @@ const InvitationPage = Loadable(
 );
 
 /* ***Master**** */
-const GatewayApp = Loadable(lazy(() => import('../views/master/gateway/gateway')));
+// const GatewayApp = Loadable(lazy(() => import('../views/master/gateway/gateway')));
 const MemberTag = Loadable(lazy(() => import('../views/master/tag/memberTag')));
 const VisitorTag = Loadable(lazy(() => import('../views/master/tag/visitorTag')));
 
@@ -237,7 +237,7 @@ const Router = [
 
       { path: '/master/membertag', exact: true, element: withAuth(<MemberTag />, '/master/membertag') },
       // { path: '/master/floorplan', exact: true, element: <Floorplan /> },
-      { path: '/master/gateway', exact: true, element: <GatewayApp /> },
+      // { path: '/master/gateway', exact: true, element: <GatewayApp /> },
 
       // Visitor
       { path: '/visitor/visitordata', exact: true, element: withAuth(<Visitor />, '/visitor/visitordata') },

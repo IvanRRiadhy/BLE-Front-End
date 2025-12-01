@@ -164,7 +164,7 @@ const isBoundaryActive = isActive('boundary');
       children: [
         { id: uniqueId(), title: 'Visitor Data', icon: IconMapPin, href: '/visitor/visitordata/' },
         { id: uniqueId(), title: 'Visitor Invitation', icon: IconMapPin, href: '/visitor/visitorinvitation/' },
-        { id: uniqueId(), title: 'Blacklist', icon: IconBarrierBlock, href: '/visitor/blacklist/' },
+        // { id: uniqueId(), title: 'Blacklist', icon: IconBarrierBlock, href: '/visitor/blacklist/' },
       ],
     },
 

@@ -33,15 +33,14 @@ export function updateMQTTBrokerURL() {
 // MQTT connection options
 const options = {
   clientId: generateClientId(),
-  username: 'bio_mqtt',
-  password: 'P@ssw0rd',
+  username: 'gNWx6jIp9X',
+  password: 'Fx6co2iTPy',
   clean: true,
 };
 
 let client: mqtt.MqttClient | null = null;
 let subscribedTopics: Set<string> = new Set();
 let messageCallbacks: { [topic: string]: ((data: any) => void)[] } = {};
-
 
 export function startMQTTclient(messagecallback: any, topic: string) {
   if (typeof messagecallback === 'function') {

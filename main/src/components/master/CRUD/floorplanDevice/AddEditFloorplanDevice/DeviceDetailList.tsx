@@ -18,6 +18,7 @@ import { useAllUnassignedCCTV } from 'src/hooks/useCCTV';
 import { useAllReaders, useAllUnassignedReaders } from 'src/hooks/useReader';
 import { DeviceType } from 'src/types/crud/input';
 import { isEqual } from 'lodash';
+import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 
 // Define form data type for better type safety
 interface DeviceFormData {
@@ -25,9 +26,9 @@ interface DeviceFormData {
   name: string;
   type: string;
   floorplanId: string;
-  accessCctvId: string;
-  readerId: string;
-  accessControlId: string;
+  accessCctvId: string | null;
+  readerId: string | null;
+  accessControlId: string | null;
   posX: number;
   posY: number;
   posPxX: number;
@@ -84,9 +85,9 @@ const DeviceDetailList = () => {
     name: '',
     type: '',
     floorplanId: '',
-    accessCctvId: '',
-    readerId: '',
-    accessControlId: '',
+    accessCctvId: null,
+    readerId: null,
+    accessControlId: null,
     posX: 0,
     posY: 0,
     posPxX: 0,
@@ -114,9 +115,9 @@ const DeviceDetailList = () => {
         name: device.name || '',
         type: device.type || '',
         floorplanId: device.floorplanId || '',
-        accessCctvId: device.accessCctvId || '',
-        readerId: device.readerId || '',
-        accessControlId: device.accessControlId || '',
+        accessCctvId: device.accessCctvId || null,
+        readerId: device.readerId || null,
+        accessControlId: device.accessControlId || null,
         posX: device.posX || 0,
         posY: device.posY || 0,
         posPxX: device.posPxX || 0,
@@ -210,9 +211,9 @@ const DeviceDetailList = () => {
         name: device.name || '',
         type: device.type || '',
         floorplanId: device.floorplanId || '',
-        accessCctvId: device.accessCctvId || '',
-        readerId: device.readerId || '',
-        accessControlId: device.accessControlId || '',
+        accessCctvId: device.accessCctvId || null,
+        readerId: device.readerId || null,
+        accessControlId: device.accessControlId || null,
         posX: device.posX || 0,
         posY: device.posY || 0,
         posPxX: device.posPxX || 0,
@@ -232,7 +233,7 @@ const DeviceDetailList = () => {
 
   const handleSave = async () => {
     if (!isFormValid()) return;
-
+    console.log('Saving device with data:', JSON.stringify(formData, null, 2));
     try {
       // Update the unsaved device in Redux store
       dispatch(EditUnsavedDevice(formData));
@@ -397,19 +398,19 @@ const DeviceDetailList = () => {
             {formData.type === 'Cctv' && (
               <Grid size={12}>
                 <CustomFormLabel htmlFor="access-cctv-id">Access CCTV</CustomFormLabel>
-                <CustomSelect
-                  name="accessCctvId"
-                  value={formData.accessCctvId}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                >
-                  {availableCCTVs.map((cctv) => (
-                    <MenuItem key={cctv.id} value={cctv.id}>
-                      {cctv.name}
-                    </MenuItem>
-                  ))}
-                </CustomSelect>
+                <CustomAutocomplete
+                  label="Access CCTV"
+                  options={availableCCTVs}
+                  value={availableCCTVs.find((x) => x.id === formData.accessCctvId) || null}
+                  onChange={(newVal) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      accessCctvId: newVal?.id ?? null,
+                    }));
+                  }}
+                  getOptionLabel={(o) => o?.name ?? ''}
+                  isOptionEqualToValue={(o, v) => o.id === v.id}
+                />
               </Grid>
             )}
 
@@ -417,19 +418,19 @@ const DeviceDetailList = () => {
             {formData.type === 'BleReader' && (
               <Grid size={12}>
                 <CustomFormLabel htmlFor="reader-id">BLE Reader</CustomFormLabel>
-                <CustomSelect
-                  name="readerId"
-                  value={formData.readerId}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                >
-                  {availableBleReaderOptions.map((bleReader) => (
-                    <MenuItem key={bleReader.id} value={bleReader.id}>
-                      {bleReader.name}
-                    </MenuItem>
-                  ))}
-                </CustomSelect>
+                <CustomAutocomplete
+                  label="BLE Reader"
+                  options={availableBleReaderOptions}
+                  value={availableBleReaderOptions.find((x) => x.id === formData.readerId) || null}
+                  onChange={(newVal) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      readerId: newVal?.id ?? null,
+                    }));
+                  }}
+                  getOptionLabel={(opt) => opt?.name ?? ''}
+                  isOptionEqualToValue={(opt, val) => opt.id === val.id}
+                />
               </Grid>
             )}
 

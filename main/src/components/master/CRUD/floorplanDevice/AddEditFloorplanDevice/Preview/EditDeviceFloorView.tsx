@@ -144,20 +144,20 @@ const EditDeviceFloorView: React.FC<{
     if (imageRatio > containerRatio) {
       // Image is wider than the container
       return {
-        // width: containerWidth,
-        // height: containerWidth / imageRatio,
-        width: imageWidth,
-        height: imageHeight,
+        width: containerWidth,
+        height: containerWidth / imageRatio,
+        // width: imageWidth,
+        // height: imageHeight,
         originalWidth: imageWidth,
         originalHeight: imageHeight,
       };
     } else {
       // Image is taller than the container
       return {
-        // width: containerHeight * imageRatio,
-        // height: containerHeight,
-        width: imageWidth,
-        height: imageHeight,
+        width: containerHeight * imageRatio,
+        height: containerHeight,
+        // width: imageWidth,
+        // height: imageHeight,
         originalWidth: imageWidth,
         originalHeight: imageHeight,
       };

@@ -43,7 +43,16 @@ const AreaListItem = ({ onListClick, onEditClick, onDeleteClick, area, active }:
       <ListItemText>
         <Stack direction="row" gap="10px" alignItems="center">
           <Box mr="auto">
-            <Typography variant="subtitle1" fontWeight={600} sx={{ maxWidth: '150px' }}>
+            <Typography
+              variant="subtitle1"
+              fontWeight={600}
+              sx={{
+                maxWidth: '150px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
               {area?.name}
             </Typography>
           </Box>

@@ -283,7 +283,7 @@ const ConfigSidebar: React.FC<ConfigSidebarProps> = ({
             <>
               <CustomFormLabel>Grid</CustomFormLabel>
               <CustomSelect value={String(activeLayout.grid)} onChange={handleGridChange} fullWidth>
-                {Array.from({ length: 7 }, (_, i) => (
+                {Array.from({ length: 6 }, (_, i) => (
                   <MenuItem key={i + 1} value={String(i + 1)}>
                     {i + 1} Screen{i + 1 > 1 ? 's' : ''}
                   </MenuItem>

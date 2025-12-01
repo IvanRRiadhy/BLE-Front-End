@@ -640,7 +640,7 @@ const handlePathClick = () => {
       </Stage>
 
  {/* Debug Info Panel */}
-    <div style={{
+    {/* <div style={{
       position: 'absolute',
       top: 10,
       left: 10,
@@ -664,7 +664,7 @@ const handlePathClick = () => {
       {drawingPath && (
         <div style={{ color: 'yellow' }}>Drawing Path: {drawingPath}</div>
       )}
-    </div>
+    </div> */}
       {/* Confirm dialog */}
       <Dialog
         open={confirmDialogOpen}

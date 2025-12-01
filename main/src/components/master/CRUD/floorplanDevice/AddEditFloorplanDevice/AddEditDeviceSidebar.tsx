@@ -30,7 +30,7 @@ const AddEditDeviceSidebar = ({ isMobileSidebarOpen, onSidebarClose }: Props) =>
         }}
         open={isMobileSidebarOpen}
         onClose={onSidebarClose}
-        variant={lgUp ? 'persistent' : 'temporary'}
+        variant="permanent"
       >
         <DeviceList />
       </Drawer>

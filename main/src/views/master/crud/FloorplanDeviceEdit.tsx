@@ -63,7 +63,7 @@ const FloorplanDeviceEdit = () => {
             left={285}
             minHeight='80vh'
             maxHeight={"100%"}
-            zIndex={5}
+            zIndex={1}
             sx={{
               boxShadow: '-2px 0px 8px rgba(0,0,0,0.15)', // Add shadow for visual separation
             }}

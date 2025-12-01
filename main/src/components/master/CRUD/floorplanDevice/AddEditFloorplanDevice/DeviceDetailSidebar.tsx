@@ -30,9 +30,12 @@ const DeviceDetailSidebar = ({ isEditingSidebarOpen, onEditingSidebarClose }: Pr
             overflowY: 'auto',
           },
         }}
+        ModalProps={{
+          onBackdropClick: () => {}, // ← prevent auto close
+        }}
         open={isEditingSidebarOpen}
         onClose={onEditingSidebarClose}
-        variant={lgUp ? 'persistent' : 'temporary'}
+        variant="permanent"
       >
         <DeviceDetailList />
       </Drawer>

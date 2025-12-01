@@ -42,18 +42,18 @@ interface MenuitemsType {
  * Returns full menu items (static + dynamic alarm menus)
  */
 const getMenuItems = (alarmSettings: AlarmSettingType[]): MenuitemsType[] => {
-  const isGeoFencingActive = alarmSettings?.some(
-    (a) => a.alarmCategory.toLowerCase() === 'geofence' && a.isEnabled,
-  ) || false;
-  const isOverPopulatingActive = alarmSettings?.some(
-    (a) => a.alarmCategory.toLowerCase() === 'overpopulating' && a.isEnabled,
-  ) || false;
-  const isStayOnAreaActive = alarmSettings?.some(
-    (a) => a.alarmCategory.toLowerCase() === 'stayonarea' && a.isEnabled,
-  ) || false;
-  const isBoundaryActive = alarmSettings?.some(
-    (a) => a.alarmCategory.toLowerCase() === 'boundary' && a.isEnabled,
-  ) || false;
+//   const isGeoFencingActive = alarmSettings?.some(
+//     (a) => a.alarmCategory.toLowerCase() === 'geofence' && a.isEnabled,
+//   ) || false;
+//   const isOverPopulatingActive = alarmSettings?.some(
+//     (a) => a.alarmCategory.toLowerCase() === 'overpopulating' && a.isEnabled,
+//   ) || false;
+//   const isStayOnAreaActive = alarmSettings?.some(
+//     (a) => a.alarmCategory.toLowerCase() === 'stayonarea' && a.isEnabled,
+//   ) || false;
+//   const isBoundaryActive = alarmSettings?.some(
+//     (a) => a.alarmCategory.toLowerCase() === 'boundary' && a.isEnabled,
+//   ) || false;
 
 
   const Menuitems: MenuitemsType[] = [
@@ -235,64 +235,64 @@ const getMenuItems = (alarmSettings: AlarmSettingType[]): MenuitemsType[] => {
     //   href: '/master/user/',
     // },
 
-    {
-      navlabel: true,
-      subheader: 'Alarm Settings',
-    },
-    {
-      id: uniqueId(),
-      title: 'Alarm Settings',
-      icon: IconBell,
-      href: '/alarmsetting/',
-      children: [
-        {
-          id: uniqueId(),
-          title: 'Alarm Setting',
-          icon: IconBell,
-          href: '/alarmsetting/',
-        },
-        ...(isGeoFencingActive
-          ? [
-              {
-                id: uniqueId(),
-                title: 'GeoFencing Alarm',
-                icon: IconBellExclamation,
-                href: '/alarmsetting/geofencing/',
-              },
-            ]
-          : []),
-        ...(isOverPopulatingActive
-          ? [
-              {
-                id: uniqueId(),
-                title: 'OverPopulating Alarm',
-                icon: IconBellExclamation,
-                href: '/alarmsetting/overpopulating/',
-              },
-            ]
-          : []),
-        ...(isStayOnAreaActive
-          ? [
-              {
-                id: uniqueId(),
-                title: 'Stay On Area Alarm',
-                icon: IconBellExclamation,
-                href: '/alarmsetting/stayonarea/',
-              },
-            ]
-          : []),
-        ...(isBoundaryActive
-          ? [
-              {
-                id: uniqueId(),
-                title: 'Boundary Alarm',
-                icon: IconBellExclamation,
-                href: '/alarmsetting/boundary/',
-              },
-            ]
-          : []),
-      ],
-    },
+    // {
+    //   navlabel: true,
+    //   subheader: 'Alarm Settings',
+    // },
+    // {
+    //   id: uniqueId(),
+    //   title: 'Alarm Settings',
+    //   icon: IconBell,
+    //   href: '/alarmsetting/',
+    //   children: [
+    //     {
+    //       id: uniqueId(),
+    //       title: 'Alarm Setting',
+    //       icon: IconBell,
+    //       href: '/alarmsetting/',
+    //     },
+    //     ...(isGeoFencingActive
+    //       ? [
+    //           {
+    //             id: uniqueId(),
+    //             title: 'GeoFencing Alarm',
+    //             icon: IconBellExclamation,
+    //             href: '/alarmsetting/geofencing/',
+    //           },
+    //         ]
+    //       : []),
+    //     ...(isOverPopulatingActive
+    //       ? [
+    //           {
+    //             id: uniqueId(),
+    //             title: 'OverPopulating Alarm',
+    //             icon: IconBellExclamation,
+    //             href: '/alarmsetting/overpopulating/',
+    //           },
+    //         ]
+    //       : []),
+    //     ...(isStayOnAreaActive
+    //       ? [
+    //           {
+    //             id: uniqueId(),
+    //             title: 'Stay On Area Alarm',
+    //             icon: IconBellExclamation,
+    //             href: '/alarmsetting/stayonarea/',
+    //           },
+    //         ]
+    //       : []),
+    //     ...(isBoundaryActive
+    //       ? [
+    //           {
+    //             id: uniqueId(),
+    //             title: 'Boundary Alarm',
+    //             icon: IconBellExclamation,
+    //             href: '/alarmsetting/boundary/',
+    //           },
+    //         ]
+    //       : []),
+    //   ],
+    // },
 
     {
       navlabel: true,

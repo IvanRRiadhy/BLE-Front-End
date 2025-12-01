@@ -62,6 +62,7 @@ import { floorType } from 'src/store/apps/crud/floor';
 import { FloorplanType } from 'src/store/apps/crud/floorplan';
 import { memberType } from 'src/store/apps/crud/member';
 import { defaultVisitorFilter } from 'src/store/apps/defaultForm';
+import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 
 dayjs.extend(utc);
 dayjs.extend(weekday);
@@ -143,19 +144,19 @@ function buildNestedHierarchy(
 const VisitorRegister = () => {
   // React Query hooks for data fetching
   const [searchVisitor, setSearchVisitor] = useState('');
-  const { data: visitorData, refetch: refetchVisitors } = useVisitorList({ 
-    ...defaultVisitorFilter, 
-    Length: 999, 
-    SearchValue: searchVisitor 
+  const { data: visitorData, refetch: refetchVisitors } = useVisitorList({
+    ...defaultVisitorFilter,
+    Length: 999,
+    SearchValue: searchVisitor,
   });
   const visitorList = visitorData?.data ?? [];
-  
+
   const { data: members = [] } = useAllMembers();
   const { data: buildingData = [] } = useAllBuilding();
   const { data: floorData = [] } = useAllFloors();
   const { data: floorplanData = [] } = useAllFloorplans();
   const { data: maskedAreaData = [] } = useAllMaskedAreas();
-  
+
   // Mutation for sending invitation
   const { mutate: sendInvitation, isPending: isSaving } = useSendInvitation();
 
@@ -184,7 +185,7 @@ const VisitorRegister = () => {
     setNotes('');
     setStartTime(dayjs());
     setEndTime(dayjs());
-    
+
     // Refetch all data when dialog opens
     Promise.all([
       refetchVisitors(),
@@ -231,6 +232,8 @@ const VisitorRegister = () => {
     });
   };
 
+
+
   const buildingHierarchy = buildNestedHierarchy(
     buildingData,
     floorData,
@@ -245,7 +248,9 @@ const VisitorRegister = () => {
 
     const floorplan = floorplanData.find((fp: FloorplanType) => fp.id === area.floorplanId);
     const floor = floorplan ? floorData.find((f: floorType) => f.id === floorplan.floorId) : null;
-    const building = floor ? buildingData.find((b: BuildingType) => b.id === floor.buildingId) : null;
+    const building = floor
+      ? buildingData.find((b: BuildingType) => b.id === floor.buildingId)
+      : null;
 
     const pathParts = [
       area.name,
@@ -284,7 +289,10 @@ const VisitorRegister = () => {
 
   // IDs of already-selected (registered) visitors
   const selectedIds = useMemo(
-    () => new Set(selectedVisitor.filter((v: VisitorType) => !!v.id).map((v: VisitorType) => v.id as string)),
+    () =>
+      new Set(
+        selectedVisitor.filter((v: VisitorType) => !!v.id).map((v: VisitorType) => v.id as string),
+      ),
     [selectedVisitor],
   );
 
@@ -294,9 +302,18 @@ const VisitorRegister = () => {
     [visitorList, selectedIds],
   );
 
-  useEffect(() => {
-    refetchVisitors();
-  }, [searchVisitor, refetchVisitors]);
+    const filteredVisitorsInMenu = useMemo(() => {
+  if (!searchVisitor.trim()) return availableVisitors;
+  return availableVisitors.filter((v) =>
+    `${v.name} ${v.email}`
+      .toLowerCase()
+      .includes(searchVisitor.toLowerCase())
+  );
+}, [searchVisitor, availableVisitors]);
+
+  // useEffect(() => {
+  //   refetchVisitors();
+  // }, [searchVisitor, refetchVisitors]);
 
   const isRegisteredVisitor = (visitor: VisitorType) => {
     return !!visitor.id; // registered visitors have a defined ID
@@ -317,7 +334,9 @@ const VisitorRegister = () => {
 
       // Only validate manual email inputs (no ID)
       if (field === 'email' && !currentVisitor.id) {
-        const emailExists = visitorList.some((v: VisitorType) => v.email?.toLowerCase() === value.toLowerCase());
+        const emailExists = visitorList.some(
+          (v: VisitorType) => v.email?.toLowerCase() === value.toLowerCase(),
+        );
 
         setEmailErrors((prevErrors) => ({
           ...prevErrors,
@@ -345,7 +364,7 @@ const VisitorRegister = () => {
           const oldIndex = newIndex >= indexToRemove ? newIndex + 1 : newIndex;
           if (prev[oldIndex]) acc[newIndex] = prev[oldIndex];
           return acc;
-        }, {} as Record<number, string>)
+        }, {} as Record<number, string>),
       );
 
       return updated;
@@ -468,32 +487,16 @@ const VisitorRegister = () => {
                   </div>
                   {/* Member Input */}
                   <CustomFormLabel> Purpose Visit (member) </CustomFormLabel>
-                  <Autocomplete<memberType>
-                    options={members} // use the actual member objects
-                    value={selectedMember || null} // same selected state as CustomSelect
-                    onChange={(_, newValue) => {
-                      setSelectedMember(newValue ?? ({} as memberType));
+                  <CustomAutocomplete<memberType>
+                    label="Purpose Person"
+                    options={members}
+                    value={selectedMember?.id ? selectedMember : null}
+                    onChange={(newVal) => {
+                      setSelectedMember(newVal ?? ({} as memberType));
                     }}
-                    isOptionEqualToValue={(option, value) => option.id === value.id}
-                    getOptionLabel={(option) => option?.name ?? ''} // show member name
-                    clearOnEscape
-                    disableClearable={false}
-                    fullWidth
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Select Member"
-                        variant="outlined"
-                        fullWidth
-                        required
-                        error={!!(selectedMember === null || selectedMember.id === undefined)}
-                        helperText={
-                          !!(selectedMember === null || selectedMember.id === undefined)
-                            ? 'Purpose Person is required'
-                            : ''
-                        }
-                      />
-                    )}
+                    getOptionLabel={(option) => option?.name ?? ''}
+                    isOptionEqualToValue={(opt, val) => opt.id === val.id}
+                    required
                   />
                   <CustomFormLabel> Notes </CustomFormLabel>
                   <CustomTextField
@@ -694,70 +697,105 @@ const VisitorRegister = () => {
           </DialogContent>
         </Dialog>
       )}
-      <Menu
-        anchorEl={anchorEl}
-        open={openMenu}
-        onClose={handleCloseMenu}
-        PaperProps={{
-          sx: { maxHeight: 300, width: 300 },
+<Menu
+  anchorEl={anchorEl}
+  open={openMenu}
+  onClose={handleCloseMenu}
+  PaperProps={{
+    sx: { maxHeight: 400, width: 320, p: 0 }, // Clean spacing
+  }}
+>
+  {/* Sticky Section */}
+  <Box
+    sx={{
+      position: 'sticky',
+      top: 0,
+      zIndex: 2,
+      backgroundColor: '#fff',
+      borderBottom: '1px solid #eee',
+    }}
+  >
+    {/* Sticky Add New */}
+    <MenuItem
+      onClick={() => {
+        setSelectedVisitor([
+          ...selectedVisitor,
+          { ...defaultVisitorForm, name: '', email: '' },
+        ]);
+        handleCloseMenu();
+      }}
+      sx={{
+        fontWeight: 'bold',
+      }}
+    >
+      ➕ Add New Visitor
+    </MenuItem>
+
+    {/* Sticky Search Box */}
+    <Box sx={{ px: 2, pb: 1 }}>
+      <TextField
+        value={searchVisitor}
+        onChange={(e) => setSearchVisitor(e.target.value)}
+        placeholder="Search visitor..."
+        size="small"
+        fullWidth
+        InputProps={{
+          sx: {
+            height: 36,
+            borderRadius: 1,
+          },
         }}
-      >
-        {/* Sticky Add New Visitor */}
+      />
+    </Box>
+  </Box>
+
+  {/* Scrollable Visitor List */}
+  <Box sx={{ maxHeight: 300, overflowY: 'auto' }}>
+    {filteredVisitorsInMenu.length > 0 ? (
+      filteredVisitorsInMenu.map((v: VisitorType) => (
         <MenuItem
+          key={v.id}
           onClick={() => {
-            setSelectedVisitor([
-              ...selectedVisitor,
-              { ...defaultVisitorForm, name: '', email: '' },
-            ]);
+            setSelectedVisitor((prev) => {
+              // Guard double-add
+              if (v.id && prev.some((p) => p.id === v.id)) return prev;
+
+              if (prev.length === 1 && !prev[0].id && !prev[0].email && !prev[0].name) {
+                return [v];
+              }
+
+              return [...prev, v];
+            });
+            setEmailErrors((prev) => {
+              const newErrors = { ...prev };
+              Object.keys(newErrors).forEach((key) => {
+                if (v.email && newErrors[Number(key)]) delete newErrors[Number(key)];
+              });
+              return newErrors;
+            });
             handleCloseMenu();
           }}
-          sx={{
-            position: 'sticky',
-            top: 0,
-            backgroundColor: '#f5f5f5',
-            zIndex: 1,
-            fontWeight: 'bold',
-          }}
         >
-          ➕ Add New Visitor
+          <Box>
+            <Typography variant="body2" fontWeight={600}>
+              {v.name}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {v.cardNumber || v.email}
+            </Typography>
+          </Box>
         </MenuItem>
+      ))
+    ) : (
+      <Typography
+        sx={{ p: 2, textAlign: 'center', color: 'text.secondary', fontSize: '0.85rem' }}
+      >
+        No visitors found
+      </Typography>
+    )}
+  </Box>
+</Menu>
 
-        {/* Visitor List (filtered) */}
-        {availableVisitors.map((v: VisitorType) => (
-          <MenuItem
-            key={v.id}
-            onClick={() => {
-              setSelectedVisitor((prev) => {
-                // safety guard against double-add
-                if (v.id && prev.some((p) => p.id === v.id)) return prev;
-
-                // replace dummy single empty row if present
-                if (prev.length === 1 && !prev[0].id && !prev[0].email && !prev[0].name) {
-                  return [v];
-                }
-                return [...prev, v];
-              });
-              setEmailErrors((prev) => {
-                const newErrors = { ...prev };
-                Object.keys(newErrors).forEach((key) => {
-                  if (v.email && newErrors[Number(key)]) delete newErrors[Number(key)];
-                });
-                return newErrors;
-              });
-              handleCloseMenu();
-            }}
-          >
-            <Box>
-              <Typography variant="body2" fontWeight={600}>
-                {v.name}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {v.cardNumber || v.email}
-              </Typography>
-            </Box>
-          </MenuItem>
-        ))}
-      </Menu>
     </>
   );
 };

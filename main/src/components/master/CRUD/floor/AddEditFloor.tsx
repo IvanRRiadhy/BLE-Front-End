@@ -14,6 +14,7 @@ import {
   TextField,
   Box,
   FormHelperText,
+  Stack,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useState } from 'react';
@@ -26,6 +27,7 @@ import { useAddFloor, useEditFloor } from 'src/hooks/useFloor';
 import { useAllBuilding } from 'src/hooks/useBuilding'; // ✅ Your React Query building hook
 import type { floorType } from 'src/store/apps/crud/floor';
 import { BuildingType } from 'src/store/apps/crud/building';
+import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 
 interface FormType {
   type?: 'add' | 'edit';
@@ -102,18 +104,20 @@ const AddEditFloor = ({ type, floor }: FormType) => {
   };
 
   // 🧠 Handle input changes
-const handleInputChange = (
-  e: React.ChangeEvent<HTMLInputElement> | { target: { id?: string; name?: string; value: string } },
-) => {
-  const { id, name, value } = e.target;
-  const key = (id || name) as keyof typeof formData; // ✅ explicitly assert string key
-  if (!key) return; // safeguard
+  const handleInputChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | { target: { id?: string; name?: string; value: string } },
+  ) => {
+    const { id, name, value } = e.target;
+    const key = (id || name) as keyof typeof formData; // ✅ explicitly assert string key
+    if (!key) return; // safeguard
 
-  setFormData((prev) => ({
-    ...prev,
-    [key]: value,
-  }));
-};
+    setFormData((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
 
   return (
     <>
@@ -142,52 +146,36 @@ const handleInputChange = (
       {/* Dialog */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
         <DialogTitle>
-          <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
+          <Typography component="div" variant="h4" my={2} fontWeight={700}>
             {type === 'add' ? 'Add Floor' : 'Edit Floor'}
           </Typography>
           <Divider />
         </DialogTitle>
 
         <DialogContent>
-          <Grid container spacing={5} mb={3}>
-            <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+          <Box mt={2}>
+            <Stack spacing={2}>
               {/* Building Select */}
               <CustomFormLabel htmlFor="building">Building</CustomFormLabel>
               <Box display="flex" alignItems="center" gap={1}>
-                <Autocomplete
-                  sx={{ flex: 1 }}
-                  loading={buildingLoading}
-                  options={buildingData.map((b: BuildingType) => ({ id: b.id, label: b.name }))}
-                  value={
-                    buildingData
-                      .map((b: BuildingType) => ({ id: b.id, label: b.name }))
-                      .find((opt: { id: string; label: string }) => opt.id === formData.buildingId) || null
-                  }
-                  onChange={(_, newVal) => {
-                    const id = newVal?.id ?? '';
-                    setFormData((prev) => ({ ...prev, buildingId: id }));
+                <CustomAutocomplete<BuildingType>
+                  label="Building"
+                  options={buildingData}
+                  value={buildingData.find((b) => b.id === formData.buildingId) || null}
+                  onChange={(val) => {
+                    setFormData((prev) => ({ ...prev, buildingId: val?.id ?? '' }));
                     setFormErrors((prev) => {
-                      if (!prev.buildingId) return prev;
                       const next = { ...prev };
                       delete next.buildingId;
                       return next;
                     });
                   }}
-                  isOptionEqualToValue={(option, value) => option.id === value.id}
-                  getOptionLabel={(option) =>
-                    typeof option === 'string' ? option : option.label
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      id="buildingId"
-                      variant="outlined"
-                      fullWidth
-                      required
-                      error={!!formErrors.buildingId}
-                      helperText={formErrors.buildingId}
-                    />
-                  )}
+                  getOptionLabel={(o) => o?.name ?? ''}
+                  isOptionEqualToValue={(opt, val) => opt.id === val.id}
+                  required
+                  error={!!formErrors.buildingId}
+                  helperText={formErrors.buildingId}
+                  sx={{ flex: 1 }}
                 />
                 <AddEditBuilding type="add" />
               </Box>
@@ -203,8 +191,8 @@ const handleInputChange = (
                 error={!!formErrors.name}
                 helperText={formErrors.name}
               />
-            </Grid>
-          </Grid>
+            </Stack>
+          </Box>
         </DialogContent>
 
         <DialogActions sx={{ justifyContent: 'space-between', px: 3, pb: 2 }}>

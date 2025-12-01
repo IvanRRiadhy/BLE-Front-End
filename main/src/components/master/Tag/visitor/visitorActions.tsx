@@ -20,16 +20,17 @@ import toast from 'react-hot-toast';
 import { createPortal } from 'react-dom';
 
 // Import React Query hooks
-import { 
-  useCheckInVisitor, 
-  useCheckOutVisitor, 
-  useChangeVisitorStatus, 
+import {
+  useCheckInVisitor,
+  useCheckOutVisitor,
+  useChangeVisitorStatus,
   useExtendVisitor,
-  useVisitorOperations 
+  useVisitorOperations,
 } from 'src/hooks/useVisitorTrx';
 import { useUnassignedCard } from 'src/hooks/useCard'; // Assuming this hook exists
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
+import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 
 // Minimal type that this component needs
 type TrxVisitorDetailLike = {
@@ -68,7 +69,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
   const { data: unassignedCards = [], isLoading: isLoadingCards } = useUnassignedCard();
   useEffect(() => {
     console.log(unassignedCards);
-  },[unassignedCards])
+  }, [unassignedCards]);
 
   const [openReasonMenu, setOpenReasonMenu] = useState(false);
   const [openCardMenu, setOpenCardMenu] = useState(false);
@@ -77,7 +78,8 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
   const [selectedCard, setSelectedCard] = useState<string>('');
   const [selectedDuration, setSelectedDuration] = useState<number | ''>('');
 
-  const loading = isCheckingIn || isCheckingOut || isChangingStatus || isExtending || isLoadingCards;
+  const loading =
+    isCheckingIn || isCheckingOut || isChangingStatus || isExtending || isLoadingCards;
 
   const handleCheckin = async () => {
     if (!trxVisitorDetail?.id) {
@@ -101,7 +103,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
           console.error('Error checking in visitor:', error);
           toast.error('Error checking in visitor');
         },
-      }
+      },
     );
   };
 
@@ -127,7 +129,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
           console.error('Error extending visitor visit:', error);
           toast.error('Error extending visitor visit');
         },
-      }
+      },
     );
   };
 
@@ -155,10 +157,10 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
     }
 
     changeVisitorStatus(
-      { 
-        trxVisitorId: trxVisitorDetail.id, 
+      {
+        trxVisitorId: trxVisitorDetail.id,
         status,
-        reason: status === 'denied' || status === 'blocked' ? reason : undefined 
+        reason: status === 'denied' || status === 'blocked' ? reason : undefined,
       },
       {
         onSuccess: () => {
@@ -167,7 +169,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
               ? 'Visitor denied successfully'
               : status === 'blocked'
               ? 'Visitor blocked successfully'
-              : 'Visitor unblocked successfully'
+              : 'Visitor unblocked successfully',
           );
           setOpenReasonMenu(false);
           setReason('');
@@ -178,7 +180,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
           setOpenReasonMenu(false);
           setReason('');
         },
-      }
+      },
     );
   };
 
@@ -318,33 +320,17 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
         </DialogTitle>
         <DialogContent>
           <Grid size={12} p={1}>
-            <CustomSelect
-              name="selectedCard"
-              value={selectedCard || ''}
-              onChange={(e: any) => setSelectedCard(e.target.value)}
-              fullWidth
-              variant="outlined"
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    maxHeight: 200,
-                    width: 100,
-                  },
-                },
-              }}
-            >
-              <MenuItem value="" disabled>
-                Select Card to Assign
-              </MenuItem>
-              {unassignedCards.map((card) => {
-                console.log('Available card:', card);
-                return (
-                  <MenuItem key={card.id} value={card.id}>
-                    {card.name} | {card.cardNumber}
-                  </MenuItem>
-                );
-              })}
-            </CustomSelect>
+            <CustomAutocomplete
+              label="Select Card"
+              options={unassignedCards}
+              value={unassignedCards.find((x) => x.id === selectedCard) || null}
+              onChange={(val) => setSelectedCard(val?.id ?? '')}
+              getOptionLabel={(card) =>
+                card ? `${card.name ?? ''} | ${card.cardNumber ?? ''}` : ''
+              }
+              isOptionEqualToValue={(opt, val) => opt.id === val.id}
+              required
+            />
           </Grid>
         </DialogContent>
         <DialogActions>
@@ -412,9 +398,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
                   <Typography variant="subtitle2" color="text.secondary" fontWeight={800}>
                     Visitor Name
                   </Typography>
-                  <Typography variant="body1">
-                    {trxVisitorDetail.name || '-'}
-                  </Typography>
+                  <Typography variant="body1">{trxVisitorDetail.name || '-'}</Typography>
                 </Box>
 
                 <Box>
@@ -457,7 +441,7 @@ const VisitorActions = ({ trxVisitorDetail, floating = true }: Props) => {
             {/* RIGHT: Duration Selection */}
             <Grid size={{ xs: 12, md: 6 }} p={1}>
               <Stack spacing={1}>
-                <Typography variant="subtitle2" color="text.secondary" fontWeight={800} mb={1} >
+                <Typography variant="subtitle2" color="text.secondary" fontWeight={800} mb={1}>
                   Select Duration
                 </Typography>
                 <Stack direction="row" flexWrap="wrap" gap={1}>
