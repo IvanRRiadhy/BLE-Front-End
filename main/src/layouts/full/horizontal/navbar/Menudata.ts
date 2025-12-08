@@ -28,7 +28,7 @@ import { AlarmSettingType } from 'src/store/apps/alarmsetting/alarmSettings';
 const useMenuItems = (alarmSettings: AlarmSettingType[]) => {
   // 🔹 Determine active alarms
   const alarms = Array.isArray(alarmSettings) ? alarmSettings : [];
-
+  console.log("ALARM SETTINGS IN MENU: ", alarms);
 const normalize = (v: any) => (typeof v === 'string' ? v.toLowerCase() : '');
 
 const isActive = (name: string) =>

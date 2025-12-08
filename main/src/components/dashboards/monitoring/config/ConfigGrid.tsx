@@ -1,8 +1,7 @@
 import { Box, Grid2 as Grid, Typography, useTheme } from '@mui/material';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react'; // Add useCallback
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import ConfigFloorView from './ConfigFloorView';
-// import VideoPlayer from 'src/components/shared/VideoPlayer';
 import {
   LayoutSet,
   setScreenSettings,
@@ -12,6 +11,7 @@ import {
   updateActiveLayoutInfo,
   setSelectedScreen,
 } from 'src/store/apps/monitoring/layout';
+import ScrollArrowButton from 'src/components/shared/ScrollArrowButton'; // Add this import
 
 interface ScreenPreview {
   type: number; // 0 = Floorplan, 1 = Masked Area, 2 = CCTV
@@ -40,6 +40,80 @@ const videoJsOptions = {
     },
   ],
   html5: { hls: { overrideNative: true } },
+};
+
+// Create a ScrollableRow component for ConfigGrid
+const ScrollableRowWithArrows: React.FC<{
+  children: React.ReactNode;
+  onScroll?: () => void;
+  itemCount?: number; // Add this prop to track when items change
+}> = ({ children, onScroll, itemCount = 0 }) => {
+  // Add itemCount with default
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+
+  const checkScrollPosition = useCallback(() => {
+    if (containerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
+      setShowLeftArrow(scrollLeft > 0);
+      setShowRightArrow(scrollLeft + clientWidth < scrollWidth - 5);
+      if (onScroll) onScroll();
+    }
+  }, [onScroll]);
+
+  useEffect(() => {
+    checkScrollPosition();
+    window.addEventListener('resize', checkScrollPosition);
+    return () => window.removeEventListener('resize', checkScrollPosition);
+  }, [checkScrollPosition]);
+
+  // Check scroll position when itemCount changes (when mini screens are added/removed)
+  useEffect(() => {
+    // Use setTimeout to ensure DOM has updated
+    const timer = setTimeout(() => {
+      checkScrollPosition();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [itemCount, checkScrollPosition]);
+
+  const scrollLeft = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <Box sx={{ position: 'relative' }}>
+      <ScrollArrowButton direction="left" onClick={scrollLeft} visible={showLeftArrow} />
+
+      <ScrollArrowButton direction="right" onClick={scrollRight} visible={showRightArrow} />
+
+      <Box
+        ref={containerRef}
+        onScroll={checkScrollPosition}
+        sx={{
+          display: 'flex',
+          overflowX: 'auto',
+          gap: 1.5,
+          pb: 1,
+          scrollbarWidth: 'none',
+          '&::-webkit-scrollbar': {
+            display: 'none',
+          },
+        }}
+      >
+        {children}
+      </Box>
+    </Box>
+  );
 };
 
 const ConfigGrid: React.FC<ConfigGridProps> = ({
@@ -91,9 +165,37 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
     if (onScreenSelect) onScreenSelect(index, floorplanId);
   };
 
-  const toRoman = (num: number) =>
-    ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'][num - 1] || num.toString();
+  const toRoman = (num: number): string => {
+    if (num <= 0) return num.toString();
 
+    const romanNumerals = [
+      { value: 1000, numeral: 'M' },
+      { value: 900, numeral: 'CM' },
+      { value: 500, numeral: 'D' },
+      { value: 400, numeral: 'CD' },
+      { value: 100, numeral: 'C' },
+      { value: 90, numeral: 'XC' },
+      { value: 50, numeral: 'L' },
+      { value: 40, numeral: 'XL' },
+      { value: 10, numeral: 'X' },
+      { value: 9, numeral: 'IX' },
+      { value: 5, numeral: 'V' },
+      { value: 4, numeral: 'IV' },
+      { value: 1, numeral: 'I' },
+    ];
+
+    let result = '';
+    let remaining = num;
+
+    for (const { value, numeral } of romanNumerals) {
+      while (remaining >= value) {
+        result += numeral;
+        remaining -= value;
+      }
+    }
+
+    return result;
+  };
   const renderContent = (screen: ScreenPreview | undefined, i: number) => {
     if (!screen || (screen.type === 0 && !screen.floorplanId && !screen.displayOutput)) {
       return (
@@ -108,7 +210,6 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
       );
     }
 
-    // if (screen.type === 2) return <VideoPlayer options={videoJsOptions} />;
     if (screen.type === 1)
       return (
         <Typography variant="h6" color={selectedScreen === i ? 'success.dark' : 'text.primary'}>
@@ -124,38 +225,6 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
         containerHeight={gridDimensions.height}
         screenSettings={screenSettings?.[i]}
       />
-    );
-  };
-
-  // ---------- Explicit layouts to match the "second image" visual ----------
-  const screenBox = (index: number, height: string) => {
-    const screen = screens[index];
-    return (
-      <Grid
-        size={{ xs: 12 }}
-        onClick={() => handleScreenClick(index)}
-        sx={{
-          height,
-          overflow: 'hidden',
-          border: `${selectedScreen === index ? '5px' : '2.5px'} solid ${
-            selectedScreen === index ? theme.palette.success.dark : theme.palette.grey[800]
-          }`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRadius: 2,
-          backgroundColor:
-            screen?.type === 2 ? 'black' : screen?.type === 1 ? theme.palette.grey[200] : 'white',
-          transition: 'all 0.3s ease',
-          cursor: 'pointer',
-          '&:hover': {
-            borderColor: theme.palette.success.main,
-            backgroundColor: theme.palette.success.light,
-          },
-        }}
-      >
-        {renderContent(screen, index)}
-      </Grid>
     );
   };
 
@@ -227,21 +296,15 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
 
         return (
           <Grid key={index} size={item.size}>
-            <Box
-              sx={{
-                display: 'flex',
-                overflowX: 'auto',
-                gap: 1.5,
-                pb: 1,
-              }}
-            >
+            {/* Pass itemCount prop to track when mini screens change */}
+            <ScrollableRowWithArrows itemCount={miniScreens.length}>
               {miniScreens.slice(1).map((_, miniIndex) => (
                 <Box
                   key={miniIndex}
                   onClick={() => handleScreenClick(miniIndex + 1)}
                   sx={{
-                    minWidth: 180,
-                    height: '15vh',
+                    minWidth: 250,
+                    height: '18vh',
                     flexShrink: 0,
                     borderRadius: 2,
                     border: selectedScreen === miniIndex + 1 ? '4px solid green' : '2px solid #777',
@@ -287,8 +350,8 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
               <Box
                 onClick={handleAddMiniScreen}
                 sx={{
-                  minWidth: 180,
-                  height: '15vh',
+                  minWidth: 250,
+                  height: '18vh',
                   flexShrink: 0,
                   borderRadius: 2,
                   border: '2px dashed #aaa',
@@ -303,7 +366,7 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
               >
                 +
               </Box>
-            </Box>
+            </ScrollableRowWithArrows>
           </Grid>
         );
       }

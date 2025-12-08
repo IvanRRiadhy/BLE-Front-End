@@ -13,10 +13,7 @@ import {
 } from '@mui/material';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DepartmentType, fetchDepartments } from 'src/store/apps/crud/department';
-import { DistrictType, fetchDistricts } from 'src/store/apps/crud/district';
 import { memberType } from 'src/store/apps/crud/member';
-import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
 import { VisitorType } from 'src/store/apps/crud/visitor';
 import { SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
@@ -52,13 +49,6 @@ const BeaconDetailPopup = ({
 }: BeaconDetailPopupProps) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
-
-  const organizationData = useSelector(
-    (state: RootState) => state.organizationReducer.organizations,
-  );
-  const districtData = useSelector((state: RootState) => state.districtReducer.districts);
-  const departmentData = useSelector((state: RootState) => state.departmentReducer.departments);
-
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
   const activeLayout = useSelector((state: RootState) =>
     state.layoutReducer.layouts.find((l) => l.id === state.layoutReducer.activeLayoutId),
@@ -67,29 +57,6 @@ const BeaconDetailPopup = ({
   const handleClose = () => {
     setDetailDialogOpen(false);
     dispatch(SetSelectedBeacon({ active: false, sourceScreenid: null }));
-  };
-
-  useEffect(() => {
-    dispatch(fetchOrganizations());
-    dispatch(fetchDistricts());
-    dispatch(fetchDepartments());
-  }, [dispatch]);
-
-  const getOrganizationName = (organizationId: string) => {
-    const organization = organizationData.find(
-      (org: OrganizationType) => org.id === organizationId,
-    );
-    return organization ? organization.name : 'Unknown Organization';
-  };
-
-  const getDistrictName = (districtId: string) => {
-    const district = districtData.find((dst: DistrictType) => dst.id === districtId);
-    return district ? district.name : 'Unknown District';
-  };
-
-  const getDepartmentName = (departmentId: string) => {
-    const department = departmentData.find((dpt: DepartmentType) => dpt.id === departmentId);
-    return department ? department.name : 'Unknown Department';
   };
 
   const formatDate = (isoString: string) => {
@@ -273,7 +240,7 @@ const handleFollowOnThisScreen = () => {
                   <Typography variant="h6" fontWeight={700} component="div">
                     <Box component="span">Organization :</Box>{' '}
                     <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                      {getOrganizationName(memberDetail.organizationId)}
+                      {memberDetail.organization?.name || 'Unknown Organization'}
                     </Box>
                     <br />
                     <Box
@@ -281,8 +248,8 @@ const handleFollowOnThisScreen = () => {
                       typography={{ fontSize: '12px', fontWeight: '400' }}
                       sx={{ display: 'inline-block', ml: 'calc(1ch * 13)' }} // aligns after "Organization :"
                     >
-                      {getDepartmentName(memberDetail.departmentId)} |{' '}
-                      {getDistrictName(memberDetail.districtId)}
+                      {memberDetail.department?.name || 'Unknown Department'} |{' '}
+                      {memberDetail.district?.name || 'Unknown District'}
                     </Box>
                   </Typography>
                 </Box>
@@ -292,7 +259,7 @@ const handleFollowOnThisScreen = () => {
                   <Typography variant="h6" fontWeight={700} component="div">
                     <Box component="span">Visit Arrival :</Box>{' '}
                     <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                      {visitorDetail.visitorPeriodStart}
+                      {/* {visitorDetail.visitorPeriodStart} */}
                     </Box>
                   </Typography>
                 </>
@@ -324,7 +291,7 @@ const handleFollowOnThisScreen = () => {
                   <Typography variant="h6" fontWeight={700} component="div">
                     <Box component="span">Visit End :</Box>{' '}
                     <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                      {visitorDetail.visitorPeriodEnd}
+                      {/* {visitorDetail.visitorPeriodEnd} */}
                     </Box>
                   </Typography>
                 </>

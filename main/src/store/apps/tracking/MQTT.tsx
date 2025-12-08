@@ -7,10 +7,14 @@ import { getConfig } from 'src/config';
 
 // ✔ replace with mutable variable:
 export let MQTT_URL = '';
+export let MQTT_USERNAME = '';
+export let MQTT_PASSWORD = '';
 
 // ✔ initialize later in main.tsx
 export function initializeMQTTConfig() {
   MQTT_URL = getConfig().MQTT_URL;
+  MQTT_USERNAME = getConfig().MQTT_USERNAME;
+  MQTT_PASSWORD = getConfig().MQTT_PASSWORD;
 }
 
 const generateClientId = () => {
@@ -33,8 +37,12 @@ export function updateMQTTBrokerURL() {
 // MQTT connection options
 const options = {
   clientId: generateClientId(),
-  username: 'gNWx6jIp9X',
-  password: 'Fx6co2iTPy',
+  username: MQTT_USERNAME,
+  password: MQTT_PASSWORD,
+  // username: 'bio_mqtt',
+  // password: 'P@ssw0rd',
+  //   username: 'gNWx6jIp9X',
+  // password: 'Fx6co2iTPy',
   clean: true,
 };
 
@@ -74,6 +82,7 @@ export function startMQTTclient(messagecallback: any, topic: string) {
 
       try {
         data = JSON.parse(message_str);
+        // console.log(`[MQTT] Message received on topic "${msgTopic}":`, data);
         (messageCallbacks[msgTopic] || []).forEach((cb) => cb(data));
       } catch (e) {
         console.warn(` Invalid JSON received on topic`, msgTopic);

@@ -35,6 +35,7 @@ import {
 import { defaultCardGroupForm } from 'src/store/apps/defaultForm';
 import { fetchCard } from 'src/store/apps/crud/card';
 import { fetchCardAccess } from 'src/store/apps/crud/cardAccess';
+import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 
 interface FormType {
   type?: string;
@@ -212,13 +213,19 @@ const AddEditCardGroup = ({ type, cardGroup }: FormType) => {
                 {/* Cards Section */}
                 <Grid size={{ xs: 12, md: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
                   <CustomFormLabel>Cards</CustomFormLabel>
-                  <CustomSelect
-                    id="cards"
-                    name="cards"
-                    value=""
-                    onChange={(e: any) => {
-                      const selectedId = e.target.value;
-                      const selectedCard = cardData.find((c) => c.id === selectedId);
+                  <CustomAutocomplete<{ id: string; label: string }>
+                    label="Select Card"
+                    options={cardData
+                      .filter((c) => !(formData.cards ?? []).some((fc: any) => fc.id === c.id))
+                      .map((c) => ({
+                        id: c.id,
+                        label: c.name ?? c.cardNumber,
+                      }))}
+                    value={null} // always empty so user can repeatedly add
+                    onChange={(val) => {
+                      if (!val) return;
+
+                      const selectedCard = cardData.find((c) => c.id === val.id);
                       if (selectedCard) {
                         setFormData((prev) => ({
                           ...prev,
@@ -226,20 +233,11 @@ const AddEditCardGroup = ({ type, cardGroup }: FormType) => {
                         }));
                       }
                     }}
-                    fullWidth
-                    variant="outlined"
-                  >
-                    <MenuItem value="" disabled>
-                      Select a Card
-                    </MenuItem>
-                    {cardData
-                      .filter((c) => !(formData.cards ?? []).some((fc: any) => fc.id === c.id))
-                      .map((c) => (
-                        <MenuItem key={c.id} value={c.id}>
-                          {c.name ?? c.cardNumber}
-                        </MenuItem>
-                      ))}
-                  </CustomSelect>
+                    getOptionLabel={(o) => o.label}
+                    isOptionEqualToValue={(a, b) => a.id === b.id}
+                    // placeholder="Select a Card"
+                    sx={{ width: '100%' }}
+                  />
 
                   {/* Make this flex-grow to fill column */}
                   <Box

@@ -203,7 +203,9 @@ export const MaskedAreaSlice = createSlice({
                     const area = state.unsavedMaskedAreas[index];
                     //Check if status is valid
                     const validStatus = restrictedStatus.map((status) => status.value);
+                    console.log("Status", area.restrictedStatus, validStatus);
                     if(!validStatus.includes(area.restrictedStatus) || area.restrictedStatus === "") {
+                        
                         state.unsavedMaskedAreas.splice(index, 1);
                         return;
                     }
@@ -218,8 +220,6 @@ export const MaskedAreaSlice = createSlice({
                         state.editingMaskedArea = null;
                     }
                 }
-
-        
             },
             prepare: (id: string) => ({
                 payload: {id},

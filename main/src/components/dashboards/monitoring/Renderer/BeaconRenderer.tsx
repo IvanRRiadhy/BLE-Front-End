@@ -5,6 +5,8 @@ import { fetchMembers, memberType } from 'src/store/apps/crud/member';
 import { fetchVisitor, masterVisitorType, VisitorType } from 'src/store/apps/crud/visitor';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import { Html } from 'react-konva-utils';
+import { useAllMembers } from 'src/hooks/useMember';
+import { useAllVisitor } from 'src/hooks/useVisitor';
 
 type BeaconRendererProps = {
   id: string;
@@ -45,17 +47,19 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
     console.log('openTrackDetail', openTrackDetail);
   }, [openTrackDetail]);
 
-  useEffect(() => {
-    dispatch(fetchMembers());
-    dispatch(fetchVisitor());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchMembers());
+  //   dispatch(fetchVisitor());
+  // }, [dispatch]);
 
-  const membersData = useSelector(
-    (state: RootState) => state.memberReducer.members,
-  ) as memberType[];
-  const visitorsData = useSelector(
-    (state: RootState) => state.visitorReducer.visitors,
-  ) as VisitorType[];
+  // const membersData = useSelector(
+  //   (state: RootState) => state.memberReducer.members,
+  // ) as memberType[];
+  // const visitorsData = useSelector(
+  //   (state: RootState) => state.visitorReducer.visitors,
+  // ) as VisitorType[];
+  const {data: membersData = []} = useAllMembers();
+  const {data: visitorsData = []} = useAllVisitor();
 
   const radius = 7.5;
   const triangleHeight = 8;

@@ -33,7 +33,7 @@ interface ZoomControlsProps {
 const ZoomControls = ({
   scale,
   applyZoom,
-  minScale = 0.5,
+  minScale = 0.1,
   maxScale = 2,
 }: ZoomControlsProps) => {
   const [isHovered, setIsHovered] = useState(false);

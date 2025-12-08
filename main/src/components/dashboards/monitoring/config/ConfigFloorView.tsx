@@ -402,11 +402,11 @@ useEffect(() => {
         }}
       >
         <Grid size={{ xs: 12 }}>
-          <Typography variant="h4" fontStyle="bold" fontWeight={900} mt={0.5}>
-            Monitoring Dashboard
-          </Typography>
           <Typography variant="h6" fontStyle="bold" fontWeight={900} mt={0.5}>
-            Please select a Grid
+            Floorplan Image missing
+          </Typography>
+          <Typography variant="h6" fontWeight={900} mt={0.5}>
+            Please check your Floorplan settings
           </Typography>
         </Grid>
       </Grid>
@@ -415,8 +415,8 @@ useEffect(() => {
 
   return (
     <Box
-      onMouseEnter={() => setIsHovered(true)} // Show ZoomControls on mouse enter
-      onMouseLeave={() => setIsHovered(false)} // Hide ZoomControls on mouse leave
+      // onMouseEnter={() => setIsHovered(true)} // Show ZoomControls on mouse enter
+      // onMouseLeave={() => setIsHovered(false)} // Hide ZoomControls on mouse leave
       sx={{
         position: 'relative',
         width: '100%',
@@ -430,7 +430,7 @@ useEffect(() => {
       }}
     >
       {/* Sticky Overlay Toggle */}
-      {isHovered && !isDragging && (
+      {/* {isHovered && !isDragging && (
         <Box
           sx={{
             position: 'absolute',
@@ -465,7 +465,7 @@ useEffect(() => {
             label="Show Gateways"
           />
         </Box>
-      )}
+      )} */}
       {/* Zoomable Content */}
       <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
         {isHovered &&

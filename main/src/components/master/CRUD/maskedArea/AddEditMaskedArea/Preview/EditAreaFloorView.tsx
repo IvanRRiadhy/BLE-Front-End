@@ -1,5 +1,5 @@
 import { BASE_URL } from 'src/utils/axios';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import { Box, FormLabel } from '@mui/material';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
@@ -34,7 +34,24 @@ const EditAreaFloorView: React.FC<{
   );
 
   const [filteredUnsavedMaskedArea, setFilteredUnsavedMaskedArea] = useState<MaskedAreaType[]>([]);
+  const [cursor, setCursor] = useState('grab');
+  const [isDragging, setIsDragging] = useState('');
+  const [isHovered, setIsHovered] = useState(false);
 
+  // Container and stage management
+  const containerRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<any>(null);
+  const [containerSize, setContainerSize] = useState({ width: 1920, height: 960 });
+  const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
+
+  // Stage transform state
+  const [stageScale, setStageScale] = useState(1);
+  const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
+
+  const MIN_SCALE = 0.1;
+  const MAX_SCALE = 4;
+
+  // Filter areas based on active floorplan
   useEffect(() => {
     const filteredMaskedArea = unsavedMaskedAreas.filter(
       (maskedArea: MaskedAreaType) => maskedArea.floorplanId === activeFloorPlan?.id,
@@ -42,208 +59,228 @@ const EditAreaFloorView: React.FC<{
     setFilteredUnsavedMaskedArea(filteredMaskedArea);
   }, [unsavedMaskedAreas, activeFloorPlan]);
 
-  const [cursor, setCursor] = useState('grab');
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
-  const [scale, setScale] = useState(1); // Initial scale set to 1
-  const [image, setImage] = useState<HTMLImageElement | null>(null);
-  const MAX_SCALE = 2; // Maximum scale to prevent the image from becoming too large
-  const [minScale] = useState(0.5);
-  const [translate, setTranslate] = useState({ x: 0, y: 0 });
-  const [isPanning, setIsPanning] = useState(false);
-  const [isDragging, setIsDragging] = useState('');
-  const dragStart = useRef({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false); // State to track mouse hover
-  const floorplanImage = activeFloorPlan?.floorplanImage
-    ? activeFloorPlan.floorplanImage.startsWith('/Uploads/') // Check if the URL is already absolute
-      ? `${BASE_URL}${activeFloorPlan.floorplanImage}`
-      : activeFloorPlan.floorplanImage // Prepend BASE_URL for relative paths
-    : FloorplanHouse; // Fallback to default image if not available
-  useEffect(() => {
-    if (floorplanImage) {
-      const img = new Image();
-      img.src = floorplanImage;
-      img.onload = () => {
-        setImage(img);
-        setImgSize({ width: img.width, height: img.height });
-
-        if (containerRef.current) {
-          const containerWidth = containerRef.current.clientWidth;
-          const containerHeight = containerRef.current.clientHeight;
-
-          // setScale(finalScale); // Set the initial scale
-
-          // Calculate the initial translate values to center the image
-          const offsetX = containerWidth / 4;
-          const offsetY = containerHeight / 4;
-
-          setTranslate({ x: offsetX, y: offsetY });
-        }
-      };
-      img.onerror = () => {
-        console.error('Failed to load image:', floorplanImage);
-      };
-    }
-  }, [activeFloorPlan]);
-
+  // Load floorplan data
   useEffect(() => {
     dispatch(fetchFloorplan());
     dispatch(fetchMaskedAreas());
   }, [dispatch]);
 
-  const calculateImageDimensions = (
-    containerWidth: number,
-    containerHeight: number,
-    imageWidth: number,
-    imageHeight: number,
-  ) => {
-    const containerRatio = containerWidth / containerHeight;
-    const imageRatio = imageWidth / imageHeight;
+  // Get floorplan image URL
+  const floorplanImage = activeFloorPlan?.floorplanImage
+    ? activeFloorPlan.floorplanImage.startsWith('/Uploads/')
+      ? `${BASE_URL}${activeFloorPlan.floorplanImage}`
+      : activeFloorPlan.floorplanImage
+    : FloorplanHouse;
 
-    if (imageRatio > containerRatio) {
-      // Image is wider than the container
-      return {
-        width: containerWidth,
-        height: containerWidth / imageRatio,
-        originalWidth: imageWidth,
-        originalHeight: imageHeight,
-      };
-    } else {
-      // Image is taller than the container
-      return {
-        width: containerHeight * imageRatio,
-        height: containerHeight,
-        originalWidth: imageWidth,
-        originalHeight: imageHeight,
-      };
-    }
-  };
-
-  const handleZoom = (event: React.WheelEvent) => {
-    event.preventDefault(); // Prevent default scrolling behavior
-    if (!zoomable) return; // Prevent zooming if zoomable is false
-    if (containerRef.current && imgSize && imgSize.width > 1 && imgSize.height > 1) {
-      const delta = event.deltaY * -0.001; // Adjust zoom sensitivity
-      const rect = containerRef.current.getBoundingClientRect();
-      if (!imgSize || !containerRef.current) return;
-
-      // Mouse position relative to the container
-      const mouseX = event.clientX - rect.left;
-      const mouseY = event.clientY - rect.top;
-      // Calculate the new scale
-      const containerWidth = containerRef.current.clientWidth;
-      const containerHeight = containerRef.current.clientHeight;
-
-      // const widthRatio = containerWidth / imgSize.width;
-      // const heightRatio = containerHeight / imgSize.height;
-      // setMinScale(Math.min(widthRatio, heightRatio));
-
-      const newScale = Math.min(Math.max(scale + delta, minScale), MAX_SCALE);
-
-      //console.log('New Scale:', newScale); // Debug new scale
-      const scaledWidth = imgSize.width * newScale;
-      const scaledHeight = imgSize.height * newScale;
-
-      // Calculate translation to keep zoom centered at mouse position
-      const offsetX = mouseX - (mouseX - translate.x) * (newScale / scale);
-      const offsetY = mouseY - (mouseY - translate.y) * (newScale / scale);
-
-      const minX = Math.min(0, containerWidth - scaledWidth);
-      const minY = Math.min(0, containerHeight - scaledHeight);
-      // console.log('Unsaved Devices:', unsavedDevices);
-      // Update the scale
-      setScale(newScale);
-      setTranslate({
-        x: Math.max(minX, offsetX),
-        y: Math.max(minY, offsetY),
-      });
-      //console.log('New Scale:', newScale);
-      //console.log('New Translate:', translate);
-    }
-  };
-
+  // Load image to get natural dimensions
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    if (!floorplanImage) return;
 
-    const handleWheel = (event: WheelEvent) => {
-      if (!event.ctrlKey) return;
-      event.preventDefault();
-      handleZoom(event as unknown as React.WheelEvent);
+    const img = new Image();
+    img.src = floorplanImage;
+
+    img.onload = () => {
+      setNaturalSize({
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+      });
+    };
+  }, [floorplanImage]);
+
+  // Container resize handler
+  useEffect(() => {
+    // const updateContainerSize = () => {
+    if (containerRef.current) {
+      setContainerSize({
+        width: containerRef.current.clientWidth,
+        height: containerRef.current.clientHeight,
+      });
+    }
+    // };
+
+    // updateContainerSize();
+    // window.addEventListener('resize', updateContainerSize);
+    // return () => window.removeEventListener('resize', updateContainerSize);
+  }, [floorplanImage, containerRef]);
+
+  // Global wheel event handler to prevent browser zoom when Ctrl is pressed
+  useEffect(() => {
+    const handleWheelGlobal = (e: WheelEvent) => {
+      // Only prevent browser zoom when Ctrl is pressed
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
     };
 
-    container.addEventListener('wheel', handleWheel, { passive: false });
+    // Use capture phase to intercept the event early
+    document.addEventListener('wheel', handleWheelGlobal, {
+      passive: false,
+      capture: true,
+    });
 
     return () => {
-      container.removeEventListener('wheel', handleWheel);
+      document.removeEventListener('wheel', handleWheelGlobal, { capture: true });
     };
-  }, [handleZoom]);
+  }, []);
 
+  // Also prevent default for Ctrl + and Ctrl -
   useEffect(() => {
-    if (containerRef.current && imgSize && imgSize.width > 1 && imgSize.height > 1) {
-      // const containerWidth = containerRef.current.clientWidth;
-      // const containerHeight = containerRef.current.clientHeight;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '=')) {
+        e.preventDefault();
+      }
+    };
 
-      // const widthRatio = containerWidth / imgSize.width;
-      // const heightRatio = containerHeight / imgSize.height;
-      // setMinScale(Math.min(widthRatio, heightRatio));
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
-      //console.log('Resetting scale to minScale:', minScale); // Debug scale reset
-      setScale(minScale);
-    }
-  }, [imgSize]); // Reset scale when imgSize changes
-  useEffect(() => {
-    if (!zoomable) setCursor('default');
-  }, [zoomable]);
+  // Simplified panning
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (!zoomable) return;
+      if (e.button !== 0) return; // Only left mouse button
 
-  const handleMouseDown = (event: React.MouseEvent) => {
-    if (!zoomable) return;
-    if (cursor === 'grab') setCursor('grabbing');
-    setIsPanning(true);
-    dragStart.current = { x: event.clientX - translate.x, y: event.clientY - translate.y };
+      // Check if we're already dragging something in Konva
+      if (isDragging || drawingMaskedArea) {
+        return;
+      }
 
-    // if (containerRef.current) containerRef.current.style.cursor = 'grabbing';
-  };
+      const container = containerRef.current;
+      if (!container) return;
 
-  const handleMouseMove = (event: React.MouseEvent) => {
-    if (!isPanning || !containerRef.current || !imgSize || !zoomable) return;
-    let pannable = true;
+      // Get the Konva canvas element
+      const canvas = container.querySelector('canvas');
 
-    // if (editingDevice && isDragging === editingDevice?.id) {
-    //   pannable = false;
-    // }
-    if (isDragging) pannable = false;
-    if (pannable) {
-      const containerWidth = containerRef.current.clientWidth;
-      const containerHeight = containerRef.current.clientHeight;
+      // Check if we clicked on empty canvas area (not on a shape)
+      // Konva sets the cursor to 'grab' when not over a shape
+      // We check the computed cursor style
+      if (canvas) {
+        const computedStyle = window.getComputedStyle(canvas);
+        const canvasCursor = computedStyle.cursor;
 
-      const scaledWidth = imgSize.width * scale;
-      const scaledHeight = imgSize.height * scale;
+        // If canvas cursor is not 'grab', it means we're over a shape
+        if (canvasCursor !== 'grab' && canvasCursor !== 'default') {
+          return; // Don't pan if we're over a shape
+        }
+      }
 
-      const minX = Math.min(-scaledWidth, containerWidth - scaledWidth); // Left boundary
-      const maxX = containerWidth; // Right boundary
-      const minY = Math.min(-scaledHeight, containerHeight - scaledHeight); // Top boundary
-      const maxY = containerHeight; // Bottom boundary
+      // If we get here, we're either clicking on the container background
+      // or on empty canvas area
+      container.style.cursor = 'grabbing';
+      setCursor('grabbing');
 
-      const newX = event.clientX - dragStart.current.x;
-      const newY = event.clientY - dragStart.current.y;
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const startPosX = stagePos.x;
+      const startPosY = stagePos.y;
 
-      setTranslate({
-        x: Math.min(maxX, Math.max(minX, newX)), // Clamp X
-        y: Math.min(maxY, Math.max(minY, newY)), // Clamp Y
+      const handleMouseMove = (moveEvent: MouseEvent) => {
+        const deltaX = moveEvent.clientX - startX;
+        const deltaY = moveEvent.clientY - startY;
+
+        setStagePos({
+          x: startPosX + deltaX,
+          y: startPosY + deltaY,
+        });
+      };
+
+      const handleMouseUp = () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+        if (container) {
+          container.style.cursor = 'grab';
+          setCursor('grab');
+        }
+      };
+
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+
+      e.preventDefault();
+    },
+    [zoomable, isDragging, drawingMaskedArea, stagePos, cursor],
+  );
+
+  // Wheel zoom handler
+  const handleWheel = useCallback(
+    (e: React.WheelEvent) => {
+      // Always prevent default for Ctrl+wheel to stop browser zoom
+      if (e.ctrlKey) {
+        // e.preventDefault();
+        e.stopPropagation();
+      }
+
+      if (!zoomable) return;
+      if (!e.ctrlKey) return;
+
+      const container = containerRef.current;
+      if (!container) return;
+
+      const rect = container.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const delta = -e.deltaY * 0.0015;
+      setStageScale((prev) => {
+        const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev + delta));
+        const scaleRatio = newScale / prev;
+        setStagePos((pos) => {
+          const newX = mouseX - scaleRatio * (mouseX - pos.x);
+          const newY = mouseY - scaleRatio * (mouseY - pos.y);
+          return { x: newX, y: newY };
+        });
+        return newScale;
       });
-    }
-  };
+    },
+    [zoomable],
+  );
 
-  const handleMouseUp = () => {
-    setIsPanning(false);
-    if (cursor === 'grabbing') setCursor('grab'); // Reset cursor
-  };
+  // Apply zoom function for ZoomControls
+  const applyZoom = useCallback((newScale: number) => {
+    const container = containerRef.current;
+    if (!container) {
+      setStageScale(Math.min(MAX_SCALE, Math.max(MIN_SCALE, newScale)));
+      return;
+    }
+
+    const centerX = container.clientWidth / 2;
+    const centerY = container.clientHeight / 2;
+    setStageScale((prev) => {
+      const clamped = Math.min(MAX_SCALE, Math.max(MIN_SCALE, newScale));
+      const ratio = clamped / prev;
+      setStagePos((pos) => {
+        const newX = centerX - ratio * (centerX - pos.x);
+        const newY = centerY - ratio * (centerY - pos.y);
+        return { x: newX, y: newY };
+      });
+      return clamped;
+    });
+  }, []);
+
+  // Update cursor based on state
+  useEffect(() => {
+    if (!zoomable) {
+      setCursor('default');
+    } else if (drawingMaskedArea) {
+      setCursor('crosshair');
+    } else if (isDragging) {
+      setCursor('move');
+    } else {
+      setCursor('grab');
+    }
+  }, [zoomable, drawingMaskedArea, isDragging]);
+
+  if (!naturalSize.width || !naturalSize.height) {
+    return <div>Loading floorplan...</div>;
+  }
 
   return (
     <Box
-      onMouseEnter={() => setIsHovered(true)} // Show ZoomControls on mouse enter
-      onMouseLeave={() => setIsHovered(false)} // Hide ZoomControls on mouse leave
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       sx={{
         position: 'relative',
         width: '100%',
@@ -252,11 +289,14 @@ const EditAreaFloorView: React.FC<{
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        overflow: 'hidden', // Allow scrolling
+        overflow: 'hidden',
         cursor: cursor,
+        // Add CSS to prevent browser zoom
+        touchAction: 'none', // Prevent touch zoom
       }}
     >
-      {editingMaskedArea && (
+      {/* Instruction Overlays */}
+      {editingMaskedArea && !drawingMaskedArea && (
         <Box
           sx={{
             position: 'absolute',
@@ -265,7 +305,6 @@ const EditAreaFloorView: React.FC<{
             zIndex: 10,
             width: '280px',
             background: 'rgba(37, 31, 31, 0.77)',
-            opacity: 0.7,
             borderRadius: 2,
             boxShadow: 2,
             p: 1,
@@ -371,6 +410,7 @@ const EditAreaFloorView: React.FC<{
           </Box>
         </Box>
       )}
+
       {drawingMaskedArea && (
         <Box
           sx={{
@@ -380,7 +420,6 @@ const EditAreaFloorView: React.FC<{
             zIndex: 10,
             width: '280px',
             background: 'rgba(37, 31, 31, 0.77)',
-            opacity: 0.7,
             borderRadius: 2,
             boxShadow: 2,
             p: 1,
@@ -428,95 +467,67 @@ const EditAreaFloorView: React.FC<{
           </Box>
         </Box>
       )}
-      {/* Zoomable Content */}
-      <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
-        {isHovered &&
-          !isPanning &&
-          zoomable && ( // Only show ZoomControls when hovered
-            <ZoomControls
-              scale={scale}
-              setScale={setScale}
-              applyZoom={(newScale) => setScale(newScale)}
-              minScale={0.5}
-              maxScale={2}
-            />
-          )}
-        <Box
-          ref={containerRef}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          sx={{
-            position: 'relative',
-            width: '100%',
-            maxWidth: '100vw',
-            height: '100%',
-            maxHeight: 'calc(100vh -200px)',
-            display: 'flex',
-            flexGrow: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            overflow: 'hidden',
-            //transform: `scale(${scale})`,
-            transformOrigin: 'center', // Zoom to the center
-            // cursor: isPanning ? 'grabbing' : 'grab', // Change cursor on drag
+
+      {/* Zoom Controls */}
+      {isHovered && zoomable && !isDragging && !drawingMaskedArea && (
+        <ZoomControls
+          scale={stageScale}
+          setScale={setStageScale}
+          applyZoom={applyZoom}
+          minScale={MIN_SCALE}
+          maxScale={MAX_SCALE}
+        />
+      )}
+
+      {/* Container for Konva */}
+      <Box
+        ref={containerRef}
+        onMouseDown={handleMouseDown}
+        onWheel={handleWheel}
+        onKeyDown={(e) => {
+          // Prevent browser zoom when Ctrl + or - is pressed
+          if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '=')) {
+            e.preventDefault();
+          }
+        }}
+        sx={{
+          width: '100%',
+          maxWidth: '100vw',
+          height: '100%',
+          maxHeight: 'calc(100vh - 200px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          overflow: 'hidden',
+          position: 'relative',
+          userSelect: 'none',
+          outline: 'none',
+        }}
+        tabIndex={0}
+      >
+        <EditAreaRenderer
+          width={containerSize.width}
+          height={containerSize.height}
+          originalWidth={naturalSize.width || 2048}
+          originalHeight={naturalSize.height || 2048}
+          imageSrc={floorplanImage}
+          scale={activeFloorPlan?.meterPerPx || 1}
+          maskedAreas={filteredUnsavedMaskedArea}
+          activeMaskedArea={activeMaskedArea}
+          setIsDragging={setIsDragging}
+          setCursor={setCursor}
+          preview={preview}
+          stageScale={stageScale}
+          stageX={stagePos.x}
+          stageY={stagePos.y}
+          stageRef={stageRef}
+          // Pass the preventDefault function to Konva stage
+          onWheel={(e: any) => {
+            if (e.evt.ctrlKey) {
+              e.evt.preventDefault();
+            }
           }}
-        >
-          <Box
-            // onMouseEnter={() => {
-            //   if (!isPanning) {
-            //     document.body.style.cursor = 'grab'; // Ensure cursor resets when re-entering
-            //   }
-            // }}
-            // onMouseLeave={() => {
-            //   handleMouseUp(); // Ensure drag stops if mouse leaves container
-            //   document.body.style.cursor = ''; // Reset when leaving
-            // }}
-            sx={{
-              position: 'relative',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              // zIndex: 2,
-              width: `100%`,
-              height: `100%`,
-              minWidth: '100%',
-              minHeight: '100%',
-              transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
-              transformOrigin: 'top left',
-            }}
-          >
-            {/* <Stage
-                        width={containerRef.current ? containerRef.current.clientWidth : 800}
-                        height={containerRef.current ? containerRef.current.clientHeight : 600}
-                        style={{ position: 'absolute', top: 0, left: 0 }}
-                      >
-                        <Layer> */}
-            {/* Render the image */}
-            {image && imgSize && containerRef.current && (
-              <>
-                <EditAreaRenderer
-                  {...calculateImageDimensions(
-                    containerRef.current.clientWidth,
-                    containerRef.current.clientHeight,
-                    imgSize.width,
-                    imgSize.height,
-                  )}
-                  imageSrc={floorplanImage}
-                  scale={activeFloorPlan?.meterPerPx || 1}
-                  maskedAreas={filteredUnsavedMaskedArea}
-                  activeMaskedArea={activeMaskedArea}
-                  setIsDragging={setIsDragging}
-                  setCursor={setCursor}
-                  preview={preview}
-                />
-              </>
-            )}
-            {/* </Layer>
-                      </Stage> */}
-          </Box>
-        </Box>
+        />
       </Box>
     </Box>
   );

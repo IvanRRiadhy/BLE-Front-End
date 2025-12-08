@@ -80,6 +80,7 @@ type DeviceRendererProps = {
   showOverPopulate: boolean;
   showStayOnArea: boolean;
   showBoundary: boolean;
+  showBeacons: boolean;
   topic: string;
   detailDialogOpen?: boolean;
   setDetailDialogOpen?: (open: boolean) => void;
@@ -121,6 +122,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     showOverPopulate,
     showStayOnArea,
     showBoundary,
+    showBeacons,
     topic,
     detailDialogOpen,
     setDetailDialogOpen,
@@ -153,6 +155,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
 
   const refreshTrigger = useSelector((state) => state.BeaconReducer.refreshTrigger);
   const beaconData = useSelector((state) => state.BeaconReducer.beaconsByTopic[topic]);
+  const beacons = useSelector((state) => state.BeaconReducer.beaconsByTopic);
   const [highlightTopic, setHighlightTopic] = useState<string | null>(null);
   const [highlightedFloorplan, setHighlightedFloorplan] = useState<string | null>(null);
   const [highlightedArea, setHighlightedArea] = useState<string | null>(null);
@@ -246,6 +249,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
 
   // animate beacons
   useEffect(() => {
+    console.log("ALL BEACON: ", beacons);
     Object.entries(lastSeenBeacons).forEach(([beaconId, beacon]) => {
       const point = { x: beacon.x, y: beacon.y };
       const prev = animatedBeacons[beaconId] || point;
@@ -484,7 +488,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
         {showGates && devices.map((d: FloorplanDeviceType) => renderDeviceShape(d))}
 
         {/* Beacons */}
-        {Object.entries(lastSeenBeacons)
+        {showBeacons && Object.entries(lastSeenBeacons)
           .filter(([beaconId]) => showOtherBeacons || beaconId === focusBeaconId)
           .map(([beaconId, beacon]) => {
             const anim = animatedBeacons[beaconId] || beacon;

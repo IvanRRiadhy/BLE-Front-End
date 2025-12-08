@@ -4,6 +4,8 @@ export interface RuntimeConfig {
   MQTT_URL: string;
   NTFY_URL: string;
   ALARM_TOPIC: string;
+  MQTT_USERNAME: string;
+  MQTT_PASSWORD: string;
 }
 
 let runtimeConfig: RuntimeConfig | null = null;

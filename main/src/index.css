@@ -55,6 +55,20 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* .konva-wrapper canvas {
+  transform: none !important;
+  image-rendering: pixelated;
+} */
+
+html, body {
+  overscroll-behavior: none;
+}
+
+.konva-container {
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

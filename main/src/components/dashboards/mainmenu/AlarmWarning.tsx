@@ -42,10 +42,11 @@ const AlarmWarning = () => {
   const alarmSettings: AlarmSettingType[] = useSelector(
     (state: RootState) => state.AlarmSettingReducer.alarmSettingAll,
   );
+  const settings = Array.isArray(alarmSettings) ? alarmSettings : [];
   const filteredAlarmRecord: AlarmTriggerType[] = alarmRecordData.filter((item) => {
-    const matchingSetting = alarmSettings.find(
+    const matchingSetting = settings.find(
       (setting) =>
-        setting.alarmCategory.toLowerCase() === item.alarmRecordStatus.toLowerCase(),
+        setting.alarmCategory?.toLowerCase() === item.alarmRecordStatus?.toLowerCase(),
     );
     return matchingSetting && matchingSetting.isEnabled;
   });

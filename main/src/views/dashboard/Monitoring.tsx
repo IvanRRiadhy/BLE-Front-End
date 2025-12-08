@@ -1,4 +1,4 @@
-import { Box, Toolbar, styled } from '@mui/material';
+import { Box, Grid2 as Grid, Toolbar, styled } from '@mui/material';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import PageContainer from 'src/components/container/PageContainer';
 import { useTheme } from '@mui/material';
@@ -99,39 +99,28 @@ const Monitoring = () => {
         title="Monitoring Dashboard"
         description="This is the Monitoring Dashboard page"
       >
-        <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%', height: 'calc(100vh - 150px)' }}>
           <MonitoringSidebar />
-
-          <Box
-            mt={0}
-            sx={{
-              flexGrow: 1,
-              margin: 0,
-              padding: 0,
-              transition: theme.transitions.create('margin-left', {
-                duration: theme.transitions.duration.shortest,
-              }),
-            }}
-          >
-            {/* The grid updates automatically based on the selected layout */}
-            <MonitoringGrid
-              screenId={screenId}
-              grid={grid}
-              floorIds={floorIds}
-              screenSettings={screenSettings}
-              screenDisplay={screenDisplay}
-              screenType={screenType}
-            />
+          
+          <Box sx={{ flex: 1, overflow: 'hidden', pl: 1 }}>
+            <Grid container>
+              <Grid size={{ xs: 12 }}>
+                <MonitoringGrid
+                  screenId={screenId}
+                  grid={grid}
+                  floorIds={floorIds}
+                  screenSettings={screenSettings}
+                  screenDisplay={screenDisplay}
+                  screenType={screenType}
+                />
+              </Grid>
+            </Grid>
           </Box>
         </Box>
       </PageContainer>
 
       <MonitoringFooter />
-      <AlarmPopup
-        alarm={latest}
-        open={open}
-        onClose={() => dispatch(hideAlarmPopup())}
-      />
+      <AlarmPopup alarm={latest} open={open} onClose={() => dispatch(hideAlarmPopup())} />
     </>
   );
 };

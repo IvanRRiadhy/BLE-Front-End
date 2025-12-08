@@ -1,5 +1,5 @@
 import { BASE_URL } from 'src/utils/axios';
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import { Box, Switch, FormControlLabel } from '@mui/material';
 import ZoomControls from 'src/components/shared/ZoomControls';
@@ -27,7 +27,7 @@ const EditDeviceFloorView: React.FC<{ zoomable: boolean }> = ({ zoomable }) => {
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorPlan?.id);
 
   const [showArea, setShowArea] = useState(true);
-  const [showEffectiveArea, setShowEffectiveArea] = useState(false);
+  const [showEffectiveArea, setShowEffectiveArea] = useState(true);
   const [isDraggingDevice, setIsDraggingDevice] = useState(false);
 
   const [filteredUnsavedDevices, setFilteredUnsavedDevices] = useState<FloorplanDeviceType[]>([]);
@@ -39,146 +39,32 @@ const EditDeviceFloorView: React.FC<{ zoomable: boolean }> = ({ zoomable }) => {
     setFilteredUnsavedDevices(filteredDevices);
   }, [unsavedDevices, activeFloorPlan]);
 
-  // container ref, stage ref
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  // Container and stage management
+  const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<any>(null);
-
-  // Image handling: preview + full image are loaded in child; we still need original image size props.
-  // We'll compute container dimensions and pass width/height to renderer
-  const [containerSize, setContainerSize] = useState({ width: 800, height: 600 });
+  const [containerSize, setContainerSize] = useState({ width: 1920, height: 960 });
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
 
-  useEffect(() => {
-    const resize = () => {
-      if (containerRef.current) {
-        setContainerSize({
-          width: containerRef.current.clientWidth,
-          height: containerRef.current.clientHeight,
-        });
-      }
-    };
-    resize();
-    window.addEventListener('resize', resize);
-    return () => window.removeEventListener('resize', resize);
-  }, []);
-
-  // Stage transform state (we handle pan/zoom inside Stage)
+  // Stage transform state
   const [stageScale, setStageScale] = useState(1);
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
 
-  // We'll compute an initial scale to fit the image to container. Use activeFloorPlan.meterPerPx as fallback.
-  // The renderer uses bgImage natural size; we can't read that here, but we can set minScale = 0.5 default
-  const MIN_SCALE = 0.5;
+  const MIN_SCALE = 0.1;
   const MAX_SCALE = 4;
 
-  // Zoom controls
+  // UI state
+  const [cursor, setCursor] = useState('grab');
+  const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Handle wheel: zoom around mouse position
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleWheel = (ev: WheelEvent) => {
-      if (!zoomable) return;
-      // Only when ctrlKey is pressed (your previous behaviour)
-      if (!ev.ctrlKey) return;
-      ev.preventDefault();
-
-      const rect = container.getBoundingClientRect();
-      const mouseX = ev.clientX - rect.left;
-      const mouseY = ev.clientY - rect.top;
-
-      const delta = -ev.deltaY * 0.0015; // sensitivity
-      setStageScale((prev) => {
-        const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev + delta));
-        // adjust stagePos so zoom centers on mouse
-        const scaleRatio = newScale / prev;
-        setStagePos((pos) => {
-          // translate to keep focus
-          const newX = mouseX - scaleRatio * (mouseX - pos.x);
-          const newY = mouseY - scaleRatio * (mouseY - pos.y);
-          return { x: newX, y: newY };
-        });
-        return newScale;
-      });
-    };
-
-    container.addEventListener('wheel', handleWheel, { passive: false });
-    return () => container.removeEventListener('wheel', handleWheel);
-  }, [zoomable]);
-
-  // Mouse pan handling
-  const isPanning = useRef(false);
-  const panStart = useRef({ x: 0, y: 0 });
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const onDown = (ev: MouseEvent) => {
-      if (ev.button !== 0) return;
-      if (isDraggingDevice) return; // This is correct and will always be up-to-date.
-
-      isPanning.current = true;
-      panStart.current = { x: ev.clientX - stagePos.x, y: ev.clientY - stagePos.y };
-      container.style.cursor = 'grabbing';
-    };
-
-    const onMove = (ev: MouseEvent) => {
-      if (!isPanning.current) return;
-      setStagePos({
-        x: ev.clientX - panStart.current.x,
-        y: ev.clientY - panStart.current.y,
-      });
-    };
-
-    const onUp = () => {
-      isPanning.current = false;
-      if (container) container.style.cursor = 'grab';
-    };
-
-    container.addEventListener('mousedown', onDown);
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-
-    return () => {
-      container.removeEventListener('mousedown', onDown);
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-    };
-  }, [stagePos, isDraggingDevice]); // ONLY depend on isDraggingDevice
-
-  // expose applyZoom for ZoomControls
-  const applyZoom = (newScale: number) => {
-    const container = containerRef.current;
-    if (!container) {
-      setStageScale(Math.min(MAX_SCALE, Math.max(MIN_SCALE, newScale)));
-      return;
-    }
-    // center zoom to middle of container
-    const centerX = container.clientWidth / 2;
-    const centerY = container.clientHeight / 2;
-    setStageScale((prev) => {
-      const clamped = Math.min(MAX_SCALE, Math.max(MIN_SCALE, newScale));
-      const ratio = clamped / prev;
-      setStagePos((pos) => {
-        const newX = centerX - ratio * (centerX - pos.x);
-        const newY = centerY - ratio * (centerY - pos.y);
-        return { x: newX, y: newY };
-      });
-      return clamped;
-    });
-  };
-
-  // If you want to auto-center image on load, you can call this when bgImage natural size is known.
-  // However the renderer loads the image and renders at natural size, so we will not set initial stagePos here.
-
+  // Get floorplan image URL
   const floorplanImage = activeFloorPlan?.floorplanImage
     ? activeFloorPlan.floorplanImage.startsWith('/Uploads/')
       ? `${BASE_URL}${activeFloorPlan.floorplanImage}`
       : activeFloorPlan.floorplanImage
     : FloorplanHouse;
 
+  // Load image to get natural dimensions
   useEffect(() => {
     if (!floorplanImage) return;
 
@@ -193,6 +79,181 @@ const EditDeviceFloorView: React.FC<{ zoomable: boolean }> = ({ zoomable }) => {
     };
   }, [floorplanImage]);
 
+  // Container resize handler
+  useEffect(() => {
+    const updateContainerSize = () => {
+      if (containerRef.current) {
+        setContainerSize({
+          width: containerRef.current.clientWidth,
+          height: containerRef.current.clientHeight,
+        });
+      }
+    };
+
+    updateContainerSize();
+    window.addEventListener('resize', updateContainerSize);
+    return () => window.removeEventListener('resize', updateContainerSize);
+  }, []);
+
+  // Global wheel event handler to prevent browser zoom when Ctrl is pressed
+  useEffect(() => {
+    const handleWheelGlobal = (e: WheelEvent) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('wheel', handleWheelGlobal, {
+      passive: false,
+      capture: true,
+    });
+
+    return () => {
+      document.removeEventListener('wheel', handleWheelGlobal, { capture: true });
+    };
+  }, []);
+
+  // Also prevent default for Ctrl + and Ctrl -
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '=')) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  // Panning handler
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (!zoomable) return;
+      if (e.button !== 0) return; // Only left mouse button
+      console.log('Mouse down for panning', isDraggingDevice, cursor, editingDevice);
+      // Don't pan if we're dragging a device
+      if (isDraggingDevice) {
+        return;
+      }
+
+      // Only allow panning when cursor is 'grab' (not over any shape)
+      if (cursor !== 'grab') {
+        return;
+      }
+
+      const container = containerRef.current;
+      if (!container) return;
+
+      container.style.cursor = 'grabbing';
+      setCursor('grabbing');
+      setIsDragging(true);
+
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const startPosX = stagePos.x;
+      const startPosY = stagePos.y;
+
+      const handleMouseMove = (moveEvent: MouseEvent) => {
+        const deltaX = moveEvent.clientX - startX;
+        const deltaY = moveEvent.clientY - startY;
+
+        setStagePos({
+          x: startPosX + deltaX,
+          y: startPosY + deltaY,
+        });
+      };
+
+      const handleMouseUp = () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+        if (container) {
+          container.style.cursor = 'grab';
+          setCursor('grab');
+        }
+        setIsDragging(false);
+      };
+
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+
+      e.preventDefault();
+    },
+    [zoomable, isDraggingDevice, cursor, stagePos],
+  );
+
+  // Wheel zoom handler
+  const handleWheel = useCallback(
+    (e: React.WheelEvent) => {
+      // Always prevent default for Ctrl+wheel to stop browser zoom
+      if (e.ctrlKey) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      if (!zoomable) return;
+      if (!e.ctrlKey) return;
+
+      const container = containerRef.current;
+      if (!container) return;
+
+      const rect = container.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const delta = -e.deltaY * 0.0015;
+      setStageScale((prev) => {
+        const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev + delta));
+        const scaleRatio = newScale / prev;
+        setStagePos((pos) => {
+          const newX = mouseX - scaleRatio * (mouseX - pos.x);
+          const newY = mouseY - scaleRatio * (mouseY - pos.y);
+          return { x: newX, y: newY };
+        });
+        return newScale;
+      });
+    },
+    [zoomable],
+  );
+
+  // Apply zoom function for ZoomControls
+  const applyZoom = useCallback((newScale: number) => {
+    const container = containerRef.current;
+    if (!container) {
+      setStageScale(Math.min(MAX_SCALE, Math.max(MIN_SCALE, newScale)));
+      return;
+    }
+
+    const centerX = container.clientWidth / 2;
+    const centerY = container.clientHeight / 2;
+    setStageScale((prev) => {
+      const clamped = Math.min(MAX_SCALE, Math.max(MIN_SCALE, newScale));
+      const ratio = clamped / prev;
+      setStagePos((pos) => {
+        const newX = centerX - ratio * (centerX - pos.x);
+        const newY = centerY - ratio * (centerY - pos.y);
+        return { x: newX, y: newY };
+      });
+      return clamped;
+    });
+  }, []);
+
+  // Update cursor based on state
+  useEffect(() => {
+    if (!zoomable) {
+      setCursor('default');
+    } else if (isDragging || isDraggingDevice) {
+      setCursor('move');
+    } else {
+      setCursor('grab');
+    }
+  }, [zoomable, isDraggingDevice, isDragging]);
+
+  if (!naturalSize.width || !naturalSize.height) {
+    return <div>Loading floorplan...</div>;
+  }
+
   return (
     <Box
       onMouseEnter={() => setIsHovered(true)}
@@ -206,7 +267,8 @@ const EditDeviceFloorView: React.FC<{ zoomable: boolean }> = ({ zoomable }) => {
         justifyContent: 'center',
         alignItems: 'center',
         overflow: 'hidden',
-        cursor: isPanning.current ? 'grabbing' : 'grab',
+        cursor: cursor,
+        touchAction: 'none', // Prevent touch zoom
       }}
     >
       {/* Sticky Overlay Toggle */}
@@ -215,12 +277,13 @@ const EditDeviceFloorView: React.FC<{ zoomable: boolean }> = ({ zoomable }) => {
           position: 'absolute',
           top: 12,
           right: 12,
-          zIndex: 10,
+          zIndex: 1000,
           width: '240px',
-          background: 'rgba(255,255,255,0.9)',
+          background: 'rgba(255,255,255,1)',
           borderRadius: 2,
           boxShadow: 2,
           p: 1,
+          pointerEvents: 'auto',
         }}
       >
         <FormControlLabel
@@ -242,19 +305,26 @@ const EditDeviceFloorView: React.FC<{ zoomable: boolean }> = ({ zoomable }) => {
       </Box>
 
       {/* Zoom Controls */}
-      {isHovered && zoomable && (
+      {isHovered && zoomable && !isDragging && !isDraggingDevice && (
         <ZoomControls
           scale={stageScale}
           setScale={setStageScale}
           applyZoom={applyZoom}
-          minScale={0.5}
-          maxScale={4}
+          minScale={MIN_SCALE}
+          maxScale={MAX_SCALE}
         />
       )}
 
       {/* Container for Konva */}
       <Box
         ref={containerRef}
+        onMouseDown={handleMouseDown}
+        onWheel={handleWheel}
+        onKeyDown={(e) => {
+          if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '=')) {
+            e.preventDefault();
+          }
+        }}
         sx={{
           width: '100%',
           maxWidth: '100vw',
@@ -265,7 +335,10 @@ const EditDeviceFloorView: React.FC<{ zoomable: boolean }> = ({ zoomable }) => {
           alignItems: 'center',
           overflow: 'hidden',
           position: 'relative',
+          userSelect: 'none',
+          outline: 'none',
         }}
+        tabIndex={0}
       >
         <EditDeviceRenderer
           width={containerSize.width}
@@ -276,7 +349,7 @@ const EditDeviceFloorView: React.FC<{ zoomable: boolean }> = ({ zoomable }) => {
           scale={activeFloorPlan?.meterPerPx || 1}
           devices={filteredUnsavedDevices}
           activeDevice={activeDevice}
-          setIsDragging={(id) => setIsDraggingDevice(Boolean(id))}
+          setIsDragging={setIsDraggingDevice}
           areas={filteredArea}
           showAreas={showArea}
           showEffectiveArea={showEffectiveArea}
@@ -284,6 +357,13 @@ const EditDeviceFloorView: React.FC<{ zoomable: boolean }> = ({ zoomable }) => {
           stageX={stagePos.x}
           stageY={stagePos.y}
           stageRef={stageRef}
+          // Pass the preventDefault function to Konva stage
+          onWheel={(e: any) => {
+            if (e.evt.ctrlKey) {
+              e.evt.preventDefault();
+            }
+          }}
+          setCursor={setCursor}
         />
       </Box>
     </Box>

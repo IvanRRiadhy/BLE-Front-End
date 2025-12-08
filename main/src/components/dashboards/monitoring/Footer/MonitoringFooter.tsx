@@ -3,6 +3,7 @@ import { Box, Typography } from '@mui/material';
 import { RootState, useSelector } from 'src/store/Store';
 import TrackingRecord from './TrackingRecord';
 import AlarmList from './Alarm';
+import NewestTrack from './NewestTrack';
 
 const MonitoringFooter = () => {
   const customizer = useSelector((state: RootState) => state.customizer);
@@ -13,7 +14,7 @@ const MonitoringFooter = () => {
 
   const sections = [
     { id: 'section1', title: 'Tracking Record', content: <TrackingRecord /> },
-    { id: 'section2', title: 'New Track', content: <TrackingRecord isNew /> },
+    { id: 'section2', title: 'New Track', content: <NewestTrack/> },
     { id: 'section3', title: 'Alarm', content: <AlarmList /> },
     // { id: 'section4', title: 'CCTV', content: 'Content for Section 4' },
   ];

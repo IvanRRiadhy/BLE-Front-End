@@ -18,6 +18,8 @@ import { fetchMemberDT, fetchMembers, memberType } from 'src/store/apps/crud/mem
 import { fetchVisitor, fetchVisitorDT, VisitorType } from 'src/store/apps/crud/visitor';
 import { SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
 import { fetchAlarmTriggerDT } from 'src/store/apps/crud/alarmTrigger';
+import { useAllMembers } from 'src/hooks/useMember';
+import { useAllVisitor } from 'src/hooks/useVisitor';
 
 interface SidebarListProps {
   filterType: string; // '', 'All', 'Tracking', 'Alarm'
@@ -44,8 +46,10 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
   const [selectedItem, setSelectedItem] = useState<ListType | null>(null);
   const [list, setList] = useState<ListType[]>([]);
 
-  const memberList: memberType[] = useSelector((s: RootState) => s.memberReducer.memberAll);
-  const visitorList: VisitorType[] = useSelector((s: RootState) => s.visitorReducer.visitorAll);
+  // const memberList: memberType[] = useSelector((s: RootState) => s.memberReducer.memberAll);
+  // const visitorList: VisitorType[] = useSelector((s: RootState) => s.visitorReducer.visitorAll);
+  const {data: memberList = []} = useAllMembers();
+  const {data: visitorList = []} = useAllVisitor();
   const beaconsByTopic = useSelector((s: RootState) => s.BeaconReducer.beaconsByTopic || {});
   const alarmTriggers = useSelector((s: RootState) => s.alarmTriggerReducer.alarmTriggers || []);
 
@@ -73,10 +77,10 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
     return `trk-${beaconId}-${area}-${t}`;
   };
 
-  useEffect(() => {
-    dispatch(fetchVisitor());
-    dispatch(fetchMembers());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchVisitor());
+  //   dispatch(fetchMembers());
+  // }, [dispatch]);
 
   useEffect(() => {
     const rowsToAppend: ListType[] = [];

@@ -72,6 +72,7 @@ const Config = () => {
     dispatch(setSelectedScreen(index));
     dispatch(setSelectedFloorplan(floorplanId || null));
     console.log(index, floorplanId);
+    console.log(layouts, activeLayoutId);
   };
 
   // const setSelectedFloorplanId = (id: string | null) => {

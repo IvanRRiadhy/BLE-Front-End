@@ -17,6 +17,7 @@ import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import { publishMQTT } from 'src/store/apps/tracking/MQTT';
 import TimeDisplay from '../horizontal/navbar/TimeDisplay';
 import { uniqueId } from 'lodash';
+import { useAllVisitor } from 'src/hooks/useVisitor';
 
 const Toolbar = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -24,31 +25,33 @@ const Toolbar = () => {
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
   const activeLayout = layouts.find((l: any) => l.id === activeLayoutId) ?? null;
 
-  const [visitorList, setVisitorList] = useState<VisitorType[]>([]);
-  const [loading, setLoading] = useState(false);
+  // const [visitorList, setVisitorList] = useState<VisitorType[]>([]);
+  const {data: visitorList = [], isLoading: loading} = useAllVisitor();
+  const filteredVisitorList = visitorList.filter((v: VisitorType) => v.bleCardNumber && v.bleCardNumber.trim() !== '');
+  // const [loading, setLoading] = useState(false);
   const [selectedVisitor, setSelectedVisitor] = useState<VisitorType | null>(null);
 
 
   // 🧠 Load visitors with BLE numbers
-  useEffect(() => {
-    const loadVisitors = async () => {
-      setLoading(true);
-      try {
-        const res = await dispatch(fetchVisitor() as any); // ✅ adjust thunk name if different
-        // const visitors = res.payload?.collection?.data ?? res.payload ?? [];
-        const filtered = res.filter(
-          (v: VisitorType) => v.bleCardNumber && v.bleCardNumber.trim() !== '',
-        );
-        // console.log('Loaded visitors with BLE:', filtered);
-        setVisitorList(filtered);
-      } catch (e) {
-        console.error('Failed to load visitors', e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadVisitors();
-  }, [dispatch]);
+  // useEffect(() => {
+  //   const loadVisitors = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const res = await dispatch(fetchVisitor() as any); // ✅ adjust thunk name if different
+  //       // const visitors = res.payload?.collection?.data ?? res.payload ?? [];
+  //       const filtered = res.filter(
+  //         (v: VisitorType) => v.bleCardNumber && v.bleCardNumber.trim() !== '',
+  //       );
+  //       // console.log('Loaded visitors with BLE:', filtered);
+  //       setVisitorList(filtered);
+  //     } catch (e) {
+  //       console.error('Failed to load visitors', e);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   loadVisitors();
+  // }, [dispatch]);
 
   // 🟢 When a visitor is chosen → Follow them
   const handleFollowVisitor = (visitor: VisitorType) => {
@@ -141,7 +144,7 @@ const Toolbar = () => {
               onChange={(e, newValue) => {
                 if (newValue) handleFollowVisitor(newValue);
               }}
-              options={visitorList}
+              options={filteredVisitorList}
               loading={loading}
               getOptionLabel={(option) => option.name}
               isOptionEqualToValue={(option, value) => option.id === value.id}

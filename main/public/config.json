@@ -4,5 +4,7 @@
   "MQTT_URL": "ws://192.168.1.116:9005",
   "NTFY_URL": "http://192.168.1.116:6099",
   "API_KEY": "FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK",
-  "NTFY_TOPIC": "alarm-ntfy"
+  "NTFY_TOPIC": "alarm-ntfy",
+  "MQTT_USERNAME": "gNWx6jIp9X",
+  "MQTT_PASSWORD": "Fx6co2iTPy"
 }

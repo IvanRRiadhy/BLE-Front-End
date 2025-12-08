@@ -7,8 +7,8 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Stage, Layer, Image as KonvaImage, Line, Circle, FastLayer } from 'react-konva';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { Stage, Layer, Image as KonvaImage, Line, Circle, FastLayer, Group } from 'react-konva';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
   FloorplanDeviceType,
@@ -43,19 +43,23 @@ interface Props {
   originalWidth: number;
   originalHeight: number;
   imageSrc?: string;
-  scale: number; // meterPerPx or device scale? kept as original prop (unused for stage transform)
+  scale: number;
   devices?: FloorplanDeviceType[];
   activeDevice?: FloorplanDeviceType | null;
-  setIsDragging: (isDragging: string) => void;
+  setIsDragging: (isDragging: boolean) => void;
   areas: MaskedAreaType[];
   showAreas: boolean;
   showEffectiveArea: boolean;
-  // Stage transform props (from parent)
   stageScale: number;
   stageX: number;
   stageY: number;
   stageRef?: React.RefObject<any>;
+  onWheel?: (e: any) => void;
+  setCursor?: (cursor: string) => void;
 }
+
+const ICON_SIZE = 36;
+const ICON_HALF = ICON_SIZE / 2;
 
 const EditDeviceRenderer: React.FC<Props> = ({
   width,
@@ -64,7 +68,7 @@ const EditDeviceRenderer: React.FC<Props> = ({
   originalHeight,
   imageSrc,
   scale,
-  devices,
+  devices = [],
   activeDevice,
   setIsDragging,
   areas,
@@ -74,6 +78,8 @@ const EditDeviceRenderer: React.FC<Props> = ({
   stageX,
   stageY,
   stageRef,
+  onWheel,
+  setCursor,
 }) => {
   const dispatch = useDispatch();
   const editingDevice = useSelector(
@@ -84,31 +90,45 @@ const EditDeviceRenderer: React.FC<Props> = ({
   );
   const isDrawingPath = Boolean(drawingPath);
   const editingPaths = editingDevice?.devicePath ?? [];
-  const [pathNodes, setPathNodes] = useState<PathNodeType[]>([]);
-  const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
 
-  // bgImage and icons (CanvasImageSource)
+  const [pathNodes, setPathNodes] = useState<PathNodeType[]>([]);
+  const [cursorWorld, setCursorWorld] = useState<{ x: number; y: number } | null>(null);
+  const [deviceDragging, setDeviceDragging] = useState(false);
+  
+  // Add a ref to track if heatmap is being generated
+  const heatmapGenerationInProgress = useRef(false);
+
+  // background images
   const [bgImage, setBgImage] = useState<HTMLImageElement | undefined>(undefined);
   const [previewImage, setPreviewImage] = useState<HTMLImageElement | undefined>(undefined);
-  const loadIcon = (src: string) => {
-    const [img, setImg] = useState<HTMLImageElement | undefined>(undefined);
-    useEffect(() => {
-      const i = new window.Image();
-      i.src = src;
-      i.onload = () => setImg(i);
-    }, [src]);
-    return img as CanvasImageSource | undefined;
-  };
 
-  const iconCCTV = loadIcon(CCTVSVG);
-  const iconGateway = loadIcon(borderGateway);
-  const iconFaceRecog = loadIcon(borderFaceRecog);
-  const iconUnknown = loadIcon(UnknownDevice);
+  // device icons - use direct image loading instead of hooks
+  const [iconCCTV, setIconCCTV] = useState<HTMLImageElement | null>(null);
+  const [iconGateway, setIconGateway] = useState<HTMLImageElement | null>(null);
+  const [iconFaceRecog, setIconFaceRecog] = useState<HTMLImageElement | null>(null);
+  const [iconUnknown, setIconUnknown] = useState<HTMLImageElement | null>(null);
 
-  // heatmap colored image produced from offscreen canvas
+  // Load device icons
+  useEffect(() => {
+    const loadIcon = (src: string, setter: React.Dispatch<React.SetStateAction<HTMLImageElement | null>>) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => setter(img);
+      img.onerror = () => console.warn(`Failed to load icon: ${src}`);
+    };
+
+    loadIcon(CCTVSVG, setIconCCTV);
+    loadIcon(borderGateway, setIconGateway);
+    loadIcon(borderFaceRecog, setIconFaceRecog);
+    loadIcon(UnknownDevice, setIconUnknown);
+  }, []);
+
+  // heatmap image produced from offscreen canvas
   const [heatmapImage, setHeatmapImage] = useState<HTMLImageElement | undefined>(undefined);
+  // Track last generated heatmap dimensions to avoid regeneration
+  const lastHeatmapDeps = useRef<string>('');
 
-  // load background image (preview first, then full)
+  // load background images with optimization for large images
   useEffect(() => {
     if (!imageSrc) {
       setPreviewImage(undefined);
@@ -116,155 +136,64 @@ const EditDeviceRenderer: React.FC<Props> = ({
       return;
     }
 
-    // try to infer a preview URL param (if backend supports). If not, preview == full.
-    const previewUrl = `${imageSrc}`; // adjust if you have resizing endpoint: `${imageSrc}?w=1200`
-
-    const p = new window.Image();
-    p.src = previewUrl;
-    p.onload = () => {
-      setPreviewImage(p);
-      // start loading full res
-      const full = new window.Image();
-      full.src = imageSrc;
-      full.onload = () => {
-        setBgImage(full);
+    // For large images, use a lower resolution preview
+    const isLargeImage = originalWidth > 3000 || originalHeight > 3000;
+    
+    if (isLargeImage && imageSrc.includes('/Uploads/')) {
+      // For large images, try to load a smaller preview first
+      const previewUrl = imageSrc.replace('/Uploads/', '/Uploads/Thumbnails/') + '?width=2000';
+      const p = new Image();
+      p.crossOrigin = 'anonymous';
+      p.src = previewUrl;
+      p.onload = () => {
+        setPreviewImage(p);
+        // Don't load full image for large images to save memory
+        setBgImage(p);
       };
-      full.onerror = () => {
-        // fallback use preview if full fails
-        if (!bgImage) setBgImage(p);
+      p.onerror = () => {
+        // Fallback to original image
+        const f = new Image();
+        f.crossOrigin = 'anonymous';
+        f.src = imageSrc;
+        f.onload = () => {
+          setBgImage(f);
+          if (!previewImage) setPreviewImage(f);
+        };
       };
-    };
-    p.onerror = () => {
-      // fallback to direct full image
-      const f = new window.Image();
-      f.src = imageSrc;
-      f.onload = () => setBgImage(f);
-    };
-  }, [imageSrc]);
-
-  useEffect(() => {
-    // debug
-    // console.log('Editing Device changed:', editingDevice);
-    // console.log('Drawing Path changed:', editingPaths);
-  }, [editingDevice, editingPaths]);
-
-  // coordinate conversions (original px <-> screen)
-  const pxToScreenX = (px: number) => (px / originalWidth) * width;
-  const pxToScreenY = (px: number) => (px / originalHeight) * height;
-  const screenToPxX = (x: number) => (x / width) * originalWidth;
-  const screenToPxY = (y: number) => (y / height) * originalHeight;
-
-  const setPointsFromNodes = (nodes: Nodes[]): number[] =>
-    nodes.flatMap((n) => [(n.x_px / originalWidth) * width, (n.y_px / originalHeight) * height]);
-
-  function isPointInPolygon(point: { x: number; y: number }, polygon: Nodes[]): boolean {
-    let inside = false;
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      const xi = polygon[i].x_px,
-        yi = polygon[i].y_px;
-      const xj = polygon[j].x_px,
-        yj = polygon[j].y_px;
-      const intersect =
-        yi > point.y !== yj > point.y &&
-        point.x < ((xj - xi) * (point.y - yi)) / (yj - yi || 0.00001) + xi;
-      if (intersect) inside = !inside;
+    } else {
+      // For normal size images, use original loading logic
+      const p = new Image();
+      p.crossOrigin = 'anonymous';
+      p.src = imageSrc;
+      p.onload = () => {
+        setPreviewImage(p);
+        const full = new Image();
+        full.crossOrigin = 'anonymous';
+        full.src = imageSrc;
+        full.onload = () => setBgImage(full);
+        full.onerror = () => {
+          if (!bgImage) setBgImage(p);
+        };
+      };
+      p.onerror = () => {
+        const f = new Image();
+        f.crossOrigin = 'anonymous';
+        f.src = imageSrc;
+        f.onload = () => setBgImage(f);
+      };
     }
-    return inside;
-  }
+  }, [imageSrc, originalWidth, originalHeight]);
 
-  const handleDragEnd = (e: any, device: FloorplanDeviceType) => {
-    setIsDragging('');
-    // note: Konva drag returns coordinates in stage pixels; our Stage has transforms applied (scale + x/y),
-    // but device icons are positioned in screen coordinates already (we compute x,y using pxToScreenX/Y)
-    const newPosX = ((e.target.x() + 18) / width) * originalWidth;
-    const newPosY = ((e.target.y() + 18) / height) * originalHeight;
+  // pointer -> world coords
+  const pointerToWorld = useCallback(
+    (pointer: { x: number; y: number } | null) => {
+      if (!pointer) return null;
+      return { x: (pointer.x - stageX) / stageScale, y: (pointer.y - stageY) / stageScale };
+    },
+    [stageScale, stageX, stageY],
+  );
 
-    const intersectedArea = areas.find(
-      (a) => a.nodes && isPointInPolygon({ x: newPosX, y: newPosY }, a.nodes),
-    );
-
-    const newDevice = {
-      ...device,
-      floorplanMaskedAreaId: intersectedArea ? intersectedArea.id : '',
-      posX: newPosX * scale,
-      posY: newPosY * scale,
-      posPxX: newPosX,
-      posPxY: newPosY,
-    };
-
-    dispatch(editDevicePosition(newDevice));
-  };
-
-  useEffect(() => {
-    if (!drawingPath) {
-      setPathNodes([]);
-      return;
-    }
-    // Find starting device
-    const startDev = devices?.find((d) => d.id === drawingPath);
-    if (!startDev) return;
-    // First node = same device
-    setPathNodes([
-      {
-        id: crypto.randomUUID(),
-        deviceId: startDev.id,
-      } as PathNodeType,
-    ]);
-  }, [drawingPath, devices]);
-
-  const handleCanvasClickForPath = (e: any) => {
-    if (!drawingPath) return;
-    const stage = e.target.getStage();
-    const pos = stage?.getPointerPosition();
-    if (!pos) return;
-
-    // pointer pos is in stage coordinates; but since we render devices using pxToScreenX/pxToScreenY
-    // and Stage is transformed by stageScale/x/y, Konva pointer coordinates are already in *screen* stage pixels.
-    const pxX = screenToPxX(pos.x);
-    const pxY = screenToPxY(pos.y);
-
-    // Check if clicking on some device
-    const clickedDev = devices?.find((d) => {
-      const dx = pxX - d.posPxX;
-      const dy = pxY - d.posPxY;
-      return Math.sqrt(dx * dx + dy * dy) < 40;
-    });
-
-    if (clickedDev && clickedDev.id !== drawingPath) {
-      const newNodes = [
-        ...pathNodes,
-        {
-          id: uniqueId(),
-          posX: clickedDev.posX,
-          posY: clickedDev.posY,
-          posPxX: clickedDev.posPxX,
-          posPxY: clickedDev.posPxY,
-          deviceId: clickedDev.id,
-        } as PathNodeType,
-      ];
-
-      // finalize - dispatch or handle as needed; original code just cleared
-      setPathNodes([]);
-      dispatch(DrawingDevicePath(''));
-      return;
-    }
-
-    setPathNodes((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        posX: pxX * scale,
-        posY: pxY * scale,
-        posPxX: pxX,
-        posPxY: pxY,
-      } as PathNodeType,
-    ]);
-  };
-
-  // dialog state
-  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [pendingDeviceId, setPendingDeviceId] = useState<string | null>(null);
-
+  // OPTIMIZED: Heatmap generation with performance improvements
   const getRadius = useCallback(() => 5 / scale, [scale]);
 
   const jetColorMap = useCallback((v: number) => {
@@ -285,88 +214,266 @@ const EditDeviceRenderer: React.FC<Props> = ({
     return { r, g, b };
   }, []);
 
-  // create heatmap image from devices + areas (offscreen)
   useEffect(() => {
-    if (!width || !height) return;
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.max(1, Math.floor(width));
-    canvas.height = Math.max(1, Math.floor(height));
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    // Only generate heatmap if showEffectiveArea is true
+    if (!showEffectiveArea) {
+      setHeatmapImage(undefined);
+      return;
+    }
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const radius = getRadius();
-
-    const drawIntensityCircle = (cx: number, cy: number, r: number) => {
-      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-      g.addColorStop(0, 'rgba(255,255,255,1.0)');
-      g.addColorStop(1, 'rgba(255,255,255,0.0)');
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.fill();
-    };
-
-    ctx.globalCompositeOperation = 'lighter';
-
-    areas.forEach((area) => {
-      const points = (area.nodes && setPointsFromNodes(area.nodes)) || [];
-      if (!points.length) return;
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(points[0], points[1]);
-      for (let i = 2; i < points.length; i += 2) ctx.lineTo(points[i], points[i + 1]);
-      ctx.closePath();
-      ctx.clip();
-
-      devices
-        ?.filter((d) => d.floorplanMaskedAreaId === area.id && d.type === 'BleReader')
-        .forEach((d) => {
-          const x = (d.posPxX / originalWidth) * width;
-          const y = (d.posPxY / originalHeight) * height;
-          drawIntensityCircle(x, y, radius);
-        });
-
-      ctx.restore();
+    // Check if we need to regenerate heatmap
+    const currentDeps = JSON.stringify({
+      devices: devices?.map(d => ({ id: d.id, posPxX: d.posPxX, posPxY: d.posPxY, type: d.type, areaId: d.floorplanMaskedAreaId })),
+      areas: areas.map(a => ({ id: a.id, nodes: a.nodes })),
+      scale,
+      showEffectiveArea,
     });
 
-    // convert grayscale to jet
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-      const intensity = data[i];
-      const v = intensity / 255;
-      if (v <= 0.001) {
-        data[i] = 0;
-        data[i + 1] = 0;
-        data[i + 2] = 0;
-        data[i + 3] = 0;
-      } else {
-        const { r, g, b } = jetColorMap(v);
-        data[i] = r;
-        data[i + 1] = g;
-        data[i + 2] = b;
-        data[i + 3] = Math.min(255, Math.floor(200 * v + 55));
-      }
+    if (lastHeatmapDeps.current === currentDeps) {
+      return; // Skip regeneration if dependencies haven't changed
     }
-    ctx.putImageData(imageData, 0, 0);
-    const outImg = new window.Image();
-    outImg.src = canvas.toDataURL('image/png');
-    outImg.onload = () => {
-      setHeatmapImage(outImg);
-    };
-  }, [devices, areas, width, height, originalWidth, originalHeight, scale, getRadius, jetColorMap]);
 
-  // device rendering
+    // For large images, generate heatmap at reduced resolution
+    const isLargeImage = originalWidth > 3000 || originalHeight > 3000;
+    const heatmapScale = isLargeImage ? 0.5 : 1; // Reduce resolution for large images
+    
+    const scaledWidth = Math.floor(originalWidth * heatmapScale);
+    const scaledHeight = Math.floor(originalHeight * heatmapScale);
+    
+    if (scaledWidth === 0 || scaledHeight === 0) return;
+
+    // Prevent multiple simultaneous heatmap generations
+    if (heatmapGenerationInProgress.current) return;
+    heatmapGenerationInProgress.current = true;
+
+    // Use requestAnimationFrame to avoid blocking UI
+    requestAnimationFrame(() => {
+      const canvas = document.createElement('canvas');
+      canvas.width = scaledWidth;
+      canvas.height = scaledHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        heatmapGenerationInProgress.current = false;
+        return;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Only draw if we have devices
+      const bleDevices = devices?.filter(d => d.type === 'BleReader');
+      if (!bleDevices || bleDevices.length === 0) {
+        const outImg = new Image();
+        outImg.crossOrigin = 'anonymous';
+        outImg.src = canvas.toDataURL('image/png');
+        outImg.onload = () => {
+          setHeatmapImage(outImg);
+          lastHeatmapDeps.current = currentDeps;
+          heatmapGenerationInProgress.current = false;
+        };
+        return;
+      }
+
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = 'black';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const radius = getRadius() * heatmapScale;
+
+      const drawIntensityCircle = (cx: number, cy: number, r: number) => {
+        const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        g.addColorStop(0, 'rgba(255,255,255,1.0)');
+        g.addColorStop(1, 'rgba(255,255,255,0.0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+      };
+
+      ctx.globalCompositeOperation = 'lighter';
+
+      // Draw intensities per area (clipped) with scaled coordinates
+      areas.forEach((area) => {
+        const nodes = area.nodes ?? [];
+        if (!nodes.length) return;
+        
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(nodes[0].x_px * heatmapScale, nodes[0].y_px * heatmapScale);
+        for (let i = 1; i < nodes.length; i++) {
+          ctx.lineTo(nodes[i].x_px * heatmapScale, nodes[i].y_px * heatmapScale);
+        }
+        ctx.closePath();
+        ctx.clip();
+
+        devices
+          ?.filter((d) => d.floorplanMaskedAreaId === area.id && d.type === 'BleReader')
+          .forEach((d) => {
+            drawIntensityCircle(d.posPxX * heatmapScale, d.posPxY * heatmapScale, radius);
+          });
+
+        ctx.restore();
+      });
+
+      // Convert to image data for color mapping
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      // Use a simpler color mapping for better performance
+      for (let i = 0; i < data.length; i += 4) {
+        const intensity = data[i];
+        const v = intensity / 255;
+        
+        if (v <= 0.001) {
+          data[i] = 0;
+          data[i + 1] = 0;
+          data[i + 2] = 0;
+          data[i + 3] = 0;
+        } else {
+          // Simplified color mapping for better performance
+          const { r, g, b } = jetColorMap(v);
+          data[i] = r;
+          data[i + 1] = g;
+          data[i + 2] = b;
+          data[i + 3] = Math.min(255, Math.floor(180 * v + 75)); // Reduced alpha for better visibility
+        }
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
+
+      const outImg = new Image();
+      outImg.crossOrigin = 'anonymous';
+      outImg.src = canvas.toDataURL('image/png');
+      outImg.onload = () => {
+        setHeatmapImage(outImg);
+        lastHeatmapDeps.current = currentDeps;
+        heatmapGenerationInProgress.current = false;
+      };
+    });
+  }, [devices, areas, originalWidth, originalHeight, scale, getRadius, jetColorMap, showEffectiveArea]);
+
+  // Rest of the component remains the same...
+  // [Keep all the existing code for Path drawing, device rendering, etc.]
+
+  // Path drawing state
+  useEffect(() => {
+    if (!drawingPath) {
+      setPathNodes([]);
+      return;
+    }
+    const startDev = devices?.find((d) => d.id === drawingPath);
+    if (!startDev) return;
+
+    setPathNodes([
+      {
+        id: crypto.randomUUID(),
+        deviceId: startDev.id,
+        posPxX: startDev.posPxX,
+        posPxY: startDev.posPxY,
+      } as PathNodeType,
+    ]);
+  }, [drawingPath, devices]);
+
+  // Canvas click for path drawing
+  const handleCanvasClickForPath = (e: any) => {
+    if (!drawingPath) return;
+    const stage = e.target.getStage();
+    const ptr = stage?.getPointerPosition();
+    const world = pointerToWorld(ptr || null);
+    if (!world) return;
+
+    const pxX = world.x;
+    const pxY = world.y;
+
+    // check if clicked on a device
+    const clickedDev = devices?.find((d) => {
+      const dx = pxX - d.posPxX;
+      const dy = pxY - d.posPxY;
+      return Math.sqrt(dx * dx + dy * dy) < 40;
+    });
+
+    if (clickedDev && clickedDev.id !== drawingPath) {
+      const newNodes = [
+        ...pathNodes,
+        {
+          id: uniqueId(),
+          posX: clickedDev.posX,
+          posY: clickedDev.posY,
+          posPxX: clickedDev.posPxX,
+          posPxY: clickedDev.posPxY,
+          deviceId: clickedDev.id,
+        } as PathNodeType,
+      ];
+
+      // finalize the path pair generation if needed
+      // original code cleared and cancelled drawing state
+      setPathNodes([]);
+      dispatch(DrawingDevicePath(''));
+      return;
+    }
+
+    setPathNodes((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        posX: pxX * scale,
+        posY: pxY * scale,
+        posPxX: pxX,
+        posPxY: pxY,
+      } as PathNodeType,
+    ]);
+  };
+
+  // Confirm dialog
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [pendingDeviceId, setPendingDeviceId] = useState<string | null>(null);
+
+  // Device drag end
+  const handleDeviceDragEnd = (e: any, device: FloorplanDeviceType) => {
+    const newPosX = e.target.x() + ICON_HALF;
+    const newPosY = e.target.y() + ICON_HALF;
+
+    const intersectedArea = areas.find(
+      (a) => a.nodes && isPointInPolygon({ x: newPosX, y: newPosY }, a.nodes),
+    );
+
+    const newDevice = {
+      ...device,
+      floorplanMaskedAreaId: intersectedArea ? intersectedArea.id : '',
+      posPxX: newPosX,
+      posPxY: newPosY,
+      posX: newPosX * scale,
+      posY: newPosY * scale,
+    };
+
+    setIsDragging(false);
+    setDeviceDragging(false);
+    dispatch(editDevicePosition(newDevice));
+  };
+
+  // isPointInPolygon
+  function isPointInPolygon(point: { x: number; y: number }, polygon: Nodes[]): boolean {
+    if (!polygon || polygon.length === 0) return false;
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const xi = polygon[i].x_px,
+        yi = polygon[i].y_px;
+      const xj = polygon[j].x_px,
+        yj = polygon[j].y_px;
+      const intersect =
+        yi > point.y !== yj > point.y &&
+        point.x < ((xj - xi) * (point.y - yi)) / (yj - yi || 0.00001) + xi;
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  // render device icon
   const renderDeviceIcon = (device: FloorplanDeviceType) => {
     const isActive = activeDevice?.id === device.id;
     const isEditing = editingDevice?.id === device.id;
-
-    let icon: CanvasImageSource | undefined = iconUnknown as unknown as CanvasImageSource;
+    
+    // Get appropriate icon
+    let icon: HTMLImageElement | null = iconUnknown;
     switch (device.type) {
       case 'Cctv':
         icon = iconCCTV;
@@ -378,11 +485,11 @@ const EditDeviceRenderer: React.FC<Props> = ({
         icon = iconFaceRecog;
         break;
       default:
-        icon = iconUnknown as unknown as CanvasImageSource;
+        icon = iconUnknown;
     }
 
-    const x = (device.posPxX / originalWidth) * width;
-    const y = (device.posPxY / originalHeight) * height;
+    const x = device.posPxX;
+    const y = device.posPxY;
 
     const handlePathClick = () => {
       if (!isDrawingPath) return;
@@ -403,7 +510,6 @@ const EditDeviceRenderer: React.FC<Props> = ({
       } as PathsType;
 
       const reversedNodes = [...forwardNodes].reverse().map((n) => ({ ...n }));
-
       reversedNodes.forEach((node, index) => {
         const orig = forwardNodes[forwardNodes.length - 1 - index];
         node.deviceId = orig.deviceId;
@@ -432,21 +538,50 @@ const EditDeviceRenderer: React.FC<Props> = ({
       dispatch(SelectFloorplanDevice(device.id));
     };
 
+    const handleDragStart = (e: any) => {
+      e.evt.stopPropagation();
+      setIsDragging(true);
+      setDeviceDragging(true);
+      if (setCursor) setCursor('move');
+    };
+
+    const handleDragEnd = (e: any) => {
+      e.evt.stopPropagation();
+      if (!isDrawingPath) {
+        handleDeviceDragEnd(e, device);
+      }
+    };
+
     return (
-      <React.Fragment key={device.id}>
-        <KonvaImage
-          image={icon as CanvasImageSource}
-          x={x - 18}
-          y={y - 18}
-          width={36}
-          height={36}
-          onClick={isDrawingPath ? undefined : handleNormalClick}
-          draggable={isEditing && !isDrawingPath}
-          onMouseDown={() => !isDrawingPath && setIsDragging(device.id)}
-          onDragEnd={(e) => !isDrawingPath && handleDragEnd(e, device)}
-          stroke={isActive ? 'lightgreen' : 'transparent'}
-          strokeWidth={isActive ? 5 : 0}
-        />
+      <Group key={device.id}>
+        {icon && (
+          <KonvaImage
+            image={icon}
+            x={x - ICON_HALF}
+            y={y - ICON_HALF}
+            width={ICON_SIZE}
+            height={ICON_SIZE}
+            onClick={isDrawingPath ? undefined : handleNormalClick}
+            draggable={isEditing && !isDrawingPath}
+            onMouseEnter={() => {
+              if (isEditing && !isDrawingPath && setCursor) {
+                setCursor('move');
+              }
+            }}
+            onMouseLeave={() => {
+              if (isEditing && !isDrawingPath && setCursor) {
+                setCursor('grab');
+              }
+            }}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onMouseDown={(e) => {
+              e.evt.stopPropagation();
+            }}
+            stroke={isActive ? 'lightgreen' : 'transparent'}
+            strokeWidth={isActive ? 5 : 0}
+          />
+        )}
         {isDrawingPath && device.id !== drawingPath && (
           <Circle
             x={x}
@@ -456,196 +591,234 @@ const EditDeviceRenderer: React.FC<Props> = ({
             strokeWidth={4}
             opacity={0.75}
             onClick={handlePathClick}
+            onMouseDown={(e) => {
+              e.evt.stopPropagation();
+            }}
           />
         )}
-      </React.Fragment>
+      </Group>
     );
   };
 
-  const getNodeScreenPos = (node: PathNodeType): { x: number; y: number } => {
+  // helper to convert node into world points for Line
+  const nodesToPoints = (nodes: Nodes[] | undefined) => {
+    if (!nodes || nodes.length === 0) return [];
+    return nodes.flatMap((n) => [n.x_px, n.y_px]);
+  };
+
+  // get node screen pos for drawing lines
+  const getNodeWorldPos = (node: PathNodeType): { x: number; y: number } => {
     if (node.deviceId) {
       const dev = devices?.find((d) => d.id === node.deviceId);
       if (dev) {
-        return {
-          x: pxToScreenX(dev.posPxX),
-          y: pxToScreenY(dev.posPxY),
-        };
+        return { x: dev.posPxX, y: dev.posPxY };
       }
     }
-    return {
-      x: pxToScreenX(node.posPxX ?? 0),
-      y: pxToScreenY(node.posPxY ?? 0),
-    };
+    return { x: node.posPxX ?? 0, y: node.posPxY ?? 0 };
   };
 
-  // helper to get image natural size safely
-  function getImageSize(src?: HTMLImageElement | undefined) {
-    if (!src) return { width: 0, height: 0 };
-    return {
-      width: src.naturalWidth || (src as any).width || 0,
-      height: src.naturalHeight || (src as any).height || 0,
-    };
+  // track pointer world position for dashed line
+const handleStageMouseMove = (e: any) => {
+  const stage = e.target.getStage();
+  if (!stage) return;
+  
+  const ptr = stage.getPointerPosition();
+  const world = pointerToWorld(ptr || null);
+  if (world) setCursorWorld(world);
+  else setCursorWorld(null);
+  
+  // Update cursor based on what's under the mouse
+  if (setCursor && ptr) {
+    const shape = stage.getIntersection(ptr);
+    
+    // If we're in editing mode and not over a shape, cursor should be 'grab'
+    if (editingDevice && !shape && !isDrawingPath && !deviceDragging) {
+      setCursor('grab');
+    } 
+    // If not in editing mode and not over a shape, cursor should also be 'grab'
+    else if (!editingDevice && !shape && !isDrawingPath && !deviceDragging) {
+      setCursor('grab');
+    }
+    // Note: When over a shape (device), the device's onMouseEnter sets cursor to 'move'
   }
-  const bgSize = useMemo(() => getImageSize(bgImage || previewImage), [bgImage, previewImage]);
+};
+
+  const handleRightClick = (e: any) => {
+    e.evt.preventDefault();
+    if (drawingPath) {
+      dispatch(DrawingDevicePath(''));
+      setPathNodes([]);
+    }
+  };
+
+  const handleStageMouseDown = (e: any) => {
+    if (editingDevice) {
+      e.evt.stopPropagation();
+    }
+  };
+
+  const imageToDraw = bgImage || previewImage;
 
   return (
     <>
-      <Stage
-        width={width}
-        height={height}
-        ref={stageRef as any}
-        scaleX={stageScale}
-        scaleY={stageScale}
-        x={stageX}
-        y={stageY}
-        onMouseMove={(e) => {
-          const pos = e.target.getStage()?.getPointerPosition();
-          if (pos) setCursorPos({ x: pos.x, y: pos.y });
-        }}
-        onClick={(e) => handleCanvasClickForPath(e)}
-        onContextMenu={(e) => {
-          e.evt.preventDefault();
-          if (drawingPath) {
-            dispatch(DrawingDevicePath(''));
-            setPathNodes([]);
-          }
-        }}
-      >
-        {/* Background in FastLayer for performance */}
-        <FastLayer>
-          {/* Prefer full bgImage, fallback to previewImage */}
-          {(bgImage || previewImage) && (
-            <KonvaImage
-              image={(bgImage || previewImage) as CanvasImageSource}
-              width={bgSize.width}
-              height={bgSize.height}
-              x={0}
-              y={0}
-              listening={false}
-            />
-          )}
-        </FastLayer>
-
-        <Layer listening={false}>
-          {showAreas &&
-            areas.map((area) => (
-              <Line
-                key={area.id}
-                points={setPointsFromNodes(area.nodes ?? [])}
-                stroke={darken(area.colorArea, 0.5)}
-                strokeWidth={5}
-                closed
-                fill={area.colorArea}
-                opacity={0.5}
-                globalCompositeOperation="source-over"
+      <div style={{ width, height }}>
+        <Stage
+          pixelRatio={1}
+          width={width}
+          height={height}
+          ref={stageRef as any}
+          scaleX={stageScale}
+          scaleY={stageScale}
+          x={stageX}
+          y={stageY}
+          onMouseMove={handleStageMouseMove}
+          onClick={handleCanvasClickForPath}
+          onContextMenu={handleRightClick}
+          onWheel={onWheel}
+          // onMouseDown={handleStageMouseDown}
+        >
+          {/* Background layer */}
+          <FastLayer listening={false}>
+            {imageToDraw && (
+              <KonvaImage 
+                image={imageToDraw} 
+                width={originalWidth} 
+                height={originalHeight} 
+                // OPTIMIZATION: Use caching for large images
+                {...(originalWidth > 3000 ? { listening: false, imageSmoothingEnabled: false } : {})}
               />
-            ))}
-        </Layer>
-
-        {/* Heatmap */}
-        {heatmapImage && showEffectiveArea && (
-          <FastLayer>
-            <KonvaImage
-              image={heatmapImage as CanvasImageSource}
-              x={0}
-              y={0}
-              width={width}
-              height={height}
-              opacity={0.95}
-              listening={false}
-            />
+            )}
           </FastLayer>
-        )}
 
-        {/* Drawing path layer */}
-        <Layer listening={false}>
-          {pathNodes.length > 1 &&
-            pathNodes.map((n, i) => {
-              if (i === pathNodes.length - 1) return null;
-              const next = pathNodes[i + 1];
-              const p1 = getNodeScreenPos(n);
-              const p2 = getNodeScreenPos(next);
-              return (
+          {/* OPTIMIZED: Heatmap - render at scaled resolution */}
+          {heatmapImage && showEffectiveArea && (
+            <FastLayer>
+              <KonvaImage
+                image={heatmapImage}
+                x={0}
+                y={0}
+                width={originalWidth}
+                height={originalHeight}
+                opacity={0.7} // Reduced opacity for better visibility
+                listening={false}
+                imageSmoothingEnabled={false} // Disable smoothing for better performance
+              />
+            </FastLayer>
+          )}
+
+          {/* Areas (polygons) */}
+          <Layer listening={false}>
+            {showAreas &&
+              areas.map((area) => (
                 <Line
-                  key={`seg-${i}`}
-                  points={[p1.x, p1.y, p2.x, p2.y]}
-                  stroke="yellow"
-                  strokeWidth={3}
+                  key={area.id}
+                  points={nodesToPoints(area.nodes)}
+                  stroke={darken(area.colorArea, 0.5)}
+                  strokeWidth={3} // Reduced stroke width
+                  closed
+                  fill={area.colorArea}
+                  opacity={0.4} // Reduced opacity
+                />
+              ))}
+          </Layer>
+
+          {/* Drawing path (live) */}
+          <Layer listening={false}>
+            {/* solid segments */}
+            {pathNodes.length > 1 &&
+              pathNodes.map((n, i) => {
+                if (i === pathNodes.length - 1) return null;
+                const next = pathNodes[i + 1];
+                const p1 = getNodeWorldPos(n);
+                const p2 = getNodeWorldPos(next);
+                return (
+                  <Line
+                    key={`seg-${i}`}
+                    points={[p1.x, p1.y, p2.x, p2.y]}
+                    stroke="yellow"
+                    strokeWidth={2} // Reduced stroke width
+                  />
+                );
+              })}
+
+            {/* dashed line to cursor */}
+            {pathNodes.length > 0 && cursorWorld && (
+              <Line
+                points={[
+                  getNodeWorldPos(pathNodes[pathNodes.length - 1]).x,
+                  getNodeWorldPos(pathNodes[pathNodes.length - 1]).y,
+                  cursorWorld.x,
+                  cursorWorld.y,
+                ]}
+                stroke="yellow"
+                strokeWidth={1.5} // Reduced stroke width
+                dash={[10, 5]}
+                opacity={0.6} // Reduced opacity
+              />
+            )}
+
+            {/* nodes */}
+            {pathNodes.map((n, idx) => {
+              const p = getNodeWorldPos(n);
+              return (
+                <Circle
+                  key={n.id}
+                  x={p.x}
+                  y={p.y}
+                  radius={idx === 0 ? 6 : 4} // Reduced radius
+                  fill={idx === 0 ? 'green' : 'black'}
+                  stroke="white"
+                  strokeWidth={1} // Reduced stroke width
                 />
               );
             })}
+          </Layer>
 
-          {pathNodes.length > 0 && cursorPos && (
-            <Line
-              points={[
-                getNodeScreenPos(pathNodes[pathNodes.length - 1]).x,
-                getNodeScreenPos(pathNodes[pathNodes.length - 1]).y,
-                cursorPos.x,
-                cursorPos.y,
-              ]}
-              stroke="yellow"
-              strokeWidth={2}
-              dash={[10, 5]}
-              opacity={0.8}
-            />
+          {/* Saved editing paths - OPTIMIZED: Only render when editing */}
+          {editingDevice && (
+            <Layer listening={false}>
+              {editingPaths.map((pathObj) =>
+                pathObj.paths.map((node, i) => {
+                  if (i === pathObj.paths.length - 1) return null;
+                  const next = pathObj.paths[i + 1];
+                  const p1 = getNodeWorldPos(node);
+                  const p2 = getNodeWorldPos(next);
+                  return (
+                    <Line
+                      key={`saved-${pathObj.id}-${i}`}
+                      points={[p1.x, p1.y, p2.x, p2.y]}
+                      stroke="#00e5ff"
+                      strokeWidth={3} // Reduced stroke width
+                    />
+                  );
+                }),
+              )}
+
+              {editingPaths.flatMap((pathObj) =>
+                pathObj.paths.map((node, idx) => {
+                  const p = getNodeWorldPos(node);
+                  return (
+                    <Circle
+                      key={`saved-node-${pathObj.id}-${node.id}`}
+                      x={p.x}
+                      y={p.y}
+                      radius={idx === 0 ? 6 : 4} // Reduced radius
+                      fill={idx === 0 ? 'cyan' : 'white'}
+                      stroke="black"
+                      strokeWidth={1} // Reduced stroke width
+                    />
+                  );
+                }),
+              )}
+            </Layer>
           )}
 
-          {pathNodes.map((n, idx) => {
-            const p = getNodeScreenPos(n);
-            return (
-              <Circle
-                key={n.id}
-                x={p.x}
-                y={p.y}
-                radius={idx === 0 ? 8 : 5}
-                fill={idx === 0 ? 'green' : 'black'}
-                stroke="white"
-                strokeWidth={idx === 0 ? 2 : 1}
-              />
-            );
-          })}
-        </Layer>
-
-        {/* Saved editing paths */}
-        <Layer listening={false}>
-          {editingPaths.map((pathObj) =>
-            pathObj.paths.map((node, i) => {
-              if (i === pathObj.paths.length - 1) return null;
-              const next = pathObj.paths[i + 1];
-              const p1 = getNodeScreenPos(node);
-              const p2 = getNodeScreenPos(next);
-              return (
-                <Line
-                  key={`saved-${pathObj.id}-${i}`}
-                  points={[p1.x, p1.y, p2.x, p2.y]}
-                  stroke="#00e5ff"
-                  strokeWidth={4}
-                />
-              );
-            }),
-          )}
-
-          {editingPaths.flatMap((pathObj) =>
-            pathObj.paths.map((node, idx) => {
-              const p = getNodeScreenPos(node);
-              return (
-                <Circle
-                  key={`saved-node-${pathObj.id}-${node.id}`}
-                  x={p.x}
-                  y={p.y}
-                  radius={idx === 0 ? 8 : 5}
-                  fill={idx === 0 ? 'cyan' : 'white'}
-                  stroke="black"
-                  strokeWidth={idx === 0 ? 2 : 1}
-                />
-              );
-            }),
-          )}
-        </Layer>
-
-        {/* Icons layer (interactive) */}
-        <Layer>{devices?.map((d) => renderDeviceIcon(d))}</Layer>
-      </Stage>
+          {/* Devices (interactive) */}
+          <Layer>
+            {devices.map((d) => renderDeviceIcon(d))}
+          </Layer>
+        </Stage>
+      </div>
 
       {/* Confirm dialog */}
       <Dialog

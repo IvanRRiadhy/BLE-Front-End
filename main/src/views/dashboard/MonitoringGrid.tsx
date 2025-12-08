@@ -2,6 +2,7 @@ import { Box, Grid2 as Grid, Typography, useTheme, Paper } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 import FloorView from 'src/components/dashboards/monitoring/FloorView';
 import { LayoutItem, ScreenSettings, gridLayoutConfig } from 'src/store/apps/monitoring/layout';
+import ScrollArrowButton from 'src/components/shared/ScrollArrowButton'; // Add this import
 
 interface MonitoringGridProps {
   grid: number;
@@ -11,6 +12,77 @@ interface MonitoringGridProps {
   screenDisplay: Record<number, any[]>;
   screenType: Record<number, number[]>;
 }
+
+// Create a ScrollableRow component for MonitoringGrid
+const ScrollableRowWithArrows: React.FC<{
+  children: React.ReactNode;
+  itemHeight?: string;
+}> = ({ children, itemHeight = '20vh' }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+
+  const checkScrollPosition = () => {
+    if (containerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
+      setShowLeftArrow(scrollLeft > 0);
+      setShowRightArrow(scrollLeft + clientWidth < scrollWidth - 5);
+    }
+  };
+
+  useEffect(() => {
+    checkScrollPosition();
+    window.addEventListener('resize', checkScrollPosition);
+    return () => window.removeEventListener('resize', checkScrollPosition);
+  }, []);
+
+  const scrollLeft = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <Box sx={{ position: 'relative' }}>
+      <ScrollArrowButton 
+        direction="left" 
+        onClick={scrollLeft} 
+        visible={showLeftArrow} 
+      />
+      
+      <ScrollArrowButton 
+        direction="right" 
+        onClick={scrollRight} 
+        visible={showRightArrow} 
+      />
+
+      <Box
+        ref={containerRef}
+        onScroll={checkScrollPosition}
+        sx={{
+          display: 'flex',
+          overflowX: 'auto',
+          gap: 1.5,
+          // p: 1,
+          whiteSpace: 'nowrap',
+          scrollbarWidth: 'none',
+          '&::-webkit-scrollbar': {
+            display: 'none',
+          },
+          height: itemHeight,
+        }}
+      >
+        {children}
+      </Box>
+    </Box>
+  );
+};
 
 const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
   ({ grid, screenId, floorIds, screenSettings, screenDisplay, screenType }) => {
@@ -47,7 +119,6 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
     // ---------------------------------------------------------------------
     const renderLayout = (items: LayoutItem[]): JSX.Element[] =>
       items.map((item, index) => {
-
         // ------------------------------------------
         // CASE A — Nested children (Recursive Layout)
         // ------------------------------------------
@@ -65,8 +136,6 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
         // CASE B — TYPE 7: Scrollable Mini-Screen Row
         // ------------------------------------------
         if (item.isScrollableRow) {
-
-          const totalScreens = floorIds[grid].length;
           const miniFloors = floorIds[grid].slice(1);
           const miniIds = screenId[grid].slice(1);
           const miniTypes = screenType[grid].slice(1);
@@ -75,23 +144,14 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
 
           return (
             <Grid key={index} size={item.size}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  overflowX: 'auto',
-                  gap: 1.5,
-                  p: 1,
-                  whiteSpace: 'nowrap',
-                  scrollbarWidth: 'thin',
-                }}
-              >
+              <ScrollableRowWithArrows itemHeight={item.height}>
                 {miniFloors.map((floorId, i) => (
                   <Paper
                     key={`mini-${i}`}
                     elevation={3}
                     sx={{
                       width: 260,
-                      height: item.height ?? '20vh',
+                      height: '100%',
                       flexShrink: 0,
                       borderRadius: 2,
                       p: 1,
@@ -106,7 +166,7 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
                       activeFloorplan={floorId}
                       zoomable={false}
                       containerWidth={260}
-                      containerHeight={item.height ? parseInt(item.height) : 200}
+                      containerHeight={item.height ? parseInt(item.height) - 20 : 180}
                       screenSettings={miniSettings[i]}
                       activeMaskedArea={miniDisplays[i]}
                       focusBeacon={miniDisplays[i]}
@@ -116,7 +176,7 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
                     />
                   </Paper>
                 ))}
-              </Box>
+              </ScrollableRowWithArrows>
             </Grid>
           );
         }
@@ -164,7 +224,7 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
     // ---------------------------------------------------------------------
     const layout = gridLayoutConfig[grid] ?? [];
     return (
-      <Box ref={gridRef} sx={{ flexGrow: 1, p: 1.5 }}>
+      <Box ref={gridRef}>
         <Grid container spacing={1.5}>
           {renderLayout(layout)}
         </Grid>
