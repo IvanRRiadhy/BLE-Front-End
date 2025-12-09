@@ -6314,7 +6314,6 @@ magic-string@^0.30.19:
     use-debounce "^10.0.6"
     use-image "^1.1.1"
     uuid "^13.0.0"
-    video.js "^4.12.15"
     videojs-contrib-hls "^1.3.12"
     vite-plugin-svgr "^4.3.0"
     yup "^0.32.11"
@@ -9296,14 +9295,6 @@ victory-vendor@^37.0.2:
     d3-time "^3.0.0"
     d3-timer "^3.0.1"
 
-video.js@^4.12.15:
-  version "4.12.15"
-  resolved "https://registry.npmjs.org/video.js/-/video.js-4.12.15.tgz"
-  integrity sha512-9eDKIoNOd4mBIIdygCd3HgGidMf15HzPzRmunxnCSMEo0I1bZ3UCJreRPR+JSlnxTx2daNqisHuAiCQEurYd9A==
-  dependencies:
-    videojs-swf "4.7.5"
-    vtt.js "git+https://github.com/gkatsev/vtt.js.git#vjs-v0.12.1"
-
 videojs-contrib-hls@^1.3.12:
   version "1.3.12"
   resolved "https://registry.npmjs.org/videojs-contrib-hls/-/videojs-contrib-hls-1.3.12.tgz"
@@ -9324,11 +9315,6 @@ videojs-swf@^5.0.0:
   version "5.4.2"
   resolved "https://registry.npmjs.org/videojs-swf/-/videojs-swf-5.4.2.tgz"
   integrity sha512-FGg+Csioa8/A/EacvFefBdb9Z0rSiMlheHDunZnN3xXfUF43jvjawcWFQnZvrv1Cs1nE1LBrHyUZjF7j2mKOLw==
-
-videojs-swf@4.7.5:
-  version "4.7.5"
-  resolved "https://registry.npmjs.org/videojs-swf/-/videojs-swf-4.7.5.tgz"
-  integrity sha512-VXFeyZaYAIwHrteM3TzebdA8yInqKebplSGJ0CC7bv8sc6CG9D2K7wKgFLfYNCMSJNIAXpCHvu6FjkNCNRxJRw==
 
 vite-plugin-svgr@^4.3.0:
   version "4.3.0"
@@ -9383,10 +9369,6 @@ void-elements@3.1.0:
   version "3.1.0"
   resolved "https://registry.npmjs.org/void-elements/-/void-elements-3.1.0.tgz"
   integrity sha512-Dhxzh5HZuiHQhbvTW9AMetFfBHDMYpo23Uo9btPXgdYP+3T5S+p+jgNy7spra+veYhBP2dCSgxR/i2Y02h5/6w==
-
-"vtt.js@git+https://github.com/gkatsev/vtt.js.git#vjs-v0.12.1":
-  version "0.12.1"
-  resolved "git+ssh://git@github.com/gkatsev/vtt.js.git#8ea664e257ec7b5c092f58ac989e3134ff536a7a"
 
 w3c-keyname@^2.2.0:
   version "2.2.8"

@@ -12,6 +12,7 @@ import {
   setSelectedScreen,
 } from 'src/store/apps/monitoring/layout';
 import ScrollArrowButton from 'src/components/shared/ScrollArrowButton'; // Add this import
+import {v4 as uuidv4} from 'uuid';
 
 interface ScreenPreview {
   type: number; // 0 = Floorplan, 1 = Masked Area, 2 = CCTV
@@ -236,7 +237,7 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
     const newScreens = [
       ...oldScreens,
       {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         type: 0,
         floorplanId: '',
         display: { displayType: 0, displayOutput: '' },

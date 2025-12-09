@@ -10,10 +10,15 @@ import { CCTVType } from "./accessCCTV";
 import { AccessControlType } from "./accessControl";
 import { DeviceType } from "src/types/crud/input";
 import { defaultFloorplanDeviceFilter } from "../defaultForm";
+import {v4 as uuidv4} from 'uuid';
 
 const API_URL = '/api/FloorplanDevice/';
 const API_DT_URL = '/api/FloorplanDevice/filter/';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+function generateUUID(): string {
+    return uuidv4();
+}
 
 export type PathNodeType = {
   id: string;
@@ -424,7 +429,7 @@ CancelAllDevicesEditing: (state) => {
             backward: { deviceId: string; paths: PathNodeType[] };
         }>) => {
             const { forward, backward } = action.payload;
-            const pairingId = crypto.randomUUID();
+            const pairingId = generateUUID();
             
             // Helper to add path to device in unsaved layer
             const addPathToDevice = (fromDeviceId: string, toDeviceId: string, paths: PathNodeType[]) => {

@@ -296,7 +296,7 @@ const EditAreaFloorView: React.FC<{
       }}
     >
       {/* Instruction Overlays */}
-      {editingMaskedArea && !drawingMaskedArea && (
+      {editingMaskedArea && !drawingMaskedArea && zoomable && (
         <Box
           sx={{
             position: 'fixed',

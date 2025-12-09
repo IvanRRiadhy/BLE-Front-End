@@ -28,6 +28,7 @@ import borderGateway from 'src/assets/images/svgs/devices/BLE GATEWAY ICON.png';
 import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { uniqueId } from 'lodash';
+import {v4 as uuidv4} from 'uuid';
 
 type Nodes = {
   id: string;
@@ -386,7 +387,7 @@ const EditDeviceRenderer: React.FC<Props> = ({
 
     setPathNodes([
       {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         deviceId: startDev.id,
         posPxX: startDev.posPxX,
         posPxY: startDev.posPxY,
@@ -437,7 +438,7 @@ const EditDeviceRenderer: React.FC<Props> = ({
     setPathNodes((prev) => [
       ...prev,
       {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         posX: pxX * scale,
         posY: pxY * scale,
         posPxX: pxX,
@@ -521,7 +522,7 @@ const EditDeviceRenderer: React.FC<Props> = ({
 
       // Create the final node for the clicked device
       const finalNode: PathNodeType = {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         posPxX: device.posPxX,
         posPxY: device.posPxY,
         posX: device.posX,
