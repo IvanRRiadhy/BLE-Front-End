@@ -76,6 +76,7 @@ export function useAddMaskedArea() {
     mutationFn: async (maskedArea: Partial<MaskedAreaType>) => {
       const {
         id,
+        applicationId,
         createdAt,
         createdBy,
         updatedAt,
@@ -114,6 +115,7 @@ export function useEditMaskedArea() {
 
   return useMutation({
     mutationFn: async (maskedArea: Partial<MaskedAreaType>) => {
+      console.log('Editing Masked Area:', maskedArea);
       if (!maskedArea.id) throw new Error('Masked Area ID is required for editing.');
 
       const {
@@ -127,6 +129,7 @@ export function useEditMaskedArea() {
         floor,
         floorplan,
         nodes,
+        applicationId,
         ...cleanData
       } = maskedArea;
 

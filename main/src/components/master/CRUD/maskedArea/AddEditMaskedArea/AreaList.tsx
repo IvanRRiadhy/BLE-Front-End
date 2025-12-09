@@ -114,16 +114,17 @@ const AreaList = () => {
     }
   }, [maskedAreasData, dispatch]);
 
-  const newArea = {
+  const newArea: MaskedAreaType = {
     id: uniqueId('maskedArea_'),
     name: uniqueId('Masked Area '),
     colorArea: '#363636',
     areaShape: '[{}]',
     restrictedStatus: 'Restricted',
-    wideArea: 0,
-    positionPxX: 0,
-    positionPxY: 0,
-    engineAreaId: 'ENG001',
+    // wideArea: 0,
+    // positionPxX: 0,
+    // positionPxY: 0,
+    // engineAreaId: 'ENG001',
+    allowFloorChange: false,
     floorId: activeFloorplan?.floorId || '',
     floorplanId: activeFloorplan?.id || '',
     createdBy: 'admin',

@@ -1,4 +1,13 @@
-import { Button, Box, Grid2 as Grid, MenuItem, SelectChangeEvent, Typography } from '@mui/material';
+import {
+  Button,
+  Box,
+  Grid2 as Grid,
+  MenuItem,
+  SelectChangeEvent,
+  Typography,
+  Switch,
+  FormControlLabel,
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
@@ -21,12 +30,13 @@ interface AreaFormData {
   colorArea: string;
   areaShape: string;
   restrictedStatus: string;
-  wideArea: number;
-  positionPxX: number;
-  positionPxY: number;
-  engineAreaId: string;
+  // wideArea: number;
+  // positionPxX: number;
+  // positionPxY: number;
+  // engineAreaId: string;
   floorId: string;
   floorplanId: string;
+  allowFloorChange: boolean;
   createdBy: string;
   createdAt: string;
   updatedBy: string;
@@ -36,7 +46,7 @@ interface AreaFormData {
 const AreaDetailList = () => {
   const dispatch: AppDispatch = useDispatch();
   const area = useSelector((state: RootState) => state.maskedAreaReducer.editingMaskedArea);
-  
+
   // Initialize form data with area data or defaults
   const [formData, setFormData] = useState<AreaFormData>({
     id: '',
@@ -44,12 +54,13 @@ const AreaDetailList = () => {
     colorArea: '#363636',
     areaShape: '',
     restrictedStatus: '',
-    wideArea: 0,
-    positionPxX: 0,
-    positionPxY: 0,
-    engineAreaId: '',
+    // wideArea: 0,
+    // positionPxX: 0,
+    // positionPxY: 0,
+    // engineAreaId: '',
     floorId: '',
     floorplanId: '',
+    allowFloorChange: false,
     createdBy: '',
     createdAt: '',
     updatedBy: '',
@@ -65,12 +76,13 @@ const AreaDetailList = () => {
         colorArea: area.colorArea || '#363636',
         areaShape: area.areaShape || '',
         restrictedStatus: area.restrictedStatus || '',
-        wideArea: area.wideArea || 0,
-        positionPxX: area.positionPxX || 0,
-        positionPxY: area.positionPxY || 0,
-        engineAreaId: area.engineAreaId || '',
+        // wideArea: area.wideArea || 0,
+        // positionPxX: area.positionPxX || 0,
+        // positionPxY: area.positionPxY || 0,
+        // engineAreaId: area.engineAreaId || '',
         floorId: area.floorId || '',
         floorplanId: area.floorplanId || '',
+        allowFloorChange: area.allowFloorChange || false,
         createdBy: area.createdBy || '',
         createdAt: area.createdAt || '',
         updatedBy: area.updatedBy || '',
@@ -93,12 +105,13 @@ const AreaDetailList = () => {
         colorArea: area.colorArea || '#363636',
         areaShape: area.areaShape || '',
         restrictedStatus: area.restrictedStatus || '',
-        wideArea: area.wideArea || 0,
-        positionPxX: area.positionPxX || 0,
-        positionPxY: area.positionPxY || 0,
-        engineAreaId: area.engineAreaId || '',
+        // wideArea: area.wideArea || 0,
+        // positionPxX: area.positionPxX || 0,
+        // positionPxY: area.positionPxY || 0,
+        // engineAreaId: area.engineAreaId || '',
         floorId: area.floorId || '',
         floorplanId: area.floorplanId || '',
+        allowFloorChange: area.allowFloorChange || false,
         createdBy: area.createdBy || '',
         createdAt: area.createdAt || '',
         updatedBy: area.updatedBy || '',
@@ -125,10 +138,10 @@ const AreaDetailList = () => {
     try {
       // Update the unsaved area in Redux store
       dispatch(EditUnsavedMaskedArea(formData));
-      
+
       // Mark as saved in Redux (this is local state management)
       dispatch(SaveMaskedArea(formData.id));
-      
+
       handleClose();
     } catch (error) {
       console.error('Error saving masked area: ', error);
@@ -148,12 +161,12 @@ const AreaDetailList = () => {
     const { value, name, id } = e.target as
       | HTMLInputElement
       | { value: string; name: string; id?: string };
-    
+
     const fieldName = (id || name) as keyof AreaFormData;
-    
-    setFormData(prev => ({ 
-      ...prev, 
-      [fieldName]: value 
+
+    setFormData((prev) => ({
+      ...prev,
+      [fieldName]: value,
     }));
   };
 
@@ -244,7 +257,7 @@ const AreaDetailList = () => {
                 {colorPalette.map((color) => (
                   <Box
                     key={color}
-                    onClick={() => setFormData(prev => ({ ...prev, colorArea: color }))}
+                    onClick={() => setFormData((prev) => ({ ...prev, colorArea: color }))}
                     sx={{
                       width: 34,
                       height: 34,
@@ -317,6 +330,24 @@ const AreaDetailList = () => {
                 ))}
               </CustomSelect>
             </Grid>
+            {/* Allow Changing Floor */}
+            <Grid size={12}>
+              <CustomFormLabel htmlFor="allow-floor-change">Allow Floor Change</CustomFormLabel>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.allowFloorChange}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        allowFloorChange: e.target.checked,
+                      }))
+                    }
+                  />
+                }
+                label={formData.allowFloorChange ? 'Enabled' : 'Disabled'}
+              />
+            </Grid>
           </Grid>
         </Box>
       </Box>
@@ -334,11 +365,7 @@ const AreaDetailList = () => {
           <Button variant="outlined" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button 
-            variant="contained" 
-            onClick={handleSave} 
-            disabled={!isFormValid()}
-          >
+          <Button variant="contained" onClick={handleSave} disabled={!isFormValid()}>
             Save
           </Button>
         </Box>

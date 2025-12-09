@@ -32,7 +32,7 @@ import { useFloorplanList } from 'src/hooks/useFloorplan';
 import FloorplanPreviewDialog from '../maskedArea/FloorplanPreviewDialog';
 import { FloorplanType } from 'src/store/apps/crud/floorplan';
 import { BuildingType } from 'src/store/apps/crud/building';
-import { FloorplanDeviceType, GetAllFloorplanDevices } from 'src/store/apps/crud/floorplanDevice';
+import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { useAllFloorplanDevices } from 'src/hooks/useFloorplanDevice';
 
 const columns = [
@@ -91,10 +91,10 @@ const FloorplanDeviceList2 = () => {
     dispatch(UpdateFilter(defaultFloorplanFilter));
   }, []);
 
-  useEffect(() => {
-    dispatch(GetAllFloorplanDevices(deviceData));
-    console.log("Floorplan Devices Data:", deviceData);
-  }, [deviceData]);
+  // useEffect(() => {
+  //   dispatch(GetAllFloorplanDevices(deviceData));
+  //   console.log("Floorplan Devices Data:", deviceData);
+  // }, [deviceData]);
 
   // Delete Confirmation Dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

@@ -289,7 +289,7 @@ const EditAreaFloorView: React.FC<{
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        overflow: 'hidden',
+        overflow: 'visible',
         cursor: cursor,
         // Add CSS to prevent browser zoom
         touchAction: 'none', // Prevent touch zoom
@@ -299,15 +299,16 @@ const EditAreaFloorView: React.FC<{
       {editingMaskedArea && !drawingMaskedArea && (
         <Box
           sx={{
-            position: 'absolute',
-            top: 12,
-            right: 12,
+            position: 'fixed',
+            top: 160,
+            right: 40,
             zIndex: 10,
             width: '280px',
-            background: 'rgba(37, 31, 31, 0.77)',
+            background: 'rgba(124, 123, 123, 0.6)',
             borderRadius: 2,
             boxShadow: 2,
             p: 1,
+            // display: 'flex',
           }}
         >
           <Box display="flex" alignItems="center" gap={1}>

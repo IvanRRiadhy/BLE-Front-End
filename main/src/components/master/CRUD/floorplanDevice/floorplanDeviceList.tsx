@@ -22,7 +22,7 @@ import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 // import { useTranslation } from 'react-i18next';
-import { fetchFloorplanDevices, FloorplanDeviceType, GetAllFloorplanDevices } from 'src/store/apps/crud/floorplanDevice';
+import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { useAllFloorplanDevices } from 'src/hooks/useFloorplanDevice';
 
 const FloorplanDeviceList = () => {
@@ -53,7 +53,7 @@ const FloorplanDeviceList = () => {
   const {data: deviceData = []} = useAllFloorplanDevices();
   useEffect(() => {
     console.log("Floorplan Devices Data:", deviceData);
-    dispatch(GetAllFloorplanDevices(deviceData));
+    // dispatch(GetAllFloorplanDevices(deviceData));
   }, [deviceData]);
 
   //Delete Pop-up

@@ -12,15 +12,15 @@ import { Stage, Layer, Image as KonvaImage, Line, Circle, FastLayer, Group } fro
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
   FloorplanDeviceType,
-  RevertDevice,
   SelectEditingFloorplanDevice,
   SelectFloorplanDevice,
   editDevicePosition,
   PathsType,
   PathNodeType,
   DrawingDevicePath,
-  editDevicePath,
-  addDevicePathPair,
+  AddPathPairToUnsaved,
+  StartEditingDevice,
+  CancelDeviceEditing,
 } from 'src/store/apps/crud/floorplanDevice';
 import borderFaceRecog from 'src/assets/images/svgs/devices/FACE READER ICON.png';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
@@ -90,11 +90,13 @@ const EditDeviceRenderer: React.FC<Props> = ({
   );
   const isDrawingPath = Boolean(drawingPath);
   const editingPaths = editingDevice?.devicePath ?? [];
-
+  const selectedPathId = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.selectDevicePath,
+  );
   const [pathNodes, setPathNodes] = useState<PathNodeType[]>([]);
   const [cursorWorld, setCursorWorld] = useState<{ x: number; y: number } | null>(null);
   const [deviceDragging, setDeviceDragging] = useState(false);
-  
+
   // Add a ref to track if heatmap is being generated
   const heatmapGenerationInProgress = useRef(false);
 
@@ -110,7 +112,10 @@ const EditDeviceRenderer: React.FC<Props> = ({
 
   // Load device icons
   useEffect(() => {
-    const loadIcon = (src: string, setter: React.Dispatch<React.SetStateAction<HTMLImageElement | null>>) => {
+    const loadIcon = (
+      src: string,
+      setter: React.Dispatch<React.SetStateAction<HTMLImageElement | null>>,
+    ) => {
       const img = new Image();
       img.src = src;
       img.onload = () => setter(img);
@@ -128,6 +133,10 @@ const EditDeviceRenderer: React.FC<Props> = ({
   // Track last generated heatmap dimensions to avoid regeneration
   const lastHeatmapDeps = useRef<string>('');
 
+  useEffect(() => {
+    console.log('showEffectiveArea changed:', showEffectiveArea);
+  }, [showEffectiveArea]);
+
   // load background images with optimization for large images
   useEffect(() => {
     if (!imageSrc) {
@@ -138,7 +147,7 @@ const EditDeviceRenderer: React.FC<Props> = ({
 
     // For large images, use a lower resolution preview
     const isLargeImage = originalWidth > 3000 || originalHeight > 3000;
-    
+
     if (isLargeImage && imageSrc.includes('/Uploads/')) {
       // For large images, try to load a smaller preview first
       const previewUrl = imageSrc.replace('/Uploads/', '/Uploads/Thumbnails/') + '?width=2000';
@@ -216,15 +225,21 @@ const EditDeviceRenderer: React.FC<Props> = ({
 
   useEffect(() => {
     // Only generate heatmap if showEffectiveArea is true
-    if (!showEffectiveArea) {
-      setHeatmapImage(undefined);
-      return;
-    }
+    // if (!showEffectiveArea) {
+    //   setHeatmapImage(undefined);
+    //   return;
+    // }
 
     // Check if we need to regenerate heatmap
     const currentDeps = JSON.stringify({
-      devices: devices?.map(d => ({ id: d.id, posPxX: d.posPxX, posPxY: d.posPxY, type: d.type, areaId: d.floorplanMaskedAreaId })),
-      areas: areas.map(a => ({ id: a.id, nodes: a.nodes })),
+      devices: devices?.map((d) => ({
+        id: d.id,
+        posPxX: d.posPxX,
+        posPxY: d.posPxY,
+        type: d.type,
+        areaId: d.floorplanMaskedAreaId,
+      })),
+      areas: areas.map((a) => ({ id: a.id, nodes: a.nodes })),
       scale,
       showEffectiveArea,
     });
@@ -236,10 +251,10 @@ const EditDeviceRenderer: React.FC<Props> = ({
     // For large images, generate heatmap at reduced resolution
     const isLargeImage = originalWidth > 3000 || originalHeight > 3000;
     const heatmapScale = isLargeImage ? 0.5 : 1; // Reduce resolution for large images
-    
+
     const scaledWidth = Math.floor(originalWidth * heatmapScale);
     const scaledHeight = Math.floor(originalHeight * heatmapScale);
-    
+
     if (scaledWidth === 0 || scaledHeight === 0) return;
 
     // Prevent multiple simultaneous heatmap generations
@@ -258,9 +273,9 @@ const EditDeviceRenderer: React.FC<Props> = ({
       }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
+
       // Only draw if we have devices
-      const bleDevices = devices?.filter(d => d.type === 'BleReader');
+      const bleDevices = devices?.filter((d) => d.type === 'BleReader');
       if (!bleDevices || bleDevices.length === 0) {
         const outImg = new Image();
         outImg.crossOrigin = 'anonymous';
@@ -295,7 +310,7 @@ const EditDeviceRenderer: React.FC<Props> = ({
       areas.forEach((area) => {
         const nodes = area.nodes ?? [];
         if (!nodes.length) return;
-        
+
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(nodes[0].x_px * heatmapScale, nodes[0].y_px * heatmapScale);
@@ -317,12 +332,12 @@ const EditDeviceRenderer: React.FC<Props> = ({
       // Convert to image data for color mapping
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
-      
+
       // Use a simpler color mapping for better performance
       for (let i = 0; i < data.length; i += 4) {
         const intensity = data[i];
         const v = intensity / 255;
-        
+
         if (v <= 0.001) {
           data[i] = 0;
           data[i + 1] = 0;
@@ -337,7 +352,7 @@ const EditDeviceRenderer: React.FC<Props> = ({
           data[i + 3] = Math.min(255, Math.floor(180 * v + 75)); // Reduced alpha for better visibility
         }
       }
-      
+
       ctx.putImageData(imageData, 0, 0);
 
       const outImg = new Image();
@@ -349,10 +364,16 @@ const EditDeviceRenderer: React.FC<Props> = ({
         heatmapGenerationInProgress.current = false;
       };
     });
-  }, [devices, areas, originalWidth, originalHeight, scale, getRadius, jetColorMap, showEffectiveArea]);
-
-  // Rest of the component remains the same...
-  // [Keep all the existing code for Path drawing, device rendering, etc.]
+  }, [
+    devices,
+    areas,
+    originalWidth,
+    originalHeight,
+    scale,
+    getRadius,
+    jetColorMap,
+    showEffectiveArea,
+  ]);
 
   // Path drawing state
   useEffect(() => {
@@ -369,6 +390,8 @@ const EditDeviceRenderer: React.FC<Props> = ({
         deviceId: startDev.id,
         posPxX: startDev.posPxX,
         posPxY: startDev.posPxY,
+        posX: startDev.posX,
+        posY: startDev.posY,
       } as PathNodeType,
     ]);
   }, [drawingPath, devices]);
@@ -471,7 +494,7 @@ const EditDeviceRenderer: React.FC<Props> = ({
   const renderDeviceIcon = (device: FloorplanDeviceType) => {
     const isActive = activeDevice?.id === device.id;
     const isEditing = editingDevice?.id === device.id;
-    
+
     // Get appropriate icon
     let icon: HTMLImageElement | null = iconUnknown;
     switch (device.type) {
@@ -493,36 +516,56 @@ const EditDeviceRenderer: React.FC<Props> = ({
 
     const handlePathClick = () => {
       if (!isDrawingPath) return;
+      if (!drawingPath) return;
       if (device.id === drawingPath) return;
 
+      // Create the final node for the clicked device
       const finalNode: PathNodeType = {
         id: crypto.randomUUID(),
+        posPxX: device.posPxX,
+        posPxY: device.posPxY,
+        posX: device.posX,
+        posY: device.posY,
         deviceId: device.id,
-      } as PathNodeType;
+      };
 
-      const forwardNodes = [...pathNodes, finalNode];
+      // Add the final node to the path
+      const completePath = [...pathNodes, finalNode];
 
-      if (!editingDevice) return;
+      // Ensure we have at least 2 nodes (start and end)
+      if (completePath.length < 2) {
+        console.error('Path needs at least 2 nodes');
+        return;
+      }
 
-      const forward = {
-        deviceId: editingDevice.id,
-        paths: forwardNodes,
-      } as PathsType;
-
-      const reversedNodes = [...forwardNodes].reverse().map((n) => ({ ...n }));
-      reversedNodes.forEach((node, index) => {
-        const orig = forwardNodes[forwardNodes.length - 1 - index];
-        node.deviceId = orig.deviceId;
-        node.posPxX = orig.posPxX;
-        node.posPxY = orig.posPxY;
+      // Create reversed path for target device
+      const reversedPath = [...completePath].reverse().map((node, index) => {
+        const newNode = { ...node };
+        // First node in reversed path gets target device ID
+        if (index === 0) {
+          newNode.deviceId = device.id;
+        }
+        // Last node in reversed path gets source device ID
+        else if (index === completePath.length - 1) {
+          newNode.deviceId = drawingPath;
+        }
+        return newNode;
       });
 
-      const backward = {
-        deviceId: device.id,
-        paths: reversedNodes,
-      } as PathsType;
+      // Use the new action for adding path pair
+      dispatch(
+        AddPathPairToUnsaved({
+          forward: {
+            deviceId: drawingPath,
+            paths: completePath,
+          },
+          backward: {
+            deviceId: device.id,
+            paths: reversedPath,
+          },
+        }),
+      );
 
-      dispatch(addDevicePathPair({ forward, backward }));
       setPathNodes([]);
       dispatch(DrawingDevicePath(''));
     };
@@ -618,30 +661,30 @@ const EditDeviceRenderer: React.FC<Props> = ({
   };
 
   // track pointer world position for dashed line
-const handleStageMouseMove = (e: any) => {
-  const stage = e.target.getStage();
-  if (!stage) return;
-  
-  const ptr = stage.getPointerPosition();
-  const world = pointerToWorld(ptr || null);
-  if (world) setCursorWorld(world);
-  else setCursorWorld(null);
-  
-  // Update cursor based on what's under the mouse
-  if (setCursor && ptr) {
-    const shape = stage.getIntersection(ptr);
-    
-    // If we're in editing mode and not over a shape, cursor should be 'grab'
-    if (editingDevice && !shape && !isDrawingPath && !deviceDragging) {
-      setCursor('grab');
-    } 
-    // If not in editing mode and not over a shape, cursor should also be 'grab'
-    else if (!editingDevice && !shape && !isDrawingPath && !deviceDragging) {
-      setCursor('grab');
+  const handleStageMouseMove = (e: any) => {
+    const stage = e.target.getStage();
+    if (!stage) return;
+
+    const ptr = stage.getPointerPosition();
+    const world = pointerToWorld(ptr || null);
+    if (world) setCursorWorld(world);
+    else setCursorWorld(null);
+
+    // Update cursor based on what's under the mouse
+    if (setCursor && ptr) {
+      const shape = stage.getIntersection(ptr);
+
+      // If we're in editing mode and not over a shape, cursor should be 'grab'
+      if (editingDevice && !shape && !isDrawingPath && !deviceDragging) {
+        setCursor('grab');
+      }
+      // If not in editing mode and not over a shape, cursor should also be 'grab'
+      else if (!editingDevice && !shape && !isDrawingPath && !deviceDragging) {
+        setCursor('grab');
+      }
+      // Note: When over a shape (device), the device's onMouseEnter sets cursor to 'move'
     }
-    // Note: When over a shape (device), the device's onMouseEnter sets cursor to 'move'
-  }
-};
+  };
 
   const handleRightClick = (e: any) => {
     e.evt.preventDefault();
@@ -680,12 +723,14 @@ const handleStageMouseMove = (e: any) => {
           {/* Background layer */}
           <FastLayer listening={false}>
             {imageToDraw && (
-              <KonvaImage 
-                image={imageToDraw} 
-                width={originalWidth} 
-                height={originalHeight} 
+              <KonvaImage
+                image={imageToDraw}
+                width={originalWidth}
+                height={originalHeight}
                 // OPTIMIZATION: Use caching for large images
-                {...(originalWidth > 3000 ? { listening: false, imageSmoothingEnabled: false } : {})}
+                {...(originalWidth > 3000
+                  ? { listening: false, imageSmoothingEnabled: false }
+                  : {})}
               />
             )}
           </FastLayer>
@@ -777,7 +822,7 @@ const handleStageMouseMove = (e: any) => {
           {/* Saved editing paths - OPTIMIZED: Only render when editing */}
           {editingDevice && (
             <Layer listening={false}>
-              {editingPaths.map((pathObj) =>
+              {editingPaths.map((pathObj: PathsType) =>
                 pathObj.paths.map((node, i) => {
                   if (i === pathObj.paths.length - 1) return null;
                   const next = pathObj.paths[i + 1];
@@ -787,7 +832,7 @@ const handleStageMouseMove = (e: any) => {
                     <Line
                       key={`saved-${pathObj.id}-${i}`}
                       points={[p1.x, p1.y, p2.x, p2.y]}
-                      stroke="#00e5ff"
+                      stroke={pathObj.id === selectedPathId ? '#ff5500' : '#00e5ff'}
                       strokeWidth={3} // Reduced stroke width
                     />
                   );
@@ -814,9 +859,7 @@ const handleStageMouseMove = (e: any) => {
           )}
 
           {/* Devices (interactive) */}
-          <Layer>
-            {devices.map((d) => renderDeviceIcon(d))}
-          </Layer>
+          <Layer>{devices.map((d) => renderDeviceIcon(d))}</Layer>
         </Stage>
       </div>
 
@@ -838,7 +881,10 @@ const handleStageMouseMove = (e: any) => {
           <Button
             color="error"
             onClick={() => {
-              dispatch(RevertDevice(editingDevice?.id || ''));
+              if (editingDevice?.id) {
+                // Start editing the new device first
+                dispatch(StartEditingDevice(pendingDeviceId || ''));
+              }
               if (pendingDeviceId) {
                 dispatch(SelectFloorplanDevice(pendingDeviceId));
                 dispatch(SelectEditingFloorplanDevice(null));

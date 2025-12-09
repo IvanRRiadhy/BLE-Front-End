@@ -128,10 +128,10 @@ const MaskedAreaList = () => {
                         <TableCell>{maskedArea.areaShape}</TableCell>
                         <TableCell>{maskedArea.colorArea}</TableCell>
                         <TableCell>{maskedArea.restrictedStatus}</TableCell>
-                        <TableCell>{maskedArea.engineAreaId}</TableCell>
-                        <TableCell>{maskedArea.wideArea}</TableCell>
+                        {/* <TableCell>{maskedArea.engineAreaId}</TableCell> */}
+                        {/* <TableCell>{maskedArea.wideArea}</TableCell>
                         <TableCell>{maskedArea.positionPxX}</TableCell>
-                        <TableCell>{maskedArea.positionPxY}</TableCell>
+                        <TableCell>{maskedArea.positionPxY}</TableCell> */}
                         <TableCell
                           sx={{
                             position: 'sticky',

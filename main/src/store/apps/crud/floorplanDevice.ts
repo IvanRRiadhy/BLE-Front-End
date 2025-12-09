@@ -1,3 +1,4 @@
+
 import axiosServices, { BASE_URL } from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch } from "src/store/Store";
@@ -25,12 +26,13 @@ export type PathNodeType = {
 
 export type PathsType = {
     id: string,
-    deviceId: string,
+    fromDeviceId: string,
+    toDeviceId: string,
     paths: PathNodeType[],
 }
 
 export type GetFilter = {
-        Draw: number,
+    Draw: number,
     Start: number,
     Length: number,
     SortColumn: string,
@@ -43,20 +45,19 @@ export type GetFilter = {
     }
 }
 
-
 export type GetFloorplanDeviceResponse = {
-    RecordsTotal : number;
-    RecordsFiltered : number;
-    Draw : number;
-    status : string;
-    status_code : number;
-    title : string;
-    msg : string;
-    collection : {
-        data : FloorplanDeviceType[];
-        draw : number;
-        recordsTotal : number;
-        recordsFiltered : number;
+    RecordsTotal: number;
+    RecordsFiltered: number;
+    Draw: number;
+    status: string;
+    status_code: number;
+    title: string;
+    msg: string;
+    collection: {
+        data: FloorplanDeviceType[];
+        draw: number;
+        recordsTotal: number;
+        recordsFiltered: number;
     };
 };
 
@@ -68,6 +69,7 @@ export interface FloorplanDeviceType {
     accessCctvId: string | null,
     readerId: string | null,
     accessControlId: string | null,
+    readerType: "Indoor" | "Outdoor",
     posX: number,
     posY: number,
     posPxX: number,
@@ -88,35 +90,42 @@ export interface FloorplanDeviceType {
 };
 
 interface StateType {
-    floorplanDevices: FloorplanDeviceType[];
+    // Layer 1: Original from DB
     floorplanDeviceAll: FloorplanDeviceType[];
-    originalFloorplanDevices: FloorplanDeviceType[];
+    
+    // Layer 2: Applied changes (saved via DeviceDetailList)
+    savedFloorplanDevices: FloorplanDeviceType[];
+    
+    // Layer 3: Current editing changes
     unsavedFloorplanDevices: FloorplanDeviceType[];
+    
+    // UI state
+    floorplanDevices: FloorplanDeviceType[];
     floorplanDeviceSearch: string;
     selectedFloorplanDevice?: FloorplanDeviceType | null;
     editingFloorplanDevice?: FloorplanDeviceType | null;
-    deletedFloorplanDevice?: FloorplanDeviceType[];
-    addedFloorplanDevice?: FloorplanDeviceType[];
     drawingDevicePath?: string;
+    selectDevicePath?: string;
+    
+    // Filter and loading state
     floorplanDeviceTotalCount: number;
     floorplanDeviceFilteredCount: number;
     floorplanDeviceFilter: GetFilter;
     lastFilter?: GetFilter;
-isLoading: boolean;
-hasLoaded: boolean;
+    isLoading: boolean;
+    hasLoaded: boolean;
 };
 
 const initialState: StateType = {
-    floorplanDevices: [],
     floorplanDeviceAll: [],
-    originalFloorplanDevices: [],
+    savedFloorplanDevices: [],
     unsavedFloorplanDevices: [],
+    floorplanDevices: [],
     floorplanDeviceSearch: '',
     selectedFloorplanDevice: null,
     editingFloorplanDevice: null,
-    deletedFloorplanDevice: [],
-    addedFloorplanDevice: [],
     drawingDevicePath: '',
+    selectDevicePath: '',
     floorplanDeviceTotalCount: 0,
     floorplanDeviceFilteredCount: 0,
     floorplanDeviceFilter: defaultFloorplanDeviceFilter,
@@ -130,148 +139,370 @@ export const FloorplanDeviceSlice = createSlice({
     reducers: {
         GetFloorplanDevices: (state, action) => {
             state.floorplanDevices = action.payload;
+        },
+        
+        // Initialize all three layers from DB data
+        InitializeAllLayers: (state, action) => {
+            const devices = action.payload;
+            state.floorplanDeviceAll = [...devices];
+            state.savedFloorplanDevices = [...devices];
+            state.unsavedFloorplanDevices = [...devices];
+        },
+        
+        // When starting to edit a device, copy from saved to unsaved layer
+        StartEditingDevice: (state, action: PayloadAction<string>) => {
+            const deviceId = action.payload;
+            
+            // Find device in saved layer
+            const savedDevice = state.savedFloorplanDevices.find(d => d.id === deviceId);
+            if (!savedDevice) return;
+            
+            // Copy to unsaved layer (or update if exists)
+            const unsavedIndex = state.unsavedFloorplanDevices.findIndex(d => d.id === deviceId);
+            if (unsavedIndex !== -1) {
+                state.unsavedFloorplanDevices[unsavedIndex] = { ...savedDevice };
+            } else {
+                state.unsavedFloorplanDevices.push({ ...savedDevice });
+            }
+            
+            // Set as editing device (from unsaved layer)
+            const editingDevice = state.unsavedFloorplanDevices.find(d => d.id === deviceId);
+            state.editingFloorplanDevice = editingDevice ? { ...editingDevice } : null;
+            state.selectedFloorplanDevice = editingDevice ? { ...editingDevice } : null;
+        },
 
+        // Save all device changes from unsaved layer to saved layer
+SaveAllDevicesToSavedLayer: (state) => {
+    // Update saved layer with all devices from unsaved layer
+    state.unsavedFloorplanDevices.forEach(unsavedDevice => {
+        const savedIndex = state.savedFloorplanDevices.findIndex(d => d.id === unsavedDevice.id);
+        if (savedIndex !== -1) {
+            state.savedFloorplanDevices[savedIndex] = { ...unsavedDevice };
+        } else {
+            state.savedFloorplanDevices.push({ ...unsavedDevice });
+        }
+    });
+    
+    // Also update any devices that are in saved but not in unsaved (handle deletions)
+    const unsavedDeviceIds = new Set(state.unsavedFloorplanDevices.map(d => d.id));
+    state.savedFloorplanDevices = state.savedFloorplanDevices.filter(device => 
+        unsavedDeviceIds.has(device.id)
+    );
+    
+    // Update editing and selected devices if they exist
+    if (state.editingFloorplanDevice) {
+        const updatedEditingDevice = state.unsavedFloorplanDevices.find(
+            d => d.id === state.editingFloorplanDevice?.id
+        );
+        if (updatedEditingDevice) {
+            state.editingFloorplanDevice = { ...updatedEditingDevice };
+        }
+    }
+    
+    if (state.selectedFloorplanDevice) {
+        const updatedSelectedDevice = state.unsavedFloorplanDevices.find(
+            d => d.id === state.selectedFloorplanDevice?.id
+        );
+        if (updatedSelectedDevice) {
+            state.selectedFloorplanDevice = { ...updatedSelectedDevice };
+        }
+    }
+},
+
+// Cancel editing for all devices - revert unsaved layer to saved layer
+CancelAllDevicesEditing: (state) => {
+    // Revert all devices in unsaved layer to their saved state
+    const updatedUnsavedDevices: FloorplanDeviceType[] = [];
+    
+    // For each device in saved layer, copy to unsaved
+    state.savedFloorplanDevices.forEach(savedDevice => {
+        updatedUnsavedDevices.push({ ...savedDevice });
+    });
+    
+    // For devices that are in unsaved but not in saved (newly added devices), remove them
+    const savedDeviceIds = new Set(state.savedFloorplanDevices.map(d => d.id));
+    state.unsavedFloorplanDevices.forEach(unsavedDevice => {
+        if (!savedDeviceIds.has(unsavedDevice.id)) {
+            // This is a newly added device that hasn't been saved yet
+            // It will be removed from unsaved layer
+        }
+    });
+    
+    // Update unsaved layer
+    state.unsavedFloorplanDevices = updatedUnsavedDevices;
+    
+    // Update editing device if it exists
+    if (state.editingFloorplanDevice) {
+        const savedEditingDevice = state.savedFloorplanDevices.find(
+            d => d.id === state.editingFloorplanDevice?.id
+        );
+        if (savedEditingDevice) {
+            state.editingFloorplanDevice = { ...savedEditingDevice };
+        } else {
+            // If editing device doesn't exist in saved layer (was newly added), clear editing
+            state.editingFloorplanDevice = null;
+        }
+    }
+    
+    // Update selected device if it exists
+    if (state.selectedFloorplanDevice) {
+        const savedSelectedDevice = state.savedFloorplanDevices.find(
+            d => d.id === state.selectedFloorplanDevice?.id
+        );
+        if (savedSelectedDevice) {
+            state.selectedFloorplanDevice = { ...savedSelectedDevice };
+        } else {
+            state.selectedFloorplanDevice = null;
+        }
+    }
+    
+    // Clear editing state
+    state.editingFloorplanDevice = null;
+},
+        
+        // Save device from unsaved to saved layer (via DeviceDetailList Save)
+        SaveDeviceToSavedLayer: (state, action: PayloadAction<FloorplanDeviceType>) => {
+            const updatedDevice = action.payload;
+            
+            // Update in unsaved layer
+            const unsavedIndex = state.unsavedFloorplanDevices.findIndex(d => d.id === updatedDevice.id);
+            if (unsavedIndex !== -1) {
+                state.unsavedFloorplanDevices[unsavedIndex] = { ...updatedDevice };
+            } else {
+                state.unsavedFloorplanDevices.push({ ...updatedDevice });
+            }
+            
+            // Update in saved layer
+            const savedIndex = state.savedFloorplanDevices.findIndex(d => d.id === updatedDevice.id);
+            if (savedIndex !== -1) {
+                state.savedFloorplanDevices[savedIndex] = { ...updatedDevice };
+            } else {
+                state.savedFloorplanDevices.push({ ...updatedDevice });
+            }
+            
+            // Update editing device
+            if (state.editingFloorplanDevice?.id === updatedDevice.id) {
+                state.editingFloorplanDevice = { ...updatedDevice };
+            }
+            
+            // Also update selection if it's the same device
+            if (state.selectedFloorplanDevice?.id === updatedDevice.id) {
+                state.selectedFloorplanDevice = { ...updatedDevice };
+            }
         },
-        GetAllFloorplanDevices: (state, action) => {
-            // console.log("GetAllFloorplanDevices: ", action.payload);
-            state.floorplanDeviceAll = action.payload;
-                        state.originalFloorplanDevices = action.payload;
+        
+        // Cancel editing - revert unsaved device to saved layer
+        CancelDeviceEditing: (state, action: PayloadAction<string>) => {
+            const deviceId = action.payload;
+            
+            // Find device in saved layer
+            const savedDevice = state.savedFloorplanDevices.find(d => d.id === deviceId);
+            if (!savedDevice) return;
+            
+            // Revert unsaved layer to saved state
+            const unsavedIndex = state.unsavedFloorplanDevices.findIndex(d => d.id === deviceId);
+            if (unsavedIndex !== -1) {
+                state.unsavedFloorplanDevices[unsavedIndex] = { ...savedDevice };
+            }
+            
+            // Clear editing state but keep selection
+            state.editingFloorplanDevice = null;
         },
-        GetUnsavedFloorplanDevices: (state) => {
-            state.unsavedFloorplanDevices = state.floorplanDeviceAll;
-            console.log("Unsaved Devices: ", JSON.stringify(state.unsavedFloorplanDevices, null, 2));
-            console.log("All Devices: ", JSON.stringify(state.floorplanDeviceAll, null, 2));
+        
+        // Add new device to unsaved layer
+        AddUnsavedDevice: (state, action: PayloadAction<FloorplanDeviceType>) => {
+            state.unsavedFloorplanDevices.push({ ...action.payload });
+            
+            // Also add to saved layer (for consistency)
+            state.savedFloorplanDevices.push({ ...action.payload });
         },
+        
+        // Edit device in unsaved layer during editing
+        EditUnsavedDevice: (state, action: PayloadAction<FloorplanDeviceType>) => {
+            const index = state.unsavedFloorplanDevices.findIndex(
+                (device) => device.id === action.payload.id
+            );
+            
+            if (index !== -1) {
+                state.unsavedFloorplanDevices[index] = {
+                    ...state.unsavedFloorplanDevices[index],
+                    ...action.payload
+                };
+                
+                // Update editing device
+                if (state.editingFloorplanDevice?.id === action.payload.id) {
+                    state.editingFloorplanDevice = {
+                        ...state.editingFloorplanDevice,
+                        ...action.payload
+                    };
+                }
+            }
+        },
+        
+        // Update device position
+        editDevicePosition: (state, action: PayloadAction<FloorplanDeviceType>) => {
+            const index = state.unsavedFloorplanDevices.findIndex((device) => device.id === action.payload.id);
+            if (index !== -1) {
+                state.unsavedFloorplanDevices[index] = {
+                    ...state.unsavedFloorplanDevices[index],
+                    floorplanMaskedAreaId: action.payload.floorplanMaskedAreaId,
+                    posX: action.payload.posX,
+                    posY: action.payload.posY,
+                    posPxX: action.payload.posPxX,
+                    posPxY: action.payload.posPxY
+                };
+
+                if (state.editingFloorplanDevice?.id === action.payload.id) {
+                    state.editingFloorplanDevice = {
+                        ...state.editingFloorplanDevice,
+                        floorplanMaskedAreaId: action.payload.floorplanMaskedAreaId,
+                        posX: action.payload.posX,
+                        posY: action.payload.posY,
+                        posPxX: action.payload.posPxX,
+                        posPxY: action.payload.posPxY
+                    };
+                }
+            }
+        },
+        
+        // Delete device from unsaved layer
+        DeleteUnsavedDevice: (state, action: PayloadAction<string>) => {
+            const index = state.unsavedFloorplanDevices.findIndex(
+                (device) => device.id === action.payload
+            );
+        
+            if (index !== -1) {
+                state.unsavedFloorplanDevices.splice(index, 1);
+                
+                // Also remove from saved layer if it was a newly added device
+                const savedIndex = state.savedFloorplanDevices.findIndex(d => d.id === action.payload);
+                if (savedIndex !== -1) {
+                    const originalIndex = state.floorplanDeviceAll.findIndex(d => d.id === action.payload);
+                    if (originalIndex === -1) {
+                        // This was a newly added device, remove from saved layer too
+                        state.savedFloorplanDevices.splice(savedIndex, 1);
+                    }
+                }
+                
+                // Clear selection if it's the deleted device
+                if (state.selectedFloorplanDevice?.id === action.payload) {
+                    state.selectedFloorplanDevice = null;
+                }
+                
+                // Clear editing if it's the deleted device
+                if (state.editingFloorplanDevice?.id === action.payload) {
+                    state.editingFloorplanDevice = null;
+                }
+            }
+        },
+        
+        // Select device for viewing
         SelectFloorplanDevice: (state, action) => {
             const selected = state.unsavedFloorplanDevices.find(
                 (floorplanDevice: FloorplanDeviceType) => floorplanDevice.id === action.payload
             );
             state.selectedFloorplanDevice = selected || null;
         },
+        
+        // Select device for editing
         SelectEditingFloorplanDevice: (state, action: PayloadAction<FloorplanDeviceType | null>) => {
-            // const selected = state.unsavedFloorplanDevices.find(
-            //     (floorplanDevice: FloorplanDeviceType) => floorplanDevice.id === action.payload
-            // );
-            // console.log("Unsaved Devices: ", JSON.stringify(state.unsavedFloorplanDevices, null, 2));
-            // console.log("Selected Editing Device: ", JSON.stringify(selected));
             state.editingFloorplanDevice = action.payload || null;
         },
-
+        
         SearchFloorplanDevice: (state, action) => {
             state.floorplanDeviceSearch = action.payload;
         },
-        AddUnsavedDevice: (state, action: PayloadAction<FloorplanDeviceType>) => {
-            state.unsavedFloorplanDevices.push(action.payload);
-          },
-        EditUnsavedDevice: (state, action: PayloadAction<FloorplanDeviceType>) => {
-            const index = state.unsavedFloorplanDevices.findIndex(
-                (device) => device.id === action.payload.id
-            );
-            // console.log("Index: ", index);
-            if (index !== -1) {
-                state.unsavedFloorplanDevices = state.unsavedFloorplanDevices.map((device, i) => 
-                    i === index ? { ...device, ...action.payload } : device
-
-                );
-                                // console.log("Editing Device", action.payload);
-                // state.unsavedFloorplanDevices[index] = action.payload;
-                state.editingFloorplanDevice = {
-                    ...state.editingFloorplanDevice,
-                    ...action.payload};
-            }   
-        },
-        editDevicePosition: (state, action: PayloadAction<FloorplanDeviceType>) => {
-            const index = state.unsavedFloorplanDevices.findIndex((device) => device.id === action.payload.id);
-            if (index !== -1) {
-                state.unsavedFloorplanDevices = state.unsavedFloorplanDevices.map((device, i) =>
-                    i === index ? { ...device,floorplanMaskedAreaId: action.payload.floorplanMaskedAreaId, posX: action.payload.posX, posY: action.payload.posY, posPxX: action.payload.posPxX, posPxY: action.payload.posPxY } : device
-                );
-
-                if(state.editingFloorplanDevice){
-                    state.editingFloorplanDevice = {
-                        ...state.editingFloorplanDevice,
-                        floorplanMaskedAreaId: action.payload.floorplanMaskedAreaId,
-                        posX: action.payload.posX, //ubah
-                        posY: action.payload.posY,
-                        posPxX: action.payload.posPxX,
-                        posPxY: action.payload.posPxY
-                    }
-                }
-            }
-        },
-        SaveDevice: (state, action: PayloadAction<string>) => {
-            const index = state.unsavedFloorplanDevices.findIndex((device) => device.id === action.payload);
-            // console.log(index);
-            if(index !== -1 && state.floorplanDeviceAll[index]) {
-                if(state.floorplanDeviceAll[index].id === state.unsavedFloorplanDevices[index].id) {
-                    state.floorplanDeviceAll[index] = state.unsavedFloorplanDevices[index];
-                    // console.log(JSON.stringify(state.floorplanDeviceAll[index], null, 2));
-                }
-            }
-            else {
-                // console.log("New device added");
-                state.floorplanDeviceAll.push(state.unsavedFloorplanDevices[index]);
-                state.addedFloorplanDevice?.push(state.unsavedFloorplanDevices[index]);
-            }
-        },
-        DeleteUnsavedDevice: (state, action: PayloadAction<string>) => {
-            // Find the index of the device to delete
-            const index = state.unsavedFloorplanDevices.findIndex(
-                (device) => device.id === action.payload
-            );
         
-            // If the device exists, remove it from the list
-            if (index !== -1) {
-                state.deletedFloorplanDevice?.push(state.unsavedFloorplanDevices[index]);
-                state.unsavedFloorplanDevices.splice(index, 1);
-                // console.log(`Device with ID ${action.payload} deleted from unsaved devices.`);
-            } else {
-                console.warn(`Device with ID ${action.payload} not found in unsaved devices.`);
-            }
-        },
-        RevertDevice: {
-            reducer: (state, action: PayloadAction<{ id: string }>) => {
-                const deviceIndex = state.unsavedFloorplanDevices.findIndex(
-                    (device) => device.id === action.payload.id
-                );
-                const device = state.floorplanDeviceAll.find((device) => device.id === action.payload.id);
-                if (deviceIndex !== -1) {
-                    const unsavedDevice = state.unsavedFloorplanDevices[deviceIndex];
-                    // Check if the device type is valid
-                    const validDeviceTypes = DeviceType.map((type) => type.value); // Extract valid types from DeviceType
-                    // console.log("Unsaved Device: ", JSON.stringify(unsavedDevice));
-                    if (unsavedDevice.type === "" || !validDeviceTypes.includes(unsavedDevice.type) || unsavedDevice.floorplanMaskedAreaId === "") {
-                        // Remove the device if its type is invalid
-                        state.unsavedFloorplanDevices.splice(deviceIndex, 1);
-                        // console.warn(`Device with ID ${action.payload.id} removed due to invalid type.`);
-                        return;
-                    }
-                }
-                if (device) {
-                    if(state.selectedFloorplanDevice?.id === action.payload.id) {
-                        state.selectedFloorplanDevice = device;
-                    }
-                }
-                if (deviceIndex !== -1 && device) {
-                    // console.log(JSON.stringify(device, null, 2));
-                    state.unsavedFloorplanDevices[deviceIndex] = device;
-                    state.editingFloorplanDevice = null ;
-                }
-            },
-            prepare: (id: string) => ({
-                payload: { id },
-            }),
-
-        },
-        ResetState: (state) => {
-            state.deletedFloorplanDevice = [];
-            state.addedFloorplanDevice = [];
-            state.selectedFloorplanDevice = null;
-            state.editingFloorplanDevice = null;
-        },
+        // Start drawing a path
         DrawingDevicePath: (state, action: PayloadAction<string>) => {
             state.drawingDevicePath = action.payload;
         },
+        
+        // Add path pair to unsaved layer (affects both devices)
+        AddPathPairToUnsaved: (state, action: PayloadAction<{
+            forward: { deviceId: string; paths: PathNodeType[] };
+            backward: { deviceId: string; paths: PathNodeType[] };
+        }>) => {
+            const { forward, backward } = action.payload;
+            const pairingId = crypto.randomUUID();
+            
+            // Helper to add path to device in unsaved layer
+            const addPathToDevice = (fromDeviceId: string, toDeviceId: string, paths: PathNodeType[]) => {
+                const deviceIndex = state.unsavedFloorplanDevices.findIndex(d => d.id === fromDeviceId);
+                if (deviceIndex === -1) return;
+                
+                const device = state.unsavedFloorplanDevices[deviceIndex];
+                const newPath: PathsType = {
+                    id: pairingId,
+                    fromDeviceId,
+                    toDeviceId,
+                    paths,
+                };
+                
+                // Check if path already exists
+                const existingPathIndex = device.devicePath?.findIndex(p => p.id === pairingId) ?? -1;
+                let updatedDevicePath: PathsType[];
+                
+                if (existingPathIndex !== -1 && device.devicePath) {
+                    // Replace existing path
+                    updatedDevicePath = [...device.devicePath];
+                    updatedDevicePath[existingPathIndex] = newPath;
+                } else {
+                    // Add new path
+                    updatedDevicePath = [...(device.devicePath || []), newPath];
+                }
+                
+                const updatedDevice = {
+                    ...device,
+                    devicePath: updatedDevicePath,
+                    path: JSON.stringify(updatedDevicePath),
+                };
+                
+                state.unsavedFloorplanDevices[deviceIndex] = updatedDevice;
+                
+                // Update editing device if it's this one
+                if (state.editingFloorplanDevice?.id === fromDeviceId) {
+                    state.editingFloorplanDevice = updatedDevice;
+                }
+            };
+            
+            // Add paths to both devices
+            addPathToDevice(forward.deviceId, backward.deviceId, forward.paths);
+            addPathToDevice(backward.deviceId, forward.deviceId, backward.paths);
+        },
+        
+        // Remove path pair from unsaved layer
+        RemovePathPairFromUnsaved: (state, action: PayloadAction<string>) => {
+            const pathId = action.payload;
+            
+            // Find devices that have this path
+            const devicesWithPath = state.unsavedFloorplanDevices.filter(
+                device => device.devicePath?.some(path => path.id === pathId)
+            );
+            
+            // Remove path from each device
+            devicesWithPath.forEach(device => {
+                const deviceIndex = state.unsavedFloorplanDevices.findIndex(d => d.id === device.id);
+                if (deviceIndex !== -1) {
+                    const updatedDevicePath = device.devicePath?.filter(path => path.id !== pathId) || [];
+                    
+                    const updatedDevice = {
+                        ...device,
+                        devicePath: updatedDevicePath,
+                        path: JSON.stringify(updatedDevicePath),
+                    };
+                    
+                    state.unsavedFloorplanDevices[deviceIndex] = updatedDevice;
+                    
+                    // Update editing device if it's this one
+                    if (state.editingFloorplanDevice?.id === device.id) {
+                        state.editingFloorplanDevice = updatedDevice;
+                    }
+                }
+            });
+        },
+        
+        // Update device path (for backward compatibility)
         editDevicePath: (state, action: PayloadAction<FloorplanDeviceType>) => {
             const index = state.unsavedFloorplanDevices.findIndex(
                 (device) => device.id === action.payload.id
@@ -279,52 +510,49 @@ export const FloorplanDeviceSlice = createSlice({
 
             if (index !== -1) {
                 state.unsavedFloorplanDevices[index] = {
-                ...state.unsavedFloorplanDevices[index],
-                path: action.payload.path,
-                devicePath: action.payload.devicePath,   // <-- ADD THIS
+                    ...state.unsavedFloorplanDevices[index],
+                    path: action.payload.path,
+                    devicePath: action.payload.devicePath,
                 };
 
-                console.log("Editing Device Path: ", action.payload);
-
-                if (state.editingFloorplanDevice) {
+                if (state.editingFloorplanDevice?.id === action.payload.id) {
                     state.editingFloorplanDevice = {
                         ...state.editingFloorplanDevice,
                         path: action.payload.path,
-                        devicePath: action.payload.devicePath, // <-- ADD THIS
+                        devicePath: action.payload.devicePath,
                     };
                 }
             }
         },
-        addDevicePathPair: (state, action) => {
-  const { forward, backward } = action.payload;
-
-  const apply = (targetId: string, newPaths: PathNodeType[]) => {
-    const deviceIndex = state.unsavedFloorplanDevices.findIndex(d => d.id === targetId);
-    if (deviceIndex !== -1) {
-      const dev = state.unsavedFloorplanDevices[deviceIndex];
-
-      const updatedDevicePath = [...(dev.devicePath ?? []), {
-        id: crypto.randomUUID(),
-        deviceId: targetId,
-        paths: newPaths,
-      }];
-
-      dev.devicePath = updatedDevicePath;
-      dev.path = JSON.stringify(updatedDevicePath);
-
-      // update editingFloorplanDevice if this device is currently being edited
-      if (state.editingFloorplanDevice?.id === targetId) {
-        state.editingFloorplanDevice.devicePath = updatedDevicePath;
-        state.editingFloorplanDevice.path = JSON.stringify(updatedDevicePath);
-      }
-    }
-  };
-
-  // apply forward and backward updates
-  apply(forward.deviceId, forward.paths);
-  apply(backward.deviceId, backward.paths);
-},
-
+        
+        // Select a specific path for highlighting
+        selectDevicePath: (state, action: PayloadAction<string>) => {
+            state.selectDevicePath = action.payload;
+        },
+        
+        // Apply all unsaved changes to saved layer (via main Save in DeviceList)
+        ApplyUnsavedToSaved: (state) => {
+            // Update saved layer from unsaved layer
+            state.unsavedFloorplanDevices.forEach(unsavedDevice => {
+                const savedIndex = state.savedFloorplanDevices.findIndex(d => d.id === unsavedDevice.id);
+                if (savedIndex !== -1) {
+                    state.savedFloorplanDevices[savedIndex] = { ...unsavedDevice };
+                } else {
+                    state.savedFloorplanDevices.push({ ...unsavedDevice });
+                }
+            });
+            
+            // Also update original layer
+            state.floorplanDeviceAll = [...state.savedFloorplanDevices];
+        },
+        
+        // Reset all editing state
+        ResetState: (state) => {
+            state.selectedFloorplanDevice = null;
+            state.editingFloorplanDevice = null;
+            state.drawingDevicePath = '';
+            state.selectDevicePath = '';
+        },
     },
 
     extraReducers: (builder) => {
@@ -351,87 +579,86 @@ export const FloorplanDeviceSlice = createSlice({
                 console.error("Delete floorplan device failed: ", action.payload);
             })
             .addCase(fetchFloorplanDeviceDT.pending, (state, action) => {
-                        const newFilter = action.meta.arg as GetFilter;
-                        const prevFilter = state.lastFilter;
-            
-                        // If no previous filter (first load), always reset
-                        if (!prevFilter) {
-                            state.isLoading = true;
-                            state.hasLoaded = false;
-                            return;
-                        }
-            
-                        // Detect only sorting change
-                        const onlySortingChanged =
-                            prevFilter.SortColumn !== newFilter.SortColumn ||
-                            prevFilter.SortDir !== newFilter.SortDir;
-            
-                        const filtersUnchanged =
-                            JSON.stringify({
-                            ...prevFilter,
-                            SortColumn: undefined,
-                            SortDir: undefined,
-                            }) ===
-                            JSON.stringify({
-                            ...newFilter,
-                            SortColumn: undefined,
-                            SortDir: undefined,
-                            });
-            
-                        const isOnlySortChange = onlySortingChanged && filtersUnchanged;
-            
-                        // ✅ If sorting only, keep hasLoaded true
-                        state.isLoading = true;
-                        if (!isOnlySortChange) {
-                            state.hasLoaded = false;
-                        }
-                    })
+                const newFilter = action.meta.arg as GetFilter;
+                const prevFilter = state.lastFilter;
+    
+                // If no previous filter (first load), always reset
+                if (!prevFilter) {
+                    state.isLoading = true;
+                    state.hasLoaded = false;
+                    return;
+                }
+    
+                // Detect only sorting change
+                const onlySortingChanged =
+                    prevFilter.SortColumn !== newFilter.SortColumn ||
+                    prevFilter.SortDir !== newFilter.SortDir;
+    
+                const filtersUnchanged =
+                    JSON.stringify({
+                    ...prevFilter,
+                    SortColumn: undefined,
+                    SortDir: undefined,
+                    }) ===
+                    JSON.stringify({
+                    ...newFilter,
+                    SortColumn: undefined,
+                    SortDir: undefined,
+                    });
+    
+                const isOnlySortChange = onlySortingChanged && filtersUnchanged;
+    
+                // ✅ If sorting only, keep hasLoaded true
+                state.isLoading = true;
+                if (!isOnlySortChange) {
+                    state.hasLoaded = false;
+                }
+            })
             .addCase(fetchFloorplanDeviceDT.fulfilled, (state, action) => {
                 state.floorplanDeviceTotalCount = action.payload.recordsTotal;
                 state.floorplanDeviceFilteredCount = action.payload.recordsFiltered;
-                console.log("Floorplan Device Records Total: ", action.payload.recordsTotal);
-                    state.isLoading = false;
-                    state.hasLoaded = true;
-state.lastFilter = { ...state.floorplanDeviceFilter };
+                state.isLoading = false;
+                state.hasLoaded = true;
+                state.lastFilter = { ...state.floorplanDeviceFilter };
             })
             .addCase(fetchFloorplanDeviceDT.rejected, (_state, action) => {
                 console.error("Fetch floorplan device DT failed: ", action.payload);
-                // _state.floorplanDeviceTotalCount = 0;
                 _state.floorplanDeviceFilteredCount = 0;
-
-                    _state.isLoading = false;
-                    _state.hasLoaded = false;
-
+                _state.isLoading = false;
+                _state.hasLoaded = false;
             })
-            
     },
 });
 
-
 export const {
     GetFloorplanDevices,
-    GetAllFloorplanDevices,
-    GetUnsavedFloorplanDevices,
-    SelectFloorplanDevice,
-    SearchFloorplanDevice,
+    InitializeAllLayers,
+    StartEditingDevice,
+    SaveAllDevicesToSavedLayer,
+    CancelAllDevicesEditing,
+    SaveDeviceToSavedLayer,
+    CancelDeviceEditing,
     AddUnsavedDevice,
     EditUnsavedDevice,
-    SelectEditingFloorplanDevice,
-    DeleteUnsavedDevice,
-    RevertDevice,
-    SaveDevice,
-    ResetState,
     editDevicePosition,
+    DeleteUnsavedDevice,
+    SelectFloorplanDevice,
+    SelectEditingFloorplanDevice,
+    SearchFloorplanDevice,
     DrawingDevicePath,
+    AddPathPairToUnsaved,
+    RemovePathPairFromUnsaved,
     editDevicePath,
-    addDevicePathPair,
+    selectDevicePath,
+    ApplyUnsavedToSaved,
+    ResetState,
 } = FloorplanDeviceSlice.actions;
 
 export const fetchFloorplanDevices = () => async (dispatch: AppDispatch) => {
     try {
         const response = await axiosServices.get(API_URL);
-        // console.log("Floorplan devices fetched: ", response.data);
-        dispatch(GetAllFloorplanDevices(response.data?.collection?.data || []));
+        const devices = response.data?.collection?.data || [];
+        dispatch(InitializeAllLayers(devices));
     } catch (error) {
         console.error("Error fetching floorplan devices: ", error);
     }    
@@ -442,34 +669,31 @@ export const fetchFloorplanDeviceDT = createAsyncThunk(
     async (filter: any, { rejectWithValue }) => {
         const started = Date.now();
         try {
-                    if (
-            filter?.filters &&
-            Object.values(filter.filters).some(
-                (arr: any) => Array.isArray(arr) && arr.includes("Empty")
-            )
-        ) {
-            // console.log("Filter contains 'Empty', skipping request");
-            // Option 1: just return null (success, no data)
-            // return null;
-            // Option 2: reject, if you want to treat as error
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
-            return rejectWithValue("Filter contains 'Empty', skipping request");
-        }
+            if (
+                filter?.filters &&
+                Object.values(filter.filters).some(
+                    (arr: any) => Array.isArray(arr) && arr.includes("Empty")
+                )
+            ) {
+                const elapsed = Date.now() - started;
+                if (elapsed < 500) await delay(500 - elapsed);
+                return rejectWithValue("Filter contains 'Empty', skipping request");
+            }
+            
             const response = await axiosServices.post(API_DT_URL, filter);
             dispatch(GetFloorplanDevices(response.data.collection.data || []));
-            // console.log("Fetch floorplan devices", response.data.collection);
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
+            
+            const elapsed = Date.now() - started;
+            if (elapsed < 500) await delay(500 - elapsed);
             return response.data.collection;
         } catch (error: any) {
             console.error("Error fetching floorplan devices:", error);
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
+            const elapsed = Date.now() - started;
+            if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
-)
+);
 
 export const addFloorplanDevice = createAsyncThunk(
     'floorplanDevice/addFloorplanDevice',
@@ -477,17 +701,16 @@ export const addFloorplanDevice = createAsyncThunk(
         const started = Date.now();
         try {
             const { id, createdAt, createdBy, updatedAt, updatedBy, accessCctv, reader, accessControl, floorplanMaskedArea, ...filteredFloorplanDevice } = floorplanDevice;
-            // console.log(filteredFloorplanDevice.applicationId);
-            // console.log("Filtered Floorplan Device: ", filteredFloorplanDevice);
+            
             const response = await axiosServices.post(API_URL, filteredFloorplanDevice);
-            // console.log("Floorplan device added: ", response.data);
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
+            
+            const elapsed = Date.now() - started;
+            if (elapsed < 500) await delay(500 - elapsed);
             return response.data;
         } catch (error: any) {
             console.error("Error adding floorplan device: ", error);
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
+            const elapsed = Date.now() - started;
+            if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
@@ -499,15 +722,16 @@ export const editFloorplanDevice = createAsyncThunk(
         const started = Date.now();
         try {
             const { id, createdAt, createdBy, updatedAt, updatedBy, accessCctv, reader, accessControl, floorplanMaskedArea, ...filteredFloorplanDevice } = floorplanDevice;
-             const response = await axiosServices.put(`${API_URL}${floorplanDevice.id}`, filteredFloorplanDevice);
-            // console.log("Floorplan device edited: ", response.data);
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
+            
+            const response = await axiosServices.put(`${API_URL}${floorplanDevice.id}`, filteredFloorplanDevice);
+            
+            const elapsed = Date.now() - started;
+            if (elapsed < 500) await delay(500 - elapsed);
             return response.data;
         } catch (error: any) {
             console.error("Error editing floorplan device: ", error);
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
+            const elapsed = Date.now() - started;
+            if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
@@ -519,70 +743,17 @@ export const deleteFloorplanDevice = createAsyncThunk(
         const started = Date.now();
         try {
             const response = await axiosServices.delete(`${API_URL}${id}`);
-            // console.log("Floorplan device deleted: ", response.data);
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
+            
+            const elapsed = Date.now() - started;
+            if (elapsed < 500) await delay(500 - elapsed);
             return response.data;
         } catch (error: any) {
             console.error("Error deleting floorplan device: ", error);
-                                const elapsed = Date.now() - started;
-      if (elapsed < 500) await delay(500 - elapsed);
+            const elapsed = Date.now() - started;
+            if (elapsed < 500) await delay(500 - elapsed);
             return rejectWithValue(error.response?.data || "Unknown error");
         }
     }
 );
-
-export const ImportFloorplanDevice = createAsyncThunk(
-    "floorplanDevice/importFloorplanDevice",
-    async (formData: FormData, { rejectWithValue }) => {
-        try {
-            const response = await axiosServices.post(`${API_URL}import`, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-            // console.log("Floorplan device imported: ", response.data);
-            return response.data;
-        } catch (error: any) {
-            console.error("Error importing floorplan device: ", error);
-            return rejectWithValue(error.response?.data || "Unknown error");
-        }
-    }
-);
-
-export const ExportFloorplanDevice = createAsyncThunk(
-    "floorplanDevice/exportFloorplanDevice",
-    async (filter: "pdf" | "excel", { rejectWithValue }) => {
-    const url = `${BASE_URL}${API_URL}export/${filter}`;
-    const accessToken = localStorage.getItem('token');
-    try {
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-          'X-BIOPEOPLETRACKING-API-KEY':
-            'FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK',
-        },
-      });
-      if (!response.ok) throw new Error('Export failed');
-      const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.download = filter === 'pdf' ? 'FloorplanDevice.pdf' : 'FloorplanDevice.xlsx';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(downloadUrl);
-      return true; // Indicate success
-        } catch (error: any) {
-            console.error("Error exporting floorplan device: ", error);
-            return rejectWithValue(error.response?.data || "Unknown error");
-        }
-    }
-)
-
-
 
 export default FloorplanDeviceSlice.reducer;

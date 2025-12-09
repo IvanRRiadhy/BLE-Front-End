@@ -91,6 +91,12 @@ export const genderEnumMap: Record<string, number> = {
     { label: "Restrict", value: "Restrict" },
     { label: "Non-Restrict", value: "NonRestrict" },
   ];
+
+    export const readerType: inputDataType[] = [
+    { label: "Please select Type", value: '', disabled: true},
+    { label: "Indoor", value: "Indoor" },
+    { label: "Outdoor", value: "Outdoor" },
+  ];
   
   export const visitorStatus: inputDataType[] = [
     { label: "Please select Status", value: '', disabled: true},

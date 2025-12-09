@@ -1,4 +1,17 @@
-import { Button, Box, Grid2 as Grid, MenuItem, SelectChangeEvent, Typography } from '@mui/material';
+import {
+  Button,
+  Box,
+  Grid2 as Grid,
+  MenuItem,
+  SelectChangeEvent,
+  Typography,
+  IconButton,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
@@ -9,16 +22,22 @@ import {
   FloorplanDeviceType,
   SelectEditingFloorplanDevice,
   SelectFloorplanDevice,
-  RevertDevice,
-  SaveDevice,
+  SaveDeviceToSavedLayer,
+  CancelDeviceEditing,
   DrawingDevicePath,
+  selectDevicePath,
+  RemovePathPairFromUnsaved,
+  StartEditingDevice,
+  SaveAllDevicesToSavedLayer,
+  CancelAllDevicesEditing,
 } from 'src/store/apps/crud/floorplanDevice';
 import { useMaskedAreaList } from 'src/hooks/useMaskedArea';
 import { useAllUnassignedCCTV } from 'src/hooks/useCCTV';
 import { useAllReaders, useAllUnassignedReaders } from 'src/hooks/useReader';
-import { DeviceType } from 'src/types/crud/input';
+import { DeviceType, readerType } from 'src/types/crud/input';
 import { isEqual } from 'lodash';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
+import { Delete } from '@mui/icons-material';
 
 // Define form data type for better type safety
 interface DeviceFormData {
@@ -29,6 +48,7 @@ interface DeviceFormData {
   accessCctvId: string | null;
   readerId: string | null;
   accessControlId: string | null;
+  readerType: 'Indoor' | 'Outdoor';
   posX: number;
   posY: number;
   posPxX: number;
@@ -55,8 +75,11 @@ const DeviceDetailList = () => {
   const unsavedDevices = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.unsavedFloorplanDevices,
   );
-  const drawingPath = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.drawingDevicePath,
+  const savedDevices = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.savedFloorplanDevices,
+  );
+  const selectedPathId = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.selectDevicePath,
   );
 
   // React Query hooks for data fetching
@@ -77,8 +100,6 @@ const DeviceDetailList = () => {
   const { data: bleReaderData = [] } = useAllReaders();
   const { data: allUnassignedReaders = [] } = useAllUnassignedReaders();
 
-  // console.log('bleReaderData', bleReaderData);
-
   // Form state
   const [formData, setFormData] = useState<DeviceFormData>({
     id: '',
@@ -88,6 +109,7 @@ const DeviceDetailList = () => {
     accessCctvId: null,
     readerId: null,
     accessControlId: null,
+    readerType: 'Indoor',
     posX: 0,
     posY: 0,
     posPxX: 0,
@@ -107,35 +129,40 @@ const DeviceDetailList = () => {
     ...(currentReader ? [currentReader] : []),
     ...allUnassignedReaders.filter((r) => r.id !== formData.readerId),
   ];
-  // Update form data when device changes
+
+  // When device is selected for editing, initialize form
   useEffect(() => {
-    if (device) {
+    if (device && device.id) {
+      // Make sure we have the latest from unsaved layer
+      const latestDevice = unsavedDevices.find((d) => d.id === device.id) || device;
+
       const newFormData: DeviceFormData = {
-        id: device.id || '',
-        name: device.name || '',
-        type: device.type || '',
-        floorplanId: device.floorplanId || '',
-        accessCctvId: device.accessCctvId || null,
-        readerId: device.readerId || null,
-        accessControlId: device.accessControlId || null,
-        posX: device.posX || 0,
-        posY: device.posY || 0,
-        posPxX: device.posPxX || 0,
-        posPxY: device.posPxY || 0,
-        floorplanMaskedAreaId: device.floorplanMaskedAreaId || '',
-        applicationId: device.applicationId || localStorage.getItem('applicationId') || '',
-        deviceStatus: device.deviceStatus || '',
-        createdBy: device.createdBy || '',
-        createdAt: device.createdAt || '',
-        updatedBy: device.updatedBy || '',
-        updatedAt: device.updatedAt || '',
+        id: latestDevice.id || '',
+        name: latestDevice.name || '',
+        type: latestDevice.type || '',
+        floorplanId: latestDevice.floorplanId || '',
+        accessCctvId: latestDevice.accessCctvId || null,
+        readerId: latestDevice.readerId || null,
+        accessControlId: latestDevice.accessControlId || null,
+        readerType: latestDevice.readerType || 'Indoor',
+        posX: latestDevice.posX || 0,
+        posY: latestDevice.posY || 0,
+        posPxX: latestDevice.posPxX || 0,
+        posPxY: latestDevice.posPxY || 0,
+        floorplanMaskedAreaId: latestDevice.floorplanMaskedAreaId || '',
+        applicationId: latestDevice.applicationId || localStorage.getItem('applicationId') || '',
+        deviceStatus: latestDevice.deviceStatus || '',
+        createdBy: latestDevice.createdBy || '',
+        createdAt: latestDevice.createdAt || '',
+        updatedBy: latestDevice.updatedBy || '',
+        updatedAt: latestDevice.updatedAt || '',
       };
 
       if (!isEqual(formData, newFormData)) {
         setFormData(newFormData);
       }
     }
-  }, [device]); // Remove formData from dependencies to avoid infinite loops
+  }, [device, unsavedDevices]);
 
   // Update other readers when floorplan changes
   useEffect(() => {
@@ -149,6 +176,8 @@ const DeviceDetailList = () => {
       setOtherReader(otherReaderData);
     }
   }, [activeFloorplan?.id, formData.id, unsavedDevices]);
+
+  // Create path destinations list
   const pathDestinations = React.useMemo(() => {
     if (!device?.devicePath?.length) return [];
 
@@ -206,25 +235,27 @@ const DeviceDetailList = () => {
   const handleClose = () => {
     // Reset to current device data or empty form
     if (device) {
+      const latestDevice = unsavedDevices.find((d) => d.id === device.id) || device;
       setFormData({
-        id: device.id || '',
-        name: device.name || '',
-        type: device.type || '',
-        floorplanId: device.floorplanId || '',
-        accessCctvId: device.accessCctvId || null,
-        readerId: device.readerId || null,
-        accessControlId: device.accessControlId || null,
-        posX: device.posX || 0,
-        posY: device.posY || 0,
-        posPxX: device.posPxX || 0,
-        posPxY: device.posPxY || 0,
-        floorplanMaskedAreaId: device.floorplanMaskedAreaId || '',
-        applicationId: device.applicationId || localStorage.getItem('applicationId') || '',
-        deviceStatus: device.deviceStatus || '',
-        createdBy: device.createdBy || '',
-        createdAt: device.createdAt || '',
-        updatedBy: device.updatedBy || '',
-        updatedAt: device.updatedAt || '',
+        id: latestDevice.id || '',
+        name: latestDevice.name || '',
+        type: latestDevice.type || '',
+        floorplanId: latestDevice.floorplanId || '',
+        accessCctvId: latestDevice.accessCctvId || null,
+        readerId: latestDevice.readerId || null,
+        accessControlId: latestDevice.accessControlId || null,
+        readerType: latestDevice.readerType || 'Indoor',
+        posX: latestDevice.posX || 0,
+        posY: latestDevice.posY || 0,
+        posPxX: latestDevice.posPxX || 0,
+        posPxY: latestDevice.posPxY || 0,
+        floorplanMaskedAreaId: latestDevice.floorplanMaskedAreaId || '',
+        applicationId: latestDevice.applicationId || localStorage.getItem('applicationId') || '',
+        deviceStatus: latestDevice.deviceStatus || '',
+        createdBy: latestDevice.createdBy || '',
+        createdAt: latestDevice.createdAt || '',
+        updatedBy: latestDevice.updatedBy || '',
+        updatedAt: latestDevice.updatedAt || '',
       });
     }
     dispatch(SelectEditingFloorplanDevice(null));
@@ -235,33 +266,16 @@ const DeviceDetailList = () => {
     if (!isFormValid()) return;
     console.log('Saving device with data:', JSON.stringify(formData, null, 2));
     try {
-      // Update the unsaved device in Redux store
-      dispatch(EditUnsavedDevice(formData));
+      // First update the unsaved device with form data
+      const updatedDevice = {
+        ...device,
+        ...formData,
+        updatedAt: new Date().toISOString(),
+        updatedBy: 'admin', // You might want to get this from auth context
+      };
 
-      // Mark as saved in Redux (local state management)
-      dispatch(SaveDevice(formData.id));
-
-      // Calculate testNodes for BleReader (if applicable)
-      // if (formData.type === 'BleReader') {
-      //   const newTestNodes: any[] = [];
-      //   otherReader.forEach((otherReader) => {
-      //     if (otherReader.id !== formData.id) {
-      //       const distance = Math.sqrt(
-      //         Math.pow(otherReader.posX - formData.posX, 2) +
-      //           Math.pow(otherReader.posY - formData.posY, 2),
-      //       );
-
-      //       newTestNodes.push({
-      //         id: `${formData.id}-${otherReader.id}`,
-      //         startPos: `(${formData.posX}, ${formData.posY})`,
-      //         endPos: `(${otherReader.posX}, ${otherReader.posY})`,
-      //         distance,
-      //       });
-      //     }
-      //   });
-      //   // You can store newTestNodes in state if needed
-      //   console.log('Test nodes created:', newTestNodes);
-      // }
+      // Save to saved layer
+      dispatch(SaveAllDevicesToSavedLayer());
 
       handleClose();
     } catch (error) {
@@ -271,7 +285,8 @@ const DeviceDetailList = () => {
 
   const handleCancel = () => {
     if (formData.id) {
-      dispatch(RevertDevice(formData.id));
+      // Cancel editing - this reverts unsaved device to saved layer
+      dispatch(CancelAllDevicesEditing());
     }
     handleClose();
   };
@@ -285,10 +300,33 @@ const DeviceDetailList = () => {
 
     const fieldName = (id || name) as keyof DeviceFormData;
 
-    setFormData((prev) => ({
-      ...prev,
+    const newFormData = {
+      ...formData,
       [fieldName]: value,
-    }));
+    };
+
+    setFormData(newFormData);
+
+    // Also update the unsaved device immediately
+    if (device) {
+      const updatedDevice = {
+        ...device,
+        ...newFormData,
+      };
+      dispatch(EditUnsavedDevice(updatedDevice));
+    }
+  };
+
+  const handleDeletePath = (pathId: string) => {
+    if (!device?.id) return;
+
+    // Dispatch the action to remove the path pair
+    dispatch(RemovePathPairFromUnsaved(pathId));
+  };
+
+  const handleRowClick = (pathId: string) => {
+    // Dispatch the action to select the path
+    dispatch(selectDevicePath(pathId));
   };
 
   // If no device is selected for editing, don't render the component
@@ -367,6 +405,24 @@ const DeviceDetailList = () => {
               </CustomSelect>
             </Grid>
 
+            <Grid size={12}>
+              <CustomFormLabel htmlFor="reader-type">Type</CustomFormLabel>
+              <CustomSelect
+                name="readerType"
+                value={formData.readerType}
+                onChange={handleInputChange}
+                fullWidth
+                variant="outlined"
+                required
+              >
+                {readerType.map((type) => (
+                  <MenuItem key={type.value} value={type.value} disabled={type.disabled || false}>
+                    {type.label}
+                  </MenuItem>
+                ))}
+              </CustomSelect>
+            </Grid>
+
             {/* Device Type */}
             <Grid size={12}>
               <CustomFormLabel htmlFor="device-type">Device Type</CustomFormLabel>
@@ -374,9 +430,17 @@ const DeviceDetailList = () => {
                 name="type"
                 value={formData.type}
                 onChange={(e: SelectChangeEvent) => {
-                  // Update both Redux and local state
-                  dispatch(EditUnsavedDevice({ ...formData, type: e.target.value }));
-                  handleInputChange(e);
+                  const newValue = e.target.value;
+                  setFormData((prev) => ({ ...prev, type: newValue }));
+
+                  // Update unsaved device
+                  if (device) {
+                    const updatedDevice = {
+                      ...device,
+                      type: newValue,
+                    };
+                    dispatch(EditUnsavedDevice(updatedDevice));
+                  }
                 }}
                 fullWidth
                 variant="outlined"
@@ -403,10 +467,19 @@ const DeviceDetailList = () => {
                   options={availableCCTVs}
                   value={availableCCTVs.find((x) => x.id === formData.accessCctvId) || null}
                   onChange={(newVal) => {
-                    setFormData((prev) => ({
-                      ...prev,
+                    const newFormData = {
+                      ...formData,
                       accessCctvId: newVal?.id ?? null,
-                    }));
+                    };
+                    setFormData(newFormData);
+
+                    if (device) {
+                      const updatedDevice = {
+                        ...device,
+                        accessCctvId: newVal?.id ?? null,
+                      };
+                      dispatch(EditUnsavedDevice(updatedDevice));
+                    }
                   }}
                   getOptionLabel={(o) => o?.name ?? ''}
                   isOptionEqualToValue={(o, v) => o.id === v.id}
@@ -423,10 +496,19 @@ const DeviceDetailList = () => {
                   options={availableBleReaderOptions}
                   value={availableBleReaderOptions.find((x) => x.id === formData.readerId) || null}
                   onChange={(newVal) => {
-                    setFormData((prev) => ({
-                      ...prev,
+                    const newFormData = {
+                      ...formData,
                       readerId: newVal?.id ?? null,
-                    }));
+                    };
+                    setFormData(newFormData);
+
+                    if (device) {
+                      const updatedDevice = {
+                        ...device,
+                        readerId: newVal?.id ?? null,
+                      };
+                      dispatch(EditUnsavedDevice(updatedDevice));
+                    }
                   }}
                   getOptionLabel={(opt) => opt?.name ?? ''}
                   isOptionEqualToValue={(opt, val) => opt.id === val.id}
@@ -434,62 +516,15 @@ const DeviceDetailList = () => {
               </Grid>
             )}
 
-            {/* Position Fields (read-only) */}
-            {/* <Grid size={6}>
-              <CustomFormLabel htmlFor="pos-x">Position X</CustomFormLabel>
-              <CustomTextField
-                id="posX"
-                value={formData.posX}
-                variant="outlined"
-                fullWidth
-                disabled
-              />
-            </Grid>
-            <Grid size={6}>
-              <CustomFormLabel htmlFor="pos-y">Position Y</CustomFormLabel>
-              <CustomTextField
-                id="posY"
-                value={formData.posY}
-                variant="outlined"
-                fullWidth
-                disabled
-              />
-            </Grid>
-            <Grid size={6}>
-              <CustomFormLabel htmlFor="pos-px-x">Pos Pixel X</CustomFormLabel>
-              <CustomTextField
-                id="posPxX"
-                value={formData.posPxX}
-                variant="outlined"
-                fullWidth
-                disabled
-              />
-            </Grid>
-            <Grid size={6}>
-              <CustomFormLabel htmlFor="pos-px-y">Pos Pixel Y</CustomFormLabel>
-              <CustomTextField
-                id="posPxY"
-                value={formData.posPxY}
-                variant="outlined"
-                fullWidth
-                disabled
-              />
-            </Grid> */}
             {/* Add Pathing (only when there are other BLE readers) */}
             {formData.type === 'BleReader' && otherReader.length > 0 && (
               <Grid size={12} mt={1}>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  fullWidth
-                  onClick={() => {
-                    handleAddPathing();
-                  }}
-                >
+                <Button variant="contained" color="secondary" fullWidth onClick={handleAddPathing}>
                   Add Pathing
                 </Button>
               </Grid>
             )}
+
             {/* ===== PATH LIST TABLE ===== */}
             {formData.type === 'BleReader' &&
               device?.devicePath &&
@@ -506,43 +541,52 @@ const DeviceDetailList = () => {
                       overflow: 'hidden',
                     }}
                   >
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                      <thead>
-                        <tr style={{ background: '#f5f5f5' }}>
-                          <th
-                            style={{
-                              padding: '8px',
-                              borderBottom: '1px solid #DDD',
-                              textAlign: 'left',
-                            }}
-                          >
-                            #
-                          </th>
-                          <th
-                            style={{
-                              padding: '8px',
-                              borderBottom: '1px solid #DDD',
-                              textAlign: 'left',
-                            }}
-                          >
-                            Destination Reader
-                          </th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
+                    <Table>
+                      <TableHead sx={{ bgcolor: '#f5f5f5' }}>
+                        <TableRow>
+                          <TableCell sx={{ fontWeight: 600 }}>#</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>Destination Reader</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
                         {pathDestinations.map((p, index) => (
-                          <tr key={p.id}>
-                            <td style={{ padding: '8px', borderBottom: '1px solid #EEE' }}>
-                              {index + 1}
-                            </td>
-                            <td style={{ padding: '8px', borderBottom: '1px solid #EEE' }}>
-                              {p.targetDeviceName}
-                            </td>
-                          </tr>
+                          <TableRow
+                            key={p.id}
+                            onClick={() => handleRowClick(p.id)}
+                            hover
+                            selected={selectedPathId === p.id}
+                            sx={{
+                              cursor: 'pointer',
+                              '&.Mui-selected': {
+                                backgroundColor: 'primary.light',
+                                '&:hover': {
+                                  backgroundColor: 'primary.light',
+                                },
+                              },
+                            }}
+                          >
+                            <TableCell>{index + 1}</TableCell>
+                            <TableCell>
+                              <Grid container alignItems="center" justifyContent="space-between">
+                                {p.targetDeviceName}
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeletePath(p.id);
+                                  }}
+                                  sx={{ padding: '4px' }}
+                                  title="Delete path"
+                                >
+                                  <Delete fontSize="small" />
+                                </IconButton>
+                              </Grid>
+                            </TableCell>
+                          </TableRow>
                         ))}
-                      </tbody>
-                    </table>
+                      </TableBody>
+                    </Table>
                   </Box>
                 </Grid>
               )}

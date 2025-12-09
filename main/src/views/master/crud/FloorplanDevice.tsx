@@ -17,8 +17,8 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 // import AddEditDevice from 'src/components/master/CRUD/floorplanDevice/addEditDevice';
 import FloorplanDeviceList2 from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceList2';
-import FloorplanDeviceImport from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceImport';
-import FloorplanDeviceExport from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceExport';
+// import FloorplanDeviceImport from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceImport';
+// import FloorplanDeviceExport from 'src/components/master/CRUD/floorplanDevice/floorplanDeviceExport';
 import FloorplanFilter from 'src/components/master/CRUD/floorplan/FloorplanFilter';
 import { useFloorplanStatus } from 'src/hooks/useFloorplan';
 import { useFloorplanDeviceStatus } from 'src/hooks/useFloorplanDevice';
@@ -102,8 +102,8 @@ const FloorplanDevice = () => {
           }}
         >
           <ParentCard title="Floorplan List" codeModel={[
-            <FloorplanDeviceImport key="import" />,
-            <FloorplanDeviceExport key="export" />,
+            // <FloorplanDeviceImport key="import" />,
+            // <FloorplanDeviceExport key="export" />,
             <FloorplanFilter key="filter" />,
           ]}>
             {/* <FloorplanDeviceList /> */}

@@ -42,10 +42,11 @@ const AddEditMaskedArea = ({ type, maskedArea }: FormType) => {
       areaShape: '',
       colorArea: '',
       restrictedStatus: '',
-      engineAreaId: '',
-      wideArea: 0,
-      positionPxX: 0,
-      positionPxY: 0,
+      // engineAreaId: '',
+      allowFloorChange: false,
+      // wideArea: 0,
+      // positionPxX: 0,
+      // positionPxY: 0,
       createdBy: '',
       createdAt: '',
       updatedBy: '',
@@ -136,14 +137,14 @@ const AddEditMaskedArea = ({ type, maskedArea }: FormType) => {
                 fullWidth
                 variant="outlined"
               />
-              <CustomFormLabel htmlFor="engineArea-id">Engine Area ID</CustomFormLabel>
+              {/* <CustomFormLabel htmlFor="engineArea-id">Engine Area ID</CustomFormLabel>
               <CustomTextField
                 id="engineAreaId"
                 placeholder={formData.engineAreaId}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
-              />
+              /> */}
             </Grid>
             <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
               <CustomFormLabel htmlFor="floor-id">Floor ID</CustomFormLabel>
@@ -178,7 +179,7 @@ const AddEditMaskedArea = ({ type, maskedArea }: FormType) => {
                 fullWidth
                 variant="outlined"
               />
-              <CustomFormLabel htmlFor="position-px-x">Position on Pixel X</CustomFormLabel>
+              {/* <CustomFormLabel htmlFor="position-px-x">Position on Pixel X</CustomFormLabel>
               <CustomTextField
                 id="positionPxX"
                 placeholder={formData.positionPxX}
@@ -193,7 +194,7 @@ const AddEditMaskedArea = ({ type, maskedArea }: FormType) => {
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
-              />
+              /> */}
             </Grid>
             <Grid size={{ lg: 6, md: 12, sm: 12 }} direction={'column'}>
               <CustomFormLabel htmlFor="floor-id">Restricted Status</CustomFormLabel>
@@ -218,14 +219,14 @@ const AddEditMaskedArea = ({ type, maskedArea }: FormType) => {
                 fullWidth
                 variant="outlined"
               />
-              <CustomFormLabel htmlFor="pos-px-y">Position on Pixel Y</CustomFormLabel>
+              {/* <CustomFormLabel htmlFor="pos-px-y">Position on Pixel Y</CustomFormLabel>
               <CustomTextField
                 id="positionPxY"
                 placeholder={formData.positionPxY}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
-              />
+              /> */}
             </Grid>
           </Grid>
         </DialogContent>

@@ -27,7 +27,7 @@ const EditDeviceFloorView: React.FC<{ zoomable: boolean }> = ({ zoomable }) => {
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorPlan?.id);
 
   const [showArea, setShowArea] = useState(true);
-  const [showEffectiveArea, setShowEffectiveArea] = useState(true);
+  const [showEffectiveArea, setShowEffectiveArea] = useState(false);
   const [isDraggingDevice, setIsDraggingDevice] = useState(false);
 
   const [filteredUnsavedDevices, setFilteredUnsavedDevices] = useState<FloorplanDeviceType[]>([]);
@@ -266,7 +266,7 @@ const EditDeviceFloorView: React.FC<{ zoomable: boolean }> = ({ zoomable }) => {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        overflow: 'hidden',
+        overflow: 'visible',
         cursor: cursor,
         touchAction: 'none', // Prevent touch zoom
       }}
@@ -274,12 +274,12 @@ const EditDeviceFloorView: React.FC<{ zoomable: boolean }> = ({ zoomable }) => {
       {/* Sticky Overlay Toggle */}
       <Box
         sx={{
-          position: 'absolute',
-          top: 12,
-          right: 12,
+          position: 'fixed',
+          top: 160,
+          right: 40,
           zIndex: 1000,
           width: '240px',
-          background: 'rgba(255,255,255,1)',
+          background: 'rgba(124, 123, 123, 0.6)',
           borderRadius: 2,
           boxShadow: 2,
           p: 1,
@@ -366,6 +366,7 @@ const EditDeviceFloorView: React.FC<{ zoomable: boolean }> = ({ zoomable }) => {
           setCursor={setCursor}
         />
       </Box>
+      
     </Box>
   );
 };
