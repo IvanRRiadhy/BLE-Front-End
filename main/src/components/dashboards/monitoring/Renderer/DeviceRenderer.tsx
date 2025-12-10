@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { Stage, Layer, Image as KonvaImage, Text, Line, Label, Tag, Group } from 'react-konva';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
-import { fetchBeacon, RefreshBeaconState } from 'src/store/apps/tracking/Beacon';
+import { fetchBeacon, RefreshBeaconState, cleanupTopicBeacons } from 'src/store/apps/tracking/Beacon';
 import BeaconRenderer from './BeaconRenderer';
 import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
@@ -23,12 +23,32 @@ import { OverPopulatingAlarmType } from 'src/store/apps/alarmsetting/overpopulat
 import { StayOnAreaAlarmType } from 'src/store/apps/alarmsetting/stayonarea';
 import { BoundaryAlarmType } from 'src/store/apps/alarmsetting/boundary';
 
+// Common node type that all area types should have
+interface BaseNode {
+  x_px: number;
+  y_px: number;
+}
+
+// Specific node types for different area types
 type Nodes = {
   id: string;
   x: number;
   y: number;
   x_px: number;
   y_px: number;
+};
+
+// Type guard to check if a value is an array
+const isArray = (value: any): value is any[] => Array.isArray(value);
+
+// Type guard to check if a node has x_px and y_px properties
+const hasPxProperties = (node: any): node is { x_px: number; y_px: number } => {
+  return node && typeof node.x_px === 'number' && typeof node.y_px === 'number';
+};
+
+// Type guard to check if a node has x and y properties
+const hasXYProperties = (node: any): node is { x: number; y: number } => {
+  return node && typeof node.x === 'number' && typeof node.y === 'number';
 };
 
 const closeRing = (ring: number[][]) => {
@@ -46,6 +66,7 @@ function areaToPolygonRings(area: MaskedAreaType): number[][][] {
   return [closeRing(outer), ...holes.map(closeRing)];
 }
 
+// Updated toCanvas function - no scaling needed since we use original coordinates
 function toCanvas(
   x_px: number,
   y_px: number,
@@ -54,9 +75,10 @@ function toCanvas(
   originalWidth: number,
   originalHeight: number,
 ) {
+  // Return original coordinates since image is rendered at original size
   return {
-    x: (x_px / originalWidth) * width,
-    y: (y_px / originalHeight) * height,
+    x: x_px,
+    y: y_px,
   };
 }
 
@@ -95,11 +117,16 @@ type DeviceRendererProps = {
     dmac: string;
   }) => void;
   screenId: string;
-  // NEW:
   focusBeaconId?: string;
   onFocusPosition?: (pt: { x: number; y: number }) => void;
   focusDmac?: string;
   showOtherBeacons?: boolean;
+  // Stage transform props (from parent)
+  stageScale: number;
+  stageX: number;
+  stageY: number;
+  stageRef?: React.RefObject<any>;
+  onWheel?: (e: any) => void;
 };
 
 const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
@@ -132,12 +159,21 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     selectedBeaconId,
     focusBeaconId,
     focusDmac,
-    onFocusPosition, // NEW
+    onFocusPosition,
     showOtherBeacons,
     screenId,
+    stageScale,
+    stageX,
+    stageY,
+    stageRef,
+    onWheel,
   } = props;
   const dispatch = useDispatch();
-  const [image, setImage] = useState<HTMLImageElement | undefined>(undefined);
+
+  // Image state like EditAreaRenderer
+  const [bgImage, setBgImage] = useState<HTMLImageElement | undefined>(undefined);
+  const [previewImage, setPreviewImage] = useState<HTMLImageElement | undefined>(undefined);
+
   const [animatedBeacons, setAnimatedBeacons] = useState<{
     [id: string]: { x: number; y: number };
   }>({});
@@ -153,9 +189,20 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     };
   }>({});
 
-  const refreshTrigger = useSelector((state) => state.BeaconReducer.refreshTrigger);
-  const beaconData = useSelector((state) => state.BeaconReducer.beaconsByTopic[topic]);
-  const beacons = useSelector((state) => state.BeaconReducer.beaconsByTopic);
+  const refreshTrigger = useSelector((state: RootState) => state.BeaconReducer.refreshTrigger);
+  
+  // Get beacon data from Redux - now an object keyed by beaconId
+  const beaconDataObj = useSelector((state: RootState) => state.BeaconReducer.beaconsByTopic[topic]);
+  
+  // Convert object to array for easier processing
+  const beaconData = useMemo(() => {
+    if (!beaconDataObj) return [];
+    return Object.values(beaconDataObj);
+  }, [beaconDataObj]);
+  
+  console.log('DeviceRenderer render - topic:', topic, 'beaconData count:', beaconData.length);
+  
+  const beacons = useSelector((state: RootState) => state.BeaconReducer.beaconsByTopic);
   const [highlightTopic, setHighlightTopic] = useState<string | null>(null);
   const [highlightedFloorplan, setHighlightedFloorplan] = useState<string | null>(null);
   const [highlightedArea, setHighlightedArea] = useState<string | null>(null);
@@ -167,8 +214,70 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     state.layoutReducer.layouts.find((l: LayoutSet) => l.id === activeLayoutId),
   );
   const thisScreen = layouts?.screens.find((s: ScreenItem) => s.id === screenId);
+  
+  // Track previous topic to detect changes
+  const prevTopicRef = useRef<string>(topic);
+  
+  // background image - like EditAreaRenderer
+  useEffect(() => {
+    if (!imageSrc) {
+      setPreviewImage(undefined);
+      setBgImage(undefined);
+      return;
+    }
 
-  // background image
+    // Create a preview image first
+    const previewUrl = imageSrc.src;
+    const p = new window.Image();
+    p.crossOrigin = 'anonymous';
+    p.src = previewUrl;
+
+    p.onload = () => {
+      setPreviewImage(p);
+      // Then load the full image
+      const full = new window.Image();
+      full.crossOrigin = 'anonymous';
+      full.src = imageSrc.src;
+      full.onload = () => setBgImage(full);
+      full.onerror = () => {
+        // Fallback to preview if full image fails
+        if (!bgImage) setBgImage(p);
+      };
+    };
+
+    p.onerror = () => {
+      // If preview fails, try to load the full image directly
+      const f = new window.Image();
+      f.crossOrigin = 'anonymous';
+      f.src = imageSrc.src;
+      f.onload = () => setBgImage(f);
+      f.onerror = () => {
+        console.error('Failed to load image:', imageSrc.src);
+      };
+    };
+  }, [imageSrc]);
+
+  // Reset beacons immediately when topic changes
+  useEffect(() => {
+    // Only reset if topic actually changed
+    if (prevTopicRef.current !== topic) {
+      console.log(`Topic changed from ${prevTopicRef.current} to ${topic}, resetting local beacon state`);
+      setLastSeenBeacons({});
+      setAnimatedBeacons({});
+      prevTopicRef.current = topic;
+    }
+  }, [topic]);
+
+  // Set up interval to clean up old beacons in Redux
+  useEffect(() => {
+    const interval = setInterval(() => {
+      dispatch(cleanupTopicBeacons(topic));
+    }, 1000); // Clean up every second
+
+    return () => clearInterval(interval);
+  }, [dispatch, topic]);
+
+  // background image effect
   useEffect(() => {
     if (
       !highlightedFloorplan ||
@@ -180,10 +289,6 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
 
     // ✅ Only the follow screen for this beacon updates floorplan
     if (thisScreen.display.displayOutput?.toLowerCase() !== focusBeaconId?.toLowerCase()) return;
-
-    // console.log(
-    //   `[DeviceRenderer] Screen ${thisScreen.display.displayOutput} switching to floorplan ${highlightedFloorplan}`,
-    // );
 
     dispatch(
       setScreenFloorplan({
@@ -217,39 +322,50 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     };
   }, [dispatch, topic]);
 
+  // maintain beacon state from Redux data
   useEffect(() => {
-    console.log(showGeoFence);
-    console.log(GeoFenceAlarm);
-  }, [showGeoFence]);
+    if (!beaconData || beaconData.length === 0) {
+      // If no beacon data, clear local state
+      setLastSeenBeacons({});
+      return;
+    }
 
-  // maintain beacon state
-  useEffect(() => {
-    if (!beaconData) return;
+    console.log(`Processing ${beaconData.length} beacons for topic ${topic}`);
+    
     setLastSeenBeacons((prev) => {
-      const now = Date.now();
       const updated = { ...prev };
+
       beaconData.forEach((b: any) => {
         if (!b.point) return;
-        updated[b.beaconId] = {
+        
+        // beaconId is the dmac
+        const beaconId = b.beaconId;
+        const dmac = beaconId; // Same as beaconId
+        
+        updated[beaconId] = {
           x: b.point.x,
           y: b.point.y,
-          lastSeen: now,
-          area: b.maskedAreaName,
-          floorplan: b.floorplanName,
-          time: b.time,
-          dmac: b.dmac,
+          lastSeen: b.lastSeen || Date.now(), // Use Redux lastSeen or current time
+          area: b.maskedAreaName || '',
+          floorplan: b.floorplanName || '',
+          time: b.time || '',
+          dmac: dmac,
         };
       });
-      for (const id of Object.keys(updated)) {
-        if (now - updated[id].lastSeen > 10000) delete updated[id];
-      }
+
+      // Clean up beacons that are no longer in Redux data
+      Object.keys(updated).forEach((beaconId) => {
+        if (!beaconData.find((b: any) => b.beaconId === beaconId)) {
+          delete updated[beaconId];
+        }
+      });
+
       return updated;
     });
-  }, [beaconData]);
+  }, [beaconData, topic]);
 
   // animate beacons
   useEffect(() => {
-    console.log("ALL BEACON: ", beacons);
     Object.entries(lastSeenBeacons).forEach(([beaconId, beacon]) => {
       const point = { x: beacon.x, y: beacon.y };
       const prev = animatedBeacons[beaconId] || point;
@@ -267,7 +383,6 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
       const distance = Math.sqrt(distX * distX + distY * distY);
       const speed = 2 / meterPx;
       const duration = Math.min(Math.max(500, (distance / speed) * 500), 2000);
-      // console.log(`Animating beacon ${beaconId} over ${distance}m in ${duration}ms`);
       const startTime = performance.now();
       function animate(now: number) {
         const t = Math.min(1, (now - startTime) / duration);
@@ -288,22 +403,19 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     setAnimatedBeacons({});
   }, [refreshTrigger, dispatch]);
 
+  // Convert beacon position from meters to pixels for focus position
   useEffect(() => {
     if (!focusBeaconId || !onFocusPosition) return;
     const b = animatedBeacons[focusBeaconId];
     if (!b) return;
 
-    const canvas = toCanvas(b.x, b.y, width, height, originalWidth, originalHeight);
-    onFocusPosition(canvas);
-  }, [
-    animatedBeacons,
-    focusBeaconId,
-    onFocusPosition,
-    width,
-    height,
-    originalWidth,
-    originalHeight,
-  ]);
+    // Convert meters to pixels using meterPx
+    const xPx = b.x / meterPx;
+    const yPx = b.y / meterPx;
+
+    // Pass the position in original image coordinates (pixels)
+    onFocusPosition({ x: xPx, y: yPx });
+  }, [animatedBeacons, focusBeaconId, onFocusPosition, meterPx]);
 
   useEffect(() => {
     if (!focusBeaconId) return;
@@ -314,9 +426,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     const unsubscribe = startMQTTclient((msg: any) => {
       if (!msg?.floorplanId || !msg?.beaconId) return;
       const payloadId = msg.beaconId;
-      // console.log('[Highlight Update]', msg);
 
-      // ✅ only accept updates from this beacon
       if (payloadId !== focusBeaconId) return;
 
       setHighlightedFloorplan(msg.floorplanId);
@@ -344,7 +454,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   // track which area is hovered
   const [hoveredAreaId, setHoveredAreaId] = useState<string | null>(null);
 
-  // render devices
+  // render devices - using original image coordinates
   const renderDeviceShape = (device: FloorplanDeviceType) => {
     let deviceIcon = iconUnknown;
     switch (device.type) {
@@ -358,8 +468,9 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
         deviceIcon = iconFaceRecog;
         break;
     }
-    const x = (device.posPxX / originalWidth) * width - 20;
-    const y = (device.posPxY / originalHeight) * height - 20;
+    // Use original coordinates directly (no scaling)
+    const x = device.posPxX - 20;
+    const y = device.posPxY - 20;
     return (
       <Group
         key={`device-${device.id}`}
@@ -385,168 +496,252 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     );
   };
 
-  const setPointsFromNodes = (nodes: Nodes[] | undefined): number[] => {
-    if (!nodes?.length) return [];
-    return nodes.flatMap((n) => [
-      (n.x_px / originalWidth) * width,
-      (n.y_px / originalHeight) * height,
-    ]);
+  // Generic function to extract points from any node structure
+  const setPointsFromNodes = (nodes: any): number[] => {
+    if (!nodes) return [];
+
+    // If nodes is already an array
+    if (isArray(nodes)) {
+      return nodes.flatMap((node: any) => {
+        if (hasPxProperties(node)) {
+          return [node.x_px, node.y_px];
+        } else if (hasXYProperties(node)) {
+          return [node.x, node.y];
+        }
+        return [];
+      });
+    }
+
+    // If nodes is not an array but has some structure
+    // Try to extract points based on common patterns
+    if (typeof nodes === 'object') {
+      // Check if it has a 'points' property
+      if (nodes.points && isArray(nodes.points)) {
+        return nodes.points.flat();
+      }
+      // Check if it has 'x' and 'y' properties directly
+      if (hasPxProperties(nodes)) {
+        return [nodes.x_px, nodes.y_px];
+      } else if (hasXYProperties(nodes)) {
+        return [nodes.x, nodes.y];
+      }
+    }
+
+    return [];
   };
 
+  // Specific handler for BoundaryAlarm nodes
+  const setPointsFromBoundaryNodes = (boundaryNodes: any): number[] => {
+    // First try the generic function
+    const points = setPointsFromNodes(boundaryNodes);
+    if (points.length > 0) return points;
+
+    // If that doesn't work, try to inspect the structure
+    console.log('Boundary nodes structure:', boundaryNodes);
+
+    // Return empty array if we can't extract points
+    return [];
+  };
+
+  // Use the image that's actually loaded (like EditAreaRenderer)
+  const imageToDraw = bgImage || previewImage;
+
+  // Don't render if image isn't loaded yet
+  if (!imageToDraw || width <= 0 || height <= 0 || originalWidth <= 0 || originalHeight <= 0) {
+    return null;
+  }
+
   return (
-    <Stage
-      width={width}
-      height={height}
-      style={{ position: 'absolute', top: 0, left: 0 }}
-      onMouseDown={(e) => {
-        const nm = (e.target && (e.target as any).name && (e.target as any).name()) || '';
-        if (!['area', 'device', 'beacon'].includes(nm)) {
-          dispatch(setFocus({ type: '', id: '' }));
-        }
-      }}
-    >
-      <Layer>
-        {imageSrc && (
-          <KonvaImage name="background" image={imageSrc} width={width} height={height} />
-        )}
+    <div style={{ width, height }}>
+      <Stage
+        pixelRatio={1}
+        width={width}
+        height={height}
+        ref={stageRef as any}
+        scaleX={stageScale}
+        scaleY={stageScale}
+        x={stageX}
+        y={stageY}
+        onMouseDown={(e) => {
+          const nm = (e.target && (e.target as any).name && (e.target as any).name()) || '';
+          if (!['area', 'device', 'beacon'].includes(nm)) {
+            dispatch(setFocus({ type: '', id: '' }));
+          }
+        }}
+        onWheel={onWheel}
+      >
+        <Layer>
+          {/* Render image at original size - only when image is loaded */}
+          {imageToDraw && (
+            <KonvaImage
+              name="background"
+              image={imageToDraw}
+              width={originalWidth}
+              height={originalHeight}
+            />
+          )}
 
-        {/* Areas */}
-        {showAreas &&
-          areas.map((area: MaskedAreaType) => (
-            <Line
-              key={area.id}
-              name="area"
-              points={setPointsFromNodes(area.nodes)}
-              stroke={darken(area.colorArea, 0.5)}
-              strokeWidth={5}
-              lineJoin="round"
-              lineCap="round"
-              closed
-              fill={area.colorArea}
-              opacity={0.5}
-              onMouseEnter={() => setHoveredAreaId(area.id)}
-              onMouseLeave={() => setHoveredAreaId((id) => (id === area.id ? null : id))}
-              onClick={() => dispatch(setFocus({ type: 'area', id: area.id }))}
-            />
-          ))}
-        {showGeoFence &&
-          GeoFenceAlarm.map((geofence: GeoFencingAlarmType) => (
-            <Line
-              key={geofence.id}
-              name="geofence"
-              points={setPointsFromNodes(geofence.nodes)}
-              stroke={darken(geofence.color, 0.3)}
-              strokeWidth={5}
-              lineJoin="round"
-              lineCap="round"
-              closed
-              fill={geofence.color}
-              opacity={0.35}
-              onMouseEnter={() => setHoveredAreaId(geofence.id)}
-              onMouseLeave={() => setHoveredAreaId((id) => (id === geofence.id ? null : id))}
-              onClick={() => dispatch(setFocus({ type: 'geofence', id: geofence.id }))}
-            />
-          ))}
-        {showOverPopulate &&
-          OverPopulateAlarm.map((overpopulate: OverPopulatingAlarmType) => (
-            <Line
-              key={overpopulate.id}
-              name="overpopulate"
-              points={setPointsFromNodes(overpopulate.nodes)}
-              stroke={darken(overpopulate.color, 0.3)}
-              strokeWidth={5}
-              lineJoin="round"
-              lineCap="round"
-              closed
-              fill={overpopulate.color}
-              opacity={0.35}
-              onMouseEnter={() => setHoveredAreaId(overpopulate.id)}
-              onMouseLeave={() => setHoveredAreaId((id) => (id === overpopulate.id ? null : id))}
-              onClick={() => dispatch(setFocus({ type: 'overpopulate', id: overpopulate.id }))}
-            />
-          ))}
-          {showStayOnArea &&
-          StayOnAreaAlarm.map((stayonarea: StayOnAreaAlarmType) => (
-            <Line
-              key={stayonarea.id}
-              name="stayonarea"
-              points={setPointsFromNodes(stayonarea.nodes)}
-              stroke={darken(stayonarea.color, 0.3)}
-              strokeWidth={5}
-              lineJoin="round"
-              lineCap="round"
-              closed
-              fill={stayonarea.color}
-              opacity={0.35}
-              onMouseEnter={() => setHoveredAreaId(stayonarea.id)}
-              onMouseLeave={() => setHoveredAreaId((id) => (id === stayonarea.id ? null : id))}
-              onClick={() => dispatch(setFocus({ type: 'stayonarea', id: stayonarea.id }))}
-            />
-          ))}
-
-        {/* Devices */}
-        {showGates && devices.map((d: FloorplanDeviceType) => renderDeviceShape(d))}
-
-        {/* Beacons */}
-        {showBeacons && Object.entries(lastSeenBeacons)
-          .filter(([beaconId]) => showOtherBeacons || beaconId === focusBeaconId)
-          .map(([beaconId, beacon]) => {
-            const anim = animatedBeacons[beaconId] || beacon;
-            return (
-              <BeaconRenderer
-                key={`beacon-${beaconId}`}
-                id={beaconId}
-                x={(anim.x / originalWidth) * width}
-                y={(anim.y / originalHeight) * height}
-                area={beacon.area}
-                floorplan={beacon.floorplan}
-                time={beacon.time}
-                clickable
-                detailDialogOpen={detailDialogOpen}
-                setDetailDialogOpen={setDetailDialogOpen}
-                openTrackDetail={openTrackDetail}
-                setOpenTrackDetail={setOpenTrackDetail}
-                onClick={() =>
-                  onSelectBeacon({
-                    id: beaconId,
-                    area: beacon.area,
-                    floorplan: beacon.floorplan,
-                    time: beacon.time,
-                    dmac: beacon.dmac,
-                  })
-                }
+          {/* Areas */}
+          {showAreas &&
+            areas.map((area: MaskedAreaType) => (
+              <Line
+                key={area.id}
+                name="area"
+                points={setPointsFromNodes(area.nodes)}
+                stroke={darken(area.colorArea, 0.5)}
+                strokeWidth={5}
+                lineJoin="round"
+                lineCap="round"
+                closed
+                fill={area.colorArea}
+                opacity={0.5}
+                onMouseEnter={() => setHoveredAreaId(area.id)}
+                onMouseLeave={() => setHoveredAreaId((id) => (id === area.id ? null : id))}
+                onClick={() => dispatch(setFocus({ type: 'area', id: area.id }))}
               />
-            );
-          })}
-      </Layer>
+            ))}
+          {showGeoFence &&
+            GeoFenceAlarm.map((geofence: GeoFencingAlarmType) => (
+              <Line
+                key={geofence.id}
+                name="geofence"
+                points={setPointsFromNodes(geofence.nodes)}
+                stroke={darken(geofence.color, 0.3)}
+                strokeWidth={5}
+                lineJoin="round"
+                lineCap="round"
+                closed
+                fill={geofence.color}
+                opacity={0.35}
+                onMouseEnter={() => setHoveredAreaId(geofence.id)}
+                onMouseLeave={() => setHoveredAreaId((id) => (id === geofence.id ? null : id))}
+                onClick={() => dispatch(setFocus({ type: 'geofence', id: geofence.id }))}
+              />
+            ))}
+          {showOverPopulate &&
+            OverPopulateAlarm.map((overpopulate: OverPopulatingAlarmType) => (
+              <Line
+                key={overpopulate.id}
+                name="overpopulate"
+                points={setPointsFromNodes(overpopulate.nodes)}
+                stroke={darken(overpopulate.color, 0.3)}
+                strokeWidth={5}
+                lineJoin="round"
+                lineCap="round"
+                closed
+                fill={overpopulate.color}
+                opacity={0.35}
+                onMouseEnter={() => setHoveredAreaId(overpopulate.id)}
+                onMouseLeave={() => setHoveredAreaId((id) => (id === overpopulate.id ? null : id))}
+                onClick={() => dispatch(setFocus({ type: 'overpopulate', id: overpopulate.id }))}
+              />
+            ))}
+          {showStayOnArea &&
+            StayOnAreaAlarm.map((stayonarea: StayOnAreaAlarmType) => (
+              <Line
+                key={stayonarea.id}
+                name="stayonarea"
+                points={setPointsFromNodes(stayonarea.nodes)}
+                stroke={darken(stayonarea.color, 0.3)}
+                strokeWidth={5}
+                lineJoin="round"
+                lineCap="round"
+                closed
+                fill={stayonarea.color}
+                opacity={0.35}
+                onMouseEnter={() => setHoveredAreaId(stayonarea.id)}
+                onMouseLeave={() => setHoveredAreaId((id) => (id === stayonarea.id ? null : id))}
+                onClick={() => dispatch(setFocus({ type: 'stayonarea', id: stayonarea.id }))}
+              />
+            ))}
+          {showBoundary &&
+            BoundaryAlarm.map((boundary: BoundaryAlarmType) => (
+              <Line
+                key={boundary.id}
+                name="boundary"
+                // Use the specific boundary handler
+                points={setPointsFromBoundaryNodes(boundary.nodes)}
+                stroke={darken(boundary.color, 0.3)}
+                strokeWidth={5}
+                lineJoin="round"
+                lineCap="round"
+                closed
+                fill={boundary.color}
+                opacity={0.35}
+                onMouseEnter={() => setHoveredAreaId(boundary.id)}
+                onMouseLeave={() => setHoveredAreaId((id) => (id === boundary.id ? null : id))}
+                onClick={() => dispatch(setFocus({ type: 'boundary', id: boundary.id }))}
+              />
+            ))}
 
-      {/* Hover label fixed at visual center */}
-      <Layer listening={false}>
-        {hoveredAreaId && areaCenters[hoveredAreaId] && (
-          <Label
-            x={areaCenters[hoveredAreaId].x}
-            y={areaCenters[hoveredAreaId].y}
-            listening={false}
-          >
-            <Tag
-              fill="rgba(0,0,0,0.75)"
-              cornerRadius={4}
-              pointerDirection="down"
-              pointerWidth={8}
-              pointerHeight={6}
-            />
-            <Text
-              text={areas.find((a: MaskedAreaType) => a.id === hoveredAreaId)?.name || ''}
-              fill="#fff"
-              fontSize={16}
-              padding={6}
-              align="center"
+          {/* Devices */}
+          {showGates && devices.map((d: FloorplanDeviceType) => renderDeviceShape(d))}
+
+          {/* Beacons */}
+          {showBeacons &&
+            Object.entries(lastSeenBeacons)
+              .filter(([beaconId]) => showOtherBeacons || beaconId === focusBeaconId)
+              .map(([beaconId, beacon]) => {
+                const anim = animatedBeacons[beaconId] || beacon;
+                // Convert meters to pixels for beacon position
+                const xPx = anim.x;
+                const yPx = anim.y;
+                return (
+                  <BeaconRenderer
+                    key={`beacon-${beaconId}`}
+                    id={beaconId}
+                    x={xPx}
+                    y={yPx}
+                    area={beacon.area}
+                    floorplan={beacon.floorplan}
+                    time={beacon.time}
+                    clickable
+                    detailDialogOpen={detailDialogOpen}
+                    setDetailDialogOpen={setDetailDialogOpen}
+                    openTrackDetail={openTrackDetail}
+                    setOpenTrackDetail={setOpenTrackDetail}
+                    onClick={() =>
+                      onSelectBeacon({
+                        id: beaconId,
+                        area: beacon.area,
+                        floorplan: beacon.floorplan,
+                        time: beacon.time,
+                        dmac: beacon.dmac || beaconId, // Use beaconId as fallback for dmac
+                      })
+                    }
+                  />
+                );
+              })}
+        </Layer>
+
+        {/* Hover label Layer (non-interactive) */}
+        <Layer listening={false}>
+          {hoveredAreaId && areaCenters[hoveredAreaId] && (
+            <Label
+              x={areaCenters[hoveredAreaId].x}
+              y={areaCenters[hoveredAreaId].y}
               listening={false}
-            />
-          </Label>
-        )}
-      </Layer>
-    </Stage>
+            >
+              <Tag
+                fill="rgba(0,0,0,0.75)"
+                cornerRadius={4}
+                pointerDirection="down"
+                pointerWidth={8}
+                pointerHeight={6}
+              />
+              <Text
+                text={areas.find((a: MaskedAreaType) => a.id === hoveredAreaId)?.name || ''}
+                fill="#fff"
+                fontSize={16}
+                padding={6}
+                align="center"
+                listening={false}
+              />
+            </Label>
+          )}
+        </Layer>
+      </Stage>
+    </div>
   );
 };
 

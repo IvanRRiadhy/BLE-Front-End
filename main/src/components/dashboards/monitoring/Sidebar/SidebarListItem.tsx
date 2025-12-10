@@ -14,11 +14,13 @@ import {
 import { MoreVertRounded } from '@mui/icons-material';
 import { IconLiveView, IconBell } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { BASE_URL } from 'src/utils/axios';
 
 type ListType = {
   id: string;
   device: string;
   target: string;
+  image: string;
   floor: string;
   area: string;
   alarmType?: string;
@@ -91,16 +93,17 @@ const SidebarListItem = ({ item, onItemClick }: Props) => {
       >
         {/* Left Section: Icon */}
         <ListItemAvatar>
-          <Avatar alt="Item Icon">
-            {item?.type === 'Alarm' ? <IconBell /> : <IconLiveView />}
-          </Avatar>
+          <Avatar
+            alt={item?.target || 'Member Face'}
+            src={item?.image ? `${BASE_URL}${item?.image}` : undefined}
+          />
         </ListItemAvatar>
 
         {/* Middle Section: Device, Time, and Floor */}
         <ListItemText>
           <Stack spacing={0.5}>
             <Typography variant="subtitle1" fontWeight="bold">
-              {item?.device}
+              {item?.target}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               {formatTime(item?.time ?? '')} {/* Format the time */}

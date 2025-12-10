@@ -10,14 +10,17 @@ import {
   Switch,
   Typography,
 } from '@mui/material';
-// import { fetchFloorplans } from 'src/store/apps/tracking/FloorPlanSlice';
 import ZoomControls from 'src/components/shared/ZoomControls';
 import DeviceRenderer from './Renderer/DeviceRenderer';
 import { floorType, fetchFloors } from 'src/store/apps/crud/floor';
 import { FloorplanType, fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import { RefreshTrigger, SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
+import {
+  cleanupAllBeacons,
+  RefreshTrigger,
+  SetSelectedBeacon,
+} from 'src/store/apps/tracking/Beacon';
 import axiosServices from 'src/utils/axios';
 import { AlarmType } from 'src/store/apps/tracking/Alarm';
 import { fetchMembers, memberType } from 'src/store/apps/crud/member';
@@ -26,7 +29,6 @@ import BeaconDetailPopup from './Popup/BeaconDetailPopup';
 import TrackingDetailPopup from './Popup/TrackingDetailPopup';
 import { setScreenDisplay, setScreenSettings, swapScreen } from 'src/store/apps/monitoring/layout';
 import {
-  
   fetchGeoFencingAlarmsAll,
   GeoFencingAlarmType,
 } from 'src/store/apps/alarmsetting/geofencing';
@@ -72,12 +74,10 @@ const FloorView: React.FC<{
 }) => {
   const dispatch: AppDispatch = useDispatch();
 
-  //DUMMY
+  // DUMMY
   const [dummyAlarm, setDummyAlarm] = useState<AlarmType>();
-  // const memberList = useSelector((state: RootState) => state.memberReducer.members);
-  // const visitorList = useSelector((state: RootState) => state.visitorReducer.visitors);
-  const {data: memberList = []} = useAllMembers();
-  const {data: visitorList = []} = useAllVisitor();
+  const { data: memberList = [] } = useAllMembers();
+  const { data: visitorList = [] } = useAllVisitor();
   const [open, setOpen] = useState(false);
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
 
@@ -85,32 +85,37 @@ const FloorView: React.FC<{
   const activeLayout = layouts.find((l) => l.id === activeLayoutId);
   const activeScreen = activeLayout?.screens.find((s) => s.floorplanId === activeFloorplan);
   const isFollowing = activeScreen?.display?.displayType === 3;
-  // const screenId = activeLayout?.screens.find((s) => s.floorplanId === activeFloorplan)?.id;
-  // console.log('testing', useSelector((state: RootState) => state.floorReducer.floors));
+
   const containerRef = useRef<HTMLDivElement>(null);
-  // const floor = useSelector((state: RootState) => state.floorReducer.floorAll);
-  const {data: floor = []} = useAllFloors();
-  // const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
-  const {data: floorplans = []} = useAllFloorplans();
+  const { data: floor = [] } = useAllFloors();
+  const { data: floorplans = [] } = useAllFloorplans();
   const actFloorplan = floorplans.find(
     (floorplan: FloorplanType) => floorplan.id === activeFloorplan,
   );
-  // const Areas: MaskedAreaType[] = useSelector(
-  //   (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
-  // );
-  const { data: Areas = []} = useAllMaskedAreas();
+
+  const { data: Areas = [] } = useAllMaskedAreas();
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorplan);
-  // const GeoFenceArea: GeoFencingAlarmType[] = useSelector(
-  //   (state: RootState) => state.GeoFencingReducer.geoFencingAlarmAll,
-  // );
-  const {data: GeoFenceArea = []} = useGeoFencingAlarmsAll();
-  const filteredGeoFenceArea: GeoFencingAlarmType[] = GeoFenceArea.filter((area) => area.floorplanId === activeFloorplan);
-  const {data: OverPopulate = []} = useOverPopulatingAlarmsAll();
-  const filteredOverPopulateArea: OverPopulatingAlarmType[] = OverPopulate.filter((area) => area.floorplanId === activeFloorplan);
-  const {data: StayOnArea = []} = useStayOnAreaAlarmsAll();
-  const filteredStayOnArea: StayOnAreaAlarmType[] = StayOnArea.filter((area) => area.floorplanId === activeFloorplan);
-  const {data: Boundary = []} = useBoundaryAlarmsAll();
-  const filteredBoundaryArea: BoundaryAlarmType[] = Boundary.filter((area) => area.floorplanId === activeFloorplan);
+
+  const { data: GeoFenceArea = [] } = useGeoFencingAlarmsAll();
+  const filteredGeoFenceArea: GeoFencingAlarmType[] = GeoFenceArea.filter(
+    (area) => area.floorplanId === activeFloorplan,
+  );
+
+  const { data: OverPopulate = [] } = useOverPopulatingAlarmsAll();
+  const filteredOverPopulateArea: OverPopulatingAlarmType[] = OverPopulate.filter(
+    (area) => area.floorplanId === activeFloorplan,
+  );
+
+  const { data: StayOnArea = [] } = useStayOnAreaAlarmsAll();
+  const filteredStayOnArea: StayOnAreaAlarmType[] = StayOnArea.filter(
+    (area) => area.floorplanId === activeFloorplan,
+  );
+
+  const { data: Boundary = [] } = useBoundaryAlarmsAll();
+  const filteredBoundaryArea: BoundaryAlarmType[] = Boundary.filter(
+    (area) => area.floorplanId === activeFloorplan,
+  );
+
   const [showArea, setShowArea] = useState(true);
   const [showGates, setShowGates] = useState(true);
   const [showGeoFence, setShowGeoFence] = useState(false);
@@ -127,45 +132,41 @@ const FloorView: React.FC<{
     centerX: number;
     centerY: number;
   } | null>(null);
-  useEffect(() => {
-    // console.log('FloorChanged:', floor);
-  }, [floor]);
-  useEffect(() => {
-    // console.log('Active Floorplan:', floorplans);
-    console.log('Active Layout', activeLayout);
-  }, [actFloorplan]);
 
-  const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
-  const [scale, setScale] = useState(screenSettings.scale); // Initial scale set to 1
+  // Container and natural size management
+  const [containerSize, setContainerSize] = useState({ width: 1920, height: 960 });
+  const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
   const [image, setImage] = useState<HTMLImageElement | null>(null);
 
-  //const MIN_SCALE = 1; // Minimum scale to prevent the image from becoming too small
-  const MAX_SCALE = 4; // Maximum scale to prevent the image from becoming too large
-  const [minScale] = useState(0.5);
+  // Transform state - EXACTLY like EditDeviceFloorView
+  const [scale, setScale] = useState(screenSettings.scale || 1);
+  const MAX_SCALE = 4;
+  const MIN_SCALE = 0.1;
   const [translate, setTranslate] = useState({
-    x: screenSettings.translateX,
-    y: screenSettings.translateY,
+    x: screenSettings.translateX || 0,
+    y: screenSettings.translateY || 0,
   });
+
+  // Interaction state - EXACTLY like EditDeviceFloorView
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false); // State to track mouse hover
+  const [isHovered, setIsHovered] = useState(false);
+  const [cursor, setCursor] = useState('grab');
+
   const floorplanImage = actFloorplan?.floorplanImage
-    ? actFloorplan.floorplanImage.startsWith('/Uploads/') // Check if the URL is already absolute
+    ? actFloorplan.floorplanImage.startsWith('/Uploads/')
       ? `${BASE_URL}${actFloorplan.floorplanImage}`
-      : actFloorplan.floorplanImage // Prepend BASE_URL for relative paths
-    : 'No Active Floorplan'; // Fallback to default image if not available
+      : actFloorplan.floorplanImage
+    : 'No Active Floorplan';
 
-  const devices = useSelector(
-    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceAll,
+  const { data: Devices = [] } = useAllFloorplanDevices();
+  const filteredDevices: FloorplanDeviceType[] = Devices.filter(
+    (area) => area.floorplanId === activeFloorplan,
   );
-  // const [filteredDevices, setFilteredDevices] = useState<FloorplanDeviceType[]>([]);
-    const {data: Devices = []} = useAllFloorplanDevices();
-  const filteredDevices: FloorplanDeviceType[] = Devices.filter((area) => area.floorplanId === activeFloorplan);
 
-  //Popup State
+  // Popup State
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [openTrackDetail, setOpenTrackDetail] = useState(false);
-  const trackingBeacon = useSelector((state: RootState) => state.BeaconReducer.trackingBeacon);
   const selectedBeacon = useSelector((state: RootState) => state.BeaconReducer.selectedBeacon);
 
   const handleSelectBeacon = (info: {
@@ -176,60 +177,89 @@ const FloorView: React.FC<{
   }) => {
     dispatch(SetSelectedBeacon({ active: true, sourceScreenId: screenNumber, ...info }));
   };
+
   useEffect(() => {
-    if (
-      selectedBeacon.active &&
-      selectedBeacon.sourceScreenId === screenNumber // ✅ only this screen opens popup
-    ) {
+    if (selectedBeacon.active && selectedBeacon.sourceScreenId === screenNumber) {
       setDetailDialogOpen(true);
     }
   }, [selectedBeacon, screenNumber]);
 
-  // useEffect(() => {
-  //   const filteredDevices = devices.filter(
-  //     (device: FloorplanDeviceType) => device.floorplanId === activeFloorplan,
-  //   );
-  //   setFilteredDevices(filteredDevices);
-  // }, [devices, activeFloorplan]);
-
+  // Load image to get natural dimensions
   useEffect(() => {
-    dispatch(RefreshTrigger());
-    console.log('FloorplanImage: ', floorplanImage);
-    if (floorplanImage && floorplanImage !== 'No Active Floorplan') {
-      const img = new Image();
-      img.src = floorplanImage;
-      img.onload = () => {
-        setImage(img);
-        setImgSize({ width: img.width, height: img.height });
-        // Center the image when it is loaded
-        if (containerRef.current) {
-          const containerWidth = containerRef.current.clientWidth;
-          const containerHeight = containerRef.current.clientHeight;
+    if (!floorplanImage || floorplanImage === 'No Active Floorplan') return;
 
-          // Calculate the initial translate values to center the image
-          const offsetX = containerWidth / 2;
-          const offsetY = containerHeight / 2;
+    const img = new Image();
+    img.src = floorplanImage;
 
-          setTranslate({
-            x: screenSettings?.translateX || offsetX,
-            y: screenSettings?.translateY || offsetY,
-          });
-          // console.log(screenSettings);
-          // setTranslate({ x: offsetX, y: offsetY });
-          // alert('Screen Resolution: ' + containerHeight + 'x' + containerWidth + 'y');
-        }
-      };
+    img.onload = () => {
+      setImage(img);
+      setNaturalSize({
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+      });
+    };
 
-      img.onerror = () => {
-        console.error('Failed to load image:', floorplanImage);
-      };
-    }
-  }, [actFloorplan, floor]);
+    img.onerror = () => {
+      console.error('Failed to load image:', floorplanImage);
+    };
+  }, [floorplanImage]);
 
+  // Container resize handler - EXACTLY like EditDeviceFloorView
+  useEffect(() => {
+    const updateContainerSize = () => {
+      if (containerRef.current) {
+        const { clientWidth, clientHeight } = containerRef.current;
+        setContainerSize({
+          width: clientWidth || 1920,
+          height: clientHeight || 960,
+        });
+      }
+    };
+
+    updateContainerSize();
+    window.addEventListener('resize', updateContainerSize);
+    return () => window.removeEventListener('resize', updateContainerSize);
+  }, []);
+
+  // Global wheel event handler to prevent browser zoom when Ctrl is pressed - EXACTLY like EditDeviceFloorView
+  useEffect(() => {
+    const handleWheelGlobal = (e: WheelEvent) => {
+      // Only prevent browser zoom when Ctrl is pressed
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    };
+
+    // Use capture phase to intercept the event early
+    document.addEventListener('wheel', handleWheelGlobal, {
+      passive: false,
+      capture: true,
+    });
+
+    return () => {
+      document.removeEventListener('wheel', handleWheelGlobal, { capture: true });
+    };
+  }, []);
+
+  // Also prevent default for Ctrl + and Ctrl - - EXACTLY like EditDeviceFloorView
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '=')) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  // Animate to screen settings
   useEffect(() => {
     if (!screenSettings) return;
 
-    const duration = 200; // ms
+    const duration = 200;
     const startTime = performance.now();
 
     const startScale = scale;
@@ -238,7 +268,7 @@ const FloorView: React.FC<{
 
     const animate = (now: number) => {
       const progress = Math.min((now - startTime) / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+      const ease = 1 - Math.pow(1 - progress, 3);
       setScale(startScale + (screenSettings.scale - startScale) * ease);
       setTranslate({
         x: startX + (screenSettings.translateX - startX) * ease,
@@ -250,6 +280,7 @@ const FloorView: React.FC<{
     requestAnimationFrame(animate);
   }, [screenSettings.scale, screenSettings.translateX, screenSettings.translateY]);
 
+  // Save screen settings to Redux
   const lastSent = useRef<{ scale: number; x: number; y: number } | null>(null);
 
   useEffect(() => {
@@ -263,7 +294,6 @@ const FloorView: React.FC<{
 
     const current = { scale, x: translate.x, y: translate.y };
 
-    // ✅ Skip dispatch if nothing changed since last run
     if (
       lastSent.current &&
       lastSent.current.scale === current.scale &&
@@ -273,10 +303,8 @@ const FloorView: React.FC<{
       return;
     }
 
-    // ✅ Remember last state to prevent repeat loops
     lastSent.current = current;
 
-    // ✅ Throttle Redux updates to avoid flooding
     const timeout = setTimeout(() => {
       dispatch(
         setScreenSettings({
@@ -289,131 +317,143 @@ const FloorView: React.FC<{
           },
         }),
       );
-    }, 150); // 150ms debounce is smooth for zoom/pan
+    }, 150);
 
     return () => clearTimeout(timeout);
   }, [scale, translate.x, translate.y, activeLayoutId, activeFloorplan, layouts]);
 
-  const calculateImageDimensions = (
-    containerWidth: number,
-    containerHeight: number,
-    imageWidth: number,
-    imageHeight: number,
-  ) => {
-    const containerRatio = containerWidth / containerHeight;
-    const imageRatio = imageWidth / imageHeight;
-    // console.log('image original size:', imageWidth, imageHeight);
-    if (imageRatio > containerRatio) {
-      // Image is wider than the container
-      return {
-        width: containerWidth,
-        height: containerWidth / imageRatio,
-        scaleX: imageWidth / containerWidth,
-        scaleY: imageHeight / (containerWidth / imageRatio),
-        originalWidth: imageWidth,
-        originalHeight: imageHeight,
-      };
-    } else {
-      // Image is taller than the container
-      return {
-        width: containerHeight * imageRatio,
-        height: containerHeight,
-        scaleX: imageWidth / (containerHeight * imageRatio),
-        scaleY: imageHeight / containerHeight,
-        originalWidth: imageWidth,
-        originalHeight: imageHeight,
-      };
-    }
-  };
-
-  const handleZoom = (event: React.WheelEvent) => {
-    event.preventDefault(); // Prevent default scrolling behavior
-    if (!zoomable) return; // Prevent zooming if zoomable is false
-    if (containerRef.current && imgSize && imgSize.width > 1 && imgSize.height > 1) {
-      const delta = event.deltaY * -0.001; // Adjust zoom sensitivity
-      const rect = containerRef.current.getBoundingClientRect();
-      if (!imgSize || !containerRef.current) return;
-
-      // Mouse position relative to the container
-      const mouseX = event.clientX - rect.left;
-      const mouseY = event.clientY - rect.top;
-      // Calculate the new scale
-      const containerWidth = containerRef.current.clientWidth;
-      const containerHeight = containerRef.current.clientHeight;
-      // setMinScale(Math.min(widthRatio, heightRatio));
-      const centerX = containerWidth / 2;
-      const centerY = containerHeight / 2;
-      const dx = mouseX - centerX;
-      const dy = mouseY - centerY;
-
-      const newScale = Math.min(Math.max(scale + delta, minScale), MAX_SCALE);
-      const scaleRatio = newScale / scale;
-      //console.log('New Scale:', newScale); // Debug new scale
-      const scaledWidth = imgSize.width * newScale;
-      const scaledHeight = imgSize.height * newScale;
-      const newTranslateX = translate.x - dx * (scaleRatio - 1);
-      const newTranslateY = translate.y - dy * (scaleRatio - 1);
-
-      // Calculate translation to keep zoom centered at mouse position
-      const offsetX = mouseX - (mouseX - translate.x) * (newScale / scale);
-      const offsetY = mouseY - (mouseY - translate.y) * (newScale / scale);
-      // console.log('MouseX:', mouseX);
-      // console.log('MouseY:', mouseY);
-      // console.log('translate:', translate);
-      // console.log('Scale: ', newScale, scale);
-
-      const minX = Math.min(0, containerWidth - scaledWidth);
-      const minY = Math.min(0, containerHeight - scaledHeight);
-
-      // Update the scale
-      setScale(newScale);
-      setTranslate({
-        x: Math.max(minX, newTranslateX),
-        y: Math.max(minY, newTranslateY),
-      });
-      // console.log('OffsetX:', offsetX);
-      // console.log('OffsetY:', offsetY);
-    }
-  };
-
-  const getClipPathFromFocusArea = (
-    focusArea: { minX: number; maxX: number; minY: number; maxY: number } | null,
-    imgWidth: number,
-    imgHeight: number,
-    originalWidth: number,
-    originalHeight: number,
-    padding = 15,
-  ) => {
-    if (!focusArea) return undefined;
-    const scaleX = originalWidth / imgWidth;
-    const scaleY = originalHeight / imgHeight;
-    // console.log('Focus Area:', focusArea);
-    // console.log('Image Size:', imgWidth, imgHeight, scaleX, scaleY);
-    const top = Math.max(focusArea.minY / scaleY - padding, 0);
-    const left = Math.max(focusArea.minX / scaleX - padding, 0);
-    const bottom = Math.max(imgHeight - (focusArea.maxY / scaleY + padding), 0);
-    const right = Math.max(imgWidth - (focusArea.maxX / scaleX + padding), 0);
-    // console.log('top:', top, 'left:', left, 'bottom:', bottom, 'right:', right);
-    return `inset(${top}px ${right}px ${bottom}px ${left}px)`;
-  };
-
   useEffect(() => {
+    // Reset beacons when floorplan changes
+    dispatch(cleanupAllBeacons());
+  }, [activeFloorplan, dispatch]);
+
+  // Also update the topic construction
+  const topic = `tracking/${activeFloorplan.toUpperCase()}`;
+
+  // Panning handler - EXACTLY like EditDeviceFloorView
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (!zoomable) return;
+      if (e.button !== 0) return; // Only left mouse button
+
+      // Don't pan if we're already dragging something
+      if (isDragging) {
+        return;
+      }
+
+      // Only allow panning when cursor is 'grab' (not over any shape)
+      if (cursor !== 'grab') {
+        return;
+      }
+
+      const container = containerRef.current;
+      if (!container) return;
+
+      container.style.cursor = 'grabbing';
+      setCursor('grabbing');
+      setIsDragging(true);
+
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const startPosX = translate.x;
+      const startPosY = translate.y;
+
+      const handleMouseMove = (moveEvent: MouseEvent) => {
+        const deltaX = moveEvent.clientX - startX;
+        const deltaY = moveEvent.clientY - startY;
+
+        setTranslate({
+          x: startPosX + deltaX,
+          y: startPosY + deltaY,
+        });
+      };
+
+      const handleMouseUp = () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+        if (container) {
+          container.style.cursor = 'grab';
+          setCursor('grab');
+        }
+        setIsDragging(false);
+      };
+
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+
+      e.preventDefault();
+    },
+    [zoomable, isDragging, cursor, translate],
+  );
+
+  // Wheel zoom handler - EXACTLY like EditDeviceFloorView
+  const handleWheel = useCallback(
+    (e: React.WheelEvent) => {
+      // Always prevent default for Ctrl+wheel to stop browser zoom
+      if (e.ctrlKey) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      if (!zoomable) return;
+      if (!e.ctrlKey) return;
+
+      const container = containerRef.current;
+      if (!container) return;
+
+      const rect = container.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const delta = -e.deltaY * 0.0015;
+      setScale((prev) => {
+        const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev + delta));
+        const scaleRatio = newScale / prev;
+        setTranslate((pos) => {
+          const newX = mouseX - scaleRatio * (mouseX - pos.x);
+          const newY = mouseY - scaleRatio * (mouseY - pos.y);
+          return { x: newX, y: newY };
+        });
+        return newScale;
+      });
+    },
+    [zoomable],
+  );
+
+  // Apply zoom function for ZoomControls - EXACTLY like EditDeviceFloorView
+  const applyZoom = useCallback((newScale: number) => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      setScale(Math.min(MAX_SCALE, Math.max(MIN_SCALE, newScale)));
+      return;
+    }
 
-    const handleWheel = (event: WheelEvent) => {
-      if (!event.ctrlKey) return;
-      event.preventDefault(); // Now it works without errors
-      handleZoom(event as unknown as React.WheelEvent);
-    };
+    const centerX = container.clientWidth / 2;
+    const centerY = container.clientHeight / 2;
+    setScale((prev) => {
+      const clamped = Math.min(MAX_SCALE, Math.max(MIN_SCALE, newScale));
+      const ratio = clamped / prev;
+      setTranslate((pos) => {
+        const newX = centerX - ratio * (centerX - pos.x);
+        const newY = centerY - ratio * (centerY - pos.y);
+        return { x: newX, y: newY };
+      });
+      return clamped;
+    });
+  }, []);
 
-    container.addEventListener('wheel', handleWheel, { passive: false });
+  // Update cursor based on state - EXACTLY like EditDeviceFloorView
+  useEffect(() => {
+    if (!zoomable) {
+      setCursor('default');
+    } else if (isDragging) {
+      setCursor('move');
+    } else {
+      setCursor('grab');
+    }
+  }, [zoomable, isDragging]);
 
-    return () => {
-      container.removeEventListener('wheel', handleWheel);
-    };
-  }, [handleZoom]);
-
+  // Focus area handling
   useEffect(() => {
     if (!activeMaskedArea) {
       setFocusArea(null);
@@ -436,11 +476,9 @@ const FloorView: React.FC<{
       const maxY = Math.max(...yList);
       const centerX = (minX + maxX) / 2;
       const centerY = (minY + maxY) / 2;
-      // console.log("Area Shape: ", targetArea.areaShape);
-      // console.log('Focus Area:', { minX, maxX, minY, maxY, centerX, centerY });
+
       const newFocus = { minX, maxX, minY, maxY, centerX, centerY };
 
-      // Hindari setState jika data tidak berubah
       const isSame =
         focusArea &&
         focusArea.minX === newFocus.minX &&
@@ -456,51 +494,13 @@ const FloorView: React.FC<{
     }
   }, [activeMaskedArea, filteredArea, focusArea]);
 
-  const handleMouseDown = (event: React.MouseEvent) => {
-    setIsDragging(true);
-    dragStart.current = { x: event.clientX - translate.x, y: event.clientY - translate.y };
-
-    if (containerRef.current) containerRef.current.style.cursor = 'grabbing';
-  };
-
-  const handleMouseMove = (event: React.MouseEvent) => {
-    if (!isDragging || !containerRef.current || !imgSize || !zoomable) return;
-
-    const containerWidth = containerRef.current.clientWidth;
-    const containerHeight = containerRef.current.clientHeight;
-
-    const scaledWidth = imgSize.width * scale;
-    const scaledHeight = imgSize.height * scale;
-
-    const minX = Math.min(-scaledWidth, containerWidth - scaledWidth); // Left boundary
-    const maxX = containerWidth; // Right boundary
-    const minY = Math.min(-scaledHeight, containerHeight - scaledHeight); // Top boundary
-    const maxY = containerHeight; // Bottom boundary
-
-    const newX = event.clientX - dragStart.current.x;
-    const newY = event.clientY - dragStart.current.y;
-
-    setTranslate({
-      x: Math.min(maxX, Math.max(minX, newX)), // Clamp X
-      y: Math.min(maxY, Math.max(minY, newY)), // Clamp Y
-    });
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    if (containerRef.current) containerRef.current.style.cursor = 'grab'; // Reset cursor
-  };
-
-  //Focus Beacon
+  // Focus beacon handling
   const beaconsByTopic = useSelector((s: RootState) => s.BeaconReducer.beaconsByTopic);
-
-  // keep last switched floorplan to avoid loops
   const lastSwitchedRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!focusBeacon || !gridNumber || !screenNumber) return;
 
-    // scan all topics for this beacon
     let transition: { from?: string; to?: string } | null = null;
     for (const arr of Object.values(beaconsByTopic)) {
       const hit = Array.isArray(arr)
@@ -512,28 +512,24 @@ const FloorView: React.FC<{
       }
     }
 
-    // if there is a from/to AND we are not already on 'to'
     if (
       transition?.to &&
       transition.to !== activeFloorplan &&
       lastSwitchedRef.current !== transition.to
     ) {
-      // dispatch(setFloorplan(gridNumber, screenNumber, transition.to));
       lastSwitchedRef.current = transition.to;
     }
   }, [focusBeacon, beaconsByTopic, activeFloorplan, gridNumber, screenNumber, dispatch]);
 
-  // === FOLLOW CAMERA HOOK ===
-  // 1) center on the focused beacon whenever we receive its canvas coords
+  // Follow camera hook
   const handleFocusPosition = useCallback((pt: { x: number; y: number }) => {
     if (!containerRef.current) return;
-    // lock scale to follow zoom (or keep current if you prefer)
-    const nextScale = FOLLOW_SCALE;
 
+    const nextScale = FOLLOW_SCALE;
     const cw = containerRef.current.clientWidth;
     const ch = containerRef.current.clientHeight;
 
-    // center formula: center - pos * scale  (same as TrackingDetailPopup's Stage x/y)
+    // Convert the point from original image coordinates to container coordinates
     const nextTranslateX = cw / 2 - pt.x * nextScale;
     const nextTranslateY = ch / 2 - pt.y * nextScale;
 
@@ -545,21 +541,17 @@ const FloorView: React.FC<{
     if (!focusBeacon || !gridNumber || !screenNumber) return;
 
     let to: string | null = null;
-    console.log('beaconsByTopic', beaconsByTopic);
-    console.log('FocusBeacon', focusBeacon);
     for (const arr of Object.values(beaconsByTopic)) {
       const hit = Array.isArray(arr)
         ? arr.find((b: any) => {
             const sameBeacon =
               (b.beaconId && b.beaconId.toLowerCase() === String(focusBeacon).toLowerCase()) ||
-              (b.cardNumber && String(b.cardNumber) === String(focusBeacon)); // optional, if you ever follow by card #
-            // prefer explicit toFloorplanId
+              (b.cardNumber && String(b.cardNumber) === String(focusBeacon));
             const explicitTo = b.toFloorplanId ?? b.toFlooplanId ?? null;
             if (explicitTo) {
               to = explicitTo;
               return true;
             }
-            // fallback: parse TransM like "…to floorplan <UUID>"
             if (b.TransM && typeof b.TransM === 'string') {
               const m = b.TransM.match(/to floorplan\s+([0-9A-Fa-f-]{36})/);
               if (m) {
@@ -570,18 +562,15 @@ const FloorView: React.FC<{
             return false;
           })
         : undefined;
-      console.log(hit);
       if (hit) break;
     }
 
     if (to && to !== activeFloorplan && lastSwitchedRef.current !== to) {
-      // dispatch(setFloorplan(gridNumber, screenNumber, to));
       lastSwitchedRef.current = to;
     }
   }, [focusBeacon, beaconsByTopic, activeFloorplan, gridNumber, screenNumber, dispatch]);
 
-  // === END FOLLOW CAMERA HOOK ===
-
+  // Cancel following
   const layoutState = useSelector((state: RootState) => state.layoutReducer);
   const activeLayouts = layoutState.layouts.find((l) => l.id === layoutState.activeLayoutId);
 
@@ -591,7 +580,7 @@ const FloorView: React.FC<{
       return;
     }
 
-    // 1️⃣ Publish "Stop" to MQTT
+    // Publish "Stop" to MQTT
     if (selectedBeacon?.id) {
       const topic = `highlight/card/${selectedBeacon.id}`;
       const payload = JSON.stringify({ message: 'Stop' });
@@ -612,8 +601,8 @@ const FloorView: React.FC<{
       });
     }
 
-    // 2️⃣ Reset this screen’s display back to default
-    const screen = activeLayouts.screens[screenNumber - 1]; // 🔹 uses screen index
+    // Reset this screen's display back to default
+    const screen = activeLayouts.screens[screenNumber - 1];
     if (!screen) {
       console.warn('Screen not found for screenNumber:', screenNumber);
       return;
@@ -633,19 +622,20 @@ const FloorView: React.FC<{
     console.log(`🧭 Screen ${screen.id} reset to default floorplan mode`);
   };
 
-  const getName = (bleNuber: string) => {
-    let name = '';
-    name =
-      memberList?.find((member: memberType) => member.bleCardNumber === bleNuber)?.name ??
-      visitorList?.find((visitor: VisitorType) => visitor.bleCardNumber === bleNuber)?.name ??
-      'Unknown Person';
-    return name;
+  // Helper functions
+  const getName = (bleNumber: string) => {
+    return (
+      memberList?.find((member: memberType) => member.bleCardNumber === bleNumber)?.name ??
+      visitorList?.find((visitor: VisitorType) => visitor.bleCardNumber === bleNumber)?.name ??
+      'Unknown Person'
+    );
   };
 
   const handleClose = () => {
     setOpen(false);
     setDummyAlarm(undefined);
   };
+
   const handleParentClick = () => {
     if (!zoomable) {
       dispatch(swapScreen(screenNumber));
@@ -677,10 +667,15 @@ const FloorView: React.FC<{
     );
   }
 
+  // Show loading while natural dimensions are not loaded - EXACTLY like EditDeviceFloorView
+  if (!naturalSize.width || !naturalSize.height) {
+    return <div>Loading floorplan...</div>;
+  }
+
   return (
     <Box
-      onMouseEnter={() => setIsHovered(true)} // Show ZoomControls on mouse enter
-      onMouseLeave={() => setIsHovered(false)} // Hide ZoomControls on mouse leave
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       sx={{
         position: 'relative',
         width: '100%',
@@ -689,9 +684,10 @@ const FloorView: React.FC<{
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        overflow: 'hidden', // Allow scrolling
-        // cursor: isDragging ? 'grabbing' : 'grab',
-        // bgcolor: '#f5f5f5',
+        overflow: 'visible',
+        cursor: cursor,
+        // Add CSS to prevent browser zoom
+        touchAction: 'none', // Prevent touch zoom
       }}
     >
       {/* Sticky Overlay Toggle */}
@@ -708,7 +704,7 @@ const FloorView: React.FC<{
             boxShadow: 2,
             p: 1,
             display: 'flex',
-            flexDirection: 'column', // Stack children vertically
+            flexDirection: 'column',
             gap: 1,
           }}
         >
@@ -784,7 +780,6 @@ const FloorView: React.FC<{
                 }
                 label="Show Other People"
               />
-
               <Button variant="contained" color="error" onClick={handleCancelFollowing}>
                 Cancel Following
               </Button>
@@ -792,135 +787,100 @@ const FloorView: React.FC<{
           )}
         </Box>
       )}
-      {/* Zoomable Content */}
+
+      {/* Zoom Controls - EXACTLY like EditDeviceFloorView */}
+      {isHovered && zoomable && !isDragging && (
+        <ZoomControls
+          scale={scale}
+          setScale={setScale}
+          applyZoom={applyZoom}
+          minScale={MIN_SCALE}
+          maxScale={MAX_SCALE}
+        />
+      )}
+
+      {/* Container for Konva - EXACTLY like EditDeviceFloorView */}
       <Box
         onDoubleClick={handleParentClick}
         sx={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}
       >
-        {isHovered &&
-          !isDragging &&
-          zoomable && ( // Only show ZoomControls when hovered
-            <ZoomControls
-              scale={scale}
-              setScale={setScale}
-              applyZoom={(newScale) => setScale(newScale)}
-              minScale={0.5}
-              maxScale={2}
-            />
-          )}
         <Box
           ref={containerRef}
-          onMouseDown={(e) => {
-            if (!focusBeacon) handleMouseDown(e);
+          onMouseDown={handleMouseDown}
+          onWheel={handleWheel}
+          onKeyDown={(e) => {
+            // Prevent browser zoom when Ctrl + or - is pressed
+            if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '=')) {
+              e.preventDefault();
+            }
           }}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          //onWheelCapture={handleZoom}
           sx={{
-            position: 'relative',
             width: '100%',
             maxWidth: '100vw',
             height: '100%',
-            maxHeight: 'calc(100vh -200px)',
+            maxHeight: 'calc(100vh - 200px)',
             display: 'flex',
-            flexGrow: 1,
             justifyContent: 'center',
             alignItems: 'center',
             overflow: 'hidden',
-            // transform: `scale(${scale})`,
-            // transformOrigin: 'center', // Zoom to the center
-            cursor: isDragging ? 'grabbing' : 'grab', // Change cursor on drag
+            position: 'relative',
+            userSelect: 'none',
+            outline: 'none',
           }}
+          tabIndex={0}
         >
-          {image &&
-            imgSize &&
-            containerRef.current &&
-            (() => {
-              // Get calculated dimensions
-              const dims = calculateImageDimensions(
-                containerRef.current.clientWidth,
-                containerRef.current.clientHeight,
-                imgSize.width,
-                imgSize.height,
-              );
-              const clipPath = getClipPathFromFocusArea(
-                focusArea,
-                dims.width,
-                dims.height,
-                dims.originalWidth,
-                dims.originalHeight,
-              );
-
-              return (
-                <Box
-                  onMouseEnter={() => {
-                    if (!isDragging) {
-                      document.body.style.cursor = 'grab';
-                    }
-                  }}
-                  onMouseLeave={() => {
-                    handleMouseUp();
-                    document.body.style.cursor = '';
-                  }}
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: dims.width,
-                    height: dims.height,
-                    transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
-                    transformOrigin: 'center center',
-                    overflow: 'hidden',
-                    ...(clipPath && {
-                      clipPath,
-                      WebkitClipPath: clipPath, // Safari support
-                    }),
-                  }}
-                >
-                  <DeviceRenderer
-                    {...dims}
-                    meterPx={actFloorplan?.meterPerPx ?? 1}
-                    devices={filteredDevices}
-                    imageSrc={image}
-                    areas={filteredArea}
-                    GeoFenceAlarm={filteredGeoFenceArea}
-                    OverPopulateAlarm={filteredOverPopulateArea}
-                    StayOnAreaAlarm={filteredStayOnArea}
-                    BoundaryAlarm={filteredBoundaryArea}
-                    showAreas={zoomable && showArea}
-                    showGates={zoomable && showGates}
-                    showGeoFence={zoomable && showGeoFence}
-                    showOverPopulate={zoomable && showOverPopulate}
-                    showStayOnArea={zoomable && showStayOnArea}
-                    showBoundary={zoomable && showBoundary}
-                    showBeacons={zoomable} // only show beacons when zoomable
-                    topic={`tracking/${activeFloorplan.toUpperCase()}`}
-                    onSelectBeacon={handleSelectBeacon}
-                    detailDialogOpen={detailDialogOpen}
-                    setDetailDialogOpen={setDetailDialogOpen}
-                    openTrackDetail={openTrackDetail}
-                    setOpenTrackDetail={setOpenTrackDetail}
-                    selectedBeaconId={selectedBeacon?.id ?? null}
-                    focusBeaconId={focusBeacon || undefined}
-                    focusDmac={selectedBeacon?.dmac ?? undefined}
-                    onFocusPosition={handleFocusPosition}
-                    showOtherBeacons={showOtherBeacons}
-                    screenId={screenId ?? ''}
-                  />
-                </Box>
-              );
-            })()}
-          {/* </Layer>
-            </Stage> */}
+          {image && containerSize.width > 0 && containerSize.height > 0 ? (
+            <DeviceRenderer
+              width={containerSize.width}
+              height={containerSize.height}
+              originalWidth={naturalSize.width}
+              originalHeight={naturalSize.height}
+              meterPx={actFloorplan?.meterPerPx ?? 1}
+              devices={filteredDevices}
+              imageSrc={image}
+              areas={filteredArea}
+              GeoFenceAlarm={filteredGeoFenceArea}
+              OverPopulateAlarm={filteredOverPopulateArea}
+              StayOnAreaAlarm={filteredStayOnArea}
+              BoundaryAlarm={filteredBoundaryArea}
+              showAreas={zoomable && showArea}
+              showGates={zoomable && showGates}
+              showGeoFence={zoomable && showGeoFence}
+              showOverPopulate={zoomable && showOverPopulate}
+              showStayOnArea={zoomable && showStayOnArea}
+              showBoundary={zoomable && showBoundary}
+              showBeacons={zoomable}
+              topic={topic}
+              onSelectBeacon={handleSelectBeacon}
+              detailDialogOpen={detailDialogOpen}
+              setDetailDialogOpen={setDetailDialogOpen}
+              openTrackDetail={openTrackDetail}
+              setOpenTrackDetail={setOpenTrackDetail}
+              selectedBeaconId={selectedBeacon?.id ?? null}
+              focusBeaconId={focusBeacon || undefined}
+              focusDmac={selectedBeacon?.dmac ?? undefined}
+              onFocusPosition={handleFocusPosition}
+              showOtherBeacons={showOtherBeacons}
+              screenId={screenId ?? ''}
+              // Pass stage transform props
+              stageScale={scale}
+              stageX={translate.x}
+              stageY={translate.y}
+            />
+          ) : (
+            <div>Loading floorplan...</div>
+          )}
         </Box>
       </Box>
+
+      {/* Alarm Dialog */}
       {dummyAlarm && (
         <Dialog
           open={open}
           onClose={handleClose}
           PaperProps={{
             sx: {
-              backgroundColor: 'transparent', // transparent outer shell
+              backgroundColor: 'transparent',
               boxShadow: 'none',
               overflow: 'visible',
             },
@@ -931,18 +891,15 @@ const FloorView: React.FC<{
               background: 'linear-gradient(to bottom, #c62828, #b71c1c)',
               color: 'white',
               borderRadius: 4,
-              px: 6, // lebih lebar horizontal padding
+              px: 6,
               pt: 4,
               pb: 8,
-              minWidth: { xs: '90vw', sm: 480, md: 600 }, // responsive minWidth
+              minWidth: { xs: '90vw', sm: 480, md: 600 },
               maxWidth: '90vw',
               textAlign: 'center',
               position: 'relative',
             }}
           >
-            {/* Optional Icon */}
-            {/* <VolumeUpIcon sx={{ fontSize: 32, mb: 1 }} /> */}
-
             <Typography variant="h2" fontWeight="bold" letterSpacing={3} mb={2}>
               ALARM TRIGGERED
             </Typography>
@@ -1019,6 +976,8 @@ const FloorView: React.FC<{
           </Box>
         </Dialog>
       )}
+
+      {/* Popups */}
       {selectedBeacon &&
         (() => {
           const member = memberList?.find((m: memberType) => m.bleCardNumber === selectedBeacon.id);
