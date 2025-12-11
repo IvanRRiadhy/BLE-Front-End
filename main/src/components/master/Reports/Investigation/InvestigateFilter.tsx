@@ -155,9 +155,9 @@ const InvestigateFilter = () => {
           value={timeRange}
           onChange={(e) => setTimeRange(e.target.value as TimeRangeKey)}
         >
-          <MenuItem value="today">Today</MenuItem>
-          <MenuItem value="week">This Week</MenuItem>
-          <MenuItem value="month">This Month</MenuItem>
+          <MenuItem value="daily">Today</MenuItem>
+          <MenuItem value="weekly">This Week</MenuItem>
+          <MenuItem value="monthly">This Month</MenuItem>
           <MenuItem value="custom">Custom Range</MenuItem>
         </TextField>
 

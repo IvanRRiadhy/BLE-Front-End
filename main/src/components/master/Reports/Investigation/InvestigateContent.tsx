@@ -12,7 +12,7 @@ import { formatFullDateTime } from 'src/utils/time';
 dayjs.extend(duration);
 
 const InvestigateContent = () => {
-  const selectedVisitor: VisitorType | null = useSelector(
+  const selectedVisitor: VisitorType = useSelector(
     (state: RootState) => state.VisitorSessionReducer.selectedVisitor,
   );
   const visitorSessions = useSelector(

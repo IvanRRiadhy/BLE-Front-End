@@ -20,6 +20,7 @@ import AddEditCard from 'src/components/master/Tag/card/AddEditCard';
 import CardImport from 'src/components/master/Tag/card/CardImport';
 import CardExport from 'src/components/master/Tag/card/CardExport';
 import { useCardList, useCardStatus } from 'src/hooks/useCard';
+import CardSearch from 'src/components/master/Tag/card/CardSearch';
 
 interface cardType {
   icon?: string;
@@ -94,6 +95,7 @@ const Card = () => {
             }}
           >
             <ParentCard title="Card List" codeModel={[
+              <CardSearch key="search" />,
               <CardImport key={'import'} />,
               <CardExport key={'export'} />,
               <AddEditCard key={'add'} type='add' />

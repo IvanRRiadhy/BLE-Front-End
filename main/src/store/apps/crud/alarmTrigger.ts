@@ -6,6 +6,7 @@ import { defaultAlarmTriggerFilter } from "../defaultForm";
 import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 import { FloorplanType } from "./floorplan";
 import { CardType } from "./card";
+import { VisitorType } from "./visitor";
 
 const API_DT_URL = "/api/AlarmTriggers/filter";
 const API_URL = "/api/AlarmTriggers/";
@@ -42,6 +43,7 @@ export type GetFilter = {
 export interface AlarmTriggerType {
     id: string;
     beaconId: string;
+    visitorId: string;
     floorplanId: string;
     posX: number;
     posY: number;
@@ -53,9 +55,24 @@ export interface AlarmTriggerType {
     actionStatus: string;
     isActive: boolean;
     alarmColor: string;
+    cancelBy: string | null;
+    cancelTimestamp: string | null;
+    doneBy: string | null;
+    doneTimestamp: string | null;
+    idleBy: string | null;
+    idleTimestamp: string | null;
+    investigatedBy: string | null;
+    investigatedDoneAt: string | null;
+    investigatedResult: string | null;
+    investigatedTimestamp: string | null;
+    waitingBy: string | null;
+    waitingTimestamp: string | null;
+    floorplanImage: string;
     floorplan?: FloorplanType;
     card?: CardType;
+    visitor?: VisitorType;
 };
+
 
 interface StateType {
     alarmTriggers: AlarmTriggerType[];

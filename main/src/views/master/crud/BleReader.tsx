@@ -22,6 +22,7 @@ import BleReaderExport from 'src/components/master/CRUD/bleReader/BleReaderExpor
 import BleReaderImport from 'src/components/master/CRUD/bleReader/BleReaderImport';
 import BulkAddEditBleReader from 'src/components/master/CRUD/bleReader/BulkAddEditBleReader';
 import { useReaderStatus } from 'src/hooks/useReader';
+import BleReaderSearch from 'src/components/master/CRUD/bleReader/BleReaderSearch';
 
 interface cardType {
   icon?: string;
@@ -95,6 +96,7 @@ const BleReader = () => {
           }}
         >
           <ParentCard title="Ble Reader List" codeModel={[
+            <BleReaderSearch key="search" />,
             <BleReaderImport key="import" />,
               <BleReaderExport key="export" />,
             <BleReaderFilter key="filter" />,

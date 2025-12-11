@@ -43,9 +43,9 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
 
   const dispatch = useDispatch();
   const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null);
-  useEffect(() => {
-    console.log('openTrackDetail', openTrackDetail);
-  }, [openTrackDetail]);
+  // useEffect(() => {
+  //   console.log('openTrackDetail', openTrackDetail);
+  // }, [openTrackDetail]);
 
   // useEffect(() => {
   //   dispatch(fetchMembers());

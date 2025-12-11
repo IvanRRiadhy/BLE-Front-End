@@ -20,6 +20,7 @@ import AddEditBuilding from 'src/components/master/CRUD/building/AddEditBuilding
 import BuildingImport from 'src/components/master/CRUD/building/BuildingImport';
 import BuildingExport from 'src/components/master/CRUD/building/BuildingExport';
 import { useBuildingStatus } from 'src/hooks/useBuilding';
+import BuildingSearch from 'src/components/master/CRUD/building/BuildingSearch';
 
 interface cardType {
   icon?: string;
@@ -94,6 +95,7 @@ const Building = () => {
           }}
         >
           <ParentCard title="Building List" codeModel={[
+            <BuildingSearch key={"search"} />,
             <BuildingImport key={"import"} />,
             <BuildingExport key={"export"} />,
             <AddEditBuilding key={"add"} type="add" />

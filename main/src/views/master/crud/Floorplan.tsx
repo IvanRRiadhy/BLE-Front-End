@@ -20,6 +20,7 @@ import FloorplanFilter from 'src/components/master/CRUD/floorplan/FloorplanFilte
 import FloorplanImport from 'src/components/master/CRUD/floorplan/FloorplanImport';
 import FloorplanExport from 'src/components/master/CRUD/floorplan/FloorplanExport';
 import { useFloorplanStatus } from 'src/hooks/useFloorplan';
+import FloorplanSearch from 'src/components/master/CRUD/floorplan/FloorplanSearch';
 
 
 interface cardType {
@@ -96,6 +97,7 @@ const { filteredCount: floorplanCount, hasLoaded, isFetching } = useFloorplanSta
           }}
         >
           <ParentCard title="Floorplan List" codeModel={[
+            <FloorplanSearch key="search" />,
             <FloorplanImport key="import" />,
             <FloorplanExport key="export" />,
             <FloorplanFilter key="filter" />,

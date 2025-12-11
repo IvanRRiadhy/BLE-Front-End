@@ -95,18 +95,18 @@ const CardAccessList = () => {
     }
   };
 
-  useEffect(() => {
-    dispatch(UpdateFilter(defaultCardAccessFilter));
-    try {
-      dispatch(fetchCardAccessDT(defaultCardAccessFilter));
-    } catch (error) {
-      console.error('Error fetching data: ', error);
-    }
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(UpdateFilter(defaultCardAccessFilter));
+  //   try {
+  //     dispatch(fetchCardAccessDT(defaultCardAccessFilter));
+  //   } catch (error) {
+  //     console.error('Error fetching data: ', error);
+  //   }
+  // }, [dispatch]);
 
-  useEffect(() => {
-    dispatch(fetchCardAccessDT(cardAccessFilter));
-  }, [cardAccessFilter, dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchCardAccessDT(cardAccessFilter));
+  // }, [cardAccessFilter, dispatch]);
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

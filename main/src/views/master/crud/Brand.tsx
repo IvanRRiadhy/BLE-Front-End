@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import BrandList from 'src/components/master/CRUD/brand/BrandList';
 import AddEditBrand from 'src/components/master/CRUD/brand/AddEditBrand';
 import { useBrandStatus } from 'src/hooks/useBrand';
+import BrandSearch from 'src/components/master/CRUD/brand/BrandSearch';
 
 interface cardType {
   icon?: string;
@@ -91,7 +92,10 @@ const Brand = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Brand List" codeModel={<AddEditBrand type="add" />}>
+          <ParentCard
+            title="Brand List"
+            codeModel={[<BrandSearch key="search" />, <AddEditBrand type="add" />]}
+          >
             <BrandList />
           </ParentCard>
         </Drawer>

@@ -91,9 +91,9 @@ const AlarmTriggerList = () => {
     dispatch(UpdateFilter(defaultAlarmTriggerFilter));
   }, [dispatch]);
 
-  useEffect(() => {
-    dispatch(fetchAlarmTriggerDT(AlarmTriggerFilter));
-  }, [AlarmTriggerFilter, dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchAlarmTriggerDT(AlarmTriggerFilter));
+  // }, [AlarmTriggerFilter, dispatch]);
 
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
@@ -283,7 +283,7 @@ const handleApplyAction = async () => {
                           </TableCell>
 
                           <TableCell>{formatTime(row.triggerTime)}</TableCell>
-                          <TableCell>{row.beaconId}</TableCell>
+                          <TableCell>{row.visitor?.name ?? 'Unknown Visitor'}</TableCell>
                           <TableCell>{row.floorplan?.name ?? 'Unknown Area'}</TableCell>
 
                           {/* 👁️ Position Preview Button */}

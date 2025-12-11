@@ -19,6 +19,7 @@ import AlarmRecordList from 'src/components/master/Reports/alarmRecord/AlarmReco
 import AlarmRecordImport from 'src/components/master/Reports/alarmRecord/AlarmRecordImport';
 import AlarmExport from 'src/components/master/Reports/alarmRecord/AlarmRecordExport';
 import AlarmRecordFilter from 'src/components/master/Reports/alarmRecord/AlarmRecordFilter';
+import AlarmRecordSearch from 'src/components/master/Reports/alarmRecord/AlarmRecordSearch';
 
 interface cardType {
   icon?: string;
@@ -99,6 +100,7 @@ const AlarmRecord = () => {
           <ParentCard
             title="Alarm Record List"
             codeModel={[
+              <AlarmRecordSearch key={'search'} />,
             <AlarmExport key={'export'} />,
             <AlarmRecordFilter key={'filter'} />,
           ]}

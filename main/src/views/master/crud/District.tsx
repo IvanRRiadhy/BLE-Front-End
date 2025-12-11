@@ -19,6 +19,7 @@ import DistrictList from 'src/components/master/CRUD/district/DistrictList';
 import AddEditDistrict from 'src/components/master/CRUD/district/AddEditDistrict';
 import BulkAddEditDistrict from 'src/components/master/CRUD/district/BulkAddEditDistrict';
 import { useDistrictStatus } from 'src/hooks/useDistrict';
+import DistrictSearch from 'src/components/master/CRUD/district/DistrictSearch';
 
 interface cardType {
   icon?: string;
@@ -94,6 +95,7 @@ const District = () => {
           }}
         >
           <ParentCard title="District List" codeModel={[
+            <DistrictSearch key={'search'} />,
             <BulkAddEditDistrict key="bulkAdd" type="add" />,
             <AddEditDistrict key="add" type="add" />
             ]}>

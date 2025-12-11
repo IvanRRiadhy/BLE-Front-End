@@ -22,6 +22,7 @@ import MaskedAreaExport from 'src/components/master/CRUD/maskedArea/MaskedAreaEx
 import FloorplanFilter from 'src/components/master/CRUD/floorplan/FloorplanFilter';
 import { useMaskedAreaStatus } from 'src/hooks/useMaskedArea';
 import { useFloorplanStatus } from 'src/hooks/useFloorplan';
+import FloorplanSearch from 'src/components/master/CRUD/floorplan/FloorplanSearch';
 
 interface cardType {
   icon?: string;
@@ -108,6 +109,7 @@ const MaskedArea = () => {
           <ParentCard
             title="Floorplan List"
             codeModel={[
+              <FloorplanSearch  key="search" />,
               <MaskedAreaImport key="import" />,
               <MaskedAreaExport key="export" />,
               <FloorplanFilter key="filter" />,

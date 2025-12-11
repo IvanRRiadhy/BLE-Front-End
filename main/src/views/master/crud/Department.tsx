@@ -19,6 +19,7 @@ import DepartmentList from 'src/components/master/CRUD/department/DepartmentList
 import AddEditDepartment from 'src/components/master/CRUD/department/AddEditDepartment';
 import { useDepartmentStatus } from 'src/hooks/useDepartment';
 import BulkAddEditDepartment from 'src/components/master/CRUD/department/BulkAddEditDepartment';
+import DepartmentSearch from 'src/components/master/CRUD/department/DepartmentSearch';
 
 interface cardType {
   icon?: string;
@@ -95,6 +96,7 @@ const Department = () => {
           }}
         >
           <ParentCard title="Department List" codeModel={[
+            <DepartmentSearch key={'search'} />,
             <BulkAddEditDepartment key="bulkAdd" type="add" />,
             <AddEditDepartment key="add" type="add" />
             ]}>

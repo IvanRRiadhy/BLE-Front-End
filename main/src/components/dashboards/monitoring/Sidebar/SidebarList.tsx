@@ -46,6 +46,9 @@ const convertBeaconObjectToArray = (beaconObj: any): any[] => {
   return Object.values(beaconObj);
 };
 
+// Maximum number of items to keep in the list
+const MAX_LIST_ITEMS = 100;
+
 const SidebarList = ({ filterType }: SidebarListProps) => {
   const dispatch = useDispatch();
 
@@ -108,6 +111,32 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
     return `trk-${beaconId}-${area}-${t}`;
   };
 
+  // Function to limit list to MAX_LIST_ITEMS
+  const limitListSize = (items: ListType[]): ListType[] => {
+    if (items.length <= MAX_LIST_ITEMS) {
+      return items;
+    }
+    
+    // Keep only the most recent MAX_LIST_ITEMS items (newest first after sorting)
+    // Since we sort newest to oldest, we want to keep the first MAX_LIST_ITEMS items
+    const limitedItems = items.slice(0, MAX_LIST_ITEMS);
+    
+    // Remove IDs of deleted items from seenIdsRef
+    const keptIds = new Set(limitedItems.map(item => item.id));
+    const deletedIds = items
+      .slice(MAX_LIST_ITEMS) // Get the items that were removed
+      .map(item => item.id);
+    
+    // Remove deleted IDs from seenIdsRef
+    deletedIds.forEach(id => {
+      seenIdsRef.current.delete(id);
+    });
+    
+    console.log(`[SidebarList] List exceeded ${MAX_LIST_ITEMS} items. Removed ${deletedIds.length} oldest items.`);
+    
+    return limitedItems;
+  };
+
   useEffect(() => {
     const rowsToAppend: ListType[] = [];
 
@@ -132,7 +161,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
       }
     }
 
-    // Process tracking beacons
+    // Process tracking beacons 
     allBeacons.forEach((b: any) => {
       const beaconId = b.beaconId || b.cardId || b.id || '';
       if (!beaconId) return;
@@ -179,9 +208,35 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
       }
 
       filtered.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+      
+      // Limit the list to MAX_LIST_ITEMS items
+      filtered = limitListSize(filtered);
+      
       return filtered;
     });
   }, [alarmTriggers, allBeacons, filterType, memberList, visitorList]);
+
+  // Also apply limit when filter changes (in case we have more than MAX_LIST_ITEMS after filtering)
+  useEffect(() => {
+    setList(prev => {
+      let filtered = prev;
+      if (filterType && filterType !== 'All') {
+        filtered = prev.filter((x) => x.type === filterType);
+      } else {
+        // If filter is 'All' or empty, show all items (but still limited)
+        filtered = prev;
+      }
+      
+      filtered.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+      
+      // Ensure we don't exceed MAX_LIST_ITEMS even after filtering
+      if (filtered.length > MAX_LIST_ITEMS) {
+        filtered = limitListSize(filtered);
+      }
+      
+      return filtered;
+    });
+  }, [filterType]);
 
   const handleItemClick = (item: ListType) => {
     setSelectedItem(item);
@@ -206,6 +261,13 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
           {list.map((item) => (
             <SidebarListItem key={item.id} item={item} onItemClick={() => handleItemClick(item)} />
           ))}
+          {list.length >= MAX_LIST_ITEMS && (
+            <Box sx={{ p: 2, textAlign: 'center' }}>
+              <Typography variant="caption" color="text.secondary">
+                Showing latest {MAX_LIST_ITEMS} items (oldest items automatically removed)
+              </Typography>
+            </Box>
+          )}
         </Scrollbar>
       </List>
 

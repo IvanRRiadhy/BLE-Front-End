@@ -17,6 +17,7 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import CardAccessList from 'src/components/master/CRUD/cardAccess/CardAccessList';
 import AddEditCardAccess from 'src/components/master/CRUD/cardAccess/AddEditCardAccess';
+import CardAccessSearch from 'src/components/master/CRUD/cardAccess/CardAccess';
 
 interface cardType {
   icon?: string;
@@ -93,6 +94,7 @@ const CardGroup = () => {
                 }}
               >
                 <ParentCard title="Card Access List" codeModel={[
+                  <CardAccessSearch key="search" />,
                     <AddEditCardAccess key="add" type="add" />
                   ]}>
                   <CardAccessList />

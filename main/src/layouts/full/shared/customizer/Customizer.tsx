@@ -104,7 +104,7 @@ const Customizer: FC = () => {
         <Fab
           color="primary"
           aria-label="settings"
-          sx={{ position: 'fixed', right: '25px', bottom: '15px' }}
+          sx={{ position: 'absolute', right: '25px', bottom: '15px' }}
           onClick={() => setShowDrawer(true)}
         >
           <IconSettings stroke={1.5} />

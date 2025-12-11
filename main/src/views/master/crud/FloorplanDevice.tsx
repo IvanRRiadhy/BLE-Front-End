@@ -22,6 +22,7 @@ import FloorplanDeviceList2 from 'src/components/master/CRUD/floorplanDevice/flo
 import FloorplanFilter from 'src/components/master/CRUD/floorplan/FloorplanFilter';
 import { useFloorplanStatus } from 'src/hooks/useFloorplan';
 import { useFloorplanDeviceStatus } from 'src/hooks/useFloorplanDevice';
+import FloorplanSearch from 'src/components/master/CRUD/floorplan/FloorplanSearch';
 interface cardType {
   icon?: string;
   title: string;
@@ -102,6 +103,7 @@ const FloorplanDevice = () => {
           }}
         >
           <ParentCard title="Floorplan List" codeModel={[
+            <FloorplanSearch key="search" />,
             // <FloorplanDeviceImport key="import" />,
             // <FloorplanDeviceExport key="export" />,
             <FloorplanFilter key="filter" />,

@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import OrganizationList from 'src/components/master/CRUD/organization/OrganizationList';
 import AddEditOrganization from 'src/components/master/CRUD/organization/AddEditOrganizationList';
 import { useOrganizationStatus } from 'src/hooks/useOrganization';
+import OrganizationSearch from 'src/components/master/CRUD/organization/OrganizationSearch';
 
 interface cardType {
   icon?: string;
@@ -91,7 +92,11 @@ const Organization = () => {
             [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
           }}
         >
-          <ParentCard title="Organization List" codeModel={<AddEditOrganization type="add" />}>
+          <ParentCard title="Organization List" codeModel={[
+            <OrganizationSearch key={'search'} />,
+            <AddEditOrganization type="add" />
+            
+            ]}>
             <OrganizationList />
           </ParentCard>
         </Drawer>

@@ -21,6 +21,7 @@ import FloorFilter from 'src/components/master/CRUD/floor/FloorFilter';
 import FloorImport from 'src/components/master/CRUD/floor/FloorImport';
 import FloorExport from 'src/components/master/CRUD/floor/FloorExport';
 import { useFloorStatus } from 'src/hooks/useFloor';
+import FloorSearch from 'src/components/master/CRUD/floor/FloorSearch';
 
 interface cardType {
   icon?: string;
@@ -95,6 +96,7 @@ const Floor = () => {
           }}
         >
           <ParentCard title="Floor List" codeModel={[
+            <FloorSearch  key="search" />,
             <FloorImport key="import" />,
             <FloorExport key="export" />,
             <FloorFilter key="filter" />,

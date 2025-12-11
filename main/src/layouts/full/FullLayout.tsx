@@ -24,6 +24,7 @@ import { defaultAlarmSettingFilter } from 'src/store/apps/defaultForm';
 import { AlarmType } from 'src/store/apps/tracking/Alarm';
 import AlarmPopup from './AlarmPopup';
 import { getConfig } from 'src/config';
+import Customizer from './shared/customizer/Customizer';
 
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
@@ -231,7 +232,9 @@ const FullLayout: FC = () => {
                 </ScrollToTop>
               </Box>
             </Container>
+            <Customizer />
           </Box>
+          
         </PageWrapper>
       </MainWrapper>
       <Toaster
