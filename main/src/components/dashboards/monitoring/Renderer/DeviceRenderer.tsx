@@ -200,7 +200,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     return Object.values(beaconDataObj);
   }, [beaconDataObj]);
   
-  console.log('DeviceRenderer render - topic:', topic, 'beaconData count:', beaconData.length);
+  // console.log('DeviceRenderer render - topic:', topic, 'beaconData count:', beaconData.length);
   
   const beacons = useSelector((state: RootState) => state.BeaconReducer.beaconsByTopic);
   const [highlightTopic, setHighlightTopic] = useState<string | null>(null);
@@ -330,7 +330,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
       return;
     }
 
-    console.log(`Processing ${beaconData.length} beacons for topic ${topic}`);
+    // console.log(`Processing ${beaconData.length} beacons for topic ${topic}`);
     
     setLastSeenBeacons((prev) => {
       const updated = { ...prev };

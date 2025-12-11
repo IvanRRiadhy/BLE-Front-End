@@ -128,7 +128,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
           time: a.triggerTime || new Date().toISOString(),
           type: 'Alarm',
         });
-        console.log('[Sidebar] Append Alarm:', id);
+        // console.log('[Sidebar] Append Alarm:', id);
       }
     }
 
@@ -157,7 +157,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
             time: b.time || new Date().toISOString(),
             type: 'Tracking',
           });
-          console.log('[Sidebar] Append Tracking (area-enter):', id);
+          // console.log('[Sidebar] Append Tracking (area-enter):', id);
         }
       }
     });

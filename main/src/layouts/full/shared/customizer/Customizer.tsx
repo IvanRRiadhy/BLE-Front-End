@@ -9,6 +9,7 @@ import {
   Typography,
   Tooltip,
   Stack,
+  Slider,
 } from '@mui/material';
 import { useSelector, useDispatch } from 'src/store/Store';
 import Box, { BoxProps } from '@mui/material/Box';
@@ -18,6 +19,10 @@ import {
   toggleLayout,
   toggleSidebar,
   toggleHorizontal,
+  setBorderRadius,
+  setCardShadow,
+  setDir,
+  setDarkMode,
 } from 'src/store/customizer/CustomizerSlice';
 import { RootState } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
@@ -25,7 +30,12 @@ import AspectRatioTwoToneIcon from '@mui/icons-material/AspectRatioTwoTone';
 import CallToActionTwoToneIcon from '@mui/icons-material/CallToActionTwoTone';
 import ViewSidebarTwoToneIcon from '@mui/icons-material/ViewSidebarTwoTone';
 import WebAssetTwoToneIcon from '@mui/icons-material/WebAssetTwoTone';
-import { ViewComfyTwoTone, PaddingTwoTone } from '@mui/icons-material';
+import { ViewComfyTwoTone, PaddingTwoTone, BorderOuter } from '@mui/icons-material';
+import WbSunnyTwoToneIcon from '@mui/icons-material/WbSunnyTwoTone';
+import DarkModeTwoToneIcon from '@mui/icons-material/DarkModeTwoTone';
+import SwipeLeftAltTwoToneIcon from '@mui/icons-material/SwipeLeftAltTwoTone';
+import SwipeRightAltTwoToneIcon from '@mui/icons-material/SwipeRightAltTwoTone';
+// import BorderOutlinedIcon from '@mui/icons-material/BorderOutlined';
 
 const SidebarWidth = '320px';
 interface colors {
@@ -126,7 +136,7 @@ const Customizer: FC = () => {
             {/* ------------------------------------------- */}
             {/* ------------ Dark light theme setting ------------- */}
             {/* ------------------------------------------- */}
-            {/* <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom>
               Theme Option
             </Typography>
             <Stack direction={'row'} gap={2} my={2}>
@@ -142,13 +152,13 @@ const Customizer: FC = () => {
                 />
                 Dark
               </StyledBox>
-            </Stack> */}
+            </Stack>
 
             {/* <Box pt={3} /> */}
             {/* ------------------------------------------- */}
             {/* ------------ RTL theme setting -------------*/}
             {/* ------------------------------------------- */}
-            {/* <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom>
               Theme Direction
             </Typography>
             <Stack direction={'row'} gap={2} my={2}>
@@ -164,7 +174,7 @@ const Customizer: FC = () => {
                 />{' '}
                 RTL
               </StyledBox>
-            </Stack> */}
+            </Stack>
 
             {/* <Box pt={3} /> */}
             {/* ------------------------------------------- */}
@@ -265,10 +275,10 @@ const Customizer: FC = () => {
                 </Stack>
               </>
             )}
-            {/* <Box pt={4} /> */}
-            {/* <Typography variant="h6" gutterBottom>
-              Card With
-            </Typography>
+              <StyledBox onClick={() => dispatch(setCardShadow(false))} display="flex" gap={1}>
+                {/* <BorderOutlinedIcon color={!customizer.isCardShadow ? 'primary' : 'inherit'} /> */}
+                Border
+              </StyledBox>
             <Stack direction={'row'} gap={2} my={2}>
               <StyledBox onClick={() => dispatch(setCardShadow(false))} display="flex" gap={1}>
                 <BorderOuter color={!customizer.isCardShadow ? 'primary' : 'inherit'} />
@@ -279,11 +289,11 @@ const Customizer: FC = () => {
                 Shadow
               </StyledBox>
             </Stack>
-            <Box pt={4} /> */}
+            <Box pt={4} />
             {/* ------------------------------------------- */}
             {/* ------------ Theme Color setting ------------- */}
             {/* ------------------------------------------- */}
-            {/* <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom>
               Theme Border Radius
             </Typography>
 
@@ -295,7 +305,7 @@ const Customizer: FC = () => {
               max={24}
               onChange={(event: any) => dispatch(setBorderRadius(event.target.value))}
               valueLabelDisplay="auto"
-            /> */}
+            />
           </Box>
         </Scrollbar>
       </Drawer>
