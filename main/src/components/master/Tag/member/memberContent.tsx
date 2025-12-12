@@ -24,7 +24,7 @@ import {
 import {
   memberType,
   deleteMember,
-  SelectMember,
+  SelectMemberId,
   fetchMembers,
   fetchMemberDT,
   blacklistMember,
@@ -87,7 +87,7 @@ const MemberContent = () => {
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
     setSelectedMember(null);
-    dispatch(SelectMember(''));
+    dispatch(SelectMemberId(''));
   };
 
   // Confirm delete action
@@ -284,7 +284,7 @@ const MemberContent = () => {
               {/* Close */}
               <Tooltip title="Close">
                 <IconButton
-                  onClick={() => dispatch(SelectMember(''))}
+                  onClick={() => dispatch(SelectMemberId(''))}
                   size="small"
                   sx={{
                     backgroundColor: 'rgba(255,255,255,0.2)',

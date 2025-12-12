@@ -101,6 +101,7 @@ export const defaultAlarmTriggerFilter: AlarmTriggerFilter = {
   SortColumn: 'TriggerTime',
   SortDir: 'desc',
   SearchValue: '',
+  dateFilters:{},
   filters: {},
 };
 //endregion
@@ -398,9 +399,6 @@ export const defaultMemberFilter: MemberFilter = {
   SortDir: 'desc',
   SearchValue: '',
   filters: {
-    OrganizationId: [],
-    DepartmentId: [],
-    DistrictId: [],
   },
 };
 //#endregion
@@ -510,6 +508,7 @@ export const defaultVisitorFilter: VisitorFilter = {
   SortColumn: 'name',
   SortDir: 'desc',
   SearchValue: '',
+  filters: {},
 };
 //#endregion
 

@@ -234,7 +234,7 @@ if (isLoading) return <InvestigateSkeleton />;
       </Typography>
 
       <Grid container spacing={3}>
-        {visitorSessions.map((s, idx) => {
+        {visitorSessions.map((s, idx: number) => {
           // (Later) When API adds floorplanImage:
           const imgSrc = s.floorplanImage ? `${BASE_URL}${s.floorplanImage}` : null;
 

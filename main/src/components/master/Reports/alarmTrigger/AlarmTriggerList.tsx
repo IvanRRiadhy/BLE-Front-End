@@ -40,7 +40,7 @@ import AlarmPositionPreviewDialog from './AlarmPositionPreviewDialog';
 import { actionStatus, actionStatusColormap } from 'src/types/crud/input';
 import toast from 'react-hot-toast';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
-import { useAlarmTriggerList, useAssignActionAlarmTrigger } from 'src/hooks/useAlarmTrigger';
+import { useAlarmTriggerList, useAssignActionAlarmTriggerByDMAC } from 'src/hooks/useAlarmTrigger';
 
 const columns = [
   { label: 'Time', field: 'TriggerTime', sortAble: true },
@@ -148,7 +148,7 @@ const AlarmTriggerList = () => {
     setSelectedAction('');
   };
 
-  const assignActionMutation = useAssignActionAlarmTrigger();
+  const assignActionMutation = useAssignActionAlarmTriggerByDMAC();
 
 const handleApplyAction = async () => {
   if (!selectedAlarmTrigger) {

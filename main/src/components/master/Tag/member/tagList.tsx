@@ -17,7 +17,7 @@ import {
   Stack,
 } from '@mui/material';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
-import { SelectMember, UpdateFilter } from 'src/store/apps/crud/member';
+import { SelectMemberId, UpdateFilter } from 'src/store/apps/crud/member';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import TagListItem from './tagListItem';
 import { defaultMemberFilter } from 'src/store/apps/defaultForm';
@@ -188,7 +188,7 @@ const active = members?.find((member: memberType) => member.id === selectedMembe
                   manySelect={isManySelect}
                   setManySelectMembers={setManySelectMembers}
                   manySelectMembers={manySelectMembers}
-                  onTagClick={() => {dispatch(SelectMember(member.id))}}
+                  onTagClick={() => {dispatch(SelectMemberId(member.id))}}
                 />
               ))}
         </Scrollbar>

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
-import { AlarmTriggerType, GetFilter } from 'src/store/apps/crud/alarmTrigger';
+import { AlarmTriggerType, IntruderType, GetFilter } from 'src/store/apps/crud/alarmTrigger';
 import { RootState, useSelector } from 'src/store/Store';
 
 // -----------------------------------------------------------------------------
@@ -55,6 +55,21 @@ export function useAllAlarmTriggers() {
 }
 
 // -----------------------------------------------------------------------------
+// ✅ FETCH INTRUDER (for dropdowns, selectors, etc.)
+// -----------------------------------------------------------------------------
+export function useAllIntruders() {
+  return useQuery({
+    queryKey: ['intruder-all'],
+    queryFn: async () => {
+      const res = await axiosServices.get(`${API_URL}lookup`);
+      console.log("Intruders: ", res.data.collection.data);
+      return res.data.collection.data as IntruderType[];
+    },
+    placeholderData: [],
+  });
+}
+
+// -----------------------------------------------------------------------------
 // ✅ ASSIGN ACTION (POST JSON)
 // -----------------------------------------------------------------------------
 export function useAddAlarmTrigger() {
@@ -73,7 +88,7 @@ export function useAddAlarmTrigger() {
   });
 }
 
-export function useAssignActionAlarmTrigger() {
+export function useAssignActionAlarmTriggerByDMAC() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -81,6 +96,28 @@ export function useAssignActionAlarmTrigger() {
       try {
         console.log("Editing AlarmTrigger:", dmac, actionStatus);
         const response = await axiosServices.put(`${API_URL}tag/${dmac}`, { actionStatus });
+        console.log(response);
+        return response.data;
+      } catch (error: any) {
+        console.error("Error editing AlarmTrigger:", error);
+        throw error.response?.data || new Error("Unknown error");
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list'] });
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
+    },
+  });
+}
+
+export function useAssignActionAlarmTriggerByID() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ triggerId, actionStatus }: { triggerId: string; actionStatus: string }) => {
+      try {
+        console.log("Editing AlarmTrigger:", triggerId, actionStatus);
+        const response = await axiosServices.put(`${API_URL}${triggerId}`, { actionStatus });
         console.log(response);
         return response.data;
       } catch (error: any) {

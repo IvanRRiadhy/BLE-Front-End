@@ -7,6 +7,7 @@ import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 import { FloorplanType } from "./floorplan";
 import { CardType } from "./card";
 import { VisitorType } from "./visitor";
+import { memberType } from "./member";
 
 const API_DT_URL = "/api/AlarmTriggers/filter";
 const API_URL = "/api/AlarmTriggers/";
@@ -36,6 +37,9 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     SearchValue: string,
+    dateFilters: {
+
+    }
     filters: {
     }
 }
@@ -43,7 +47,8 @@ export type GetFilter = {
 export interface AlarmTriggerType {
     id: string;
     beaconId: string;
-    visitorId: string;
+    visitorId: string | null;
+    memberId: string | null;
     floorplanId: string;
     posX: number;
     posY: number;
@@ -71,7 +76,24 @@ export interface AlarmTriggerType {
     floorplan?: FloorplanType;
     card?: CardType;
     visitor?: VisitorType;
+    member?: memberType
 };
+
+export type IntruderType = {
+    id: string;
+    beaconId: string;
+    cardNumber: string;
+    visitorId: string;
+    visitorName: string;
+    visitorFaceImage: string;
+    memberId: string;
+    memberName: string;
+    memberFaceImage: string;
+    personGuid: string;
+    personName: string;
+    personImage: string;
+    personType: string;
+}
 
 
 interface StateType {
@@ -79,6 +101,7 @@ interface StateType {
     alarmTriggerAll: AlarmTriggerType[];
     alarmTriggerSearch: string;
     selectedAlarmTrigger?: AlarmTriggerType | null;
+    selectedIntruder?: IntruderType | null;
     alarmTriggerTotalCount: number;
     alarmTriggerFilteredCount: number;
     alarmTriggerFilter: GetFilter;
@@ -92,6 +115,7 @@ const initialState: StateType = {
     alarmTriggerAll: [],
     alarmTriggerSearch: "",
     selectedAlarmTrigger: null,
+    selectedIntruder: null,
     alarmTriggerTotalCount: 0,
     alarmTriggerFilteredCount: 0,
     alarmTriggerFilter: defaultAlarmTriggerFilter,
@@ -116,8 +140,12 @@ export const AlarmTriggerSlice = createSlice({
             const selected = state.alarmTriggers.find((alarmTrigger: AlarmTriggerType) => alarmTrigger.id === action.payload);
             state.selectedAlarmTrigger = selected || null;
         },
+        SelectIntruder: (state, action: PayloadAction<IntruderType>) => {
+            state.selectedIntruder = action.payload;
+        },
         UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
             state.alarmTriggerFilter = {...state.alarmTriggerFilter, ...action.payload};
+            console.log("Updated AlarmTrigger Filter: ", JSON.stringify(state.alarmTriggerFilter));
         },
     },
     extraReducers: (builder) => {
@@ -190,6 +218,7 @@ export const {
     GetAlarmTriggers,
     SearchAlarmTrigger,
     SelectAlarmTrigger,
+    SelectIntruder,
     UpdateFilter,
 } = AlarmTriggerSlice.actions;
 

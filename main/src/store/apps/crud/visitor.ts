@@ -22,6 +22,9 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     SearchValue: string,
+    filters: {
+
+    }
 }
 
 
@@ -92,15 +95,9 @@ export type VisitorType = {
     districtName: string,
     departmentName: string,
     isVip: boolean,
-    // isEmailVerified: boolean,
-    // emailVerificationSendAt: string,
-    // emailVerificationToken: string,
-    // visitorPeriodStart: string,
-    // visitorPeriodEnd: string,
     address:string,
     applicationId: string,
     identityId: string,
-    // isEmployee: boolean,
     personId: string,
     isBlacklist: boolean,
 }
@@ -144,9 +141,8 @@ export const VisitorSlice = createSlice({
       GetAllVisitor(state, action: PayloadAction<VisitorType[]>)  {
         state.visitorAll = action.payload;
       },
-      SelectVisitor(state, action: PayloadAction<string>) {
-        const selected = state.visitors.find((visitor: VisitorType) => visitor.id === action.payload);
-        state.selectedVisitor = selected || undefined;
+      SelectVisitor(state, action: PayloadAction<VisitorType>) {
+        state.selectedVisitor = action.payload;
       },
       SearchVisitor(state, action: PayloadAction<string>) {
         state.visitorSearch = action.payload;

@@ -4,6 +4,7 @@ import React, { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 import VisitorCard from 'src/views/master/tag/VisitorCard';
+import AlarmList from 'src/views/Reports/AlarmList';
 
 
 /* ***Layouts**** */
@@ -248,6 +249,7 @@ const Router = [
       { path: '/report/trackingtransaction', exact: true, element: withAuth(<TrackingTransaction />, '/report/trackingtransaction') },
       { path: '/report/alarmrecord', exact: true, element: withAuth(<AlarmRecord />, '/report/alarmrecord') },
       { path: '/report/alarmtrigger', exact: true, element: withAuth(<AlarmTrigger />, '/report/alarmtrigger') },
+      { path: '/report/alarmlist', exact: true, element: withAuth(<AlarmList />, '/report/alarmlist') },
       { path: '/report/cardrecord', exact: true, element: withAuth(<CardRecord />, '/report/cardrecord') },
       { path: '/report/testrecord', exact: true, element: withAuth(<TestRecord />, '/report/testrecord') },
       { path: '/report/visitorreport/filter', exact: true, element: withAuth(<TestReport />, '/report/visitorreport/filter') },

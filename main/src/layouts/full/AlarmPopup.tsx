@@ -3,7 +3,7 @@ import { Dialog, Box, Button, Typography, Popover, Chip } from '@mui/material';
 import { AlarmType, MQTTAlarmType } from 'src/store/apps/tracking/Alarm';
 import { actionStatus, actionStatusColormap } from 'src/types/crud/input';
 import toast from 'react-hot-toast';
-import { useAssignActionAlarmTrigger } from 'src/hooks/useAlarmTrigger'; // Fixed import
+import { useAssignActionAlarmTriggerByDMAC } from 'src/hooks/useAlarmTrigger'; // Fixed import
 import { alpha, darken } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -15,7 +15,7 @@ interface AlarmPopupProps {
 
 const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
   // React Query mutation hook
-  const assignActionMutation = useAssignActionAlarmTrigger();
+  const assignActionMutation = useAssignActionAlarmTriggerByDMAC();
 
   // State for action popover
   const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);

@@ -21,9 +21,6 @@ export type GetFilter = {
     SortDir: 'asc' | 'desc',
     SearchValue: string,
     filters: {
-        OrganizationId: string[],
-        DistrictId: string[],
-        DepartmentId: string[],
     }
 }
 
@@ -120,8 +117,11 @@ export const MemberSlice = createSlice({
         GetAllMember(state, action: PayloadAction<memberType[]>) {
             state.memberAll = action.payload;
         },
-        SelectMember(state, action: PayloadAction<string>) {
+        SelectMemberId(state, action: PayloadAction<string>) {
             state.selectedMemberId = action.payload;
+        },
+        SelectMember(state, action: PayloadAction<memberType>) {
+            state.selectedMember = action.payload;
         },
         SearchMember(state, action: PayloadAction<string>) {
             state.memberSearch = action.payload;
@@ -206,7 +206,7 @@ export const MemberSlice = createSlice({
     },
 });
 
-export const { GetMember, GetAllMember, SelectMember, SearchMember, UpdateFilter } = MemberSlice.actions;
+export const { GetMember, GetAllMember, SelectMemberId, SelectMember, SearchMember, UpdateFilter } = MemberSlice.actions;
 
 export const fetchMembers = () => async (dispatch: AppDispatch) => {
     try {
