@@ -153,7 +153,7 @@ const EditDeviceRenderer: React.FC<Props> = ({
       // For large images, try to load a smaller preview first
       const previewUrl = imageSrc.replace('/Uploads/', '/Uploads/Thumbnails/') + '?width=2000';
       const p = new Image();
-      p.crossOrigin = 'anonymous';
+      // p.crossOrigin = 'anonymous';
       p.src = previewUrl;
       p.onload = () => {
         setPreviewImage(p);
@@ -163,7 +163,7 @@ const EditDeviceRenderer: React.FC<Props> = ({
       p.onerror = () => {
         // Fallback to original image
         const f = new Image();
-        f.crossOrigin = 'anonymous';
+        // f.crossOrigin = 'anonymous';
         f.src = imageSrc;
         f.onload = () => {
           setBgImage(f);

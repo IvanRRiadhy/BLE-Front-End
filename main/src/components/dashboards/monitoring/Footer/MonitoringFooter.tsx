@@ -17,7 +17,7 @@ const MonitoringFooter = () => {
     { id: 'section1', title: 'Tracking Record', content: <TrackingRecord /> },
     { id: 'section2', title: 'New Track', content: <NewestTrack/> },
     { id: 'section3', title: 'Alarm', content: <AlarmList /> },
-    { id: 'section4', title: 'Statistic', content: <Statistic /> },
+    { id: 'section4', title: 'Occupancy', content: <Statistic /> },
   ];
 
   // Close the expanded section when clicking outside the footer

@@ -42,9 +42,10 @@ export interface MQTTAlarmType {
   cardAccesses: any;
   cardId: string;
   cardName: string;
-  cardDMAC: string;
+  dmac: string;
   color: string;
   faceImage: string;
+  floorplanId: string;
   floorplanName: string;
   maskedAreaId: string;
   maskedAreaName: string;

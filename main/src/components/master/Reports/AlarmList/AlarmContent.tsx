@@ -13,9 +13,9 @@ import {
   Button,
   DialogActions,
 } from '@mui/material';
-// import Grid from '@mui/material/Grid2';
 import { BASE_URL } from 'src/utils/axios';
 import { VisitorType } from 'src/store/apps/crud/visitor';
+import { memberType } from 'src/store/apps/crud/member';
 import { fontWeight } from '@mui/system';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -35,39 +35,51 @@ const AlarmContent = () => {
   const dispatch: AppDispatch = useDispatch();
   const language = useSelector((state: RootState) => state.customizer.isLanguage);
 
-  const selectedTrx = useSelector((state: RootState) => state.TrxVisitorReducer.SelectedTrxVisitor);
-  const selectedVisitor = useSelector((state: RootState) => state.visitorReducer.selectedVisitor);
-  const selectedMember = useSelector((state: RootState) => state.memberReducer.selectedMember);
   const selectedIntruder = useSelector(
     (state: RootState) => state.alarmTriggerReducer.selectedIntruder,
   );
+  const selectedVisitor = useSelector((state: RootState) => state.visitorReducer.selectedVisitor);
+  const selectedMember = useSelector((state: RootState) => state.memberReducer.selectedMember);
+  
   const alarmTriggerFilter = useSelector(
     (state: RootState) => state.alarmTriggerReducer.alarmTriggerFilter,
   );
   const { data: data, isLoading } = useAlarmTriggerList(alarmTriggerFilter);
   const alarmTriggerData = data?.data ?? [];
 
+  // Determine which person to display based on selectedIntruder
+  const [currentPerson, setCurrentPerson] = useState<VisitorType | memberType | null>(null);
+  const [personType, setPersonType] = useState<'Visitor' | 'Member' | null>(null);
+
   useEffect(() => {
     if (selectedIntruder) {
-      console.log(selectedIntruder);
-      switch (selectedIntruder.personType) {
-        case 'Visitor':
-          if (selectedVisitor) {
-            dispatch(
-              UpdateFilter({ ...alarmTriggerFilter, filters: { visitorId: selectedVisitor.id } }),
-            );
-          }
-          break;
-        case 'Member':
-          if (selectedMember) {
-            dispatch(
-              UpdateFilter({ ...alarmTriggerFilter, filters: { memberId: selectedMember.id } }),
-            );
-          }
-          break;
+      console.log('Selected intruder:', selectedIntruder);
+      
+      // Determine person type from selectedIntruder
+      const type = selectedIntruder.personType as 'Visitor' | 'Member';
+      setPersonType(type);
+      
+      // Set the current person based on type
+      if (type === 'Visitor' && selectedVisitor) {
+        setCurrentPerson(selectedVisitor);
+        // Update filter for visitor
+        dispatch(
+          UpdateFilter({ ...alarmTriggerFilter, filters: { visitorId: selectedVisitor.id } }),
+        );
+      } else if (type === 'Member' && selectedMember) {
+        setCurrentPerson(selectedMember);
+        // Update filter for member
+        dispatch(
+          UpdateFilter({ ...alarmTriggerFilter, filters: { memberId: selectedMember.id } }),
+        );
+      } else {
+        setCurrentPerson(null);
       }
+    } else {
+      setCurrentPerson(null);
+      setPersonType(null);
     }
-  }, [selectedIntruder]);
+  }, [selectedIntruder, selectedVisitor, selectedMember]);
 
   useEffect(() => {
     console.log('alarmTriggerData updated:', alarmTriggerData);
@@ -79,15 +91,16 @@ const AlarmContent = () => {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     display: 'block',
-    maxWidth: '100%', // important for Grid2
+    maxWidth: '100%',
   };
+  
   const value = {
     fontWeight: 300,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     display: 'block',
-    maxWidth: '100%', // important for Grid2
+    maxWidth: '100%',
   };
 
   // Alarm Action
@@ -125,11 +138,7 @@ const AlarmContent = () => {
         actionStatus: selectedAction.toLowerCase(),
       });
 
-      // With React Query, if mutateAsync resolves, it means the mutation was successful
       toast.success('Action dispatched successfully');
-
-      // No need to manually refetch - the mutation's onSuccess already invalidates queries
-      // which will automatically trigger refetch of any active useAlarmTriggerList queries
     } catch (error: any) {
       toast.error('Error dispatching action');
       console.error('Error dispatching action', error);
@@ -140,16 +149,17 @@ const AlarmContent = () => {
 
   const formatActionLabel = (value: string) => {
     if (!value) return '-';
-    return value.replace(/([a-z])([A-Z])/g, '$1 $2'); // Adds space before capital letters
+    return value.replace(/([a-z])([A-Z])/g, '$1 $2');
   };
 
-  if (!selectedVisitor)
+  if (!currentPerson)
     return (
       <Box p={3} display="flex" flexDirection="column" alignItems="center">
-        <Typography variant="h4">No visitor selected</Typography>
-        <Typography variant="h6"> Please select a visitor</Typography>
+        <Typography variant="h4">No {personType?.toLowerCase() || 'person'} selected</Typography>
+        <Typography variant="h6">Please select a {personType?.toLowerCase() || 'person'}</Typography>
       </Box>
     );
+    
   return (
     <Box p={3}>
       {/* ================= TOP SECTION ================== */}
@@ -160,7 +170,7 @@ const AlarmContent = () => {
         mb={2}
         sx={{ borderBottom: '1px solid #DDD', pb: 3 }}
       >
-        {/* ============ VISITOR PHOTO ============ */}
+        {/* ============ PERSON PHOTO ============ */}
         <Box
           display="flex"
           flexDirection="column"
@@ -169,8 +179,8 @@ const AlarmContent = () => {
           sx={{ minWidth: 180 }}
         >
           <Avatar
-            alt="Visitor Face"
-            src={`${BASE_URL}${selectedVisitor.faceImage ?? ''}`}
+            alt={`${personType} Face`}
+            src={`${BASE_URL}${currentPerson.faceImage ?? ''}`}
             sx={{
               width: 160,
               height: 160,
@@ -178,92 +188,164 @@ const AlarmContent = () => {
               border: '3px solid #1976d2',
             }}
           />
+          {/* Person Type Badge */}
+          <Chip
+            label={personType}
+            color={personType === 'Visitor' ? 'primary' : 'success'}
+            sx={{ fontWeight: 700, mt: 1 }}
+          />
         </Box>
-        {/* ============ VISITOR FIELDS ============ */}
+        
+        {/* ============ PERSON FIELDS ============ */}
         <Box flexGrow={1}>
           <Grid container spacing={2}>
+            {/* Common Fields for both Visitor and Member */}
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Typography sx={field}>Name</Typography>
-
               <Box display="flex" gap={1}>
-                <Typography sx={value}>{selectedVisitor.name}</Typography>
-                {}
-                {selectedVisitor.isBlacklist ? (
+                <Typography sx={value}>{currentPerson.name}</Typography>
+                {/* Blacklist Chip - common for both */}
+                {'isBlacklist' in currentPerson && currentPerson.isBlacklist ? (
                   <Chip label="Blacklisted" color="error" size="small" sx={{ fontWeight: 700 }} />
-                ) : selectedVisitor.isVip ? (
+                ) : null}
+                {/* VIP Chip - only for Visitor */}
+                {personType === 'Visitor' && 'isVip' in currentPerson && currentPerson.isVip ? (
                   <Chip label="VIP" color="warning" size="small" sx={{ fontWeight: 700 }} />
-                ) : (
-                  <></>
-                )}
+                ) : null}
               </Box>
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography sx={field}>Organization</Typography>
-              <Typography sx={value}>{selectedVisitor.organizationName}</Typography>
-            </Grid>
-
+            {/* Gender - common */}
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Typography sx={field}>Gender</Typography>
-              <Typography sx={value}>{selectedVisitor.gender}</Typography>
+              <Typography sx={value}>{currentPerson.gender}</Typography>
             </Grid>
 
+            {/* Address - common */}
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Typography sx={field}>Address</Typography>
-              <Typography sx={value}>{selectedVisitor.address}</Typography>
+              <Typography sx={value}>{currentPerson.address}</Typography>
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography sx={field}>Card Number</Typography>
-              <Typography sx={value}>{selectedVisitor.cardNumber}</Typography>
-            </Grid>
+            {/* Card Number - common */}
+            {'cardNumber' in currentPerson && (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography sx={field}>Card Number</Typography>
+                <Typography sx={value}>{currentPerson.cardNumber}</Typography>
+              </Grid>
+            )}
 
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography sx={field}>BLE Card Number</Typography>
-              <Typography sx={value}>{selectedVisitor.bleCardNumber}</Typography>
-            </Grid>
+            {/* BLE Card Number - common */}
+            {'bleCardNumber' in currentPerson && (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography sx={field}>BLE Card Number</Typography>
+                <Typography sx={value}>{currentPerson.bleCardNumber}</Typography>
+              </Grid>
+            )}
 
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography sx={field}>Department</Typography>
-              <Typography sx={value}>{selectedVisitor.departmentName}</Typography>
-            </Grid>
+            {/* Visitor Specific Fields */}
+            {personType === 'Visitor' && (
+              <>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Typography sx={field}>Organization</Typography>
+                  <Typography sx={value}>
+                    {(currentPerson as VisitorType).organizationName}
+                  </Typography>
+                </Grid>
 
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography sx={field}>District</Typography>
-              <Typography sx={value}>{selectedVisitor.districtName}</Typography>
-            </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Typography sx={field}>Department</Typography>
+                  <Typography sx={value}>
+                    {(currentPerson as VisitorType).departmentName}
+                  </Typography>
+                </Grid>
 
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography sx={field}>Identity Type</Typography>
-              <Typography sx={value}>{selectedVisitor.identityType}</Typography>
-            </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Typography sx={field}>District</Typography>
+                  <Typography sx={value}>
+                    {(currentPerson as VisitorType).districtName}
+                  </Typography>
+                </Grid>
 
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography sx={field}>Identity ID</Typography>
-              <Typography sx={value}>{selectedVisitor.identityId}</Typography>
-            </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Typography sx={field}>Identity Type</Typography>
+                  <Typography sx={value}>
+                    {(currentPerson as VisitorType).identityType}
+                  </Typography>
+                </Grid>
 
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Typography sx={field}>Identity ID</Typography>
+                  <Typography sx={value}>
+                    {(currentPerson as VisitorType).identityId}
+                  </Typography>
+                </Grid>
+              </>
+            )}
+
+            {/* Member Specific Fields */}
+            {personType === 'Member' && (
+              <>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Typography sx={field}>Organization</Typography>
+                  <Typography sx={value}>
+                    {(currentPerson as memberType).organization?.name || '-'}
+                  </Typography>
+                </Grid>
+
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Typography sx={field}>Department</Typography>
+                  <Typography sx={value}>
+                    {(currentPerson as memberType).department?.name || '-'}
+                  </Typography>
+                </Grid>
+
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Typography sx={field}>District</Typography>
+                  <Typography sx={value}>
+                    {(currentPerson as memberType).district?.name || '-'}
+                  </Typography>
+                </Grid>
+
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Typography sx={field}>Employee ID</Typography>
+                  <Typography sx={value}>
+                    {(currentPerson as memberType).personId || '-'}
+                  </Typography>
+                </Grid>
+
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Typography sx={field}>Join Date</Typography>
+                  <Typography sx={value}>
+                    {(currentPerson as memberType).joinDate || '-'}
+                  </Typography>
+                </Grid>
+              </>
+            )}
+
+            {/* Email - common */}
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Typography sx={field}>Email</Typography>
-              <Typography sx={value}>{selectedVisitor.email}</Typography>
+              <Typography sx={value}>{currentPerson.email}</Typography>
             </Grid>
 
+            {/* Phone - common */}
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Typography sx={field}>Phone</Typography>
-              <Typography sx={value}>{selectedVisitor.phone}</Typography>
+              <Typography sx={value}>{currentPerson.phone}</Typography>
             </Grid>
           </Grid>
         </Box>
       </Box>
 
-      {/* ================= NEXT SECTION PLACEHOLDER ================== */}
+      {/* ================= ALARM TRIGGERS SECTION ================== */}
       <Typography variant="h5" fontWeight="bold" mb={2}>
         Alarm Triggered
       </Typography>
 
       <Grid container spacing={3}>
         {alarmTriggerData.length === 0 && !isLoading && (
-          <Typography>No alarm triggers found for this visitor.</Typography>
+          <Typography>No alarm triggers found for this {personType?.toLowerCase()}.</Typography>
         )}
         {alarmTriggerData.map((alarmTrigger: AlarmTriggerType, index) => {
           const imgSrc = alarmTrigger.floorplanImage
@@ -271,8 +353,7 @@ const AlarmContent = () => {
             : alarmTrigger.floorplan?.floorplanImage
             ? `${BASE_URL}${alarmTrigger.floorplan.floorplanImage}`
             : null;
-          // console.log('imgSrc', alarmTrigger.floorplanImage);
-          // Format time + duration
+            
           const lang = language === 'id' ? 'id' : 'en';
           const append = language === 'id' ? 'hingga' : 'to';
 
@@ -285,10 +366,6 @@ const AlarmContent = () => {
             ? 'Aktif'
             : 'Active';
 
-          // let timeRange = '-';
-          // if(startFormatted && endFormatted) {
-          //   timeRange = `${startFormatted} ${append} ${endFormatted}`;
-          // }
           return (
             <Grid key={index} size={{ xs: 12, sm: 6, md: 3, lg: 2 }}>
               <Box
@@ -312,7 +389,7 @@ const AlarmContent = () => {
                   },
                 }}
               >
-                {/* Floorplan Image placeholder */}
+                {/* Floorplan Image */}
                 <Box
                   sx={{
                     width: '100%',
@@ -325,7 +402,7 @@ const AlarmContent = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     bgcolor: '#e1e1e1',
-                    position: 'relative', // 1. Container utama jadi referensi posisi
+                    position: 'relative',
                   }}
                 >
                   {imgSrc ? (
@@ -333,7 +410,7 @@ const AlarmContent = () => {
                       sx={{
                         width: '100%',
                         height: '100%',
-                        position: 'relative', // 2. Container gambar jadi referensi posisi Chip
+                        position: 'relative',
                       }}
                     >
                       <img
@@ -346,14 +423,14 @@ const AlarmContent = () => {
                         }}
                       />
                       <Chip
-                        label={formatActionLabel(alarmTrigger.alarmRecordStatus)} // Tambahkan properti label yang diperlukan
+                        label={formatActionLabel(alarmTrigger.alarmRecordStatus)}
                         sx={{
                           bgcolor: alarmTrigger.alarmColor || 'secondary.dark',
                           color: 'white',
-                          position: 'absolute', // 3. Posisi absolut relatif ke container parent
-                          top: 8, // Jarak dari atas
-                          right: 8, // Jarak dari kanan
-                          zIndex: 1, // Pastikan Chip di atas gambar
+                          position: 'absolute',
+                          top: 8,
+                          right: 8,
+                          zIndex: 1,
                         }}
                         size="small"
                       />
@@ -397,6 +474,7 @@ const AlarmContent = () => {
           );
         })}
       </Grid>
+      
       {/* ⚙️ Apply Action Dialog */}
       <Dialog open={openActionDialog} onClose={handleCloseActionDialog} fullWidth maxWidth="sm">
         <DialogTitle>Apply Action to Alarm</DialogTitle>

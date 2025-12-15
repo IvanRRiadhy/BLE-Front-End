@@ -360,7 +360,7 @@ const MemberContent = () => {
                       },
                     }}
                   >
-                    {memberDetail.isBlacklist ? 'Unblacklist Member' : 'Block Member'}
+                    {memberDetail.isBlacklist ? 'Unblacklist Member' : 'Blacklist Member'}
                   </Button>
                 </Stack>
               </Box>

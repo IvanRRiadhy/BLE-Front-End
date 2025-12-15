@@ -229,14 +229,14 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     // Create a preview image first
     const previewUrl = imageSrc.src;
     const p = new window.Image();
-    p.crossOrigin = 'anonymous';
+    // p.crossOrigin = 'anonymous';
     p.src = previewUrl;
 
     p.onload = () => {
       setPreviewImage(p);
       // Then load the full image
       const full = new window.Image();
-      full.crossOrigin = 'anonymous';
+      // full.crossOrigin = 'anonymous';
       full.src = imageSrc.src;
       full.onload = () => setBgImage(full);
       full.onerror = () => {
@@ -410,8 +410,8 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     if (!b) return;
 
     // Convert meters to pixels using meterPx
-    const xPx = b.x / meterPx;
-    const yPx = b.y / meterPx;
+    const xPx = b.x;
+    const yPx = b.y;
 
     // Pass the position in original image coordinates (pixels)
     onFocusPosition({ x: xPx, y: yPx });

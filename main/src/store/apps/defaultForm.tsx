@@ -101,6 +101,7 @@ export const defaultAlarmTriggerFilter: AlarmTriggerFilter = {
   SortColumn: 'TriggerTime',
   SortDir: 'desc',
   SearchValue: '',
+  TimeReport: "daily",
   dateFilters:{},
   filters: {},
 };

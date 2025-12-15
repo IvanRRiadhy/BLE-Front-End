@@ -132,12 +132,12 @@ const EditAreaRenderer: React.FC<Props> = ({
 
     const previewUrl = `${imageSrc}`;
     const p = new window.Image();
-    p.crossOrigin = 'anonymous';
+    // p.crossOrigin = 'anonymous';
     p.src = previewUrl;
     p.onload = () => {
       setPreviewImage(p);
       const full = new window.Image();
-      full.crossOrigin = 'anonymous';
+      // full.crossOrigin = 'anonymous';
       full.src = imageSrc;
       full.onload = () => setBgImage(full);
       full.onerror = () => {

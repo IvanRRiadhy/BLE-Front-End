@@ -9,6 +9,8 @@ import {
   ListItemAvatar,
   ListItemText,
   Stack,
+  Typography,
+  Divider,
 } from '@mui/material';
 import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'src/store/Store';
@@ -32,7 +34,7 @@ const IntruderList = () => {
 
   // Fetch all visitors and members upfront
   const { data: allVisitors } = useAllVisitor();
-  
+
   const { data: allMembers } = useAllMembers();
 
   // Create lookup maps for quick access
@@ -40,7 +42,7 @@ const IntruderList = () => {
     if (!allVisitors) return {};
     return allVisitors.reduce((acc: { [key: string]: VisitorType }, visitor) => {
       acc[visitor.id] = visitor;
-    //   acc[visitor.personGuid] = visitor;
+      //   acc[visitor.personGuid] = visitor;
       return acc;
     }, {});
   }, [allVisitors]);
@@ -49,7 +51,7 @@ const IntruderList = () => {
     if (!allMembers) return {};
     return allMembers.reduce((acc: { [key: string]: memberType }, member) => {
       acc[member.id] = member;
-    //   acc[member.personGuid] = member;
+      //   acc[member.personGuid] = member;
       return acc;
     }, {});
   }, [allMembers]);
@@ -76,7 +78,7 @@ const IntruderList = () => {
 
   const handleClick = (intruder: IntruderType) => {
     dispatch(SelectIntruder(intruder));
-    
+
     // Use the pre-fetched data from maps
     switch (intruder.personType) {
       case 'Visitor':
@@ -107,6 +109,10 @@ const IntruderList = () => {
             overflow: 'auto',
           }}
         >
+          <Box p={2}>
+            <Typography variant="h4" fontWeight={800}>Intruders</Typography>
+          </Box>
+          <Divider />
           {!loading && intruderData.length > 0
             ? intruderData.map((intruder) => (
                 <IntruderListItem

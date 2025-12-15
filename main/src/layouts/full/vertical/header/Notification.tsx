@@ -11,6 +11,7 @@ import {
   useTheme,
   alpha,
   darken,
+  Chip,
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IconBellRinging } from '@tabler/icons-react';
@@ -31,11 +32,26 @@ type BubbleData = {
   title: string;
   subtitle: string;
   status: string;
-  color: string;
+  priority: string;
+  priorityColor: string; // Changed from color to priorityColor
+  chipColor: string; // New field for chip color
+  category: string;
   createdAt: number;
 };
 
 const AUTOHIDE_MS = 6000;
+
+// Priority color mapping
+const PRIORITY_COLORS: Record<string, string> = {
+  'low': '#ffc107',    // Yellow
+  'medium': '#ff9800', // Orange
+  'high': '#f44336',   // Red
+};
+
+const getPriorityColor = (priority: string): string => {
+  const normalizedPriority = priority?.toLowerCase() || 'medium';
+  return PRIORITY_COLORS[normalizedPriority] || PRIORITY_COLORS.medium;
+};
 
 const Notifications = () => {
   const theme = useTheme();
@@ -56,7 +72,7 @@ const Notifications = () => {
   const alarmTriggers: AlarmTriggerType[] = useAllAlarmTriggers().data || [];
   const memberList: memberType[] = useAllMembers().data || [];
   const visitorList: VisitorType[] = useAllVisitor().data || [];
-const MAX_BUBBLES = 4;
+  const MAX_BUBBLES = 4;
   const ONE_HOUR_MS = 60 * 60 * 1000;
   const toMs = (v: any) => (v instanceof Date ? v.getTime() : Date.parse(v));
 
@@ -117,7 +133,7 @@ const MAX_BUBBLES = 4;
         return;
       }
 
-      // Extract data directly from the MQTT object (no need to parse JSON string)
+      // Extract data directly from the MQTT object
       const bd: BubbleData = {
         id: uniqueId(),
         title: alarmData.visitorName || alarmData.MemberName || alarmData.cardName || 'Unknown',
@@ -127,7 +143,10 @@ const MAX_BUBBLES = 4;
         status: getStatusText(
           alarmData.action?.toLowerCase() === 'idle' ? 'Idle' : alarmData.action ?? 'Idle',
         ),
-        color: alarmData.color ?? '#d32f2f',
+        priority: alarmData.priority || 'medium',
+        priorityColor: getPriorityColor(alarmData.priority), // Use priority-based color
+        chipColor: alarmData.color ?? '#2196f3', // Use original alarmData.color for chip
+        category: alarmData.status.toUpperCase() || 'Alert',
         createdAt: Date.now(),
       };
 
@@ -202,7 +221,9 @@ const MAX_BUBBLES = 4;
                   maskedAreaName: 'MA-Lantai 2',
                   floorplanName: 'FP Lantai 2',
                   action: 'idle',
-                  color: '#ff4d4f'
+                  priority: 'high', // Added priority
+                  color: '#4caf50', // This will be used for chip color
+                  status: 'EXAMPLE' // Added status for category
                 },
               },
             },
@@ -252,12 +273,12 @@ const MAX_BUBBLES = 4;
                   borderRadius: 3,
                   color: 'white',
                   cursor: 'pointer',
-                  background: `linear-gradient(135deg, ${alpha(b.color, 0.95)}, ${darken(
-                    b.color,
+                  background: `linear-gradient(135deg, ${alpha(b.priorityColor, 0.95)}, ${darken(
+                    b.priorityColor,
                     0.25,
                   )})`,
-                  border: `1px solid ${alpha(b.color, 0.4)}`,
-                  boxShadow: `0 8px 30px ${alpha(b.color, 0.5)}`,
+                  border: `1px solid ${alpha(b.priorityColor, 0.4)}`,
+                  boxShadow: `0 8px 30px ${alpha(b.priorityColor, 0.5)}`,
                   backdropFilter: 'blur(6px)',
                   overflow: 'visible',
                   ...(isTop && {
@@ -268,21 +289,50 @@ const MAX_BUBBLES = 4;
                       right: 24,
                       borderWidth: '0 8px 8px 8px',
                       borderStyle: 'solid',
-                      borderColor: `transparent transparent ${darken(b.color, 0.1)} transparent`,
+                      borderColor: `transparent transparent ${darken(b.priorityColor, 0.1)} transparent`,
                     },
                   }),
                 }}
               >
+                {/* Category Chip - Top Right */}
+                <Chip
+                  label={b.category}
+                  size="small"
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    backgroundColor: b.chipColor,
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '0.65rem',
+                    height: '20px',
+                    borderRadius: 1.2,
+                    '& .MuiChip-label': {
+                      px: 1,
+                    },
+                  }}
+                />
+                
                 <Stack spacing={0.5}>
-                  <Typography variant="subtitle2" sx={{ opacity: 0.75 }}>
+                  <Typography variant="subtitle2" sx={{ opacity: 0.75, pt: 0.5 }}>
                     Alarm Triggered
                   </Typography>
                   <Typography variant="h6" fontWeight={700}>
                     {b.title}
                   </Typography>
                   <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    {b.subtitle}
+                    {b.subtitle} 
                   </Typography>
+                  {/* Priority indicator */}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
+                    <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                      Priority: <strong>{b.priority.toUpperCase()}</strong>
+                    </Typography>
+                    <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                      Status: {b.status}
+                    </Typography>
+                  </Box>
                 </Stack>
               </Paper>
             </motion.div>

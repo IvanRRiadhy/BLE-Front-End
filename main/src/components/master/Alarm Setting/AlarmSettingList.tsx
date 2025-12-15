@@ -410,7 +410,7 @@ const AlarmSettingList = () => {
                                     size="small"
                                     variant="contained"
                                     sx={{
-                                      backgroundColor: '#e53935',
+                                      backgroundColor: '#f44336',
                                       color: 'white',
                                       borderRadius: '16px',
                                       textTransform: 'none',
@@ -427,7 +427,7 @@ const AlarmSettingList = () => {
                                     size="small"
                                     variant="contained"
                                     sx={{
-                                      backgroundColor: '#4da5f3ff',
+                                      backgroundColor: '#ff9800',
                                       color: 'white',
                                       borderRadius: '16px',
                                       textTransform: 'none',
@@ -444,7 +444,7 @@ const AlarmSettingList = () => {
                                     size="small"
                                     variant="contained"
                                     sx={{
-                                      backgroundColor: '#6ae670ff',
+                                      backgroundColor: '#ffc107',
                                       color: 'white',
                                       borderRadius: '16px',
                                       textTransform: 'none',

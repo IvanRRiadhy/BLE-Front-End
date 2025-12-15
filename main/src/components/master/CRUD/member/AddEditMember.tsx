@@ -11,10 +11,9 @@ import {
   Typography,
   CircularProgress,
   FormHelperText,
-  Autocomplete,
-  TextField,
   Box,
   MenuItem,
+  IconButton,
 } from '@mui/material';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
@@ -36,6 +35,10 @@ import AddEditOrganization from '../organization/AddEditOrganizationList';
 import { useQueryClient } from '@tanstack/react-query';
 import { PaginatedResponse } from 'src/hooks/useMember';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
+import { useAllDistricts } from 'src/hooks/useDistrict';
+import { useAllDepartments } from 'src/hooks/useDepartment';
+import { useAllOrganizations } from 'src/hooks/useOrganization';
+import { useAllCard, useUnassignedCard } from 'src/hooks/useCard';
 
 interface FormType {
   type?: string;
@@ -48,20 +51,18 @@ const AddEditMember = ({ type, member }: FormType) => {
   const [loading, setLoading] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const [image, setImage] = React.useState<File | null>(null);
-  const [preview, setPreview] = React.useState<string | null>(member?.faceImage || null);
+  const [preview, setPreview] = React.useState<string | null>(null);
   const [formData, setFormData] = React.useState<memberType>({
     ...defaultMemberForm,
     ...member,
   });
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
-  const districtData = useSelector((state: RootState) => state.districtReducer.districtAll);
-  const departmentData = useSelector((state: RootState) => state.departmentReducer.departmentAll);
-  const organizationData = useSelector(
-    (state: RootState) => state.organizationReducer.organizationAll,
-  );
-  const cardData = useSelector((state: RootState) => state.CardReducer.cardAll);
-  const filteredCard: CardType[] = cardData.filter((card) => !card.isUsed);
+  const districtData = useAllDistricts().data || [];
+  const departmentData = useAllDepartments().data || [];
+  const organizationData = useAllOrganizations().data || [];
+  const filteredCard = useUnassignedCard().data || [];
+  const cardData = useAllCard().data || [];
 
   useEffect(() => {
     dispatch(fetchDistricts());
@@ -74,6 +75,18 @@ const AddEditMember = ({ type, member }: FormType) => {
     setLoading(true);
     setFormErrors({});
     setFormData({ ...defaultMemberForm, ...member });
+    
+    // Set image preview properly - check if member exists and has faceImage
+    if (member?.faceImage) {
+      // Create the full URL for preview
+      const fullImageUrl = `${BASE_URL}${member.faceImage}`;
+      setPreview(fullImageUrl);
+      console.log('Setting preview to:', fullImageUrl);
+    } else {
+      setPreview(null);
+    }
+    
+    setImage(null);
     setTimeout(() => {
       setLoading(false);
       setOpen(true);
@@ -81,8 +94,16 @@ const AddEditMember = ({ type, member }: FormType) => {
   };
 
   const handleClose = () => {
+    console.log(member);
     setOpen(false);
-    setPreview(member?.faceImage || null);
+    
+    // Reset preview to the original member image if it exists
+    if (member?.faceImage) {
+      setPreview(`${BASE_URL}${member.faceImage}`);
+    } else {
+      setPreview(null);
+    }
+    
     setImage(null);
   };
 
@@ -95,13 +116,20 @@ const AddEditMember = ({ type, member }: FormType) => {
     if (!formData.districtId?.trim()) errors.districtId = 'District is required';
     if (!formData.gender?.trim()) errors.gender = 'Gender is required';
     if (!formData.phone?.trim()) errors.phone = 'Phone Number is required';
-    if (!image && type === 'add') errors.faceImage = 'Face Image is required';
+    if (!image && type === 'add' && !preview) errors.faceImage = 'Face Image is required';
     if (!!formData.email?.trim() && !formData.email.includes('@'))
       errors.email = 'Valid Email required';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
-
+  
+  const logFormData = (formData: any) => {
+    console.log('FormData contents:');
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }
+  };
+  
   const handleSave = async () => {
     if (!validateForm()) {
       toast.error('Please fill all required fields correctly.');
@@ -114,12 +142,18 @@ const AddEditMember = ({ type, member }: FormType) => {
         if (!['faceImage', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key))
           data.append(key, value?.toString() ?? '');
       });
-      if (image) data.append('faceImage', image);
-
+      if (image) {
+        data.append('faceImage', image);
+      } else {
+        data.delete('faceImage');
+      }
+      logFormData(data);
       let result;
       if (type === 'edit') result = await dispatch(editMember(data));
       else result = await dispatch(addMember(data));
-
+      
+      console.log("API result:", result);
+      
       if (result && result.type.endsWith('/fulfilled')) {
         // ✅ Update cache manually
         queryClient.setQueryData<PaginatedResponse<memberType>>(
@@ -157,57 +191,87 @@ const AddEditMember = ({ type, member }: FormType) => {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) return alert('File size exceeds 5MB.');
-    if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type))
-      return alert('Invalid image type.');
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size exceeds 5MB.');
+      return;
+    }
+    if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+      toast.error('Invalid image type. Please use PNG, JPEG, or JPG.');
+      return;
+    }
+    
+    // Clear any existing preview URL
+    if (preview && preview.startsWith('blob:')) {
+      URL.revokeObjectURL(preview);
+    }
+    
     setImage(file);
     setPreview(URL.createObjectURL(file));
   };
+
+  // Clean up blob URLs on component unmount
+  React.useEffect(() => {
+    return () => {
+      if (preview && preview.startsWith('blob:')) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
+
+  // Create forwardRef components for Tooltip children
+  const EditButton = React.forwardRef<HTMLButtonElement>((props, ref) => (
+    <IconButton
+      ref={ref}
+      onClick={handleClickOpen}
+      sx={{
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        border: '1px solid rgba(0,0,0,0.15)',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
+        transition: 'all 0.2s ease',
+        width: 36,
+        height: 36,
+        '& svg': {
+          color: '#fff',
+          filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))',
+        },
+        '&:hover': {
+          backgroundColor: 'rgba(255,255,255,0.35)',
+          transform: 'scale(1.1)',
+        },
+      }}
+      {...props}
+    >
+      <IconPencil size={18} stroke={1.6} />
+    </IconButton>
+  ));
+  EditButton.displayName = 'EditButton';
+
+  const AddButton = React.forwardRef<HTMLButtonElement>((props, ref) => (
+    <Button
+      ref={ref}
+      variant="contained"
+      color="primary"
+      startIcon={<IconPlus size={20} />}
+      fullWidth
+      onClick={handleClickOpen}
+      {...props}
+    >
+      Add Member
+    </Button>
+  ));
+  AddButton.displayName = 'AddButton';
 
   return (
     <>
       {type === 'edit' && (
         <Tooltip title="Edit Member">
-          <Box
-            onClick={handleClickOpen}
-            sx={{
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              border: '1px solid rgba(0,0,0,0.15)',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
-              transition: 'all 0.2s ease',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '50%',
-              width: 36,
-              height: 36,
-              cursor: 'pointer',
-              '& svg': {
-                color: '#fff',
-                filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))',
-              },
-              '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.35)',
-                transform: 'scale(1.1)',
-              },
-            }}
-          >
-            <IconPencil size={18} stroke={1.6} />
-          </Box>
+          <EditButton />
         </Tooltip>
       )}
 
       {type === 'add' && (
         <Tooltip title="Add Member">
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<IconPlus size={20} />}
-            fullWidth
-            onClick={handleClickOpen}
-          >
-            Add Member
-          </Button>
+          <AddButton />
         </Tooltip>
       )}
 
@@ -261,14 +325,15 @@ const AddEditMember = ({ type, member }: FormType) => {
                     }}
                     getOptionLabel={(o) => o.label}
                     isOptionEqualToValue={(a, b) => a.id === b.id}
-                    required
-                    error={!!formErrors.departmentId}
-                    helperText={formErrors.departmentId}
                     sx={{ flex: 1 }}
                   />
-
                   <AddEditDepartment type="add" />
                 </Box>
+                {formErrors.departmentId && (
+                  <FormHelperText error sx={{ mt: 0.5 }}>
+                    {formErrors.departmentId}
+                  </FormHelperText>
+                )}
                 <CustomFormLabel htmlFor="identity-Id">Identity</CustomFormLabel>
                 <CustomTextField
                   id="identityId"
@@ -304,14 +369,15 @@ const AddEditMember = ({ type, member }: FormType) => {
                     }}
                     getOptionLabel={(o) => o.label}
                     isOptionEqualToValue={(a, b) => a.id === b.id}
-                    required
-                    error={!!formErrors.organizationId}
-                    helperText={formErrors.organizationId}
                     sx={{ flex: 1 }}
                   />
-
                   <AddEditOrganization type="add" />
                 </Box>
+                {formErrors.organizationId && (
+                  <FormHelperText error sx={{ mt: 0.5 }}>
+                    {formErrors.organizationId}
+                  </FormHelperText>
+                )}
                 <CustomFormLabel htmlFor="district">District</CustomFormLabel>
                 <Box display="flex" alignItems="center" gap={1}>
                   <CustomAutocomplete<{ label: string; id: string }>
@@ -337,13 +403,15 @@ const AddEditMember = ({ type, member }: FormType) => {
                     }}
                     getOptionLabel={(o) => o.label}
                     isOptionEqualToValue={(a, b) => a.id === b.id}
-                    required
-                    error={!!formErrors.districtId}
-                    helperText={formErrors.districtId}
                     sx={{ flex: 1 }}
                   />
                   <AddEditDistrict type="add" />
                 </Box>
+                {formErrors.districtId && (
+                  <FormHelperText error sx={{ mt: 0.5 }}>
+                    {formErrors.districtId}
+                  </FormHelperText>
+                )}
               </Grid>
             </Grid>
             <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
@@ -351,18 +419,6 @@ const AddEditMember = ({ type, member }: FormType) => {
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
-              {/* <Grid size={{ lg: 6, md: 12, sm: 12 }} >
-                <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
-                <CustomTextField
-                  id="cardNumber"
-                  value={formData.cardNumber}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  error={!!formErrors.cardNumber}
-                  helperText={formErrors.cardNumber}
-                />
-              </Grid> */}
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="ble-card-number">Card Number</CustomFormLabel>
                 <CustomAutocomplete<{ label: string; id: string }>
@@ -389,12 +445,13 @@ const AddEditMember = ({ type, member }: FormType) => {
                   }}
                   getOptionLabel={(o) => o.label}
                   isOptionEqualToValue={(a, b) => a.id === b.id}
-                  // noOptionsText="No Available BLE Card"
-                  required
-                  error={!!formErrors.cardNumber}
-                  helperText={formErrors.cardNumber}
                   sx={{ flex: 1 }}
                 />
+                {formErrors.cardNumber && (
+                  <FormHelperText error sx={{ mt: 0.5 }}>
+                    {formErrors.cardNumber}
+                  </FormHelperText>
+                )}
               </Grid>
             </Grid>
             <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
@@ -472,11 +529,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                   helperText={formErrors.gender}
                 >
                   {gender.map((gender) => (
-                    <MenuItem
-                      key={gender.value}
-                      value={gender.value}
-                      disabled={gender.disabled || false}
-                    >
+                    <MenuItem key={gender.value} value={gender.value}>
                       {gender.label}
                     </MenuItem>
                   ))}
@@ -524,11 +577,32 @@ const AddEditMember = ({ type, member }: FormType) => {
                   <FormHelperText error>{formErrors.faceImage}</FormHelperText>
                 )}
                 {preview && (
-                  <img
-                    src={preview?.startsWith('blob:') ? preview : `${BASE_URL}${preview}`}
-                    alt="Face Preview"
-                    style={{ width: '100%', marginTop: '10px', borderRadius: '5px' }}
-                  />
+                  <Box sx={{ mt: 2 }}>
+                    <img
+                      src={preview}
+                      alt="Face Preview"
+                      style={{ 
+                        width: '100%', 
+                        maxHeight: '300px',
+                        objectFit: 'contain',
+                        marginTop: '10px', 
+                        borderRadius: '5px',
+                        border: '1px solid #ddd',
+                        padding: '5px',
+                        backgroundColor: '#f5f5f5'
+                      }}
+                    />
+                    {type === 'edit' && !image && (
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                        Current image from database
+                      </Typography>
+                    )}
+                    {image && (
+                      <Typography variant="caption" color="primary" sx={{ display: 'block', mt: 0.5 }}>
+                        New image selected
+                      </Typography>
+                    )}
+                  </Box>
                 )}
               </Grid>
             </Grid>

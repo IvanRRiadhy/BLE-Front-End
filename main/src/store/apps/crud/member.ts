@@ -241,7 +241,6 @@ export const fetchMemberDT = createAsyncThunk(
 export const addMember = createAsyncThunk("member/addMember", async (formData: FormData) => {
     const started = Date.now();
     try {
-        formData.delete('id');
         const response = await axiosServices.post(API_URL, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
