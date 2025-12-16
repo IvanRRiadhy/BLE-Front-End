@@ -9,6 +9,13 @@ import { VisitorType } from './visitor';
 const API_URL = '/api/TrackingAnalytics/visitor-session/';
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+export interface EventTypesFilter {
+  all: boolean;
+  accessTracking: boolean;
+  alarm: boolean;
+  alarmSubTypes: Record<string, boolean>;
+}
+
 export type GetFilter = {
   TimeRange: string;
   buildingId: string | null;
@@ -16,6 +23,7 @@ export type GetFilter = {
   floorplanId: string | null;
   areaId: string | null;
   visitorId: string | null;
+  eventTypes: EventTypesFilter;
 };
 
 export type GetVisitorSession = {
@@ -79,12 +87,18 @@ const initialState: StateType = {
   visitorSessionTotalCount: 0,
   visitorSessionFilteredCount: 0,
   visitorSessionFilter: {
-    TimeRange: 'today',
+    TimeRange: 'daily',
     buildingId: null,
     floorId: null,
     floorplanId: null,
     areaId: null,
     visitorId: "",
+    eventTypes: {
+      all: true,
+      accessTracking: true,
+      alarm: true,
+      alarmSubTypes: {},
+    },
   },
   isLoading: false,
   hasLoaded: false,

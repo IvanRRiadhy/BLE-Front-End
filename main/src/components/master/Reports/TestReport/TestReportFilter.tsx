@@ -12,6 +12,10 @@ import {
   InputLabel,
   Autocomplete,
   Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { dispatch, RootState } from 'src/store/Store';
@@ -28,10 +32,32 @@ import { fetchMembers, memberType } from 'src/store/apps/crud/member';
 import trackingJson from './DummyData/TrackingTransactionDummyData.json';
 import alarmJson from './DummyData/AlarmDummyData.json';
 import VisitorReportDialog from './VisitorReportDialog';
+import { useAllBuilding } from 'src/hooks/useBuilding';
+import { useAllMembers } from 'src/hooks/useMember';
+import { useAllFloors } from 'src/hooks/useFloor';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import { useAllVisitor } from 'src/hooks/useVisitor';
+import { useAddVisitorFilterPreset } from 'src/hooks/useVisitorFilterPreset';
+import toast from 'react-hot-toast';
+import AreaHierarchySelector from 'src/components/shared/AreaHierarchySelector';
 
 // ⬇️ activate plugins
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
+
+type PersonOption = {
+  id: string;
+  name: string;
+  type: 'visitor' | 'member';
+};
+
+export type SelectedNode =
+  | { type: 'building'; data: any }
+  | { type: 'floor'; data: any }
+  | { type: 'floorplan'; data: any }
+  | { type: 'area'; data: any }
+  | null;
 
 // Dummy visitor names
 const dummyVisitors = ['Alakazam', 'Bastiodon', 'Cacturne', 'Donphan', 'Espeon'];
@@ -40,14 +66,17 @@ const VisitorReportFilter = () => {
   const didInit = useRef(false);
 
   // ✅ Switch for testing mode
-  const isTesting = true;
+  const isTesting = false;
 
   // Redux Data
-  const buildings = useSelector((state: RootState) => state.buildingReducer.buildingAll);
-  const floors = useSelector((state: RootState) => state.floorReducer.floorAll);
-  const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
-  const maskedAreas = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
-  const members = useSelector((state: RootState) => state.memberReducer.memberAll);
+  const buildingData = useAllBuilding().data || [];
+  const floorData = useAllFloors().data || [];
+  const floorplanData = useAllFloorplans().data || [];
+  const areaData = useAllMaskedAreas().data || [];
+  const visitorData = useAllVisitor().data || [];
+  const memberData = useAllMembers().data || [];
+
+  const addMutation = useAddVisitorFilterPreset();
 
   const [openReport, setOpenReport] = useState(false);
   const [filteredTracking, setFilteredTracking] = useState<any[]>([]);
@@ -63,12 +92,67 @@ const VisitorReportFilter = () => {
     from: dayjs().format('YYYY-MM-DD'),
     to: dayjs().format('YYYY-MM-DD'),
   });
-  const [selectedVisitors, setSelectedVisitors] = useState<string[]>([]);
+  const [selectedPersons, setSelectedPersons] = useState<PersonOption[]>([]);
+  const [selectedArea, setSelectedArea] = useState<SelectedNode>(null);
   const [areaValue, setAreaValue] = useState('');
-  const [host, setHost] = useState('');
+  const [selectedHost, setSelectedHost] = useState<memberType | null>(null);
 
-  // Hardcoded dummy areas
-  const dummyAreas = ['Meeting Room', 'Pantry', 'Rooftop', 'Parking Lot', 'Lobby'];
+  const personOptions: PersonOption[] = [
+    ...visitorData.map((v: any) => ({
+      id: v.id,
+      name: v.name,
+      type: 'visitor' as const,
+    })),
+    ...memberData.map((m: any) => ({
+      id: m.id,
+      name: m.name,
+      type: 'member' as const,
+    })),
+  ];
+  const [openPresetDialog, setOpenPresetDialog] = useState(false);
+  const [presetName, setPresetName] = useState('');
+
+  const buildPresetPayload = (name: string) => {
+    let fromDate: string | null = null;
+    let toDate: string | null = null;
+
+    if (timeType === 'Custom') {
+      fromDate = dateRange.from;
+      toDate = dateRange.to;
+    }
+
+    return {
+      name,
+      timeRange: timeType,
+      buildingId: selectedArea?.type === 'building' ? selectedArea?.data?.id : null,
+      floorplanId: selectedArea?.type === 'floorplan' ? selectedArea?.data?.id : null,
+      floorId: selectedArea?.type === 'floor' ? selectedArea?.data?.id : null,
+      areaId: selectedArea?.type === 'area' ? selectedArea?.data?.id : null,
+      visitorId: selectedPersons.find((p) => p.type === 'visitor')?.id || null,
+      memberId: selectedPersons.find((p) => p.type === 'member')?.id || null,
+      fromDate,
+      toDate,
+    };
+  };
+
+  const handleConfirmSavePreset = async () => {
+    if (!presetName.trim()) {
+      toast.error('Preset name is required');
+      return;
+    }
+
+    try {
+      const payload = buildPresetPayload(presetName.trim());
+      await addMutation.mutateAsync(payload);
+
+      toast.success('Preset saved successfully');
+      setOpenPresetDialog(false);
+      setPresetName('');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to save preset');
+    }
+  };
 
   // 🧭 Handlers
   const handleGenerate = () => {
@@ -89,9 +173,11 @@ const VisitorReportFilter = () => {
       const filteredT = trackingData.filter((t) => {
         const enter = dayjs(t.EnterTime);
         return (
-          (selectedVisitors.length === 0 || selectedVisitors.includes(t.VisitorName)) &&
+          (selectedPersons.length === 0 ||
+            selectedPersons.includes(t.VisitorName) ||
+            selectedPersons.includes(t.MemberName)) &&
           (!areaValue || t.AreaName === areaValue) &&
-          (!host || t.HostName === host) &&
+          (!selectedHost || t.HostName === selectedHost) &&
           withinRange(enter)
         );
       });
@@ -99,9 +185,11 @@ const VisitorReportFilter = () => {
       const filteredA = alarmData.filter((a) => {
         const trig = dayjs(a.AlarmTriggered);
         return (
-          (selectedVisitors.length === 0 || selectedVisitors.includes(a.VisitorName)) &&
+          (selectedPersons.length === 0 ||
+            selectedPersons.includes(a.VisitorName) ||
+            selectedPersons.includes(a.MemberName)) &&
           (!areaValue || a.AreaName === areaValue) &&
-          (!host || a.HostName === host) &&
+          (!selectedHost || a.HostName === selectedHost) &&
           withinRange(trig)
         );
       });
@@ -144,6 +232,21 @@ const VisitorReportFilter = () => {
       });
     }
   }, [isTesting]);
+
+  const adaptTrackingFromApi = (apiData: any[]) => {
+  return apiData.map((r) => ({
+    Id: r.visitorId,
+    VisitorName: r.visitorName,
+    BuildingName: r.buildingName,
+    FloorName: r.floorName,
+    AreaName: r.areaName,
+    EnterTime: r.enterTime,
+    ExitTime: r.exitTime,
+    VisitorStatus: r.status ?? '-',
+    HostName: r.hostName ?? '-',
+    DurationInMinutes: r.durationInMinutes,
+  }));
+};
 
   return (
     <Box p={2}>
@@ -208,77 +311,76 @@ const VisitorReportFilter = () => {
 
         {/* Filter Options */}
         <Grid container spacing={1} alignItems="center">
-          {/* Visitor Name Autocomplete */}
+          {/* Person Name Autocomplete */}
           <Grid size={{ xs: 12, md: 4 }}>
             <Autocomplete
               multiple
-              options={dummyVisitors}
-              value={selectedVisitors}
-              onChange={(event, newValue) => {
-                setSelectedVisitors(newValue);
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Visitor (by name)"
-                  placeholder="Select visitors..."
-                />
+              options={personOptions}
+              value={selectedPersons}
+              onChange={(_, newValue) => setSelectedPersons(newValue)}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              getOptionLabel={(option) => option.name}
+              renderOption={(props, option) => (
+                <li {...props} key={`${option.type}-${option.id}`}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      width: '100%',
+                    }}
+                  >
+                    <Typography variant="body2">{option.name}</Typography>
+
+                    <Box sx={{ flexGrow: 1 }} />
+
+                    <Chip
+                      size="small"
+                      label={option.type === 'visitor' ? 'Visitor' : 'Member'}
+                      color={option.type === 'visitor' ? 'primary' : 'success'}
+                    />
+                  </Box>
+                </li>
               )}
               renderTags={(value, getTagProps) =>
                 value.map((option, index) => (
                   <Chip
-                    label={option}
-                    size="small"
                     {...getTagProps({ index })}
-                    key={option}
+                    key={option.id}
+                    label={`${option.name} (${option.type})`}
+                    size="small"
                   />
                 ))
               }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Person (Visitor / Member)"
+                  placeholder="Select person..."
+                />
+              )}
             />
           </Grid>
 
           <Grid size={{ xs: 12, md: 4 }}>
-            {isTesting ? (
-              <FormControl fullWidth>
-                <InputLabel>Area</InputLabel>
-                <Select
-                  label="Area"
-                  value={areaValue}
-                  onChange={(e) => setAreaValue(e.target.value)}
-                >
-                  <MenuItem value="">Select Area</MenuItem>
-                  {dummyAreas.map((area) => (
-                    <MenuItem key={area} value={area}>
-                      {area}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            ) : (
-              <Typography variant="body2" color="text.secondary">
-                <i>Real AutocompleteFilter will appear in production mode.</i>
-              </Typography>
-            )}
+            <AreaHierarchySelector
+              buildings={buildingData}
+              floors={floorData}
+              floorplans={floorplanData}
+              maskedAreas={areaData}
+              value={selectedArea}
+              onChange={setSelectedArea}
+            />
           </Grid>
 
           <Grid size={{ xs: 12, md: 4 }}>
-            <FormControl fullWidth>
-              <InputLabel>Host</InputLabel>
-              <Select label="Host" value={host} onChange={(e) => setHost(e.target.value)}>
-                <MenuItem value="">Select Host</MenuItem>
-                {isTesting
-                  ? ['Zygarde', 'Yveltal', 'Xerneas'].map((h) => (
-                      <MenuItem key={h} value={h}>
-                        {h}
-                      </MenuItem>
-                    ))
-                  : members.map((m: memberType) => (
-                      <MenuItem key={m.id} value={m.id}>
-                        {m.name}
-                      </MenuItem>
-                    ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              options={memberData}
+              value={selectedHost}
+              onChange={(_, newValue) => setSelectedHost(newValue)}
+              getOptionLabel={(option) => option.name}
+              renderInput={(params) => <TextField {...params} label="Host (Member)" />}
+              isOptionEqualToValue={(opt, val) => opt.id === val.id}
+            />
           </Grid>
         </Grid>
 
@@ -300,7 +402,7 @@ const VisitorReportFilter = () => {
               fullWidth
               variant="outlined"
               color="primary"
-              onClick={() => console.log('Saving report...')}
+              onClick={() => setOpenPresetDialog(true)}
               sx={{ height: 40 }}
             >
               Save Generate Report
@@ -308,6 +410,47 @@ const VisitorReportFilter = () => {
           </Grid>
         </Grid>
       </Card>
+      <Dialog
+        open={openPresetDialog}
+        onClose={() => setOpenPresetDialog(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Save Report Preset</DialogTitle>
+
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Preset Name"
+            fullWidth
+            value={presetName}
+            onChange={(e) => setPresetName(e.target.value)}
+            placeholder="e.g. Weekly Lobby Visitors"
+          />
+        </DialogContent>
+
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setOpenPresetDialog(false);
+              setPresetName('');
+            }}
+            color="inherit"
+          >
+            Cancel
+          </Button>
+
+          <Button
+            onClick={handleConfirmSavePreset}
+            variant="contained"
+            disabled={addMutation.isPending}
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <VisitorReportDialog
         open={openReport}
         onClose={() => setOpenReport(false)}

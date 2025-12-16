@@ -99,7 +99,7 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
   const currentData = isTracking ? sortedTracking : sortedAlarm;
 
   const headers = isTracking
-    ? ['Visitor', 'Area', 'Enter Time', 'Exit Time', 'Status', 'Host']
+    ? ['Visitor', 'Building', 'Floor', 'Area', 'Enter Time', 'Exit Time', 'Duration', 'Status', 'Host']
     : ['Visitor', 'Area', 'Triggered', 'Done', 'Status', 'Host', 'Category'];
 
   // 🧩 Helper: convert and download Excel
@@ -193,55 +193,52 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
   };
 
   // 🧩 Helper: export CSV (two files zipped together if needed)
-const handleExportCSV = () => {
-  if (trackingLogs.length === 0 && alarmLogs.length === 0) {
-    alert('No data available to export.');
-    return;
-  }
+  const handleExportCSV = () => {
+    if (trackingLogs.length === 0 && alarmLogs.length === 0) {
+      alert('No data available to export.');
+      return;
+    }
 
-  const toCsv = (data: any[]) => {
-    if (!data.length) return '';
-    const headers = Object.keys(data[0]);
-    const rows = data.map((row) =>
-      headers.map((h) => `"${(row[h] ?? '').toString().replace(/"/g, '""')}"`).join(','),
-    );
-    return [headers.join(','), ...rows].join('\n');
+    const toCsv = (data: any[]) => {
+      if (!data.length) return '';
+      const headers = Object.keys(data[0]);
+      const rows = data.map((row) =>
+        headers.map((h) => `"${(row[h] ?? '').toString().replace(/"/g, '""')}"`).join(','),
+      );
+      return [headers.join(','), ...rows].join('\n');
+    };
+
+    const trackingData = trackingLogs.map((t) => ({
+      Visitor: t.VisitorName,
+      Area: t.AreaName,
+      'Enter Time': formatDateTime(t.EnterTime),
+      'Exit Time': formatDateTime(t.ExitTime),
+      Status: t.VisitorStatus,
+      Host: t.HostName,
+    }));
+
+    const alarmData = alarmLogs.map((a) => ({
+      Visitor: a.VisitorName,
+      Area: a.AreaName,
+      'Alarm Triggered': formatDateTime(a.AlarmTriggered),
+      'Alarm Done': formatDateTime(a.AlarmDone),
+      Status: a.VisitorStatus,
+      Host: a.HostName,
+      Category: a.AlarmCategory,
+    }));
+
+    const trackingCsv = toCsv(trackingData);
+    const alarmCsv = toCsv(alarmData);
+
+    const combinedCsv =
+      '--- Tracking Logs ---\n' + trackingCsv + '\n\n--- Alarm Logs ---\n' + alarmCsv;
+
+    const blob = new Blob([combinedCsv], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const fileName = `VisitorReport_${new Date().toISOString().split('T')[0]}.csv`;
+    saveAs(blob, fileName);
   };
-
-  const trackingData = trackingLogs.map((t) => ({
-    Visitor: t.VisitorName,
-    Area: t.AreaName,
-    'Enter Time': formatDateTime(t.EnterTime),
-    'Exit Time': formatDateTime(t.ExitTime),
-    Status: t.VisitorStatus,
-    Host: t.HostName,
-  }));
-
-  const alarmData = alarmLogs.map((a) => ({
-    Visitor: a.VisitorName,
-    Area: a.AreaName,
-    'Alarm Triggered': formatDateTime(a.AlarmTriggered),
-    'Alarm Done': formatDateTime(a.AlarmDone),
-    Status: a.VisitorStatus,
-    Host: a.HostName,
-    Category: a.AlarmCategory,
-  }));
-
-  const trackingCsv = toCsv(trackingData);
-  const alarmCsv = toCsv(alarmData);
-
-  const combinedCsv =
-    '--- Tracking Logs ---\n' +
-    trackingCsv +
-    '\n\n--- Alarm Logs ---\n' +
-    alarmCsv;
-
-  const blob = new Blob([combinedCsv], {
-    type: 'text/csv;charset=utf-8;',
-  });
-  const fileName = `VisitorReport_${new Date().toISOString().split('T')[0]}.csv`;
-  saveAs(blob, fileName);
-};
 
   const computeExcelAnalytics = (trackingLogs: any[], alarmLogs: any[]) => {
     const countBy = (arr: any[], key: string) => {
@@ -303,6 +300,25 @@ const handleExportCSV = () => {
       blockByVisitor,
     };
   };
+
+  const formatDuration = (totalMinutes?: number | null) => {
+  if (totalMinutes == null || isNaN(totalMinutes)) return '-';
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = Math.floor(totalMinutes % 60);
+  const days = Math.floor(hours / 24);
+  const finalHours = hours % 24;
+
+  if(days > 0) {
+    return `${days}d ${finalHours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m`;
+  }
+
+  if (hours > 0) {
+    return `${hours}h ${minutes.toString().padStart(2, '0')}m`;
+  }
+
+  return `${minutes}m`;
+};
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl">
@@ -462,9 +478,12 @@ const handleExportCSV = () => {
                       {isTracking ? (
                         <>
                           <TableCell>{row.VisitorName}</TableCell>
+                          <TableCell>{row.BuildingName}</TableCell>
+                          <TableCell>{row.FloorName}</TableCell>
                           <TableCell>{row.AreaName}</TableCell>
                           <TableCell>{formatDateTime(row.EnterTime)}</TableCell>
                           <TableCell>{formatDateTime(row.ExitTime)}</TableCell>
+                          <TableCell>{formatDuration(row.DurationInMinutes)}</TableCell>
                           <TableCell>{row.VisitorStatus}</TableCell>
                           <TableCell>{row.HostName}</TableCell>
                         </>

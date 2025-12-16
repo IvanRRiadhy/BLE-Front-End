@@ -64,7 +64,7 @@ const AlarmContent = () => {
         setCurrentPerson(selectedVisitor);
         // Update filter for visitor
         dispatch(
-          UpdateFilter({ ...alarmTriggerFilter, filters: { visitorId: selectedVisitor.id } }),
+          UpdateFilter({ ...alarmTriggerFilter, Length: 0, filters: { visitorId: selectedVisitor.id } }),
         );
       } else if (type === 'Member' && selectedMember) {
         setCurrentPerson(selectedMember);

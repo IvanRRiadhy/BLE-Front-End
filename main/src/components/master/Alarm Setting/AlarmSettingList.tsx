@@ -42,6 +42,7 @@ import {
   ChangeActiveStatus,
   ChangePriorityStatus,
   editAlarmSetting,
+  fetchAlarmSetting,
 } from 'src/store/apps/alarmsetting/alarmSettings';
 import { useLocation, useNavigate } from 'react-router';
 
@@ -162,6 +163,7 @@ const AlarmSettingList = () => {
       const res = await dispatch(editAlarmSetting(updatedAlarm));
       if (res.type.endsWith('/fulfilled')) {
         await dispatch(fetchAlarmSettingsDT(alarmSettingFilter));
+        dispatch(fetchAlarmSetting());
         toast.success('Alarm status updated successfully');
       }
     } catch (error) {
@@ -183,6 +185,7 @@ const AlarmSettingList = () => {
       const res = await dispatch(editAlarmSetting(updatedAlarm));
       if (res.type.endsWith('/fulfilled')) {
         await dispatch(fetchAlarmSettingsDT(alarmSettingFilter));
+        dispatch(fetchAlarmSetting());
         toast.success('Alarm priority updated successfully');
       }
     } catch (error) {
@@ -203,6 +206,7 @@ const AlarmSettingList = () => {
       const res = await dispatch(editAlarmSetting(updatedAlarm));
       if (res.type.endsWith('/fulfilled')) {
         await dispatch(fetchAlarmSettingsDT(alarmSettingFilter));
+        dispatch(fetchAlarmSetting());
         toast.success('Alarm priority updated successfully');
       }
     } catch (error) {

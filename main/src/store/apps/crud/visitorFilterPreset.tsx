@@ -46,6 +46,7 @@ export type VisitorFilterPresetType = {
   buildingId: string | null;
   hostName: string | null;
   visitorId: string | null;
+  memberId: string | null;
 };
 
 interface StateType {
