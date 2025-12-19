@@ -19,6 +19,7 @@ export function useCardAccessList(filter: GetFilter) {
     queryFn: async () => {
       const response = await axiosServices.post(API_DT_URL, filter);
       const collection = response.data.collection;
+      // console.log("Card Access", collection)
       return {
         data: collection.data as CardAccessType[],
         draw: collection.draw,

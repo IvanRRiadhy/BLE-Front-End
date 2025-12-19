@@ -94,7 +94,8 @@ const Notifications = () => {
     'Unknown';
 
   const getStatusText = (status: string) => {
-    const s = actionStatus.find((x) => x.value === status);
+    const s = actionStatus.find((x) => x.value.toLowerCase() === status);
+    // console.log("Status:", status, s);
     if (!s) return 'Unknown';
     switch (status) {
       case 'Idle':
@@ -141,7 +142,7 @@ const Notifications = () => {
           alarmData.floorplanName ?? 'Unknown'
         }`,
         status: getStatusText(
-          alarmData.action?.toLowerCase() === 'idle' ? 'Idle' : alarmData.action ?? 'Idle',
+          alarmData.action?.toLowerCase(),
         ),
         priority: alarmData.priority || 'medium',
         priorityColor: getPriorityColor(alarmData.priority), // Use priority-based color

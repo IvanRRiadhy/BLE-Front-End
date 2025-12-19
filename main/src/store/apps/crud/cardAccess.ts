@@ -5,6 +5,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { MaskedAreaType } from "./maskedArea";
 import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
+import { defaultCardAccessFilter } from "../defaultForm";
 
 
 const API_DT_URL = "/api/CardAccess/filter/";
@@ -54,15 +55,7 @@ const initialState: StateType = {
     cardAccessAll: [],
     cardAccessTotalCount: 0,
     cardAccessFilteredCount: 0,
-    cardAccessFilter: {
-        Draw: 0,
-        Start: 0,
-        Length: 0,
-        SortColumn: '',
-        SortDir: 'asc',
-        SearchValue: '',
-        filters: {}
-    },
+    cardAccessFilter: defaultCardAccessFilter,
     isLoading: false,
     hasLoaded: false,
     selectedCardAccess: null

@@ -22,8 +22,11 @@ import {
 import { saveAs } from 'file-saver';
 import ExcelJS from 'exceljs';
 import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { TrackingCharts } from './TrackingCharts';
 import AlarmCharts from './AlarmCharts';
+import VisitorReportPdf from './VisitorReportPdf';
 
 export const captureChartAsImage = async (chartId: string): Promise<string | null> => {
   const el = document.getElementById(chartId);
@@ -99,8 +102,39 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
   const currentData = isTracking ? sortedTracking : sortedAlarm;
 
   const headers = isTracking
-    ? ['Visitor', 'Building', 'Floor', 'Area', 'Enter Time', 'Exit Time', 'Duration', 'Status', 'Host']
+    ? [
+        'Visitor',
+        'Building',
+        'Floor',
+        'Area',
+        'Enter Time',
+        'Exit Time',
+        'Duration',
+        'Status',
+        'Host',
+      ]
     : ['Visitor', 'Area', 'Triggered', 'Done', 'Status', 'Host', 'Category'];
+
+  // Capture charts
+  const chartIdsTracking = [
+    'chart-tracking-1',
+    'chart-tracking-2',
+    'chart-tracking-3',
+    'chart-tracking-6',
+  ];
+  const chartIdsAlarm = ['chart-alarm-1', 'chart-alarm-2', 'chart-alarm-4', 'chart-alarm-5'];
+
+  const mapTrackingRowForExcel = (r: any) => ({
+    VisitorName: r.VisitorName,
+    BuildingName: r.BuildingName,
+    FloorName: r.FloorName,
+    AreaName: r.AreaName,
+    EnterTime: formatDateTime(r.EnterTime),
+    ExitTime: formatDateTime(r.ExitTime),
+    DurationInMinutes: formatDuration(r.DurationInMinutes),
+    VisitorStatus: r.VisitorStatus,
+    HostName: r.HostName,
+  });
 
   // 🧩 Helper: convert and download Excel
   const handleExportExcel = async () => {
@@ -112,28 +146,23 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
       const trackingSheet = workbook.addWorksheet('Tracking Logs');
       const alarmSheet = workbook.addWorksheet('Alarm Logs');
 
-      // Capture charts
-      const chartIdsTracking = [
-        'chart-tracking-1',
-        'chart-tracking-2',
-        'chart-tracking-3',
-        'chart-tracking-6',
-      ];
-      const chartIdsAlarm = ['chart-alarm-1', 'chart-alarm-2', 'chart-alarm-4', 'chart-alarm-5'];
-
       const trackingImages = await Promise.all(chartIdsTracking.map(captureChartAsImage));
       const alarmImages = await Promise.all(chartIdsAlarm.map(captureChartAsImage));
       console.log('Captured chart images for Excel export.', trackingImages, alarmImages);
+
       // Add data table
       trackingSheet.columns = [
         { header: 'Visitor', key: 'VisitorName', width: 20 },
+        { header: 'Building', key: 'BuildingName', width: 20 },
+        { header: 'Floor', key: 'FloorName', width: 20 },
         { header: 'Area', key: 'AreaName', width: 20 },
         { header: 'Enter Time', key: 'EnterTime', width: 25 },
         { header: 'Exit Time', key: 'ExitTime', width: 25 },
+        { header: 'Duration', key: 'DurationInMinutes', width: 25 },
         { header: 'Status', key: 'VisitorStatus', width: 15 },
         { header: 'Host', key: 'HostName', width: 20 },
       ];
-      trackingLogs.forEach((r) => trackingSheet.addRow(r));
+      trackingLogs.map(mapTrackingRowForExcel).forEach((row) => trackingSheet.addRow(row));
 
       alarmSheet.columns = [
         { header: 'Visitor', key: 'VisitorName', width: 20 },
@@ -210,9 +239,12 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
 
     const trackingData = trackingLogs.map((t) => ({
       Visitor: t.VisitorName,
+      Building: t.BuildingName,
+      Floor: t.FloorName,
       Area: t.AreaName,
-      'Enter Time': formatDateTime(t.EnterTime),
-      'Exit Time': formatDateTime(t.ExitTime),
+      'Enter Time': t.EnterTime,
+      'Exit Time': t.ExitTime,
+      Duration: t.DurationInMinutes,
       Status: t.VisitorStatus,
       Host: t.HostName,
     }));
@@ -220,8 +252,8 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
     const alarmData = alarmLogs.map((a) => ({
       Visitor: a.VisitorName,
       Area: a.AreaName,
-      'Alarm Triggered': formatDateTime(a.AlarmTriggered),
-      'Alarm Done': formatDateTime(a.AlarmDone),
+      'Alarm Triggered': a.AlarmTriggered,
+      'Alarm Done': a.AlarmDone,
       Status: a.VisitorStatus,
       Host: a.HostName,
       Category: a.AlarmCategory,
@@ -238,6 +270,108 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
     });
     const fileName = `VisitorReport_${new Date().toISOString().split('T')[0]}.csv`;
     saveAs(blob, fileName);
+  };
+
+  const handleExportPDF = async () => {
+    await new Promise((r) => setTimeout(r, 800));
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    let y = 10;
+
+    // ======================
+    // TRACKING TABLE
+    // ======================
+    autoTable(pdf, {
+      startY: y,
+      head: [
+        [
+          'Visitor',
+          'Building',
+          'Floor',
+          'Area',
+          'Enter Time',
+          'Exit Time',
+          'Duration',
+          'Status',
+          'Host',
+        ],
+      ],
+      body: trackingLogs.map((r) => [
+        r.VisitorName,
+        r.BuildingName,
+        r.FloorName,
+        r.AreaName,
+        formatDateTime(r.EnterTime),
+        formatDateTime(r.ExitTime),
+        formatDuration(r.DurationInMinutes),
+        r.VisitorStatus,
+        r.HostName,
+      ]),
+    });
+
+    // Move Y below tracking table
+    y = (pdf as any).lastAutoTable.finalY + 10;
+
+    // ======================
+    // TRACKING CHARTS
+    // ======================
+    for (const id of chartIdsTracking) {
+      const img = await captureChartAsImage(id);
+      if (!img || !img.startsWith('data:image')) continue;
+
+      if (y > 260) {
+        pdf.addPage();
+        y = 10;
+      }
+
+      pdf.addImage(img, 'PNG', 10, y, pageWidth - 20, 70);
+      y += 80;
+    }
+
+    // New page before Alarm section
+    pdf.addPage();
+    y = 10;
+
+    // ======================
+    // ALARM TABLE
+    // ======================
+    autoTable(pdf, {
+      startY: y,
+      head: [['Visitor', 'Area', 'Triggered', 'Done', 'Status', 'Host', 'Category']],
+      body: alarmLogs.map((r) => [
+        r.VisitorName,
+        r.AreaName,
+        formatDateTime(r.AlarmTriggered),
+        formatDateTime(r.AlarmDone),
+        r.VisitorStatus,
+        r.HostName,
+        r.AlarmCategory,
+      ]),
+    });
+
+    y = (pdf as any).lastAutoTable.finalY + 10;
+
+    // ======================
+    // ALARM CHARTS
+    // ======================
+    for (const id of chartIdsAlarm) {
+      const img = await captureChartAsImage(id);
+      if (!img || !img.startsWith('data:image')) continue;
+
+      if (y > 260) {
+        pdf.addPage();
+        y = 10;
+      }
+
+      pdf.addImage(img, 'PNG', 10, y, pageWidth - 20, 70);
+      y += 80;
+    }
+    chartIdsTracking.forEach((id) => {
+      console.log(id, document.getElementById(id));
+    });
+    // Save file
+    pdf.save(`VisitorReport_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   const computeExcelAnalytics = (trackingLogs: any[], alarmLogs: any[]) => {
@@ -302,211 +436,217 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
   };
 
   const formatDuration = (totalMinutes?: number | null) => {
-  if (totalMinutes == null || isNaN(totalMinutes)) return '-';
+    if (totalMinutes == null || isNaN(totalMinutes)) return '-';
 
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = Math.floor(totalMinutes % 60);
-  const days = Math.floor(hours / 24);
-  const finalHours = hours % 24;
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = Math.floor(totalMinutes % 60);
+    const days = Math.floor(hours / 24);
+    const finalHours = hours % 24;
 
-  if(days > 0) {
-    return `${days}d ${finalHours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m`;
-  }
+    if (days > 0) {
+      return `${days}d ${finalHours.toString().padStart(2, '0')}h ${minutes
+        .toString()
+        .padStart(2, '0')}m`;
+    }
 
-  if (hours > 0) {
-    return `${hours}h ${minutes.toString().padStart(2, '0')}m`;
-  }
+    if (hours > 0) {
+      return `${hours}h ${minutes.toString().padStart(2, '0')}m`;
+    }
 
-  return `${minutes}m`;
-};
+    return `${minutes}m`;
+  };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl">
-      <Paper
-        sx={{
-          p: 3,
-          borderRadius: 0,
-          overflow: 'hidden',
-          boxShadow: 6,
-        }}
-      >
-        {/* Title + Action Buttons */}
-        <DialogTitle sx={{ p: 2, pb: 0 }}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            flexWrap="wrap"
-            gap={1}
-          >
-            <Typography variant="h4" fontWeight={700}>
-              Visitor Report
-            </Typography>
-            <Stack direction="row" spacing={1}>
-              <Button variant="outlined" size="small">
-                Print
-              </Button>
-              <Button variant="outlined" size="small">
-                PDF
-              </Button>
-              <Button variant="outlined" size="small" onClick={handleExportCSV}>
-                Export CSV
-              </Button>
-              <Button
-                variant="contained"
-                size="small"
-                color="primary"
-                onClick={handleExportExcel}
-                disabled={isExporting}
-                startIcon={
-                  isExporting ? (
-                    <CircularProgress color="inherit" size={16} thickness={5} />
-                  ) : undefined
-                }
-              >
-                {isExporting ? 'Exporting...' : 'Export Excel'}
-              </Button>
-            </Stack>
-          </Stack>
-        </DialogTitle>
-
-        {/* Tabs */}
-        <Box
+    <>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl">
+        <Paper
           sx={{
-            px: 2,
-            bgcolor: 'background.paper',
-            borderBottom: 1,
-            borderColor: 'divider',
-            position: 'sticky',
-            top: 0,
-            zIndex: 10,
-          }}
-        >
-          <Tabs
-            value={activeTab}
-            onChange={handleTabChange}
-            centered
-            textColor="primary"
-            indicatorColor="primary"
-            sx={{
-              '& .MuiTab-root': { textTransform: 'none', fontWeight: 600 },
-            }}
-          >
-            <Tab label="Tracking Logs" value="tracking" />
-            <Tab label="Alarm Logs" value="alarm" />
-          </Tabs>
-        </Box>
-
-        <Divider />
-        <Box
-          id="chart-capture-container"
-          sx={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '1200px',
-            backgroundColor: '#fff',
-            zIndex: -9999,
-            opacity: 0,
-          }}
-        >
-          <TrackingCharts trackingLogs={trackingLogs} />
-          <AlarmCharts alarmLogs={alarmLogs} />
-        </Box>
-        <DialogContent
-          sx={{
-            p: 0,
-            height: '75vh',
+            p: 3,
+            borderRadius: 0,
             overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
+            boxShadow: 6,
           }}
         >
-          {/* Scroll container around table only */}
+          {/* Title + Action Buttons */}
+          <DialogTitle sx={{ p: 2, pb: 0 }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              flexWrap="wrap"
+              gap={1}
+            >
+              <Typography variant="h4" fontWeight={700}>
+                Visitor Report
+              </Typography>
+              <Stack direction="row" spacing={1}>
+                <Button variant="outlined" size="small">
+                  Print
+                </Button>
+                <Button variant="outlined" size="small" onClick={handleExportPDF}>
+                  PDF
+                </Button>
+                <Button variant="outlined" size="small" onClick={handleExportCSV}>
+                  Export CSV
+                </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="primary"
+                  onClick={handleExportExcel}
+                  disabled={isExporting}
+                  startIcon={
+                    isExporting ? (
+                      <CircularProgress color="inherit" size={16} thickness={5} />
+                    ) : undefined
+                  }
+                >
+                  {isExporting ? 'Exporting...' : 'Export Excel'}
+                </Button>
+              </Stack>
+            </Stack>
+          </DialogTitle>
+
+          {/* Tabs */}
           <Box
             sx={{
-              flex: 1,
-              overflowY: 'auto',
-              bgcolor: 'background.default',
               px: 2,
-              pb: 2,
+              bgcolor: 'background.paper',
+              borderBottom: 1,
+              borderColor: 'divider',
+              position: 'sticky',
+              top: 0,
+              zIndex: 10,
             }}
           >
-            <Table stickyHeader>
-              <TableHead>
-                <TableRow>
-                  {headers.map((head) => (
-                    <TableCell
-                      key={head}
-                      sx={{
-                        backgroundColor: 'background.paper',
-                        fontWeight: 600,
-                        fontSize: 14,
-                        color: 'text.primary',
-                        position: 'sticky',
-                        top: 0,
-                        zIndex: 1,
-                        borderBottom: '2px solid',
-                        borderColor: 'divider',
-                      }}
-                    >
-                      {head}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {currentData.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={headers.length} align="center" sx={{ py: 3 }}>
-                      <Typography color="text.secondary">No data available.</Typography>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  currentData.map((row, i) => (
-                    <TableRow
-                      key={i}
-                      sx={{
-                        '&:nth-of-type(odd)': { backgroundColor: 'action.hover' },
-                        '&:hover': {
-                          backgroundColor: 'action.selected',
-                          cursor: 'pointer',
-                        },
-                      }}
-                    >
-                      {isTracking ? (
-                        <>
-                          <TableCell>{row.VisitorName}</TableCell>
-                          <TableCell>{row.BuildingName}</TableCell>
-                          <TableCell>{row.FloorName}</TableCell>
-                          <TableCell>{row.AreaName}</TableCell>
-                          <TableCell>{formatDateTime(row.EnterTime)}</TableCell>
-                          <TableCell>{formatDateTime(row.ExitTime)}</TableCell>
-                          <TableCell>{formatDuration(row.DurationInMinutes)}</TableCell>
-                          <TableCell>{row.VisitorStatus}</TableCell>
-                          <TableCell>{row.HostName}</TableCell>
-                        </>
-                      ) : (
-                        <>
-                          <TableCell>{row.VisitorName}</TableCell>
-                          <TableCell>{row.AreaName}</TableCell>
-                          <TableCell>{formatDateTime(row.AlarmTriggered)}</TableCell>
-                          <TableCell>{formatDateTime(row.AlarmDone)}</TableCell>
-                          <TableCell>{row.VisitorStatus}</TableCell>
-                          <TableCell>{row.HostName}</TableCell>
-                          <TableCell>{row.AlarmCategory}</TableCell>
-                        </>
-                      )}
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+            <Tabs
+              value={activeTab}
+              onChange={handleTabChange}
+              centered
+              textColor="primary"
+              indicatorColor="primary"
+              sx={{
+                '& .MuiTab-root': { textTransform: 'none', fontWeight: 600 },
+              }}
+            >
+              <Tab label="Tracking Logs" value="tracking" />
+              <Tab label="Alarm Logs" value="alarm" />
+            </Tabs>
           </Box>
-        </DialogContent>
-      </Paper>
-    </Dialog>
+
+          <Divider />
+          <Box
+            id="chart-capture-container"
+            sx={{
+              position: 'fixed',
+              top: 0,
+              left: '-2000px', // 👈 move off screen
+              width: '1200px',
+              backgroundColor: '#ffffff',
+              zIndex: 1,
+              opacity: 1, // 👈 MUST be visible
+              pointerEvents: 'none',
+            }}
+          >
+            <TrackingCharts trackingLogs={trackingLogs} />
+            <AlarmCharts alarmLogs={alarmLogs} />
+          </Box>
+
+          <DialogContent
+            sx={{
+              p: 0,
+              height: '75vh',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            {/* Scroll container around table only */}
+            <Box
+              sx={{
+                flex: 1,
+                overflowY: 'auto',
+                bgcolor: 'background.default',
+                px: 2,
+                pb: 2,
+              }}
+            >
+              <Table stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    {headers.map((head) => (
+                      <TableCell
+                        key={head}
+                        sx={{
+                          backgroundColor: 'background.paper',
+                          fontWeight: 600,
+                          fontSize: 14,
+                          color: 'text.primary',
+                          position: 'sticky',
+                          top: 0,
+                          zIndex: 1,
+                          borderBottom: '2px solid',
+                          borderColor: 'divider',
+                        }}
+                      >
+                        {head}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {currentData.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={headers.length} align="center" sx={{ py: 3 }}>
+                        <Typography color="text.secondary">No data available.</Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    currentData.map((row, i) => (
+                      <TableRow
+                        key={i}
+                        sx={{
+                          '&:nth-of-type(odd)': { backgroundColor: 'action.hover' },
+                          '&:hover': {
+                            backgroundColor: 'action.selected',
+                            cursor: 'pointer',
+                          },
+                        }}
+                      >
+                        {isTracking ? (
+                          <>
+                            <TableCell>{row.VisitorName}</TableCell>
+                            <TableCell>{row.BuildingName}</TableCell>
+                            <TableCell>{row.FloorName}</TableCell>
+                            <TableCell>{row.AreaName}</TableCell>
+                            <TableCell>{formatDateTime(row.EnterTime)}</TableCell>
+                            <TableCell>{formatDateTime(row.ExitTime)}</TableCell>
+                            <TableCell>{formatDuration(row.DurationInMinutes)}</TableCell>
+                            <TableCell>{row.VisitorStatus}</TableCell>
+                            <TableCell>{row.HostName}</TableCell>
+                          </>
+                        ) : (
+                          <>
+                            <TableCell>{row.VisitorName}</TableCell>
+                            <TableCell>{row.AreaName}</TableCell>
+                            <TableCell>{formatDateTime(row.AlarmTriggered)}</TableCell>
+                            <TableCell>{formatDateTime(row.AlarmDone)}</TableCell>
+                            <TableCell>{row.VisitorStatus}</TableCell>
+                            <TableCell>{row.HostName}</TableCell>
+                            <TableCell>{row.AlarmCategory}</TableCell>
+                          </>
+                        )}
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </Box>
+          </DialogContent>
+        </Paper>
+      </Dialog>
+    </>
   );
 };
 

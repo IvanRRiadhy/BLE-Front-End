@@ -13,10 +13,9 @@ const NewestTrack = () => {
   );
 
   // Gabungkan semua beacon
-  let allBeacons: any[] = [];
-  trackingTopics.forEach((topic) => {
-    allBeacons = [...allBeacons, ...beaconsByTopic[topic]];
-  });
+const allBeacons = trackingTopics.flatMap((topic) => 
+  Object.values(beaconsByTopic[topic] || {})
+);
 
   // Urutkan berdasarkan waktu (newest first)
   allBeacons.sort(

@@ -29,6 +29,7 @@ import {
 import { AlarmTriggerType, UpdateFilter } from 'src/store/apps/crud/alarmTrigger';
 import { actionStatus, actionStatusColormap } from 'src/types/crud/input';
 import toast from 'react-hot-toast';
+import TrackingPositionFloorView from '../trackingTransaction/Preview/TrackingPositionFloorView';
 dayjs.extend(duration);
 
 const AlarmContent = () => {
@@ -343,7 +344,10 @@ const AlarmContent = () => {
         Alarm Triggered
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={3} sx={{
+        maxHeight: '440px',
+        overflowY: 'auto',
+      }}>
         {alarmTriggerData.length === 0 && !isLoading && (
           <Typography>No alarm triggers found for this {personType?.toLowerCase()}.</Typography>
         )}
@@ -476,15 +480,49 @@ const AlarmContent = () => {
       </Grid>
       
       {/* ⚙️ Apply Action Dialog */}
-      <Dialog open={openActionDialog} onClose={handleCloseActionDialog} fullWidth maxWidth="sm">
-        <DialogTitle>Apply Action to Alarm</DialogTitle>
-        <DialogContent sx={{ mt: 1 }}>
+      <Dialog open={openActionDialog && selectedAlarmTrigger !== null} onClose={handleCloseActionDialog} fullWidth maxWidth="lg" >
+        <DialogTitle sx={{ mt: 1, p: 3 }}>Alarm Details</DialogTitle>
+        <DialogContent sx={{ mt: 1, p: 3 }}>
+          <Box
+        sx={{
+          width: '100%',
+          height: '40vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#f5f5f5',
+          borderTop: '1px solid #e0e0e0',
+          p: 2,
+          mb: 2,
+        }}
+      >
+        {selectedAlarmTrigger && (
+          <Box
+          sx={{
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            borderRadius: 2,
+            overflow: 'hidden',
+            boxShadow: 2,
+            backgroundColor: '#f5f5f5',
+          }}
+        >
+          <TrackingPositionFloorView
+            floorplanId={selectedAlarmTrigger.floorplan?.id ?? ''}
+            positionPxX={selectedAlarmTrigger.posX}
+            positionPxY={selectedAlarmTrigger.posY}
+            markerColor={selectedAlarmTrigger.isActive ? 'red' : selectedAlarmTrigger.alarmColor ?? 'yellow'}
+          />
+        </Box>
+        )}
+      </Box>
           {/* Alarm Info */}
           <Typography variant="body2" color="text.secondary" mb={1}>
-            Alarm DMAC:
+            Alarm Category:
           </Typography>
           <Typography variant="body1" fontWeight={600} mb={2}>
-            {selectedAlarmTrigger?.beaconId?.toUpperCase() || '-'}
+            {selectedAlarmTrigger?.alarmRecordStatus?.toUpperCase() || '-'}
           </Typography>
 
           {/* If alarm is inactive */}
@@ -556,7 +594,7 @@ const AlarmContent = () => {
           )}
         </DialogContent>
 
-        <DialogActions>
+        <DialogActions sx={{ p: 3 }}>
           <Button onClick={handleCloseActionDialog} color="error" variant="outlined">
             Close
           </Button>

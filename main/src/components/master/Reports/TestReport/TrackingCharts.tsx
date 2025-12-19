@@ -36,7 +36,7 @@ export const TrackingCharts = ({ trackingLogs }: { trackingLogs: any[] }) => {
     trackingLogs.forEach((t) => {
       const start = new Date(t.EnterTime).getTime();
       const end = new Date(t.ExitTime).getTime();
-      const minutes = (end - start) / 60000;
+      const minutes = t.DurationInMinutes;
       if (!map[t.AreaName]) map[t.AreaName] = [];
       map[t.AreaName].push(minutes);
     });

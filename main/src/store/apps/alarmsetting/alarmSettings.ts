@@ -41,6 +41,7 @@ export type AlarmSettingType = {
     isEnabled: boolean;
     alarmLevelPriority: "Low" | "Medium" | "High";
     alarmColor: string;
+    notifyIntervalSec: number;
 };
 
 interface StateType {

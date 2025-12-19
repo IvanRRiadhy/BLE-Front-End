@@ -57,9 +57,9 @@ const AlarmPositionPreviewDialog: React.FC<{ row: AlarmTriggerType; onClose: () 
         >
           <TrackingPositionFloorView
             floorplanId={row.floorplan?.id ?? ''}
-            positionPxX={row.posX}
-            positionPxY={row.posY}
-            markerColor={row.isActive ? 'red' : row.alarmColor ?? 'yellow'}
+            positionPxX={posX}
+            positionPxY={posY}
+            markerColor={row.isActive ? 'red' : alarmColor ?? 'yellow'}
           />
         </Box>
       </Box>

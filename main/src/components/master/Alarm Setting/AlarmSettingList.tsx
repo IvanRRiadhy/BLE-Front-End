@@ -45,13 +45,21 @@ import {
   fetchAlarmSetting,
 } from 'src/store/apps/alarmsetting/alarmSettings';
 import { useLocation, useNavigate } from 'react-router';
+import {
+  useAlarmCategoryList,
+  useEditAlarmCategory,
+} from 'src/hooks/AlarmSetting/useAlarmCategory';
+import { defaultAlarmSettingFilter } from 'src/store/apps/defaultForm';
 
 const columns = [
   { label: 'Alarm Type', field: 'AlarmCategory', sortAble: true },
   { label: 'Status', field: 'IsEnabled', sortAble: true },
   { label: 'Color', field: 'AlarmColor', sortAble: false },
   { label: 'Level Priority', field: 'AlarmLevelPriority', sortAble: true },
+  { label: 'Notification Intervals (sec)', field: 'NotifyIntervalSec', sortAble: true },
 ];
+
+const NOTIFY_INTERVAL_PRESETS = [5, 10, 15, 30, 45, 60, 90, 120];
 
 const SKELETON_ROWS = 5;
 
@@ -59,15 +67,16 @@ const AlarmSettingList = () => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const alarmSettings = useSelector((state: RootState) => state.AlarmSettingReducer.alarmSettings);
+  // const alarmSettings = useSelector((state: RootState) => state.AlarmSettingReducer.alarmSettings);
+
   const alarmSettingFilter = useSelector(
     (state: RootState) => state.AlarmSettingReducer.alarmSettingFilter,
   );
+  const { data: data, isLoading: queryLoading } = useAlarmCategoryList(alarmSettingFilter);
   const isLoading = useSelector((state: RootState) => state.AlarmSettingReducer.isLoading);
   const hasLoaded = useSelector((state: RootState) => state.AlarmSettingReducer.hasLoaded);
-  const alarmSettingTotalCount = useSelector(
-    (state: RootState) => state.AlarmSettingReducer.alarmSettingTotalCount,
-  );
+  const alarmSettings = data?.data || [];
+  const alarmSettingTotalCount = data?.recordsFiltered || 0;
 
   // Pagination State
   const page = Math.floor(alarmSettingFilter.Start / alarmSettingFilter.Length);
@@ -105,14 +114,13 @@ const AlarmSettingList = () => {
     }
   };
 
+  //Mutation
+  const editMutation = useEditAlarmCategory();
+
   // state for color picker dialog
   const [colorDialogOpen, setColorDialogOpen] = useState(false);
   const [selectedAlarm, setSelectedAlarm] = useState<AlarmSettingType | null>(null);
   const [tempColor, setTempColor] = useState<string>('');
-
-  useEffect(() => {
-    dispatch(fetchAlarmSettingsDT(alarmSettingFilter));
-  }, [dispatch, alarmSettingFilter]);
 
   const getRoute = (name: string): string => {
     const basePath = `${window.location.origin}${location.pathname}`;
@@ -144,12 +152,10 @@ const AlarmSettingList = () => {
     if (!selectedAlarm) return;
     const updated = { ...selectedAlarm, alarmColor: tempColor };
     try {
-      const res = await dispatch(editAlarmSetting(updated));
-      if (res.type.endsWith('/fulfilled')) {
-        await dispatch(fetchAlarmSettingsDT(alarmSettingFilter));
-        toast.success('Alarm color updated');
-        setColorDialogOpen(false);
-      }
+      await editMutation.mutateAsync(updated);
+
+      toast.success('Alarm color updated');
+      setColorDialogOpen(false);
     } catch (err) {
       toast.error('Failed to update color');
       console.error(err);
@@ -160,12 +166,8 @@ const AlarmSettingList = () => {
     const updatedAlarm = { ...alarm, isEnabled: !alarm.isEnabled };
     console.log('Toggle Status Clicked:', alarm, 'New Status:', updatedAlarm.isEnabled);
     try {
-      const res = await dispatch(editAlarmSetting(updatedAlarm));
-      if (res.type.endsWith('/fulfilled')) {
-        await dispatch(fetchAlarmSettingsDT(alarmSettingFilter));
-        dispatch(fetchAlarmSetting());
-        toast.success('Alarm status updated successfully');
-      }
+      await editMutation.mutateAsync(updatedAlarm);
+      toast.success('Alarm status updated successfully');
     } catch (error) {
       toast.error('Error updating alarm status');
       console.error('Error updating alarm status:', error);
@@ -182,12 +184,8 @@ const AlarmSettingList = () => {
     const updatedAlarm = { ...alarm, alarmLevelPriority: newPriority };
     console.log('Priority Up Clicked:', alarm, 'New Priority:', newPriority);
     try {
-      const res = await dispatch(editAlarmSetting(updatedAlarm));
-      if (res.type.endsWith('/fulfilled')) {
-        await dispatch(fetchAlarmSettingsDT(alarmSettingFilter));
-        dispatch(fetchAlarmSetting());
-        toast.success('Alarm priority updated successfully');
-      }
+      await editMutation.mutateAsync(updatedAlarm);
+      toast.success('Alarm priority updated successfully');
     } catch (error) {
       toast.error('Error updating alarm priority');
       console.error('Error updating alarm priority:', error);
@@ -203,15 +201,29 @@ const AlarmSettingList = () => {
     const updatedAlarm = { ...alarm, alarmLevelPriority: newPriority };
     console.log('Priority Down Clicked:', alarm, 'New Priority:', newPriority);
     try {
-      const res = await dispatch(editAlarmSetting(updatedAlarm));
-      if (res.type.endsWith('/fulfilled')) {
-        await dispatch(fetchAlarmSettingsDT(alarmSettingFilter));
-        dispatch(fetchAlarmSetting());
-        toast.success('Alarm priority updated successfully');
-      }
+      await editMutation.mutateAsync(updatedAlarm);
+      toast.success('Alarm priority updated successfully');
     } catch (error) {
       toast.error('Error updating alarm priority');
       console.error('Error updating alarm priority:', error);
+    }
+  };
+
+  // notification interval dialog
+  const [notifyDialogOpen, setNotifyDialogOpen] = useState(false);
+  const [tempNotifyInterval, setTempNotifyInterval] = useState<number | null>(null);
+
+  const handleApplyNotifyInterval = async () => {
+    if (!selectedAlarm || tempNotifyInterval === null) return;
+const updatedAlarm = { ...selectedAlarm, notifyIntervalSec: tempNotifyInterval };
+    try {
+      await editMutation.mutateAsync(updatedAlarm);
+
+      toast.success('Notification interval updated');
+      setNotifyDialogOpen(false);
+    } catch (err) {
+      toast.error('Failed to update notification interval');
+      console.error(err);
     }
   };
 
@@ -238,6 +250,9 @@ const AlarmSettingList = () => {
           </TableCell>
           <TableCell>
             <Skeleton variant="text" width={160} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={120} height={22} />
           </TableCell>
           <TableCell>
             <Skeleton variant="text" width={120} height={22} />
@@ -479,6 +494,40 @@ const AlarmSettingList = () => {
                               </Box>
                             )}
                           </TableCell>
+                          {/* Notification Interval */}
+                          <TableCell>
+                            {alarmSetting.isEnabled && (
+                              <Box
+                                display="inline-flex"
+                                alignItems="center"
+                                gap={1.5}
+                                sx={{
+                                  cursor: 'pointer',
+                                  px: 1.2,
+                                  py: 0.4,
+                                  borderRadius: 1,
+                                  border: '1px dashed',
+                                  borderColor: 'primary.main',
+                                  color: 'primary.main',
+                                  transition: 'all 0.2s ease',
+                                  '&:hover': {
+                                    backgroundColor: 'primary.main',
+                                    color: 'white',
+                                  },
+                                }}
+                                onClick={() => {
+                                  setSelectedAlarm(alarmSetting);
+                                  setTempNotifyInterval(alarmSetting.notifyIntervalSec ?? null);
+                                  setNotifyDialogOpen(true);
+                                }}
+                              >
+                                <Typography variant="h6" fontWeight={600}>
+                                  {alarmSetting.notifyIntervalSec}
+                                </Typography>
+                                <IconEdit size={18} />
+                              </Box>
+                            )}
+                          </TableCell>
 
                           <TableCell
                             sx={{
@@ -626,6 +675,96 @@ const AlarmSettingList = () => {
           <Button
             variant="contained"
             onClick={handleApplyColor}
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              px: 2.5,
+              background: 'linear-gradient(45deg, #355CFF, #00CFFF)',
+            }}
+          >
+            Apply Change
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Notification Interval Dialog */}
+      <Dialog
+        open={notifyDialogOpen}
+        onClose={() => setNotifyDialogOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            p: 1,
+            minWidth: 320,
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 600, textAlign: 'center', pb: 1 }}>
+          Notification Interval
+        </DialogTitle>
+
+        <DialogContent>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: 1.5,
+              p: 1,
+            }}
+          >
+            {NOTIFY_INTERVAL_PRESETS.map((sec) => {
+              const selected = tempNotifyInterval === sec;
+
+              return (
+                <Box
+                  key={sec}
+                  onClick={() => setTempNotifyInterval(sec)}
+                  sx={{
+                    py: 1,
+                    textAlign: 'center',
+                    borderRadius: 2,
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    border: selected ? '2px solid' : '1px solid',
+                    borderColor: selected ? 'primary.main' : 'divider',
+                    backgroundColor: selected ? 'primary.main' : 'transparent',
+                    color: selected ? 'white' : 'text.primary',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      backgroundColor: selected ? 'primary.main' : 'action.hover',
+                    },
+                  }}
+                >
+                  {sec}s
+                </Box>
+              );
+            })}
+          </Box>
+
+          {/* Selected preview */}
+          {tempNotifyInterval !== null && (
+            <Box mt={2} textAlign="center">
+              <Typography variant="body2" fontWeight={500}>
+                Selected: {tempNotifyInterval} seconds
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+
+        <DialogActions sx={{ justifyContent: 'center', p: 2 }}>
+          <Button
+            onClick={() => setNotifyDialogOpen(false)}
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              px: 2.5,
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            disabled={tempNotifyInterval === null}
+            onClick={handleApplyNotifyInterval}
             sx={{
               borderRadius: 2,
               textTransform: 'none',

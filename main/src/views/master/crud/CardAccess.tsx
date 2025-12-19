@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import CardAccessList from 'src/components/master/CRUD/cardAccess/CardAccessList';
 import AddEditCardAccess from 'src/components/master/CRUD/cardAccess/AddEditCardAccess';
 import CardAccessSearch from 'src/components/master/CRUD/cardAccess/CardAccess';
+import { useCardAccessStatus } from 'src/hooks/useCardAccess';
 
 interface cardType {
   icon?: string;
@@ -28,13 +29,13 @@ interface cardType {
 
 const drawerWidth = 320;
 
-const CardGroup = () => {
+const CardAccess = () => {
       const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
       const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
       const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
     
-      const cardAccessCount = useSelector((state: RootState) => state.CardAccessReducer.cardAccessTotalCount);
-      const hasLoaded = useSelector((state: RootState) => state.CardAccessReducer.hasLoaded);
+      const {filteredCount: cardAccessCount, hasLoaded} = useCardAccessStatus();
+      // const hasLoaded = useSelector((state: RootState) => state.CardAccessReducer.hasLoaded);
       const { t } = useTranslation();
       const topCards: cardType[] = [
         {
@@ -112,4 +113,4 @@ const CardGroup = () => {
         );
 }
 
-export default CardGroup
+export default CardAccess

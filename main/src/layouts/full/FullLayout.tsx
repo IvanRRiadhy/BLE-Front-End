@@ -232,7 +232,7 @@ const FullLayout: FC = () => {
                 </ScrollToTop>
               </Box>
             </Container>
-            <Customizer />
+            {/* <Customizer /> */}
           </Box>
           
         </PageWrapper>

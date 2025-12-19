@@ -30,6 +30,7 @@ import { CardAccessType } from 'src/store/apps/crud/cardAccess';
 import { defaultCardAccessForm } from 'src/store/apps/defaultForm';
 import AutocompleteFilter from 'src/layouts/full/horizontal/navbar/AutocompleteFilter';
 import { TimeBlockType, TimeGroupType } from 'src/store/apps/crud/timeGroup';
+import AreaHierarchySelector, { SelectedNode } from 'src/components/shared/AreaHierarchySelector';
 
 // React Query hooks
 import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
@@ -45,13 +46,14 @@ interface FormType {
 }
 
 const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
-  const dispatch: AppDispatch = useDispatch();
   const [open, setOpen] = React.useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = React.useState({
     ...defaultCardAccessForm,
     ...cardAccess,
   });
+  const [selectedAreaNode, setSelectedAreaNode] = useState<SelectedNode>(null);
+
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
 
   // React Query hooks for data fetching
@@ -98,7 +100,7 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
     setIsSaving(true);
     try {
       console.log('Data: ', formData);
-      
+
       if (type === 'edit') {
         await editMutation.mutateAsync(formData);
         toast.success('Card Access updated successfully');
@@ -106,7 +108,7 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
         await addMutation.mutateAsync(formData);
         toast.success('Card Access created successfully');
       }
-      
+
       handleClose();
     } catch (error) {
       console.error('Error saving Card Access:', error);
@@ -125,6 +127,41 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
     console.log('Input Change:', { id, name, value });
     setFormData((prev) => ({ ...prev, [id || name]: value }));
   };
+
+  // 1️⃣ Floorplans that actually have masked areas
+  const floorplanIdsWithArea = React.useMemo(
+    () => new Set(maskedAreas.map((ma) => ma.floorplanId)),
+    [maskedAreas],
+  );
+
+  // 2️⃣ Floors that have at least one valid floorplan
+  const floorIdsWithArea = React.useMemo(
+    () =>
+      new Set(floorplans.filter((fp) => floorplanIdsWithArea.has(fp.id)).map((fp) => fp.floorId)),
+    [floorplans, floorplanIdsWithArea],
+  );
+
+  // 3️⃣ Buildings that have at least one valid floor
+  const buildingIdsWithArea = React.useMemo(
+    () => new Set(floors.filter((f) => floorIdsWithArea.has(f.id)).map((f) => f.buildingId)),
+    [floors, floorIdsWithArea],
+  );
+
+  // 4️⃣ Final filtered data
+  const filteredFloorplans = React.useMemo(
+    () => floorplans.filter((fp) => floorplanIdsWithArea.has(fp.id)),
+    [floorplans, floorplanIdsWithArea],
+  );
+
+  const filteredFloors = React.useMemo(
+    () => floors.filter((f) => floorIdsWithArea.has(f.id)),
+    [floors, floorIdsWithArea],
+  );
+
+  const filteredBuildings = React.useMemo(
+    () => buildings.filter((b) => buildingIdsWithArea.has(b.id)),
+    [buildings, buildingIdsWithArea],
+  );
 
   return (
     <>
@@ -212,50 +249,27 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
               </Box>
               {formData.accessScope === 'Specific' && (
                 <>
-                  <Autocomplete
-                    multiple
-                    options={maskedAreas}
-                    getOptionLabel={(option: any) => option.name}
-                    filterSelectedOptions
-                    value={maskedAreas.filter((m) =>
-                      (formData.maskedAreaIds ?? []).includes(m.id),
-                    )}
-                    onChange={(_e, newValue) => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        maskedAreaIds: newValue.map((m: any) => m.id),
-                      }));
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        placeholder="Type area name..."
-                        variant="outlined"
-                        fullWidth
-                      />
-                    )}
-                    renderTags={() => null}
-                    renderOption={(props, option: any) => {
-                      const floor = floors.find((f) => f.id === option.floorId);
-                      const building = floor
-                        ? buildings.find((b) => b.id === floor.buildingId)
-                        : null;
-                      const floorplan = floorplans.find((fp) => fp.id === option.floorplanId);
+                  <AreaHierarchySelector
+                    buildings={filteredBuildings}
+                    floors={filteredFloors}
+                    floorplans={filteredFloorplans}
+                    maskedAreas={maskedAreas}
+                    value={selectedAreaNode}
+                    onChange={(node) => {
+                      // 🚫 Ignore anything except area
+                      if (!node || node.type !== 'area') return;
 
-                      return (
-                        <li {...props} key={option.id}>
-                          <Box>
-                            <Typography variant="body1" fontWeight={600}>
-                              {option.name}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {building?.name ?? 'Unknown Building'} &gt;{' '}
-                              {floor?.name ?? 'Unknown Floor'} &gt;{' '}
-                              {floorplan?.name ?? 'Unknown Floorplan'}
-                            </Typography>
-                          </Box>
-                        </li>
-                      );
+                      setSelectedAreaNode(null); // reset picker after select
+
+                      setFormData((prev) => {
+                        const exists = (prev.maskedAreaIds ?? []).includes(node.data.id);
+                        if (exists) return prev; // prevent duplicates
+
+                        return {
+                          ...prev,
+                          maskedAreaIds: [...(prev.maskedAreaIds ?? []), node.data.id],
+                        };
+                      });
                     }}
                   />
 
@@ -364,12 +378,7 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
                     <Box>
                       {option.timeBlocks?.length ? (
                         option.timeBlocks.map((tb) => (
-                          <Typography
-                            key={tb.id}
-                            variant="caption"
-                            display="block"
-                            color="inherit"
-                          >
+                          <Typography key={tb.id} variant="caption" display="block" color="inherit">
                             {tb.dayOfWeek} : {tb.startTime} - {tb.endTime}
                           </Typography>
                         ))
@@ -492,9 +501,7 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
                             onClick={() =>
                               setFormData((prev) => ({
                                 ...prev,
-                                timeGroupIds: (prev.timeGroupIds ?? []).filter(
-                                  (fid) => fid !== id,
-                                ),
+                                timeGroupIds: (prev.timeGroupIds ?? []).filter((fid) => fid !== id),
                               }))
                             }
                           >
@@ -510,11 +517,7 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
           </Grid>
         </DialogContent>
         <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
-          <Button
-            onClick={handleClose}
-            variant="outlined"
-            sx={{ fontSize: '1rem', py: 1, px: 3 }}
-          >
+          <Button onClick={handleClose} variant="outlined" sx={{ fontSize: '1rem', py: 1, px: 3 }}>
             Cancel
           </Button>
           <Button
@@ -523,7 +526,7 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
             sx={{ fontSize: '1rem', py: 1, px: 3 }}
             disabled={isSaving || addMutation.isPending || editMutation.isPending}
           >
-            {(isSaving || addMutation.isPending || editMutation.isPending) ? (
+            {isSaving || addMutation.isPending || editMutation.isPending ? (
               <CircularProgress size={20} color="inherit" />
             ) : (
               'Save'

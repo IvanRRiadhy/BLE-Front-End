@@ -18,8 +18,12 @@ export function useAlarmCategoryList(filter: GetFilter) {
     queryFn: async () => {
       const res = await axiosServices.post(`${API_URL}filter`, filter);
       const collection = res.data.collection;
+      const normalized: AlarmSettingType[] = collection.data.map((item: any) => ({
+        ...item,
+        isEnabled: item.isEnabled === 1,
+      }));
       return {
-        data: collection.data as AlarmSettingType[],
+        data: normalized,
         draw: collection.draw,
         recordsTotal: collection.recordsTotal,
         recordsFiltered: collection.recordsFiltered,
@@ -47,8 +51,13 @@ export function useEditAlarmCategory() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (AlarmCategory: Partial<AlarmSettingType>) => {
-      const { id, ...cleanData } = AlarmCategory;
-      const res = await axiosServices.put(`${API_URL}${id}`, cleanData);
+      const { id, remarks, alarmCategory, isEnabled, ...cleanData } = AlarmCategory;
+      const filteredData = {
+        ...cleanData,
+        isEnabled: isEnabled ? 1 : 0,
+      };
+
+      const res = await axiosServices.put(`${API_URL}${id?.toUpperCase()}`, filteredData);
       return res.data;
     },
     onSuccess: () => {

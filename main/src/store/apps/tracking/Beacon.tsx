@@ -54,6 +54,10 @@ interface StoredBeacon extends BeaconType {
 interface EntityCount {
   count: number;
   name: string;
+  persons: {  // Add this
+    visitor: string[];
+    member: string[];
+  };
 }
 
 interface CountingData {
@@ -240,14 +244,14 @@ export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
 export const fetchCountingData = () => (dispatch: AppDispatch) => {
   const countingTopic = 'tracking/counting'; // Adjust the topic as needed
   
-  console.log(`[MQTT] Subscribing to counting topic: ${countingTopic}`);
+  // console.log(`[MQTT] Subscribing to counting topic: ${countingTopic}`);
   
   const unsubscribe = startMQTTclient((data: any) => {
     try {
       // Parse the counting data
       const countingData = parseCountingData(data);
       
-      console.log(`[MQTT] Received counting data:`, countingData);
+      // console.log(`[MQTT] Received counting data:`, countingData);
       
       dispatch(UpdateCountingData(countingData));
     } catch (error) {
@@ -281,23 +285,27 @@ const parseEntityCounts = (entities: any): { [id: string]: EntityCount } => {
     Object.keys(entities).forEach(key => {
       const entity = entities[key];
       
+      // Create the EntityCount with persons
+      const entityCount: EntityCount = {
+        count: entity.count || 0,
+        name: entity.name || 'Unknown',
+        persons: {
+          visitor: entity.persons?.visitor || [],
+          member: entity.persons?.member || []
+        }
+      };
+      
       // Check if the key contains multiple IDs separated by commas
       if (key.includes(',')) {
         // Split by comma and create individual entries for each ID
         const ids = key.split(',').map(id => id.trim());
         
         ids.forEach(id => {
-          result[id] = {
-            count: entity.count || 0,
-            name: entity.name || 'Unknown'
-          };
+          result[id] = entityCount;
         });
       } else {
         // Single ID
-        result[key] = {
-          count: entity.count || 0,
-          name: entity.name || 'Unknown'
-        };
+        result[key] = entityCount;
       }
     });
   }
