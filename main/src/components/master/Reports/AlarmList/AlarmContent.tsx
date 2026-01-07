@@ -12,6 +12,7 @@ import {
   DialogContent,
   Button,
   DialogActions,
+  TextField,
 } from '@mui/material';
 import { BASE_URL } from 'src/utils/axios';
 import { VisitorType } from 'src/store/apps/crud/visitor';
@@ -41,7 +42,7 @@ const AlarmContent = () => {
   );
   const selectedVisitor = useSelector((state: RootState) => state.visitorReducer.selectedVisitor);
   const selectedMember = useSelector((state: RootState) => state.memberReducer.selectedMember);
-  
+
   const alarmTriggerFilter = useSelector(
     (state: RootState) => state.alarmTriggerReducer.alarmTriggerFilter,
   );
@@ -55,24 +56,26 @@ const AlarmContent = () => {
   useEffect(() => {
     if (selectedIntruder) {
       console.log('Selected intruder:', selectedIntruder);
-      
+
       // Determine person type from selectedIntruder
       const type = selectedIntruder.personType as 'Visitor' | 'Member';
       setPersonType(type);
-      
+
       // Set the current person based on type
       if (type === 'Visitor' && selectedVisitor) {
         setCurrentPerson(selectedVisitor);
         // Update filter for visitor
         dispatch(
-          UpdateFilter({ ...alarmTriggerFilter, Length: 0, filters: { visitorId: selectedVisitor.id } }),
+          UpdateFilter({
+            ...alarmTriggerFilter,
+            Length: 0,
+            filters: { visitorId: selectedVisitor.id },
+          }),
         );
       } else if (type === 'Member' && selectedMember) {
         setCurrentPerson(selectedMember);
         // Update filter for member
-        dispatch(
-          UpdateFilter({ ...alarmTriggerFilter, filters: { memberId: selectedMember.id } }),
-        );
+        dispatch(UpdateFilter({ ...alarmTriggerFilter, filters: { memberId: selectedMember.id } }));
       } else {
         setCurrentPerson(null);
       }
@@ -94,7 +97,7 @@ const AlarmContent = () => {
     display: 'block',
     maxWidth: '100%',
   };
-  
+
   const value = {
     fontWeight: 300,
     whiteSpace: 'nowrap',
@@ -108,6 +111,7 @@ const AlarmContent = () => {
   const [openActionDialog, setOpenActionDialog] = useState(false);
   const [selectedAction, setSelectedAction] = useState<string>('');
   const [selectedAlarmTrigger, setSelectedAlarmTrigger] = useState<AlarmTriggerType | null>(null);
+  const [investigateResult, setInvestigateResult] = useState<string>('');
 
   const handleOpenActionDialog = () => {
     setSelectedAction('');
@@ -132,11 +136,16 @@ const AlarmContent = () => {
       toast.error('Please select an action status');
       return;
     }
+    if( selectedAction === 'Investigated' && investigateResult.trim() === '') {
+      toast.error('Please provide investigation result');
+      return;
+    }
 
     try {
       const result = await assignActionMutation.mutateAsync({
         triggerId: selectedAlarmTrigger.id.toUpperCase(),
         actionStatus: selectedAction.toLowerCase(),
+        investigatedResult: investigateResult.trim() === '' ? null : investigateResult,
       });
 
       toast.success('Action dispatched successfully');
@@ -157,10 +166,12 @@ const AlarmContent = () => {
     return (
       <Box p={3} display="flex" flexDirection="column" alignItems="center">
         <Typography variant="h4">No {personType?.toLowerCase() || 'person'} selected</Typography>
-        <Typography variant="h6">Please select a {personType?.toLowerCase() || 'person'}</Typography>
+        <Typography variant="h6">
+          Please select a {personType?.toLowerCase() || 'person'}
+        </Typography>
       </Box>
     );
-    
+
   return (
     <Box p={3}>
       {/* ================= TOP SECTION ================== */}
@@ -196,7 +207,7 @@ const AlarmContent = () => {
             sx={{ fontWeight: 700, mt: 1 }}
           />
         </Box>
-        
+
         {/* ============ PERSON FIELDS ============ */}
         <Box flexGrow={1}>
           <Grid container spacing={2}>
@@ -263,23 +274,17 @@ const AlarmContent = () => {
 
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Typography sx={field}>District</Typography>
-                  <Typography sx={value}>
-                    {(currentPerson as VisitorType).districtName}
-                  </Typography>
+                  <Typography sx={value}>{(currentPerson as VisitorType).districtName}</Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Typography sx={field}>Identity Type</Typography>
-                  <Typography sx={value}>
-                    {(currentPerson as VisitorType).identityType}
-                  </Typography>
+                  <Typography sx={value}>{(currentPerson as VisitorType).identityType}</Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Typography sx={field}>Identity ID</Typography>
-                  <Typography sx={value}>
-                    {(currentPerson as VisitorType).identityId}
-                  </Typography>
+                  <Typography sx={value}>{(currentPerson as VisitorType).identityId}</Typography>
                 </Grid>
               </>
             )}
@@ -344,10 +349,14 @@ const AlarmContent = () => {
         Alarm Triggered
       </Typography>
 
-      <Grid container spacing={3} sx={{
-        maxHeight: '440px',
-        overflowY: 'auto',
-      }}>
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          maxHeight: '440px',
+          overflowY: 'auto',
+        }}
+      >
         {alarmTriggerData.length === 0 && !isLoading && (
           <Typography>No alarm triggers found for this {personType?.toLowerCase()}.</Typography>
         )}
@@ -357,7 +366,7 @@ const AlarmContent = () => {
             : alarmTrigger.floorplan?.floorplanImage
             ? `${BASE_URL}${alarmTrigger.floorplan.floorplanImage}`
             : null;
-            
+
           const lang = language === 'id' ? 'id' : 'en';
           const append = language === 'id' ? 'hingga' : 'to';
 
@@ -478,45 +487,54 @@ const AlarmContent = () => {
           );
         })}
       </Grid>
-      
+
       {/* ⚙️ Apply Action Dialog */}
-      <Dialog open={openActionDialog && selectedAlarmTrigger !== null} onClose={handleCloseActionDialog} fullWidth maxWidth="lg" >
+      <Dialog
+        open={openActionDialog && selectedAlarmTrigger !== null}
+        onClose={handleCloseActionDialog}
+        fullWidth
+        maxWidth="lg"
+      >
         <DialogTitle sx={{ mt: 1, p: 3 }}>Alarm Details</DialogTitle>
         <DialogContent sx={{ mt: 1, p: 3 }}>
           <Box
-        sx={{
-          width: '100%',
-          height: '40vh',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: '#f5f5f5',
-          borderTop: '1px solid #e0e0e0',
-          p: 2,
-          mb: 2,
-        }}
-      >
-        {selectedAlarmTrigger && (
-          <Box
-          sx={{
-            position: 'relative',
-            width: '100%',
-            height: '100%',
-            borderRadius: 2,
-            overflow: 'hidden',
-            boxShadow: 2,
-            backgroundColor: '#f5f5f5',
-          }}
-        >
-          <TrackingPositionFloorView
-            floorplanId={selectedAlarmTrigger.floorplan?.id ?? ''}
-            positionPxX={selectedAlarmTrigger.posX}
-            positionPxY={selectedAlarmTrigger.posY}
-            markerColor={selectedAlarmTrigger.isActive ? 'red' : selectedAlarmTrigger.alarmColor ?? 'yellow'}
-          />
-        </Box>
-        )}
-      </Box>
+            sx={{
+              width: '100%',
+              height: '40vh',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: '#f5f5f5',
+              borderTop: '1px solid #e0e0e0',
+              p: 2,
+              mb: 2,
+            }}
+          >
+            {selectedAlarmTrigger && (
+              <Box
+                sx={{
+                  position: 'relative',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  boxShadow: 2,
+                  backgroundColor: '#f5f5f5',
+                }}
+              >
+                <TrackingPositionFloorView
+                  floorplanId={selectedAlarmTrigger.floorplan?.id ?? ''}
+                  positionPxX={selectedAlarmTrigger.posX}
+                  positionPxY={selectedAlarmTrigger.posY}
+                  markerColor={
+                    selectedAlarmTrigger.isActive
+                      ? 'red'
+                      : selectedAlarmTrigger.alarmColor ?? 'yellow'
+                  }
+                />
+              </Box>
+            )}
+          </Box>
           {/* Alarm Info */}
           <Typography variant="body2" color="text.secondary" mb={1}>
             Alarm Category:
@@ -592,6 +610,22 @@ const AlarmContent = () => {
               </Box>
             </>
           )}
+
+          {/* Investigate Result */}
+          {selectedAction.toLowerCase() === 'done' && selectedAlarmTrigger?.isActive && (
+            <Box mt={3}>
+              <Typography variant="subtitle2" color="text.secondary" mb={1}>
+                Investigate Result
+              </Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                value={investigateResult}
+                onChange={(e) => setInvestigateResult(e.target.value)}
+              />
+            </Box>
+          )}
         </DialogContent>
 
         <DialogActions sx={{ p: 3 }}>
@@ -605,7 +639,12 @@ const AlarmContent = () => {
               onClick={handleApplyAction}
               color="primary"
               variant="contained"
-              disabled={!selectedAction || !selectedAlarmTrigger || assignActionMutation.isPending}
+              disabled={
+                !selectedAction ||
+                !selectedAlarmTrigger ||
+                assignActionMutation.isPending ||
+                (selectedAction.toLowerCase() === 'done' && investigateResult.trim() === '')
+              }
             >
               {assignActionMutation.isPending ? 'Applying...' : 'Apply Action'}
             </Button>

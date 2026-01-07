@@ -288,7 +288,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                 error={!!formErrors.floorX}
                 helperText={formErrors.floorX}
               />
-              <CustomFormLabel htmlFor="Engine-id">Engine</CustomFormLabel>
+              {/* <CustomFormLabel htmlFor="Engine-id">Engine</CustomFormLabel>
               <CustomAutocomplete
                 label="Engine"
                 options={engineOptions}
@@ -298,7 +298,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                 isOptionEqualToValue={(a, b) => a.id === b.id}
                 loading={engineLoading}
                 sx={{ width: '100%' }}
-              />
+              /> */}
             </Grid>
             <Grid size={{ lg: 6, md: 12, sm: 12 }}>
               {/* <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel> */}

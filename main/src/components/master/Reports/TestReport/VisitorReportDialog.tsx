@@ -111,9 +111,9 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
         'Exit Time',
         'Duration',
         'Status',
-        'Host',
+        // 'Host',
       ]
-    : ['Visitor', 'Area', 'Triggered', 'Done', 'Status', 'Host', 'Category'];
+    : ['Visitor', 'Building', 'Floor',  'Area', 'Triggered', 'Done', 'Handle Duration',  'Status', 'Category'];
 
   // Capture charts
   const chartIdsTracking = [
@@ -160,17 +160,20 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
         { header: 'Exit Time', key: 'ExitTime', width: 25 },
         { header: 'Duration', key: 'DurationInMinutes', width: 25 },
         { header: 'Status', key: 'VisitorStatus', width: 15 },
-        { header: 'Host', key: 'HostName', width: 20 },
+        // { header: 'Host', key: 'HostName', width: 20 },
       ];
       trackingLogs.map(mapTrackingRowForExcel).forEach((row) => trackingSheet.addRow(row));
 
       alarmSheet.columns = [
         { header: 'Visitor', key: 'VisitorName', width: 20 },
+        { header: 'Building', key: 'BuildingName', width: 20 },
+        { header: 'Floor', key: 'FloorName', width: 20 },
         { header: 'Area', key: 'AreaName', width: 20 },
         { header: 'Triggered', key: 'AlarmTriggered', width: 25 },
         { header: 'Done', key: 'AlarmDone', width: 25 },
+        { header: 'Duration', key: 'HandleDuration', width: 25 },
         { header: 'Status', key: 'VisitorStatus', width: 15 },
-        { header: 'Host', key: 'HostName', width: 20 },
+        // { header: 'Host', key: 'HostName', width: 20 },
         { header: 'Category', key: 'AlarmCategory', width: 20 },
       ];
       alarmLogs.forEach((r) => alarmSheet.addRow(r));
@@ -246,16 +249,19 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
       'Exit Time': t.ExitTime,
       Duration: t.DurationInMinutes,
       Status: t.VisitorStatus,
-      Host: t.HostName,
+      // Host: t.HostName,
     }));
 
     const alarmData = alarmLogs.map((a) => ({
       Visitor: a.VisitorName,
+      Building: a.BuildingName,
+      Floor: a.FloorName,
       Area: a.AreaName,
       'Alarm Triggered': a.AlarmTriggered,
       'Alarm Done': a.AlarmDone,
+      Duration: a.HandleDuration,
       Status: a.VisitorStatus,
-      Host: a.HostName,
+      // Host: a.HostName,
       Category: a.AlarmCategory,
     }));
 
@@ -294,7 +300,6 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
           'Exit Time',
           'Duration',
           'Status',
-          'Host',
         ],
       ],
       body: trackingLogs.map((r) => [
@@ -306,7 +311,6 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
         formatDateTime(r.ExitTime),
         formatDuration(r.DurationInMinutes),
         r.VisitorStatus,
-        r.HostName,
       ]),
     });
 
@@ -341,11 +345,13 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
       head: [['Visitor', 'Area', 'Triggered', 'Done', 'Status', 'Host', 'Category']],
       body: alarmLogs.map((r) => [
         r.VisitorName,
+        r.BuildingName,
+        r.FloorName,
         r.AreaName,
         formatDateTime(r.AlarmTriggered),
         formatDateTime(r.AlarmDone),
+        r.HandleDuration,
         r.VisitorStatus,
-        r.HostName,
         r.AlarmCategory,
       ]),
     });
@@ -436,8 +442,9 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
   };
 
   const formatDuration = (totalMinutes?: number | null) => {
+// console.log('Formatting duration for minutes:', totalMinutes);
     if (totalMinutes == null || isNaN(totalMinutes)) return '-';
-
+    
     const hours = Math.floor(totalMinutes / 60);
     const minutes = Math.floor(totalMinutes % 60);
     const days = Math.floor(hours / 24);
@@ -629,11 +636,13 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
                         ) : (
                           <>
                             <TableCell>{row.VisitorName}</TableCell>
+                            <TableCell>{row.BuildingName}</TableCell>
+                            <TableCell>{row.FloorName}</TableCell>
                             <TableCell>{row.AreaName}</TableCell>
                             <TableCell>{formatDateTime(row.AlarmTriggered)}</TableCell>
                             <TableCell>{formatDateTime(row.AlarmDone)}</TableCell>
+                            <TableCell>{formatDuration(row.HandleDuration)}</TableCell>
                             <TableCell>{row.VisitorStatus}</TableCell>
-                            <TableCell>{row.HostName}</TableCell>
                             <TableCell>{row.AlarmCategory}</TableCell>
                           </>
                         )}

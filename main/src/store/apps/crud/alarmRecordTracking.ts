@@ -11,6 +11,7 @@ import { AlarmTriggerType } from "./alarmTrigger";
 import { memberType } from "./member";
 import { BASE_URL } from "../../../utils/axios";
 
+const API_REPORT_URL = '/api/alarm-record/event-log';
 const API_URL = '/api/AlarmRecordTracking/';
 const API_DT_URL = '/api/AlarmRecordTracking/filter/';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -30,6 +31,16 @@ export type GetAlarmRecordResponse = {
         recordsFiltered : number;
     };
 };
+export type NewGetFilter = {
+    TimeReport: "daily" | "weekly" | "monthly" | "yearly" | "custom";
+    buildingId: string | null;
+    floorId: string | null;
+    floorplanId: string | null;
+    areaId: string | null;
+    visitorId: string | null;
+    from: string | null;
+    to: string | null;
+}
 export type GetFilter = {
         Draw: number,
     Start: number,
@@ -52,6 +63,33 @@ export type GetFilter = {
     }
 }
 
+export type NewAlarmType = {
+  visitorId: string;
+  visitorName: string;
+
+  buildingId: string;
+  buildingName: string;
+
+  floorId: string;
+  floorName: string;
+
+  floorplanId: string;
+  floorplanName: string;
+
+  alarmStatus: string;
+  actionStatus: string;
+
+  investigatedResult: string | null;
+  triggeredAt: string;           // ISO datetime
+  doneAt: string | null;         // ISO datetime | null
+  lastNotifiedAt: string | null; // ISO datetime | null
+
+  assignedSecurityName: string | null;
+  handleDurationMinutes: number | null;
+
+  isActive: boolean;
+
+};
 
 export interface AlarmType {
     id: string;
@@ -191,6 +229,19 @@ export const {
     GetAlarms,GetAllAlarms, SelectAlarm, SearchAlarm, UpdateFilter
 } = AlarmSlice.actions;
 
+
+export const fetchEventLogs = createAsyncThunk(
+    'alarmRecordTrackings/fetchEventLogs',
+    async (filter: any, thunkAPI) => {
+        const res = await retryUntilSuccess(() => axiosServices.post(`${API_REPORT_URL}`, filter), {
+      signal: thunkAPI.signal,
+      timeoutMs: 2 * 60 * 1000,
+      minDelay: 500,
+      maxDelay: 8000,
+    });
+        return res.data;
+    }
+)
 
 export const fetchAlarm = () => async (dispatch: AppDispatch) => {
     try{

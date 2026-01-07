@@ -32,8 +32,8 @@ const MotionForm = motion(
   }),
 );
 
-const ADMIN_API_URL = '/api/Auth/login/'; // existing
-const VISITOR_API_URL = '/api/Auth/login/'; // TODO: set your actual visitor endpoint
+const ADMIN_API_URL = '/api/Auth/login'; // existing
+const VISITOR_API_URL = '/api/Auth/login'; // TODO: set your actual visitor endpoint
 
 type TabKey = 'admin' | 'visitor';
 

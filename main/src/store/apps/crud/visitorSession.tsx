@@ -17,13 +17,13 @@ export interface EventTypesFilter {
 }
 
 export type GetFilter = {
-  TimeRange: string;
+  TimeReport: string;
   buildingId: string | null;
   floorId: string | null;
   floorplanId: string | null;
   areaId: string | null;
   visitorId: string | null;
-  eventTypes: EventTypesFilter;
+  // eventTypes: EventTypesFilter;
 };
 
 export type GetVisitorSession = {
@@ -87,18 +87,18 @@ const initialState: StateType = {
   visitorSessionTotalCount: 0,
   visitorSessionFilteredCount: 0,
   visitorSessionFilter: {
-    TimeRange: 'daily',
+    TimeReport: 'daily',
     buildingId: null,
     floorId: null,
     floorplanId: null,
     areaId: null,
     visitorId: "",
-    eventTypes: {
-      all: true,
-      accessTracking: true,
-      alarm: true,
-      alarmSubTypes: {},
-    },
+    // eventTypes: {
+    //   all: true,
+    //   accessTracking: true,
+    //   alarm: true,
+    //   alarmSubTypes: {},
+    // },
   },
   isLoading: false,
   hasLoaded: false,

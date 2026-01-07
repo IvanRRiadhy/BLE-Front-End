@@ -193,7 +193,7 @@ const InvestigateFilter = () => {
     if (!investigateFilter) return;
 
     // Time Range
-    setTimeRange(investigateFilter.TimeRange as TimeRangeKey);
+    setTimeRange(investigateFilter.TimeReport as TimeRangeKey);
 
     // Visitor
     if (investigateFilter.visitorId) {
@@ -217,36 +217,36 @@ const InvestigateFilter = () => {
     }
 
     // Event Type Filter
-    if (investigateFilter.eventTypes) {
-      const { all, accessTracking, alarm } = investigateFilter.eventTypes;
+    // if (investigateFilter.eventTypes) {
+    //   const { all, accessTracking, alarm } = investigateFilter.eventTypes;
 
-      if (all === true || (accessTracking && alarm)) {
-        setEventTypeFilter('both');
-      } else if (accessTracking && !alarm) {
-        setEventTypeFilter('tracking');
-      } else if (!accessTracking && alarm) {
-        setEventTypeFilter('alarm');
-      } else {
-        setEventTypeFilter('both');
-      }
+    //   if (all === true || (accessTracking && alarm)) {
+    //     setEventTypeFilter('both');
+    //   } else if (accessTracking && !alarm) {
+    //     setEventTypeFilter('tracking');
+    //   } else if (!accessTracking && alarm) {
+    //     setEventTypeFilter('alarm');
+    //   } else {
+    //     setEventTypeFilter('both');
+    //   }
 
-      // Load alarm types if they exist in filter
-      if (investigateFilter.eventTypes.alarmSubTypes) {
-        // Filter out any alarm sub-types that are not in activeAlarmTypes
-        const filteredAlarmSubTypes = { ...investigateFilter.eventTypes.alarmSubTypes };
-        Object.keys(filteredAlarmSubTypes).forEach((key) => {
-          if (!activeAlarmTypes.includes(key)) {
-            delete filteredAlarmSubTypes[key];
-          }
-        });
-        setSelectedAlarmTypes(filteredAlarmSubTypes);
-      }
+    //   // Load alarm types if they exist in filter
+    //   if (investigateFilter.eventTypes.alarmSubTypes) {
+    //     // Filter out any alarm sub-types that are not in activeAlarmTypes
+    //     const filteredAlarmSubTypes = { ...investigateFilter.eventTypes.alarmSubTypes };
+    //     Object.keys(filteredAlarmSubTypes).forEach((key) => {
+    //       if (!activeAlarmTypes.includes(key)) {
+    //         delete filteredAlarmSubTypes[key];
+    //       }
+    //     });
+    //     setSelectedAlarmTypes(filteredAlarmSubTypes);
+    //   }
 
-      // Expand alarm types if alarm is selected
-      if (alarm) {
-        setAlarmTypesExpanded(true);
-      }
-    }
+    //   // Expand alarm types if alarm is selected
+    //   if (alarm) {
+    //     setAlarmTypesExpanded(true);
+    //   }
+    // }
   }, [
     investigateFilter,
     visitorData,
@@ -471,13 +471,13 @@ const InvestigateFilter = () => {
     };
 
     const finalFilter = {
-      TimeRange: timeRange,
+      TimeReport: timeRange,
       visitorId: selectedVisitor?.id || null,
       buildingId,
       floorId,
       floorplanId,
       areaId,
-      eventTypes,
+      // eventTypes,
     };
 
     if (selectedVisitor) {

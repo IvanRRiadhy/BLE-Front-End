@@ -47,6 +47,8 @@ import { useAllVisitor } from 'src/hooks/useVisitor';
 import toast from 'react-hot-toast';
 import { useAllMembers } from 'src/hooks/useMember';
 import VisitorReportDialog from './VisitorReportDialog';
+import { useAlarmLog } from 'src/hooks/useAlarmRecord';
+import { NewGetFilter } from 'src/store/apps/crud/alarmRecordTracking';
 
 interface VisitorReportFilterPresetProps {
   onApplyPreset: (preset: VisitorFilterPresetType) => void;
@@ -58,6 +60,43 @@ type PersonOption = {
   name: string;
   type: 'visitor' | 'member';
 };
+
+type AlarmLogFilter = {
+  TimeReport: 'daily' | 'weekly' | 'monthly';
+  buildingId: string | null;
+  floorId: string | null;
+  floorplanId: string | null;
+  areaId: string | null;
+  visitorId: string | null;
+  from?: string;
+  to?: string;
+};
+
+export function mapPresetToAlarmLogFilter(
+  preset: VisitorFilterPresetType
+): NewGetFilter {
+  const filter: NewGetFilter = {
+    TimeReport: preset.timeRange.toLowerCase() as NewGetFilter['TimeReport'],
+    buildingId: preset.buildingId ?? null,
+    floorId: preset.floorId ?? null,
+    floorplanId: preset.floorplanId ?? null,
+    areaId: preset.areaId ?? null,
+    visitorId: preset.visitorId ?? null,
+    from: null,
+    to: null,
+  };
+
+  if (preset.timeRange === 'Custom') {
+    if (preset.fromDate) {
+      filter.from = new Date(preset.fromDate).toISOString();
+    }
+    if (preset.toDate) {
+      filter.to = new Date(preset.toDate).toISOString();
+    }
+  }
+
+  return filter;
+}
 
 const VisitorReportFilterPreset = ({
   onApplyPreset,
@@ -92,9 +131,12 @@ const VisitorReportFilterPreset = ({
 
   const [openReport, setOpenReport] = useState(false);
   const [apiTrackingData, setApiTrackingData] = useState<any[]>([]);
+  const [apiAlarmData, setApiAlarmData] = useState<any[]>([]);
+
 
   const deleteMutation = useDeleteVisitorFilterPreset();
   const applyMutation = useApplyVisitorFilterPreset();
+  const alarmLogMutation = useAlarmLog();
 
   const filteredPresets = presets?.filter((preset) =>
     preset.name.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -148,10 +190,14 @@ const VisitorReportFilterPreset = ({
       toast.error('Please select a filter preset first');
       return;
     }
-
+    console.log('Generating report with preset: ', selectedPreset);
     try {
       const result = await applyMutation.mutateAsync(selectedPreset.id);
+      const alarmFilter = mapPresetToAlarmLogFilter(selectedPreset);
+      const alarmLog = await alarmLogMutation.mutateAsync(alarmFilter);
+      console.log('Fetched Alarm Log for Report:', alarmLog);
       setApiTrackingData(result.data.data);
+      setApiAlarmData((alarmLog));
       // toast.success(`Applied preset: ${selectedPreset.name}`);
       // console.log('Visitor filter preset applied successfully: ', result.data);
       setOpenReport(true);
@@ -197,6 +243,22 @@ const VisitorReportFilterPreset = ({
       DurationInMinutes: r.durationInMinutes,
     }));
   };
+
+  const adaptAlarmFromApi = (apiData: any[]) => {
+    // console.log('Adapting Alarm Data from API:', apiData);
+  return apiData.map((r) => ({
+    VisitorName: r.visitorName ?? '-',
+    BuildingName: r.buildingName ?? '-',
+    FloorName: r.floorName ?? '-',
+    AreaName: r.floorplanName ?? '-', // or masked area if available later
+    AlarmTriggered: r.triggeredAt,
+    AlarmDone: r.doneAt,
+    HandleDuration: r.handleDurationMinutes,
+    VisitorStatus: r.actionStatus ?? '-',
+    HostName: '-', // explicitly excluded as you requested
+    AlarmCategory: r.alarmStatus,
+  }));
+};
 
   return (
     <>
@@ -358,7 +420,7 @@ const VisitorReportFilterPreset = ({
                             InputLabelProps={{ shrink: true }}
                             value={
                               selectedPreset.timeRange === 'Custom'
-                                ? selectedPreset.startTime || ''
+                                ? selectedPreset.fromDate || ''
                                 : ''
                             }
                             disabled={selectedPreset.timeRange !== 'Custom'}
@@ -375,7 +437,7 @@ const VisitorReportFilterPreset = ({
                             InputLabelProps={{ shrink: true }}
                             value={
                               selectedPreset.timeRange === 'Custom'
-                                ? selectedPreset.endTime || ''
+                                ? selectedPreset.toDate || ''
                                 : ''
                             }
                             disabled={selectedPreset.timeRange !== 'Custom'}
@@ -514,7 +576,7 @@ const VisitorReportFilterPreset = ({
         open={openReport}
         onClose={() => setOpenReport(false)}
         trackingLogs={adaptTrackingFromApi(apiTrackingData)}
-        alarmLogs={[]}
+        alarmLogs={adaptAlarmFromApi(apiAlarmData)}
       />
     </>
   );

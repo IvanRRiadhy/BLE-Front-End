@@ -89,33 +89,33 @@ const CardList = () => {
 
   useEffect(() => {
     dispatch(UpdateFilter(defaultCardFilter));
-    try {
-      setLoading(true);
-      dispatch(fetchCardDT(defaultCardFilter));
-    } catch (error) {
-      console.log(error);
-    }
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
+    // try {
+    //   setLoading(true);
+    //   dispatch(fetchCardDT(defaultCardFilter));
+    // } catch (error) {
+    //   console.log(error);
+    // }
+    // setTimeout(() => {
+    //   setLoading(false);
+    // }, 500);
   }, [dispatch]);
 
-  useEffect(() => {
-    const prevFilter = prevFilterRef.current;
-    const isStartOrLengthChanged =
-      prevFilter.Start !== cardFilter.Start || prevFilter.Length !== cardFilter.Length;
-    if (isStartOrLengthChanged) {
-      setLoading(true);
-    }
-    dispatch(fetchCardDT(cardFilter)).finally(() => {
-      if (isStartOrLengthChanged) {
-        setTimeout(() => {
-          setLoading(false);
-        }, 500);
-      }
-    });
-    prevFilterRef.current = cardFilter;
-  }, [cardFilter, dispatch]);
+  // useEffect(() => {
+  //   const prevFilter = prevFilterRef.current;
+  //   const isStartOrLengthChanged =
+  //     prevFilter.Start !== cardFilter.Start || prevFilter.Length !== cardFilter.Length;
+  //   if (isStartOrLengthChanged) {
+  //     setLoading(true);
+  //   }
+  //   dispatch(fetchCardDT(cardFilter)).finally(() => {
+  //     if (isStartOrLengthChanged) {
+  //       setTimeout(() => {
+  //         setLoading(false);
+  //       }, 500);
+  //     }
+  //   });
+  //   prevFilterRef.current = cardFilter;
+  // }, [cardFilter, dispatch]);
 
   //Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

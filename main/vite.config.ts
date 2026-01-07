@@ -8,7 +8,7 @@ export default defineConfig({
   base: '/',
   server: {
     host: true,
-    port: 1000,
+    port: 3000,
     allowedHosts:[
       'memphis-existing-decent-engineering.trycloudflare.com',
       '.trycloudflare.com',

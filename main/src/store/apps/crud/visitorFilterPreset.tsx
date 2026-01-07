@@ -38,8 +38,8 @@ export type VisitorFilterPresetType = {
   id: string;
   name: string;
   timeRange: string;
-  startTime: string | null;
-  endTime: string | null;
+  fromDate: string | null;
+  toDate: string | null;
   areaId: string | null;
   floorplanId: string | null;
   floorId: string | null;

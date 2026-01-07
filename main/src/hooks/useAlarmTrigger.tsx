@@ -26,7 +26,7 @@ export function useAlarmTriggerList(filter: GetFilter) {
     queryFn: async () => {
       const res = await axiosServices.post(API_DT_URL, filter);
       const col = res.data.collection;
-      console.log("Fetched AlarmTrigger List:", col);
+      console.log('Fetched AlarmTrigger List:', col);
       return {
         data: col.data as AlarmTriggerType[],
         draw: col.draw,
@@ -62,7 +62,7 @@ export function useAllIntruders() {
     queryKey: ['intruder-all'],
     queryFn: async () => {
       const res = await axiosServices.get(`${API_URL}lookup`);
-      console.log("Intruders: ", res.data.collection.data);
+      console.log('Intruders: ', res.data.collection.data);
       return res.data.collection.data as IntruderType[];
     },
     placeholderData: [],
@@ -94,13 +94,13 @@ export function useAssignActionAlarmTriggerByDMAC() {
   return useMutation({
     mutationFn: async ({ dmac, actionStatus }: { dmac: string; actionStatus: string }) => {
       try {
-        console.log("Editing AlarmTrigger:", dmac, actionStatus);
+        console.log('Editing AlarmTrigger:', dmac, actionStatus);
         const response = await axiosServices.put(`${API_URL}tag/${dmac}`, { actionStatus });
         console.log(response);
         return response.data;
       } catch (error: any) {
-        console.error("Error editing AlarmTrigger:", error);
-        throw error.response?.data || new Error("Unknown error");
+        console.error('Error editing AlarmTrigger:', error);
+        throw error.response?.data || new Error('Unknown error');
       }
     },
     onSuccess: () => {
@@ -114,15 +114,26 @@ export function useAssignActionAlarmTriggerByID() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ triggerId, actionStatus }: { triggerId: string; actionStatus: string }) => {
+    mutationFn: async ({
+      triggerId,
+      actionStatus,
+      investigatedResult,
+    }: {
+      triggerId: string;
+      actionStatus: string;
+      investigatedResult: string | null;
+    }) => {
       try {
-        console.log("Editing AlarmTrigger:", triggerId, actionStatus);
-        const response = await axiosServices.put(`${API_URL}${triggerId}`, { actionStatus });
+        console.log('Editing AlarmTrigger:', triggerId, actionStatus);
+        const response = await axiosServices.put(`${API_URL}${triggerId}`, {
+          actionStatus,
+          investigatedResult,
+        });
         console.log(response);
         return response.data;
       } catch (error: any) {
-        console.error("Error editing AlarmTrigger:", error);
-        throw error.response?.data || new Error("Unknown error");
+        console.error('Error editing AlarmTrigger:', error);
+        throw error.response?.data || new Error('Unknown error');
       }
     },
     onSuccess: () => {
@@ -132,7 +143,7 @@ export function useAssignActionAlarmTriggerByID() {
   });
 }
 
-export function useAlarmTriggerStatus(){
+export function useAlarmTriggerStatus() {
   const filter = useSelector((state: RootState) => state.alarmTriggerReducer.alarmTriggerFilter);
   const query = useAlarmTriggerList(filter);
   return {

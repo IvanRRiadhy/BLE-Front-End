@@ -120,64 +120,7 @@ export function useVisitorFilterPresetStatus() {
 
 // src/hooks/visitorFilterPreset.ts (add this to your existing file)
 // Dummy data for development
-const dummyVisitorFilterPresets: VisitorFilterPresetType[] = [
-  {
-    id: '1',
-    name: 'Daily Visitor Report',
-    timeRange: 'Daily',
-    startTime: '09:00',
-    endTime: '17:00',
-    areaId: 'main-area',
-    floorplanId: null,
-    floorId: 'floor-1',
-    buildingId: 'building-a',
-    hostName: 'John Smith',
-    visitorId: null,
-    memberId: 'member-456',
-  },
-  {
-    id: '2',
-    name: 'Weekly Summary',
-    timeRange: 'Weekly',
-    startTime: null,
-    endTime: null,
-    areaId: null,
-    floorplanId: 'floorplan-2',
-    floorId: 'floor-2',
-    buildingId: 'building-b',
-    hostName: null,
-    visitorId: 'visitor-123',
-    memberId: null,
-  },
-  {
-    id: '3',
-    name: 'Monthly All Areas',
-    timeRange: 'Monthly',
-    startTime: '08:00',
-    endTime: '18:00',
-    areaId: 'all-areas',
-    floorplanId: null,
-    floorId: null,
-    buildingId: null,
-    hostName: 'All Hosts',
-    visitorId: null,
-    memberId: null,
-  },
-  {
-    id: '4',
-    name: 'Custom Time Range',
-    timeRange: 'Custom',
-    startTime: '10:30',
-    endTime: '15:45',
-    areaId: 'lobby-area',
-    floorplanId: 'floorplan-1',
-    floorId: 'floor-1',
-    buildingId: 'building-a',
-    hostName: 'Sarah Johnson',
-    visitorId: 'visitor-456',
-    memberId: null,
-  },
-];
+
 
 // Dummy hook for development
 export function useAllVisitorFilterPresetDummy() {

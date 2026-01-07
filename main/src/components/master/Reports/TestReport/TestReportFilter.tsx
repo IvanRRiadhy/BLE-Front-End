@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Card,
@@ -17,34 +17,26 @@ import {
   DialogContent,
   DialogActions,
 } from '@mui/material';
-import { useSelector } from 'react-redux';
-import { dispatch, RootState } from 'src/store/Store';
 import dayjs from 'dayjs';
-import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
-import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import toast from 'react-hot-toast';
 
-import { visitorStatus } from 'src/types/crud/input';
-import { fetchBuildings } from 'src/store/apps/crud/building';
-import { fetchFloors } from 'src/store/apps/crud/floor';
-import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
-import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
-import { fetchMembers, memberType } from 'src/store/apps/crud/member';
-import trackingJson from './DummyData/TrackingTransactionDummyData.json';
-import alarmJson from './DummyData/AlarmDummyData.json';
+import AreaHierarchySelector from 'src/components/shared/AreaHierarchySelector';
 import VisitorReportDialog from './VisitorReportDialog';
+
 import { useAllBuilding } from 'src/hooks/useBuilding';
-import { useAllMembers } from 'src/hooks/useMember';
 import { useAllFloors } from 'src/hooks/useFloor';
 import { useAllFloorplans } from 'src/hooks/useFloorplan';
 import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 import { useAllVisitor } from 'src/hooks/useVisitor';
-import { useAddVisitorFilterPreset } from 'src/hooks/useVisitorFilterPreset';
-import toast from 'react-hot-toast';
-import AreaHierarchySelector from 'src/components/shared/AreaHierarchySelector';
+import { useAllMembers } from 'src/hooks/useMember';
+import { memberType } from 'src/store/apps/crud/member';
 
-// ⬇️ activate plugins
-dayjs.extend(isSameOrAfter);
-dayjs.extend(isSameOrBefore);
+import { useVisitorSession } from 'src/hooks/useVisitorSession';
+import { useAlarmLog } from 'src/hooks/useAlarmRecord';
+import { useAddVisitorFilterPreset } from 'src/hooks/useVisitorFilterPreset';
+
+import { VisitorSessionType } from 'src/store/apps/crud/visitorSession';
+import { NewAlarmType, NewGetFilter } from 'src/store/apps/crud/alarmRecordTracking';
 
 type PersonOption = {
   id: string;
@@ -59,314 +51,223 @@ export type SelectedNode =
   | { type: 'area'; data: any }
   | null;
 
-// Dummy visitor names
-const dummyVisitors = ['Alakazam', 'Bastiodon', 'Cacturne', 'Donphan', 'Espeon'];
-
 const VisitorReportFilter = () => {
-  const didInit = useRef(false);
+  /* ===================== DATA ===================== */
+  const buildings = useAllBuilding().data || [];
+  const floors = useAllFloors().data || [];
+  const floorplans = useAllFloorplans().data || [];
+  const areas = useAllMaskedAreas().data || [];
+  const visitors = useAllVisitor().data || [];
+  const members = useAllMembers().data || [];
 
-  // ✅ Switch for testing mode
-  const isTesting = false;
+  const personOptions: PersonOption[] = [
+  ...visitors.map((v) => ({
+    id: v.id,
+    name: v.name,
+    type: 'visitor' as const,
+  })),
+  ...members.map((m) => ({
+    id: m.id,
+    name: m.name,
+    type: 'member' as const,
+  })),
+];
 
-  // Redux Data
-  const buildingData = useAllBuilding().data || [];
-  const floorData = useAllFloors().data || [];
-  const floorplanData = useAllFloorplans().data || [];
-  const areaData = useAllMaskedAreas().data || [];
-  const visitorData = useAllVisitor().data || [];
-  const memberData = useAllMembers().data || [];
+  /* ===================== STATE ===================== */
+  const [timeType, setTimeType] =
+    useState<'Daily' | 'Weekly' | 'Monthly' | 'Custom'>('Daily');
 
-  const addMutation = useAddVisitorFilterPreset();
-
-  const [openReport, setOpenReport] = useState(false);
-  const [filteredTracking, setFilteredTracking] = useState<any[]>([]);
-  const [filteredAlarm, setFilteredAlarm] = useState<any[]>([]);
-
-  // Dummy Data (Testing Mode)
-  const [trackingData, setTrackingData] = useState<any[]>([]);
-  const [alarmData, setAlarmData] = useState<any[]>([]);
-
-  // Filter state
-  const [timeType, setTimeType] = useState<'Daily' | 'Weekly' | 'Monthly' | 'Custom'>('Daily');
   const [dateRange, setDateRange] = useState({
     from: dayjs().format('YYYY-MM-DD'),
     to: dayjs().format('YYYY-MM-DD'),
   });
+
   const [selectedPersons, setSelectedPersons] = useState<PersonOption[]>([]);
   const [selectedArea, setSelectedArea] = useState<SelectedNode>(null);
-  const [areaValue, setAreaValue] = useState('');
   const [selectedHost, setSelectedHost] = useState<memberType | null>(null);
 
-  const personOptions: PersonOption[] = [
-    ...visitorData.map((v: any) => ({
-      id: v.id,
-      name: v.name,
-      type: 'visitor' as const,
-    })),
-    ...memberData.map((m: any) => ({
-      id: m.id,
-      name: m.name,
-      type: 'member' as const,
-    })),
-  ];
+  const [openReport, setOpenReport] = useState(false);
+  const [trackingLogs, setTrackingLogs] = useState<any[]>([]);
+  const [alarmLogs, setAlarmLogs] = useState<any[]>([]);
+
   const [openPresetDialog, setOpenPresetDialog] = useState(false);
   const [presetName, setPresetName] = useState('');
 
-  const buildPresetPayload = (name: string) => {
-    let fromDate: string | null = null;
-    let toDate: string | null = null;
+  /* ===================== MUTATIONS ===================== */
+  const visitorSessionMutation = useVisitorSession();
+  const alarmLogMutation = useAlarmLog();
+  const addPresetMutation = useAddVisitorFilterPreset();
+
+  /* ===================== FILTER BUILDERS ===================== */
+  const buildTrackingFilter = () => ({
+    TimeReport: timeType.toLowerCase(),
+    buildingId: selectedArea?.type === 'building' ? selectedArea.data.id : null,
+    floorId: selectedArea?.type === 'floor' ? selectedArea.data.id : null,
+    floorplanId: selectedArea?.type === 'floorplan' ? selectedArea.data.id : null,
+    areaId: selectedArea?.type === 'area' ? selectedArea.data.id : null,
+    visitorId: selectedPersons.find((p) => p.type === 'visitor')?.id ?? null,
+  });
+
+  const buildAlarmFilter = (): NewGetFilter => {
+    const filter: NewGetFilter = {
+      TimeReport: timeType.toLowerCase() as NewGetFilter['TimeReport'],
+      buildingId: selectedArea?.type === 'building' ? selectedArea.data.id : null,
+      floorId: selectedArea?.type === 'floor' ? selectedArea.data.id : null,
+      floorplanId: selectedArea?.type === 'floorplan' ? selectedArea.data.id : null,
+      areaId: selectedArea?.type === 'area' ? selectedArea.data.id : null,
+      visitorId: selectedPersons.find((p) => p.type === 'visitor')?.id ?? null,
+      from: null,
+      to: null,
+    };
 
     if (timeType === 'Custom') {
-      fromDate = dateRange.from;
-      toDate = dateRange.to;
+      filter.from = dayjs(dateRange.from).startOf('day').toISOString();
+      filter.to = dayjs(dateRange.to).endOf('day').toISOString();
     }
 
-    return {
-      name,
-      timeRange: timeType,
-      buildingId: selectedArea?.type === 'building' ? selectedArea?.data?.id : null,
-      floorplanId: selectedArea?.type === 'floorplan' ? selectedArea?.data?.id : null,
-      floorId: selectedArea?.type === 'floor' ? selectedArea?.data?.id : null,
-      areaId: selectedArea?.type === 'area' ? selectedArea?.data?.id : null,
-      visitorId: selectedPersons.find((p) => p.type === 'visitor')?.id || null,
-      memberId: selectedPersons.find((p) => p.type === 'member')?.id || null,
-      fromDate,
-      toDate,
-    };
+    return filter;
   };
 
-  const handleConfirmSavePreset = async () => {
+  /* ===================== ADAPTERS ===================== */
+  const adaptTracking = (data: VisitorSessionType[]) =>
+    data.map((r) => ({
+      VisitorName: r.visitorName ?? '-',
+      BuildingName: r.buildingName ?? '-',
+      FloorName: r.floorName ?? '-',
+      AreaName: r.areaName ?? '-',
+      EnterTime: r.enterTime,
+      ExitTime: r.exitTime,
+      VisitorStatus: r.status ?? '-',
+      HostName: r.hostName ?? '-',
+      DurationInMinutes: r.durationInMinutes,
+    }));
+
+  const adaptAlarm = (data: NewAlarmType[]) =>
+    data.map((r) => ({
+      VisitorName: r.visitorName ?? '-',
+      AreaName: r.floorplanName ?? '-',
+      AlarmTriggered: r.triggeredAt,
+      AlarmDone: r.doneAt,
+      VisitorStatus: r.actionStatus,
+      HostName: '-', // explicitly excluded
+      AlarmCategory: r.alarmStatus,
+    }));
+
+  /* ===================== HANDLERS ===================== */
+  const handleGenerate = async () => {
+    try {
+      const [tracking, alarms] = await Promise.all([
+        visitorSessionMutation.mutateAsync(buildTrackingFilter()),
+        alarmLogMutation.mutateAsync(buildAlarmFilter()),
+      ]);
+
+      setTrackingLogs(adaptTracking(tracking));
+      setAlarmLogs(adaptAlarm(alarms));
+      setOpenReport(true);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to generate report');
+    }
+  };
+
+  const handleSavePreset = async () => {
     if (!presetName.trim()) {
       toast.error('Preset name is required');
       return;
     }
 
     try {
-      const payload = buildPresetPayload(presetName.trim());
-      await addMutation.mutateAsync(payload);
+      await addPresetMutation.mutateAsync({
+        name: presetName,
+        timeRange: timeType,
+        buildingId: selectedArea?.type === 'building' ? selectedArea.data.id : null,
+        floorId: selectedArea?.type === 'floor' ? selectedArea.data.id : null,
+        floorplanId: selectedArea?.type === 'floorplan' ? selectedArea.data.id : null,
+        areaId: selectedArea?.type === 'area' ? selectedArea.data.id : null,
+        visitorId: selectedPersons.find((p) => p.type === 'visitor')?.id ?? null,
+        memberId: selectedPersons.find((p) => p.type === 'member')?.id ?? null,
+        fromDate: timeType === 'Custom' ? dateRange.from : null,
+        toDate: timeType === 'Custom' ? dateRange.to : null,
+      });
 
-      toast.success('Preset saved successfully');
+      toast.success('Preset saved');
       setOpenPresetDialog(false);
       setPresetName('');
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Failed to save preset');
     }
   };
 
-  // 🧭 Handlers
-  const handleGenerate = () => {
-    if (isTesting) {
-      let fromDate = dayjs(dateRange.from).startOf('day');
-      let toDate = dayjs(dateRange.to).endOf('day');
-
-      if (timeType === 'Weekly') {
-        fromDate = fromDate.startOf('week').add(1, 'day'); // Monday
-        toDate = fromDate.add(6, 'day').endOf('day');
-      } else if (timeType === 'Monthly') {
-        fromDate = fromDate.startOf('month');
-        toDate = fromDate.endOf('month');
-      }
-
-      const withinRange = (d: dayjs.Dayjs) => d.isSameOrAfter(fromDate) && d.isSameOrBefore(toDate);
-
-      const filteredT = trackingData.filter((t) => {
-        const enter = dayjs(t.EnterTime);
-        return (
-          (selectedPersons.length === 0 ||
-            selectedPersons.includes(t.VisitorName) ||
-            selectedPersons.includes(t.MemberName)) &&
-          (!areaValue || t.AreaName === areaValue) &&
-          (!selectedHost || t.HostName === selectedHost) &&
-          withinRange(enter)
-        );
-      });
-
-      const filteredA = alarmData.filter((a) => {
-        const trig = dayjs(a.AlarmTriggered);
-        return (
-          (selectedPersons.length === 0 ||
-            selectedPersons.includes(a.VisitorName) ||
-            selectedPersons.includes(a.MemberName)) &&
-          (!areaValue || a.AreaName === areaValue) &&
-          (!selectedHost || a.HostName === selectedHost) &&
-          withinRange(trig)
-        );
-      });
-
-      setFilteredTracking(filteredT);
-      setFilteredAlarm(filteredA);
-      setOpenReport(true);
-    }
-  };
-
-  // 🧱 Load Data
-  useEffect(() => {
-    if (didInit.current) return;
-    didInit.current = true;
-
-    if (!isTesting) {
-      dispatch(fetchBuildings());
-      dispatch(fetchFloors());
-      dispatch(fetchFloorplan());
-      dispatch(fetchMaskedAreas());
-      dispatch(fetchMembers());
-    } else {
-      // ✅ Load dummy JSON data and add visitor names
-      const trackingWithVisitors = trackingJson.map((item, index) => ({
-        ...item,
-        VisitorName: dummyVisitors[index % dummyVisitors.length], // Assign visitors cyclically
-      }));
-
-      const alarmWithVisitors = alarmJson.map((item, index) => ({
-        ...item,
-        VisitorName: dummyVisitors[index % dummyVisitors.length], // Assign visitors cyclically
-      }));
-
-      setTrackingData(trackingWithVisitors);
-      setAlarmData(alarmWithVisitors);
-      console.log('Loaded dummy data from import:', {
-        tracking: trackingWithVisitors.length,
-        alarm: alarmWithVisitors.length,
-        visitors: dummyVisitors,
-      });
-    }
-  }, [isTesting]);
-
-  const adaptTrackingFromApi = (apiData: any[]) => {
-  return apiData.map((r) => ({
-    Id: r.visitorId,
-    VisitorName: r.visitorName,
-    BuildingName: r.buildingName,
-    FloorName: r.floorName,
-    AreaName: r.areaName,
-    EnterTime: r.enterTime,
-    ExitTime: r.exitTime,
-    VisitorStatus: r.status ?? '-',
-    HostName: r.hostName ?? '-',
-    DurationInMinutes: r.durationInMinutes,
-  }));
-};
-
+  /* ===================== UI ===================== */
   return (
     <Box p={2}>
       <Typography variant="h6" fontWeight={700} textAlign="center" mb={2}>
-        Visitor Report Filter {isTesting && '(Dummy Mode)'}
+        Visitor Report Filter
       </Typography>
 
-      <Card
-        sx={{
-          p: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2,
-          maxWidth: '100%',
-          mx: 'auto',
-        }}
-      >
-        {/* Time Filter */}
-        <Grid container spacing={1} alignItems="center">
+      <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {/* Time */}
+        <Grid container spacing={1}>
           <Grid size={{ xs: 12, md: 4 }}>
             <FormControl fullWidth>
               <InputLabel>Filter Type</InputLabel>
-              <Select
-                label="Filter Type"
-                value={timeType}
-                onChange={(e) => setTimeType(e.target.value as any)}
-                size="small"
-              >
-                <MenuItem value="Daily">Daily</MenuItem>
-                <MenuItem value="Weekly">Weekly</MenuItem>
-                <MenuItem value="Monthly">Monthly</MenuItem>
-                <MenuItem value="Custom">Custom</MenuItem>
+              <Select value={timeType} label="Filter Type" onChange={(e) => setTimeType(e.target.value as any)}>
+                {['Daily', 'Weekly', 'Monthly', 'Custom'].map((v) => (
+                  <MenuItem key={v} value={v}>{v}</MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
 
           <Grid size={{ xs: 12, md: 4 }}>
             <TextField
-              label="Start Date"
               type="date"
+              label="Start Date"
               fullWidth
-              size="small"
               InputLabelProps={{ shrink: true }}
-              value={timeType === 'Custom' ? dateRange.from : ''}
               disabled={timeType !== 'Custom'}
+              value={dateRange.from}
               onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
             />
           </Grid>
+
           <Grid size={{ xs: 12, md: 4 }}>
             <TextField
-              label="End Date"
               type="date"
+              label="End Date"
               fullWidth
-              size="small"
               InputLabelProps={{ shrink: true }}
-              value={timeType === 'Custom' ? dateRange.to : ''}
               disabled={timeType !== 'Custom'}
+              value={dateRange.to}
               onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
             />
           </Grid>
         </Grid>
 
-        {/* Filter Options */}
-        <Grid container spacing={1} alignItems="center">
-          {/* Person Name Autocomplete */}
+        {/* Filters */}
+        <Grid container spacing={1}>
           <Grid size={{ xs: 12, md: 4 }}>
             <Autocomplete
               multiple
               options={personOptions}
               value={selectedPersons}
-              onChange={(_, newValue) => setSelectedPersons(newValue)}
-              isOptionEqualToValue={(option, value) => option.id === value.id}
-              getOptionLabel={(option) => option.name}
-              renderOption={(props, option) => (
-                <li {...props} key={`${option.type}-${option.id}`}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      width: '100%',
-                    }}
-                  >
-                    <Typography variant="body2">{option.name}</Typography>
-
-                    <Box sx={{ flexGrow: 1 }} />
-
-                    <Chip
-                      size="small"
-                      label={option.type === 'visitor' ? 'Visitor' : 'Member'}
-                      color={option.type === 'visitor' ? 'primary' : 'success'}
-                    />
-                  </Box>
-                </li>
-              )}
+              onChange={(_, v) => setSelectedPersons(v)}
+              getOptionLabel={(o) => o.name}
               renderTags={(value, getTagProps) =>
-                value.map((option, index) => (
-                  <Chip
-                    {...getTagProps({ index })}
-                    key={option.id}
-                    label={`${option.name} (${option.type})`}
-                    size="small"
-                  />
+                value.map((o, i) => (
+                  <Chip {...getTagProps({ index: i })} label={`${o.name} (${o.type})`} />
                 ))
               }
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Person (Visitor / Member)"
-                  placeholder="Select person..."
-                />
-              )}
+              renderInput={(p) => <TextField {...p} label="Person" />}
             />
           </Grid>
 
           <Grid size={{ xs: 12, md: 4 }}>
             <AreaHierarchySelector
-              buildings={buildingData}
-              floors={floorData}
-              floorplans={floorplanData}
-              maskedAreas={areaData}
+              buildings={buildings}
+              floors={floors}
+              floorplans={floorplans}
+              maskedAreas={areas}
               value={selectedArea}
               onChange={setSelectedArea}
             />
@@ -374,78 +275,45 @@ const VisitorReportFilter = () => {
 
           <Grid size={{ xs: 12, md: 4 }}>
             <Autocomplete
-              options={memberData}
+              options={members}
               value={selectedHost}
-              onChange={(_, newValue) => setSelectedHost(newValue)}
-              getOptionLabel={(option) => option.name}
-              renderInput={(params) => <TextField {...params} label="Host (Member)" />}
-              isOptionEqualToValue={(opt, val) => opt.id === val.id}
+              onChange={(_, v) => setSelectedHost(v)}
+              getOptionLabel={(o) => o.name}
+              renderInput={(p) => <TextField {...p} label="Host (Member)" />}
             />
           </Grid>
         </Grid>
 
-        {/* Action Buttons */}
-        <Grid container spacing={2} mt={1}>
+        {/* Actions */}
+        <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              onClick={handleGenerate}
-              sx={{ height: 40 }}
-            >
+            <Button fullWidth variant="contained" onClick={handleGenerate}>
               Generate Report
             </Button>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <Button
-              fullWidth
-              variant="outlined"
-              color="primary"
-              onClick={() => setOpenPresetDialog(true)}
-              sx={{ height: 40 }}
-            >
-              Save Generate Report
+            <Button fullWidth variant="outlined" onClick={() => setOpenPresetDialog(true)}>
+              Save as Preset
             </Button>
           </Grid>
         </Grid>
       </Card>
-      <Dialog
-        open={openPresetDialog}
-        onClose={() => setOpenPresetDialog(false)}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>Save Report Preset</DialogTitle>
 
+      {/* Preset Dialog */}
+      <Dialog open={openPresetDialog} onClose={() => setOpenPresetDialog(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Save Report Preset</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
-            margin="dense"
-            label="Preset Name"
             fullWidth
+            label="Preset Name"
             value={presetName}
             onChange={(e) => setPresetName(e.target.value)}
-            placeholder="e.g. Weekly Lobby Visitors"
           />
         </DialogContent>
-
         <DialogActions>
-          <Button
-            onClick={() => {
-              setOpenPresetDialog(false);
-              setPresetName('');
-            }}
-            color="inherit"
-          >
-            Cancel
-          </Button>
-
-          <Button
-            onClick={handleConfirmSavePreset}
-            variant="contained"
-            disabled={addMutation.isPending}
-          >
+          <Button onClick={() => setOpenPresetDialog(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleSavePreset}>
             Save
           </Button>
         </DialogActions>
@@ -454,8 +322,8 @@ const VisitorReportFilter = () => {
       <VisitorReportDialog
         open={openReport}
         onClose={() => setOpenReport(false)}
-        trackingLogs={filteredTracking}
-        alarmLogs={filteredAlarm}
+        trackingLogs={trackingLogs}
+        alarmLogs={alarmLogs}
       />
     </Box>
   );

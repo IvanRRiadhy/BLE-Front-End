@@ -75,6 +75,11 @@ interface StateType {
       [beaconId: string]: StoredBeacon;
     };
   };
+  allBeacons: {
+    [topic: string]: {
+      [beaconId: string]: StoredBeacon;
+    };
+  };
   countingData: CountingData | null;
   refreshTrigger: boolean;
   trackingBeacon: string;
@@ -92,6 +97,7 @@ interface StateType {
 const initialState: StateType = {
   beacons: [],
   beaconsByTopic: {},
+  allBeacons: {},
   countingData: null,
   refreshTrigger: false,
   trackingBeacon: '',
@@ -117,6 +123,9 @@ export const BeaconSlice = createSlice({
       if (!state.beaconsByTopic[topic]) {
         state.beaconsByTopic[topic] = {};
       }
+      if (!state.allBeacons[topic]) {
+        state.allBeacons[topic] = {};
+      }
       
       // Update or add each beacon
       beacons.forEach((beacon: any) => {
@@ -130,6 +139,7 @@ export const BeaconSlice = createSlice({
         };
         
         state.beaconsByTopic[topic][beacon.beaconId] = storedBeacon;
+        state.allBeacons[topic][beacon.beaconId] = storedBeacon;
       });
     },
     
