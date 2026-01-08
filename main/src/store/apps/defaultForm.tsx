@@ -19,13 +19,16 @@ import { OrganizationType, GetFilter as OrganizationFilter } from './crud/organi
 import { GetFilter as TrackingTransFilter } from './crud/trackingTrans';
 import { VisitorType, GetFilter as VisitorFilter } from './crud/visitor';
 import { GetFilter as TrxVisitorFilter } from './crud/trxVisitor';
-import {  GetFilter as CardRecordFilter } from './crud/cardRecord';
+import { GetFilter as CardRecordFilter } from './crud/cardRecord';
 import { TimeGroupType, GetFilter as TimeGroupFilter } from './crud/timeGroup';
 import { CardAccessType, GetFilter as CardAccessFilter } from './crud/cardAccess';
 import { CardGroupType, GetFilter as CardGroupFilter } from './crud/cardGroup';
 import { GeoFencingAlarmType, GetFilter as GeoFenceFilter } from './alarmsetting/geofencing';
 import { GetFilter as AlarmSettingFilter } from './alarmsetting/alarmSettings';
-import { OverPopulatingAlarmType, GetFilter as OverPopulatingFilter } from './alarmsetting/overpopulating';
+import {
+  OverPopulatingAlarmType,
+  GetFilter as OverPopulatingFilter,
+} from './alarmsetting/overpopulating';
 import { BoundaryAlarmType, GetFilter as BoundaryFilter } from './alarmsetting/boundary';
 import { StayOnAreaAlarmType, GetFilter as StayOnAreaFilter } from './alarmsetting/stayonarea';
 
@@ -87,9 +90,8 @@ export const defaultAlarmRecordFilter: AlarmRecordFilter = {
   SortColumn: 'Timestamp',
   SortDir: 'desc',
   SearchValue: '',
-  timeReport: "daily",
-  filters: {
-  },
+  timeRange: 'daily',
+  filters: {},
 };
 //#endregion
 
@@ -101,8 +103,8 @@ export const defaultAlarmTriggerFilter: AlarmTriggerFilter = {
   SortColumn: 'TriggerTime',
   SortDir: 'desc',
   SearchValue: '',
-  TimeReport: "daily",
-  dateFilters:{},
+  timeRange: 'daily',
+  dateFilters: {},
   filters: {},
 };
 //endregion
@@ -278,7 +280,7 @@ export const defaultFloorplanForm: FloorplanType = {
   floorX: 0,
   floorY: 0,
   meterPerPx: 0,
-  engineId: "",
+  engineId: '',
   applicationId: localStorage.getItem('applicationId') || '',
   createdBy: '',
   createdAt: '',
@@ -399,8 +401,7 @@ export const defaultMemberFilter: MemberFilter = {
   SortColumn: 'Name',
   SortDir: 'desc',
   SearchValue: '',
-  filters: {
-  },
+  filters: {},
 };
 //#endregion
 
@@ -454,10 +455,8 @@ export const defaultTrackingTransFilter: TrackingTransFilter = {
   SortColumn: 'Transtime',
   SortDir: 'desc',
   SearchValue: '',
-  timeReport: "daily",
-  filters: {
-
-  },
+  timeRange: 'daily',
+  filters: {},
 };
 //#endregion
 

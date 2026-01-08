@@ -216,3 +216,10 @@ export const visitorStatusEnumMap: Record<string, number> = {
     {label: "Outdoor", value: 'outdoor'},
     {label: "Indoor", value: 'indoor'},
   ]
+
+  export const PersonType: inputDataType[] = [
+    {label: "Please select Type", value: '', disabled: true},
+    {label: "Member", value: 'member'},
+    {label: "Visitor", value: 'visitor'},
+    {label: "All", value: 'all'},
+  ]

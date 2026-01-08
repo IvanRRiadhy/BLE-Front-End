@@ -362,6 +362,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
 
       return updated;
     });
+    // dispatch(buildTrackingLogs());
   }, [beaconData, topic]);
 
   // animate beacons

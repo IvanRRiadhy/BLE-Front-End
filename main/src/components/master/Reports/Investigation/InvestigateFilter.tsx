@@ -193,7 +193,7 @@ const InvestigateFilter = () => {
     if (!investigateFilter) return;
 
     // Time Range
-    setTimeRange(investigateFilter.TimeReport as TimeRangeKey);
+    setTimeRange(investigateFilter.timeRange as TimeRangeKey);
 
     // Visitor
     if (investigateFilter.visitorId) {
@@ -471,7 +471,7 @@ const InvestigateFilter = () => {
     };
 
     const finalFilter = {
-      TimeReport: timeRange,
+      timeRange: timeRange,
       visitorId: selectedVisitor?.id || null,
       buildingId,
       floorId,
@@ -668,7 +668,9 @@ const InvestigateFilter = () => {
               }}
             >
               <ToggleButton value="both">Both</ToggleButton>
-              <ToggleButton value="tracking" disabled={activeMode === 'alarm'}>Tracking</ToggleButton>
+              <ToggleButton value="tracking" disabled={activeMode === 'alarm'}>
+                Tracking
+              </ToggleButton>
               <ToggleButton value="alarm">Alarm</ToggleButton>
             </ToggleButtonGroup>
             {shouldShowError('alarm') &&

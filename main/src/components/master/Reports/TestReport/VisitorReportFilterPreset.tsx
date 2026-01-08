@@ -62,7 +62,7 @@ type PersonOption = {
 };
 
 type AlarmLogFilter = {
-  TimeReport: 'daily' | 'weekly' | 'monthly';
+  timeRange: 'daily' | 'weekly' | 'monthly';
   buildingId: string | null;
   floorId: string | null;
   floorplanId: string | null;
@@ -72,11 +72,9 @@ type AlarmLogFilter = {
   to?: string;
 };
 
-export function mapPresetToAlarmLogFilter(
-  preset: VisitorFilterPresetType
-): NewGetFilter {
+export function mapPresetToAlarmLogFilter(preset: VisitorFilterPresetType): NewGetFilter {
   const filter: NewGetFilter = {
-    TimeReport: preset.timeRange.toLowerCase() as NewGetFilter['TimeReport'],
+    timeRange: preset.timeRange.toLowerCase() as NewGetFilter['timeRange'],
     buildingId: preset.buildingId ?? null,
     floorId: preset.floorId ?? null,
     floorplanId: preset.floorplanId ?? null,
@@ -132,7 +130,6 @@ const VisitorReportFilterPreset = ({
   const [openReport, setOpenReport] = useState(false);
   const [apiTrackingData, setApiTrackingData] = useState<any[]>([]);
   const [apiAlarmData, setApiAlarmData] = useState<any[]>([]);
-
 
   const deleteMutation = useDeleteVisitorFilterPreset();
   const applyMutation = useApplyVisitorFilterPreset();
@@ -197,7 +194,7 @@ const VisitorReportFilterPreset = ({
       const alarmLog = await alarmLogMutation.mutateAsync(alarmFilter);
       console.log('Fetched Alarm Log for Report:', alarmLog);
       setApiTrackingData(result.data.data);
-      setApiAlarmData((alarmLog));
+      setApiAlarmData(alarmLog);
       // toast.success(`Applied preset: ${selectedPreset.name}`);
       // console.log('Visitor filter preset applied successfully: ', result.data);
       setOpenReport(true);
@@ -246,19 +243,19 @@ const VisitorReportFilterPreset = ({
 
   const adaptAlarmFromApi = (apiData: any[]) => {
     // console.log('Adapting Alarm Data from API:', apiData);
-  return apiData.map((r) => ({
-    VisitorName: r.visitorName ?? '-',
-    BuildingName: r.buildingName ?? '-',
-    FloorName: r.floorName ?? '-',
-    AreaName: r.floorplanName ?? '-', // or masked area if available later
-    AlarmTriggered: r.triggeredAt,
-    AlarmDone: r.doneAt,
-    HandleDuration: r.handleDurationMinutes,
-    VisitorStatus: r.actionStatus ?? '-',
-    HostName: '-', // explicitly excluded as you requested
-    AlarmCategory: r.alarmStatus,
-  }));
-};
+    return apiData.map((r) => ({
+      VisitorName: r.visitorName ?? '-',
+      BuildingName: r.buildingName ?? '-',
+      FloorName: r.floorName ?? '-',
+      AreaName: r.floorplanName ?? '-', // or masked area if available later
+      AlarmTriggered: r.triggeredAt,
+      AlarmDone: r.doneAt,
+      HandleDuration: r.handleDurationMinutes,
+      VisitorStatus: r.actionStatus ?? '-',
+      HostName: '-', // explicitly excluded as you requested
+      AlarmCategory: r.alarmStatus,
+    }));
+  };
 
   return (
     <>

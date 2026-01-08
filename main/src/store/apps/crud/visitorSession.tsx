@@ -17,12 +17,14 @@ export interface EventTypesFilter {
 }
 
 export type GetFilter = {
-  TimeReport: string;
+  timeRange: string;
   buildingId: string | null;
   floorId: string | null;
   floorplanId: string | null;
   areaId: string | null;
-  visitorId: string | null;
+  visitorId?: string | null;
+  memberId?: string | null;
+  personType?: 'member' | 'visitor' | 'all' | null;
   // eventTypes: EventTypesFilter;
 };
 
@@ -87,12 +89,14 @@ const initialState: StateType = {
   visitorSessionTotalCount: 0,
   visitorSessionFilteredCount: 0,
   visitorSessionFilter: {
-    TimeReport: 'daily',
+    timeRange: 'daily',
     buildingId: null,
     floorId: null,
     floorplanId: null,
     areaId: null,
-    visitorId: "",
+    visitorId: '',
+    memberId: '',
+    personType: null,
     // eventTypes: {
     //   all: true,
     //   accessTracking: true,
@@ -125,7 +129,7 @@ export const VisitorSessionSlice = createSlice({
     },
     UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
       state.visitorSessionFilter = { ...state.visitorSessionFilter, ...action.payload };
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -168,6 +172,6 @@ export const fetchVisitorSession = createAsyncThunk(
     await ensureMinLatency(started, 500);
     return res.data;
   },
-)
+);
 
 export default VisitorSessionSlice.reducer;

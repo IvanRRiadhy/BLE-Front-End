@@ -109,7 +109,7 @@ const SidebarListItem = ({ item, onItemClick }: Props) => {
               {formatTime(item?.time ?? '')} {/* Format the time */}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {item?.floor}
+              {item?.area} - {item?.floor}
             </Typography>
           </Stack>
         </ListItemText>

@@ -112,7 +112,7 @@ const TrackingTransactionFilter = () => {
   // --- Sync with Redux ---
   useEffect(() => {
     const f = trackingTransFilter.filters;
-    const t = trackingTransFilter.timeReport as TimeRangeKey ?? 'any';
+    const t = (trackingTransFilter.timeRange as TimeRangeKey) ?? 'any';
     if (!isEqual(f, filterState)) {
       setFilterState({
         VisitorId: f?.VisitorId ?? [],
@@ -169,7 +169,7 @@ const TrackingTransactionFilter = () => {
     dispatch(
       UpdateFilter({
         Start: 0,
-        timeReport: timeRange,
+        timeRange: timeRange,
         filters: filterState,
         dateFilters: timeFilter,
       }),

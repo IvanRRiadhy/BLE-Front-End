@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { AppDispatch, RootState } from 'src/store/Store';
 import { startMQTTclient } from './MQTT';
+import { uniqueId } from 'lodash';
 
 export interface BeaconType {
   beaconId: string; // This is the dmac
@@ -45,6 +46,21 @@ export interface BeaconType {
   qrCode?: string | null;
 }
 
+export type TrackingLogItem = {
+  id: string;
+  device: string;
+  target: string;
+  image: string;
+  dmac: string;
+  floor: string;
+  area: string;
+  alarmType?: string;
+  time: string;
+  status?: string;
+  type: 'Alarm' | 'Tracking';
+  personType?: 'Member' | 'Visitor';
+};
+
 interface StoredBeacon extends BeaconType {
   lastSeen: number;
   dmac: string; // Set to beaconId since they're the same
@@ -54,7 +70,8 @@ interface StoredBeacon extends BeaconType {
 interface EntityCount {
   count: number;
   name: string;
-  persons: {  // Add this
+  persons: {
+    // Add this
     visitor: string[];
     member: string[];
   };
@@ -92,6 +109,7 @@ interface StateType {
     dmac: string;
     sourceScreenId?: number;
   };
+  trackingLogs: TrackingLogItem[];
 }
 
 const initialState: StateType = {
@@ -109,6 +127,7 @@ const initialState: StateType = {
     time: '',
     dmac: '',
   },
+  trackingLogs: [],
 };
 
 export const BeaconSlice = createSlice({
@@ -118,7 +137,7 @@ export const BeaconSlice = createSlice({
     UpdateBeacon: (state, action) => {
       const { topic, beacons } = action.payload;
       const now = Date.now();
-      
+
       // Initialize topic if it doesn't exist
       if (!state.beaconsByTopic[topic]) {
         state.beaconsByTopic[topic] = {};
@@ -126,36 +145,36 @@ export const BeaconSlice = createSlice({
       if (!state.allBeacons[topic]) {
         state.allBeacons[topic] = {};
       }
-      
+
       // Update or add each beacon
       beacons.forEach((beacon: any) => {
         if (!beacon.beaconId) return;
-        
+
         // Create stored beacon with dmac = beaconId
         const storedBeacon: StoredBeacon = {
           ...beacon,
           dmac: beacon.beaconId, // Set dmac to beaconId
           lastSeen: now,
         };
-        
+
         state.beaconsByTopic[topic][beacon.beaconId] = storedBeacon;
         state.allBeacons[topic][beacon.beaconId] = storedBeacon;
       });
     },
-    
+
     // Update counting data
     UpdateCountingData: (state, action) => {
       const countingData = action.payload;
       state.countingData = countingData;
     },
-    
+
     // Clean up old beacons for a specific topic
     CleanupTopicBeacons: (state, action) => {
       const { topic, maxAge = 10000 } = action.payload; // Default 10 seconds
       const now = Date.now();
-      
+
       if (!state.beaconsByTopic[topic]) return;
-      
+
       // Remove beacons older than maxAge
       Object.keys(state.beaconsByTopic[topic]).forEach((beaconId) => {
         const beacon = state.beaconsByTopic[topic][beaconId];
@@ -163,18 +182,18 @@ export const BeaconSlice = createSlice({
           delete state.beaconsByTopic[topic][beaconId];
         }
       });
-      
+
       // Remove empty topics
       if (Object.keys(state.beaconsByTopic[topic]).length === 0) {
         delete state.beaconsByTopic[topic];
       }
     },
-    
+
     // Clean up ALL old beacons across all topics
     CleanupAllBeacons: (state, action) => {
       const { maxAge = 10000 } = action.payload;
       const now = Date.now();
-      
+
       Object.keys(state.beaconsByTopic).forEach((topic) => {
         Object.keys(state.beaconsByTopic[topic]).forEach((beaconId) => {
           const beacon = state.beaconsByTopic[topic][beaconId];
@@ -182,60 +201,87 @@ export const BeaconSlice = createSlice({
             delete state.beaconsByTopic[topic][beaconId];
           }
         });
-        
+
         // Remove empty topics
         if (Object.keys(state.beaconsByTopic[topic]).length === 0) {
           delete state.beaconsByTopic[topic];
         }
       });
     },
-    
+
     RefreshTrigger: (state) => {
       state.refreshTrigger = true;
     },
-    
+
     RefreshBeaconState: (state) => {
       state.beacons = [];
       state.beaconsByTopic = {};
       state.refreshTrigger = false;
     },
-    
+
     SetTrackingBeacon: (state, action) => {
       state.trackingBeacon = action.payload;
     },
-    
+
     SetSelectedBeacon: (state, action) => {
       state.selectedBeacon = action.payload;
-    }
+    },
+    AppendTrackingLogs: (state: StateType, action) => {
+      const newLogs: TrackingLogItem[] = action.payload;
+
+      const existingIds = new Set(state.trackingLogs.map((x) => x.id));
+
+      newLogs.forEach((log) => {
+        if (!existingIds.has(log.id)) {
+          state.trackingLogs.push(log);
+        }
+      });
+
+      // sort newest first
+      state.trackingLogs.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+      // cap list (same logic you already use)
+      if (state.trackingLogs.length > 100) {
+        state.trackingLogs = state.trackingLogs.slice(0, 100);
+      }
+    },
+
+    ClearTrackingLogs: (state: StateType) => {
+      state.trackingLogs = [];
+    },
   },
 });
 
-export const { 
-  UpdateBeacon, 
+export const {
+  UpdateBeacon,
   UpdateCountingData,
-  CleanupTopicBeacons, 
+  CleanupTopicBeacons,
   CleanupAllBeacons,
-  RefreshTrigger, 
-  RefreshBeaconState, 
-  SetTrackingBeacon, 
-  SetSelectedBeacon 
+  RefreshTrigger,
+  RefreshBeaconState,
+  SetTrackingBeacon,
+  SetSelectedBeacon,
+  AppendTrackingLogs,
+  ClearTrackingLogs,
 } = BeaconSlice.actions;
 
 export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
   let lastDispatch = 0;
+  const prevAreaByBeacon: Record<string, string | undefined> = {};
   const unsubscribe = startMQTTclient((data: any) => {
     const now = Date.now();
     if (now - lastDispatch > 200) {
       lastDispatch = now;
-      
+
       // Ensure data is an array
       const beaconArray = Array.isArray(data) ? data : [data];
-      
+
       // Filter to only include beacons for this floorplan
-      const filteredBeacons = beaconArray.filter((beacon: any) => 
-        beacon.floorplanId && `tracking/${beacon.floorplanId.toUpperCase()}` === topic
+      const filteredBeacons = beaconArray.filter(
+        (beacon: any) =>
+          beacon.floorplanId && `tracking/${beacon.floorplanId.toUpperCase()}` === topic,
       );
-      
+
       if (filteredBeacons.length > 0) {
         // console.log(`[MQTT] Received ${filteredBeacons.length} beacons for topic ${topic}`);
         dispatch(
@@ -244,6 +290,37 @@ export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
             beacons: filteredBeacons,
           }),
         );
+        const newLogs: TrackingLogItem[] = [];
+
+        filteredBeacons.forEach((b: any) => {
+          const beaconId = b.beaconId;
+          if (!beaconId) return;
+
+          const currentArea = b.maskedAreaName || 'Unknown Area';
+          const prevArea = prevAreaByBeacon[beaconId];
+
+          // 🔥 only log when area changes
+          if (prevArea !== currentArea) {
+            prevAreaByBeacon[beaconId] = currentArea;
+            // console.log(`[MQTT] Beacon ${beaconId} moved to area: ${currentArea}, from ${prevArea || 'N/A'}`);
+            newLogs.push({
+              id: `trk-${beaconId}-${b.time}`, // keep unique
+              device: 'Tracking Event',
+              type: 'Tracking',
+              target: beaconId, // raw, will be enriched later
+              image: '',
+              dmac: beaconId,
+              floor: b.floorplanName || 'Unknown Floor',
+              area: currentArea,
+              time: b.time || new Date().toISOString(),
+              personType: b.visitorCardName ? 'Visitor' : b.memberCardName ? 'Member' : undefined,
+            });
+          }
+        });
+
+        if (newLogs.length > 0) {
+          dispatch(AppendTrackingLogs(newLogs));
+        }
       }
     }
   }, topic);
@@ -253,22 +330,22 @@ export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
 // Thunk to subscribe to counting data
 export const fetchCountingData = () => (dispatch: AppDispatch) => {
   const countingTopic = 'tracking/counting'; // Adjust the topic as needed
-  
+
   // console.log(`[MQTT] Subscribing to counting topic: ${countingTopic}`);
-  
+
   const unsubscribe = startMQTTclient((data: any) => {
     try {
       // Parse the counting data
       const countingData = parseCountingData(data);
-      
+
       // console.log(`[MQTT] Received counting data:`, countingData);
-      
+
       dispatch(UpdateCountingData(countingData));
     } catch (error) {
       console.error('[MQTT] Error parsing counting data:', error);
     }
   }, countingTopic);
-  
+
   return unsubscribe;
 };
 
@@ -276,41 +353,41 @@ export const fetchCountingData = () => (dispatch: AppDispatch) => {
 const parseCountingData = (data: any): CountingData => {
   // If data is a string, parse it as JSON
   const rawData = typeof data === 'string' ? JSON.parse(data) : data;
-  
+
   return {
     building: parseEntityCounts(rawData.building || {}),
     floor: parseEntityCounts(rawData.floor || {}),
     floorplan: parseEntityCounts(rawData.floorplan || {}),
     area: parseEntityCounts(rawData.area || {}),
-    time: rawData.time || new Date().toISOString()
+    time: rawData.time || new Date().toISOString(),
   };
 };
 
 // Helper function to parse entity counts with comma-separated IDs
 const parseEntityCounts = (entities: any): { [id: string]: EntityCount } => {
   const result: { [id: string]: EntityCount } = {};
-  
+
   // If entities is an object with the structure you showed
   if (typeof entities === 'object' && entities !== null) {
-    Object.keys(entities).forEach(key => {
+    Object.keys(entities).forEach((key) => {
       const entity = entities[key];
-      
+
       // Create the EntityCount with persons
       const entityCount: EntityCount = {
         count: entity.count || 0,
         name: entity.name || 'Unknown',
         persons: {
           visitor: entity.persons?.visitor || [],
-          member: entity.persons?.member || []
-        }
+          member: entity.persons?.member || [],
+        },
       };
-      
+
       // Check if the key contains multiple IDs separated by commas
       if (key.includes(',')) {
         // Split by comma and create individual entries for each ID
-        const ids = key.split(',').map(id => id.trim());
-        
-        ids.forEach(id => {
+        const ids = key.split(',').map((id) => id.trim());
+
+        ids.forEach((id) => {
           result[id] = entityCount;
         });
       } else {
@@ -319,7 +396,7 @@ const parseEntityCounts = (entities: any): { [id: string]: EntityCount } => {
       }
     });
   }
-  
+
   return result;
 };
 
@@ -351,42 +428,46 @@ export const getAreaCount = (state: RootState, areaId: string): number => {
 };
 
 // Helper to get all buildings with counts
-export const getAllBuildings = (state: RootState): { id: string; name: string; count: number }[] => {
+export const getAllBuildings = (
+  state: RootState,
+): { id: string; name: string; count: number }[] => {
   const buildingData = state.BeaconReducer.countingData?.building || {};
-  return Object.keys(buildingData).map(id => ({
+  return Object.keys(buildingData).map((id) => ({
     id,
     name: buildingData[id].name,
-    count: buildingData[id].count
+    count: buildingData[id].count,
   }));
 };
 
 // Helper to get all floors with counts
 export const getAllFloors = (state: RootState): { id: string; name: string; count: number }[] => {
   const floorData = state.BeaconReducer.countingData?.floor || {};
-  return Object.keys(floorData).map(id => ({
+  return Object.keys(floorData).map((id) => ({
     id,
     name: floorData[id].name,
-    count: floorData[id].count
+    count: floorData[id].count,
   }));
 };
 
 // Helper to get all floorplans with counts
-export const getAllFloorplans = (state: RootState): { id: string; name: string; count: number }[] => {
+export const getAllFloorplans = (
+  state: RootState,
+): { id: string; name: string; count: number }[] => {
   const floorplanData = state.BeaconReducer.countingData?.floorplan || {};
-  return Object.keys(floorplanData).map(id => ({
+  return Object.keys(floorplanData).map((id) => ({
     id,
     name: floorplanData[id].name,
-    count: floorplanData[id].count
+    count: floorplanData[id].count,
   }));
 };
 
 // Helper to get all areas with counts
 export const getAllAreas = (state: RootState): { id: string; name: string; count: number }[] => {
   const areaData = state.BeaconReducer.countingData?.area || {};
-  return Object.keys(areaData).map(id => ({
+  return Object.keys(areaData).map((id) => ({
     id,
     name: areaData[id].name,
-    count: areaData[id].count
+    count: areaData[id].count,
   }));
 };
 

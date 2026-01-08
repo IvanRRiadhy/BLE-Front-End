@@ -16,6 +16,7 @@ import SidebarListItem from './SidebarListItem';
 import { SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllVisitor } from 'src/hooks/useVisitor';
+import { useEnrichedTrackingLogs, useTrackingLogs } from 'src/hooks/useTrackingLogs';
 
 interface SidebarListProps {
   filterType: string; // '', 'All', 'Tracking', 'Alarm'
@@ -38,10 +39,10 @@ type ListType = {
 // Helper function to convert beacon object to array
 const convertBeaconObjectToArray = (beaconObj: any): any[] => {
   if (!beaconObj) return [];
-  
+
   // If it's already an array, return it
   if (Array.isArray(beaconObj)) return beaconObj;
-  
+
   // If it's an object, convert to array
   return Object.values(beaconObj);
 };
@@ -54,30 +55,34 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
 
   const [openModal, setOpenModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ListType | null>(null);
-  const [list, setList] = useState<ListType[]>([]);
-
+  // const [list, setList] = useState<ListType[]>([]);
+  const trackingLogs = useEnrichedTrackingLogs();
+  const list =
+    filterType && filterType !== 'All'
+      ? trackingLogs.filter((x) => x.type === filterType)
+      : trackingLogs;
   const { data: memberList = [] } = useAllMembers();
   const { data: visitorList = [] } = useAllVisitor();
-  
+
   // Get beaconsByTopic from Redux - now it's an object of objects
   const beaconsByTopicObj = useSelector((s: RootState) => s.BeaconReducer.beaconsByTopic || {});
-  
+
   // Convert beaconsByTopic to array format for easier processing
   const allBeacons = useMemo(() => {
     const result: any[] = [];
-    
+
     // Iterate through each topic
     Object.values(beaconsByTopicObj).forEach((topicBeacons) => {
       if (!topicBeacons) return;
-      
+
       // topicBeacons is an object with beaconId as keys
       const beaconArray = Object.values(topicBeacons);
       result.push(...beaconArray);
     });
-    
+
     return result;
   }, [beaconsByTopicObj]);
-  
+
   const alarmTriggers = useSelector((s: RootState) => s.alarmTriggerReducer.alarmTriggers || []);
 
   const getName = (bleNumber: string) => {
@@ -93,7 +98,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
     const v = visitorList.find((x) => x.bleCardNumber === bleNumber);
     if (v && v.faceImage) return v.faceImage;
     return '';
-  }
+  };
 
   const prevAreaByBeaconRef = useRef<Record<string, string>>({});
   const seenIdsRef = useRef<Set<string>>(new Set());
@@ -103,7 +108,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
     if (a.id) return `alarm-${a.id}`;
     return `alarm-${a.beaconId || 'unk'}-${a.firstGatewayId || 'na'}-${t}`;
   };
-  
+
   const trackingKey = (b: any) => {
     const t = b.time ? new Date(b.time).getTime() : 0;
     const beaconId = b.beaconId || b.cardId || b.id || 'unk';
@@ -116,127 +121,129 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
     if (items.length <= MAX_LIST_ITEMS) {
       return items;
     }
-    
+
     // Keep only the most recent MAX_LIST_ITEMS items (newest first after sorting)
     // Since we sort newest to oldest, we want to keep the first MAX_LIST_ITEMS items
     const limitedItems = items.slice(0, MAX_LIST_ITEMS);
-    
+
     // Remove IDs of deleted items from seenIdsRef
-    const keptIds = new Set(limitedItems.map(item => item.id));
+    const keptIds = new Set(limitedItems.map((item) => item.id));
     const deletedIds = items
       .slice(MAX_LIST_ITEMS) // Get the items that were removed
-      .map(item => item.id);
-    
+      .map((item) => item.id);
+
     // Remove deleted IDs from seenIdsRef
-    deletedIds.forEach(id => {
+    deletedIds.forEach((id) => {
       seenIdsRef.current.delete(id);
     });
-    
-    console.log(`[SidebarList] List exceeded ${MAX_LIST_ITEMS} items. Removed ${deletedIds.length} oldest items.`);
-    
+
+    console.log(
+      `[SidebarList] List exceeded ${MAX_LIST_ITEMS} items. Removed ${deletedIds.length} oldest items.`,
+    );
+
     return limitedItems;
   };
 
-  useEffect(() => {
-    const rowsToAppend: ListType[] = [];
+  // useEffect(() => {
+  //   const rowsToAppend: ListType[] = [];
 
-    // Process alarm triggers
-    for (const a of alarmTriggers) {
-      const id = alarmKey(a);
-      if (!seenIdsRef.current.has(id)) {
-        rowsToAppend.push({
-          id,
-          device: 'Alarm',
-          target: getName(a.beaconId),
-          image: getImage(a.beaconId),
-          dmac: a.beaconId,
-          floor: a.floorplan?.name || 'Unknown Floor',
-          area: 'Unknown Area',
-          alarmType: a.isInRestrictedArea ? 'Restricted' : undefined,
-          status: a.isActive ? 'Active' : 'Inactive',
-          time: a.triggerTime || new Date().toISOString(),
-          type: 'Alarm',
-        });
-        // console.log('[Sidebar] Append Alarm:', id);
-      }
-    }
+  //   // Process alarm triggers
+  //   for (const a of alarmTriggers) {
+  //     const id = alarmKey(a);
+  //     if (!seenIdsRef.current.has(id)) {
+  //       rowsToAppend.push({
+  //         id,
+  //         device: 'Alarm',
+  //         target: getName(a.beaconId),
+  //         image: getImage(a.beaconId),
+  //         dmac: a.beaconId,
+  //         floor: a.floorplan?.name || 'Unknown Floor',
+  //         area: 'Unknown Area',
+  //         alarmType: a.isInRestrictedArea ? 'Restricted' : undefined,
+  //         status: a.isActive ? 'Active' : 'Inactive',
+  //         time: a.triggerTime || new Date().toISOString(),
+  //         type: 'Alarm',
+  //       });
+  //       // console.log('[Sidebar] Append Alarm:', id);
+  //     }
+  //   }
 
-    // Process tracking beacons 
-    allBeacons.forEach((b: any) => {
-      const beaconId = b.beaconId || b.cardId || b.id || '';
-      if (!beaconId) return;
-      
-      const areaNow = b.maskedAreaName || b.areaName || '';
-      if (!areaNow) return;
+  //   // Process tracking beacons
+  //   allBeacons.forEach((b: any) => {
+  //     const beaconId = b.beaconId || b.cardId || b.id || '';
+  //     if (!beaconId) return;
 
-      const prevArea = prevAreaByBeaconRef.current[beaconId];
-      if (prevArea !== areaNow) {
-        prevAreaByBeaconRef.current[beaconId] = areaNow;
+  //     const areaNow = b.maskedAreaName || b.areaName || '';
+  //     if (!areaNow) return;
 
-        const id = trackingKey(b);
-        if (!seenIdsRef.current.has(id)) {
-          rowsToAppend.push({
-            id,
-            device: 'Tracking Event',
-            target: getName(beaconId),
-            image: getImage(beaconId),
-            dmac: beaconId,
-            floor: b.floorplanName || 'Unknown Floor',
-            area: areaNow,
-            time: b.time || new Date().toISOString(),
-            type: 'Tracking',
-          });
-          // console.log('[Sidebar] Append Tracking (area-enter):', id);
-        }
-      }
-    });
+  //     const prevArea = prevAreaByBeaconRef.current[beaconId];
+  //     if (prevArea !== areaNow) {
+  //       prevAreaByBeaconRef.current[beaconId] = areaNow;
 
-    if (rowsToAppend.length === 0) return;
+  //       const id = trackingKey(b);
+  //       if (!seenIdsRef.current.has(id)) {
+  //         rowsToAppend.push({
+  //           id,
+  //           device: 'Tracking Event',
+  //           target: getName(beaconId),
+  //           image: getImage(beaconId),
+  //           dmac: beaconId,
+  //           floor: b.floorplanName || 'Unknown Floor',
+  //           area: areaNow,
+  //           time: b.time || new Date().toISOString(),
+  //           type: 'Tracking',
+  //         });
+  //         // console.log('[Sidebar] Append Tracking (area-enter):', id);
+  //       }
+  //     }
+  //   });
 
-    setList((prev) => {
-      const merged = [...prev];
-      for (const row of rowsToAppend) {
-        if (!seenIdsRef.current.has(row.id)) {
-          seenIdsRef.current.add(row.id);
-          merged.push(row);
-        }
-      }
+  //   if (rowsToAppend.length === 0) return;
 
-      let filtered = merged;
-      if (filterType && filterType !== 'All') {
-        filtered = filtered.filter((x) => x.type === filterType);
-      }
+  //   setList((prev) => {
+  //     const merged = [...prev];
+  //     for (const row of rowsToAppend) {
+  //       if (!seenIdsRef.current.has(row.id)) {
+  //         seenIdsRef.current.add(row.id);
+  //         merged.push(row);
+  //       }
+  //     }
 
-      filtered.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-      
-      // Limit the list to MAX_LIST_ITEMS items
-      filtered = limitListSize(filtered);
-      
-      return filtered;
-    });
-  }, [alarmTriggers, allBeacons, filterType, memberList, visitorList]);
+  //     let filtered = merged;
+  //     if (filterType && filterType !== 'All') {
+  //       filtered = filtered.filter((x) => x.type === filterType);
+  //     }
+
+  //     filtered.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+  //     // Limit the list to MAX_LIST_ITEMS items
+  //     filtered = limitListSize(filtered);
+
+  //     return filtered;
+  //   });
+  // }, [alarmTriggers, allBeacons, filterType, memberList, visitorList]);
 
   // Also apply limit when filter changes (in case we have more than MAX_LIST_ITEMS after filtering)
-  useEffect(() => {
-    setList(prev => {
-      let filtered = prev;
-      if (filterType && filterType !== 'All') {
-        filtered = prev.filter((x) => x.type === filterType);
-      } else {
-        // If filter is 'All' or empty, show all items (but still limited)
-        filtered = prev;
-      }
-      
-      filtered.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-      
-      // Ensure we don't exceed MAX_LIST_ITEMS even after filtering
-      if (filtered.length > MAX_LIST_ITEMS) {
-        filtered = limitListSize(filtered);
-      }
-      
-      return filtered;
-    });
-  }, [filterType]);
+  // useEffect(() => {
+  //   setList(prev => {
+  //     let filtered = prev;
+  //     if (filterType && filterType !== 'All') {
+  //       filtered = prev.filter((x) => x.type === filterType);
+  //     } else {
+  //       // If filter is 'All' or empty, show all items (but still limited)
+  //       filtered = prev;
+  //     }
+
+  //     filtered.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+  //     // Ensure we don't exceed MAX_LIST_ITEMS even after filtering
+  //     if (filtered.length > MAX_LIST_ITEMS) {
+  //       filtered = limitListSize(filtered);
+  //     }
+
+  //     return filtered;
+  //   });
+  // }, [filterType]);
 
   const handleItemClick = (item: ListType) => {
     setSelectedItem(item);

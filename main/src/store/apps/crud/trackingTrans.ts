@@ -28,7 +28,7 @@ export type GetFilter = {
             DateTo?: string | null,
         }
     }
-    timeReport?: string,
+    timeRange?: string,
     filters: {
         FloorplanMaskedAreaId?: string[],
         ReaderId?: string[],

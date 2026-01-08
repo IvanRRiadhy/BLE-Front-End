@@ -137,7 +137,7 @@ const NewestTrack = () => {
     <Box mt={1}>
       {/* Header */}
       <Box display="flex" alignItems="center" gap={1} mb={1}>
-        <Typography sx={{ color: '#fff', fontWeight: 600 }}>{visitor.name}</Typography>
+        <Typography variant='h5' sx={{ color: '#fff', fontWeight: 700 }}>{visitor.name}</Typography>
 
         {visitor.isVip && <Chip label="VIP" color="warning" size="small" sx={chipSx} />}
         {visitor.isBlacklist && <Chip label="BLACKLIST" size="small" sx={chipSx} />}
@@ -186,7 +186,7 @@ const NewestTrack = () => {
     <Box mt={1}>
       {/* Header */}
       <Box display="flex" alignItems="center" gap={1} mb={1}>
-        <Typography sx={{ color: '#fff', fontWeight: 600 }}>{member.name}</Typography>
+        <Typography variant='h5' sx={{ color: '#fff', fontWeight: 700 }}>{member.name}</Typography>
 
         {member.isBlacklist && <Chip label="BLACKLIST" size="small" sx={chipSx} />}
 
@@ -236,7 +236,7 @@ const NewestTrack = () => {
   );
 
   return (
-    <Box sx={{ width: '100%', height: '100%', overflowY: 'auto', p: 2 }}>
+    <Box sx={{ width: '100%', height: '100%', overflowY: 'auto', p: 0.5 }}>
       {allBeacons.map((beacon: any, idx) => {
         const isVisitor = !!beacon.visitorCardId;
         const isMember = !!beacon.memberCardId;
@@ -297,7 +297,7 @@ const NewestTrack = () => {
             )} */}
             <Grid container spacing={2}>
               {/* FOTO */}
-              <Grid size={2}>
+              <Grid size={1}>
                 <Avatar
                   src={`${BASE_URL}${faceImage}`}
                   sx={{
@@ -314,7 +314,7 @@ const NewestTrack = () => {
               </Grid>
 
               {/* INFO */}
-              <Grid size={10}>
+              <Grid size={11} mb={1}>
                 {visitor && <VisitorDetails visitor={visitor} beacon={beacon} />}
                 {member && <MemberDetails member={member} beacon={beacon} />}
               </Grid>

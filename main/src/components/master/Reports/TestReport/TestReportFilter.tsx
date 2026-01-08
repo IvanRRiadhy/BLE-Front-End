@@ -37,6 +37,8 @@ import { useAddVisitorFilterPreset } from 'src/hooks/useVisitorFilterPreset';
 
 import { VisitorSessionType } from 'src/store/apps/crud/visitorSession';
 import { NewAlarmType, NewGetFilter } from 'src/store/apps/crud/alarmRecordTracking';
+import { PersonType } from 'src/types/crud/input';
+import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 
 type PersonOption = {
   id: string;
@@ -61,21 +63,20 @@ const VisitorReportFilter = () => {
   const members = useAllMembers().data || [];
 
   const personOptions: PersonOption[] = [
-  ...visitors.map((v) => ({
-    id: v.id,
-    name: v.name,
-    type: 'visitor' as const,
-  })),
-  ...members.map((m) => ({
-    id: m.id,
-    name: m.name,
-    type: 'member' as const,
-  })),
-];
+    ...visitors.map((v) => ({
+      id: v.id,
+      name: v.name,
+      type: 'visitor' as const,
+    })),
+    ...members.map((m) => ({
+      id: m.id,
+      name: m.name,
+      type: 'member' as const,
+    })),
+  ];
 
   /* ===================== STATE ===================== */
-  const [timeType, setTimeType] =
-    useState<'Daily' | 'Weekly' | 'Monthly' | 'Custom'>('Daily');
+  const [timeType, setTimeType] = useState<'Daily' | 'Weekly' | 'Monthly' | 'Custom'>('Daily');
 
   const [dateRange, setDateRange] = useState({
     from: dayjs().format('YYYY-MM-DD'),
@@ -85,6 +86,7 @@ const VisitorReportFilter = () => {
   const [selectedPersons, setSelectedPersons] = useState<PersonOption[]>([]);
   const [selectedArea, setSelectedArea] = useState<SelectedNode>(null);
   const [selectedHost, setSelectedHost] = useState<memberType | null>(null);
+  const [selectedType, setSelectedType] = useState<any>(null);
 
   const [openReport, setOpenReport] = useState(false);
   const [trackingLogs, setTrackingLogs] = useState<any[]>([]);
@@ -100,7 +102,7 @@ const VisitorReportFilter = () => {
 
   /* ===================== FILTER BUILDERS ===================== */
   const buildTrackingFilter = () => ({
-    TimeReport: timeType.toLowerCase(),
+    timeRange: timeType.toLowerCase(),
     buildingId: selectedArea?.type === 'building' ? selectedArea.data.id : null,
     floorId: selectedArea?.type === 'floor' ? selectedArea.data.id : null,
     floorplanId: selectedArea?.type === 'floorplan' ? selectedArea.data.id : null,
@@ -110,7 +112,7 @@ const VisitorReportFilter = () => {
 
   const buildAlarmFilter = (): NewGetFilter => {
     const filter: NewGetFilter = {
-      TimeReport: timeType.toLowerCase() as NewGetFilter['TimeReport'],
+      timeRange: timeType.toLowerCase() as NewGetFilter['timeRange'],
       buildingId: selectedArea?.type === 'building' ? selectedArea.data.id : null,
       floorId: selectedArea?.type === 'floor' ? selectedArea.data.id : null,
       floorplanId: selectedArea?.type === 'floorplan' ? selectedArea.data.id : null,
@@ -211,9 +213,15 @@ const VisitorReportFilter = () => {
           <Grid size={{ xs: 12, md: 4 }}>
             <FormControl fullWidth>
               <InputLabel>Filter Type</InputLabel>
-              <Select value={timeType} label="Filter Type" onChange={(e) => setTimeType(e.target.value as any)}>
+              <Select
+                value={timeType}
+                label="Filter Type"
+                onChange={(e) => setTimeType(e.target.value as any)}
+              >
                 {['Daily', 'Weekly', 'Monthly', 'Custom'].map((v) => (
-                  <MenuItem key={v} value={v}>{v}</MenuItem>
+                  <MenuItem key={v} value={v}>
+                    {v}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -274,13 +282,31 @@ const VisitorReportFilter = () => {
           </Grid>
 
           <Grid size={{ xs: 12, md: 4 }}>
-            <Autocomplete
-              options={members}
-              value={selectedHost}
-              onChange={(_, v) => setSelectedHost(v)}
-              getOptionLabel={(o) => o.name}
-              renderInput={(p) => <TextField {...p} label="Host (Member)" />}
-            />
+            {/* <Autocomplete
+              options={PersonType}
+              value={selectedType}
+              onChange={(_, v) => setSelectedType(v)}
+              getOptionLabel={(o) => o.label}
+              
+              renderInput={(p) => <TextField {...p} label="Target" disabled={p.disabled} />}
+            /> */}
+            <CustomSelect
+              name="Person Type"
+              value={selectedType}
+              onChange={(e: React.ChangeEvent<{ value: unknown }>) =>
+                setSelectedType(e.target.value)
+              }
+              fullWidth
+              // label="Person Type"
+              // options = {PersonType}
+              variant="outlined"
+            >
+              {PersonType.map((option) => (
+                <MenuItem key={option.value} value={option.value} disabled={option.disabled}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </CustomSelect>
           </Grid>
         </Grid>
 
@@ -300,7 +326,12 @@ const VisitorReportFilter = () => {
       </Card>
 
       {/* Preset Dialog */}
-      <Dialog open={openPresetDialog} onClose={() => setOpenPresetDialog(false)} maxWidth="xs" fullWidth>
+      <Dialog
+        open={openPresetDialog}
+        onClose={() => setOpenPresetDialog(false)}
+        maxWidth="xs"
+        fullWidth
+      >
         <DialogTitle>Save Report Preset</DialogTitle>
         <DialogContent>
           <TextField

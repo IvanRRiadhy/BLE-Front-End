@@ -32,7 +32,7 @@ export type GetAlarmRecordResponse = {
     };
 };
 export type NewGetFilter = {
-    TimeReport: "daily" | "weekly" | "monthly" | "yearly" | "custom";
+    timeRange: "daily" | "weekly" | "monthly" | "yearly" | "custom";
     buildingId: string | null;
     floorId: string | null;
     floorplanId: string | null;
@@ -54,7 +54,7 @@ export type GetFilter = {
             DateTo?: string | null,
         }
     }
-    timeReport?: string,
+    timeRange?: string,
     filters: {
         FloorplanMaskedAreaId?: string[],
         ReaderId?: string[],

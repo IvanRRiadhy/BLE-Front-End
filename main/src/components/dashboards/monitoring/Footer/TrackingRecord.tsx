@@ -11,16 +11,23 @@ import {
   Typography,
   TablePagination,
   Divider,
+  Avatar,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import { fetchTrackingTrans, fetchTrackingTransDT, trackingTransType } from 'src/store/apps/crud/trackingTrans';
+import {
+  fetchTrackingTrans,
+  fetchTrackingTransDT,
+  trackingTransType,
+} from 'src/store/apps/crud/trackingTrans';
 import { fetchBleReaders, bleReaderType } from 'src/store/apps/crud/bleReader';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { useTranslation } from 'react-i18next';
 import { fetchMembers, memberType } from 'src/store/apps/crud/member';
 import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import { defaultTrackingTransFilter } from 'src/store/apps/defaultForm';
+import { useEnrichedTrackingLogs } from 'src/hooks/useTrackingLogs';
+import { BASE_URL } from 'src/utils/axios';
 
 const dummyData: trackingTransType[] = [
   {
@@ -118,9 +125,7 @@ const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
     setPage(0);
   };
   const dispatch: AppDispatch = useDispatch();
-  const trackingTransData = useSelector(
-    (state: RootState) => state.trackingTransReducer.trackingTrans,
-  );
+  const trackingLogs = useEnrichedTrackingLogs();
   // const trackingTransData = dummyData;
   const readerData = useSelector((state: RootState) => state.bleReaderReducer.bleReaders);
   const floorplanMaskedAreaData = useSelector(
@@ -144,7 +149,7 @@ const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
   const newestTransaction = findNewestTransaction(dummyData);
 
   useEffect(() => {
-    dispatch(fetchTrackingTransDT({...defaultTrackingTransFilter}));
+    dispatch(fetchTrackingTransDT({ ...defaultTrackingTransFilter }));
     dispatch(fetchBleReaders());
     dispatch(fetchMaskedAreas());
     dispatch(fetchMembers());
@@ -187,9 +192,8 @@ const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
           <BlankCard>
             <TableContainer sx={{ maxHeight: '200px', overflowY: 'auto' }}>
               <Table aria-label="simple table" sx={{ tableLayout: 'fixed', width: '100%' }}>
-                <TableHead>
+                <TableHead >
                   <TableRow>
-                    {/* Left Sticky Empty Column */}
                     <TableCell
                       sx={{
                         position: 'sticky',
@@ -197,76 +201,114 @@ const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
                         left: 0,
                         background: 'white',
                         zIndex: 2,
-                        width: '50px',
+                        width: '70px',
+                        
                       }}
                     >
-                      <Typography variant="h6"> No </Typography>
+                      <Typography variant="h6"></Typography>
                     </TableCell>
+
                     {[
-                      // 'ID',
-                      'Trans Time',
-                      'Reader Name',
-                      'Card Holder Name',
-                      'Floorplan Name',
-                      'Coordinate',
-                      'Alarm Status',
-                      'Battery',
+                      // 'Image',
+                      'Person Name',
+                      'Area',
+                      'Time',
+                      'Card Number',
+                      'Type',
+                      'Alarm',
                     ].map((header) => (
                       <TableCell
                         key={header}
-                        sx={{
-                          position: 'sticky',
-                          top: 0, // Ensure the header sticks to the top
-                          background: 'white',
-                          zIndex: 1,
-                        }}
+                        sx={{ position: 'sticky', top: 0, background: 'white', zIndex: 1 }}
                       >
                         <Typography variant="h6">{header}</Typography>
                       </TableCell>
                     ))}
                   </TableRow>
+                  
                 </TableHead>
+                
                 <TableBody>
-                  {(isNew
-                    ? [newestTransaction]
-                    : trackingTransData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  )
-                    .filter((item) => item !== null) // Ensure no null values are rendered
-                    .map((trackingTrans: trackingTransType, index) => {
-                      const { label, isVisitor, isMember } = getName(trackingTrans.cardId);
+                  {trackingLogs
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((log, index) => {
+                      const isAlarm = log.type === 'Alarm';
+                      const isVisitor = log.personType === 'Visitor';
+                      const isMember = log.personType === 'Member';
+
                       return (
-                        <TableRow key={trackingTrans.id}>
+                        <TableRow key={log.id}>
+                          {/* Avatar */}
                           <TableCell
-                            sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                            sx={{
+                              position: 'sticky',
+                              left: 0,
+                              background: 'white',
+                              zIndex: 1,
+                              width: '70px',
+                            }}
                           >
-                            {isNew ? 1 : index + 1} {/* Show "1" if isNew is true */}
+                            <Grid size={2}>
+                              <Avatar
+                                src={`${BASE_URL}${log.image}`}
+                                sx={{
+                                  width: 50,
+                                  height: 50,
+                                  border: '3px solid',
+                                  borderColor: isVisitor ? '#f50057' : '#1976d2',
+                                }}
+                              />
+                            </Grid>
                           </TableCell>
-                          {/* <TableCell>{trackingTrans.id}</TableCell> */}
-                          <TableCell>{formatTime(trackingTrans.transTime)}</TableCell>
-                          <TableCell>{trackingTrans.reader?.name}</TableCell>
+
+                          {/* Image */}
+                          {/* <TableCell>
+            
+          </TableCell> */}
+
+                          {/* Person Name */}
                           <TableCell>
-                            {isVisitor ? '(Visitor) ' : isMember ? '(Member) ' : 'Unknown'} {label}
+                            <Typography fontWeight={600}>{log.target}</Typography>
                           </TableCell>
+
+                          {/* Area - Floor */}
                           <TableCell>
-                            {trackingTrans.floorplanMaskedArea?.name ?? 'Unknown Area'}
+                            {log.area} – {log.floor}
                           </TableCell>
+
+                          {/* Time */}
+                          <TableCell>{formatTime(log.time)}</TableCell>
+
+                          {/* Card Number */}
+                          <TableCell>{log.dmac}</TableCell>
+
+                          {/* Type */}
                           <TableCell>
-                            {formatCoords(trackingTrans.coordinateX, trackingTrans.coordinateY)}
+                            {isVisitor ? 'Visitor' : isMember ? 'Member' : 'Unknown'}
                           </TableCell>
-                          <TableCell>{trackingTrans.alarmStatus}</TableCell>
-                          <TableCell>{trackingTrans.battery}</TableCell>
+
+                          {/* Alarm */}
+                          <TableCell>
+                            {isAlarm ? (
+                              <Typography color="error" fontWeight={600}>
+                                Yes
+                              </Typography>
+                            ) : (
+                              'No'
+                            )}
+                          </TableCell>
                         </TableRow>
                       );
                     })}
                 </TableBody>
               </Table>
             </TableContainer>
-            <Divider />
+
             {!isNew && (
               <TablePagination
                 rowsPerPageOptions={[]}
                 component="div"
-                count={trackingTransData.length}
+                count={trackingLogs.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}
