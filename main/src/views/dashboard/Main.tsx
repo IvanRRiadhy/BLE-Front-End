@@ -11,11 +11,9 @@ import WelcomePopup from 'src/components/dashboards/mainmenu/WelcomePopup';
 import { blacklistType, fetchBlacklistDT } from 'src/store/apps/crud/blacklist';
 import { fetchMaskedAreaDT, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { fetchBleReaderDT } from 'src/store/apps/crud/bleReader';
-import { AlarmType, fetchAlarmDT, fetchAlarm } from 'src/store/apps/crud/alarmRecordTracking';
+import { AlarmType, } from 'src/store/apps/crud/alarmRecordTracking';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
-  fetchTrackingTrans,
-  fetchTrackingTransDT,
   trackingTransType,
 } from 'src/store/apps/crud/trackingTrans';
 import { setMainMenu } from 'src/store/customizer/CustomizerSlice';

@@ -86,9 +86,9 @@ const AlarmWarning = () => {
     );
   }, [dispatch]);
 
-  useEffect(() => {
-    dispatch(fetchAlarmDT(AlarmRecordFilter));
-  }, [AlarmRecordFilter, dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchAlarmDT(AlarmRecordFilter));
+  // }, [AlarmRecordFilter, dispatch]);
 
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);

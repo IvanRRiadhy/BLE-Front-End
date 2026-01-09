@@ -111,7 +111,7 @@ const Notifications = () => {
     if (!bellRef.current) return null;
     const rect = bellRef.current.getBoundingClientRect();
     const baseTop = rect.bottom + 8;
-    const spacing = 85; // bubble height + gap
+    const spacing = 125; // bubble height + gap
     return { top: baseTop + index * spacing, left: rect.right - 370 };
   };
 

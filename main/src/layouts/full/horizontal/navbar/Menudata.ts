@@ -21,6 +21,8 @@ import {
   IconUsers,
   IconCalendar,
   IconBell,
+  IconEye,
+  IconBadge,
 } from '@tabler/icons-react';
 import { uniqueId } from 'lodash';
 import { AlarmSettingType } from 'src/store/apps/alarmsetting/alarmSettings';
@@ -125,6 +127,14 @@ const isBoundaryActive = isActive('boundary');
             { id: uniqueId(), title: 'Card Group', icon: IconMapPin, href: '/master/cardgroup/' },
             { id: uniqueId(), title: 'Card Access', icon: IconMapPin, href: '/master/cardaccess/' },
           ],
+        },
+        {
+          id: uniqueId(),
+          title: 'Security',
+          icon: IconEye,
+          children: [
+            { id: uniqueId(), title: 'Security Guard', icon: IconBadge, href: '/master/securityguard/' },
+          ]
         },
         { id: uniqueId(), title: 'Member Data', icon: IconUsers, href: '/master/membertag/' },
         { id: uniqueId(), title: 'Time Group', icon: IconCalendar, href: '/master/timegroup/' },

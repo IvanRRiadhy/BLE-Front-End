@@ -88,6 +88,9 @@ const FloorplanDeviceEdit = Loadable(
 const MaskedAreaEdit = Loadable(lazy(() => import('../views/master/crud/MaskedAreaEdit')));
 const RulesEdit = Loadable(lazy(() => import('../views/master/rules/rulesEdit')));
 
+/* ****Security**** */
+const SecurityGuard = Loadable(lazy(() => import('../views/master/security/securityGuard')));
+
 /* ****Reports**** */
 const TrackingTransaction = Loadable(lazy(() => import('../views/Reports/TrackingTrans')));
 const AlarmRecord = Loadable(lazy(() => import('../views/Reports/AlarmRecord')));
@@ -237,6 +240,9 @@ const Router = [
       { path: '/master/cardgroup', exact: true, element: withAuth(<CardGroup />, '/master/cardgroup') },
 
       { path: '/master/membertag', exact: true, element: withAuth(<MemberTag />, '/master/membertag') },
+
+      //Security
+      { path: '/master/securityguard', exact: true, element: withAuth(<SecurityGuard />, '/master/securityguard') },
       // { path: '/master/floorplan', exact: true, element: <Floorplan /> },
       // { path: '/master/gateway', exact: true, element: <GatewayApp /> },
 

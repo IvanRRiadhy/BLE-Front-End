@@ -176,16 +176,16 @@ const VisitorContent = () => {
     if (lastPayloadRef.current === key) return; // already fetched same thing
     lastPayloadRef.current = key;
 
-    setLoading(true);
-    try {
-      if (viewMode === 'alarm') {
-        await dispatch(fetchAlarmDT(payload as any));
-      } else {
-        await dispatch(fetchTrackingTransDT(payload as any));
-      }
-    } finally {
-      setLoading(false);
-    }
+    // setLoading(true);
+    // try {
+    //   if (viewMode === 'alarm') {
+    //     await dispatch(fetchAlarmDT(payload as any));
+    //   } else {
+    //     await dispatch(fetchTrackingTransDT(payload as any));
+    //   }
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   // 🔹 Run once when visitor changes (initial load)

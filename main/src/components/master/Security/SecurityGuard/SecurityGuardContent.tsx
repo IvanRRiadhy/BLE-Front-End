@@ -46,7 +46,7 @@ import { useAllDistricts } from 'src/hooks/useDistrict';
 import { useAllDepartments } from 'src/hooks/useDepartment';
 import { useAllOrganizations } from 'src/hooks/useOrganization';
 
-const MemberContent = () => {
+const SecurityGuardContent = () => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const selectedMemberId: string = useSelector(
@@ -64,7 +64,7 @@ const MemberContent = () => {
   ]);
 
   // Resolve the selected member directly from cache
-  const memberDetail = memberCache?.data.find((m) => m.id === selectedMemberId);
+  const securityGuardDetail = memberCache?.data.find((m) => m.id === selectedMemberId);
   const dispatch = useDispatch();
   // const theme = useTheme();
   const [loading, setLoading] = useState(false);
@@ -128,7 +128,7 @@ const MemberContent = () => {
 
   //Block Member
   const [blacklistDialogOpen, setBlacklistDialogOpen] = useState(false);
-  const [targetMember, setTargetMember] = useState<memberType | null>(null);
+  const [targetSecurityGuard, setTargetMember] = useState<memberType | null>(null);
   const [reason, setReason] = useState<string>('');
   const { mutateAsync: blacklistMutation, isPending: isBlacklistPending } = useBlacklistMember();
 
@@ -144,13 +144,13 @@ const MemberContent = () => {
   };
 
   const handleConfirmBlacklist = async () => {
-    // if (targetMember) {
-    //   dispatch(blacklistVisitor(targetMember.id));
+    // if (targetSecurityGuard) {
+    //   dispatch(blacklistVisitor(targetSecurityGuard.id));
     // }
-    if (targetMember && reason) {
+    if (targetSecurityGuard && reason) {
       try {
         await blacklistMutation({
-          memberId: targetMember.id,
+          memberId: targetSecurityGuard.id,
           blacklistReason: reason,
         });
         toast.success('Member has been Blacklisted');
@@ -181,8 +181,8 @@ const MemberContent = () => {
 
   // Confirm delete action
   const handleConfirmUnblacklist = async () => {
-    // if (targetMember) {
-    //   dispatch(blacklistVisitor(targetMember.id));
+    // if (targetSecurityGuard) {
+    //   dispatch(blacklistVisitor(targetSecurityGuard.id));
     // }
     if (selectedUList) {
       try {
@@ -208,7 +208,7 @@ const MemberContent = () => {
 
   return (
     <>
-      {memberDetail ? (
+      {securityGuardDetail ? (
         <>
           {/* Header Part */}
           <Box
@@ -218,7 +218,7 @@ const MemberContent = () => {
             alignItems="center"
             justifyContent="space-between"
             sx={{
-              background: memberDetail.isBlacklist
+              background: securityGuardDetail.isBlacklist
                 ? 'linear-gradient(90deg, #e53935 0%, #ef5350 100%)' // vivid red
                 : 'linear-gradient(90deg, #1e88e5 0%, #42a5f5 100%)', // vivid blue
               borderRadius: '8px',
@@ -232,8 +232,8 @@ const MemberContent = () => {
               color="#fff"
               sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
             >
-              Member Details
-              {memberDetail.isBlacklist && (
+              Security Guard Details
+              {securityGuardDetail.isBlacklist && (
                 <Typography
                   variant="caption"
                   sx={{
@@ -253,14 +253,14 @@ const MemberContent = () => {
             {/* Right Section */}
             <Stack direction="row" alignItems="center" spacing={1.2}>
               {/* Edit */}
-              <Tooltip title="Edit Member">
-                <AddEditMember member={memberDetail} type="edit" />
+              <Tooltip title="Edit Security Guard">
+                <AddEditMember member={securityGuardDetail} type="edit" />
               </Tooltip>
 
               {/* Delete */}
-              <Tooltip title="Delete Member">
+              <Tooltip title="Delete Security Guard">
                 <IconButton
-                  onClick={() => handleOpenDeleteDialog(memberDetail)}
+                  onClick={() => handleOpenDeleteDialog(securityGuardDetail)}
                   size="small"
                   sx={{
                     backgroundColor: 'rgba(255,255,255,0.2)',
@@ -328,8 +328,8 @@ const MemberContent = () => {
               sx={{ position: 'relative' }}
             >
               <Avatar
-                alt="Member Profile"
-                src={`${BASE_URL}${memberDetail.faceImage}`}
+                alt="Security Guard Profile"
+                src={`${BASE_URL}${securityGuardDetail.faceImage}`}
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
               <Box
@@ -344,31 +344,31 @@ const MemberContent = () => {
                   <Button
                     size="large"
                     variant="contained"
-                    color={memberDetail.isBlacklist ? 'success' : 'error'}
+                    color={securityGuardDetail.isBlacklist ? 'success' : 'error'}
                     onClick={() => {
-                      memberDetail.isBlacklist
-                        ? handleOpenUnblacklistDialog(memberDetail)
-                        : handleOpenBlacklistDialog(memberDetail);
+                      securityGuardDetail.isBlacklist
+                        ? handleOpenUnblacklistDialog(securityGuardDetail)
+                        : handleOpenBlacklistDialog(securityGuardDetail);
                     }}
                     sx={{
                       boxShadow: 2,
                       width: '12vw',
                       height: 50,
-                      backgroundColor: memberDetail.isBlacklist ? '#66bb6a' : '#f08080',
+                      backgroundColor: securityGuardDetail.isBlacklist ? '#66bb6a' : '#f08080',
                       '&:hover': {
-                        backgroundColor: memberDetail.isBlacklist ? '#4caf50' : '#e57373',
+                        backgroundColor: securityGuardDetail.isBlacklist ? '#4caf50' : '#e57373',
                       },
                     }}
                   >
-                    {memberDetail.isBlacklist ? 'Unblacklist Member' : 'Blacklist Member'}
+                    {securityGuardDetail.isBlacklist ? 'Unblacklist Member' : 'Blacklist Member'}
                   </Button>
                 </Stack>
               </Box>
               <Typography variant="h4" fontWeight={800}>
-                {memberDetail.name}
+                {securityGuardDetail.name}
               </Typography>
               {/* 🚨 WARNING BOX FOR BLACKLISTED MEMBER */}
-              {memberDetail.isBlacklist && memberDetail.blacklistReason && (
+              {securityGuardDetail.isBlacklist && securityGuardDetail.blacklistReason && (
                 <Box
                   sx={{
                     mt: 2,
@@ -385,7 +385,7 @@ const MemberContent = () => {
                     ⚠ Blacklist Reason
                   </Typography>
                   <Typography variant="body2" color="#7f0000" mt={1}>
-                    {memberDetail.blacklistReason}
+                    {securityGuardDetail.blacklistReason}
                   </Typography>
                 </Box>
               )}
@@ -394,27 +394,27 @@ const MemberContent = () => {
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} display="flex" flexDirection={'column'}>
                 <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
-                <Typography>{memberDetail.email}</Typography>
+                <Typography>{securityGuardDetail.email}</Typography>
                 <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
-                <Typography>{memberDetail.address}</Typography>
+                <Typography>{securityGuardDetail.address}</Typography>
                 <CustomFormLabel htmlFor="birth-Date">Birth Date</CustomFormLabel>
-                <Typography>{formatDate(memberDetail.birthDate)}</Typography>
+                <Typography>{formatDate(securityGuardDetail.birthDate)}</Typography>
                 <CustomFormLabel htmlFor="join-Date">Join Date</CustomFormLabel>
-                <Typography>{formatDate(memberDetail.joinDate)}</Typography>
+                <Typography>{formatDate(securityGuardDetail.joinDate)}</Typography>
                 <CustomFormLabel htmlFor="exit-Date">Exit Date</CustomFormLabel>
-                <Typography>{formatDate(memberDetail.exitDate)}</Typography>
+                <Typography>{formatDate(securityGuardDetail.exitDate)}</Typography>
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} display="flex" flexDirection={'column'}>
                 <CustomFormLabel htmlFor="phone">Phone</CustomFormLabel>
-                <Typography>{memberDetail.phone}</Typography>
+                <Typography>{securityGuardDetail.phone}</Typography>
                 <CustomFormLabel htmlFor="gender">Gender</CustomFormLabel>
-                <Typography>{memberDetail.gender}</Typography>
+                <Typography>{securityGuardDetail.gender}</Typography>
                 <CustomFormLabel htmlFor="head-Member-1">Head Member 1</CustomFormLabel>
-                <Typography>{memberDetail.headMember1}</Typography>
+                <Typography>{securityGuardDetail.headMember1}</Typography>
                 <CustomFormLabel htmlFor="head-Member-2">Head Member 2</CustomFormLabel>
-                <Typography>{memberDetail.headMember2}</Typography>
+                <Typography>{securityGuardDetail.headMember2}</Typography>
                 <CustomFormLabel htmlFor="status-employee">Status Employee</CustomFormLabel>
-                <Typography>{memberDetail.statusEmployee}</Typography>
+                <Typography>{securityGuardDetail.statusEmployee}</Typography>
               </Grid>
             </Grid>
             <Typography variant="h5" fontWeight={600} mb={2} mt={2}>
@@ -424,18 +424,18 @@ const MemberContent = () => {
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} display="flex" flexDirection={'column'}>
                 <CustomFormLabel htmlFor="person-id">Person ID</CustomFormLabel>
-                <Typography>{memberDetail.personId}</Typography>
+                <Typography>{securityGuardDetail.personId}</Typography>
                 <CustomFormLabel htmlFor="department-Id">Department Name</CustomFormLabel>
-                <Typography>{memberDetail.department?.name}</Typography>
+                <Typography>{securityGuardDetail.department?.name}</Typography>
                 <CustomFormLabel htmlFor="identity-Id">Identity ID</CustomFormLabel>
-                <Typography>{memberDetail.identityId}</Typography>
+                <Typography>{securityGuardDetail.identityId}</Typography>
               </Grid>
 
               <Grid size={{ lg: 6, md: 12, sm: 12 }} display="flex" flexDirection={'column'}>
                 <CustomFormLabel htmlFor="organization-id">Organization Name</CustomFormLabel>
-                <Typography>{memberDetail.organization?.name}</Typography>
+                <Typography>{securityGuardDetail.organization?.name}</Typography>
                 <CustomFormLabel htmlFor="district-id">District Name</CustomFormLabel>
-                <Typography>{memberDetail.district?.name}</Typography>
+                <Typography>{securityGuardDetail.district?.name}</Typography>
               </Grid>
             </Grid>
             <Typography variant="h5" fontWeight={600} mb={2} mt={2}>
@@ -445,11 +445,11 @@ const MemberContent = () => {
             <Grid container spacing={5}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} display="flex" flexDirection={'column'}>
                 <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
-                <Typography>{memberDetail.cardNumber}</Typography>
+                <Typography>{securityGuardDetail.cardNumber}</Typography>
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} display="flex" flexDirection={'column'}>
                 <CustomFormLabel htmlFor="ble-card-number">Ble Card Number</CustomFormLabel>
-                <Typography>{memberDetail.bleCardNumber}</Typography>
+                <Typography>{securityGuardDetail.bleCardNumber}</Typography>
               </Grid>
             </Grid>
           </Box>
@@ -460,7 +460,7 @@ const MemberContent = () => {
           {/* If no Contact  */}
           {/* ------------------------------------------- */}
           <Box>
-            <Typography variant="h4">Please Select a Member</Typography>
+            <Typography variant="h4">Please Select a Security Guard</Typography>
             <br />
           </Box>
         </Box>
@@ -470,7 +470,7 @@ const MemberContent = () => {
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete member <strong>{selectedMember?.name}</strong>?
+            Are you sure you want to delete security guard <strong>{selectedMember?.name}</strong>?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -492,7 +492,7 @@ const MemberContent = () => {
         <DialogTitle>Confirm Blacklist</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to blacklist member <strong>{targetMember?.name}</strong>?
+            Are you sure you want to blacklist security guard <strong>{targetSecurityGuard?.name}</strong>?
           </DialogContentText>
           <Grid size={12} mt={2}>
             <CustomTextField
@@ -529,7 +529,7 @@ const MemberContent = () => {
         <DialogTitle>Confirm Unblacklist</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to unblacklist member <strong>{selectedUList?.name}</strong>?
+            Are you sure you want to unblacklist security guard <strong>{selectedUList?.name}</strong>?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -563,4 +563,4 @@ const MemberContent = () => {
   );
 };
 
-export default MemberContent;
+export default SecurityGuardContent;

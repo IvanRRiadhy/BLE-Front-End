@@ -19,37 +19,38 @@ import {
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import { SelectMemberId, UpdateFilter } from 'src/store/apps/crud/member';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import TagListItem from './tagListItem';
+import SecurityGuardListItem from './SecurityGuardListItem';
 import { defaultMemberFilter } from 'src/store/apps/defaultForm';
 import { memberType } from 'src/store/apps/crud/member';
 import { useMemberList, useDeleteMember } from 'src/hooks/useMember';
 
 const SKELETON_ROWS = 5;
 
-const TagList = () => {
+const SecurityGuardList = () => {
   const dispatch = useDispatch();
 
   // 🔹 Redux filter and selected state
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
   const selectedMemberId = useSelector((state: RootState) => state.memberReducer.selectedMemberId);
 
+
   // 🔹 React Query fetching
   const { data, isLoading, isFetching, isFetched } = useMemberList({
     ...memberFilter,
     Length: 0, // show all for side list
   });
-
+  
   const deleteMutation = useDeleteMember();
 
   // 🔹 State for bulk select
   const [isManySelect, setIsManySelect] = useState(false);
-  const [manySelectMembers, setManySelectMembers] = useState<memberType[]>([]);
+  const [manySelectSecurityGuards, setManySelectSecurityGuards] = useState<memberType[]>([]);
   const [isChecked, setIsChecked] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // 🔹 Derived members list
   const members = data?.data ?? [];
-  const active = members?.find((member: memberType) => member.id === selectedMemberId);
+const active = members?.find((member: memberType) => member.id === selectedMemberId);
   // ---------------------------------------------------------------------------
   // ✅ Initialization on mount
   // ---------------------------------------------------------------------------
@@ -66,10 +67,10 @@ const TagList = () => {
 
   const handleConfirmDelete = async () => {
     try {
-      for (const member of manySelectMembers) {
+      for (const member of manySelectSecurityGuards) {
         await deleteMutation.mutateAsync(member.id);
       }
-      setManySelectMembers([]);
+      setManySelectSecurityGuards([]);
       setIsManySelect(false);
     } catch (err) {
       console.error('Error deleting members:', err);
@@ -82,12 +83,12 @@ const TagList = () => {
   // ---------------------------------------------------------------------------
   const handleSelectAll = () => {
     setIsChecked(!isChecked);
-    setManySelectMembers(!isChecked ? members : []);
+    setManySelectSecurityGuards(!isChecked ? members : []);
   };
 
   const handleCancelClick = () => {
     setIsManySelect(false);
-    setManySelectMembers([]);
+    setManySelectSecurityGuards([]);
   };
 
   // ---------------------------------------------------------------------------
@@ -170,7 +171,12 @@ const TagList = () => {
           }}
         >
           {isManySelect && (
-            <Box display="flex" justifyContent="flex-end" alignItems="center" sx={{ mr: 2 }}>
+            <Box
+              display="flex"
+              justifyContent="flex-end"
+              alignItems="center"
+              sx={{ mr: 2 }}
+            >
               <Typography variant="body2" fontWeight={100}>
                 Select All
               </Typography>
@@ -181,16 +187,14 @@ const TagList = () => {
           {isLoading || isFetching
             ? renderSkeletonItems(SKELETON_ROWS)
             : members.map((member) => (
-                <TagListItem
+                <SecurityGuardListItem
                   key={member.id}
                   active={member === active}
                   member={member}
                   manySelect={isManySelect}
-                  setManySelectMembers={setManySelectMembers}
-                  manySelectMembers={manySelectMembers}
-                  onTagClick={() => {
-                    dispatch(SelectMemberId(member.id));
-                  }}
+                  setManySelectSecurityGuards={setManySelectSecurityGuards}
+                  manySelectSecurityGuards={manySelectSecurityGuards}
+                  onSecurityGuardClick={() => {dispatch(SelectMemberId(member.id))}}
                 />
               ))}
         </Box>
@@ -200,7 +204,9 @@ const TagList = () => {
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
-          <DialogContentText>Are you sure you want to delete these members?</DialogContentText>
+          <DialogContentText>
+            Are you sure you want to delete these members?
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDeleteDialog} color="primary">
@@ -215,4 +221,4 @@ const TagList = () => {
   );
 };
 
-export default TagList;
+export default SecurityGuardList;

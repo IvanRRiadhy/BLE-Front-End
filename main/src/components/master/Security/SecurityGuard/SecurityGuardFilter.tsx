@@ -28,7 +28,7 @@ interface DataType {
   category?: 'department' | 'district' | 'organization' | 'all';
 }
 
-const TagFilter = () => {
+const SecurityGuardFilter = () => {
   const dispatch = useDispatch();
 
   const customizer = useSelector((state: RootState) => state.customizer);
@@ -214,4 +214,4 @@ const TagFilter = () => {
   );
 };
 
-export default TagFilter;
+export default SecurityGuardFilter;

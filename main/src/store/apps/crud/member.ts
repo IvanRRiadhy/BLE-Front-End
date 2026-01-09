@@ -21,6 +21,9 @@ export type GetFilter = {
     SortDir: 'asc' | 'desc',
     SearchValue: string,
     filters: {
+        OrganizationId?: string[];
+        DepartmentId?: string[];
+        DistrictId?: string[];
     }
 }
 
