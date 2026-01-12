@@ -9,22 +9,36 @@ import Statistic from './Statistic';
 const MonitoringFooter = () => {
   const customizer = useSelector((state: RootState) => state.customizer);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+
+
   const footerRef = useRef<HTMLDivElement>(null); // Reference to the footer
   const toggleHeight = '50px';
   // const focus = useSelector((state: RootState) => state.layoutReducer.focus);
 
   const sections = [
     { id: 'section1', title: 'Tracking Record', content: <TrackingRecord /> },
-    { id: 'section2', title: 'New Track', content: <NewestTrack/> },
-    { id: 'section3', title: 'Alarm', content: <AlarmList /> },
+    { id: 'section2', title: 'New Track', content: <NewestTrack /> },
+    {
+      id: 'section3',
+      title: 'Alarm',
+      content: <AlarmList />,
+    },
     { id: 'section4', title: 'Occupancy', content: <Statistic /> },
   ];
+
 
   // Close the expanded section when clicking outside the footer
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (footerRef.current && !footerRef.current.contains(event.target as Node)) {
-        setExpandedSection(null); // Collapse the expanded section
+      const target = event.target as HTMLElement;
+
+      // 🔥 CRITICAL FIX: ignore clicks inside ANY MUI Dialog
+      if (target.closest('.MuiDialog-root')) {
+        return;
+      }
+
+      if (footerRef.current && !footerRef.current.contains(target)) {
+        setExpandedSection(null);
       }
     };
 

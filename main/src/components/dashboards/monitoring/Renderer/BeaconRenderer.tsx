@@ -73,8 +73,9 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   useEffect(() => {
     if (imageUrl) {
       const img = new window.Image();
-      img.crossOrigin = 'anonymous';
+      img.crossOrigin = '';
       img.src = imageUrl;
+      console.log('Loading image for beacon:', img);
       img.onload = () => setImageObj(img);
     }
   }, [imageUrl]);

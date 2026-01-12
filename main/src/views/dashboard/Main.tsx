@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React, { useEffect, useState } from 'react';
-import { Box, Grid2 as Grid } from '@mui/material';
+import { Box, Grid2 as Grid, Stack } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import TopCards from 'src/components/dashboards/mainmenu/TopCards';
 import TrackingGraph from 'src/components/dashboards/mainmenu/Tracking';
@@ -11,11 +11,9 @@ import WelcomePopup from 'src/components/dashboards/mainmenu/WelcomePopup';
 import { blacklistType, fetchBlacklistDT } from 'src/store/apps/crud/blacklist';
 import { fetchMaskedAreaDT, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { fetchBleReaderDT } from 'src/store/apps/crud/bleReader';
-import { AlarmType, } from 'src/store/apps/crud/alarmRecordTracking';
+import { AlarmType } from 'src/store/apps/crud/alarmRecordTracking';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
-import {
-  trackingTransType,
-} from 'src/store/apps/crud/trackingTrans';
+import { trackingTransType } from 'src/store/apps/crud/trackingTrans';
 import { setMainMenu } from 'src/store/customizer/CustomizerSlice';
 import { fetchFloorplanDeviceDT, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import BlacklistList from 'src/components/master/CRUD/blacklist/BlacklistList';
@@ -34,6 +32,14 @@ import {
   fetchCardCount,
   fetchDashboardTopCards,
 } from 'src/store/apps/dashboard/Dashboard';
+import NewAreaDistribution from 'src/components/dashboards/newmainmenu/AreaDistribution';
+import AlarmLog from 'src/components/dashboards/newmainmenu/AlarmLog';
+import UpcomingVisitor from 'src/components/dashboards/newmainmenu/UpcomingVisitor';
+import NewBlacklist from 'src/components/dashboards/newmainmenu/BlacklistList';
+import NewBeaconDistribution from 'src/components/dashboards/newmainmenu/BeaconDistribution';
+import Tracking from 'src/components/dashboards/newmainmenu/TrackingChart';
+import { useAlarmByArea, useAlarmByStatus } from 'src/hooks/useDashboard';
+import AlarmCategorized from 'src/components/dashboards/newmainmenu/AlarmCategorized';
 
 const filter = {
   Draw: 1,
@@ -95,16 +101,18 @@ const Modern = () => {
     //Test new API
     dispatch(fetchDashboardTopCards());
     dispatch(fetchCardCount());
-    dispatch(fetchAreaChart({
-      TimeRange: 'today',
-      from: null,
-      to: null,
-      operatorName: null,
-      visitorId: null,
-      buildingId: null,
-      floorId: null,
-      floorplanMaskedAreaId: null
-    }));
+    dispatch(
+      fetchAreaChart({
+        TimeRange: 'today',
+        from: null,
+        to: null,
+        operatorName: null,
+        visitorId: null,
+        buildingId: null,
+        floorId: null,
+        floorplanMaskedAreaId: null,
+      }),
+    );
 
     // Fetch initial data for the dashboard
     // dispatch(
@@ -269,10 +277,17 @@ const Modern = () => {
   );
   const trackingGraphLoaded: boolean = useSelector(
     (state: RootState) => state.DashboardReducer.trackingGraph.hasLoaded,
-  )
+  );
   useEffect(() => {
-    console.log("Area Chart Data",areaChartData, areaChartLoaded);
+    console.log('Area Chart Data', areaChartData, areaChartLoaded);
   }, [areaChartData, areaChartLoaded]);
+
+  const { data: alarmByStatus = [], isLoading: isAlarmByStatusLoading } = useAlarmByStatus({
+    timeRange: 'daily',
+  });
+  const { data: alarmByArea = [], isLoading: isAlarmByAreaLoading } = useAlarmByArea({
+    timeRange: 'daily',
+  });
   return (
     <PageContainer title="Dashboard" description="this is Dashboard page">
       <Box>
@@ -373,7 +388,7 @@ const Modern = () => {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+            {/* <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
               <HeatmapFloorplan
                 TrackingList={trackingData}
                 Floorlist={floorData}
@@ -382,6 +397,33 @@ const Modern = () => {
                 imageWidth={800}
                 imageHeight={200}
               />
+            </Grid> */}
+
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+              <NewAreaDistribution />
+            </Grid>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+              <AlarmLog />
+            </Grid>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+              <UpcomingVisitor />
+            </Grid>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+              <NewBlacklist />
+            </Grid>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+              <NewBeaconDistribution />
+            </Grid>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Tracking />
+            </Grid>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Grid size={4}>
+                <Stack spacing={1}>
+                  <AlarmCategorized title="Alarm By Status" data={alarmByStatus} />
+                  <AlarmCategorized title="Alarm By Area" data={alarmByArea} />
+                </Stack>
+              </Grid>
             </Grid>
           </Grid>
         </Grid>

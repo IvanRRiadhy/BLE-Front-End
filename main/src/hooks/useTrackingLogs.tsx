@@ -3,7 +3,7 @@ import { RootState } from 'src/store/Store';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllVisitor } from 'src/hooks/useVisitor';
 import { useMemo } from 'react';
-import { TrackingLogItem } from 'src/store/apps/tracking/Beacon';
+import { AlarmLogItem, TrackingLogItem } from 'src/store/apps/tracking/Beacon';
 
 export function useTrackingLogs(): TrackingLogItem[] {
   const beaconsByTopic = useSelector(
@@ -95,4 +95,30 @@ export function useEnrichedTrackingLogs(): TrackingLogItem[] {
       };
     });
   }, [logs, members, visitors]);
+}
+
+export function useEnrichedAlarmLogs(): AlarmLogItem[] {
+  const alarmLogs = useSelector(
+    (state: RootState) => state.BeaconReducer.alarmLogs
+  );
+
+  const { data: members = [] } = useAllMembers();
+  const { data: visitors = [] } = useAllVisitor();
+
+  return useMemo(() => {
+    const memberMap = new Map(members.map(m => [m.bleCardNumber, m]));
+    const visitorMap = new Map(visitors.map(v => [v.bleCardNumber, v]));
+
+    return alarmLogs.map(log => {
+      const m = memberMap.get(log.dmac);
+      const v = visitorMap.get(log.dmac);
+
+      return {
+        ...log,
+        target: m?.name || v?.name || log.target || 'Unknown',
+        image: m?.faceImage || v?.faceImage || log.image || '',
+        personType: m ? 'Member' : v ? 'Visitor' : undefined,
+      };
+    });
+  }, [alarmLogs, members, visitors]);
 }

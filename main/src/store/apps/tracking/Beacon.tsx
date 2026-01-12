@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AppDispatch, RootState } from 'src/store/Store';
 import { startMQTTclient } from './MQTT';
 import { uniqueId } from 'lodash';
@@ -61,6 +61,24 @@ export type TrackingLogItem = {
   personType?: 'Member' | 'Visitor';
 };
 
+export type AlarmLogItem = {
+  id: string;
+  dmac: string;
+  target: string;
+  image: string;
+
+  floor: string;
+  area: string;
+  time: string;
+
+  alarmStatus: string; // blacklist, restricted, etc
+  action: string; // active, investigated, closed
+  priority?: string;
+
+  personType?: 'Visitor' | 'Member';
+  type: 'Alarm';
+};
+
 interface StoredBeacon extends BeaconType {
   lastSeen: number;
   dmac: string; // Set to beaconId since they're the same
@@ -110,6 +128,7 @@ interface StateType {
     sourceScreenId?: number;
   };
   trackingLogs: TrackingLogItem[];
+  alarmLogs: AlarmLogItem[];
 }
 
 const initialState: StateType = {
@@ -128,6 +147,7 @@ const initialState: StateType = {
     dmac: '',
   },
   trackingLogs: [],
+  alarmLogs: [],
 };
 
 export const BeaconSlice = createSlice({
@@ -246,6 +266,20 @@ export const BeaconSlice = createSlice({
       }
     },
 
+    AppendAlarmLogs: (state: StateType, action: PayloadAction<AlarmLogItem[]>) => {
+      const existing = new Set(state.alarmLogs.map((x) => x.id));
+
+      action.payload.forEach((log) => {
+        if (!existing.has(log.id)) {
+          state.alarmLogs.push(log);
+        }
+      });
+
+      state.alarmLogs.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+      state.alarmLogs = state.alarmLogs.slice(0, 100);
+    },
+
     ClearTrackingLogs: (state: StateType) => {
       state.trackingLogs = [];
     },
@@ -262,6 +296,7 @@ export const {
   SetTrackingBeacon,
   SetSelectedBeacon,
   AppendTrackingLogs,
+  AppendAlarmLogs,
   ClearTrackingLogs,
 } = BeaconSlice.actions;
 

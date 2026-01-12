@@ -11,6 +11,8 @@ import {
   Divider,
   Tabs,
   Tab,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router';
 import { AnimatePresence, motion, MotionProps } from 'framer-motion';
@@ -23,6 +25,7 @@ import axiosServices from 'src/utils/axios';
 import { useDispatch } from 'src/store/Store';
 import { fetchAlarmSettingsDT } from 'src/store/apps/alarmsetting/alarmSettings';
 import { defaultAlarmSettingFilter } from 'src/store/apps/defaultForm';
+import { IconEye, IconEyeOff } from '@tabler/icons-react';
 
 type NativeFormProps = React.ComponentPropsWithoutRef<'form'>;
 
@@ -52,6 +55,12 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   const [loginError, setLoginError] = useState<string>('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
 
   const handleTabChange = (_: React.SyntheticEvent, next: TabKey) => {
     setDirection(activeTab === 'admin' && next === 'visitor' ? 1 : -1);
@@ -200,11 +209,24 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
               <CustomFormLabel htmlFor="password">Password</CustomFormLabel>
               <CustomTextField
                 id="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 variant="outlined"
                 fullWidth
                 value={currentCreds.password}
                 onChange={handleChange(activeTab)}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={togglePasswordVisibility}
+                        edge="end"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
               />
             </Box>
 

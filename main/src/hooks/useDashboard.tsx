@@ -1,0 +1,169 @@
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import axiosServices from 'src/utils/axios';
+import { RootState, useSelector } from 'src/store/Store';
+import { DashboardAreaChartFilter as DashboardFilter } from 'src/store/apps/dashboard/Dashboard';
+
+const API_DASHBOARD = '/api/Dashboard/';
+const API_TRACKING = '/api/TrackingAnalytics/';
+const API_ALARM = '/api/AlarmAnalyticsIncident/';
+const API_TRIGGER = '/api/AlarmTriggers/';
+
+export type AreaReportType = {
+    areaId: string;
+    areaName: string;
+    totalRecords: number;
+}
+
+export function useAreaDistributionData(filter: DashboardFilter) {
+    return useQuery({
+        queryKey: ['dashboard-area-distribution', filter],
+        queryFn: async () => {
+            const response = await axiosServices.post(`${API_TRACKING}area`, filter);
+            console.log('Area Distribution Data fetched: ', response.data);
+            return response.data.collection.data as AreaReportType[];
+        },
+        placeholderData: [],
+    });
+}
+
+export function useTopButtonSummary() {
+  return useQuery({
+    queryKey: ['dashboard-count-summary'],
+    queryFn: async () => {
+      const res = await axiosServices.get(`${API_DASHBOARD}count-summary`);
+      return res.data;
+    },
+  });
+}
+
+export function useBeaconCount() {
+  return useQuery({
+    queryKey: ['dashboard-count-card'],
+    queryFn: async () => {
+      const res = await axiosServices.get(`${API_DASHBOARD}count-card`);
+      console.log('Beacon Count Data fetched: ', res.data.collection.data);
+      return res.data.collection.data;
+    },
+  });
+}
+
+export function useTrackingAreaAccessed(filter: DashboardFilter) {
+  return useQuery({
+    queryKey: ['tracking-area-accessed', filter],
+    queryFn: async () => {
+      const res = await axiosServices.post(
+        `${API_TRACKING}area-accessed`,
+        filter
+      );
+      console.log('Tracking Area Accessed Data fetched: ', res.data);
+      return res.data.collection.data;
+    },
+    enabled: !!filter,
+  });
+}
+
+export function useUpcomingVisitor(filter: any) {
+  return useQuery({
+    queryKey: ['upcoming-visitor', filter],
+    queryFn: async () => {
+      const res = await axiosServices.post(
+        '/api/TrxVisitor/filter',
+        filter
+      );
+      console.log('Upcoming Visitor Data fetched: ', res.data);
+      return res.data.collection.data;
+    },
+    enabled: !!filter,
+  });
+}
+
+export function useAreaDistribution(
+  filter: DashboardFilter,
+  params?: Record<string, any>
+) {
+  return useQuery({
+    queryKey: ['area-distribution', filter, params],
+    queryFn: async () => {
+      const res = await axiosServices.post(
+        `${API_TRACKING}area`,
+        filter,
+        { params }
+      );
+      return res.data.collection.data;
+    },
+  });
+}
+
+export function useBlacklistLog() {
+  return useQuery({
+    queryKey: ['blacklist-log'],
+    queryFn: async () => {
+      const res = await axiosServices.get(`${API_DASHBOARD}blacklist-logs`);
+      return res.data.collection.data;
+    },
+  });
+}
+
+export function useAlarmByStatus(filter: any) {
+  return useQuery({
+    queryKey: ['alarm-by-status', filter],
+    queryFn: async () => {
+      const res = await axiosServices.post(
+        `${API_ALARM}status`,
+        filter
+      );
+      return res.data.collection.data;
+    },
+  });
+}
+
+export function useAlarmByArea(filter: any, params?: any) {
+  return useQuery({
+    queryKey: ['alarm-by-area', filter, params],
+    queryFn: async () => {
+      const res = await axiosServices.post(
+        `${API_ALARM}area`,
+        filter,
+        { params }
+      );
+      return res.data.collection.data;
+    },
+  });
+}
+
+export function useAlarmStatisticHourly(filter: any) {
+  return useQuery({
+    queryKey: ['alarm-hourly', filter],
+    queryFn: async () => {
+      const res = await axiosServices.post(
+        `${API_ALARM}hourly`,
+        filter
+      );
+      return res.data.collection.data;
+    },
+  });
+}
+
+export function useRealtimeAlarmLog(filter: any) {
+  return useQuery({
+    queryKey: ['realtime-alarm-log', filter],
+    queryFn: async () => {
+      const res = await axiosServices.post(
+        `${API_TRIGGER}filter`,
+        filter
+      );
+      console.log('Realtime Alarm Log Data fetched: ', res.data);
+      return res.data.collection.data;
+    },
+  });
+}
+
+export function useNotificationLog() {
+  return useQuery({
+    queryKey: ['notification-log'],
+    queryFn: async () => {
+      const res = await axiosServices.get(`${API_TRIGGER}lookup`);
+      return res.data.collection.data;
+    },
+  });
+}

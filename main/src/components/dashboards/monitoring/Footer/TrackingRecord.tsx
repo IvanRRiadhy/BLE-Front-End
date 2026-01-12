@@ -235,7 +235,7 @@ const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
                       const isAlarm = log.type === 'Alarm';
                       const isVisitor = log.personType === 'Visitor';
                       const isMember = log.personType === 'Member';
-
+                      // console.log('log', log);
                       return (
                         <TableRow key={log.id}>
                           {/* Avatar */}

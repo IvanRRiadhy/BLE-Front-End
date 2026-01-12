@@ -25,7 +25,7 @@ import { AlarmType } from 'src/store/apps/tracking/Alarm';
 import AlarmPopup from './AlarmPopup';
 import { getConfig } from 'src/config';
 import Customizer from './shared/customizer/Customizer';
-import { AppendTrackingLogs, TrackingLogItem } from 'src/store/apps/tracking/Beacon';
+import { AlarmLogItem, AppendAlarmLogs, AppendTrackingLogs, TrackingLogItem } from 'src/store/apps/tracking/Beacon';
 
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
@@ -138,9 +138,9 @@ const FullLayout: FC = () => {
           lastDispatchRef.current = now;
           dispatch(fetchAlarmTrigger());
         }
-        const alarmLog: TrackingLogItem = {
+        const alarmLog: AlarmLogItem = {
           id: `alarm-${alarmData.triggerId}`, // ✅ stable & unique
-          device: 'Alarm',
+          // device: 'Alarm',
           type: 'Alarm',
 
           target: alarmData.visitorName || alarmData.cardName || alarmData.dmac,
@@ -150,13 +150,13 @@ const FullLayout: FC = () => {
           floor: alarmData.floorplanName || 'Unknown Floor',
           area: alarmData.maskedAreaName || 'Unknown Area',
 
-          alarmType: alarmData.status, // e.g. blacklist / restricted
-          status: alarmData.action, // investigated / active / etc
+          alarmStatus: alarmData.status, // e.g. blacklist / restricted
+          action: alarmData.action, // investigated / active / etc
           time: new Date().toISOString(),
 
           personType: alarmData.visitorName ? 'Visitor' : 'Member',
         };
-        dispatch(AppendTrackingLogs([alarmLog]));
+        dispatch(AppendAlarmLogs([alarmLog]));
       },
       topic, // MQTT topic
     );
