@@ -37,29 +37,6 @@ const Navigation = () => {
       }),
     );
     console.log('Daily Report Data:', res.payload);
-    // const element = document.querySelector('.page-wrapper'); // FullLayout wrapper for MainView
-    // if (!element) return;
-
-    // // Take screenshot of main view only
-    // const canvas = await html2canvas(element as HTMLElement, { scale: 2 });
-    // const imgData = canvas.toDataURL('image/png');
-
-    // // Create A4 PDF
-    // const pdf = new jsPDF('p', 'mm', 'a4');
-    // const pdfWidth = pdf.internal.pageSize.getWidth();
-    // const pdfHeight = pdf.internal.pageSize.getHeight();
-
-    // const imgWidth = pdfWidth;
-    // const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    // let position = 0;
-    // if (imgHeight < pdfHeight) {
-    //   // Center vertically if smaller
-    //   position = (pdfHeight - imgHeight) / 2;
-    // }
-
-    // pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    // pdf.save('dashboard.pdf');
   };
 
   if (lgUp) {

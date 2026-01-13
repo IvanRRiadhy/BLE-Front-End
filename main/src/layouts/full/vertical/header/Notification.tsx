@@ -208,7 +208,7 @@ const Notifications = () => {
       </IconButton>
 
       {/* Test trigger button - UPDATED FOR MQTT DATA STRUCTURE */}
-      <IconButton
+      {/* <IconButton
         size="large"
         color="error"
         onClick={() => {
@@ -235,7 +235,7 @@ const Notifications = () => {
         <Badge badgeContent="!" color="error">
           <IconBellRinging size="21" stroke="1.5" />
         </Badge>
-      </IconButton>
+      </IconButton> */}
 
       {/* 🎨 Animated Bubble Stack */}
       <AnimatePresence>

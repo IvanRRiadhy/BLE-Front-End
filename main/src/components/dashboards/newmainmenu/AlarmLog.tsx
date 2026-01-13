@@ -117,7 +117,7 @@ const AlarmLog: React.FC = () => {
             <Box sx={{ flex: 1 }}>
               <Typography
                 sx={{
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: 600,
                   color: '#045498',
                 }}
@@ -152,7 +152,7 @@ const AlarmLog: React.FC = () => {
             >
               <Typography
                 sx={{
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: 700,
                   color: item.color,
                 }}

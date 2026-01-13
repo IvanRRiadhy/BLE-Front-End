@@ -89,7 +89,7 @@ const UpcomingVisitor: React.FC = () => {
             <Box sx={{ flex: 1 }}>
               <Typography
                 sx={{
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: 600,
                   color: '#045498',
                 }}
@@ -110,7 +110,7 @@ const UpcomingVisitor: React.FC = () => {
             {/* Status */}
             <Typography
               sx={{
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: 700,
                 color: statusColorMap[item.status.toLowerCase()] ?? '#000',
               }}

@@ -118,12 +118,12 @@ const Bar: React.FC = () => {
       </Box> */}
 
       {/* Chart */}
-      <Box sx={{ width: "100%" }}>
+      <Box sx={{ height: "100%", width: "100%" }}>
         <Chart
           options={options}
           series={series}
           type="bar"
-          height={240}
+          height={"100%"}
         />
       </Box>
     </Box>

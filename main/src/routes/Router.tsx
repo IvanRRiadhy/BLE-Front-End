@@ -14,6 +14,7 @@ const MyVisitLayout = Loadable(lazy(() => import('../layouts/MyVisit/MyVisitLayo
 
 /* ****Pages***** */
 const MainMenuDash = Loadable(lazy(() => import('../views/dashboard/Main')));
+const NewDashboardView = Loadable(lazy(() => import('../views/dashboard/NewDashboardView')));
 const MonitoringDash = Loadable(lazy(() => import('../views/dashboard/Monitoring')));
 const MonitoringConfig = Loadable(lazy(() => import('../views/dashboard/MonitoringConfig')));
 const MyVisitDashboard = Loadable(lazy(() => import('../views/MyVisit/MyVisitDashboard')));
@@ -153,7 +154,7 @@ const withAuth = (element: JSX.Element, path: string): JSX.Element => {
       .some((r) => normalize(path).startsWith(normalize(r.slice(1))));
     if (denied) {
       console.warn(`[AuthGuard] ${userRole} denied path: ${path}`);
-      return <Navigate to="/dashboards/mainmenu" replace />;
+      return <Navigate to="/dashboards/newmainmenu" replace />;
     }
     return element;
   }
@@ -165,7 +166,7 @@ const withAuth = (element: JSX.Element, path: string): JSX.Element => {
   }
 
   console.warn(`[AuthGuard] ${userRole} not allowed to access ${path}`);
-  return <Navigate to="/dashboards/mainmenu" replace />;
+  return <Navigate to="/dashboards/newmainmenu" replace />;
 };
 
 
@@ -175,13 +176,18 @@ const Router = [
     path: '/',
     element: <FullLayout />,
     children: [
-      { path: '/', element: <Navigate to="/dashboards/mainmenu" /> },
+      { path: '/', element: <Navigate to="/dashboards/newmainmenu" /> },
 
       // dashboards
       {
         path: '/dashboards/mainmenu',
         exact: true,
         element: withAuth(<MainMenuDash />, '/dashboards/mainmenu'),
+      },
+      {
+        path: '/dashboards/newmainmenu',
+        exact: true,
+        element: withAuth(<NewDashboardView />, '/dashboards/newmainmenu'), 
       },
       {
         path: '/dashboards/monitoring',

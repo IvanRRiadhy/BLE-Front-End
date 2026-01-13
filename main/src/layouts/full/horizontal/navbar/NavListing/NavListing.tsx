@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import useMenuItems from '../Menudata';
 import { useLocation } from 'react-router';
 import { Box, List, Theme, useMediaQuery } from '@mui/material';
@@ -11,17 +11,20 @@ import { RootState } from 'src/store/Store';
 
 const NavListing = () => {
   const { pathname } = useLocation();
-  const alarmSettings = useSelector((state:RootState) => state.AlarmSettingReducer.alarmSettingAll);
+  const alarmSettings = useSelector(
+    (state: RootState) => state.AlarmSettingReducer.alarmSettingAll,
+  );
   const pathDirect = pathname;
   const pathWithoutLastPart = pathname.slice(0, pathname.lastIndexOf('/'));
   const customizer = useSelector((state: RootState) => state.customizer);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const hideMenu = lgUp ? customizer.isCollapse && !customizer.isSidebarHover : '';
   const Menudata = useMenuItems(alarmSettings);
+  const [lockedMenuId, setLockedMenuId] = useState<string | null>(null);
 
   return (
     <Box>
-      <List sx={{ p: 0, display: 'flex', gap: '3px', zIndex: '100' }}>
+      <List sx={{ p: 1, display: 'flex', gap: '3px', zIndex: '100' }}>
         {Menudata.map((item) => {
           if (item.children) {
             return (
@@ -32,7 +35,8 @@ const NavListing = () => {
                 pathWithoutLastPart={pathWithoutLastPart}
                 level={1}
                 key={item.id}
-                onClick={undefined}
+                lockedMenuId={lockedMenuId}
+                setLockedMenuId={setLockedMenuId}
               />
             );
 

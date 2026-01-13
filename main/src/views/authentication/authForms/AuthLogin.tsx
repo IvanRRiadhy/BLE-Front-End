@@ -104,7 +104,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         setTimeout(() => {
           if (isAdmin) {
             console.log('Admin logged in');
-            window.location.href = '/dashboards/mainmenu';
+            window.location.href = '/dashboards/newmainmenu';
           } else {
             window.location.href = '/my-visit';
           }

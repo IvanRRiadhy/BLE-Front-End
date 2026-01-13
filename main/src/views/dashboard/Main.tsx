@@ -40,7 +40,10 @@ import NewBeaconDistribution from 'src/components/dashboards/newmainmenu/BeaconD
 import Tracking from 'src/components/dashboards/newmainmenu/TrackingChart';
 import { useAlarmByArea, useAlarmByStatus } from 'src/hooks/useDashboard';
 import AlarmCategorized from 'src/components/dashboards/newmainmenu/AlarmCategorized';
-
+import Statistic from 'src/components/dashboards/newmainmenu/Statistic';
+import Bar from 'src/components/dashboards/newmainmenu/Bar';
+import TopButton from 'src/components/dashboards/newmainmenu/TopButton';
+import { IconBuildingBroadcastTower, IconCircleX, IconClock, IconActivityHeartbeat, IconMapPin } from '@tabler/icons-react';
 const filter = {
   Draw: 1,
   Start: 0,
@@ -67,16 +70,7 @@ const Modern = () => {
     }
     dispatch(setMainMenu(true));
   }, []);
-  // useEffect(() => {
-  //   const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-  //     dispatch(setMainMenu(false));
-  //     console.log('Before Unload');
-  //     e.preventDefault();
-  //     // e.returnValue = ''; // Triggers browser's native dialog
-  //   };
-  //   window.addEventListener('beforeunload', handleBeforeUnload);
-  //   return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  // }, []);
+
   useEffect(() => {
     // This runs on every route change
     return () => {
@@ -113,20 +107,6 @@ const Modern = () => {
         floorplanMaskedAreaId: null,
       }),
     );
-
-    // Fetch initial data for the dashboard
-    // dispatch(
-    //   // fetchTrackingTransDT({
-    //   //   ...filter,
-    //   //   length: 0,
-    //   //   filters: {
-    //   //     FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || [],
-    //   //     ReaderId: [],
-    //   //   },
-    //   // }),
-    //   fetchTrackingTrans(),
-    // );
-    // dispatch(fetchAlarm());
     dispatch(
       fetchCardDT({
         ...filter,
@@ -178,17 +158,6 @@ const Modern = () => {
         },
       }),
     );
-    // dispatch(
-    //   fetchAlarmDT({
-    //     ...filter,
-    //     SortColumn: 'Timestamp',
-    //     Length: alarmRowsPerPage,
-    //     Start: alarmPage * alarmRowsPerPage,
-    //     filters: {
-    //       FloorplanMaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId || [],
-    //     },
-    //   }),
-    // );
   }, [dispatch, dashboardFilter]);
   const trackingFilteredCount: number = useSelector(
     (state: RootState) => state.trackingTransReducer.trackingTransFilteredCount ?? 0,
@@ -388,17 +357,6 @@ const Modern = () => {
               />
             </Grid>
 
-            {/* <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
-              <HeatmapFloorplan
-                TrackingList={trackingData}
-                Floorlist={floorData}
-                maskedAreaList={maskedAreaData}
-                floorImageUrl={'/Uploads/FloorImages/0d2f3336-7689-4f38-9c0e-79cbab4d2e66.png'}
-                imageWidth={800}
-                imageHeight={200}
-              />
-            </Grid> */}
-
             <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
               <NewAreaDistribution />
             </Grid>
@@ -417,13 +375,84 @@ const Modern = () => {
             <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
               <Tracking />
             </Grid>
-            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', gap: 2, flexDirection: 'row' }}>
               <Grid size={4}>
                 <Stack spacing={1}>
                   <AlarmCategorized title="Alarm By Status" data={alarmByStatus} />
                   <AlarmCategorized title="Alarm By Area" data={alarmByArea} />
                 </Stack>
               </Grid>
+              <Grid size={8}>
+                <Bar />
+              </Grid>
+            </Grid>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Statistic />
+            </Grid>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Grid size={6}>
+                                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(2, 1fr)",
+                      gap: 1,
+                      p: 1,
+                      pt: 1.5,
+                    }}
+                  >
+                    <TopButton
+                      icon={IconClock}
+                      label="Alarm"
+                      num={alarmFilteredCount}
+                      color="#045498"
+                    />
+                    <TopButton
+                      icon={IconClock}
+                      label="Active Alarm"
+                      num={alarmFilteredCount}
+                      color="#D73D3D"
+                    />
+                    <TopButton
+                      icon={IconCircleX}
+                      label="Blacklist"
+                      num={blacklistFilteredCount}
+                      color="#D73D3D"
+                    />
+                    <TopButton
+                      icon={IconActivityHeartbeat}
+                      label="Beacon"
+                      num={activeTag}
+                      color="#045498"
+                    />
+                    
+                    
+                    <TopButton
+                      icon={IconBuildingBroadcastTower}
+                      label="Gateway"
+                      num={bleReaderFilteredCount}
+                      color="#045498"
+                    />
+                    <TopButton
+                      icon={IconActivityHeartbeat}
+                      label="NonActive Beacon"
+                      num={nonActiveTag}
+                      color="#045498"
+                    />
+                    <TopButton
+                      icon={IconMapPin}
+                      label="Area"
+                      num={maskedAreaFilteredCount}
+                      color="#045498"
+                    />
+                    <TopButton
+                      icon={IconMapPin}
+                      label="Placeholder"
+                      num={123}
+                      color="#045498"
+                    />
+                  </Box>
+              </Grid>
+
             </Grid>
           </Grid>
         </Grid>

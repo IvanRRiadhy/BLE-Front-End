@@ -54,7 +54,7 @@ const isBoundaryActive = isActive('boundary');
           id: uniqueId(),
           title: 'Main Menu',
           icon: IconHome,
-          href: '/dashboards/mainmenu',
+          href: '/dashboards/newmainmenu',
         },
         {
           id: uniqueId(),

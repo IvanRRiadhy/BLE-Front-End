@@ -225,7 +225,7 @@ const FullLayout: FC = () => {
           {/* Header */}
           {customizer.isHorizontal ? <HorizontalHeader /> : <MonitoringHeader />}
           {/* PageContent */}
-          {customizer.isHorizontal ? <Navigation /> : ''}
+          {/* {customizer.isHorizontal ? <Navigation /> : ''} */}
           {/* Monitoring Sidebar */}
           <Box
             sx={{

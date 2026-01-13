@@ -28,21 +28,21 @@ const { categories, series } = useMemo(() => {
   if (!data.length) {
     return { categories: [], series: [] as ChartSeries };
   }
-
+  const raw = data as StatisticRawItem[];
   // X-axis
-  const categories = data.map((item: any) => item.hourLabel);
+  const categories = raw.map((item: any) => item.hourLabel);
 
   // collect all unique status keys
   const statusKeys = Array.from(
     new Set(
-      data.flatMap((item: any) => Object.keys(item.status ?? {}))
+      raw.flatMap((item: any) => Object.keys(item.status ?? {}))
     )
   );
 
   // build chart series
   const series: ChartSeries = statusKeys.map((key) => ({
     name: key,
-    data: data.map((item: any) => item.status?.[key] ?? 0),
+    data: raw.map((item) => item.status?.[key] ?? 0),
   }));
 
   return { categories, series };
@@ -129,12 +129,12 @@ const { categories, series } = useMemo(() => {
       </Box>
 
       {/* Chart */}
-      <Box sx={{ width: "100%" }}>
+      <Box sx={{ height: "100%", width: "100%" }}>
         <Chart
           options={options}
           series={series}
           type="line"
-          height={200}
+          height={"90%"}
         />
       </Box>
     </Box>

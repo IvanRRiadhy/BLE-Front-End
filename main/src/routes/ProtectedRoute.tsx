@@ -12,7 +12,7 @@ const ProtectedRoute = ({ element, allowedRoles }: { element: JSX.Element; allow
 
   // check if allowed
   if (!allowedRoles.includes(userRole)) {
-    return <Navigate to="/dashboards/mainmenu" replace />;
+    return <Navigate to="/dashboards/newmainmenu" replace />;
   }
 
   return element;

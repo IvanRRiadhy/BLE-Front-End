@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useLocation } from 'react-router';
 
@@ -30,7 +30,9 @@ interface NavCollapseProps {
   pathWithoutLastPart: any;
   pathDirect: any;
   hideMenu: any;
-  onClick: any;
+  lockedMenuId: string | null;
+  setLockedMenuId: (id: string | null) => void;
+  parentHref?: string;
 }
 
 // FC Component For Dropdown Menu
@@ -40,16 +42,28 @@ const NavCollapse = ({
   pathWithoutLastPart,
   pathDirect,
   hideMenu,
+  lockedMenuId,
+  setLockedMenuId,
+  parentHref,
 }: NavCollapseProps) => {
   const Icon = menu.icon;
   const theme = useTheme();
+  const rootRef = useRef<HTMLLIElement | null>(null);
+
   const { pathname } = useLocation();
   const [open, setOpen] = React.useState(false);
   const customizer = useSelector((state: RootState) => state.customizer);
   const menuIcon =
     level > 1 ? <Icon stroke={1.5} size="1rem" /> : <Icon stroke={1.5} size="1.1rem" />;
+  const [lockedOpen, setLockedOpen] = useState(false);
+  const menuKey = menu.href;
+  const selfHref = menu.href ?? parentHref ?? '';
 
-  React.useEffect(() => {
+  const isLocked = lockedMenuId !== null && selfHref.startsWith(lockedMenuId);
+
+  const isAnotherLocked = lockedMenuId !== null && !selfHref.startsWith(lockedMenuId);
+
+  useEffect(() => {
     setOpen(false);
     menu.children.forEach((item: any) => {
       if (item.href === pathname) {
@@ -57,6 +71,22 @@ const NavCollapse = ({
       }
     });
   }, [pathname, menu.children]);
+
+  useEffect(() => {
+    if (!lockedMenuId) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
+        setLockedMenuId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [lockedMenuId, setLockedMenuId]);
 
   const ListItemStyled = styled(ListItemButton)(() => ({
     width: 'auto',
@@ -70,14 +100,17 @@ const NavCollapse = ({
       open || pathname.includes(menu.href) || level < 1 ? 'white' : theme.palette.text.secondary,
     backgroundColor: open || pathname.includes(menu.href) ? theme.palette.primary.main : '',
 
+    // Hover only works when nothing else is locked
     '&:hover': {
       backgroundColor:
         open || pathname.includes(menu.href)
           ? theme.palette.primary.main
           : theme.palette.primary.light,
     },
-    '&:hover > .SubNav': {
-      display: 'grid',
+
+    // Hover OR locked → show submenu
+    '&:hover > .SubNav, &.locked-open > .SubNav': {
+      display: isAnotherLocked && !isLocked ? 'none' : 'grid',
       gridAutoFlow: 'row',
       gap: '1em',
     },
@@ -90,6 +123,9 @@ const NavCollapse = ({
     left: level > 1 ? `100%` : '0px',
     padding: '10px',
     maxHeight: '75em',
+    listStyle: 'none',
+    paddingLeft: 0,
+    margin: 0,
     color: theme.palette.text.primary,
     boxShadow: theme.shadows[8],
     backgroundColor: theme.palette.background.paper,
@@ -108,13 +144,15 @@ const NavCollapse = ({
     if (item.children) {
       return (
         <NavCollapse
-          key={item.id}
+          key={item.title}
           menu={item}
           level={level + 1}
           pathWithoutLastPart={pathWithoutLastPart}
           pathDirect={pathDirect}
           hideMenu={hideMenu}
-          onClick={undefined}
+          lockedMenuId={lockedMenuId}
+          setLockedMenuId={setLockedMenuId}
+          parentHref={selfHref}
         />
       );
     } else {
@@ -132,11 +170,16 @@ const NavCollapse = ({
   });
 
   return (
-    <React.Fragment key={menu.id}>
+    <li ref={rootRef}>
       <ListItemStyled
         {...listItemProps}
         selected={pathWithoutLastPart === menu.href}
-        className={open ? 'selected' : ''}
+        className={isLocked && !parentHref ? 'locked-open' : ''}
+        onClick={(e) => {
+          e.preventDefault();
+          const lockKey = menu.href ?? parentHref ?? null;
+          setLockedMenuId(isLocked ? null : lockKey);
+        }}
       >
         <ListItemIcon
           sx={{
@@ -155,7 +198,7 @@ const NavCollapse = ({
           {submenus}
         </ListSubMenu>
       </ListItemStyled>
-    </React.Fragment>
+    </li>
   );
 };
 
