@@ -59,6 +59,7 @@ import DashboardReducer from './apps/dashboard/Dashboard';
 import VisitorFilterPresetReducer from './apps/crud/visitorFilterPreset';
 import VisitorSessionReducer from './apps/crud/visitorSession';
 import InvestigateReducer from './apps/crud/investigate';
+import PatrolAreaReducer from './apps/crud/patrolArea';
 import SessionReducer from './apps/session';
 import { combineReducers } from 'redux';
 import {
@@ -125,6 +126,7 @@ const rootReducer = combineReducers({
   DashboardReducer: DashboardReducer,
   VisitorFilterPresetReducer: VisitorFilterPresetReducer,
   VisitorSessionReducer: VisitorSessionReducer,
+  PatrolAreaReducer: PatrolAreaReducer,
   InvestigateReducer: InvestigateReducer,
 });
 
