@@ -17,8 +17,8 @@ export type GetFilter = {
   SortDir: 'asc' | 'desc';
   SearchValue: string;
   filters: {
-    FloorplanId: string[];
-    FloorId: string[];
+    FloorplanId: string;
+    FloorId: string;
   };
 };
 
@@ -84,8 +84,8 @@ const initialState: StateType = {
     SortDir: 'asc',
     SearchValue: '',
     filters: {
-      FloorplanId: [],
-      FloorId: [],
+      FloorplanId: "",
+      FloorId: "",
     },
   },
   lastFilter: {
@@ -96,8 +96,8 @@ const initialState: StateType = {
     SortDir: 'asc',
     SearchValue: '',
     filters: {
-      FloorplanId: [],
-      FloorId: [],
+      FloorplanId: "",
+      FloorId: "",
     },
   },
   isLoading: false,

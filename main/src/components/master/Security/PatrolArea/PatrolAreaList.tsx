@@ -40,7 +40,6 @@ const columns = [
   { label: 'Building', field: 'Floor.Name', sortAble: true },
   { label: 'Floor', field: 'Floor.Name', sortAble: true },
   { label: 'Floorplan', field: 'Name', sortAble: true },
-  { label: 'Total Area', field: 'MaskedAreaCount', sortAble: true },
 ];
 
 const SKELETON_ROWS = 5;
@@ -107,14 +106,14 @@ const MaskedAreaList2 = () => {
     dispatch(fetchBuildings());
   }, [dispatch]);
 
-  useEffect(() => {
-    dispatch(fetchFloorplanDT(floorplanFilter));
-  }, [dispatch, floorplanFilter]);
+//   useEffect(() => {
+//     dispatch(fetchFloorplanDT(floorplanFilter));
+//   }, [dispatch, floorplanFilter]);
 
   const handleOnClick = (floorplanToEdit: FloorplanType) => {
     // console.log('floorplanToEdit: ', floorplanToEdit);
     dispatch(SelectFloorplan(floorplanToEdit));
-    navigate('/master/floorplanmaskedarea/edit');
+    navigate('/master/patrolarea/edit');
   };
 
   const getbuildingName = (buildingId: string) => {
@@ -226,7 +225,6 @@ const MaskedAreaList2 = () => {
                               <IconEye size={20} />
                             </IconButton>
                           </TableCell>
-                          <TableCell>{floorplan.maskedAreaCount}</TableCell>
 
                           <TableCell
                             sx={{

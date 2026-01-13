@@ -2,24 +2,24 @@ import { useState } from 'react';
 import PageContainer from 'src/components/container/PageContainer';
 import AppCard from 'src/components/shared/AppCard';
 import { Box } from '@mui/material';
-import AddEditMaskedAreaSidebar from 'src/components/master/CRUD/maskedArea/AddEditMaskedArea/AddEditMaskAreaSidebar';
+import AddEditPatrolAreaSidebar from 'src/components/master/Security/PatrolArea/AddEditPatrolArea/AddEditPatrolAreaSidebar';
 // import EditDeviceFloorView from 'src/components/master/CRUD/floorplanDevice/AddEditFloorplanDevice/Preview/EditDeviceFloorView';
 // import DeviceDetailSidebar from 'src/components/master/CRUD/floorplanDevice/AddEditFloorplanDevice/DeviceDetailSidebar';
 import { RootState, useSelector } from 'src/store/Store';
-import EditAreaFloorView from 'src/components/master/CRUD/maskedArea/AddEditMaskedArea/Preview/EditAreaFloorView';
-import AreaDetailSidebar from 'src/components/master/CRUD/maskedArea/AddEditMaskedArea/AreaDetailSidebar';
+import EditPatrolAreaFloorView from 'src/components/master/Security/PatrolArea/AddEditPatrolArea/Preview/EditPatrolAreaFloorView';
+import PatrolAreaDetailSidebar from 'src/components/master/Security/PatrolArea/AddEditPatrolArea/PatrolAreaDetailSidebar';
 
-const MaskedAreaEdit = () => {
+const PatrolAreaEdit = () => {
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(true);
-  const editingArea = useSelector((state: RootState) => state.maskedAreaReducer.editingMaskedArea);
+  const editingArea = useSelector((state: RootState) => state.PatrolAreaReducer.editingPatrolArea);
   const selectedFloorplan = useSelector(
     (state: RootState) => state.floorplanReducer.selectedFloorplan,
   );
   if (!selectedFloorplan) {
-    window.location.href = '/master/floorplanmaskedarea/';
+    window.location.href = '/master/patrolarea/';
   }
   return (
-    <PageContainer title="Masked Area" description="this is masked area page">
+    <PageContainer title="Patrol Area" description="this is patrol area page">
       <AppCard>
         <Box
           display="flex"
@@ -28,7 +28,7 @@ const MaskedAreaEdit = () => {
           maxHeight={715}
           sx={{ border: '1px solid', borderColor: 'divider' }}
         >
-          <AddEditMaskedAreaSidebar
+          <AddEditPatrolAreaSidebar
             isMobileSidebarOpen={isMobileSidebarOpen}
             onSidebarClose={() => setMobileSidebarOpen(false)}
           />
@@ -44,7 +44,7 @@ const MaskedAreaEdit = () => {
               boxShadow: '-2px 0px 8px rgba(0,0,0,0.15)', // Add shadow for visual separation
             }}
           >
-            <AreaDetailSidebar
+            <PatrolAreaDetailSidebar
               isEditingSidebarOpen={isMobileSidebarOpen}
               onEditingSidebarClose={() => setMobileSidebarOpen(false)}
             />
@@ -53,7 +53,7 @@ const MaskedAreaEdit = () => {
         </Box>
 
         <Box flexGrow={1}>
-          <EditAreaFloorView zoomable />
+          <EditPatrolAreaFloorView zoomable />
         </Box>
 
       </AppCard>
@@ -61,4 +61,4 @@ const MaskedAreaEdit = () => {
   );
 };
 
-export default MaskedAreaEdit;
+export default PatrolAreaEdit;

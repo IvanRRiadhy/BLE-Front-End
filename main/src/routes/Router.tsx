@@ -91,6 +91,8 @@ const RulesEdit = Loadable(lazy(() => import('../views/master/rules/rulesEdit'))
 
 /* ****Security**** */
 const SecurityGuard = Loadable(lazy(() => import('../views/master/security/securityGuard')));
+const PatrolArea = Loadable(lazy(() => import('../views/master/security/PatrolArea')));
+const PatrolAreaEdit = Loadable(lazy(() => import('../views/master/security/PatrolAreaEdit')));
 
 /* ****Reports**** */
 const TrackingTransaction = Loadable(lazy(() => import('../views/Reports/TrackingTrans')));
@@ -249,6 +251,8 @@ const Router = [
 
       //Security
       { path: '/master/securityguard', exact: true, element: withAuth(<SecurityGuard />, '/master/securityguard') },
+      { path: '/master/patrolarea', exact: true, element: withAuth(<PatrolArea />, '/master/patrolarea') },
+      { path: '/master/patrolarea/edit', exact: true, element: withAuth(<PatrolAreaEdit />, '/master/patrolarea/edit') },
       // { path: '/master/floorplan', exact: true, element: <Floorplan /> },
       // { path: '/master/gateway', exact: true, element: <GatewayApp /> },
 
