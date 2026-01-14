@@ -74,7 +74,7 @@ const PatrolAreaList = () => {
   } = usePatrolAreaList({
     Draw: 1,
     Start: 0,
-    Length: 999,
+    Length: 0,
     SortColumn: '',
     SortDir: 'asc',
     SearchValue: '',
@@ -95,7 +95,7 @@ const PatrolAreaList = () => {
   const filteredOriginalAreas = patrolAreasData;
 
   // Filter unsaved areas for current floorplan
-  const filteredUnsavedMaksedArea = unsavedPatrolAreas.filter(
+  const filteredUnsavedPatrolArea = unsavedPatrolAreas.filter(
     (patrolArea: PatrolAreaType) => patrolArea.floorplanId === activeFloorplan?.id,
   );
 
@@ -111,6 +111,7 @@ const PatrolAreaList = () => {
   useEffect(() => {
     if (patrolAreasData.length > 0) {
       dispatch(GetUnsavedPatrolArea());
+      console.log(patrolAreasData);
     }
   }, [patrolAreasData, dispatch]);
 
@@ -223,7 +224,7 @@ const handleSaveEdits = async () => {
     const originalAreas = patrolAreasData;
     
     // Get current unsaved areas from Redux (client state with modifications)
-    const currentUnsavedAreas = filteredUnsavedMaksedArea;
+    const currentUnsavedAreas = filteredUnsavedPatrolArea;
 
     // Create a map of original areas for quick lookup
     const originAreaMap = new Map(
@@ -363,8 +364,8 @@ const handleSaveEdits = async () => {
         <Scrollbar
           sx={{ height: { lg: 'calc(100vh - 370px)', sm: '100vh' }, maxHeight: 'fit-content' }}
         >
-          {filteredUnsavedMaksedArea.length > 0 ? (
-            filteredUnsavedMaksedArea.map((patrolArea: PatrolAreaType) => (
+          {filteredUnsavedPatrolArea.length > 0 ? (
+            filteredUnsavedPatrolArea.map((patrolArea: PatrolAreaType) => (
               <PatrolAreaListItem
                 key={patrolArea.id}
                 patrolArea={patrolArea}

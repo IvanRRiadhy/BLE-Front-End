@@ -27,7 +27,7 @@ const AlarmList: React.FC = () => {
   useEffect(() => {
     dispatch(fetchTrackingTrans());
     dispatch(fetchBleReaders());
-    dispatch(fetchMaskedAreas());
+    // dispatch(fetchMaskedAreas());
   }, [dispatch]);
 
   useEffect(() => {

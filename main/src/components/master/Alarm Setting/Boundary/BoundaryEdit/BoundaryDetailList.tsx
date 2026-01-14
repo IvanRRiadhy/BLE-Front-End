@@ -19,11 +19,7 @@ import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 
 // Import React Query hooks
-import { 
-
-  useAddBoundaryAlarm,
-  useEditBoundaryAlarm
-} from 'src/hooks/AlarmSetting/useBoundary';
+import { useAddBoundaryAlarm, useEditBoundaryAlarm } from 'src/hooks/AlarmSetting/useBoundary';
 
 // Import external hooks for building/floor data
 import { useAllBuilding as useAllBuildings } from 'src/hooks/useBuilding';
@@ -54,9 +50,7 @@ const BoundaryDetailList = () => {
 
   const boundary = useSelector((state: RootState) => state.BoundaryReducer.selectedBoundaryAlarm);
 
-  const filteredMaskedAreas = maskedAreas.filter(
-    (ma) => ma.floorplanId === boundary?.floorplanId,
-  );
+  const filteredMaskedAreas = maskedAreas.filter((ma) => ma.floorplanId === boundary?.floorplanId);
 
   const handleCancel = () => {
     dispatch(SetSelectedBoundaryAlarm(null));
@@ -66,9 +60,7 @@ const BoundaryDetailList = () => {
   const handleSave = async () => {
     if (!boundary) return;
 
-    const saveOperation = boundary.id.startsWith('Boundary-') 
-      ? addAlarm 
-      : editAlarm;
+    const saveOperation = boundary.id.startsWith('Boundary-') ? addAlarm : editAlarm;
 
     saveOperation(boundary, {
       onSuccess: () => {
@@ -108,7 +100,7 @@ const BoundaryDetailList = () => {
   return (
     <Box
       sx={{
-        height: '80vh',
+        height: '90vh',
         display: 'grid',
         minHeight: 0,
         gridTemplateRows: 'auto 1fr auto',
@@ -117,12 +109,19 @@ const BoundaryDetailList = () => {
         borderColor: 'divider',
       }}
     >
-      <Box p={3} px={2} display="flex" justifyContent="flex-start" alignItems="center">
+      <Box
+        p={3}
+        px={2}
+        display="flex"
+        justifyContent="flex-start"
+        alignItems="center"
+        sx={{ borderBottom: '1px solid', borderColor: 'divider' }}
+      >
         <Typography variant="h5" mb={2} fontWeight={700} textAlign="left">
           Alarm Details
         </Typography>
       </Box>
-      <Divider />
+      {/* <Divider /> */}
       <Box sx={{ minHeight: 600, overflow: 'auto' }}>
         <Box pl={3} pr={1}>
           <Grid container spacing={1}>
@@ -193,9 +192,7 @@ const BoundaryDetailList = () => {
             )}
 
             <Grid size={12}>
-              <CustomFormLabel htmlFor="area-color" >
-                Area Color
-              </CustomFormLabel>
+              <CustomFormLabel htmlFor="area-color">Area Color</CustomFormLabel>
               <input
                 type="color"
                 id="color"
@@ -215,7 +212,7 @@ const BoundaryDetailList = () => {
                 disabled={saving}
               />
             </Grid>
-            <Grid size={12}>
+            <Grid size={12} mb={2}>
               <CustomFormLabel>Direction</CustomFormLabel>
               <CustomSelect
                 id="boundaryType"
@@ -250,11 +247,7 @@ const BoundaryDetailList = () => {
           <Button variant="outlined" onClick={handleCancel} disabled={saving}>
             Cancel
           </Button>
-          <Button 
-            variant="contained" 
-            onClick={handleSave} 
-            disabled={!isFormValid() || saving}
-          >
+          <Button variant="contained" onClick={handleSave} disabled={!isFormValid() || saving}>
             {saving ? 'Saving...' : 'Save'}
           </Button>
         </Box>

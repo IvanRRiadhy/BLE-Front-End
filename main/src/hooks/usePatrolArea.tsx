@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tansta
 import axiosServices from 'src/utils/axios';
 import { PatrolAreaType, GetFilter } from 'src/store/apps/crud/patrolArea';
 import { RootState, useSelector } from 'src/store/Store';
+import { safeParseAreaShape } from 'src/utils/isJsonObject';
 
 // -----------------------------------------------------------------------------
 // ✅ API URLs
@@ -22,7 +23,7 @@ export interface PaginatedResponse<T> {
 // -----------------------------------------------------------------------------
 export function usePatrolAreaList(filter: GetFilter) {
   return useQuery({
-    queryKey: ['masked-area-list', filter],
+    queryKey: ['patrol-area-list', filter],
     queryFn: async () => {
       const res = await axiosServices.post(API_DT_URL, filter);
       const col = res.data.collection;
@@ -51,16 +52,20 @@ export function usePatrolAreaList(filter: GetFilter) {
 // -----------------------------------------------------------------------------
 export function useAllPatrolAreas() {
   return useQuery({
-    queryKey: ['masked-area-all'],
+    queryKey: ['patrol-area-all'],
     queryFn: async () => {
       const res = await axiosServices.get(API_URL);
       const data = res.data.collection.data as PatrolAreaType[];
+      // console.log("data", data);
 
-      // Parse nodes from areaShape string
-      return data.map((patrolArea: PatrolAreaType) => ({
+      const parsedData = data.map((patrolArea) => ({
         ...patrolArea,
-        nodes: patrolArea.areaShape ? JSON.parse(patrolArea.areaShape) : [],
+        nodes: safeParseAreaShape(patrolArea.areaShape),
       }));
+
+      // console.log("parsedData", parsedData);
+      // Parse nodes from areaShape string
+      return parsedData;
     },
     placeholderData: [],
   });
@@ -91,8 +96,8 @@ export function useAddPatrolArea() {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['masked-area-list'] });
-      queryClient.invalidateQueries({ queryKey: ['masked-area-all'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-area-list'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-area-all'] });
       queryClient.invalidateQueries({ queryKey: ['floorplan-list'] });
       queryClient.invalidateQueries({ queryKey: ['floorplan-all'] });
     },
@@ -127,8 +132,8 @@ export function useEditPatrolArea() {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['masked-area-list'] });
-      queryClient.invalidateQueries({ queryKey: ['masked-area-all'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-area-list'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-area-all'] });
       queryClient.invalidateQueries({ queryKey: ['floorplan-list'] });
       queryClient.invalidateQueries({ queryKey: ['floorplan-all'] });
     },
@@ -147,8 +152,8 @@ export function useDeletePatrolArea() {
       return id;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['masked-area-list'] });
-      queryClient.invalidateQueries({ queryKey: ['masked-area-all'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-area-list'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-area-all'] });
       queryClient.invalidateQueries({ queryKey: ['floorplan-list'] });
       queryClient.invalidateQueries({ queryKey: ['floorplan-all'] });
     },
@@ -171,8 +176,8 @@ export function useImportPatrolArea() {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['masked-area-list'] });
-      queryClient.invalidateQueries({ queryKey: ['masked-area-all'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-area-list'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-area-all'] });
       queryClient.invalidateQueries({ queryKey: ['floorplan-list'] });
       queryClient.invalidateQueries({ queryKey: ['floorplan-all'] });
     },

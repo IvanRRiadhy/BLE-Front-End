@@ -98,7 +98,7 @@
 //     dispatch(fetchAccessCCTV());
 //     dispatch(fetchAccessControls());
 //     dispatch(fetchBleReaders());
-//     dispatch(fetchMaskedAreas());
+//     // dispatch(fetchMaskedAreas());
 //     dispatch(fetchFloorplan());
 //     dispatch(fetchFloors());
 //     // dispatch(fetchNodes());

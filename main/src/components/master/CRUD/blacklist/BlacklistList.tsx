@@ -102,7 +102,7 @@ const BlacklistList = () => {
 
   useEffect(() => {
     dispatch(fetchVisitor());
-    dispatch(fetchMaskedAreas());
+    // dispatch(fetchMaskedAreas());
     dispatch(fetchFloorplan());
   }, [dispatch]);
 
@@ -129,7 +129,7 @@ const BlacklistList = () => {
         await deleteMutation.mutateAsync(selectedBList.id);
         toast.success('Data Deleted');
       } catch (error) {
-        toast.error('Delete failed'); 
+        toast.error('Delete failed');
         console.error(error);
       }
     }

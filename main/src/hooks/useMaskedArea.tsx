@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tansta
 import axiosServices from 'src/utils/axios';
 import { MaskedAreaType, GetFilter } from 'src/store/apps/crud/maskedArea';
 import { RootState, useSelector } from 'src/store/Store';
+import { safeParseAreaShape } from 'src/utils/isJsonObject';
 
 // -----------------------------------------------------------------------------
 // ✅ API URLs
@@ -30,7 +31,7 @@ export function useMaskedAreaList(filter: GetFilter) {
       // Parse nodes from areaShape string
       const dataWithParsedNodes = col.data.map((maskedArea: MaskedAreaType) => ({
         ...maskedArea,
-        nodes: maskedArea.areaShape ? JSON.parse(maskedArea.areaShape) : [],
+        nodes: safeParseAreaShape(maskedArea.areaShape),
       }));
       console.log("dataWithParsedNodes", dataWithParsedNodes);
       return {
@@ -55,12 +56,12 @@ export function useAllMaskedAreas() {
     queryFn: async () => {
       const res = await axiosServices.get(API_URL);
       const data = res.data.collection.data as MaskedAreaType[];
-
-      // Parse nodes from areaShape string
-      return data.map((maskedArea: MaskedAreaType) => ({
+      const parsedData = data.map((maskedArea) => ({
         ...maskedArea,
-        nodes: maskedArea.areaShape ? JSON.parse(maskedArea.areaShape) : [],
-      }));
+        nodes: safeParseAreaShape(maskedArea.areaShape),
+      }))
+      // Parse nodes from areaShape string
+      return parsedData;
     },
     placeholderData: [],
   });

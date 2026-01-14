@@ -95,7 +95,7 @@ const EditStayOnAreaFloorView = () => {
 
   useEffect(() => {
     dispatch(fetchFloorplan());
-    dispatch(fetchMaskedAreas());
+    // dispatch(fetchMaskedAreas());
     dispatch(
       fetchStayOnAreaAlarms({
         ...defaultStayOnAreaFilter,
@@ -411,7 +411,7 @@ const EditStayOnAreaFloorView = () => {
             width: '100%',
             maxWidth: '100vw',
             height: '100%',
-            maxHeight: 'calc(100vh -200px)',
+            maxHeight: '90vh',
             display: 'flex',
             flexGrow: 1,
             justifyContent: 'center',

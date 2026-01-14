@@ -17,10 +17,7 @@ import {
 import BlankCard from 'src/components/shared/BlankCard';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 // import { useTranslation } from 'react-i18next';
-import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import {
-  fetchFloorplan,
-  fetchFloorplanDT,
   FloorplanType,
   SelectFloorplan,
   UpdateFilter,
@@ -28,13 +25,13 @@ import {
 import { IconEdit, IconEye } from '@tabler/icons-react';
 import { useNavigate } from 'react-router';
 import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
-import { fetchFloorplanDevices } from 'src/store/apps/crud/floorplanDevice';
 import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
 import FloorplanPreviewDialog from './FloorplanPreviewDialog';
-import { useMaskedAreaStatus } from 'src/hooks/useMaskedArea';
 import { useAllBuilding } from 'src/hooks/useBuilding';
 import { UseQueryResult } from '@tanstack/react-query';
 import { useFloorplanList } from 'src/hooks/useFloorplan';
+import { useAllPatrolAreas } from 'src/hooks/usePatrolArea';
+import { GetAllPatrolArea } from 'src/store/apps/crud/patrolArea';
 
 const columns = [
   { label: 'Building', field: 'Floor.Name', sortAble: true },
@@ -44,7 +41,7 @@ const columns = [
 
 const SKELETON_ROWS = 5;
 
-const MaskedAreaList2 = () => {
+const PatrolAreaList2 = () => {
   const dispatch: AppDispatch = useDispatch();
   // const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplans);
   // // const buildingData: BuildingType[] = useSelector(
@@ -57,6 +54,8 @@ const MaskedAreaList2 = () => {
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
 
   const buildingData: BuildingType[] = (useAllBuilding() as UseQueryResult<BuildingType[], Error>)['data'] || [];
+  const {data: patrolAreaAll = []} = useAllPatrolAreas();
+
   const {data, isLoading: queryLoading} = useFloorplanList(floorplanFilter);
   const floorplanData = data?.data || [];
   const floorplanTotalCount = data?.recordsTotal || 0;
@@ -101,10 +100,15 @@ const MaskedAreaList2 = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchMaskedAreas());
+
     dispatch(UpdateFilter(defaultFloorplanFilter));
     dispatch(fetchBuildings());
   }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(GetAllPatrolArea(patrolAreaAll));
+    // console.log("patrolAreaAll: ", patrolAreaAll);
+  }, [dispatch, patrolAreaAll]);
 
 //   useEffect(() => {
 //     dispatch(fetchFloorplanDT(floorplanFilter));
@@ -274,4 +278,4 @@ const MaskedAreaList2 = () => {
   );
 };
 
-export default MaskedAreaList2;
+export default PatrolAreaList2;

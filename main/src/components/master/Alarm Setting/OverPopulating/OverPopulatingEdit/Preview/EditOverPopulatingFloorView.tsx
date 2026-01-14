@@ -27,15 +27,21 @@ const EditOverPopulatingFloorView = () => {
   const overPopulatingData = useSelector(
     (state: RootState) => state.OverPopulatingReducer.selectedOverPopulatingAlarm,
   );
-  const activeFloorPlan = floorplans.find((fp: FloorplanType) => fp.id === overPopulatingData?.floorplanId);
-    const { data: overPopulatingAlarms } = useOverPopulatingAlarms({
-      ...defaultOverPopulatingFilter,
-      filters: { FloorplanId: activeFloorPlan?.id } // Dynamic filter
-    });
-    
+  const activeFloorPlan = floorplans.find(
+    (fp: FloorplanType) => fp.id === overPopulatingData?.floorplanId,
+  );
+  const { data: overPopulatingAlarms } = useOverPopulatingAlarms({
+    ...defaultOverPopulatingFilter,
+    filters: { FloorplanId: activeFloorPlan?.id }, // Dynamic filter
+  });
+
   const overPopulatingAlarmData = overPopulatingAlarms?.data || [];
-  const otherOverPopulating = overPopulatingAlarmData.filter((alarm) => alarm.id !== overPopulatingData?.id);
-  const filteredArea = maskedAreas.filter((area: MaskedAreaType) => area.floorplanId === activeFloorPlan?.id);
+  const otherOverPopulating = overPopulatingAlarmData.filter(
+    (alarm) => alarm.id !== overPopulatingData?.id,
+  );
+  const filteredArea = maskedAreas.filter(
+    (area: MaskedAreaType) => area.floorplanId === activeFloorPlan?.id,
+  );
   const drawOverPopulating = useSelector(
     (state: RootState) => state.OverPopulatingReducer.drawingOverPopulating,
   );
@@ -91,7 +97,7 @@ const EditOverPopulatingFloorView = () => {
 
   useEffect(() => {
     dispatch(fetchFloorplan());
-    dispatch(fetchMaskedAreas());
+    // dispatch(fetchMaskedAreas());
     dispatch(
       fetchOverPopulatingAlarms({
         ...defaultOverPopulatingFilter,
@@ -407,7 +413,7 @@ const EditOverPopulatingFloorView = () => {
             width: '100%',
             maxWidth: '100vw',
             height: '100%',
-            maxHeight: 'calc(100vh -200px)',
+            maxHeight: '90vh',
             display: 'flex',
             flexGrow: 1,
             justifyContent: 'center',

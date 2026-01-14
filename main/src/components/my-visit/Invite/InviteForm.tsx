@@ -206,7 +206,7 @@ const InviteForm = () => {
     setEndTime(dayjs());
     dispatch(fetchVisitorDT({ ...visitorFilter, length: 0 }));
     dispatch(fetchMemberDT({ ...memberFilter, length: 999 }));
-    dispatch(fetchMaskedAreas());
+    // dispatch(fetchMaskedAreas());
     dispatch(fetchBuildings());
     dispatch(fetchFloors());
     dispatch(fetchFloorplan());

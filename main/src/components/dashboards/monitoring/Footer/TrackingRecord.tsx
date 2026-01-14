@@ -151,7 +151,7 @@ const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
   useEffect(() => {
     dispatch(fetchTrackingTransDT({ ...defaultTrackingTransFilter }));
     dispatch(fetchBleReaders());
-    dispatch(fetchMaskedAreas());
+    // dispatch(fetchMaskedAreas());
     dispatch(fetchMembers());
     dispatch(fetchVisitor());
   }, [dispatch]);
@@ -192,7 +192,7 @@ const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
           <BlankCard>
             <TableContainer sx={{ maxHeight: '200px', overflowY: 'auto' }}>
               <Table aria-label="simple table" sx={{ tableLayout: 'fixed', width: '100%' }}>
-                <TableHead >
+                <TableHead>
                   <TableRow>
                     <TableCell
                       sx={{
@@ -202,7 +202,6 @@ const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
                         background: 'white',
                         zIndex: 2,
                         width: '70px',
-                        
                       }}
                     >
                       <Typography variant="h6"></Typography>
@@ -225,9 +224,8 @@ const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
                       </TableCell>
                     ))}
                   </TableRow>
-                  
                 </TableHead>
-                
+
                 <TableBody>
                   {trackingLogs
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)

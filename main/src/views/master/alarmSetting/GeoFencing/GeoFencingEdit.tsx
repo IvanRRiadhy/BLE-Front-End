@@ -31,8 +31,8 @@ const GeoFencingEdit = () => {
           <Box
             display="flex"
             flexDirection="column"
-            minHeight={'80vh'}
-            maxHeight={715}
+            minHeight={'90vh'}
+            maxHeight={855}
             sx={{ border: '1px solid', borderColor: 'divider' }}
           >
             <GeoFencingSidebar

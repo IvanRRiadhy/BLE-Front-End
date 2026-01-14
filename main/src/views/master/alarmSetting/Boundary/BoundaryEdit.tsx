@@ -26,7 +26,7 @@ const BoundaryEdit = () => {
     return (
       <PageContainer title="Boundary" description="this is Boundary Edit page">
         <AppCard>
-          <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="90vh">
             Loading...
           </Box>
         </AppCard>
@@ -41,8 +41,8 @@ const BoundaryEdit = () => {
           <Box
             display="flex"
             flexDirection="column"
-            minHeight={'80vh'}
-            maxHeight={715}
+            minHeight={'90vh'}
+            maxHeight={855}
             sx={{ border: '1px solid', borderColor: 'divider' }}
           >
             <BoundarySidebar

@@ -389,7 +389,7 @@ const DeviceList = () => {
   return (
     <Box
       sx={{
-        height: '80vh',
+        height: '90vh',
         display: 'grid',
         minHeight: 0,
         gridTemplateRows: 'auto 1fr auto',

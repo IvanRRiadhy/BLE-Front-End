@@ -1,10 +1,4 @@
-import {
-  Box,
-  Button,
-  Drawer,
-  Grid2 as Grid,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Drawer, Grid2 as Grid, Typography } from '@mui/material';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
 import { useCallback, useEffect, useState } from 'react';
 import { fetchBuildings } from 'src/store/apps/crud/building';
@@ -26,8 +20,8 @@ const DashboardFilter = () => {
   const [resetToken, setResetToken] = useState(0);
 
   const handleClickOpen = () => {
-    console.log("Dashboard Filter: ", dashboardFilter);
-    console.log("Filter: ", appliedFilter);
+    console.log('Dashboard Filter: ', dashboardFilter);
+    console.log('Filter: ', appliedFilter);
     setOpen(true);
   };
   const handleClose = () => {
@@ -49,7 +43,7 @@ const DashboardFilter = () => {
     dispatch(fetchBuildings());
     dispatch(fetchFloors());
     dispatch(fetchFloorplan());
-    dispatch(fetchMaskedAreas());
+    // // dispatch(fetchMaskedAreas());
   }, [dispatch]);
   useEffect(() => {
     console.log('Building List:', buildingList);
@@ -77,56 +71,54 @@ const DashboardFilter = () => {
     }
     return { data, empty: data.length === 0 };
   }
-const handleApplyFilter = () => {
-  let finalFloorIds: string[] = [];
-  let finalFloorplanIds: string[] = [];
+  const handleApplyFilter = () => {
+    let finalFloorIds: string[] = [];
+    let finalFloorplanIds: string[] = [];
 
-  // 🧠 If there are masked areas selected, collect their parent floor/floorplan
-  if (appliedFilter.MaskedAreaId.length > 0) {
-    for (const maId of appliedFilter.MaskedAreaId) {
-      const ma = maskedAreaList.find((m) => m.id === maId);
-      if (ma) {
-        const fpId = ma.floorplanId;
-        if (fpId && !finalFloorplanIds.includes(fpId)) finalFloorplanIds.push(fpId);
+    // 🧠 If there are masked areas selected, collect their parent floor/floorplan
+    if (appliedFilter.MaskedAreaId.length > 0) {
+      for (const maId of appliedFilter.MaskedAreaId) {
+        const ma = maskedAreaList.find((m: any) => m.id === maId);
+        if (ma) {
+          const fpId = ma.floorplanId;
+          if (fpId && !finalFloorplanIds.includes(fpId)) finalFloorplanIds.push(fpId);
 
-        // Prefer ma.floorId, fallback to floorplan.floorId
-        let fId = ma.floorId;
-        if (!fId) {
-          const fp = floorplanList.find((f) => f.id === fpId);
-          fId = fp?.floorId ?? '';
+          // Prefer ma.floorId, fallback to floorplan.floorId
+          let fId = ma.floorId;
+          if (!fId) {
+            const fp = floorplanList.find((f: any) => f.id === fpId);
+            fId = fp?.floorId ?? '';
+          }
+          if (fId && !finalFloorIds.includes(fId)) finalFloorIds.push(fId);
         }
-        if (fId && !finalFloorIds.includes(fId)) finalFloorIds.push(fId);
       }
+    } else {
+      // 🧩 If no MaskedArea is selected, use the existing ones or empty
+      finalFloorIds = appliedFilter.FloorId;
+      finalFloorplanIds = appliedFilter.FloorplanId;
     }
-  } else {
-    // 🧩 If no MaskedArea is selected, use the existing ones or empty
-    finalFloorIds = appliedFilter.FloorId;
-    finalFloorplanIds = appliedFilter.FloorplanId;
-  }
 
-  // 🧩 Send to Redux with the updated floor/floorplan sets
-  dispatch(
-    setDashboardFilter({
+    // 🧩 Send to Redux with the updated floor/floorplan sets
+    dispatch(
+      setDashboardFilter({
+        BuildingId: appliedFilter.BuildingId,
+        FloorId: finalFloorIds.length ? finalFloorIds : ['Empty'],
+        FloorplanId: finalFloorplanIds.length ? finalFloorplanIds : ['Empty'],
+        FloorplanMaskedAreaId: appliedFilter.MaskedAreaId.length
+          ? appliedFilter.MaskedAreaId
+          : ['Empty'],
+      }),
+    );
+
+    console.log('Dashboard Filter Set:', {
       BuildingId: appliedFilter.BuildingId,
-      FloorId: finalFloorIds.length ? finalFloorIds : ['Empty'],
-      FloorplanId: finalFloorplanIds.length ? finalFloorplanIds : ['Empty'],
-      FloorplanMaskedAreaId: appliedFilter.MaskedAreaId.length
-        ? appliedFilter.MaskedAreaId
-        : ['Empty'],
-    }),
-  );
+      FloorId: finalFloorIds,
+      FloorplanId: finalFloorplanIds,
+      FloorplanMaskedAreaId: appliedFilter.MaskedAreaId,
+    });
 
-  console.log('Dashboard Filter Set:', {
-    BuildingId: appliedFilter.BuildingId,
-    FloorId: finalFloorIds,
-    FloorplanId: finalFloorplanIds,
-    FloorplanMaskedAreaId: appliedFilter.MaskedAreaId,
-  });
-
-  setOpen(false);
-};
-
-
+    setOpen(false);
+  };
 
   const handleResetFilter = () => {
     setAppliedFilter({ BuildingId: [], FloorId: [], FloorplanId: [], MaskedAreaId: [] });
@@ -137,8 +129,8 @@ const handleApplyFilter = () => {
     setOpen(false);
   };
   const handleFilterChange = useCallback((f: FilterState) => {
-  setAppliedFilter(f);
-}, []);
+    setAppliedFilter(f);
+  }, []);
 
   return (
     <>

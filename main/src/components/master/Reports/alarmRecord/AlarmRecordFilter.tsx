@@ -49,8 +49,6 @@ type FilterState = {
   FloorplanMaskedAreaId: string[];
 };
 
-
-
 const AlarmRecordFilter = () => {
   const dispatch: AppDispatch = useDispatch();
   const [resetToken, setResetToken] = useState(0);
@@ -65,9 +63,7 @@ const AlarmRecordFilter = () => {
   const [endTime, setEndTime] = useState<Dayjs | null>(null);
 
   // Redux state
-  const alarmRecordFilter = useSelector(
-    (state: RootState) => state.alarmReducer.alarmRecordFilter,
-  );
+  const alarmRecordFilter = useSelector((state: RootState) => state.alarmReducer.alarmRecordFilter);
 
   const visitorData = useSelector((state: RootState) => state.visitorReducer.visitorAll);
   const memberData = useSelector((state: RootState) => state.memberReducer.memberAll);
@@ -103,7 +99,7 @@ const AlarmRecordFilter = () => {
     dispatch(fetchVisitor());
     dispatch(fetchBleReaders());
     dispatch(fetchMembers());
-    dispatch(fetchMaskedAreas());
+    // dispatch(fetchMaskedAreas());
     dispatch(fetchFloorplan());
     dispatch(fetchFloors());
     dispatch(fetchBuildings());
@@ -174,7 +170,13 @@ const AlarmRecordFilter = () => {
     setStartTime(null);
     setEndTime(null);
     setResetToken((n) => n + 1);
-    dispatch(UpdateFilter({ filters: defaults, dateFilters: {}, SearchValue: alarmRecordFilter.SearchValue }));
+    dispatch(
+      UpdateFilter({
+        filters: defaults,
+        dateFilters: {},
+        SearchValue: alarmRecordFilter.SearchValue,
+      }),
+    );
     onClose();
   };
 
@@ -209,7 +211,7 @@ const AlarmRecordFilter = () => {
 
   return (
     <>
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <Button
           onClick={() => setOpen(true)}
           size="medium"
@@ -223,271 +225,270 @@ const AlarmRecordFilter = () => {
           </Typography>
         </Button>
       </Box>
-          <Drawer
-      anchor="right"
-      open={open}
-      onClose={onClose}
-      PaperProps={{
-        sx: {
-          width: 360,
-          padding: 3,
-          backgroundColor: 'background.paper',
-        },
-      }}
-    >
-      <Typography
-        variant="h4"
-        gutterBottom
-        sx={{ my: 2, borderBottom: 5, borderColor: 'primary.main' }}
-      >
-        Alarm Record Filter
-      </Typography>
-
-      <Box sx={{ overflowY: 'auto', maxHeight: 'calc(100vh - 160px)', pb: 2 }}>
-        <Grid container spacing={3}>
-          {/* Time Filter */}
-          <Grid size={12}>
-            <CustomFormLabel htmlFor="timeRange">
-              <Typography variant="caption">Tracking Time :</Typography>
-            </CustomFormLabel>
-            <TextField
-              select
-              fullWidth
-              label="Time Range"
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value as TimeRangeKey)}
-              size="small"
-            >
-              <MenuItem value="any">Any</MenuItem>
-              <MenuItem value="today">Today</MenuItem>
-              <MenuItem value="week">This Week</MenuItem>
-              <MenuItem value="month">This Month</MenuItem>
-              <MenuItem value="custom">Custom</MenuItem>
-            </TextField>
-
-            {timeRange === 'custom' && (
-              <Box mt={2}>
-                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="id">
-                  <Grid container spacing={1.5}>
-                    <Grid size={12}>
-                      <DateTimePicker
-                        label="From"
-                        value={startTime}
-                        onChange={setStartTime}
-                        ampm={false}
-                        format="ddd, DD - MMM - YYYY, HH:mm"
-                        viewRenderers={{
-                          hours: renderTimeViewClock,
-                          minutes: renderTimeViewClock,
-                          seconds: renderTimeViewClock,
-                        }}
-                        slotProps={{ textField: { fullWidth: true, size: 'small' } }}
-                      />
-                    </Grid>
-                    <Grid size={12}>
-                      <DateTimePicker
-                        label="To"
-                        value={endTime}
-                        onChange={setEndTime}
-                        ampm={false}
-                        format="ddd, DD - MMM - YYYY, HH:mm"
-                        viewRenderers={{
-                          hours: renderTimeViewClock,
-                          minutes: renderTimeViewClock,
-                          seconds: renderTimeViewClock,
-                        }}
-                        slotProps={{ textField: { fullWidth: true, size: 'small' } }}
-                      />
-                    </Grid>
-                  </Grid>
-                </LocalizationProvider>
-              </Box>
-            )}
-          </Grid>
-
-          {/* 👤 Visitor Filter */}
-          <Grid size={12}>
-            <CustomFormLabel htmlFor="visitorId">
-              <Typography variant="caption">Visitor :</Typography>
-            </CustomFormLabel>
-            <CustomSelect
-              name="VisitorId"
-              value={filterState.VisitorId}
-              onChange={(e: any) =>
-                setFilterState((prev) => ({ ...prev, VisitorId: e.target.value ?? [] }))
-              }
-              fullWidth
-              multiple
-              variant="outlined"
-              InputProps={{
-                endAdornment: filterState.VisitorId.length > 0 && (
-                  <InputAdornment position="end">
-                    <IconButton size="small" onClick={() => clearField('VisitorId')}>
-                      <IconX size={16} />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              renderValue={(selected: string[]) => {
-                if (selected.length === 0) return 'Select Visitors';
-                return selected
-                  .map((id: string) => visitorData.find((v: any) => v.id === id)?.name || '')
-                  .join(', ');
-              }}
-            >
-              {visitorData.map((v: any) => (
-                <MenuItem key={v.id} value={v.id}>
-                  <ListItemIcon>
-                    <Checkbox checked={filterState.VisitorId.includes(v.id)} />
-                  </ListItemIcon>
-                  <ListItemText primary={v.name} />
-                </MenuItem>
-              ))}
-            </CustomSelect>
-          </Grid>
-
-          {/* 🧑‍🤝‍🧑 Member Filter */}
-          <Grid size={12}>
-            <CustomFormLabel htmlFor="memberId">
-              <Typography variant="caption">Member :</Typography>
-            </CustomFormLabel>
-            <CustomSelect
-              name="MemberId"
-              value={filterState.MemberId}
-              onChange={(e: any) =>
-                setFilterState((prev) => ({ ...prev, MemberId: e.target.value ?? [] }))
-              }
-              fullWidth
-              multiple
-              variant="outlined"
-              InputProps={{
-                endAdornment: filterState.MemberId.length > 0 && (
-                  <InputAdornment position="end">
-                    <IconButton size="small" onClick={() => clearField('MemberId')}>
-                      <IconX size={16} />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              renderValue={(selected: string[]) => {
-                if (selected.length === 0) return 'Select Members';
-                return selected
-                  .map((id: string) => memberData.find((m: any) => m.id === id)?.name || '')
-                  .join(', ');
-              }}
-            >
-              {memberData.map((m: any) => (
-                <MenuItem key={m.id} value={m.id}>
-                  <ListItemIcon>
-                    <Checkbox checked={filterState.MemberId.includes(m.id)} />
-                  </ListItemIcon>
-                  <ListItemText primary={m.name} />
-                </MenuItem>
-              ))}
-            </CustomSelect>
-          </Grid>
-
-          {/* 🛰️ BLE Reader Filter */}
-          <Grid size={12}>
-            <CustomFormLabel htmlFor="readerId">
-              <Typography variant="caption">BLE Reader :</Typography>
-            </CustomFormLabel>
-            <CustomSelect
-              name="ReaderId"
-              value={filterState.ReaderId}
-              onChange={(e: any) =>
-                setFilterState((prev) => ({ ...prev, ReaderId: e.target.value ?? [] }))
-              }
-              fullWidth
-              multiple
-              variant="outlined"
-              InputProps={{
-                endAdornment: filterState.ReaderId.length > 0 && (
-                  <InputAdornment position="end">
-                    <IconButton size="small" onClick={() => clearField('ReaderId')}>
-                      <IconX size={16} />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              renderValue={(selected: string[]) => {
-                if (selected.length === 0) return 'Select Readers';
-                return selected
-                  .map((id: string) => bleReaderData.find((r: any) => r.id === id)?.name || '')
-                  .join(', ');
-              }}
-            >
-              {bleReaderData.map((r: any) => (
-                <MenuItem key={r.id} value={r.id}>
-                  <ListItemIcon>
-                    <Checkbox checked={filterState.ReaderId.includes(r.id)} />
-                  </ListItemIcon>
-                  <ListItemText primary={r.name} />
-                </MenuItem>
-              ))}
-            </CustomSelect>
-          </Grid>
-
-          {/* 📍 Area Filter */}
-          <Grid size={12}>
-            <CustomFormLabel>
-              <Typography variant="caption">Area :</Typography>
-            </CustomFormLabel>
-            <AutocompleteFilter
-              buildings={buildingData}
-              floors={floorData}
-              floorplans={floorplanData}
-              maskedAreas={areaData}
-              initial={{
-                BuildingId: [],
-                FloorId: [],
-                FloorplanId: [],
-                MaskedAreaId: filterState.FloorplanMaskedAreaId,
-              }}
-              onChangeFilter={handleAreaChange}
-              resetToken={resetToken}
-            />
-          </Grid>
-        </Grid>
-      </Box>
-
-      {/* Footer */}
-      <Box
-        sx={{
-          position: 'sticky',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: 'background.paper',
-          pt: 2,
-          pb: 0,
-          mt: 3,
-          boxShadow: '0 -2px 6px rgba(0,0,0,0.05)',
-          zIndex: 10,
+      <Drawer
+        anchor="right"
+        open={open}
+        onClose={onClose}
+        PaperProps={{
+          sx: {
+            width: 360,
+            padding: 3,
+            backgroundColor: 'background.paper',
+          },
         }}
       >
-        <Grid container justifyContent="space-between" px={0.5}>
-          <Grid size={4}>
-            <Button variant="outlined" color="error" fullWidth onClick={handleResetFilter}>
-              Reset
-            </Button>
-          </Grid>
-          <Grid size={7.5}>
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              onClick={handleApplyFilter}
-              disabled={isEqual(filterState, alarmRecordFilter.filters)}
-            >
-              Apply
-            </Button>
-          </Grid>
-        </Grid>
-      </Box>
-    </Drawer>
-    </>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ my: 2, borderBottom: 5, borderColor: 'primary.main' }}
+        >
+          Alarm Record Filter
+        </Typography>
 
+        <Box sx={{ overflowY: 'auto', maxHeight: 'calc(100vh - 160px)', pb: 2 }}>
+          <Grid container spacing={3}>
+            {/* Time Filter */}
+            <Grid size={12}>
+              <CustomFormLabel htmlFor="timeRange">
+                <Typography variant="caption">Tracking Time :</Typography>
+              </CustomFormLabel>
+              <TextField
+                select
+                fullWidth
+                label="Time Range"
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value as TimeRangeKey)}
+                size="small"
+              >
+                <MenuItem value="any">Any</MenuItem>
+                <MenuItem value="today">Today</MenuItem>
+                <MenuItem value="week">This Week</MenuItem>
+                <MenuItem value="month">This Month</MenuItem>
+                <MenuItem value="custom">Custom</MenuItem>
+              </TextField>
+
+              {timeRange === 'custom' && (
+                <Box mt={2}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="id">
+                    <Grid container spacing={1.5}>
+                      <Grid size={12}>
+                        <DateTimePicker
+                          label="From"
+                          value={startTime}
+                          onChange={setStartTime}
+                          ampm={false}
+                          format="ddd, DD - MMM - YYYY, HH:mm"
+                          viewRenderers={{
+                            hours: renderTimeViewClock,
+                            minutes: renderTimeViewClock,
+                            seconds: renderTimeViewClock,
+                          }}
+                          slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                        />
+                      </Grid>
+                      <Grid size={12}>
+                        <DateTimePicker
+                          label="To"
+                          value={endTime}
+                          onChange={setEndTime}
+                          ampm={false}
+                          format="ddd, DD - MMM - YYYY, HH:mm"
+                          viewRenderers={{
+                            hours: renderTimeViewClock,
+                            minutes: renderTimeViewClock,
+                            seconds: renderTimeViewClock,
+                          }}
+                          slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </LocalizationProvider>
+                </Box>
+              )}
+            </Grid>
+
+            {/* 👤 Visitor Filter */}
+            <Grid size={12}>
+              <CustomFormLabel htmlFor="visitorId">
+                <Typography variant="caption">Visitor :</Typography>
+              </CustomFormLabel>
+              <CustomSelect
+                name="VisitorId"
+                value={filterState.VisitorId}
+                onChange={(e: any) =>
+                  setFilterState((prev) => ({ ...prev, VisitorId: e.target.value ?? [] }))
+                }
+                fullWidth
+                multiple
+                variant="outlined"
+                InputProps={{
+                  endAdornment: filterState.VisitorId.length > 0 && (
+                    <InputAdornment position="end">
+                      <IconButton size="small" onClick={() => clearField('VisitorId')}>
+                        <IconX size={16} />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                renderValue={(selected: string[]) => {
+                  if (selected.length === 0) return 'Select Visitors';
+                  return selected
+                    .map((id: string) => visitorData.find((v: any) => v.id === id)?.name || '')
+                    .join(', ');
+                }}
+              >
+                {visitorData.map((v: any) => (
+                  <MenuItem key={v.id} value={v.id}>
+                    <ListItemIcon>
+                      <Checkbox checked={filterState.VisitorId.includes(v.id)} />
+                    </ListItemIcon>
+                    <ListItemText primary={v.name} />
+                  </MenuItem>
+                ))}
+              </CustomSelect>
+            </Grid>
+
+            {/* 🧑‍🤝‍🧑 Member Filter */}
+            <Grid size={12}>
+              <CustomFormLabel htmlFor="memberId">
+                <Typography variant="caption">Member :</Typography>
+              </CustomFormLabel>
+              <CustomSelect
+                name="MemberId"
+                value={filterState.MemberId}
+                onChange={(e: any) =>
+                  setFilterState((prev) => ({ ...prev, MemberId: e.target.value ?? [] }))
+                }
+                fullWidth
+                multiple
+                variant="outlined"
+                InputProps={{
+                  endAdornment: filterState.MemberId.length > 0 && (
+                    <InputAdornment position="end">
+                      <IconButton size="small" onClick={() => clearField('MemberId')}>
+                        <IconX size={16} />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                renderValue={(selected: string[]) => {
+                  if (selected.length === 0) return 'Select Members';
+                  return selected
+                    .map((id: string) => memberData.find((m: any) => m.id === id)?.name || '')
+                    .join(', ');
+                }}
+              >
+                {memberData.map((m: any) => (
+                  <MenuItem key={m.id} value={m.id}>
+                    <ListItemIcon>
+                      <Checkbox checked={filterState.MemberId.includes(m.id)} />
+                    </ListItemIcon>
+                    <ListItemText primary={m.name} />
+                  </MenuItem>
+                ))}
+              </CustomSelect>
+            </Grid>
+
+            {/* 🛰️ BLE Reader Filter */}
+            <Grid size={12}>
+              <CustomFormLabel htmlFor="readerId">
+                <Typography variant="caption">BLE Reader :</Typography>
+              </CustomFormLabel>
+              <CustomSelect
+                name="ReaderId"
+                value={filterState.ReaderId}
+                onChange={(e: any) =>
+                  setFilterState((prev) => ({ ...prev, ReaderId: e.target.value ?? [] }))
+                }
+                fullWidth
+                multiple
+                variant="outlined"
+                InputProps={{
+                  endAdornment: filterState.ReaderId.length > 0 && (
+                    <InputAdornment position="end">
+                      <IconButton size="small" onClick={() => clearField('ReaderId')}>
+                        <IconX size={16} />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                renderValue={(selected: string[]) => {
+                  if (selected.length === 0) return 'Select Readers';
+                  return selected
+                    .map((id: string) => bleReaderData.find((r: any) => r.id === id)?.name || '')
+                    .join(', ');
+                }}
+              >
+                {bleReaderData.map((r: any) => (
+                  <MenuItem key={r.id} value={r.id}>
+                    <ListItemIcon>
+                      <Checkbox checked={filterState.ReaderId.includes(r.id)} />
+                    </ListItemIcon>
+                    <ListItemText primary={r.name} />
+                  </MenuItem>
+                ))}
+              </CustomSelect>
+            </Grid>
+
+            {/* 📍 Area Filter */}
+            <Grid size={12}>
+              <CustomFormLabel>
+                <Typography variant="caption">Area :</Typography>
+              </CustomFormLabel>
+              <AutocompleteFilter
+                buildings={buildingData}
+                floors={floorData}
+                floorplans={floorplanData}
+                maskedAreas={areaData}
+                initial={{
+                  BuildingId: [],
+                  FloorId: [],
+                  FloorplanId: [],
+                  MaskedAreaId: filterState.FloorplanMaskedAreaId,
+                }}
+                onChangeFilter={handleAreaChange}
+                resetToken={resetToken}
+              />
+            </Grid>
+          </Grid>
+        </Box>
+
+        {/* Footer */}
+        <Box
+          sx={{
+            position: 'sticky',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: 'background.paper',
+            pt: 2,
+            pb: 0,
+            mt: 3,
+            boxShadow: '0 -2px 6px rgba(0,0,0,0.05)',
+            zIndex: 10,
+          }}
+        >
+          <Grid container justifyContent="space-between" px={0.5}>
+            <Grid size={4}>
+              <Button variant="outlined" color="error" fullWidth onClick={handleResetFilter}>
+                Reset
+              </Button>
+            </Grid>
+            <Grid size={7.5}>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={handleApplyFilter}
+                disabled={isEqual(filterState, alarmRecordFilter.filters)}
+              >
+                Apply
+              </Button>
+            </Grid>
+          </Grid>
+        </Box>
+      </Drawer>
+    </>
   );
 };
 

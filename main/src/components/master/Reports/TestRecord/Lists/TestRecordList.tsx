@@ -51,7 +51,7 @@ const TestRecordList = () => {
       // dispatch(fetchBuildings());
       // dispatch(fetchFloors());
       // dispatch(fetchFloorplan());
-      // dispatch(fetchMaskedAreas());
+      // // dispatch(fetchMaskedAreas());
     } catch (error) {
       console.error('Error fetching visitors:', error);
     }
@@ -80,7 +80,7 @@ const TestRecordList = () => {
     console.log('active', active);
   }, [active]);
 
-      const renderSkeletonItems = (count: number) => (
+  const renderSkeletonItems = (count: number) => (
     <>
       {Array.from({ length: count }).map((_, idx) => (
         <ListItemButton key={`skeleton-${idx}`} sx={{ mb: 1 }}>
@@ -111,18 +111,18 @@ const TestRecordList = () => {
             overflow: 'auto',
           }}
         >
-          {hasLoaded ? (trxVisitors.map((trx) => (
-            <TestRecordListItem
-              key={trx.id}
-              active={trx.id === active.id}
-              trx={trx}
-              onTagClick={() => {
-                dispatch(SelectTrxVisitor(trx.id));
-              }}
-            />
-          ))) : (
-            renderSkeletonItems(SKELETON_ROWS)
-          )}
+          {hasLoaded
+            ? trxVisitors.map((trx) => (
+                <TestRecordListItem
+                  key={trx.id}
+                  active={trx.id === active.id}
+                  trx={trx}
+                  onTagClick={() => {
+                    dispatch(SelectTrxVisitor(trx.id));
+                  }}
+                />
+              ))
+            : renderSkeletonItems(SKELETON_ROWS)}
         </Box>
       </List>
       {loading &&

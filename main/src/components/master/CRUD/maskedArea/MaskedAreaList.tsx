@@ -44,10 +44,10 @@ const MaskedAreaList = () => {
   };
   const dispatch: AppDispatch = useDispatch();
   // const maskedAreaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreas);
-  const {data : maskedAreaData = []} = useAllMaskedAreas();
+  const { data: maskedAreaData = [] } = useAllMaskedAreas();
 
   // useEffect(() => {
-  //   dispatch(fetchMaskedAreas());
+  //   // dispatch(fetchMaskedAreas());
   // }, [dispatch]);
 
   //Delete Pop-up

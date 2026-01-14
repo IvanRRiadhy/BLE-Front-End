@@ -196,7 +196,7 @@ const VisitorContent = () => {
     if (!buildings.length) dispatch(fetchBuildings());
     if (!floors.length) dispatch(fetchFloors());
     if (!floorplans.length) dispatch(fetchFloorplan());
-    if (!maskedAreas.length) dispatch(fetchMaskedAreas());
+    if (!maskedAreas.length) // dispatch(fetchMaskedAreas());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

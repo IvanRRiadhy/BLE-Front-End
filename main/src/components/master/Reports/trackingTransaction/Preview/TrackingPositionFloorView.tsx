@@ -10,7 +10,7 @@ interface TrackingPositionFloorViewProps {
   floorplanId: string;
   positionPxX: number;
   positionPxY: number;
-    visitorId?: string;
+  visitorId?: string;
   memberId?: string;
   markerColor?: string;
 }
@@ -19,9 +19,9 @@ const TrackingPositionFloorView: React.FC<TrackingPositionFloorViewProps> = ({
   floorplanId,
   positionPxX,
   positionPxY,
-  visitorId,    
+  visitorId,
   memberId,
-  markerColor
+  markerColor,
 }) => {
   const dispatch: AppDispatch = useDispatch();
   const floorplans = useSelector((s: RootState) => s.floorplanReducer.floorplanAll);
@@ -43,7 +43,7 @@ const TrackingPositionFloorView: React.FC<TrackingPositionFloorViewProps> = ({
   // Load resources
   useEffect(() => {
     dispatch(fetchFloorplan());
-    dispatch(fetchMaskedAreas());
+    // dispatch(fetchMaskedAreas());
   }, [dispatch]);
 
   useEffect(() => {

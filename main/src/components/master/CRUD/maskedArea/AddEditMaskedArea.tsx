@@ -81,7 +81,7 @@ const AddEditMaskedArea = ({ type, maskedArea }: FormType) => {
       if (type === 'add') {
         await dispatch(addMaskedArea(formData));
       }
-      await dispatch(fetchMaskedAreas());
+      await // dispatch(fetchMaskedAreas());
       console.log('Saved!');
       setOpen(false);
     } catch (error) {

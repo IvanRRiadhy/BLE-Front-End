@@ -139,7 +139,7 @@ const AddEditVisitorCard = ({ type, visitorCard }: formType) => {
     dispatch(fetchBuildings());
     dispatch(fetchFloors());
     dispatch(fetchFloorplan());
-    dispatch(fetchMaskedAreas());
+    // dispatch(fetchMaskedAreas());
   }, [dispatch]);
   const handleClickOpen = () => {
     setOpen(true);

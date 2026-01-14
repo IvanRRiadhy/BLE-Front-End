@@ -85,7 +85,7 @@ const Blacklist: React.FC<BlacklistTableProps> = ({ filterFloorplanId }) => {
 
   useEffect(() => {
     dispatch(fetchVisitor());
-    dispatch(fetchMaskedAreas());
+    // dispatch(fetchMaskedAreas());
     dispatch(fetchFloorplan());
   }, [dispatch]);
 
@@ -114,114 +114,104 @@ const Blacklist: React.FC<BlacklistTableProps> = ({ filterFloorplanId }) => {
   );
 
   return (
-      <Grid container spacing={3}>
-        <Grid size={12}>
-          <Box
-            sx={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              minHeight: 440,
-              maxHeight: 440,
-              overflow: 'auto',
-              maxWidth: '100%',
-            }}
-          >
-            <BlankCard>
-              <TableContainer>
-                <Table aria-label="blacklist table" sx={{ whiteSpace: 'nowrap' }}>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell
-                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}
-                      >
-                        <Typography variant="h6"> </Typography>
-                      </TableCell>
-                      {columns.map((col) => (
-                        <TableCell key={col.label}>
-                          {col.sortAble && col.field ? (
-                            <TableSortLabel
-                              disabled={!hasLoaded} // disable while loading
-                              active={orderBy === col.field}
-                              direction={orderBy === col.field ? order : 'asc'}
-                              onClick={() => handleSort(col.field)}
-                            >
-                              <Typography variant="h6">{col.label}</Typography>
-                            </TableSortLabel>
-                          ) : (
+    <Grid container spacing={3}>
+      <Grid size={12}>
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 440,
+            maxHeight: 440,
+            overflow: 'auto',
+            maxWidth: '100%',
+          }}
+        >
+          <BlankCard>
+            <TableContainer>
+              <Table aria-label="blacklist table" sx={{ whiteSpace: 'nowrap' }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
+                      <Typography variant="h6"> </Typography>
+                    </TableCell>
+                    {columns.map((col) => (
+                      <TableCell key={col.label}>
+                        {col.sortAble && col.field ? (
+                          <TableSortLabel
+                            disabled={!hasLoaded} // disable while loading
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'asc'}
+                            onClick={() => handleSort(col.field)}
+                          >
                             <Typography variant="h6">{col.label}</Typography>
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
 
-                  <TableBody>
-                    {!hasLoaded ? (
-                      renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
-                    ) : (
-                      <>
-                        {blaclistData.map((blacklist: blacklistType, index) => (
-                          <TableRow key={blacklist.id}>
-                            <TableCell
-                              sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
-                            >
-                              {index + 1 + page * rowsPerPage}
-                            </TableCell>
-                            <TableCell>
-                              <Box>
-                                <Typography variant="subtitle2" fontWeight={600}>
-                                  {blacklist.visitor?.name || 'Unknown Visitor'}
-                                </Typography>
-                                <Typography
-                                  color="textSecondary"
-                                  fontSize="12px"
-                                  variant="subtitle2"
-                                >
-                                  {blacklist.visitor?.cardNumber || 'No Card Number'}
-                                </Typography>
-                              </Box>
-                            </TableCell>
-                            <TableCell>
-                              <Typography
-                                color="textSecondary"
-                                variant="subtitle2"
-                                fontWeight={400}
-                              >
-                                {blacklist.floorplanMaskedArea?.name || 'Unknown Area'}
+                <TableBody>
+                  {!hasLoaded ? (
+                    renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                  ) : (
+                    <>
+                      {blaclistData.map((blacklist: blacklistType, index) => (
+                        <TableRow key={blacklist.id}>
+                          <TableCell
+                            sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                          >
+                            {index + 1 + page * rowsPerPage}
+                          </TableCell>
+                          <TableCell>
+                            <Box>
+                              <Typography variant="subtitle2" fontWeight={600}>
+                                {blacklist.visitor?.name || 'Unknown Visitor'}
                               </Typography>
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                              <Typography color="textSecondary" fontSize="12px" variant="subtitle2">
+                                {blacklist.visitor?.cardNumber || 'No Card Number'}
+                              </Typography>
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Typography color="textSecondary" variant="subtitle2" fontWeight={400}>
+                              {blacklist.floorplanMaskedArea?.name || 'Unknown Area'}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      ))}
 
-                        {/* keep table height stable */}
-                        {Array.from({
-                          length:
-                            rowsPerPage -
-                            Math.min(rowsPerPage, blaclistData.length - page * rowsPerPage),
-                        }).map((_, idx) => (
-                          <TableRow key={`empty-row-${idx}`} style={{ height: 63 }}>
-                            <TableCell colSpan={4} />
-                          </TableRow>
-                        ))}
-                      </>
-                    )}
-                  </TableBody>
-                </Table>
-                <TablePagination
-                  component="div"
-                  count={hasLoaded ? blacklistFilteredCount : rowsPerPage} // avoid jumpy pager while loading
-                  page={page}
-                  rowsPerPage={rowsPerPage}
-                  onPageChange={handleChangePage}
-                  rowsPerPageOptions={[5]}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                />
-              </TableContainer>
-            </BlankCard>
-          </Box>
-        </Grid>
+                      {/* keep table height stable */}
+                      {Array.from({
+                        length:
+                          rowsPerPage -
+                          Math.min(rowsPerPage, blaclistData.length - page * rowsPerPage),
+                      }).map((_, idx) => (
+                        <TableRow key={`empty-row-${idx}`} style={{ height: 63 }}>
+                          <TableCell colSpan={4} />
+                        </TableRow>
+                      ))}
+                    </>
+                  )}
+                </TableBody>
+              </Table>
+              <TablePagination
+                component="div"
+                count={hasLoaded ? blacklistFilteredCount : rowsPerPage} // avoid jumpy pager while loading
+                page={page}
+                rowsPerPage={rowsPerPage}
+                onPageChange={handleChangePage}
+                rowsPerPageOptions={[5]}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </TableContainer>
+          </BlankCard>
+        </Box>
       </Grid>
+    </Grid>
   );
 };
 

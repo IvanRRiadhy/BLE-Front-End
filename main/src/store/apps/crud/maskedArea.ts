@@ -121,9 +121,11 @@ export const MaskedAreaSlice = createSlice({
         GetAllMaskedArea: (state, action: PayloadAction<MaskedAreaType[]>) => {
             state.maskedAreaAll = action.payload;
                         state.originalMaskedAreas = action.payload;
+                        console.log("Unsaved Masked Areas: ", JSON.stringify(state.maskedAreaAll, null, 2));
         },
         GetUnsavedMaskedArea: (state) => {
             state.unsavedMaskedAreas = state.maskedAreaAll;
+            
         },
         SelectMaskedArea: (state, action) => {
             const selected = state.unsavedMaskedAreas.find((maskedAreaAll: MaskedAreaType) => maskedAreaAll.id === action.payload);

@@ -103,7 +103,7 @@ const TrackingTransactionFilter = () => {
     dispatch(fetchVisitor());
     dispatch(fetchBleReaders());
     dispatch(fetchMembers());
-    dispatch(fetchMaskedAreas());
+    // dispatch(fetchMaskedAreas());
     dispatch(fetchFloorplan());
     dispatch(fetchFloors());
     dispatch(fetchBuildings());

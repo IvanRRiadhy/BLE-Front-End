@@ -22,9 +22,9 @@ import { useAllBuilding } from 'src/hooks/useBuilding';
 import { useAllFloors } from 'src/hooks/useFloor';
 import { useAllFloorplans } from 'src/hooks/useFloorplan';
 import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
-import { 
+import {
   useAddOverPopulatingAlarm,
-  useEditOverPopulatingAlarm
+  useEditOverPopulatingAlarm,
 } from 'src/hooks/AlarmSetting/useOverPopulate';
 
 // Import Redux actions (for form state management)
@@ -67,9 +67,7 @@ const OverPopulatingDetailList = () => {
     if (!overPopulateData) return;
     setIsSaving(true);
 
-    const saveOperation = overPopulateData.id.startsWith('OverPopulating-') 
-      ? addAlarm 
-      : editAlarm;
+    const saveOperation = overPopulateData.id.startsWith('OverPopulating-') ? addAlarm : editAlarm;
 
     saveOperation(overPopulateData, {
       onSuccess: () => {
@@ -83,7 +81,7 @@ const OverPopulatingDetailList = () => {
       },
       onSettled: () => {
         setIsSaving(false);
-      }
+      },
     });
   };
 
@@ -97,15 +95,13 @@ const OverPopulatingDetailList = () => {
   // Validation function
   const isFormValid = () => {
     if (overPopulateData === null) return false;
-    return requiredFields.every(
-      (field) => {
-        const value = overPopulateData[field as keyof typeof overPopulateData];
-        if (field === 'maxCapacity') {
-          return value !== undefined && value !== null && Number(value) > 0;
-        }
-        return value?.toString().trim() !== '';
+    return requiredFields.every((field) => {
+      const value = overPopulateData[field as keyof typeof overPopulateData];
+      if (field === 'maxCapacity') {
+        return value !== undefined && value !== null && Number(value) > 0;
       }
-    );
+      return value?.toString().trim() !== '';
+    });
   };
 
   const findFloorId = (fpId: string) => {
@@ -118,7 +114,7 @@ const OverPopulatingDetailList = () => {
   return (
     <Box
       sx={{
-        height: '80vh',
+        height: '90vh',
         display: 'grid',
         minHeight: 0,
         gridTemplateRows: 'auto 1fr auto',
@@ -127,9 +123,16 @@ const OverPopulatingDetailList = () => {
         borderColor: 'divider',
       }}
     >
-      <Box p={3} px={2} display="flex" justifyContent="flex-start" alignItems="center">
+      <Box
+        p={3}
+        px={2}
+        display="flex"
+        justifyContent="flex-start"
+        alignItems="center"
+        sx={{ borderBottom: '1px solid', borderColor: 'divider' }}
+      >
         <Typography variant="h5" fontWeight={700} textAlign="left">
-           Details
+          Details
         </Typography>
       </Box>
       <Divider />
@@ -264,9 +267,7 @@ const OverPopulatingDetailList = () => {
             )}
 
             <Grid size={12}>
-              <CustomFormLabel htmlFor="area-color">
-                Area Color
-              </CustomFormLabel>
+              <CustomFormLabel htmlFor="area-color">Area Color</CustomFormLabel>
               <input
                 type="color"
                 id="color"
@@ -286,7 +287,7 @@ const OverPopulatingDetailList = () => {
                 disabled={saving}
               />
             </Grid>
-            <Grid size={12}>
+            <Grid size={12} mb={2}>
               <CustomFormLabel>Area Max Capacity</CustomFormLabel>
               <CustomTextField
                 id="maxCapacity"
@@ -322,11 +323,7 @@ const OverPopulatingDetailList = () => {
           <Button variant="outlined" onClick={handleCancel} disabled={saving}>
             Cancel
           </Button>
-          <Button 
-            variant="contained" 
-            onClick={handleSave} 
-            disabled={!isFormValid() || saving}
-          >
+          <Button variant="contained" onClick={handleSave} disabled={!isFormValid() || saving}>
             {saving ? 'Saving...' : 'Save'}
           </Button>
         </Box>

@@ -57,7 +57,6 @@ type TrackType = {
   created_at: string;
 };
 
-
 const TrackingDetailPopup = ({
   bleNumber,
   person,
@@ -92,7 +91,7 @@ const TrackingDetailPopup = ({
   useEffect(() => {
     // dispatch(fetchTrackingTrans());
     // dispatch(fetchFloors());
-    // dispatch(fetchMaskedAreas());
+    // // dispatch(fetchMaskedAreas());
     dispatch(fetchBuildings());
     dispatch(fetchFloorplan());
   }, [dispatch]);
@@ -391,8 +390,8 @@ const TrackingDetailPopup = ({
           <Stage
             width={stageWidth > 0 ? stageWidth : maxWidth}
             height={stageHeight > 0 ? stageHeight : minHeight}
-            x={(stageWidth/2-(animatedPosition?.x || 0)*1.5)}
-            y={(stageHeight/2-(animatedPosition?.y || 0)*1.5)}
+            x={stageWidth / 2 - (animatedPosition?.x || 0) * 1.5}
+            y={stageHeight / 2 - (animatedPosition?.y || 0) * 1.5}
             scaleX={1.5}
             scaleY={1.5}
           >

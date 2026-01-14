@@ -22,10 +22,7 @@ import { useAllBuilding } from 'src/hooks/useBuilding';
 import { useAllFloors } from 'src/hooks/useFloor';
 import { useAllFloorplans } from 'src/hooks/useFloorplan';
 import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
-import { 
-  useAddGeoFencingAlarm,
-  useEditGeoFencingAlarm
-} from 'src/hooks/AlarmSetting/useGeofence';
+import { useAddGeoFencingAlarm, useEditGeoFencingAlarm } from 'src/hooks/AlarmSetting/useGeofence';
 
 // Import Redux actions (for form state management)
 import {
@@ -69,9 +66,7 @@ const GeoFencingDetailList = () => {
     if (!geoFenceData) return;
     setIsSaving(true);
 
-    const saveOperation = geoFenceData.id.startsWith('GeoFence-') 
-      ? addAlarm 
-      : editAlarm;
+    const saveOperation = geoFenceData.id.startsWith('GeoFence-') ? addAlarm : editAlarm;
 
     saveOperation(geoFenceData, {
       onSuccess: () => {
@@ -85,7 +80,7 @@ const GeoFencingDetailList = () => {
       },
       onSettled: () => {
         setIsSaving(false);
-      }
+      },
     });
   };
 
@@ -107,14 +102,14 @@ const GeoFencingDetailList = () => {
   const findFloorId = (fpId: string) => {
     const floor = floorplans.find((f: FloorplanType) => f.id === fpId);
     return floor?.floorId;
-  }
+  };
 
   const saving = isSaving || isAdding || isEditing;
 
   return (
     <Box
       sx={{
-        height: '80vh',
+        height: '90vh',
         display: 'grid',
         minHeight: 0,
         gridTemplateRows: 'auto 1fr auto',
@@ -123,12 +118,18 @@ const GeoFencingDetailList = () => {
         borderColor: 'divider',
       }}
     >
-      <Box p={3} px={2} display="flex" justifyContent="flex-start" alignItems="center">
+      <Box
+        p={3}
+        px={2}
+        display="flex"
+        justifyContent="flex-start"
+        alignItems="center"
+        sx={{ borderBottom: '1px solid', borderColor: 'divider' }}
+      >
         <Typography variant="h5" fontWeight={700} textAlign="left">
-           Details
+          Details
         </Typography>
       </Box>
-      <Divider />
       <Box sx={{ minHeight: 600, overflow: 'auto' }}>
         <Box pl={3} pr={1}>
           <Grid container spacing={1}>
@@ -169,10 +170,12 @@ const GeoFencingDetailList = () => {
                 floorplans={floorplans}
                 value={geoFenceData?.floorplanId ?? ''}
                 onChange={(fpId) => {
-                  dispatch(UpdateSelectedGeoFencingAlarm({ 
-                    floorplanId: fpId, 
-                    floorId: findFloorId(fpId) 
-                  }));
+                  dispatch(
+                    UpdateSelectedGeoFencingAlarm({
+                      floorplanId: fpId,
+                      floorId: findFloorId(fpId),
+                    }),
+                  );
                 }}
                 // disabled={saving}
               />
@@ -206,12 +209,15 @@ const GeoFencingDetailList = () => {
                 <CustomSelect
                   id="areaShape"
                   value={
-                    filteredMaskedAreas.find((ma: MaskedAreaType) => ma.areaShape === geoFenceData?.areaShape)
-                      ?.id || ''
+                    filteredMaskedAreas.find(
+                      (ma: MaskedAreaType) => ma.areaShape === geoFenceData?.areaShape,
+                    )?.id || ''
                   }
                   onChange={(e: React.ChangeEvent<{ value: unknown }>) => {
                     const selectedId = e.target.value as string;
-                    const selectedArea = filteredMaskedAreas.find((ma: MaskedAreaType) => ma.id === selectedId);
+                    const selectedArea = filteredMaskedAreas.find(
+                      (ma: MaskedAreaType) => ma.id === selectedId,
+                    );
 
                     if (selectedArea) {
                       dispatch(
@@ -245,7 +251,7 @@ const GeoFencingDetailList = () => {
                       variant="outlined"
                       color="primary"
                       onClick={() => {
-                        console.log("geoFenceData: ", geoFenceData.id);
+                        console.log('geoFenceData: ', geoFenceData.id);
                         dispatch(DrawGeoFence(geoFenceData.id));
                       }}
                       disabled={saving}
@@ -257,10 +263,8 @@ const GeoFencingDetailList = () => {
               </Grid>
             )}
 
-            <Grid size={12}>
-              <CustomFormLabel htmlFor="area-color">
-                Area Color
-              </CustomFormLabel>
+            <Grid size={12} mb={2}>
+              <CustomFormLabel htmlFor="area-color">Area Color</CustomFormLabel>
               <input
                 type="color"
                 id="color"
@@ -297,11 +301,7 @@ const GeoFencingDetailList = () => {
           <Button variant="outlined" onClick={handleCancel} disabled={saving}>
             Cancel
           </Button>
-          <Button 
-            variant="contained" 
-            onClick={handleSave} 
-            disabled={!isFormValid() || saving}
-          >
+          <Button variant="contained" onClick={handleSave} disabled={!isFormValid() || saving}>
             {saving ? 'Saving...' : 'Save'}
           </Button>
         </Box>

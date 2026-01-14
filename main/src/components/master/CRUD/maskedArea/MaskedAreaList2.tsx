@@ -17,7 +17,7 @@ import {
 import BlankCard from 'src/components/shared/BlankCard';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 // import { useTranslation } from 'react-i18next';
-import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
+import { fetchMaskedAreas, GetAllMaskedArea } from 'src/store/apps/crud/maskedArea';
 import {
   fetchFloorplan,
   fetchFloorplanDT,
@@ -31,7 +31,7 @@ import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
 import { fetchFloorplanDevices } from 'src/store/apps/crud/floorplanDevice';
 import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
 import FloorplanPreviewDialog from './FloorplanPreviewDialog';
-import { useMaskedAreaStatus } from 'src/hooks/useMaskedArea';
+import { useAllMaskedAreas, useMaskedAreaStatus } from 'src/hooks/useMaskedArea';
 import { useAllBuilding } from 'src/hooks/useBuilding';
 import { UseQueryResult } from '@tanstack/react-query';
 import { useFloorplanList } from 'src/hooks/useFloorplan';
@@ -58,6 +58,8 @@ const MaskedAreaList2 = () => {
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
 
   const buildingData: BuildingType[] = (useAllBuilding() as UseQueryResult<BuildingType[], Error>)['data'] || [];
+  const {data: maskedAreaAll = []} = useAllMaskedAreas();
+
   const {data, isLoading: queryLoading} = useFloorplanList(floorplanFilter);
   const floorplanData = data?.data || [];
   const floorplanTotalCount = data?.recordsTotal || 0;
@@ -102,10 +104,13 @@ const MaskedAreaList2 = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchMaskedAreas());
     dispatch(UpdateFilter(defaultFloorplanFilter));
     dispatch(fetchBuildings());
   }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(GetAllMaskedArea(maskedAreaAll));
+  }, [dispatch, maskedAreaAll]);
 
   useEffect(() => {
     dispatch(fetchFloorplanDT(floorplanFilter));

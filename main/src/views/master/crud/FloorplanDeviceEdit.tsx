@@ -34,7 +34,7 @@ const FloorplanDeviceEdit = () => {
     return (
       <PageContainer title="Floorplan Device" description="this is floorplan device page">
         <AppCard>
-          <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="90vh">
             Loading...
           </Box>
         </AppCard>
@@ -48,8 +48,8 @@ const FloorplanDeviceEdit = () => {
         <Box
           display="flex"
           flexDirection="column"
-          minHeight={'80vh'}
-          maxHeight={715}
+          height={'90vh'}
+          maxHeight={855}
           sx={{ border: '1px solid', borderColor: 'divider' }}
         >
           <AddEditDeviceSidebar
@@ -61,8 +61,8 @@ const FloorplanDeviceEdit = () => {
             position="absolute"
             // top={140}
             left={285}
-            minHeight='80vh'
-            maxHeight={"100%"}
+            height='90vh'
+            maxHeight={855}
             zIndex={1}
             sx={{
               boxShadow: '-2px 0px 8px rgba(0,0,0,0.15)', // Add shadow for visual separation

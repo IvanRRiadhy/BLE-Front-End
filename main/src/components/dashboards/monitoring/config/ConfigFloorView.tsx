@@ -11,8 +11,6 @@ import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { setScreenSettings } from 'src/store/apps/monitoring/layout';
 
-
-
 const ConfigFloorView: React.FC<{
   activeFloorplan: string;
   zoomable: boolean;
@@ -27,7 +25,7 @@ const ConfigFloorView: React.FC<{
     dispatch(fetchFloorplan());
     dispatch(fetchFloors());
     dispatch(fetchFloorplanDevices());
-    dispatch(fetchMaskedAreas());
+    // dispatch(fetchMaskedAreas());
   }, [dispatch]);
   // console.log('testing', useSelector((state: RootState) => state.floorReducer.floors));
   const containerRef = useRef<HTMLDivElement>(null);
@@ -56,8 +54,8 @@ const ConfigFloorView: React.FC<{
   useEffect(() => {
     // console.log('Active Floorplan:', floorplans);
   }, [actFloorplan]);
-const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
-const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
+  const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
+  const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
   const [scale, setScale] = useState(screenSettings?.scale || 1); // Initial scale set to 1
   const [image, setImage] = useState<HTMLImageElement | null>(null);
@@ -98,7 +96,6 @@ const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ??
         if (containerRef.current) {
           const containerWidth = containerRef.current.clientWidth;
           const containerHeight = containerRef.current.clientHeight;
-
 
           const offsetX = containerWidth / 2;
           const offsetY = containerHeight / 2;
@@ -304,61 +301,59 @@ const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ??
   };
 
   useEffect(() => {
-  if (screenSettings) {
-    setScale(screenSettings.scale);
-    setTranslate({
-      x: screenSettings.translateX,
-      y: screenSettings.translateY,
-    });
-  }
-}, [screenSettings]);
+    if (screenSettings) {
+      setScale(screenSettings.scale);
+      setTranslate({
+        x: screenSettings.translateX,
+        y: screenSettings.translateY,
+      });
+    }
+  }, [screenSettings]);
 
-// 🧠 Prevent infinite re-renders by remembering last sent values
-const lastSent = useRef<{ scale: number; x: number; y: number } | null>(null);
+  // 🧠 Prevent infinite re-renders by remembering last sent values
+  const lastSent = useRef<{ scale: number; x: number; y: number } | null>(null);
 
-useEffect(() => {
-  if (!activeLayoutId || !activeFloorplan) return;
+  useEffect(() => {
+    if (!activeLayoutId || !activeFloorplan) return;
 
-  const activeLayout = layouts.find((l) => l.id === activeLayoutId);
-  if (!activeLayout) return;
+    const activeLayout = layouts.find((l) => l.id === activeLayoutId);
+    if (!activeLayout) return;
 
-  const screen = activeLayout.screens.find((s) => s.floorplanId === activeFloorplan);
-  if (!screen) return;
+    const screen = activeLayout.screens.find((s) => s.floorplanId === activeFloorplan);
+    if (!screen) return;
 
-  const current = { scale, x: translate.x, y: translate.y };
+    const current = { scale, x: translate.x, y: translate.y };
 
-  // ✅ Skip dispatch if nothing changed since last run
-  if (
-    lastSent.current &&
-    lastSent.current.scale === current.scale &&
-    lastSent.current.x === current.x &&
-    lastSent.current.y === current.y
-  ) {
-    return;
-  }
+    // ✅ Skip dispatch if nothing changed since last run
+    if (
+      lastSent.current &&
+      lastSent.current.scale === current.scale &&
+      lastSent.current.x === current.x &&
+      lastSent.current.y === current.y
+    ) {
+      return;
+    }
 
-  // ✅ Remember last state to prevent repeat loops
-  lastSent.current = current;
+    // ✅ Remember last state to prevent repeat loops
+    lastSent.current = current;
 
-  // ✅ Throttle Redux updates to avoid flooding
-  const timeout = setTimeout(() => {
-    dispatch(
-      setScreenSettings({
-        layoutId: activeLayout.id,
-        screenId: screen.id,
-        settings: {
-          scale: current.scale,
-          translateX: current.x,
-          translateY: current.y,
-        },
-      }),
-    );
-  }, 150); // 150ms debounce is smooth for zoom/pan
+    // ✅ Throttle Redux updates to avoid flooding
+    const timeout = setTimeout(() => {
+      dispatch(
+        setScreenSettings({
+          layoutId: activeLayout.id,
+          screenId: screen.id,
+          settings: {
+            scale: current.scale,
+            translateX: current.x,
+            translateY: current.y,
+          },
+        }),
+      );
+    }, 150); // 150ms debounce is smooth for zoom/pan
 
-  return () => clearTimeout(timeout);
-}, [scale, translate.x, translate.y, activeLayoutId, activeFloorplan, layouts, dispatch]);
-
-
+    return () => clearTimeout(timeout);
+  }, [scale, translate.x, translate.y, activeLayoutId, activeFloorplan, layouts, dispatch]);
 
   const handleMouseMove = (event: React.MouseEvent) => {
     if (!isDragging || !containerRef.current || !imgSize || !zoomable) return;

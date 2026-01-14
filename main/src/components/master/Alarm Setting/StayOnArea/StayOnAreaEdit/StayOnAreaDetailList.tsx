@@ -18,9 +18,9 @@ import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 
 // Import React Query hooks
-import { 
+import {
   useAddStayOnAreaAlarm,
-  useEditStayOnAreaAlarm
+  useEditStayOnAreaAlarm,
 } from 'src/hooks/AlarmSetting/useStayOnArea';
 
 // Import building/floor hooks from their respective locations
@@ -68,9 +68,7 @@ const StayOnAreaDetailList = () => {
     if (!stayOnAreaData) return;
     setIsSaving(true);
 
-    const saveOperation = stayOnAreaData.id.startsWith('StayOnArea-') 
-      ? addAlarm 
-      : editAlarm;
+    const saveOperation = stayOnAreaData.id.startsWith('StayOnArea-') ? addAlarm : editAlarm;
 
     saveOperation(stayOnAreaData, {
       onSuccess: () => {
@@ -84,7 +82,7 @@ const StayOnAreaDetailList = () => {
       },
       onSettled: () => {
         setIsSaving(false);
-      }
+      },
     });
   };
 
@@ -113,7 +111,7 @@ const StayOnAreaDetailList = () => {
   return (
     <Box
       sx={{
-        height: '80vh',
+        height: '90vh',
         display: 'grid',
         minHeight: 0,
         gridTemplateRows: 'auto 1fr auto',
@@ -122,7 +120,14 @@ const StayOnAreaDetailList = () => {
         borderColor: 'divider',
       }}
     >
-      <Box p={3} px={2} display="flex" justifyContent="flex-start" alignItems="center">
+      <Box
+        p={3}
+        px={2}
+        display="flex"
+        justifyContent="flex-start"
+        alignItems="center"
+        sx={{ borderBottom: '1px solid', borderColor: 'divider' }}
+      >
         <Typography variant="h5" fontWeight={700} textAlign="left">
           Details
         </Typography>
@@ -258,9 +263,7 @@ const StayOnAreaDetailList = () => {
             )}
 
             <Grid size={12}>
-              <CustomFormLabel htmlFor="area-color">
-                Area Color
-              </CustomFormLabel>
+              <CustomFormLabel htmlFor="area-color">Area Color</CustomFormLabel>
               <input
                 type="color"
                 id="color"
@@ -280,7 +283,7 @@ const StayOnAreaDetailList = () => {
                 disabled={saving}
               />
             </Grid>
-            <Grid size={12}>
+            <Grid size={12} mb={2}>
               <CustomFormLabel>Area Max Duration (minutes)</CustomFormLabel>
               <CustomTextField
                 id="maxDuration"
@@ -316,11 +319,7 @@ const StayOnAreaDetailList = () => {
           <Button variant="outlined" onClick={handleCancel} disabled={saving}>
             Cancel
           </Button>
-          <Button 
-            variant="contained" 
-            onClick={handleSave} 
-            disabled={!isFormValid() || saving}
-          >
+          <Button variant="contained" onClick={handleSave} disabled={!isFormValid() || saving}>
             {saving ? 'Saving...' : 'Save'}
           </Button>
         </Box>
