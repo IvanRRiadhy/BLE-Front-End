@@ -22,9 +22,13 @@ import {
 } from 'src/store/apps/crud/patrolArea';
 import earcut from 'earcut';
 import { uniqueId } from 'lodash';
+import polylabel from 'polylabel';
+
+type NodeType = 'corner' | 'center';
 
 type Nodes = {
   id: string;
+  type: string;
   x: number;
   y: number;
   x_px: number;
@@ -49,6 +53,27 @@ interface Props {
   stageY: number;
   stageRef?: React.RefObject<any>;
   onWheel?: (e: any) => void;
+}
+const closeRing = (ring: number[][]) => {
+  if (!ring.length) return ring;
+  const [fx, fy] = ring[0];
+  const [lx, ly] = ring[ring.length - 1];
+  if (fx !== lx || fy !== ly) return [...ring, [fx, fy]];
+  return ring;
+};
+function areaToPolygonRingsFromNodes(nodes: Nodes[]): number[][][] {
+  const cornerNodes = nodes.filter((n) => n.type === 'corner');
+  if (cornerNodes.length < 3) return [];
+
+  const outer: number[][] = cornerNodes.map((n) => [n.x_px, n.y_px]);
+  return [closeRing(outer)];
+}
+
+function areaToPolygonRings(area: PatrolAreaType): number[][][] {
+  const outer: number[][] = (area.nodes ?? []).map((n: Nodes) => [n.x_px, n.y_px]);
+  const holesRaw: Nodes[][] = (area as any).holes ?? [];
+  const holes: number[][][] = holesRaw.map((nodes) => nodes.map((n) => [n.x_px, n.y_px]));
+  return [closeRing(outer), ...holes.map(closeRing)];
 }
 
 const EditPatrolAreaRenderer: React.FC<Props> = ({
@@ -121,6 +146,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
     },
     [stageScale, stageX, stageY],
   );
+  const getCornerNodes = (nodes?: Nodes[]) => (nodes ?? []).filter((n) => n.type === 'corner');
 
   // ----------- load background images -----------
   useEffect(() => {
@@ -169,6 +195,30 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
       setCursor('default');
     }
   }, [drawingPatrolArea, setCursor]);
+  //----------- Center Node Helper -----------
+  function withRecomputedCenter(nodes: Nodes[], scale: number): Nodes[] {
+    const cornerNodes = nodes.filter((n) => n.type === 'corner');
+
+    if (cornerNodes.length < 3) {
+      return cornerNodes; // no center possible
+    }
+
+    const rings = areaToPolygonRingsFromNodes(cornerNodes);
+    if (!rings.length) return cornerNodes;
+
+    const [cx, cy] = polylabel(rings, 1.0);
+
+    const centerNode: Nodes = {
+      id: 'center', // stable id (important)
+      type: 'center',
+      x_px: cx,
+      y_px: cy,
+      x: cx * scale,
+      y: cy * scale,
+    };
+
+    return [...cornerNodes, centerNode];
+  }
 
   // ----------- collision detection helpers -----------
   type Point = { x: number; y: number };
@@ -238,7 +288,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
   };
 
   const nodesToVertices = (nodes: Nodes[]): number[] => {
-    return nodes.flatMap((node) => [node.x_px, node.y_px]);
+    return getCornerNodes(nodes).flatMap((n) => [n.x_px, n.y_px]);
   };
 
   const checkPolygonCollision = (poly1: { nodes: Nodes[] }, poly2: { nodes: Nodes[] }): boolean => {
@@ -389,6 +439,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
 
       const newNode = {
         id: uniqueId(),
+        type: 'corner',
         x: x * scale,
         y: y * scale,
         x_px: x,
@@ -396,6 +447,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
       };
 
       setDrawingNodes((prevNodes) => {
+        const finalNodes = withRecomputedCenter(prevNodes, scale);
         if (prevNodes.length >= 3) {
           const first = prevNodes[0];
           const dist = Math.hypot(first.x_px - newNode.x_px, first.y_px - newNode.y_px);
@@ -405,8 +457,8 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
               name: drawingPatrolArea,
               remarks: '',
               color: '#363636',
-              areaShape: JSON.stringify(prevNodes),
-              nodes: prevNodes,
+              areaShape: JSON.stringify(finalNodes),
+              nodes: finalNodes,
               floorId: selectedFloorplan?.floorId || '',
               floorplanId: selectedFloorplan?.id || '',
               isActive: true,
@@ -573,8 +625,8 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
           x_px: x,
           y_px: y,
         };
-
-        return { ...area, nodes: newNodes, areaShape: JSON.stringify(newNodes) };
+        const finalNodes = withRecomputedCenter(newNodes, scale);
+        return { ...area, nodes: finalNodes, areaShape: JSON.stringify(finalNodes) };
       });
 
       const updatedArea = updatedAreas.find((area) => area.name === areaName);
@@ -624,7 +676,8 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
 
         const newNodes = [...area.nodes];
         newNodes.splice(cornerIndex, 1);
-        return { ...area, nodes: newNodes, areaShape: JSON.stringify(newNodes) };
+        const finalNodes = withRecomputedCenter(newNodes, scale);
+        return { ...area, nodes: finalNodes, areaShape: JSON.stringify(finalNodes) };
       });
 
       const updatedArea = updatedAreas.find((area) => area.name === areaName);
@@ -663,13 +716,16 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
       const newNodes = [...area.nodes];
       newNodes.splice(insertIndex, 0, {
         id: uniqueId(),
+        type: 'corner',
         x: clickX * scale,
         y: clickY * scale,
         x_px: clickX,
         y_px: clickY,
       });
+      const finalNodes = withRecomputedCenter(newNodes, scale);
 
-      const updatedArea = { ...area, nodes: newNodes };
+      const updatedArea = { ...area, nodes: finalNodes };
+
       dispatch(EditPatrolAreaPosition(updatedArea));
     },
     [filteredUnsavedArea, scale, dispatch],
@@ -753,7 +809,8 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
 
   const renderArea = useCallback(
     (area: PatrolAreaType) => {
-      const points = area.nodes?.flatMap((node) => [node.x_px, node.y_px]) || [];
+      const cornerNodes = getCornerNodes(area.nodes);
+      const points = cornerNodes.flatMap((node) => [node.x_px, node.y_px]);
       const isActive = area.name === activeArea;
       const isEditing = area.name === editingArea;
 
@@ -766,9 +823,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
             lineJoin="round"
             lineCap="round"
             closed
-            fill={
-              preview ? area.color : isActive ? area.color : lighten(area.color, 0.7)
-            }
+            fill={preview ? area.color : isActive ? area.color : lighten(area.color, 0.7)}
             opacity={0.7}
             draggable={!preview && isEditing && !drawingPatrolArea}
             onMouseEnter={() => {
@@ -831,7 +886,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
           />
           {isEditing &&
             !areaDragging &&
-            area.nodes?.map((node, index) => (
+            cornerNodes.map((node, index) => (
               <Circle
                 key={node.id}
                 x={node.x_px}
@@ -896,6 +951,20 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
                 }}
               />
             ))}
+          {isEditing &&
+            !areaDragging &&
+            area.nodes
+              ?.filter((n) => n.type === 'center')
+              .map((node) => (
+                <Circle
+                  key={node.id}
+                  x={node.x_px}
+                  y={node.y_px}
+                  radius={4}
+                  fill="yellow"
+                  listening={false}
+                />
+              ))}
         </Group>
       );
     },

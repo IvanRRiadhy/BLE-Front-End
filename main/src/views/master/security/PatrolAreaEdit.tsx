@@ -24,8 +24,8 @@ const PatrolAreaEdit = () => {
         <Box
           display="flex"
           flexDirection="column"
-          minHeight={'80vh'}
-          maxHeight={715}
+          height={'90vh'}
+          maxHeight={855}
           sx={{ border: '1px solid', borderColor: 'divider' }}
         >
           <AddEditPatrolAreaSidebar
@@ -37,7 +37,7 @@ const PatrolAreaEdit = () => {
             position="absolute"
             // top={140}
             left={285}
-            minHeight='80vh'
+            height='90vh'
             maxHeight={"100%"}
             zIndex={1}
             sx={{

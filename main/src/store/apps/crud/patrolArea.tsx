@@ -24,6 +24,7 @@ export type GetFilter = {
 
 type Nodes = {
   id: string;
+  type: string;
   x: number;
   y: number;
   x_px: number;

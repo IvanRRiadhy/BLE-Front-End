@@ -494,7 +494,7 @@ const EditPatrolAreaFloorView: React.FC<{
           width: '100%',
           maxWidth: '100vw',
           height: '100%',
-          maxHeight: 'calc(100vh - 200px)',
+          maxHeight: '90vh',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',

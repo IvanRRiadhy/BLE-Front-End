@@ -24,6 +24,7 @@ import {
   IconEye,
   IconBadge,
   IconMapSearch,
+  IconRoute,
 } from '@tabler/icons-react';
 import { uniqueId } from 'lodash';
 import { AlarmSettingType } from 'src/store/apps/alarmsetting/alarmSettings';
@@ -136,6 +137,7 @@ const isBoundaryActive = isActive('boundary');
           children: [
             { id: uniqueId(), title: 'Security Guard', icon: IconBadge, href: '/master/securityguard/' },
             { id: uniqueId(), title: 'Patrol Area', icon: IconMapSearch, href: '/master/patrolarea/' },
+            { id: uniqueId(), title: 'Patrol Route', icon: IconRoute, href: '/master/patrolroute/' },
           ]
         },
         { id: uniqueId(), title: 'Member Data', icon: IconUsers, href: '/master/membertag/' },

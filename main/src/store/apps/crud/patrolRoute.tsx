@@ -1,0 +1,80 @@
+import axiosServices, { BASE_URL } from '../../../utils/axios';
+import { createSlice } from '@reduxjs/toolkit';
+import { AppDispatch, dispatch } from 'src/store/Store';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk } from '@reduxjs/toolkit';
+
+const API_URL = '/api/patrol-route/';
+const API_URL_FILTER = '/api/patrol-route/filter/';
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export type GetFilter = {
+  Draw: number;
+  Start: number;
+  Length: number;
+  SortColumn: string;
+  SortDir: 'asc' | 'desc';
+  SearchValue: string;
+  filters?: {
+    PatrolAreaId?: string[];
+  };
+};
+
+export type PatrolRouteType = {
+    id: string;
+    name: string;
+    description: string;
+    patrolAreaIds: string[];
+}
+
+interface Statetype {
+    patrolRoutes: PatrolRouteType[];
+    patrolRouteAll: PatrolRouteType[];
+    patrolRouteSearch: string;
+    selectedPatrolRoute?: PatrolRouteType | null;
+    selectedPatrolRouteId?: string;
+    patrolRouteTotalCount: number;
+    patrolRouteFilteredCount: number;
+    patrolRouteFilter: GetFilter;
+    lastFilter?: GetFilter;
+    isLoading: boolean;
+    hasLoaded: boolean;
+}
+
+const initialState: Statetype = {
+    patrolRoutes: [],
+    patrolRouteAll: [],
+    patrolRouteSearch: '',
+    selectedPatrolRoute: null,
+    selectedPatrolRouteId: '',
+    patrolRouteTotalCount: 0,
+    patrolRouteFilteredCount: 0,
+    patrolRouteFilter: {} as GetFilter,
+    lastFilter: {} as GetFilter,
+    isLoading: false,
+    hasLoaded: false,
+};
+
+export const PatrolRouteSlice = createSlice({
+    name: "patrolRoute",
+    initialState,
+    reducers: {
+        GetPatrolRoute: (state, action: PayloadAction<PatrolRouteType[]>) => {
+            state.patrolRoutes = action.payload;
+        },
+        GetAllPatrolRoute: (state, action: PayloadAction<PatrolRouteType[]>) => {
+            state.patrolRouteAll = action.payload;
+        },
+        SelectPatrolRoute: (state, action: PayloadAction<PatrolRouteType>) => {
+            state.selectedPatrolRoute = action.payload;
+            state.selectedPatrolRouteId = action.payload.id;
+        },
+        UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
+            state.patrolRouteFilter = { ...state.patrolRouteFilter, ...action.payload };
+        },
+    }
+});
+
+export const { GetPatrolRoute, GetAllPatrolRoute, SelectPatrolRoute, UpdateFilter } = PatrolRouteSlice.actions;
+
+export default PatrolRouteSlice.reducer;

@@ -222,7 +222,7 @@ const DeviceList = () => {
   const handleConfirmDelete = () => {
     if (deleteDeviceId) {
       // Find the device to get its name for the toast
-      const deviceToDelete = filteredUnsavedDevices.find(d => d.id === deleteDeviceId);
+      const deviceToDelete = filteredUnsavedDevices.find((d: FloorplanDeviceType) => d.id === deleteDeviceId);
       
       // We'll handle the actual deletion in the save function
       // For now, just remove from unsaved devices
