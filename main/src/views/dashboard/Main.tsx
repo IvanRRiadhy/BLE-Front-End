@@ -16,8 +16,6 @@ import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import { trackingTransType } from 'src/store/apps/crud/trackingTrans';
 import { setMainMenu } from 'src/store/customizer/CustomizerSlice';
 import { fetchFloorplanDeviceDT, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
-import BlacklistList from 'src/components/master/CRUD/blacklist/BlacklistList';
-import HeatmapFloorplan from 'src/components/dashboards/mainmenu/Heatmap';
 import { fetchFloorDT, floorType } from 'src/store/apps/crud/floor';
 import BeaconDistribution from 'src/components/dashboards/mainmenu/BeaconDistribution';
 import AreaDistribution from 'src/components/dashboards/mainmenu/AreaDistribution';

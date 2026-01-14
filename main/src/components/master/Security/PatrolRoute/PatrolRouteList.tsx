@@ -30,6 +30,7 @@ import { PatrolRouteType, UpdateFilter } from 'src/store/apps/crud/patrolRoute';
 // import AddEditPatrolRoute from './AddEditPatrolRoute';
 import toast from 'react-hot-toast';
 import { useDeletePatrolRoute, usePatrolRouteList } from 'src/hooks/usePatrolRoute';
+import AddEditPatrolRoute from './AddEditPatrolRoute';
 
 const columns = [
   { label: 'Route Name', field: 'Name', sortAble: true },
@@ -288,7 +289,7 @@ const PatrolRouteList = () => {
                               maxWidth: 150,
                             }}
                           >
-                            {/* <AddEditPatrolRoute patrolRoute={patrolRoute} type="edit" /> */}
+                            <AddEditPatrolRoute patrolRoute={patrolRoute} type="edit" />
                             <IconButton
                               color="error"
                               size="small"

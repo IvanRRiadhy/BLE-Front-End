@@ -17,6 +17,7 @@ import ParentCard from 'src/components/shared/ParentCard';
 import { useTranslation } from 'react-i18next';
 import { usePatrolRouteStatus } from 'src/hooks/usePatrolRoute';
 import PatrolRouteList from 'src/components/master/Security/PatrolRoute/PatrolRouteList';
+import AddEditPatrolRoute from 'src/components/master/Security/PatrolRoute/AddEditPatrolRoute';
 
 interface cardType {
   icon?: string;
@@ -93,7 +94,7 @@ const PatrolRoute = () => {
               >
                 <ParentCard title="Patrol Route List" codeModel={[
                 //   <CardAccessSearch key="search" />,
-                //     <AddEditCardAccess key="add" type="add" />
+                    <AddEditPatrolRoute key="add" type="add" />
                   ]}>
                   <PatrolRouteList />
                 </ParentCard>

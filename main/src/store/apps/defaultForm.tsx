@@ -31,6 +31,7 @@ import {
 } from './alarmsetting/overpopulating';
 import { BoundaryAlarmType, GetFilter as BoundaryFilter } from './alarmsetting/boundary';
 import { StayOnAreaAlarmType, GetFilter as StayOnAreaFilter } from './alarmsetting/stayonarea';
+import { PatrolRouteType, GetFilter as PatrolRouteFilter } from './crud/patrolRoute';
 
 //#region AccessCCTV
 export const defaultAccessCCTVForm: CCTVType = {
@@ -706,6 +707,26 @@ export const defaultStayOnAreaFilter: StayOnAreaFilter = {
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
   SearchValue: '',
+};
+
+//#endregion
+
+//#region Patrol Route
+export const defaultPatrolRouteForm: PatrolRouteType = {
+  id: '',
+  name: '',
+  description: '',
+  patrolAreaIds: [],
+};
+export const defaultPatrolRouteFilter: PatrolRouteFilter = {
+  Draw: 1,
+  Start: 0,
+  Length: 5,
+  SortColumn: 'UpdatedAt',
+  SortDir: 'desc',
+  SearchValue: '',
+  filters: {
+  },
 };
 
 //#endregion

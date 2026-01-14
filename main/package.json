@@ -29,7 +29,6 @@
     "@mui/x-tree-view": "^7.18.0",
     "@react-spring/web": "^9.7.5",
     "@reduxjs/toolkit": "2.2.3",
-    "@sarpere/heatmapjs-react": "^0.2.0",
     "@svgr/rollup": "8.1.0",
     "@tabler/icons-react": "^3.34.0",
     "@tanstack/react-query": "^5.90.6",
@@ -57,7 +56,6 @@
     "fs-extra": "^11.3.2",
     "fslightbox-react": "^1.7.6",
     "gray-matter": "^4.0.3",
-    "heatmap.js": "^2.0.5",
     "html2canvas": "^1.4.1",
     "i18next": "^23.5.1",
     "its-fine": "1.2.1",
@@ -88,7 +86,7 @@
     "react-qr-code": "^2.0.18",
     "react-reconciler": "0.29.2",
     "react-redux": "9.1.2",
-    "react-router": "^7.0.2",
+    "react-router": "^7.12.0",
     "react-router-dom": "^7.7.1",
     "react-slick": "^0.29.0",
     "react-spring": "^9.7.3",
@@ -141,7 +139,7 @@
     "rollup": "^3.29.4",
     "simpleheat": "^0.4.0",
     "typescript": "5.7.2",
-    "vite": "^6.3.5",
+    "vite": "^7.3.1",
     "vitest": "^4.0.6"
   }
 }
