@@ -196,6 +196,7 @@ const isBoundaryActive = isActive('boundary');
         // { id: uniqueId(), title: 'Test Record', icon: IconCalendar, href: '/report/testrecord/' },
         { id: uniqueId(), title: 'Visitor Report', icon: IconCalendar, href: '/report/visitorreport/filter/'},
         { id: uniqueId(), title: 'Investigate', icon: IconCalendar, href: '/report/investigate'},
+        { id: uniqueId(), title: 'Event Log', icon: IconCalendar, href: '/report/eventlog'},
       ],
     },
   ];

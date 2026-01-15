@@ -197,7 +197,7 @@ const CardRecordList = () => {
                       {!hasLoaded ? (
                         renderSkeletonRows(SKELETON_ROWS)
                       ) : (
-                        cardRecordData.map((cardRecord, index) => (
+                        cardRecordData.map((cardRecord: CardRecordType, index) => (
                         <TableRow key={index}>
                           <TableCell
                             sx={{

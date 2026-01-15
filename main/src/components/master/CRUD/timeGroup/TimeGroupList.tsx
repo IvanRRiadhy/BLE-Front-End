@@ -83,8 +83,8 @@ const TimeGroupList = () => {
         <Box
           ref={scrollBoxRef}
           sx={{
-            height: { lg: 'calc(100vh - 260px)', md: '100vh' },
-            maxHeight: '620px',
+            height: { lg: '90vh', md: '100vh' },
+            maxHeight: '715px',
             overflow: 'auto',
           }}
         >

@@ -273,9 +273,9 @@ const PatrolRouteList = () => {
                           </TableCell>
                           <TableCell>{patrolRoute.name}</TableCell>
                           <TableCell>{patrolRoute.description}</TableCell>
-                          <TableCell>{patrolRoute.patrolAreaIds?.length ?? 0}</TableCell>
-                          <TableCell>{"A"}</TableCell>
-                          <TableCell>{"B"}</TableCell>
+                          <TableCell>{patrolRoute.areas?.length ?? 0}</TableCell>
+                          <TableCell>{patrolRoute.areas?.[0].startAreaId}</TableCell>
+                          <TableCell>{patrolRoute.areas?.[0].endAreaId}</TableCell>
                           <TableCell
                             sx={{
                               position: 'sticky',

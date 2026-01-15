@@ -23,7 +23,7 @@ export function usePatrolRouteList(filter: GetFilter) {
     queryFn: async () => {
       const response = await axiosServices.post(API_DT_URL, filter);
       const collection = response.data.collection;
-      // console.log("Card Access", collection)
+      console.log("Route: ", collection)
       return {
         data: collection.data as PatrolRouteType[],
         draw: collection.draw,
@@ -31,7 +31,7 @@ export function usePatrolRouteList(filter: GetFilter) {
         recordsFiltered: collection.recordsFiltered,
       } satisfies PaginatedResponse<PatrolRouteType>;
     },
-    placeholderData: keepPreviousData, // Keep old data during refetch
+    placeholderData: keepPreviousData, 
     staleTime: 5_000, // fresh for 1 minute
     gcTime: 5 * 60_000, // cache for 5 minutes
   });

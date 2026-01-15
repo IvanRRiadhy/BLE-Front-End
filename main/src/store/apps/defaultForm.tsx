@@ -433,6 +433,7 @@ export const defaultOrganizationFilter: OrganizationFilter = {
 export const defaultTimeGroupForm: TimeGroupType = {
   id: '',
   name: 'Add Name',
+  scheduleType: 'Shift',
   description: 'Add Description',
   timeBlocks: [],
   cardAccessIds: [],

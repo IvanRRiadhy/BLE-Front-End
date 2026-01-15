@@ -87,7 +87,15 @@ const Header = () => {
           maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',
         }}
       >
-        <Box sx={{ width: lgDown ? '45px' : 'auto', overflow: 'hidden' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            pl: 2, // 👈 small left padding
+            pr: 2,
+            flexShrink: 0,
+          }}
+        >
           <Logo />
         </Box>
         {/* ------------------------------------------- */}
@@ -104,15 +112,7 @@ const Header = () => {
         ) : (
           ''
         )}
-        {/* ------------------------------------------- */}
-        {/* Search Dropdown */}
-        {/* ------------------------------------------- */}
-        {/* <Search />
-        {lgUp ? (
-          <>
-            <Navigation />
-          </>
-        ) : null} */}
+
         <Container
           sx={{
             maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',

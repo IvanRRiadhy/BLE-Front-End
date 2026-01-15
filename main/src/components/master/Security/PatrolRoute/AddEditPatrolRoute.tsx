@@ -36,9 +36,12 @@ import {
   DragEndEvent,
 } from '@dnd-kit/core';
 import { SortableContext, useSortable, arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
+import { restrictToParentElement, restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
 import { CSS } from '@dnd-kit/utilities';
 import SortablePatrolAreaCard from './SortablePatrolAreaCard';
 import { PatrolAreaType } from 'src/store/apps/crud/patrolArea';
+import SnakeFlowOverlay from './RouteDialogBackground';
+import SnakeChevronBackground from './RouteDialogBackground';
 
 interface FormType {
   type?: 'add' | 'edit';
@@ -46,7 +49,6 @@ interface FormType {
 }
 
 const COLUMNS = 4;
-
 
 const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
   const [open, setOpen] = useState(false);
@@ -70,7 +72,11 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
   const handleClickOpen = () => {
     setFormErrors({});
     if (type === 'edit' && patrolRoute) {
-      setFormData({ ...defaultPatrolRouteForm, ...patrolRoute });
+      setFormData({
+        ...defaultPatrolRouteForm,
+        ...patrolRoute,
+        patrolAreaIds: patrolRoute.areas?.map((a) => a.patrolAreaId) || [],
+      });
     } else {
       setFormData({ ...defaultPatrolRouteForm });
     }
@@ -86,7 +92,7 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
   // 🧩 Validation
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
-    if (!formData.name?.trim()) errors.name = 'Floor name is required';
+    if (!formData.name?.trim()) errors.name = 'Route Name is required';
     if (!formData.patrolAreaIds || formData.patrolAreaIds.length === 0)
       errors.patrolAreaIds = 'Patrol Area is required';
     setFormErrors(errors);
@@ -144,62 +150,58 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
   );
 
   function chunk<T>(arr: T[], size: number): T[][] {
-  const res: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) {
-    res.push(arr.slice(i, i + size));
+    const res: T[][] = [];
+    for (let i = 0; i < arr.length; i += size) {
+      res.push(arr.slice(i, i + size));
+    }
+    return res;
   }
-  return res;
-}
-const snakeOrderedAreas = React.useMemo(() => {
-  const rows = chunk(selectedAreas, COLUMNS);
+  const snakeOrderedAreas = React.useMemo(() => {
+    const rows = chunk(selectedAreas, COLUMNS);
 
-  return rows.flatMap((row, rowIndex) =>
-    rowIndex % 2 === 0 ? row : [...row].reverse()
-  );
-}, [selectedAreas]);
+    return rows.flatMap((row, rowIndex) => (rowIndex % 2 === 0 ? row : [...row].reverse()));
+  }, [selectedAreas]);
 
-type RenderItem =
-  | { type: 'area'; area: PatrolAreaType }
-  | { type: 'add' }
-  | { type: 'spacer'; key: string };
+  type RenderItem =
+    | { type: 'area'; area: PatrolAreaType }
+    | { type: 'add' }
+    | { type: 'spacer'; key: string };
 
-const renderItems = React.useMemo<RenderItem[]>(() => {
-  // 1️⃣ build base list (areas + add)
-  const base: RenderItem[] = [
-    ...selectedAreas.map((a) => ({ type: 'area', area: a } as const)),
-    { type: 'add' } as const,
-  ];
+  const renderItems = React.useMemo<RenderItem[]>(() => {
+    // 1️⃣ build base list (areas + add)
+    const base: RenderItem[] = [
+      ...selectedAreas.map((a) => ({ type: 'area', area: a } as const)),
+      { type: 'add' } as const,
+    ];
 
-  // 2️⃣ chunk into rows
-  const rows: RenderItem[][] = [];
-  for (let i = 0; i < base.length; i += COLUMNS) {
-    rows.push(base.slice(i, i + COLUMNS));
-  }
+    // 2️⃣ chunk into rows
+    const rows: RenderItem[][] = [];
+    for (let i = 0; i < base.length; i += COLUMNS) {
+      rows.push(base.slice(i, i + COLUMNS));
+    }
 
-  // 3️⃣ apply snake direction PER ROW
-  const snakeRows = rows.map((row, rowIndex) => {
-    const isRTL = rowIndex % 2 === 1;
-    return isRTL ? [...row].reverse() : row;
-  });
+    // 3️⃣ apply snake direction PER ROW
+    const snakeRows = rows.map((row, rowIndex) => {
+      const isRTL = rowIndex % 2 === 1;
+      return isRTL ? [...row].reverse() : row;
+    });
 
-  // 4️⃣ pad LAST ROW if it is RTL
-  const lastRowIndex = snakeRows.length - 1;
-  const lastRow = snakeRows[lastRowIndex];
+    // 4️⃣ pad LAST ROW if it is RTL
+    const lastRowIndex = snakeRows.length - 1;
+    const lastRow = snakeRows[lastRowIndex];
 
-  if (lastRowIndex % 2 === 1 && lastRow.length < COLUMNS) {
-    const padCount = COLUMNS - lastRow.length;
-    const spacers = Array.from({ length: padCount }, (_, i) => ({
-      type: 'spacer' as const,
-      key: `spacer-${i}`,
-    }));
-    snakeRows[lastRowIndex] = [...spacers, ...lastRow];
-  }
+    if (lastRowIndex % 2 === 1 && lastRow.length < COLUMNS) {
+      const padCount = COLUMNS - lastRow.length;
+      const spacers = Array.from({ length: padCount }, (_, i) => ({
+        type: 'spacer' as const,
+        key: `spacer-${i}`,
+      }));
+      snakeRows[lastRowIndex] = [...spacers, ...lastRow];
+    }
 
-  // 5️⃣ flatten back
-  return snakeRows.flat();
-}, [selectedAreas]);
-
-
+    // 5️⃣ flatten back
+    return snakeRows.flat();
+  }, [selectedAreas]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     // console.log('patrolAreaIds', formData.patrolAreaIds);
@@ -217,6 +219,15 @@ const renderItems = React.useMemo<RenderItem[]>(() => {
     });
     // console.log('patrolAreaIds', formData.patrolAreaIds);
   };
+const ROWS = Math.ceil((selectedAreas.length + 1) / COLUMNS);
+
+//Remove from list
+const handleRemoveArea = (id: string) => {
+  setFormData((prev) => ({
+    ...prev,
+    patrolAreaIds: prev.patrolAreaIds.filter((x) => x !== id),
+  }));
+};
 
   return (
     <>
@@ -284,53 +295,78 @@ const renderItems = React.useMemo<RenderItem[]>(() => {
         <Divider />
 
         {/* ===== MAIN CONTENT ===== */}
-        <DialogContent sx={{ flex: 1 }}>
+        <DialogContent sx={{ flex: 1, position: 'relative' }}>
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              pointerEvents: 'none',
+              zIndex: 0,
+            }}
+          >
+            <SnakeChevronBackground
+            itemCount={renderItems.filter(i => i.type !== 'spacer').length}
+              rows={ROWS} // + add card
+              columns={COLUMNS}
+              cardWidth={220}
+              cardHeight={320}
+              gap={24} // Grid spacing * 8px
+            />
+          </Box>
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
+            modifiers={[restrictToFirstScrollableAncestor]}
             onDragEnd={handleDragEnd}
           >
             <SortableContext items={formData.patrolAreaIds} strategy={rectSortingStrategy}>
               <Grid container spacing={3}>
-  {renderItems.map((item, index) => {
-    if (item.type === 'spacer') {
-      return (
-        <Grid key={item.key} size={{ xs: 12, sm: 6, md: 3 }} />
-      );
-    }
+                {renderItems.map((item, index) => {
+                  if (item.type === 'spacer') {
+                    return <Grid key={item.key} size={{ xs: 12, sm: 6, md: 3 }} />;
+                  }
 
-    if (item.type === 'add') {
-      return (
-        <Grid key="add" size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card
-            onClick={() => setAddAreaOpen(true)}
-            sx={{
-              height: 320,
-              width: 220,
-              borderRadius: 3,
-              border: '2px dashed',
-              borderColor: 'divider',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <IconPlus size={48} />
-          </Card>
-        </Grid>
-      );
-    }
+                  if (item.type === 'add') {
+                    return (
+                      <Grid key="add" size={{ xs: 12, sm: 6, md: 3 }}>
+                        <Card
+                          onClick={() => setAddAreaOpen(true)}
+                          sx={{
+                            height: 320,
+                            width: 220,
+                            borderRadius: 3,
+                            border: '2px dashed',
+                            borderColor: 'divider',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <IconPlus size={48} />
+                        </Card>
+                      </Grid>
+                    );
+                  }
+                  const rowIndex = Math.floor(index / COLUMNS);
+                  const colIndex = index % COLUMNS;
+                  const isRTL = rowIndex % 2 === 1;
+                  const isEndOfRow = colIndex === COLUMNS - 1;
 
-    return (
-      <SortablePatrolAreaCard
-        key={item.area.id}
-        area={item.area}
-      />
-    );
-  })}
-</Grid>
-
+                  return (
+                    <SortablePatrolAreaCard
+                      key={item.area.id}
+                      area={item.area}
+                      rowIndex={rowIndex}
+                      colIndex={colIndex}
+                      isRTL={isRTL}
+                      isEndOfRow={isEndOfRow}
+                      isLast={index === renderItems.length - 1}
+                      onRemove={handleRemoveArea}
+                    />
+                  );
+                })}
+              </Grid>
             </SortableContext>
           </DndContext>
         </DialogContent>

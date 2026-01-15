@@ -339,7 +339,7 @@ const handleSave = async () => {
           display: 'flex',
           flexDirection: 'column',
           gap: 0.5,
-          maxHeight: '550px',
+          maxHeight: '625px',
           overflowY: 'auto',
           pr: 1,
           userSelect: 'none',

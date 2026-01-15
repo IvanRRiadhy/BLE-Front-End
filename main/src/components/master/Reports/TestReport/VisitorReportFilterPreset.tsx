@@ -297,7 +297,7 @@ const VisitorReportFilterPreset = ({
               />
 
               {/* Presets List */}
-              <Box sx={{ maxHeight: 320, overflow: 'auto' }}>
+              <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
                 <List dense>
                   {filteredPresets?.map((preset) => (
                     <ListItem

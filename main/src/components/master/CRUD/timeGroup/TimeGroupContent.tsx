@@ -289,7 +289,7 @@ const TimeGroupDetails = () => {
               </Box>
             </Grid>
 
-            <Grid size={{ lg: 9.5, md: 12, sm: 12 }}>
+            <Grid size={{ lg: 9.5, md: 12, sm: 12  }}>
               <TimeGridSelector
                 onSelectionChange={handleTimeGridChange}
                 initialData={formData.timeBlocks}

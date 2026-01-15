@@ -32,6 +32,7 @@ export type TimeGroupType = {
   id: string; 
   name: string;
   description: string;
+  scheduleType: "Shift" | "Patrol"
   timeBlocks: TimeBlockType[];
   cardAccessIds: string[];
 };
