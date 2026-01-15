@@ -1,79 +1,113 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import React from 'react';
-import { Grid2 as Grid, Box } from '@mui/material';
+import { Box, Paper, Typography } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
-import img1 from 'src/assets/images/backgrounds/login-bg.svg';
-import Logo from 'src/layouts/full/shared/logo/Logo';
+
+import gedung from 'src/assets/images/backgrounds/gedung-bi.png';
+import logo from 'src/assets/images/logos/BI_Logo.png';
+import bg from 'src/assets/images/backgrounds/bg.jpg';
+
 import AuthLogin from '../authForms/AuthLogin';
 
-const Login = () => (
-  <PageContainer title="Login" description="this is Login page">
-    <Grid container spacing={0} sx={{ overflowX: 'hidden' }}>
-      <Grid
+const Login = () => {
+  return (
+    <PageContainer title="Login" description="Login page">
+      {/* Background */}
+      <Box
         sx={{
-          position: 'relative',
-          '&:before': {
-            content: '""',
-            background: 'radial-gradient(#d2f1df, #d3d7fa, #bad8f4)',
-            backgroundSize: '400% 400%',
-            animation: 'gradient 15s ease infinite',
-            position: 'absolute',
-            height: '100%',
-            width: '100%',
-            opacity: '0.3',
-          },
-        }}
-        size={{
-          xs: 12,
-          sm: 12,
-          lg: 7,
-          xl: 8,
+          minHeight: '100vh',
+          width: '100vw',
+          backgroundImage: `url(${bg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 2,
         }}
       >
-        <Box position="relative">
-          <Box px={3}>
-            <Logo />
-          </Box>
+        {/* Card */}
+        <Paper
+          elevation={8}
+          sx={{
+            width: '100%',
+            maxWidth: '72rem',
+            minHeight: '36rem',
+            borderRadius: 4,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+          }}
+        >
+          {/* LEFT PANEL */}
           <Box
-            alignItems="center"
-            justifyContent="center"
-            height={'calc(100vh - 75px)'}
             sx={{
-              display: {
-                xs: 'none',
-                lg: 'flex',
-              },
+              flex: 1,
+              backgroundColor: '#045498',
+              color: '#f3f4f6',
+              p: { xs: 3, md: 5 },
+              display: { xs: 'none', md: 'flex' },
+              flexDirection: 'column',
+              gap: 3,
             }}
           >
-            <img
-              src={img1}
-              alt="bg"
-              style={{
-                width: '100%',
-                maxWidth: '500px',
+            <Box
+              component="img"
+              src={gedung}
+              alt="Gedung BI"
+              sx={{
+                maxWidth: '100%',
+                maxHeight: 320,
+                borderRadius: 3,
+                objectFit: 'contain',
               }}
             />
+
+            <Typography variant="h4" fontWeight={700}>
+              Lorem Ipsum
+            </Typography>
+
+            <Typography
+              sx={{
+                fontFamily: 'var(--font-serif)',
+                fontWeight: 300,
+                opacity: 0.9,
+              }}
+            >
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur
+              eget pulvinar nibh. Donec ut arcu in erat auctor gravida.
+            </Typography>
           </Box>
-        </Box>
-      </Grid>
-      <Grid
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        size={{
-          xs: 12,
-          sm: 12,
-          lg: 5,
-          xl: 4,
-        }}
-      >
-        <Box p={4}>
-          <AuthLogin title="Welcome" />
-        </Box>
-      </Grid>
-    </Grid>
-  </PageContainer>
-);
+
+          {/* RIGHT PANEL */}
+          <Box
+            sx={{
+              flex: 1,
+              backgroundColor: '#f3f4f6',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              p: { xs: 3, md: 5 },
+            }}
+          >
+            <Box
+              component="img"
+              src={logo}
+              alt="Logo BI"
+              sx={{
+                width: '40%',
+                maxWidth: 200,
+                mb: 2,
+              }}
+            />
+
+            {/* Existing login logic */}
+            <AuthLogin title="Sign in" />
+          </Box>
+        </Paper>
+      </Box>
+    </PageContainer>
+  );
+};
 
 export default Login;

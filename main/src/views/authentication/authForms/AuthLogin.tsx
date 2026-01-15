@@ -133,18 +133,6 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       {subtext}
 
       <Box mt={3}>
-        <Divider sx={{ mb: 2 }}>
-          <Typography
-            component="span"
-            color="textSecondary"
-            variant="h6"
-            fontWeight="400"
-            position="relative"
-            px={2}
-          >
-            Sign in
-          </Typography>
-        </Divider>
 
         {/* Top switcher: Admin (top) vs Visitor (bottom) using tabs */}
         <Tabs
