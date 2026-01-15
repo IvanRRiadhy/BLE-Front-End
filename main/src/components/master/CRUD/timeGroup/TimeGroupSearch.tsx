@@ -48,7 +48,7 @@ const TimeGroupSearch = ({ onClick }: Props) => {
         variant="outlined"
         onChange={(e) => dispatch(UpdateFilter({ SearchValue: e.target.value }))}
       />
-      <Button variant="contained" color="secondary" onClick={handleAdd}>
+      <Button variant="contained" color="primary" onClick={handleAdd}>
         + Add TimeGroup
       </Button>
     </Box>

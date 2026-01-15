@@ -10,6 +10,8 @@ import {
   TextField,
   Tooltip,
   IconButton,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
 import { IconInfoCircle } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
@@ -33,7 +35,7 @@ const TimeGroupDetails = () => {
   const dispatch = useDispatch();
   const selectedTimeGroup = useSelector((state: any) => state.TimeGroupReducer.selectedTimeGroup);
   const isNewTimeGroup = useSelector((state: any) => state.TimeGroupReducer.isNewTimeGroup);
-  
+
   // React Query hooks
   const { data: cardAccess = [] } = useAllCardAccess();
   const addMutation = useAddTimeGroup();
@@ -43,7 +45,7 @@ const TimeGroupDetails = () => {
     ...defaultTimeGroupForm,
     ...selectedTimeGroup,
   });
-  
+
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [timeBlocks, setTimeBlocks] = useState<TimeBlockType[]>(formData.timeBlocks ?? []);
 
@@ -71,6 +73,20 @@ const TimeGroupDetails = () => {
     }));
     // Also update Redux state if needed
     dispatch(UpdateSelectedTimeGroup({ timeBlocks: blocks }));
+  };
+
+  const handleScheduleTypeChange = (
+    _event: React.MouseEvent<HTMLElement>,
+    value: 'Shift' | 'Patrol' | null,
+  ) => {
+    if (!value) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      scheduleType: value,
+    }));
+
+    dispatch(UpdateSelectedTimeGroup({ scheduleType: value }));
   };
 
   // const handleSave = async () => {
@@ -169,7 +185,39 @@ const TimeGroupDetails = () => {
                 minRows={3}
                 maxRows={5}
               />
-              
+
+              <Box mt={2}>
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                  Schedule Type
+                </Typography>
+
+                <ToggleButtonGroup
+                  value={formData.scheduleType}
+                  exclusive
+                  onChange={handleScheduleTypeChange}
+                  fullWidth
+                  size="small"
+                  sx={{
+                    '& .MuiToggleButton-root': {
+                      py: 1,
+                      fontWeight: 500,
+                      textTransform: 'none',
+                      '&.Mui-selected': {
+                        background: 'linear-gradient(45deg, #355CFF, #00CFFF)',
+                        color: 'white',
+                        '&:hover': {
+                          background: 'linear-gradient(45deg, #355CFF, #00CFFF)',
+                          opacity: 0.9,
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <ToggleButton value="Shift">Shift</ToggleButton>
+                  <ToggleButton value="Patrol">Patrol</ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
+
               <CustomFormLabel>Card Access</CustomFormLabel>
               <Autocomplete
                 multiple
@@ -289,7 +337,7 @@ const TimeGroupDetails = () => {
               </Box>
             </Grid>
 
-            <Grid size={{ lg: 9.5, md: 12, sm: 12  }}>
+            <Grid size={{ lg: 9.5, md: 12, sm: 12 }}>
               <TimeGridSelector
                 onSelectionChange={handleTimeGridChange}
                 initialData={formData.timeBlocks}
