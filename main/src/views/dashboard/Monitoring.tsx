@@ -91,18 +91,18 @@ const Monitoring = () => {
 
   return (
     <>
-      <ToolbarStyled>
+      {/* <ToolbarStyled>
         <ToolbarMonitor />
-      </ToolbarStyled>
+      </ToolbarStyled> */}
 
       <PageContainer
         title="Monitoring Dashboard"
         description="This is the Monitoring Dashboard page"
       >
-        <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%', height: 'calc(100vh - 150px)' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%', height: 'calc(100vh - 100px)' }}>
           <MonitoringSidebar />
           
-          <Box sx={{ flex: 1, overflow: 'hidden', pl: 1 }}>
+          <Box sx={{ flex: 1, overflow: 'hidden', pl: 1, pt: 2 }}>
             <Grid container>
               <Grid size={{ xs: 12 }}>
                 <MonitoringGrid

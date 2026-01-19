@@ -12,7 +12,7 @@ const MonitoringSidebar = () => {
   const toggleWidth = customizer.isMonitorSidebar
     ? customizer.SidebarWidth
     : customizer.MiniSidebarWidth;
-  const [filterType, setFilterType] = useState('');
+  const [filterType, setFilterType] = useState<string[]>(['Tracking', 'Alarm']);
 
   if (lgUp) {
     return (
@@ -20,7 +20,7 @@ const MonitoringSidebar = () => {
         sx={{
           width: toggleWidth,
           flexShrink: 0,
-          marginTop: `calc(1.9 * ${customizer.TopbarHeight}px)`,
+          marginTop: `${customizer.TopbarHeight}px)`,
           position: 'relative',
           //marginLeft: customizer.isCollapse ? 0 : `${customizer.SidebarWidth}px`,
           //   ...(customizer.isCollapse && {
@@ -42,7 +42,7 @@ const MonitoringSidebar = () => {
               }),
               width: toggleWidth,
               boxSizing: 'border-box',
-              marginTop: `calc(1.9 * ${customizer.TopbarHeight}px)`,
+              marginTop: `${customizer.TopbarHeight}px`,
               //marginLeft: customizer.isCollapse ? 0 : `${customizer.SidebarWidth}px`,
             },
           }}
@@ -52,10 +52,10 @@ const MonitoringSidebar = () => {
           {/* ------------------------------------------- */}
           <Box
             sx={{
-              height: `calc(100% - 2 * ${customizer.TopbarHeight}px)`,
+              height: `calc(100% - ${customizer.TopbarHeight}px)`,
             }}
           >
-            <SidebarFilter setFilterType={setFilterType} />
+            <SidebarFilter filterType={filterType} setFilterType={setFilterType} />
             <SidebarList filterType={filterType} />
           </Box>
         </Drawer>

@@ -149,7 +149,7 @@ const FullLayout: FC = () => {
           dmac: alarmData.dmac,
           floor: alarmData.floorplanName || 'Unknown Floor',
           area: alarmData.maskedAreaName || 'Unknown Area',
-
+          personId: alarmData.personId || '',
           alarmStatus: alarmData.status, // e.g. blacklist / restricted
           action: alarmData.action, // investigated / active / etc
           time: new Date().toISOString(),

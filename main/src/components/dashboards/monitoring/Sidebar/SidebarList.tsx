@@ -19,7 +19,7 @@ import { useAllVisitor } from 'src/hooks/useVisitor';
 import { useEnrichedTrackingLogs, useTrackingLogs } from 'src/hooks/useTrackingLogs';
 
 interface SidebarListProps {
-  filterType: string; // '', 'All', 'Tracking', 'Alarm'
+  filterType: string[]; // '', 'All', 'Tracking', 'Alarm'
 }
 
 type ListType = {
@@ -57,10 +57,10 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
   const [selectedItem, setSelectedItem] = useState<ListType | null>(null);
   // const [list, setList] = useState<ListType[]>([]);
   const trackingLogs = useEnrichedTrackingLogs();
-  const list =
-    filterType && filterType !== 'All'
-      ? trackingLogs.filter((x) => x.type === filterType)
-      : trackingLogs;
+const list =
+  filterType.length > 0
+    ? trackingLogs.filter((x) => filterType.includes(x.type))
+    : trackingLogs;
   const { data: memberList = [] } = useAllMembers();
   const { data: visitorList = [] } = useAllVisitor();
 
@@ -246,6 +246,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
   // }, [filterType]);
 
   const handleItemClick = (item: ListType) => {
+    console.log('🟡 handleItemClick called', list);
     setSelectedItem(item);
     setOpenModal(true);
   };
@@ -264,7 +265,7 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
   return (
     <>
       <List>
-        <Scrollbar sx={{ height: { lg: 'calc(100vh - 270px)', md: '100vh' }, maxHeight: '800px' }}>
+        <Scrollbar sx={{ height: { lg: 'calc(100vh - 200px)', md: '100vh' }, maxHeight: '800px' }}>
           {list.map((item) => (
             <SidebarListItem key={item.id} item={item} onItemClick={() => handleItemClick(item)} />
           ))}

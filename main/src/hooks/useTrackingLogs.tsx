@@ -37,6 +37,7 @@ export function useTrackingLogs(): TrackingLogItem[] {
         type: 'Alarm',
         target: getName(a.beaconId),
         image: getImage(a.beaconId),
+        personId: a.beaconId,
         dmac: a.beaconId,
         floor: a.floorplan?.name || 'Unknown Floor',
         area: 'Unknown Area',
@@ -55,6 +56,7 @@ export function useTrackingLogs(): TrackingLogItem[] {
           type: 'Tracking',
           target: getName(b.beaconId),
           image: getImage(b.beaconId),
+          personId: b.beaconId,
           dmac: b.beaconId,
           floor: b.floorplanName || 'Unknown Floor',
           area: b.maskedAreaName || 'Unknown Area',
@@ -91,6 +93,7 @@ export function useEnrichedTrackingLogs(): TrackingLogItem[] {
       return {
         ...log,
         target: m?.name || v?.name || 'Unknown',
+        personId: m?.personId || v?.personId || '',
         image: m?.faceImage || v?.faceImage || '',
       };
     });
@@ -117,6 +120,7 @@ export function useEnrichedAlarmLogs(): AlarmLogItem[] {
         ...log,
         target: m?.name || v?.name || log.target || 'Unknown',
         image: m?.faceImage || v?.faceImage || log.image || '',
+        personId: m?.personId || v?.personId || log.personId || '',
         personType: m ? 'Member' : v ? 'Visitor' : undefined,
       };
     });

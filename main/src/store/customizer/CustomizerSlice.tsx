@@ -32,7 +32,7 @@ const initialState: StateType = {
   activeDir: 'ltr',
   activeMode: 'light', // This can be light or dark
   activeTheme: 'BLUE_THEME', // BLUE_THEME, GREEN_THEME, BLACK_THEME, PURPLE_THEME, ORANGE_THEME
-  SidebarWidth: 270,
+  SidebarWidth: 280,
   MiniSidebarWidth: 0,
   TopbarHeight: 70,
   isLayout: 'full', // This can be full or boxed

@@ -115,9 +115,9 @@ const SidebarListItem = ({ item, onItemClick }: Props) => {
         </ListItemText>
 
         {/* Right Section: Three Dots Icon */}
-        <Box>
+        {/* <Box>
           <MoreVertRounded />
-        </Box>
+        </Box> */}
       </Box>
 
       {/* Bottom Section: Status Box for Alarm */}

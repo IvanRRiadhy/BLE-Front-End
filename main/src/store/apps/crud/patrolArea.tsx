@@ -41,6 +41,8 @@ export type PatrolAreaType = {
   floorId: string;
   isActive: boolean;
   nodes?: Nodes[];
+  status: number;
+  applicationId: string;
 };
 
 interface StateType {

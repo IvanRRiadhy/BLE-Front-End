@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -8,13 +8,12 @@ import {
   FormControlLabel,
   Button,
   Stack,
-  Divider,
   Tabs,
   Tab,
   InputAdornment,
   IconButton,
 } from '@mui/material';
-import { Link, useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import { AnimatePresence, motion, MotionProps } from 'framer-motion';
 
 import { loginType } from 'src/types/auth/auth';
@@ -22,21 +21,18 @@ import CustomCheckbox from '../../../components/forms/theme-elements/CustomCheck
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
 import CustomFormLabel from '../../../components/forms/theme-elements/CustomFormLabel';
 import axiosServices from 'src/utils/axios';
-import { useDispatch } from 'src/store/Store';
-import { fetchAlarmSettingsDT } from 'src/store/apps/alarmsetting/alarmSettings';
-import { defaultAlarmSettingFilter } from 'src/store/apps/defaultForm';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
 
 type NativeFormProps = React.ComponentPropsWithoutRef<'form'>;
 
 const MotionForm = motion(
-  React.forwardRef<HTMLFormElement, NativeFormProps & MotionProps>(function MF(props, ref) {
-    return <form ref={ref} {...props} />;
-  }),
+  React.forwardRef<HTMLFormElement, NativeFormProps & MotionProps>((props, ref) => (
+    <form ref={ref} {...props} />
+  )),
 );
 
-const ADMIN_API_URL = '/api/Auth/login'; // existing
-const VISITOR_API_URL = '/api/Auth/login'; // TODO: set your actual visitor endpoint
+const ADMIN_API_URL = '/api/Auth/login';
+const VISITOR_API_URL = '/api/Auth/login';
 
 type TabKey = 'admin' | 'visitor';
 
@@ -48,19 +44,17 @@ const slideVariants = {
 
 const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   const [activeTab, setActiveTab] = useState<TabKey>('admin');
-  const [direction, setDirection] = useState(1); // for slide left/right
-  const dispatch = useDispatch();
-  const [adminCreds, setAdminCreds] = useState({ username: '', password: '' });
-  const [visitorCreds, setVisitorCreds] = useState({ username: '', password: '' }); // keep same fields for now
-  const [loginError, setLoginError] = useState<string>('');
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
-
+  const [direction, setDirection] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
-  const togglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev);
-  };
+  const [adminCreds, setAdminCreds] = useState({ username: '', password: '' });
+  const [visitorCreds, setVisitorCreds] = useState({ username: '', password: '' });
+
+  const usernameRef = useRef<HTMLInputElement>(null);
+
+  const isAdmin = activeTab === 'admin';
+  const creds = isAdmin ? adminCreds : visitorCreds;
 
   const handleTabChange = (_: React.SyntheticEvent, next: TabKey) => {
     setDirection(activeTab === 'admin' && next === 'visitor' ? 1 : -1);
@@ -68,107 +62,91 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
     setLoginError('');
   };
 
-  const handleChange = (tab: TabKey) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLoginError('');
-    if (tab === 'admin') {
-      setAdminCreds({ ...adminCreds, [e.target.id]: e.target.value });
-    } else {
-      setVisitorCreds({ ...visitorCreds, [e.target.id]: e.target.value });
-    }
-  };
+  const handleChange =
+    (tab: TabKey, field: 'username' | 'password') =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setLoginError('');
+      tab === 'admin'
+        ? setAdminCreds((prev) => ({ ...prev, [field]: e.target.value }))
+        : setVisitorCreds((prev) => ({ ...prev, [field]: e.target.value }));
+    };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    const isAdmin = activeTab === 'admin';
-    const creds = isAdmin ? adminCreds : visitorCreds;
+    setLoginError('');
+
     const url = isAdmin ? ADMIN_API_URL : VISITOR_API_URL;
 
-    axiosServices
-      .post(url, creds)
-      .then((res) => {
-        const data = res?.data?.collection?.data ?? res?.data;
+    try {
+      const res = await axiosServices.post(url, creds);
+      const data = res?.data?.collection?.data ?? res?.data;
 
-        // ✅ store token and role BEFORE navigating
-        if (data?.token) localStorage.setItem('token', data.token);
-        if (data?.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
-        if (data?.applicationId) localStorage.setItem('applicationId', data.applicationId);
-        if (data?.levelPriority) {
-          localStorage.setItem('levelPriority', data.levelPriority.trim());
-          console.log('levelPriority stored:', data.levelPriority); // 👀 check value
-        }
-        localStorage.setItem('response', JSON.stringify(data));
-        localStorage.setItem('welcomePopupShown', 'false');
-        console.log('levelPriority stored:', localStorage.getItem('levelPriority'));
-        // ✅ ensure localStorage committed before navigation
-        setTimeout(() => {
-          if (isAdmin) {
-            console.log('Admin logged in');
-            window.location.href = '/dashboards/newmainmenu';
-          } else {
-            window.location.href = '/my-visit';
-          }
-        }, 300);
-      })
+      if (data?.token) localStorage.setItem('token', data.token);
+      if (data?.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+      if (data?.applicationId) localStorage.setItem('applicationId', data.applicationId);
+      if (data?.levelPriority) {
+        localStorage.setItem('levelPriority', data.levelPriority.trim());
+      }
 
-      .catch((err) => {
-        setLoginError('Invalid username or password. Please try again.');
-        console.error(
-          'error: ',
-          err?.response ? err.response.data?.collection.data ?? err.response.data : err?.message,
-        );
+      localStorage.setItem('response', JSON.stringify(data));
+      localStorage.setItem('welcomePopupShown', 'false');
+
+      setTimeout(() => {
+        window.location.href = isAdmin ? '/dashboards/newmainmenu' : '/my-visit';
+      }, 300);
+    } catch (err) {
+      setLoginError('Invalid username or password. Please try again.');
+
+      isAdmin
+        ? setAdminCreds({ username: '', password: '' })
+        : setVisitorCreds({ username: '', password: '' });
+
+      // UX: refocus username
+      requestAnimationFrame(() => {
+        usernameRef.current?.focus();
       });
+    }
   };
-
-  const currentCreds = activeTab === 'admin' ? adminCreds : visitorCreds;
 
   return (
     <>
-      {title ? (
-        <Typography fontWeight="700" variant="h3" mb={1}>
+      {title && (
+        <Typography fontWeight={700} variant="h3" mb={1}>
           {title}
         </Typography>
-      ) : null}
+      )}
 
       {subtext}
 
       <Box mt={3}>
-
-        {/* Top switcher: Admin (top) vs Visitor (bottom) using tabs */}
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
           variant="fullWidth"
-          sx={{
-            mb: 2,
-            '& .MuiTab-root': { textTransform: 'none', fontWeight: 600 },
-          }}
+          sx={{ mb: 2, '& .MuiTab-root': { textTransform: 'none', fontWeight: 600 } }}
         >
           <Tab value="admin" label="Admin" />
           <Tab value="visitor" label="Visitor / Guest" />
         </Tabs>
       </Box>
 
-      {/* Error message */}
       {loginError && (
-        <Box mt={2}>
-          <Typography
-            variant="body2"
-            color="error"
-            textAlign="center"
-            sx={{
-              backgroundColor: '#ffebee',
-              padding: '8px 12px',
-              borderRadius: '4px',
-              border: '1px solid #ffcdd2',
-            }}
-          >
-            {loginError}
-          </Typography>
-        </Box>
+        <Typography
+          variant="body2"
+          color="error"
+          textAlign="center"
+          sx={{
+            backgroundColor: '#ffebee',
+            border: '1px solid #ffcdd2',
+            borderRadius: 1,
+            p: 1,
+            mb: 2,
+          }}
+        >
+          {loginError}
+        </Typography>
       )}
 
-      {/* Animated form container */}
       <AnimatePresence mode="wait" custom={direction}>
         <MotionForm
           key={activeTab}
@@ -180,73 +158,62 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
           exit="exit"
           transition={{ duration: 0.25, ease: 'easeOut' }}
         >
-          <Stack>
+          <Stack spacing={2}>
             <Box>
               <CustomFormLabel htmlFor="username">
-                {activeTab === 'admin' ? 'Username' : 'Visitor Username'}
+                {isAdmin ? 'Username' : 'Visitor Username'}
               </CustomFormLabel>
               <CustomTextField
                 id="username"
-                variant="outlined"
                 fullWidth
-                value={currentCreds.username}
-                onChange={handleChange(activeTab)}
+                inputRef={usernameRef}
+                value={creds.username}
+                onChange={handleChange(activeTab, 'username')}
               />
             </Box>
+
             <Box>
               <CustomFormLabel htmlFor="password">Password</CustomFormLabel>
               <CustomTextField
                 id="password"
                 type={showPassword ? 'text' : 'password'}
-                variant="outlined"
                 fullWidth
-                value={currentCreds.password}
-                onChange={handleChange(activeTab)}
+                value={creds.password}
+                onChange={handleChange(activeTab, 'password')}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton
-                        onClick={togglePasswordVisibility}
-                        edge="end"
-                        aria-label={showPassword ? 'Hide password' : 'Show password'}
-                      >
+                      <IconButton onClick={() => setShowPassword((p) => !p)}>
                         {showPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
                       </IconButton>
                     </InputAdornment>
-                  )
+                  ),
                 }}
               />
             </Box>
 
-            <Stack justifyContent="space-between" direction="row" alignItems="center" my={2}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
               <FormGroup>
                 <FormControlLabel
                   control={<CustomCheckbox defaultChecked />}
                   label="Remember this Device"
                 />
               </FormGroup>
+
               <Typography
                 component={Link}
                 to="/auth/forgot-password"
-                fontWeight="500"
+                fontWeight={500}
                 sx={{ textDecoration: 'none', color: 'primary.main' }}
               >
                 Forgot Password ?
               </Typography>
             </Stack>
-          </Stack>
 
-          {error && (
-            <Typography color="error" mb={2}>
-              {error}
-            </Typography>
-          )}
-
-          <Box>
-            <Button color="primary" variant="contained" size="large" fullWidth type="submit">
-              {activeTab === 'admin' ? 'Sign In as Admin' : 'Sign In as Visitor'}
+            <Button type="submit" fullWidth size="large" variant="contained">
+              {isAdmin ? 'Sign In as Admin' : 'Sign In as Visitor'}
             </Button>
-          </Box>
+          </Stack>
         </MotionForm>
       </AnimatePresence>
 

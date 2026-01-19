@@ -48,6 +48,7 @@ export interface BeaconType {
 
 export type TrackingLogItem = {
   id: string;
+  personId: string;
   device: string;
   target: string;
   image: string;
@@ -74,7 +75,7 @@ export type AlarmLogItem = {
   alarmStatus: string; // blacklist, restricted, etc
   action: string; // active, investigated, closed
   priority?: string;
-
+  personId: string;
   personType?: 'Visitor' | 'Member';
   type: 'Alarm';
 };
@@ -326,7 +327,7 @@ export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
           }),
         );
         const newLogs: TrackingLogItem[] = [];
-
+        // console.log('🟡 filteredBeacons', filteredBeacons);
         filteredBeacons.forEach((b: any) => {
           const beaconId = b.beaconId;
           if (!beaconId) return;
@@ -342,7 +343,8 @@ export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
               id: `trk-${beaconId}-${b.time}`, // keep unique
               device: 'Tracking Event',
               type: 'Tracking',
-              target: beaconId, // raw, will be enriched later
+              target: b.cardName, // raw, will be enriched later
+              personId: b.memberCardNumber || b.visitorCardNumber || 'unk',
               image: '',
               dmac: beaconId,
               floor: b.floorplanName || 'Unknown Floor',

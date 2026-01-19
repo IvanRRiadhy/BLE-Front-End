@@ -83,6 +83,8 @@ export function useAddPatrolArea() {
         id,
         nodes,
         isActive,
+        status,
+        applicationId,
         ...cleanData
       } = patrolArea;
 
@@ -119,6 +121,8 @@ export function useEditPatrolArea() {
         id,
         nodes,
         isActive,
+        status,
+        applicationId,
         ...cleanData
       } = patrolArea;
 

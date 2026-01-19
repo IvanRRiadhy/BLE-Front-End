@@ -41,7 +41,7 @@ export function useAllAlarmCategory() {
     queryFn: async () => {
       const res = await axiosServices.get(`${API_URL}`);
       const collection = res.data.collection;
-      return res.data.collection.data as AlarmSettingType[];
+      return collection.data as AlarmSettingType[];
     },
     placeholderData: [],
   });

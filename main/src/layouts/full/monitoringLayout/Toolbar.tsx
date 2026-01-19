@@ -32,27 +32,6 @@ const Toolbar = () => {
   const [selectedVisitor, setSelectedVisitor] = useState<VisitorType | null>(null);
 
 
-  // 🧠 Load visitors with BLE numbers
-  // useEffect(() => {
-  //   const loadVisitors = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const res = await dispatch(fetchVisitor() as any); // ✅ adjust thunk name if different
-  //       // const visitors = res.payload?.collection?.data ?? res.payload ?? [];
-  //       const filtered = res.filter(
-  //         (v: VisitorType) => v.bleCardNumber && v.bleCardNumber.trim() !== '',
-  //       );
-  //       // console.log('Loaded visitors with BLE:', filtered);
-  //       setVisitorList(filtered);
-  //     } catch (e) {
-  //       console.error('Failed to load visitors', e);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   loadVisitors();
-  // }, [dispatch]);
-
   // 🟢 When a visitor is chosen → Follow them
   const handleFollowVisitor = (visitor: VisitorType) => {
     if (!activeLayoutId || !activeLayout) {
@@ -182,9 +161,9 @@ const Toolbar = () => {
         </Box>
 
         {/* Right side clock */}
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+        {/* <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <TimeDisplay />
-        </Box>
+        </Box> */}
       </Box>
     </Box>
   );
