@@ -65,10 +65,10 @@ const BleReaderList = () => {
   const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
 
   // 🔹 Pagination and sorting
-  const page = Math.floor(filter.Start / filter.Length);
-  const rowsPerPage = filter.Length;
-  const orderBy = filter.SortColumn;
-  const order = filter.SortDir;
+  const page = Math.floor(bleReaderFilter.Start / bleReaderFilter.Length);
+  const rowsPerPage = bleReaderFilter.Length;
+  const orderBy = bleReaderFilter.SortColumn;
+  const order = bleReaderFilter.SortDir;
 
   const handleChangePage = (_: unknown, newPage: number) => {
     dispatch(UpdateFilter({ Start: newPage * bleReaderFilter.Length }));
@@ -80,8 +80,8 @@ const BleReaderList = () => {
   };
 
   const handleSort = (column: string) => {
-    const isAsc = filter.SortColumn === column && filter.SortDir === 'asc';
-    const isDesc = filter.SortColumn === column && filter.SortDir === 'desc';
+    const isAsc = bleReaderFilter.SortColumn === column && bleReaderFilter.SortDir === 'asc';
+    const isDesc = bleReaderFilter.SortColumn === column && bleReaderFilter.SortDir === 'desc';
 
     if (isDesc) {
       dispatch(
@@ -194,7 +194,7 @@ const BleReaderList = () => {
                   backgroundColor: 'primary.main',
                   color: 'white',
                   px: 2,
-                  py: 1,
+                  // py: 1,
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -227,8 +227,10 @@ const BleReaderList = () => {
             )}
 
             {/* --- Table --- */}
-            <TableContainer>
-              <Table sx={{ whiteSpace: 'nowrap' }}>
+            <TableContainer  sx={{
+              maxHeight: '55vh',
+            }}>
+              <Table stickyHeader sx={{ whiteSpace: 'nowrap' }}>
                 <TableHead>
                   <TableRow>
                     <TableCell padding="checkbox" sx={{ width: 80 }}>

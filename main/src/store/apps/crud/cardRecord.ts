@@ -22,7 +22,7 @@ export type GetFilter = {
     SortDir: 'asc' | 'desc',
     SearchValue: string,
     filters?: {
-        MaskedAreaId?: string[],
+        // MaskedAreaId?: string[],
     }
 }
 
@@ -63,7 +63,24 @@ export type CardRecordType = {
     mstMemberId1: string,
     visitorId1: string,
 
-}
+};
+
+export type CardUsageType = {
+    cardId: string,
+    cardNumber: string,
+    totalUsage: number,
+};
+
+export type CardHistoryType = {
+    cardId: string;
+    identityId: string;
+    cardNumber: string;
+    usedBy: string;
+    usedByType: string;
+    faceImage: string;
+    checkinAt: string;
+    checkoutAt: string;
+};
 
 interface StateType {
     cardRecords: CardRecordType[];
@@ -94,6 +111,7 @@ export const CardRecordSlice = createSlice({
     reducers: {
         GetCardRecord: (state, action: PayloadAction<CardRecordType[]>) => {
             state.cardRecords = action.payload;
+            console.log("Reducer Card Record: ", JSON.stringify(action.payload));
         },
         UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
             state.cardRecordFilter = { ...state.cardRecordFilter, ...action.payload };
@@ -174,9 +192,9 @@ export const fetchCardRecordDt = createAsyncThunk(
       }
     );
     console.log("Card Record: ", res.data.collection);
-    dispatch(GetCardRecord(res.data.collection.data || []));
+    dispatch(GetCardRecord(res.data.collection.data.data || []));
     await ensureMinLatency(started, 500);
-    return res.data.collection;
+    return res.data.collection.data;
   }
 );  
 

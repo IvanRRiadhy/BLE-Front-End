@@ -25,6 +25,7 @@ import {
   IconBadge,
   IconMapSearch,
   IconRoute,
+  IconCards,
 } from '@tabler/icons-react';
 import { uniqueId } from 'lodash';
 import { AlarmSettingType } from 'src/store/apps/alarmsetting/alarmSettings';
@@ -197,6 +198,7 @@ const isBoundaryActive = isActive('boundary');
         { id: uniqueId(), title: 'Visitor Report', icon: IconCalendar, href: '/report/visitorreport/filter/'},
         { id: uniqueId(), title: 'Investigate', icon: IconCalendar, href: '/report/investigate'},
         { id: uniqueId(), title: 'Event Log', icon: IconCalendar, href: '/report/eventlog'},
+        { id: uniqueId(), title: 'Card History', icon: IconCards, href: '/report/cardhistory'}
       ],
     },
   ];

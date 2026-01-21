@@ -3,26 +3,21 @@ import { Button, Box, Drawer, useMediaQuery, Theme } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 // import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import AppCard from 'src/components/shared/AppCard';
-import VisitorSearch from 'src/components/master/Tag/visitor/visitorSearch';
-import VisitorList from 'src/components/master/Tag/visitor/trxvisitorlist/trxVisitorList';
-import VisitorFilter from 'src/components/master/Tag/visitor/visitorFilter';
-import AlarmContent from 'src/components/master/Reports/AlarmList/AlarmContent';
-import IntruderList from 'src/components/master/Reports/AlarmList/IntruderList';
+import CardHistoryList from 'src/components/master/Reports/CardHistory/CardHIstoryList';
 
 const drawerWidth = 320;
 const secdrawerWidth = 320;
 
+const CardHistory = () => {
+    const [isLeftSidebarOpen, setLeftSidebarOpen] = useState(false);
+    const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
+    const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
+    const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 
-const AlarmList = () => {
-  const [isLeftSidebarOpen, setLeftSidebarOpen] = useState(false);
-  const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
-  const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
-  const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-
-  return (
-    <PageContainer title="Alarm List" description="this is Alarm List Page">
-        <AppCard>
-        {/* ------------------------------------------- */}
+    return (
+        <PageContainer title="Card History" description="this is Card History Page">
+            <AppCard>
+                {/* ------------------------------------------- */}
         {/* Left Part */}
         {/* ------------------------------------------- */}
         <Box
@@ -32,7 +27,7 @@ const AlarmList = () => {
             flexShrink: 0,
           }}
         >
-          <IntruderList />
+          {/* <IntruderList /> */}
         </Box>
                 <Drawer
                   anchor="right"
@@ -62,12 +57,11 @@ const AlarmList = () => {
                       </Button>
                     </Box>
                   )}
-                  <AlarmContent />
+                  <CardHistoryList />
                 </Drawer>
-        </AppCard>
-    </PageContainer>
-  )
+            </AppCard>
+        </PageContainer>
+    )
 
 };
-
-export default AlarmList;
+export default CardHistory;
