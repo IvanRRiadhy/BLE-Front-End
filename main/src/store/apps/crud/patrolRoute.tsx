@@ -29,13 +29,20 @@ export type PatrolAreas = {
     startAreaId: string;
     endAreaId: string;
 }
+export type PatrolTimeGroups = {
+    timeGroupId: string;
+    name: string;
+    scheduleType: string;
+};
 
 export type PatrolRouteType = {
   id: string;
   name: string;
   description: string;
   patrolAreaIds: string[];
+  timeGroupIds: string[];
   areas?: PatrolAreas[];
+  patrolTimeGroups?: PatrolTimeGroups[];
 };
 
 interface Statetype {

@@ -25,24 +25,28 @@ import {
 import BlankCard from 'src/components/shared/BlankCard';
 import { EVENT_TYPE, EventType } from 'src/types/crud/input';
 import { useTranslation } from 'react-i18next';
+import { RootState, useSelector } from 'src/store/Store';
 
 const columns = [
   { label: 'Event', field: 'Building.Name', sortAble: true },
   { label: 'Event Time', field: 'Name', sortAble: true },
-
   { label: 'Server Time', field: 'Name', sortAble: true },
   { label: 'Actor', field: 'Building.Name', sortAble: true },
   { label: 'Actor Role', field: 'Name', sortAble: true },
+  { label: 'Entity', field: 'Entity', sortAble: true },
   { label: 'Details', field: 'Building.Name', sortAble: false },
 ];
 
 const EVENT_META: Record<EventType, { color: string }> = {
   CREATE: { color: 'success' },
   UPDATE: { color: 'secondary' },
-  DELETE: { color: 'gray' },
+  DELETE: { color: 'warning' },
   REPORT: { color: 'warning' },
   ALARM: { color: 'error' },
-  ASSIGN_ACTION: { color: 'primary' },
+  User: { color: 'primary' },
+  ACTION: { color: 'primary' },
+  LOGIN: { color: 'info' },
+  OTHER: { color: 'gray' },
 } as const;
 
 type EventLogType = {
@@ -51,6 +55,7 @@ type EventLogType = {
   serverTime: string;
   actor: string;
   actorRole: string;
+  entity: string;
   details: string;
 };
 
@@ -66,7 +71,10 @@ const DETAILS_MAP: Record<EventType, string[]> = {
   DELETE: ['Deleted expired visitor record', 'Removed access rule'],
   REPORT: ['Daily activity report generated', 'Weekly alarm report generated'],
   ALARM: ['Restricted area breach detected', 'Unauthorized access detected'],
-  ASSIGN_ACTION: ['Assigned security action to guard', 'Assigned follow-up task'],
+  User: ['Created user account', 'Deleted user account'],
+  ACTION: ['Assigned security action to guard', 'Assigned follow-up task'],
+  LOGIN: ['User logged in', 'User logged out'],
+  OTHER: ['Performed system maintenance', 'Updated application settings'],
 };
 
 const EventLogList = () => {
@@ -74,20 +82,37 @@ const EventLogList = () => {
 
   const isDummy = true;
 
-  const [eventLogData, setEventLogData] = useState<EventLogType[]>([]);
+  const isValidEventType = (value: any): value is EventType =>
+    Object.values(EVENT_TYPE).includes(value);
 
-  useEffect(() => {
-    if (!isDummy) return;
+  const eventLogData = useSelector((state: RootState) =>
+    state.EventLogReducer.logs.map((log) => {
+      const safeEvent: EventType = isValidEventType(log.event) ? log.event : 'OTHER'; // fallback
+      console.log(log.event);
+      return {
+        event: safeEvent,
+        eventTime: log.eventTime,
+        serverTime: log.serverTime,
+        actor: log.actor?.name ?? '-',
+        actorRole: log.actor?.role ?? '-',
+        entity: log.entity ?? '-',
+        details: log.details ?? '-',
+      };
+    }),
+  );
 
-    const interval = setInterval(() => {
-      setEventLogData((prev) => [
-        generateRandomEventLog(),
-        ...prev.slice(0, 49), // max 50 rows
-      ]);
-    }, 5000);
+  // useEffect(() => {
+  //   if (!isDummy) return;
 
-    return () => clearInterval(interval);
-  }, [isDummy]);
+  //   const interval = setInterval(() => {
+  //     setEventLogData((prev) => [
+  //       generateRandomEventLog(),
+  //       ...prev.slice(0, 49), // max 50 rows
+  //     ]);
+  //   }, 5000);
+
+  //   return () => clearInterval(interval);
+  // }, [isDummy]);
 
   const toLocalISOString = (date: Date) => {
     const tzOffset = date.getTimezoneOffset() * 60000;
@@ -128,6 +153,7 @@ const EventLogList = () => {
 
       actor: actor.name,
       actorRole: actor.role,
+      entity: getRandomItem(DETAILS_MAP[event]),
       details: getRandomItem(DETAILS_MAP[event]),
     };
   };
@@ -137,8 +163,12 @@ const EventLogList = () => {
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%', maxHeight: '100%' }}>
           <BlankCard>
-            <TableContainer>
-              <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
+            <TableContainer
+              sx={{
+                maxHeight: '85vh', // or any fixed height
+              }}
+            >
+              <Table stickyHeader aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
                 <TableHead>
                   <TableRow>
                     <TableCell
@@ -217,6 +247,10 @@ const EventLogList = () => {
 
                       <TableCell>
                         <Typography variant="body2">{row.actorRole}</Typography>
+                      </TableCell>
+
+                      <TableCell>
+                        <Typography variant="body2">{row.entity}</Typography>
                       </TableCell>
 
                       <TableCell>

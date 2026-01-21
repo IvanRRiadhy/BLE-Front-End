@@ -1,145 +1,141 @@
 import React from 'react';
-
-import { useSelector } from 'src/store/Store';
 import {
-  ListItemText,
   Box,
   Avatar,
   ListItemButton,
   Typography,
   Stack,
-  ListItemAvatar,
+  Divider,
+  IconButton,
   useTheme,
 } from '@mui/material';
 import { MoreVertRounded } from '@mui/icons-material';
-import { IconLiveView, IconBell } from '@tabler/icons-react';
+import { IconBell, IconLiveView } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { BASE_URL } from 'src/utils/axios';
+import { useSelector } from 'src/store/Store';
 
 type ListType = {
   id: string;
-  device: string;
   target: string;
   image: string;
   floor: string;
   area: string;
-  alarmType?: string;
   time: string;
   status?: string;
-  type?: string;
+  type?: 'Alarm' | 'Tracking';
+  personId?: string;
+  dmac?: string;
 };
 
 type Props = {
-  onItemClick: (event: React.MouseEvent<HTMLElement>) => void;
   item?: ListType;
+  onItemClick: (event: React.MouseEvent<HTMLElement>) => void;
 };
 
 const SidebarListItem = ({ item, onItemClick }: Props) => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const customizer = useSelector((state) => state.customizer);
   const br = `${customizer.borderRadius}px`;
 
-  const theme = useTheme();
+  const isAlarm = item?.type === 'Alarm';
 
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
-
-    // Extract the weekday
-    const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
-    const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-
-    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
-      'en-GB',
-      {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      },
-    )}`;
+    return date.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
   };
 
   return (
     <ListItemButton
+      onClick={onItemClick}
       sx={{
         mb: 2,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
         borderRadius: br,
         border: `1px solid ${theme.palette.divider}`,
-        padding: 2,
-        backgroundColor:
-          item?.type === 'Alarm'
-            ? theme.palette.error.light // Background for "Alarm"
-            : theme.palette.secondary.light, // Background for "Tracking"
+        p: 2,
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        backgroundColor: isAlarm
+          ? theme.palette.error.light
+          : theme.palette.secondary.light,
         '&:hover': {
-          backgroundColor:
-            item?.type === 'Alarm'
-              ? theme.palette.error.main // Hover effect for "Alarm"
-              : theme.palette.secondary.main, // Hover effect for "Tracking"
+          backgroundColor: isAlarm
+            ? theme.palette.error.main
+            : theme.palette.secondary.main,
         },
       }}
-      onClick={onItemClick}
     >
-      {/* Top Section: Icon and Details */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          width: '100%',
-          justifyContent: 'space-between',
-        }}
-      >
-        {/* Left Section: Icon */}
-        <ListItemAvatar>
-          <Avatar
-            alt={item?.target || 'Member Face'}
-            src={item?.image ? `${BASE_URL}${item?.image}` : undefined}
-          />
-        </ListItemAvatar>
+      {/* ================= HEADER ================= */}
+      <Box display="flex" alignItems="center" justifyContent="space-between">
+        <Stack direction="row" spacing={1} alignItems="center">
+          {isAlarm ? <IconBell size={18} /> : <IconLiveView size={18} />}
+          <Typography fontWeight={700}>
+            {isAlarm ? 'Alarm Event' : 'Tracking Event'}
+          </Typography>
+        </Stack>
 
-        {/* Middle Section: Device, Time, and Floor */}
-        <ListItemText>
-          <Stack spacing={0.5}>
-            <Typography variant="subtitle1" fontWeight="bold">
-              {item?.target}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {formatTime(item?.time ?? '')} {/* Format the time */}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {item?.area} - {item?.floor}
-            </Typography>
-          </Stack>
-        </ListItemText>
-
-        {/* Right Section: Three Dots Icon */}
-        {/* <Box>
+        <IconButton size="small">
           <MoreVertRounded />
-        </Box> */}
+        </IconButton>
       </Box>
 
-      {/* Bottom Section: Status Box for Alarm */}
-      {item?.type === 'Alarm' && item?.status && (
-        <Box
-          sx={{
-            marginTop: 1, // Add spacing above the status box
-            textAlign: 'center', // Center the text inside the box
-            backgroundColor: theme.palette.error.dark,
-            color: theme.palette.common.white,
-            padding: '4px 8px', // Adjust padding for a compact size
-            borderRadius: '4px',
-            fontSize: '0.875rem',
-            fontWeight: 'bold',
-            boxShadow: theme.shadows[2],
-            display: 'inline-block', // Ensure the box wraps tightly around the text
-            alignSelf: 'center',
-          }}
-        >
-          {item.status}
+      <Box
+        mt={0.5}
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Typography variant="body2" fontWeight={500}>
+          {item?.area} - {item?.floor}
+        </Typography>
+
+        <Typography variant="body2">
+          {formatTime(item?.time ?? '')}
+        </Typography>
+      </Box>
+
+      <Divider sx={{ my: 1 }} />
+
+      {/* ================= BODY ================= */}
+      <Box display="flex" alignItems="center" gap={2}>
+        <Avatar
+          src={item?.image ? `${BASE_URL}${item.image}` : undefined}
+          alt={item?.target}
+        />
+
+        <Box flex={1}>
+          <Typography fontWeight={700}>{item?.target}</Typography>
+          <Typography variant="body2">
+            Card Number: {item?.personId ?? '-'}
+          </Typography>
+          <Typography variant="body2">
+            DMAC: {item?.dmac ?? '-'}
+          </Typography>
         </Box>
-      )}
+
+        {/* Alarm Status */}
+        {isAlarm && item?.status && (
+          <Box
+            sx={{
+              backgroundColor: theme.palette.error.dark,
+              color: '#fff',
+              px: 2,
+              py: 0.5,
+              borderRadius: 2,
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              boxShadow: theme.shadows[2],
+            }}
+          >
+            {item.status}
+          </Box>
+        )}
+      </Box>
     </ListItemButton>
   );
 };

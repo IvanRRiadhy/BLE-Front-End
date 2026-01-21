@@ -80,7 +80,10 @@ const NavItem = ({ item, level, pathDirect, onClick }: ItemType) => {
         {...listItemProps}
         disabled={item.disabled}
         selected={pathDirect === item.href}
-        onClick={onClick}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.(e);
+        }}
       >
         <ListItemIcon
           sx={{

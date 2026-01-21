@@ -246,14 +246,14 @@ const list =
   // }, [filterType]);
 
   const handleItemClick = (item: ListType) => {
-    console.log('🟡 handleItemClick called', list);
+    // console.log('🟡 handleItemClick called', list);
     setSelectedItem(item);
     setOpenModal(true);
   };
 
   const handleOpenDetails = (cardNumber: string, area: string, floorplan: string, time: string) => {
-    console.log('🟡 handleOpenDetails called', cardNumber);
-    dispatch(SetSelectedBeacon({ active: true, id: cardNumber, area, floorplan, time }));
+    // console.log('🟡 handleOpenDetails called', cardNumber);
+    dispatch(SetSelectedBeacon({ active: true, id: cardNumber, area, floorplan, time, sourceScreenId: 1 }));
     setOpenModal(false);
   };
 

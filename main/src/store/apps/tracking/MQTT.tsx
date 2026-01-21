@@ -64,6 +64,7 @@ export function startMQTTclient(messagecallback: any, topic: string) {
 
     client.on('connect', () => {
       Object.keys(messageCallbacks).forEach((t) => {
+        console.log(`[MQTT] Subscribing to topic: ${t}`);
         if (!subscribedTopics.has(t)) {
           client!.subscribe(t, (err) => {
             if (!err) subscribedTopics.add(t);

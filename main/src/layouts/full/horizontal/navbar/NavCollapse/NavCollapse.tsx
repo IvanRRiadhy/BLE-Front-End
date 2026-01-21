@@ -174,11 +174,18 @@ const NavCollapse = ({
       <ListItemStyled
         {...listItemProps}
         selected={pathWithoutLastPart === menu.href}
-        className={isLocked && !parentHref ? 'locked-open' : ''}
+        className={isLocked && level === 1 ? 'locked-open' : ''}
         onClick={(e) => {
           e.preventDefault();
-          const lockKey = menu.href ?? parentHref ?? null;
-          setLockedMenuId(isLocked ? null : lockKey);
+
+          // 🛑 STOP bubbling so parent does not receive child clicks
+          e.stopPropagation();
+
+          // 🔒 Only lock top-level menu
+          if (level === 1) {
+            const lockKey = menu.href ?? null;
+            setLockedMenuId(isLocked ? null : lockKey);
+          }
         }}
       >
         <ListItemIcon

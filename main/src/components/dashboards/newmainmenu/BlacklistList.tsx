@@ -82,7 +82,7 @@ const NewBlacklist: React.FC = () => {
             <Box sx={{ minWidth: 0 }}>
               <Typography
                 sx={{
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: 600,
                   color: "#045498",
                   whiteSpace: "nowrap",

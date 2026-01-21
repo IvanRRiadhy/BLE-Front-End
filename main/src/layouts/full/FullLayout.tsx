@@ -26,6 +26,7 @@ import AlarmPopup from './AlarmPopup';
 import { getConfig } from 'src/config';
 import Customizer from './shared/customizer/Customizer';
 import { AlarmLogItem, AppendAlarmLogs, AppendTrackingLogs, TrackingLogItem } from 'src/store/apps/tracking/Beacon';
+import { fetchEventLogs } from 'src/store/apps/tracking/Event';
 
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
@@ -70,6 +71,7 @@ const FullLayout: FC = () => {
 
   useEffect(() => {
     dispatch(fetchAlarmSettingsDT(defaultAlarmSettingFilter));
+    dispatch(fetchEventLogs());
   }, []);
 
   useEffect(() => {

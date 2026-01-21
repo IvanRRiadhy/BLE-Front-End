@@ -155,7 +155,7 @@ const FloorView: React.FC<{
 
   // New state for manual dragging in following mode
   const [isUserDragging, setIsUserDragging] = useState(false);
-  const lastBeaconPosition = useRef<{x: number, y: number} | null>(null);
+  const lastBeaconPosition = useRef<{ x: number; y: number } | null>(null);
   const isManualDragRef = useRef(false);
 
   const floorplanImage = actFloorplan?.floorplanImage
@@ -186,6 +186,7 @@ const FloorView: React.FC<{
   useEffect(() => {
     if (selectedBeacon.active && selectedBeacon.sourceScreenId === screenNumber) {
       setDetailDialogOpen(true);
+      console.log('🟡 selectedBeacon', selectedBeacon, screenNumber);
     }
   }, [selectedBeacon, screenNumber]);
 
@@ -387,12 +388,12 @@ const FloorView: React.FC<{
           setCursor('grab');
         }
         setIsDragging(false);
-        
+
         // When mouse is released in following mode, reset manual dragging flag
         if (isFollowing) {
           isManualDragRef.current = false;
           setIsUserDragging(false);
-          
+
           // If we have a last known beacon position, snap back to it
           if (lastBeaconPosition.current) {
             setTimeout(() => {
@@ -546,28 +547,31 @@ const FloorView: React.FC<{
   }, [focusBeacon, beaconsByTopic, activeFloorplan, gridNumber, screenNumber, dispatch]);
 
   // Follow camera hook - Modified to respect manual dragging
-  const handleFocusPosition = useCallback((pt: { x: number; y: number }) => {
-    if (!containerRef.current) return;
-    
-    // Store the last beacon position
-    lastBeaconPosition.current = pt;
-    
-    // If user is manually dragging in following mode, don't update the view
-    if (isFollowing && isManualDragRef.current) {
-      return;
-    }
+  const handleFocusPosition = useCallback(
+    (pt: { x: number; y: number }) => {
+      if (!containerRef.current) return;
 
-    const nextScale = FOLLOW_SCALE;
-    const cw = containerRef.current.clientWidth;
-    const ch = containerRef.current.clientHeight;
+      // Store the last beacon position
+      lastBeaconPosition.current = pt;
 
-    // Convert the point from original image coordinates to container coordinates
-    const nextTranslateX = cw / 2 - pt.x * nextScale;
-    const nextTranslateY = ch / 2 - pt.y * nextScale;
-    
-    setScale(nextScale);
-    setTranslate({ x: nextTranslateX, y: nextTranslateY });
-  }, [isFollowing]);
+      // If user is manually dragging in following mode, don't update the view
+      if (isFollowing && isManualDragRef.current) {
+        return;
+      }
+
+      const nextScale = FOLLOW_SCALE;
+      const cw = containerRef.current.clientWidth;
+      const ch = containerRef.current.clientHeight;
+
+      // Convert the point from original image coordinates to container coordinates
+      const nextTranslateX = cw / 2 - pt.x * nextScale;
+      const nextTranslateY = ch / 2 - pt.y * nextScale;
+
+      setScale(nextScale);
+      setTranslate({ x: nextTranslateX, y: nextTranslateY });
+    },
+    [isFollowing],
+  );
 
   // Reset manual dragging when following mode changes
   useEffect(() => {

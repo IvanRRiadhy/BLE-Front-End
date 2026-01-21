@@ -230,7 +230,10 @@ export const visitorStatusEnumMap: Record<string, number> = {
   DELETE: 'DELETE',
   REPORT: 'REPORT',
   ALARM: 'ALARM',
-  ASSIGN_ACTION: 'ASSIGN_ACTION',
+  User: 'User',
+  ACTION: 'ACTION',
+  LOGIN: 'LOGIN',
+  OTHER: 'OTHER',
 } as const;
 
 export type EventType = keyof typeof EVENT_TYPE;

@@ -718,6 +718,7 @@ export const defaultPatrolRouteForm: PatrolRouteType = {
   name: '',
   description: '',
   patrolAreaIds: [],
+  timeGroupIds: [],
 };
 export const defaultPatrolRouteFilter: PatrolRouteFilter = {
   Draw: 1,

@@ -61,6 +61,7 @@ import VisitorSessionReducer from './apps/crud/visitorSession';
 import InvestigateReducer from './apps/crud/investigate';
 import PatrolAreaReducer from './apps/crud/patrolArea';
 import PatrolRouteReducer from './apps/crud/patrolRoute';
+import EventLogReducer from './apps/tracking/Event';
 import SessionReducer from './apps/session';
 import { combineReducers } from 'redux';
 import {
@@ -130,12 +131,13 @@ const rootReducer = combineReducers({
   PatrolAreaReducer: PatrolAreaReducer,
   PatrolRouteReducer: PatrolRouteReducer,
   InvestigateReducer: InvestigateReducer,
+  EventLogReducer: EventLogReducer,
 });
 
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['layoutReducer'], // Only persist layout state
+  whitelist: ['layoutReducer', 'EventLogReducer', 'BeaconReducer', 'AlarmActiveReducer'], // Only persist layout state
 };
 
 // Create persisted root reducer

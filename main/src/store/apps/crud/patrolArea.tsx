@@ -199,8 +199,9 @@ export const PatrolAreaSlice = createSlice({
                     //Check if status is valid
                     // const validStatus = restrictedStatus.map((status) => status.value);
                     console.log("Status", area.areaShape);
-                    if( area.areaShape !== "" || !isValidJsonString(area.areaShape)) {
+                    if( area.areaShape === "" || !isValidJsonString(area.areaShape)) {
                         state.unsavedPatrolAreas.splice(index, 1);
+                        console.log("area", area.areaShape,  isValidJsonString(area.areaShape));
                         return;
                     }
                 }
@@ -211,7 +212,7 @@ export const PatrolAreaSlice = createSlice({
                     if(index !== -1) {
 
                         state.unsavedPatrolAreas[index] = area;
-                        state.editingPatrolArea = null;
+                        state.editingPatrolArea = null; 
                     }
                 }
             },
