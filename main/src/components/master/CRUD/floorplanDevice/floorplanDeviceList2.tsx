@@ -160,8 +160,10 @@ const FloorplanDeviceList2 = () => {
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
           <BlankCard>
-            <TableContainer>
-              <Table sx={{ whiteSpace: 'nowrap' }}>
+            <TableContainer  sx={{
+              maxHeight: '55vh',
+            }}>
+              <Table stickyHeader sx={{ whiteSpace: 'nowrap' }}>
                 <TableHead>
                   <TableRow>
                     {columns.map((col) => (

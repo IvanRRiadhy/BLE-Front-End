@@ -18,11 +18,13 @@ import {
   DialogActions,
   Button,
   TableSortLabel,
+  Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
 import { fetchUser, UpdateFilter, userType } from 'src/store/apps/crud/users';
+import { useUserList } from 'src/hooks/useUser';
 
 const columns = [
   { label: 'Username', field: 'Username', sortAble: false },
@@ -30,12 +32,16 @@ const columns = [
   { label: 'Email Verified', field: 'IsEmailConfirmation', sortAble: true },
   { label: 'Last Login', field: 'LastLoginAt', sortAble: true },
 ];
-
+const SKELETON_ROWS = 5;
 const UserList = () => {
   const dispatch: AppDispatch = useDispatch();
-  const userData: userType[] = useSelector((state: RootState) => state.userReducer.users);
-  const userFilteredCount = useSelector((state: RootState) => state.userReducer.userFilteredCount);
+  // const userData: userType[] = useSelector((state: RootState) => state.userReducer.users);
+  // const userFilteredCount = useSelector((state: RootState) => state.userReducer.userFilteredCount);
   const userFilter = useSelector((state: RootState) => state.userReducer.userFilter);
+  const { data, isLoading, isFetching } = useUserList(userFilter);
+
+  const userData = data?.data ?? [];
+  const userFilteredCount = data?.recordsFiltered ?? 0;
   // Pagination State
   const page = Math.floor(userFilter.Start / userFilter.Length);
   const rowsPerPage = userFilter.Length;
@@ -99,6 +105,59 @@ const UserList = () => {
     handleCloseDeleteDialog();
   };
 
+  const renderSkeletonRows = (rows: number) => (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <TableRow key={`skeleton-${i}`}>
+          {/* sticky index */}
+          <TableCell
+            sx={{
+              position: 'sticky',
+              left: 0,
+              background: 'white',
+              zIndex: 1,
+              width: 35,
+              minWidth: 35,
+              maxWidth: 35,
+            }}
+          >
+            <Skeleton variant="text" width={18} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={180} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={160} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={180} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={160} height={22} />
+          </TableCell>
+          {/* right actions */}
+          <TableCell
+            sx={{
+              position: 'sticky',
+              right: 0,
+              background: 'white',
+              zIndex: 2,
+              width: 150,
+              minWidth: 150,
+              maxWidth: 150,
+            }}
+          >
+            <Box display="flex" gap={1}>
+              <Skeleton variant="rounded" width={90} height={32} />
+              {/* <Skeleton variant="circular" width={32} height={32} />
+              <Skeleton variant="circular" width={32} height={32} /> */}
+            </Box>
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -136,41 +195,43 @@ const UserList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {userData.map((user, index) => (
-                    <TableRow key={user.id}>
-                      <TableCell
-                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
-                      >
-                        {index + 1 + page * rowsPerPage}
-                      </TableCell>
-                      <TableCell>{user.username}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        {user.isEmailConfirmation ? 'Verified' : 'Not Verified'}
-                      </TableCell>
-                      <TableCell>{user.lastLoginAt}</TableCell>
-                      <TableCell
-                        sx={{
-                          position: 'sticky',
-                          right: 0,
-                          background: 'white',
-                          zIndex: 2,
-                          display: 'flex',
-                          gap: 1,
-                          alignItems: 'center',
-                        }}
-                      >
-                        {/* <AddEditDistrict type="edit" district={district} /> */}
-                        <IconButton
-                          color="error"
-                          size="small"
-                          onClick={() => handleOpenDeleteDialog(user)}
-                        >
-                          <IconTrash size={20} />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {isLoading
+                    ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
+                    : userData.map((user, index) => (
+                        <TableRow key={user.id}>
+                          <TableCell
+                            sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                          >
+                            {index + 1 + page * rowsPerPage}
+                          </TableCell>
+                          <TableCell>{user.username}</TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>
+                            {user.isEmailConfirmation ? 'Verified' : 'Not Verified'}
+                          </TableCell>
+                          <TableCell>{user.lastLoginAt}</TableCell>
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              right: 0,
+                              background: 'white',
+                              zIndex: 2,
+                              display: 'flex',
+                              gap: 1,
+                              alignItems: 'center',
+                            }}
+                          >
+                            {/* <AddEditDistrict type="edit" district={district} /> */}
+                            <IconButton
+                              color="error"
+                              size="small"
+                              onClick={() => handleOpenDeleteDialog(user)}
+                            >
+                              <IconTrash size={20} />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                 </TableBody>
               </Table>
             </TableContainer>

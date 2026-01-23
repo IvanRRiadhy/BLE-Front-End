@@ -64,8 +64,8 @@ const BuildingList = () => {
   const buildingData = data?.data || [];
   const buildingTotalCount = data?.recordsTotal || 0;
   const buildingFilteredCount = data?.recordsFiltered || 0;
-  const isLoading = useSelector((state => state.buildingReducer.isLoading));
-  const hasLoaded = useSelector(state => state.buildingReducer.hasLoaded);
+  const isLoading = useSelector((state) => state.buildingReducer.isLoading);
+  const hasLoaded = useSelector((state) => state.buildingReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(buildingFilter.Start / buildingFilter.Length);
   const rowsPerPage = buildingFilter.Length;
@@ -207,8 +207,12 @@ const BuildingList = () => {
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
           <BlankCard>
-            <TableContainer>
-              <Table aria-label="simple-table" sx={{ whiteSpace: 'nowrap' }}>
+            <TableContainer
+              sx={{
+                maxHeight: '55vh',
+              }}
+            >
+              <Table stickyHeader aria-label="simple-table" sx={{ whiteSpace: 'nowrap' }}>
                 <TableHead>
                   <TableRow>
                     {/* Left Sticky Empty Column */}

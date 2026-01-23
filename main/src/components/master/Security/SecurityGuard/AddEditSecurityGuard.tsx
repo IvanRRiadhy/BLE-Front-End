@@ -29,23 +29,24 @@ import { CardType, fetchCard } from 'src/store/apps/crud/card';
 import { gender, statusEmployee } from 'src/types/crud/input';
 import toast from 'react-hot-toast';
 import { defaultMemberForm } from 'src/store/apps/defaultForm';
-import AddEditDistrict from '../district/AddEditDistrict';
-import AddEditDepartment from '../department/AddEditDepartment';
-import AddEditOrganization from '../organization/AddEditOrganizationList';
+import AddEditDistrict from '../../CRUD/district/AddEditDistrict';
+import AddEditDepartment from '../../CRUD/department/AddEditDepartment';
+import AddEditOrganization from '../../CRUD/organization/AddEditOrganizationList';
 import { useQueryClient } from '@tanstack/react-query';
-import { PaginatedResponse, useAddMember, useEditMember } from 'src/hooks/useMember';
+import { PaginatedResponse } from 'src/hooks/useMember';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 import { useAllDistricts } from 'src/hooks/useDistrict';
 import { useAllDepartments } from 'src/hooks/useDepartment';
 import { useAllOrganizations } from 'src/hooks/useOrganization';
 import { useAllCard, useUnassignedCard } from 'src/hooks/useCard';
+import { useAddSecurity, useEditSecurity } from 'src/hooks/useSecurityGuard';
 
 interface FormType {
   type?: string;
   member?: memberType;
 }
 
-const AddEditMember = ({ type, member }: FormType) => {
+const AddEditSecurityGuard = ({ type, member }: FormType) => {
   const queryClient = useQueryClient();
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -100,12 +101,12 @@ const AddEditMember = ({ type, member }: FormType) => {
     setImage(null);
   };
 
-  const addMemberMutation = useAddMember();
-const editMemberMutation = useEditMember();
+    const addMemberMutation = useAddSecurity();
+  const editMemberMutation = useEditSecurity();
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
-    if (!formData.name?.trim()) errors.name = "Member's name is required";
+    if (!formData.name?.trim()) errors.name = "Security's name is required";
     if (!formData.cardNumber?.trim()) errors.cardNumber = 'Card Number is required';
     if (!formData.departmentId?.trim()) errors.departmentId = 'Department is required';
     if (!formData.organizationId?.trim()) errors.organizationId = 'Organization is required';
@@ -160,7 +161,6 @@ const handleSave = async () => {
     setIsSaving(false);
   }
 };
-
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<{ value: unknown }>,
@@ -622,4 +622,4 @@ const handleSave = async () => {
   );
 };
 
-export default AddEditMember;
+export default AddEditSecurityGuard;

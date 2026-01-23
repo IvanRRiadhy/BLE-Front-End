@@ -195,8 +195,10 @@ const BrandList = () => {
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
           <BlankCard>
-            <TableContainer>
-              <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
+            <TableContainer  sx={{
+              maxHeight: '55vh',
+            }}>
+              <Table stickyHeader aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
                 <TableHead>
                   <TableRow>
                     {/* Left Sticky Empty Column */}

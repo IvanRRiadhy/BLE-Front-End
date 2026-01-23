@@ -224,6 +224,14 @@ const VisitorList = () => {
     handleCloseUnblacklistDialog();
   };
 
+  //TABLE LAYOUT
+
+  const ellipsisSx = {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  };
+
   const renderSkeletonRows = (rows: number) =>
     Array.from({ length: rows }).map((_, i) => (
       <TableRow key={`skeleton-${i}`}>
@@ -291,8 +299,16 @@ const VisitorList = () => {
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
           <BlankCard>
-            <TableContainer>
-              <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
+            <TableContainer
+              sx={{
+                maxHeight: '55vh',
+              }}
+            >
+              <Table
+                stickyHeader
+                aria-label="simple table"
+                sx={{ tableLayout: 'fixed', whiteSpace: 'nowrap' }}
+              >
                 <TableHead>
                   <TableRow>
                     {/* Left Sticky Empty Column */}
@@ -334,6 +350,9 @@ const VisitorList = () => {
                         width: 150, // Fixed width
                         minWidth: 150,
                         maxWidth: 150,
+                        // display: 'flex', // ✅ WAJIB
+                        // alignItems: 'center',
+                        // justifyContent: 'center',
                       }}
                     >
                       <Typography variant="h6"> Actions </Typography>
@@ -360,25 +379,61 @@ const VisitorList = () => {
                           >
                             {index + 1 + page * rowsPerPage}
                           </TableCell>
-                          <TableCell>{visitor.name}</TableCell>
-                          <TableCell>{visitor.personId}</TableCell>
-                          <TableCell>{visitor.identityId}</TableCell>
-                          <TableCell>{visitor.cardNumber}</TableCell>
-                          <TableCell>{visitor.bleCardNumber}</TableCell>
-
-                          <TableCell>{visitor.phone}</TableCell>
-                          <TableCell>{visitor.email}</TableCell>
-                          <TableCell>{visitor.gender}</TableCell>
-                          <TableCell>{visitor.address}</TableCell>
-                          <TableCell>{visitor.isBlacklist ? 'Yes' : 'No'}</TableCell>
+                          <TableCell>
+                            <Tooltip title={visitor.name} arrow placement="top">
+                              <Box sx={ellipsisSx}>{visitor.name}</Box>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell>
+                            <Tooltip title={visitor.personId} arrow placement="top">
+                              <Box sx={ellipsisSx}>{visitor.personId}</Box>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell>
+                            <Tooltip title={visitor.identityId} arrow placement="top">
+                              <Box sx={ellipsisSx}>{visitor.identityId}</Box>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell>
+                            <Tooltip title={visitor.cardNumber} arrow placement="top">
+                              <Box sx={ellipsisSx}>{visitor.cardNumber}</Box>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell>
+                            <Tooltip title={visitor.bleCardNumber} arrow placement="top">
+                              <Box sx={ellipsisSx}>{visitor.bleCardNumber}</Box>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell>
+                            <Tooltip title={visitor.phone} arrow placement="top">
+                              <Box sx={ellipsisSx}>{visitor.phone}</Box>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell>
+                            <Tooltip title={visitor.email} arrow placement="top">
+                              <Box sx={ellipsisSx}>{visitor.email}</Box>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell>
+                            <Tooltip title={visitor.gender} arrow placement="top">
+                              <Box sx={ellipsisSx}>{visitor.gender}</Box>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell>
+                            <Tooltip title={visitor.address} arrow placement="top">
+                              <Box sx={ellipsisSx}>{visitor.address}</Box>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell>
+                            <Box sx={ellipsisSx}>{visitor.isBlacklist ? 'Yes' : 'No'}</Box>
+                          </TableCell>
                           <TableCell
                             sx={{
                               position: 'sticky',
                               right: 0,
                               background: 'white',
-                              zIndex: 2,
+                              zIndex: 1,
                               gap: 1,
-                              alignItems: 'center',
                               width: 150, // Fixed width
                               minWidth: 150,
                               maxWidth: 150,
@@ -387,24 +442,24 @@ const VisitorList = () => {
                             <AddEditVisitor type="edit" visitor={visitor} />
                             {visitor.isBlacklist ? (
                               <Tooltip title="Unblacklist Visitor">
-                              <IconButton
-                                color="success"
-                                size="small"
-                                onClick={() => handleOpenUnblacklistDialog(visitor)}
-                              >
-                                <IconCircleCheck size={20} />
-                              </IconButton>
-                            </Tooltip>
+                                <IconButton
+                                  color="success"
+                                  size="small"
+                                  onClick={() => handleOpenUnblacklistDialog(visitor)}
+                                >
+                                  <IconCircleCheck size={20} />
+                                </IconButton>
+                              </Tooltip>
                             ) : (
                               <Tooltip title="Blacklist Visitor">
-                              <IconButton
-                                color="error"
-                                size="small"
-                                onClick={() => handleOpenBlacklistDialog(visitor)}
-                              >
-                                <IconForbid size={20} />
-                              </IconButton>
-                            </Tooltip>
+                                <IconButton
+                                  color="error"
+                                  size="small"
+                                  onClick={() => handleOpenBlacklistDialog(visitor)}
+                                >
+                                  <IconForbid size={20} />
+                                </IconButton>
+                              </Tooltip>
                             )}
                           </TableCell>
                         </TableRow>
