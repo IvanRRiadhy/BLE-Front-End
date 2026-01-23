@@ -21,9 +21,10 @@ import {
   TableSortLabel,
   Skeleton,
   CircularProgress,
+  Tooltip,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconTrash } from '@tabler/icons-react';
+import { IconInfoCircle, IconInfoHexagon, IconQuestionMark, IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { PatrolRouteType, UpdateFilter } from 'src/store/apps/crud/patrolRoute';
 
@@ -38,6 +39,7 @@ const columns = [
   { label: 'Patrol Area Count', field: 'PatrolAreaIds.Length', sortAble: false },
   { label: 'Patrol Start', field: '', sortAble: false },
   { label: 'Patrol End', field: '', sortAble: false },
+  { label: 'Patrol Times', field: '', sortAble: false },
 ];
 
 const SKELETON_ROWS = 5;
@@ -273,9 +275,16 @@ const PatrolRouteList = () => {
                           </TableCell>
                           <TableCell>{patrolRoute.name}</TableCell>
                           <TableCell>{patrolRoute.description}</TableCell>
-                          <TableCell>{patrolRoute.areas?.length ?? 0}</TableCell>
-                          <TableCell>{patrolRoute.areas?.[0].startAreaId}</TableCell>
-                          <TableCell>{patrolRoute.areas?.[0].endAreaId}</TableCell>
+                          <TableCell>{patrolRoute.patrolAreas?.length ?? 0}</TableCell>
+                          <TableCell>{patrolRoute.startAreaName ?? '-'}</TableCell>
+                          <TableCell>{patrolRoute.endAreaName ?? '-'}</TableCell>
+                          <TableCell>{patrolRoute.patrolTimeGroups?.length ?? 0}
+                            <Tooltip title={patrolRoute.patrolTimeGroups?.map((ptg) => ptg.name).join(', ') || 'No Patrol Times'}>
+                              <IconButton size="small">
+                                <IconInfoCircle size={16} />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
                           <TableCell
                             sx={{
                               position: 'sticky',

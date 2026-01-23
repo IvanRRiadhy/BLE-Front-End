@@ -1,84 +1,110 @@
-import Chart from "react-apexcharts";
-import { Box, Typography } from "@mui/material";
-import { useAllAlarmCategory } from "src/hooks/AlarmSetting/useAlarmCategory";
+import { Box } from '@mui/material';
+import Chart from 'react-apexcharts';
+import { useMemo } from 'react';
+
+import { useAllAlarmCategory } from 'src/hooks/AlarmSetting/useAlarmCategory';
+import { useAlarmByArea } from 'src/hooks/useDashboard';
+
+/* ---------------- Filter ---------------- */
+
+const defaultFilter = {
+  timeRange: 'daily',
+  floorplanMaskedAreaId: null,
+  operatorName: null,
+  visitorId: null,
+  buildingId: null,
+  floorId: null,
+};
+
+/* ---------------- Component ---------------- */
 
 const Bar: React.FC = () => {
+  const { data: alarmCategories = [] } = useAllAlarmCategory();
+  const { data: alarmByArea, isLoading } = useAlarmByArea(defaultFilter);
 
-  const {data: AlarmCategoryData} = useAllAlarmCategory();
-const ALLOWED_CATEGORIES = {
-  Geofence: {
-    label: 'Geofence',
-    dummyData: [120, 160, 150, 170],
-  },
-  Boundary: {
-    label: 'Boundary',
-    dummyData: [80, 60, 90, 40],
-  },
-  CardAccess: {
-    label: 'Card Access',
-    dummyData: [70, 90, 60, 50],
-  },
-} as const;
+  /* ---------------- Transform API → Chart ---------------- */
 
+  const chartData = useMemo(() => {
+    if (!alarmByArea?.areas?.length) {
+      return {
+        categories: [],
+        series: [],
+      };
+    }
 
-  const series: ApexCharts.ApexOptions['series'] =
-    AlarmCategoryData
-      ?.filter(
-        (item) =>
-          item.isEnabled &&
-          item.alarmCategory in ALLOWED_CATEGORIES,
-      )
-      .map((item) => {
-        const config =
-          ALLOWED_CATEGORIES[
-            item.alarmCategory as keyof typeof ALLOWED_CATEGORIES
-          ];
+    const areas = alarmByArea.areas;
 
-        return {
-          name: config.label,
-          data: [...config.dummyData],
-          color: item.alarmColor,
-        };
-      }) ?? [];
+    // X-axis categories (area names)
+    const categories = areas.map((a: any) => a.areaName);
+
+    // Collect all unique alarm category names
+    const categorySet = new Set<string>();
+    areas.forEach((area: any) => {
+      area.series.forEach((s: any) => {
+        categorySet.add(s.name);
+      });
+    });
+
+    const categoryNames = Array.from(categorySet);
+
+    // Build stacked series (one per alarm category)
+    const series = categoryNames.map((categoryName) => {
+      const color =
+        alarmCategories.find(
+          (c: any) => c.alarmCategory === categoryName
+        )?.alarmColor ?? '#999999';
+
+      return {
+        name: categoryName,
+        color,
+        data: areas.map((area: any) => {
+          const found = area.series.find(
+            (s: any) => s.name === categoryName
+          );
+          return found ? found.data[0] : 0;
+        }),
+      };
+    });
+
+    return { categories, series };
+  }, [alarmByArea, alarmCategories]);
+
+  /* ---------------- Chart Options ---------------- */
 
   const options: ApexCharts.ApexOptions = {
-    title: {
-      text: "Alarm Distribution",
-      align: "left",
-      style: {
-        fontSize: "24px",
-        fontWeight: "bold",
-        color: "#045498",
-      },
-    },
     chart: {
-      type: "bar",
+      type: 'bar',
       stacked: true,
       toolbar: {
         show: true,
         offsetX: -10,
-        offsetY: 0,
+      },
+    },
+
+    title: {
+      text: 'Alarm Distribution by Area',
+      align: 'left',
+      style: {
+        fontSize: '22px',
+        fontWeight: 'bold',
+        color: '#045498',
       },
     },
 
     plotOptions: {
       bar: {
         horizontal: false,
-        columnWidth: "50%",
+        columnWidth: '55%',
+        borderRadius: 4,
       },
     },
 
     xaxis: {
-      categories: [
-        "Gedung Utama",
-        "Gedung Serbaguna",
-        "Data Center",
-        "Gedung Visitor",
-      ],
+      categories: chartData.categories,
       labels: {
         style: {
-          colors: "#045498",
-          fontSize: "12px",
+          colors: '#045498',
+          fontSize: '12px',
         },
       },
     },
@@ -87,63 +113,48 @@ const ALLOWED_CATEGORIES = {
       tickAmount: 4,
       labels: {
         style: {
-          colors: "#045498",
-          fontSize: "12px",
+          colors: '#045498',
+          fontSize: '12px',
         },
       },
     },
 
     grid: {
-      borderColor: "#d3d3d360",
+      borderColor: '#d3d3d360',
     },
 
     legend: {
-      position: "top",
-      horizontalAlign: "right",
-      offsetX: -40,
+      position: 'top',
+      horizontalAlign: 'right',
+      offsetX: -30,
+    },
+
+    tooltip: {
+      y: {
+        formatter: (val) => (val === 0 ? '0' : val.toString()),
+      },
     },
   };
+
+  /* ---------------- Render ---------------- */
 
   return (
     <Box
       sx={{
-        width: "100%",
-        height: "30vh",
-        borderRadius: "25px",
-        boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+        width: '100%',
+        height: '30vh',
+        borderRadius: '25px',
+        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
         px: 2,
         py: 2,
       }}
-    > 
-      {/* Title */}
-      {/* <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-start",
-          mb: 2,
-          mt: 1,
-        }}
-      >
-        <Typography
-          sx={{
-            fontSize: 26,
-            fontWeight: 700,
-            color: "#045498",
-          }}
-        >
-          Bar
-        </Typography>
-      </Box> */}
-
-      {/* Chart */}
-      <Box sx={{ height: "100%", width: "100%" }}>
-        <Chart
-          options={options}
-          series={series}
-          type="bar"
-          height={"100%"}
-        />
-      </Box>
+    >
+      <Chart
+        options={options}
+        series={chartData.series}
+        type="bar"
+        height="100%"
+      />
     </Box>
   );
 };

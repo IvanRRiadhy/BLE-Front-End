@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Box, Typography, Avatar, Stack } from '@mui/material';
 import { useUpcomingVisitor } from 'src/hooks/useDashboard';
+import { BASE_URL } from 'src/utils/axios';
 // import { getUpcomingVisitor } from "../services/apiService";
 // import dumpy from "../assets/ambatukam.jpeg";
 
@@ -18,6 +19,7 @@ interface UpcomingVisitorItem {
   id: string;
   status: string;
   name: string;
+  image: string;
   checkInAt?: string | null;
   checkOutAt?: string | null;
 }
@@ -29,11 +31,39 @@ const statusColorMap: Record<string, string> = {
 
 const UpcomingVisitor: React.FC = () => {
   const { data = [], isLoading, isError } = useUpcomingVisitor(defaultFilter);
+    function resolvePerson(x: any) {
+      // console.log("Resolving Person:", x);
+    if (x.visitor) {
+      // console.log("Is Visitor", x.visitor)
+      return {
+        type: 'Visitor',
+        name: x.visitor.name,
+        image: x.visitor.faceImage,
+      };
+    }
+
+    if (x.member) {
+      // console.log("Is Member", x.member)
+      return {
+        type: 'Member',
+        name: x.member.name,
+        image: x.member.faceImage,
+      };
+    }
+
+    return {
+      type: 'Unknown',
+      name: x.visitorCode ? `${x.visitorCode} (Visit Code)` : '-',
+      image: '',
+    };
+  }
   const upcomingVisitor = useMemo<UpcomingVisitorItem[]>(() => {
+    console.log("Upcoming Visitor Data:", data);
     return data.map((x: any) => ({
       id: x.id,
       status: x.status,
-      name: x.visitor?.name ?? x.member?.name ?? x.visitorCode ? `${x.visitorCode} (Visit Code)` : '-',
+      name: resolvePerson(x).name,
+      image: resolvePerson(x).image,
       checkInAt: x.checkedInAt,
       checkOutAt: x.checkedOutAt,
     }));
@@ -83,7 +113,7 @@ const UpcomingVisitor: React.FC = () => {
         {upcomingVisitor.map((item) => (
           <Stack key={item.id} direction="row" spacing={2} alignItems="center" sx={{ pb: 2 }}>
             {/* Avatar */}
-            <Avatar src={'/dummy-avatar.jpg'} alt="visitor" sx={{ width: 56, height: 56 }} />
+            <Avatar src={ item.image ? `${BASE_URL}${item.image}` : ''} alt="visitor" sx={{ width: 56, height: 56 }} />
 
             {/* Visitor info */}
             <Box sx={{ flex: 1 }}>

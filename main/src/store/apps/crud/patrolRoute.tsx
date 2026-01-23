@@ -41,7 +41,9 @@ export type PatrolRouteType = {
   description: string;
   patrolAreaIds: string[];
   timeGroupIds: string[];
-  areas?: PatrolAreas[];
+  startAreaName?: string;
+  endAreaName?: string;
+  patrolAreas?: PatrolAreas[];
   patrolTimeGroups?: PatrolTimeGroups[];
 };
 

@@ -1,4 +1,4 @@
-import { Box, Typography, Divider, Stack } from "@mui/material";
+import { Box, Typography, Divider, Stack, Grid2 as Grid } from '@mui/material';
 
 interface AlarmByStatusItem {
   status: string;
@@ -18,27 +18,26 @@ interface PublicProps {
 }
 
 const AlarmCategorized: React.FC<PublicProps> = ({ title, data }) => {
-const formatTitle = (value: string) =>
-  value.replace(/([a-z])([A-Z])/g, "$1 $2");
-  const isAlarmByStatus = title === "Alarm By Status";
-  const isAlarmByArea = title === "Alarm By Area";
+  const formatTitle = (value: string) => value.replace(/([a-z])([A-Z])/g, '$1 $2');
+  const isAlarmByStatus = title === 'Alarm By Status';
+  const isAlarmByArea = title === 'Alarm By Area';
 
   return (
     <Box
       sx={{
-        width: "100%",
-        height: "14.65vh",
-        borderRadius: "25px",
-        boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-        px: 2,
-        py: 1,
+        width: '100%',
+        height: '14.65vh',
+        borderRadius: '25px',
+        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+        px: 3,
+        py: 2,
       }}
     >
       {/* Title */}
       <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
+          display: 'flex',
+          alignItems: 'center',
           mb: 1,
         }}
       >
@@ -46,7 +45,7 @@ const formatTitle = (value: string) =>
           sx={{
             fontSize: 24,
             fontWeight: 700,
-            color: "#045498",
+            color: '#045498',
             mt: 1,
           }}
         >
@@ -62,8 +61,8 @@ const formatTitle = (value: string) =>
         spacing={2.5}
         sx={{
           height: 70,
-          alignItems: "center",
-          justifyContent: isAlarmByStatus ? "flex-start" : "center",
+          alignItems: 'center',
+          justifyContent: 'space-between',
         }}
       >
         {isAlarmByStatus &&
@@ -72,19 +71,23 @@ const formatTitle = (value: string) =>
             <Box key={(item as AlarmByStatusItem).status}>
               <Typography
                 sx={{
-                  fontSize: 18,
+                  fontSize: 14,
                   fontWeight: 700,
-                  color: "#1f4e79",
+                  color: '#1f4e79',
+                  maxWidth: 120,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}
               >
                 {formatTitle((item as AlarmByStatusItem).status)}
               </Typography>
               <Typography
                 sx={{
-                  fontSize: 14,
+                  fontSize: 18,
                   fontWeight: 700,
-                  color: "#1f4e79",
-                    textAlign: "center",
+                  color: '#1f4e79',
+                  textAlign: 'center',
                 }}
               >
                 {(item as AlarmByStatusItem).total}
@@ -98,19 +101,24 @@ const formatTitle = (value: string) =>
             <Box key={(item as AlarmByAreaItem).alarmStatus}>
               <Typography
                 sx={{
-                  fontSize: 18,
+                  fontSize: 14,
                   fontWeight: 700,
-                  color: "#1f4e79",
+                  color: '#1f4e79',
+                  maxWidth: 100,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  my: 0.5,
                 }}
               >
                 {formatTitle((item as AlarmByAreaItem).alarmStatus)}
               </Typography>
               <Typography
                 sx={{
-                  fontSize: 14,
+                  fontSize: 18,
                   fontWeight: 700,
-                  color: "#1f4e79",
-                  textAlign: "center",
+                  color: '#1f4e79',
+                  textAlign: 'center',
                 }}
               >
                 {(item as AlarmByAreaItem).total}

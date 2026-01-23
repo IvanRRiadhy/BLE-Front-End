@@ -58,6 +58,8 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
   const [formData, setFormData] = useState({
     ...defaultPatrolRouteForm,
     ...patrolRoute,
+    patrolAreaIds: patrolRoute?.patrolAreas?.map((a) => a.patrolAreaId) || [],
+    timeGroupIds: patrolRoute?.patrolTimeGroups?.map((a) => a.timeGroupId) || [],
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
@@ -67,11 +69,7 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
   const { data: PatrolAreaData = [] } = useAllPatrolAreas();
   const { data: timeGroupData = [] } = useAllTimeGroups();
   const timeGroupOptions = timeGroupData
-    .filter((tg) => tg.scheduleType === 'Patrol')
-    .map((tg) => ({
-      label: tg.name,
-      value: tg.id,
-    }));
+    .filter((tg) => tg.scheduleType === 'Patrol');
   const selectedAreas = formData.patrolAreaIds
     .map((id) => PatrolAreaData.find((a) => a.id === id))
     .filter((a): a is NonNullable<typeof a> => a != null);
@@ -84,14 +82,15 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
       setFormData({
         ...defaultPatrolRouteForm,
         ...patrolRoute,
-        patrolAreaIds: patrolRoute.areas?.map((a) => a.patrolAreaId) || [],
+        patrolAreaIds: patrolRoute.patrolAreas?.map((a) => a.patrolAreaId) || [],
+        timeGroupIds: patrolRoute.patrolTimeGroups?.map((a) => a.timeGroupId) || [],
       });
     } else {
       setFormData({ ...defaultPatrolRouteForm });
     }
     setOpen(true);
   };
-
+  console.log('formData', formData.timeGroupIds);
   const handleClose = () => setOpen(false);
 
   // Add or Append New Patrol Area
@@ -395,10 +394,10 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
               <CustomFormLabel>Patrol Time</CustomFormLabel>
               <Autocomplete
                 multiple
-                options={timeGroupData}
+                options={timeGroupOptions}
                 getOptionLabel={(option: TimeGroupType) => option.name}
                 filterSelectedOptions
-                value={timeGroupData.filter((tg) => (formData.timeGroupIds ?? []).includes(tg.id))}
+                value={timeGroupOptions.filter((tg) => (formData.timeGroupIds ?? []).includes(tg.id))}
                 onChange={(_e, newValue) => {
                   setFormData((prev) => ({
                     ...prev,
@@ -476,13 +475,14 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
                   flexDirection: 'column',
                 }}
               >
-                {(formData.timeGroupIds ?? []).length === 0 ? (
+                {formData.timeGroupIds.length === 0 ? (
                   <Typography variant="body1" color="text.secondary">
                     Selected TimeGroup: None
                   </Typography>
                 ) : (
                   (formData.timeGroupIds ?? []).map((id) => {
-                    const tg = timeGroupData.find((t: TimeGroupType) => t.id === id);
+                    const tg = timeGroupOptions.find((t: TimeGroupType) => t.id === id);
+                    console.log('tg', timeGroupOptions, id);
                     if (!tg) return null;
 
                     const tooltipContent = (

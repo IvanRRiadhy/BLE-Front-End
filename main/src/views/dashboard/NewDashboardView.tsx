@@ -6,13 +6,13 @@ import {
   IconActivityHeartbeat,
   IconMapPin,
 } from '@tabler/icons-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import PageContainer from 'src/components/container/PageContainer';
 import AreaDistribution from 'src/components/dashboards/newmainmenu/AreaDistribution';
 import TopButton from 'src/components/dashboards/newmainmenu/TopButton';
 import UpcomingVisitor from 'src/components/dashboards/newmainmenu/UpcomingVisitor';
-import { useAlarmByArea, useAlarmByStatus } from 'src/hooks/useDashboard';
+import { useAlarmByArea, useAlarmByStatus, useTopButtonSummary } from 'src/hooks/useDashboard';
 import { CountCardType, fetchDashboardTopCards } from 'src/store/apps/dashboard/Dashboard';
 import { setMainMenu } from 'src/store/customizer/CustomizerSlice';
 import { RootState, useDispatch } from 'src/store/Store';
@@ -61,39 +61,42 @@ const DashboardView: React.FC = () => {
     setShowWelcomePopup(false); // Close the popup
   };
 
-  useEffect(() => {
-    dispatch(fetchDashboardTopCards());
-  }, [dispatch, dashboardFilter]);
+  // useEffect(() => {
+  //   dispatch(fetchDashboardTopCards());
+  // }, [dispatch, dashboardFilter]);
+  const { data: topSummary, isLoading: isTopSummaryLoading } = useTopButtonSummary();
 
-  const blacklistFilteredCount: number = useSelector(
-    (state: RootState) => state.DashboardReducer.topCards.data?.blacklistCount ?? 0,
-  );
-
-  const maskedAreaFilteredCount: number = useSelector(
-    (state: RootState) => state.DashboardReducer.topCards.data?.areaCount ?? 0,
-  );
-
-  const bleReaderFilteredCount: number = useSelector(
-    (state: RootState) => state.DashboardReducer.topCards.data?.activeGatewayCount ?? 0,
-  );
-
-  const alarmFilteredCount: number = useSelector(
-    (state: RootState) => state.DashboardReducer.topCards.data?.alarmCount ?? 0,
-  );
-
-  const activeTag: number = useSelector(
-    (state: RootState) => state.DashboardReducer.topCards.data?.activeBeaconCount ?? 0,
-  );
-  const nonActiveTag: number = useSelector(
-    (state: RootState) => state.DashboardReducer.topCards.data?.nonActiveBeaconCount ?? 0,
-  );
-
+  const blacklistFilteredCount = topSummary?.blacklistedCount ?? 0;
+  const maskedAreaFilteredCount = topSummary?.areaCount ?? 0;
+  const bleReaderFilteredCount = topSummary?.activeGatewayCount ?? 0;
+  const alarmFilteredCount = topSummary?.alarmCount ?? 0;
+  const activeTag = topSummary?.activeBeaconCount ?? 0;
+  const nonActiveTag = topSummary?.nonActiveBeaconCount ?? 0;
   const { data: alarmByStatus = [], isLoading: isAlarmByStatusLoading } = useAlarmByStatus({
     timeRange: 'daily',
   });
   const { data: alarmByArea = [], isLoading: isAlarmByAreaLoading } = useAlarmByArea({
     timeRange: 'daily',
   });
+
+  const topAlarmAreas = useMemo(() => {
+  if (!alarmByArea?.areas?.length) return [];
+
+  return alarmByArea.areas
+    .map((area: any) => {
+      const total = area.series.reduce(
+        (sum: number, s: any) => sum + (s.data?.[0] ?? 0),
+        0
+      );
+
+      return {
+        alarmStatus: area.areaName, // reuse existing prop name
+        total,
+      };
+    })
+    .sort((a: any, b: any) => b.total - a.total)
+    .slice(0, 3);
+}, [alarmByArea]);
 
   return (
     <PageContainer title="Dashboard" description="This is Dashboard">
@@ -139,7 +142,7 @@ const DashboardView: React.FC = () => {
                     />
                     <TopButton
                       icon={IconActivityHeartbeat}
-                      label="Beacon"
+                      label="Active Card"
                       num={activeTag}
                       color="#045498"
                     />
@@ -152,7 +155,7 @@ const DashboardView: React.FC = () => {
                     />
                     <TopButton
                       icon={IconActivityHeartbeat}
-                      label="NonActive Beacon"
+                      label="NonActive Card"
                       num={nonActiveTag}
                       color="#045498"
                     />
@@ -196,7 +199,7 @@ const DashboardView: React.FC = () => {
             <Grid size={2.5}>
               <Stack spacing={1}>
                 <AlarmCategorized title="Alarm By Status" data={alarmByStatus} />
-                <AlarmCategorized title="Alarm By Area" data={alarmByArea} />
+                <AlarmCategorized title="Alarm By Area" data={topAlarmAreas} />
               </Stack>
             </Grid>
 

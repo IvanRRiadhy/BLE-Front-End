@@ -144,7 +144,7 @@ const isBoundaryActive = isActive('boundary');
         { id: uniqueId(), title: 'Member Data', icon: IconUsers, href: '/master/membertag/' },
         { id: uniqueId(), title: 'Time Group', icon: IconCalendar, href: '/master/timegroup/' },
         // { id: uniqueId(), title: 'Integration --(WIP)--', icon: IconLicense, href: '/master/integration/' },
-        // { id: uniqueId(), title: 'Users --(WIP)--', icon: IconMapPin, href: '/master/user/' },
+        { id: uniqueId(), title: 'Users --(WIP)--', icon: IconMapPin, href: '/master/user/' },
         { id: uniqueId(), title: 'Application', icon: IconAppWindow, href: '/master/application/' },
       ],
     },

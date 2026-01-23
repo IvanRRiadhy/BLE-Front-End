@@ -66,7 +66,7 @@ const NewBeaconDistribution: React.FC = () => {
     },
 
     fill: {
-      opacity: 1,
+      opacity: 0.8,
     },
   };
 
@@ -103,7 +103,7 @@ const NewBeaconDistribution: React.FC = () => {
           },
 
           '& .apexcharts-legend::before': {
-            content: '"Beacon Distribution"',
+            content: '"Card Distribution"',
             position: 'absolute',
             top: 0,
             left: 20, 

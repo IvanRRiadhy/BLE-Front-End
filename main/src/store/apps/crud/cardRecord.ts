@@ -68,6 +68,8 @@ export type CardRecordType = {
 export type CardUsageType = {
     cardId: string,
     cardNumber: string,
+    status: string,
+    lastUsedBy: string,
     totalUsage: number,
 };
 

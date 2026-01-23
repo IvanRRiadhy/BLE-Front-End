@@ -20,8 +20,8 @@ export type DashboardCountType = {
 };
 
 export type DashboardAreaChartFilter = {
-  from: string | null;
-  to: string | null;
+  from?: string | null;
+  to?: string | null;
   TimeRange: string;
   operatorName: string | null;
   visitorId: string | null;

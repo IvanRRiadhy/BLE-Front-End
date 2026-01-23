@@ -23,6 +23,7 @@ import SecurityGuardListItem from './SecurityGuardListItem';
 import { defaultMemberFilter } from 'src/store/apps/defaultForm';
 import { memberType } from 'src/store/apps/crud/member';
 import { useMemberList, useDeleteMember } from 'src/hooks/useMember';
+import { useDeleteSecurity, useSecurityList } from 'src/hooks/useSecurityGuard';
 
 const SKELETON_ROWS = 5;
 
@@ -35,12 +36,12 @@ const SecurityGuardList = () => {
 
 
   // 🔹 React Query fetching
-  const { data, isLoading, isFetching, isFetched } = useMemberList({
+  const { data, isLoading, isFetching, isFetched } = useSecurityList({
     ...memberFilter,
     Length: 0, // show all for side list
   });
   
-  const deleteMutation = useDeleteMember();
+  const deleteMutation = useDeleteSecurity();
 
   // 🔹 State for bulk select
   const [isManySelect, setIsManySelect] = useState(false);

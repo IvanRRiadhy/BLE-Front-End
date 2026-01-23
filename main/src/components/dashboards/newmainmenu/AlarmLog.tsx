@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Box, Typography, Avatar, Stack } from '@mui/material';
 import { useRealtimeAlarmLog } from 'src/hooks/useDashboard';
+import { BASE_URL } from 'src/utils/axios';
 
 const defaultFilter = {
   draw: 1,
@@ -30,6 +31,7 @@ const AlarmLog: React.FC = () => {
   const { data = [], isLoading, isError } = useRealtimeAlarmLog(defaultFilter);
   function resolvePerson(x: any) {
     if (x.visitor) {
+      // console.log("Is Visitor", x.visitor)
       return {
         type: 'Visitor',
         name: x.visitor.name,
@@ -38,6 +40,7 @@ const AlarmLog: React.FC = () => {
     }
 
     if (x.member) {
+      // console.log("Is Visitor", x.member)
       return {
         type: 'Member',
         name: x.member.name,
@@ -56,7 +59,7 @@ const AlarmLog: React.FC = () => {
       const person = resolvePerson(x);
 
       return {
-        image: person.image ? `${import.meta.env.VITE_API_BASE_URL}${person.image}` : '',
+        image: person.image ? `${BASE_URL}${person.image}` : '',
         name: person.name,
         idleTime: x.idleTimestamp ? new Date(x.idleTimestamp).toLocaleString() : '-',
         triggerTime: x.triggerTime ? new Date(x.triggerTime).toLocaleString() : '-',

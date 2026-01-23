@@ -31,8 +31,10 @@ export function useTopButtonSummary() {
     queryKey: ['dashboard-count-summary'],
     queryFn: async () => {
       const res = await axiosServices.get(`${API_DASHBOARD}count-summary`);
-      return res.data;
+      console.log('Top Button Summary Data fetched: ', res.data);
+      return res.data.collection.data;
     },
+    placeholderData: {},
   });
 }
 
@@ -117,14 +119,13 @@ export function useAlarmByStatus(filter: any) {
   });
 }
 
-export function useAlarmByArea(filter: any, params?: any) {
+export function useAlarmByArea(filter: any) {
   return useQuery({
-    queryKey: ['alarm-by-area', filter, params],
+    queryKey: ['alarm-by-area', filter],
     queryFn: async () => {
       const res = await axiosServices.post(
         `${API_ALARM}area`,
-        filter,
-        { params }
+        filter
       );
       return res.data.collection.data;
     },
