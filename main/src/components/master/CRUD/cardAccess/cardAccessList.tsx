@@ -240,7 +240,7 @@ const CardAccessList = () => {
                         position: 'sticky',
                         right: 0,
                         background: 'white',
-                        zIndex: 2,
+                        zIndex: 1,
                         width: 150, // Fixed width
                         minWidth: 150,
                         maxWidth: 150,

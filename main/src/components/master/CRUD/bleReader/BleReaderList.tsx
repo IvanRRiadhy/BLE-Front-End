@@ -227,13 +227,25 @@ const BleReaderList = () => {
             )}
 
             {/* --- Table --- */}
-            <TableContainer  sx={{
-              maxHeight: '55vh',
-            }}>
+            <TableContainer
+              sx={{
+                maxHeight: '55vh',
+              }}
+            >
               <Table stickyHeader sx={{ whiteSpace: 'nowrap' }}>
                 <TableHead>
                   <TableRow>
-                    <TableCell padding="checkbox" sx={{ width: 80 }}>
+                    <TableCell
+                      sx={{
+                        position: 'sticky',
+                        left: 0,
+                        background: 'white',
+                        zIndex: 2,
+                        width: 35, // Fixed width
+                        minWidth: 35,
+                        maxWidth: 35,
+                      }}
+                    >
                       <Checkbox
                         indeterminate={
                           currentPageIds.some((id) => selectedIds.has(id)) &&
@@ -271,7 +283,17 @@ const BleReaderList = () => {
                       </TableCell>
                     ))}
 
-                    <TableCell sx={{ width: 150 }}>
+                    <TableCell
+                      sx={{
+                        position: 'sticky',
+                        right: 0,
+                        background: 'white',
+                        zIndex: 2,
+                        width: 150, // Fixed width
+                        minWidth: 150,
+                        maxWidth: 150,
+                      }}
+                    >
                       <Typography variant="h6">Actions</Typography>
                     </TableCell>
                   </TableRow>
@@ -301,7 +323,19 @@ const BleReaderList = () => {
                           <TableCell>{ble.name}</TableCell>
                           <TableCell>{ble.ip}</TableCell>
                           <TableCell>{ble.gmac}</TableCell>
-                          <TableCell>
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              right: 0,
+                              background: 'white',
+                              zIndex: 1,
+                              gap: 1,
+                              alignItems: 'center',
+                              width: 150, // Fixed width
+                              minWidth: 150,
+                              maxWidth: 150,
+                            }}
+                          >
                             <AddEditBleReader type="edit" bleReader={ble} />
                             <IconButton
                               color="error"

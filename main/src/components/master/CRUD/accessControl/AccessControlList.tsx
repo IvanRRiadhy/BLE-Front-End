@@ -219,8 +219,8 @@ const AccessControlList = () => {
                           position: 'sticky',
                           right: 0,
                           background: 'white',
-                          zIndex: 2,
-                          display: 'flex',
+                          zIndex: 1,
+                          // display: 'flex',
                           gap: 1,
                           alignItems: 'center',
                           width: 150, // Fixed width

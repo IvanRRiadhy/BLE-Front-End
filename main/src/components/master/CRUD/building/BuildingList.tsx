@@ -297,7 +297,7 @@ const BuildingList = () => {
                               position: 'sticky',
                               right: 0,
                               background: 'white',
-                              zIndex: 2,
+                              zIndex: 1,
                               gap: 1,
                               alignItems: 'center',
                               width: 150, // Fixed width

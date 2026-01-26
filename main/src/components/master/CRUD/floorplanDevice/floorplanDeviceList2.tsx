@@ -229,7 +229,7 @@ const FloorplanDeviceList2 = () => {
                               right: 0,
                               background: 'white',
                               width: 150,
-                              zIndex: 2,
+                              zIndex: 1,
                             }}
                           >
                             <IconButton
