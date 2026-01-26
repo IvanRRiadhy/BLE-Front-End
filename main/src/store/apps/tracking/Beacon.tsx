@@ -49,7 +49,7 @@ export interface BeaconType {
 export type TrackingLogItem = {
   id: string;
   personId: string;
-  device: string;
+  // device: string;
   target: string;
   image: string;
   dmac: string;
@@ -71,13 +71,14 @@ export type AlarmLogItem = {
   floor: string;
   area: string;
   time: string;
-
+  color?: string;
   alarmStatus: string; // blacklist, restricted, etc
   action: string; // active, investigated, closed
   priority?: string;
   personId: string;
   personType?: 'Visitor' | 'Member';
   type: 'Alarm';
+  seen: boolean;
 };
 
 interface StoredBeacon extends BeaconType {
@@ -130,6 +131,7 @@ interface StateType {
   };
   trackingLogs: TrackingLogItem[];
   alarmLogs: AlarmLogItem[];
+  alarmPopupId: string | null;
 }
 
 const initialState: StateType = {
@@ -149,6 +151,7 @@ const initialState: StateType = {
   },
   trackingLogs: [],
   alarmLogs: [],
+  alarmPopupId: null,
 };
 
 export const BeaconSlice = createSlice({
@@ -255,6 +258,9 @@ export const BeaconSlice = createSlice({
       newLogs.forEach((log) => {
         if (!existingIds.has(log.id)) {
           state.trackingLogs.push(log);
+          console.log('Added Tracking Log:', log);
+        } else {
+          console.log('Duplicate Tracking Log ignored:', log, existingIds.has(log.id));
         }
       });
 
@@ -273,16 +279,37 @@ export const BeaconSlice = createSlice({
       action.payload.forEach((log) => {
         if (!existing.has(log.id)) {
           state.alarmLogs.push(log);
+          // console.log('Added Alarm Log:', log);
+        } else {
+          // console.log('Duplicate Alarm Log ignored:', log, existing.has(log.id));
         }
       });
 
       state.alarmLogs.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
       state.alarmLogs = state.alarmLogs.slice(0, 100);
+      // console.log('Updated Alarm Logs:', JSON.stringify(state.alarmLogs, null, 2));
+    },
+
+    NotifyAlarmPopup: (state, action: PayloadAction<string | null>) => {
+      state.alarmPopupId = action.payload;
     },
 
     ClearTrackingLogs: (state: StateType) => {
       state.trackingLogs = [];
+    },
+    ClearAlarmLogs: (state: StateType) => {
+      state.alarmLogs = [];
+    },
+    ClearAlarmPopup: (state) => {
+      state.alarmPopupId = null;
+    },
+    MarkAlarmSeen: (state, action: PayloadAction<string>) => {
+      const alarmId = action.payload;
+      const alarm = state.alarmLogs.find((a) => a.id === alarmId);
+      if (alarm) {
+        alarm.seen = true;
+      }
     },
   },
 });
@@ -298,8 +325,17 @@ export const {
   SetSelectedBeacon,
   AppendTrackingLogs,
   AppendAlarmLogs,
+  NotifyAlarmPopup,
   ClearTrackingLogs,
+  ClearAlarmLogs,
+  ClearAlarmPopup,
+  MarkAlarmSeen,
 } = BeaconSlice.actions;
+
+export const selectAlarmPopupId = (state: RootState) => state.BeaconReducer.alarmPopupId;
+
+export const selectAlarmById = (id: string | null) => (state: RootState) =>
+  id ? state.BeaconReducer.alarmLogs.find((a) => a.id === id) : null;
 
 export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
   let lastDispatch = 0;
@@ -341,7 +377,7 @@ export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
             // console.log(`[MQTT] Beacon ${beaconId} moved to area: ${currentArea}, from ${prevArea || 'N/A'}`);
             newLogs.push({
               id: `trk-${beaconId}-${b.time}`, // keep unique
-              device: 'Tracking Event',
+              // device: 'Tracking Event',
               type: 'Tracking',
               target: b.cardName, // raw, will be enriched later
               personId: b.memberCardNumber || b.visitorCardNumber || 'unk',

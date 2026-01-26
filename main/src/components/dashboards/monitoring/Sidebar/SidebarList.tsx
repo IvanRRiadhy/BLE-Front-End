@@ -13,10 +13,10 @@ import {
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import SidebarListItem from './SidebarListItem';
-import { SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
+import { AlarmLogItem, ClearAlarmLogs, ClearTrackingLogs, SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllVisitor } from 'src/hooks/useVisitor';
-import { useEnrichedTrackingLogs, useTrackingLogs } from 'src/hooks/useTrackingLogs';
+import { CombinedLogItem, useCombinedEnrichedLogs, useEnrichedTrackingLogs, useTrackingLogs } from 'src/hooks/useTrackingLogs';
 
 interface SidebarListProps {
   filterType: string[]; // '', 'All', 'Tracking', 'Alarm'
@@ -37,15 +37,9 @@ type ListType = {
 };
 
 // Helper function to convert beacon object to array
-const convertBeaconObjectToArray = (beaconObj: any): any[] => {
-  if (!beaconObj) return [];
-
-  // If it's already an array, return it
-  if (Array.isArray(beaconObj)) return beaconObj;
-
-  // If it's an object, convert to array
-  return Object.values(beaconObj);
-};
+function isAlarmLog(item: CombinedLogItem): item is AlarmLogItem {
+  return item.type === 'Alarm';
+}
 
 // Maximum number of items to keep in the list
 const MAX_LIST_ITEMS = 100;
@@ -54,15 +48,14 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
   const dispatch = useDispatch();
 
   const [openModal, setOpenModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<ListType | null>(null);
+  const [selectedItem, setSelectedItem] = useState<CombinedLogItem | null>(null);
   // const [list, setList] = useState<ListType[]>([]);
   const trackingLogs = useEnrichedTrackingLogs();
+  const logs = useCombinedEnrichedLogs(100);
 const list =
   filterType.length > 0
-    ? trackingLogs.filter((x) => filterType.includes(x.type))
-    : trackingLogs;
-  const { data: memberList = [] } = useAllMembers();
-  const { data: visitorList = [] } = useAllVisitor();
+    ? logs.filter((x) => filterType.includes(x.type))
+    : logs;
 
   // Get beaconsByTopic from Redux - now it's an object of objects
   const beaconsByTopicObj = useSelector((s: RootState) => s.BeaconReducer.beaconsByTopic || {});
@@ -85,167 +78,7 @@ const list =
 
   const alarmTriggers = useSelector((s: RootState) => s.alarmTriggerReducer.alarmTriggers || []);
 
-  const getName = (bleNumber: string) => {
-    const m = memberList.find((x) => x.bleCardNumber === bleNumber);
-    if (m) return m.name;
-    const v = visitorList.find((x) => x.bleCardNumber === bleNumber);
-    if (v) return v.name;
-    return 'Unknown';
-  };
-  const getImage = (bleNumber: string) => {
-    const m = memberList.find((x) => x.bleCardNumber === bleNumber);
-    if (m && m.faceImage) return m.faceImage;
-    const v = visitorList.find((x) => x.bleCardNumber === bleNumber);
-    if (v && v.faceImage) return v.faceImage;
-    return '';
-  };
-
-  const prevAreaByBeaconRef = useRef<Record<string, string>>({});
-  const seenIdsRef = useRef<Set<string>>(new Set());
-
-  const alarmKey = (a: any) => {
-    const t = a.triggerTime ? new Date(a.triggerTime).getTime() : 0;
-    if (a.id) return `alarm-${a.id}`;
-    return `alarm-${a.beaconId || 'unk'}-${a.firstGatewayId || 'na'}-${t}`;
-  };
-
-  const trackingKey = (b: any) => {
-    const t = b.time ? new Date(b.time).getTime() : 0;
-    const beaconId = b.beaconId || b.cardId || b.id || 'unk';
-    const area = b.maskedAreaName || b.areaName || b.maskedAreaId || 'na';
-    return `trk-${beaconId}-${area}-${t}`;
-  };
-
-  // Function to limit list to MAX_LIST_ITEMS
-  const limitListSize = (items: ListType[]): ListType[] => {
-    if (items.length <= MAX_LIST_ITEMS) {
-      return items;
-    }
-
-    // Keep only the most recent MAX_LIST_ITEMS items (newest first after sorting)
-    // Since we sort newest to oldest, we want to keep the first MAX_LIST_ITEMS items
-    const limitedItems = items.slice(0, MAX_LIST_ITEMS);
-
-    // Remove IDs of deleted items from seenIdsRef
-    const keptIds = new Set(limitedItems.map((item) => item.id));
-    const deletedIds = items
-      .slice(MAX_LIST_ITEMS) // Get the items that were removed
-      .map((item) => item.id);
-
-    // Remove deleted IDs from seenIdsRef
-    deletedIds.forEach((id) => {
-      seenIdsRef.current.delete(id);
-    });
-
-    console.log(
-      `[SidebarList] List exceeded ${MAX_LIST_ITEMS} items. Removed ${deletedIds.length} oldest items.`,
-    );
-
-    return limitedItems;
-  };
-
-  // useEffect(() => {
-  //   const rowsToAppend: ListType[] = [];
-
-  //   // Process alarm triggers
-  //   for (const a of alarmTriggers) {
-  //     const id = alarmKey(a);
-  //     if (!seenIdsRef.current.has(id)) {
-  //       rowsToAppend.push({
-  //         id,
-  //         device: 'Alarm',
-  //         target: getName(a.beaconId),
-  //         image: getImage(a.beaconId),
-  //         dmac: a.beaconId,
-  //         floor: a.floorplan?.name || 'Unknown Floor',
-  //         area: 'Unknown Area',
-  //         alarmType: a.isInRestrictedArea ? 'Restricted' : undefined,
-  //         status: a.isActive ? 'Active' : 'Inactive',
-  //         time: a.triggerTime || new Date().toISOString(),
-  //         type: 'Alarm',
-  //       });
-  //       // console.log('[Sidebar] Append Alarm:', id);
-  //     }
-  //   }
-
-  //   // Process tracking beacons
-  //   allBeacons.forEach((b: any) => {
-  //     const beaconId = b.beaconId || b.cardId || b.id || '';
-  //     if (!beaconId) return;
-
-  //     const areaNow = b.maskedAreaName || b.areaName || '';
-  //     if (!areaNow) return;
-
-  //     const prevArea = prevAreaByBeaconRef.current[beaconId];
-  //     if (prevArea !== areaNow) {
-  //       prevAreaByBeaconRef.current[beaconId] = areaNow;
-
-  //       const id = trackingKey(b);
-  //       if (!seenIdsRef.current.has(id)) {
-  //         rowsToAppend.push({
-  //           id,
-  //           device: 'Tracking Event',
-  //           target: getName(beaconId),
-  //           image: getImage(beaconId),
-  //           dmac: beaconId,
-  //           floor: b.floorplanName || 'Unknown Floor',
-  //           area: areaNow,
-  //           time: b.time || new Date().toISOString(),
-  //           type: 'Tracking',
-  //         });
-  //         // console.log('[Sidebar] Append Tracking (area-enter):', id);
-  //       }
-  //     }
-  //   });
-
-  //   if (rowsToAppend.length === 0) return;
-
-  //   setList((prev) => {
-  //     const merged = [...prev];
-  //     for (const row of rowsToAppend) {
-  //       if (!seenIdsRef.current.has(row.id)) {
-  //         seenIdsRef.current.add(row.id);
-  //         merged.push(row);
-  //       }
-  //     }
-
-  //     let filtered = merged;
-  //     if (filterType && filterType !== 'All') {
-  //       filtered = filtered.filter((x) => x.type === filterType);
-  //     }
-
-  //     filtered.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-
-  //     // Limit the list to MAX_LIST_ITEMS items
-  //     filtered = limitListSize(filtered);
-
-  //     return filtered;
-  //   });
-  // }, [alarmTriggers, allBeacons, filterType, memberList, visitorList]);
-
-  // Also apply limit when filter changes (in case we have more than MAX_LIST_ITEMS after filtering)
-  // useEffect(() => {
-  //   setList(prev => {
-  //     let filtered = prev;
-  //     if (filterType && filterType !== 'All') {
-  //       filtered = prev.filter((x) => x.type === filterType);
-  //     } else {
-  //       // If filter is 'All' or empty, show all items (but still limited)
-  //       filtered = prev;
-  //     }
-
-  //     filtered.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-
-  //     // Ensure we don't exceed MAX_LIST_ITEMS even after filtering
-  //     if (filtered.length > MAX_LIST_ITEMS) {
-  //       filtered = limitListSize(filtered);
-  //     }
-
-  //     return filtered;
-  //   });
-  // }, [filterType]);
-
-  const handleItemClick = (item: ListType) => {
+  const handleItemClick = (item: CombinedLogItem) => {
     // console.log('🟡 handleItemClick called', list);
     setSelectedItem(item);
     setOpenModal(true);
@@ -265,6 +98,16 @@ const list =
   return (
     <>
       <List>
+        <Button
+          fullWidth
+          variant="outlined"
+          color="secondary"
+          sx={{ mb: 2 }}
+          onClick={() => {
+            dispatch(ClearTrackingLogs());
+            dispatch(ClearAlarmLogs());
+          }}
+        >Clear All</Button>
         <Scrollbar sx={{ height: { lg: 'calc(100vh - 200px)', md: '100vh' }, maxHeight: '800px' }}>
           {list.map((item) => (
             <SidebarListItem key={item.id} item={item} onItemClick={() => handleItemClick(item)} />
@@ -287,7 +130,7 @@ const list =
               bgcolor={selectedItem.type === 'Alarm' ? 'error.main' : 'secondary.main'}
               color="white"
             >
-              {selectedItem.device}
+              {selectedItem.type} Event
             </DialogTitle>
             <Divider />
             <DialogContent sx={{ p: '8px 16px', ml: '8px' }}>
@@ -304,13 +147,13 @@ const list =
                 <Typography variant="body1" gutterBottom>
                   Area: {selectedItem.area}
                 </Typography>
-                {selectedItem.type === 'Alarm' && (
+                {isAlarmLog(selectedItem) && (
                   <>
                     <Typography variant="body1" gutterBottom>
-                      Alarm Type: {selectedItem.alarmType || '-'}
+                      Alarm Type: {selectedItem.alarmStatus || '-'}
                     </Typography>
                     <Typography variant="body1" gutterBottom>
-                      Status: {selectedItem.status || '-'}
+                      Status: {selectedItem.action || '-'}
                     </Typography>
                   </>
                 )}

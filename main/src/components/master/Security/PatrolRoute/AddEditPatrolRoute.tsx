@@ -17,12 +17,12 @@ import {
   Stack,
   Card,
 } from '@mui/material';
-import { IconGripHorizontal, IconInfoCircle, IconPencil, IconPlus } from '@tabler/icons-react';
+import { IconInfoCircle, IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { defaultPatrolRouteForm } from 'src/store/apps/defaultForm';
+import { defaultPatrolRouteFilter, defaultPatrolRouteForm } from 'src/store/apps/defaultForm';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 import { PatrolRouteType } from 'src/store/apps/crud/patrolRoute';
 import { useAddPatrolRoute, useEditPatrolRoute } from 'src/hooks/usePatrolRoute';
@@ -35,14 +35,12 @@ import {
   useSensors,
   DragEndEvent,
 } from '@dnd-kit/core';
-import { SortableContext, useSortable, arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
-import { restrictToParentElement, restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
-import { CSS } from '@dnd-kit/utilities';
+import { SortableContext,  arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
+import { restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
 import SortablePatrolAreaCard from './SortablePatrolAreaCard';
 import { PatrolAreaType } from 'src/store/apps/crud/patrolArea';
-import SnakeFlowOverlay from './RouteDialogBackground';
 import SnakeChevronBackground from './RouteDialogBackground';
-import { useAllTimeGroups } from 'src/hooks/useTimeGroup';
+import { useAllTimeGroups, useTimeGroupList } from 'src/hooks/useTimeGroup';
 import { TimeBlockType, TimeGroupType } from 'src/store/apps/crud/timeGroup';
 
 interface FormType {
@@ -67,9 +65,9 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
   const addMutation = useAddPatrolRoute();
   const editMutation = useEditPatrolRoute();
   const { data: PatrolAreaData = [] } = useAllPatrolAreas();
-  const { data: timeGroupData = [] } = useAllTimeGroups();
-  const timeGroupOptions = timeGroupData
-    .filter((tg) => tg.scheduleType === 'Patrol');
+  const { data: timeGroupData} = useTimeGroupList({...defaultPatrolRouteFilter, Length: 0, filters: {ScheduleType: 'Patrol'}});
+  const timeGroupOptions = timeGroupData?.data ?? [];
+  //   .filter((tg) => tg.scheduleType === 'Patrol');
   const selectedAreas = formData.patrolAreaIds
     .map((id) => PatrolAreaData.find((a) => a.id === id))
     .filter((a): a is NonNullable<typeof a> => a != null);
@@ -90,7 +88,7 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
     }
     setOpen(true);
   };
-  console.log('formData', formData.timeGroupIds);
+  // console.log('formData', formData.timeGroupIds);
   const handleClose = () => setOpen(false);
 
   // Add or Append New Patrol Area
@@ -264,7 +262,7 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
 
       {/* Dialog */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xl">
-        <DialogContent sx={{ pb: 2 }}>
+        <DialogTitle sx={{ pb: 2 }}>
           <Grid container spacing={2} alignItems="center">
             {/* Title */}
             <Grid size={{ xs: 12, md: 2 }}>
@@ -299,7 +297,7 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
               />
             </Grid>
           </Grid>
-        </DialogContent>
+        </DialogTitle>
 
         <Divider />
 
@@ -368,6 +366,7 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
                         <SortablePatrolAreaCard
                           key={item.area.id}
                           area={item.area}
+                          index={index + 1}
                           rowIndex={rowIndex}
                           colIndex={colIndex}
                           isRTL={isRTL}

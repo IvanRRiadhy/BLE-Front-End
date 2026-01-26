@@ -4,6 +4,7 @@ import { AppDispatch, dispatch } from 'src/store/Store';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { defaultPatrolRouteFilter } from '../defaultForm';
+import { memberType } from './member';
 
 const API_URL = '/api/patrol-route/';
 const API_URL_FILTER = '/api/patrol-route/filter/';
@@ -47,6 +48,34 @@ export type PatrolRouteType = {
   patrolTimeGroups?: PatrolTimeGroups[];
 };
 
+export type SecurityType = {
+  id: string;
+  name: string;
+  cardNumber: string;
+  identityId: string;
+  organizationName: string;
+  departmentName: string;
+  districtName: string;
+}
+
+export type PatrolAssignType = {
+  id:string;
+  name: string;
+  description: string;
+  patrolRouteId: string;
+  startDate: string;
+  endDate: string;
+  securityIds: string[];
+  patrolRouteName?: string;
+  securities?: SecurityType[];
+  applicationId?: string;
+  status?: string;
+  updatedAt?: string;
+  createdAt?: string;
+  createdBy?: string;
+  updatedBy?: string;
+}
+
 interface Statetype {
   patrolRoutes: PatrolRouteType[];
   patrolRouteAll: PatrolRouteType[];
@@ -56,6 +85,7 @@ interface Statetype {
   patrolRouteTotalCount: number;
   patrolRouteFilteredCount: number;
   patrolRouteFilter: GetFilter;
+  patrolAssignFilter: GetFilter;
   lastFilter?: GetFilter;
   isLoading: boolean;
   hasLoaded: boolean;
@@ -70,6 +100,7 @@ const initialState: Statetype = {
   patrolRouteTotalCount: 0,
   patrolRouteFilteredCount: 0,
   patrolRouteFilter: defaultPatrolRouteFilter,
+  patrolAssignFilter: defaultPatrolRouteFilter,
   lastFilter: defaultPatrolRouteFilter,
   isLoading: false,
   hasLoaded: false,

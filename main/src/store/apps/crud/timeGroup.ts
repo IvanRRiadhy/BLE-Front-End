@@ -19,6 +19,9 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     SearchValue: string,
+    filters?: {
+      ScheduleType?: string;
+    };
 }
 
 export type TimeBlockType = {

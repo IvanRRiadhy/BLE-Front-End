@@ -16,6 +16,7 @@ import { useEffect, useRef, useState } from 'react';
 
 interface SortablePatrolAreaCardProps {
   area: PatrolAreaType;
+  index: number;
   rowIndex: number;
   colIndex: number;
   isRTL: boolean;
@@ -26,6 +27,7 @@ interface SortablePatrolAreaCardProps {
 
 const SortablePatrolAreaCard = ({
   area,
+  index,
   rowIndex,
   colIndex,
   isRTL,
@@ -86,6 +88,31 @@ const SortablePatrolAreaCard = ({
             opacity: isDragging ? 0.6 : 1,
           }}
         >
+          <Box 
+            sx={{
+              position: 'absolute',
+              top: 8,
+              left: 8,
+              zIndex: 2,
+
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              bgcolor: 'grey.300',
+              color: 'text.primary',
+
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+
+              boxShadow: 2,
+              // cursor: 'pointer',
+            }}
+          >
+            <Typography variant="caption" fontWeight={700}>
+              {index}
+            </Typography>
+          </Box>
           <Box
             sx={{
               position: 'absolute',

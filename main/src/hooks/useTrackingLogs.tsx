@@ -5,6 +5,8 @@ import { useAllVisitor } from 'src/hooks/useVisitor';
 import { useMemo } from 'react';
 import { AlarmLogItem, TrackingLogItem } from 'src/store/apps/tracking/Beacon';
 
+export type CombinedLogItem = TrackingLogItem | AlarmLogItem;
+
 export function useTrackingLogs(): TrackingLogItem[] {
   const beaconsByTopic = useSelector(
     (state: RootState) => state.BeaconReducer.beaconsByTopic
@@ -33,7 +35,7 @@ export function useTrackingLogs(): TrackingLogItem[] {
     alarmTriggers.forEach(a => {
       logs.push({
         id: `alarm-${a.id}`,
-        device: 'Alarm',
+        // device: 'Alarm',
         type: 'Alarm',
         target: getName(a.beaconId),
         image: getImage(a.beaconId),
@@ -52,7 +54,7 @@ export function useTrackingLogs(): TrackingLogItem[] {
       Object.values(topic).forEach((b: any) => {
         logs.push({
           id: `trk-${b.beaconId}-${b.time}`,
-          device: 'Tracking Event',
+          // device: 'Tracking Event',
           type: 'Tracking',
           target: getName(b.beaconId),
           image: getImage(b.beaconId),
@@ -112,10 +114,10 @@ export function useEnrichedAlarmLogs(): AlarmLogItem[] {
     const memberMap = new Map(members.map(m => [m.bleCardNumber, m]));
     const visitorMap = new Map(visitors.map(v => [v.bleCardNumber, v]));
 
-    return alarmLogs.map(log => {
+    return alarmLogs.map((log: AlarmLogItem) => {
       const m = memberMap.get(log.dmac);
       const v = visitorMap.get(log.dmac);
-
+      // console.log("AlarmLog :", log);
       return {
         ...log,
         target: m?.name || v?.name || log.target || 'Unknown',
@@ -125,4 +127,29 @@ export function useEnrichedAlarmLogs(): AlarmLogItem[] {
       };
     });
   }, [alarmLogs, members, visitors]);
+}
+
+
+export function useCombinedEnrichedLogs(
+  limit?: number
+): CombinedLogItem[] {
+  const trackingLogs = useEnrichedTrackingLogs();
+  const alarmLogs = useEnrichedAlarmLogs();
+  // console.log('Alarm Logs:', alarmLogs);
+  // console.log('Tracking Logs:', trackingLogs);
+  return useMemo(() => {
+    const merged: CombinedLogItem[] = [
+      ...trackingLogs,
+      ...alarmLogs,
+    ];
+
+    merged.sort(
+      (a, b) =>
+        new Date(b.time).getTime() - new Date(a.time).getTime()
+    );
+    // console.log('Combined Enriched Logs:', merged);
+    return typeof limit === 'number'
+      ? merged.slice(0, limit)
+      : merged;
+  }, [trackingLogs, alarmLogs, limit]);
 }

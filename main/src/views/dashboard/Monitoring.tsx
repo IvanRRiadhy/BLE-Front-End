@@ -15,12 +15,14 @@ import MonitoringGrid from 'src/views/dashboard/MonitoringGrid.tsx';
 import { hideAlarmPopup } from 'src/store/apps/monitoring/AlarmUI';
 import AlarmPopup from 'src/layouts/full/AlarmPopup';
 import { fetchMonitoringLayouts, ScreenSettings } from 'src/store/apps/monitoring/layout';
+import { selectAlarmById } from 'src/store/apps/tracking/Beacon';
 
 const Monitoring = () => {
   const dispatch = useDispatch();
   const theme = useTheme();
 
-  const { latest, open } = useSelector((s: RootState) => s.AlarmUIReducer);
+  const alarmPopupId = useSelector((state: RootState) => state.BeaconReducer.alarmPopupId);
+  const latest = useSelector(selectAlarmById(alarmPopupId));
 
   const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
@@ -120,7 +122,7 @@ const Monitoring = () => {
       </PageContainer>
 
       <MonitoringFooter />
-      <AlarmPopup alarm={latest} open={open} onClose={() => dispatch(hideAlarmPopup())} />
+      <AlarmPopup alarm={latest} />
     </>
   );
 };

@@ -13,6 +13,7 @@ import {
   Button,
   DialogActions,
   TextField,
+  MenuItem,
 } from '@mui/material';
 import { BASE_URL } from 'src/utils/axios';
 import { VisitorType } from 'src/store/apps/crud/visitor';
@@ -31,6 +32,9 @@ import { AlarmTriggerType, UpdateFilter } from 'src/store/apps/crud/alarmTrigger
 import { actionStatus, actionStatusColormap } from 'src/types/crud/input';
 import toast from 'react-hot-toast';
 import TrackingPositionFloorView from '../trackingTransaction/Preview/TrackingPositionFloorView';
+import { useAllSecurityLookup, useAllSecuritys } from 'src/hooks/useSecurityGuard';
+import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
+import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 dayjs.extend(duration);
 
 const AlarmContent = () => {
@@ -48,6 +52,9 @@ const AlarmContent = () => {
   );
   const { data: data, isLoading } = useAlarmTriggerList(alarmTriggerFilter);
   const alarmTriggerData = data?.data ?? [];
+
+  const { data: securityData = [], isLoading: isLoadingSecurity } = useAllSecurityLookup();
+  const [selectedSecurity, setSelectedSecurity] = useState<memberType | null>(null);
 
   // Determine which person to display based on selectedIntruder
   const [currentPerson, setCurrentPerson] = useState<VisitorType | memberType | null>(null);
@@ -136,7 +143,7 @@ const AlarmContent = () => {
       toast.error('Please select an action status');
       return;
     }
-    if( selectedAction === 'Investigated' && investigateResult.trim() === '') {
+    if (selectedAction === 'Done' && investigateResult.trim() === '') {
       toast.error('Please provide investigation result');
       return;
     }
@@ -146,14 +153,20 @@ const AlarmContent = () => {
         triggerId: selectedAlarmTrigger.id.toUpperCase(),
         actionStatus: selectedAction.toLowerCase(),
         investigatedResult: investigateResult.trim() === '' ? null : investigateResult,
+        assignedSecurityId:
+          selectedAction.toLowerCase() === 'investigated' && selectedSecurity
+            ? selectedSecurity.id
+            : null,
       });
 
       toast.success('Action dispatched successfully');
+      handleCloseActionDialog();
+      setSelectedSecurity(null);
+      setSelectedAction('');
     } catch (error: any) {
       toast.error('Error dispatching action');
       console.error('Error dispatching action', error);
     } finally {
-      handleCloseActionDialog();
     }
   };
 
@@ -364,8 +377,8 @@ const AlarmContent = () => {
           const imgSrc = alarmTrigger.floorplanImage
             ? `${BASE_URL}${alarmTrigger.floorplanImage}`
             : alarmTrigger.floorplan?.floorplanImage
-            ? `${BASE_URL}${alarmTrigger.floorplan.floorplanImage}`
-            : null;
+              ? `${BASE_URL}${alarmTrigger.floorplan.floorplanImage}`
+              : null;
 
           const lang = language === 'id' ? 'id' : 'en';
           const append = language === 'id' ? 'hingga' : 'to';
@@ -376,8 +389,8 @@ const AlarmContent = () => {
           const endFormatted = alarmTrigger.doneTimestamp
             ? formatFullDateTime(alarmTrigger.doneTimestamp, lang)
             : lang === 'id'
-            ? 'Aktif'
-            : 'Active';
+              ? 'Aktif'
+              : 'Active';
 
           return (
             <Grid key={index} size={{ xs: 12, sm: 6, md: 3, lg: 2 }}>
@@ -529,7 +542,7 @@ const AlarmContent = () => {
                   markerColor={
                     selectedAlarmTrigger.isActive
                       ? 'red'
-                      : selectedAlarmTrigger.alarmColor ?? 'yellow'
+                      : (selectedAlarmTrigger.alarmColor ?? 'yellow')
                   }
                 />
               </Box>
@@ -595,8 +608,8 @@ const AlarmContent = () => {
                           color: isSelected
                             ? 'white'
                             : isActiveStatus
-                            ? 'text.disabled'
-                            : 'text.primary',
+                              ? 'text.disabled'
+                              : 'text.primary',
                           '&:hover': {
                             backgroundColor: isSelected ? 'primary.dark' : 'rgba(0,0,0,0.05)',
                           },
@@ -623,6 +636,26 @@ const AlarmContent = () => {
                 rows={4}
                 value={investigateResult}
                 onChange={(e) => setInvestigateResult(e.target.value)}
+              />
+            </Box>
+          )}
+
+          {/* Select Security Guard */}
+          {selectedAction.toLowerCase() === 'investigated' && selectedAlarmTrigger?.isActive && (
+            <Box mt={3}>
+              <Typography variant="subtitle2" color="text.secondary" mb={1}>
+                Select Security Guard
+              </Typography>
+              <CustomAutocomplete
+                label="Security Guard"
+                options={securityData || []}
+                value={selectedSecurity}
+                loading={isLoadingSecurity}
+                onChange={(newValue) => setSelectedSecurity(newValue)}
+                getOptionLabel={(option) => option?.name ?? ''}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                required
+                helperText={!selectedSecurity ? 'Please select a security guard' : undefined}
               />
             </Box>
           )}

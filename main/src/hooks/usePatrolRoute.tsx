@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
-import { PatrolRouteType, GetFilter } from 'src/store/apps/crud/patrolRoute';
+import { PatrolRouteType, GetFilter, PatrolAssignType } from 'src/store/apps/crud/patrolRoute';
 import { RootState, useSelector } from 'src/store/Store';
 
 // -----------------------------------------------------------------------------
@@ -8,6 +8,8 @@ import { RootState, useSelector } from 'src/store/Store';
 // -----------------------------------------------------------------------------
 const API_URL = '/api/patrol-route/';
 const API_DT_URL = '/api/patrol-route/filter/';
+const API_URL_PATROL_ASSIGN = '/api/patrol-assignment/';
+const API_DT_PATROL_ASSIGN = '/api/patrol-assignment/filter/';
 
 // ✅ Shared paginated response interface
 export interface PaginatedResponse<T> {
@@ -23,7 +25,7 @@ export function usePatrolRouteList(filter: GetFilter) {
     queryFn: async () => {
       const response = await axiosServices.post(API_DT_URL, filter);
       const collection = response.data.collection;
-      console.log("Route: ", collection)
+      console.log('Route: ', collection);
       return {
         data: collection.data as PatrolRouteType[],
         draw: collection.draw,
@@ -31,11 +33,11 @@ export function usePatrolRouteList(filter: GetFilter) {
         recordsFiltered: collection.recordsFiltered,
       } satisfies PaginatedResponse<PatrolRouteType>;
     },
-    placeholderData: keepPreviousData, 
+    placeholderData: keepPreviousData,
     staleTime: 5_000, // fresh for 1 minute
     gcTime: 5 * 60_000, // cache for 5 minutes
   });
-};
+}
 
 export function useAllPatrolRoute() {
   return useQuery({
@@ -106,4 +108,141 @@ export function usePatrolRouteStatus() {
     totalCount: query.data?.recordsTotal || 0,
     filteredCount: query.data?.recordsFiltered || 0,
   };
+}
+
+export function useAllPatrolAssign() {
+  return useQuery({
+    queryKey: ['patrol-assignment-all'],
+    queryFn: async () => {
+      const response = await axiosServices.get(API_URL_PATROL_ASSIGN);
+      return response.data.collection.data as PatrolAssignType[];
+    },
+    placeholderData: [],
+  });
+}
+
+export function usePatrolAssignList(filter: GetFilter) {
+  return useQuery({
+    queryKey: ['patrol-assignment-list', filter],
+    queryFn: async () => {
+      const response = await axiosServices.post(API_DT_PATROL_ASSIGN, filter);
+      const collection = response.data.collection;
+      console.log('Patrol Assign: ', collection);
+      return {
+        data: collection.data as PatrolAssignType[],
+        draw: collection.draw,
+        recordsTotal: collection.recordsTotal,
+        recordsFiltered: collection.recordsFiltered,
+      } satisfies PaginatedResponse<PatrolAssignType>;
+    },
+    placeholderData: keepPreviousData,
+    staleTime: 5_000, // fresh for 1 minute
+    gcTime: 5 * 60_000, // cache for 5 minutes
+  });
+}
+
+export function usePatrolAssignmentId(patrolAssignId: string) {
+  return useQuery({
+    queryKey: ['patrol-assignment-id', patrolAssignId],
+    queryFn: async () => {
+      const response = await axiosServices.get(`${API_URL_PATROL_ASSIGN}${patrolAssignId}`);
+      return response.data;
+    },
+  });
+}
+
+export function usePatrolAssignmentByRoute(patrolRouteId: string, filter: GetFilter) {
+  return useQuery({
+    queryKey: ['patrol-assignment-by-route', patrolRouteId, filter],
+    queryFn: async () => {
+      const fullFilter = {
+        ...filter,
+        filters: {
+          patrolRouteId: patrolRouteId,
+        },
+      };
+      const response = await axiosServices.post(`${API_DT_PATROL_ASSIGN}`, fullFilter);
+      const mappedResponse: PatrolAssignType[] = response.data.collection.data.map(
+        (item: PatrolAssignType) => ({
+          ...item,
+          securityIds: item.securities?.map((security) => security.id) || [],
+        }),
+      );
+      console.log('Patrol Assign by Route: ', mappedResponse);
+      return mappedResponse;
+    },
+  });
+}
+
+export function usePatrolAssign() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (patrolAssignment: Partial<PatrolAssignType>) => {
+      const {
+        id,
+        patrolRouteName,
+        securities,
+        applicationId,
+        status,
+        createdAt,
+        createdBy,
+        updatedAt,
+        updatedBy,
+        ...cleanData
+      } = patrolAssignment;
+      const res = await axiosServices.post(API_URL_PATROL_ASSIGN, cleanData);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-all'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-list'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-id'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-by-route'] });
+    },
+  });
+}
+
+export function useEditPatrolAssign() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (patrolAssignment: Partial<PatrolAssignType>) => {
+      const {
+        id,
+        patrolRouteName,
+        securities,
+        applicationId,
+        status,
+        createdAt,
+        createdBy,
+        updatedAt,
+        updatedBy,
+        ...cleanData
+      } = patrolAssignment;
+      const res = await axiosServices.put(`${API_URL_PATROL_ASSIGN}${id}`, cleanData);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-all'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-list'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-id'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-by-route'] });
+    },
+  });
+}
+
+export function useDeletePatrolAssign() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await axiosServices.delete(`${API_URL_PATROL_ASSIGN}${id}`);
+      return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-all'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-list'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-id'] });
+    },
+  });
 }

@@ -25,7 +25,7 @@ import { AlarmType } from 'src/store/apps/tracking/Alarm';
 import AlarmPopup from './AlarmPopup';
 import { getConfig } from 'src/config';
 import Customizer from './shared/customizer/Customizer';
-import { AlarmLogItem, AppendAlarmLogs, AppendTrackingLogs, TrackingLogItem } from 'src/store/apps/tracking/Beacon';
+import { AlarmLogItem, AppendAlarmLogs, AppendTrackingLogs, NotifyAlarmPopup, TrackingLogItem } from 'src/store/apps/tracking/Beacon';
 import { fetchEventLogs } from 'src/store/apps/tracking/Event';
 
 const MainWrapper = styled('div')(() => ({
@@ -105,7 +105,7 @@ const FullLayout: FC = () => {
 
         setLatestAlarm(alarmData);
         setOpenAlarmPopup(true);
-        dispatch(showAlarmPopup(alarmData));
+        // dispatch(showAlarmPopup(alarmData));
         window.postMessage({ type: 'app:new-alarm', detail: { alarm: alarmData } }, '*');
         dispatch(
           pushItem({
@@ -141,13 +141,13 @@ const FullLayout: FC = () => {
           dispatch(fetchAlarmTrigger());
         }
         const alarmLog: AlarmLogItem = {
-          id: `alarm-${alarmData.triggerId}`, // ✅ stable & unique
+          id: `alarm-${alarmData.triggerId}-${Date.now()}-${alarmData.status}`, // ✅ stable & unique
           // device: 'Alarm',
           type: 'Alarm',
 
           target: alarmData.visitorName || alarmData.cardName || alarmData.dmac,
           image: alarmData.faceImage || '',
-
+          color: alarmData.color || 'gray',
           dmac: alarmData.dmac,
           floor: alarmData.floorplanName || 'Unknown Floor',
           area: alarmData.maskedAreaName || 'Unknown Area',
@@ -155,10 +155,11 @@ const FullLayout: FC = () => {
           alarmStatus: alarmData.status, // e.g. blacklist / restricted
           action: alarmData.action, // investigated / active / etc
           time: new Date().toISOString(),
-
+          seen: false,
           personType: alarmData.visitorName ? 'Visitor' : 'Member',
         };
         dispatch(AppendAlarmLogs([alarmLog]));
+        dispatch(NotifyAlarmPopup(alarmLog.id));
       },
       topic, // MQTT topic
     );

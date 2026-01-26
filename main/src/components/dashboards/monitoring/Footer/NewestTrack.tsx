@@ -79,7 +79,30 @@ const NewestTrack = () => {
   const trackingTopics = Object.keys(beaconsByTopic).filter((x) => x.startsWith('tracking/'));
 
   // Gabungkan semua beacon
-  const allBeacons = trackingTopics.flatMap((topic) => Object.values(beaconsByTopic[topic] || {}));
+  const allBeacons = Object.values(
+  trackingTopics.reduce<Record<string, any>>((acc, topic) => {
+    const beacons = beaconsByTopic[topic] || {};
+
+    Object.values(beacons).forEach((beacon: any) => {
+      const key = beacon.dmac || beacon.beaconId || beacon.cardNumber;
+
+      if (!key) return;
+
+      const existing = acc[key];
+
+      // take newest by lastSeen (preferred)
+      if (
+        !existing ||
+        (beacon.lastSeen ?? new Date(beacon.time).getTime()) >
+          (existing.lastSeen ?? new Date(existing.time).getTime())
+      ) {
+        acc[key] = beacon;
+      }
+    });
+
+    return acc;
+  }, {})
+);
 
   // Urutkan berdasarkan nama secara alfabetis
   allBeacons.sort((a, b) =>
@@ -87,6 +110,11 @@ const NewestTrack = () => {
       sensitivity: 'base', // case-insensitive
     }),
   );
+  // Urutkan berdasarkan waktu terbaru
+//   allBeacons.sort((a, b) =>
+//   (b.lastSeen ?? new Date(b.time).getTime()) -
+//   (a.lastSeen ?? new Date(a.time).getTime())
+// );
   const getItemBackground = (isVisitor: boolean, isMember: boolean, isBlacklisted: boolean) => {
     const baseColor = isMember ? COLORS.member : isVisitor ? COLORS.visitor : '#e0e0e0';
 
@@ -249,7 +277,7 @@ const NewestTrack = () => {
         const member = beacon.memberCardId
           ? memberMap.get(beacon.memberCardId.toLowerCase())
           : null;
-
+        console.log("Beacons: ", beaconsByTopic);
         const faceImage = visitor?.faceImage || member?.faceImage || '/dummy-avatar.jpg';
         const isBlacklisted = visitor?.isBlacklist === true || member?.isBlacklist === true;
         // console.log(visitor, member, beacon);

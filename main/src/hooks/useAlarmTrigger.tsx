@@ -92,10 +92,24 @@ export function useAssignActionAlarmTriggerByDMAC() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ dmac, actionStatus }: { dmac: string; actionStatus: string }) => {
+    mutationFn: async ({
+      dmac,
+      actionStatus,
+      investigatedResult,
+      assignedSecurityId,
+    }: {
+      dmac: string;
+      actionStatus: string;
+      investigatedResult: string | null;
+      assignedSecurityId: string | null;
+    }) => {
       try {
         console.log('Editing AlarmTrigger:', dmac, actionStatus);
-        const response = await axiosServices.put(`${API_URL}tag/${dmac}`, { actionStatus });
+        const response = await axiosServices.put(`${API_URL}tag/${dmac}`, {
+          actionStatus,
+          investigatedResult,
+          assignedSecurityId,
+        });
         console.log(response);
         return response.data;
       } catch (error: any) {
@@ -118,16 +132,19 @@ export function useAssignActionAlarmTriggerByID() {
       triggerId,
       actionStatus,
       investigatedResult,
+      assignedSecurityId,
     }: {
       triggerId: string;
       actionStatus: string;
       investigatedResult: string | null;
+      assignedSecurityId: string | null;
     }) => {
       try {
         console.log('Editing AlarmTrigger:', triggerId, actionStatus);
         const response = await axiosServices.put(`${API_URL}${triggerId}`, {
           actionStatus,
           investigatedResult,
+          assignedSecurityId,
         });
         console.log(response);
         return response.data;

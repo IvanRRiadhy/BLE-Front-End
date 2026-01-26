@@ -84,7 +84,7 @@ const PatrolRoute = () => {
                 anchor="right"
                 open={isRightSidebarOpen}
                 onClose={() => setRightSidebarOpen(false)}
-                variant={mdUp ? 'permanent' : 'temporary'}
+                variant={'permanent'}
                 sx={{
                   width: mdUp ? drawerWidth : '100%',
                   zIndex: lgUp ? 0 : 1,

@@ -160,9 +160,9 @@ export const visitorStatusEnumMap: Record<string, number> = {
     { label: "Done", value: 'Done'},
     { label: "No Action", value: 'NoAction'},
     { label: "Waiting", value: 'Waiting'},
-    { label: "Investigated", value: 'Investigated'},
-    { label: "Done Investigated", value: 'DoneInvestigated'},
-    { label: "Postpone Investigated", value: 'PostponeInvestigated'},
+    { label: "Investigate", value: 'Investigated'},
+    { label: "Done Investigate", value: 'DoneInvestigated'},
+    { label: "Postpone Investigation", value: 'PostponeInvestigated'},
   ];
 
   export const actionStatusColormap: Record<string, string> = {

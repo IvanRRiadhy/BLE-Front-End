@@ -113,33 +113,37 @@ const Header = () => {
           ''
         )}
 
-        <Container
-          sx={{
-            maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',
-          }}
-        >
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <NavListing />
+        {lgDown ? (
+          <Box flexGrow={1} />
+        ) : (
+          <Container
+            sx={{
+              maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',
+            }}
+          >
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <NavListing />
 
-            {/* Right section */}
-            <Box display="flex" alignItems="center" sx={{ gap: 2 }}>
-              {/* Fixed button group */}
-              {isMain && (
-                <Box display="flex" alignItems="center" sx={{ gap: 1 }}>
-                  <DashboardFilter />
-                  <Button variant="outlined" size="small" onClick={handleScreenshot}>
-                    Screenshot
-                  </Button>
+              {/* Right section */}
+              <Box display="flex" alignItems="center" sx={{ gap: 2 }}>
+                {/* Fixed button group */}
+                {isMain && (
+                  <Box display="flex" alignItems="center" sx={{ gap: 1 }}>
+                    <DashboardFilter />
+                    <Button variant="outlined" size="small" onClick={handleScreenshot}>
+                      Screenshot
+                    </Button>
+                  </Box>
+                )}
+
+                {/* Let TimeDisplay take space but not affect the button group */}
+                <Box sx={{ flexShrink: 0 }}>
+                  <TimeDisplay />
                 </Box>
-              )}
-
-              {/* Let TimeDisplay take space but not affect the button group */}
-              <Box sx={{ flexShrink: 0 }}>
-                <TimeDisplay />
               </Box>
             </Box>
-          </Box>
-        </Container>
+          </Container>
+        )}
         <Box flexGrow={1} />
         <Stack spacing={1} direction="row" alignItems="center">
           <IconButton size="large" color="inherit" onClick={handleClick}>

@@ -1,23 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, Box, Button, Typography, Popover, Chip } from '@mui/material';
 import { AlarmType, MQTTAlarmType } from 'src/store/apps/tracking/Alarm';
 import { actionStatus, actionStatusColormap } from 'src/types/crud/input';
 import toast from 'react-hot-toast';
-import { useAssignActionAlarmTriggerByDMAC } from 'src/hooks/useAlarmTrigger';
+import {
+  // useAssignActionAlarmTriggerByDMAC,
+  useAssignActionAlarmTriggerByDMAC,
+} from 'src/hooks/useAlarmTrigger';
 import { alpha, darken } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
+import AlarmActionForm from 'src/components/shared/AlarmActionForm';
+import { useAllSecurityLookup } from 'src/hooks/useSecurityGuard';
+import { memberType } from 'src/store/apps/crud/member';
+import { AlarmLogItem, ClearAlarmPopup, MarkAlarmSeen } from 'src/store/apps/tracking/Beacon';
+import { dispatch } from 'src/store/Store';
 
 interface AlarmPopupProps {
-  alarm: MQTTAlarmType | null;
-  open: boolean;
-  onClose: () => void;
+  alarm: AlarmLogItem | null | undefined;
+  // open: boolean;
+  // onClose: () => void;
 }
 
 // Priority color mapping
 const PRIORITY_COLORS: Record<string, string> = {
-  'low': '#ffc107',    // Yellow
-  'medium': '#ff9800', // Orange
-  'high': '#f44336',   // Red
+  low: '#ffc107', // Yellow
+  medium: '#ff9800', // Orange
+  high: '#f44336', // Red
 };
 
 const getPriorityColor = (priority: string): string => {
@@ -25,7 +33,8 @@ const getPriorityColor = (priority: string): string => {
   return PRIORITY_COLORS[normalizedPriority] || PRIORITY_COLORS.medium;
 };
 
-const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
+const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
+  const popupRef = useRef<HTMLDivElement | null>(null);
   // React Query mutation hook
   const assignActionMutation = useAssignActionAlarmTriggerByDMAC();
 
@@ -33,12 +42,17 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
   const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedAction, setSelectedAction] = useState<string>('');
 
+  const { data: securityData = [], isLoading: isLoadingSecurity } = useAllSecurityLookup();
+
+  const [investigateResult, setInvestigateResult] = useState('');
+  const [selectedSecurity, setSelectedSecurity] = useState<memberType | null>(null);
+
   useEffect(() => {
     console.log('Alarm: ', alarm);
   }, [alarm]);
 
   const handleDisarmClick = (event: React.MouseEvent<HTMLElement>) => {
-    setActionAnchorEl(event.currentTarget);
+    setActionAnchorEl(popupRef.current);
   };
 
   const handleActionClose = () => {
@@ -47,8 +61,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
   };
 
   const handleApplyAction = async () => {
-    if (!alarm?.cardName) {
-      // Using cardName as the beacon ID/DMAC
+    if (!alarm?.dmac) {
       toast.error('No alarm selected');
       handleActionClose();
       return;
@@ -59,22 +72,35 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
       return;
     }
 
-    try {
-      // Use React Query mutation with correct parameters
-      const result = await assignActionMutation.mutateAsync({
-        dmac: alarm.cardName.toUpperCase(), // Using cardName as dmac
-        actionStatus: selectedAction.toLowerCase(),
-      });
-      console.log('Assign Action Result:', result);
-      // If we reach here, the mutation was successful
-      toast.success('Action applied successfully');
+    if (selectedAction.toLowerCase() === 'done' && investigateResult.trim() === '') {
+      toast.error('Please provide investigation result');
+      return;
+    }
 
-      // Close both popovers
+    if (selectedAction.toLowerCase() === 'investigated' && !selectedSecurity) {
+      toast.error('Please select a security guard');
+      return;
+    }
+
+    try {
+      await assignActionMutation.mutateAsync({
+        dmac: alarm.dmac.toUpperCase(),
+        actionStatus: selectedAction.toLowerCase(),
+        investigatedResult:
+          selectedAction.toLowerCase() === 'done' ? investigateResult.trim() : null,
+        assignedSecurityId:
+          selectedAction.toLowerCase() === 'investigated' && selectedSecurity
+            ? selectedSecurity.id
+            : null,
+      });
+
+      toast.success('Action applied successfully');
       handleActionClose();
-      onClose();
-    } catch (error: any) {
+      dispatch(MarkAlarmSeen(alarm.id));
+      dispatch(ClearAlarmPopup());
+    } catch (error) {
       toast.error('Error applying action');
-      console.error('Error applying action', error);
+      console.error(error);
     }
   };
 
@@ -86,12 +112,25 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
   // Get chip color from alarm.color or use a default
   const chipColor = alarm?.color || '#2196f3';
 
+  const handleBackdropClose = () => {
+  // ❗ UI-only close
+  dispatch(ClearAlarmPopup());
+
+  // DO NOT mark as seen
+  // DO NOT touch alarm log
+};
+
   return (
     <>
       {/* ========= ALARM POPUP DIALOG ========= */}
-      {/* <Dialog
-        open={open}
-        onClose={onClose}
+      <Dialog
+        open={Boolean(alarm)}
+          onClose={(_, reason) => {
+    // optional: ignore backdrop if you want
+    if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+      handleBackdropClose();
+    }
+  }}
         PaperProps={{
           sx: {
             backgroundColor: 'transparent',
@@ -101,15 +140,16 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
         }}
       >
         <AnimatePresence>
-          {open && (
+          {Boolean(alarm) && (
             <motion.div
-              key={alarm?.triggerId}
+              key={alarm?.id}
               initial={{ opacity: 0, scale: 0.8, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: -20 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
             >
               <Box
+                ref={popupRef}
                 sx={{
                   background: `linear-gradient(135deg, ${alpha(priorityColor, 0.95)}, ${darken(
                     priorityColor,
@@ -132,7 +172,6 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
                   ALARM TRIGGERED
                 </Typography>
 
-          
                 <Box
                   sx={{
                     backgroundColor: chipColor,
@@ -149,7 +188,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
                     minWidth: '180px',
                   }}
                 >
-                  {alarm?.status?.toUpperCase() || 'UNKNOWN'}
+                  {alarm?.alarmStatus?.toUpperCase() || 'UNKNOWN'}
                 </Box>
 
                 <Box
@@ -166,29 +205,28 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
                 >
                   🔔 Triggered by{' '}
                   <Box component="span" fontWeight="bold" fontSize="1.125rem">
-                    {alarm?.MemberName || alarm?.visitorName || 'Unknown Person'}
+                    {alarm?.target}
                   </Box>
                 </Box>
 
                 <Typography variant="h6" mb={3}>
                   Card:{' '}
                   <Box component="span" fontWeight="bold" fontSize="1.1rem">
-                    {alarm?.cardName || 'Unknown'}
+                    {alarm?.dmac || 'Unknown'}
                   </Box>
                 </Typography>
 
                 <Typography variant="h6" mb={3}>
                   Area:{' '}
                   <Box component="span" fontWeight="bold" fontSize="1.1rem">
-                    {alarm?.maskedAreaName || 'Unknown'}
+                    {alarm?.area || 'Unknown'}
                   </Box>{' '}
                   |{' '}
                   <Box component="span" fontWeight="bold" fontSize="1.1rem">
-                    {alarm?.floorplanName || 'Unknown'}
+                    {alarm?.floor || 'Unknown'}
                   </Box>
                 </Typography>
 
-                
                 <Box
                   sx={{
                     display: 'flex',
@@ -214,7 +252,6 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
                   />
                 </Box>
 
-             
                 <Box
                   sx={{
                     position: 'absolute',
@@ -266,23 +303,24 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
             </motion.div>
           )}
         </AnimatePresence>
-      </Dialog> */}
+      </Dialog>
 
       {/* ========= ACTION POPOVER ========= */}
-      {/* <Popover
+      <Popover
         id={actionId}
         open={actionOpen}
         anchorEl={actionAnchorEl}
         onClose={handleActionClose}
         anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
+          vertical: 'center',
+          horizontal: 'right',
         }}
         transformOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
+          vertical: 'center',
+          horizontal: 'left',
         }}
         sx={{
+          ml: 2,
           '& .MuiPopover-paper': {
             borderRadius: 2,
             boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
@@ -300,8 +338,8 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
           Alarm DMAC:
         </Typography>
 
-        <Typography variant="body1" fontWeight={600} mb={3}>
-          {alarm?.cardName?.toUpperCase() || '-'}
+        <Typography variant="body1" fontWeight={600} mb={1}>
+          {alarm?.dmac?.toUpperCase() || '-'}
         </Typography>
 
         {alarm && (
@@ -310,24 +348,25 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
               backgroundColor: 'rgba(0, 0, 0, 0.04)',
               p: 2,
               borderRadius: 1,
-              mb: 3,
+              mb: 1,
             }}
           >
             <Typography variant="body2" color="text.secondary">
-              Person: {alarm?.MemberName || alarm?.visitorName || 'Unknown'}
+              Person: {alarm?.target || 'Unknown'}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Area: {alarm?.maskedAreaName || 'Unknown'}
+              Area: {alarm?.area || 'Unknown'}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Priority: <span style={{ color: priorityColor, fontWeight: 'bold' }}>
+              Priority:{' '}
+              <span style={{ color: priorityColor, fontWeight: 'bold' }}>
                 {(alarm?.priority || 'medium').toUpperCase()}
               </span>
             </Typography>
           </Box>
         )}
 
-        <Box display="flex" flexDirection="column" gap={1} mb={3}>
+        {/* <Box display="flex" flexDirection="column" gap={1} mb={3}>
           {actionStatus
             .filter((item) => !item.disabled && item.value !== 'Idle')
             .map((item) => {
@@ -369,9 +408,24 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
                 </Box>
               );
             })}
-        </Box>
+        </Box> */}
+        <AlarmActionForm
+          alarmTrigger={{
+            id: alarm?.id,
+            isActive: true,
+          }}
+          selectedAction={selectedAction}
+          setSelectedAction={setSelectedAction}
+          investigateResult={investigateResult}
+          setInvestigateResult={setInvestigateResult}
+          selectedSecurity={selectedSecurity}
+          setSelectedSecurity={setSelectedSecurity}
+          securityData={securityData}
+          isLoadingSecurity={isLoadingSecurity}
+          compact
+        />
 
-        <Box display="flex" gap={1} justifyContent="flex-end">
+        <Box display="flex" gap={1} justifyContent="flex-end" mt={2}>
           <Button
             onClick={handleActionClose}
             variant="outlined"
@@ -389,7 +443,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm, open, onClose }) => {
             {assignActionMutation.isPending ? 'Applying...' : 'Apply Action'}
           </Button>
         </Box>
-      </Popover> */}
+      </Popover>
     </>
   );
 };

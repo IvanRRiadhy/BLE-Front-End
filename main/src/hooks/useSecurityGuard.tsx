@@ -53,7 +53,19 @@ export function useAllSecuritys() {
     placeholderData: [],
   });
 }
-
+// -----------------------------------------------------------------------------
+// ✅ FETCH ALL Security Lookup (for dropdowns, etc.)
+// -----------------------------------------------------------------------------
+export function useAllSecurityLookup() {
+  return useQuery({
+    queryKey: ['security-lookup'],
+    queryFn: async () => {
+      const res = await axiosServices.get(`${API_URL}lookup`);
+      return res.data.collection.data as memberType[];
+    },
+    placeholderData: [],
+  });
+}
 // -----------------------------------------------------------------------------
 // ✅ ADD Security (POST with FormData)
 // -----------------------------------------------------------------------------
@@ -71,6 +83,7 @@ export function useAddSecurity() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['security-list'] });
       queryClient.invalidateQueries({ queryKey: ['security-all'] });
+      queryClient.invalidateQueries({ queryKey: ['security-lookup'] });
     },
   });
 }
@@ -93,6 +106,7 @@ export function useEditSecurity() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['security-list'] });
       queryClient.invalidateQueries({ queryKey: ['security-all'] });
+      queryClient.invalidateQueries({ queryKey: ['security-lookup'] });
     },
   });
 }
@@ -111,6 +125,7 @@ export function useBlacklistSecurity() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['security-list'] });
       queryClient.invalidateQueries({ queryKey: ['security-all'] });
+      queryClient.invalidateQueries({ queryKey: ['security-lookup'] });
     },
   });
 }
@@ -125,6 +140,7 @@ export function useUnBlacklistSecurity() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['security-list'] });
       queryClient.invalidateQueries({ queryKey: ['security-all'] });
+      queryClient.invalidateQueries({ queryKey: ['security-lookup'] });
     },
   });
 }
@@ -143,6 +159,7 @@ export function useDeleteSecurity() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['security-list'] });
       queryClient.invalidateQueries({ queryKey: ['security-all'] });
+      queryClient.invalidateQueries({ queryKey: ['security-lookup'] });
     },
   });
 }

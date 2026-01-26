@@ -31,7 +31,7 @@ import {
 } from './alarmsetting/overpopulating';
 import { BoundaryAlarmType, GetFilter as BoundaryFilter } from './alarmsetting/boundary';
 import { StayOnAreaAlarmType, GetFilter as StayOnAreaFilter } from './alarmsetting/stayonarea';
-import { PatrolRouteType, GetFilter as PatrolRouteFilter } from './crud/patrolRoute';
+import { PatrolRouteType, GetFilter as PatrolRouteFilter, PatrolAssignType } from './crud/patrolRoute';
 
 //#region AccessCCTV
 export const defaultAccessCCTVForm: CCTVType = {
@@ -730,5 +730,13 @@ export const defaultPatrolRouteFilter: PatrolRouteFilter = {
   filters: {
   },
 };
-
+export const defaultPatrolAssignForm: PatrolAssignType = {
+  id: '',
+  name: 'Add Name',
+  description: 'Add Description',
+  patrolRouteId: '',
+  startDate: '',
+  endDate: '',
+  securityIds: [],
+}
 //#endregion

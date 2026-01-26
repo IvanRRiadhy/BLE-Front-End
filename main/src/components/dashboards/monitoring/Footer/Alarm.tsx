@@ -166,6 +166,8 @@ const AlarmList = () => {
       const result = await assignActionMutation.mutateAsync({
         dmac: selectedAlarmTrigger.beaconId.toUpperCase(),
         actionStatus: selectedAction.toLowerCase(),
+        investigatedResult: null,
+        assignedSecurityId: null,
       });
 
       // With React Query, if mutateAsync resolves, it means the mutation was successful
