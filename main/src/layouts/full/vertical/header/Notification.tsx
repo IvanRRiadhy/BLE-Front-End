@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+
 import {
   IconButton,
   Box,
@@ -12,20 +13,25 @@ import {
   alpha,
   darken,
   Chip,
+  Tooltip,
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 import { IconBellRinging } from '@tabler/icons-react';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import { Link } from 'react-router';
 import { actionStatus } from 'src/types/crud/input';
 import { memberType } from 'src/store/apps/crud/member';
 import { VisitorType } from 'src/store/apps/crud/visitor';
-import { RootState, useSelector } from 'src/store/Store';
+import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import { AlarmTriggerType } from 'src/store/apps/crud/alarmTrigger';
 import { uniqueId } from 'lodash';
 import { useAllAlarmTriggers } from 'src/hooks/useAlarmTrigger';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllVisitor } from 'src/hooks/useVisitor';
+import { AlarmLogItem, ClearSeenAlarms, MarkAllAlarmsSeen } from 'src/store/apps/tracking/Beacon';
+import { MarkAlarmSeen } from 'src/store/apps/tracking/Beacon';
+import AlarmMenuItem from './AlarmMenuItem';
+import { DeleteSweep, VisibilityOutlined } from '@mui/icons-material';
 
 type BubbleData = {
   id: string;
@@ -43,9 +49,9 @@ const AUTOHIDE_MS = 6000;
 
 // Priority color mapping
 const PRIORITY_COLORS: Record<string, string> = {
-  'low': '#ffc107',    // Yellow
-  'medium': '#ff9800', // Orange
-  'high': '#f44336',   // Red
+  low: '#ffc107', // Yellow
+  medium: '#ff9800', // Orange
+  high: '#f44336', // Red
 };
 
 const getPriorityColor = (priority: string): string => {
@@ -54,20 +60,49 @@ const getPriorityColor = (priority: string): string => {
 };
 
 const Notifications = () => {
+  const dispatch: AppDispatch = useDispatch();
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const bellRef = useRef<HTMLButtonElement | null>(null);
   const [bubbles, setBubbles] = useState<BubbleData[]>([]);
   const hideTimers = useRef<Record<string, number>>({});
+  const hoverTimers = useRef<Record<string, number>>({});
 
   const openMenu = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
-  const closeMenu = () => setAnchorEl(null);
+  const closeMenu = () => {
+    setAnchorEl(null);
+    setSoftSeenIds(new Set()); // reset session
+  };
 
   const [nowMs, setNowMs] = useState(Date.now());
   useEffect(() => {
     const id = window.setInterval(() => setNowMs(Date.now()), 60_000);
     return () => window.clearInterval(id);
   }, []);
+  const alarmLogs: AlarmLogItem[] = useSelector(
+    (state: RootState) => state.BeaconReducer.alarmLogs,
+  );
+  const [softSeenIds, setSoftSeenIds] = useState<Set<string>>(new Set());
+  const { unseenAlarms, seenAlarms } = useMemo(() => {
+    const unseen: AlarmLogItem[] = [];
+    const seen: AlarmLogItem[] = [];
+
+    alarmLogs.forEach((a) => {
+      // 🧠 IMPORTANT: softSeenIds first
+      if (softSeenIds.has(a.id)) {
+        unseen.push(a); // keep in Unseen section for this session
+      } else if (a.seen) {
+        seen.push(a);
+      } else {
+        unseen.push(a);
+      }
+    });
+
+    unseen.sort((a, b) => Date.parse(b.time) - Date.parse(a.time));
+    seen.sort((a, b) => Date.parse(b.time) - Date.parse(a.time));
+
+    return { unseenAlarms: unseen, seenAlarms: seen };
+  }, [alarmLogs, softSeenIds]); // ✅ FIXED
 
   const alarmTriggers: AlarmTriggerType[] = useAllAlarmTriggers().data || [];
   const memberList: memberType[] = useAllMembers().data || [];
@@ -125,9 +160,9 @@ const Notifications = () => {
   useEffect(() => {
     const onNewAlarm = (e: MessageEvent) => {
       if (e.data?.type !== 'app:new-alarm') return;
-      
+
       // console.log('[Notifications] Received alarm message:', e.data);
-      
+
       const alarmData = e.data.detail.alarm;
       if (!alarmData) {
         console.warn('[Notifications] No alarm data found in message');
@@ -141,9 +176,7 @@ const Notifications = () => {
         subtitle: `${alarmData.cardName ?? ''} · ${alarmData.maskedAreaName ?? 'Unknown'} · ${
           alarmData.floorplanName ?? 'Unknown'
         }`,
-        status: getStatusText(
-          alarmData.action?.toLowerCase(),
-        ),
+        status: getStatusText(alarmData.action?.toLowerCase()),
         priority: alarmData.priority || 'medium',
         priorityColor: getPriorityColor(alarmData.priority), // Use priority-based color
         chipColor: alarmData.color ?? '#2196f3', // Use original alarmData.color for chip
@@ -192,6 +225,63 @@ const Notifications = () => {
     exit: { opacity: 0, y: -15, scale: 0.96, transition: { duration: 0.25 } },
   };
 
+  const startHoverTimer = (alarm: AlarmLogItem) => {
+    if (alarm.seen || softSeenIds.has(alarm.id)) return;
+    if (hoverTimers.current[alarm.id]) return;
+
+    hoverTimers.current[alarm.id] = window.setTimeout(() => {
+      // 🎨 UI FIRST (same render cycle)
+      setSoftSeenIds((prev) => {
+        const next = new Set(prev);
+        next.add(alarm.id);
+        return next;
+      });
+
+      // 🔥 Redux SECOND
+      dispatch(MarkAlarmSeen(alarm.id));
+
+      delete hoverTimers.current[alarm.id];
+    }, 3000);
+  };
+
+  const cancelHoverTimer = (alarmId: string) => {
+    if (hoverTimers.current[alarmId]) {
+      window.clearTimeout(hoverTimers.current[alarmId]);
+      delete hoverTimers.current[alarmId];
+    }
+  };
+  const isVisuallySeen = (alarm: AlarmLogItem) => alarm.seen || softSeenIds.has(alarm.id);
+  const { unseenCount, seenCount } = useMemo(() => {
+    let unseen = 0;
+    let seen = 0;
+
+    alarmLogs.forEach((a) => {
+      if (isVisuallySeen(a)) seen++;
+      else unseen++;
+    });
+
+    return { unseenCount: unseen, seenCount: seen };
+  }, [alarmLogs, softSeenIds]);
+
+  const errorColor = theme.palette.error.main;
+  const primaryColor = theme.palette.primary.main;
+  const neutralBg = theme.palette.common.white;
+
+  const unseenBg = alpha(errorColor, 0.14);
+  const hoverBg = neutralBg;
+  const seenBg = alpha(primaryColor, 0.1);
+
+  const unseenBorder = errorColor;
+  const hoverBorder = theme.palette.grey[400];
+  const seenBorder = primaryColor;
+
+  useEffect(() => {
+    return () => {
+      Object.values(hoverTimers.current).forEach((t) => window.clearTimeout(t));
+      hoverTimers.current = {};
+    };
+  }, []);
+
   return (
     <Box sx={{ position: 'relative' }}>
       {/* Notification Bell */}
@@ -202,7 +292,7 @@ const Notifications = () => {
         onClick={openMenu}
         sx={{ color: anchorEl ? 'error.main' : 'text.secondary' }}
       >
-        <Badge badgeContent={bubbles.length} color="error">
+        <Badge badgeContent={unseenCount} color="error">
           <IconBellRinging size="21" stroke="1.5" />
         </Badge>
       </IconButton>
@@ -221,10 +311,10 @@ const Notifications = () => {
                   cardName: '676986',
                   maskedAreaName: 'MA-Lantai 2',
                   floorplanName: 'FP Lantai 2',
-                  action: 'idle',
-                  priority: 'high', // Added priority
+                  action: 'high',
+                  priority: 'medium', // Added priority
                   color: '#4caf50', // This will be used for chip color
-                  status: 'EXAMPLE' // Added status for category
+                  status: 'EXAMPLE', // Added status for category
                 },
               },
             },
@@ -314,7 +404,7 @@ const Notifications = () => {
                     },
                   }}
                 />
-                
+
                 <Stack spacing={0.5}>
                   <Typography variant="subtitle2" sx={{ opacity: 0.75, pt: 0.5 }}>
                     Alarm Triggered
@@ -323,10 +413,17 @@ const Notifications = () => {
                     {b.title}
                   </Typography>
                   <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    {b.subtitle} 
+                    {b.subtitle}
                   </Typography>
                   {/* Priority indicator */}
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      mt: 0.5,
+                    }}
+                  >
                     <Typography variant="caption" sx={{ opacity: 0.8 }}>
                       Priority: <strong>{b.priority.toUpperCase()}</strong>
                     </Typography>
@@ -341,7 +438,7 @@ const Notifications = () => {
         })}
       </AnimatePresence>
 
-      {/* Menu (unchanged minimal) */}
+      {/* 🔔 Notifications Menu */}
       <Menu
         id="msgs-menu"
         anchorEl={anchorEl}
@@ -352,12 +449,155 @@ const Notifications = () => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         sx={{ '& .MuiMenu-paper': { width: '360px' } }}
       >
-        <Scrollbar sx={{ height: '385px' }}>
-          <Box p={3}>
+        <Box
+          sx={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 2,
+            backgroundColor: theme.palette.background.paper,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            px: 2,
+            py: 1.5,
+          }}
+        >
+          <Box display="flex" alignItems="center" justifyContent="space-between">
             <Typography variant="h6">All Notifications</Typography>
-            <Button to="/report/alarmtrigger" component={Link} fullWidth variant="outlined">
-              View All
-            </Button>
+
+            <Stack direction="row" spacing={0.5}>
+              <Tooltip title="Mark all as seen">
+                <span>
+                  <IconButton
+                    size="small"
+                    disabled={unseenCount === 0}
+                    onClick={() => {
+                      dispatch(MarkAllAlarmsSeen());
+                      setSoftSeenIds(new Set());
+                    }}
+                  >
+                    <VisibilityOutlined fontSize="small" />
+                  </IconButton>
+                </span>
+              </Tooltip>
+
+              <Tooltip title="Clear seen notifications">
+                <span>
+                  <IconButton
+                    size="small"
+                    color="error"
+                    disabled={seenCount === 0}
+                    onClick={() => dispatch(ClearSeenAlarms())}
+                  >
+                    <DeleteSweep fontSize="small" />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            </Stack>
+          </Box>
+        </Box>
+
+        <Scrollbar sx={{ height: '385px' }}>
+          <Box p={2}>
+            {/* 🔴 UNSEEN (includes soft-seen during this session) */}
+            {unseenAlarms.length > 0 && (
+              <>
+                <Box display="flex" alignItems="center" gap={1} mb={1}>
+                  <Typography variant="subtitle2" color="error">
+                    Unseen
+                  </Typography>
+                  <Chip
+                    size="small"
+                    label={unseenCount}
+                    sx={{
+                      backgroundColor: alpha(theme.palette.error.main, 0.15),
+                      color: theme.palette.error.main,
+                      fontWeight: 600,
+                    }}
+                  />
+                </Box>
+
+                <Stack spacing={1} mb={2}>
+                  {unseenAlarms.map((alarm) => (
+                    <AlarmMenuItem
+                      key={alarm.id}
+                      alarm={alarm}
+                      isVisuallySeen={isVisuallySeen(alarm)}
+                      unseenBg={unseenBg}
+                      seenBg={seenBg}
+                      hoverBg={hoverBg}
+                      unseenBorder={unseenBorder}
+                      seenBorder={seenBorder}
+                      hoverBorder={hoverBorder}
+                      onMarkSeen={(a) => {
+                        setSoftSeenIds((prev) => new Set(prev).add(a.id));
+                        dispatch(MarkAlarmSeen(a.id));
+                      }}
+                    />
+                  ))}
+                </Stack>
+              </>
+            )}
+
+            {/* ⚪ SEEN (only after reopen) */}
+            {seenAlarms.length > 0 && (
+              <>
+                <Box display="flex" alignItems="center" gap={1} mb={1}>
+                  <Typography variant="subtitle2" color="primary">
+                    Seen
+                  </Typography>
+                  <Chip
+                    size="small"
+                    label={seenCount}
+                    sx={{
+                      backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                      color: theme.palette.primary.main,
+                      fontWeight: 600,
+                    }}
+                  />
+                </Box>
+
+                <Stack spacing={1}>
+                  {seenAlarms.map((alarm) => (
+                    <Paper
+                      key={alarm.id}
+                      onClick={() => {
+                        console.log('SEEN alarm clicked:', alarm);
+                      }}
+                      sx={{
+                        p: 1.5,
+                        cursor: 'pointer',
+                        opacity: 0.75,
+                        backgroundColor: seenBg,
+                        transition: 'background-color 0.4s ease, opacity 0.4s ease',
+                        '&:hover': {
+                          backgroundColor: alpha(theme.palette.grey[500], 0.12),
+                        },
+                      }}
+                    >
+                      <Typography fontWeight={600}>{alarm.target}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {alarm.area} · {alarm.floor}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {new Date(alarm.time).toLocaleString()}
+                      </Typography>
+                    </Paper>
+                  ))}
+                </Stack>
+              </>
+            )}
+
+            {/* Empty state */}
+            {alarmLogs.length === 0 && (
+              <Typography variant="body2" color="text.secondary">
+                No notifications
+              </Typography>
+            )}
+
+            <Box mt={2}>
+              <Button to="/report/alarmtrigger" component={Link} fullWidth variant="outlined">
+                View All
+              </Button>
+            </Box>
           </Box>
         </Scrollbar>
       </Menu>

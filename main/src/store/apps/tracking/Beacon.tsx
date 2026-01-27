@@ -311,6 +311,15 @@ export const BeaconSlice = createSlice({
         alarm.seen = true;
       }
     },
+    MarkAllAlarmsSeen: (state: StateType) => {
+      state.alarmLogs.forEach((alarm) => {
+        alarm.seen = true;
+      });
+    },
+
+    ClearSeenAlarms: (state: StateType) => {
+      state.alarmLogs = state.alarmLogs.filter((alarm) => !alarm.seen);
+    },
   },
 });
 
@@ -330,6 +339,8 @@ export const {
   ClearAlarmLogs,
   ClearAlarmPopup,
   MarkAlarmSeen,
+  MarkAllAlarmsSeen,
+  ClearSeenAlarms,
 } = BeaconSlice.actions;
 
 export const selectAlarmPopupId = (state: RootState) => state.BeaconReducer.alarmPopupId;
