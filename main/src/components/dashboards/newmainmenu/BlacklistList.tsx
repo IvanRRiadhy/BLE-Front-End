@@ -1,11 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  Box,
-  Typography,
-  Avatar,
-  Stack,
-} from "@mui/material";
-import { useBlacklistLog } from "src/hooks/useDashboard";
+import { useEffect, useMemo, useState } from 'react';
+import { Box, Typography, Avatar, Stack, Tooltip } from '@mui/material';
+import { useBlacklistLog } from 'src/hooks/useDashboard';
 // import dumpy from "../assets/ambatukam.jpeg";
 
 interface BlacklistItem {
@@ -14,32 +9,32 @@ interface BlacklistItem {
 }
 
 const NewBlacklist: React.FC = () => {
-    const {data = [], isLoading, isError} = useBlacklistLog();
-    const blacklist = useMemo<BlacklistItem[]>(() => {
-        return data.map((x: any) => ({
-            id: x.id,
-            name: x.name,
-        }));
-    }, [data]);
+  const { data = [], isLoading, isError } = useBlacklistLog();
+  const blacklist = useMemo<BlacklistItem[]>(() => {
+    return data.map((x: any) => ({
+      id: x.id,
+      name: x.name,
+    }));
+  }, [data]);
 
   return (
     <Box
       sx={{
-        width: "100%",
-        height: '26.5vh',          // ✅ ikut Grid
-        borderRadius: "25px",
-        boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+        width: '100%',
+        height: '26.5vh', // ✅ ikut Grid
+        borderRadius: '25px',
+        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
         px: 2,
         py: 2,
-        display: "flex",
-        flexDirection: "column",
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       {/* TITLE (fixed height) */}
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "center",
+          display: 'flex',
+          justifyContent: 'center',
           pb: 2,
         }}
       >
@@ -47,7 +42,7 @@ const NewBlacklist: React.FC = () => {
           sx={{
             fontSize: 24,
             fontWeight: 700,
-            color: "#045498",
+            color: '#045498',
           }}
         >
           Blacklist Log
@@ -57,41 +52,43 @@ const NewBlacklist: React.FC = () => {
       {/* LIST (flexible height) */}
       <Box
         sx={{
-          flex: 1,              
-          overflowY: "auto",
+          flex: 1,
+          overflowY: 'auto',
           px: 1.5,
           py: 1,
         }}
       >
-        {blacklist.map((item) => (
+        {blacklist.map((item, index: number) => (
           <Stack
             key={item.id}
             direction="row"
             spacing={2}
             alignItems="center"
-            sx={{ pb: 2 }}
+            sx={{
+              p: 1,
+              backgroundColor: index % 2 === 0 ? 'grey.50' : 'white',
+              borderBottom: '1px solid #e0e0e0',
+            }}
           >
             {/* Avatar */}
-            <Avatar
-              src="/dummy-avatar.jpg"
-              alt="user"
-              sx={{ width: 56, height: 56 }}
-            />
+            <Avatar src="/dummy-avatar.jpg" alt="user" sx={{ width: 56, height: 56 }} />
 
             {/* Info */}
             <Box sx={{ minWidth: 0 }}>
-              <Typography
-                sx={{
-                  fontSize: 16,
-                  fontWeight: 600,
-                  color: "#045498",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {item.name}
-              </Typography>
+              <Tooltip title={item.name}>
+                <Typography
+                  sx={{
+                    fontSize: 16,
+                    fontWeight: 600,
+                    color: '#045498',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {item.name}
+                </Typography>
+              </Tooltip>
             </Box>
           </Stack>
         ))}
@@ -101,4 +98,3 @@ const NewBlacklist: React.FC = () => {
 };
 
 export default NewBlacklist;
-

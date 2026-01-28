@@ -21,6 +21,7 @@ export type GetFilter = {
     SearchValue: string,
     filters?: {
       ScheduleType?: string;
+      id?:string[];
     };
 }
 

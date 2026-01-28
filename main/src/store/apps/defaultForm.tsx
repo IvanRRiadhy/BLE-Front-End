@@ -739,4 +739,14 @@ export const defaultPatrolAssignForm: PatrolAssignType = {
   endDate: '',
   securityIds: [],
 }
+export const defaultPatrolAssignmentFilter: PatrolRouteFilter = {
+  Draw: 1,
+  Start: 0,
+  Length: 0,
+  SortColumn: 'startDate',
+  SortDir: 'desc',
+  SearchValue: '',
+  filters: {
+  },
+};
 //#endregion

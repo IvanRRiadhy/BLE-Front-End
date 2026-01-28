@@ -5,7 +5,7 @@ import { createBrowserRouter, Navigate } from 'react-router';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 import VisitorCard from 'src/views/master/tag/VisitorCard';
 import AlarmList from 'src/views/Reports/AlarmList';
-
+import SecurityViewLayout from 'src/layouts/SecurityView/SecurityViewLayout';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -19,6 +19,11 @@ const MonitoringDash = Loadable(lazy(() => import('../views/dashboard/Monitoring
 const MonitoringConfig = Loadable(lazy(() => import('../views/dashboard/MonitoringConfig')));
 const MyVisitDashboard = Loadable(lazy(() => import('../views/MyVisit/MyVisitDashboard')));
 const WebView = Loadable(lazy(() => import('../components/dashboards/monitoring/FloorView')));
+
+/* Security View */
+const SecurityViewDashboard = Loadable(
+  lazy(() => import('../views/SecurityView/SecurityViewDashboard')),
+);
 
 /* ****Invitation***** */
 const InvitationForm = Loadable(lazy(() => import('../components/InvitationForm/InvitationForm')));
@@ -106,7 +111,6 @@ const Investigate = Loadable(lazy(() => import('../views/Reports/Investigate')))
 const EventLog = Loadable(lazy(() => import('../views/Reports/EventLog')));
 const CardHistory = Loadable(lazy(() => import('../views/Reports/CardHistory')));
 
-
 // Evacuation
 const EvacuationDashboard = Loadable(
   lazy(() => import('../views/dashboard/Evacuation/Evacuation')),
@@ -130,7 +134,7 @@ const roleAccessRules: Record<string, string[]> = {
   System: ['*'], // all routes
   SuperAdmin: ['*', '!/master/application'], // all except application
   PrimaryAdmin: ['/dashboards/', '/report/', '/visitor/visitorinvitation'],
-  Primary: ['/dashboards/monitoring'],
+  Primary: ['/dashboards/monitoring', '/security-view/'],
   Secondary: ['/my-visit/'],
   UserCreated: ['/my-visit/'],
 };
@@ -174,8 +178,6 @@ const withAuth = (element: JSX.Element, path: string): JSX.Element => {
   return <Navigate to="/dashboards/newmainmenu" replace />;
 };
 
-
-
 const Router = [
   {
     path: '/',
@@ -192,7 +194,7 @@ const Router = [
       {
         path: '/dashboards/newmainmenu',
         exact: true,
-        element: withAuth(<NewDashboardView />, '/dashboards/newmainmenu'), 
+        element: withAuth(<NewDashboardView />, '/dashboards/newmainmenu'),
       },
       {
         path: '/dashboards/monitoring',
@@ -231,66 +233,230 @@ const Router = [
         exact: true,
         element: withAuth(<District />, '/master/district'),
       },
-      { path: '/master/building', exact: true, element: withAuth(<Building />, '/master/building') },
+      {
+        path: '/master/building',
+        exact: true,
+        element: withAuth(<Building />, '/master/building'),
+      },
       { path: '/master/floor', exact: true, element: withAuth(<Floor />, '/master/floor') },
-      { path: '/master/floorplan', exact: true, element: withAuth(<Floorplan />, '/master/floorplan') },
-      { path: '/master/floorplanmaskedarea', exact: true, element: withAuth(<FloorplanMaskedArea />, '/master/floorplanmaskedarea') },
-      { path: '/master/floorplanmaskedarea/edit', exact: true, element: withAuth(<MaskedAreaEdit />, '/master/floorplanmaskedarea/edit') },
+      {
+        path: '/master/floorplan',
+        exact: true,
+        element: withAuth(<Floorplan />, '/master/floorplan'),
+      },
+      {
+        path: '/master/floorplanmaskedarea',
+        exact: true,
+        element: withAuth(<FloorplanMaskedArea />, '/master/floorplanmaskedarea'),
+      },
+      {
+        path: '/master/floorplanmaskedarea/edit',
+        exact: true,
+        element: withAuth(<MaskedAreaEdit />, '/master/floorplanmaskedarea/edit'),
+      },
       { path: '/master/brand', exact: true, element: withAuth(<Brand />, '/master/brand') },
-      { path: '/master/accesscctv', exact: true, element: withAuth(<AccessCCTV />, '/master/accesscctv') },
-      { path: '/master/accesscontrol', exact: true, element: withAuth(<AccessControl />, '/master/accesscontrol') },
-      { path: '/master/blereader', exact: true, element: withAuth(<BleReader />, '/master/blereader') },
-      { path: '/master/device', exact: true, element: withAuth(<FloorplanDevice />, '/master/device') },
-      { path: '/master/device/edit', exact: true, element: withAuth(<FloorplanDeviceEdit />, '/master/device/edit') },
-      { path: '/master/rules/edit', exact: true, element: withAuth(<RulesEdit />, '/master/rules/edit') },
+      {
+        path: '/master/accesscctv',
+        exact: true,
+        element: withAuth(<AccessCCTV />, '/master/accesscctv'),
+      },
+      {
+        path: '/master/accesscontrol',
+        exact: true,
+        element: withAuth(<AccessControl />, '/master/accesscontrol'),
+      },
+      {
+        path: '/master/blereader',
+        exact: true,
+        element: withAuth(<BleReader />, '/master/blereader'),
+      },
+      {
+        path: '/master/device',
+        exact: true,
+        element: withAuth(<FloorplanDevice />, '/master/device'),
+      },
+      {
+        path: '/master/device/edit',
+        exact: true,
+        element: withAuth(<FloorplanDeviceEdit />, '/master/device/edit'),
+      },
+      {
+        path: '/master/rules/edit',
+        exact: true,
+        element: withAuth(<RulesEdit />, '/master/rules/edit'),
+      },
       { path: '/master/member', exact: true, element: withAuth(<Member />, '/master/member') },
       { path: '/master/card', exact: true, element: withAuth(<Card />, '/master/card') },
-      { path: '/master/timegroup', exact: true, element: withAuth(<TimeGroup />, '/master/timegroup') },
-      { path: '/master/visitorcard', exact: true, element: withAuth(<VisitorCard />, '/master/visitorcard') },
-      { path: '/master/cardaccess', exact: true, element: withAuth(<CardAccess />, '/master/cardaccess') },
-      { path: '/master/cardgroup', exact: true, element: withAuth(<CardGroup />, '/master/cardgroup') },
+      {
+        path: '/master/timegroup',
+        exact: true,
+        element: withAuth(<TimeGroup />, '/master/timegroup'),
+      },
+      {
+        path: '/master/visitorcard',
+        exact: true,
+        element: withAuth(<VisitorCard />, '/master/visitorcard'),
+      },
+      {
+        path: '/master/cardaccess',
+        exact: true,
+        element: withAuth(<CardAccess />, '/master/cardaccess'),
+      },
+      {
+        path: '/master/cardgroup',
+        exact: true,
+        element: withAuth(<CardGroup />, '/master/cardgroup'),
+      },
 
-      { path: '/master/membertag', exact: true, element: withAuth(<MemberTag />, '/master/membertag') },
+      {
+        path: '/master/membertag',
+        exact: true,
+        element: withAuth(<MemberTag />, '/master/membertag'),
+      },
 
       //Security
-      { path: '/master/securityguard', exact: true, element: withAuth(<SecurityGuard />, '/master/securityguard') },
-      { path: '/master/patrolarea', exact: true, element: withAuth(<PatrolArea />, '/master/patrolarea') },
-      { path: '/master/patrolarea/edit', exact: true, element: withAuth(<PatrolAreaEdit />, '/master/patrolarea/edit') },
-      { path: '/master/patrolroute', exact: true, element: withAuth(<PatrolRoute />, '/master/patrolroute') },
+      {
+        path: '/master/securityguard',
+        exact: true,
+        element: withAuth(<SecurityGuard />, '/master/securityguard'),
+      },
+      {
+        path: '/master/patrolarea',
+        exact: true,
+        element: withAuth(<PatrolArea />, '/master/patrolarea'),
+      },
+      {
+        path: '/master/patrolarea/edit',
+        exact: true,
+        element: withAuth(<PatrolAreaEdit />, '/master/patrolarea/edit'),
+      },
+      {
+        path: '/master/patrolroute',
+        exact: true,
+        element: withAuth(<PatrolRoute />, '/master/patrolroute'),
+      },
       // { path: '/master/floorplan', exact: true, element: <Floorplan /> },
       // { path: '/master/gateway', exact: true, element: <GatewayApp /> },
 
       // Visitor
-      { path: '/visitor/visitordata', exact: true, element: withAuth(<Visitor />, '/visitor/visitordata') },
-      { path: '/visitor/blacklist', exact: true, element: withAuth(<Blacklist />, '/visitor/blacklist') },
-      { path: '/visitor/visitorinvitation', exact: true, element: withAuth(<VisitorTag />, '/visitor/visitorinvitation') },
+      {
+        path: '/visitor/visitordata',
+        exact: true,
+        element: withAuth(<Visitor />, '/visitor/visitordata'),
+      },
+      {
+        path: '/visitor/blacklist',
+        exact: true,
+        element: withAuth(<Blacklist />, '/visitor/blacklist'),
+      },
+      {
+        path: '/visitor/visitorinvitation',
+        exact: true,
+        element: withAuth(<VisitorTag />, '/visitor/visitorinvitation'),
+      },
 
       // Report
-      { path: '/report/trackingtransaction', exact: true, element: withAuth(<TrackingTransaction />, '/report/trackingtransaction') },
-      { path: '/report/alarmrecord', exact: true, element: withAuth(<AlarmRecord />, '/report/alarmrecord') },
-      { path: '/report/alarmtrigger', exact: true, element: withAuth(<AlarmTrigger />, '/report/alarmtrigger') },
-      { path: '/report/alarmlist', exact: true, element: withAuth(<AlarmList />, '/report/alarmlist') },
-      { path: '/report/cardrecord', exact: true, element: withAuth(<CardRecord />, '/report/cardrecord') },
-      { path: '/report/testrecord', exact: true, element: withAuth(<TestRecord />, '/report/testrecord') },
-      { path: '/report/visitorreport/filter', exact: true, element: withAuth(<TestReport />, '/report/visitorreport/filter') },
-      { path: '/report/investigate', exact: true, element: withAuth(<Investigate />, '/report/investigate') },
-      { path: '/report/eventlog', exact: true, element: withAuth(<EventLog />, '/report/eventlog') },
-      { path: '/report/cardhistory', exact: true, element: withAuth(<CardHistory />, '/report/cardhistory') },
+      {
+        path: '/report/trackingtransaction',
+        exact: true,
+        element: withAuth(<TrackingTransaction />, '/report/trackingtransaction'),
+      },
+      {
+        path: '/report/alarmrecord',
+        exact: true,
+        element: withAuth(<AlarmRecord />, '/report/alarmrecord'),
+      },
+      {
+        path: '/report/alarmtrigger',
+        exact: true,
+        element: withAuth(<AlarmTrigger />, '/report/alarmtrigger'),
+      },
+      {
+        path: '/report/alarmlist',
+        exact: true,
+        element: withAuth(<AlarmList />, '/report/alarmlist'),
+      },
+      {
+        path: '/report/cardrecord',
+        exact: true,
+        element: withAuth(<CardRecord />, '/report/cardrecord'),
+      },
+      {
+        path: '/report/testrecord',
+        exact: true,
+        element: withAuth(<TestRecord />, '/report/testrecord'),
+      },
+      {
+        path: '/report/visitorreport/filter',
+        exact: true,
+        element: withAuth(<TestReport />, '/report/visitorreport/filter'),
+      },
+      {
+        path: '/report/investigate',
+        exact: true,
+        element: withAuth(<Investigate />, '/report/investigate'),
+      },
+      {
+        path: '/report/eventlog',
+        exact: true,
+        element: withAuth(<EventLog />, '/report/eventlog'),
+      },
+      {
+        path: '/report/cardhistory',
+        exact: true,
+        element: withAuth(<CardHistory />, '/report/cardhistory'),
+      },
 
       // ***Alarm Setting*** //
       { path: '/alarmsetting', exact: true, element: withAuth(<AlarmSetting />, '/alarmsetting') },
-      { path: '/alarmsetting/geofencing', exact: true, element: withAuth(<GeoFencing />, '/alarmsetting/geofencing') },
-      { path: '/alarmsetting/geofencing/edit', exact: true, element: withAuth(<GeoFencingEdit />, '/alarmsetting/geofencing/edit') },
-      { path: '/alarmsetting/overpopulating', exact: true, element: withAuth(<OverPopulating />, '/alarmsetting/overpopulating') },
-      { path: '/alarmsetting/overpopulating/edit', exact: true, element: withAuth(<OverPopulatingEdit />, '/alarmsetting/overpopulating/edit') },
-      { path: '/alarmsetting/stayonarea', exact: true, element: withAuth(<StayOnArea />, '/alarmsetting/stayonarea') },
-      { path: '/alarmsetting/stayonarea/edit', exact: true, element: withAuth(<StayOnAreaEdit />, '/alarmsetting/stayonarea/edit') },
-      { path: '/alarmsetting/boundary', exact: true, element: withAuth(<Boundary />, '/alarmsetting/boundary') },
-      { path: '/alarmsetting/boundary/edit', exact: true, element: withAuth(<BoundaryEdit />, '/alarmsetting/boundary/edit') },
+      {
+        path: '/alarmsetting/geofencing',
+        exact: true,
+        element: withAuth(<GeoFencing />, '/alarmsetting/geofencing'),
+      },
+      {
+        path: '/alarmsetting/geofencing/edit',
+        exact: true,
+        element: withAuth(<GeoFencingEdit />, '/alarmsetting/geofencing/edit'),
+      },
+      {
+        path: '/alarmsetting/overpopulating',
+        exact: true,
+        element: withAuth(<OverPopulating />, '/alarmsetting/overpopulating'),
+      },
+      {
+        path: '/alarmsetting/overpopulating/edit',
+        exact: true,
+        element: withAuth(<OverPopulatingEdit />, '/alarmsetting/overpopulating/edit'),
+      },
+      {
+        path: '/alarmsetting/stayonarea',
+        exact: true,
+        element: withAuth(<StayOnArea />, '/alarmsetting/stayonarea'),
+      },
+      {
+        path: '/alarmsetting/stayonarea/edit',
+        exact: true,
+        element: withAuth(<StayOnAreaEdit />, '/alarmsetting/stayonarea/edit'),
+      },
+      {
+        path: '/alarmsetting/boundary',
+        exact: true,
+        element: withAuth(<Boundary />, '/alarmsetting/boundary'),
+      },
+      {
+        path: '/alarmsetting/boundary/edit',
+        exact: true,
+        element: withAuth(<BoundaryEdit />, '/alarmsetting/boundary/edit'),
+      },
 
       //Restricted
       { path: '/master/application', element: withAuth(<Application />, '/master/application') },
-      { path: '/master/integration', exact: true, element: withAuth(<Integration />, '/master/integration') },
+      {
+        path: '/master/integration',
+        exact: true,
+        element: withAuth(<Integration />, '/master/integration'),
+      },
       { path: '/master/user', exact: true, element: withAuth(<User />, '/master/user') },
 
       { path: '*', element: <Navigate to="/auth/404" /> },
@@ -302,6 +468,16 @@ const Router = [
     children: [
       { path: '/my-visit', element: withAuth(<MyVisitDashboard />, '/my-visit') },
       { path: '/my-visit/invite', element: withAuth(<InvitationPage />, '/my-visit/invite') },
+    ],
+  },
+  {
+    path: '/',
+    element: <SecurityViewLayout />,
+    children: [
+      {
+        path: '/security-view/dashboard',
+        element: withAuth(<SecurityViewDashboard />, '/security-view/dashboard'),
+      },
     ],
   },
   {

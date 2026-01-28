@@ -30,37 +30,6 @@ const VisitAreaCard = ({ invitationData, trackingData, title = 'Most Visited Are
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  //   // Initialize start/end based on range
-  //   useEffect(() => {
-  //     const now = dayjs();
-  //     switch (range) {
-  //       case 'day':
-  //         setStartDate(now.startOf('day'));
-  //         setEndDate(now.endOf('day'));
-  //         break;
-  //       case 'week':
-  //         setStartDate(now.startOf('week'));
-  //         setEndDate(now.endOf('week'));
-  //         break;
-  //       case 'month':
-  //         setStartDate(now.startOf('month'));
-  //         setEndDate(now.endOf('month'));
-  //         break;
-  //       case 'nextMonth':
-  //         setStartDate(now.add(1, 'month').startOf('month'));
-  //         setEndDate(now.add(1, 'month').endOf('month'));
-  //         break;
-  //       case 'year':
-  //         setStartDate(now);
-  //         setEndDate(now.endOf('year'));
-  //         break;
-  //       case 'custom':
-  //         setStartDate(null);
-  //         setEndDate(null);
-  //         break;
-  //     }
-  //   }, [range]);
-
   const handleOpenFilter = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };

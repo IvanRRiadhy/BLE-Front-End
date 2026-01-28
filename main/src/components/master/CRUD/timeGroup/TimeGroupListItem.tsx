@@ -41,7 +41,7 @@ const TimeGroupListItem = ({
 
   const isChecked = manySelectTimeGroups.some((time) => time.id === timeGroup?.id);
     useEffect(() => {
-        console.log(timeGroup);
+        // console.log(timeGroup);
     },[timeGroup]);
   const handleCheckboxChange = () => {
     if (!setManySelectTimeGroups || !timeGroup) return;

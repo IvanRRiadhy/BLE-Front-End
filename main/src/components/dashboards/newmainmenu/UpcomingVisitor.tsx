@@ -110,8 +110,12 @@ const UpcomingVisitor: React.FC = () => {
           py: 1,
         }}
       >
-        {upcomingVisitor.map((item) => (
-          <Stack key={item.id} direction="row" spacing={2} alignItems="center" sx={{ pb: 2 }}>
+        {upcomingVisitor.map((item, index:number) => (
+          <Stack key={`${index}-${item.id}`} direction="row" spacing={2} alignItems="center" sx={{ 
+            p:1,
+            backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
+            borderBottom: '1px solid #e0e0e0',
+            }}>
             {/* Avatar */}
             <Avatar src={ item.image ? `${BASE_URL}${item.image}` : ''} alt="visitor" sx={{ width: 56, height: 56 }} />
 

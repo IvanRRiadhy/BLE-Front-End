@@ -86,7 +86,7 @@ const EventLogList = () => {
     Object.values(EVENT_TYPE).includes(value);
 
   const eventLogData = useSelector((state: RootState) =>
-    state.EventLogReducer.logs.map((log) => {
+    state.EventLogReducer.logs.map((log: any) => {
       const safeEvent: EventType = isValidEventType(log.event) ? log.event : 'OTHER'; // fallback
       console.log(log.event);
       return {

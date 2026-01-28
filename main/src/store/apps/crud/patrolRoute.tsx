@@ -19,6 +19,7 @@ export type GetFilter = {
   SearchValue: string;
   filters?: {
     PatrolAreaId?: string[];
+    "Securities.Id"?: string[];
   };
 };
 

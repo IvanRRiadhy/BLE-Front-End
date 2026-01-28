@@ -19,36 +19,62 @@ export interface PaginatedResponse<T> {
   recordsFiltered: number;
 }
 
+function mapPatrolRoute(route: any): PatrolRouteType {
+  return {
+    ...route,
+    patrolAreaIds: route.patrolAreas?.map((a: any) => a.patrolAreaId) ?? [],
+    timeGroupIds: route.patrolTimeGroups?.map(
+      (tg: any) => tg.timeGroupId
+    ) ?? [],
+  };
+}
+
+
 export function usePatrolRouteList(filter: GetFilter) {
   return useQuery({
     queryKey: ['patrol-route-list', filter],
     queryFn: async () => {
       const response = await axiosServices.post(API_DT_URL, filter);
-      const collection = response.data.collection;
-      console.log('Route: ', collection);
-      return {
-        data: collection.data as PatrolRouteType[],
-        draw: collection.draw,
-        recordsTotal: collection.recordsTotal,
-        recordsFiltered: collection.recordsFiltered,
-      } satisfies PaginatedResponse<PatrolRouteType>;
+      return response.data.collection;
     },
+    select: (collection) => ({
+      data: collection.data.map(mapPatrolRoute),
+      draw: collection.draw,
+      recordsTotal: collection.recordsTotal,
+      recordsFiltered: collection.recordsFiltered,
+    }) satisfies PaginatedResponse<PatrolRouteType>,
     placeholderData: keepPreviousData,
-    staleTime: 5_000, // fresh for 1 minute
-    gcTime: 5 * 60_000, // cache for 5 minutes
+    staleTime: 5_000,
+    gcTime: 5 * 60_000,
   });
 }
+
 
 export function useAllPatrolRoute() {
   return useQuery({
     queryKey: ['patrol-route-all'],
     queryFn: async () => {
       const response = await axiosServices.get(API_URL);
-      return response.data.collection.data as PatrolRouteType[];
+      return response.data.collection.data;
     },
+    select: (data) => data.map(mapPatrolRoute),
     placeholderData: [],
   });
 }
+
+
+export function usePatrolRouteId(id: string) {
+  return useQuery({
+    queryKey: ['patrol-route-id', id],
+    queryFn: async () => {
+      const response = await axiosServices.get(`${API_URL}${id}`);
+      return response.data.collection.data;
+    },
+    select: mapPatrolRoute,
+    enabled: !!id,
+  });
+}
+
 
 export function useAddPatrolRoute() {
   const queryClient = useQueryClient();
@@ -62,6 +88,7 @@ export function useAddPatrolRoute() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['patrol-route-all'] });
       queryClient.invalidateQueries({ queryKey: ['patrol-route-list'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-route-id'] });
     },
   });
 }
@@ -78,6 +105,7 @@ export function useEditPatrolRoute() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['patrol-route-all'] });
       queryClient.invalidateQueries({ queryKey: ['patrol-route-list'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-route-id'] });
     },
   });
 }
@@ -93,6 +121,7 @@ export function useDeletePatrolRoute() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['patrol-route-all'] });
       queryClient.invalidateQueries({ queryKey: ['patrol-route-list'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-route-id'] });
     },
   });
 }

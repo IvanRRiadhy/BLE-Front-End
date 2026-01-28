@@ -82,6 +82,20 @@ export function useAllTimeGroups() {
 }
 
 // -----------------------------------------------------------------------------
+// ✅ FETCH SINGLE
+// -----------------------------------------------------------------------------
+export function useTimeGroupId(id: string) {
+  return useQuery({
+    queryKey: ['time-group-id', id],
+    queryFn: async () => {
+      const res = await axiosServices.get(`${API_URL}${id}`);
+      return res.data.collection.data as TimeGroupType[];
+    },
+    placeholderData: [],
+  });
+}
+
+// -----------------------------------------------------------------------------
 // ✅ ADD TIME GROUP (POST JSON)
 // -----------------------------------------------------------------------------
 export function useAddTimeGroup() {
@@ -97,6 +111,7 @@ export function useAddTimeGroup() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['time-group-list'] });
       queryClient.invalidateQueries({ queryKey: ['time-group-all'] });
+      queryClient.invalidateQueries({ queryKey: ['time-group-id'] });
     },
   });
 }
@@ -119,6 +134,7 @@ export function useEditTimeGroup() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['time-group-list'] });
       queryClient.invalidateQueries({ queryKey: ['time-group-all'] });
+      queryClient.invalidateQueries({ queryKey: ['time-group-id'] });
     },
   });
 }
@@ -137,6 +153,7 @@ export function useDeleteTimeGroup() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['time-group-list'] });
       queryClient.invalidateQueries({ queryKey: ['time-group-all'] });
+      queryClient.invalidateQueries({ queryKey: ['time-group-id'] });
     },
   });
 }
@@ -160,6 +177,7 @@ export function useAddTimeBlock() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['time-group-list'] });
       queryClient.invalidateQueries({ queryKey: ['time-group-all'] });
+      queryClient.invalidateQueries({ queryKey: ['time-group-id'] });
     },
   });
 }
@@ -178,6 +196,7 @@ export function useDeleteTimeBlock() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['time-group-list'] });
       queryClient.invalidateQueries({ queryKey: ['time-group-all'] });
+      queryClient.invalidateQueries({ queryKey: ['time-group-id'] });
     },
   });
 }
@@ -214,6 +233,7 @@ export function useAddBatchTimeGroup() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['time-group-list'] });
       queryClient.invalidateQueries({ queryKey: ['time-group-all'] });
+      queryClient.invalidateQueries({ queryKey: ['time-group-id'] });
     },
   });
 }

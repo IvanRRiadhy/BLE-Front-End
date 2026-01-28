@@ -27,7 +27,7 @@ const statusColorMap: Record<string, string> = {
   geofence: '#d73d3d',
 };
 
-const AlarmLog: React.FC = () => {
+const SecurityViewAlarmLog: React.FC = () => {
   const { data = [], isLoading, isError } = useRealtimeAlarmLog(defaultFilter);
   function resolvePerson(x: any) {
     if (x.visitor) {
@@ -74,10 +74,10 @@ const AlarmLog: React.FC = () => {
     <Box
       sx={{
         width: '100%',
-        height: '26.5vh',
+        height: '40vh',
+        backgroundColor: 'white',
         borderRadius: '25px',
         boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-        backgroundColor: 'white',
         px: 2,
         py: 2,
         display: 'flex',
@@ -94,7 +94,7 @@ const AlarmLog: React.FC = () => {
       >
         <Typography
           sx={{
-            fontSize: 24,
+            fontSize: { xs: 20, md: 24 },
             fontWeight: 700,
             color: '#045498',
           }}
@@ -118,17 +118,20 @@ const AlarmLog: React.FC = () => {
             direction="row"
             spacing={2}
             alignItems="center"
-            sx={{ 
-              p: 1, 
-              backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
-              borderBottom: '1px solid #e0e0e0', 
+            sx={{ p: 1, 
+                backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
+                borderBottom: '1px solid #e0e0e0',
             }}
           >
             {/* Avatar */}
             <Avatar src={item.image} alt="user" sx={{ width: 56, height: 56 }} />
 
             {/* Left info */}
-            <Box sx={{ flex: 1 }}>
+            <Box
+              sx={{
+                flex: 1,
+              }}
+            >
               <Typography
                 sx={{
                   fontSize: 16,
@@ -197,4 +200,4 @@ const AlarmLog: React.FC = () => {
   );
 };
 
-export default AlarmLog;
+export default SecurityViewAlarmLog;

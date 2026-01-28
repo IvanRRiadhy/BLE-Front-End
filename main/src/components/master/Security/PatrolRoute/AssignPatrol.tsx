@@ -27,7 +27,7 @@ import { PatrolRouteType, PatrolAssignType, SecurityType } from 'src/store/apps/
 import { useEditPatrolAssign, usePatrolAssign } from 'src/hooks/usePatrolRoute';
 import { useAllSecurityLookup } from 'src/hooks/useSecurityGuard';
 import dayjs, { Dayjs } from 'dayjs';
-import { LocalizationProvider, DateTimePicker, renderTimeViewClock } from '@mui/x-date-pickers';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 interface FormType {
@@ -103,22 +103,26 @@ const AssignPatrol = ({ patrolRouteId, type, patrolAssign }: FormType) => {
   };
 
   useEffect(() => {
+    if (!startTime) return;
+
     setFormData((prev) => ({
       ...prev,
-      startDate: startTime ? startTime.toISOString() : '',
+      startDate: startTime.hour(0).minute(0).second(0).millisecond(0).toISOString(),
     }));
   }, [startTime]);
 
   useEffect(() => {
+    if (!endTime) return;
+
     setFormData((prev) => ({
       ...prev,
-      endDate: endTime ? endTime.toISOString() : '',
+      endDate: endTime.hour(23).minute(59).second(59).millisecond(999).toISOString(),
     }));
   }, [endTime]);
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
-    if(!formData.name?.trim()) {
+    if (!formData.name?.trim()) {
       errors.name = 'Patrol Assignment Name is required';
     }
 
@@ -336,20 +340,20 @@ const AssignPatrol = ({ patrolRouteId, type, patrolAssign }: FormType) => {
 
               <Grid size={6} display="flex" flexDirection="column">
                 <CustomTextField
-                id="description"
-                name="description"
-                multiline
-                fullWidth
-                value={formData.description}
-                onChange={handleInputChange}
-                sx={{
-                  flex: 1,
-                  '& .MuiInputBase-root': {
-                    height: '100%',
-                    alignItems: 'flex-start',
-                  },
-                }}
-              />
+                  id="description"
+                  name="description"
+                  multiline
+                  fullWidth
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  sx={{
+                    flex: 1,
+                    '& .MuiInputBase-root': {
+                      height: '100%',
+                      alignItems: 'flex-start',
+                    },
+                  }}
+                />
               </Grid>
             </Grid>
             <Grid container size={12} spacing={2} mt={0}>
@@ -360,17 +364,11 @@ const AssignPatrol = ({ patrolRouteId, type, patrolAssign }: FormType) => {
               <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="id">
                 {/* Start Time */}
                 <Grid size={6}>
-                  <DateTimePicker
-                    label="Start Time"
+                  <DatePicker
+                    label="Start Date"
                     value={startTime}
                     onChange={setStartTime}
-                    ampm={false}
-                    format="ddd, DD - MMM - YYYY, HH:mm"
-                    viewRenderers={{
-                      hours: renderTimeViewClock,
-                      minutes: renderTimeViewClock,
-                      seconds: renderTimeViewClock,
-                    }}
+                    format="ddd, DD - MMM - YYYY"
                     slotProps={{
                       textField: {
                         fullWidth: true,
@@ -381,18 +379,12 @@ const AssignPatrol = ({ patrolRouteId, type, patrolAssign }: FormType) => {
 
                 {/* End Time */}
                 <Grid size={6}>
-                  <DateTimePicker
-                    label="End Time"
+                  <DatePicker
+                    label="End Date"
                     value={endTime}
                     onChange={setEndTime}
-                    ampm={false}
-                    format="ddd, DD - MMM - YYYY, HH:mm"
-                    viewRenderers={{
-                      hours: renderTimeViewClock,
-                      minutes: renderTimeViewClock,
-                      seconds: renderTimeViewClock,
-                    }}
-                    minDateTime={startTime ?? undefined}
+                    format="ddd, DD - MMM - YYYY"
+                    minDate={startTime ?? undefined}
                     slotProps={{
                       textField: {
                         fullWidth: true,

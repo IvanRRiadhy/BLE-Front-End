@@ -28,6 +28,7 @@ import BlankCard from 'src/components/shared/BlankCard';
 import {
   IconChevronDown,
   IconChevronRight,
+  IconEye,
   IconInfoCircle,
   IconInfoHexagon,
   IconQuestionMark,
@@ -152,10 +153,7 @@ const PatrolRouteList = () => {
     const date = new Date(isoString);
     const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
     const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
-      'en-GB',
-      { hour: '2-digit', minute: '2-digit', hour12: false },
-    )}`;
+    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()}`;
   };
 
   const renderSkeletonRows = (rows: number) => (
@@ -289,7 +287,16 @@ const PatrolRouteList = () => {
               <TableCell>{assign.name}</TableCell>
               <TableCell>{formatTime(assign.startDate)}</TableCell>
               <TableCell>{formatTime(assign.endDate)}</TableCell>
-              <TableCell>{assign.securities?.length ?? 0}</TableCell>
+              <TableCell>
+                {assign.securities?.length}
+                {
+                
+                <Tooltip title={assign.securities?.map((security: { name: string }) => security.name)?.join(', ')} >
+                  <IconButton size="small">
+                    <IconEye size={18} />
+                  </IconButton>
+                </Tooltip>
+                }</TableCell>
 
               {/* ACTION */}
               <TableCell
