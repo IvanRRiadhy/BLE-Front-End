@@ -1,16 +1,20 @@
 import { Box, IconButton, Tooltip, Typography, useTheme } from '@mui/material';
 import {
   IconChevronRight,
-  IconExclamationCircle,
   IconExclamationCircleFilled,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { usePatrolRouteId } from 'src/hooks/usePatrolRoute';
 import { useTimeGroupList } from 'src/hooks/useTimeGroup';
-import { PatrolAssignType, PatrolRouteType } from 'src/store/apps/crud/patrolRoute';
+import {
+  PatrolAssignType,
+  PatrolRouteType,
+} from 'src/store/apps/crud/patrolRoute';
 import { TimeGroupType } from 'src/store/apps/crud/timeGroup';
 import { defaultTimeGroupFilter } from 'src/store/apps/defaultForm';
-import { PatrolDetailPayload } from './PatrolDetailDialog';
+import { PatrolDetailPayload } from './SecurityViewPatrolList';
+
+/* ===================== types ===================== */
 
 interface PatrolListItemProps {
   patrol: PatrolAssignType;
@@ -19,9 +23,19 @@ interface PatrolListItemProps {
 
 type DayTimeMap = Record<string, { startTime: string; endTime: string }[]>;
 
-/* ===================== helpers ===================== */
+/* ===================== constants ===================== */
 
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DAYS = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+];
+
+/* ===================== helpers ===================== */
 
 function isSameDay(a: Date, b: Date) {
   return (
@@ -33,7 +47,7 @@ function isSameDay(a: Date, b: Date) {
 
 function buildDayTimeMap(timeGroups: TimeGroupType[] = []): DayTimeMap {
   return timeGroups
-    .flatMap((tg) => tg.timeBlocks ?? [])
+    .flatMap(tg => tg.timeBlocks ?? [])
     .reduce((acc, block) => {
       acc[block.dayOfWeek] ??= [];
       acc[block.dayOfWeek].push({
@@ -44,7 +58,7 @@ function buildDayTimeMap(timeGroups: TimeGroupType[] = []): DayTimeMap {
     }, {} as DayTimeMap);
 }
 
-function getNearestPatrol(timeMap: DayTimeMap) {
+function getNearestPatrol(timeMap: DayTimeMap): Date | null {
   const now = new Date();
   const todayIndex = now.getDay();
 
@@ -73,7 +87,10 @@ function getNearestPatrol(timeMap: DayTimeMap) {
 
 /* ===================== component ===================== */
 
-const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps) => {
+const SecurityViewPatrolListItem = ({
+  patrol,
+  openDetail,
+}: PatrolListItemProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -82,27 +99,22 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
   tomorrow.setDate(now.getDate() + 1);
 
   /* ===== fetch route ===== */
-  const { data: routeData = {} as PatrolRouteType, isLoading } = usePatrolRouteId(
-    patrol.patrolRouteId,
-  );
+  const { data: routeData = {} as PatrolRouteType, isLoading } =
+    usePatrolRouteId(patrol.patrolRouteId);
 
-  const timeGroupIds = Array.isArray(routeData)
-    ? routeData[0]?.timeGroupIds
-    : routeData?.timeGroupIds;
-
-  /* ===== fetch time groups ===== */
+  /* ===== fetch time groups (NOW FROM PATROL ASSIGNMENT) ===== */
   const { data: timeGroupRes } = useTimeGroupList({
     ...defaultTimeGroupFilter,
-    filters: { id: timeGroupIds },
+    filters: { id:[ patrol.timeGroupId ]},
   });
 
   const timeGroups = timeGroupRes?.data ?? [];
-
+  console.log("Time Groups: ", timeGroups, "for", patrol.name);
   /* ===== compute nearest patrol ===== */
   const timeMap = buildDayTimeMap(timeGroups);
   const nearestPatrol = getNearestPatrol(timeMap);
 
-  /* ===== helpers for UI ===== */
+  /* ===== UI helpers ===== */
   const getDayLabel = (date: Date) => {
     if (isSameDay(date, now)) return t('Today');
     if (isSameDay(date, tomorrow)) return t('Tomorrow');
@@ -124,16 +136,16 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
   };
 
   const startAreaName = !isLoading
-    ? Array.isArray(routeData)
-      ? routeData[0]?.startAreaName
-      : routeData?.startAreaName
+    ? routeData?.startAreaName ?? null
     : null;
 
+  /* ===== payload for detail dialog ===== */
   const payload: PatrolDetailPayload = {
     patrolAssignment: patrol,
-    route: Array.isArray(routeData) ? routeData[0] : routeData,
+    route: routeData,
     timeGroups,
     nearestPatrol,
+    
   };
 
   /* ===================== render ===================== */
@@ -148,7 +160,9 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
         gap: 1,
         cursor: 'pointer',
       }}
-      onClick={() => openDetail(payload)}
+      onClick={() => {openDetail(payload);
+        console.log('payload', payload);
+      }}
     >
       {/* LEFT */}
       <Box sx={{ flex: '0 0 50%', px: 1 }}>
@@ -156,7 +170,9 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
           {patrol.name}
         </Typography>
 
-        <Typography sx={{ fontSize: 12, color: '#045498' }}>{patrol.description}</Typography>
+        <Typography sx={{ fontSize: 12, color: '#045498' }}>
+          {patrol.description}
+        </Typography>
       </Box>
 
       {/* RIGHT */}
@@ -167,7 +183,6 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
           alignItems: 'center',
           justifyContent: 'flex-end',
           gap: 1,
-          //   cursor: 'pointer',
         }}
       >
         <Box
@@ -187,7 +202,6 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
 
           {nearestPatrol && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-
               <Typography
                 sx={{
                   fontSize: 12,
@@ -198,12 +212,17 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
               >
                 Next patrol: {formatNearestPatrol(nearestPatrol)}
               </Typography>
-                            {isSameDay(nearestPatrol, now) && (
-                <IconExclamationCircleFilled size={20} color={theme.palette.error.dark} />
+
+              {isSameDay(nearestPatrol, now) && (
+                <IconExclamationCircleFilled
+                  size={20}
+                  color={theme.palette.error.dark}
+                />
               )}
             </Box>
           )}
         </Box>
+
         <Tooltip title="See Patrol Detail" placement="right">
           <IconButton size="small">
             <IconChevronRight size={20} />

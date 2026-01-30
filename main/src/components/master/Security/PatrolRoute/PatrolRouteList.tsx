@@ -56,7 +56,6 @@ const columns = [
   { label: 'Patrol Area Count', field: 'PatrolAreaIds.Length', sortAble: false },
   { label: 'Patrol Start', field: '', sortAble: false },
   { label: 'Patrol End', field: '', sortAble: false },
-  { label: 'Patrol Times', field: '', sortAble: false },
 ];
 
 const SKELETON_ROWS = 5;
@@ -84,36 +83,36 @@ const PatrolRouteList = () => {
   };
 
   //Pagination State
-  const page = Math.floor(patrolRouteFilter.Start / patrolRouteFilter.Length);
-  const rowsPerPage = patrolRouteFilter.Length;
-  const orderBy = patrolRouteFilter.SortColumn;
-  const order = patrolRouteFilter.SortDir;
+  const page = Math.floor(patrolRouteFilter.start / patrolRouteFilter.length);
+  const rowsPerPage = patrolRouteFilter.length;
+  const orderBy = patrolRouteFilter.sortColumn;
+  const order = patrolRouteFilter.sortDir;
 
   const handleChangePage = (_: unknown, newPage: number) => {
-    dispatch(UpdateFilter({ Start: newPage * patrolRouteFilter.Length }));
+    dispatch(UpdateFilter({ start: newPage * patrolRouteFilter.length }));
   };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newLength = parseInt(event.target.value, 10);
-    dispatch(UpdateFilter({ Length: newLength, Start: 0 }));
+    dispatch(UpdateFilter({ length: newLength, start: 0 }));
   };
   const handleSort = (column: string) => {
-    const isAsc = patrolRouteFilter.SortColumn === column && patrolRouteFilter.SortDir === 'asc';
-    const isDesc = patrolRouteFilter.SortColumn === column && patrolRouteFilter.SortDir === 'desc';
+    const isAsc = patrolRouteFilter.sortColumn === column && patrolRouteFilter.sortDir === 'asc';
+    const isDesc = patrolRouteFilter.sortColumn === column && patrolRouteFilter.sortDir === 'desc';
 
     if (isDesc) {
       dispatch(
         UpdateFilter({
-          SortColumn: 'name',
-          SortDir: 'asc',
-          Start: 0,
+          sortColumn: 'name',
+          sortDir: 'asc',
+          start: 0,
         }),
       );
     } else {
       dispatch(
         UpdateFilter({
-          SortColumn: column,
-          SortDir: isAsc ? 'desc' : 'asc',
-          Start: 0,
+          sortColumn: column,
+          sortDir: isAsc ? 'desc' : 'asc',
+          start: 0,
         }),
       );
     }
@@ -406,7 +405,6 @@ const PatrolRouteList = () => {
                                 <TableCell>{patrolRoute.patrolAreas?.length ?? 0}</TableCell>
                                 <TableCell>{patrolRoute.startAreaName ?? '-'}</TableCell>
                                 <TableCell>{patrolRoute.endAreaName ?? '-'}</TableCell>
-                                <TableCell>{patrolRoute.patrolTimeGroups?.length ?? 0}</TableCell>
                                 <TableCell
                                   sx={{
                                     position: 'sticky',

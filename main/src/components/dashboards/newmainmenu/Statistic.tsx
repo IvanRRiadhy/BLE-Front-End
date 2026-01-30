@@ -113,7 +113,8 @@ const { categories, series } = useMemo(() => {
         sx={{
           display: "flex",
           alignItems: "center",
-          mb: 1,
+          p: 2
+          // mb: 1,
         }}
       >
         <Typography
@@ -121,7 +122,7 @@ const { categories, series } = useMemo(() => {
             fontSize: 26,
             fontWeight: 700,
             color: "#045498",
-            mt: 2,
+            // mt: 2,
           }}
         >
           Statistic
@@ -129,12 +130,12 @@ const { categories, series } = useMemo(() => {
       </Box>
 
       {/* Chart */}
-      <Box sx={{ height: "100%", width: "100%" }}>
+      <Box sx={{ height: "80%", width: "100%" }}>
         <Chart
           options={options}
           series={series}
           type="line"
-          height={"90%"}
+          height={"100%"}
         />
       </Box>
     </Box>

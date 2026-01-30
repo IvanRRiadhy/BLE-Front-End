@@ -22,7 +22,7 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { defaultPatrolRouteFilter, defaultPatrolRouteForm } from 'src/store/apps/defaultForm';
+import { defaultPatrolRouteFilter, defaultPatrolRouteForm, defaultTimeGroupFilter } from 'src/store/apps/defaultForm';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 import { PatrolRouteType } from 'src/store/apps/crud/patrolRoute';
 import { useAddPatrolRoute, useEditPatrolRoute } from 'src/hooks/usePatrolRoute';
@@ -35,7 +35,7 @@ import {
   useSensors,
   DragEndEvent,
 } from '@dnd-kit/core';
-import { SortableContext,  arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
+import { SortableContext, arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
 import { restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
 import SortablePatrolAreaCard from './SortablePatrolAreaCard';
 import { PatrolAreaType } from 'src/store/apps/crud/patrolArea';
@@ -57,7 +57,6 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
     ...defaultPatrolRouteForm,
     ...patrolRoute,
     patrolAreaIds: patrolRoute?.patrolAreas?.map((a) => a.patrolAreaId) || [],
-    timeGroupIds: patrolRoute?.patrolTimeGroups?.map((a) => a.timeGroupId) || [],
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
@@ -65,7 +64,11 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
   const addMutation = useAddPatrolRoute();
   const editMutation = useEditPatrolRoute();
   const { data: PatrolAreaData = [] } = useAllPatrolAreas();
-  const { data: timeGroupData} = useTimeGroupList({...defaultPatrolRouteFilter, Length: 0, filters: {ScheduleType: 'Patrol'}});
+  const { data: timeGroupData } = useTimeGroupList({
+    ...defaultTimeGroupFilter,
+    Length: 0,
+    filters: { ScheduleType: 'Patrol' },
+  });
   const timeGroupOptions = timeGroupData?.data ?? [];
   //   .filter((tg) => tg.scheduleType === 'Patrol');
   const selectedAreas = formData.patrolAreaIds
@@ -81,7 +84,6 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
         ...defaultPatrolRouteForm,
         ...patrolRoute,
         patrolAreaIds: patrolRoute.patrolAreas?.map((a) => a.patrolAreaId) || [],
-        timeGroupIds: patrolRoute.patrolTimeGroups?.map((a) => a.timeGroupId) || [],
       });
     } else {
       setFormData({ ...defaultPatrolRouteForm });
@@ -117,7 +119,6 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
         name: formData.name,
         description: formData.description,
         patrolAreaIds: formData.patrolAreaIds,
-        timeGroupIds: formData.timeGroupIds,
       };
       if (type === 'add') {
         await addMutation.mutateAsync(payload);
@@ -380,7 +381,7 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
                 </SortableContext>
               </DndContext>
             </Grid>
-            <Grid
+            {/* <Grid
               size={{ xs: 12, md: 3 }}
               sx={{
                 borderLeft: '1px solid',
@@ -396,7 +397,9 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
                 options={timeGroupOptions}
                 getOptionLabel={(option: TimeGroupType) => option.name}
                 filterSelectedOptions
-                value={timeGroupOptions.filter((tg) => (formData.timeGroupIds ?? []).includes(tg.id))}
+                value={timeGroupOptions.filter((tg) =>
+                  (formData.timeGroupIds ?? []).includes(tg.id),
+                )}
                 onChange={(_e, newValue) => {
                   setFormData((prev) => ({
                     ...prev,
@@ -439,7 +442,6 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
                           width: '100%',
                         }}
                       >
-                        {/* Left side: name + description */}
                         <Box>
                           <Typography variant="body1" fontWeight={600}>
                             {option.name}
@@ -449,7 +451,6 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
                           </Typography>
                         </Box>
 
-                        {/* Right side: Info button */}
                         <Tooltip title={tooltipContent} arrow placement="left">
                           <IconButton size="small" onClick={(e) => e.stopPropagation()}>
                             <IconInfoCircle size={16} />
@@ -460,7 +461,6 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
                   );
                 }}
               />
-              {/* Bordered list for selected time groups */}
               <Box
                 sx={{
                   mt: 1,
@@ -518,7 +518,6 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
                           '&:hover': { bgcolor: 'grey.100' },
                         }}
                       >
-                        {/* Left side: name + desc */}
                         <Box>
                           <Typography variant="body1" fontWeight={600}>
                             {tg.name}
@@ -528,7 +527,6 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
                           </Typography>
                         </Box>
 
-                        {/* Right side: (i) info + (x) remove */}
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           <Tooltip title={tooltipContent} arrow placement="top">
                             <IconButton size="small">
@@ -552,7 +550,7 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
                   })
                 )}
               </Box>
-            </Grid>
+            </Grid> */}
           </Grid>
         </DialogContent>
 

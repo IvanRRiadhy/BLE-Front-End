@@ -195,6 +195,7 @@ export function usePatrolAssignmentByRoute(patrolRouteId: string, filter: GetFil
         (item: PatrolAssignType) => ({
           ...item,
           securityIds: item.securities?.map((security) => security.id) || [],
+          timeGroupId: item.timeGroup?.id || '',
         }),
       );
       console.log('Patrol Assign by Route: ', mappedResponse);
@@ -210,7 +211,8 @@ export function usePatrolAssign() {
     mutationFn: async (patrolAssignment: Partial<PatrolAssignType>) => {
       const {
         id,
-        patrolRouteName,
+        patrolRoute,
+        timeGroup,
         securities,
         applicationId,
         status,
@@ -238,7 +240,8 @@ export function useEditPatrolAssign() {
     mutationFn: async (patrolAssignment: Partial<PatrolAssignType>) => {
       const {
         id,
-        patrolRouteName,
+        patrolRoute,
+        timeGroup,
         securities,
         applicationId,
         status,

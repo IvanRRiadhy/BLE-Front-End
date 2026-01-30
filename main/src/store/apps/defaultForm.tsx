@@ -718,15 +718,15 @@ export const defaultPatrolRouteForm: PatrolRouteType = {
   name: '',
   description: '',
   patrolAreaIds: [],
-  timeGroupIds: [],
+  
 };
 export const defaultPatrolRouteFilter: PatrolRouteFilter = {
-  Draw: 1,
-  Start: 0,
-  Length: 5,
-  SortColumn: 'UpdatedAt',
-  SortDir: 'desc',
-  SearchValue: '',
+  draw: 1,
+  start: 0,
+  length: 999,
+  sortColumn: 'UpdatedAt',
+  sortDir: 'desc',
+  searchValue: '',
   filters: {
   },
 };
@@ -738,14 +738,15 @@ export const defaultPatrolAssignForm: PatrolAssignType = {
   startDate: '',
   endDate: '',
   securityIds: [],
+  timeGroupId: "",
 }
 export const defaultPatrolAssignmentFilter: PatrolRouteFilter = {
-  Draw: 1,
-  Start: 0,
-  Length: 0,
-  SortColumn: 'startDate',
-  SortDir: 'desc',
-  SearchValue: '',
+  draw: 1,
+  start: 0,
+  length: 999,
+  sortColumn: 'startDate',
+  sortDir: 'desc',
+  searchValue: '',
   filters: {
   },
 };

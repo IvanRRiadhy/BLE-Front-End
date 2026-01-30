@@ -11,30 +11,30 @@ const API_URL_FILTER = '/api/patrol-route/filter/';
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export type GetFilter = {
-  Draw: number;
-  Start: number;
-  Length: number;
-  SortColumn: string;
-  SortDir: 'asc' | 'desc';
-  SearchValue: string;
+  draw: number;
+  start: number;
+  length: number;
+  sortColumn: string;
+  sortDir: 'asc' | 'desc';
+  searchValue: string;
   filters?: {
     PatrolAreaId?: string[];
-    "Securities.Id"?: string[];
+    'Securities.Id'?: string[];
   };
 };
 
 export type PatrolAreas = {
-    patrolAreaId: string;
-    orderIndex: number;
-    estimatedDistance: number;
-    estimatedTime: number;
-    startAreaId: string;
-    endAreaId: string;
-}
+  patrolAreaId: string;
+  orderIndex: number;
+  estimatedDistance: number;
+  estimatedTime: number;
+  startAreaId: string;
+  endAreaId: string;
+};
 export type PatrolTimeGroups = {
-    timeGroupId: string;
-    name: string;
-    scheduleType: string;
+  id: string;
+  name: string;
+  scheduleType: string;
 };
 
 export type PatrolRouteType = {
@@ -42,11 +42,10 @@ export type PatrolRouteType = {
   name: string;
   description: string;
   patrolAreaIds: string[];
-  timeGroupIds: string[];
+
   startAreaName?: string;
   endAreaName?: string;
   patrolAreas?: PatrolAreas[];
-  patrolTimeGroups?: PatrolTimeGroups[];
 };
 
 export type SecurityType = {
@@ -57,25 +56,27 @@ export type SecurityType = {
   organizationName: string;
   departmentName: string;
   districtName: string;
-}
+};
 
 export type PatrolAssignType = {
-  id:string;
+  id: string;
   name: string;
   description: string;
   patrolRouteId: string;
   startDate: string;
   endDate: string;
   securityIds: string[];
-  patrolRouteName?: string;
+  timeGroupId: string;
+  patrolRoute?: PatrolRouteType;
   securities?: SecurityType[];
+  timeGroup?: PatrolTimeGroups;
   applicationId?: string;
   status?: string;
   updatedAt?: string;
   createdAt?: string;
   createdBy?: string;
   updatedBy?: string;
-}
+};
 
 interface Statetype {
   patrolRoutes: PatrolRouteType[];

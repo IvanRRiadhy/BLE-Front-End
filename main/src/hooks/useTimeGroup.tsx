@@ -53,7 +53,7 @@ export function useTimeGroupList(filter: GetFilter) {
     queryFn: async () => {
       const res = await axiosServices.post(API_DT_URL, filter);
       const col = res.data.collection;
-
+      console.log('Time Group List fetched: ', col, "filter: ", filter);
       return {
         data: col.data as TimeGroupType[],
         draw: col.draw,

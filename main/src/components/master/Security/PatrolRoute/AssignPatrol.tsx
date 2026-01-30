@@ -22,13 +22,19 @@ import React, { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { defaultPatrolAssignForm } from 'src/store/apps/defaultForm';
+import {
+  defaultPatrolAssignForm,
+  defaultPatrolRouteFilter,
+  defaultTimeGroupFilter,
+} from 'src/store/apps/defaultForm';
 import { PatrolRouteType, PatrolAssignType, SecurityType } from 'src/store/apps/crud/patrolRoute';
 import { useEditPatrolAssign, usePatrolAssign } from 'src/hooks/usePatrolRoute';
-import { useAllSecurityLookup } from 'src/hooks/useSecurityGuard';
+import { useAllSecurityLookup, useAllSecuritys } from 'src/hooks/useSecurityGuard';
 import dayjs, { Dayjs } from 'dayjs';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { TimeBlockType, TimeGroupType } from 'src/store/apps/crud/timeGroup';
+import { useTimeGroupList } from 'src/hooks/useTimeGroup';
 
 interface FormType {
   type?: 'add' | 'edit';
@@ -55,7 +61,8 @@ const AssignPatrol = ({ patrolRouteId, type, patrolAssign }: FormType) => {
     formData.endDate ? dayjs(formData.endDate) : null,
   );
 
-  const { data: securityData = [], isLoading: securityLoading } = useAllSecurityLookup();
+  //Form Selection Options
+  const { data: securityData = [], isLoading: securityLoading } = useAllSecuritys();
   const securityOptions: SecurityType[] = useMemo(() => {
     return securityData.map((m) => ({
       id: m.id,
@@ -68,6 +75,13 @@ const AssignPatrol = ({ patrolRouteId, type, patrolAssign }: FormType) => {
       districtName: m.district?.name ?? '',
     }));
   }, [securityData]);
+
+  const { data: timeGroupData } = useTimeGroupList({
+    ...defaultTimeGroupFilter,
+    Length: 0,
+    filters: { ScheduleType: 'Patrol' },
+  });
+  const timeGroupOptions = timeGroupData?.data ?? [];
 
   //Hooks
   const addMutation = usePatrolAssign();
@@ -164,6 +178,7 @@ const AssignPatrol = ({ patrolRouteId, type, patrolAssign }: FormType) => {
         ...formData,
         patrolRouteId,
         securityIds: formData.securityIds,
+        timeGroupId: formData.timeGroupId,
       };
 
       if (type === 'edit' && formData.id) {
@@ -315,6 +330,7 @@ const AssignPatrol = ({ patrolRouteId, type, patrolAssign }: FormType) => {
                   value={securityOptions.filter((sec) => formData.securityIds?.includes(sec.id))}
                   // 🔁 map SecurityType[] -> string[]
                   onChange={(_, newValue) => {
+                    console.log('newValue', newValue, JSON.stringify(formData));
                     setFormData((prev) => ({
                       ...prev,
                       securityIds: newValue.map((sec) => sec.id),
@@ -358,7 +374,7 @@ const AssignPatrol = ({ patrolRouteId, type, patrolAssign }: FormType) => {
             </Grid>
             <Grid container size={12} spacing={2} mt={0}>
               <Grid size={12}>
-                <CustomFormLabel>Patrol Time</CustomFormLabel>
+                <CustomFormLabel>Patrol Date</CustomFormLabel>
               </Grid>
 
               <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="id">
@@ -395,6 +411,73 @@ const AssignPatrol = ({ patrolRouteId, type, patrolAssign }: FormType) => {
               </LocalizationProvider>
             </Grid>
           </Grid>
+          <CustomFormLabel>Patrol Time</CustomFormLabel>
+
+          <Autocomplete
+            options={timeGroupOptions}
+            getOptionLabel={(option: TimeGroupType) => option.name}
+            value={timeGroupOptions.find((tg) => tg.id === formData.timeGroupId) ?? null}
+            onChange={(_e, newValue) => {
+              console.log("Time Group Options", timeGroupOptions);
+              setFormData((prev) => ({
+                ...prev,
+                timeGroupId: newValue ? newValue.id : '',
+              }));
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder="Type time group name..."
+                variant="outlined"
+                fullWidth
+              />
+            )}
+            renderOption={(props, option) => {
+              const tooltipContent = (
+                <Box>
+                  {option.timeBlocks?.length ? (
+                    option.timeBlocks.map((tb: TimeBlockType) => (
+                      <Typography key={tb.id} variant="caption" display="block" color="inherit">
+                        {tb.dayOfWeek} : {tb.startTime} - {tb.endTime}
+                      </Typography>
+                    ))
+                  ) : (
+                    <Typography variant="caption" color="inherit">
+                      No time blocks
+                    </Typography>
+                  )}
+                </Box>
+              );
+
+              return (
+                <li {...props} key={option.id}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      width: '100%',
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="body1" fontWeight={600}>
+                        {option.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {option.description ?? 'No description'}
+                      </Typography>
+                    </Box>
+
+                    <Tooltip title={tooltipContent} arrow placement="left">
+                      <IconButton size="small" onClick={(e) => e.stopPropagation()}>
+                        <IconInfoCircle size={16} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </li>
+              );
+            }}
+          />
         </DialogContent>
         <DialogActions>
           <Button variant="outlined" color="secondary" onClick={handleClose}>
