@@ -224,11 +224,15 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
     }
   };
 
-  const floorOptions = floorData.map((f) => ({
-    label: f.name,
-    id: f.id,
-    buildingName: f.building?.name ?? 'Unknown Building',
-  }));
+const floorOptions = React.useMemo(
+  () =>
+    floorData.map((f) => ({
+      label: f.name,
+      id: f.id,
+      buildingName: f.building?.name ?? 'Unknown Building',
+    })),
+  [floorData]
+);
 
   const engineOptions = engineData.map((e) => ({
     label: e.name,
@@ -332,7 +336,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                     </div>
                   </li>
                 )}
-                sx={{ width: '100%' }}
+                sx={{ flex: 1 }}
               />
 
               <CustomFormLabel htmlFor="floorY">Floor Width (in meters)</CustomFormLabel>

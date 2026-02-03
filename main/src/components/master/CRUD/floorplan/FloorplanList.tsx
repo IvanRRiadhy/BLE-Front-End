@@ -44,7 +44,7 @@ const columns = [
   { label: 'Building Name', field: '', sortAble: false },
   { label: 'Floorplan Image', field: '', sortAble: false },
   { label: 'Floorplan Dimension (meter)', field: '', sortAble: false },
-  { label: 'Engine', field: 'Engine.Name', sortAble: true },
+  // { label: 'Engine', field: 'Engine.Name', sortAble: true },
 ];
 const AddEditFloorplan = lazy(() => import('./AddEditFloorplan'));
 
@@ -365,7 +365,7 @@ console.log("Floorplan Data:", floorplanData);
                           </TableCell>
                           <TableCell>{`(${floorplan.floorX}, ${floorplan.floorY})`}</TableCell>
 
-                          <TableCell>{floorplan.engine?.name}</TableCell>
+                          {/* <TableCell>{floorplan.engine?.name}</TableCell> */}
                           <TableCell
                             sx={{
                               position: 'sticky',
