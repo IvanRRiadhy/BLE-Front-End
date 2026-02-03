@@ -1,5 +1,5 @@
 import { BASE_URL } from 'src/utils/axios';
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import { Box, FormLabel } from '@mui/material';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
@@ -33,11 +33,32 @@ const EditAreaFloorView: React.FC<{
     (state: RootState) => state.maskedAreaReducer.drawingMaskedArea,
   );
 
+  const [isDraggingView, setIsDraggingView] = useState(false);
+  const [isHoveringView, setIsHoveringView] = useState(false);
+  const [isHoveringAreaShape, setIsHoveringAreaShape] = useState(false);
+  const [isOnArea, setIsOnArea] = useState(false);
+  const isDrawingMaskedArea = drawingMaskedArea !== '';
   const [filteredUnsavedMaskedArea, setFilteredUnsavedMaskedArea] = useState<MaskedAreaType[]>([]);
-  const [cursor, setCursor] = useState('grab');
+  const [cursor, setCursor] = useState(drawingMaskedArea? 'crosshair' : 'grab');
+  const Cursor = useMemo(() => {
+  if (isDrawingMaskedArea) return 'crosshair';
+  if(isOnArea) return 'pointer';
+  if (isDraggingView) return 'grabbing';
+  if (isHoveringAreaShape) return 'move';
+  if (isHoveringView) return 'grab';
+  return 'default';
+}, [
+  isDrawingMaskedArea,
+  isDraggingView,
+  isHoveringAreaShape,
+  isHoveringView,
+]);
+
   const [isDragging, setIsDragging] = useState('');
   const [isHovered, setIsHovered] = useState(false);
-
+  useEffect(() => {
+    console.log("CURSOR: ", cursor);
+  }, [cursor]);
   // Container and stage management
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<any>(null);
@@ -169,8 +190,9 @@ const EditAreaFloorView: React.FC<{
 
       // If we get here, we're either clicking on the container background
       // or on empty canvas area
-      container.style.cursor = 'grabbing';
-      setCursor('grabbing');
+      // container.style.cursor = 'grabbing';
+      // setCursor('grabbing');
+      setIsDraggingView(true);
 
       const startX = e.clientX;
       const startY = e.clientY;
@@ -190,9 +212,10 @@ const EditAreaFloorView: React.FC<{
       const handleMouseUp = () => {
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
-        if (container) {
-          container.style.cursor = 'grab';
-          setCursor('grab');
+        if (container && !drawingMaskedArea) {
+          // container.style.cursor = 'grab';
+          // setCursor('grab');
+          setIsDraggingView(false);
         }
       };
 
@@ -261,17 +284,17 @@ const EditAreaFloorView: React.FC<{
   }, []);
 
   // Update cursor based on state
-  useEffect(() => {
-    if (!zoomable) {
-      setCursor('default');
-    } else if (drawingMaskedArea) {
-      setCursor('crosshair');
-    } else if (isDragging) {
-      setCursor('move');
-    } else {
-      setCursor('grab');
-    }
-  }, [zoomable, drawingMaskedArea, isDragging]);
+  // useEffect(() => {
+  //   if (!zoomable) {
+  //     setCursor('default');
+  //   } else if (drawingMaskedArea) {
+  //     setCursor('crosshair');
+  //   } else if (isDragging) {
+  //     setCursor('move');
+  //   } else {
+  //     setCursor('grab');
+  //   }
+  // }, [zoomable, drawingMaskedArea, isDragging]);
 
   if (!naturalSize.width || !naturalSize.height) {
     return <div>Loading floorplan...</div>;
@@ -279,8 +302,8 @@ const EditAreaFloorView: React.FC<{
 
   return (
     <Box
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => setIsHoveringView(true)}
+      onMouseLeave={() => setIsHoveringView(false)}
       sx={{
         position: 'relative',
         width: '100%',
@@ -516,7 +539,10 @@ const EditAreaFloorView: React.FC<{
           maskedAreas={filteredUnsavedMaskedArea}
           activeMaskedArea={activeMaskedArea}
           setIsDragging={setIsDragging}
-          setCursor={setCursor}
+          // setCursor={setCursor}
+          onAreaHoverChange={setIsHoveringAreaShape}
+          onAreaDragChange={setIsDraggingView}
+          onOnArea={setIsOnArea}
           preview={preview}
           stageScale={stageScale}
           stageX={stagePos.x}

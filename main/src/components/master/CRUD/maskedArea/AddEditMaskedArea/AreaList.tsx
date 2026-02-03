@@ -176,8 +176,8 @@ const AreaList = () => {
     setPendingAreaId(null);
   };
 
-  const handleOnEditClick = (id: string) => {
-    dispatch(SelectEditingMaskedArea(id));
+  const handleOnEditClick = (area: MaskedAreaType) => {
+    dispatch(SelectEditingMaskedArea(area));
   };
 
   const handleOpenDeleteDialog = (id: string) => {
@@ -349,7 +349,7 @@ const handleSaveEdits = async () => {
           <Typography variant="h6" mt={0}>
             Masked Areas
           </Typography>
-          {!editingMaskedArea && (
+          {(!editingMaskedArea && !drawingArea) && (
             <Tooltip title="Add Masked Area">
               <IconButton color="primary" onClick={handleAddAreaClick}>
                 <AddIcon />
@@ -367,7 +367,7 @@ const handleSaveEdits = async () => {
                 key={area.id}
                 area={area}
                 onListClick={() => handleOnClick(area.id)}
-                onEditClick={() => handleOnEditClick(area.id)}
+                onEditClick={() => handleOnEditClick(area)}
                 onDeleteClick={() => handleOpenDeleteDialog(area.id)}
                 active={area.id === selectedMaskedArea?.id}
               />

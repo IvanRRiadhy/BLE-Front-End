@@ -5,6 +5,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { defaultPatrolRouteFilter } from '../defaultForm';
 import { memberType } from './member';
+import { TimeGroupType } from './timeGroup';
 
 const API_URL = '/api/patrol-route/';
 const API_URL_FILTER = '/api/patrol-route/filter/';
@@ -92,6 +93,13 @@ interface Statetype {
   isLoading: boolean;
   hasLoaded: boolean;
 }
+
+export type PatrolDetailPayload = {
+  patrolAssignment: PatrolAssignType;
+  route: PatrolRouteType;
+  timeGroups: TimeGroupType[];
+  nearestPatrol?: Date | null;
+};
 
 const initialState: Statetype = {
   patrolRoutes: [],

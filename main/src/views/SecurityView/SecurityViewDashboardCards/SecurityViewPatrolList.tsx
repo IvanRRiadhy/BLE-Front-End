@@ -1,18 +1,11 @@
 import { Box, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { usePatrolAssignList } from 'src/hooks/usePatrolRoute';
-import SecurityViewPatrolListItem from './SecurityViewPatrolListItem';
+import SecurityViewPatrolListItem from 'src/components/security-view/PatrolAssignment/SecurityViewPatrol/SecurityViewPatrolListItem';
 import { useState } from 'react';
-import { PatrolAssignType, PatrolRouteType } from 'src/store/apps/crud/patrolRoute';
+import { PatrolAssignType, PatrolDetailPayload, PatrolRouteType } from 'src/store/apps/crud/patrolRoute';
 import { TimeGroupType } from 'src/store/apps/crud/timeGroup';
-import PatrolDetailDialog from './PatrolDetailDialog';
-
-export type PatrolDetailPayload = {
-  patrolAssignment: PatrolAssignType;
-  route: PatrolRouteType;
-  timeGroups: TimeGroupType[];
-  nearestPatrol?: Date | null;
-};
+import PatrolDetailDialog from 'src/components/security-view/PatrolAssignment/SecurityViewPatrol/PatrolDetailDialog';
 
 const defaultFilter = {
   draw: 1,

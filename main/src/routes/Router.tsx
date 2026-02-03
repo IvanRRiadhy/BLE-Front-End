@@ -24,6 +24,12 @@ const WebView = Loadable(lazy(() => import('../components/dashboards/monitoring/
 const SecurityViewDashboard = Loadable(
   lazy(() => import('../views/SecurityView/SecurityViewDashboard')),
 );
+const SecurityViewPatrolPage = Loadable(
+  lazy(() => import('../views/SecurityView/SecurityViewPatrolPage')),
+)
+const SecurityViewPatrolDetail = Loadable(
+  lazy(() => import('../views/SecurityView/SecurityViewPatrolDetail')),
+)
 
 /* ****Invitation***** */
 const InvitationForm = Loadable(lazy(() => import('../components/InvitationForm/InvitationForm')));
@@ -478,6 +484,14 @@ const Router = [
         path: '/security-view/dashboard',
         element: withAuth(<SecurityViewDashboard />, '/security-view/dashboard'),
       },
+      {
+        path: '/security-view/patrol-assignment',
+        element: withAuth(<SecurityViewPatrolPage />, '/security-view/patrol-assignment'),
+      },
+      {
+        path: '/security-view/patrol-assignment/detail',
+        element: withAuth(<SecurityViewPatrolDetail />, '/security-view/patrol-assignment/detail'),
+      }
     ],
   },
   {

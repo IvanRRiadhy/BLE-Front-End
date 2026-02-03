@@ -17,23 +17,29 @@ import { useEffect, useRef, useState } from 'react';
 interface SortablePatrolAreaCardProps {
   area: PatrolAreaType;
   index: number;
+  cardWidth: number;
+  cardHeight: number;
   rowIndex: number;
   colIndex: number;
   isRTL: boolean;
   isEndOfRow: boolean;
   isLast: boolean;
   onRemove: (id: string) => void;
+  readOnly?: boolean;
 }
 
 const SortablePatrolAreaCard = ({
   area,
   index,
+  cardWidth,
+  cardHeight,
   rowIndex,
   colIndex,
   isRTL,
   isEndOfRow,
   isLast,
   onRemove,
+  readOnly,
 }: SortablePatrolAreaCardProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: area.id,
@@ -69,6 +75,8 @@ const SortablePatrolAreaCard = ({
 
   // Hide trash when dragging starts
   useEffect(() => {
+    console.log("card Height: ", cardHeight)
+    console.log("Card Width", cardWidth)
     if (isDragging) {
       hideImmediately();
     }
@@ -81,14 +89,14 @@ const SortablePatrolAreaCard = ({
           onMouseEnter={showWithTimeout}
           onMouseLeave={hideImmediately}
           sx={{
-            height: 320,
-            width: 220,
+            height: {xs: "100%", md: 320},
+            width: {xs: "100%", md: 220},
             borderRadius: 3,
             position: 'relative',
             opacity: isDragging ? 0.6 : 1,
           }}
         >
-          <Box 
+          <Box
             sx={{
               position: 'absolute',
               top: 8,
@@ -113,49 +121,51 @@ const SortablePatrolAreaCard = ({
               {index}
             </Typography>
           </Box>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              zIndex: 2,
+          {!readOnly && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                zIndex: 2,
 
-              width: 32,
-              height: 32,
-              borderRadius: '50%',
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
 
-              bgcolor: 'error.main',
-              color: 'error.contrastText',
+                bgcolor: 'error.main',
+                color: 'error.contrastText',
 
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
 
-              boxShadow: 2,
-              cursor: 'pointer',
+                boxShadow: 2,
+                cursor: 'pointer',
 
-              // ✨ Fade animation
-              opacity: showTrash ? 1 : 0,
-              transform: showTrash ? 'scale(1)' : 'scale(0.9)',
-              transition: showTrash
-                ? 'opacity 200ms ease-out, transform 200ms ease-out'
-                : 'opacity 350ms ease-in, transform 350ms ease-in',
-              // Prevent interaction when hidden
-              pointerEvents: showTrash ? 'auto' : 'none',
-              backdropFilter: 'blur(2px)',
+                // ✨ Fade animation
+                opacity: showTrash ? 1 : 0,
+                transform: showTrash ? 'scale(1)' : 'scale(0.9)',
+                transition: showTrash
+                  ? 'opacity 200ms ease-out, transform 200ms ease-out'
+                  : 'opacity 350ms ease-in, transform 350ms ease-in',
+                // Prevent interaction when hidden
+                pointerEvents: showTrash ? 'auto' : 'none',
+                backdropFilter: 'blur(2px)',
 
-              '&:hover': {
-                bgcolor: 'error.dark',
-              },
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove(area.id);
-              setShowTrash(false);
-            }}
-          >
-            <IconTrash size={16} />
-          </Box>
+                '&:hover': {
+                  bgcolor: 'error.dark',
+                },
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove(area.id);
+                setShowTrash(false);
+              }}
+            >
+              <IconTrash size={16} />
+            </Box>
+          )}
           {/* 🔳 Area Preview */}
           <Box
             sx={{
@@ -190,25 +200,27 @@ const SortablePatrolAreaCard = ({
           </Box>
 
           {/* ⠿ Drag Handle */}
-          <Box
-            {...attributes}
-            {...listeners}
-            sx={{
-              position: 'absolute',
-              bottom: 6,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              color: 'text.disabled',
-              cursor: isDragging ? 'grabbing' : 'grab',
-              userSelect: 'none',
+          {!readOnly && (
+            <Box
+              {...attributes}
+              {...listeners}
+              sx={{
+                position: 'absolute',
+                bottom: 6,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                color: 'text.disabled',
+                cursor: isDragging ? 'grabbing' : 'grab',
+                userSelect: 'none',
 
-              '&:active': {
-                cursor: 'grabbing',
-              },
-            }}
-          >
-            <IconGripHorizontal size={18} stroke={1.5} />
-          </Box>
+                '&:active': {
+                  cursor: 'grabbing',
+                },
+              }}
+            >
+              <IconGripHorizontal size={18} stroke={1.5} />
+            </Box>
+          )}
         </Card>
       </Box>
     </Grid>

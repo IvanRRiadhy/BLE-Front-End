@@ -1,8 +1,8 @@
 import { FC } from 'react';
 import { useSelector } from 'src/store/Store';
 import { Link } from 'react-router';
-import LogoImage from 'src/assets/images/logos/logoBioPng.png';
-import LogoIcon from 'src/assets/images/logos/logoOnlyBio.png';
+import LogoImage from 'src/assets/images/logos/BI_Logo.png';
+import LogoIcon from 'src/assets/images/logos/BI_Logo_Mini2.png';
 import { styled } from '@mui/material';
 import { RootState } from 'src/store/Store';
 

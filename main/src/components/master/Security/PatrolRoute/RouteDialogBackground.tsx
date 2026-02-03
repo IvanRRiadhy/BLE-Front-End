@@ -92,7 +92,7 @@ const SnakeChevronBackground = ({
 
               if (!isRTL) {
                 // LTR: first card → last card
-                for (let x = 0; x <= rowWidth - CHEVRON_SIZE; x += CHEVRON_STEP) {
+                for (let x = cardWidth; x <= rowWidth ; x += CHEVRON_STEP) {
                   chevrons.push(
                     <use
                       key={`ltr-${x}`}
@@ -128,7 +128,7 @@ const SnakeChevronBackground = ({
             {/* Vertical chevrons at row end */}
             {row < rows - 1 &&
               (() => {
-                const x = isRTL ? -CHEVRON_SIZE : columns * (cardWidth + gap) - gap;
+                const x = isRTL ? cardWidth/2 : columns * (cardWidth + gap);
 
                 const chevrons = [];
                 for (let i = 0; i < cardHeight; i += CHEVRON_STEP) {

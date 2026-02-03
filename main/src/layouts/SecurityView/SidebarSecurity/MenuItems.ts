@@ -46,7 +46,7 @@ const Menuitems: MenuitemsType[] = [
         id: uniqueId(),
         title: 'Home',
         icon: IconHome,
-        href: '/my-visit',
+        href: '/security-view/dashboard',
     },
 
     {
@@ -55,9 +55,9 @@ const Menuitems: MenuitemsType[] = [
     },
     {
       id: uniqueId(),
-      title: 'Invite',
+      title: 'Patrol',
       icon: IconSend,
-      href: '/my-visit/invite',
+      href: '/security-view/patrol-assignment',
     }
   ];
 

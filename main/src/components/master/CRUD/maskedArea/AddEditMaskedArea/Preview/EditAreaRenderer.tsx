@@ -23,6 +23,12 @@ import {
 import earcut from 'earcut';
 import { uniqueId } from 'lodash';
 
+type CollisionResult =
+  | { collided: false }
+  | { collided: true; type: 'self'; areaName?: string }
+  | { collided: true; type: 'area'; withAreaName: string };
+
+
 type Nodes = {
   id: string;
   x: number;
@@ -41,7 +47,10 @@ interface Props {
   maskedAreas: MaskedAreaType[];
   activeMaskedArea?: MaskedAreaType | null;
   setIsDragging: (isDragging: string) => void;
-  setCursor: (cursor: string) => void;
+  // setCursor: (cursor: string) => void;
+  onAreaHoverChange: (areaHover: boolean) => void;
+  onAreaDragChange: (areaDrag: boolean) => void;
+  onOnArea: (onArea: boolean) => void;
   preview?: boolean;
   // Stage transform props (from parent)
   stageScale: number;
@@ -61,7 +70,9 @@ const EditAreaRenderer: React.FC<Props> = ({
   maskedAreas,
   activeMaskedArea,
   setIsDragging,
-  setCursor,
+  onAreaHoverChange,
+  onAreaDragChange,
+  onOnArea,
   preview = false,
   stageScale,
   stageX,
@@ -112,6 +123,21 @@ const EditAreaRenderer: React.FC<Props> = ({
     () => unsavedArea.filter((area) => area.floorplanId === selectedFloorplan?.id),
     [unsavedArea, selectedFloorplan],
   );
+  const renderAreas = useMemo(() => {
+  const map = new Map<string, MaskedAreaType>();
+
+  // 1. masukkan semua unsaved area
+  filteredUnsavedArea.forEach((area) => {
+    map.set(area.id, area);
+  });
+
+  // 2. override dengan editing area kalau ada
+  if (editingMaskedArea) {
+    map.set(editingMaskedArea.id, editingMaskedArea);
+  }
+
+  return Array.from(map.values());
+}, [filteredUnsavedArea, editingMaskedArea]);
 
   // ----------- helpers: pointer -> world coords (image pixels) -----------
   const pointerToWorld = useCallback(
@@ -162,13 +188,13 @@ const EditAreaRenderer: React.FC<Props> = ({
   }, [editingMaskedArea]);
 
   // ----------- cursor style management -----------
-  useEffect(() => {
-    if (drawingMaskedArea !== '') {
-      setCursor('crosshair');
-    } else {
-      setCursor('default');
-    }
-  }, [drawingMaskedArea, setCursor]);
+  // useEffect(() => {
+  //   if (drawingMaskedArea !== '') {
+  //     setCursor('crosshair');
+  //   } else {
+  //     setCursor('default');
+  //   }
+  // }, [drawingMaskedArea, setCursor]);
 
   // ----------- collision detection helpers -----------
   type Point = { x: number; y: number };
@@ -261,6 +287,40 @@ const EditAreaRenderer: React.FC<Props> = ({
 
     return false;
   };
+  const checkPolygonCollisionDetailed = (
+  poly1: { nodes: Nodes[]; name: string },
+  poly2: { nodes: Nodes[]; name: string },
+): CollisionResult => {
+  const vertices1 = nodesToVertices(poly1.nodes);
+  const vertices2 = nodesToVertices(poly2.nodes);
+
+  const triangles1 = triangulate(vertices1);
+  const triangles2 = triangulate(vertices2);
+
+  for (const tri1 of triangles1) {
+    for (const tri2 of triangles2) {
+      if (checkTriangleCollision(tri1, tri2)) {
+        return {
+          collided: true,
+          type: 'area',
+          withAreaName: poly2.name,
+        };
+      }
+    }
+  }
+
+  // self-intersection poly1
+  if (checkSelfIntersections(poly1.nodes)) {
+    return {
+      collided: true,
+      type: 'self',
+      areaName: poly1.name,
+    };
+  }
+
+  return { collided: false };
+};
+
 
   const checkSelfIntersections = (nodes: Nodes[]): boolean => {
     const n = nodes.length;
@@ -333,26 +393,73 @@ const EditAreaRenderer: React.FC<Props> = ({
     return false;
   };
 
-  const checkCollisionWithOffset = (areaName: string, dx: number, dy: number): boolean => {
-    const currentArea = filteredUnsavedArea.find((a) => a.name === areaName);
-    if (!currentArea || !currentArea.nodes) return false;
+  // const checkCollisionWithOffset = (areaName: string, dx: number, dy: number): boolean => {
+  //   const currentArea = filteredUnsavedArea.find((a) => a.name === areaName);
+  //   if (!currentArea || !currentArea.nodes) return false;
 
-    const proposedArea = {
-      nodes: currentArea.nodes.map((node) => ({
-        ...node,
-        x: node.x + dx * scale,
-        y: node.y + dy * scale,
-        x_px: node.x_px + dx,
-        y_px: node.y_px + dy,
-      })),
-    };
+  //   const proposedArea = {
+  //     nodes: currentArea.nodes.map((node) => ({
+  //       ...node,
+  //       x: node.x + dx * scale,
+  //       y: node.y + dy * scale,
+  //       x_px: node.x_px + dx,
+  //       y_px: node.y_px + dy,
+  //     })),
+  //   };
 
-    return filteredUnsavedArea.some((otherArea) => {
-      if (otherArea.name === areaName) return false;
-      if (!otherArea.nodes) return false;
-      return checkPolygonCollision(proposedArea, { nodes: otherArea.nodes });
-    });
+  //   return filteredUnsavedArea.some((otherArea) => {
+  //     if (otherArea.name === areaName) return false;
+  //     if (!otherArea.nodes) return false;
+  //     return checkPolygonCollision(proposedArea, { nodes: otherArea.nodes });
+  //   });
+  // };
+
+  const checkCollisionWithOffset = (
+  areaName: string,
+  dx: number,
+  dy: number,
+): boolean => {
+  const currentArea = renderAreas.find((a) => a.name === areaName);
+  if (!currentArea || !currentArea.nodes) return false;
+
+  const proposedArea = {
+    name: areaName,
+    nodes: currentArea.nodes.map((node) => ({
+      ...node,
+      x: node.x + dx * scale,
+      y: node.y + dy * scale,
+      x_px: node.x_px + dx,
+      y_px: node.y_px + dy,
+    })),
   };
+
+  for (const otherArea of renderAreas) {
+    if (otherArea.name === areaName || !otherArea.nodes) continue;
+
+    const result = checkPolygonCollisionDetailed(
+      proposedArea,
+      { nodes: otherArea.nodes, name: otherArea.name },
+    );
+
+    if (result.collided) {
+      if (result.type === 'area') {
+        console.log(
+          `Collision detected: ${areaName} <-> ${result.withAreaName}`,
+        );
+      }
+      return true;
+    }
+  }
+
+  // self collision
+  if (checkSelfIntersections(proposedArea.nodes)) {
+    console.log(`Colliding with self, ${areaName}`);
+    return true;
+  }
+
+  return false;
+};
+
 
   const checkCornerDragCollision = (
     areaName: string,
@@ -360,7 +467,7 @@ const EditAreaRenderer: React.FC<Props> = ({
     newX: number,
     newY: number,
   ): boolean => {
-    const currentArea = filteredUnsavedArea.find((a) => a.name === areaName);
+    const currentArea = renderAreas.find((a) => a.name === areaName);
     if (!currentArea || !currentArea.nodes) return false;
 
     const proposedArea = {
@@ -369,7 +476,7 @@ const EditAreaRenderer: React.FC<Props> = ({
       ),
     };
 
-    return filteredUnsavedArea.some((otherArea) => {
+    return renderAreas.some((otherArea) => {
       if (otherArea.name === areaName) return false;
       if (!otherArea.nodes) return false;
       return checkPolygonCollision(proposedArea, { nodes: otherArea.nodes });
@@ -421,10 +528,11 @@ const EditAreaRenderer: React.FC<Props> = ({
             };
 
             (async () => {
-              await dispatch(AddUnsavedMaskedArea(newArea));
+              // await dispatch(AddUnsavedMaskedArea(newArea));
+              await dispatch(SelectEditingMaskedArea(newArea));
               dispatch(DrawingMaskedArea(''));
               dispatch(SelectMaskedArea(newArea.id));
-              dispatch(SelectEditingMaskedArea(newArea.id));
+              
               setActiveArea(newArea.name);
               setDrawingNodes([]);
             })();
@@ -447,12 +555,13 @@ const EditAreaRenderer: React.FC<Props> = ({
       if (editingArea) {
         setPendingAreaId(id);
         setConfirmDialogOpen(true);
-        setCursor('move');
+        // setCursor('move');
+        onAreaHoverChange(true);
         return;
       }
       dispatch(SelectMaskedArea(id));
     },
-    [drawingMaskedArea, maskedAreas, activeArea, editingArea, dispatch, setCursor],
+    [drawingMaskedArea, maskedAreas, activeArea, editingArea, dispatch],
   );
 
   // FIXED: handleDragStart - track the starting position
@@ -516,7 +625,7 @@ const EditAreaRenderer: React.FC<Props> = ({
 
   const handleDragArea = useCallback(
     (areaName: string, dx: number, dy: number) => {
-      const updatedAreas = filteredUnsavedArea.map((area) =>
+      const updatedAreas = renderAreas.map((area) =>
         area.name === areaName
           ? {
               ...area,
@@ -545,12 +654,12 @@ const EditAreaRenderer: React.FC<Props> = ({
         dispatch(EditMaskedAreaPosition(updatedArea));
       }
     },
-    [filteredUnsavedArea, scale, dispatch],
+    [renderAreas, scale, dispatch],
   );
 
   const handleCornerDragStart = useCallback(
     (areaName: string, cornerIndex: number, e: any) => {
-      const area = filteredUnsavedArea.find((a) => a.name === areaName);
+      const area = renderAreas.find((a) => a.name === areaName);
       if (!area || !area.nodes) return;
 
       const corner = area.nodes[cornerIndex];
@@ -559,18 +668,18 @@ const EditAreaRenderer: React.FC<Props> = ({
       setCornerDragData({
         areaName,
         cornerIndex,
-        originalX: corner.x,
-        originalY: corner.y,
+        originalX: corner.x_px,
+        originalY: corner.y_px,
       });
       setIsDragging(areaName);
       setDraggingAreaName(areaName);
     },
-    [filteredUnsavedArea, setIsDragging],
+    [renderAreas, setIsDragging],
   );
 
   const handleDragCorner = useCallback(
     (areaName: string, cornerIndex: number, x: number, y: number) => {
-      const updatedAreas = filteredUnsavedArea.map((area) => {
+      const updatedAreas = renderAreas.map((area) => {
         if (area.name !== areaName || !area.nodes) return area;
 
         const newNodes = [...area.nodes];
@@ -590,18 +699,18 @@ const EditAreaRenderer: React.FC<Props> = ({
         dispatch(EditMaskedAreaPosition(updatedArea));
       }
     },
-    [filteredUnsavedArea, scale, dispatch],
+    [renderAreas, scale, dispatch],
   );
 
   const handleCornerDragEnd = useCallback(
     (areaName: string, cornerIndex: number, x: number, y: number) => {
-      const area = filteredUnsavedArea.find((a) => a.name === areaName);
+      const area = renderAreas.find((a) => a.name === areaName);
       if (!area || !area.nodes) return;
 
       const proposedNodes = [...area.nodes];
       proposedNodes[cornerIndex] = { ...proposedNodes[cornerIndex], x: x * scale, y: y * scale };
 
-      const hasCollision = filteredUnsavedArea.some((otherArea) => {
+      const hasCollision = renderAreas.some((otherArea) => {
         if (otherArea.name === areaName || !otherArea.nodes) return false;
         return checkPolygonCollision({ nodes: proposedNodes }, { nodes: otherArea.nodes });
       });
@@ -622,12 +731,12 @@ const EditAreaRenderer: React.FC<Props> = ({
       setIsDragging(''); // Clear dragging state
       setDraggingAreaName(null);
     },
-    [cornerDragData, filteredUnsavedArea, scale, handleDragCorner, setIsDragging],
+    [cornerDragData, renderAreas, scale, handleDragCorner, setIsDragging],
   );
 
   const handleDeleteCorner = useCallback(
     (areaName: string, cornerIndex: number) => {
-      const updatedAreas = filteredUnsavedArea.map((area) => {
+      const updatedAreas = renderAreas.map((area) => {
         if (area.name !== areaName || !area.nodes) return area;
 
         const newNodes = [...area.nodes];
@@ -640,12 +749,12 @@ const EditAreaRenderer: React.FC<Props> = ({
         dispatch(EditMaskedAreaPosition(updatedArea));
       }
     },
-    [filteredUnsavedArea, dispatch],
+    [renderAreas, dispatch],
   );
 
   const handleInsertCorner = useCallback(
     (areaName: string, clickX: number, clickY: number) => {
-      const area = filteredUnsavedArea.find((a) => a.name === areaName);
+      const area = renderAreas.find((a) => a.name === areaName);
       if (!area || !area.nodes) return;
 
       let insertIndex = -1;
@@ -680,7 +789,7 @@ const EditAreaRenderer: React.FC<Props> = ({
       const updatedArea = { ...area, nodes: newNodes };
       dispatch(EditMaskedAreaPosition(updatedArea));
     },
-    [filteredUnsavedArea, scale, dispatch],
+    [renderAreas, scale, dispatch],
   );
 
   const pointToSegmentDistance = (
@@ -727,7 +836,7 @@ const EditAreaRenderer: React.FC<Props> = ({
       setDrawingNodes([]);
       dispatch(DrawingMaskedArea(''));
       dispatch(SelectMaskedArea(''));
-      dispatch(SelectEditingMaskedArea(''));
+      dispatch(SelectEditingMaskedArea(null));
       setActiveArea('');
     },
     [drawingMaskedArea, dispatch],
@@ -751,12 +860,13 @@ const EditAreaRenderer: React.FC<Props> = ({
 
           // If there's no shape under the mouse, ensure cursor is grab
           if (!shape && !drawingMaskedArea) {
-            setCursor('grab');
+            // setCursor('grab');
+            onAreaDragChange(false);
           }
         }
       }
     },
-    [pointerToWorld, drawingMaskedArea, setCursor],
+    [pointerToWorld, drawingMaskedArea],
   );
 
   const renderArea = useCallback(
@@ -783,17 +893,21 @@ const EditAreaRenderer: React.FC<Props> = ({
               if (isEditing) {
                 if (preview) return;
                 if (!drawingMaskedArea) {
-                  setCursor('move');
+                  // setCursor('move');
+                  onAreaHoverChange(true);
                 }
               } else {
                 if (!drawingMaskedArea) {
-                  setCursor('pointer');
+                  // setCursor('pointer');
+                  onOnArea(true);
                 }
               }
             }}
             onMouseLeave={() => {
               if (!preview && !drawingMaskedArea) {
-                setCursor('grab');
+                // setCursor('grab');
+                onAreaHoverChange(false);
+                onOnArea(false);
               }
             }}
             onMouseDown={(e) => {
@@ -854,7 +968,8 @@ const EditAreaRenderer: React.FC<Props> = ({
                     shape.radius(10);
                     shape.stroke('black');
                     shape.strokeWidth(3);
-                    setCursor('move');
+                    // setCursor('move');
+                    onAreaHoverChange(true);
                     shape.getLayer()?.batchDraw();
                   }
                 }}
@@ -864,7 +979,8 @@ const EditAreaRenderer: React.FC<Props> = ({
                     shape.radius(7);
                     shape.stroke('');
                     shape.strokeWidth(1);
-                    setCursor('grab');
+                    // setCursor('grab');
+                    onAreaHoverChange(false);
                     shape.getLayer()?.batchDraw();
                   }
                 }}
@@ -952,7 +1068,7 @@ const EditAreaRenderer: React.FC<Props> = ({
           </FastLayer>
 
           {/* Areas */}
-          <Layer>{filteredUnsavedArea.map((area) => renderArea(area))}</Layer>
+          <Layer>{renderAreas.map((area) => renderArea(area))}</Layer>
 
           {/* Drawing nodes */}
           <Layer listening={false}>
@@ -970,14 +1086,16 @@ const EditAreaRenderer: React.FC<Props> = ({
                     const shape = e.target as any;
                     shape.radius(12);
                     shape.fill('green');
-                    setCursor('pointer');
+                    // setCursor('pointer');
+                    onOnArea(true);
                     shape.getLayer()?.batchDraw();
                   }}
                   onMouseLeave={(e) => {
                     const shape = e.target as any;
                     shape.radius(8);
                     shape.fill('blue');
-                    setCursor('crosshair');
+                    // setCursor('crosshair');
+                    onOnArea(false);
                     shape.getLayer()?.batchDraw();
                   }}
                 />

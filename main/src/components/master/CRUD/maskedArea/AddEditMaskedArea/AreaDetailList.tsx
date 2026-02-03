@@ -19,6 +19,7 @@ import {
   SelectMaskedArea,
   RevertMaskedArea,
   SaveMaskedArea,
+  SaveEditingArea,
 } from 'src/store/apps/crud/maskedArea';
 import { restrictedStatus } from 'src/types/crud/input';
 import isEqual from 'lodash/isEqual';
@@ -137,10 +138,10 @@ const AreaDetailList = () => {
 
     try {
       // Update the unsaved area in Redux store
-      dispatch(EditUnsavedMaskedArea(formData));
-
+      // dispatch(EditUnsavedMaskedArea(formData));
+      dispatch(SaveEditingArea());
       // Mark as saved in Redux (this is local state management)
-      dispatch(SaveMaskedArea(formData.id));
+      // dispatch(SaveMaskedArea(formData.id));
 
       handleClose();
     } catch (error) {
@@ -168,6 +169,14 @@ const AreaDetailList = () => {
       ...prev,
       [fieldName]: value,
     }));
+    dispatch(EditUnsavedMaskedArea({ ...formData, [fieldName]: value }));
+  };
+  const updateField = <K extends keyof AreaFormData>(field: K, value: AreaFormData[K]) => {
+    setFormData((prev) => {
+      const next = { ...prev, [field]: value };
+      dispatch(EditUnsavedMaskedArea(next));
+      return next;
+    });
   };
 
   // Color palette for the area
@@ -257,7 +266,7 @@ const AreaDetailList = () => {
                 {colorPalette.map((color) => (
                   <Box
                     key={color}
-                    onClick={() => setFormData((prev) => ({ ...prev, colorArea: color }))}
+                    onClick={() => updateField('colorArea', color)}
                     sx={{
                       width: 34,
                       height: 34,
@@ -337,12 +346,7 @@ const AreaDetailList = () => {
                 control={
                   <Switch
                     checked={formData.allowFloorChange}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        allowFloorChange: e.target.checked,
-                      }))
-                    }
+                    onChange={(e) => updateField('allowFloorChange', e.target.checked)}
                   />
                 }
                 label={formData.allowFloorChange ? 'Enabled' : 'Disabled'}

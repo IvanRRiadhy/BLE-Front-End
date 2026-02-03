@@ -13,9 +13,10 @@ import {
   Button,
 } from '@mui/material';
 import { IconX } from '@tabler/icons-react';
-import { useState } from 'react';
-import { PatrolDetailPayload } from './SecurityViewPatrolList';
+import { useEffect, useState } from 'react';
 import PatrolScheduleCalendarDialog from './PatrolScheduleCalendarDialog';
+import PatrolRouteDetailDialog from './PatrolRouteDetailDialog';
+import { PatrolDetailPayload } from 'src/store/apps/crud/patrolRoute';
 
 interface PatrolDetailDialogProps {
   open: boolean;
@@ -23,11 +24,7 @@ interface PatrolDetailDialogProps {
   onClose: () => void;
 }
 
-const PatrolDetailDialog = ({
-  open,
-  data,
-  onClose,
-}: PatrolDetailDialogProps) => {
+const PatrolDetailDialog = ({ open, data, onClose }: PatrolDetailDialogProps) => {
   const theme = useTheme();
 
   const [openSchedule, setOpenSchedule] = useState(false);
@@ -37,13 +34,11 @@ const PatrolDetailDialog = ({
 
   /* ===== derived values ===== */
 
-  const areaCount =
-    route?.patrolAreas?.length
-      ? Math.max(route.patrolAreas.length - 2, 0)
-      : 0;
+  const areaCount = route?.patrolAreas?.length ? Math.max(route.patrolAreas.length - 2, 0) : 0;
 
-  const formatDate = (date?: string) =>
-    date ? new Date(date).toLocaleDateString('en-GB') : '-';
+  const formatDate = (date?: string) => (date ? new Date(date).toLocaleDateString('en-GB') : '-');
+
+
 
   /* ===================== render ===================== */
 
@@ -72,30 +67,20 @@ const PatrolDetailDialog = ({
               <Typography fontSize={12} color="text.secondary">
                 Description
               </Typography>
-              <Typography fontSize={14}>
-                {patrolAssignment.description || '-'}
-              </Typography>
+              <Typography fontSize={14}>{patrolAssignment.description || '-'}</Typography>
             </Box>
 
             {/* Schedule */}
-            <Box
-              flex="1 1 35%"
-              sx={{ cursor: 'pointer' }}
-              onClick={() => setOpenSchedule(true)}
-            >
+            <Box flex="1 1 35%" sx={{ cursor: 'pointer' }} onClick={() => setOpenSchedule(true)}>
               <Typography fontSize={12} color="text.secondary">
                 Active From
               </Typography>
-              <Typography fontWeight={600}>
-                {formatDate(patrolAssignment.startDate)}
-              </Typography>
+              <Typography fontWeight={600}>{formatDate(patrolAssignment.startDate)}</Typography>
 
               <Typography fontSize={12} color="text.secondary" mt={1}>
                 Until
               </Typography>
-              <Typography fontWeight={600}>
-                {formatDate(patrolAssignment.endDate)}
-              </Typography>
+              <Typography fontWeight={600}>{formatDate(patrolAssignment.endDate)}</Typography>
             </Box>
           </Box>
 
@@ -112,14 +97,11 @@ const PatrolDetailDialog = ({
               Route
             </Typography>
 
-            <Typography fontWeight={600}>
-              {route?.name ?? 'Unknown Route'}
-            </Typography>
+            <Typography fontWeight={600}>{route?.name ?? 'Unknown Route'}</Typography>
 
             <Typography fontSize={13} mt={0.5} color="text.secondary">
               {`From ${route?.startAreaName ?? '-'}`}
-              {areaCount > 0 &&
-                ` ————— ${areaCount} Area${areaCount > 1 ? 's' : ''} ————— `}
+              {areaCount > 0 && ` ————— ${areaCount} Area${areaCount > 1 ? 's' : ''} ————— `}
               {areaCount === 0 && ' ————— '}
               {`To ${route?.endAreaName ?? '-'}`}
             </Typography>
@@ -133,7 +115,7 @@ const PatrolDetailDialog = ({
           </Typography>
 
           <Stack spacing={1}>
-            {patrolAssignment.securities?.map(sec => (
+            {patrolAssignment.securities?.map((sec) => (
               <Box
                 key={sec.id}
                 display="flex"
@@ -143,9 +125,7 @@ const PatrolDetailDialog = ({
                 borderRadius={1}
                 sx={{ backgroundColor: theme.palette.action.hover }}
               >
-                <Avatar sx={{ width: 32, height: 32 }}>
-                  {sec.name.charAt(0)}
-                </Avatar>
+                <Avatar sx={{ width: 32, height: 32 }}>{sec.name.charAt(0)}</Avatar>
 
                 <Box flex={1}>
                   <Typography fontWeight={600} fontSize={14}>
@@ -156,11 +136,7 @@ const PatrolDetailDialog = ({
                   </Typography>
                 </Box>
 
-                <Typography
-                  fontSize={12}
-                  fontWeight={600}
-                  color={theme.palette.success.main}
-                >
+                <Typography fontSize={12} fontWeight={600} color={theme.palette.success.main}>
                   On Patrol
                 </Typography>
               </Box>
@@ -204,12 +180,7 @@ const PatrolDetailDialog = ({
       />
 
       {/* ================= ROUTE DIALOG ================= */}
-      <Dialog open={openRoute} onClose={() => setOpenRoute(false)}>
-        <DialogTitle>Route Detail</DialogTitle>
-        <DialogContent>
-          <Typography>Route details go here</Typography>
-        </DialogContent>
-      </Dialog>
+      <PatrolRouteDetailDialog open={openRoute} route={route} onClose={() => setOpenRoute(false)} />
     </>
   );
 };

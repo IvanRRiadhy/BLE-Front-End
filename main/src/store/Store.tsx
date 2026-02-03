@@ -61,6 +61,7 @@ import VisitorSessionReducer from './apps/crud/visitorSession';
 import InvestigateReducer from './apps/crud/investigate';
 import PatrolAreaReducer from './apps/crud/patrolArea';
 import PatrolRouteReducer from './apps/crud/patrolRoute';
+import PatrolSessionReducer from './apps/crud/patrolSession';
 import EventLogReducer from './apps/tracking/Event';
 import SessionReducer from './apps/session';
 import { combineReducers } from 'redux';
@@ -130,6 +131,7 @@ const rootReducer = combineReducers({
   VisitorSessionReducer: VisitorSessionReducer,
   PatrolAreaReducer: PatrolAreaReducer,
   PatrolRouteReducer: PatrolRouteReducer,
+  PatrolSessionReducer: PatrolSessionReducer,
   InvestigateReducer: InvestigateReducer,
   EventLogReducer: EventLogReducer,
 });

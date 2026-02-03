@@ -192,7 +192,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+      if (['image/png'].includes(file.type)) {
         setImage(file);
         const prepreview = URL.createObjectURL(file);
         // console.log(prepreview);
@@ -219,7 +219,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
         };
         img.src = prepreview;
       } else {
-        alert('Please select a valid image file (PNG, JPG, JPEG)');
+        alert('Please select a valid image file PNG');
       }
     }
   };
@@ -355,7 +355,7 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
                 </CustomFormLabel>
                 <input
                   type="file"
-                  accept="image/png, image/jpeg, image/jpg"
+                  accept="image/png"
                   onChange={handleImageChange}
                   required
                   style={{

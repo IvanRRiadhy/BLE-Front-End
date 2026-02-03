@@ -15,14 +15,14 @@ const stats = [
   { label: 'Placeholder', value: 0, color: 'info' },
 ];
 
-const SecurityViewDashboard = () => {
+const SecurityViewPatrolPage = () => {
   return (
     <PageContainer
-      title="Security View Dashboard"
-      description="This is the security view dashboard page"
+      title="Security View Patrol Assignment"
+      description="This is the security view patrol assignment page"
     >
       <Box>
-        <Grid container spacing={2} mt={1}>
+        {/* <Grid container spacing={2} mt={1}>
           <Grid
             container
             spacing={2}
@@ -53,13 +53,13 @@ const SecurityViewDashboard = () => {
           >
             <SecurityViewAlarmLog />
           </Grid>
-        </Grid>
-        {/* <Grid container spacing={2} mt={1}>
-          <PatrolAssignmentList />
         </Grid> */}
+        <Grid container spacing={2} mt={1}>
+          <PatrolAssignmentList />
+        </Grid>
       </Box>
     </PageContainer>
   );
 };
 
-export default SecurityViewDashboard;
+export default SecurityViewPatrolPage;
