@@ -1,11 +1,8 @@
-import axiosServices, { BASE_URL } from '../../../utils/axios';
+
 import { createSlice } from '@reduxjs/toolkit';
-import { AppDispatch, dispatch } from 'src/store/Store';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import { defaultPatrolRouteFilter } from '../defaultForm';
-import { memberType } from './member';
-import { PatrolAssignType, PatrolDetailPayload } from './patrolRoute';
+import {  defaultPatrolSessionFilter } from '../defaultForm';
+import {  PatrolDetailPayload } from './patrolRoute';
 
 // const API_URL = '/api/patrol-route/';
 // const API_URL_FILTER = '/api/patrol-route/filter/';
@@ -19,8 +16,8 @@ export type GetFilter = {
   sortDir: 'asc' | 'desc';
   searchValue: string;
   filters?: {
-    PatrolAreaId?: string[];
-    'Securities.Id'?: string[];
+    PatrolAssignmentId?: string;
+    SecurityId?: string[];
   };
 };
 
@@ -34,7 +31,7 @@ export type CheckpointType = {
   distanceFromPrevMeters: number;
 };
 
-export type PatrolSession = {
+export type PatrolSessionType = {
   id: string;
   patrolRouteId: string;
   patrolRouteNameSnap: string;
@@ -56,8 +53,8 @@ export type PatrolSession = {
 };
 
 interface PatrolSessionState {
-  patrolSessions: PatrolSession[];
-  currentPatrolSession: PatrolSession | null;
+  patrolSessions: PatrolSessionType[];
+  currentPatrolSession: PatrolSessionType | null;
   selectedPatrolAssignment: PatrolDetailPayload | null;
   patrolSessionFilter: GetFilter;
 }
@@ -66,17 +63,17 @@ const initialState: PatrolSessionState = {
   patrolSessions: [],
   currentPatrolSession: null,
   selectedPatrolAssignment: null,
-  patrolSessionFilter: defaultPatrolRouteFilter,
+  patrolSessionFilter: defaultPatrolSessionFilter,
 };
 
 export const PatrolSessionSlice = createSlice({
   name: 'patrolSession',
   initialState,
   reducers: {
-    setPatrolSessions: (state, action: PayloadAction<PatrolSession[]>) => {
+    setPatrolSessions: (state, action: PayloadAction<PatrolSessionType[]>) => {
       state.patrolSessions = action.payload;
     },
-    setCurrentPatrolSession: (state, action: PayloadAction<PatrolSession>) => {
+    setCurrentPatrolSession: (state, action: PayloadAction<PatrolSessionType>) => {
       state.currentPatrolSession = action.payload;
     },
     setSelectedPatrolAssignment: (state, action: PayloadAction<PatrolDetailPayload | null>) => {

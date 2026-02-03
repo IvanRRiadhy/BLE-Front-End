@@ -31,7 +31,13 @@ import {
 } from './alarmsetting/overpopulating';
 import { BoundaryAlarmType, GetFilter as BoundaryFilter } from './alarmsetting/boundary';
 import { StayOnAreaAlarmType, GetFilter as StayOnAreaFilter } from './alarmsetting/stayonarea';
-import { PatrolRouteType, GetFilter as PatrolRouteFilter, PatrolAssignType } from './crud/patrolRoute';
+import {
+  PatrolRouteType,
+  GetFilter as PatrolRouteFilter,
+  PatrolAssignType,
+} from './crud/patrolRoute';
+import { PatrolSessionType, GetFilter as PatrolSessionFilter } from './crud/patrolSession';
+import { PatrolCaseType, GetFilter as PatrolCaseFilter, CaseUploadType } from './crud/patrolCase';
 
 //#region AccessCCTV
 export const defaultAccessCCTVForm: CCTVType = {
@@ -718,7 +724,6 @@ export const defaultPatrolRouteForm: PatrolRouteType = {
   name: '',
   description: '',
   patrolAreaIds: [],
-  
 };
 export const defaultPatrolRouteFilter: PatrolRouteFilter = {
   draw: 1,
@@ -727,9 +732,12 @@ export const defaultPatrolRouteFilter: PatrolRouteFilter = {
   sortColumn: 'UpdatedAt',
   sortDir: 'desc',
   searchValue: '',
-  filters: {
-  },
+  filters: {},
 };
+
+//#endregion
+
+//#region Patrol Assign
 export const defaultPatrolAssignForm: PatrolAssignType = {
   id: '',
   name: 'Add Name',
@@ -738,8 +746,8 @@ export const defaultPatrolAssignForm: PatrolAssignType = {
   startDate: '',
   endDate: '',
   securityIds: [],
-  timeGroupId: "",
-}
+  timeGroupId: '',
+};
 export const defaultPatrolAssignmentFilter: PatrolRouteFilter = {
   draw: 1,
   start: 0,
@@ -747,7 +755,40 @@ export const defaultPatrolAssignmentFilter: PatrolRouteFilter = {
   sortColumn: 'startDate',
   sortDir: 'desc',
   searchValue: '',
-  filters: {
-  },
+  filters: {},
 };
+//#endregion
+
+//#region Patrol Session
+export const defaultPatrolSessionFilter: PatrolSessionFilter = {
+  draw: 1,
+  start: 0,
+  length: 999,
+  sortColumn: '',
+  sortDir: 'desc',
+  searchValue: '',
+  filters: {},
+};
+//#endregion
+
+//#region Patrol Case
+
+export const defaultPatrolCaseFilter: PatrolCaseFilter = {
+  draw: 1,
+  start: 0,
+  length: 999,
+  sortColumn: '',
+  sortDir: 'desc',
+  searchValue: '',
+  filters: {},
+};
+
+export const defaultPatrolCaseUploadForm: CaseUploadType = {
+  title: '',
+  description: '',
+  caseType: '',
+  patrolSessionId: '',
+  attachments: [{ fileUrl: '', fileType: '' }],
+};
+
 //#endregion

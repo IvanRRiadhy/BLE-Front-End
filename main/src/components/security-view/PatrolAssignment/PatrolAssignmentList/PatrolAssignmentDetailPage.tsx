@@ -14,6 +14,9 @@ import { PatrolDetailPayload } from 'src/store/apps/crud/patrolRoute';
 import PatrolRouteDetailDialog from '../SecurityViewPatrol/PatrolRouteDetailDialog';
 import PatrolScheduleCalendarDialog from '../SecurityViewPatrol/PatrolScheduleCalendarDialog';
 import { useNavigate } from 'react-router';
+import { useStartPatrol, useStopPatrol, usePatrolSessionList } from 'src/hooks/usePatrolSession';
+import { PatrolSessionType } from 'src/store/apps/crud/patrolSession';
+import { defaultPatrolSessionFilter } from 'src/store/apps/defaultForm';
 interface PatrolDetailPageProps {
   data: PatrolDetailPayload;
 }
@@ -25,8 +28,13 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
   const [openSchedule, setOpenSchedule] = useState(false);
   const [openRoute, setOpenRoute] = useState(false);
   const { patrolAssignment, route } = data;
-
+  const [patrolSession, setPatrolSession] = useState<PatrolSessionType | null>(null);
   const formatDate = (date?: string) => (date ? new Date(date).toLocaleDateString('en-GB') : '-');
+
+  const { data: patrolSessionData, isLoading: isSessionLoading } = usePatrolSessionList({
+    ...defaultPatrolSessionFilter,
+    filters: { PatrolAssignmentId: patrolAssignment.id },
+  });
 
   const InfoRow = ({ label, value }: { label: string; value: string }) => (
     <Box display="flex" justifyContent="space-between">
@@ -52,6 +60,27 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
 
     return () => clearInterval(timer);
   }, [startedAt, endedAt]);
+  useEffect(() => {
+    if (!patrolSessionData?.data?.length) {
+      // No session at all
+      setPatrolSession(null);
+      setStartedAt(null);
+      setEndedAt(null);
+      return;
+    }
+
+    const latestSession = patrolSessionData.data[0];
+
+    setPatrolSession(latestSession);
+
+    // Parse UTC properly (Z already exists ✔)
+    const started = latestSession.startedAt ? new Date(latestSession.startedAt) : null;
+
+    const ended = latestSession.endedAt ? new Date(latestSession.endedAt) : null;
+
+    setStartedAt(started);
+    setEndedAt(ended);
+  }, [patrolSessionData]);
 
   const durationMinutes = (() => {
     if (!startedAt) return 0;
@@ -63,13 +92,48 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
     return Math.max(diffMinutes, 0);
   })();
 
-  const handleStart = () => {
-    setStartedAt(new Date());
-    setEndedAt(null);
+  const StartPatrolMutation = useStartPatrol();
+  const StopPatrolMutation = useStopPatrol();
+
+  const handleStart = async () => {
+    if (!data) return;
+    if (!data.patrolAssignment) return;
+    try {
+      const res = await StartPatrolMutation.mutateAsync(data.patrolAssignment.id);
+      console.log('Start Patrol res', res);
+      if (!res?.success || !res?.collection?.data) return;
+
+      const session = res.collection.data;
+
+      setPatrolSession(session);
+
+      // backend is source of truth
+      setStartedAt(new Date(session.startedAt));
+      setEndedAt(null);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const handleDone = () => {
-    setEndedAt(new Date());
+  const handleDone = async () => {
+    if (!data) return;
+    if (!patrolSession?.id) return;
+
+    try {
+      const res = await StopPatrolMutation.mutateAsync(patrolSession.id);
+      console.log('Stop Patrol res', res);
+      if (!res?.success) return;
+
+      const ended = res.collection?.data?.endedAt
+        ? new Date(res.collection.data.endedAt)
+        : new Date();
+
+      setEndedAt(ended);
+
+      setPatrolSession((prev) => (prev ? { ...prev, endedAt: ended.toISOString() } : prev));
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const formatTime24 = (date?: Date | null) =>
@@ -158,7 +222,6 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
               </Stack>
             </Box>
             <Divider sx={{ my: 2 }} />
-            {/* Route */}
             {/* Route */}
             <Box mt={2} sx={{ cursor: 'pointer' }} onClick={() => setOpenRoute(true)}>
               <Typography fontSize={12} color="text.secondary" textAlign="center" mb={0.5}>
@@ -301,23 +364,25 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
 
                 {/* ===== Action ===== */}
                 <Box flex={1} p={1.5} textAlign="center">
-                  {/* <Typography fontSize={12} color="text.secondary" mb={0.5}>
-                    Patrol
-                  </Typography> */}
+                  {isSessionLoading && (
+                    <Typography fontSize={12} color="text.secondary">
+                      Loading…
+                    </Typography>
+                  )}
 
-                  {!startedAt && (
+                  {!isSessionLoading && !startedAt && (
                     <Button size="small" variant="contained" onClick={handleStart}>
                       Start
                     </Button>
                   )}
 
-                  {startedAt && !endedAt && (
+                  {!isSessionLoading && startedAt && !endedAt && (
                     <Button size="small" variant="contained" color="warning" onClick={handleDone}>
                       Done
                     </Button>
                   )}
 
-                  {startedAt && endedAt && (
+                  {!isSessionLoading && startedAt && endedAt && (
                     <Stack spacing={0.5} alignItems="center">
                       <Chip label="Done" color="success" size="small" />
                       <Typography fontWeight={600}>{formatTime24(endedAt)}</Typography>

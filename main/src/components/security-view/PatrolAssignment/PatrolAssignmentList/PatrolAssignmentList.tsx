@@ -19,7 +19,7 @@ const defaultFilter = {
   sortDir: 'desc' as 'asc' | 'desc',
   searchValue: '',
   filters: {
-    'Securities.Id': ['eba4833a-6e5d-4181-8e18-5776cadd0998'],
+
   },
 };
 
