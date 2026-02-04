@@ -3,6 +3,7 @@ export interface RuntimeConfig {
   API_ENGINE_URL: string;
   MQTT_URL: string;
   NTFY_URL: string;
+  CDN_URL: string;
   ALARM_TOPIC: string;
   MQTT_USERNAME: string;
   MQTT_PASSWORD: string;

@@ -788,7 +788,7 @@ export const defaultPatrolCaseUploadForm: CaseUploadType = {
   description: '',
   caseType: '',
   patrolSessionId: '',
-  attachments: [{ fileUrl: '', fileType: '' }],
+  attachments: [],
 };
 
 //#endregion

@@ -224,6 +224,25 @@ export const visitorStatusEnumMap: Record<string, number> = {
     {label: "All", value: 'all'},
   ]
 
+  export const CaseType: inputDataType[] = [
+    {label: "Please select Type", value: '', disabled: true},
+    {label: "Damage", value: 'Damage'},
+    {label: "Incident", value: 'Incident'},
+    {label: "Hazard", value: 'Hazard'},
+    {label: "Theft", value: 'Theft'},
+    {label: "Report", value: 'Report'},
+    {label: "PatrolSummary", value: 'PatrolSummary'},
+  ]
+
+  export const CaseStatus: inputDataType[] = [
+    {label: "Please select Status", value: '', disabled: true},
+    {label: "Open", value: 'Open'},
+    {label: "Close", value: 'Close'},
+    {label: "Submitted", value: 'Submitted'},
+    {label: "Approved", value: 'Approved'},
+    {label: "Rejected", value: 'Rejected'},
+  ]
+
   export const EVENT_TYPE = {
   CREATE: 'CREATE',
   UPDATE: 'UPDATE',
@@ -234,6 +253,6 @@ export const visitorStatusEnumMap: Record<string, number> = {
   ACTION: 'ACTION',
   LOGIN: 'LOGIN',
   OTHER: 'OTHER',
-} as const;
+  } as const;
 
 export type EventType = keyof typeof EVENT_TYPE;

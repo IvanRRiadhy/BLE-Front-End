@@ -33,6 +33,7 @@ export interface bleReaderType {
   name: string;
   gmac: string;
   ip: string;
+  isAssigned: boolean;
   createdBy: string;
   createdAt: string;
   updatedBy: string;
@@ -109,7 +110,7 @@ export function useAddReader() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (newReader: bleReaderType) => {
-      const { id, createdBy, createdAt, updatedBy, updatedAt, ...payload } = newReader;
+      const { id,isAssigned, createdBy, createdAt, updatedBy, updatedAt, ...payload } = newReader;
       const response = await axiosServices.post(API_URL, payload);
       return response.data;
     },
@@ -129,7 +130,7 @@ export function useEditReader() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (updatedReader: bleReaderType) => {
-      const { id, createdBy, createdAt, updatedBy, updatedAt, ...payload } = updatedReader;
+      const { id, isAssigned, createdBy, createdAt, updatedBy, updatedAt, ...payload } = updatedReader;
       const response = await axiosServices.put(`${API_URL}${id}`, payload);
       return response.data;
     },

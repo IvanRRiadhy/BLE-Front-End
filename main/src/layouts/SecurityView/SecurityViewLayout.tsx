@@ -128,8 +128,10 @@ const SecurityViewLayout: FC = () => {
         position="top-center"
         containerStyle={{
           fontSize: '1.15rem',
-          padding: '16px 24px',
-          minWidth: '500px',
+          padding: '12px 16px',
+          minWidth: '300px',
+          // maxWidth: '90vw', // 🔑 responsive
+          // width: 'fit-content',
         }}
         toastOptions={{
           success: {

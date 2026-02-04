@@ -63,7 +63,7 @@ export type CaseUploadType = {
     description: string;
     caseType: string;
     patrolSessionId: string;
-    attachments : CaseAttachmentType[];
+    attachments : CaseAttachmentType[] | [];
 }
 
 export type PatrolCaseType = {
@@ -80,6 +80,7 @@ export type PatrolCaseType = {
     security?: memberType;
     patrolAssignment?: PatrolAssignType;
     patrolRoute?: PatrolRouteType;
+    attachments : CaseAttachmentType[];
     status: number;
     applicationId: string;
 }

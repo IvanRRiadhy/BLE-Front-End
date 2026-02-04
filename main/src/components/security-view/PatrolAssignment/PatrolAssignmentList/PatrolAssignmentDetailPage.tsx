@@ -8,6 +8,7 @@ import {
   useMediaQuery,
   Button,
   Chip,
+  CircularProgress,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { PatrolDetailPayload } from 'src/store/apps/crud/patrolRoute';
@@ -16,7 +17,16 @@ import PatrolScheduleCalendarDialog from '../SecurityViewPatrol/PatrolScheduleCa
 import { useNavigate } from 'react-router';
 import { useStartPatrol, useStopPatrol, usePatrolSessionList } from 'src/hooks/usePatrolSession';
 import { PatrolSessionType } from 'src/store/apps/crud/patrolSession';
-import { defaultPatrolSessionFilter } from 'src/store/apps/defaultForm';
+import {
+  defaultPatrolCaseFilter,
+  defaultPatrolCaseUploadForm,
+  defaultPatrolSessionFilter,
+} from 'src/store/apps/defaultForm';
+import { useAllPatrolCase, usePatrolCaseList } from 'src/hooks/usePatrolCase';
+import PatrolCaseDialog from './PatrolCaseDialog';
+import { CaseUploadType } from 'src/store/apps/crud/patrolCase';
+import PatrolCaseListItem from './PatrolCaseListItem';
+import toast from 'react-hot-toast';
 interface PatrolDetailPageProps {
   data: PatrolDetailPayload;
 }
@@ -29,12 +39,23 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
   const [openRoute, setOpenRoute] = useState(false);
   const { patrolAssignment, route } = data;
   const [patrolSession, setPatrolSession] = useState<PatrolSessionType | null>(null);
+  const [openCaseDialog, setOpenCaseDialog] = useState(false);
+  const [caseDialogType, setCaseDialogType] = useState<'add' | 'edit'>('add');
+  const [selectedCase, setSelectedCase] = useState<CaseUploadType | undefined>(undefined);
+  const [patrolSessionId, setPatrolSessionId] = useState<string | undefined>(undefined);
+
   const formatDate = (date?: string) => (date ? new Date(date).toLocaleDateString('en-GB') : '-');
 
   const { data: patrolSessionData, isLoading: isSessionLoading } = usePatrolSessionList({
     ...defaultPatrolSessionFilter,
     filters: { PatrolAssignmentId: patrolAssignment.id },
   });
+
+  const { data: caseData, isLoading: isCaseLoading } = usePatrolCaseList({
+    ...defaultPatrolCaseFilter,
+    filters: { PatrolAssignmentId: patrolAssignment.id },
+  });
+  const patrolCaseData = caseData?.data || [];
 
   const InfoRow = ({ label, value }: { label: string; value: string }) => (
     <Box display="flex" justifyContent="space-between">
@@ -50,6 +71,10 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
   const [startedAt, setStartedAt] = useState<Date | null>(null);
   const [endedAt, setEndedAt] = useState<Date | null>(null);
   const [now, setNow] = useState<Date>(new Date());
+  const patrolNotStarted = !startedAt;
+  const patrolRunning = !!startedAt && !endedAt;
+  const patrolEnded = !!startedAt && !!endedAt;
+  const canAddCase = patrolRunning;
 
   useEffect(() => {
     if (!startedAt || endedAt) return;
@@ -77,7 +102,9 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
     const started = latestSession.startedAt ? new Date(latestSession.startedAt) : null;
 
     const ended = latestSession.endedAt ? new Date(latestSession.endedAt) : null;
-
+    if (started && !ended) {
+      setPatrolSessionId(latestSession.id);
+    }
     setStartedAt(started);
     setEndedAt(ended);
   }, [patrolSessionData]);
@@ -173,6 +200,34 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
   };
 
   const durationMs = startedAt ? (endedAt ?? now).getTime() - startedAt.getTime() : 0;
+
+  const handleAddCase = () => {
+    console.log('handleAddCase', patrolSessionId);
+    if (patrolNotStarted) {
+      toast.error('Cases can only be added after the patrol has started.');
+      return;
+    }
+
+    if (patrolEnded) {
+      toast.error('The patrol has ended. New cases can no longer be added.');
+      return;
+    }
+    if (patrolSessionId) {
+      setCaseDialogType('add');
+      setSelectedCase({ ...defaultPatrolCaseUploadForm, patrolSessionId: patrolSessionId });
+      setOpenCaseDialog(true);
+    }
+  };
+
+  const handleEditCase = (item: any) => {
+    setCaseDialogType('edit');
+    setSelectedCase(item);
+    setOpenCaseDialog(true);
+  };
+
+  const handleCloseCaseDialog = () => {
+    setOpenCaseDialog(false);
+  };
 
   return (
     <>
@@ -394,16 +449,78 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
           </Box>
 
           {/* ================= RIGHT PANEL ================= */}
-          {/* {!isMobile && ( */}
           <Box
             flex={1}
             borderRadius={2}
-            p={3}
+            p={2}
             sx={{ backgroundColor: theme.palette.background.paper }}
           >
-            <Typography color="text.secondary">List Cases (coming soon)</Typography>
+            {/* Title */}
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Typography fontWeight={700} fontSize={18}>
+                Patrol Cases
+              </Typography>
+
+              <Box
+                sx={{
+                  opacity: canAddCase ? 1 : 0.5,
+                  cursor: canAddCase ? 'pointer' : 'not-allowed',
+                }}
+              >
+                
+                <Button
+                  size="small"
+                  variant="contained"
+                  onClick={handleAddCase}
+                  fullWidth={isMobile}
+                >
+                  Add Case
+                </Button>
+                
+              </Box>
+              
+            </Box>
+
+            {/* List */}
+            {isCaseLoading ? (
+              <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+                <CircularProgress />
+              </Box>
+            ) : (
+              <Box
+                sx={{
+                  maxHeight: isMobile ? 'auto' : 'calc(100vh - 220px)',
+                  overflowY: 'auto',
+                }}
+              >
+                {patrolCaseData.length > 0 ? (
+                  patrolCaseData.map((item, index) => (
+                    <Box
+                      key={item.id}
+                      sx={{
+                        backgroundColor: index % 2 ? 'grey.50' : 'transparent',
+                        borderBottom: '1px solid',
+                        borderColor: 'divider',
+                      }}
+                    >
+                      <PatrolCaseListItem
+                        data={item}
+                        onClick={(c) => {
+                          // optional: navigate to case detail
+                          // navigate(`/patrol-case/${c.id}`);
+                          console.log('case clicked', c);
+                        }}
+                      />
+                    </Box>
+                  ))
+                ) : (
+                  <Typography fontSize={13} color="text.secondary" textAlign="center" mt={2}>
+                    No patrol cases found
+                  </Typography>
+                )}
+              </Box>
+            )}
           </Box>
-          {/* )} */}
         </Box>
       </Box>
       {/* ================= SCHEDULE DIALOG ================= */}
@@ -417,6 +534,13 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
 
       {/* ================= ROUTE DIALOG ================= */}
       <PatrolRouteDetailDialog open={openRoute} route={route} onClose={() => setOpenRoute(false)} />
+      {/* ================= CASE DIALOG ================= */}
+      <PatrolCaseDialog
+        open={openCaseDialog}
+        onClose={handleCloseCaseDialog}
+        type={caseDialogType}
+        initialData={selectedCase}
+      />
     </>
   );
 };

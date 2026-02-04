@@ -16,11 +16,11 @@ export interface PaginatedResponse<T> {
   recordsFiltered: number;
 }
 
-export function usePatrolSessionList (fitler: GetFilter) {
+export function usePatrolSessionList (filter: GetFilter) {
     return useQuery({
-        queryKey: ['patrol-session-list', fitler],
+        queryKey: ['patrol-session-list', filter],
         queryFn: async () => {
-            const response = await axiosServices.post(API_DT_URL, fitler);
+            const response = await axiosServices.post(API_DT_URL, filter);
             const res = response.data.collection;
             return{
                 data: res.data as PatrolSessionType[],
