@@ -74,7 +74,7 @@ export interface FloorplanDeviceType {
     accessCctvId: string | null,
     readerId: string | null,
     accessControlId: string | null,
-    readerType: "Indoor" | "Outdoor",
+    // readerType: "Indoor" | "Outdoor",
     posX: number,
     posY: number,
     posPxX: number,

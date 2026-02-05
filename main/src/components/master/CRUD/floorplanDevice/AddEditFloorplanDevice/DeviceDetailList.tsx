@@ -48,7 +48,7 @@ interface DeviceFormData {
   accessCctvId: string | null;
   readerId: string | null;
   accessControlId: string | null;
-  readerType: 'Indoor' | 'Outdoor';
+  // readerType: 'Indoor' | 'Outdoor';
   posX: number;
   posY: number;
   posPxX: number;
@@ -109,7 +109,7 @@ const DeviceDetailList = () => {
     accessCctvId: null,
     readerId: null,
     accessControlId: null,
-    readerType: 'Indoor',
+    // readerType: 'Indoor',
     posX: 0,
     posY: 0,
     posPxX: 0,
@@ -144,7 +144,7 @@ const DeviceDetailList = () => {
         accessCctvId: latestDevice.accessCctvId || null,
         readerId: latestDevice.readerId || null,
         accessControlId: latestDevice.accessControlId || null,
-        readerType: latestDevice.readerType || 'Indoor',
+        // readerType: latestDevice.readerType || 'Indoor',
         posX: latestDevice.posX || 0,
         posY: latestDevice.posY || 0,
         posPxX: latestDevice.posPxX || 0,
@@ -244,7 +244,7 @@ const DeviceDetailList = () => {
         accessCctvId: latestDevice.accessCctvId || null,
         readerId: latestDevice.readerId || null,
         accessControlId: latestDevice.accessControlId || null,
-        readerType: latestDevice.readerType || 'Indoor',
+        // readerType: latestDevice.readerType || 'Indoor',
         posX: latestDevice.posX || 0,
         posY: latestDevice.posY || 0,
         posPxX: latestDevice.posPxX || 0,
@@ -405,7 +405,7 @@ const DeviceDetailList = () => {
               </CustomSelect>
             </Grid>
 
-            <Grid size={12}>
+            {/* <Grid size={12}>
               <CustomFormLabel htmlFor="reader-type">Type</CustomFormLabel>
               <CustomSelect
                 name="readerType"
@@ -421,9 +421,8 @@ const DeviceDetailList = () => {
                   </MenuItem>
                 ))}
               </CustomSelect>
-            </Grid>
+            </Grid> */}
 
-            {/* Device Type */}
             <Grid size={12}>
               <CustomFormLabel htmlFor="device-type">Device Type</CustomFormLabel>
               <CustomSelect

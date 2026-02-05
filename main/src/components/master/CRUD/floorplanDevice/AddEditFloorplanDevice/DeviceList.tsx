@@ -134,7 +134,7 @@ const DeviceList = () => {
     accessCctvId: null,
     readerId: null,
     accessControlId: null,
-    readerType: "Indoor",
+    // readerType: "Indoor",
     posX: 100,
     posY: 100,
     posPxX: 100,

@@ -28,7 +28,7 @@ import borderGateway from 'src/assets/images/svgs/devices/BLE GATEWAY ICON.png';
 import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { uniqueId } from 'lodash';
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 type Nodes = {
   id: string;
@@ -151,19 +151,24 @@ const EditDeviceRenderer: React.FC<Props> = ({
 
     if (isLargeImage && imageSrc.includes('/Uploads/')) {
       // For large images, try to load a smaller preview first
-      const previewUrl = imageSrc.replace('/Uploads/', '/Uploads/Thumbnails/') + '?width=2000';
-      const p = new Image();
+      const previewUrl = `${imageSrc}`;
+      const p = new window.Image();
       // p.crossOrigin = 'anonymous';
       p.src = previewUrl;
       p.onload = () => {
         setPreviewImage(p);
-        // Don't load full image for large images to save memory
-        setBgImage(p);
+        const full = new window.Image();
+        // full.crossOrigin = 'anonymous';
+        full.src = imageSrc;
+        full.onload = () => setBgImage(full);
+        full.onerror = () => {
+          if (!bgImage) setBgImage(p);
+        };
       };
       p.onerror = () => {
         // Fallback to original image
         const f = new Image();
-        // f.crossOrigin = 'anonymous';
+        f.crossOrigin = 'anonymous';
         f.src = imageSrc;
         f.onload = () => {
           setBgImage(f);
@@ -173,12 +178,12 @@ const EditDeviceRenderer: React.FC<Props> = ({
     } else {
       // For normal size images, use original loading logic
       const p = new Image();
-      p.crossOrigin = 'anonymous';
+      // p.crossOrigin = 'anonymous';
       p.src = imageSrc;
       p.onload = () => {
         setPreviewImage(p);
-        const full = new Image();
-        full.crossOrigin = 'anonymous';
+        const full = new window.Image();
+        // full.crossOrigin = 'anonymous';
         full.src = imageSrc;
         full.onload = () => setBgImage(full);
         full.onerror = () => {
@@ -186,7 +191,7 @@ const EditDeviceRenderer: React.FC<Props> = ({
         };
       };
       p.onerror = () => {
-        const f = new Image();
+        const f = new window.Image();
         f.crossOrigin = 'anonymous';
         f.src = imageSrc;
         f.onload = () => setBgImage(f);
