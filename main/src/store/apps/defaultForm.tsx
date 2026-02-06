@@ -38,6 +38,7 @@ import {
 } from './crud/patrolRoute';
 import { PatrolSessionType, GetFilter as PatrolSessionFilter } from './crud/patrolSession';
 import { PatrolCaseType, GetFilter as PatrolCaseFilter, CaseUploadType } from './crud/patrolCase';
+import {GetFilter as UserFilter} from './crud/users';
 
 //#region AccessCCTV
 export const defaultAccessCCTVForm: CCTVType = {
@@ -791,4 +792,16 @@ export const defaultPatrolCaseUploadForm: CaseUploadType = {
   attachments: [],
 };
 
+//#endregion
+
+//#region User
+export const defaultUserFilter: UserFilter = {
+  Draw: 1,
+  Start: 0,
+  Length: 5,
+  SortColumn: 'UpdatedAt',
+  SortDir: 'desc',
+  SearchValue: '',
+  filters: null,
+}
 //#endregion

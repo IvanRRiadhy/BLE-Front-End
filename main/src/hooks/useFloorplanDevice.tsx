@@ -152,9 +152,10 @@ export function useAddFloorplanDevice() {
         reader,
         accessControl,
         floorplanMaskedArea,
+        floorplan,
         ...cleanData
       } = floorplanDevice;
-
+      console.log("Clean Data:", cleanData);
       const res = await axiosServices.post(API_URL, cleanData);
       return res.data;
     },
@@ -187,6 +188,9 @@ export function useEditFloorplanDevice() {
         reader,
         accessControl,
         floorplanMaskedArea,
+        floorplan,
+        status,
+        applicationId,
         ...cleanData
       } = floorplanDevice;
 

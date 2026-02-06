@@ -70,6 +70,7 @@ export function useEditPatrolCase() {
       const { id, patrolCase } = data;
       const { patrolSessionId, ...filteredPatrolCase } = patrolCase;
       const res = await axiosServices.put(`${API_URL}${id}`, filteredPatrolCase);
+      console.log('edit res', res);
       return res.data;
     },
     onSuccess: () => {

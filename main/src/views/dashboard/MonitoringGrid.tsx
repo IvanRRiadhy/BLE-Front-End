@@ -3,6 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import FloorView from 'src/components/dashboards/monitoring/FloorView';
 import { LayoutItem, ScreenSettings, gridLayoutConfig } from 'src/store/apps/monitoring/layout';
 import ScrollArrowButton from 'src/components/shared/ScrollArrowButton'; // Add this import
+import { useSelector } from 'react-redux';
+import { RootState } from 'src/store/Store';
 
 interface MonitoringGridProps {
   grid: number;
@@ -50,17 +52,9 @@ const ScrollableRowWithArrows: React.FC<{
 
   return (
     <Box sx={{ position: 'relative' }}>
-      <ScrollArrowButton 
-        direction="left" 
-        onClick={scrollLeft} 
-        visible={showLeftArrow} 
-      />
-      
-      <ScrollArrowButton 
-        direction="right" 
-        onClick={scrollRight} 
-        visible={showRightArrow} 
-      />
+      <ScrollArrowButton direction="left" onClick={scrollLeft} visible={showLeftArrow} />
+
+      <ScrollArrowButton direction="right" onClick={scrollRight} visible={showRightArrow} />
 
       <Box
         ref={containerRef}
@@ -89,6 +83,9 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
     const gridRef = useRef<HTMLDivElement>(null);
     const [gridDimensions, setGridDimensions] = useState({ width: 0, height: 0 });
     const theme = useTheme();
+
+    const alarmData = useSelector((state: RootState) => state.BeaconReducer.alarmLogs);
+    const activeAlarmFloor = alarmData.find((alarm) => alarm.seen === false)?.floorplanId || '';
 
     // Track container size
     useEffect(() => {
@@ -145,37 +142,58 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
           return (
             <Grid key={index} size={item.size}>
               <ScrollableRowWithArrows itemHeight={item.height}>
-                {miniFloors.map((floorId, i) => (
-                  <Paper
-                    key={`mini-${i}`}
-                    elevation={3}
-                    sx={{
-                      width: 260,
-                      height: '100%',
-                      flexShrink: 0,
-                      borderRadius: 2,
-                      p: 1,
-                      bgcolor: '#e1e1e1',
-                      border: '2.5px solid #a1a1a1',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <FloorView
-                      activeFloorplan={floorId}
-                      zoomable={false}
-                      containerWidth={260}
-                      containerHeight={item.height ? parseInt(item.height) - 20 : 180}
-                      screenSettings={miniSettings[i]}
-                      activeMaskedArea={miniDisplays[i]}
-                      focusBeacon={miniDisplays[i]}
-                      gridNumber={grid}
-                      screenNumber={i + 2}
-                      screenId={miniIds[i]}
-                    />
-                  </Paper>
-                ))}
+                {miniFloors.map((floorId, i) => {
+                  const isMiniAlarm = activeAlarmFloor.includes(floorId.toUpperCase());
+
+                  return (
+                    <Paper
+                      elevation={3}
+                      sx={{
+                        width: 260,
+                        height: '100%',
+                        flexShrink: 0,
+                        borderRadius: 2,
+                        p: 1,
+                        bgcolor: '#e1e1e1',
+                        border: '2.5px solid',
+                        borderColor: isMiniAlarm ? theme.palette.error.main : '#a1a1a1',
+
+                        ...(isMiniAlarm && {
+                          animation: 'alarmAura 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        }),
+
+                        '@keyframes alarmAura': {
+                          '0%': {
+                            boxShadow: '0 0 4px rgba(255,0,0,0.3)',
+                          },
+                          '50%': {
+                            boxShadow: '0 0 18px 6px rgba(255,0,0,0.6)',
+                          },
+                          '100%': {
+                            boxShadow: '0 0 4px rgba(255,0,0,0.3)',
+                          },
+                        },
+
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <FloorView
+                        activeFloorplan={floorId}
+                        zoomable={false}
+                        containerWidth={260}
+                        containerHeight={item.height ? parseInt(item.height) - 20 : 180}
+                        screenSettings={miniSettings[i]}
+                        activeMaskedArea={miniDisplays[i]}
+                        focusBeacon={miniDisplays[i]}
+                        gridNumber={grid}
+                        screenNumber={i + 2}
+                        screenId={miniIds[i]}
+                      />
+                    </Paper>
+                  );
+                })}
               </ScrollableRowWithArrows>
             </Grid>
           );
@@ -187,7 +205,7 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
         const idx = item.floorId!;
         const floorplanId = floorIds[grid][idx];
         const type = screenType[grid][idx];
-
+        const isAlarmActive = activeAlarmFloor.includes(floorplanId.toUpperCase());
         return (
           <Grid key={index} size={item.size}>
             <Paper
@@ -197,7 +215,26 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
                 p: 1.5,
                 borderRadius: 2,
                 bgcolor: '#e1e1e1',
-                border: '2.5px solid #a1a1a1',
+                border: '2.5px solid',
+                borderColor: isAlarmActive ? theme.palette.error.main : '#a1a1a1',
+
+                // 🔥 AURA EFFECT
+                ...(isAlarmActive && {
+                  animation: 'alarmAura 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                }),
+
+                // Keyframes defined inline
+                '@keyframes alarmAura': {
+                  '0%': {
+                    boxShadow: '0 0 4px rgba(255,0,0,0.3)',
+                  },
+                  '50%': {
+                    boxShadow: '0 0 18px 6px rgba(255,0,0,0.6)',
+                  },
+                  '100%': {
+                    boxShadow: '0 0 4px rgba(255,0,0,0.3)',
+                  },
+                },
               }}
             >
               {type === 2 ? null : (
@@ -230,7 +267,7 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
         </Grid>
       </Box>
     );
-  }
+  },
 );
 
 export default MonitoringGrid;

@@ -22,6 +22,7 @@ export function usePatrolSessionList (filter: GetFilter) {
         queryFn: async () => {
             const response = await axiosServices.post(API_DT_URL, filter);
             const res = response.data.collection;
+            console.log('Patrol Session Data fetched: ', res);
             return{
                 data: res.data as PatrolSessionType[],
                 draw: res.draw,

@@ -67,8 +67,8 @@ export type AlarmLogItem = {
   dmac: string;
   target: string;
   image: string;
-
   floor: string;
+  floorplanId:string;
   area: string;
   time: string;
   color?: string;
@@ -287,7 +287,7 @@ export const BeaconSlice = createSlice({
 
       state.alarmLogs.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
-      state.alarmLogs = state.alarmLogs.slice(0, 100);
+      // state.alarmLogs = state.alarmLogs.slice(0, 100);
       // console.log('Updated Alarm Logs:', JSON.stringify(state.alarmLogs, null, 2));
     },
 

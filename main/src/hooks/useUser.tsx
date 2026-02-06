@@ -1,13 +1,16 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
 import { RootState, useSelector } from 'src/store/Store';
-import { userType, GetFilter } from 'src/store/apps/crud/users';
+import { userType, GetFilter, userGroupType } from 'src/store/apps/crud/users';
 
 // -----------------------------------------------------------------------------
 // ✅ API URLs
 // -----------------------------------------------------------------------------
-const API_URL = "/api/Auth/users";
+const API_URL = '/api/Auth/users';
+const API_DT_URL = '/api/user/filter';
 const REGIST_URL = '/api/Auth/register/';
+const GROUP_URL = '/api/UserGroup';
+const AssignBuilding = '/api/access';
 
 // ✅ Shared paginated response interface
 export interface PaginatedResponse<T> {
@@ -25,7 +28,7 @@ export function useAllUsers() {
     queryKey: ['user-all'],
     queryFn: async () => {
       const res = await axiosServices.get(API_URL);
-      console.log("Users: ", res.data);
+      console.log('Users: ', res.data);
       return res.data.collection.data as userType[];
     },
     placeholderData: [],
@@ -39,7 +42,7 @@ export function useUserList(filter: GetFilter) {
   return useQuery({
     queryKey: ['user-list', filter],
     queryFn: async () => {
-      const res = await axiosServices.post(`${API_URL}/filter`, filter);
+      const res = await axiosServices.post(`${API_DT_URL}`, filter);
       const col = res.data.collection;
 
       return {
@@ -52,4 +55,102 @@ export function useUserList(filter: GetFilter) {
     placeholderData: keepPreviousData,
     staleTime: 5_000,
   });
+}
+// -----------------------------------------------------------------------------
+// ✅ REGISTER NEW USER
+// -----------------------------------------------------------------------------
+export function useRegisterUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {email: string, GroupId: string, username: string}) => {
+      const res = await axiosServices.post(REGIST_URL, payload);
+      console.log("Adding Result", res);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-all'] });
+    }
+  })
+}
+
+// -----------------------------------------------------------------------------
+// ✅ FETCH ALL USER GROUPS (for dropdowns, etc.)
+// -----------------------------------------------------------------------------
+export function useAllUserGroups() {
+  return useQuery({
+    queryKey: ['user-group-all'],
+    queryFn: async () => {
+      const res = await axiosServices.get(GROUP_URL);
+      console.log('User Groups: ', res.data);
+      return res.data.collection.data as userGroupType[];
+    },
+    placeholderData: [],
+  });
+}
+
+// -----------------------------------------------------------------------------
+// ✅ CREATE NEW USER GROUPS 
+// -----------------------------------------------------------------------------
+export function useAddUserGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {name: string, levelPriority: string}) => {
+      const res = await axiosServices.post(GROUP_URL, payload);
+      console.log("Adding Result", res);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-group-all'] });
+    }
+  })
+}
+// -----------------------------------------------------------------------------
+// ✅ ASSIGN BUILDING TO USER GROUPS 
+// -----------------------------------------------------------------------------
+export function useAssignBuilding(){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {groupId: string, buildingIds: string[]}) => {
+      const res = await axiosServices.post(`${AssignBuilding}/assign`, payload);
+      console.log("Adding Result", res);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-group-all'] });
+    }
+  })
+}
+
+// -----------------------------------------------------------------------------
+// ✅ REVOKE BUILDING TO USER GROUPS 
+// -----------------------------------------------------------------------------
+export function useRevokeBuilding(){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {groupId: string, buildingId: string}) => {
+      const res = await axiosServices.post(`${AssignBuilding}/revoke`, payload);
+      console.log("Adding Result", res);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-group-all'] });
+    }
+  })
+}
+
+// -----------------------------------------------------------------------------
+// ✅ REVOKE ALL BUILDING TO USER GROUPS 
+// -----------------------------------------------------------------------------
+export function useRevokeAllBuilding(){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {groupId: string}) => {
+      const res = await axiosServices.post(`${AssignBuilding}/revoke-all`, payload);
+      console.log("Adding Result", res);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-group-all'] });
+    }
+  })
 }

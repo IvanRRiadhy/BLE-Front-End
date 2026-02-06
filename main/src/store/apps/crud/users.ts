@@ -3,8 +3,9 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { defaultUserFilter } from "../defaultForm";
 
-const API_URL = "/api/Auth/users";
+const API_URL = "/api/users";
 const REGIST_URL = '/api/Auth/register/';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -15,9 +16,9 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     SearchValue: string,
-    filters: {
+    filters?: {
         GroupId?: string,
-    }
+    } | null,
 }
 
 export type userType = {
@@ -33,13 +34,59 @@ export type userRegistrationType = {
     email: string,
     groupId: string
 };
+export type userMinType = {
+    id: string;
+    username: string;
+    email: string;
+    fullName: string;
+    status: number;
+}
+export type accessibleBuildingType = {
+    id: string;
+    name: string;
+    image: string;
+    status: number;
+    applicationId: string;
+}
+
+export type userGroupType = {
+    id: string;
+    name: string;
+    levelPriority: string;
+    applicationId: string;
+    members: userMinType[];
+    accessibleBuildings: accessibleBuildingType[];
+    memberCount: number;
+    accessibleBuildingCount: number;
+    createdAt: string;
+    createdBy: string;
+    updatedAt: string;
+    updatedBy: string;
+}
+
+// src/constants/levelPriority.ts
+export const LEVEL_PRIORITY_ORDER = [
+//   'System',
+  'SuperAdmin',
+  'PrimaryAdmin',
+  'Primary',
+  'Secondary',
+  'UserCreated',
+] as const;
+
+export type LevelPriorityType = typeof LEVEL_PRIORITY_ORDER[number];
+
 
 interface StateType {
     users : userType[];
+    userGroups : userGroupType[];
     selectedUser : userType;
+    selectedUserGroup : userGroupType;
     userTotalCount: number;
     userFilteredCount: number;
     userFilter: GetFilter;
+    userGroupTotalCount: number;
+    userGroupFilteredCount: number;
     lastFilter?: GetFilter;
 isLoading: boolean;
 hasLoaded: boolean;
@@ -47,10 +94,15 @@ hasLoaded: boolean;
 
 const initialState: StateType = {
     users: [],
+    userGroups: [],
     selectedUser: {} as userType,
+    selectedUserGroup: {} as userGroupType,
     userTotalCount: 0,
     userFilteredCount: 0,
-    userFilter: {} as GetFilter,
+    userFilter: defaultUserFilter,
+    userGroupTotalCount: 0,
+    userGroupFilteredCount: 0,
+
     isLoading: false,
     hasLoaded: false,
 };
@@ -62,8 +114,14 @@ export const UserSlice = createSlice({
         GetUsers: (state, action: PayloadAction<userType[]>) => {
             state.users = action.payload;
         },
+        GetUserGroups: (state, action: PayloadAction<userGroupType[]>) => {
+            state.userGroups = action.payload;
+        },
         setSelectedUser: (state, action: PayloadAction<userType>) => {
             state.selectedUser = action.payload;
+        },
+        setSelectedUserGroup: (state, action: PayloadAction<userGroupType>) => {
+            state.selectedUserGroup = action.payload;
         },
         UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
             state.userFilter = {...state.userFilter, ...action.payload};
@@ -77,7 +135,7 @@ export const UserSlice = createSlice({
     },
 });
 
-export const { GetUsers, setSelectedUser, UpdateFilter } = UserSlice.actions;
+export const { GetUsers, setSelectedUser, UpdateFilter, GetUserGroups, setSelectedUserGroup } = UserSlice.actions;
 
 export const fetchUser = () => async (dispatch: AppDispatch) => {
     try {

@@ -39,26 +39,21 @@ const EditAreaFloorView: React.FC<{
   const [isOnArea, setIsOnArea] = useState(false);
   const isDrawingMaskedArea = drawingMaskedArea !== '';
   const [filteredUnsavedMaskedArea, setFilteredUnsavedMaskedArea] = useState<MaskedAreaType[]>([]);
-  const [cursor, setCursor] = useState(drawingMaskedArea? 'crosshair' : 'grab');
+  const [cursor, setCursor] = useState(drawingMaskedArea ? 'crosshair' : 'grab');
   const Cursor = useMemo(() => {
-  if (isDrawingMaskedArea) return 'crosshair';
-  if(isOnArea) return 'pointer';
-  if (isDraggingView) return 'grabbing';
-  if (isHoveringAreaShape) return 'move';
-  if (isHoveringView) return 'grab';
-  return 'default';
-}, [
-  isDrawingMaskedArea,
-  isDraggingView,
-  isHoveringAreaShape,
-  isHoveringView,
-]);
+    if (isDrawingMaskedArea) return 'crosshair';
+    if (isOnArea) return 'pointer';
+    if (isDraggingView) return 'grabbing';
+    if (isHoveringAreaShape) return 'move';
+    if (isHoveringView) return 'grab';
+    return 'default';
+  }, [isDrawingMaskedArea, isDraggingView, isHoveringAreaShape, isHoveringView]);
 
   const [isDragging, setIsDragging] = useState('');
   const [isHovered, setIsHovered] = useState(false);
   useEffect(() => {
-    console.log("CURSOR: ", cursor);
-  }, [cursor]);
+    console.log('CURSOR: ', Cursor);
+  }, [Cursor]);
   // Container and stage management
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<any>(null);
@@ -313,7 +308,7 @@ const EditAreaFloorView: React.FC<{
         justifyContent: 'center',
         alignItems: 'center',
         overflow: 'visible',
-        cursor: cursor,
+        cursor: Cursor,
         // Add CSS to prevent browser zoom
         touchAction: 'none', // Prevent touch zoom
       }}
@@ -449,6 +444,26 @@ const EditAreaFloorView: React.FC<{
             p: 1,
           }}
         >
+          <Box mt={1} display="flex" alignItems="center" gap={1}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                // bgcolor: 'white',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mr: 4.75,
+                ml: 2.25,
+              }}
+            >
+              {/* <img src={MouseLeftClickIcon} alt="Left Click" style={{ width: 36, height: 36 }} /> */}
+            </Box>
+            <FormLabel sx={{ color: 'white', fontSize: '0.875rem', fontWeight: 600 }}>
+              Create Point
+            </FormLabel>
+          </Box>
           <Box mt={1} display="flex" alignItems="center" gap={1}>
             <Box
               sx={{

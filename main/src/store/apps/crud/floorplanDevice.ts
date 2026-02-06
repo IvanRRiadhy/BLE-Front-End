@@ -11,6 +11,7 @@ import { AccessControlType } from "./accessControl";
 import { DeviceType } from "src/types/crud/input";
 import { defaultFloorplanDeviceFilter } from "../defaultForm";
 import {v4 as uuidv4} from 'uuid';
+import { FloorplanType } from "./floorplan";
 
 const API_URL = '/api/FloorplanDevice/';
 const API_DT_URL = '/api/FloorplanDevice/filter/';
@@ -74,7 +75,6 @@ export interface FloorplanDeviceType {
     accessCctvId: string | null,
     readerId: string | null,
     accessControlId: string | null,
-    // readerType: "Indoor" | "Outdoor",
     posX: number,
     posY: number,
     posPxX: number,
@@ -91,7 +91,9 @@ export interface FloorplanDeviceType {
     accessControl?: AccessControlType,
     floorplanMaskedArea?: MaskedAreaType,
     path?: string,
+    floorplan?: FloorplanType,
     devicePath?: PathsType[],
+    status?:number,
 };
 
 interface StateType {

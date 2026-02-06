@@ -21,11 +21,18 @@ import {
   TableContainer,
   TableSortLabel,
   Chip,
+  TextField,
+  MenuItem,
+  Tooltip,
+  IconButton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { EVENT_TYPE, EventType } from 'src/types/crud/input';
 import { useTranslation } from 'react-i18next';
-import { RootState, useSelector } from 'src/store/Store';
+import { RootState, useDispatch, useSelector } from 'src/store/Store';
+import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
+import { ClearEventLogs, fetchEventLogs } from 'src/store/apps/tracking/Event';
+import { IconEraser } from '@tabler/icons-react';
 
 const columns = [
   { label: 'Event', field: 'Building.Name', sortAble: true },
@@ -76,14 +83,39 @@ const DETAILS_MAP: Record<EventType, string[]> = {
   LOGIN: ['User logged in', 'User logged out'],
   OTHER: ['Performed system maintenance', 'Updated application settings'],
 };
+const EVENT_OPTIONS: EventType[] = [
+  'CREATE',
+  'UPDATE',
+  'DELETE',
+  'REPORT',
+  'ALARM',
+  'LOGIN',
+  'ACTION',
+  'OTHER',
+];
+
+const ACTOR_ROLE_OPTIONS = ['SuperAdmin', 'PrimaryAdmin', 'Primary', 'Secondary'];
+
+const ENTITY_OPTIONS = ['Organization', 'Department', 'District', 'Building'];
 
 const EventLogList = () => {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  useEffect(() => {
+    // dispatch(fetchAlarmSettingsDT(defaultAlarmSettingFilter));
+    dispatch(fetchEventLogs());
+  }, []);
 
   const isDummy = true;
 
   const isValidEventType = (value: any): value is EventType =>
     Object.values(EVENT_TYPE).includes(value);
+  const [filterEvent, setFilterEvent] = useState<EventType | 'ALL'>('ALL');
+  const [filterActorRole, setFilterActorRole] = useState<string | 'ALL'>('ALL');
+  const [filterEntity, setFilterEntity] = useState<string | 'ALL'>('ALL');
+  const [filterStartDate, setFilterStartDate] = useState<string>(''); // ISO string
+  const [filterEndDate, setFilterEndDate] = useState<string>('');
+  const [openClearDialog, setOpenClearDialog] = useState(false);
 
   const eventLogData = useSelector((state: RootState) =>
     state.EventLogReducer.logs.map((log: any) => {
@@ -100,7 +132,7 @@ const EventLogList = () => {
       };
     }),
   );
-
+  console.log('eventLogData', eventLogData);
   // useEffect(() => {
   //   if (!isDummy) return;
 
@@ -135,37 +167,164 @@ const EventLogList = () => {
       },
     )}`;
   };
+  const filteredData = useMemo(() => {
+    return eventLogData.filter((row) => {
+      // Event
+      if (filterEvent !== 'ALL' && row.event !== filterEvent) return false;
 
-  const getRandomItem = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+      // Actor Role
+      if (filterActorRole !== 'ALL' && row.actorRole !== filterActorRole) return false;
 
-  const generateRandomEventLog = (): EventLogType => {
-    const event = getRandomItem(Object.values(EVENT_TYPE));
-    const actor = getRandomItem(ACTORS);
+      // Entity
+      if (filterEntity !== 'ALL' && row.entity !== filterEntity) return false;
 
-    const nowUtc = new Date(); // UTC source
-    const serverLocal = new Date(); // Client local time
+      // DateTime (pakai eventTime)
+      const eventDate = new Date(row.eventTime).getTime();
 
-    return {
-      event,
-      eventTime: nowUtc.toISOString(),
+      if (filterStartDate) {
+        const start = new Date(filterStartDate).getTime();
+        if (eventDate < start) return false;
+      }
 
-      serverTime: toLocalISOString(serverLocal),
+      if (filterEndDate) {
+        const end = new Date(filterEndDate).getTime();
+        if (eventDate > end) return false;
+      }
 
-      actor: actor.name,
-      actorRole: actor.role,
-      entity: getRandomItem(DETAILS_MAP[event]),
-      details: getRandomItem(DETAILS_MAP[event]),
-    };
-  };
+      return true;
+    });
+  }, [eventLogData, filterEvent, filterActorRole, filterEntity, filterStartDate, filterEndDate]);
+
+  // const getRandomItem = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
+  // const generateRandomEventLog = (): EventLogType => {
+  //   const event = getRandomItem(Object.values(EVENT_TYPE));
+  //   const actor = getRandomItem(ACTORS);
+
+  //   const nowUtc = new Date(); // UTC source
+  //   const serverLocal = new Date(); // Client local time
+
+  //   return {
+  //     event,
+  //     eventTime: nowUtc.toISOString(),
+
+  //     serverTime: toLocalISOString(serverLocal),
+
+  //     actor: actor.name,
+  //     actorRole: actor.role,
+  //     entity: getRandomItem(DETAILS_MAP[event]),
+  //     details: getRandomItem(DETAILS_MAP[event]),
+  //   };
+  // };
 
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%', maxHeight: '100%' }}>
           <BlankCard>
+            <Box p={2}>
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, sm: 2 }}>
+                  <CustomTextField
+                    select
+                    fullWidth
+                    label="Event"
+                    value={filterEvent}
+                    onChange={(e: any) => setFilterEvent(e.target.value as any)}
+                  >
+                    <MenuItem value="ALL">All</MenuItem>
+                    {EVENT_OPTIONS.map((ev) => (
+                      <MenuItem key={ev} value={ev}>
+                        {ev}
+                      </MenuItem>
+                    ))}
+                  </CustomTextField>
+                </Grid>
+
+                <Grid size={{ xs: 12, sm: 2 }}>
+                  <CustomTextField
+                    select
+                    fullWidth
+                    label="Actor Role"
+                    value={filterActorRole}
+                    onChange={(e: any) => setFilterActorRole(e.target.value)}
+                  >
+                    <MenuItem value="ALL">All</MenuItem>
+                    {ACTOR_ROLE_OPTIONS.map((role) => (
+                      <MenuItem key={role} value={role}>
+                        {role}
+                      </MenuItem>
+                    ))}
+                  </CustomTextField>
+                </Grid>
+
+                <Grid size={{ xs: 12, sm: 2 }}>
+                  <CustomTextField
+                    select
+                    fullWidth
+                    label="Entity"
+                    value={filterEntity}
+                    onChange={(e: any) => setFilterEntity(e.target.value)}
+                  >
+                    <MenuItem value="ALL">All</MenuItem>
+                    {ENTITY_OPTIONS.map((ent) => (
+                      <MenuItem key={ent} value={ent}>
+                        {ent}
+                      </MenuItem>
+                    ))}
+                  </CustomTextField>
+                </Grid>
+
+                <Grid size={{ xs: 12, sm: 2 }}>
+                  <CustomTextField
+                    type="datetime-local"
+                    fullWidth
+                    label="From"
+                    InputLabelProps={{ shrink: true }}
+                    value={filterStartDate}
+                    onChange={(e: any) => setFilterStartDate(e.target.value)}
+                  />
+                </Grid>
+
+                <Grid size={{ xs: 12, sm: 2 }}>
+                  <CustomTextField
+                    type="datetime-local"
+                    fullWidth
+                    label="To"
+                    InputLabelProps={{ shrink: true }}
+                    value={filterEndDate}
+                    onChange={(e: any) => setFilterEndDate(e.target.value)}
+                  />
+                </Grid>
+
+                <Grid size={{ xs: 2 }}>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Button
+                      variant="outlined"
+                      onClick={() => {
+                        setFilterEvent('ALL');
+                        setFilterActorRole('ALL');
+                        setFilterEntity('ALL');
+                        setFilterStartDate('');
+                        setFilterEndDate('');
+                      }}
+                    >
+                      Reset Filter
+                    </Button>
+                    <Tooltip title="Clear Event Logs">
+                      <IconButton color="error" onClick={() => setOpenClearDialog(true)}>
+                        <IconEraser size={20} />
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+                </Grid>
+              </Grid>
+            </Box>
+
+            <Divider />
             <TableContainer
               sx={{
-                maxHeight: '85vh', // or any fixed height
+                maxHeight: '75vh', // or any fixed height
               }}
             >
               <Table stickyHeader aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
@@ -190,24 +349,10 @@ const EventLogList = () => {
                         <Typography variant="h6">{col.label}</Typography>
                       </TableCell>
                     ))}
-                    {/* Right Sticky Empty Column */}
-                    {/* <TableCell
-                      sx={{
-                        position: 'sticky',
-                        right: 0,
-                        background: 'white',
-                        zIndex: 2,
-                        width: 150, // Fixed width
-                        minWidth: 150,
-                        maxWidth: 150,
-                      }}
-                    >
-                      <Typography variant="h6"> Actions </Typography>
-                    </TableCell> */}
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {eventLogData.map((row, index) => (
+                  {filteredData.map((row, index) => (
                     <TableRow
                       key={index}
                       sx={{
@@ -280,6 +425,38 @@ const EventLogList = () => {
                 </TableBody>
               </Table>
             </TableContainer>
+            <Dialog
+              open={openClearDialog}
+              onClose={() => setOpenClearDialog(false)}
+              maxWidth="xs"
+              fullWidth
+            >
+              <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }} color="error">
+                <IconEraser size={20} color="#fa896b" />
+                Confirm Action
+              </DialogTitle>
+              <Divider />
+              <DialogContent>
+                <Typography>Are you sure to permanently clear Event Logs?</Typography>
+              </DialogContent>
+
+              <Stack direction="row" spacing={2} justifyContent="flex-end" p={2}>
+                <Button variant="outlined" onClick={() => setOpenClearDialog(false)}>
+                  Cancel
+                </Button>
+
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={() => {
+                    dispatch(ClearEventLogs());
+                    setOpenClearDialog(false);
+                  }}
+                >
+                  Clear Logs
+                </Button>
+              </Stack>
+            </Dialog>
           </BlankCard>
         </Box>
       </Grid>

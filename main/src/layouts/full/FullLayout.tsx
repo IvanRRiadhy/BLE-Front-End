@@ -71,7 +71,7 @@ const FullLayout: FC = () => {
 
   useEffect(() => {
     dispatch(fetchAlarmSettingsDT(defaultAlarmSettingFilter));
-    dispatch(fetchEventLogs());
+    // dispatch(fetchEventLogs());
   }, []);
 
   useEffect(() => {
@@ -150,6 +150,7 @@ const FullLayout: FC = () => {
           color: alarmData.color || 'gray',
           dmac: alarmData.dmac,
           floor: alarmData.floorplanName || 'Unknown Floor',
+          floorplanId: alarmData.floorplanId,
           area: alarmData.maskedAreaName || 'Unknown Area',
           personId: alarmData.personId || '',
           alarmStatus: alarmData.status, // e.g. blacklist / restricted

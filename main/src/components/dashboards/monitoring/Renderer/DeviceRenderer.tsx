@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { Stage, Layer, Image as KonvaImage, Text, Line, Label, Tag, Group } from 'react-konva';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
-import { fetchBeacon, RefreshBeaconState, cleanupTopicBeacons } from 'src/store/apps/tracking/Beacon';
+import { fetchBeacon, RefreshBeaconState, cleanupTopicBeacons, AlarmLogItem } from 'src/store/apps/tracking/Beacon';
 import BeaconRenderer from './BeaconRenderer';
 import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
@@ -173,7 +173,9 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   // Image state like EditAreaRenderer
   const [bgImage, setBgImage] = useState<HTMLImageElement | undefined>(undefined);
   const [previewImage, setPreviewImage] = useState<HTMLImageElement | undefined>(undefined);
-
+  const alarmData = useSelector((state: RootState) => state.BeaconReducer.alarmLogs);
+  const activeAlarm = alarmData.find((a: AlarmLogItem) => a.action === 'active');
+  const investigatedAlarm = alarmData.find((a: AlarmLogItem) => a.action === 'investigated');
   const [animatedBeacons, setAnimatedBeacons] = useState<{
     [id: string]: { x: number; y: number };
   }>({});

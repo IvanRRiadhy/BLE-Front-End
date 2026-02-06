@@ -430,7 +430,7 @@ const PatrolRouteList = () => {
                                   sx={{ p: 0, borderBottom: 0 }}
                                 >
                                   <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                                    <Box p={2} bgcolor="grey.50">
+                                    <Box p={2} bgcolor="grey.200" pl={8}>
                                       <PatrolAssignmentAccordionRow routeId={patrolRoute.id} />
                                     </Box>
                                   </Collapse>
@@ -439,64 +439,6 @@ const PatrolRouteList = () => {
                             </React.Fragment>
                           );
                         },
-                        // <TableRow key={index}>
-                        //   <TableCell
-                        //     sx={{
-                        //       position: 'sticky',
-                        //       left: 0,
-                        //       background: 'white',
-                        //       zIndex: 1,
-                        //       width: 35, // Fixed width
-                        //       minWidth: 35,
-                        //       maxWidth: 35,
-                        //       alignItems: 'center',
-                        //       justifyContent: 'center',
-                        //     }}
-                        //   >
-                        //     {index + 1 + page * rowsPerPage}
-                        //   </TableCell>
-                        //   <TableCell>{patrolRoute.name}</TableCell>
-                        //   <TableCell>{patrolRoute.description}</TableCell>
-                        //   <TableCell>{patrolRoute.patrolAreas?.length ?? 0}</TableCell>
-                        //   <TableCell>{patrolRoute.startAreaName ?? '-'}</TableCell>
-                        //   <TableCell>{patrolRoute.endAreaName ?? '-'}</TableCell>
-                        //   <TableCell>
-                        //     {patrolRoute.patrolTimeGroups?.length ?? 0}
-                        //     <Tooltip
-                        //       title={
-                        //         patrolRoute.patrolTimeGroups?.map((ptg) => ptg.name).join(', ') ||
-                        //         'No Patrol Times'
-                        //       }
-                        //     >
-                        //       <IconButton size="small">
-                        //         <IconInfoCircle size={16} />
-                        //       </IconButton>
-                        //     </Tooltip>
-                        //   </TableCell>
-                        //   <TableCell
-                        //     sx={{
-                        //       position: 'sticky',
-                        //       right: 0,
-                        //       background: 'white',
-                        //       zIndex: 2,
-                        //       gap: 1,
-                        //       alignItems: 'center',
-                        //       width: 150, // Fixed width
-                        //       minWidth: 150,
-                        //       maxWidth: 150,
-                        //     }}
-                        //   >
-                        //     <AddEditPatrolRoute patrolRoute={patrolRoute} type="edit" />
-                        //     <AssignPatrol patrolRouteId={patrolRoute.id} type="add" />
-                        //     <IconButton
-                        //       color="error"
-                        //       size="small"
-                        //       onClick={() => handleOpenDeleteDialog(patrolRoute)}
-                        //     >
-                        //       <IconTrash size={20} />
-                        //     </IconButton>
-                        //   </TableCell>
-                        // </TableRow>
                       )}
                 </TableBody>
               </Table>

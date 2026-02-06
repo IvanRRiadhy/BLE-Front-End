@@ -10,6 +10,7 @@ import {
   Chip,
   CircularProgress,
 } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useEffect, useState } from 'react';
 import { PatrolDetailPayload } from 'src/store/apps/crud/patrolRoute';
 import PatrolRouteDetailDialog from '../SecurityViewPatrol/PatrolRouteDetailDialog';
@@ -27,6 +28,8 @@ import PatrolCaseDialog from './PatrolCaseDialog';
 import { CaseUploadType } from 'src/store/apps/crud/patrolCase';
 import PatrolCaseListItem from './PatrolCaseListItem';
 import toast from 'react-hot-toast';
+import { use } from 'i18next';
+import { RootState, useSelector } from 'src/store/Store';
 interface PatrolDetailPageProps {
   data: PatrolDetailPayload;
 }
@@ -34,6 +37,7 @@ interface PatrolDetailPageProps {
 const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const customizer = useSelector((state: RootState) => state.customizer);
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [openSchedule, setOpenSchedule] = useState(false);
   const [openRoute, setOpenRoute] = useState(false);
@@ -42,6 +46,7 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
   const [openCaseDialog, setOpenCaseDialog] = useState(false);
   const [caseDialogType, setCaseDialogType] = useState<'add' | 'edit'>('add');
   const [selectedCase, setSelectedCase] = useState<CaseUploadType | undefined>(undefined);
+  const [editId, setEditId] = useState<string | undefined>(undefined);
   const [patrolSessionId, setPatrolSessionId] = useState<string | undefined>(undefined);
 
   const formatDate = (date?: string) => (date ? new Date(date).toLocaleDateString('en-GB') : '-');
@@ -219,9 +224,23 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
     }
   };
 
+  const mapCaseToForm = (data: any): CaseUploadType => ({
+  title: data.title ?? '',
+  description: data.description ?? '',
+  caseType: data.caseType ?? '',
+  patrolSessionId: data.patrolSessionId,
+  attachments: (data.attachments || []).map((a: any) => ({
+    fileUrl: a.fileUrl.startsWith('http')
+      ? a.fileUrl
+      : `https://${a.fileUrl}`,
+    fileType: a.fileType,
+  })),
+});
+
   const handleEditCase = (item: any) => {
     setCaseDialogType('edit');
-    setSelectedCase(item);
+    setEditId(item.id);
+    setSelectedCase(mapCaseToForm(item));
     setOpenCaseDialog(true);
   };
 
@@ -239,8 +258,25 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
             width={isMobile ? '100%' : 360}
             borderRadius={2}
             p={2}
-            sx={{ backgroundColor: theme.palette.background.paper }}
+            display="flex"
+            flexDirection="column"
+            sx={{
+              backgroundColor: theme.palette.background.paper,
+              minHeight: isMobile
+                ? 'auto'
+                : `calc(100vh - ${(customizer.TopbarHeight ?? 70) * 2}px)`,
+            }}
           >
+            {/* Back Button */}
+            <Box mb={1}>
+              <Button
+                size="small"
+                startIcon={<ArrowBackIcon />}
+                onClick={() => navigate('/security-view/patrol-assignment')}
+              >
+                Back
+              </Button>
+            </Box>
             {/* Name */}
             <Typography fontWeight={700} fontSize={20}>
               {patrolAssignment.name}
@@ -339,39 +375,54 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
 
             <Divider sx={{ my: 2 }} />
             {/* Securities */}
-            <Typography fontWeight={600} mb={1}>
-              Securities
-            </Typography>
-            <Stack spacing={1}>
-              {patrolAssignment.securities?.map((sec) => (
-                <Box
-                  key={sec.id}
-                  display="flex"
-                  alignItems="center"
-                  gap={1.5}
-                  p={1}
-                  borderRadius={1}
-                  sx={{ backgroundColor: theme.palette.action.hover }}
-                >
-                  <Avatar sx={{ width: 32, height: 32 }}>{sec.name.charAt(0)}</Avatar>
+            <Box display="flex" flexDirection="column" flexGrow={isMobile ? 0 : 1}>
+              <Typography fontWeight={600} mb={1}>
+                Securities
+              </Typography>
 
-                  <Box>
-                    <Typography fontWeight={600} fontSize={14}>
-                      {sec.name}
-                    </Typography>
+              {/* LIST CONTAINER */}
+              <Box
+                sx={{
+                  overflowY: isMobile ? 'auto' : 'visible',
+                  maxHeight: isMobile ? 200 : 'none', // ± 3 items
+                  pr: isMobile ? 0.5 : 0,
+                }}
+              >
+                <Stack spacing={1}>
+                  {patrolAssignment.securities?.map((sec) => (
+                    <Box
+                      key={sec.id}
+                      display="flex"
+                      alignItems="center"
+                      gap={1.5}
+                      p={1}
+                      borderRadius={1}
+                      sx={{ backgroundColor: theme.palette.action.hover }}
+                    >
+                      <Avatar sx={{ width: 32, height: 32 }}>{sec.name.charAt(0)}</Avatar>
+
+                      <Box>
+                        <Typography fontWeight={600} fontSize={14}>
+                          {sec.name}
+                        </Typography>
+                        <Typography fontSize={12} color="text.secondary">
+                          {sec.identityId}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ))}
+
+                  {!patrolAssignment.securities?.length && (
                     <Typography fontSize={12} color="text.secondary">
-                      {sec.identityId}
+                      No securities assigned
                     </Typography>
-                  </Box>
-                </Box>
-              ))}
+                  )}
+                </Stack>
+              </Box>
 
-              {!patrolAssignment.securities?.length && (
-                <Typography fontSize={12} color="text.secondary">
-                  No securities assigned
-                </Typography>
-              )}
-            </Stack>
+              {/* Spacer otomatis kalau list sedikit */}
+              {!isMobile && <Box flexGrow={1} />}
+            </Box>
             <Divider sx={{ my: 2 }} />
 
             {/* ===== Patrol Status ===== */}
@@ -467,7 +518,6 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
                   cursor: canAddCase ? 'pointer' : 'not-allowed',
                 }}
               >
-                
                 <Button
                   size="small"
                   variant="contained"
@@ -476,9 +526,7 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
                 >
                   Add Case
                 </Button>
-                
               </Box>
-              
             </Box>
 
             {/* List */}
@@ -506,9 +554,11 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
                       <PatrolCaseListItem
                         data={item}
                         onClick={(c) => {
-                          // optional: navigate to case detail
-                          // navigate(`/patrol-case/${c.id}`);
-                          console.log('case clicked', c);
+                          if (patrolEnded) {
+                            toast.error('This patrol has ended. Cases can no longer be edited.');
+                            return;
+                          }
+                          handleEditCase(c);
                         }}
                       />
                     </Box>
@@ -538,8 +588,10 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
       <PatrolCaseDialog
         open={openCaseDialog}
         onClose={handleCloseCaseDialog}
+        id={editId}
         type={caseDialogType}
         initialData={selectedCase}
+        setEditId={setEditId}
       />
     </>
   );

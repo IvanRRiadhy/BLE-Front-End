@@ -29,11 +29,12 @@ interface Props {
   id?: string;
   open: boolean;
   onClose: () => void;
+  setEditId?: (id: string) => void;
 }
 
 // const CASE_TYPES = ['Damage', 'Incident', 'Security', 'Other'];
 
-const PatrolCaseDialog = ({ open, onClose, id, type, initialData }: Props) => {
+const PatrolCaseDialog = ({ open, onClose, id, type, initialData, setEditId }: Props) => {
   const addMutation = useAddPatrolCase();
   const editMutation = useEditPatrolCase();
   const uploadMutation = useUploadCDN();
@@ -43,6 +44,8 @@ const PatrolCaseDialog = ({ open, onClose, id, type, initialData }: Props) => {
 
   const [form, setForm] = useState({ ...defaultPatrolCaseUploadForm, ...initialData });
   //   console.log("Session ID: ", form.patrolSessionId);
+  const [openAttachmentDialog, setOpenAttachmentDialog] = useState(false);
+  const [selectedAttachment, setSelectedAttachment] = useState<any | null>(null);
 
   /* ================== HANDLERS ================== */
 
@@ -88,14 +91,17 @@ const PatrolCaseDialog = ({ open, onClose, id, type, initialData }: Props) => {
       return;
     }
     console.log('form', form);
+    console.log('isEdit', isEdit, "or isAdd", type);
     try {
       if (isEdit && id) {
+        console.log("edit", id, form);
         await editMutation.mutateAsync({
           id: id,
           patrolCase: form,
         });
 
         toast.success('Patrol case updated successfully');
+        
       } else {
         await addMutation.mutateAsync(form);
 
@@ -107,6 +113,7 @@ const PatrolCaseDialog = ({ open, onClose, id, type, initialData }: Props) => {
       setIsDirty(false);
 
       onClose();
+      setEditId?.('');
     } catch (err: any) {
       console.error(err);
 
@@ -138,6 +145,18 @@ const PatrolCaseDialog = ({ open, onClose, id, type, initialData }: Props) => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [open, isDirty]);
+
+  const getCdnUrl = (url?: string) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `https://${url}`;
+  };
+  const isImage = (att: any) =>
+    att?.mimeType?.startsWith('image') || /\.(png|jpg|jpeg|gif|webp)$/i.test(att?.fileUrl || '');
+
+  const isVideo = (att: any) =>
+    att?.mimeType?.startsWith('video') || /\.(mp4|webm|ogg)$/i.test(att?.fileUrl || '');
+
   /* ================== UI ================== */
 
   return (
@@ -205,12 +224,10 @@ const PatrolCaseDialog = ({ open, onClose, id, type, initialData }: Props) => {
                   <Chip
                     key={idx}
                     label={att.fileType}
-                    onDelete={() => {
-                      setIsDirty(true);
-                      setForm((prev) => ({
-                        ...prev,
-                        attachments: prev.attachments.filter((_, i) => i !== idx),
-                      }));
+                    clickable
+                    onClick={() => {
+                      setSelectedAttachment({ ...att, index: idx });
+                      setOpenAttachmentDialog(true);
                     }}
                     color={att.fileType === 'Video' ? 'secondary' : 'primary'}
                     size="small"
@@ -268,6 +285,86 @@ const PatrolCaseDialog = ({ open, onClose, id, type, initialData }: Props) => {
             }}
           >
             Discard
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={openAttachmentDialog}
+        onClose={() => setOpenAttachmentDialog(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle display="flex" justifyContent="space-between" alignItems="center">
+          Attachment Preview
+          <IconButton onClick={() => setOpenAttachmentDialog(false)}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent dividers>
+          {selectedAttachment && (
+            <Box display="flex" justifyContent="center" alignItems="center" sx={{ minHeight: 200 }}>
+              {/* IMAGE */}
+              {isImage(selectedAttachment) && (
+                <Box
+                  component="img"
+                  src={getCdnUrl(selectedAttachment.fileUrl)}
+                  alt="attachment"
+                  sx={{
+                    maxWidth: '100%',
+                    maxHeight: '60vh',
+                    borderRadius: 2,
+                    objectFit: 'contain',
+                  }}
+                />
+              )}
+
+              {/* VIDEO */}
+              {isVideo(selectedAttachment) && (
+                <Box
+                  component="video"
+                  src={getCdnUrl(selectedAttachment.fileUrl)}
+                  controls
+                  playsInline
+                  sx={{
+                    maxWidth: '100%',
+                    maxHeight: '60vh',
+                    borderRadius: 2,
+                    backgroundColor: 'black',
+                  }}
+                />
+              )}
+
+              {/* FALLBACK */}
+              {!isImage(selectedAttachment) && !isVideo(selectedAttachment) && (
+                <Typography color="text.secondary">
+                  Preview not available for this file type
+                </Typography>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenAttachmentDialog(false)}>Close</Button>
+
+          <Button
+            color="error"
+            variant="contained"
+            onClick={() => {
+              if (!selectedAttachment) return;
+
+              setIsDirty(true);
+              setForm((prev) => ({
+                ...prev,
+                attachments: prev.attachments.filter((_, i) => i !== selectedAttachment.index),
+              }));
+
+              setOpenAttachmentDialog(false);
+              setSelectedAttachment(null);
+            }}
+          >
+            Delete Attachment
           </Button>
         </DialogActions>
       </Dialog>

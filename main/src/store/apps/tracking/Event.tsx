@@ -49,9 +49,9 @@ export const EventLogSlice = createSlice({
       );
 
       // cap list
-      if (state.logs.length > 100) {
-        state.logs = state.logs.slice(0, 100);
-      }
+      // if (state.logs.length > 100) {
+      //   state.logs = state.logs.slice(0, 100);
+      // }
     },
 
     ClearEventLogs: (state) => {

@@ -139,7 +139,7 @@ const rootReducer = combineReducers({
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['layoutReducer', 'EventLogReducer', 'BeaconReducer', 'AlarmActiveReducer'], // Only persist layout state
+  whitelist: ['layoutReducer', 'BeaconReducer', 'AlarmActiveReducer'], // Only persist layout state
 };
 
 // Create persisted root reducer

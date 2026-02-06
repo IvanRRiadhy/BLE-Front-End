@@ -24,7 +24,9 @@ import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
 import { fetchUser, UpdateFilter, userType } from 'src/store/apps/crud/users';
-import { useUserList } from 'src/hooks/useUser';
+import { useAllUserGroups, useUserList } from 'src/hooks/useUser';
+import { defaultUserFilter } from 'src/store/apps/defaultForm';
+import { useTranslation } from 'react-i18next';
 
 const columns = [
   { label: 'Username', field: 'Username', sortAble: false },
@@ -34,11 +36,13 @@ const columns = [
 ];
 const SKELETON_ROWS = 5;
 const UserList = () => {
+  const {t} = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   // const userData: userType[] = useSelector((state: RootState) => state.userReducer.users);
   // const userFilteredCount = useSelector((state: RootState) => state.userReducer.userFilteredCount);
   const userFilter = useSelector((state: RootState) => state.userReducer.userFilter);
-  const { data, isLoading, isFetching } = useUserList(userFilter);
+  const { data, isLoading, isFetching } = useUserList({...defaultUserFilter, ...userFilter});
+  const {data: userGroupData} = useAllUserGroups();
 
   const userData = data?.data ?? [];
   const userFilteredCount = data?.recordsFiltered ?? 0;
@@ -103,6 +107,22 @@ const UserList = () => {
       // dispatch(deleteUser(selectedUser.id));
     }
     handleCloseDeleteDialog();
+  };
+    const formatTime = (isoString: string) => {
+    const date = new Date(isoString);
+
+    // Extract the weekday
+    const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
+    const month = t(date.toLocaleString('en-GB', { month: 'short' }));
+
+    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
+      'en-GB',
+      {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      },
+    )}`;
   };
 
   const renderSkeletonRows = (rows: number) => (
@@ -209,7 +229,7 @@ const UserList = () => {
                           <TableCell>
                             {user.isEmailConfirmation ? 'Verified' : 'Not Verified'}
                           </TableCell>
-                          <TableCell>{user.lastLoginAt}</TableCell>
+                          <TableCell>{formatTime(user.lastLoginAt)}</TableCell>
                           <TableCell
                             sx={{
                               position: 'sticky',
