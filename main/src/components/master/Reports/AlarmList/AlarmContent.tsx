@@ -365,6 +365,7 @@ const AlarmContent = () => {
       <Grid
         container
         spacing={3}
+        padding={1}
         sx={{
           maxHeight: '440px',
           overflowY: 'auto',

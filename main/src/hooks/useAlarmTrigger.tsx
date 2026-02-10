@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
-import { AlarmTriggerType, IntruderType, GetFilter } from 'src/store/apps/crud/alarmTrigger';
+import { AlarmTriggerType, IntruderType, GetFilter, AlarmTimelineType } from 'src/store/apps/crud/alarmTrigger';
 import { RootState, useSelector } from 'src/store/Store';
 
 // -----------------------------------------------------------------------------
@@ -157,6 +157,17 @@ export function useAssignActionAlarmTriggerByID() {
       queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list'] });
       queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
     },
+  });
+};
+
+export function useAlarmTimeline(id: string) {
+  return useQuery({
+    queryKey: ['alarmTrigger-timeline', id],
+    queryFn: async (): Promise<AlarmTimelineType> => {
+      const res = await axiosServices.get(`${API_URL}${id}/timeline`);
+      return res.data.collection.data as AlarmTimelineType;
+    },
+    placeholderData: {} as AlarmTimelineType,
   });
 }
 

@@ -178,6 +178,7 @@ export type LayoutSet = {
   name: string; // user-friendly name
   description: string;
   grid: number; // number of screens (1-6)
+  buildingIds: string[];
   screens: ScreenItem[]; // list of screen items
   focus?: { type: string; id: string }; // optional focus info
 };
@@ -206,6 +207,7 @@ export const initialState: LayoutState = {
       name: 'Default Layout',
       description: '',
       grid: 2,
+      buildingIds: [],
       screens: [defaultScreen(), defaultScreen()],
       focus: { type: '', id: '' },
     },
@@ -237,6 +239,7 @@ export const LayoutSlice = createSlice({
         name: action.payload.name,
         description: '',
         grid: action.payload.grid,
+        buildingIds: [],
         screens: Array.from({ length: action.payload.grid }, () => defaultScreen()),
       };
 
@@ -449,6 +452,7 @@ export const addMonitoringLayout = createAsyncThunk(
       const payload = {
         name: layout.name,
         description: layout.description ?? '',
+        buildingIds: layout.buildingIds,
         config: JSON.stringify(configObj),
       };
       console.log('Add monitoring layout payload:', payload);
@@ -475,6 +479,7 @@ export const editMonitoringLayout = createAsyncThunk(
       const payload = {
         name: layout.name,
         description: layout.description ?? '',
+        buildingIds: layout.buildingIds,
         config: JSON.stringify(configObj),
       };
       console.log('Edit monitoring layout payload:', payload);

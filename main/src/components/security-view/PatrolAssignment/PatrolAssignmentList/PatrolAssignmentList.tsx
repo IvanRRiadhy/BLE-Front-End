@@ -9,6 +9,7 @@ import PatrolDetailDialog from '../SecurityViewPatrol/PatrolDetailDialog';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import { setSelectedPatrolAssignment } from 'src/store/apps/crud/patrolSession';
 import { useNavigate } from 'react-router';
+import PatrolCaseList from '../../PatrolCaseList/PatrolCaseList';
 
 
 const defaultFilter = {

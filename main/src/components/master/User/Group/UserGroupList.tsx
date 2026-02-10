@@ -24,15 +24,29 @@ import {
   Tab,
   Collapse,
 } from '@mui/material';
-import { IconPlus, IconTrash, IconChevronDown, IconChevronRight } from '@tabler/icons-react';
+import {
+  IconPlus,
+  IconTrash,
+  IconChevronDown,
+  IconChevronRight,
+  IconArrowBackUp,
+  IconBan,
+} from '@tabler/icons-react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { userGroupType } from 'src/store/apps/crud/users';
-import { useAddUserGroup, useAssignBuilding, useRegisterUser } from 'src/hooks/useUser';
+import {
+  useAddUserGroup,
+  useAssignBuilding,
+  useRegisterUser,
+  useRevokeBuilding,
+  useRevokeAllBuilding,
+} from 'src/hooks/useUser';
 import { useAllBuilding } from 'src/hooks/useBuilding';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 import AddEditBuilding from '../../CRUD/building/AddEditBuilding';
 import toast from 'react-hot-toast';
+import { BuildingType } from 'src/store/apps/crud/building';
 
 interface Props {
   groups: userGroupType[];
@@ -45,6 +59,7 @@ const SKELETON_ROWS = 5;
 const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
   /* ---------------- STATE ---------------- */
   const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null);
+  const expandedGroup = groups.find((g) => g.id === expandedGroupId);
 
   const [openCreate, setOpenCreate] = useState(false);
   const [groupName, setGroupName] = useState('');
@@ -57,11 +72,16 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
   const [openAssignBuilding, setOpenAssignBuilding] = useState(false);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [buildingId, setBuildingId] = useState<string>();
+  const [selectedBuildings, setSelectedBuildings] = useState<BuildingType[]>([]);
+  const [openRevokeOne, setOpenRevokeOne] = useState(false);
+  const [openRevokeAll, setOpenRevokeAll] = useState(false);
+  const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
 
   const addGroupMutation = useAddUserGroup();
   const registerUserMutation = useRegisterUser();
   const assignBuildingMutation = useAssignBuilding();
+  const revokeBuildingMutation = useRevokeBuilding();
+  const revokeAllBuildingMutation = useRevokeAllBuilding();
 
   const [activeTabByGroup, setActiveTabByGroup] = useState<Record<string, 'members' | 'buildings'>>(
     {},
@@ -99,12 +119,12 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
   const handleRegisterUser = async (username: string, email: string) => {
     if (!expandedGroupId) return;
     try {
-          await registerUserMutation.mutateAsync({
-      username,
-      email,
-      GroupId: expandedGroupId,
-    });
-    toast.success('User registered successfully!');
+      await registerUserMutation.mutateAsync({
+        username,
+        email,
+        GroupId: expandedGroupId,
+      });
+      toast.success('User registered successfully!');
     } catch (error) {
       console.error('Error registering user:', error);
       toast.error('User Registration failed.');
@@ -114,15 +134,19 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
   };
 
   const handleAssignBuilding = async () => {
-    if (!expandedGroupId || !buildingId) return;
-   try {
-     await assignBuildingMutation.mutateAsync({ groupId: expandedGroupId, buildingIds: [buildingId] });
-     toast.success('Building assigned successfully!');
-   } catch (error) {
-     console.error('Error assigning building:', error);
-     toast.error('Building Assign failed.');
-   }
+    if (!expandedGroupId || selectedBuildings.length === 0) return;
+    try {
+      await assignBuildingMutation.mutateAsync({
+        groupId: expandedGroupId,
+        buildingIds: selectedBuildings.map((building) => building.id),
+      });
+      toast.success('Building assigned successfully!');
+    } catch (error) {
+      console.error('Error assigning building:', error);
+      toast.error('Building Assign failed.');
+    }
     setOpenAssignBuilding(false);
+    setSelectedBuildings([]);
   };
 
   /* ---------------- SKELETON ---------------- */
@@ -149,7 +173,7 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
 
   /* ---------------- SUB TABLES ---------------- */
   const MemberTable = ({ members }: { members: any[] }) => (
-    <Table size="small">
+    <Table>
       <TableHead>
         <TableRow>
           <TableCell>Username</TableCell>
@@ -177,17 +201,21 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
     </Table>
   );
 
-  const BuildingTable = ({ buildings }: { buildings: any[] }) => (
-    <Table size="small">
+  const BuildingTable = ({ buildings, groupId }: { buildings: any[]; groupId: string }) => (
+    <Table>
       <TableHead>
         <TableRow>
           <TableCell>Building Name</TableCell>
+          <TableCell align="right" width={80}>
+            Action
+          </TableCell>
         </TableRow>
       </TableHead>
+
       <TableBody>
         {buildings.length === 0 ? (
           <TableRow>
-            <TableCell>
+            <TableCell colSpan={2}>
               <Typography variant="body2" color="text.secondary">
                 No accessible buildings
               </Typography>
@@ -197,6 +225,20 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
           buildings.map((b) => (
             <TableRow key={b.id}>
               <TableCell>{b.name}</TableCell>
+              <TableCell align="right">
+                <Tooltip title="Revoke access">
+                  <IconButton
+                    size="small"
+                    color="warning"
+                    onClick={() => {
+                      setSelectedBuildingId(b.id);
+                      setOpenRevokeOne(true);
+                    }}
+                  >
+                    <IconArrowBackUp size={18} />
+                  </IconButton>
+                </Tooltip>
+              </TableCell>
             </TableRow>
           ))
         )}
@@ -234,21 +276,43 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
           )}
 
           {tab === 'buildings' && (
-            <Button
-              size="small"
-              variant="contained"
-              startIcon={<IconPlus size={16} />}
-              onClick={() => setOpenAssignBuilding(true)}
-            >
-              Assign Building
-            </Button>
+            <Box display="flex" gap={1}>
+              <Button
+                size="small"
+                variant="contained"
+                startIcon={<IconPlus size={16} />}
+                onClick={() => {
+                  const mappedBuildings =
+                    buildingData.filter((b) =>
+                      expandedGroup?.accessibleBuildings?.some((ab) => ab.id === b.id),
+                    ) ?? [];
+
+                  setSelectedBuildings(mappedBuildings);
+                  setOpenAssignBuilding(true);
+                }}
+              >
+                Assign Building
+              </Button>
+
+              {group.accessibleBuildingCount > 0 && (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="error"
+                  startIcon={<IconBan size={16} />}
+                  onClick={() => setOpenRevokeAll(true)}
+                >
+                  Revoke All
+                </Button>
+              )}
+            </Box>
           )}
         </Box>
 
         {tab === 'members' ? (
           <MemberTable members={group.members || []} />
         ) : (
-          <BuildingTable buildings={group.accessibleBuildings || []} />
+          <BuildingTable buildings={group.accessibleBuildings || []} groupId={group.id} />
         )}
       </Paper>
     );
@@ -366,10 +430,7 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
           <Button variant="outlined" onClick={() => setOpenAddUser(false)}>
             Cancel
           </Button>
-          <Button
-            variant="contained"
-            onClick={() => handleRegisterUser(username, email)}
-          >
+          <Button variant="contained" onClick={() => handleRegisterUser(username, email)}>
             Save
           </Button>
         </DialogActions>
@@ -391,16 +452,16 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
         <DialogContent>
           <CustomFormLabel htmlFor="building">Building</CustomFormLabel>
           <Box display="flex" alignItems="center" gap={1}>
-            <CustomAutocomplete
-              label="Building"
+            <CustomAutocomplete<BuildingType>
+              label="Buildings"
+              multiple
               options={buildingData}
-              value={buildingData.find((b) => b.id === buildingId) || null}
-              onChange={(val) => setBuildingId(val?.id ?? '')}
-              getOptionLabel={(o) => o?.name ?? ''}
-              isOptionEqualToValue={(opt, val) => opt.id === val.id}
-              sx={{ flex: 1 }}
+              value={selectedBuildings}
+              onChange={(val) => setSelectedBuildings(val as BuildingType[])}
+              getOptionLabel={(o) => o.name}
+              isOptionEqualToValue={(a, b) => a.id === b.id}
             />
-            <AddEditBuilding type="add" />
+            {/* <AddEditBuilding type="add" /> */}
           </Box>
         </DialogContent>
 
@@ -408,10 +469,7 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
           <Button variant="outlined" onClick={() => setOpenAssignBuilding(false)}>
             Cancel
           </Button>
-          <Button
-            variant="contained"
-            onClick={() => handleAssignBuilding()}
-          >
+          <Button variant="contained" onClick={() => handleAssignBuilding()}>
             Save
           </Button>
         </DialogActions>
@@ -460,6 +518,75 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
         <DialogActions>
           <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
           <Button color="error">Delete</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* REVOKE DIALOG */}
+      <Dialog open={openRevokeOne} onClose={() => setOpenRevokeOne(false)}>
+        <DialogTitle>Revoke Building Access</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to revoke access to this building?
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenRevokeOne(false)}>Cancel</Button>
+          <Button
+            color="error"
+            onClick={async () => {
+              if (!expandedGroupId || !selectedBuildingId) return;
+
+              try {
+                await revokeBuildingMutation.mutateAsync({
+                  groupId: expandedGroupId,
+                  buildingId: selectedBuildingId,
+                });
+                toast.success('Building access revoked');
+              } catch {
+                toast.error('Failed to revoke building');
+              }
+
+              setOpenRevokeOne(false);
+              setSelectedBuildingId(null);
+            }}
+          >
+            Revoke
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={openRevokeAll} onClose={() => setOpenRevokeAll(false)}>
+        <DialogTitle>Revoke All Buildings</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>
+            This will remove <strong>all building access</strong> from this group. This action
+            cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenRevokeAll(false)}>Cancel</Button>
+          <Button
+            color="error"
+            onClick={async () => {
+              if (!expandedGroupId) return;
+
+              try {
+                await revokeAllBuildingMutation.mutateAsync({
+                  groupId: expandedGroupId,
+                });
+                toast.success('All building access revoked');
+              } catch {
+                toast.error('Failed to revoke all buildings');
+              }
+
+              setOpenRevokeAll(false);
+            }}
+          >
+            Revoke All
+          </Button>
         </DialogActions>
       </Dialog>
     </Grid>

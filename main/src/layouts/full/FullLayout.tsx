@@ -1,5 +1,5 @@
 import { FC, useEffect, useState, useRef } from 'react';
-import { styled, Container, Box, useTheme } from '@mui/material';
+import { styled, Container, Box, useTheme, useMediaQuery } from '@mui/material';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { Outlet } from 'react-router';
 import { RootState, AppDispatch } from 'src/store/Store';
@@ -25,7 +25,15 @@ import { AlarmType } from 'src/store/apps/tracking/Alarm';
 import AlarmPopup from './AlarmPopup';
 import { getConfig } from 'src/config';
 import Customizer from './shared/customizer/Customizer';
-import { AlarmLogItem, AppendAlarmLogs, AppendTrackingLogs, NotifyAlarmPopup, TrackingLogItem } from 'src/store/apps/tracking/Beacon';
+import {
+  AlarmLogItem,
+  AppendAlarmLogs,
+  AppendTrackingLogs,
+  fetchCountingData,
+  NotifyAlarmPopup,
+  ShowAlarmPopup,
+  TrackingLogItem,
+} from 'src/store/apps/tracking/Beacon';
 import { fetchEventLogs } from 'src/store/apps/tracking/Event';
 
 const MainWrapper = styled('div')(() => ({
@@ -44,6 +52,7 @@ const PageWrapper = styled('div')(() => ({
 }));
 
 const FullLayout: FC = () => {
+  const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
   const dispatch: AppDispatch = useDispatch();
   const config = getConfig();
   const topic = config.ALARM_TOPIC || 'tracking/engine/alarm'; // Use MQTT topic from config
@@ -52,11 +61,12 @@ const FullLayout: FC = () => {
   const theme = useTheme();
   const memberList: memberType[] = useSelector((s: RootState) => s.memberReducer.members);
   const visitorList: VisitorType[] = useSelector((s: RootState) => s.visitorReducer.visitors);
+  const showAlarmPopup = useSelector((s: RootState) => s.BeaconReducer.alarmPopupId);
 
   const [sessionExpired, setSessionExpired] = useState(false);
   const lastDispatchRef = useRef(0);
   const unsubscriberRef = useRef<(() => void) | null>(null);
-
+  const showAlarmPopupRef = useRef<string | null>(null);
   const [latestAlarm, setLatestAlarm] = useState<AlarmType | null>(null);
   const [openAlarmPopup, setOpenAlarmPopup] = useState(false);
 
@@ -69,6 +79,19 @@ const FullLayout: FC = () => {
     return bleNumber || 'Unknown';
   };
 
+  useEffect(() => {
+    showAlarmPopupRef.current = showAlarmPopup;
+  }, [showAlarmPopup]);
+
+  useEffect(() => {
+    // Subscribe to counting data when component mounts
+    const unsubscribe = dispatch(fetchCountingData());
+
+    // Cleanup subscription when component unmounts
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [dispatch]);
   useEffect(() => {
     dispatch(fetchAlarmSettingsDT(defaultAlarmSettingFilter));
     // dispatch(fetchEventLogs());
@@ -159,8 +182,13 @@ const FullLayout: FC = () => {
           seen: false,
           personType: alarmData.visitorName ? 'Visitor' : 'Member',
         };
+        console.log('SHould show Alarm', showAlarmPopup);
+        if (!showAlarmPopupRef.current) {
+          console.log('Showing alarm popup');
+          // dispatch(ShowAlarmPopup(alarmLog));
+          dispatch(NotifyAlarmPopup(alarmLog.id));
+        }
         dispatch(AppendAlarmLogs([alarmLog]));
-        dispatch(NotifyAlarmPopup(alarmLog.id));
       },
       topic, // MQTT topic
     );
@@ -216,7 +244,7 @@ const FullLayout: FC = () => {
         )}
 
         {/* Sidebar */}
-        {customizer.isHorizontal ? '' : <Sidebar />}
+        {customizer.isHorizontal ? lgDown ? <Sidebar /> : '' : <Sidebar />}
         {/* Main Wrapper */}
         <PageWrapper
           className="page-wrapper"

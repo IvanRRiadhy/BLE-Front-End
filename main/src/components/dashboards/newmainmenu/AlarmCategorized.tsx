@@ -18,10 +18,13 @@ interface PublicProps {
 }
 
 const AlarmCategorized: React.FC<PublicProps> = ({ title, data }) => {
-  const formatTitle = (value: string) => value.replace(/([a-z])([A-Z])/g, '$1 $2');
+  const formatTitle = (value: string) => {
+    if (!value) return '-';
+    return value.replace(/([a-z])([A-Z])/g, '$1 $2');
+  };
   const isAlarmByStatus = title === 'Alarm By Status';
   const isAlarmByArea = title === 'Alarm By Area';
-
+  console.log('TITLE: ', data);
   return (
     <Box
       sx={{
@@ -67,6 +70,7 @@ const AlarmCategorized: React.FC<PublicProps> = ({ title, data }) => {
       >
         {isAlarmByStatus &&
           Array.isArray(data) &&
+          data.length > 0 &&
           data.map((item) => (
             <Box key={(item as AlarmByStatusItem).status}>
               <Typography

@@ -74,7 +74,7 @@ const AlarmLog: React.FC = () => {
     <Box
       sx={{
         width: '100%',
-        height: '26.5vh',
+        height: '32vh',
         borderRadius: '25px',
         boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
         backgroundColor: 'white',

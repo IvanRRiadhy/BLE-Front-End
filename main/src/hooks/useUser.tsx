@@ -62,15 +62,15 @@ export function useUserList(filter: GetFilter) {
 export function useRegisterUser() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: {email: string, GroupId: string, username: string}) => {
+    mutationFn: async (payload: { email: string; GroupId: string; username: string }) => {
       const res = await axiosServices.post(REGIST_URL, payload);
-      console.log("Adding Result", res);
+      console.log('Adding Result', res);
       return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-all'] });
-    }
-  })
+    },
+  });
 }
 
 // -----------------------------------------------------------------------------
@@ -89,68 +89,70 @@ export function useAllUserGroups() {
 }
 
 // -----------------------------------------------------------------------------
-// ✅ CREATE NEW USER GROUPS 
+// ✅ CREATE NEW USER GROUPS
 // -----------------------------------------------------------------------------
 export function useAddUserGroup() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: {name: string, levelPriority: string}) => {
+    mutationFn: async (payload: { name: string; levelPriority: string }) => {
       const res = await axiosServices.post(GROUP_URL, payload);
-      console.log("Adding Result", res);
+      console.log('Adding Result', res);
       return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-group-all'] });
-    }
-  })
+    },
+  });
 }
 // -----------------------------------------------------------------------------
-// ✅ ASSIGN BUILDING TO USER GROUPS 
+// ✅ ASSIGN BUILDING TO USER GROUPS
 // -----------------------------------------------------------------------------
-export function useAssignBuilding(){
+export function useAssignBuilding() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: {groupId: string, buildingIds: string[]}) => {
+    mutationFn: async (payload: { groupId: string; buildingIds: string[] }) => {
       const res = await axiosServices.post(`${AssignBuilding}/assign`, payload);
-      console.log("Adding Result", res);
+      console.log('Adding Result', res);
       return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-group-all'] });
-    }
-  })
+    },
+  });
 }
 
 // -----------------------------------------------------------------------------
-// ✅ REVOKE BUILDING TO USER GROUPS 
+// ✅ REVOKE BUILDING TO USER GROUPS
 // -----------------------------------------------------------------------------
-export function useRevokeBuilding(){
+export function useRevokeBuilding() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: {groupId: string, buildingId: string}) => {
-      const res = await axiosServices.post(`${AssignBuilding}/revoke`, payload);
-      console.log("Adding Result", res);
+    mutationFn: async (payload: { groupId: string; buildingId: string }) => {
+      const res = await axiosServices.delete(`${AssignBuilding}/revoke`, { data: payload });
+      console.log('Adding Result', res);
       return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-group-all'] });
-    }
-  })
+    },
+  });
 }
 
 // -----------------------------------------------------------------------------
-// ✅ REVOKE ALL BUILDING TO USER GROUPS 
+// ✅ REVOKE ALL BUILDING TO USER GROUPS
 // -----------------------------------------------------------------------------
-export function useRevokeAllBuilding(){
+export function useRevokeAllBuilding() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: {groupId: string}) => {
-      const res = await axiosServices.post(`${AssignBuilding}/revoke-all`, payload);
-      console.log("Adding Result", res);
+    mutationFn: async ({ groupId }: { groupId: string }) => {
+      const res = await axiosServices.delete(`${AssignBuilding}/revoke-all`, {
+        params: { groupId },
+      });
+      console.log('Adding Result', res);
       return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-group-all'] });
-    }
-  })
+    },
+  });
 }

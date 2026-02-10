@@ -1,6 +1,7 @@
 import { Grid2 as Grid, Box } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import PatrolAssignmentList from 'src/components/security-view/PatrolAssignment/PatrolAssignmentList/PatrolAssignmentList';
+import PatrolCaseList from 'src/components/security-view/PatrolCaseList/PatrolCaseList';
 
 const SecurityViewPatrolPage = () => {
   return (
@@ -10,7 +11,7 @@ const SecurityViewPatrolPage = () => {
     >
       <Box>
         <Grid container spacing={2} mt={1}>
-          <PatrolAssignmentList />
+          <PatrolCaseList />
         </Grid>
       </Box>
     </PageContainer>

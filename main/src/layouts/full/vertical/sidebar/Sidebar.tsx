@@ -1,4 +1,4 @@
-import { useMediaQuery, Box, Drawer, useTheme } from '@mui/material';
+import { useMediaQuery, Box, Drawer, useTheme, Typography } from '@mui/material';
 import SidebarItems from './SidebarItems';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { hoverSidebar, toggleMobileSidebar } from 'src/store/customizer/CustomizerSlice';
@@ -15,7 +15,7 @@ const Sidebar = () => {
     customizer.isCollapse && !customizer.isSidebarHover
       ? customizer.MiniSidebarWidth
       : customizer.SidebarWidth;
-
+  console.log('toggleWidth', toggleWidth);
   const onHoverEnter = () => {
     if (customizer.isCollapse) {
       dispatch(hoverSidebar(true));

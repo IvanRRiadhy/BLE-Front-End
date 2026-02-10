@@ -93,3 +93,45 @@ export function useUploadCDN() {
     },
   });
 }
+
+export function useApproveCase() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await axiosServices.put(`${API_URL}${id}/approve`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patrol-case-all'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-case-list'] });
+    }
+  })
+};
+
+export function useRejectCase() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await axiosServices.put(`${API_URL}${id}/reject`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patrol-case-all'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-case-list'] });
+    }
+  })
+};
+
+export function useCloseCase() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await axiosServices.put(`${API_URL}${id}/close`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patrol-case-all'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-case-list'] });
+    }
+  })
+}

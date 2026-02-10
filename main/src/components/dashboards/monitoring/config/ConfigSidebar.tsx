@@ -35,6 +35,9 @@ import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { CCTVType, fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import toast from 'react-hot-toast';
+import { useAllBuilding } from 'src/hooks/useBuilding';
+import { useAllFloors } from 'src/hooks/useFloor';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 
 interface ConfigSidebarProps {
   onGridChange: (grid: number) => void;
@@ -65,15 +68,18 @@ const ConfigSidebar: React.FC<ConfigSidebarProps> = ({
   const floorplanLists: FloorplanType[] = useSelector(
     (s: RootState) => s.floorplanReducer.floorplans,
   );
-  const buildingLists: BuildingType[] = useSelector((s: RootState) => s.buildingReducer.buildings);
-  const floorLists: floorType[] = useSelector((s: RootState) => s.floorReducer.floors);
-  const areaLists: MaskedAreaType[] = useSelector(
-    (s: RootState) => s.maskedAreaReducer.maskedAreas,
-  );
-  const cctvLists: CCTVType[] = useSelector((s: RootState) => s.CCTVReducer.cctvs);
-  const floorplanDeviceLists: FloorplanDeviceType[] = useSelector(
-    (s: RootState) => s.floorplanDeviceReducer.floorplanDevices,
-  );
+  // const buildingLists: BuildingType[] = useSelector((s: RootState) => s.buildingReducer.buildings);
+  const { data: buildingLists = [] } = useAllBuilding();
+  // const floorLists: floorType[] = useSelector((s: RootState) => s.floorReducer.floors);
+  const { data: floorLists = [] } = useAllFloors();
+  // const areaLists: MaskedAreaType[] = useSelector(
+  //   (s: RootState) => s.maskedAreaReducer.maskedAreas,
+  // );
+  const { data: areaLists = [] } = useAllMaskedAreas();
+  // const cctvLists: CCTVType[] = useSelector((s: RootState) => s.CCTVReducer.cctvs);
+  // const floorplanDeviceLists: FloorplanDeviceType[] = useSelector(
+  //   (s: RootState) => s.floorplanDeviceReducer.floorplanDevices,
+  // );
 
   const layouts = useSelector((s: RootState) => s.layoutReducer.layouts ?? []);
   const activeLayoutId = useSelector((s: RootState) => s.layoutReducer.activeLayoutId);
@@ -87,7 +93,9 @@ const ConfigSidebar: React.FC<ConfigSidebarProps> = ({
   const [selectedMaskedArea, setSelectedMaskedArea] = useState('');
   const [selectedCCTV, setSelectedCCTV] = useState('');
 
-    {/** 🔄 Loading states */}
+  {
+    /** 🔄 Loading states */
+  }
   const [isSaving, setIsSaving] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -96,12 +104,12 @@ const ConfigSidebar: React.FC<ConfigSidebarProps> = ({
   const filteredFloor = floorLists.filter((f) => f.buildingId === selectedBuilding);
   const filteredFloorplan = floorplanLists.filter((f) => f.floorId === selectedFloor);
   const filteredMaskedArea = areaLists.filter((a) => a.floorplanId === selectedFloorplan);
-  const filteredFloorplanDevice = floorplanDeviceLists.filter(
-    (d) => d.floorplanMaskedAreaId === selectedMaskedArea,
-  );
-  const filteredCCTV = cctvLists.filter((cctv) =>
-    filteredFloorplanDevice.some((d) => d.type === 'Cctv' && d.accessCctvId === cctv.id),
-  );
+  // const filteredFloorplanDevice = floorplanDeviceLists.filter(
+  //   (d) => d.floorplanMaskedAreaId === selectedMaskedArea,
+  // );
+  // const filteredCCTV = cctvLists.filter((cctv) =>
+  //   filteredFloorplanDevice.some((d) => d.type === 'Cctv' && d.accessCctvId === cctv.id),
+  // );
 
   // --- Handlers ---
   const handleLayoutChange = (e: SelectChangeEvent<string>) => {
@@ -146,15 +154,15 @@ const ConfigSidebar: React.FC<ConfigSidebarProps> = ({
       selectedCCTV !== '' && selectedCCTV !== 'None'
         ? 2
         : selectedMaskedArea !== '' && selectedMaskedArea !== 'None'
-        ? 1
-        : 0;
+          ? 1
+          : 0;
 
     const displayOutput =
       selectedCCTV !== '' && selectedCCTV !== 'None'
         ? selectedCCTV
         : selectedMaskedArea !== '' && selectedMaskedArea !== 'None'
-        ? selectedMaskedArea
-        : selectedFloorplan;
+          ? selectedMaskedArea
+          : selectedFloorplan;
 
     onScreenUpdate(selectedScreen, {
       type: displayType,
@@ -441,7 +449,7 @@ const ConfigSidebar: React.FC<ConfigSidebarProps> = ({
               )}
 
               {/* CCTV - only show after masked area selected */}
-              {selectedMaskedArea && (
+              {/* {selectedMaskedArea && (
                 <>
                   <CustomFormLabel>CCTV</CustomFormLabel>
                   <CustomSelect
@@ -457,160 +465,184 @@ const ConfigSidebar: React.FC<ConfigSidebarProps> = ({
                     ))}
                   </CustomSelect>
                 </>
-              )}
-{/* Clear this screen only */}
-<Box mt={2}>
-  <Button
-    variant="outlined"
-    color="warning"
-    fullWidth
-    disabled={
-      !activeLayout ||
-      selectedScreen === null ||
-      !activeLayout.screens[selectedScreen] ||
-      (
-        !activeLayout.screens[selectedScreen].floorplanId &&
-        !activeLayout.screens[selectedScreen].display?.displayOutput
-      )
-    }
-    onClick={() => {
-      if (!activeLayout || selectedScreen === null) return;
+              )} */}
+              {/* Clear this screen only */}
+              <Box mt={2}>
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  fullWidth
+                  disabled={
+                    !activeLayout ||
+                    selectedScreen === null ||
+                    !activeLayout.screens[selectedScreen] ||
+                    (!activeLayout.screens[selectedScreen].floorplanId &&
+                      !activeLayout.screens[selectedScreen].display?.displayOutput)
+                  }
+                  onClick={() => {
+                    if (!activeLayout || selectedScreen === null) return;
 
-      const screenId = activeLayout.screens[selectedScreen].id;
-      dispatch(
-        resetScreen({
-          layoutId: activeLayout.id,
-          screenId,
-        }),
-      );
+                    const screenId = activeLayout.screens[selectedScreen].id;
+                    dispatch(
+                      resetScreen({
+                        layoutId: activeLayout.id,
+                        screenId,
+                      }),
+                    );
 
-      // 🧹 Reset local selections (but keep layout intact)
-      setSelectedBuilding('');
-      setSelectedFloor('');
-      setSelectedFloorplan('');
-      setSelectedMaskedArea('');
-      setSelectedCCTV('');
-    }}
-  >
-    Clear This Screen
-  </Button>
-</Box>
-
+                    // 🧹 Reset local selections (but keep layout intact)
+                    setSelectedBuilding('');
+                    setSelectedFloor('');
+                    setSelectedFloorplan('');
+                    setSelectedMaskedArea('');
+                    setSelectedCCTV('');
+                  }}
+                >
+                  Clear This Screen
+                </Button>
+              </Box>
             </>
           )}
-{/* --- Layout Action Buttons --- */}
-<Box mt={2}>
+          {/* --- Layout Action Buttons --- */}
+          <Box mt={2}>
+            {/* Row: Save + Clear */}
+            <Box display="flex" justifyContent="space-between" gap={1} mb={1}>
+              {/* 💾 Save Layout */}
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                disabled={isSaving || isClearing || isDeleting}
+                onClick={async () => {
+                  if (!activeLayout) return;
+                  setIsSaving(true);
+                  const selectedFloorplanIds = activeLayout.screens
+                    .map((s) => s.floorplanId)
+                    .filter((id): id is string => Boolean(id));
+                  const selectedFloorIds = [
+                    ...new Set(
+                      floorplanLists
+                        .filter((fp) => selectedFloorplanIds.includes(fp.id))
+                        .map((fp) => fp.floorId)
+                        .filter(Boolean),
+                    ),
+                  ];
+                  const selectedBuildingIds = [
+                    ...new Set(
+                      floorLists
+                        .filter((f) => selectedFloorIds.includes(f.id))
+                        .map((f) => f.buildingId)
+                        .filter(Boolean),
+                    ),
+                  ];
+                  console.log(
+                    'Selected Floorplan IDs:',
+                    selectedFloorplanIds,
+                    'Selected Floor IDs:',
+                    selectedFloorIds,
+                    'Selected Building IDs:',
+                    selectedBuildingIds,
+                  );
+                  try {
+                    const isNewLayout = activeLayout.id.startsWith('layout-');
+                    let result;
 
+                    if (isNewLayout) {
+                      console.log('🆕 Creating new layout...');
+                      result = await dispatch(
+                        addMonitoringLayout({ ...activeLayout, buildingIds: selectedBuildingIds }),
+                      );
+                    } else {
+                      console.log('✏️ Editing existing layout...');
+                      result = await dispatch(
+                        editMonitoringLayout({ ...activeLayout, buildingIds: selectedBuildingIds }),
+                      );
+                    }
 
-  {/* Row: Save + Clear */}
-  <Box display="flex" justifyContent="space-between" gap={1} mb={1}>
-    {/* 💾 Save Layout */}
-    <Button
-      variant="contained"
-      color="primary"
-      fullWidth
-      disabled={isSaving || isClearing || isDeleting}
-      onClick={async () => {
-        if (!activeLayout) return;
-        setIsSaving(true);
+                    if (result && result.type && result.type.endsWith('/fulfilled')) {
+                      toast.success('Layout saved successfully!');
+                    } else {
+                      toast.error('Failed to save layout.');
+                    }
+                  } catch (error) {
+                    console.error('❌ Save Layout Error:', error);
+                    toast.error('An error occurred while saving.');
+                  } finally {
+                    setTimeout(() => setIsSaving(false), 1000);
+                  }
+                }}
+              >
+                {isSaving ? 'Saving...' : 'Save Layout'}
+              </Button>
 
-        try {
-          const isNewLayout = activeLayout.id.startsWith('layout-');
-          let result;
+              {/* 🧹 Clear Layout */}
+              <Button
+                variant="outlined"
+                color="warning"
+                fullWidth
+                disabled={isSaving || isClearing || isDeleting}
+                onClick={async () => {
+                  if (!activeLayoutId) return;
+                  setIsClearing(true);
+                  try {
+                    dispatch(clearActiveLayout());
+                    toast.success('Layout cleared!');
+                    // 🧹 Reset sidebar local states
+                    setSelectedBuilding('');
+                    setSelectedFloor('');
+                    setSelectedFloorplan('');
+                    setSelectedMaskedArea('');
+                    setSelectedCCTV('');
+                    setSelectedScreen(null);
+                  } catch (error) {
+                    toast.error('Error while clearing layout.');
+                    console.error('❌ Clear Layout Error:', error);
+                  } finally {
+                    setTimeout(() => setIsClearing(false), 800);
+                  }
+                }}
+              >
+                {isClearing ? 'Clearing...' : 'Clear Layout'}
+              </Button>
+            </Box>
 
-          if (isNewLayout) {
-            console.log('🆕 Creating new layout...');
-            result = await dispatch(addMonitoringLayout(activeLayout));
-          } else {
-            console.log('✏️ Editing existing layout...');
-            result = await dispatch(editMonitoringLayout(activeLayout));
-          }
+            {/* 🗑️ Delete Layout */}
+            <Button
+              variant="outlined"
+              color="error"
+              fullWidth
+              disabled={isSaving || isClearing || isDeleting}
+              onClick={async () => {
+                if (!activeLayoutId) return;
+                const confirmed = window.confirm('Are you sure you want to delete this layout?');
+                if (!confirmed) return;
 
-          if (result && result.type && result.type.endsWith('/fulfilled')) {
-            toast.success('Layout saved successfully!');
-          } else {
-            toast.error('Failed to save layout.');
-          }
-        } catch (error) {
-          console.error('❌ Save Layout Error:', error);
-          toast.error('An error occurred while saving.');
-        } finally {
-          setTimeout(() => setIsSaving(false), 1000);
-        }
-      }}
-    >
-      {isSaving ? 'Saving...' : 'Save Layout'}
-    </Button>
-
-    {/* 🧹 Clear Layout */}
-    <Button
-      variant="outlined"
-      color="warning"
-      fullWidth
-      disabled={isSaving || isClearing || isDeleting}
-      onClick={async () => {
-        if (!activeLayoutId) return;
-        setIsClearing(true);
-        try {
-          dispatch(clearActiveLayout());
-          toast.success('Layout cleared!');
-          // 🧹 Reset sidebar local states
-          setSelectedBuilding('');
-          setSelectedFloor('');
-          setSelectedFloorplan('');
-          setSelectedMaskedArea('');
-          setSelectedCCTV('');
-          setSelectedScreen(null);
-        } catch (error) {
-          toast.error('Error while clearing layout.');
-          console.error('❌ Clear Layout Error:', error);
-        } finally {
-          setTimeout(() => setIsClearing(false), 800);
-        }
-      }}
-    >
-      {isClearing ? 'Clearing...' : 'Clear Layout'}
-    </Button>
-  </Box>
-
-  {/* 🗑️ Delete Layout */}
-  <Button
-    variant="outlined"
-    color="error"
-    fullWidth
-    disabled={isSaving || isClearing || isDeleting}
-    onClick={async () => {
-      if (!activeLayoutId) return;
-      const confirmed = window.confirm('Are you sure you want to delete this layout?');
-      if (!confirmed) return;
-
-      setIsDeleting(true);
-      try {
-        const result = await dispatch(deleteMonitoringLayout(activeLayoutId));
-        if (result && result.type && result.type.endsWith('/fulfilled')) {
-          toast.success('Layout deleted successfully!');
-          // 🧹 Reset sidebar local states
-          setSelectedBuilding('');
-          setSelectedFloor('');
-          setSelectedFloorplan('');
-          setSelectedMaskedArea('');
-          setSelectedCCTV('');
-          setSelectedScreen(null);
-        } else {
-          toast.error('Failed to delete layout.');
-        }
-      } catch (error) {
-        toast.error('Error while deleting layout.');
-        console.error('❌ Delete Layout Error:', error);
-      } finally {
-        setTimeout(() => setIsDeleting(false), 1000);
-      }
-    }}
-  >
-    {isDeleting ? 'Deleting...' : 'Delete Layout'}
-  </Button>
-</Box>
-
+                setIsDeleting(true);
+                try {
+                  const result = await dispatch(deleteMonitoringLayout(activeLayoutId));
+                  if (result && result.type && result.type.endsWith('/fulfilled')) {
+                    toast.success('Layout deleted successfully!');
+                    // 🧹 Reset sidebar local states
+                    setSelectedBuilding('');
+                    setSelectedFloor('');
+                    setSelectedFloorplan('');
+                    setSelectedMaskedArea('');
+                    setSelectedCCTV('');
+                    setSelectedScreen(null);
+                  } else {
+                    toast.error('Failed to delete layout.');
+                  }
+                } catch (error) {
+                  toast.error('Error while deleting layout.');
+                  console.error('❌ Delete Layout Error:', error);
+                } finally {
+                  setTimeout(() => setIsDeleting(false), 1000);
+                }
+              }}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Layout'}
+            </Button>
+          </Box>
         </Box>
       </Box>
     </Box>

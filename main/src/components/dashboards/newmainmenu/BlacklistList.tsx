@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Box, Typography, Avatar, Stack, Tooltip } from '@mui/material';
 import { useBlacklistLog } from 'src/hooks/useDashboard';
-// import dumpy from "../assets/ambatukam.jpeg";
 
 interface BlacklistItem {
   id: string;
@@ -21,7 +20,7 @@ const NewBlacklist: React.FC = () => {
     <Box
       sx={{
         width: '100%',
-        height: '26.5vh', // ✅ ikut Grid
+        height: '32vh', // ✅ ikut Grid
         borderRadius: '25px',
         boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
         px: 2,
@@ -66,7 +65,7 @@ const NewBlacklist: React.FC = () => {
             alignItems="center"
             sx={{
               p: 1,
-              backgroundColor: index % 2 === 0 ? 'grey.50' : 'white',
+              backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
               borderBottom: '1px solid #e0e0e0',
             }}
           >

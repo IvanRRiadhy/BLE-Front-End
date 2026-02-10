@@ -101,7 +101,7 @@ const { categories, series } = useMemo(() => {
     <Box
       sx={{
         width: "100%",
-        height: "30vh",
+        height: "32vh",
         borderRadius: "25px",
         boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
         px: 2,

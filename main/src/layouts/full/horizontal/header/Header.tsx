@@ -12,10 +12,11 @@ import {
   Theme,
   Button,
   Container,
+  Tooltip,
 } from '@mui/material';
 
 import { useSelector, useDispatch } from 'src/store/Store';
-import { toggleMobileSidebar } from 'src/store/customizer/CustomizerSlice';
+import { hoverSidebar, toggleMobileSidebar } from 'src/store/customizer/CustomizerSlice';
 import { IconMenu2, IconRestore } from '@tabler/icons-react';
 import Profile from 'src/layouts/full/vertical/header/Profile';
 import Language from 'src/layouts/full/vertical/header/Language';
@@ -28,10 +29,14 @@ import DashboardFilter from '../navbar/DashboardFilter';
 import TimeDisplay from '../navbar/TimeDisplay';
 import { fetchAlarmSetting } from 'src/store/apps/alarmsetting/alarmSettings';
 import { fetchDailyReport } from 'src/store/apps/crud/analytics';
+import { useHorizontalOverflow } from '../../shared/useHorizontalOverflow';
 
 const Header = () => {
   const lgDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('lg'));
+  const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const isMain = useSelector((state: RootState) => state.customizer.isMainMenu);
+  const isSidebarHover = useSelector((state: RootState) => state.customizer.isSidebarHover);
+  const { ref: navRef, isOverflowing } = useHorizontalOverflow();
 
   // drawer
   const customizer = useSelector((state: RootState) => state.customizer);
@@ -101,16 +106,20 @@ const Header = () => {
         {/* ------------------------------------------- */}
         {/* Toggle Button Sidebar */}
         {/* ------------------------------------------- */}
-        {lgDown ? (
-          <IconButton
-            color="inherit"
-            aria-label="menu"
-            onClick={() => dispatch(toggleMobileSidebar())}
-          >
-            <IconMenu2 />
-          </IconButton>
-        ) : (
-          ''
+        {(lgDown || isOverflowing) && (
+          <Tooltip title="Open navigation">
+            <IconButton
+              color="inherit"
+              aria-label="menu"
+              onClick={
+              lgDown
+                ? () => dispatch(toggleMobileSidebar())
+                : () => dispatch(hoverSidebar(!isSidebarHover))
+            }
+            >
+              <IconMenu2 />
+            </IconButton>
+          </Tooltip>
         )}
 
         {lgDown ? (
@@ -122,7 +131,18 @@ const Header = () => {
             }}
           >
             <Box display="flex" justifyContent="space-between" alignItems="center">
-              <NavListing />
+              {!isOverflowing && (
+                <Box
+                  ref={navRef}
+                  sx={{
+                    // overflowx: 'hidden',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '100%',
+                  }}
+                >
+                  <NavListing />
+                </Box>
+              )}
 
               {/* Right section */}
               <Box display="flex" alignItems="center" sx={{ gap: 2 }}>

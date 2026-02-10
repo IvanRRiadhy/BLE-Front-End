@@ -132,6 +132,7 @@ interface StateType {
   trackingLogs: TrackingLogItem[];
   alarmLogs: AlarmLogItem[];
   alarmPopupId: string | null;
+  showAlarm:AlarmLogItem | null;
 }
 
 const initialState: StateType = {
@@ -152,6 +153,7 @@ const initialState: StateType = {
   trackingLogs: [],
   alarmLogs: [],
   alarmPopupId: null,
+  showAlarm: null
 };
 
 export const BeaconSlice = createSlice({
@@ -320,6 +322,9 @@ export const BeaconSlice = createSlice({
     ClearSeenAlarms: (state: StateType) => {
       state.alarmLogs = state.alarmLogs.filter((alarm) => !alarm.seen);
     },
+    ShowAlarmPopup: (state, action: PayloadAction<AlarmLogItem | null>) => {
+      state.showAlarm = action.payload;
+    }
   },
 });
 
@@ -341,6 +346,7 @@ export const {
   MarkAlarmSeen,
   MarkAllAlarmsSeen,
   ClearSeenAlarms,
+  ShowAlarmPopup,
 } = BeaconSlice.actions;
 
 export const selectAlarmPopupId = (state: RootState) => state.BeaconReducer.alarmPopupId;

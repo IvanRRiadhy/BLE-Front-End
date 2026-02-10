@@ -24,7 +24,6 @@ import Statistic from 'src/components/dashboards/newmainmenu/Statistic';
 import Bar from 'src/components/dashboards/newmainmenu/Bar';
 import AlarmCategorized from 'src/components/dashboards/newmainmenu/AlarmCategorized';
 import WelcomePopup from 'src/components/dashboards/mainmenu/WelcomePopup';
-import AlarmRadarChart from 'src/components/dashboards/newmainmenu/AlarmDurationChart';
 const filter = {
   Draw: 1,
   Start: 0,
@@ -81,126 +80,108 @@ const DashboardView: React.FC = () => {
   });
 
   const topAlarmAreas = useMemo(() => {
-    if (!alarmByArea?.areas?.length) return [];
+  if (!alarmByArea?.areas?.length) return [];
 
-    return alarmByArea.areas
-      .map((area: any) => {
-        const total = area.series.reduce((sum: number, s: any) => sum + (s.data?.[0] ?? 0), 0);
+  return alarmByArea.areas
+    .map((area: any) => {
+      const total = area.series.reduce(
+        (sum: number, s: any) => sum + (s.data?.[0] ?? 0),
+        0
+      );
 
-        return {
-          alarmStatus: area.areaName, // reuse existing prop name
-          total,
-        };
-      })
-      .sort((a: any, b: any) => b.total - a.total)
-      .slice(0, 3);
-  }, [alarmByArea]);
+      return {
+        alarmStatus: area.areaName, // reuse existing prop name
+        total,
+      };
+    })
+    .sort((a: any, b: any) => b.total - a.total)
+    .slice(0, 3);
+}, [alarmByArea]);
 
   return (
     <PageContainer title="Dashboard" description="This is Dashboard">
       <Box>
         <Grid container spacing={1}>
-          {/* First Row */}
-          {/* <Grid container size={12} spacing={1} mt={0}>
-            <Grid size={2.5}>
-              <Stack spacing={1}>
-                <AlarmCategorized title="Alarm By Status" data={alarmByStatus} />
-                <AlarmCategorized title="Alarm By Area" data={topAlarmAreas} />
-              </Stack>
-            </Grid>
-
-            <Grid size={4.75}>
-              <Bar />
-            </Grid>
-
-            <Grid size={4.75}>
-              <Statistic />
-            </Grid>
-          </Grid> */}
-          <Grid container size={12} spacing={1}>
-            <Grid size={2.5}>
-              <AlarmRadarChart />
-            </Grid>
-            <Grid size={2.3}>
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: 0.5,
-                  p: 1,
-                  pt: 1.5,
-                }}
-              >
-                <TopButton
-                  icon={IconClock}
-                  label="Alarm"
-                  num={alarmFilteredCount}
-                  color="#045498"
-                />
-                <TopButton
-                  icon={IconClock}
-                  label="Active Alarm"
-                  num={alarmFilteredCount}
-                  color="#D73D3D"
-                />
-                <TopButton
-                  icon={IconCircleX}
-                  label="Blacklist"
-                  num={blacklistFilteredCount}
-                  color="#D73D3D"
-                />
-                <TopButton
-                  icon={IconActivityHeartbeat}
-                  label="Active Card"
-                  num={activeTag}
-                  color="#045498"
-                />
-
-                <TopButton
-                  icon={IconBuildingBroadcastTower}
-                  label="Gateway"
-                  num={bleReaderFilteredCount}
-                  color="#045498"
-                />
-                <TopButton
-                  icon={IconActivityHeartbeat}
-                  label="NonActive Card"
-                  num={nonActiveTag}
-                  color="#045498"
-                />
-                <TopButton
-                  icon={IconMapPin}
-                  label="Area"
-                  num={maskedAreaFilteredCount}
-                  color="#045498"
-                />
-                <TopButton icon={IconMapPin} label="Placeholder" num={123} color="#045498" />
-              </Box>
-            </Grid>
-
-            <Grid size={2.45}>
-              <UpcomingVisitor />
-            </Grid>
-
-            <Grid size={3}>
-              <AlarmLog />
-            </Grid>
-
-            <Grid size={1.75}>
-              <NewBlacklist />
-            </Grid>
-          </Grid>
-
-          {/* Second Row */}
-          {/* Left Side Second Row */}
+          {/* Left Side First Row */}
           <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
             <AreaDistribution />
           </Grid>
 
-          {/* Right Side Second Row */}
+          {/* First Row */}
           <Grid size={{ xs: 12, sm: 6, md: 9.5 }}>
             <Grid container spacing={1}>
               {/* Top Section */}
+              <Grid container size={12} spacing={1}>
+                <Grid size={3}>
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(2, 1fr)',
+                      gap: 1,
+                      p: 1,
+                      pt: 1.5,
+                    }}
+                  >
+                    <TopButton
+                      icon={IconClock}
+                      label="Alarm"
+                      num={alarmFilteredCount}
+                      color="#045498"
+                    />
+                    <TopButton
+                      icon={IconClock}
+                      label="Active Alarm"
+                      num={alarmFilteredCount}
+                      color="#D73D3D"
+                    />
+                    <TopButton
+                      icon={IconCircleX}
+                      label="Blacklist"
+                      num={blacklistFilteredCount}
+                      color="#D73D3D"
+                    />
+                    <TopButton
+                      icon={IconActivityHeartbeat}
+                      label="Active Card"
+                      num={activeTag}
+                      color="#045498"
+                    />
+
+                    <TopButton
+                      icon={IconBuildingBroadcastTower}
+                      label="Gateway"
+                      num={bleReaderFilteredCount}
+                      color="#045498"
+                    />
+                    <TopButton
+                      icon={IconActivityHeartbeat}
+                      label="NonActive Card"
+                      num={nonActiveTag}
+                      color="#045498"
+                    />
+                    <TopButton
+                      icon={IconMapPin}
+                      label="Area"
+                      num={maskedAreaFilteredCount}
+                      color="#045498"
+                    />
+                    <TopButton icon={IconMapPin} label="Placeholder" num={123} color="#045498" />
+                  </Box>
+                </Grid>
+
+                <Grid size={3}>
+                  <UpcomingVisitor />
+                </Grid>
+
+                <Grid size={4}>
+                  <AlarmLog />
+                </Grid>
+
+                <Grid size={2}>
+                  <NewBlacklist />
+                </Grid>
+              </Grid>
+              {/* BOTTOM SECTION */}
               <Grid container size={12} spacing={1}>
                 <Grid size={6}>
                   <BeaconDistribution />
@@ -210,23 +191,10 @@ const DashboardView: React.FC = () => {
                   <Tracking />
                 </Grid>
               </Grid>
-
-              {/* BOTTOM SECTION */}
-              <Grid container size={12} spacing={1}>
-                <Grid size={6}>
-                  <Statistic />
-                </Grid>
-
-                <Grid size={6}>
-                  <Statistic />
-                </Grid>
-              </Grid>
             </Grid>
           </Grid>
 
           {/* SECOND ROW */}
-
-          {/* THIRD ROW */}
           <Grid container size={12} spacing={1} mt={0}>
             <Grid size={2.5}>
               <Stack spacing={1}>
@@ -243,6 +211,7 @@ const DashboardView: React.FC = () => {
               <Statistic />
             </Grid>
           </Grid>
+          
         </Grid>
       </Box>
       {/* Welcome Popup */}

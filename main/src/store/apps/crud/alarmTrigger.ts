@@ -96,6 +96,80 @@ export type IntruderType = {
     personType: string;
 }
 
+export type LocationType = {
+    floorplanId: string;
+    floorplanName: string;
+    floorplanmaskedAreaId: string;
+    areaName: string;
+    position: {
+        x: number;
+        y: number;
+        beaconId: string;
+    };
+};
+
+export type PersonType = {
+    type: string;
+    id: string;
+    name: string;
+    identityId: string;
+    cardNumber: string;
+};
+export type SecurityType = {
+    id: string;
+    name: string;
+    email: string;
+};
+export type IncidentType = {
+    alarmTriggerId: string;
+    triggerTime: string;
+    alarmColor: string;
+    alarmStatus: string;
+    actionStatus: string;
+    isActive: boolean;
+    isInRestrictedArea: boolean;
+    location: LocationType;
+    person: PersonType;
+    security: SecurityType;
+};
+
+export type TimelineItemType = {
+    stage: string;
+    timestamp: string;
+    actor: string;
+    actorId: string;
+    durationInSeconds: number;
+    durationFormatted: string;
+    description: string;
+};
+
+export type DurationType = {
+    totalSeconds: number;
+    totalFormatted: string;
+    responseTimeSeconds: number;
+    responseTimeFormatted: string;
+    resolutionTimeSeconds: number;
+    resolutionTimeFormatted: string;
+};
+
+export type investigationType = {
+    result: string;
+    dispatchedPerson: string;
+    dispatchedPersonId: string;
+    investigatedAt: string;
+    doneAt: string;
+    notes: string;
+    wasInvestigated: boolean;
+};
+
+export type AlarmTimelineType = {
+    incident: IncidentType;
+    timeline: TimelineItemType[];
+    duration: DurationType;
+    investigation: investigationType;
+}
+
+
 
 interface StateType {
     alarmTriggers: AlarmTriggerType[];

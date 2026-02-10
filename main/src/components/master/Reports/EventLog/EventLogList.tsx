@@ -168,7 +168,7 @@ const EventLogList = () => {
     )}`;
   };
   const filteredData = useMemo(() => {
-    return eventLogData.filter((row) => {
+    return eventLogData.filter((row: any) => {
       // Event
       if (filterEvent !== 'ALL' && row.event !== filterEvent) return false;
 

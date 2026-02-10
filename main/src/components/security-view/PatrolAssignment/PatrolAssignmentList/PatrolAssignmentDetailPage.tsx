@@ -79,7 +79,7 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
   const patrolNotStarted = !startedAt;
   const patrolRunning = !!startedAt && !endedAt;
   const patrolEnded = !!startedAt && !!endedAt;
-  const canAddCase = patrolRunning;
+  const canAddEditCase = patrolRunning;
 
   useEffect(() => {
     if (!startedAt || endedAt) return;
@@ -225,17 +225,15 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
   };
 
   const mapCaseToForm = (data: any): CaseUploadType => ({
-  title: data.title ?? '',
-  description: data.description ?? '',
-  caseType: data.caseType ?? '',
-  patrolSessionId: data.patrolSessionId,
-  attachments: (data.attachments || []).map((a: any) => ({
-    fileUrl: a.fileUrl.startsWith('http')
-      ? a.fileUrl
-      : `https://${a.fileUrl}`,
-    fileType: a.fileType,
-  })),
-});
+    title: data.title ?? '',
+    description: data.description ?? '',
+    caseType: data.caseType ?? '',
+    patrolSessionId: data.patrolSessionId,
+    attachments: (data.attachments || []).map((a: any) => ({
+      fileUrl: a.fileUrl.startsWith('http') ? a.fileUrl : `https://${a.fileUrl}`,
+      fileType: a.fileType,
+    })),
+  });
 
   const handleEditCase = (item: any) => {
     setCaseDialogType('edit');
@@ -514,8 +512,8 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
 
               <Box
                 sx={{
-                  opacity: canAddCase ? 1 : 0.5,
-                  cursor: canAddCase ? 'pointer' : 'not-allowed',
+                  opacity: canAddEditCase ? 1 : 0.5,
+                  cursor: canAddEditCase ? 'pointer' : 'not-allowed',
                 }}
               >
                 <Button
@@ -554,8 +552,12 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
                       <PatrolCaseListItem
                         data={item}
                         onClick={(c) => {
-                          if (patrolEnded) {
-                            toast.error('This patrol has ended. Cases can no longer be edited.');
+                          if (!canAddEditCase) {
+                            patrolEnded
+                              ? toast.error('This patrol has ended. Cases can no longer be edited.')
+                              : toast.error(
+                                  'Cases can only be edited after the patrol has started.',
+                                );
                             return;
                           }
                           handleEditCase(c);

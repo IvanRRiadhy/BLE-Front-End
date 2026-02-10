@@ -70,7 +70,7 @@ const Header = () => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement); // Update state based on fullscreenElement
     };
-
+    console.log('isFullscreen', isFullscreen);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange); // Safari
     document.addEventListener('msfullscreenchange', handleFullscreenChange); // IE/Edge

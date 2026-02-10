@@ -114,6 +114,7 @@ export function useAlarmByStatus(filter: any) {
         `${API_ALARM}status`,
         filter
       );
+      console.log("Result", res)
       return res.data.collection.data;
     },
   });
@@ -127,6 +128,7 @@ export function useAlarmByArea(filter: any) {
         `${API_ALARM}area`,
         filter
       );
+      console.log("Result", res)
       return res.data.collection.data;
     },
   });

@@ -54,15 +54,7 @@ const Statistic = () => {
   const countingData = useSelector((state: RootState) => state.BeaconReducer.countingData) as CountingData;
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    // Subscribe to counting data when component mounts
-    const unsubscribe = dispatch(fetchCountingData());
 
-    // Cleanup subscription when component unmounts
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, [dispatch]);
 
   // Create a lookup map for members by ID
   const memberMap = useMemo(() => {

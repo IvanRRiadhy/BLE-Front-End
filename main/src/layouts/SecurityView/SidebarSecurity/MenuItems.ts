@@ -58,7 +58,13 @@ const Menuitems: MenuitemsType[] = [
       title: 'Patrol',
       icon: IconSend,
       href: '/security-view/patrol-assignment',
-    }
+    },
+    {
+      id: uniqueId(),
+      title: 'Patrol Case',
+      icon: IconSend,
+      href: '/security-view/patrol-case',
+    },
   ];
 
 export default Menuitems;

@@ -76,7 +76,7 @@ const FloorFilter = () => {
     FloorplanId: string[];
     MaskedAreaId: string[];
   }) => {
-    setAppliedFilter((prev) => ({
+    setAppliedFilter((prev: typeof appliedFilter) => ({
       ...prev,
       BuildingId: filter.BuildingId ?? [],
     }));

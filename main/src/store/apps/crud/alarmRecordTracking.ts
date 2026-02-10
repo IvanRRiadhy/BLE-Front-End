@@ -91,6 +91,8 @@ export type NewAlarmType = {
 
 };
 
+
+
 export interface AlarmType {
     id: string;
     timestamp: string;

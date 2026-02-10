@@ -159,6 +159,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
               <CustomFormLabel htmlFor="building">Building</CustomFormLabel>
               <Box display="flex" alignItems="center" gap={1}>
                 <CustomAutocomplete<BuildingType>
+                  multiple={false}
                   label="Building"
                   options={buildingData}
                   value={buildingData.find((b) => b.id === formData.buildingId) || null}

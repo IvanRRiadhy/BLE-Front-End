@@ -1,11 +1,21 @@
 import React from 'react';
 import { Autocomplete, TextField, CircularProgress, SxProps, Theme } from '@mui/material';
 
-export interface CustomAutocompleteProps<T> {
+type SingleSelectProps<T> = {
+  multiple?: false;
+  value: T | null;
+  onChange: (value: T | null) => void;
+};
+
+type MultiSelectProps<T> = {
+  multiple: true;
+  value: T[];
+  onChange: (value: T[]) => void;
+};
+
+export type CustomAutocompleteProps<T> = {
   label: string;
   options: T[];
-  value: T | null;
-  onChange: (newValue: T | null) => void;
   getOptionLabel: (option: T) => string;
   isOptionEqualToValue: (option: T, value: T) => boolean;
 
@@ -13,31 +23,31 @@ export interface CustomAutocompleteProps<T> {
   error?: boolean;
   helperText?: string;
 
-  loading?: boolean;          // <-- ADD THIS
-  renderOption?: any;         // <-- support custom option layout
+  loading?: boolean;
+  renderOption?: any;
   sx?: SxProps<Theme>;
-}
+} & (SingleSelectProps<T> | MultiSelectProps<T>);
 
-export default function CustomAutocomplete<T>({
-  label,
-  options,
-  value,
-  onChange,
-  getOptionLabel,
-  isOptionEqualToValue,
-  required = false,
-  error,
-  helperText,
-  loading = false,            // <-- default value
-  renderOption,
-  sx,
-}: CustomAutocompleteProps<T>) {
+export default function CustomAutocomplete<T>(props: CustomAutocompleteProps<T>) {
+  const {
+    label,
+    options,
+    getOptionLabel,
+    isOptionEqualToValue,
+    required = false,
+    error,
+    helperText,
+    loading = false,
+    renderOption,
+    sx,
+  } = props;
   return (
     <Autocomplete
+      multiple={props.multiple}
       options={options}
-      value={value}
-      loading={loading}       // <-- pass to Autocomplete
-      onChange={(_, newVal) => onChange(newVal)}
+      value={props.value as any}
+      loading={loading} // <-- pass to Autocomplete
+      onChange={(_, newVal) => props.onChange(newVal as any)}
       getOptionLabel={getOptionLabel}
       isOptionEqualToValue={isOptionEqualToValue}
       renderOption={renderOption}
@@ -54,8 +64,7 @@ export default function CustomAutocomplete<T>({
             mt: 1,
             py: 1,
             backgroundColor: '#fff',
-            boxShadow:
-              '0px 4px 12px rgba(0,0,0,0.12), 0px 0px 4px rgba(0,0,0,0.05)',
+            boxShadow: '0px 4px 12px rgba(0,0,0,0.12), 0px 0px 4px rgba(0,0,0,0.05)',
             '& .MuiAutocomplete-option': {
               px: 2,
               py: 1,
