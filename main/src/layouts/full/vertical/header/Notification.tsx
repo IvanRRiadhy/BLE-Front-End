@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-
+// import { useNavigate } from 'react-router-dom';
 import {
   IconButton,
   Box,
@@ -63,6 +63,7 @@ const getPriorityColor = (priority: string): string => {
 
 const Notifications = () => {
   const dispatch: AppDispatch = useDispatch();
+  // const navigate = useNavigate();
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const bellRef = useRef<HTMLButtonElement | null>(null);
@@ -131,24 +132,44 @@ const Notifications = () => {
     return pruned;
   }, [alarmTriggerData, nowMs]);
 
-const categorizedTriggers = useMemo(() => {
-  return filteredSortedTriggers.reduce((acc, trigger) => {
-    const key = trigger.action?.toLowerCase();
+  const categorizedTriggers = useMemo(() => {
+    return filteredSortedTriggers.reduce(
+      (acc, trigger) => {
+        const key = trigger.action?.toLowerCase();
 
-    if (key === 'idle') acc.idle.push(trigger);
-    else if (key === 'acknowledged') acc.acknowledged.push(trigger);
-    else if (key === 'done') acc.done.push(trigger);
-    else acc.others.push(trigger);
+        if (key === 'idle') acc.idle.push(trigger);
+        else if (key === 'acknowledged') acc.acknowledged.push(trigger);
+        else if (key === 'done') acc.done.push(trigger);
+        else acc.others.push(trigger);
 
-    return acc;
-  }, {
-    idle: [] as AlarmTriggerType[],
-    acknowledged: [] as AlarmTriggerType[],
-    done: [] as AlarmTriggerType[],
-    others: [] as AlarmTriggerType[],
-  });
-}, [filteredSortedTriggers]);
-console.log("Categorized Triggers:", categorizedTriggers);
+        return acc;
+      },
+      {
+        idle: [] as AlarmTriggerType[],
+        acknowledged: [] as AlarmTriggerType[],
+        done: [] as AlarmTriggerType[],
+        others: [] as AlarmTriggerType[],
+      },
+    );
+  }, [filteredSortedTriggers]);
+  // console.log('Categorized Triggers:', categorizedTriggers);
+
+  const redirectToAlarmList = (trigger: AlarmTriggerType) => {
+    const params = new URLSearchParams();
+
+    if (trigger.visitorId) {
+      params.set('visitorId', trigger.visitorId);
+    }
+
+    if (trigger.memberId) {
+      params.set('memberId', trigger.memberId);
+    }
+
+    params.set('alarmTriggerId', trigger.id);
+
+    window.location.href = `/report/alarmlist?${params.toString()}`;
+  };
+
   const getName = (ble: string) =>
     memberList.find((x) => x.bleCardNumber === ble)?.name ||
     visitorList.find((x) => x.bleCardNumber === ble)?.name ||
@@ -253,7 +274,8 @@ console.log("Categorized Triggers:", categorizedTriggers);
   };
 
   const isVisuallySeen = (alarm: AlarmLogItem) => alarm.seen || softSeenIds.has(alarm.id);
-const isTriggerVisuallySeen = (alarm: AlarmTriggerType) => alarm.action !== 'Idle' || softSeenIds.has(alarm.id);
+  const isTriggerVisuallySeen = (alarm: AlarmTriggerType) =>
+    alarm.action !== 'Idle' || softSeenIds.has(alarm.id);
   const { unseenCount, seenCount } = useMemo(() => {
     let unseen = 0;
     let seen = 0;
@@ -555,10 +577,14 @@ const isTriggerVisuallySeen = (alarm: AlarmTriggerType) => alarm.action !== 'Idl
                         setSoftSeenIds((prev) => new Set(prev).add(t.id));
                         dispatch(MarkAlarmSeen(t.id));
                       }}
+                      // onClick={(t) => {
+                      //   console.log('UNSEEN trigger clicked:', t, isTriggerVisuallySeen(t));
+                      // }}
                       onClick={(t) => {
-                        console.log('UNSEEN trigger clicked:', t, isTriggerVisuallySeen(t));
+                        redirectToAlarmList(t);
+                        closeMenu();
                       }}
-                      />
+                    />
                   ))}
                 </Stack>
               </>
@@ -605,7 +631,7 @@ const isTriggerVisuallySeen = (alarm: AlarmTriggerType) => alarm.action !== 'Idl
               </>
             )} */}
             {/* ⚪ SEEN (only after reopen) */}
-{/* 🔴 UNSEEN (includes soft-seen during this session) */}
+            {/* 🔴 UNSEEN (includes soft-seen during this session) */}
             {categorizedTriggers.acknowledged.length > 0 && (
               <>
                 <Box display="flex" alignItems="center" gap={1} mb={1}>
@@ -660,10 +686,14 @@ const isTriggerVisuallySeen = (alarm: AlarmTriggerType) => alarm.action !== 'Idl
                       //   setSoftSeenIds((prev) => new Set(prev).add(t.id));
                       //   dispatch(MarkAlarmSeen(t.id));
                       // }}
+                      // onClick={(t) => {
+                      //   console.log('SEEN alarm clicked:', t, isTriggerVisuallySeen(t));
+                      // }}
                       onClick={(t) => {
-                        console.log('SEEN alarm clicked:', t, isTriggerVisuallySeen(t));
+                        redirectToAlarmList(t);
+                        closeMenu();
                       }}
-                      />
+                    />
                   ))}
                 </Stack>
               </>
@@ -704,7 +734,9 @@ const isTriggerVisuallySeen = (alarm: AlarmTriggerType) => alarm.action !== 'Idl
                         },
                       }}
                     >
-                      <Typography fontWeight={600}>{alarm.visitorName ?? alarm.memberName}</Typography>
+                      <Typography fontWeight={600}>
+                        {alarm.visitorName ?? alarm.memberName}
+                      </Typography>
                       <Typography variant="body2" color="text.secondary">
                         {alarm.floorName} · {alarm.buildingName}
                       </Typography>

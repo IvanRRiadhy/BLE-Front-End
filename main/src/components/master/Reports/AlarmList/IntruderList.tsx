@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import {
   Backdrop,
   Box,
@@ -22,6 +22,7 @@ import { defaultMemberFilter, defaultVisitorFilter } from 'src/store/apps/defaul
 import { SelectVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import { useAllMembers, useMemberList } from 'src/hooks/useMember';
 import { memberType, SelectMember } from 'src/store/apps/crud/member';
+import { useSearchParams } from 'react-router-dom';
 
 const SKELETON_ROWS = 5;
 
@@ -31,7 +32,8 @@ const IntruderList = () => {
   const { data: intruderData = [], isLoading, isFetching } = useAllIntruders();
 
   const selectedIntruder = useSelector((state) => state.alarmTriggerReducer.selectedIntruder);
-
+  const searchParams = new URLSearchParams(window.location.search);
+  const autoSelectDone = useRef(false);
   // Fetch all visitors and members upfront
   const { data: allVisitors } = useAllVisitor();
 
@@ -55,6 +57,31 @@ const IntruderList = () => {
       return acc;
     }, {});
   }, [allMembers]);
+
+  useEffect(() => {
+    if (autoSelectDone.current) return;
+    if (!intruderData?.length) return;
+
+    const visitorId = searchParams.get('visitorId');
+    const memberId = searchParams.get('memberId');
+
+    if (!visitorId && !memberId) return;
+
+    const matchedIntruder = intruderData.find((intruder) => {
+      if (visitorId && intruder.personType === 'Visitor') {
+        return intruder.visitorId === visitorId || intruder.personGuid === visitorId;
+      }
+      if (memberId && intruder.personType === 'Member') {
+        return intruder.memberId === memberId || intruder.personGuid === memberId;
+      }
+      return false;
+    });
+
+    if (matchedIntruder) {
+      handleClick(matchedIntruder);
+      autoSelectDone.current = true;
+    }
+  }, [intruderData, searchParams]);
 
   const renderSkeletonItems = (count: number) => (
     <>
@@ -110,7 +137,9 @@ const IntruderList = () => {
           }}
         >
           <Box p={2}>
-            <Typography variant="h4" fontWeight={800}>Intruders</Typography>
+            <Typography variant="h4" fontWeight={800}>
+              Intruders
+            </Typography>
           </Box>
           <Divider />
           {!loading && intruderData.length > 0

@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useDispatch } from 'src/store/Store';
 import {
@@ -40,7 +42,8 @@ dayjs.extend(duration);
 const AlarmContent = () => {
   const dispatch: AppDispatch = useDispatch();
   const language = useSelector((state: RootState) => state.customizer.isLanguage);
-
+  const searchParams = new URLSearchParams(window.location.search);
+  const autoAlarmSelectDone = useRef(false);
   const selectedIntruder = useSelector(
     (state: RootState) => state.alarmTriggerReducer.selectedIntruder,
   );
@@ -113,6 +116,24 @@ const AlarmContent = () => {
     display: 'block',
     maxWidth: '100%',
   };
+
+  useEffect(() => {
+    if (autoAlarmSelectDone.current) return;
+    if (!alarmTriggerData?.length) return;
+
+    const alarmTriggerId = searchParams.get('alarmTriggerId');
+    if (!alarmTriggerId) return;
+
+    const matchedAlarm = alarmTriggerData.find(
+      (alarm) => alarm.id.toLowerCase() === alarmTriggerId.toLowerCase(),
+    );
+
+    if (matchedAlarm) {
+      setSelectedAlarmTrigger(matchedAlarm);
+      setOpenActionDialog(true);
+      autoAlarmSelectDone.current = true;
+    }
+  }, [alarmTriggerData, searchParams]);
 
   // Alarm Action
   const [openActionDialog, setOpenActionDialog] = useState(false);
@@ -587,8 +608,7 @@ const AlarmContent = () => {
                   .filter((item) => !item.disabled)
                   .map((item) => {
                     const isActiveStatus =
-                      selectedAlarmTrigger?.action?.toLowerCase() ===
-                      item.value.toLowerCase();
+                      selectedAlarmTrigger?.action?.toLowerCase() === item.value.toLowerCase();
 
                     const isSelected = selectedAction?.toLowerCase() === item.value.toLowerCase();
 
