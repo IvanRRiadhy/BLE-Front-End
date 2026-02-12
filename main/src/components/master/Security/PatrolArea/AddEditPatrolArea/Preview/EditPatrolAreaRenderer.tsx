@@ -462,6 +462,8 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
               floorId: selectedFloorplan?.floorId || '',
               floorplanId: selectedFloorplan?.id || '',
               isActive: true,
+              status: 1,
+              applicationId: '',
             };
 
             (async () => {
@@ -951,7 +953,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
                 }}
               />
             ))}
-          {isEditing &&
+          {/* {isEditing &&
             !areaDragging &&
             area.nodes
               ?.filter((n) => n.type === 'center')
@@ -964,7 +966,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
                   fill="yellow"
                   listening={false}
                 />
-              ))}
+              ))} */}
         </Group>
       );
     },

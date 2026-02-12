@@ -25,13 +25,15 @@ import { VisitorType } from 'src/store/apps/crud/visitor';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import { AlarmTriggerType } from 'src/store/apps/crud/alarmTrigger';
 import { uniqueId } from 'lodash';
-import { useAllAlarmTriggers } from 'src/hooks/useAlarmTrigger';
+import { useAlarmTriggerList, useAllAlarmTriggers } from 'src/hooks/useAlarmTrigger';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllVisitor } from 'src/hooks/useVisitor';
 import { AlarmLogItem, ClearSeenAlarms, MarkAllAlarmsSeen } from 'src/store/apps/tracking/Beacon';
 import { MarkAlarmSeen } from 'src/store/apps/tracking/Beacon';
 import AlarmMenuItem from './AlarmMenuItem';
 import { DeleteSweep, VisibilityOutlined } from '@mui/icons-material';
+import { defaultAlarmTriggerFilter } from 'src/store/apps/defaultForm';
+import AlarmTriggerMenuItem from '../../shared/AlarmTriggerMenuItem';
 
 type BubbleData = {
   id: string;
@@ -104,7 +106,13 @@ const Notifications = () => {
     return { unseenAlarms: unseen, seenAlarms: seen };
   }, [alarmLogs, softSeenIds]); // ✅ FIXED
 
-  const alarmTriggers: AlarmTriggerType[] = useAllAlarmTriggers().data || [];
+  // const alarmTriggers: AlarmTriggerType[] = useAllAlarmTriggers().data || [];
+  const { data: data, isLoading } = useAlarmTriggerList({
+    ...defaultAlarmTriggerFilter,
+    Length: 999,
+    filters: { isActive: true },
+  });
+  const alarmTriggerData = data?.data || [];
   const memberList: memberType[] = useAllMembers().data || [];
   const visitorList: VisitorType[] = useAllVisitor().data || [];
   const MAX_BUBBLES = 4;
@@ -112,16 +120,35 @@ const Notifications = () => {
   const toMs = (v: any) => (v instanceof Date ? v.getTime() : Date.parse(v));
 
   const filteredSortedTriggers = useMemo(() => {
-    const pruned = alarmTriggers.filter((t) => {
-      const active = (t as any).isActive === true || t.actionStatus === 'Idle';
+    if (alarmTriggerData === undefined || alarmTriggerData.length === 0) return [];
+    const pruned = alarmTriggerData.filter((t) => {
+      const active = (t as any).isActive === true;
       if (active) return true;
       const tMs = toMs((t as any).triggerTime);
       return tMs > 0 ? nowMs - tMs <= ONE_HOUR_MS : false;
     });
     pruned.sort((a, b) => toMs(b.triggerTime) - toMs(a.triggerTime));
     return pruned;
-  }, [alarmTriggers, nowMs]);
+  }, [alarmTriggerData, nowMs]);
 
+const categorizedTriggers = useMemo(() => {
+  return filteredSortedTriggers.reduce((acc, trigger) => {
+    const key = trigger.action?.toLowerCase();
+
+    if (key === 'idle') acc.idle.push(trigger);
+    else if (key === 'acknowledged') acc.acknowledged.push(trigger);
+    else if (key === 'done') acc.done.push(trigger);
+    else acc.others.push(trigger);
+
+    return acc;
+  }, {
+    idle: [] as AlarmTriggerType[],
+    acknowledged: [] as AlarmTriggerType[],
+    done: [] as AlarmTriggerType[],
+    others: [] as AlarmTriggerType[],
+  });
+}, [filteredSortedTriggers]);
+console.log("Categorized Triggers:", categorizedTriggers);
   const getName = (ble: string) =>
     memberList.find((x) => x.bleCardNumber === ble)?.name ||
     visitorList.find((x) => x.bleCardNumber === ble)?.name ||
@@ -225,32 +252,8 @@ const Notifications = () => {
     exit: { opacity: 0, y: -15, scale: 0.96, transition: { duration: 0.25 } },
   };
 
-  const startHoverTimer = (alarm: AlarmLogItem) => {
-    if (alarm.seen || softSeenIds.has(alarm.id)) return;
-    if (hoverTimers.current[alarm.id]) return;
-
-    hoverTimers.current[alarm.id] = window.setTimeout(() => {
-      // 🎨 UI FIRST (same render cycle)
-      setSoftSeenIds((prev) => {
-        const next = new Set(prev);
-        next.add(alarm.id);
-        return next;
-      });
-
-      // 🔥 Redux SECOND
-      dispatch(MarkAlarmSeen(alarm.id));
-
-      delete hoverTimers.current[alarm.id];
-    }, 3000);
-  };
-
-  const cancelHoverTimer = (alarmId: string) => {
-    if (hoverTimers.current[alarmId]) {
-      window.clearTimeout(hoverTimers.current[alarmId]);
-      delete hoverTimers.current[alarmId];
-    }
-  };
   const isVisuallySeen = (alarm: AlarmLogItem) => alarm.seen || softSeenIds.has(alarm.id);
+const isTriggerVisuallySeen = (alarm: AlarmTriggerType) => alarm.action !== 'Idle' || softSeenIds.has(alarm.id);
   const { unseenCount, seenCount } = useMemo(() => {
     let unseen = 0;
     let seen = 0;
@@ -498,7 +501,69 @@ const Notifications = () => {
         <Scrollbar sx={{ height: '385px' }}>
           <Box p={2}>
             {/* 🔴 UNSEEN (includes soft-seen during this session) */}
-            {unseenAlarms.length > 0 && (
+            {categorizedTriggers.idle.length > 0 && (
+              <>
+                <Box display="flex" alignItems="center" gap={1} mb={1}>
+                  <Typography variant="subtitle2" color="error">
+                    Unseen
+                  </Typography>
+                  <Chip
+                    size="small"
+                    label={categorizedTriggers.idle.length}
+                    sx={{
+                      backgroundColor: alpha(theme.palette.error.main, 0.15),
+                      color: theme.palette.error.main,
+                      fontWeight: 600,
+                    }}
+                  />
+                </Box>
+
+                <Stack spacing={1} mb={2}>
+                  {/* {unseenAlarms.map((alarm) => (
+                    <AlarmMenuItem
+                      key={alarm.id}
+                      alarm={alarm}
+                      isVisuallySeen={isVisuallySeen(alarm)}
+                      unseenBg={unseenBg}
+                      seenBg={seenBg}
+                      hoverBg={hoverBg}
+                      unseenBorder={unseenBorder}
+                      seenBorder={seenBorder}
+                      hoverBorder={hoverBorder}
+                      onMarkSeen={(a) => {
+                        setSoftSeenIds((prev) => new Set(prev).add(a.id));
+                        dispatch(MarkAlarmSeen(a.id));
+                      }}
+                      onClick={(a) => {
+                        console.log('UNSEEN alarm clicked:', a);
+                      }}
+                    />
+                  ))} */}
+                  {categorizedTriggers.idle.map((idle) => (
+                    <AlarmTriggerMenuItem
+                      key={idle.id}
+                      trigger={idle}
+                      isSeen={isTriggerVisuallySeen(idle)}
+                      // isClicked={isClicked(idle)}
+                      unseenBg={unseenBg}
+                      seenBg={seenBg}
+                      hoverBg={hoverBg}
+                      unseenBorder={unseenBorder}
+                      seenBorder={seenBorder}
+                      hoverBorder={hoverBorder}
+                      onMarkSeen={(t) => {
+                        setSoftSeenIds((prev) => new Set(prev).add(t.id));
+                        dispatch(MarkAlarmSeen(t.id));
+                      }}
+                      onClick={(t) => {
+                        console.log('UNSEEN trigger clicked:', t, isTriggerVisuallySeen(t));
+                      }}
+                      />
+                  ))}
+                </Stack>
+              </>
+            )}
+            {/* {unseenAlarms.length > 0 && (
               <>
                 <Box display="flex" alignItems="center" gap={1} mb={1}>
                   <Typography variant="subtitle2" color="error">
@@ -531,22 +596,88 @@ const Notifications = () => {
                         setSoftSeenIds((prev) => new Set(prev).add(a.id));
                         dispatch(MarkAlarmSeen(a.id));
                       }}
+                      onClick={(a) => {
+                        console.log('UNSEEN alarm clicked:', a);
+                      }}
                     />
                   ))}
                 </Stack>
               </>
-            )}
-
+            )} */}
             {/* ⚪ SEEN (only after reopen) */}
+{/* 🔴 UNSEEN (includes soft-seen during this session) */}
+            {categorizedTriggers.acknowledged.length > 0 && (
+              <>
+                <Box display="flex" alignItems="center" gap={1} mb={1}>
+                  <Typography variant="subtitle2" color="primary">
+                    Unseen
+                  </Typography>
+                  <Chip
+                    size="small"
+                    label={categorizedTriggers.acknowledged.length}
+                    sx={{
+                      backgroundColor: alpha(theme.palette.primary.main, 0.15),
+                      color: theme.palette.primary.main,
+                      fontWeight: 600,
+                    }}
+                  />
+                </Box>
+
+                <Stack spacing={1} mb={2}>
+                  {/* {unseenAlarms.map((alarm) => (
+                    <AlarmMenuItem
+                      key={alarm.id}
+                      alarm={alarm}
+                      isVisuallySeen={isVisuallySeen(alarm)}
+                      unseenBg={unseenBg}
+                      seenBg={seenBg}
+                      hoverBg={hoverBg}
+                      unseenBorder={unseenBorder}
+                      seenBorder={seenBorder}
+                      hoverBorder={hoverBorder}
+                      onMarkSeen={(a) => {
+                        setSoftSeenIds((prev) => new Set(prev).add(a.id));
+                        dispatch(MarkAlarmSeen(a.id));
+                      }}
+                      onClick={(a) => {
+                        console.log('UNSEEN alarm clicked:', a);
+                      }}
+                    />
+                  ))} */}
+                  {categorizedTriggers.acknowledged.map((seen) => (
+                    <AlarmTriggerMenuItem
+                      key={seen.id}
+                      trigger={seen}
+                      isSeen={true}
+                      // isClicked={isClicked(idle)}
+                      unseenBg={unseenBg}
+                      seenBg={seenBg}
+                      hoverBg={hoverBg}
+                      unseenBorder={unseenBorder}
+                      seenBorder={seenBorder}
+                      hoverBorder={hoverBorder}
+                      // onMarkSeen={(t) => {
+                      //   setSoftSeenIds((prev) => new Set(prev).add(t.id));
+                      //   dispatch(MarkAlarmSeen(t.id));
+                      // }}
+                      onClick={(t) => {
+                        console.log('SEEN alarm clicked:', t, isTriggerVisuallySeen(t));
+                      }}
+                      />
+                  ))}
+                </Stack>
+              </>
+            )}
+            {/* DONE */}
             {seenAlarms.length > 0 && (
               <>
                 <Box display="flex" alignItems="center" gap={1} mb={1}>
                   <Typography variant="subtitle2" color="primary">
-                    Seen
+                    Done
                   </Typography>
                   <Chip
                     size="small"
-                    label={seenCount}
+                    label={categorizedTriggers.done.length}
                     sx={{
                       backgroundColor: alpha(theme.palette.primary.main, 0.12),
                       color: theme.palette.primary.main,
@@ -556,7 +687,7 @@ const Notifications = () => {
                 </Box>
 
                 <Stack spacing={1}>
-                  {seenAlarms.map((alarm) => (
+                  {categorizedTriggers.done.map((alarm: AlarmTriggerType) => (
                     <Paper
                       key={alarm.id}
                       onClick={() => {
@@ -573,12 +704,12 @@ const Notifications = () => {
                         },
                       }}
                     >
-                      <Typography fontWeight={600}>{alarm.target}</Typography>
+                      <Typography fontWeight={600}>{alarm.visitorName ?? alarm.memberName}</Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {alarm.area} · {alarm.floor}
+                        {alarm.floorName} · {alarm.buildingName}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {new Date(alarm.time).toLocaleString()}
+                        {new Date(alarm.triggerTime).toLocaleString()}
                       </Typography>
                     </Paper>
                   ))}

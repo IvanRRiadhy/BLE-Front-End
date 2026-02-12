@@ -6,7 +6,7 @@ import { BASE_URL } from 'src/utils/axios';
 const defaultFilter = {
   draw: 1,
   start: 0,
-  length: 0,
+  length: 999,
   sortColumn: '',
   sortDir: 'desc',
   searchValue: '',
@@ -34,8 +34,8 @@ const AlarmLog: React.FC = () => {
       // console.log("Is Visitor", x.visitor)
       return {
         type: 'Visitor',
-        name: x.visitor.name,
-        image: x.visitor.faceImage,
+        name: x.visitorName,
+        image: x.visitorFaceImage,
       };
     }
 
@@ -43,8 +43,8 @@ const AlarmLog: React.FC = () => {
       // console.log("Is Visitor", x.member)
       return {
         type: 'Member',
-        name: x.member.name,
-        image: x.member.faceImage,
+        name: x.memberName,
+        image: x.memberFaceImage,
       };
     }
 

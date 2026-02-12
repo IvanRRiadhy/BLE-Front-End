@@ -156,12 +156,15 @@ export const visitorStatusEnumMap: Record<string, number> = {
 
   export const actionStatus: inputDataType[] = [
     { label: "Please select Status", value: '', disabled: true},
-    { label: "Idle", value: 'Idle'},
+    { label: "Idle", value: 'Idle', disabled: true},
     { label: "Done", value: 'Done'},
     { label: "No Action", value: 'NoAction'},
     { label: "Waiting", value: 'Waiting'},
-    { label: "Investigate", value: 'Investigated'},
-    { label: "Done Investigate", value: 'DoneInvestigated'},
+    { label: "Acknowledge", value: 'Acknowledge'},
+    { label: "Dispatched", value: 'Dispatched'},
+    { label: "Arrived", value: 'Arrived', disabled: true},
+    { label: "Accepted", value: 'Accepted', disabled: true},
+    { label: "Done Investigate", value: 'DoneInvestigated', disabled: true},
     { label: "Postpone Investigation", value: 'PostponeInvestigated'},
   ];
 
@@ -256,3 +259,12 @@ export const visitorStatusEnumMap: Record<string, number> = {
   } as const;
 
 export type EventType = keyof typeof EVENT_TYPE;
+
+export const ApprovalType: inputDataType[] = [
+  {label: "Auto", value: "ByThreatLevel"},
+  {label: "Without Approval", value: "WithoutApproval"},
+  {label: "Either Head Security", value: "Or"},
+  {label: "Both Head Security", value: "And"},
+  {label: "Sequence", value: "Sequential"},
+
+]

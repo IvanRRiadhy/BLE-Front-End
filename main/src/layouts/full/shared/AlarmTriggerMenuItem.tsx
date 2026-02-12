@@ -1,24 +1,30 @@
 import { Box, Paper, Typography, alpha, useTheme } from '@mui/material';
 import { motion, useAnimationControls } from 'framer-motion';
-import { AlarmLogItem } from 'src/store/apps/tracking/Beacon';
+import { AlarmTriggerType } from 'src/store/apps/crud/alarmTrigger';
 import { useEffect, useRef } from 'react';
 
 interface Props {
-  alarm: AlarmLogItem;
-  isVisuallySeen: boolean;
+  trigger: AlarmTriggerType;
+
+  isSeen?: boolean;
+  isClicked?: boolean;
+
   unseenBg: string;
   seenBg: string;
   hoverBg: string;
+
   unseenBorder: string;
   seenBorder: string;
   hoverBorder: string;
-  onMarkSeen?: (alarm: AlarmLogItem) => void;
-  onClick?: (alarm: AlarmLogItem) => void;
+
+  onMarkSeen?: (trigger: AlarmTriggerType) => void;
+  onClick?: (trigger: AlarmTriggerType) => void;
 }
 
-const AlarmMenuItem = ({
-  alarm,
-  isVisuallySeen,
+const AlarmTriggerMenuItem = ({
+  trigger,
+  isSeen,
+  isClicked,
   unseenBg,
   seenBg,
   hoverBg,
@@ -30,70 +36,82 @@ const AlarmMenuItem = ({
 }: Props) => {
   const theme = useTheme();
   const controls = useAnimationControls();
+
   const hoverActiveRef = useRef(false);
   const completedRef = useRef(false);
 
+  const clickedBg = alpha(unseenBorder, 1); // darker highlight
+  const clickedBorder = unseenBorder;
+
+  const displayName =
+    trigger.visitorName ||
+    trigger.memberName ||
+    trigger.securityName ||
+    'Unknown';
+
   useEffect(() => {
-    // sync visual state if redux updates
+    // Priority: clicked > seen > unseen
+    if (isClicked) {
+      controls.set({
+        backgroundColor: clickedBg,
+        borderLeftColor: clickedBorder,
+      });
+      return;
+    }
+
+    if (isSeen) {
+      controls.set({
+        backgroundColor: seenBg,
+        borderLeftColor: seenBorder,
+      });
+      console.log('Seen');
+      return;
+    }
+
     controls.set({
-      backgroundColor: isVisuallySeen ? seenBg : unseenBg,
-      borderLeftColor: isVisuallySeen ? seenBorder : unseenBorder,
+      backgroundColor: unseenBg,
+      borderLeftColor: unseenBorder,
     });
-  }, [isVisuallySeen]);
+  }, [isSeen, isClicked]);
 
   const handleHoverStart = async () => {
-    if(!onMarkSeen) return;
-    if (isVisuallySeen || completedRef.current) return;
+    if (!onMarkSeen || isSeen) return;
+    console.log('Hover Start');
+    if (isSeen || isClicked || completedRef.current) return;
 
     hoverActiveRef.current = true;
 
-    // Phase 1: unseen (error) → white (progress, 3s)
     await controls.start({
       backgroundColor: hoverBg,
       borderLeftColor: hoverBorder,
       transition: { duration: 2, ease: 'linear' },
     });
 
-    // Phase 2: commit only if still hovering
     if (hoverActiveRef.current && !completedRef.current) {
       completedRef.current = true;
 
-      // Phase 2: white → primary (quick confirmation)
       await controls.start({
         backgroundColor: seenBg,
         borderLeftColor: seenBorder,
-        transition: { duration: 0.2, ease: 'easeOut' }, // 👈 0.5–1s sweet spot
+        transition: { duration: 0.2 },
       });
 
-      onMarkSeen(alarm);
+      onMarkSeen(trigger);
     }
   };
 
   const handleHoverEnd = () => {
+    if(!onMarkSeen || isSeen) return;
     hoverActiveRef.current = false;
 
-    if (!completedRef.current) {
+    if (!completedRef.current && !isClicked) {
       controls.start({
         backgroundColor: unseenBg,
         borderLeftColor: unseenBorder,
-        transition: { duration: 0.25, ease: 'easeOut' },
+        transition: { duration: 0.25 },
       });
     }
   };
-  useEffect(() => {
-    if (isVisuallySeen) {
-      completedRef.current = true;
-      controls.set({
-        backgroundColor: seenBg,
-        borderLeftColor: seenBorder,
-      });
-    } else {
-      controls.set({
-        backgroundColor: unseenBg,
-        borderLeftColor: unseenBorder,
-      });
-    }
-  }, [isVisuallySeen]);
 
   return (
     <motion.div
@@ -101,8 +119,8 @@ const AlarmMenuItem = ({
       onHoverEnd={handleHoverEnd}
       animate={controls}
       initial={{
-        backgroundColor: unseenBg,
-        borderLeftColor: unseenBorder,
+        backgroundColor: isSeen ? seenBg : unseenBg,
+        borderLeftColor: isSeen ? seenBorder : unseenBorder,
       }}
       style={{
         borderLeft: '4px solid',
@@ -111,7 +129,7 @@ const AlarmMenuItem = ({
     >
       <Paper
         elevation={0}
-        onClick={() => onClick?.(alarm)}
+        onClick={() => onClick?.(trigger)}
         sx={{
           p: 1.5,
           cursor: 'pointer',
@@ -119,7 +137,7 @@ const AlarmMenuItem = ({
         }}
       >
         <Typography fontWeight={700} display="flex" alignItems="center" gap={0.75}>
-          {!isVisuallySeen && (
+          {!isSeen && !isClicked && (
             <Box
               component="span"
               sx={{
@@ -132,17 +150,19 @@ const AlarmMenuItem = ({
               !
             </Box>
           )}
-          {alarm.target}
+          {displayName}
         </Typography>
+
         <Typography variant="body2" color="text.secondary">
-          {alarm.area} · {alarm.floor}
+          {trigger.buildingName} · {trigger.floorplanName}
         </Typography>
+
         <Typography variant="caption" color="text.secondary">
-          {new Date(alarm.time).toLocaleString()}
+          {new Date(trigger.triggerTime).toLocaleString()}
         </Typography>
       </Paper>
     </motion.div>
   );
 };
 
-export default AlarmMenuItem;
+export default AlarmTriggerMenuItem;

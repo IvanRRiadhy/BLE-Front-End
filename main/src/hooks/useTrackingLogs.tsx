@@ -1,9 +1,9 @@
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store/Store';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllVisitor } from 'src/hooks/useVisitor';
-import { useMemo } from 'react';
-import { AlarmLogItem, TrackingLogItem } from 'src/store/apps/tracking/Beacon';
+import { useMemo, useState } from 'react';
+import { AlarmLogItem, MarkAlarmSeen, TrackingLogItem } from 'src/store/apps/tracking/Beacon';
 
 export type CombinedLogItem = TrackingLogItem | AlarmLogItem;
 
@@ -152,4 +152,31 @@ export function useCombinedEnrichedLogs(
       ? merged.slice(0, limit)
       : merged;
   }, [trackingLogs, alarmLogs, limit]);
+}
+export function useUnseenAlarms(currentAlarmId?: string) {
+  const dispatch = useDispatch();
+  const alarmLogs = useEnrichedAlarmLogs();
+  const [softSeenIds, setSoftSeenIds] = useState<Set<string>>(new Set());
+
+  const unseenAlarms = useMemo(
+    () =>
+      alarmLogs.filter(
+        (a) =>
+          !a.seen &&
+          !softSeenIds.has(a.id) &&
+          a.id !== currentAlarmId,
+      ),
+    [alarmLogs, softSeenIds, currentAlarmId],
+  );
+
+  const markSeen = (alarm: AlarmLogItem) => {
+    setSoftSeenIds((prev) => new Set(prev).add(alarm.id));
+    dispatch(MarkAlarmSeen(alarm.id));
+  };
+
+  return {
+    unseenAlarms,
+    unseenCount: unseenAlarms.length,
+    markSeen,
+  };
 }

@@ -105,7 +105,7 @@ export function useAssignActionAlarmTriggerByDMAC() {
     }) => {
       try {
         console.log('Editing AlarmTrigger:', dmac, actionStatus);
-        const response = await axiosServices.put(`${API_URL}tag/${dmac}`, {
+        const response = await axiosServices.put(`${API_URL}${dmac}`, {
           actionStatus,
           investigatedResult,
           assignedSecurityId,

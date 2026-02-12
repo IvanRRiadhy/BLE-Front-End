@@ -170,3 +170,7 @@ export function useNotificationLog() {
     },
   });
 }
+
+export function usePeakHour() {
+  
+}

@@ -3,6 +3,10 @@ import { AppDispatch, RootState } from 'src/store/Store';
 import { startMQTTclient } from './MQTT';
 import { uniqueId } from 'lodash';
 
+
+export type AlarmPriority = 'low' | 'medium' | 'high';
+
+
 export interface BeaconType {
   beaconId: string; // This is the dmac
   pair: string;
@@ -74,7 +78,7 @@ export type AlarmLogItem = {
   color?: string;
   alarmStatus: string; // blacklist, restricted, etc
   action: string; // active, investigated, closed
-  priority?: string;
+  priority?: AlarmPriority;
   personId: string;
   personType?: 'Visitor' | 'Member';
   type: 'Alarm';

@@ -75,7 +75,7 @@ const AlarmContent = () => {
         dispatch(
           UpdateFilter({
             ...alarmTriggerFilter,
-            Length: 0,
+            Length: 999,
             filters: { visitorId: selectedVisitor.id },
           }),
         );
@@ -450,7 +450,7 @@ const AlarmContent = () => {
                         }}
                       />
                       <Chip
-                        label={formatActionLabel(alarmTrigger.alarmRecordStatus)}
+                        label={formatActionLabel(alarmTrigger.alarm)}
                         sx={{
                           bgcolor: alarmTrigger.alarmColor || 'secondary.dark',
                           color: 'white',
@@ -478,17 +478,17 @@ const AlarmContent = () => {
                       textOverflow: 'ellipsis',
                     }}
                   >
-                    {alarmTrigger.floorplan?.name ?? 'Unknown Floorplan'}
+                    {alarmTrigger.floorplanName ?? 'Unknown Floorplan'}
                   </Typography>
                   <Chip
                     sx={{
-                      backgroundColor: actionStatusColormap[alarmTrigger.actionStatus] || 'grey',
+                      backgroundColor: actionStatusColormap[alarmTrigger.action] || 'grey',
                       color: 'white',
                       borderRadius: '8px',
                       minWidth: '50px',
                     }}
                     size="small"
-                    label={alarmTrigger.actionStatus}
+                    label={alarmTrigger.action}
                   />
                 </Grid>
 
@@ -537,7 +537,7 @@ const AlarmContent = () => {
                 }}
               >
                 <TrackingPositionFloorView
-                  floorplanId={selectedAlarmTrigger.floorplan?.id ?? ''}
+                  floorplanId={selectedAlarmTrigger.floorplanId ?? ''}
                   positionPxX={selectedAlarmTrigger.posX}
                   positionPxY={selectedAlarmTrigger.posY}
                   markerColor={
@@ -554,7 +554,7 @@ const AlarmContent = () => {
             Alarm Category:
           </Typography>
           <Typography variant="body1" fontWeight={600} mb={2}>
-            {selectedAlarmTrigger?.alarmRecordStatus?.toUpperCase() || '-'}
+            {selectedAlarmTrigger?.alarm?.toUpperCase() || '-'}
           </Typography>
 
           {/* If alarm is inactive */}
@@ -587,7 +587,7 @@ const AlarmContent = () => {
                   .filter((item) => !item.disabled)
                   .map((item) => {
                     const isActiveStatus =
-                      selectedAlarmTrigger?.actionStatus?.toLowerCase() ===
+                      selectedAlarmTrigger?.action?.toLowerCase() ===
                       item.value.toLowerCase();
 
                     const isSelected = selectedAction?.toLowerCase() === item.value.toLowerCase();

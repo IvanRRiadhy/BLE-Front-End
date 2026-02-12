@@ -27,10 +27,12 @@ import { getConfig } from 'src/config';
 import Customizer from './shared/customizer/Customizer';
 import {
   AlarmLogItem,
+  AlarmPriority,
   AppendAlarmLogs,
   AppendTrackingLogs,
   fetchCountingData,
   NotifyAlarmPopup,
+  selectAlarmById,
   ShowAlarmPopup,
   TrackingLogItem,
 } from 'src/store/apps/tracking/Beacon';
@@ -51,6 +53,12 @@ const PageWrapper = styled('div')(() => ({
   backgroundColor: '#ffffffff',
 }));
 
+const PRIORITY_WEIGHT: Record<AlarmPriority, number> = {
+  low: 1,
+  medium: 2,
+  high: 3,
+};
+
 const FullLayout: FC = () => {
   const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
   const dispatch: AppDispatch = useDispatch();
@@ -61,12 +69,13 @@ const FullLayout: FC = () => {
   const theme = useTheme();
   const memberList: memberType[] = useSelector((s: RootState) => s.memberReducer.members);
   const visitorList: VisitorType[] = useSelector((s: RootState) => s.visitorReducer.visitors);
-  const showAlarmPopup = useSelector((s: RootState) => s.BeaconReducer.alarmPopupId);
-
+  const showAlarmPopupId = useSelector((s: RootState) => s.BeaconReducer.alarmPopupId);
+  const showAlarmPopup = useSelector(selectAlarmById(showAlarmPopupId));
   const [sessionExpired, setSessionExpired] = useState(false);
   const lastDispatchRef = useRef(0);
   const unsubscriberRef = useRef<(() => void) | null>(null);
-  const showAlarmPopupRef = useRef<string | null>(null);
+  const alarmPopupIdRef = useRef<string | null>(null);
+  const alarmPopupRef = useRef<AlarmLogItem | null>(null);
   const [latestAlarm, setLatestAlarm] = useState<AlarmType | null>(null);
   const [openAlarmPopup, setOpenAlarmPopup] = useState(false);
 
@@ -79,9 +88,24 @@ const FullLayout: FC = () => {
     return bleNumber || 'Unknown';
   };
 
+  const isHigherPriority = (incoming?: AlarmPriority, current?: AlarmPriority) => {
+    if (!incoming) return false;
+    if (!current) return true;
+
+    return PRIORITY_WEIGHT[incoming] > PRIORITY_WEIGHT[current];
+  };
+
   useEffect(() => {
-    showAlarmPopupRef.current = showAlarmPopup;
+    alarmPopupIdRef.current = showAlarmPopupId;
+    alarmPopupRef.current = showAlarmPopup ?? null;
   }, [showAlarmPopup]);
+
+  const normalizePriority = (value?: string): AlarmPriority | undefined => {
+    if (value === 'low' || value === 'medium' || value === 'high') {
+      return value;
+    }
+    return undefined; // or default to 'low'
+  };
 
   useEffect(() => {
     // Subscribe to counting data when component mounts
@@ -182,11 +206,21 @@ const FullLayout: FC = () => {
           seen: false,
           personType: alarmData.visitorName ? 'Visitor' : 'Member',
         };
-        console.log('SHould show Alarm', showAlarmPopup);
-        if (!showAlarmPopupRef.current) {
-          console.log('Showing alarm popup');
-          // dispatch(ShowAlarmPopup(alarmLog));
-          dispatch(NotifyAlarmPopup(alarmLog.id));
+        const incomingAlarm: AlarmLogItem = alarmLog; // your mapped object
+
+        const currentAlarm = alarmPopupRef.current;
+
+        const shouldShowPopup =
+          !currentAlarm || isHigherPriority(incomingAlarm.priority, currentAlarm.priority);
+        console.log('ShouldShowPopup', shouldShowPopup);
+        console.log('Incoming Alarm', incomingAlarm, 'Current Alarm', currentAlarm, "AlarmData", alarmData);
+        if (shouldShowPopup) {
+          dispatch(ShowAlarmPopup(incomingAlarm));
+          dispatch(NotifyAlarmPopup(incomingAlarm.id));
+
+          // Update refs immediately to prevent race
+          alarmPopupRef.current = incomingAlarm;
+          alarmPopupIdRef.current = incomingAlarm.id;
         }
         dispatch(AppendAlarmLogs([alarmLog]));
       },
