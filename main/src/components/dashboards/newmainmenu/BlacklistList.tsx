@@ -44,7 +44,7 @@ const NewBlacklist: React.FC = () => {
             color: '#045498',
           }}
         >
-          Blacklist Log
+          Blacklisted
         </Typography>
       </Box>
 

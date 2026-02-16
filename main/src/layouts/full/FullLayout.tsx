@@ -148,7 +148,7 @@ const FullLayout: FC = () => {
         const now = Date.now();
         const alarmData = Array.isArray(data) ? data[0] : data;
 
-        // console.log('[MQTT] Received alarm data:', alarmData);
+        console.log('[MQTT] Received alarm data:', alarmData);
 
         setLatestAlarm(alarmData);
         setOpenAlarmPopup(true);
@@ -200,6 +200,7 @@ const FullLayout: FC = () => {
           floorplanId: alarmData.floorplanId,
           area: alarmData.maskedAreaName || 'Unknown Area',
           personId: alarmData.personId || '',
+          triggerId: alarmData.triggerId,
           alarmStatus: alarmData.status, // e.g. blacklist / restricted
           action: alarmData.action, // investigated / active / etc
           time: new Date().toISOString(),

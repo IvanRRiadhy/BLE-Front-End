@@ -1,4 +1,16 @@
-import { Box, CircularProgress, Dialog, DialogContent, DialogTitle, IconButton, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
+import {
+  Box,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Stack,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
@@ -7,6 +19,7 @@ import { useAllPatrolCase } from 'src/hooks/usePatrolCase';
 import PatrolCaseListItem from '../PatrolAssignment/PatrolAssignmentList/PatrolCaseListItem';
 import PatrolCaseOverview from './PatrolCaseOverview';
 import CloseIcon from '@mui/icons-material/Close';
+import { getCaseStatusColor } from 'src/utils/caseStatus';
 
 const PatrolCaseList = () => {
   const theme = useTheme();
@@ -101,7 +114,21 @@ const PatrolCaseList = () => {
       </Box>
       <Dialog open={openOverview} onClose={() => setOpenOverview(false)} fullWidth maxWidth="lg">
         <DialogTitle display="flex" justifyContent="space-between" alignItems="center">
-          Patrol Case Overview
+          <Stack
+            direction={isMobile ? 'column' : 'row'}
+            spacing={isMobile ? 0.5 : 2}
+            alignItems={isMobile ? 'flex-start' : 'center'}
+          >
+            {/* Title */}
+            <Typography fontWeight={800} fontSize={24}>Patrol Case Overview</Typography>
+            {/* Status Chip */}
+            <Chip
+              size="small"
+              label={selectedCase?.caseStatus}
+              color={getCaseStatusColor(selectedCase?.caseStatus)}
+            />
+          </Stack>
+          {/* Patrol Case Overview */}
           <IconButton onClick={() => setOpenOverview(false)}>
             <CloseIcon />
           </IconButton>

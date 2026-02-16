@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Chart from "react-apexcharts";
 import { Box, Typography } from "@mui/material";
-import { useAlarmStatisticHourly } from "src/hooks/useDashboard";
+import { useAlarmStatisticHourly, usePeakHour } from "src/hooks/useDashboard";
 
 /* ---------------- Types ---------------- */
 
@@ -15,6 +15,17 @@ type ChartSeries = {
   data: number[];
 }[];
 
+const defaultFilter = {
+  // from: '2025-10-01T00:00:00Z',
+  // to: '2025-10-30T23:59:59Z',
+  TimeRange: 'weekly',
+  operatorName: null,
+  visitorId: null,
+  buildingId: null,
+  floorId: null,
+  floorplanMaskedAreaId: null,
+};
+
 /* ---------------- Component ---------------- */
 
 const Statistic: React.FC = () => {
@@ -23,6 +34,8 @@ const Statistic: React.FC = () => {
   };
 
   const { data = [], isLoading, isError } = useAlarmStatisticHourly(body);
+  const { data: peakHourData, isLoading: isLoading2, isError: isError2 } = usePeakHour(defaultFilter);
+  console.log('peakHourData', peakHourData);
   
 const { categories, series } = useMemo(() => {
   if (!data.length) {
@@ -125,7 +138,7 @@ const { categories, series } = useMemo(() => {
             // mt: 2,
           }}
         >
-          Statistic
+          Alarm Statistic
         </Typography>
       </Box>
 

@@ -6,7 +6,7 @@ interface AlarmByStatusItem {
 }
 
 interface AlarmByAreaItem {
-  alarmStatus: string;
+  areaName: string;
   total: number;
 }
 
@@ -19,6 +19,7 @@ interface PublicProps {
 
 const AlarmCategorized: React.FC<PublicProps> = ({ title, data }) => {
   const formatTitle = (value: string) => {
+    // console.log('VALUE: ', value);
     if (!value) return '-';
     return value.replace(/([a-z])([A-Z])/g, '$1 $2');
   };
@@ -102,7 +103,7 @@ const AlarmCategorized: React.FC<PublicProps> = ({ title, data }) => {
         {isAlarmByArea &&
           Array.isArray(data) &&
           data.map((item) => (
-            <Box key={(item as AlarmByAreaItem).alarmStatus}>
+            <Box key={(item as AlarmByAreaItem).areaName}>
               <Typography
                 sx={{
                   fontSize: 14,
@@ -115,7 +116,7 @@ const AlarmCategorized: React.FC<PublicProps> = ({ title, data }) => {
                   my: 0.5,
                 }}
               >
-                {formatTitle((item as AlarmByAreaItem).alarmStatus)}
+                {formatTitle((item as AlarmByAreaItem).areaName)}
               </Typography>
               <Typography
                 sx={{

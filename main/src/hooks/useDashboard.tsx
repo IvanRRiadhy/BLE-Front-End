@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
 import { RootState, useSelector } from 'src/store/Store';
-import { DashboardAreaChartFilter as DashboardFilter } from 'src/store/apps/dashboard/Dashboard';
+// import { DashboardAreaChartFilter as DashboardFilter } from 'src/store/apps/dashboard/Dashboard';
 
 const API_DASHBOARD = '/api/Dashboard/';
 const API_TRACKING = '/api/TrackingAnalytics/';
@@ -9,21 +9,32 @@ const API_ALARM = '/api/AlarmAnalyticsIncident/';
 const API_TRIGGER = '/api/AlarmTriggers/';
 
 export type AreaReportType = {
-    areaId: string;
-    areaName: string;
-    totalRecords: number;
-}
+  areaId: string;
+  areaName: string;
+  totalRecords: number;
+};
 
-export function useAreaDistributionData(filter: DashboardFilter) {
-    return useQuery({
-        queryKey: ['dashboard-area-distribution', filter],
-        queryFn: async () => {
-            const response = await axiosServices.post(`${API_TRACKING}area`, filter);
-            console.log('Area Distribution Data fetched: ', response.data);
-            return response.data.collection.data as AreaReportType[];
-        },
-        placeholderData: [],
-    });
+export type DashboardFilterType = {
+  from?: string | null;
+  to?: string | null;
+  TimeRange?: string | null;
+  floorplanMaskedAreaId: string | null;
+  operatorName: string | null;
+  visitorId: string | null;
+  buildingId: string | null;
+  floorId: string | null;
+};
+
+export function useAreaDistributionData(filter: DashboardFilterType) {
+  return useQuery({
+    queryKey: ['dashboard-area-distribution', filter],
+    queryFn: async () => {
+      const response = await axiosServices.post(`${API_TRACKING}area`, filter);
+      console.log('Area Distribution Data fetched: ', response.data);
+      return response.data.collection.data as AreaReportType[];
+    },
+    placeholderData: [],
+  });
 }
 
 export function useTopButtonSummary() {
@@ -49,14 +60,11 @@ export function useBeaconCount() {
   });
 }
 
-export function useTrackingAreaAccessed(filter: DashboardFilter) {
+export function useTrackingAreaAccessed(filter: DashboardFilterType) {
   return useQuery({
     queryKey: ['tracking-area-accessed', filter],
     queryFn: async () => {
-      const res = await axiosServices.post(
-        `${API_TRACKING}area-accessed`,
-        filter
-      );
+      const res = await axiosServices.post(`${API_TRACKING}area-accessed`, filter);
       console.log('Tracking Area Accessed Data fetched: ', res.data);
       return res.data.collection.data;
     },
@@ -68,10 +76,7 @@ export function useUpcomingVisitor(filter: any) {
   return useQuery({
     queryKey: ['upcoming-visitor', filter],
     queryFn: async () => {
-      const res = await axiosServices.post(
-        '/api/TrxVisitor/filter',
-        filter
-      );
+      const res = await axiosServices.post('/api/TrxVisitor/filter', filter);
       console.log('Upcoming Visitor Data fetched: ', res.data);
       return res.data.collection.data;
     },
@@ -79,18 +84,11 @@ export function useUpcomingVisitor(filter: any) {
   });
 }
 
-export function useAreaDistribution(
-  filter: DashboardFilter,
-  params?: Record<string, any>
-) {
+export function useAreaDistribution(filter: DashboardFilterType, params?: Record<string, any>) {
   return useQuery({
     queryKey: ['area-distribution', filter, params],
     queryFn: async () => {
-      const res = await axiosServices.post(
-        `${API_TRACKING}area`,
-        filter,
-        { params }
-      );
+      const res = await axiosServices.post(`${API_TRACKING}area`, filter, { params });
       return res.data.collection.data;
     },
   });
@@ -110,11 +108,8 @@ export function useAlarmByStatus(filter: any) {
   return useQuery({
     queryKey: ['alarm-by-status', filter],
     queryFn: async () => {
-      const res = await axiosServices.post(
-        `${API_ALARM}status`,
-        filter
-      );
-      console.log("Result", res)
+      const res = await axiosServices.post(`${API_ALARM}status`, filter);
+      console.log('Result', res);
       return res.data.collection.data;
     },
   });
@@ -124,11 +119,8 @@ export function useAlarmByArea(filter: any) {
   return useQuery({
     queryKey: ['alarm-by-area', filter],
     queryFn: async () => {
-      const res = await axiosServices.post(
-        `${API_ALARM}area`,
-        filter
-      );
-      console.log("Result", res)
+      const res = await axiosServices.post(`${API_ALARM}area`, filter);
+      console.log('Result', res);
       return res.data.collection.data;
     },
   });
@@ -138,10 +130,7 @@ export function useAlarmStatisticHourly(filter: any) {
   return useQuery({
     queryKey: ['alarm-hourly', filter],
     queryFn: async () => {
-      const res = await axiosServices.post(
-        `${API_ALARM}hourly`,
-        filter
-      );
+      const res = await axiosServices.post(`${API_ALARM}hourly`, filter);
       return res.data.collection.data;
     },
   });
@@ -151,10 +140,7 @@ export function useRealtimeAlarmLog(filter: any) {
   return useQuery({
     queryKey: ['realtime-alarm-log', filter],
     queryFn: async () => {
-      const res = await axiosServices.post(
-        `${API_TRIGGER}filter`,
-        filter
-      );
+      const res = await axiosServices.post(`${API_TRIGGER}filter`, filter);
       console.log('Realtime Alarm Log Data fetched: ', res.data);
       return res.data.collection.data;
     },
@@ -171,6 +157,13 @@ export function useNotificationLog() {
   });
 }
 
-export function usePeakHour() {
-  
+export function usePeakHour(filter: DashboardFilterType, params?: Record<string, any>) {
+  return useQuery({
+    queryKey: ['peak-hour', filter, params],
+    queryFn: async () => {
+      const res = await axiosServices.post(`${API_TRACKING}peak-hours-by-area`, filter, {params});
+      console.log('Peak Hour Data fetched: ', res.data);
+      return res.data.collection.data;
+    },
+  });
 }

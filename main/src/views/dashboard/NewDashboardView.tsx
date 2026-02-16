@@ -25,6 +25,7 @@ import Bar from 'src/components/dashboards/newmainmenu/Bar';
 import AlarmCategorized from 'src/components/dashboards/newmainmenu/AlarmCategorized';
 import WelcomePopup from 'src/components/dashboards/mainmenu/WelcomePopup';
 import AlarmRadarChart from 'src/components/dashboards/newmainmenu/AlarmDurationChart';
+import PeakHour from 'src/components/dashboards/newmainmenu/PeakHour';
 const filter = {
   Draw: 1,
   Start: 0,
@@ -86,19 +87,19 @@ const DashboardView: React.FC = () => {
     return alarmByArea.areas
       .map((area: any) => {
         const total = area.series.reduce((sum: number, s: any) => sum + (s.data?.[0] ?? 0), 0);
-
+        // console.log("alarm by area", area, "total", total);
         return {
-          alarmStatus: area.areaName, // reuse existing prop name
+          areaName: area.name, // reuse existing prop name
           total,
         };
       })
       .sort((a: any, b: any) => b.total - a.total)
       .slice(0, 3);
   }, [alarmByArea]);
-
+// console.log("alarrm by status", alarmByStatus, "alarm by area", topAlarmAreas);
   return (
     <PageContainer title="Dashboard" description="This is Dashboard">
-      <Box>
+      <Box id='dashboard'>
         <Grid container spacing={1}>
           {/* First Row */}
           {/* <Grid container size={12} spacing={1} mt={0}>
@@ -214,7 +215,7 @@ const DashboardView: React.FC = () => {
               {/* BOTTOM SECTION */}
               <Grid container size={12} spacing={1}>
                 <Grid size={6}>
-                  <Statistic />
+                  <PeakHour />
                 </Grid>
 
                 <Grid size={6}>

@@ -15,6 +15,7 @@ import {
   Tooltip,
 } from '@mui/material';
 
+import * as htmlToImage from 'html-to-image';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { hoverSidebar, toggleMobileSidebar } from 'src/store/customizer/CustomizerSlice';
 import { IconMenu2, IconRestore } from '@tabler/icons-react';
@@ -62,18 +63,24 @@ const Header = () => {
   }, [dispatch]);
 
   const handleScreenshot = async () => {
-    const res = await dispatch(
-      fetchDailyReport({
-        from: '2025-07-01T00:00:00Z',
-        to: '2025-10-24T23:59:59Z',
-        floorplanMaskedAreaId: null,
-        operatorName: null,
-        visitorId: null,
-        buildingId: 'bb785baf-f0b4-4f12-86c7-6dcec0c0a160',
-        floorId: null,
-      }),
-    );
-    console.log('Daily Report Data:', res.payload);
+    const node = document.getElementById('dashboard');
+    console.log(node);
+    if (!node) return;
+
+    try {
+      const dataUrl = await htmlToImage.toPng(node, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+      });
+
+      const link = document.createElement('a');
+      link.download = `dashboard-${Date.now()}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleClick = async () => {
@@ -112,10 +119,10 @@ const Header = () => {
               color="inherit"
               aria-label="menu"
               onClick={
-              lgDown
-                ? () => dispatch(toggleMobileSidebar())
-                : () => dispatch(hoverSidebar(!isSidebarHover))
-            }
+                lgDown
+                  ? () => dispatch(toggleMobileSidebar())
+                  : () => dispatch(hoverSidebar(!isSidebarHover))
+              }
             >
               <IconMenu2 />
             </IconButton>

@@ -85,8 +85,16 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
     const theme = useTheme();
 
     const alarmData = useSelector((state: RootState) => state.BeaconReducer.alarmLogs);
-    const activeAlarmFloor = alarmData.find((alarm) => alarm.seen === false)?.floorplanId || '';
-
+    const activeAlarmFloor = React.useMemo(() => {
+      return [
+        ...new Set(
+          alarmData
+            .filter((a) => a.action !== 'Done')
+            .map((a) => a.floorplanId?.toUpperCase())
+            .filter(Boolean), // remove null/undefined
+        ),
+      ];
+    }, [alarmData]);
     // Track container size
     useEffect(() => {
       if (gridRef.current) {
@@ -143,8 +151,15 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
             <Grid key={index} size={item.size}>
               <ScrollableRowWithArrows itemHeight={item.height}>
                 {miniFloors.map((floorId, i) => {
-                  const isMiniAlarm = activeAlarmFloor.includes(floorId.toUpperCase());
-
+                  const isMiniAlarm = activeAlarmFloor?.includes(floorId.toUpperCase());
+                  // console.log(
+                  //   'isMiniAlarm',
+                  //   isMiniAlarm,
+                  //   'activeAlarmFloor',
+                  //   activeAlarmFloor,
+                  //   'floorId',
+                  //   floorId,
+                  // );
                   return (
                     <Paper
                       elevation={3}
@@ -205,7 +220,7 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
         const idx = item.floorId!;
         const floorplanId = floorIds[grid][idx];
         const type = screenType[grid][idx];
-        const isAlarmActive = activeAlarmFloor.includes(floorplanId.toUpperCase());
+        const isAlarmActive = activeAlarmFloor?.includes(floorplanId.toUpperCase());
         return (
           <Grid key={index} size={item.size}>
             <Paper

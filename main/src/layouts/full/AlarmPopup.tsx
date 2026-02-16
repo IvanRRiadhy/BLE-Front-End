@@ -4,6 +4,7 @@ import { AlarmType, MQTTAlarmType } from 'src/store/apps/tracking/Alarm';
 import { actionStatus, actionStatusColormap } from 'src/types/crud/input';
 import toast from 'react-hot-toast';
 import {
+  useAcknowledgeAlarmTrigger,
   useAlarmTriggerList,
   useAllAlarmTriggers,
   // useAssignActionAlarmTriggerByDMAC,
@@ -54,6 +55,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
   // React Query mutation hook
   const assignActionMutation = useAssignActionAlarmTriggerByDMAC();
   const assignActionByIdMutation = useAssignActionAlarmTriggerByID();
+  const acknowledgeMutation = useAcknowledgeAlarmTrigger();
 
   const { data: data } = useAlarmTriggerList({
     ...defaultAlarmTriggerFilter,
@@ -173,9 +175,9 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
   const handleBackdropClose = () => {
     // ❗ UI-only close
     dispatch(ClearAlarmPopup());
-
-    // DO NOT mark as seen
-    // DO NOT touch alarm log
+    if(alarm) {
+      acknowledgeMutation.mutateAsync(alarm.triggerId);
+    }
   };
   useEffect(() => {
     if (!alarm) return;

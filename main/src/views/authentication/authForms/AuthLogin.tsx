@@ -87,12 +87,17 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       if (data?.levelPriority) {
         localStorage.setItem('levelPriority', data.levelPriority.trim());
       }
-
+      
       localStorage.setItem('response', JSON.stringify(data));
       localStorage.setItem('welcomePopupShown', 'false');
+      if(isAdmin && data.levelPriority === 'Primary'){
+        setLoginError('You do not have permission to login as Admin');
+        return
+      };
 
       setTimeout(() => {
-        window.location.href = isAdmin ? '/dashboards/newmainmenu' : '/my-visit';
+        window.location.href = isAdmin ? '/dashboards/newmainmenu' : data.levelPriority === 'Primary' ? '/security-view/dashboard' : '/my-visit';
+        console.log('data', data);
       }, 300);
     } catch (err) {
       setLoginError('Invalid username or password. Please try again.');

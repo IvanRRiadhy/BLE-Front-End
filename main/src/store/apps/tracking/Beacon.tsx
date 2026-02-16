@@ -77,11 +77,12 @@ export type AlarmLogItem = {
   time: string;
   color?: string;
   alarmStatus: string; // blacklist, restricted, etc
-  action: string; // active, investigated, closed
+  action: string; // active, acknowledged, investigate, done
   priority?: AlarmPriority;
   personId: string;
   personType?: 'Visitor' | 'Member';
   type: 'Alarm';
+  triggerId: string;
   seen: boolean;
 };
 

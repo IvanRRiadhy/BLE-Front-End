@@ -31,6 +31,7 @@ import {
   IconChevronRight,
   IconArrowBackUp,
   IconBan,
+  IconSettings,
 } from '@tabler/icons-react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
@@ -178,6 +179,9 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
         <TableRow>
           <TableCell>Username</TableCell>
           <TableCell>Email</TableCell>
+          <TableCell align="right" width={80}>
+            Action
+          </TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -194,6 +198,21 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
             <TableRow key={m.id}>
               <TableCell>{m.username}</TableCell>
               <TableCell>{m.email}</TableCell>
+              <TableCell align="right">
+                <Tooltip title="User Settings">
+                  <IconButton
+                    size="small"
+                    color="info"
+                    onClick={() => {
+                      // setSelectedBuildingId(b.id);
+                      // setOpenRevokeOne(true);
+                      console.log("User: ", m);
+                    }}
+                  >
+                    <IconSettings size={18} />
+                  </IconButton>
+                </Tooltip>
+                </TableCell>
             </TableRow>
           ))
         )}

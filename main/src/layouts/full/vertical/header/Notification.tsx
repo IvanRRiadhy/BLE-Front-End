@@ -317,7 +317,7 @@ const Notifications = () => {
         onClick={openMenu}
         sx={{ color: anchorEl ? 'error.main' : 'text.secondary' }}
       >
-        <Badge badgeContent={unseenCount} color="error">
+        <Badge badgeContent={categorizedTriggers.idle.length} color="error">
           <IconBellRinging size="21" stroke="1.5" />
         </Badge>
       </IconButton>
@@ -504,7 +504,7 @@ const Notifications = () => {
                 </span>
               </Tooltip>
 
-              <Tooltip title="Clear seen notifications">
+              {/* <Tooltip title="Clear seen notifications">
                 <span>
                   <IconButton
                     size="small"
@@ -515,7 +515,7 @@ const Notifications = () => {
                     <DeleteSweep fontSize="small" />
                   </IconButton>
                 </span>
-              </Tooltip>
+              </Tooltip> */}
             </Stack>
           </Box>
         </Box>
@@ -636,7 +636,7 @@ const Notifications = () => {
               <>
                 <Box display="flex" alignItems="center" gap={1} mb={1}>
                   <Typography variant="subtitle2" color="primary">
-                    Unseen
+                    Seen
                   </Typography>
                   <Chip
                     size="small"

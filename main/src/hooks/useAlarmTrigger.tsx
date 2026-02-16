@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData, UseQueryOptions } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
 import { AlarmTriggerType, IntruderType, GetFilter, AlarmTimelineType } from 'src/store/apps/crud/alarmTrigger';
 import { RootState, useSelector } from 'src/store/Store';
@@ -26,7 +26,7 @@ export function useAlarmTriggerList(filter: GetFilter) {
     queryFn: async () => {
       const res = await axiosServices.post(API_DT_URL, filter);
       const col = res.data.collection;
-      console.log('Fetched AlarmTrigger List:', col);
+      // console.log('Fetched AlarmTrigger List:', col);
       return {
         data: col.data as AlarmTriggerType[],
         draw: col.draw,
@@ -62,7 +62,7 @@ export function useAllIntruders() {
     queryKey: ['intruder-all'],
     queryFn: async () => {
       const res = await axiosServices.get(`${API_URL}lookup`);
-      console.log('Intruders: ', res.data.collection.data);
+      // console.log('Intruders: ', res.data.collection.data);
       return res.data.collection.data as IntruderType[];
     },
     placeholderData: [],
@@ -104,13 +104,13 @@ export function useAssignActionAlarmTriggerByDMAC() {
       assignedSecurityId: string | null;
     }) => {
       try {
-        console.log('Editing AlarmTrigger:', dmac, actionStatus);
+        // console.log('Editing AlarmTrigger:', dmac, actionStatus);
         const response = await axiosServices.put(`${API_URL}${dmac}`, {
           actionStatus,
           investigatedResult,
           assignedSecurityId,
         });
-        console.log(response);
+        // console.log(response);
         return response.data;
       } catch (error: any) {
         console.error('Error editing AlarmTrigger:', error);
@@ -140,13 +140,13 @@ export function useAssignActionAlarmTriggerByID() {
       assignedSecurityId: string | null;
     }) => {
       try {
-        console.log('Editing AlarmTrigger:', triggerId, actionStatus);
+        // console.log('Editing AlarmTrigger:', triggerId, actionStatus);
         const response = await axiosServices.put(`${API_URL}${triggerId}`, {
           actionStatus,
           investigatedResult,
           assignedSecurityId,
         });
-        console.log(response);
+        // console.log(response);
         return response.data;
       } catch (error: any) {
         console.error('Error editing AlarmTrigger:', error);
@@ -160,14 +160,28 @@ export function useAssignActionAlarmTriggerByID() {
   });
 };
 
-export function useAlarmTimeline(id: string) {
+
+export function useAlarmTimeline(
+  id: string,
+  options?: Omit<
+    UseQueryOptions<
+      AlarmTimelineType,          // TQueryFnData
+      Error,                      // TError
+      AlarmTimelineType,          // TData
+      ['alarmTrigger-timeline', string] // TQueryKey
+    >,
+    'queryKey' | 'queryFn'
+  >
+) {
   return useQuery({
     queryKey: ['alarmTrigger-timeline', id],
     queryFn: async (): Promise<AlarmTimelineType> => {
       const res = await axiosServices.get(`${API_URL}${id}/timeline`);
       return res.data.collection.data as AlarmTimelineType;
     },
-    placeholderData: {} as AlarmTimelineType,
+    enabled: !!id,
+    // placeholderData: {} as AlarmTimelineType,
+    ...options,
   });
 }
 
@@ -181,4 +195,19 @@ export function useAlarmTriggerStatus() {
     totalCount: query.data?.recordsTotal || 0,
     filteredCount: query.data?.recordsFiltered || 0,
   };
+};
+
+export function useAcknowledgeAlarmTrigger() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await axiosServices.put(`${API_URL}${id}/acknowledge`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list'] });
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
+
+    },
+  })
 }

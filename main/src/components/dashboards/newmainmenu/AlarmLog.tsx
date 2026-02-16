@@ -30,8 +30,9 @@ const statusColorMap: Record<string, string> = {
 const AlarmLog: React.FC = () => {
   const { data = [], isLoading, isError } = useRealtimeAlarmLog(defaultFilter);
   function resolvePerson(x: any) {
-    if (x.visitor) {
-      // console.log("Is Visitor", x.visitor)
+    console.log("Resolving Person:", x);
+    if (x.visitorId) {
+      console.log("Is Visitor", x.visitor)
       return {
         type: 'Visitor',
         name: x.visitorName,
@@ -39,8 +40,8 @@ const AlarmLog: React.FC = () => {
       };
     }
 
-    if (x.member) {
-      // console.log("Is Visitor", x.member)
+    if (x.memberId) {
+      console.log("Is Visitor", x.member)
       return {
         type: 'Member',
         name: x.memberName,
@@ -65,7 +66,7 @@ const AlarmLog: React.FC = () => {
         triggerTime: x.triggerTime ? new Date(x.triggerTime).toLocaleString() : '-',
         firstGateway: x.firstGatewayId ?? '-',
         secondGateway: x.secondGatewayId ?? '-',
-        status: x.alarmRecordStatus ?? 'Unknown',
+        status: x.alarm ?? 'Unknown',
         color: x.alarmColor ?? '#000',
       };
     });

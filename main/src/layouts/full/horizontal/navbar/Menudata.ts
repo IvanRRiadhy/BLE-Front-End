@@ -79,6 +79,12 @@ const isBoundaryActive = isActive('boundary');
             },
           ],
         },
+        {
+          id: uniqueId(), 
+          title: "Evacuate --(WIP)--", 
+          icon: IconMapPin, 
+          href: "/dashboards/evacuation"
+        },
       ],
     },
 
@@ -145,6 +151,7 @@ const isBoundaryActive = isActive('boundary');
         { id: uniqueId(), title: 'Time Group', icon: IconCalendar, href: '/master/timegroup/' },
         // { id: uniqueId(), title: 'Integration --(WIP)--', icon: IconLicense, href: '/master/integration/' },
         { id: uniqueId(), title: 'Users --(WIP)--', icon: IconMapPin, href: '/master/user/' },
+        
         { id: uniqueId(), title: 'Application', icon: IconAppWindow, href: '/master/application/' },
       ],
     },

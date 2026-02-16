@@ -16,6 +16,7 @@ import {
   DialogActions,
   TextField,
   MenuItem,
+  Divider,
 } from '@mui/material';
 import { BASE_URL } from 'src/utils/axios';
 import { VisitorType } from 'src/store/apps/crud/visitor';
@@ -26,17 +27,24 @@ import duration from 'dayjs/plugin/duration';
 import { useEffect, useState } from 'react';
 import { formatFullDateTime } from 'src/utils/time';
 import {
+  useAcknowledgeAlarmTrigger,
+  useAlarmTimeline,
   useAlarmTriggerList,
   useAllIntruders,
   useAssignActionAlarmTriggerByID,
 } from 'src/hooks/useAlarmTrigger';
-import { AlarmTriggerType, UpdateFilter } from 'src/store/apps/crud/alarmTrigger';
+import {
+  AlarmTimelineType,
+  AlarmTriggerType,
+  UpdateFilter,
+} from 'src/store/apps/crud/alarmTrigger';
 import { actionStatus, actionStatusColormap } from 'src/types/crud/input';
 import toast from 'react-hot-toast';
 import TrackingPositionFloorView from '../trackingTransaction/Preview/TrackingPositionFloorView';
 import { useAllSecurityLookup, useAllSecuritys } from 'src/hooks/useSecurityGuard';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
+import AlarmTimelineProgress from './AlarmTimeline';
 dayjs.extend(duration);
 
 const AlarmContent = () => {
@@ -59,9 +67,15 @@ const AlarmContent = () => {
   const { data: securityData = [], isLoading: isLoadingSecurity } = useAllSecurityLookup();
   const [selectedSecurity, setSelectedSecurity] = useState<memberType | null>(null);
 
+  // const [alarmTimeline, setAlarmTimeline] = useState<AlarmTimelineType | null>(null);
+
   // Determine which person to display based on selectedIntruder
   const [currentPerson, setCurrentPerson] = useState<VisitorType | memberType | null>(null);
   const [personType, setPersonType] = useState<'Visitor' | 'Member' | null>(null);
+
+  //UseQuery Mutation
+  const assignActionMutation = useAssignActionAlarmTriggerByID();
+  const acknowledgeMutation = useAcknowledgeAlarmTrigger();
 
   useEffect(() => {
     if (selectedIntruder) {
@@ -95,9 +109,9 @@ const AlarmContent = () => {
     }
   }, [selectedIntruder, selectedVisitor, selectedMember]);
 
-  useEffect(() => {
-    console.log('alarmTriggerData updated:', alarmTriggerData);
-  }, [alarmTriggerData]);
+  // useEffect(() => {
+  //   console.log('alarmTriggerData updated:', alarmTriggerData);
+  // }, [alarmTriggerData]);
 
   const field = {
     fontWeight: 800,
@@ -129,8 +143,7 @@ const AlarmContent = () => {
     );
 
     if (matchedAlarm) {
-      setSelectedAlarmTrigger(matchedAlarm);
-      setOpenActionDialog(true);
+      handleOpenAlarmWithAcknowledge(matchedAlarm);
       autoAlarmSelectDone.current = true;
     }
   }, [alarmTriggerData, searchParams]);
@@ -150,8 +163,6 @@ const AlarmContent = () => {
     setOpenActionDialog(false);
     setSelectedAction('');
   };
-
-  const assignActionMutation = useAssignActionAlarmTriggerByID();
 
   const handleApplyAction = async () => {
     if (!selectedAlarmTrigger) {
@@ -195,6 +206,54 @@ const AlarmContent = () => {
     if (!value) return '-';
     return value.replace(/([a-z])([A-Z])/g, '$1 $2');
   };
+
+  const { data: timelineData, isFetching: isFetchingTimeline } = useAlarmTimeline(
+    selectedAlarmTrigger?.id ?? '',
+    {
+      enabled: !!selectedAlarmTrigger?.id,
+    },
+  );
+
+  const handleOpenAlarmWithAcknowledge = async (alarm: AlarmTriggerType) => {
+    // Always set selected alarm first (so dialog can use it later)
+    setSelectedAlarmTrigger(alarm);
+    // await handleFetchTimeline(alarm.id);
+    // ✅ Only call API if action is "Idle"
+    if (alarm.action?.toLowerCase() !== 'idle') {
+      setOpenActionDialog(true);
+      return;
+    }
+
+    // Prevent duplicate calls
+    if (acknowledgeMutation.isPending) return;
+
+    try {
+      console.log('acknowledgeMutation', acknowledgeMutation);
+      await acknowledgeMutation.mutateAsync(alarm.id.toUpperCase());
+
+      setOpenActionDialog(true);
+    } catch (error) {
+      console.error('Failed to acknowledge alarm:', error);
+      toast.error('Failed to fetch alarm');
+    }
+  };
+
+  // const handleFetchTimeline = async (alarmId: string) => {
+  //   console.log('Fetching timeline for alarm:', alarmId);
+  //   if (!alarmId) return;
+
+  //   try {
+  //     const { data } = await refetchTimeline();
+
+  //     if (data) {
+  //       setAlarmTimeline(data);
+  //       console.log('Alarm Timeline:', data);
+  //     }
+  //   } catch (error) {
+  //     console.error('Failed to fetch timeline:', error);
+  //     toast.error('Failed to fetch timeline');
+  //   }
+  // };
 
   if (!currentPerson)
     return (
@@ -418,8 +477,7 @@ const AlarmContent = () => {
             <Grid key={index} size={{ xs: 12, sm: 6, md: 3, lg: 2 }}>
               <Box
                 onClick={() => {
-                  setSelectedAlarmTrigger(alarmTrigger);
-                  setOpenActionDialog(true);
+                  handleOpenAlarmWithAcknowledge(alarmTrigger);
                 }}
                 sx={{
                   border: '1px solid #CCC',
@@ -570,11 +628,23 @@ const AlarmContent = () => {
               </Box>
             )}
           </Box>
+          <Divider />
+          <Box sx={{ my: 2 }}>
+            <Typography variant="body1" color="text.secondary" mb={1}>
+              Alarm Timeline :
+            </Typography>
+            {(isFetchingTimeline || !timelineData) ? (
+              <Skeleton height={120} />
+            ) : (
+              <AlarmTimelineProgress timelineData={timelineData} />
+            )}
+          </Box>
+          <Divider /> 
           {/* Alarm Info */}
-          <Typography variant="body2" color="text.secondary" mb={1}>
+          <Typography variant="body1" color="text.secondary" my={1}>
             Alarm Category:
           </Typography>
-          <Typography variant="body1" fontWeight={600} mb={2}>
+          <Typography variant="body1" fontWeight={700} mb={2}>
             {selectedAlarmTrigger?.alarm?.toUpperCase() || '-'}
           </Typography>
 

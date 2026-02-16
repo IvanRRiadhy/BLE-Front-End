@@ -35,7 +35,7 @@ const Bar: React.FC = () => {
     const areas = alarmByArea.areas;
 
     // X-axis categories (area names)
-    const categories = areas.map((a: any) => a.areaName);
+    const categories = areas.map((a: any) => a.name);
 
     // Collect all unique alarm category names
     const categorySet = new Set<string>();
