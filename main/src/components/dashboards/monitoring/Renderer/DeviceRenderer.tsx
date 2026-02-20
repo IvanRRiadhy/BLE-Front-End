@@ -1,7 +1,12 @@
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { Stage, Layer, Image as KonvaImage, Text, Line, Label, Tag, Group } from 'react-konva';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
-import { fetchBeacon, RefreshBeaconState, cleanupTopicBeacons, AlarmLogItem } from 'src/store/apps/tracking/Beacon';
+import {
+  fetchBeacon,
+  RefreshBeaconState,
+  cleanupTopicBeacons,
+  AlarmLogItem,
+} from 'src/store/apps/tracking/Beacon';
 import BeaconRenderer from './BeaconRenderer';
 import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
@@ -22,6 +27,7 @@ import { startMQTTclient } from 'src/store/apps/tracking/MQTT';
 import { OverPopulatingAlarmType } from 'src/store/apps/alarmsetting/overpopulating';
 import { StayOnAreaAlarmType } from 'src/store/apps/alarmsetting/stayonarea';
 import { BoundaryAlarmType } from 'src/store/apps/alarmsetting/boundary';
+import { PatrolAreaType } from 'src/store/apps/crud/patrolArea';
 
 // Common node type that all area types should have
 interface BaseNode {
@@ -36,6 +42,7 @@ type Nodes = {
   y: number;
   x_px: number;
   y_px: number;
+  type?: 'corner' | 'center';
 };
 
 // Type guard to check if a value is an array
@@ -65,6 +72,8 @@ function areaToPolygonRings(area: MaskedAreaType): number[][][] {
   const holes: number[][][] = holesRaw.map((nodes) => nodes.map((n) => [n.x_px, n.y_px]));
   return [closeRing(outer), ...holes.map(closeRing)];
 }
+
+const getCornerNodes = (nodes?: Nodes[]) => (nodes ?? []).filter((n) => n.type === 'corner');
 
 // Updated toCanvas function - no scaling needed since we use original coordinates
 function toCanvas(
@@ -96,12 +105,14 @@ type DeviceRendererProps = {
   OverPopulateAlarm: OverPopulatingAlarmType[];
   StayOnAreaAlarm: StayOnAreaAlarmType[];
   BoundaryAlarm: BoundaryAlarmType[];
+  PatrolAreas: PatrolAreaType[];
   showAreas: boolean;
   showGates: boolean;
   showGeoFence: boolean;
   showOverPopulate: boolean;
   showStayOnArea: boolean;
   showBoundary: boolean;
+  showPatrolAreas: boolean;
   showBeacons: boolean;
   topic: string;
   detailDialogOpen?: boolean;
@@ -143,12 +154,14 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     OverPopulateAlarm,
     StayOnAreaAlarm,
     BoundaryAlarm,
+    PatrolAreas,
     showAreas,
     showGates,
     showGeoFence,
     showOverPopulate,
     showStayOnArea,
     showBoundary,
+    showPatrolAreas,
     showBeacons,
     topic,
     detailDialogOpen,
@@ -192,18 +205,20 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   }>({});
 
   const refreshTrigger = useSelector((state: RootState) => state.BeaconReducer.refreshTrigger);
-  
+
   // Get beacon data from Redux - now an object keyed by beaconId
-  const beaconDataObj = useSelector((state: RootState) => state.BeaconReducer.beaconsByTopic[topic]);
-  
+  const beaconDataObj = useSelector(
+    (state: RootState) => state.BeaconReducer.beaconsByTopic[topic],
+  );
+
   // Convert object to array for easier processing
   const beaconData = useMemo(() => {
     if (!beaconDataObj) return [];
     return Object.values(beaconDataObj);
   }, [beaconDataObj]);
-  
+
   // console.log('DeviceRenderer render - topic:', topic, 'beaconData count:', beaconData.length);
-  
+
   const beacons = useSelector((state: RootState) => state.BeaconReducer.beaconsByTopic);
   const [highlightTopic, setHighlightTopic] = useState<string | null>(null);
   const [highlightedFloorplan, setHighlightedFloorplan] = useState<string | null>(null);
@@ -216,10 +231,10 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     state.layoutReducer.layouts.find((l: LayoutSet) => l.id === activeLayoutId),
   );
   const thisScreen = layouts?.screens.find((s: ScreenItem) => s.id === screenId);
-  
+
   // Track previous topic to detect changes
   const prevTopicRef = useRef<string>(topic);
-  
+
   // background image - like EditAreaRenderer
   useEffect(() => {
     if (!imageSrc) {
@@ -263,7 +278,9 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   useEffect(() => {
     // Only reset if topic actually changed
     if (prevTopicRef.current !== topic) {
-      console.log(`Topic changed from ${prevTopicRef.current} to ${topic}, resetting local beacon state`);
+      console.log(
+        `Topic changed from ${prevTopicRef.current} to ${topic}, resetting local beacon state`,
+      );
       setLastSeenBeacons({});
       setAnimatedBeacons({});
       prevTopicRef.current = topic;
@@ -333,17 +350,17 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     }
 
     // console.log(`Processing ${beaconData.length} beacons for topic ${topic}`);
-    
+
     setLastSeenBeacons((prev) => {
       const updated = { ...prev };
 
       beaconData.forEach((b: any) => {
         if (!b.point) return;
-        
+
         // beaconId is the dmac
         const beaconId = b.beaconId;
         const dmac = beaconId; // Same as beaconId
-        
+
         updated[beaconId] = {
           x: b.point.x,
           y: b.point.y,
@@ -676,6 +693,31 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                 onClick={() => dispatch(setFocus({ type: 'boundary', id: boundary.id }))}
               />
             ))}
+          {showPatrolAreas &&
+            PatrolAreas.map((patrolArea: PatrolAreaType) => {
+              if (!patrolArea.nodes || patrolArea.nodes.length < 3) return null;
+              // if (patrolArea.nodes.length < 3) return null;
+              const cornerNodes = patrolArea.nodes.filter((n) => n.type === 'corner');
+              const points = cornerNodes.flatMap((node) => [node.x_px, node.y_px]);
+              return (
+                <Line
+                  key={patrolArea.id}
+                  name="patrolarea"
+                  // Use the specific boundary handler
+                  points={points}
+                  stroke={darken(patrolArea.color, 0.3)}
+                  strokeWidth={5}
+                  lineJoin="round"
+                  lineCap="round"
+                  closed
+                  fill={patrolArea.color}
+                  opacity={0.35}
+                  onMouseEnter={() => setHoveredAreaId(patrolArea.id)}
+                  onMouseLeave={() => setHoveredAreaId((id) => (id === patrolArea.id ? null : id))}
+                  onClick={() => dispatch(setFocus({ type: 'patrolarea', id: patrolArea.id }))}
+                />
+              );
+            })}
 
           {/* Devices */}
           {showGates && devices.map((d: FloorplanDeviceType) => renderDeviceShape(d))}

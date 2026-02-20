@@ -204,7 +204,7 @@ const InviteForm = () => {
     setNotes('');
     setStartTime(dayjs());
     setEndTime(dayjs());
-    dispatch(fetchVisitorDT({ ...visitorFilter, length: 0 }));
+    dispatch(fetchVisitorDT({ ...visitorFilter, length: 999 }));
     dispatch(fetchMemberDT({ ...memberFilter, length: 999 }));
     // dispatch(fetchMaskedAreas());
     dispatch(fetchBuildings());
@@ -378,18 +378,18 @@ const InviteForm = () => {
     const ids = new Set<string>();
     if (!areaId) return ids;
 
-    const area = maskedAreaData.find((a) => a.id === areaId);
+    const area = maskedAreaData.find((a: MaskedAreaType) => a.id === areaId);
     if (!area) return ids;
 
     ids.add(area.id);
 
-    const floorplan = floorplanData.find((fp) => fp.id === area.floorplanId);
+    const floorplan = floorplanData.find((fp: FloorplanType) => fp.id === area.floorplanId);
     if (floorplan) {
       ids.add(floorplan.id);
-      const floor = floorData.find((f) => f.id === floorplan.floorId);
+      const floor = floorData.find((f: floorType) => f.id === floorplan.floorId);
       if (floor) {
         ids.add(floor.id);
-        const building = buildingData.find((b) => b.id === floor.buildingId);
+        const building = buildingData.find((b: BuildingType) => b.id === floor.buildingId);
         if (building) ids.add(building.id);
       }
     }
@@ -399,7 +399,7 @@ const InviteForm = () => {
   const selectedAncestorIds = getSelectedAncestorIds(selectedMaskedArea);
 
   useEffect(() => {
-    dispatch(fetchVisitorDT({ ...visitorFilter, length: 0, SearchValue: searchName }));
+    dispatch(fetchVisitorDT({ ...visitorFilter, length: 999, SearchValue: searchName }));
   }, [searchName]);
 
   const handleAddRow = (event: React.MouseEvent<HTMLElement>) => {
@@ -440,12 +440,12 @@ const InviteForm = () => {
 
   // Only show visitors not yet selected
   const availableVisitors = useMemo(
-    () => visitorList.filter((v) => !selectedIds.has(v.id)),
+    () => visitorList.filter((v: VisitorType) => !selectedIds.has(v.id)),
     [visitorList, selectedIds],
   );
 
   const availableMembers = useMemo(
-    () => memberList.filter((m) => !selectedMemberIds.has(m.id)),
+    () => memberList.filter((m: memberType) => !selectedMemberIds.has(m.id)),
     [memberList, selectedMemberIds],
   );
 
@@ -899,7 +899,7 @@ const InviteForm = () => {
                   <Typography variant="body2">No members found</Typography>
                 </Box>
               )}
-              {availableMembers.map((m) => (
+              {availableMembers.map((m: memberType) => (
                 <MenuItem
                   key={m.id}
                   onClick={() => {
@@ -978,7 +978,7 @@ const InviteForm = () => {
                   <Typography variant="body2">No visitors found</Typography>
                 </Box>
               )}
-              {availableVisitors.map((v) => (
+              {availableVisitors.map((v: VisitorType) => (
                 <MenuItem
                   key={v.id}
                   onClick={() => {

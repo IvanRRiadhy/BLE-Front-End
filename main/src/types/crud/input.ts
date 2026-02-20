@@ -273,3 +273,16 @@ export const ApprovalType: inputDataType[] = [
   {label: "Sequence", value: "Sequential"},
 
 ]
+
+export const investigationResultType: inputDataType[] = [
+  { label: "Please select Investigation Result", value: "", disabled: true },
+{ label: "Test Trigger", value: "TEST_TRIGGER" }, //Disarmed without Action
+  { label: "False Alarm", value: "FALSE_ALARM" }, //Disarmed without Action
+  { label: "Authorized Access", value: "AUTHORIZED_ACCESS" },//Disarmed and Grant Correct Access
+  { label: "Suspicious Activity", value: "SUSPICIOUS_ACTIVITY" }, //Disarmed, Give Warning, and Continue Monitor
+  { label: "Trespassing Warning", value: "TRESPASSING_WARNING" }, //Disarmed, Give Warning, and Continue Monitor
+  { label: "Escorted Out", value: "ESCORTED_OUT" },
+  { label: "Apprehended", value: "APPREHENDED" },
+  { label: "Handed Over to Police", value: "HANDED_OVER_TO_POLICE" },
+  { label: "Escalated to Law Enforcement", value: "ESCALATED_TO_LAW_ENFORCEMENT" }, 
+];

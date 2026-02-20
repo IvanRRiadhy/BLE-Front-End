@@ -148,7 +148,7 @@ const FullLayout: FC = () => {
         const now = Date.now();
         const alarmData = Array.isArray(data) ? data[0] : data;
 
-        console.log('[MQTT] Received alarm data:', alarmData);
+        // console.log('[MQTT] Received alarm data:', alarmData);
 
         setLatestAlarm(alarmData);
         setOpenAlarmPopup(true);
@@ -202,7 +202,8 @@ const FullLayout: FC = () => {
           personId: alarmData.personId || '',
           triggerId: alarmData.triggerId,
           alarmStatus: alarmData.status, // e.g. blacklist / restricted
-          action: alarmData.action, // investigated / active / etc
+          action: alarmData.action, // idle / dispatched / etc
+          priority: alarmData.priority,
           time: new Date().toISOString(),
           seen: false,
           personType: alarmData.visitorName ? 'Visitor' : 'Member',
@@ -213,8 +214,8 @@ const FullLayout: FC = () => {
 
         const shouldShowPopup =
           !currentAlarm || isHigherPriority(incomingAlarm.priority, currentAlarm.priority);
-        console.log('ShouldShowPopup', shouldShowPopup);
-        console.log('Incoming Alarm', incomingAlarm, 'Current Alarm', currentAlarm, "AlarmData", alarmData);
+        // console.log('ShouldShowPopup', shouldShowPopup);
+        // console.log('Incoming Alarm', incomingAlarm, 'Current Alarm', currentAlarm, "AlarmData", alarmData);
         if (shouldShowPopup) {
           dispatch(ShowAlarmPopup(incomingAlarm));
           dispatch(NotifyAlarmPopup(incomingAlarm.id));

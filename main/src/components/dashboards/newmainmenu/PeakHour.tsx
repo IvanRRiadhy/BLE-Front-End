@@ -18,8 +18,13 @@ type DistributionLevel = 'building' | 'floor' | 'floorplan' | 'area';
 /* ---------------- Component ---------------- */
 
 const PeakHour: React.FC = () => {
-  const { data: peakHourData, isLoading, isError } = usePeakHour(defaultFilter, { groupByMode: "floorplan" });
-const [level, setLevel] = useState<DistributionLevel>('building');
+  const [level, setLevel] = useState<DistributionLevel>('building');
+  const {
+    data: peakHourData,
+    isLoading,
+    isError,
+  } = usePeakHour(defaultFilter, { groupByMode: level });
+
   /* ---------------- Memoized Chart Data ---------------- */
 
   const { categories, series } = useMemo(() => {
@@ -132,21 +137,21 @@ const [level, setLevel] = useState<DistributionLevel>('building');
         >
           Peak Hour
         </Typography>
-                <CustomSelect
-                  size="small"
-                  value={level}
-                  onChange={(e: SelectChangeEvent) => setLevel(e.target.value as DistributionLevel)}
-                  sx={{
-                    minWidth: 140,
-                    borderRadius: 2,
-                    backgroundColor: '#f5f7fa',
-                  }}
-                >
-                  <MenuItem value="building">Building</MenuItem>
-                  <MenuItem value="floor">Floor</MenuItem>
-                  <MenuItem value="floorplan">Floorplan</MenuItem>
-                  <MenuItem value="area">Area</MenuItem>
-                </CustomSelect>
+        <CustomSelect
+          size="small"
+          value={level}
+          onChange={(e: SelectChangeEvent) => setLevel(e.target.value as DistributionLevel)}
+          sx={{
+            minWidth: 140,
+            borderRadius: 2,
+            backgroundColor: '#f5f7fa',
+          }}
+        >
+          <MenuItem value="building">Building</MenuItem>
+          <MenuItem value="floor">Floor</MenuItem>
+          <MenuItem value="floorplan">Floorplan</MenuItem>
+          <MenuItem value="area">Area</MenuItem>
+        </CustomSelect>
       </Box>
 
       {/* Chart */}

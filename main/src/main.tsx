@@ -6,7 +6,6 @@ import { store, persistor } from './store/Store';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
-
 import { loadRuntimeConfig } from './config';
 import { initializeAxiosBaseURL } from './utils/axios';
 
@@ -31,12 +30,12 @@ const queryClient = new QueryClient({
 });
 
 async function startApp() {
-await loadRuntimeConfig();
-initializeAxiosBaseURL();
-initializeMQTTConfig();
-updateMQTTBrokerURL();
-initializeEngineConfig();
-initializeNTFYConfig();
+  await loadRuntimeConfig();
+  initializeAxiosBaseURL();
+  initializeMQTTConfig();
+  updateMQTTBrokerURL();
+  initializeEngineConfig();
+  initializeNTFYConfig();
   // 🟩 3. THEN render the app
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <Provider store={store}>

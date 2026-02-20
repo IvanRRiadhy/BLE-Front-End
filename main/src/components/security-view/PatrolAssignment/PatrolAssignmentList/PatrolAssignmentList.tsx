@@ -3,14 +3,19 @@ import { useTranslation } from 'react-i18next';
 import { usePatrolAssignList } from 'src/hooks/usePatrolRoute';
 import SecurityViewPatrolListItem from 'src/components/security-view/PatrolAssignment/SecurityViewPatrol/SecurityViewPatrolListItem';
 import { useState } from 'react';
-import { PatrolAssignType, PatrolDetailPayload, PatrolRouteType } from 'src/store/apps/crud/patrolRoute';
+import {
+  PatrolAssignType,
+  PatrolDetailPayload,
+  PatrolRouteType,
+} from 'src/store/apps/crud/patrolRoute';
 import { TimeGroupType } from 'src/store/apps/crud/timeGroup';
 import PatrolDetailDialog from '../SecurityViewPatrol/PatrolDetailDialog';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import { setSelectedPatrolAssignment } from 'src/store/apps/crud/patrolSession';
 import { useNavigate } from 'react-router';
+import { useSearchParams } from 'react-router';
+import { useEffect } from 'react';
 import PatrolCaseList from '../../PatrolCaseList/PatrolCaseList';
-
 
 const defaultFilter = {
   draw: 1,
@@ -19,19 +24,19 @@ const defaultFilter = {
   sortColumn: 'startDate',
   sortDir: 'desc' as 'asc' | 'desc',
   searchValue: '',
-  filters: {
-
-  },
+  filters: {},
 };
 
 const PatrolAssignmentList = () => {
-    const dispatch: AppDispatch = useDispatch();
-    const customizer = useSelector((state: RootState) => state.customizer);
+  const dispatch: AppDispatch = useDispatch();
+  const customizer = useSelector((state: RootState) => state.customizer);
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [selectedPatrol, setSelectedPatrol] = useState<PatrolAssignType | null>(null);
+
   const { data: patrols, isLoading } = usePatrolAssignList(defaultFilter);
   const patrolData = patrols?.data || [];
-//   const [detail, setDetail] = useState<PatrolDetailPayload | null>(null);
+  //   const [detail, setDetail] = useState<PatrolDetailPayload | null>(null);
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
     const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
@@ -39,10 +44,20 @@ const PatrolAssignmentList = () => {
     return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()}`;
   };
 
-  const setDetail = (detail: PatrolDetailPayload | null) => {
-      dispatch(setSelectedPatrolAssignment(detail));
-      navigate('/security-view/patrol-assignment/detail');
-  }
+  const setDetail = (patrol: PatrolAssignType) => {
+    // dispatch(setSelectedPatrolAssignment(detail));
+    navigate(`/security-view/patrol-assignment/detail?id=${patrol.id}&mode=''`);
+  };
+
+  // useEffect(() => {
+  //   if (!id || !patrolData.length) return;
+
+  //   const selected = patrolData.find((p) => p.id === id);
+
+  //   if (selected) {
+  //     navigate(`/security-view/patrol-assignment/detail?id=${id}&mode=${mode ?? ''}`);
+  //   }
+  // }, [id, patrolData, navigate, mode]);
 
   const listHeight = `calc(100% - ${customizer.TopbarHeight}px)`;
   return (

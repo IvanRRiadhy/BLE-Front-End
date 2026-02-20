@@ -110,7 +110,7 @@ const AlarmActionForm: React.FC<AlarmActionFormProps> = ({
       )}
 
       {/* ================= INVESTIGATED → SECURITY GUARD ================= */}
-      {selectedAction.toLowerCase() === 'investigated' && (
+      {selectedAction.toLowerCase() === 'dispatch' && (
         <Box mt={2}>
           <Typography variant={compact ? 'subtitle2' : 'subtitle1'} color="text.secondary" mb={1}>
             Assign Security Guard

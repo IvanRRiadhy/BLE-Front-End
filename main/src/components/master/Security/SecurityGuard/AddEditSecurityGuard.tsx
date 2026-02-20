@@ -33,13 +33,13 @@ import AddEditDistrict from '../../CRUD/district/AddEditDistrict';
 import AddEditDepartment from '../../CRUD/department/AddEditDepartment';
 import AddEditOrganization from '../../CRUD/organization/AddEditOrganizationList';
 import { useQueryClient } from '@tanstack/react-query';
-import { PaginatedResponse } from 'src/hooks/useMember';
+import { PaginatedResponse, useMemberList } from 'src/hooks/useMember';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 import { useAllDistricts } from 'src/hooks/useDistrict';
 import { useAllDepartments } from 'src/hooks/useDepartment';
 import { useAllOrganizations } from 'src/hooks/useOrganization';
 import { useAllCard, useUnassignedCard } from 'src/hooks/useCard';
-import { useAddSecurity, useEditSecurity } from 'src/hooks/useSecurityGuard';
+import { useAddSecurity, useEditSecurity, useSecurityList } from 'src/hooks/useSecurityGuard';
 
 interface FormType {
   type?: string;
@@ -64,12 +64,21 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
   const organizationData = useAllOrganizations().data || [];
   const filteredCard = useUnassignedCard().data || [];
   const cardData = useAllCard().data || [];
+  const headMemberData = useSecurityList({ ...memberFilter, Length: 999, filters: {isHead: true} }).data?.data || [];
+  const headOptions = headMemberData.map((m: any) => ({
+    id: m.id,
+    label: m.name,
+    personId: m.personId,
+  }));
+  const filteredHead1Options = headOptions.filter((opt) => opt.id !== formData.headMember2);
+
+  const filteredHead2Options = headOptions.filter((opt) => opt.id !== formData.headMember1);
 
   const handleClickOpen = () => {
     setLoading(true);
     setFormErrors({});
     setFormData({ ...defaultMemberForm, ...member });
-    
+
     // Set image preview properly - check if member exists and has faceImage
     if (member?.faceImage) {
       // Create the full URL for preview
@@ -79,7 +88,7 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
     } else {
       setPreview(null);
     }
-    
+
     setImage(null);
     setTimeout(() => {
       setLoading(false);
@@ -90,18 +99,18 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
   const handleClose = () => {
     console.log(member);
     setOpen(false);
-    
+
     // Reset preview to the original member image if it exists
     if (member?.faceImage) {
       setPreview(`${BASE_URL}${member.faceImage}`);
     } else {
       setPreview(null);
     }
-    
+
     setImage(null);
   };
 
-    const addMemberMutation = useAddSecurity();
+  const addMemberMutation = useAddSecurity();
   const editMemberMutation = useEditSecurity();
 
   const validateForm = (): boolean => {
@@ -119,48 +128,72 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
-  
+
   const logFormData = (formData: any) => {
     console.log('FormData contents:');
     for (let [key, value] of formData.entries()) {
       console.log(`${key}:`, value);
     }
   };
-  
-const handleSave = async () => {
-  if (!validateForm()) {
-    toast.error('Please fill all required fields correctly.');
-    return;
-  }
 
-  setIsSaving(true);
-
-  try {
-    const data = new FormData();
-
-    Object.entries(formData).forEach(([key, value]) => {
-      if (!['faceImage', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key)) {
-        data.append(key, value?.toString() ?? '');
-      }
-    });
-
-    if (image) data.append('faceImage', image);
-
-    if (type === 'edit') {
-      await editMemberMutation.mutateAsync(data);
-    } else {
-      await addMemberMutation.mutateAsync(data);
+  const handleSave = async () => {
+    if (!validateForm()) {
+      toast.error('Please fill all required fields correctly.');
+      return;
     }
 
-    toast.success('Data saved successfully!');
-    handleClose();
-  } catch (error) {
-    console.error(error);
-    toast.error('Saving data failed.');
-  } finally {
-    setIsSaving(false);
-  }
-};
+    setIsSaving(true);
+
+    try {
+      const data = new FormData();
+
+      Object.entries(formData).forEach(([key, value]) => {
+        if (
+          ![
+            'faceImage',
+            'createdBy',
+            'createdAt',
+            'updatedBy',
+            'updatedAt',
+            // 'applicationId',
+            'cardNumber',
+            'bleCardNumber',
+            'uploadFr',
+            'uploadFrError',
+            'isBlacklist',
+            'blacklistAt',
+            'blacklistReason',
+            'generate',
+            'status',
+          ].includes(key)
+        ) {
+          // 🔥 Rename logic
+          let newKey = key;
+
+          // if (key === 'headMember1') newKey = 'headSecurity1';
+          // if (key === 'headMember2') newKey = 'headSecurity2';
+
+          data.append(newKey, value?.toString() ?? '');
+        }
+      });
+
+      if (image) data.append('faceImage', image);
+
+      if (type === 'edit') {
+        await editMemberMutation.mutateAsync(data);
+      } else {
+        await addMemberMutation.mutateAsync(data);
+      }
+
+      toast.success('Data saved successfully!');
+      handleClose();
+    } catch (error) {
+      console.error(error);
+      toast.error('Saving data failed.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<{ value: unknown }>,
@@ -180,12 +213,12 @@ const handleSave = async () => {
       toast.error('Invalid image type. Please use PNG, JPEG, or JPG.');
       return;
     }
-    
+
     // Clear any existing preview URL
     if (preview && preview.startsWith('blob:')) {
       URL.revokeObjectURL(preview);
     }
-    
+
     setImage(file);
     setPreview(URL.createObjectURL(file));
   };
@@ -237,7 +270,7 @@ const handleSave = async () => {
       onClick={handleClickOpen}
       {...props}
     >
-      Add Member
+      Add Security
     </Button>
   ));
   AddButton.displayName = 'AddButton';
@@ -245,13 +278,13 @@ const handleSave = async () => {
   return (
     <>
       {type === 'edit' && (
-        <Tooltip title="Edit Member">
+        <Tooltip title="Edit Security">
           <EditButton />
         </Tooltip>
       )}
 
       {type === 'add' && (
-        <Tooltip title="Add Member">
+        <Tooltip title="Add Security">
           <AddButton />
         </Tooltip>
       )}
@@ -260,7 +293,7 @@ const handleSave = async () => {
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
           <DialogTitle>
             <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
-              {type === 'add' ? 'Add Member' : 'Edit Member'}
+              {type === 'add' ? 'Add Security' : 'Edit Security'}
             </Typography>
             <Divider />
           </DialogTitle>
@@ -436,7 +469,7 @@ const handleSave = async () => {
               </Grid>
             </Grid>
             <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
-              Member Details
+              Security Details
             </Typography>
             <Divider />
             <Grid container spacing={5} mb={3}>
@@ -515,21 +548,51 @@ const handleSave = async () => {
                     </MenuItem>
                   ))}
                 </CustomSelect>
-                <CustomFormLabel htmlFor="head-Member-1">Head Member 1</CustomFormLabel>
-                <CustomTextField
-                  id="headMember1"
-                  value={formData.headMember1}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
+                <CustomFormLabel htmlFor="head-Member-1">Head Security 1</CustomFormLabel>
+                <CustomAutocomplete
+                  label="Head Security 1"
+                  options={filteredHead1Options}
+                  value={filteredHead1Options.find((h) => h.id === formData.headMember1) || null}
+                  onChange={(val) => {
+                    const id = val?.id ?? '';
+                    setFormData((prev) => ({ ...prev, headMember1: id }));
+                  }}
+                  getOptionLabel={(opt) => opt.label}
+                  isOptionEqualToValue={(a, b) => a.id === b.id}
+                  renderOption={(props: any, option: (typeof headOptions)[number]) => (
+                    <li {...props} key={option.id}>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Typography variant="body1">{option.label}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {option.personId}
+                        </Typography>
+                      </div>
+                    </li>
+                  )}
+                  sx={{ flex: 1 }}
                 />
-                <CustomFormLabel htmlFor="head-Member-2">Head Member 2</CustomFormLabel>
-                <CustomTextField
-                  id="headMember2"
-                  value={formData.headMember2}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
+                <CustomFormLabel htmlFor="head-Member-2">Head Security 2</CustomFormLabel>
+                <CustomAutocomplete
+                  label="Head Security 2"
+                  options={filteredHead2Options}
+                  value={filteredHead2Options.find((h) => h.id === formData.headMember2) || null}
+                  onChange={(val) => {
+                    const id = val?.id ?? '';
+                    setFormData((prev) => ({ ...prev, headMember2: id }));
+                  }}
+                  getOptionLabel={(opt) => opt.label}
+                  isOptionEqualToValue={(a, b) => a.id === b.id}
+                  renderOption={(props: any, option: (typeof headOptions)[number]) => (
+                    <li {...props} key={option.id}>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Typography variant="body1">{option.label}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {option.personId}
+                        </Typography>
+                      </div>
+                    </li>
+                  )}
+                  sx={{ flex: 1 }}
                 />
               </Grid>
             </Grid>
@@ -562,24 +625,32 @@ const handleSave = async () => {
                     <img
                       src={preview}
                       alt="Face Preview"
-                      style={{ 
-                        width: '100%', 
+                      style={{
+                        width: '100%',
                         maxHeight: '300px',
                         objectFit: 'contain',
-                        marginTop: '10px', 
+                        marginTop: '10px',
                         borderRadius: '5px',
                         border: '1px solid #ddd',
                         padding: '5px',
-                        backgroundColor: '#f5f5f5'
+                        backgroundColor: '#f5f5f5',
                       }}
                     />
                     {type === 'edit' && !image && (
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ display: 'block', mt: 0.5 }}
+                      >
                         Current image from database
                       </Typography>
                     )}
                     {image && (
-                      <Typography variant="caption" color="primary" sx={{ display: 'block', mt: 0.5 }}>
+                      <Typography
+                        variant="caption"
+                        color="primary"
+                        sx={{ display: 'block', mt: 0.5 }}
+                      >
                         New image selected
                       </Typography>
                     )}

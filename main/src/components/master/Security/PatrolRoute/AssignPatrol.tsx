@@ -78,7 +78,7 @@ const AssignPatrol = ({ patrolRouteId, type, patrolAssign }: FormType) => {
 
   const { data: timeGroupData } = useTimeGroupList({
     ...defaultTimeGroupFilter,
-    Length: 0,
+    Length: 999,
     filters: { ScheduleType: 'Patrol' },
   });
   const timeGroupOptions = timeGroupData?.data ?? [];

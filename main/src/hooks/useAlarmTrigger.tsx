@@ -210,4 +210,18 @@ export function useAcknowledgeAlarmTrigger() {
 
     },
   })
+};
+
+export function useDispatchAlarmTrigger() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({id, assignedSecurityId} : {id: string, assignedSecurityId: string}) => {
+      const res = await axiosServices.put(`${API_URL}${id}/dispatch`, { assignedSecurityId });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list'] });
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
+    },
+  })
 }

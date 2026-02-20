@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, Box, Button, Typography, Popover, Chip, Stack } from '@mui/material';
-import { AlarmType, MQTTAlarmType } from 'src/store/apps/tracking/Alarm';
+// import { AlarmType, MQTTAlarmType } from 'src/store/apps/tracking/Alarm';
 import { actionStatus, actionStatusColormap } from 'src/types/crud/input';
 import toast from 'react-hot-toast';
 import {
@@ -10,6 +10,7 @@ import {
   // useAssignActionAlarmTriggerByDMAC,
   useAssignActionAlarmTriggerByDMAC,
   useAssignActionAlarmTriggerByID,
+  useDispatchAlarmTrigger,
 } from 'src/hooks/useAlarmTrigger';
 import { alpha, darken, useTheme } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -28,12 +29,15 @@ import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import AlarmMenuItem from './vertical/header/AlarmMenuItem';
 import { defaultAlarmTriggerFilter } from 'src/store/apps/defaultForm';
 import AlarmTriggerMenuItem from './shared/AlarmTriggerMenuItem';
+import { AlarmTriggerType } from 'src/store/apps/crud/alarmTrigger';
 
 interface AlarmPopupProps {
   alarm: AlarmLogItem | null | undefined;
   // open: boolean;
   // onClose: () => void;
 }
+
+type AlarmType = AlarmTriggerType | AlarmLogItem;
 
 // Priority color mapping
 const PRIORITY_COLORS: Record<string, string> = {
@@ -56,13 +60,16 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
   const assignActionMutation = useAssignActionAlarmTriggerByDMAC();
   const assignActionByIdMutation = useAssignActionAlarmTriggerByID();
   const acknowledgeMutation = useAcknowledgeAlarmTrigger();
+  const dispatchMutation = useDispatchAlarmTrigger();
 
   const { data: data } = useAlarmTriggerList({
     ...defaultAlarmTriggerFilter,
     Length: 999,
-    filters: { action: 'Idle', isActive: true },
+    filters: { isActive: true },
   });
-  const alarmLogs = data?.data || [];
+  const alarmLogs =
+    data?.data.filter((a) => a.action === 'Idle' || a.action === 'Acknowledged') || [];
+  // console.log('Alarm Logs: ', alarmLogs);
   // const { unseenAlarms, unseenCount, markSeen } = useUnseenAlarms(alarm?.id);
   // State for action popover
   const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
@@ -75,6 +82,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
 
   const [openUnseenDialog, setOpenUnseenDialog] = useState(false);
   const [visuallySeenIds, setVisuallySeenIds] = useState<Set<string>>(new Set());
+  const [selectedAlarms, setSelectedAlarms] = useState<AlarmType[]>([]);
 
   useEffect(() => {
     console.log('Alarm: ', alarm);
@@ -117,10 +125,9 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
       return;
     }
 
-    const idsToProcess =
-      visuallySeenIds.size > 0 ? Array.from(visuallySeenIds) : [];
+    const idsToProcess = visuallySeenIds.size > 0 ? Array.from(visuallySeenIds) : [];
     const currentTriggerId = extractTriggerId(alarm?.id);
-    if(currentTriggerId && !visuallySeenIds.has(currentTriggerId)) {
+    if (currentTriggerId && !visuallySeenIds.has(currentTriggerId)) {
       idsToProcess.push(currentTriggerId);
     }
     // idsToProcess.push(extractTriggerId(alarm?.id) ?? '');
@@ -164,6 +171,74 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
     dispatch(ClearAlarmPopup());
   };
 
+  const handleDispatchAction = async () => {
+    if (!alarm?.dmac) {
+      toast.error('No alarm selected');
+      handleActionClose();
+      return;
+    }
+    const alarmToProcess: AlarmType[] = [...selectedAlarms];
+
+    if (alarm) {
+      const currentTriggerId = extractTriggerId(alarm?.id);
+      const exists = alarmToProcess.find((a) => a.id === currentTriggerId);
+      if (!exists) {
+        alarmToProcess.push({ ...alarm, id: currentTriggerId ?? alarm.id });
+      }
+    }
+    console.log('Selected Sec', selectedSecurity);
+    if (!selectedSecurity) {
+      toast.error('Please select a security');
+      return;
+    } else {
+      console.log(selectedSecurity);
+    }
+    // const idsToProcess = visuallySeenIds.size > 0 ? Array.from(visuallySeenIds) : [];
+    // const currentTriggerId = extractTriggerId(alarm?.id);
+    // if (currentTriggerId && !visuallySeenIds.has(currentTriggerId)) {
+    //   idsToProcess.push(currentTriggerId);
+    // }
+    // idsToProcess.push(extractTriggerId(alarm?.id) ?? '');
+    let successCount = 0;
+    let failedCount = 0;
+    for (const a of alarmToProcess) {
+      if (!a.id) {
+        failedCount++;
+        continue;
+      }
+      if (a.action?.toLowerCase() !== 'acknowledged') {
+        // toast.error('Alarm is not acknowledged');
+        failedCount++;
+        continue;
+      }
+      try {
+        const result = await dispatchMutation.mutateAsync({
+          id: a.id.toUpperCase(),
+          assignedSecurityId: selectedSecurity.id,
+        });
+        console.log('Success result', result);
+        // toast.success('Action dispatched successfully');
+        successCount++;
+      } catch (error: any) {
+        // toast.error('Error dispatching action');
+        console.error('Error dispatching action', error);
+        failedCount++;
+      } finally {
+      }
+    }
+    if (successCount > 0) {
+      toast.success(`Processed: ${successCount} success`);
+    }
+    if (failedCount > 0) {
+      toast.error(`Processed: ${failedCount} failed`);
+    }
+    setVisuallySeenIds(new Set());
+    handleActionClose();
+    dispatch(ClearAlarmPopup());
+    setSelectedSecurity(null);
+    setSelectedAction('');
+  };
+
   const actionOpen = Boolean(actionAnchorEl);
   const actionId = actionOpen ? 'action-status-popover' : undefined;
 
@@ -175,7 +250,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
   const handleBackdropClose = () => {
     // ❗ UI-only close
     dispatch(ClearAlarmPopup());
-    if(alarm) {
+    if (alarm && alarm.action === 'Idle') {
       acknowledgeMutation.mutateAsync(alarm.triggerId);
     }
   };
@@ -459,7 +534,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                             <AlarmTriggerMenuItem
                               key={trigger.id}
                               trigger={trigger}
-                              isClicked={visuallySeenIds.has(trigger.id)}
+                              isClicked={selectedAlarms.includes(trigger)}
                               unseenBg={unseenBg}
                               seenBg={seenBg}
                               hoverBg={hoverBg}
@@ -467,16 +542,13 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                               seenBorder={seenBorder}
                               hoverBorder={hoverBorder}
                               onClick={(t) =>
-                                setVisuallySeenIds((prev) => {
-                                  const updated = new Set(prev);
-
-                                  if (updated.has(t.id)) {
-                                    updated.delete(t.id);
-                                  } else {
-                                    updated.add(t.id);
+                                setSelectedAlarms((prev) => {
+                                  const exists = prev.find((a) => a.id === t.id);
+                                  console.log("alarmtrigger clicked", t, exists);
+                                  if (exists) {
+                                    return prev.filter((a) => a.id !== t.id);
                                   }
-
-                                  return updated;
+                                  return [...prev, t];
                                 })
                               }
                             />
@@ -570,7 +642,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                           Cancel{' '}
                         </Button>{' '}
                         <Button
-                          onClick={handleApplyAction}
+                          onClick={handleDispatchAction}
                           variant="contained"
                           color="primary"
                           disabled={!selectedAction || assignActionMutation.isPending}

@@ -46,6 +46,8 @@ import { useBoundaryAlarmsAll } from 'src/hooks/AlarmSetting/useBoundary';
 import { BoundaryAlarmType } from 'src/store/apps/alarmsetting/boundary';
 import { getConfig } from 'src/config';
 import { useAllFloorplanDevices } from 'src/hooks/useFloorplanDevice';
+import { useAllPatrolAreas } from 'src/hooks/usePatrolArea';
+import { fetchAlarmSettingsDT } from 'src/store/apps/alarmsetting/alarmSettings';
 
 const MQTT_URL = getConfig().MQTT_URL;
 
@@ -116,12 +118,16 @@ const FloorView: React.FC<{
     (area) => area.floorplanId === activeFloorplan,
   );
 
+  const { data: PatrolArea = [] } = useAllPatrolAreas();
+  const filteredPatrolArea = PatrolArea.filter((area) => area.floorplanId === activeFloorplan);
+
   const [showArea, setShowArea] = useState(true);
   const [showGates, setShowGates] = useState(true);
   const [showGeoFence, setShowGeoFence] = useState(false);
   const [showOverPopulate, setShowOverPopulate] = useState(false);
   const [showStayOnArea, setShowStayOnArea] = useState(false);
   const [showBoundary, setShowBoundary] = useState(false);
+  const [showPatrolArea, setShowPatrolArea] = useState(false);
   const [showOtherBeacons, setShowOtherBeacons] = useState(true);
 
   const [focusArea, setFocusArea] = useState<{
@@ -812,6 +818,16 @@ const FloorView: React.FC<{
             }
             label="Show Boundary Areas"
           />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showPatrolArea}
+                onChange={() => setShowPatrolArea((prev) => !prev)}
+                color="primary"
+              />
+            }
+            label="Show Patrol Areas"
+          />
           {Boolean(focusBeacon) && isFollowing && (
             <>
               <FormControlLabel
@@ -887,12 +903,14 @@ const FloorView: React.FC<{
               OverPopulateAlarm={filteredOverPopulateArea}
               StayOnAreaAlarm={filteredStayOnArea}
               BoundaryAlarm={filteredBoundaryArea}
+              PatrolAreas={filteredPatrolArea}
               showAreas={zoomable && showArea}
               showGates={zoomable && showGates}
               showGeoFence={zoomable && showGeoFence}
               showOverPopulate={zoomable && showOverPopulate}
               showStayOnArea={zoomable && showStayOnArea}
               showBoundary={zoomable && showBoundary}
+              showPatrolAreas={zoomable && showPatrolArea}
               showBeacons={zoomable}
               topic={topic}
               onSelectBeacon={handleSelectBeacon}

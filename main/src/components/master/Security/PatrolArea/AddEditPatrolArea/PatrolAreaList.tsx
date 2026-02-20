@@ -74,7 +74,7 @@ const PatrolAreaList = () => {
   } = usePatrolAreaList({
     Draw: 1,
     Start: 0,
-    Length: 0,
+    Length: 999,
     SortColumn: '',
     SortDir: 'asc',
     SearchValue: '',
@@ -121,19 +121,11 @@ const PatrolAreaList = () => {
     remarks: '',
     color: '#363636',
     areaShape: '[{}]',
-    // restrictedStatus: 'Restricted',
-    // wideArea: 0,
-    // positionPxX: 0,
-    // positionPxY: 0,
-    // engineAreaId: 'ENG001',
-    // allowFloorChange: false,
     floorId: activeFloorplan?.floorId || '',
     floorplanId: activeFloorplan?.id || '',
     isActive: true,
-    // createdBy: 'admin',
-    // createdAt: new Date().toISOString(),
-    // updatedBy: 'admin',
-    // updatedAt: new Date().toISOString(),
+    status: 1,
+    applicationId: localStorage.getItem('applicationId') || '',
   };
 
   const handleAddAreaClick = () => {

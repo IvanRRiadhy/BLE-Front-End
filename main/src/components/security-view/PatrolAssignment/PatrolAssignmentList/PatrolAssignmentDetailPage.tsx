@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useEffect, useState } from 'react';
-import { PatrolDetailPayload } from 'src/store/apps/crud/patrolRoute';
+import { PatrolDetailPayload, SecurityType } from 'src/store/apps/crud/patrolRoute';
 import PatrolRouteDetailDialog from '../SecurityViewPatrol/PatrolRouteDetailDialog';
 import PatrolScheduleCalendarDialog from '../SecurityViewPatrol/PatrolScheduleCalendarDialog';
 import { useNavigate } from 'react-router';
@@ -22,6 +22,7 @@ import {
   defaultPatrolCaseFilter,
   defaultPatrolCaseUploadForm,
   defaultPatrolSessionFilter,
+  defaultTimeGroupFilter,
 } from 'src/store/apps/defaultForm';
 import { useAllPatrolCase, usePatrolCaseList } from 'src/hooks/usePatrolCase';
 import PatrolCaseDialog from './PatrolCaseDialog';
@@ -30,18 +31,39 @@ import PatrolCaseListItem from './PatrolCaseListItem';
 import toast from 'react-hot-toast';
 import { use } from 'i18next';
 import { RootState, useSelector } from 'src/store/Store';
+import { useSearchParams } from 'react-router';
+import { usePatrolAssignmentId, usePatrolRouteId } from 'src/hooks/usePatrolRoute';
+import { useTimeGroupList } from 'src/hooks/useTimeGroup';
+
+
 interface PatrolDetailPageProps {
-  data: PatrolDetailPayload;
 }
 
-const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
+const PatrolDetailPage = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const customizer = useSelector((state: RootState) => state.customizer);
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  const [searchParams] = useSearchParams();
+const id = searchParams.get('id') ?? undefined;
+
+const { data: patrolRes } = usePatrolAssignmentId(id ?? '');
+
+const patrol = patrolRes?.collection?.data;
+const { data: route } = usePatrolRouteId(patrol?.patrolRouteId ?? '');
+
+const { data: timeGroupRes } = useTimeGroupList({
+  ...defaultTimeGroupFilter,
+  filters: { id: patrol?.timeGroupId ? [patrol.timeGroupId] : [] },
+});
+
+const timeGroups = timeGroupRes?.data ?? [];
+
   const [openSchedule, setOpenSchedule] = useState(false);
   const [openRoute, setOpenRoute] = useState(false);
-  const { patrolAssignment, route } = data;
+  
+
   const [patrolSession, setPatrolSession] = useState<PatrolSessionType | null>(null);
   const [openCaseDialog, setOpenCaseDialog] = useState(false);
   const [caseDialogType, setCaseDialogType] = useState<'add' | 'edit'>('add');
@@ -53,12 +75,12 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
 
   const { data: patrolSessionData, isLoading: isSessionLoading } = usePatrolSessionList({
     ...defaultPatrolSessionFilter,
-    filters: { PatrolAssignmentId: patrolAssignment.id },
+    filters: { PatrolAssignmentId: id },
   });
 
   const { data: caseData, isLoading: isCaseLoading } = usePatrolCaseList({
     ...defaultPatrolCaseFilter,
-    filters: { PatrolAssignmentId: patrolAssignment.id },
+    filters: { PatrolAssignmentId: id },
   });
   const patrolCaseData = caseData?.data || [];
 
@@ -128,10 +150,10 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
   const StopPatrolMutation = useStopPatrol();
 
   const handleStart = async () => {
-    if (!data) return;
-    if (!data.patrolAssignment) return;
+    if (!patrol) return;
+    // if (!data.patrolAssignment) return;
     try {
-      const res = await StartPatrolMutation.mutateAsync(data.patrolAssignment.id);
+      const res = await StartPatrolMutation.mutateAsync(patrol.id);
       console.log('Start Patrol res', res);
       if (!res?.success || !res?.collection?.data) return;
 
@@ -148,7 +170,7 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
   };
 
   const handleDone = async () => {
-    if (!data) return;
+    if (!patrol) return;
     if (!patrolSession?.id) return;
 
     try {
@@ -246,6 +268,15 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
     setOpenCaseDialog(false);
   };
 
+  if (!patrol) {
+  return (
+    <Box display="flex" justifyContent="center" mt={5}>
+      <CircularProgress />
+    </Box>
+  );
+}
+console.log('patrol', patrol);
+
   return (
     <>
       <Box p={isMobile ? 2 : 3}>
@@ -277,7 +308,7 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
             </Box>
             {/* Name */}
             <Typography fontWeight={700} fontSize={20}>
-              {patrolAssignment.name}
+              {patrol.name}
             </Typography>
             {/* Description */}
             <Box mt={1}>
@@ -299,15 +330,15 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
                   },
                 }}
               >
-                <Typography fontSize={13}>{patrolAssignment.description || '-'}</Typography>
+                <Typography fontSize={13}>{patrol.description || '-'}</Typography>
               </Box>
             </Box>
             <Divider sx={{ my: 2 }} />
             {/* Dates */}
             <Box sx={{ cursor: 'pointer' }} onClick={() => setOpenSchedule(true)}>
               <Stack spacing={1}>
-                <InfoRow label="Active From" value={formatDate(patrolAssignment.startDate)} />
-                <InfoRow label="Until" value={formatDate(patrolAssignment.endDate)} />
+                <InfoRow label="Active From" value={formatDate(patrol.startDate)} />
+                <InfoRow label="Until" value={formatDate(patrol.endDate)} />
               </Stack>
             </Box>
             <Divider sx={{ my: 2 }} />
@@ -387,7 +418,7 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
                 }}
               >
                 <Stack spacing={1}>
-                  {patrolAssignment.securities?.map((sec) => (
+                  {patrol.securities?.map((sec: SecurityType) => (
                     <Box
                       key={sec.id}
                       display="flex"
@@ -410,7 +441,7 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
                     </Box>
                   ))}
 
-                  {!patrolAssignment.securities?.length && (
+                  {!patrol.securities?.length && (
                     <Typography fontSize={12} color="text.secondary">
                       No securities assigned
                     </Typography>
@@ -579,9 +610,9 @@ const PatrolDetailPage = ({ data }: PatrolDetailPageProps) => {
       <PatrolScheduleCalendarDialog
         open={openSchedule}
         onClose={() => setOpenSchedule(false)}
-        startDate={patrolAssignment.startDate}
-        endDate={patrolAssignment.endDate}
-        timeGroups={data.timeGroups}
+        startDate={patrol.startDate}
+        endDate={patrol.endDate}
+        timeGroups={timeGroups}
       />
 
       {/* ================= ROUTE DIALOG ================= */}

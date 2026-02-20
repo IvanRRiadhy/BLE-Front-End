@@ -33,7 +33,7 @@ import AddEditDistrict from '../district/AddEditDistrict';
 import AddEditDepartment from '../department/AddEditDepartment';
 import AddEditOrganization from '../organization/AddEditOrganizationList';
 import { useQueryClient } from '@tanstack/react-query';
-import { PaginatedResponse, useAddMember, useEditMember } from 'src/hooks/useMember';
+import { PaginatedResponse, useAddMember, useEditMember, useMemberList } from 'src/hooks/useMember';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 import { useAllDistricts } from 'src/hooks/useDistrict';
 import { useAllDepartments } from 'src/hooks/useDepartment';
@@ -63,12 +63,21 @@ const AddEditMember = ({ type, member }: FormType) => {
   const organizationData = useAllOrganizations().data || [];
   const filteredCard = useUnassignedCard().data || [];
   const cardData = useAllCard().data || [];
+  const headMemberData = useMemberList({ ...memberFilter, Length: 999 }).data?.data || [];
+  const headOptions = headMemberData.map((m: any) => ({
+    id: m.id,
+    label: m.name,
+    personId: m.personId,
+  }));
+  const filteredHead1Options = headOptions.filter((opt) => opt.id !== formData.headMember2);
+
+  const filteredHead2Options = headOptions.filter((opt) => opt.id !== formData.headMember1);
 
   const handleClickOpen = () => {
     setLoading(true);
     setFormErrors({});
     setFormData({ ...defaultMemberForm, ...member });
-    
+
     // Set image preview properly - check if member exists and has faceImage
     if (member?.faceImage) {
       // Create the full URL for preview
@@ -78,7 +87,7 @@ const AddEditMember = ({ type, member }: FormType) => {
     } else {
       setPreview(null);
     }
-    
+
     setImage(null);
     setTimeout(() => {
       setLoading(false);
@@ -89,19 +98,19 @@ const AddEditMember = ({ type, member }: FormType) => {
   const handleClose = () => {
     console.log(member);
     setOpen(false);
-    
+
     // Reset preview to the original member image if it exists
     if (member?.faceImage) {
       setPreview(`${BASE_URL}${member.faceImage}`);
     } else {
       setPreview(null);
     }
-    
+
     setImage(null);
   };
 
   const addMemberMutation = useAddMember();
-const editMemberMutation = useEditMember();
+  const editMemberMutation = useEditMember();
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
@@ -118,49 +127,48 @@ const editMemberMutation = useEditMember();
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
-  
+
   const logFormData = (formData: any) => {
     console.log('FormData contents:');
     for (let [key, value] of formData.entries()) {
       console.log(`${key}:`, value);
     }
   };
-  
-const handleSave = async () => {
-  if (!validateForm()) {
-    toast.error('Please fill all required fields correctly.');
-    return;
-  }
 
-  setIsSaving(true);
-
-  try {
-    const data = new FormData();
-
-    Object.entries(formData).forEach(([key, value]) => {
-      if (!['faceImage', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key)) {
-        data.append(key, value?.toString() ?? '');
-      }
-    });
-
-    if (image) data.append('faceImage', image);
-
-    if (type === 'edit') {
-      await editMemberMutation.mutateAsync(data);
-    } else {
-      await addMemberMutation.mutateAsync(data);
+  const handleSave = async () => {
+    if (!validateForm()) {
+      toast.error('Please fill all required fields correctly.');
+      return;
     }
 
-    toast.success('Data saved successfully!');
-    handleClose();
-  } catch (error) {
-    console.error(error);
-    toast.error('Saving data failed.');
-  } finally {
-    setIsSaving(false);
-  }
-};
+    setIsSaving(true);
 
+    try {
+      const data = new FormData();
+
+      Object.entries(formData).forEach(([key, value]) => {
+        if (!['faceImage', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key)) {
+          data.append(key, value?.toString() ?? '');
+        }
+      });
+
+      if (image) data.append('faceImage', image);
+
+      if (type === 'edit') {
+        await editMemberMutation.mutateAsync(data);
+      } else {
+        await addMemberMutation.mutateAsync(data);
+      }
+
+      toast.success('Data saved successfully!');
+      handleClose();
+    } catch (error) {
+      console.error(error);
+      toast.error('Saving data failed.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<{ value: unknown }>,
@@ -180,12 +188,12 @@ const handleSave = async () => {
       toast.error('Invalid image type. Please use PNG, JPEG, or JPG.');
       return;
     }
-    
+
     // Clear any existing preview URL
     if (preview && preview.startsWith('blob:')) {
       URL.revokeObjectURL(preview);
     }
-    
+
     setImage(file);
     setPreview(URL.createObjectURL(file));
   };
@@ -516,20 +524,50 @@ const handleSave = async () => {
                   ))}
                 </CustomSelect>
                 <CustomFormLabel htmlFor="head-Member-1">Head Member 1</CustomFormLabel>
-                <CustomTextField
-                  id="headMember1"
-                  value={formData.headMember1}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
+                <CustomAutocomplete
+                  label="Head Security 1"
+                  options={filteredHead1Options}
+                  value={filteredHead1Options.find((h) => h.id === formData.headMember1) || null}
+                  onChange={(val) => {
+                    const id = val?.id ?? '';
+                    setFormData((prev) => ({ ...prev, headMember1: id }));
+                  }}
+                  getOptionLabel={(opt) => opt.label}
+                  isOptionEqualToValue={(a, b) => a.id === b.id}
+                  renderOption={(props: any, option: (typeof headOptions)[number]) => (
+                    <li {...props} key={option.id}>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Typography variant="body1">{option.label}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {option.personId}
+                        </Typography>
+                      </div>
+                    </li>
+                  )}
+                  sx={{ flex: 1 }}
                 />
                 <CustomFormLabel htmlFor="head-Member-2">Head Member 2</CustomFormLabel>
-                <CustomTextField
-                  id="headMember2"
-                  value={formData.headMember2}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
+                <CustomAutocomplete
+                  label="Head Security 2"
+                  options={filteredHead2Options}
+                  value={filteredHead2Options.find((h) => h.id === formData.headMember2) || null}
+                  onChange={(val) => {
+                    const id = val?.id ?? '';
+                    setFormData((prev) => ({ ...prev, headMember2: id }));
+                  }}
+                  getOptionLabel={(opt) => opt.label}
+                  isOptionEqualToValue={(a, b) => a.id === b.id}
+                  renderOption={(props: any, option: (typeof headOptions)[number]) => (
+                    <li {...props} key={option.id}>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Typography variant="body1">{option.label}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {option.personId}
+                        </Typography>
+                      </div>
+                    </li>
+                  )}
+                  sx={{ flex: 1 }}
                 />
               </Grid>
             </Grid>
@@ -562,24 +600,32 @@ const handleSave = async () => {
                     <img
                       src={preview}
                       alt="Face Preview"
-                      style={{ 
-                        width: '100%', 
+                      style={{
+                        width: '100%',
                         maxHeight: '300px',
                         objectFit: 'contain',
-                        marginTop: '10px', 
+                        marginTop: '10px',
                         borderRadius: '5px',
                         border: '1px solid #ddd',
                         padding: '5px',
-                        backgroundColor: '#f5f5f5'
+                        backgroundColor: '#f5f5f5',
                       }}
                     />
                     {type === 'edit' && !image && (
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ display: 'block', mt: 0.5 }}
+                      >
                         Current image from database
                       </Typography>
                     )}
                     {image && (
-                      <Typography variant="caption" color="primary" sx={{ display: 'block', mt: 0.5 }}>
+                      <Typography
+                        variant="caption"
+                        color="primary"
+                        sx={{ display: 'block', mt: 0.5 }}
+                      >
                         New image selected
                       </Typography>
                     )}

@@ -45,6 +45,7 @@ import CustomTextField from 'src/components/forms/theme-elements/CustomTextField
 import { useAllDistricts } from 'src/hooks/useDistrict';
 import { useAllDepartments } from 'src/hooks/useDepartment';
 import { useAllOrganizations } from 'src/hooks/useOrganization';
+import AddEditSecurityGuard from './AddEditSecurityGuard';
 
 const SecurityGuardContent = () => {
   const { t } = useTranslation();
@@ -59,7 +60,7 @@ const SecurityGuardContent = () => {
   const organizationData = useAllOrganizations();
   // Get cached data for the member list
   const memberCache = queryClient.getQueryData<PaginatedResponse<memberType>>([
-    'member-list',
+    'security-list',
     memberFilter,
   ]);
 
@@ -254,7 +255,7 @@ const SecurityGuardContent = () => {
             <Stack direction="row" alignItems="center" spacing={1.2}>
               {/* Edit */}
               <Tooltip title="Edit Security Guard">
-                <AddEditMember member={securityGuardDetail} type="edit" />
+                <AddEditSecurityGuard member={securityGuardDetail} type="edit" />
               </Tooltip>
 
               {/* Delete */}
@@ -409,9 +410,9 @@ const SecurityGuardContent = () => {
                 <Typography>{securityGuardDetail.phone}</Typography>
                 <CustomFormLabel htmlFor="gender">Gender</CustomFormLabel>
                 <Typography>{securityGuardDetail.gender}</Typography>
-                <CustomFormLabel htmlFor="head-Member-1">Head Member 1</CustomFormLabel>
+                <CustomFormLabel htmlFor="head-Member-1">Head Security 1</CustomFormLabel>
                 <Typography>{securityGuardDetail.headMember1}</Typography>
-                <CustomFormLabel htmlFor="head-Member-2">Head Member 2</CustomFormLabel>
+                <CustomFormLabel htmlFor="head-Member-2">Head Security 2</CustomFormLabel>
                 <Typography>{securityGuardDetail.headMember2}</Typography>
                 <CustomFormLabel htmlFor="status-employee">Status Employee</CustomFormLabel>
                 <Typography>{securityGuardDetail.statusEmployee}</Typography>

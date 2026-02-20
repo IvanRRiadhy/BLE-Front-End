@@ -108,7 +108,7 @@ const Modern = () => {
     dispatch(
       fetchCardDT({
         ...filter,
-        Length: 0,
+        Length: 999,
         filters: {
           IsUsed: true,
         },

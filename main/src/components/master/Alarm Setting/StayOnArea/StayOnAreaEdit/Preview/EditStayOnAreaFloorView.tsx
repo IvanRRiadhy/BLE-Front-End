@@ -99,7 +99,7 @@ const EditStayOnAreaFloorView = () => {
     dispatch(
       fetchStayOnAreaAlarms({
         ...defaultStayOnAreaFilter,
-        Length: 0,
+        Length: 999,
         filters: { FloorplanId: activeFloorPlan?.id },
       }),
     );

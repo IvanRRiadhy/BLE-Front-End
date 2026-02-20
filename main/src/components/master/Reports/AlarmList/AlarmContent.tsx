@@ -17,7 +17,14 @@ import {
   TextField,
   MenuItem,
   Divider,
+  Stack,
+  CircularProgress,
 } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import BoltIcon from '@mui/icons-material/Bolt';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import PersonIcon from '@mui/icons-material/Person';
 import { BASE_URL } from 'src/utils/axios';
 import { VisitorType } from 'src/store/apps/crud/visitor';
 import { memberType } from 'src/store/apps/crud/member';
@@ -32,6 +39,7 @@ import {
   useAlarmTriggerList,
   useAllIntruders,
   useAssignActionAlarmTriggerByID,
+  useDispatchAlarmTrigger,
 } from 'src/hooks/useAlarmTrigger';
 import {
   AlarmTimelineType,
@@ -76,6 +84,7 @@ const AlarmContent = () => {
   //UseQuery Mutation
   const assignActionMutation = useAssignActionAlarmTriggerByID();
   const acknowledgeMutation = useAcknowledgeAlarmTrigger();
+  const dispatchMutation = useDispatchAlarmTrigger();
 
   useEffect(() => {
     if (selectedIntruder) {
@@ -202,6 +211,35 @@ const AlarmContent = () => {
     }
   };
 
+  const handleDispatchAction = async () => {
+    if (!selectedAlarmTrigger) {
+      toast.error('Please select an alarm');
+      return;
+    }
+    if (selectedAlarmTrigger.action?.toLowerCase() !== 'acknowledged') {
+      toast.error('Alarm is not acknowledged');
+      return;
+    }
+    if (!selectedSecurity) {
+      toast.error('Please select a security');
+      return;
+    }
+    try {
+      const result = await dispatchMutation.mutateAsync({
+        id: selectedAlarmTrigger.id.toUpperCase(),
+        assignedSecurityId: selectedSecurity.id,
+      });
+      toast.success('Action dispatched successfully');
+      handleCloseActionDialog();
+      setSelectedSecurity(null);
+      setSelectedAction('');
+    } catch (error: any) {
+      toast.error('Error dispatching action');
+      console.error('Error dispatching action', error);
+    } finally {
+    }
+  };
+
   const formatActionLabel = (value: string) => {
     if (!value) return '-';
     return value.replace(/([a-z])([A-Z])/g, '$1 $2');
@@ -216,6 +254,7 @@ const AlarmContent = () => {
 
   const handleOpenAlarmWithAcknowledge = async (alarm: AlarmTriggerType) => {
     // Always set selected alarm first (so dialog can use it later)
+    console.log("Alarm: ", alarm);
     setSelectedAlarmTrigger(alarm);
     // await handleFetchTimeline(alarm.id);
     // ✅ Only call API if action is "Idle"
@@ -588,7 +627,29 @@ const AlarmContent = () => {
         fullWidth
         maxWidth="lg"
       >
-        <DialogTitle sx={{ mt: 1, p: 3 }}>Alarm Details</DialogTitle>
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            px: 5,
+          }}
+        >
+          <Typography variant="h4" fontWeight={700}>
+            Alarm Detail
+          </Typography>
+
+          {selectedAlarmTrigger && (
+            <Chip
+              label={`Category : ${selectedAlarmTrigger.alarm?.toUpperCase()}`}
+              sx={{
+                fontWeight: 600,
+                backgroundColor: selectedAlarmTrigger.alarmColor,
+                color: '#fff',
+              }}
+            />
+          )}
+        </DialogTitle>
         <DialogContent sx={{ mt: 1, p: 3 }}>
           <Box
             sx={{
@@ -629,94 +690,156 @@ const AlarmContent = () => {
             )}
           </Box>
           <Divider />
+          {!selectedAlarmTrigger?.isActive && (
+            <Box
+              sx={{
+                border: '1px solid',
+                borderColor: 'success.light',
+                borderRadius: 3,
+                p: 3,
+                my: 2,
+                background: 'linear-gradient(135deg, rgba(80,246,110,0.08), rgba(80,246,110,0.02))',
+              }}
+            >
+              {/* Header */}
+              <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+                <CheckCircleIcon color="success" />
+                <Typography variant="h6" fontWeight={700} color="success.main">
+                  Alarm Successfully Resolved
+                </Typography>
+              </Stack>
+
+              {isFetchingTimeline || !timelineData ? (
+                <Skeleton height={140} />
+              ) : (
+                <>
+                  {/* Investigation Result */}
+                  <Stack
+                    direction={{ xs: 'column', sm: 'row' }}
+                    spacing={2}
+                    alignItems={{ sm: 'center' }}
+                    justifyContent="space-between"
+                    mb={2}
+                  >
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <TaskAltIcon color="success" fontSize="small" />
+                      <Typography variant="body2" color="text.secondary">
+                        Investigation Result
+                      </Typography>
+                    </Stack>
+
+                    <Chip
+                      label={timelineData.investigation.result}
+                      color="success"
+                      variant="filled"
+                      sx={{ fontWeight: 600 }}
+                    />
+                  </Stack>
+
+                  {/* Dispatched Person */}
+                  <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+                    <PersonIcon fontSize="small" color="action" />
+                    <Typography variant="body2">
+                      Handled by <strong>{timelineData.investigation.dispatchedPerson}</strong>
+                    </Typography>
+                  </Stack>
+
+                  <Divider sx={{ my: 2 }} />
+
+                  {/* Duration Metrics */}
+                  <Stack
+                    direction={{ xs: 'column', sm: 'row' }}
+                    spacing={3}
+                    justifyContent="space-between"
+                  >
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <AccessTimeIcon fontSize="small" color="action" />
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          Total Duration
+                        </Typography>
+                        <Typography fontWeight={600}>
+                          {timelineData.duration.totalFormatted}
+                        </Typography>
+                      </Box>
+                    </Stack>
+
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <BoltIcon fontSize="small" color="action" />
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          Response Time
+                        </Typography>
+                        <Typography fontWeight={600}>
+                          {timelineData.duration.responseTimeFormatted}
+                        </Typography>
+                      </Box>
+                    </Stack>
+
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <TaskAltIcon fontSize="small" color="action" />
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          Resolution Time
+                        </Typography>
+                        <Typography fontWeight={600}>
+                          {timelineData.duration.resolutionTimeFormatted}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </Stack>
+
+                  {/* Notes */}
+                  {timelineData.investigation.notes && (
+                    <>
+                      <Divider sx={{ my: 2 }} />
+                      <Typography variant="body2" color="text.secondary" mb={0.5}>
+                        Notes
+                      </Typography>
+                      <Typography variant="body2">{timelineData.investigation.notes}</Typography>
+                    </>
+                  )}
+                </>
+              )}
+            </Box>
+          )}
+          <Divider />
           <Box sx={{ my: 2 }}>
             <Typography variant="body1" color="text.secondary" mb={1}>
               Alarm Timeline :
             </Typography>
-            {(isFetchingTimeline || !timelineData) ? (
+            {isFetchingTimeline || !timelineData ? (
               <Skeleton height={120} />
             ) : (
               <AlarmTimelineProgress timelineData={timelineData} />
             )}
           </Box>
-          <Divider /> 
-          {/* Alarm Info */}
-          <Typography variant="body1" color="text.secondary" my={1}>
-            Alarm Category:
-          </Typography>
-          <Typography variant="body1" fontWeight={700} mb={2}>
-            {selectedAlarmTrigger?.alarm?.toUpperCase() || '-'}
-          </Typography>
 
           {/* If alarm is inactive */}
-          {!selectedAlarmTrigger?.isActive ? (
-            <Box
-              sx={{
-                border: '1px dashed',
-                borderColor: 'error.main',
-                borderRadius: 2,
-                p: 2,
-                backgroundColor: 'rgba(255, 0, 0, 0.05)',
-              }}
-            >
-              <Typography variant="h6" color="error" fontWeight={600}>
-                Alarm is no longer active
-              </Typography>
-              <Typography variant="body2" color="text.secondary" mt={0.5}>
-                You cannot apply any new actions to an inactive alarm.
-              </Typography>
-            </Box>
-          ) : (
+          {selectedAlarmTrigger?.action.toLocaleLowerCase() === 'acknowledged' && (
             <>
-              {/* If alarm is active, show chip-style status selector */}
-              <Typography variant="subtitle2" color="text.secondary" mb={1}>
-                Select Action Status
-              </Typography>
-
-              <Box display="flex" flexWrap="wrap" gap={1}>
-                {actionStatus
-                  .filter((item) => !item.disabled)
-                  .map((item) => {
-                    const isActiveStatus =
-                      selectedAlarmTrigger?.action?.toLowerCase() === item.value.toLowerCase();
-
-                    const isSelected = selectedAction?.toLowerCase() === item.value.toLowerCase();
-
-                    return (
-                      <Button
-                        key={item.value}
-                        variant="outlined"
-                        disabled={isActiveStatus}
-                        onClick={() => setSelectedAction(item.value)}
-                        sx={{
-                          borderRadius: '20px',
-                          textTransform: 'none',
-                          px: 2,
-                          py: 0.75,
-                          border: '1px solid',
-                          borderColor: isSelected ? 'primary.main' : 'rgba(0,0,0,0.23)',
-                          backgroundColor: isSelected ? 'primary.main' : 'transparent',
-                          color: isSelected
-                            ? 'white'
-                            : isActiveStatus
-                              ? 'text.disabled'
-                              : 'text.primary',
-                          '&:hover': {
-                            backgroundColor: isSelected ? 'primary.dark' : 'rgba(0,0,0,0.05)',
-                          },
-                          transition: 'all 0.15s ease-in-out',
-                        }}
-                      >
-                        {item.label}
-                      </Button>
-                    );
-                  })}
+              <Divider />
+              <Box mt={3}>
+                <Typography variant="subtitle2" color="text.secondary" mb={1}>
+                  Dispatch Security Guard
+                </Typography>
+                <CustomAutocomplete
+                  label="Security Guard"
+                  options={securityData || []}
+                  value={selectedSecurity}
+                  loading={isLoadingSecurity}
+                  onChange={(newValue) => setSelectedSecurity(newValue)}
+                  getOptionLabel={(option) => option?.name ?? ''}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  required
+                  helperText={!selectedSecurity ? 'Please select a security guard' : undefined}
+                />
               </Box>
             </>
           )}
 
           {/* Investigate Result */}
-          {selectedAction.toLowerCase() === 'done' && selectedAlarmTrigger?.isActive && (
+          {/* {selectedAction.toLowerCase() === 'done' && selectedAlarmTrigger?.isActive && (
             <Box mt={3}>
               <Typography variant="subtitle2" color="text.secondary" mb={1}>
                 Investigate Result
@@ -729,10 +852,10 @@ const AlarmContent = () => {
                 onChange={(e) => setInvestigateResult(e.target.value)}
               />
             </Box>
-          )}
+          )} */}
 
           {/* Select Security Guard */}
-          {selectedAction.toLowerCase() === 'investigated' && selectedAlarmTrigger?.isActive && (
+          {/* {selectedAction.toLowerCase() === 'investigated' && selectedAlarmTrigger?.isActive && (
             <Box mt={3}>
               <Typography variant="subtitle2" color="text.secondary" mb={1}>
                 Select Security Guard
@@ -749,7 +872,7 @@ const AlarmContent = () => {
                 helperText={!selectedSecurity ? 'Please select a security guard' : undefined}
               />
             </Box>
-          )}
+          )} */}
         </DialogContent>
 
         <DialogActions sx={{ p: 3 }}>
@@ -758,20 +881,28 @@ const AlarmContent = () => {
           </Button>
 
           {/* Only show confirm if alarm is active */}
-          {selectedAlarmTrigger?.isActive && (
-            <Button
-              onClick={handleApplyAction}
-              color="primary"
-              variant="contained"
-              disabled={
-                !selectedAction ||
-                !selectedAlarmTrigger ||
-                assignActionMutation.isPending ||
-                (selectedAction.toLowerCase() === 'done' && investigateResult.trim() === '')
-              }
-            >
-              {assignActionMutation.isPending ? 'Applying...' : 'Apply Action'}
-            </Button>
+          {selectedAlarmTrigger?.action.toLocaleLowerCase() === 'acknowledged' && (
+            <>
+              <Button
+                variant="outlined"
+                color="warning"
+                onClick={() => console.log('Postpone clicked')}
+              >
+                Postpone
+              </Button>
+
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={!selectedSecurity || dispatchMutation.isPending}
+                onClick={handleDispatchAction}
+                startIcon={
+                  dispatchMutation.isPending ? <CircularProgress size={16} color="inherit" /> : null
+                }
+              >
+                {dispatchMutation.isPending ? 'Dispatching...' : 'Dispatch'}
+              </Button>
+            </>
           )}
         </DialogActions>
       </Dialog>

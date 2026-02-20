@@ -36,7 +36,7 @@ const TagList = () => {
   // 🔹 React Query fetching
   const { data, isLoading, isFetching, isFetched } = useMemberList({
     ...memberFilter,
-    Length: 0, // show all for side list
+    Length: 999, // show all for side list
   });
 
   const deleteMutation = useDeleteMember();
@@ -55,7 +55,7 @@ const TagList = () => {
   // ---------------------------------------------------------------------------
   useEffect(() => {
     // Reset filter on mount (only once)
-    dispatch(UpdateFilter({ ...defaultMemberFilter, Length: 0 }));
+    dispatch(UpdateFilter({ ...defaultMemberFilter, Length: 999 }));
   }, [dispatch]);
 
   // ---------------------------------------------------------------------------

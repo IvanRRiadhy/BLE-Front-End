@@ -8,7 +8,7 @@ import { BASE_URL } from 'src/utils/axios';
 const defaultFilter = {
   draw: 1,
   start: 0,
-  length: 0,
+  length: 999,
   sortColumn: '',
   sortDir: 'desc',
   searchValue: '',

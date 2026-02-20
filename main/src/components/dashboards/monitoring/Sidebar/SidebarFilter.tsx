@@ -132,7 +132,7 @@ const SidebarFilter = ({ filterType, setFilterType }: SidebarFilterProps) => {
       >
         <ToggleButton value="Tracking">Tracking</ToggleButton>
         <ToggleButton value="Alarm">Alarm</ToggleButton>
-        <ToggleButton value="Blacklist">Blacklist</ToggleButton>
+        {/* <ToggleButton value="Blacklist">Blacklist</ToggleButton> */}
       </ToggleButtonGroup>
     </Box>
   );

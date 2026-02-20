@@ -82,7 +82,7 @@ const initialState: StateType = {
   patrolAreaFilter: {
     Draw: 0,
     Start: 0,
-    Length: 0,
+    Length: 999,
     SortColumn: '',
     SortDir: 'asc',
     SearchValue: '',
@@ -94,7 +94,7 @@ const initialState: StateType = {
   lastFilter: {
     Draw: 0,
     Start: 0,
-    Length: 0,
+    Length: 999,
     SortColumn: '',
     SortDir: 'asc',
     SearchValue: '',

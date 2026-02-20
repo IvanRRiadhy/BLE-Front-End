@@ -3,7 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { usePatrolAssignList } from 'src/hooks/usePatrolRoute';
 import SecurityViewPatrolListItem from 'src/components/security-view/PatrolAssignment/SecurityViewPatrol/SecurityViewPatrolListItem';
 import { useState } from 'react';
-import { PatrolAssignType, PatrolDetailPayload, PatrolRouteType } from 'src/store/apps/crud/patrolRoute';
+import {
+  PatrolAssignType,
+  PatrolDetailPayload,
+  PatrolRouteType,
+} from 'src/store/apps/crud/patrolRoute';
 import { TimeGroupType } from 'src/store/apps/crud/timeGroup';
 import PatrolDetailDialog from 'src/components/security-view/PatrolAssignment/SecurityViewPatrol/PatrolDetailDialog';
 
@@ -23,7 +27,9 @@ const SecurityViewPatrolList = () => {
   const { t } = useTranslation();
   const { data: patrols, isLoading } = usePatrolAssignList(defaultFilter);
   const patrolData = patrols?.data || [];
-  const [detail, setDetail] = useState<PatrolDetailPayload | null>(null);
+  // const [detail, setDetail] = useState<PatrolDetailPayload | null>(null);
+  const [selectedPatrol, setSelectedPatrol] = useState<PatrolAssignType | null>(null);
+
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
     const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
@@ -89,13 +95,15 @@ const SecurityViewPatrolList = () => {
                   borderBottom: '1px solid #e0e0e0',
                 }}
               >
-                <SecurityViewPatrolListItem patrol={item} openDetail={setDetail} />
+                <SecurityViewPatrolListItem patrol={item} openDetail={setSelectedPatrol} />
               </Stack>
             ))}
         </Box>
       </Box>
       {/* Detail Dialog */}
-      {detail && <PatrolDetailDialog open data={detail} onClose={() => setDetail(null)} />}
+      {selectedPatrol && (
+        <PatrolDetailDialog open patrol={selectedPatrol} onClose={() => setSelectedPatrol(null)} />
+      )}
     </>
   );
 };

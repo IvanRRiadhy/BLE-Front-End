@@ -56,7 +56,7 @@ const initialState: StateType = {
     cardGroupFilter: {
         Draw: 0,
         Start: 0,
-        Length: 0,
+        Length: 999,
         SortColumn: '',
         SortDir: 'asc',
         SearchValue: '',

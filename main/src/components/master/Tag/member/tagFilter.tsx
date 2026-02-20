@@ -17,6 +17,9 @@ import { fetchDistricts, DistrictType } from 'src/store/apps/crud/district';
 import { UpdateFilter } from 'src/store/apps/crud/member';
 import { defaultMemberFilter } from 'src/store/apps/defaultForm';
 
+type ArrayFilterKey = 'OrganizationId' | 'DepartmentId' | 'DistrictId';
+
+
 interface DataType {
   id: string | number;
   name?: string;
@@ -97,26 +100,29 @@ const TagFilter = () => {
   const handleFilter = (filter: string, category?: string) => {
     const currentFilters = { ...memberFilter };
 
-    const toggleSelection = (key: keyof typeof currentFilters) => {
-      const selected = currentFilters[key];
-      if (!selected) return;
+    const toggleSelection = (key: ArrayFilterKey, filter: string) => {
+      const selected = currentFilters[key] ?? [];
+
       const newSelected = selected.includes(filter)
         ? selected.filter((id: string) => id !== filter)
         : [...selected, filter];
 
-      const updatedFilters = { ...currentFilters, [key]: newSelected };
-      dispatch(UpdateFilter({ filters: updatedFilters }));
+      dispatch(
+        UpdateFilter({
+          filters: { ...currentFilters, [key]: newSelected },
+        }),
+      );
     };
 
     switch (category) {
       case 'department':
-        toggleSelection('DepartmentId');
+        toggleSelection('DepartmentId', filter);
         break;
       case 'district':
-        toggleSelection('DistrictId');
+        toggleSelection('DistrictId', filter);
         break;
       case 'organization':
-        toggleSelection('OrganizationId');
+        toggleSelection('OrganizationId', filter);
         break;
       case 'all':
       default:

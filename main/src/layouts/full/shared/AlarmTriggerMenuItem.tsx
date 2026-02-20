@@ -1,4 +1,4 @@
-import { Box, Paper, Typography, alpha, useTheme } from '@mui/material';
+import { Box, Chip, Paper, Typography, alpha, useTheme } from '@mui/material';
 import { motion, useAnimationControls } from 'framer-motion';
 import { AlarmTriggerType } from 'src/store/apps/crud/alarmTrigger';
 import { useEffect, useRef } from 'react';
@@ -20,6 +20,12 @@ interface Props {
   onMarkSeen?: (trigger: AlarmTriggerType) => void;
   onClick?: (trigger: AlarmTriggerType) => void;
 }
+
+const PRIORITY_COLOR: Record<string, string> = {
+  low: '#ffc107',
+  medium: '#ff9800',
+  high: '#f44336',
+};
 
 const AlarmTriggerMenuItem = ({
   trigger,
@@ -44,10 +50,7 @@ const AlarmTriggerMenuItem = ({
   const clickedBorder = unseenBorder;
 
   const displayName =
-    trigger.visitorName ||
-    trigger.memberName ||
-    trigger.securityName ||
-    'Unknown';
+    trigger.visitorName || trigger.memberName || trigger.securityName || 'Unknown';
 
   useEffect(() => {
     // Priority: clicked > seen > unseen
@@ -64,7 +67,7 @@ const AlarmTriggerMenuItem = ({
         backgroundColor: seenBg,
         borderLeftColor: seenBorder,
       });
-      console.log('Seen');
+      // console.log('Seen');
       return;
     }
 
@@ -76,7 +79,7 @@ const AlarmTriggerMenuItem = ({
 
   const handleHoverStart = async () => {
     if (!onMarkSeen || isSeen) return;
-    console.log('Hover Start');
+    // console.log('Hover Start');
     if (isSeen || isClicked || completedRef.current) return;
 
     hoverActiveRef.current = true;
@@ -101,7 +104,7 @@ const AlarmTriggerMenuItem = ({
   };
 
   const handleHoverEnd = () => {
-    if(!onMarkSeen || isSeen) return;
+    if (!onMarkSeen || isSeen) return;
     hoverActiveRef.current = false;
 
     if (!completedRef.current && !isClicked) {
@@ -136,30 +139,68 @@ const AlarmTriggerMenuItem = ({
           backgroundColor: 'transparent',
         }}
       >
-        <Typography fontWeight={700} display="flex" alignItems="center" gap={0.75}>
-          {!isSeen && !isClicked && (
-            <Box
-              component="span"
+        {/* HEADER */}
+        <Box display="flex" justifyContent="space-between" alignItems="flex-start">
+          {/* LEFT SIDE */}
+          <Box>
+            <Typography fontWeight={700} display="flex" alignItems="center" gap={0.75}>
+              {!isSeen && !isClicked && (
+                <Box
+                  component="span"
+                  sx={{
+                    color: theme.palette.error.main,
+                    fontWeight: 900,
+                    fontSize: '1.1rem',
+                    lineHeight: 1,
+                  }}
+                >
+                  !
+                </Box>
+              )}
+              {displayName}
+            </Typography>
+
+            <Typography variant="body2" color="text.secondary">
+              {trigger.buildingName} · {trigger.floorplanName}
+            </Typography>
+
+            <Typography variant="caption" color="text.secondary">
+              {new Date(trigger.triggerTime).toLocaleString()}
+            </Typography>
+          </Box>
+
+          {/* RIGHT SIDE */}
+          <Box display="flex" flexDirection="column" alignItems="flex-end" gap={0.75}>
+            {/* Alarm Type */}
+            <Chip
+              label={trigger.alarm?.toUpperCase() || 'ALARM'}
+              // color="#fff"
+              size="small"
               sx={{
-                color: theme.palette.error.main,
-                fontWeight: 900,
-                fontSize: '1.1rem',
-                lineHeight: 1,
+                color: '#fff',
+                fontWeight: 600,
+                backgroundColor: trigger.alarmColor || '#ff9800',
               }}
-            >
-              !
-            </Box>
-          )}
-          {displayName}
-        </Typography>
+            />
 
-        <Typography variant="body2" color="text.secondary">
-          {trigger.buildingName} · {trigger.floorplanName}
-        </Typography>
-
-        <Typography variant="caption" color="text.secondary">
-          {new Date(trigger.triggerTime).toLocaleString()}
-        </Typography>
+            {/* Priority */}
+            {/* <Box
+        sx={{
+          px: 1.2,
+          py: 0.25,
+          borderRadius: 10,
+          fontSize: '0.7rem',
+          fontWeight: 700,
+          color: '#fff',
+          backgroundColor:
+            PRIORITY_COLOR[trigger.priority?.toLowerCase() || 'medium'] ||
+            PRIORITY_COLOR.medium,
+        }}
+      >
+        {(trigger.priority || 'medium').toUpperCase()}
+      </Box> */}
+          </Box>
+        </Box>
       </Paper>
     </motion.div>
   );

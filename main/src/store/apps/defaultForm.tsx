@@ -473,7 +473,7 @@ export const defaultTrackingTransFilter: TrackingTransFilter = {
 export const defaultTrxVisitorFilter: TrxVisitorFilter = {
   Draw: 1,
   Start: 0,
-  Length: 0,
+  Length: 999,
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
   SearchValue: '',
@@ -618,7 +618,7 @@ export const defaultCardGroupFilter: CardGroupFilter = {
 export const defaultAlarmSettingFilter: AlarmSettingFilter = {
   Draw: 1,
   Start: 0,
-  Length: 0,
+  Length: 999,
   SortColumn: 'AlarmCategory',
   SortDir: 'asc',
   SearchValue: '',

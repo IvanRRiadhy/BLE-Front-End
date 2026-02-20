@@ -14,6 +14,10 @@ import {
   darken,
   Chip,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 import { IconBellRinging } from '@tabler/icons-react';
@@ -34,9 +38,11 @@ import AlarmMenuItem from './AlarmMenuItem';
 import { DeleteSweep, VisibilityOutlined } from '@mui/icons-material';
 import { defaultAlarmTriggerFilter } from 'src/store/apps/defaultForm';
 import AlarmTriggerMenuItem from '../../shared/AlarmTriggerMenuItem';
+import toast from 'react-hot-toast';
 
 type BubbleData = {
   id: string;
+  triggerId: string;
   title: string;
   subtitle: string;
   status: string;
@@ -220,6 +226,7 @@ const Notifications = () => {
       // Extract data directly from the MQTT object
       const bd: BubbleData = {
         id: uniqueId(),
+        triggerId: alarmData.triggerId,
         title: alarmData.visitorName || alarmData.MemberName || alarmData.cardName || 'Unknown',
         subtitle: `${alarmData.cardName ?? ''} · ${alarmData.maskedAreaName ?? 'Unknown'} · ${
           alarmData.floorplanName ?? 'Unknown'
@@ -273,6 +280,9 @@ const Notifications = () => {
     exit: { opacity: 0, y: -15, scale: 0.96, transition: { duration: 0.25 } },
   };
 
+  const findAlarmTrigger = (id: string) =>
+    alarmTriggerData.find((x) => x.id.toUpperCase() === id.toUpperCase());
+
   const isVisuallySeen = (alarm: AlarmLogItem) => alarm.seen || softSeenIds.has(alarm.id);
   const isTriggerVisuallySeen = (alarm: AlarmTriggerType) =>
     alarm.action !== 'Idle' || softSeenIds.has(alarm.id);
@@ -306,6 +316,9 @@ const Notifications = () => {
       hoverTimers.current = {};
     };
   }, []);
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedTrigger, setSelectedTrigger] = useState<AlarmTriggerType | null>(null);
 
   return (
     <Box sx={{ position: 'relative' }}>
@@ -380,6 +393,13 @@ const Notifications = () => {
                     delete hideTimers.current[b.id];
                   }
                   setBubbles((prev) => prev.filter((x) => x.id !== b.id));
+                  const trigger = findAlarmTrigger(b.triggerId!);
+                  if (trigger) {
+                    setSelectedTrigger(trigger);
+                    setConfirmOpen(true);
+                  } else {
+                    toast.error('Alarm trigger not found');
+                  }
                 }}
                 elevation={6}
                 sx={{
@@ -577,12 +597,9 @@ const Notifications = () => {
                         setSoftSeenIds((prev) => new Set(prev).add(t.id));
                         dispatch(MarkAlarmSeen(t.id));
                       }}
-                      // onClick={(t) => {
-                      //   console.log('UNSEEN trigger clicked:', t, isTriggerVisuallySeen(t));
-                      // }}
                       onClick={(t) => {
-                        redirectToAlarmList(t);
-                        closeMenu();
+                        setSelectedTrigger(t);
+                        setConfirmOpen(true);
                       }}
                     />
                   ))}
@@ -650,26 +667,6 @@ const Notifications = () => {
                 </Box>
 
                 <Stack spacing={1} mb={2}>
-                  {/* {unseenAlarms.map((alarm) => (
-                    <AlarmMenuItem
-                      key={alarm.id}
-                      alarm={alarm}
-                      isVisuallySeen={isVisuallySeen(alarm)}
-                      unseenBg={unseenBg}
-                      seenBg={seenBg}
-                      hoverBg={hoverBg}
-                      unseenBorder={unseenBorder}
-                      seenBorder={seenBorder}
-                      hoverBorder={hoverBorder}
-                      onMarkSeen={(a) => {
-                        setSoftSeenIds((prev) => new Set(prev).add(a.id));
-                        dispatch(MarkAlarmSeen(a.id));
-                      }}
-                      onClick={(a) => {
-                        console.log('UNSEEN alarm clicked:', a);
-                      }}
-                    />
-                  ))} */}
                   {categorizedTriggers.acknowledged.map((seen) => (
                     <AlarmTriggerMenuItem
                       key={seen.id}
@@ -682,16 +679,9 @@ const Notifications = () => {
                       unseenBorder={unseenBorder}
                       seenBorder={seenBorder}
                       hoverBorder={hoverBorder}
-                      // onMarkSeen={(t) => {
-                      //   setSoftSeenIds((prev) => new Set(prev).add(t.id));
-                      //   dispatch(MarkAlarmSeen(t.id));
-                      // }}
-                      // onClick={(t) => {
-                      //   console.log('SEEN alarm clicked:', t, isTriggerVisuallySeen(t));
-                      // }}
                       onClick={(t) => {
-                        redirectToAlarmList(t);
-                        closeMenu();
+                        setSelectedTrigger(t);
+                        setConfirmOpen(true);
                       }}
                     />
                   ))}
@@ -764,6 +754,35 @@ const Notifications = () => {
           </Box>
         </Scrollbar>
       </Menu>
+      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle fontWeight={700}>Open Alarm Detail?</DialogTitle>
+
+        <DialogContent>
+          <Typography variant="body2">
+            You are about to navigate to the Alarm Detail page. Do you want to continue?
+          </Typography>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)} color="inherit">
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              if (selectedTrigger) {
+                redirectToAlarmList(selectedTrigger);
+              }
+              setConfirmOpen(false);
+              closeMenu();
+            }}
+          >
+            Go to Detail
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

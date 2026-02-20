@@ -12,7 +12,8 @@ import { PatrolDetailPayload } from 'src/store/apps/crud/patrolRoute';
 
 interface PatrolListItemProps {
   patrol: PatrolAssignType;
-  openDetail: (payload: PatrolDetailPayload) => void;
+  // openDetail: (payload: PatrolDetailPayload) => void;
+  openDetail: (patrol: PatrolAssignType) => void;
 }
 
 type DayTimeMap = Record<string, { startTime: string; endTime: string }[]>;
@@ -122,12 +123,12 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
   const startAreaName = !isLoading ? (routeData?.startAreaName ?? null) : null;
 
   /* ===== payload for detail dialog ===== */
-  const payload: PatrolDetailPayload = {
-    patrolAssignment: patrol,
-    route: routeData,
-    timeGroups,
-    nearestPatrol,
-  };
+  // const payload: PatrolDetailPayload = {
+  //   patrolAssignment: patrol,
+  //   route: routeData,
+  //   timeGroups,
+  //   nearestPatrol,
+  // };
 
   /* ===================== render ===================== */
 
@@ -141,9 +142,12 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
         gap: 1,
         cursor: 'pointer',
       }}
+      // onClick={() => {
+      //   openDetail(payload);
+      //   console.log('payload', payload);
+      // }}
       onClick={() => {
-        openDetail(payload);
-        console.log('payload', payload);
+        openDetail(patrol);
       }}
     >
       {/* LEFT */}

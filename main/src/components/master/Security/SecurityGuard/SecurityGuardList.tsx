@@ -38,7 +38,7 @@ const SecurityGuardList = () => {
   // 🔹 React Query fetching
   const { data, isLoading, isFetching, isFetched } = useSecurityList({
     ...memberFilter,
-    Length: 0, // show all for side list
+    Length: 999, // show all for side list
   });
   
   const deleteMutation = useDeleteSecurity();
@@ -57,7 +57,7 @@ const active = members?.find((member: memberType) => member.id === selectedMembe
   // ---------------------------------------------------------------------------
   useEffect(() => {
     // Reset filter on mount (only once)
-    dispatch(UpdateFilter({ ...defaultMemberFilter, Length: 0 }));
+    dispatch(UpdateFilter({ ...defaultMemberFilter, Length: 999 }));
   }, [dispatch]);
 
   // ---------------------------------------------------------------------------
@@ -74,7 +74,7 @@ const active = members?.find((member: memberType) => member.id === selectedMembe
       setManySelectSecurityGuards([]);
       setIsManySelect(false);
     } catch (err) {
-      console.error('Error deleting members:', err);
+      console.error('Error deleting security guards:', err);
     }
     handleCloseDeleteDialog();
   };
@@ -206,7 +206,7 @@ const active = members?.find((member: memberType) => member.id === selectedMembe
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete these members?
+            Are you sure you want to delete these security guards?
           </DialogContentText>
         </DialogContent>
         <DialogActions>

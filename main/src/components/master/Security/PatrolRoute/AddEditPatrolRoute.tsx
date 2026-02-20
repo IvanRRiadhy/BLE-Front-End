@@ -69,7 +69,7 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
   const { data: patrolAreaData = [] } = useAllPatrolAreas();
   useTimeGroupList({
     ...defaultTimeGroupFilter,
-    Length: 0,
+    Length: 999,
     filters: { ScheduleType: 'Patrol' },
   });
 

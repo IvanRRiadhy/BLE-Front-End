@@ -53,9 +53,8 @@ export const TimeGridSelector = ({
   const [selectionMode, setSelectionMode] = useState<'add' | 'remove'>('add');
 
   const addTG = useAddTimeGroup();
-const editTG = useEditTimeGroup();
-const addBlock = useAddTimeBlock();
-
+  const editTG = useEditTimeGroup();
+  const addBlock = useAddTimeBlock();
 
   // 24 slots
   const timeSlots = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0') + ':00');
@@ -74,7 +73,8 @@ const addBlock = useAddTimeBlock();
     existingBlocks: TimeBlockType[],
   ): TimeBlockType => {
     const startTime = `${timeSlots[startHour]}:00`;
-    const endTime = `${timeSlots[endHour] || '24:00'}:00`;
+    const endHourAdjusted = endHour - 1; // because endHour is exclusive
+    const endTime = `${endHourAdjusted.toString().padStart(2, '0')}:59:59.999`;
 
     const match = existingBlocks.find(
       (b) =>
@@ -140,7 +140,11 @@ const addBlock = useAddTimeBlock();
         if (!block.startTime || !block.endTime) return;
         const dayIndex = daysOfWeek.indexOf(block.dayOfWeek);
         const startHour = parseInt(block.startTime.split(':')[0], 10);
-        const endHour = parseInt(block.endTime.split(':')[0], 10);
+        const endHourRaw = parseInt(block.endTime.split(':')[0], 10);
+
+        // because endTime is HH:59:59.xxx, we must include that hour
+        const endHour = endHourRaw + 1;
+
         for (let h = startHour; h < endHour; h++) newSelected[`${dayIndex}-${h}`] = true;
       });
       setSelectedCells(newSelected);
@@ -224,68 +228,67 @@ const addBlock = useAddTimeBlock();
 
   // ---------------- Save & Cancel ----------------
 
-const handleSave = async () => {
-  if (!selectedTimeGroup) return;
+  const handleSave = async () => {
+    if (!selectedTimeGroup) return;
 
-  const normalizedBlocks = selectedTimeGroup.timeBlocks.map((b: TimeBlockType) => ({
-    ...b,
-    dayOfWeek: b.dayOfWeek.toLowerCase(),
-    id: b.id.startsWith("block-") ? "" : b.id, // remove temp id
-  }));
+    const normalizedBlocks = selectedTimeGroup.timeBlocks.map((b: TimeBlockType) => ({
+      ...b,
+      dayOfWeek: b.dayOfWeek.toLowerCase(),
+      id: b.id.startsWith('block-') ? '' : b.id, // remove temp id
+    }));
 
-  try {
-    if (isNewTimeGroup) {
-      // --------------------------------------
-      // CREATE NEW TIME GROUP (same as old saveNewTimeGroup)
-      // --------------------------------------
-      await addTG.mutateAsync({
-        ...selectedTimeGroup,
-        timeBlocks: normalizedBlocks,
-      });
+    try {
+      if (isNewTimeGroup) {
+        // --------------------------------------
+        // CREATE NEW TIME GROUP (same as old saveNewTimeGroup)
+        // --------------------------------------
+        await addTG.mutateAsync({
+          ...selectedTimeGroup,
+          timeBlocks: normalizedBlocks,
+        });
 
-      toast.success("Time group created successfully");
-    } else {
-      // --------------------------------------
-      // EDIT EXISTING TIME GROUP
-      // --------------------------------------
+        toast.success('Time group created successfully');
+      } else {
+        // --------------------------------------
+        // EDIT EXISTING TIME GROUP
+        // --------------------------------------
 
-      // 1. Identify brand new blocks that must be created separately
-      const newBlocks = selectedTimeGroup.timeBlocks.filter((b: TimeBlockType) =>
-        b.id.startsWith("block-")
-      );
+        // 1. Identify brand new blocks that must be created separately
+        const newBlocks = selectedTimeGroup.timeBlocks.filter((b: TimeBlockType) =>
+          b.id.startsWith('block-'),
+        );
 
-      // 2. Prepare payload for editing main group
-      const editPayload = {
-        id: selectedTimeGroup.id,
-        name: selectedTimeGroup.name,
-        description: selectedTimeGroup.description,
-        cardAccessIds: selectedTimeGroup.cardAccessIds,
-        timeBlocks: normalizedBlocks, // without temp ids
-      };
-
-      // First update the group (same as old editTimeGroup)
-      await editTG.mutateAsync(editPayload);
-
-      // 3. Add new time blocks (same as old addTimeBlock)
-      for (const b of newBlocks) {
-        const addPayload = {
-          dayOfWeek: b.dayOfWeek.toLowerCase(),
-          startTime: b.startTime,
-          endTime: b.endTime,
-          TimeGroupId: selectedTimeGroup.id,
+        // 2. Prepare payload for editing main group
+        const editPayload = {
+          id: selectedTimeGroup.id,
+          name: selectedTimeGroup.name,
+          description: selectedTimeGroup.description,
+          cardAccessIds: selectedTimeGroup.cardAccessIds,
+          timeBlocks: normalizedBlocks, // without temp ids
         };
 
-        await addBlock.mutateAsync(addPayload);
+        // First update the group (same as old editTimeGroup)
+        await editTG.mutateAsync(editPayload);
+
+        // 3. Add new time blocks (same as old addTimeBlock)
+        for (const b of newBlocks) {
+          const addPayload = {
+            dayOfWeek: b.dayOfWeek.toLowerCase(),
+            startTime: b.startTime,
+            endTime: b.endTime,
+            TimeGroupId: selectedTimeGroup.id,
+          };
+
+          await addBlock.mutateAsync(addPayload);
+        }
+
+        toast.success('Time group updated successfully');
       }
-
-      toast.success("Time group updated successfully");
+    } catch (err) {
+      console.error('Failed to save:', err);
+      toast.error('Failed to save time group');
     }
-  } catch (err) {
-    console.error("Failed to save:", err);
-    toast.error("Failed to save time group");
-  }
-};
-
+  };
 
   const handleCancel = () => {
     dispatch(CancelNewTimeGroup());

@@ -98,6 +98,9 @@ export function useEditSecurity() {
     mutationFn: async (formData: FormData) => {
       const id = formData.get('id');
       formData.delete('id');
+      formData.delete('organization');
+      formData.delete('department');
+      formData.delete('district');
       const res = await axiosServices.put(`${API_URL}${id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });

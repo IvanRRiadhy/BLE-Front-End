@@ -16,6 +16,9 @@ import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organi
 import { fetchDistricts, DistrictType } from 'src/store/apps/crud/district';
 import { UpdateFilter } from 'src/store/apps/crud/member';
 import { defaultMemberFilter } from 'src/store/apps/defaultForm';
+import AddEditSecurityGuard from './AddEditSecurityGuard';
+
+type ArrayFilterKey = 'OrganizationId' | 'DepartmentId' | 'DistrictId';
 
 interface DataType {
   id: string | number;
@@ -36,7 +39,9 @@ const SecurityGuardFilter = () => {
 
   const departmentData = useSelector((state: RootState) => state.departmentReducer.departmentAll);
   const districtData = useSelector((state: RootState) => state.districtReducer.districtAll);
-  const organizationData = useSelector((state: RootState) => state.organizationReducer.organizationAll);
+  const organizationData = useSelector(
+    (state: RootState) => state.organizationReducer.organizationAll,
+  );
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter.filters);
 
   // -------------------------------------------------------------------------
@@ -97,26 +102,29 @@ const SecurityGuardFilter = () => {
   const handleFilter = (filter: string, category?: string) => {
     const currentFilters = { ...memberFilter };
 
-    const toggleSelection = (key: keyof typeof currentFilters) => {
-      const selected = currentFilters[key];
-      if (!selected) return;
+    const toggleSelection = (key: ArrayFilterKey, filter: string) => {
+      const selected = currentFilters[key] ?? [];
+
       const newSelected = selected.includes(filter)
         ? selected.filter((id: string) => id !== filter)
         : [...selected, filter];
 
-      const updatedFilters = { ...currentFilters, [key]: newSelected };
-      dispatch(UpdateFilter({ filters: updatedFilters }));
+      dispatch(
+        UpdateFilter({
+          filters: { ...currentFilters, [key]: newSelected },
+        }),
+      );
     };
 
     switch (category) {
       case 'department':
-        toggleSelection('DepartmentId');
+        toggleSelection('DepartmentId', filter);
         break;
       case 'district':
-        toggleSelection('DistrictId');
+        toggleSelection('DistrictId', filter);
         break;
       case 'organization':
-        toggleSelection('OrganizationId');
+        toggleSelection('OrganizationId', filter);
         break;
       case 'all':
       default:
@@ -143,7 +151,7 @@ const SecurityGuardFilter = () => {
   return (
     <>
       <Box p={2}>
-        <AddEditMember type="add" />
+        <AddEditSecurityGuard type="add" />
       </Box>
 
       <List>

@@ -24,6 +24,7 @@ export type GetFilter = {
         OrganizationId?: string[];
         DepartmentId?: string[];
         DistrictId?: string[];
+        isHead?: boolean;
     }
 }
 

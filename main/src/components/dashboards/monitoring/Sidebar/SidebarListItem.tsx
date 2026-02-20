@@ -30,10 +30,11 @@ type ListType = {
 
 type Props = {
   item?: ListType;
+  isNew?: boolean;
   onItemClick: (event: React.MouseEvent<HTMLElement>) => void;
 };
 
-const SidebarListItem = ({ item, onItemClick }: Props) => {
+const SidebarListItem = ({ item, isNew, onItemClick }: Props) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const customizer = useSelector((state) => state.customizer);

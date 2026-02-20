@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router';
 import {
   Box,
   Dialog,
@@ -17,28 +18,45 @@ import { useEffect, useState } from 'react';
 import PatrolScheduleCalendarDialog from './PatrolScheduleCalendarDialog';
 import PatrolRouteDetailDialog from './PatrolRouteDetailDialog';
 import { PatrolDetailPayload } from 'src/store/apps/crud/patrolRoute';
+import { PatrolAssignType } from 'src/store/apps/crud/patrolRoute';
+import { usePatrolRouteId } from 'src/hooks/usePatrolRoute';
+import { useTimeGroupList } from 'src/hooks/useTimeGroup';
+import { defaultTimeGroupFilter } from 'src/store/apps/defaultForm';
 
+// interface PatrolDetailDialogProps {
+//   open: boolean;
+//   data: PatrolDetailPayload;
+//   onClose: () => void;
+// }
 interface PatrolDetailDialogProps {
   open: boolean;
-  data: PatrolDetailPayload;
+  patrol: PatrolAssignType;
   onClose: () => void;
 }
 
-const PatrolDetailDialog = ({ open, data, onClose }: PatrolDetailDialogProps) => {
+const PatrolDetailDialog = ({ open, patrol, onClose }: PatrolDetailDialogProps) => {
   const theme = useTheme();
-
+  const navigate = useNavigate();
   const [openSchedule, setOpenSchedule] = useState(false);
   const [openRoute, setOpenRoute] = useState(false);
 
-  const { patrolAssignment, route } = data;
+  const { data: route } = usePatrolRouteId(patrol.patrolRouteId);
+
+  const { data: timeGroupRes } = useTimeGroupList({
+    ...defaultTimeGroupFilter,
+    filters: { id: [patrol.timeGroupId] },
+  });
+
+  const timeGroups = timeGroupRes?.data ?? [];
+  const patrolAssignment = patrol;
+
+  // const { patrolAssignment, route } = data;
 
   /* ===== derived values ===== */
 
   const areaCount = route?.patrolAreas?.length ? Math.max(route.patrolAreas.length - 2, 0) : 0;
 
   const formatDate = (date?: string) => (date ? new Date(date).toLocaleDateString('en-GB') : '-');
-
-
 
   /* ===================== render ===================== */
 
@@ -136,9 +154,7 @@ const PatrolDetailDialog = ({ open, data, onClose }: PatrolDetailDialogProps) =>
                   </Typography>
                 </Box>
 
-                <Typography fontSize={12} fontWeight={600} color={theme.palette.success.main}>
-                  On Patrol
-                </Typography>
+
               </Box>
             ))}
 
@@ -164,8 +180,20 @@ const PatrolDetailDialog = ({ open, data, onClose }: PatrolDetailDialogProps) =>
             Close
           </Button>
 
-          <Button variant="contained" color="primary" disabled>
-            Start Patrol
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              if (!patrolAssignment?.id) return;
+
+              navigate(
+                `/security-view/patrol-assignment/detail?id=${patrolAssignment.id}`,
+              );
+
+              onClose(); // optional: close dialog after navigate
+            }}
+          >
+            Patrol Details
           </Button>
         </DialogActions>
       </Dialog>
@@ -176,7 +204,7 @@ const PatrolDetailDialog = ({ open, data, onClose }: PatrolDetailDialogProps) =>
         onClose={() => setOpenSchedule(false)}
         startDate={patrolAssignment.startDate}
         endDate={patrolAssignment.endDate}
-        timeGroups={data.timeGroups}
+        timeGroups={timeGroups}
       />
 
       {/* ================= ROUTE DIALOG ================= */}

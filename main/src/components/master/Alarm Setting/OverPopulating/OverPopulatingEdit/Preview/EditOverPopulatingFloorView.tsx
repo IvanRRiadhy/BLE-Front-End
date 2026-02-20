@@ -101,7 +101,7 @@ const EditOverPopulatingFloorView = () => {
     dispatch(
       fetchOverPopulatingAlarms({
         ...defaultOverPopulatingFilter,
-        Length: 0,
+        Length: 999,
         filters: { FloorplanId: activeFloorPlan?.id },
       }),
     );
