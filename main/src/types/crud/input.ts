@@ -265,6 +265,14 @@ export const visitorStatusEnumMap: Record<string, number> = {
 
 export type EventType = keyof typeof EVENT_TYPE;
 
+export const ThreatLevel: inputDataType[] = [
+  {label: "Please select Threat Level", value: '', disabled: true},
+  {label: "Low", value: 'Low'},
+  {label: "Medium", value: 'Medium'},
+  {label: "High", value: 'High'},
+  {label: "CRITICAL", value: 'Critical'},
+]
+
 export const ApprovalType: inputDataType[] = [
   {label: "Auto", value: "ByThreatLevel"},
   {label: "Without Approval", value: "WithoutApproval"},

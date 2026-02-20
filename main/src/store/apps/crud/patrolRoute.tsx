@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { AppDispatch, dispatch } from 'src/store/Store';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { defaultPatrolRouteFilter } from '../defaultForm';
+import { defaultPatrolAssignmentFilter, defaultPatrolRouteFilter } from '../defaultForm';
 import { memberType } from './member';
 import { TimeGroupType } from './timeGroup';
 
@@ -85,6 +85,8 @@ interface Statetype {
   patrolRouteSearch: string;
   selectedPatrolRoute?: PatrolRouteType | null;
   selectedPatrolRouteId?: string;
+  selectedPatrolAssign?: PatrolAssignType | null;
+  selectedPatrolAssignId?: string;
   patrolRouteTotalCount: number;
   patrolRouteFilteredCount: number;
   patrolRouteFilter: GetFilter;
@@ -107,10 +109,12 @@ const initialState: Statetype = {
   patrolRouteSearch: '',
   selectedPatrolRoute: null,
   selectedPatrolRouteId: '',
+  selectedPatrolAssign: null,
+  selectedPatrolAssignId: '',
   patrolRouteTotalCount: 0,
   patrolRouteFilteredCount: 0,
   patrolRouteFilter: defaultPatrolRouteFilter,
-  patrolAssignFilter: defaultPatrolRouteFilter,
+  patrolAssignFilter: defaultPatrolAssignmentFilter,
   lastFilter: defaultPatrolRouteFilter,
   isLoading: false,
   hasLoaded: false,
@@ -130,13 +134,26 @@ export const PatrolRouteSlice = createSlice({
       state.selectedPatrolRoute = action.payload;
       state.selectedPatrolRouteId = action.payload.id;
     },
+    SelectPatrolAssign: (state, action: PayloadAction<PatrolAssignType>) => {
+      state.selectedPatrolAssign = action.payload;
+      state.selectedPatrolAssignId = action.payload.id;
+    },
     UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
       state.patrolRouteFilter = { ...state.patrolRouteFilter, ...action.payload };
+    },
+    UpdateAssignmentFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
+      state.patrolAssignFilter = { ...state.patrolAssignFilter, ...action.payload };
     },
   },
 });
 
-export const { GetPatrolRoute, GetAllPatrolRoute, SelectPatrolRoute, UpdateFilter } =
-  PatrolRouteSlice.actions;
+export const {
+  GetPatrolRoute,
+  GetAllPatrolRoute,
+  SelectPatrolRoute,
+  UpdateFilter,
+  SelectPatrolAssign,
+  UpdateAssignmentFilter,
+} = PatrolRouteSlice.actions;
 
 export default PatrolRouteSlice.reducer;

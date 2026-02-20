@@ -9,12 +9,17 @@ import {
   Button,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  IconButton,
+  DialogContent,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CloseIcon from '@mui/icons-material/Close';
 import { useEffect, useState } from 'react';
 import { PatrolDetailPayload, SecurityType } from 'src/store/apps/crud/patrolRoute';
-import PatrolRouteDetailDialog from '../SecurityViewPatrol/PatrolRouteDetailDialog';
-import PatrolScheduleCalendarDialog from '../SecurityViewPatrol/PatrolScheduleCalendarDialog';
+import PatrolRouteDetailDialog from 'src/components/security-view/PatrolAssignment/SecurityViewPatrol/PatrolRouteDetailDialog';
+import PatrolScheduleCalendarDialog from 'src/components/security-view/PatrolAssignment/SecurityViewPatrol/PatrolScheduleCalendarDialog';
 import { useNavigate } from 'react-router';
 import { useStartPatrol, useStopPatrol, usePatrolSessionList } from 'src/hooks/usePatrolSession';
 import { PatrolSessionType } from 'src/store/apps/crud/patrolSession';
@@ -25,62 +30,54 @@ import {
   defaultTimeGroupFilter,
 } from 'src/store/apps/defaultForm';
 import { useAllPatrolCase, usePatrolCaseList } from 'src/hooks/usePatrolCase';
-import PatrolCaseDialog from './PatrolCaseDialog';
-import { CaseUploadType } from 'src/store/apps/crud/patrolCase';
-import PatrolCaseListItem from './PatrolCaseListItem';
+import PatrolCaseDialog from 'src/components/security-view/PatrolAssignment/PatrolAssignmentList/PatrolCaseDialog';
+import PatrolCaseOverview from 'src/components/security-view/PatrolCaseList/PatrolCaseOverview';
+import { CaseUploadType, PatrolCaseType } from 'src/store/apps/crud/patrolCase';
+import PatrolCaseListItem from 'src/components/security-view/PatrolAssignment/PatrolAssignmentList/PatrolCaseListItem';
 import toast from 'react-hot-toast';
 import { use } from 'i18next';
 import { RootState, useSelector } from 'src/store/Store';
 import { useSearchParams } from 'react-router';
 import { usePatrolAssignmentId, usePatrolRouteId } from 'src/hooks/usePatrolRoute';
 import { useTimeGroupList } from 'src/hooks/useTimeGroup';
+import { getCaseStatusColor } from 'src/utils/caseStatus';
 
-
-interface PatrolDetailPageProps {
-}
-
-const PatrolDetailPage = () => {
+const PatrolReportContent = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const customizer = useSelector((state: RootState) => state.customizer);
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [searchParams] = useSearchParams();
-const id = searchParams.get('id') ?? undefined;
+  const id = searchParams.get('id') ?? undefined;
 
-const { data: patrolRes } = usePatrolAssignmentId(id ?? '');
+  const { data: patrolRes } = usePatrolAssignmentId(id ?? '');
 
-const patrol = patrolRes?.collection?.data;
-const { data: route } = usePatrolRouteId(patrol?.patrolRouteId ?? '');
+  const patrol2 = patrolRes?.collection?.data;
+  const patrol = useSelector((state: RootState) => state.PatrolRouteReducer.selectedPatrolAssign);
 
-const { data: timeGroupRes } = useTimeGroupList({
-  ...defaultTimeGroupFilter,
-  filters: { id: patrol?.timeGroupId ? [patrol.timeGroupId] : [] },
-});
+  const { data: route } = usePatrolRouteId(patrol?.patrolRouteId ?? '');
 
-const timeGroups = timeGroupRes?.data ?? [];
+  const { data: timeGroupRes } = useTimeGroupList({
+    ...defaultTimeGroupFilter,
+    filters: { id: patrol?.timeGroupId ? [patrol.timeGroupId] : [] },
+  });
+
+  const timeGroups = timeGroupRes?.data ?? [];
 
   const [openSchedule, setOpenSchedule] = useState(false);
   const [openRoute, setOpenRoute] = useState(false);
-  
 
-  const [patrolSession, setPatrolSession] = useState<PatrolSessionType | null>(null);
   const [openCaseDialog, setOpenCaseDialog] = useState(false);
   const [caseDialogType, setCaseDialogType] = useState<'add' | 'edit'>('add');
-  const [selectedCase, setSelectedCase] = useState<CaseUploadType | undefined>(undefined);
+  const [selectedCase, setSelectedCase] = useState<PatrolCaseType | undefined>(undefined);
   const [editId, setEditId] = useState<string | undefined>(undefined);
-  const [patrolSessionId, setPatrolSessionId] = useState<string | undefined>(undefined);
 
   const formatDate = (date?: string) => (date ? new Date(date).toLocaleDateString('en-GB') : '-');
 
-  const { data: patrolSessionData, isLoading: isSessionLoading } = usePatrolSessionList({
-    ...defaultPatrolSessionFilter,
-    filters: { PatrolAssignmentId: id },
-  });
-
   const { data: caseData, isLoading: isCaseLoading } = usePatrolCaseList({
     ...defaultPatrolCaseFilter,
-    filters: { PatrolAssignmentId: id },
+    filters: { PatrolAssignmentId: patrol?.id },
   });
   const patrolCaseData = caseData?.data || [];
 
@@ -94,158 +91,6 @@ const timeGroups = timeGroupRes?.data ?? [];
   );
   const areaCount = route?.patrolAreas?.length ? Math.max(route.patrolAreas.length - 2, 0) : 0;
 
-  /* ===== Timer Function ===== */
-  const [startedAt, setStartedAt] = useState<Date | null>(null);
-  const [endedAt, setEndedAt] = useState<Date | null>(null);
-  const [now, setNow] = useState<Date>(new Date());
-  const patrolNotStarted = !startedAt;
-  const patrolRunning = !!startedAt && !endedAt;
-  const patrolEnded = !!startedAt && !!endedAt;
-  const canAddEditCase = patrolRunning;
-
-  useEffect(() => {
-    if (!startedAt || endedAt) return;
-
-    const timer = setInterval(() => {
-      setNow(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [startedAt, endedAt]);
-  useEffect(() => {
-    if (!patrolSessionData?.data?.length) {
-      // No session at all
-      setPatrolSession(null);
-      setStartedAt(null);
-      setEndedAt(null);
-      return;
-    }
-
-    const latestSession = patrolSessionData.data[0];
-
-    setPatrolSession(latestSession);
-
-    // Parse UTC properly (Z already exists ✔)
-    const started = latestSession.startedAt ? new Date(latestSession.startedAt) : null;
-
-    const ended = latestSession.endedAt ? new Date(latestSession.endedAt) : null;
-    if (started && !ended) {
-      setPatrolSessionId(latestSession.id);
-    }
-    setStartedAt(started);
-    setEndedAt(ended);
-  }, [patrolSessionData]);
-
-  const durationMinutes = (() => {
-    if (!startedAt) return 0;
-
-    const end = endedAt ?? now;
-    const diffMs = end.getTime() - startedAt.getTime();
-    const diffMinutes = Math.floor(diffMs / 60000);
-
-    return Math.max(diffMinutes, 0);
-  })();
-
-  const StartPatrolMutation = useStartPatrol();
-  const StopPatrolMutation = useStopPatrol();
-
-  const handleStart = async () => {
-    if (!patrol) return;
-    // if (!data.patrolAssignment) return;
-    try {
-      const res = await StartPatrolMutation.mutateAsync(patrol.id);
-      console.log('Start Patrol res', res);
-      if (!res?.success || !res?.collection?.data) return;
-
-      const session = res.collection.data;
-
-      setPatrolSession(session);
-
-      // backend is source of truth
-      setStartedAt(new Date(session.startedAt));
-      setEndedAt(null);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleDone = async () => {
-    if (!patrol) return;
-    if (!patrolSession?.id) return;
-
-    try {
-      const res = await StopPatrolMutation.mutateAsync(patrolSession.id);
-      console.log('Stop Patrol res', res);
-      if (!res?.success) return;
-
-      const ended = res.collection?.data?.endedAt
-        ? new Date(res.collection.data.endedAt)
-        : new Date();
-
-      setEndedAt(ended);
-
-      setPatrolSession((prev) => (prev ? { ...prev, endedAt: ended.toISOString() } : prev));
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const formatTime24 = (date?: Date | null) =>
-    date
-      ? date.toLocaleTimeString('en-GB', {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-        })
-      : '-';
-
-  const formatStopwatch = (ms: number) => {
-    const totalSeconds = Math.floor(ms / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    const pad = (n: number) => String(n).padStart(2, '0');
-
-    if (hours > 0) {
-      return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-    }
-
-    return `${pad(minutes)}:${pad(seconds)}`;
-  };
-
-  const formatDurationFinal = (ms: number) => {
-    const totalMinutes = Math.floor(ms / 60000);
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-
-    if (hours > 0) {
-      return `${hours} h${minutes > 0 ? ` ${minutes} min` : ''}`;
-    }
-
-    return `${totalMinutes} min`;
-  };
-
-  const durationMs = startedAt ? (endedAt ?? now).getTime() - startedAt.getTime() : 0;
-
-  const handleAddCase = () => {
-    console.log('handleAddCase', patrolSessionId);
-    if (patrolNotStarted) {
-      toast.error('Cases can only be added after the patrol has started.');
-      return;
-    }
-
-    if (patrolEnded) {
-      toast.error('The patrol has ended. New cases can no longer be added.');
-      return;
-    }
-    if (patrolSessionId) {
-      setCaseDialogType('add');
-      setSelectedCase({ ...defaultPatrolCaseUploadForm, patrolSessionId: patrolSessionId });
-      setOpenCaseDialog(true);
-    }
-  };
-
   const mapCaseToForm = (data: any): CaseUploadType => ({
     title: data.title ?? '',
     description: data.description ?? '',
@@ -258,25 +103,25 @@ const timeGroups = timeGroupRes?.data ?? [];
     })),
   });
 
-  const handleEditCase = (item: any) => {
-    setCaseDialogType('edit');
-    setEditId(item.id);
-    setSelectedCase(mapCaseToForm(item));
-    setOpenCaseDialog(true);
-  };
+  //   const handleEditCase = (item: any) => {
+  //     setCaseDialogType('edit');
+  //     setEditId(item.id);
+  //     setSelectedCase(mapCaseToForm(item));
+  //     setOpenCaseDialog(true);
+  //   };
 
   const handleCloseCaseDialog = () => {
     setOpenCaseDialog(false);
   };
 
   if (!patrol) {
-  return (
-    <Box display="flex" justifyContent="center" mt={5}>
-      <CircularProgress />
-    </Box>
-  );
-}
-console.log('patrol', patrol);
+    return (
+      <Box display="flex" justifyContent="center" mt={5}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+  console.log('patrol', patrol);
 
   return (
     <>
@@ -297,16 +142,6 @@ console.log('patrol', patrol);
                 : `calc(100vh - ${(customizer.TopbarHeight ?? 70) * 2}px)`,
             }}
           >
-            {/* Back Button */}
-            <Box mb={1}>
-              <Button
-                size="small"
-                startIcon={<ArrowBackIcon />}
-                onClick={() => navigate('/security-view/patrol-assignment')}
-              >
-                Back
-              </Button>
-            </Box>
             {/* Name */}
             <Typography fontWeight={700} fontSize={20}>
               {patrol.name}
@@ -456,77 +291,6 @@ console.log('patrol', patrol);
             <Divider sx={{ my: 2 }} />
 
             {/* ===== Patrol Status ===== */}
-            <Box
-              sx={{
-                border: 1,
-                borderColor: 'divider',
-                borderRadius: 1,
-                overflow: 'hidden',
-              }}
-            >
-              <Box display="flex">
-                {/* ===== Started Patrol ===== */}
-                <Box
-                  flex={1}
-                  p={1.5}
-                  textAlign="center"
-                  sx={{ borderRight: 1, borderColor: 'divider' }}
-                >
-                  <Typography fontSize={12} color="text.secondary">
-                    Started Patrol
-                  </Typography>
-                  <Typography fontWeight={600}>{formatTime24(startedAt)}</Typography>
-                </Box>
-
-                {/* ===== Duration ===== */}
-                <Box
-                  flex={1}
-                  p={1.5}
-                  textAlign="center"
-                  sx={{ borderRight: 1, borderColor: 'divider' }}
-                >
-                  <Typography fontSize={12} color="text.secondary">
-                    Duration
-                  </Typography>
-
-                  <Typography fontWeight={600}>
-                    {startedAt && !endedAt
-                      ? formatStopwatch(durationMs) // ⏱ running
-                      : startedAt && endedAt
-                        ? formatDurationFinal(durationMs) // ✅ finished
-                        : '-'}
-                  </Typography>
-                </Box>
-
-                {/* ===== Action ===== */}
-                <Box flex={1} p={1.5} textAlign="center">
-                  {isSessionLoading && (
-                    <Typography fontSize={12} color="text.secondary">
-                      Loading…
-                    </Typography>
-                  )}
-
-                  {!isSessionLoading && !startedAt && (
-                    <Button size="small" variant="contained" onClick={handleStart}>
-                      Start
-                    </Button>
-                  )}
-
-                  {!isSessionLoading && startedAt && !endedAt && (
-                    <Button size="small" variant="contained" color="warning" onClick={handleDone}>
-                      Done
-                    </Button>
-                  )}
-
-                  {!isSessionLoading && startedAt && endedAt && (
-                    <Stack spacing={0.5} alignItems="center">
-                      <Chip label="Done" color="success" size="small" />
-                      <Typography fontWeight={600}>{formatTime24(endedAt)}</Typography>
-                    </Stack>
-                  )}
-                </Box>
-              </Box>
-            </Box>
           </Box>
 
           {/* ================= RIGHT PANEL ================= */}
@@ -541,22 +305,6 @@ console.log('patrol', patrol);
               <Typography fontWeight={700} fontSize={18}>
                 Patrol Cases
               </Typography>
-
-              <Box
-                sx={{
-                  opacity: canAddEditCase ? 1 : 0.5,
-                  cursor: canAddEditCase ? 'pointer' : 'not-allowed',
-                }}
-              >
-                <Button
-                  size="small"
-                  variant="contained"
-                  onClick={handleAddCase}
-                  fullWidth={isMobile}
-                >
-                  Add Case
-                </Button>
-              </Box>
             </Box>
 
             {/* List */}
@@ -584,15 +332,9 @@ console.log('patrol', patrol);
                       <PatrolCaseListItem
                         data={item}
                         onClick={(c) => {
-                          if (!canAddEditCase) {
-                            patrolEnded
-                              ? toast.error('This patrol has ended. Cases can no longer be edited.')
-                              : toast.error(
-                                  'Cases can only be edited after the patrol has started.',
-                                );
-                            return;
-                          }
-                          handleEditCase(c);
+                          setSelectedCase(c);
+                          setOpenCaseDialog(true);
+                          //   handleEditCase(c);
                         }}
                       />
                     </Box>
@@ -619,16 +361,41 @@ console.log('patrol', patrol);
       {/* ================= ROUTE DIALOG ================= */}
       <PatrolRouteDetailDialog open={openRoute} route={route} onClose={() => setOpenRoute(false)} />
       {/* ================= CASE DIALOG ================= */}
-      <PatrolCaseDialog
-        open={openCaseDialog}
-        onClose={handleCloseCaseDialog}
-        id={editId}
-        type={caseDialogType}
-        initialData={selectedCase}
-        setEditId={setEditId}
-      />
+      <Dialog open={openCaseDialog} onClose={() => handleCloseCaseDialog()} fullWidth maxWidth="lg">
+        <DialogTitle display="flex" justifyContent="space-between" alignItems="center">
+          <Stack
+            direction={isMobile ? 'column' : 'row'}
+            spacing={isMobile ? 0.5 : 2}
+            alignItems={isMobile ? 'flex-start' : 'center'}
+          >
+            {/* Title */}
+            <Typography fontWeight={800} fontSize={24}>
+              Patrol Case Overview
+            </Typography>
+            {/* Status Chip */}
+            <Chip
+              size="small"
+              label={selectedCase?.caseStatus}
+              color={getCaseStatusColor(selectedCase?.caseStatus)}
+            />
+          </Stack>
+          {/* Patrol Case Overview */}
+          <IconButton onClick={() => handleCloseCaseDialog()}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent dividers>
+          {selectedCase ? (
+            <PatrolCaseOverview data={selectedCase} />
+          ) : (
+            <Typography color="text.secondary">No data selected</Typography>
+          )}
+        </DialogContent>
+      </Dialog>
+      {/* <PatrolCaseOverview data={selectedCase} /> */}
     </>
   );
 };
 
-export default PatrolDetailPage;
+export default PatrolReportContent;

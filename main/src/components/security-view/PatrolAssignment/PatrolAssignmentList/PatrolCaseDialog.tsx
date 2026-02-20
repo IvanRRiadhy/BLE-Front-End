@@ -12,7 +12,11 @@ import {
   IconButton,
   CircularProgress,
   Typography,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
 } from '@mui/material';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CloseIcon from '@mui/icons-material/Close';
 import UploadIcon from '@mui/icons-material/Upload';
 import { useEffect, useState } from 'react';
@@ -21,7 +25,8 @@ import { useUploadCDN } from 'src/hooks/usePatrolCase';
 import { defaultPatrolCaseUploadForm } from 'src/store/apps/defaultForm';
 import { CaseUploadType } from 'src/store/apps/crud/patrolCase';
 import toast from 'react-hot-toast';
-import { CaseType } from 'src/types/crud/input';
+import { CaseType, ThreatLevel } from 'src/types/crud/input';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   type?: 'add' | 'edit';
@@ -35,6 +40,7 @@ interface Props {
 // const CASE_TYPES = ['Damage', 'Incident', 'Security', 'Other'];
 
 const PatrolCaseDialog = ({ open, onClose, id, type, initialData, setEditId }: Props) => {
+  const { t } = useTranslation();
   const addMutation = useAddPatrolCase();
   const editMutation = useEditPatrolCase();
   const uploadMutation = useUploadCDN();
@@ -91,17 +97,16 @@ const PatrolCaseDialog = ({ open, onClose, id, type, initialData, setEditId }: P
       return;
     }
     console.log('form', form);
-    console.log('isEdit', isEdit, "or isAdd", type);
+    console.log('isEdit', isEdit, 'or isAdd', type);
     try {
       if (isEdit && id) {
-        console.log("edit", id, form);
+        console.log('edit', id, form);
         await editMutation.mutateAsync({
           id: id,
           patrolCase: form,
         });
 
         toast.success('Patrol case updated successfully');
-        
       } else {
         await addMutation.mutateAsync(form);
 
@@ -200,6 +205,94 @@ const PatrolCaseDialog = ({ open, onClose, id, type, initialData, setEditId }: P
                 </MenuItem>
               ))}
             </TextField>
+
+            <Box>
+              <Box display="flex" alignItems="center" gap={1} mb={1}>
+                <Typography fontWeight={600}>{t('Threat Level')}</Typography>
+
+                <Tooltip title={t('patrolCase.threatLevelDescription')} arrow>
+                  <IconButton size="small">
+                    <InfoOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+
+              <ToggleButtonGroup
+                value={form.threatLevel}
+                exclusive
+                fullWidth
+                onChange={(_, newValue) => {
+                  if (!newValue) return; // prevent unselect
+                  setIsDirty(true);
+                  setForm((prev) => ({ ...prev, threatLevel: newValue }));
+                }}
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1,
+                  '& .MuiToggleButtonGroup-grouped': {
+                    margin: 0,
+                    border: '2px solid', // allow our custom border
+                  },
+                }}
+              >
+                {ThreatLevel.map((item) => {
+                  if (item.value === '') return null;
+                  const getColor = () => {
+                    switch (item.value) {
+                      case 'Low':
+                        return '#fbc02d'; // yellow
+                      case 'Medium':
+                        return '#f57c00'; // orange
+                      case 'High':
+                        return '#ff1744'; // bright red
+                      case 'Critical':
+                        return '#b71c1c'; // dark red
+                      default:
+                        return '#ccc';
+                    }
+                  };
+
+                  const selected = form.threatLevel === item.value;
+                  const color = getColor();
+                  return (
+                    <ToggleButton
+                      key={item.value}
+                      value={item.value}
+                      disabled={item.disabled}
+                      sx={{
+                        flex: {
+                          xs: '1 1 48%', // 2 per row on mobile
+                          sm: '1 1 22%', // 4 per row on bigger screens
+                        },
+                        minWidth: 0, // prevent overflow
+                        border: `2px solid ${color}`,
+                        backgroundColor: selected ? color : 'transparent',
+                        color: selected ? '#fff' : color,
+                        fontWeight: item.value === 'Critical' ? 900 : 600,
+                        transition: 'all 0.2s ease',
+
+                        '&:hover': {
+                          backgroundColor: selected ? color : `${color}20`,
+                        },
+
+                        '&.Mui-selected': {
+                          backgroundColor: color,
+                          color: '#fff',
+                          border: `2px solid ${color}`,
+                        },
+
+                        '&.Mui-selected:hover': {
+                          backgroundColor: color,
+                        },
+                      }}
+                    >
+                      {item.label}
+                    </ToggleButton>
+                  );
+                })}
+              </ToggleButtonGroup>
+            </Box>
 
             {/* ===== Attachments ===== */}
             <Box>

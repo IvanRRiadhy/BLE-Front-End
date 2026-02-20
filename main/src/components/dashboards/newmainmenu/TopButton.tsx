@@ -1,5 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface TopButtonProps {
   icon: React.ElementType;
@@ -16,6 +17,9 @@ const TopButton: React.FC<TopButtonProps> = ({
   num,
   color,
 }) => {
+  const { t } = useTranslation();
+
+
   return (
     <Box
       sx={{
@@ -40,11 +44,11 @@ const TopButton: React.FC<TopButtonProps> = ({
         <Icon size={20} color={color} />
         <Box>
           <Typography sx={{ fontSize: 14, fontWeight: 700, color }}>
-            {label}
+            {t(label)}
           </Typography>
           {label2 && (
             <Typography sx={{ fontSize: 10, color }}>
-              {label2}
+              {t(label2)}
             </Typography>
           )}
         </Box>

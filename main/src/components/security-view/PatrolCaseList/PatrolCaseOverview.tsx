@@ -1,16 +1,11 @@
-import {
-  Box,
-  Typography,
-  Stack,
-  Paper,
-  Chip,
-  Divider,
-} from '@mui/material';
+import { Box, Typography, Stack, Paper, Chip, Divider, Button } from '@mui/material';
 import { useState } from 'react';
-import { CaseUploadType } from 'src/store/apps/crud/patrolCase';
+import toast from 'react-hot-toast';
+import { useApproveCase, useCloseCase, useRejectCase } from 'src/hooks/usePatrolCase';
+import { PatrolCaseType } from 'src/store/apps/crud/patrolCase';
 
 interface Props {
-  data: CaseUploadType;
+  data: PatrolCaseType;
 }
 
 const PatrolCaseOverview = ({ data }: Props) => {
@@ -25,17 +20,47 @@ const PatrolCaseOverview = ({ data }: Props) => {
   };
 
   const isImage = (att: any) =>
-    att?.mimeType?.startsWith('image') ||
-    /\.(png|jpg|jpeg|gif|webp)$/i.test(att?.fileUrl || '');
+    att?.mimeType?.startsWith('image') || /\.(png|jpg|jpeg|gif|webp)$/i.test(att?.fileUrl || '');
 
   const isVideo = (att: any) =>
-    att?.mimeType?.startsWith('video') ||
-    /\.(mp4|webm|ogg)$/i.test(att?.fileUrl || '');
+    att?.mimeType?.startsWith('video') || /\.(mp4|webm|ogg)$/i.test(att?.fileUrl || '');
+
+  const ApproveMutation = useApproveCase();
+  const RejectMutation = useRejectCase();
+  const CloseMutation = useCloseCase();
+
+  const handleApprove = async () => {
+    try {
+      await ApproveMutation.mutateAsync(data.id);
+      toast.success('Case approved successfully');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Failed to approve case');
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      await RejectMutation.mutateAsync(data.id);
+      toast.success('Case rejected successfully');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Failed to reject case');
+    }
+  };
+
+  const handleClose = async () => {
+    try {
+      await CloseMutation.mutateAsync(data.id);
+      toast.success('Case closed successfully');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Failed to close case');
+    }
+  };
+
+  const canApprove = localStorage.getItem('levelPriority') === 'SuperAdmin';
 
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
       <Stack direction="row" spacing={2}>
-
         {/* LEFT – CASE DETAIL */}
         <Box width="35%">
           <Typography fontWeight={600} mb={1}>
@@ -45,7 +70,7 @@ const PatrolCaseOverview = ({ data }: Props) => {
           <Divider sx={{ mb: 2 }} />
 
           <Stack spacing={2}>
-            <Box >
+            <Box>
               <Typography fontSize={16} color="text.secondary" fontWeight={700}>
                 Title
               </Typography>
@@ -53,7 +78,7 @@ const PatrolCaseOverview = ({ data }: Props) => {
             </Box>
 
             <Box>
-              <Typography fontSize={16} color="text.secondary"fontWeight={700}>
+              <Typography fontSize={16} color="text.secondary" fontWeight={700}>
                 Description
               </Typography>
               <Typography whiteSpace="pre-line" mt={1}>
@@ -62,7 +87,7 @@ const PatrolCaseOverview = ({ data }: Props) => {
             </Box>
 
             <Box>
-              <Typography fontSize={16} color="text.secondary"fontWeight={700}>
+              <Typography fontSize={16} color="text.secondary" fontWeight={700}>
                 Case Type
               </Typography>
               <Typography mt={1}>{data.caseType || '-'}</Typography>
@@ -93,9 +118,7 @@ const PatrolCaseOverview = ({ data }: Props) => {
             }}
           >
             {!activeAttachment && (
-              <Typography color="text.secondary">
-                No attachment available
-              </Typography>
+              <Typography color="text.secondary">No attachment available</Typography>
             )}
 
             {activeAttachment && isImage(activeAttachment) && (
@@ -141,6 +164,41 @@ const PatrolCaseOverview = ({ data }: Props) => {
           </Stack>
         </Box>
       </Stack>
+      {/* ACTION BUTTONS */}
+      <Box mt={3} display="flex" justifyContent="flex-end">
+        {data.caseStatus === 'Submitted' && canApprove && (
+          <Stack direction="row" spacing={2}>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleReject}
+              disabled={RejectMutation.isPending}
+            >
+              Reject
+            </Button>
+
+            <Button
+              variant="contained"
+              color="success"
+              onClick={handleApprove}
+              disabled={ApproveMutation.isPending}
+            >
+              Approve
+            </Button>
+          </Stack>
+        )}
+
+        {data.caseStatus === 'Approved' && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleClose}
+            disabled={CloseMutation.isPending}
+          >
+            Close Case
+          </Button>
+        )}
+      </Box>
     </Paper>
   );
 };

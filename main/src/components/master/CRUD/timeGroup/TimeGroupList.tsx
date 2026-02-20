@@ -71,14 +71,14 @@ const TimeGroupList = () => {
 
   return (
     <>
-      <Box
+      {/* <Box
         display="flex"
         flexDirection="row"
         justifyContent="content-between"
         alignItems="center"
         gap={1}
         sx={{ ml: 2 }}
-      ></Box>
+      ></Box> */}
       <List>
         <Box
           ref={scrollBoxRef}

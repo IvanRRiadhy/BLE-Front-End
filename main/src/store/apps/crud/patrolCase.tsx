@@ -62,6 +62,7 @@ export type CaseUploadType = {
     title: string;
     description: string;
     caseType: string;
+    threatLevel: string;
     patrolSessionId: string;
     attachments : CaseAttachmentType[] | [];
 }

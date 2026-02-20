@@ -7,6 +7,8 @@ import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import { Html } from 'react-konva-utils';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllVisitor } from 'src/hooks/useVisitor';
+import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
+import { copySync } from 'fs-extra';
 
 type BeaconRendererProps = {
   id: string;
@@ -22,7 +24,6 @@ type BeaconRendererProps = {
   setOpenTrackDetail?: (open: boolean) => void;
   onClick?: () => void;
 };
-
 
 const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   id,
@@ -47,28 +48,39 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   //   console.log('openTrackDetail', openTrackDetail);
   // }, [openTrackDetail]);
 
-  useEffect(() => {
-    dispatch(fetchMembers());
-    dispatch(fetchVisitor());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchMembers());
+  //   dispatch(fetchVisitor());
+  // }, [dispatch]);
 
-  const {data: membersData = []} = useAllMembers();
-  const {data: visitorsData = []} = useAllVisitor();
+  // const membersData = useSelector(
+  //   (state: RootState) => state.memberReducer.members,
+  // ) as memberType[];
+  // const visitorsData = useSelector(
+  //   (state: RootState) => state.visitorReducer.visitors,
+  // ) as VisitorType[];
+  const { data: membersData = [] } = useAllMembers();
+  const { data: visitorsData = [] } = useAllVisitor();
+  const { data: securityData = [] } = useAllSecuritys();
 
   const radius = 7.5;
   const triangleHeight = 8;
 
-  const person = [...membersData, ...visitorsData].find((p) => p.bleCardNumber === id);
+  const person = [...membersData, ...visitorsData, ...securityData].find(
+    (p) => p.bleCardNumber === id,
+  );
   const isVisitor = visitorsData.some((v) => v.bleCardNumber === id);
   const isMember = membersData.some((m) => m.bleCardNumber === id);
+  const isSecurity = securityData.some((s) => s.bleCardNumber === id);
   const label = person?.name || id;
   const imageUrl = person?.faceImage ? `${BASE_URL}${person.faceImage}` : '';
 
   useEffect(() => {
     if (imageUrl) {
       const img = new window.Image();
-      img.crossOrigin = 'anonymous';
+      img.crossOrigin = '';
       img.src = imageUrl;
+      console.log('Loading image for beacon:', img);
       img.onload = () => setImageObj(img);
     }
   }, [imageUrl]);
@@ -113,10 +125,12 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
     };
   }, []);
 
+  const beaconColor = isSecurity || isMember ? '#1976d2' : '#f50057';
+  console.log(isSecurity, isMember, isVisitor);
   return (
     <>
       <Group
-        name='beacon'
+        name="beacon"
         ref={groupRef}
         onClick={(e) => {
           if (!clickable) return;
@@ -129,57 +143,105 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
           y={y - triangleHeight - radius - 25}
           text={label}
           fontSize={10}
-          fill={isMember ? '#1976d2' : '#f50057'}
+          fill={beaconColor}
           fontStyle="bold"
           width={120}
           align="center"
         />
+        {isSecurity ? (
+          <>
+            {/* Upside-down triangle (bottom tip = anchor point) */}
+            <Shape
+              x={x}
+              y={y}
+              sceneFunc={(context, shape) => {
+                const height = radius * 2 + triangleHeight;
+                const halfWidth = radius + 2;
 
-        {/* Background circle */}
-        <Circle
-          x={x}
-          y={y - triangleHeight - radius}
-          radius={radius + 2}
-          fill={isMember ? '#1976d2' : '#f50057'}
-          stroke="#fff"
-          strokeWidth={1}
-          shadowBlur={3}
-        />
+                context.beginPath();
+                context.moveTo(0, 0); // bottom tip (anchor)
+                context.lineTo(halfWidth, -height);
+                context.lineTo(-halfWidth, -height);
+                context.closePath();
+                context.fillStrokeShape(shape);
+              }}
+              fill="#1976d2"
+              stroke="#fff"
+              strokeWidth={1}
+              shadowBlur={3}
+            />
 
-        {/* Face Image */}
-        {imageObj && (
-          <Shape
-            sceneFunc={(ctx) => {
-              ctx.beginPath();
-              ctx.arc(radius, radius, radius, 0, Math.PI * 2, false);
-              ctx.closePath();
-              ctx.clip();
-              ctx.drawImage(imageObj, 0, 0, radius * 2, radius * 2);
-              // Circular border
-            }}
-            x={x - radius}
-            y={y - triangleHeight - radius * 2}
-            width={radius * 2}
-            height={radius * 2}
-            shadowBlur={3}
-          />
+            {/* Face image clipped inside triangle */}
+            {imageObj && (
+              <Shape
+                x={x - radius}
+                y={y - (radius * 2 + triangleHeight) + triangleHeight / 2}
+                width={radius * 2}
+                height={radius * 2}
+                sceneFunc={(ctx) => {
+                  ctx.save();
+
+                  // clip circle area inside triangle
+                  ctx.beginPath();
+                  ctx.arc(radius, radius, radius, 0, Math.PI * 2);
+                  ctx.closePath();
+                  ctx.clip();
+
+                  ctx.drawImage(imageObj, 0, 0, radius * 2, radius * 2);
+                  ctx.restore();
+                }}
+              />
+            )}
+          </>
+        ) : (
+          <>
+            {/* Background circle */}
+            <Circle
+              x={x}
+              y={y - triangleHeight - radius}
+              radius={radius + 2}
+              fill={beaconColor}
+              stroke="#fff"
+              strokeWidth={1}
+              shadowBlur={3}
+            />
+
+            {/* Face Image */}
+            {imageObj && (
+              <Shape
+                sceneFunc={(ctx) => {
+                  ctx.beginPath();
+                  ctx.arc(radius, radius, radius, 0, Math.PI * 2, false);
+                  ctx.closePath();
+                  ctx.clip();
+                  ctx.drawImage(imageObj, 0, 0, radius * 2, radius * 2);
+                  // Circular border
+                }}
+                x={x - radius}
+                y={y - triangleHeight - radius * 2}
+                width={radius * 2}
+                height={radius * 2}
+                shadowBlur={3}
+              />
+            )}
+
+            {/* Triangle pointer */}
+            <Shape
+              x={x}
+              y={y - triangleHeight}
+              sceneFunc={(context, shape) => {
+                context.beginPath();
+                context.moveTo(0, triangleHeight);
+                context.lineTo(radius * 0.7, 0);
+                context.quadraticCurveTo(0, 5, -radius * 0.7, 0);
+                context.closePath();
+                context.fillStrokeShape(shape);
+              }}
+              fill={beaconColor}
+              shadowBlur={2}
+            />
+          </>
         )}
-
-        {/* Triangle pointer */}
-        <Shape
-          x={x}
-          y={y - triangleHeight}
-          sceneFunc={(context, shape) => {
-            context.beginPath();
-            context.moveTo(0, triangleHeight);
-            context.lineTo(radius * 0.7, 0);
-            context.quadraticCurveTo(0, 5, -radius * 0.7, 0);
-            context.closePath();
-            context.fillStrokeShape(shape);
-          }}
-          fill={isMember ? '#1976d2' : '#f50057'}
-          shadowBlur={2}
-        />
       </Group>
     </>
   );

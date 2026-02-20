@@ -12,49 +12,22 @@ import {
   // useTheme,
   Checkbox,
 } from '@mui/material';
-import { TimeGroupType } from 'src/store/apps/crud/timeGroup';
+import { PatrolAssignType } from 'src/store/apps/crud/patrolRoute';
 
 type Props = {
-  onTimeGroupClick: (event: React.MouseEvent<HTMLElement>) => void;
-  timeGroup?: TimeGroupType;
-  manySelect?: boolean;
-  setManySelectTimeGroups?: (TimeGroup: TimeGroupType[]) => void; // Improved typing
-  manySelectTimeGroups?: TimeGroupType[]; // Track selected time group
+  onAssignmentClick: (event: React.MouseEvent<HTMLElement>) => void;
+  assignment?: PatrolAssignType;
   active: any;
 };
 
-const TimeGroupListItem = ({
-  onTimeGroupClick,
-  timeGroup,
-  manySelect,
-  setManySelectTimeGroups,
-  manySelectTimeGroups = [],
-  active,
-}: Props) => {
+const PatrolAssignmentListItem = ({ onAssignmentClick, assignment, active }: Props) => {
   const customizer = useSelector((state) => state.customizer);
-
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const br = `${customizer.borderRadius}px`;
 
-  // const theme = useTheme();
-
-  const isChecked = manySelectTimeGroups.some((time) => time.id === timeGroup?.id);
-  // useEffect(() => {
-  //     // console.log(timeGroup);
-  // },[timeGroup]);
-  const handleCheckboxChange = () => {
-    if (!setManySelectTimeGroups || !timeGroup) return;
-
-    if (isChecked) {
-      setManySelectTimeGroups(manySelectTimeGroups.filter((m) => m.id !== timeGroup.id));
-    } else {
-      setManySelectTimeGroups([...manySelectTimeGroups, timeGroup]);
-    }
-  };
-
   return (
-    <ListItemButton sx={{ mb: 1 }} selected={active} onClick={onTimeGroupClick}>
+    <ListItemButton sx={{ mb: 1 }} selected={active} onClick={onAssignmentClick}>
       <ListItemText>
         <Stack direction="row" gap="10px" alignItems="center">
           <Box mr="auto">
@@ -65,7 +38,7 @@ const TimeGroupListItem = ({
               sx={{ maxWidth: '200px' }}
               textOverflow={'ellipsis'}
             >
-              {timeGroup?.name}
+              {assignment?.name}
             </Typography>
             <Typography
               variant="body2"
@@ -74,7 +47,7 @@ const TimeGroupListItem = ({
               textOverflow={'ellipsis'}
               noWrap
             >
-              {timeGroup?.description}
+              {assignment?.description}
             </Typography>
           </Box>
         </Stack>
@@ -83,4 +56,4 @@ const TimeGroupListItem = ({
   );
 };
 
-export default TimeGroupListItem;
+export default PatrolAssignmentListItem;

@@ -98,7 +98,7 @@ const MonitoringFooter = () => {
             >
               {section.title}
             </Typography>
-          </Box>
+          </Box>  
         ))}
       </Box>
 

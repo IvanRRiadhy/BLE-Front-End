@@ -32,7 +32,7 @@ const SecurityViewPatrolDetail = Loadable(
 );
 const SecurityViewPatrolCasePage = Loadable(
   lazy(() => import('../views/SecurityView/SecurityViewPatrolCasePage')),
-)
+);
 
 /* ****Invitation***** */
 const InvitationForm = Loadable(lazy(() => import('../components/InvitationForm/InvitationForm')));
@@ -119,6 +119,7 @@ const TestReport = Loadable(lazy(() => import('../views/Reports/TestReport')));
 const Investigate = Loadable(lazy(() => import('../views/Reports/Investigate')));
 const EventLog = Loadable(lazy(() => import('../views/Reports/EventLog')));
 const CardHistory = Loadable(lazy(() => import('../views/Reports/CardHistory')));
+const PatrolReport = Loadable(lazy(() => import('../views/Reports/PatrolReport')));
 
 // Evacuation
 const EvacuationDashboard = Loadable(
@@ -415,6 +416,11 @@ const Router = [
         exact: true,
         element: withAuth(<CardHistory />, '/report/cardhistory'),
       },
+      {
+        path: '/report/patrolreport',
+        exact: true,
+        element: withAuth(<PatrolReport />, '/report/patrolreport'),
+      },
 
       // ***Alarm Setting*** //
       { path: '/alarmsetting', exact: true, element: withAuth(<AlarmSetting />, '/alarmsetting') },
@@ -498,7 +504,7 @@ const Router = [
       {
         path: '/security-view/patrol-case',
         element: withAuth(<SecurityViewPatrolCasePage />, '/security-view/patrol-case'),
-      }
+      },
     ],
   },
   {
