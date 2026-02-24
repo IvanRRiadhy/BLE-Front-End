@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
-import { Box, Typography, Avatar, Stack } from '@mui/material';
+import { Box, Typography, Avatar, Stack, Tooltip } from '@mui/material';
 import { useRealtimeAlarmLog } from 'src/hooks/useDashboard';
 import { BASE_URL } from 'src/utils/axios';
+import SmartScrollingText from 'src/utils/SmartScrollingText';
 
 const defaultFilter = {
   draw: 1,
@@ -20,6 +21,10 @@ export interface AlarmLogItem {
   secondGateway: string;
   status: string;
   color: string;
+  buildingName: string;
+  floorName: string;
+  floorplanName: string;
+  lastSeenTime: string;
 }
 
 const statusColorMap: Record<string, string> = {
@@ -30,9 +35,9 @@ const statusColorMap: Record<string, string> = {
 const AlarmLog: React.FC = () => {
   const { data = [], isLoading, isError } = useRealtimeAlarmLog(defaultFilter);
   function resolvePerson(x: any) {
-    console.log("Resolving Person:", x);
+    // console.log("Resolving Person:", x);
     if (x.visitorId) {
-      console.log("Is Visitor", x.visitor)
+      // console.log("Is Visitor", x.visitor)
       return {
         type: 'Visitor',
         name: x.visitorName,
@@ -41,11 +46,18 @@ const AlarmLog: React.FC = () => {
     }
 
     if (x.memberId) {
-      console.log("Is Visitor", x.member)
+      // console.log("Is Visitor", x.member)
       return {
         type: 'Member',
         name: x.memberName,
         image: x.memberFaceImage,
+      };
+    }
+    if (x.securityId) {
+      return {
+        type: 'Security',
+        name: x.securityName,
+        image: x.securityFaceImage,
       };
     }
 
@@ -68,6 +80,10 @@ const AlarmLog: React.FC = () => {
         secondGateway: x.secondGatewayId ?? '-',
         status: x.alarm ?? 'Unknown',
         color: x.alarmColor ?? '#000',
+        buildingName: x.buildingName ?? '-',
+        floorName: x.floorName ?? '-',
+        floorplanName: x.floorplanName ?? '-',
+        lastSeenTime: x.lastSeenAt ? new Date(x.lastSeenAt).toLocaleString() : '-',
       };
     });
   }, [data]);
@@ -83,6 +99,7 @@ const AlarmLog: React.FC = () => {
         py: 2,
         display: 'flex',
         flexDirection: 'column',
+        overflowX: 'hidden',
       }}
     >
       {/* Title */}
@@ -119,18 +136,25 @@ const AlarmLog: React.FC = () => {
             direction="row"
             spacing={2}
             alignItems="center"
-            sx={{ 
-              p: 1, 
+            sx={{
+              p: 1,
               backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
-              borderBottom: '1px solid #e0e0e0', 
+              borderBottom: '1px solid #e0e0e0',
+              width: '100%',
+              overflow: 'hidden',
             }}
           >
             {/* Avatar */}
             <Avatar src={item.image} alt="user" sx={{ width: 56, height: 56 }} />
 
             {/* Left info */}
-            <Box sx={{ flex: 1 }}>
-              <Typography
+            <Box
+              sx={{
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
+              {/* <Typography
                 sx={{
                   fontSize: 16,
                   fontWeight: 600,
@@ -138,15 +162,22 @@ const AlarmLog: React.FC = () => {
                 }}
               >
                 {item.name}
-              </Typography>
-              <Typography
+              </Typography> */}
+              <SmartScrollingText
+                text={item.name}
+                sx={{
+                  fontSize: 16,
+                  fontWeight: 600,
+                  color: '#045498',
+                }}
+              />
+              <SmartScrollingText
+                text={`${item.buildingName} | ${item.floorName}`}
                 sx={{
                   fontSize: 12,
                   color: '#045498',
                 }}
-              >
-                {item.firstGateway}
-              </Typography>
+              />
               <Typography
                 sx={{
                   fontSize: 12,
@@ -160,6 +191,8 @@ const AlarmLog: React.FC = () => {
             {/* Right info */}
             <Box
               sx={{
+                flex: 1,
+                minWidth: 0,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'flex-end',
@@ -188,7 +221,7 @@ const AlarmLog: React.FC = () => {
                   color: '#045498',
                 }}
               >
-                {item.triggerTime}
+                {item.lastSeenTime}
               </Typography>
             </Box>
           </Stack>

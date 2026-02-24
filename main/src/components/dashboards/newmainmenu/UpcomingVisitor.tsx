@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Box, Typography, Avatar, Stack } from '@mui/material';
 import { useUpcomingVisitor } from 'src/hooks/useDashboard';
 import { BASE_URL } from 'src/utils/axios';
+import SmartScrollingText from 'src/utils/SmartScrollingText';
 // import { getUpcomingVisitor } from "../services/apiService";
 // import dumpy from "../assets/ambatukam.jpeg";
 
@@ -31,8 +32,8 @@ const statusColorMap: Record<string, string> = {
 
 const UpcomingVisitor: React.FC = () => {
   const { data = [], isLoading, isError } = useUpcomingVisitor(defaultFilter);
-    function resolvePerson(x: any) {
-      // console.log("Resolving Person:", x);
+  function resolvePerson(x: any) {
+    // console.log("Resolving Person:", x);
     if (x.visitor) {
       // console.log("Is Visitor", x.visitor)
       return {
@@ -58,7 +59,7 @@ const UpcomingVisitor: React.FC = () => {
     };
   }
   const upcomingVisitor = useMemo<UpcomingVisitorItem[]>(() => {
-    console.log("Upcoming Visitor Data:", data);
+    console.log('Upcoming Visitor Data:', data);
     return data.map((x: any) => ({
       id: x.id,
       status: x.status,
@@ -80,6 +81,7 @@ const UpcomingVisitor: React.FC = () => {
         py: 2,
         display: 'flex',
         flexDirection: 'column',
+        overflowX: 'hidden',
       }}
     >
       {/* Title */}
@@ -110,18 +112,30 @@ const UpcomingVisitor: React.FC = () => {
           py: 1,
         }}
       >
-        {upcomingVisitor.map((item, index:number) => (
-          <Stack key={`${index}-${item.id}`} direction="row" spacing={2} alignItems="center" sx={{ 
-            p:1,
-            backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
-            borderBottom: '1px solid #e0e0e0',
-            }}>
+        {upcomingVisitor.map((item, index: number) => (
+          <Stack
+            key={`${index}-${item.id}`}
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            sx={{
+              p: 1,
+              backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
+              borderBottom: '1px solid #e0e0e0',
+              width: '100%',
+              overflow: 'hidden',
+            }}
+          >
             {/* Avatar */}
-            <Avatar src={ item.image ? `${BASE_URL}${item.image}` : ''} alt="visitor" sx={{ width: 56, height: 56 }} />
+            <Avatar
+              src={item.image ? `${BASE_URL}${item.image}` : ''}
+              alt="visitor"
+              sx={{ width: 56, height: 56 }}
+            />
 
             {/* Visitor info */}
-            <Box sx={{ flex: 1 }}>
-              <Typography
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              {/* <Typography
                 sx={{
                   fontSize: 16,
                   fontWeight: 600,
@@ -129,16 +143,22 @@ const UpcomingVisitor: React.FC = () => {
                 }}
               >
                 {item.name}
-              </Typography>
+              </Typography> */}
+              <SmartScrollingText text={item.name} fontSize={16} fontWeight={600} color="#045498" />
 
-              <Typography
+              {/* <Typography
                 sx={{
                   fontSize: 12,
                   color: '#045498',
                 }}
               >
                 {item.checkInAt ? new Date(item.checkInAt).toLocaleString() : '-'}
-              </Typography>
+              </Typography> */}
+              <SmartScrollingText
+                text={item.checkInAt ? new Date(item.checkInAt).toLocaleString() : '-'}
+                fontSize={12}
+                color="#045498"
+              />  
             </Box>
 
             {/* Status */}

@@ -188,7 +188,7 @@ const SortablePatrolAreaCard = ({
               <Box component="span" fontWeight={700}>
                 Floor:
               </Box>{' '}
-              {area.floorId}
+              {area.floorName}
             </Typography>
 
             <Typography variant="caption" fontSize={12} color="text.secondary">

@@ -65,10 +65,10 @@ const Profile = () => {
           <Avatar src={ProfileImg} alt={ProfileImg} sx={{ width: 95, height: 95 }} />
           <Box>
             <Typography variant="subtitle2" color="textPrimary" fontWeight={600}>
-              Tommy May
+              {localStorage.getItem('username')}
             </Typography>
             <Typography variant="subtitle2" color="textSecondary">
-              Super Admin
+              {localStorage.getItem('levelPriority')}
             </Typography>
             <Typography
               variant="subtitle2"
@@ -78,7 +78,7 @@ const Profile = () => {
               gap={1}
             >
               <IconMail width={15} height={15} />
-              admin@123
+              {localStorage.getItem('email')}
             </Typography>
           </Box>
         </Stack>

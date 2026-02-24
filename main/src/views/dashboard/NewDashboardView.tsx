@@ -26,6 +26,7 @@ import AlarmCategorized from 'src/components/dashboards/newmainmenu/AlarmCategor
 import WelcomePopup from 'src/components/dashboards/mainmenu/WelcomePopup';
 import AlarmRadarChart from 'src/components/dashboards/newmainmenu/AlarmDurationChart';
 import PeakHour from 'src/components/dashboards/newmainmenu/PeakHour';
+import AlarmInvestigatedResult from 'src/components/dashboards/newmainmenu/AlarmInvestigatedResult';
 const filter = {
   Draw: 1,
   Start: 0,
@@ -241,7 +242,8 @@ const DashboardView: React.FC = () => {
             </Grid>
 
             <Grid size={4.75}>
-              <Statistic />
+              
+              <AlarmInvestigatedResult />
             </Grid>
           </Grid>
         </Grid>

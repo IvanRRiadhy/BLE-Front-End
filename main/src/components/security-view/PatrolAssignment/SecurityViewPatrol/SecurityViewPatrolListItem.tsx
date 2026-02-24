@@ -7,6 +7,7 @@ import { PatrolAssignType, PatrolRouteType } from 'src/store/apps/crud/patrolRou
 import { TimeGroupType } from 'src/store/apps/crud/timeGroup';
 import { defaultTimeGroupFilter } from 'src/store/apps/defaultForm';
 import { PatrolDetailPayload } from 'src/store/apps/crud/patrolRoute';
+import SmartScrollingText from 'src/utils/SmartScrollingText';
 
 /* ===================== types ===================== */
 
@@ -103,7 +104,8 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
   const getDayLabel = (date: Date) => {
     if (isSameDay(date, now)) return t('Today');
     if (isSameDay(date, tomorrow)) return t('Tomorrow');
-    return t(date.toLocaleString('en-GB', { weekday: 'long' }));
+    console.log("asd ", date)
+    return (date.toLocaleString('en-GB', { weekday: 'long' }));
   };
 
   const getPatrolColor = (date: Date) => {
@@ -117,6 +119,7 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
       hour: '2-digit',
       minute: '2-digit',
     });
+    console.log("Formatting nearest patrol date:", date, "->", getDayLabel(date), time);
     return `${getDayLabel(date)} • ${time}`;
   };
 
@@ -152,9 +155,10 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
     >
       {/* LEFT */}
       <Box sx={{ flex: '0 0 50%', px: 1 }}>
-        <Typography sx={{ fontSize: 16, fontWeight: 600, color: '#045498' }}>
+        {/* <Typography sx={{ fontSize: 16, fontWeight: 600, color: '#045498' }}>
           {patrol.name}
-        </Typography>
+        </Typography> */}
+        <SmartScrollingText text={patrol.name} fontSize={16} fontWeight={600} color="#045498" />
 
         <Typography sx={{ fontSize: 12, color: '#045498' }}>{patrol.description}</Typography>
       </Box>
@@ -194,7 +198,7 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
                   textAlign: 'right',
                 }}
               >
-                Next patrol: {formatNearestPatrol(nearestPatrol)}
+                {t('Next patrol')}: {formatNearestPatrol(nearestPatrol)}
               </Typography>
 
               {isSameDay(nearestPatrol, now) && (

@@ -17,7 +17,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from '@mui/icons-material/Close';
 import { useEffect, useState } from 'react';
-import { PatrolDetailPayload, SecurityType } from 'src/store/apps/crud/patrolRoute';
+import { PatrolAssignType, PatrolDetailPayload, SecurityType } from 'src/store/apps/crud/patrolRoute';
 import PatrolRouteDetailDialog from 'src/components/security-view/PatrolAssignment/SecurityViewPatrol/PatrolRouteDetailDialog';
 import PatrolScheduleCalendarDialog from 'src/components/security-view/PatrolAssignment/SecurityViewPatrol/PatrolScheduleCalendarDialog';
 import { useNavigate } from 'react-router';
@@ -42,7 +42,12 @@ import { usePatrolAssignmentId, usePatrolRouteId } from 'src/hooks/usePatrolRout
 import { useTimeGroupList } from 'src/hooks/useTimeGroup';
 import { getCaseStatusColor } from 'src/utils/caseStatus';
 
-const PatrolReportContent = () => {
+interface Props {
+  patrol: PatrolAssignType;
+ onSecurityClick: (sec: SecurityType | null) => void;
+}
+
+const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
   const navigate = useNavigate();
   const theme = useTheme();
   const customizer = useSelector((state: RootState) => state.customizer);
@@ -53,8 +58,8 @@ const PatrolReportContent = () => {
 
   const { data: patrolRes } = usePatrolAssignmentId(id ?? '');
 
-  const patrol2 = patrolRes?.collection?.data;
-  const patrol = useSelector((state: RootState) => state.PatrolRouteReducer.selectedPatrolAssign);
+  // const patrol2 = patrolRes?.collection?.data;
+  // const patrol = useSelector((state: RootState) => state.PatrolRouteReducer.selectedPatrolAssign);
 
   const { data: route } = usePatrolRouteId(patrol?.patrolRouteId ?? '');
 
@@ -136,6 +141,7 @@ const PatrolReportContent = () => {
             display="flex"
             flexDirection="column"
             sx={{
+              border: `1px solid ${theme.palette.divider}`,
               backgroundColor: theme.palette.background.paper,
               minHeight: isMobile
                 ? 'auto'
@@ -262,7 +268,8 @@ const PatrolReportContent = () => {
                       gap={1.5}
                       p={1}
                       borderRadius={1}
-                      sx={{ backgroundColor: theme.palette.action.hover }}
+                      sx={{ backgroundColor: theme.palette.action.hover, cursor: 'pointer' }}
+                      onClick={() => onSecurityClick(sec)}
                     >
                       <Avatar sx={{ width: 32, height: 32 }}>{sec.name.charAt(0)}</Avatar>
 
@@ -288,9 +295,6 @@ const PatrolReportContent = () => {
               {/* Spacer otomatis kalau list sedikit */}
               {!isMobile && <Box flexGrow={1} />}
             </Box>
-            <Divider sx={{ my: 2 }} />
-
-            {/* ===== Patrol Status ===== */}
           </Box>
 
           {/* ================= RIGHT PANEL ================= */}
@@ -298,7 +302,7 @@ const PatrolReportContent = () => {
             flex={1}
             borderRadius={2}
             p={2}
-            sx={{ backgroundColor: theme.palette.background.paper }}
+            sx={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}` }}
           >
             {/* Title */}
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>

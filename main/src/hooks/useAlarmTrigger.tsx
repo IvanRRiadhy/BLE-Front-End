@@ -225,3 +225,17 @@ export function useDispatchAlarmTrigger() {
     },
   })
 }
+
+export function useInvestigateAlarmTrigger() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({id, result} : {id: string, result: string}) => {
+      const res = await axiosServices.put(`${API_URL}${id}/investigate`, { result });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list'] });
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
+    },
+  })
+}

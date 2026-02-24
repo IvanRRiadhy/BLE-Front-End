@@ -80,7 +80,7 @@ export type AlarmLogItem = {
   action: string; // active, acknowledged, investigate, done
   priority?: AlarmPriority;
   personId: string;
-  personType?: 'Visitor' | 'Member';
+  personType?: 'Visitor' | 'Member' | 'Security';
   type: 'Alarm';
   triggerId: string;
   seen: boolean;

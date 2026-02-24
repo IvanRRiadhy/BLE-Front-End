@@ -284,13 +284,14 @@ export const ApprovalType: inputDataType[] = [
 
 export const investigationResultType: inputDataType[] = [
   { label: "Please select Investigation Result", value: "", disabled: true },
-{ label: "Test Trigger", value: "TEST_TRIGGER" }, //Disarmed without Action
-  { label: "False Alarm", value: "FALSE_ALARM" }, //Disarmed without Action
-  { label: "Authorized Access", value: "AUTHORIZED_ACCESS" },//Disarmed and Grant Correct Access
-  { label: "Suspicious Activity", value: "SUSPICIOUS_ACTIVITY" }, //Disarmed, Give Warning, and Continue Monitor
-  { label: "Trespassing Warning", value: "TRESPASSING_WARNING" }, //Disarmed, Give Warning, and Continue Monitor
-  { label: "Escorted Out", value: "ESCORTED_OUT" },
-  { label: "Apprehended", value: "APPREHENDED" },
-  { label: "Handed Over to Police", value: "HANDED_OVER_TO_POLICE" },
-  { label: "Escalated to Law Enforcement", value: "ESCALATED_TO_LAW_ENFORCEMENT" }, 
+  { label: "Test Trigger", value: "TestTrigger" }, //Disarmed without Action
+  { label: "False Alarm", value: "FalseAlarm" }, //Disarmed without Action
+  { label: "Authorized Access", value: "AuthorizedAccess" },//Disarmed and Grant Correct Access
+  { label: "Suspicious Activity", value: "SuspiciousActivity" }, //Disarmed, Give Warning, and Continue Monitor
+  { label: "Trespassing Warning", value: "TrepassingWarning" }, //Disarmed, Give Warning, and Continue Monitor
+  { label: "Escorted Out", value: "EscortedOut" },
+  { label: "Apprehended", value: "Apprehended" },
+  { label: "Handed Over to Police", value: "HandedOverToPolice" },
+  { label: "Escalated to Law Enforcement", value: "EscalatedToLawEnforcement" }, 
+  { label: "Other", value: "Other" },
 ];

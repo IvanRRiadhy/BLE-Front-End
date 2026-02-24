@@ -38,7 +38,9 @@ export type PatrolAreaType = {
   areaShape: string;
   color: string;
   floorplanId: string;
+  floorplanName: string;
   floorId: string;
+  floorName: string;
   isActive: boolean;
   nodes?: Nodes[];
   status: number;

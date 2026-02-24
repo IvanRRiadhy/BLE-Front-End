@@ -44,8 +44,8 @@ export const Profile = () => {
     > */}
       <Avatar alt="Remy Sharp" src={img1} />
       <Box>
-        <Typography variant="h6">Tommy</Typography>
-        <Typography variant="caption">Admin</Typography>
+        <Typography variant="h6">{localStorage.getItem('username') || 'Guest'}</Typography>
+        <Typography variant="caption">{localStorage.getItem('levelPriority') || 'User'}</Typography>
       </Box>
 
       <Box sx={{ ml: 'auto' }}>

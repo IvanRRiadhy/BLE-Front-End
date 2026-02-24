@@ -193,3 +193,16 @@ export function usePeakHour(filter: DashboardFilterType, params?: Record<string,
     refetchIntervalInBackground: true,
   });
 }
+
+export function useAlarmInvestigatedResult(filter: DashboardFilterType) {
+  return useQuery({
+    queryKey: ['alarm-investigated-result', filter],
+    queryFn: async () => {
+      const res = await axiosServices.post(`${API_ALARM}investigated-result`, filter);
+      console.log('Alarm Investigated Result Data fetched: ', res.data);
+      return res.data.collection.data;
+    },
+    refetchInterval: 10000,
+    refetchIntervalInBackground: true,
+  });
+}

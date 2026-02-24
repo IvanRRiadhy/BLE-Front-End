@@ -37,7 +37,7 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     SearchValue: string,
-    timeRange: string,
+    // timeRange: string,
     dateFilters: {
 
     }

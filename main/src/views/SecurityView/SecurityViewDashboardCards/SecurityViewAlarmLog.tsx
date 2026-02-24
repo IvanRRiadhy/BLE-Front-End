@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Box, Typography, Avatar, Stack } from '@mui/material';
 import { useRealtimeAlarmLog } from 'src/hooks/useDashboard';
 import { BASE_URL } from 'src/utils/axios';
+import SmartScrollingText from 'src/utils/SmartScrollingText';
 
 const defaultFilter = {
   draw: 1,
@@ -20,31 +21,38 @@ export interface AlarmLogItem {
   secondGateway: string;
   status: string;
   color: string;
+  buildingName: string;
+  floorName: string;
+  floorplanName: string;
+  lastSeenTime: string;
 }
-
-const statusColorMap: Record<string, string> = {
-  wrongzone: '#00ce00',
-  geofence: '#d73d3d',
-};
 
 const SecurityViewAlarmLog: React.FC = () => {
   const { data = [], isLoading, isError } = useRealtimeAlarmLog(defaultFilter);
   function resolvePerson(x: any) {
-    if (x.visitor) {
+    // console.log("Resolving Person:", x);
+    if (x.visitorId) {
       // console.log("Is Visitor", x.visitor)
       return {
         type: 'Visitor',
-        name: x.visitor.name,
-        image: x.visitor.faceImage,
+        name: x.visitorName,
+        image: x.visitorFaceImage,
       };
     }
 
-    if (x.member) {
+    if (x.memberId) {
       // console.log("Is Visitor", x.member)
       return {
         type: 'Member',
-        name: x.member.name,
-        image: x.member.faceImage,
+        name: x.memberName,
+        image: x.memberFaceImage,
+      };
+    }
+    if (x.securityId) {
+      return {
+        type: 'Security',
+        name: x.securityName,
+        image: x.securityFaceImage,
       };
     }
 
@@ -65,8 +73,12 @@ const SecurityViewAlarmLog: React.FC = () => {
         triggerTime: x.triggerTime ? new Date(x.triggerTime).toLocaleString() : '-',
         firstGateway: x.firstGatewayId ?? '-',
         secondGateway: x.secondGatewayId ?? '-',
-        status: x.alarmRecordStatus ?? 'Unknown',
+        status: x.alarm ?? 'Unknown',
         color: x.alarmColor ?? '#000',
+        buildingName: x.buildingName ?? '-',
+        floorName: x.floorName ?? '-',
+        floorplanName: x.floorplanName ?? '-',
+        lastSeenTime: x.lastSeenAt ? new Date(x.lastSeenAt).toLocaleString() : '-',
       };
     });
   }, [data]);
@@ -82,6 +94,7 @@ const SecurityViewAlarmLog: React.FC = () => {
         py: 2,
         display: 'flex',
         flexDirection: 'column',
+        overflowX: 'hidden',
       }}
     >
       {/* Title */}
@@ -99,7 +112,7 @@ const SecurityViewAlarmLog: React.FC = () => {
             color: '#045498',
           }}
         >
-          Real-Time Alarm Log
+          Alarm to Investigate
         </Typography>
       </Box>
 
@@ -112,15 +125,19 @@ const SecurityViewAlarmLog: React.FC = () => {
           py: 1,
         }}
       >
-        {log.map((item, index) => (
+        {log.length > 0 ? (
+          log.map((item, index) => (
           <Stack
             key={index}
             direction="row"
             spacing={2}
             alignItems="center"
-            sx={{ p: 1, 
-                backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
-                borderBottom: '1px solid #e0e0e0',
+            sx={{
+              p: 1,
+              backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
+              borderBottom: '1px solid #e0e0e0',
+              width: '100%',
+              overflow: 'hidden',
             }}
           >
             {/* Avatar */}
@@ -130,9 +147,10 @@ const SecurityViewAlarmLog: React.FC = () => {
             <Box
               sx={{
                 flex: 1,
+                minWidth: 0,
               }}
             >
-              <Typography
+              {/* <Typography
                 sx={{
                   fontSize: 16,
                   fontWeight: 600,
@@ -140,15 +158,22 @@ const SecurityViewAlarmLog: React.FC = () => {
                 }}
               >
                 {item.name}
-              </Typography>
-              <Typography
+              </Typography> */}
+              <SmartScrollingText
+                text={item.name}
+                sx={{
+                  fontSize: 16,
+                  fontWeight: 600,
+                  color: '#045498',
+                }}
+              />
+              <SmartScrollingText
+                text={`${item.buildingName} | ${item.floorName}`}
                 sx={{
                   fontSize: 12,
                   color: '#045498',
                 }}
-              >
-                {item.firstGateway}
-              </Typography>
+              />
               <Typography
                 sx={{
                   fontSize: 12,
@@ -162,6 +187,8 @@ const SecurityViewAlarmLog: React.FC = () => {
             {/* Right info */}
             <Box
               sx={{
+                flex: 1,
+                minWidth: 0,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'flex-end',
@@ -190,11 +217,20 @@ const SecurityViewAlarmLog: React.FC = () => {
                   color: '#045498',
                 }}
               >
-                {item.triggerTime}
+                {item.lastSeenTime}
               </Typography>
             </Box>
           </Stack>
-        ))}
+          ))
+        ) : (
+          <Box
+            sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
+          >
+            <Typography sx={{ color: '#045498', fontSize: 16 }}>
+              No Investigation Assigned yet
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Box>
   );

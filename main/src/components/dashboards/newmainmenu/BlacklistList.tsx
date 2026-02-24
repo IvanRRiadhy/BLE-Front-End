@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Box, Typography, Avatar, Stack, Tooltip } from '@mui/material';
 import { useBlacklistLog } from 'src/hooks/useDashboard';
+import SmartScrollingText from 'src/utils/SmartScrollingText';
 
 interface BlacklistItem {
   id: string;
@@ -27,6 +28,7 @@ const NewBlacklist: React.FC = () => {
         py: 2,
         display: 'flex',
         flexDirection: 'column',
+        overflowX: 'hidden',
       }}
     >
       {/* TITLE (fixed height) */}
@@ -67,14 +69,16 @@ const NewBlacklist: React.FC = () => {
               p: 1,
               backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
               borderBottom: '1px solid #e0e0e0',
+              width: '100%',
+              overflow: 'hidden',
             }}
           >
             {/* Avatar */}
             <Avatar src="/dummy-avatar.jpg" alt="user" sx={{ width: 56, height: 56 }} />
 
             {/* Info */}
-            <Box sx={{ minWidth: 0 }}>
-              <Tooltip title={item.name}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              {/* <Tooltip title={item.name}>
                 <Typography
                   sx={{
                     fontSize: 16,
@@ -87,7 +91,8 @@ const NewBlacklist: React.FC = () => {
                 >
                   {item.name}
                 </Typography>
-              </Tooltip>
+              </Tooltip> */}
+              <SmartScrollingText text={item.name} fontSize={16} fontWeight={600} color="#045498" />
             </Box>
           </Stack>
         ))}

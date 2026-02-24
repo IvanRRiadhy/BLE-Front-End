@@ -63,8 +63,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   };
 
   const handleChange =
-    (tab: TabKey, field: 'username' | 'password') =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (tab: TabKey, field: 'username' | 'password') => (e: React.ChangeEvent<HTMLInputElement>) => {
       setLoginError('');
       tab === 'admin'
         ? setAdminCreds((prev) => ({ ...prev, [field]: e.target.value }))
@@ -87,16 +86,22 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       if (data?.levelPriority) {
         localStorage.setItem('levelPriority', data.levelPriority.trim());
       }
-      
+      if (data?.username) localStorage.setItem('username', data.username);
+      if (data?.email) localStorage.setItem('email', data.email);
+
       localStorage.setItem('response', JSON.stringify(data));
       localStorage.setItem('welcomePopupShown', 'false');
-      if(isAdmin && data.levelPriority === 'Primary'){
+      if (isAdmin && data.levelPriority === 'Primary') {
         setLoginError('You do not have permission to login as Admin');
-        return
-      };
+        return;
+      }
 
       setTimeout(() => {
-        window.location.href = isAdmin ? '/dashboards/newmainmenu' : data.levelPriority === 'Primary' ? '/security-view/dashboard' : '/my-visit';
+        window.location.href = isAdmin
+          ? '/dashboards/newmainmenu'
+          : data.levelPriority === 'Primary'
+            ? '/security-view/dashboard'
+            : '/my-visit';
         console.log('data', data);
       }, 300);
     } catch (err) {

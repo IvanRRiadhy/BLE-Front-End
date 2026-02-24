@@ -39,6 +39,7 @@ import {
 import { PatrolSessionType, GetFilter as PatrolSessionFilter } from './crud/patrolSession';
 import { PatrolCaseType, GetFilter as PatrolCaseFilter, CaseUploadType } from './crud/patrolCase';
 import {GetFilter as UserFilter} from './crud/users';
+import {GetFilter as PatrolReportFilter} from './crud/patrolReport';
 
 //#region AccessCCTV
 export const defaultAccessCCTVForm: CCTVType = {
@@ -111,7 +112,7 @@ export const defaultAlarmTriggerFilter: AlarmTriggerFilter = {
   SortColumn: 'TriggerTime',
   SortDir: 'desc',
   SearchValue: '',
-  timeRange: 'daily',
+  // timeRange: 'daily',
   dateFilters: {},
   filters: {},
 };
@@ -788,6 +789,7 @@ export const defaultPatrolCaseUploadForm: CaseUploadType = {
   title: '',
   description: '',
   caseType: '',
+  threatLevel: '',
   patrolSessionId: '',
   attachments: [],
 };
@@ -805,3 +807,14 @@ export const defaultUserFilter: UserFilter = {
   filters: null,
 }
 //#endregion
+
+//#region Patrol Report
+export const defaultPatrolReportFilter: PatrolReportFilter = {
+  draw: 1,
+  start: 0,
+  length: 999,
+  sortColumn: '',
+  sortDir: 'desc',
+  searchValue: '',
+  filters: {},
+};

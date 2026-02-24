@@ -294,11 +294,11 @@ console.log('patrol', patrol);
               backgroundColor: theme.palette.background.paper,
               minHeight: isMobile
                 ? 'auto'
-                : `calc(100vh - ${(customizer.TopbarHeight ?? 70) * 2}px)`,
+                : `calc(100vh - ${(customizer.TopbarHeight ?? 70) * 2}px)`, 
             }}
           >
             {/* Back Button */}
-            <Box mb={1}>
+            <Box mb={2}>
               <Button
                 size="small"
                 startIcon={<ArrowBackIcon />}
