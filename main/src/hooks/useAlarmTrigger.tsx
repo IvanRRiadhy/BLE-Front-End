@@ -226,6 +226,20 @@ export function useDispatchAlarmTrigger() {
   })
 }
 
+export function useAcceptInvestigate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await axiosServices.put(`${API_URL}${id}/accept`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list'] });
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
+    },
+  })
+}
+
 export function useInvestigateAlarmTrigger() {
   const queryClient = useQueryClient();
   return useMutation({

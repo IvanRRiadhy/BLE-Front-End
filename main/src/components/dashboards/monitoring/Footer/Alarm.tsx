@@ -44,8 +44,8 @@ import { useAlarmTriggerList, useAssignActionAlarmTriggerByDMAC } from 'src/hook
 
 const columns = [
   { label: 'Time', field: 'TriggerTime', sortAble: true },
-  { label: 'Visitor', field: 'Visitor.Name', sortAble: true },
-  { label: 'Floorplan', field: 'Floorplan.Name', sortAble: true },
+  { label: 'Person', field: 'Name', sortAble: true },
+  { label: 'Floorplan', field: 'FloorplanName', sortAble: true },
   { label: 'Alarm Status', field: 'AlarmTriggerStatus', sortAble: true },
   { label: 'Action Status', field: 'ActionStatus', sortAble: true },
 ];
@@ -291,8 +291,8 @@ const AlarmList = () => {
                           </TableCell>
 
                           <TableCell>{formatTime(row.triggerTime)}</TableCell>
-                          <TableCell>{row.visitor?.name ?? 'Unknown Visitor'}</TableCell>
-                          <TableCell>{row.floorplan?.name ?? 'Unknown Area'}</TableCell>
+                          <TableCell>{row.visitorName ?? row.memberName ?? row.securityName ?? 'Unknown Visitor'}</TableCell>
+                          <TableCell>{row.floorName ?? 'Unknown Area'}</TableCell>
 
                           <TableCell>
                             {/* {formatActionLabel(row.alarmRecordStatus)} */}
@@ -304,11 +304,11 @@ const AlarmList = () => {
                                 minWidth: '50px',
                               }}
                               size="small"
-                              label={formatActionLabel(row.alarmRecordStatus)}
+                              label={formatActionLabel(row.alarm)}
                             />
                           </TableCell>
                           <TableCell>
-                            {row.actionStatus ? (
+                            {row.action ? (
                               <Box
                                 component="span"
                                 sx={{
@@ -320,10 +320,10 @@ const AlarmList = () => {
                                   fontWeight: 600,
                                   color: 'white',
                                   textTransform: 'capitalize',
-                                  backgroundColor: actionStatusColormap[row.actionStatus] || 'grey',
+                                  backgroundColor: actionStatusColormap[row.action] || 'grey',
                                 }}
                               >
-                                {formatActionLabel(row.actionStatus)}
+                                {formatActionLabel(row.action)}
                               </Box>
                             ) : (
                               '-'
@@ -413,7 +413,7 @@ const AlarmList = () => {
                       .filter((item) => !item.disabled)
                       .map((item) => {
                         const isActiveStatus =
-                          selectedAlarmTrigger?.actionStatus?.toLowerCase() ===
+                          selectedAlarmTrigger?.action?.toLowerCase() ===
                           item.value.toLowerCase();
 
                         const isSelected =

@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { useAllMembers } from 'src/hooks/useMember';
+import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
 import { useAllVisitor } from 'src/hooks/useVisitor';
 import { memberType } from 'src/store/apps/crud/member';
 import { VisitorType } from 'src/store/apps/crud/visitor';
@@ -21,6 +22,7 @@ const VISITOR_COLOR = '#f50057'; // red
 const COLORS = {
   visitor: '#f50057', // bright red
   member: '#1976d2', // bright blue
+  security: '#00c853', // bright green
   blacklist: '#8B0000', // dark red
   black: '#000000',
   white: '#ffffff',
@@ -53,10 +55,13 @@ const NewestTrack = () => {
   const beaconsByTopic = useSelector((state: RootState) => state.BeaconReducer.allBeacons);
   const { data: visitorsData = [] } = useAllVisitor();
   const { data: membersData = [] } = useAllMembers();
+  const { data: securityData = []} = useAllSecuritys();
 
   const visitorMap = new Map(visitorsData.map((v) => [v.id, v]));
 
   const memberMap = new Map(membersData.map((m) => [m.id, m]));
+
+  const securityMap = new Map(securityData.map((s) => [s.id, s]));
 
   const getDisplayName = (beacon: any) => {
     const visitor = beacon.visitorCardId
@@ -65,11 +70,17 @@ const NewestTrack = () => {
 
     const member = beacon.memberCardId ? memberMap.get(beacon.memberCardId.toLowerCase()) : null;
 
+    const security = beacon.securityCardId
+      ? securityMap.get(beacon.securityCardId.toLowerCase())
+      : null;
+
     return (
       visitor?.name ||
       member?.name ||
+      security?.name ||
       beacon.visitorCardName ||
       beacon.memberCardName ||
+      beacon.securityCardName ||
       beacon.cardName ||
       'Unknown'
     );
@@ -115,8 +126,8 @@ const NewestTrack = () => {
 //   (b.lastSeen ?? new Date(b.time).getTime()) -
 //   (a.lastSeen ?? new Date(a.time).getTime())
 // );
-  const getItemBackground = (isVisitor: boolean, isMember: boolean, isBlacklisted: boolean) => {
-    const baseColor = isMember ? COLORS.member : isVisitor ? COLORS.visitor : '#e0e0e0';
+  const getItemBackground = (isVisitor: boolean, isMember: boolean, isSecurity: boolean, isBlacklisted: boolean) => {
+    const baseColor = isMember ? COLORS.member : isVisitor ? COLORS.visitor : isSecurity ? COLORS.security : '#e0e0e0';
 
     // 🔴 BLACKLISTED → color → BLACK
     if (isBlacklisted) {
@@ -134,10 +145,11 @@ const NewestTrack = () => {
     ${lighten(baseColor, 0.5)} 100%
   )`;
   };
-  const getBorderColor = (isVisitor: boolean, isMember: boolean, isBlacklisted: boolean) => {
+  const getBorderColor = (isVisitor: boolean, isMember: boolean, isSecurity: boolean, isBlacklisted: boolean) => {
     if (isBlacklisted) return COLORS.blacklist;
     if (isMember) return COLORS.member;
     if (isVisitor) return COLORS.visitor;
+    if (isSecurity) return COLORS.security;
     return '#ccc';
   };
 
@@ -268,6 +280,7 @@ const NewestTrack = () => {
       {allBeacons.map((beacon: any, idx) => {
         const isVisitor = !!beacon.visitorCardId;
         const isMember = !!beacon.memberCardId;
+        const isSecurity = !!beacon.securityCardId;
         // console.log('Beacon Data:', beacon);
         const cardName = getDisplayName(beacon);
         const visitor = beacon.visitorCardId
@@ -277,9 +290,14 @@ const NewestTrack = () => {
         const member = beacon.memberCardId
           ? memberMap.get(beacon.memberCardId.toLowerCase())
           : null;
-        console.log("Beacons: ", beaconsByTopic);
-        const faceImage = visitor?.faceImage || member?.faceImage || '/dummy-avatar.jpg';
-        const isBlacklisted = visitor?.isBlacklist === true || member?.isBlacklist === true;
+
+        const security = beacon.securityCardId
+          ? securityMap.get(beacon.securityCardId.toLowerCase())
+          : null;
+
+        // console.log("Beacons: ", beaconsByTopic);
+        const faceImage = visitor?.faceImage || member?.faceImage || security?.faceImage || '/dummy-avatar.jpg';
+        const isBlacklisted = visitor?.isBlacklist === true || member?.isBlacklist === true || security?.isBlacklist === true;
         // console.log(visitor, member, beacon);
         // console.log('Face Image URL:', faceImage);
         return (
@@ -291,8 +309,8 @@ const NewestTrack = () => {
               mb: 2,
               borderRadius: '12px',
               border: '1px solid',
-              borderColor: getBorderColor(isVisitor, isMember, isBlacklisted),
-              background: getItemBackground(isVisitor, isMember, isBlacklisted),
+              borderColor: getBorderColor(isVisitor, isMember, isSecurity, isBlacklisted),
+              background: getItemBackground(isVisitor, isMember, isSecurity, isBlacklisted),
               color: isBlacklisted ? '#fff' : 'inherit', // 🔥 important for readability
               overflow: 'hidden',
               transition: 'all 0.2s ease',
@@ -345,6 +363,7 @@ const NewestTrack = () => {
               <Grid size={11} mb={1}>
                 {visitor && <VisitorDetails visitor={visitor} beacon={beacon} />}
                 {member && <MemberDetails member={member} beacon={beacon} />}
+                {security && <MemberDetails member={security} beacon={beacon} />}
               </Grid>
             </Grid>
           </Box>

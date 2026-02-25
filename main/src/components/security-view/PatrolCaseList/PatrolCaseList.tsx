@@ -11,6 +11,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
@@ -18,7 +19,6 @@ import { useNavigate } from 'react-router';
 import { useAllPatrolCase } from 'src/hooks/usePatrolCase';
 import PatrolCaseListItem from '../PatrolAssignment/PatrolAssignmentList/PatrolCaseListItem';
 import PatrolCaseOverview from './PatrolCaseOverview';
-import CloseIcon from '@mui/icons-material/Close';
 import { getCaseStatusColor } from 'src/utils/caseStatus';
 
 const PatrolCaseList = () => {

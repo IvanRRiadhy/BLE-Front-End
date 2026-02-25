@@ -65,6 +65,12 @@ const Menuitems: MenuitemsType[] = [
       icon: IconSend,
       href: '/security-view/patrol-case',
     },
+    {
+      id: uniqueId(),
+      title: 'Alarm Investigate',
+      icon: IconSend,
+      href: '/security-view/alarm-investigate',
+    }
   ];
 
 export default Menuitems;

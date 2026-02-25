@@ -33,6 +33,9 @@ const SecurityViewPatrolDetail = Loadable(
 const SecurityViewPatrolCasePage = Loadable(
   lazy(() => import('../views/SecurityView/SecurityViewPatrolCasePage')),
 );
+const SecurityViewAlarmInvestigatePage = Loadable(
+  lazy(() => import('../views/SecurityView/SecurityViewAlarmInvestigate')),
+);
 
 /* ****Invitation***** */
 const InvitationForm = Loadable(lazy(() => import('../components/InvitationForm/InvitationForm')));
@@ -504,6 +507,10 @@ const Router = [
       {
         path: '/security-view/patrol-case',
         element: withAuth(<SecurityViewPatrolCasePage />, '/security-view/patrol-case'),
+      },
+      {
+        path: '/security-view/alarm-investigate',
+        element: withAuth(<SecurityViewAlarmInvestigatePage />, '/security-view/alarm-investigate'),
       },
     ],
   },

@@ -16,21 +16,6 @@ const SecurityGuard = () => {
   const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
-  useEffect(() => {
-    const audio = new Audio('/sfx/SecurityGuard/FNAF_MUSIC_BOX.mp3');
-    audio.volume = 0.2; // 0.0 - 1.0
-
-    // audio.loop = true; // 🔁 loop enabled
-
-    audio.play().catch((err) => {
-      console.warn('Audio autoplay blocked:', err);
-    });
-
-    return () => {
-      audio.pause();
-      audio.currentTime = 0;
-    };
-  }, []);
 
   return (
     <PageContainer title="Member" description="this is Member Page">
