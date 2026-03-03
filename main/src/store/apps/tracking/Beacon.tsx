@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AppDispatch, RootState } from 'src/store/Store';
 import { startMQTTclient } from './MQTT';
 import { uniqueId } from 'lodash';
+import { SecurityAlarmLogItem } from 'src/components/security-view/AlarmInvestigate/AlarmInvestigation';
 
 
 export type AlarmPriority = 'low' | 'medium' | 'high';
@@ -138,6 +139,12 @@ interface StateType {
   alarmLogs: AlarmLogItem[];
   alarmPopupId: string | null;
   showAlarm:AlarmLogItem | null;
+  focusAlarm: SecurityAlarmLogItem  | null;
+  focusPosition: {
+    floorplanName: string;
+    areaName: string;
+    time: string;
+  }
 }
 
 const initialState: StateType = {
@@ -158,7 +165,13 @@ const initialState: StateType = {
   trackingLogs: [],
   alarmLogs: [],
   alarmPopupId: null,
-  showAlarm: null
+  showAlarm: null,
+  focusAlarm: null,
+  focusPosition: {
+    floorplanName: '',
+    areaName: '',
+    time: '',
+  }
 };
 
 export const BeaconSlice = createSlice({
@@ -265,9 +278,9 @@ export const BeaconSlice = createSlice({
       newLogs.forEach((log) => {
         if (!existingIds.has(log.id)) {
           state.trackingLogs.push(log);
-          console.log('Added Tracking Log:', log);
+          // console.log('Added Tracking Log:', log);
         } else {
-          console.log('Duplicate Tracking Log ignored:', log, existingIds.has(log.id));
+          // console.log('Duplicate Tracking Log ignored:', log, existingIds.has(log.id));
         }
       });
 
@@ -329,7 +342,13 @@ export const BeaconSlice = createSlice({
     },
     ShowAlarmPopup: (state, action: PayloadAction<AlarmLogItem | null>) => {
       state.showAlarm = action.payload;
-    }
+    },
+    SetFocusAlarm: (state, action: PayloadAction<SecurityAlarmLogItem | null>) => {
+      state.focusAlarm = action.payload;
+    },
+    SetFocusPosition: (state, action: PayloadAction<{ floorplanName: string; areaName: string, time: string }>) => {
+      state.focusPosition = action.payload;
+    },
   },
 });
 
@@ -352,12 +371,14 @@ export const {
   MarkAllAlarmsSeen,
   ClearSeenAlarms,
   ShowAlarmPopup,
+  SetFocusAlarm,
+  SetFocusPosition,
 } = BeaconSlice.actions;
 
 export const selectAlarmPopupId = (state: RootState) => state.BeaconReducer.alarmPopupId;
 
 export const selectAlarmById = (id: string | null) => (state: RootState) =>
-  id ? state.BeaconReducer.alarmLogs.find((a) => a.id === id) : null;
+  id ? state.BeaconReducer.alarmLogs.find((a: AlarmLogItem) => a.id === id) : null;
 
 export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
   let lastDispatch = 0;

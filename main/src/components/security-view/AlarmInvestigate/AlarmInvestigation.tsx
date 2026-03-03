@@ -28,6 +28,7 @@ import { AlarmTriggerType } from 'src/store/apps/crud/alarmTrigger';
 import toast from 'react-hot-toast';
 import AlarmList from './AlarmList';
 import AcceptedAlarm from './AcceptedAlarm';
+import { SetFocusAlarm } from 'src/store/apps/tracking/Beacon';
 
 const defaultFilter = {
   Draw: 1,
@@ -41,6 +42,7 @@ export interface SecurityAlarmLogItem {
   id: string;
   image: string;
   name: string;
+  beacon: string;
   idleTime: string;
   triggerTime: string;
   firstGateway: string;
@@ -55,12 +57,14 @@ export interface SecurityAlarmLogItem {
 }
 
 const AlarmInvestigation = () => {
+  const dispatch: AppDispatch = useDispatch();
   const {
     data: data,
     isLoading,
     isError,
   } = useAlarmTriggerList({ ...defaultAlarmTriggerFilter, Length: 999 });
   const alarmTriggerData = data?.data ?? [];
+  
   function resolvePerson(x: any) {
     // console.log("Resolving Person:", x);
     if (x.visitorId) {
@@ -101,7 +105,7 @@ const AlarmInvestigation = () => {
 
     const filtered = hasAccepted
       ? alarmTriggerData.filter((x: any) => x.action === 'Accepted')
-      : alarmTriggerData;
+      : alarmTriggerData.filter((x: any) => x.action === 'Dispatched');
 
     return filtered.map((x: any) => {
       const person = resolvePerson(x);
@@ -110,6 +114,7 @@ const AlarmInvestigation = () => {
         id: x.id,
         image: person.image ? `${BASE_URL}${person.image}` : '',
         name: person.name,
+        beacon: x.beaconId ?? '-',
         idleTime: x.idleTimestamp ? new Date(x.idleTimestamp).toLocaleString() : '-',
         triggerTime: x.triggerTime ? new Date(x.triggerTime).toLocaleString() : '-',
         firstGateway: x.firstGatewayId ?? '-',
@@ -129,11 +134,13 @@ const AlarmInvestigation = () => {
     return log.filter((x: any) => x.action === 'Accepted');
   }, [alarmTriggerData]);
 
+  const [selectedAlarm, setSelectedAlarm] = useState<SecurityAlarmLogItem | null>(null);
+
   const hasAccepted = acceptedAlarms.length > 0;
 
   const AcceptMutation = useAcceptInvestigate();
 
-  const handleAccept = (alarm: SecurityAlarmLogItem) => {
+  const handleAccept = async (alarm: SecurityAlarmLogItem) => {
     console.log('Accepting investigation for ID:', alarm);
     if (AcceptMutation.isPending) return;
     if (alarm.action === 'Accepted') {
@@ -141,7 +148,15 @@ const AlarmInvestigation = () => {
       console.log('Already accepted, no action taken.');
       return;
     }
-    AcceptMutation.mutate(alarm.id);
+    try {
+      await AcceptMutation.mutateAsync(alarm.id);
+      toast.success('Investigation accepted successfully!');
+      dispatch(SetFocusAlarm(alarm));
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Failed to accept investigation');
+    }
+    // const res = await AcceptMutation.mutate(alarm.id);
+    // console.log('Accept response:', res);
   };
 
   return (
@@ -167,45 +182,62 @@ const AlarmInvestigation = () => {
           pb: 2,
         }}
       >
-        <Typography
-          sx={{
-            fontSize: { xs: 20, md: 24 },
-            fontWeight: 700,
-            color: '#045498',
-          }}
-        >
-          Alarm to Investigate
-        </Typography>
+        {hasAccepted ? (
+          <Typography
+            sx={{
+              fontSize: 20,
+              fontWeight: 700,
+              color: 'error.main',
+              mt: 2,
+            }}
+          >
+            Investigation In Progress
+          </Typography>
+        ) : (
+          <Typography
+            sx={{
+              fontSize: { xs: 20, md: 24 },
+              fontWeight: 700,
+              color: '#045498',
+            }}
+          >
+            Alarm to Investigate
+          </Typography>
+        )}
       </Box>
 
       {/* Scrollable list */}
-<Box
-  sx={{
-    flex: 1,
-    overflowY: 'auto',
-    px: 1.5,
-    py: 1,
-  }}
->
-  {hasAccepted ? (
-    <AcceptedAlarm alarm={acceptedAlarms[0]} />
-  ) : log.length > 0 ? (
-    <AlarmList data={log} onAccept={handleAccept} />
-  ) : (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100%',
-      }}
-    >
-      <Typography sx={{ color: '#045498', fontSize: 16 }}>
-        No Investigation Assigned yet
-      </Typography>
-    </Box>
-  )}
-</Box>
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: 'auto',
+          px: 1.5,
+          // py: 1,
+        }}
+      >
+        {hasAccepted || selectedAlarm ? (
+          <AcceptedAlarm
+            alarm={selectedAlarm || acceptedAlarms[0]}
+            onBack={() => setSelectedAlarm(null)}
+            onAccept={handleAccept}
+          />
+        ) : log.length > 0 ? (
+          <AlarmList data={log} onAccept={(alarm) => setSelectedAlarm(alarm)} />
+        ) : (
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%',
+            }}
+          >
+            <Typography sx={{ color: '#045498', fontSize: 16 }}>
+              No Investigation Assigned yet
+            </Typography>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 };

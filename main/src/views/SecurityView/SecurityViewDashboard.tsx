@@ -42,7 +42,7 @@ const SecurityViewDashboard = () => {
             ))}
           </Grid>
           <Grid
-            key={'bar-chart'}
+            key={'Patrol-List'}
             size={{ xs: 12, sm: 12, md: 5 }} // full width
           >
             <SecurityViewPatrolList />

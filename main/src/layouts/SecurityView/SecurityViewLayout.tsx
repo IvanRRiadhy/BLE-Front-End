@@ -8,11 +8,16 @@ import Navigation from 'src/layouts/full/horizontal/navbar/Navigation';
 import HorizontalHeader from 'src/layouts/full/horizontal/header/Header';
 import ScrollToTop from '../../components/shared/ScrollToTop';
 import LoadingBar from '../../LoadingBar';
-import { setSessionExpiredHandler } from 'src/utils/axios';
+import { BASE_URL, setSessionExpiredHandler } from 'src/utils/axios';
 import SessionExp from 'src/layouts/full/shared/SessionExp';
 import { hydrateEvacState } from 'src/store/customizer/CustomizerSlice';
 import Header from './HeaderSecurity/Header';
 import { Toaster } from 'react-hot-toast';
+import { publishMQTT, startMQTTclient } from 'src/store/apps/tracking/MQTT';
+import { useAlarmTriggerList } from 'src/hooks/useAlarmTrigger';
+import { defaultAlarmTriggerFilter } from 'src/store/apps/defaultForm';
+import { SecurityAlarmLogItem } from 'src/components/security-view/AlarmInvestigate/AlarmInvestigation';
+import { SetFocusAlarm, SetFocusPosition } from 'src/store/apps/tracking/Beacon';
 
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
@@ -34,8 +39,51 @@ const SecurityViewLayout: FC = () => {
   const dispatch = useDispatch();
   const customizer = useSelector((state: RootState) => state.customizer);
   const evacState = useSelector((state: RootState) => state.customizer.evacState);
+  const focusAlarm = useSelector((state: RootState) => state.BeaconReducer.focusAlarm);
   const theme = useTheme();
+  function resolvePerson(x: any) {
+    // console.log("Resolving Person:", x);
+    if (x.visitorId) {
+      // console.log("Is Visitor", x.visitor)
+      return {
+        type: 'Visitor',
+        name: x.visitorName,
+        image: x.visitorFaceImage,
+      };
+    }
 
+    if (x.memberId) {
+      // console.log("Is Visitor", x.member)
+      return {
+        type: 'Member',
+        name: x.memberName,
+        image: x.memberFaceImage,
+      };
+    }
+    if (x.securityId) {
+      return {
+        type: 'Security',
+        name: x.securityName,
+        image: x.securityFaceImage,
+      };
+    }
+
+    return {
+      type: 'Unknown',
+      name: '-',
+      image: '',
+    };
+  }
+  function formatTime(iso: string) {
+    const d = new Date(iso);
+    return d.toLocaleString('en-GB', { hour12: false });
+  }
+  const { data: data } = useAlarmTriggerList({
+    ...defaultAlarmTriggerFilter,
+    Length: 1,
+    filters: { action: 'Accepted' },
+  });
+  const acceptedAlarm = data?.data?.[0] ?? null;
   const [sessionExpired, setSessionExpired] = useState(false);
   useEffect(() => {
     setSessionExpiredHandler(() => setSessionExpired(true));
@@ -46,6 +94,70 @@ const SecurityViewLayout: FC = () => {
     }
     return () => setSessionExpiredHandler(() => {});
   }, []);
+
+  useEffect(() => {
+    if (acceptedAlarm && acceptedAlarm !== null) {
+      if (!acceptedAlarm.id) return;
+      const person = resolvePerson(acceptedAlarm);
+      const alarm: SecurityAlarmLogItem = {
+        id: acceptedAlarm.id,
+        image: person.image ? `${BASE_URL}${person.image}` : '',
+        name: person.name,
+        beacon: acceptedAlarm.beaconId ?? '-',
+        idleTime: acceptedAlarm.idleTimestamp
+          ? formatTime(acceptedAlarm.idleTimestamp)
+          : '-',
+        triggerTime: acceptedAlarm.triggerTime
+          ? formatTime(acceptedAlarm.triggerTime)
+          : '-',
+        firstGateway: acceptedAlarm.firstGatewayId ?? '-',
+        secondGateway: acceptedAlarm.secondGatewayId ?? '-',
+        action: acceptedAlarm.action ?? 'Unknown',
+        status: acceptedAlarm.alarm ?? 'Unknown',
+        color: acceptedAlarm.alarmColor ?? '#000',
+        buildingName: acceptedAlarm.buildingName ?? '-',
+        floorName: acceptedAlarm.floorName ?? '-',
+        floorplanName: acceptedAlarm.floorplanName ?? '-',
+        lastSeenTime: acceptedAlarm.lastSeenAt
+          ? new Date(acceptedAlarm.lastSeenAt).toLocaleString()
+          : '-',
+      };
+      dispatch(SetFocusAlarm(alarm));
+    }
+  }, [acceptedAlarm]);
+
+  useEffect(() => {
+    if (focusAlarm === null) return;
+
+    const startTopic = `highlight/card/${focusAlarm.beacon}`;
+    const payload = 'Start';
+
+    publishMQTT(startTopic, payload);
+    console.log(`[MQTT] Published Start message to ${startTopic}`);
+
+    const topic = `highlight/positions/${focusAlarm.beacon}`;
+    console.log(`[MQTT] Subscribing to focus alarm topic: ${topic}`);
+
+    const unsubscribe = startMQTTclient((msg: any) => {
+      if (!msg?.floorplanId || !msg?.beaconId) return;
+      const payloadId = msg.beaconId;
+      console.log(`[MQTT] Received message on focus alarm topic: ${topic} with payload:`, msg);
+      if (payloadId !== focusAlarm.beacon) return;
+      dispatch(
+        SetFocusPosition({
+          floorplanName: msg.floorplanName,
+          areaName: msg.maskedAreaName || '',
+          time: msg.time ? formatTime(msg.time) : '',
+        }),
+      );
+    }, topic);
+
+    return () => {
+      console.log(`[MQTT] Unsubscribing from focus alarm topic: ${topic}`);
+      unsubscribe();
+    };
+  }, [focusAlarm]);
+
   return (
     <>
       <SessionExp open={sessionExpired} />

@@ -1,6 +1,17 @@
-import { useQuery, useMutation, useQueryClient, keepPreviousData, UseQueryOptions } from '@tanstack/react-query';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+  UseQueryOptions,
+} from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
-import { AlarmTriggerType, IntruderType, GetFilter, AlarmTimelineType } from 'src/store/apps/crud/alarmTrigger';
+import {
+  AlarmTriggerType,
+  IntruderType,
+  GetFilter,
+  AlarmTimelineType,
+} from 'src/store/apps/crud/alarmTrigger';
 import { RootState, useSelector } from 'src/store/Store';
 
 // -----------------------------------------------------------------------------
@@ -158,20 +169,19 @@ export function useAssignActionAlarmTriggerByID() {
       queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
     },
   });
-};
-
+}
 
 export function useAlarmTimeline(
   id: string,
   options?: Omit<
     UseQueryOptions<
-      AlarmTimelineType,          // TQueryFnData
-      Error,                      // TError
-      AlarmTimelineType,          // TData
+      AlarmTimelineType, // TQueryFnData
+      Error, // TError
+      AlarmTimelineType, // TData
       ['alarmTrigger-timeline', string] // TQueryKey
     >,
     'queryKey' | 'queryFn'
-  >
+  >,
 ) {
   return useQuery({
     queryKey: ['alarmTrigger-timeline', id],
@@ -195,7 +205,7 @@ export function useAlarmTriggerStatus() {
     totalCount: query.data?.recordsTotal || 0,
     filteredCount: query.data?.recordsFiltered || 0,
   };
-};
+}
 
 export function useAcknowledgeAlarmTrigger() {
   const queryClient = useQueryClient();
@@ -207,15 +217,14 @@ export function useAcknowledgeAlarmTrigger() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list'] });
       queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
-
     },
-  })
-};
+  });
+}
 
 export function useDispatchAlarmTrigger() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({id, assignedSecurityId} : {id: string, assignedSecurityId: string}) => {
+    mutationFn: async ({ id, assignedSecurityId }: { id: string; assignedSecurityId: string }) => {
       const res = await axiosServices.put(`${API_URL}${id}/dispatch`, { assignedSecurityId });
       return res.data;
     },
@@ -223,7 +232,7 @@ export function useDispatchAlarmTrigger() {
       queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list'] });
       queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
     },
-  })
+  });
 }
 
 export function useAcceptInvestigate() {
@@ -237,19 +246,19 @@ export function useAcceptInvestigate() {
       queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list'] });
       queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
     },
-  })
+  });
 }
 
 export function useInvestigateAlarmTrigger() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({id, result} : {id: string, result: string}) => {
-      const res = await axiosServices.put(`${API_URL}${id}/investigate`, { result });
+    mutationFn: async ({ id, result, note }: { id: string; result: string; note: string }) => {
+      const res = await axiosServices.put(`${API_URL}${id}/done-investigated`, { investigatedResult : result, InvestigationNotes: note });
       return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list'] });
       queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
     },
-  })
+  });
 }
