@@ -279,7 +279,6 @@ export const ApprovalType: inputDataType[] = [
   {label: "Either Head Security", value: "Or"},
   {label: "Both Head Security", value: "And"},
   {label: "Sequence", value: "Sequential"},
-
 ]
 
 export const investigationResultType: inputDataType[] = [

@@ -17,6 +17,10 @@ import {
   Autocomplete,
   GlobalStyles,
   Tooltip,
+  MenuItem,
+  ToggleButtonGroup,
+  ToggleButton,
+  Menu,
 } from '@mui/material';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
@@ -41,6 +45,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useNavigate } from 'react-router';
 import { IconInfoCircle } from '@tabler/icons-react';
+import { ApprovalType } from 'src/types/crud/input';
 // import '@fullcalendar/daygrid/main.css';
 
 interface CustomDayProps extends PickersDayProps<Dayjs> {
@@ -112,10 +117,6 @@ const PatrolAssignmentEdit = () => {
     };
   }, [securityData]);
 
-  const availableHeadSecurities = useMemo(() => {
-    return securityOptions.head.filter((s) => !formData.headSecurityIds?.includes(s.id));
-  }, [securityOptions.head, formData.headSecurityIds]);
-
   const availableSecurities = useMemo(() => {
     return securityOptions.nonHead.filter((s) => !formData.securityIds?.includes(s.id));
   }, [securityOptions.nonHead, formData.securityIds]);
@@ -137,6 +138,59 @@ const PatrolAssignmentEdit = () => {
   const [securitySearch, setSecuritySearch] = useState<any | null>(null);
   const [securityInputValue, setSecurityInputValue] = useState('');
   const [timeGroupSearch, setTimeGroupSearch] = useState<TimeGroupType | null>(null);
+  const [selectedHeadSecurities, setSelectedHeadSecurities] = useState<string[]>([]);
+
+  const availableHeadSecurities = useMemo(() => {
+    return securityOptions.head.filter((s) => !selectedHeadSecurities?.includes(s.id));
+  }, [securityOptions.head, selectedHeadSecurities]);
+
+  useEffect(() => {
+    console.log('Selected Patrol Assign:', selectedPatrolAssign, formData);
+    if (selectedPatrolAssign?.securityHead1) {
+      const heads = [selectedPatrolAssign.securityHead1.id];
+
+      if (
+        selectedPatrolAssign.securityHead2 &&
+        selectedPatrolAssign.securityHead2.id !== selectedPatrolAssign.securityHead1.id
+      ) {
+        heads.push(selectedPatrolAssign.securityHead2.id);
+      }
+
+      setSelectedHeadSecurities(heads);
+      // console.log('Selected heads:', selectedHeadSecurities);
+    }
+    if (selectedPatrolAssign?.timeGroup) {
+      console.log('Setting time group ID in form data:', selectedPatrolAssign.timeGroup.id);
+      setFormData((prev) => ({
+        ...prev,
+        timeGroupId: selectedPatrolAssign.timeGroup?.id || '',
+      }));
+      setTimeGroupSearch(selectedPatrolAssign.timeGroup as TimeGroupType);
+    }
+  }, [selectedPatrolAssign]);
+
+  const filteredApprovalTypes = useMemo(() => {
+    const headCount = selectedHeadSecurities.length;
+
+    if (headCount <= 1) {
+      return ApprovalType.filter((a) =>
+        ['ByThreatLevel', 'WithoutApproval', 'Or'].includes(a.value),
+      );
+    }
+
+    return ApprovalType;
+  }, [selectedHeadSecurities]);
+
+  useEffect(() => {
+    const validValues = filteredApprovalTypes.map((x) => x.value);
+
+    if (formData.approvalType && !validValues.includes(formData.approvalType)) {
+      setFormData((prev) => ({
+        ...prev,
+        approvalType: validValues[0] ?? '',
+      }));
+    }
+  }, [filteredApprovalTypes]);
 
   const handleInputChange = (
     e:
@@ -171,6 +225,14 @@ const PatrolAssignmentEdit = () => {
     }));
   }, [endDate]);
 
+  useEffect(() => {
+    if (!startDate || !endDate) return;
+
+    if (endDate.isBefore(startDate)) {
+      setEndDate(startDate);
+    }
+  }, [startDate]);
+
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
     if (!formData.name?.trim()) {
@@ -180,7 +242,9 @@ const PatrolAssignmentEdit = () => {
     if (!formData.patrolRouteId) {
       errors.patrolRouteId = 'Patrol Route is required';
     }
-
+    if (selectedHeadSecurities.length === 0) {
+      errors.securityHead1Id = 'Head security is required';
+    }
     if (!formData.securityIds || formData.securityIds.length === 0) {
       errors.securityIds = 'At least one security guard is required';
     }
@@ -191,6 +255,11 @@ const PatrolAssignmentEdit = () => {
     if (!formData.endDate) {
       errors.endDate = 'End time is required';
     }
+
+    if (formData.endDate <= formData.startDate) {
+      errors.endDate = 'End time must be after start time';
+    }
+
     if (
       formData.startDate &&
       formData.endDate &&
@@ -224,8 +293,15 @@ const PatrolAssignmentEdit = () => {
     setIsSaving(true);
 
     try {
-      const payload: Partial<PatrolAssignType> = {
+      const head1 = selectedHeadSecurities[0];
+      const head2 = selectedHeadSecurities[1] ?? head1;
+
+      const payload: any = {
         ...formData,
+
+        securityHead1Id: head1,
+        securityHead2Id: head2,
+
         securityIds: formData.securityIds,
         timeGroupId: formData.timeGroupId,
       };
@@ -250,6 +326,8 @@ const PatrolAssignmentEdit = () => {
     // Reset form to initial state or navigate away
     handleClose();
   };
+
+  //Calendar
 
   const calendarEvents = useMemo(() => {
     if (!startDate || !endDate || !formData.timeGroupId) return [];
@@ -286,6 +364,33 @@ const PatrolAssignmentEdit = () => {
 
     return events;
   }, [startDate, endDate, formData.timeGroupId, timeGroupOptions]);
+
+  //Calendar Function
+  const [calendarMenuAnchor, setCalendarMenuAnchor] = useState<HTMLElement | null>(null);
+  const [calendarSelectedDate, setCalendarSelectedDate] = useState<Dayjs | null>(null);
+
+  const handleCalendarDateClick = (info: any) => {
+    setCalendarSelectedDate(dayjs(info.date));
+    setCalendarMenuAnchor(info.dayEl); // anchor menu to the clicked cell
+  };
+
+  const handleSetStartDate = () => {
+    if (!calendarSelectedDate) return;
+
+    setStartDate(calendarSelectedDate);
+    setCalendarMenuAnchor(null);
+  };
+
+  const handleSetEndDate = () => {
+    if (!calendarSelectedDate) return;
+
+    setEndDate(calendarSelectedDate);
+    setCalendarMenuAnchor(null);
+  };
+
+  const handleCloseCalendarMenu = () => {
+    setCalendarMenuAnchor(null);
+  };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -378,11 +483,12 @@ const PatrolAssignmentEdit = () => {
                 getOptionLabel={(option) => option.name}
                 value={headSearch}
                 inputValue={headInputValue}
+                disabled={selectedHeadSecurities.length >= 2}
                 onInputChange={(e, value) => setHeadInputValue(value)}
                 onChange={(e, value) => {
                   if (!value) return;
 
-                  const current = formData.headSecurityIds || [];
+                  const current = selectedHeadSecurities || [];
 
                   if (current.length >= 2) {
                     toast.error('Max 2 Head Security');
@@ -390,10 +496,11 @@ const PatrolAssignmentEdit = () => {
                   }
 
                   if (!current.includes(value.id)) {
-                    setFormData((prev) => ({
-                      ...prev,
-                      headSecurityIds: [...current, value.id],
-                    }));
+                    // setFormData((prev) => ({
+                    //   ...prev,
+                    //   headSecurityIds: [...current, value.id],
+                    // }));
+                    setSelectedHeadSecurities((prev) => [...prev, value.id]);
                   }
 
                   setHeadSearch(null);
@@ -415,7 +522,7 @@ const PatrolAssignmentEdit = () => {
                   borderRadius: 1,
                 }}
               >
-                {formData.headSecurityIds?.map((id) => {
+                {selectedHeadSecurities?.map((id) => {
                   const sec = securityOptions.head.find((s) => s.id === id);
 
                   return (
@@ -426,10 +533,11 @@ const PatrolAssignmentEdit = () => {
                           size="small"
                           color="error"
                           onClick={() => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              headSecurityIds: prev.headSecurityIds?.filter((x) => x !== id),
-                            }));
+                            // setFormData((prev) => ({
+                            //   ...prev,
+                            //   headSecurityIds: prev.headSecurityIds?.filter((x) => x !== id),
+                            // }));
+                            setSelectedHeadSecurities((prev) => prev.filter((x) => x !== id));
                           }}
                         >
                           <DeleteIcon />
@@ -441,6 +549,26 @@ const PatrolAssignmentEdit = () => {
                   );
                 })}
               </List>
+              <CustomFormLabel sx={{ mt: 2 }}>Approval Type</CustomFormLabel>
+
+              <CustomTextField
+                select
+                fullWidth
+                value={formData.approvalType || ''}
+                disabled={selectedHeadSecurities.length === 0}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    approvalType: e.target.value,
+                  }))
+                }
+              >
+                {filteredApprovalTypes.map((opt) => (
+                  <MenuItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </MenuItem>
+                ))}
+              </CustomTextField>
             </Paper>
 
             {/* SECURITY */}
@@ -540,6 +668,7 @@ const PatrolAssignmentEdit = () => {
                   value={startDate}
                   onChange={(v) => setStartDate(v)}
                   format="DD/MM/YYYY"
+                  // maxDate={endDate ?? undefined}
                 />
 
                 <DatePicker
@@ -547,6 +676,7 @@ const PatrolAssignmentEdit = () => {
                   value={endDate}
                   onChange={(v) => setEndDate(v)}
                   format="DD/MM/YYYY"
+                  minDate={startDate ?? undefined}
                 />
               </Box>
             </Paper>
@@ -633,6 +763,171 @@ const PatrolAssignmentEdit = () => {
               />
             </Paper>
 
+            {/* EXECUTION SETTINGS */}
+            <Paper
+              sx={{
+                p: 2.5,
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 2,
+              }}
+            >
+              <Typography fontWeight={700} mb={1}>
+                Patrol Settings
+              </Typography>
+
+              {/* APPROVAL TYPE */}
+              {/* <CustomFormLabel>Approval Type</CustomFormLabel>
+
+  <CustomTextField
+    select
+    fullWidth
+    value={formData.approvalType || ""}
+    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+      setFormData((prev) => ({
+        ...prev,
+        approvalType: e.target.value,
+      }))
+    }
+  >
+    {ApprovalType.map((opt) => (
+      <MenuItem key={opt.value} value={opt.value}>
+        {opt.label}
+      </MenuItem>
+    ))}
+  </CustomTextField> */}
+
+              {/* DURATION TYPE */}
+              <CustomFormLabel sx={{ mt: 2 }}>Duration</CustomFormLabel>
+
+              <ToggleButtonGroup
+                exclusive
+                fullWidth
+                value={formData.durationType}
+                color="primary"
+                onChange={(e, value) => {
+                  if (!value) return;
+                  setFormData((prev) => ({
+                    ...prev,
+                    durationType: value,
+                  }));
+                }}
+                size="small"
+                sx={{
+                  '& .MuiToggleButton-root': {
+                    borderColor: 'divider',
+                    color: 'text.primary',
+                    textTransform: 'none',
+                  },
+
+                  '& .MuiToggleButton-root.Mui-selected': {
+                    backgroundColor: 'primary.main',
+                    color: 'white',
+                    borderColor: 'primary.main',
+                  },
+
+                  '& .MuiToggleButton-root.Mui-selected:hover': {
+                    backgroundColor: 'primary.dark',
+                  },
+                }}
+              >
+                <ToggleButton value="NoDuration">No Duration</ToggleButton>
+                <ToggleButton value="WithDuration">With Duration</ToggleButton>
+              </ToggleButtonGroup>
+
+              {/* START TYPE */}
+              <CustomFormLabel sx={{ mt: 2 }}>Start Type</CustomFormLabel>
+
+              <ToggleButtonGroup
+                exclusive
+                fullWidth
+                value={formData.startType}
+                color="primary"
+                onChange={(e, value) => {
+                  if (!value) return;
+                  setFormData((prev) => ({
+                    ...prev,
+                    startType: value,
+                  }));
+                }}
+                size="small"
+                sx={{
+                  '& .MuiToggleButton-root': {
+                    borderColor: 'divider',
+                    color: 'text.primary',
+                    textTransform: 'none',
+                  },
+
+                  '& .MuiToggleButton-root.Mui-selected': {
+                    backgroundColor: 'primary.main',
+                    color: 'white',
+                    borderColor: 'primary.main',
+                  },
+
+                  '& .MuiToggleButton-root.Mui-selected:hover': {
+                    backgroundColor: 'primary.dark',
+                  },
+                }}
+              >
+                <ToggleButton value="Manual">Manual</ToggleButton>
+                <ToggleButton value="AutoStart">Auto Start</ToggleButton>
+              </ToggleButtonGroup>
+
+              {/* CYCLE TYPE */}
+              <CustomFormLabel sx={{ mt: 2 }}>Cycle Type</CustomFormLabel>
+
+              <ToggleButtonGroup
+                exclusive
+                fullWidth
+                value={formData.cycleType}
+                color="primary"
+                onChange={(e, value) => {
+                  if (!value) return;
+                  setFormData((prev) => ({
+                    ...prev,
+                    cycleType: value,
+                  }));
+                }}
+                size="small"
+                sx={{
+                  '& .MuiToggleButton-root': {
+                    borderColor: 'divider',
+                    color: 'text.primary',
+                    textTransform: 'none',
+                  },
+
+                  '& .MuiToggleButton-root.Mui-selected': {
+                    backgroundColor: 'primary.main',
+                    color: 'white',
+                    borderColor: 'primary.main',
+                  },
+
+                  '& .MuiToggleButton-root.Mui-selected:hover': {
+                    backgroundColor: 'primary.dark',
+                  },
+                }}
+              >
+                <ToggleButton value="HalfCycle">Half Cycle</ToggleButton>
+                <ToggleButton value="FullCycle">Full Cycle</ToggleButton>
+              </ToggleButtonGroup>
+
+              {/* CYCLE COUNT */}
+              <CustomFormLabel sx={{ mt: 2 }}>Cycle Count</CustomFormLabel>
+
+              <CustomTextField
+                type="number"
+                fullWidth
+                inputProps={{ min: 1 }}
+                value={formData.cycleCount ?? 1}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    cycleCount: Number(e.target.value),
+                  }))
+                }
+              />
+            </Paper>
+
             {/* STICKY FOOTER */}
             <Box
               sx={{
@@ -677,6 +972,7 @@ const PatrolAssignmentEdit = () => {
               height="100%"
               fixedWeekCount={false}
               events={calendarEvents}
+              dateClick={handleCalendarDateClick}
               dayCellClassNames={(arg) => {
                 if (!startDate || !endDate) return [];
 
@@ -709,6 +1005,48 @@ const PatrolAssignmentEdit = () => {
                 </div>
               )}
             />
+            <Menu
+              anchorEl={calendarMenuAnchor}
+              open={Boolean(calendarMenuAnchor)}
+              onClose={handleCloseCalendarMenu}
+              anchorOrigin={{
+                vertical: 'center',
+                horizontal: 'center',
+              }}
+              transformOrigin={{
+                vertical: 'center',
+                horizontal: 'center',
+              }}
+              PaperProps={{
+                sx: {
+                  minWidth: 160,
+                  borderRadius: 2,
+                  p: 0.5,
+                },
+              }}
+            >
+              <Box sx={{ px: 2, py: 1, backgroundColor: 'primary.light' }}>
+                <Typography variant="caption" fontWeight={700} color="text.secondary">
+                  Options
+                </Typography>
+              </Box>
+
+              <MenuItem
+                onClick={handleSetStartDate}
+                disabled={endDate && calendarSelectedDate?.isAfter(endDate) === true ? true : false}
+              >
+                Set as Start Date
+              </MenuItem>
+
+              <MenuItem
+                onClick={handleSetEndDate}
+                disabled={
+                  startDate && calendarSelectedDate?.isBefore(startDate) === true ? true : false
+                }
+              >
+                Set as End Date
+              </MenuItem>
+            </Menu>
           </Paper>
         </Grid>
       </Grid>

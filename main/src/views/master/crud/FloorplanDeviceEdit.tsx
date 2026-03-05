@@ -15,22 +15,22 @@ const FloorplanDeviceEdit = () => {
   );
   const drawingPath = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.drawingDevicePath,
-  )
+  );
   const selectedFloorplan = useSelector(
     (state: RootState) => state.floorplanReducer.selectedFloorplan,
   );
-    useEffect(() => {
+  useEffect(() => {
     if (selectedFloorplan) {
       setLoading(false);
     } else {
       setLoading(true);
     }
   }, [selectedFloorplan]);
-  if(!selectedFloorplan && !loading) {
+  if (!selectedFloorplan && !loading) {
     window.location.href = '/master/device';
   }
 
-    if (loading) {
+  if (loading) {
     return (
       <PageContainer title="Floorplan Device" description="this is floorplan device page">
         <AppCard>
@@ -56,30 +56,29 @@ const FloorplanDeviceEdit = () => {
             isMobileSidebarOpen={isMobileSidebarOpen}
             onSidebarClose={() => setMobileSidebarOpen(false)}
           />
-                  {(editingDevice && !drawingPath) && (
-          <Box
-            position="absolute"
-            // top={140}
-            left={285}
-            height='90vh'
-            maxHeight={855}
-            zIndex={1}
-            sx={{
-              boxShadow: '-2px 0px 8px rgba(0,0,0,0.15)', // Add shadow for visual separation
-            }}
-          >
-            <DeviceDetailSidebar
-              isEditingSidebarOpen={isMobileSidebarOpen}
-              onEditingSidebarClose={() => setMobileSidebarOpen(false)}
-            />
-          </Box>
-        )}
+          {editingDevice && !drawingPath && (
+            <Box
+              position="absolute"
+              // top={140}
+              left={285}
+              height="90vh"
+              maxHeight={855}
+              zIndex={1}
+              sx={{
+                boxShadow: '-2px 0px 8px rgba(0,0,0,0.15)', // Add shadow for visual separation
+              }}
+            >
+              <DeviceDetailSidebar
+                isEditingSidebarOpen={isMobileSidebarOpen}
+                onEditingSidebarClose={() => setMobileSidebarOpen(false)}
+              />
+            </Box>
+          )}
         </Box>
 
         <Box flexGrow={1}>
           <EditDeviceFloorView zoomable />
         </Box>
-
       </AppCard>
     </PageContainer>
   );
