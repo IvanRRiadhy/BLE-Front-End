@@ -21,6 +21,10 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   Menu,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
@@ -31,7 +35,11 @@ import {
   SecurityType,
   SelectPatrolAssign,
 } from 'src/store/apps/crud/patrolRoute';
-import { useEditPatrolAssign, usePatrolAssign } from 'src/hooks/usePatrolRoute';
+import {
+  useAssignmentReplacement,
+  useEditPatrolAssign,
+  usePatrolAssign,
+} from 'src/hooks/usePatrolRoute';
 import { useAllSecurityLookup, useAllSecuritys } from 'src/hooks/useSecurityGuard';
 import dayjs, { Dayjs } from 'dayjs';
 import { LocalizationProvider, DatePicker, DateCalendar } from '@mui/x-date-pickers';
@@ -390,6 +398,56 @@ const PatrolAssignmentEdit = () => {
 
   const handleCloseCalendarMenu = () => {
     setCalendarMenuAnchor(null);
+  };
+
+  //Shift Replacement
+  const ReplacementMutation = useAssignmentReplacement();
+  const [openShiftReplacement, setOpenShiftReplacement] = useState(false);
+
+  const [replacementForm, setReplacementForm] = useState({
+    originalSecurityId: '',
+    substituteSecurityId: '',
+    replacementStartDate: null as Dayjs | null,
+    replacementEndDate: null as Dayjs | null,
+    reason: '',
+  });
+
+  const originalSecurityOptions = useMemo(() => {
+    return securityOptions.nonHead.filter((s) => formData.securityIds?.includes(s.id));
+  }, [securityOptions.nonHead, formData.securityIds]);
+
+  const substituteSecurityOptions = useMemo(() => {
+    return securityOptions.nonHead.filter((s) => !formData.securityIds?.includes(s.id));
+  }, [securityOptions.nonHead, formData.securityIds]);
+
+  const handleSubmitReplacement = async () => {
+    try {
+      if (selectedPatrolAssign?.id === undefined)
+        return toast.error('Please select a patrol assignment');
+      if (replacementForm.replacementStartDate === null)
+        return toast.error('Please select a replacement start date');
+      if (replacementForm.replacementEndDate === null)
+        return toast.error('Please select a replacement end date');
+      const payload = {
+        patrolAssignmentId: selectedPatrolAssign?.id,
+        originalSecurityId: replacementForm.originalSecurityId,
+        substituteSecurityId: replacementForm.substituteSecurityId,
+        replacementStartDate: replacementForm.replacementStartDate?.format('YYYY-MM-DD'),
+        replacementEndDate: replacementForm.replacementEndDate?.format('YYYY-MM-DD'),
+        reason: replacementForm.reason,
+      };
+
+      console.log('Replacement Payload', payload);
+      await ReplacementMutation.mutateAsync(payload);
+
+      // await createShiftReplacement(payload)
+
+      toast.success('Shift replacement created');
+
+      setOpenShiftReplacement(false);
+    } catch (err) {
+      toast.error('Failed to create replacement');
+    }
   };
 
   return (
@@ -1046,8 +1104,125 @@ const PatrolAssignmentEdit = () => {
               >
                 Set as End Date
               </MenuItem>
+              {mode === 'edit' && (
+                <MenuItem
+                  onClick={() => {
+                    if (!calendarSelectedDate) return;
+
+                    setReplacementForm((prev) => ({
+                      ...prev,
+                      replacementStartDate: calendarSelectedDate.startOf('day'),
+                      replacementEndDate: calendarSelectedDate.endOf('day'),
+                    }));
+
+                    setCalendarMenuAnchor(null);
+                    setOpenShiftReplacement(true);
+                  }}
+                >
+                  Shift Replacement
+                </MenuItem>
+              )}
             </Menu>
           </Paper>
+          <Dialog
+            open={openShiftReplacement}
+            onClose={() => setOpenShiftReplacement(false)}
+            maxWidth="sm"
+            fullWidth
+          >
+            <DialogTitle>Shift Replacement</DialogTitle>
+
+            <DialogContent>
+              {/* ORIGINAL SECURITY */}
+              <CustomFormLabel>Original Security</CustomFormLabel>
+
+              <Autocomplete
+                options={originalSecurityOptions}
+                getOptionLabel={(opt) => opt.name}
+                onChange={(e, value) =>
+                  setReplacementForm((prev) => ({
+                    ...prev,
+                    originalSecurityId: value?.id || '',
+                  }))
+                }
+                renderInput={(params) => (
+                  <CustomTextField {...params} placeholder="Select security" />
+                )}
+              />
+
+              {/* SUBSTITUTE SECURITY */}
+
+              <CustomFormLabel sx={{ mt: 2 }}>Substitute Security</CustomFormLabel>
+
+              <Autocomplete
+                options={substituteSecurityOptions}
+                getOptionLabel={(opt) => opt.name}
+                onChange={(e, value) =>
+                  setReplacementForm((prev) => ({
+                    ...prev,
+                    substituteSecurityId: value?.id || '',
+                  }))
+                }
+                renderInput={(params) => (
+                  <CustomTextField {...params} placeholder="Select substitute security" />
+                )}
+              />
+
+              {/* START DATE */}
+
+              <CustomFormLabel sx={{ mt: 2 }}>Replacement Start</CustomFormLabel>
+
+              <DatePicker
+                disabled
+                value={replacementForm.replacementStartDate}
+                format="DD/MM/YYYY"
+              />
+
+              {/* END DATE */}
+
+              <CustomFormLabel sx={{ mt: 2 }}>Replacement End</CustomFormLabel>
+
+              <DatePicker
+                value={replacementForm.replacementEndDate}
+                minDate={replacementForm.replacementStartDate ?? undefined}
+                onChange={(v) =>
+                  setReplacementForm((prev) => ({
+                    ...prev,
+                    replacementEndDate: v,
+                  }))
+                }
+                format="DD/MM/YYYY"
+              />
+
+              {/* REASON */}
+
+              <CustomFormLabel sx={{ mt: 2 }}>Reason</CustomFormLabel>
+
+              <CustomTextField
+                multiline
+                minRows={3}
+                fullWidth
+                value={replacementForm.reason}
+                onChange={(e: any) =>
+                  setReplacementForm((prev) => ({
+                    ...prev,
+                    reason: e.target.value,
+                  }))
+                }
+                placeholder="Enter reason"
+              />
+            </DialogContent>
+
+            <DialogActions>
+              <Button variant="outlined" onClick={() => setOpenShiftReplacement(false)}>
+                Cancel
+              </Button>
+
+              <Button variant="contained" onClick={handleSubmitReplacement}>
+                Save Replacement
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Grid>
       </Grid>
     </LocalizationProvider>

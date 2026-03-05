@@ -23,12 +23,9 @@ function mapPatrolRoute(route: any): PatrolRouteType {
   return {
     ...route,
     patrolAreaIds: route.patrolAreas?.map((a: any) => a.patrolAreaId) ?? [],
-    timeGroupIds: route.patrolTimeGroups?.map(
-      (tg: any) => tg.timeGroupId
-    ) ?? [],
+    timeGroupIds: route.patrolTimeGroups?.map((tg: any) => tg.timeGroupId) ?? [],
   };
 }
-
 
 export function usePatrolRouteList(filter: GetFilter) {
   return useQuery({
@@ -37,18 +34,18 @@ export function usePatrolRouteList(filter: GetFilter) {
       const response = await axiosServices.post(API_DT_URL, filter);
       return response.data.collection;
     },
-    select: (collection) => ({
-      data: collection.data.map(mapPatrolRoute),
-      draw: collection.draw,
-      recordsTotal: collection.recordsTotal,
-      recordsFiltered: collection.recordsFiltered,
-    }) satisfies PaginatedResponse<PatrolRouteType>,
+    select: (collection) =>
+      ({
+        data: collection.data.map(mapPatrolRoute),
+        draw: collection.draw,
+        recordsTotal: collection.recordsTotal,
+        recordsFiltered: collection.recordsFiltered,
+      }) satisfies PaginatedResponse<PatrolRouteType>,
     placeholderData: keepPreviousData,
     staleTime: 5_000,
     gcTime: 5 * 60_000,
   });
 }
-
 
 export function useAllPatrolRoute() {
   return useQuery({
@@ -62,7 +59,6 @@ export function useAllPatrolRoute() {
   });
 }
 
-
 export function usePatrolRouteId(id: string) {
   return useQuery({
     queryKey: ['patrol-route-id', id],
@@ -74,7 +70,6 @@ export function usePatrolRouteId(id: string) {
     enabled: !!id,
   });
 }
-
 
 export function useAddPatrolRoute() {
   const queryClient = useQueryClient();
@@ -211,10 +206,10 @@ export function usePatrolAssign() {
     mutationFn: async (patrolAssignment: Partial<PatrolAssignType>) => {
       const {
         id,
-        headSecurityIds,
         patrolRoute,
         timeGroup,
-        headSecurities,
+        securityHead1,
+        securityHead2,
         securities,
         applicationId,
         status,
@@ -272,6 +267,28 @@ export function useDeletePatrolAssign() {
     mutationFn: async (id: string) => {
       await axiosServices.delete(`${API_URL_PATROL_ASSIGN}${id}`);
       return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-all'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-list'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-id'] });
+    },
+  });
+}
+
+export function useAssignmentReplacement() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {
+      patrolAssignmentId: string;
+      originalSecurityId: string;
+      substituteSecurityId: string;
+      replacementStartDate: string;
+      replacementEndDate: string;
+      reason: string;
+    }) => {
+      const res = await axiosServices.post(`${API_URL_PATROL_ASSIGN}replacement`, payload);
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['patrol-assignment-all'] });
