@@ -22,6 +22,10 @@ import {
 import { defaultTimeGroupFilter } from 'src/store/apps/defaultForm';
 import { useAddTimeGroup, useEditTimeGroup, useAddTimeBlock } from 'src/hooks/useTimeGroup';
 import toast from 'react-hot-toast';
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
 
 const daysOfWeek: TimeBlockType['dayOfWeek'][] = [
   'Sunday',
@@ -66,30 +70,36 @@ export const TimeGridSelector = ({
   });
 
   // ---------------- Helpers ----------------
-  const makeBlock = (
-    dayIndex: number,
-    startHour: number,
-    endHour: number,
-    existingBlocks: TimeBlockType[],
-  ): TimeBlockType => {
-    const startTime = `${timeSlots[startHour]}:00`;
-    const endHourAdjusted = endHour - 1; // because endHour is exclusive
-    const endTime = `${endHourAdjusted.toString().padStart(2, '0')}:59:59.999`;
+const makeBlock = (
+  dayIndex: number,
+  startHour: number,
+  endHour: number,
+  existingBlocks: TimeBlockType[],
+): TimeBlockType => {
 
-    const match = existingBlocks.find(
-      (b) =>
-        daysOfWeek.indexOf(b.dayOfWeek) === dayIndex &&
-        b.startTime === startTime &&
-        b.endTime === endTime,
-    );
+  const startLocal = dayjs(`1970-01-01T${startHour.toString().padStart(2,"0")}:00:00`);
+  const endLocal = dayjs(`1970-01-01T${(endHour-1).toString().padStart(2,"0")}:59:59.999`);
 
-    return {
-      id: match ? match.id : `block-${dayIndex}-${startHour}`, // keep old id or temp
-      dayOfWeek: daysOfWeek[dayIndex],
-      startTime,
-      endTime,
-    };
+  const startUTC = startLocal.utc();
+  const endUTC = endLocal.utc();
+
+  const startTime = startUTC.format("HH:mm:ss");
+  const endTime = endUTC.format("HH:mm:ss.SSS");
+
+  const match = existingBlocks.find(
+    (b) =>
+      daysOfWeek.indexOf(b.dayOfWeek) === dayIndex &&
+      b.startTime === startTime &&
+      b.endTime === endTime,
+  );
+
+  return {
+    id: match ? match.id : `block-${dayIndex}-${startHour}`,
+    dayOfWeek: daysOfWeek[dayIndex],
+    startTime,
+    endTime,
   };
+};
 
   const convertCellsToBlocks = useCallback(
     (cells: Record<string, boolean>, existingBlocks: TimeBlockType[] = []): TimeBlockType[] => {
@@ -133,25 +143,30 @@ export const TimeGridSelector = ({
   );
 
   // ---------------- Init from props ----------------
-  useEffect(() => {
-    if (initialData.length > 0) {
-      const newSelected: Record<string, boolean> = {};
-      initialData.forEach((block) => {
-        if (!block.startTime || !block.endTime) return;
-        const dayIndex = daysOfWeek.indexOf(block.dayOfWeek);
-        const startHour = parseInt(block.startTime.split(':')[0], 10);
-        const endHourRaw = parseInt(block.endTime.split(':')[0], 10);
+useEffect(() => {
+  if (!initialData.length) {
+    setSelectedCells({});
+    return;
+  }
 
-        // because endTime is HH:59:59.xxx, we must include that hour
-        const endHour = endHourRaw + 1;
+  const newSelected: Record<string, boolean> = {};
 
-        for (let h = startHour; h < endHour; h++) newSelected[`${dayIndex}-${h}`] = true;
-      });
-      setSelectedCells(newSelected);
-    } else {
-      setSelectedCells({});
+  initialData.forEach((block) => {
+    const dayIndex = daysOfWeek.indexOf(block.dayOfWeek);
+
+    const startLocal = dayjs.utc(`1970-01-01T${block.startTime}`).local();
+    const endLocal = dayjs.utc(`1970-01-01T${block.endTime}`).local();
+
+    const startHour = startLocal.hour();
+    const endHour = endLocal.hour() + 1;
+
+    for (let h = startHour; h < endHour; h++) {
+      newSelected[`${dayIndex}-${h}`] = true;
     }
-  }, [initialData]);
+  });
+
+  setSelectedCells(newSelected);
+}, [initialData]);
 
   // ---------------- Mouse events ----------------
   const handleCellClick = useCallback(
@@ -232,8 +247,9 @@ export const TimeGridSelector = ({
     if (!selectedTimeGroup) return;
 
     const normalizedBlocks = selectedTimeGroup.timeBlocks.map((b: TimeBlockType) => ({
-      ...b,
       dayOfWeek: b.dayOfWeek.toLowerCase(),
+      startTime: b.startTime, 
+      endTime: b.endTime,
       id: b.id.startsWith('block-') ? '' : b.id, // remove temp id
     }));
 

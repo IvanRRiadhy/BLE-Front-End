@@ -66,9 +66,11 @@ export type PatrolAssignType = {
   patrolRouteId: string;
   startDate: string;
   endDate: string;
+  headSecurityIds?: string[];
   securityIds: string[];
   timeGroupId: string;
   patrolRoute?: PatrolRouteType;
+  headSecurities?: SecurityType[];
   securities?: SecurityType[];
   timeGroup?: PatrolTimeGroups;
   applicationId?: string;
@@ -130,13 +132,13 @@ export const PatrolRouteSlice = createSlice({
     GetAllPatrolRoute: (state, action: PayloadAction<PatrolRouteType[]>) => {
       state.patrolRouteAll = action.payload;
     },
-    SelectPatrolRoute: (state, action: PayloadAction<PatrolRouteType>) => {
+    SelectPatrolRoute: (state, action: PayloadAction<PatrolRouteType | null>) => {
       state.selectedPatrolRoute = action.payload;
-      state.selectedPatrolRouteId = action.payload.id;
+      state.selectedPatrolRouteId = action.payload?.id || '';
     },
-    SelectPatrolAssign: (state, action: PayloadAction<PatrolAssignType>) => {
+    SelectPatrolAssign: (state, action: PayloadAction<PatrolAssignType | null>) => {
       state.selectedPatrolAssign = action.payload;
-      state.selectedPatrolAssignId = action.payload.id;
+      state.selectedPatrolAssignId = action.payload?.id || '';
     },
     UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
       state.patrolRouteFilter = { ...state.patrolRouteFilter, ...action.payload };

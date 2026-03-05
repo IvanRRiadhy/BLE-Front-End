@@ -253,7 +253,35 @@ export function useInvestigateAlarmTrigger() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, result, note }: { id: string; result: string; note: string }) => {
-      const res = await axiosServices.put(`${API_URL}${id}/done-investigated`, { investigatedResult : result, InvestigationNotes: note });
+      const res = await axiosServices.put(`${API_URL}${id}/done-investigated`, {
+        investigatedResult: result,
+        InvestigationNotes: note,
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list'] });
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
+    },
+  });
+}
+
+export function usePostponeAlarmTrigger() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      postponedUntilDate,
+      postponeReason,
+    }: {
+      id: string;
+      postponedUntilDate: string;
+      postponeReason: string;
+    }) => {
+      const res = await axiosServices.put(`${API_URL}${id}/postpone-investigated`, {
+        postponedUntilDate,
+        postponeReason,
+      });
       return res.data;
     },
     onSuccess: () => {

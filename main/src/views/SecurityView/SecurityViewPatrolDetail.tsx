@@ -5,10 +5,10 @@ import { useSearchParams, useNavigate } from 'react-router';
 import { useEffect } from 'react';
 
 const SecurityViewPatrolPage = () => {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  // const [searchParams] = useSearchParams();
+  // const navigate = useNavigate();
 
-  const id = searchParams.get('id');
+  // const id = searchParams.get('id');
 
   // If no id in URL → redirect back to list
   // useEffect(() => {

@@ -211,8 +211,10 @@ export function usePatrolAssign() {
     mutationFn: async (patrolAssignment: Partial<PatrolAssignType>) => {
       const {
         id,
+        headSecurityIds,
         patrolRoute,
         timeGroup,
+        headSecurities,
         securities,
         applicationId,
         status,

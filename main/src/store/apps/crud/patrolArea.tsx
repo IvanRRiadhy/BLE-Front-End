@@ -38,13 +38,13 @@ export type PatrolAreaType = {
   areaShape: string;
   color: string;
   floorplanId: string;
-  floorplanName: string;
+  floorplanName?: string;
   floorId: string;
-  floorName: string;
+  floorName?: string;
   isActive: boolean;
   nodes?: Nodes[];
-  status: number;
-  applicationId: string;
+  status?: number;
+  applicationId?: string;
 };
 
 interface StateType {

@@ -1,13 +1,13 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
 import { RootState, useSelector } from 'src/store/Store';
-import { userType, GetFilter, userGroupType } from 'src/store/apps/crud/users';
+import { userType, GetFilter, userGroupType, userRegistrationType } from 'src/store/apps/crud/users';
 
 // -----------------------------------------------------------------------------
 // ✅ API URLs
 // -----------------------------------------------------------------------------
 const API_URL = '/api/Auth/users';
-const API_DT_URL = '/api/user/filter';
+const API_DT_URL = '/api/user';
 const REGIST_URL = '/api/Auth/register/';
 const GROUP_URL = '/api/UserGroup';
 const AssignBuilding = '/api/access';
@@ -42,7 +42,7 @@ export function useUserList(filter: GetFilter) {
   return useQuery({
     queryKey: ['user-list', filter],
     queryFn: async () => {
-      const res = await axiosServices.post(`${API_DT_URL}`, filter);
+      const res = await axiosServices.post(`${API_DT_URL}/filter`, filter);
       const col = res.data.collection;
 
       return {
@@ -62,13 +62,30 @@ export function useUserList(filter: GetFilter) {
 export function useRegisterUser() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { email: string; GroupId: string; username: string }) => {
+    mutationFn: async (payload: userRegistrationType) => {
       const res = await axiosServices.post(REGIST_URL, payload);
       console.log('Adding Result', res);
       return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-all'] });
+    },
+  });
+}
+
+// -----------------------------------------------------------------------------
+// ✅ EDIT USER
+// -----------------------------------------------------------------------------
+export function useEditUser() {
+  const queryClient = useQueryClient();
+  return useMutation({ 
+    mutationFn: async ({payload, id} : {payload: userRegistrationType, id: string})  => {
+      const res = await axiosServices.put(`${API_DT_URL}/${id}`, payload);
+      console.log('Editing Result', res);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-all', 'user-list'] });
     },
   });
 }
@@ -94,7 +111,7 @@ export function useAllUserGroups() {
 export function useAddUserGroup() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { name: string; levelPriority: string }) => {
+    mutationFn: async (payload: { name: string; levelPriority: string; isHead: boolean }) => {
       const res = await axiosServices.post(GROUP_URL, payload);
       console.log('Adding Result', res);
       return res.data;

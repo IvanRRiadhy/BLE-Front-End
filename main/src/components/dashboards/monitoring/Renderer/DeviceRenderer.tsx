@@ -448,7 +448,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
       const payloadId = msg.beaconId;
 
       if (payloadId !== focusBeaconId) return;
-
+      // console.log(`[MQTT] Received message on highlight topic: ${topic} with payload:`, msg);
       setHighlightedFloorplan(msg.floorplanId);
       setHighlightedArea(msg.area || null);
     }, topic);

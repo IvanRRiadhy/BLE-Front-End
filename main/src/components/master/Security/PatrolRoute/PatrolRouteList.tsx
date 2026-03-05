@@ -32,10 +32,18 @@ import {
   IconInfoCircle,
   IconInfoHexagon,
   IconQuestionMark,
+  IconSettings,
   IconTrash,
+  IconUserCheck,
 } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import { PatrolAssignType, PatrolRouteType, UpdateFilter } from 'src/store/apps/crud/patrolRoute';
+import {
+  PatrolAssignType,
+  PatrolRouteType,
+  SelectPatrolAssign,
+  SelectPatrolRoute,
+  UpdateFilter,
+} from 'src/store/apps/crud/patrolRoute';
 
 // import AddEditPatrolRoute from './AddEditPatrolRoute';
 import toast from 'react-hot-toast';
@@ -48,6 +56,7 @@ import {
 import AddEditPatrolRoute from './AddEditPatrolRoute';
 import AssignPatrol from './AssignPatrol';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 
 const columns = [
   // { label: '', field: 'expand', sortAble: false },
@@ -63,6 +72,7 @@ const SKELETON_ROWS = 5;
 const PatrolRouteList = () => {
   const dispatch: AppDispatch = useDispatch();
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const patrolRouteFilter = useSelector(
     (state: RootState) => state.PatrolRouteReducer.patrolRouteFilter,
   );
@@ -236,6 +246,15 @@ const PatrolRouteList = () => {
     handleCloseDeleteDialogAssignment();
   };
 
+  const handleAssignmentSetting = (route: PatrolRouteType, assign?: PatrolAssignType) => {
+    if (assign) {
+      dispatch(SelectPatrolAssign(assign));
+    }
+
+    dispatch(SelectPatrolRoute(route));
+    navigate(`/master/patrolassignment/edit`);
+  };
+
   const PatrolAssignmentAccordionRow = ({ routeId }: { routeId: string }) => {
     const { data, isLoading } = usePatrolAssignmentByRoute(routeId, patrolAssignmentFilter);
 
@@ -289,13 +308,17 @@ const PatrolRouteList = () => {
               <TableCell>
                 {assign.securities?.length}
                 {
-                
-                <Tooltip title={assign.securities?.map((security: { name: string }) => security.name)?.join(', ')} >
-                  <IconButton size="small">
-                    <IconEye size={18} />
-                  </IconButton>
-                </Tooltip>
-                }</TableCell>
+                  <Tooltip
+                    title={assign.securities
+                      ?.map((security: { name: string }) => security.name)
+                      ?.join(', ')}
+                  >
+                    <IconButton size="small">
+                      <IconEye size={18} />
+                    </IconButton>
+                  </Tooltip>
+                }
+              </TableCell>
 
               {/* ACTION */}
               <TableCell
@@ -311,6 +334,13 @@ const PatrolRouteList = () => {
                   patrolRouteId={assign.patrolRouteId}
                   patrolAssign={assign}
                 />
+                <IconButton
+                  color="primary"
+                  size="small"
+                  onClick={() => handleAssignmentSetting(assign.patrolRoute!, assign)}
+                >
+                  <IconSettings size={18} />
+                </IconButton>
                 <IconButton
                   color="error"
                   size="small"
@@ -383,63 +413,67 @@ const PatrolRouteList = () => {
                 <TableBody>
                   {queryLoading
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
-                    : patrolRouteData.map(
-                        (patrolRoute: PatrolRouteType, index: number) => {
-                          const isOpen = openRowId === patrolRoute.id;
-                          return (
-                            <React.Fragment key={patrolRoute.id}>
-                              {/* MAIN ROW */}
-                              <TableRow hover>
-                                <TableCell width={40}>
-                                  <Tooltip title={isOpen ? 'Hide Assignments' : 'Show Assignments'}>
-                                    <IconButton
-                                      size="small"
-                                      onClick={() => toggleRow(patrolRoute.id)}
-                                    >
-                                      {isOpen ? <IconChevronDown /> : <IconChevronRight />}
-                                    </IconButton>
-                                  </Tooltip>
-                                </TableCell>
-                                <TableCell>{patrolRoute.name}</TableCell>
-                                <TableCell>{patrolRoute.description}</TableCell>
-                                <TableCell>{patrolRoute.patrolAreas?.length ?? 0}</TableCell>
-                                <TableCell>{patrolRoute.startAreaName ?? '-'}</TableCell>
-                                <TableCell>{patrolRoute.endAreaName ?? '-'}</TableCell>
-                                <TableCell
-                                  sx={{
-                                    position: 'sticky',
-                                    right: 0,
-                                    background: 'white',
-                                  }}
-                                >
-                                  <AddEditPatrolRoute patrolRoute={patrolRoute} type="edit" />
-                                  <AssignPatrol patrolRouteId={patrolRoute.id} type="add" />
+                    : patrolRouteData.map((patrolRoute: PatrolRouteType, index: number) => {
+                        const isOpen = openRowId === patrolRoute.id;
+                        return (
+                          <React.Fragment key={patrolRoute.id}>
+                            {/* MAIN ROW */}
+                            <TableRow hover>
+                              <TableCell width={40}>
+                                <Tooltip title={isOpen ? 'Hide Assignments' : 'Show Assignments'}>
                                   <IconButton
-                                    color="error"
                                     size="small"
-                                    onClick={() => handleOpenDeleteDialog(patrolRoute)}
+                                    onClick={() => toggleRow(patrolRoute.id)}
                                   >
-                                    <IconTrash size={20} />
+                                    {isOpen ? <IconChevronDown /> : <IconChevronRight />}
                                   </IconButton>
-                                </TableCell>
-                              </TableRow>
-                              {/* ACCORDION ROW */}
-                              <TableRow>
-                                <TableCell
-                                  colSpan={columns.length + 2}
-                                  sx={{ p: 0, borderBottom: 0 }}
+                                </Tooltip>
+                              </TableCell>
+                              <TableCell>{patrolRoute.name}</TableCell>
+                              <TableCell>{patrolRoute.description}</TableCell>
+                              <TableCell>{patrolRoute.patrolAreas?.length ?? 0}</TableCell>
+                              <TableCell>{patrolRoute.startAreaName ?? '-'}</TableCell>
+                              <TableCell>{patrolRoute.endAreaName ?? '-'}</TableCell>
+                              <TableCell
+                                sx={{
+                                  position: 'sticky',
+                                  right: 0,
+                                  background: 'white',
+                                }}
+                              >
+                                <AddEditPatrolRoute patrolRoute={patrolRoute} type="edit" />
+                                <IconButton
+                                  color="success"
+                                  size="small"
+                                  onClick={() => handleAssignmentSetting(patrolRoute)}
                                 >
-                                  <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                                    <Box p={2} bgcolor="grey.200" pl={8}>
-                                      <PatrolAssignmentAccordionRow routeId={patrolRoute.id} />
-                                    </Box>
-                                  </Collapse>
-                                </TableCell>
-                              </TableRow>
-                            </React.Fragment>
-                          );
-                        },
-                      )}
+                                  <IconUserCheck size={18} />
+                                </IconButton>
+                                <IconButton
+                                  color="error"
+                                  size="small"
+                                  onClick={() => handleOpenDeleteDialog(patrolRoute)}
+                                >
+                                  <IconTrash size={20} />
+                                </IconButton>
+                              </TableCell>
+                            </TableRow>
+                            {/* ACCORDION ROW */}
+                            <TableRow>
+                              <TableCell
+                                colSpan={columns.length + 2}
+                                sx={{ p: 0, borderBottom: 0 }}
+                              >
+                                <Collapse in={isOpen} timeout="auto" unmountOnExit>
+                                  <Box p={2} bgcolor="grey.200" pl={8}>
+                                    <PatrolAssignmentAccordionRow routeId={patrolRoute.id} />
+                                  </Box>
+                                </Collapse>
+                              </TableCell>
+                            </TableRow>
+                          </React.Fragment>
+                        );
+                      })}
                 </TableBody>
               </Table>
             </TableContainer>

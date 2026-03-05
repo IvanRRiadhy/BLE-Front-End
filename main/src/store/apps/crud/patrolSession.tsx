@@ -15,6 +15,7 @@ export type GetFilter = {
   sortColumn: string;
   sortDir: 'asc' | 'desc';
   searchValue: string;
+  timeRange?:string;
   filters?: {
     PatrolAssignmentId?: string;
     SecurityId?: string[];

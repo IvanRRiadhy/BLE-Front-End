@@ -24,8 +24,8 @@ dayjs.extend(isSameOrBefore);
 /* ---------------- Types ---------------- */
 
 const defaultFilter = {
-  // from: '2025-10-01T00:00:00Z',
-  // to: '2025-10-30T23:59:59Z',
+  from: '2025-10-01T00:00:00Z',
+  to: '2025-10-30T23:59:59Z',
   TimeRange: 'weekly',
   operatorName: null,
   visitorId: null,

@@ -32,7 +32,11 @@ export type userType = {
 export type userRegistrationType = {
     username: string,
     email: string,
-    groupId: string
+    GroupId: string,
+    canAlarmAction: boolean | null;
+    canApprovePatrol: boolean | null;
+    canCreateMonitoringConfig: boolean | null;
+    canUpdateMonitoringConfig: boolean | null;
 };
 export type userMinType = {
     id: string;

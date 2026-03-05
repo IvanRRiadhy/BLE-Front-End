@@ -35,9 +35,7 @@ import { useSearchParams } from 'react-router';
 import { usePatrolAssignmentId, usePatrolRouteId } from 'src/hooks/usePatrolRoute';
 import { useTimeGroupList } from 'src/hooks/useTimeGroup';
 
-
-interface PatrolDetailPageProps {
-}
+interface PatrolDetailPageProps {}
 
 const PatrolDetailPage = () => {
   const navigate = useNavigate();
@@ -46,23 +44,22 @@ const PatrolDetailPage = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [searchParams] = useSearchParams();
-const id = searchParams.get('id') ?? undefined;
+  const id = searchParams.get('id') ?? undefined;
 
-const { data: patrolRes } = usePatrolAssignmentId(id ?? '');
+  const { data: patrolRes } = usePatrolAssignmentId(id ?? '');
 
-const patrol = patrolRes?.collection?.data;
-const { data: route } = usePatrolRouteId(patrol?.patrolRouteId ?? '');
+  const patrol = patrolRes?.collection?.data;
+  const { data: route } = usePatrolRouteId(patrol?.patrolRouteId ?? '');
 
-const { data: timeGroupRes } = useTimeGroupList({
-  ...defaultTimeGroupFilter,
-  filters: { id: patrol?.timeGroupId ? [patrol.timeGroupId] : [] },
-});
+  const { data: timeGroupRes } = useTimeGroupList({
+    ...defaultTimeGroupFilter,
+    filters: { id: patrol?.timeGroupId ? [patrol.timeGroupId] : [] },
+  });
 
-const timeGroups = timeGroupRes?.data ?? [];
+  const timeGroups = timeGroupRes?.data ?? [];
 
   const [openSchedule, setOpenSchedule] = useState(false);
   const [openRoute, setOpenRoute] = useState(false);
-  
 
   const [patrolSession, setPatrolSession] = useState<PatrolSessionType | null>(null);
   const [openCaseDialog, setOpenCaseDialog] = useState(false);
@@ -75,6 +72,7 @@ const timeGroups = timeGroupRes?.data ?? [];
 
   const { data: patrolSessionData, isLoading: isSessionLoading } = usePatrolSessionList({
     ...defaultPatrolSessionFilter,
+    timeRange: 'daily',
     filters: { PatrolAssignmentId: id },
   });
 
@@ -124,7 +122,7 @@ const timeGroups = timeGroupRes?.data ?? [];
     const latestSession = patrolSessionData.data[0];
 
     setPatrolSession(latestSession);
-
+    console.log('latestSession', latestSession);
     // Parse UTC properly (Z already exists ✔)
     const started = latestSession.startedAt ? new Date(latestSession.startedAt) : null;
 
@@ -166,6 +164,7 @@ const timeGroups = timeGroupRes?.data ?? [];
       setEndedAt(null);
     } catch (error) {
       console.error(error);
+      console.log("Time", timeGroups[0].timeBlocks);
     }
   };
 
@@ -270,14 +269,27 @@ const timeGroups = timeGroupRes?.data ?? [];
   };
 
   if (!patrol) {
-  return (
-    <Box display="flex" justifyContent="center" mt={5}>
-      <CircularProgress />
-    </Box>
-  );
-}
-console.log('patrol', patrol);
+    return (
+      <Box display="flex" justifyContent="center" mt={5}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+  console.log('patrol', patrol);
+  // ===== Patrol Assignment Date Validation =====
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
+  const startDate = patrol.startDate ? new Date(patrol.startDate) : null;
+  const endDate = patrol.endDate ? new Date(patrol.endDate) : null;
+
+  if (startDate) startDate.setHours(0, 0, 0, 0);
+  if (endDate) endDate.setHours(23, 59, 59, 999);
+
+  const assignmentNotStarted = startDate && today < startDate;
+  const assignmentOver = endDate && today > endDate;
+
+  const assignmentActive = (!startDate || today >= startDate) && (!endDate || today <= endDate);
   return (
     <>
       <Box p={isMobile ? 2 : 3}>
@@ -294,7 +306,7 @@ console.log('patrol', patrol);
               backgroundColor: theme.palette.background.paper,
               minHeight: isMobile
                 ? 'auto'
-                : `calc(100vh - ${(customizer.TopbarHeight ?? 70) * 2}px)`, 
+                : `calc(100vh - ${(customizer.TopbarHeight ?? 70) * 2}px)`,
             }}
           >
             {/* Back Button */}
@@ -464,68 +476,81 @@ console.log('patrol', patrol);
                 overflow: 'hidden',
               }}
             >
-              <Box display="flex">
-                {/* ===== Started Patrol ===== */}
-                <Box
-                  flex={1}
-                  p={1.5}
-                  textAlign="center"
-                  sx={{ borderRight: 1, borderColor: 'divider' }}
-                >
-                  <Typography fontSize={12} color="text.secondary">
-                    Started Patrol
-                  </Typography>
-                  <Typography fontWeight={600}>{formatTime24(startedAt)}</Typography>
+              {!assignmentActive ? (
+                <Box p={2} textAlign="center">
+                  <Chip
+                    label={
+                      assignmentOver
+                        ? 'Patrol Assignment is already over'
+                        : 'Patrol Assignment has not yet started'
+                    }
+                    color="warning"
+                  />
                 </Box>
-
-                {/* ===== Duration ===== */}
-                <Box
-                  flex={1}
-                  p={1.5}
-                  textAlign="center"
-                  sx={{ borderRight: 1, borderColor: 'divider' }}
-                >
-                  <Typography fontSize={12} color="text.secondary">
-                    Duration
-                  </Typography>
-
-                  <Typography fontWeight={600}>
-                    {startedAt && !endedAt
-                      ? formatStopwatch(durationMs) // ⏱ running
-                      : startedAt && endedAt
-                        ? formatDurationFinal(durationMs) // ✅ finished
-                        : '-'}
-                  </Typography>
-                </Box>
-
-                {/* ===== Action ===== */}
-                <Box flex={1} p={1.5} textAlign="center">
-                  {isSessionLoading && (
+              ) : (
+                <Box display="flex">
+                  {/* ===== Started Patrol ===== */}
+                  <Box
+                    flex={1}
+                    p={1.5}
+                    textAlign="center"
+                    sx={{ borderRight: 1, borderColor: 'divider' }}
+                  >
                     <Typography fontSize={12} color="text.secondary">
-                      Loading…
+                      Started Patrol
                     </Typography>
-                  )}
+                    <Typography fontWeight={600}>{formatTime24(startedAt)}</Typography>
+                  </Box>
 
-                  {!isSessionLoading && !startedAt && (
-                    <Button size="small" variant="contained" onClick={handleStart}>
-                      Start
-                    </Button>
-                  )}
+                  {/* ===== Duration ===== */}
+                  <Box
+                    flex={1}
+                    p={1.5}
+                    textAlign="center"
+                    sx={{ borderRight: 1, borderColor: 'divider' }}
+                  >
+                    <Typography fontSize={12} color="text.secondary">
+                      Duration
+                    </Typography>
 
-                  {!isSessionLoading && startedAt && !endedAt && (
-                    <Button size="small" variant="contained" color="warning" onClick={handleDone}>
-                      Done
-                    </Button>
-                  )}
+                    <Typography fontWeight={600}>
+                      {startedAt && !endedAt
+                        ? formatStopwatch(durationMs)
+                        : startedAt && endedAt
+                          ? formatDurationFinal(durationMs)
+                          : '-'}
+                    </Typography>
+                  </Box>
 
-                  {!isSessionLoading && startedAt && endedAt && (
-                    <Stack spacing={0.5} alignItems="center">
-                      <Chip label="Done" color="success" size="small" />
-                      <Typography fontWeight={600}>{formatTime24(endedAt)}</Typography>
-                    </Stack>
-                  )}
+                  {/* ===== Action ===== */}
+                  <Box flex={1} p={1.5} textAlign="center">
+                    {isSessionLoading && (
+                      <Typography fontSize={12} color="text.secondary">
+                        Loading…
+                      </Typography>
+                    )}
+
+                    {!isSessionLoading && !startedAt && (
+                      <Button size="small" variant="contained" onClick={handleStart}>
+                        Start
+                      </Button>
+                    )}
+
+                    {!isSessionLoading && startedAt && !endedAt && (
+                      <Button size="small" variant="contained" color="warning" onClick={handleDone}>
+                        Done
+                      </Button>
+                    )}
+
+                    {!isSessionLoading && startedAt && endedAt && (
+                      <Stack spacing={0.5} alignItems="center">
+                        <Chip label="Done" color="success" size="small" />
+                        <Typography fontWeight={600}>{formatTime24(endedAt)}</Typography>
+                      </Stack>
+                    )}
+                  </Box>
                 </Box>
-              </Box>
+              )}
             </Box>
           </Box>
 

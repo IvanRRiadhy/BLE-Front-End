@@ -85,6 +85,8 @@ export function useAddPatrolArea() {
         isActive,
         status,
         applicationId,
+        floorName,
+        floorplanName,
         ...cleanData
       } = patrolArea;
 
@@ -123,6 +125,8 @@ export function useEditPatrolArea() {
         isActive,
         status,
         applicationId,
+        floorName,
+        floorplanName,
         ...cleanData
       } = patrolArea;
 

@@ -68,6 +68,7 @@ export interface memberType {
     birthDate: string,
     joinDate: string,
     exitDate: string,
+    isHead?: boolean,
     headMember1: string,
     headMember2: string,
     applicationId: string,

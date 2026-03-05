@@ -105,7 +105,7 @@ const IntruderList = () => {
 
   const handleClick = (intruder: IntruderType) => {
     dispatch(SelectIntruder(intruder));
-
+    console.log('Selected Intruder:', intruder);
     // Use the pre-fetched data from maps
     switch (intruder.personType) {
       case 'Visitor':

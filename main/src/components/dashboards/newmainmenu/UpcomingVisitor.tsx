@@ -59,7 +59,7 @@ const UpcomingVisitor: React.FC = () => {
     };
   }
   const upcomingVisitor = useMemo<UpcomingVisitorItem[]>(() => {
-    console.log('Upcoming Visitor Data:', data);
+    // console.log('Upcoming Visitor Data:', data);
     return data.map((x: any) => ({
       id: x.id,
       status: x.status,
@@ -158,7 +158,7 @@ const UpcomingVisitor: React.FC = () => {
                 text={item.checkInAt ? new Date(item.checkInAt).toLocaleString() : '-'}
                 fontSize={12}
                 color="#045498"
-              />  
+              />
             </Box>
 
             {/* Status */}

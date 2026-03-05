@@ -28,8 +28,6 @@ import PersonIcon from '@mui/icons-material/Person';
 import { BASE_URL } from 'src/utils/axios';
 import { VisitorType } from 'src/store/apps/crud/visitor';
 import { memberType } from 'src/store/apps/crud/member';
-import { fontWeight } from '@mui/system';
-import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import { useEffect, useState } from 'react';
 import { formatFullDateTime } from 'src/utils/time';
@@ -40,6 +38,7 @@ import {
   useAllIntruders,
   useAssignActionAlarmTriggerByID,
   useDispatchAlarmTrigger,
+  usePostponeAlarmTrigger,
 } from 'src/hooks/useAlarmTrigger';
 import {
   AlarmTimelineType,
@@ -53,6 +52,10 @@ import { useAllSecurityLookup, useAllSecuritys } from 'src/hooks/useSecurityGuar
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 import AlarmTimelineProgress from './AlarmTimeline';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs, { Dayjs } from 'dayjs';
 dayjs.extend(duration);
 
 const AlarmContent = () => {
@@ -85,6 +88,7 @@ const AlarmContent = () => {
   const assignActionMutation = useAssignActionAlarmTriggerByID();
   const acknowledgeMutation = useAcknowledgeAlarmTrigger();
   const dispatchMutation = useDispatchAlarmTrigger();
+  const postponeMutation = usePostponeAlarmTrigger();
 
   useEffect(() => {
     if (selectedIntruder) {
@@ -254,7 +258,7 @@ const AlarmContent = () => {
 
   const handleOpenAlarmWithAcknowledge = async (alarm: AlarmTriggerType) => {
     // Always set selected alarm first (so dialog can use it later)
-    console.log("Alarm: ", alarm);
+    console.log('Alarm: ', alarm);
     setSelectedAlarmTrigger(alarm);
     // await handleFetchTimeline(alarm.id);
     // ✅ Only call API if action is "Idle"
@@ -274,6 +278,44 @@ const AlarmContent = () => {
     } catch (error) {
       console.error('Failed to acknowledge alarm:', error);
       toast.error('Failed to fetch alarm');
+    }
+  };
+
+  //Postpone Alarm
+  const [openPostponeDialog, setOpenPostponeDialog] = useState(false);
+  const [postponeDate, setPostponeDate] = useState<Dayjs | null>(null);
+  const [postponeReason, setPostponeReason] = useState('');
+
+  const handlePostpone = async () => {
+    if (!selectedAlarmTrigger) {
+      toast.error('No alarm selected');
+      return;
+    }
+
+    if (!postponeDate) {
+      toast.error('Please select postpone date');
+      return;
+    }
+
+    if (!postponeReason.trim()) {
+      toast.error('Please provide reason');
+      return;
+    }
+
+    try {
+      await postponeMutation.mutateAsync({
+        id: selectedAlarmTrigger.id,
+        postponedUntilDate: postponeDate.toISOString(),
+        postponeReason: postponeReason.trim(),
+      });
+
+      toast.success('Alarm postponed successfully');
+
+      setOpenPostponeDialog(false);
+      setPostponeDate(null);
+      setPostponeReason('');
+    } catch (error) {
+      toast.error('Failed to postpone alarm');
     }
   };
 
@@ -886,7 +928,7 @@ const AlarmContent = () => {
               <Button
                 variant="outlined"
                 color="warning"
-                onClick={() => console.log('Postpone clicked')}
+                onClick={() => setOpenPostponeDialog(true)}
               >
                 Postpone
               </Button>
@@ -904,6 +946,80 @@ const AlarmContent = () => {
               </Button>
             </>
           )}
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={openPostponeDialog}
+        onClose={() => {
+          setOpenPostponeDialog(false);
+          setPostponeDate(null);
+          setPostponeReason('');
+        }}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>
+          <Typography variant="h5" fontWeight={700}>
+            Postpone Alarm
+          </Typography>
+        </DialogTitle>
+
+        <DialogContent>
+          <Stack spacing={3} mt={1}>
+            {/* DATE PICKER */}
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Postpone Until"
+                value={postponeDate}
+                onChange={(newValue) => setPostponeDate(newValue)}
+                disablePast
+                minDate={dayjs().add(1, 'day')} // ❌ block today
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    required: true,
+                  },
+                }}
+              />
+            </LocalizationProvider>
+
+            {/* REASON */}
+            <TextField
+              label="Reason"
+              multiline
+              rows={4}
+              value={postponeReason}
+              onChange={(e) => setPostponeReason(e.target.value)}
+              fullWidth
+              required
+            />
+          </Stack>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 3 }}>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => {
+              setOpenPostponeDialog(false);
+              setPostponeDate(null);
+              setPostponeReason('');
+            }}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            color="warning"
+            onClick={handlePostpone}
+            disabled={postponeMutation.isPending}
+            startIcon={
+              postponeMutation.isPending ? <CircularProgress size={16} color="inherit" /> : null
+            }
+          >
+            {postponeMutation.isPending ? 'Saving...' : 'Confirm Postpone'}
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

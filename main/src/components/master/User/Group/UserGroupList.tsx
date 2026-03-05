@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Grid2 as Grid,
@@ -23,6 +23,9 @@ import {
   Tabs,
   Tab,
   Collapse,
+  Stack,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
 import {
   IconPlus,
@@ -35,13 +38,14 @@ import {
 } from '@tabler/icons-react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { userGroupType } from 'src/store/apps/crud/users';
+import { userGroupType, userRegistrationType } from 'src/store/apps/crud/users';
 import {
   useAddUserGroup,
   useAssignBuilding,
   useRegisterUser,
   useRevokeBuilding,
   useRevokeAllBuilding,
+  useEditUser,
 } from 'src/hooks/useUser';
 import { useAllBuilding } from 'src/hooks/useBuilding';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
@@ -64,15 +68,31 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
 
   const [openCreate, setOpenCreate] = useState(false);
   const [groupName, setGroupName] = useState('');
+  const [isHead, setIsHead] = useState(false);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<userGroupType | null>(null);
 
   const { data: buildingData = [] } = useAllBuilding();
+
+  const [userDialogMode, setUserDialogMode] = useState<'create' | 'edit'>('create');
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [openAddUser, setOpenAddUser] = useState(false);
   const [openAssignBuilding, setOpenAssignBuilding] = useState(false);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const initialUserAbility = {
+    canAlarmAction: null,
+    canApprovePatrol: null,
+    canCreateMonitoringConfig: null,
+    canUpdateMonitoringConfig: null,
+  };
+  const [userAbility, setUserAbility] = useState({
+    canAlarmAction: null,
+    canApprovePatrol: null,
+    canCreateMonitoringConfig: null,
+    canUpdateMonitoringConfig: null,
+  });
   const [selectedBuildings, setSelectedBuildings] = useState<BuildingType[]>([]);
   const [openRevokeOne, setOpenRevokeOne] = useState(false);
   const [openRevokeAll, setOpenRevokeAll] = useState(false);
@@ -80,9 +100,25 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
 
   const addGroupMutation = useAddUserGroup();
   const registerUserMutation = useRegisterUser();
+  const editUserMutation = useEditUser();
   const assignBuildingMutation = useAssignBuilding();
   const revokeBuildingMutation = useRevokeBuilding();
   const revokeAllBuildingMutation = useRevokeAllBuilding();
+
+  const resetRegisterUserForm = () => {
+    setUsername('');
+    setEmail('');
+    setUserAbility(initialUserAbility);
+  };
+
+  const resetCreateGroupForm = () => {
+    setGroupName('');
+    setIsHead(false);
+  };
+
+  const resetAssignBuildingForm = () => {
+    setSelectedBuildings([]);
+  };
 
   const [activeTabByGroup, setActiveTabByGroup] = useState<Record<string, 'members' | 'buildings'>>(
     {},
@@ -101,10 +137,11 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
     await addGroupMutation.mutateAsync({
       name: groupName,
       levelPriority,
+      isHead: isHead,
     });
 
-    setGroupName('');
     setOpenCreate(false);
+    resetCreateGroupForm();
   };
 
   const handleOpenDeleteDialog = (group: userGroupType) => {
@@ -124,6 +161,7 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
         username,
         email,
         GroupId: expandedGroupId,
+        ...userAbility,
       });
       toast.success('User registered successfully!');
     } catch (error) {
@@ -132,6 +170,29 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
     }
 
     setOpenAddUser(false);
+    resetRegisterUserForm();
+  };
+
+  const handleUpdateUser = async () => {
+    if (!selectedUser) return;
+    if (!expandedGroupId) return;
+    try {
+      await editUserMutation.mutateAsync({
+        id: selectedUser.id,
+        payload: {
+          username,
+          email,
+          GroupId: expandedGroupId,
+          ...userAbility,
+        },
+      });
+      toast.success('User updated successfully!');
+    } catch (error) {
+      console.error('Error updating user:', error);
+      toast.error('User Update failed.');
+    }
+    setOpenAddUser(false);
+    resetRegisterUserForm();
   };
 
   const handleAssignBuilding = async () => {
@@ -147,8 +208,26 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
       toast.error('Building Assign failed.');
     }
     setOpenAssignBuilding(false);
-    setSelectedBuildings([]);
+    resetAssignBuildingForm();
   };
+
+  useEffect(() => {
+    if (openAddUser && userDialogMode === 'edit' && selectedUser) {
+      setUsername(selectedUser.username ?? '');
+      setEmail(selectedUser.email ?? '');
+
+      setUserAbility({
+        canAlarmAction: selectedUser.canAlarmAction ?? false,
+        canApprovePatrol: selectedUser.canApprovePatrol ?? false,
+        canCreateMonitoringConfig: selectedUser.canCreateMonitoringConfig ?? false,
+        canUpdateMonitoringConfig: selectedUser.canUpdateMonitoringConfig ?? false,
+      });
+    }
+
+    if (openAddUser && userDialogMode === 'create') {
+      resetRegisterUserForm();
+    }
+  }, [openAddUser, userDialogMode, selectedUser]);
 
   /* ---------------- SKELETON ---------------- */
   const renderSkeletonRows = () =>
@@ -204,15 +283,15 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
                     size="small"
                     color="info"
                     onClick={() => {
-                      // setSelectedBuildingId(b.id);
-                      // setOpenRevokeOne(true);
-                      console.log("User: ", m);
+                      setUserDialogMode('edit');
+                      setSelectedUser(m);
+                      setOpenAddUser(true);
                     }}
                   >
                     <IconSettings size={18} />
                   </IconButton>
                 </Tooltip>
-                </TableCell>
+              </TableCell>
             </TableRow>
           ))
         )}
@@ -288,7 +367,11 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
               size="small"
               variant="contained"
               startIcon={<IconPlus size={16} />}
-              onClick={() => setOpenAddUser(true)}
+              onClick={() => {
+                setUserDialogMode('create');
+                setSelectedUser(null);
+                setOpenAddUser(true);
+              }}
             >
               Add User
             </Button>
@@ -415,31 +498,73 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
         </TableContainer>
       </Grid>
       {/* REGISTER USER */}
-      <Dialog open={openAddUser} onClose={() => setOpenAddUser(false)} fullWidth maxWidth="sm">
+      <Dialog
+        open={openAddUser}
+        onClose={() => {
+          setOpenAddUser(false);
+          resetRegisterUserForm();
+        }}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>
           <Typography variant="h4" fontWeight={700}>
-            Register New User
+            {userDialogMode === 'create' ? 'Register New User' : 'Edit User'}
           </Typography>
           <Divider />
         </DialogTitle>
 
         <DialogContent>
-          <Grid container spacing={3}>
-            <Grid size={12}>
+          <Grid container spacing={5} mb={3}>
+            {/* LEFT SIDE */}
+            <Grid size={{ lg: 6, md: 12, sm: 12 }}>
               <CustomFormLabel htmlFor="username">Username</CustomFormLabel>
               <CustomTextField
-                fullWidth
+                id="username"
                 value={username}
-                onChange={(e: any) => setUsername(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
+                fullWidth
+                variant="outlined"
+              />
+
+              <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
+              <CustomTextField
+                id="email"
+                value={email}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                fullWidth
+                variant="outlined"
               />
             </Grid>
 
-            <Grid size={12}>
-              <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
-              <CustomTextField
-                fullWidth
-                value={email}
-                onChange={(e: any) => setEmail(e.target.value)}
+            {/* RIGHT SIDE */}
+            <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+              <YesNoSwitch
+                label="Can Alarm Action"
+                value={userAbility.canAlarmAction}
+                field="canAlarmAction"
+                setState={setUserAbility}
+              />
+
+              <YesNoSwitch
+                label="Can Approve Patrol"
+                value={userAbility.canApprovePatrol}
+                field="canApprovePatrol"
+                setState={setUserAbility}
+              />
+
+              <YesNoSwitch
+                label="Can Create Monitoring Config"
+                value={userAbility.canCreateMonitoringConfig}
+                field="canCreateMonitoringConfig"
+                setState={setUserAbility}
+              />
+
+              <YesNoSwitch
+                label="Can Update Monitoring Config"
+                value={userAbility.canUpdateMonitoringConfig}
+                field="canUpdateMonitoringConfig"
+                setState={setUserAbility}
               />
             </Grid>
           </Grid>
@@ -449,15 +574,27 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
           <Button variant="outlined" onClick={() => setOpenAddUser(false)}>
             Cancel
           </Button>
-          <Button variant="contained" onClick={() => handleRegisterUser(username, email)}>
-            Save
+          <Button
+            variant="contained"
+            onClick={() => {
+              if (userDialogMode === 'create') {
+                handleRegisterUser(username, email);
+              } else {
+                handleUpdateUser();
+              }
+            }}
+          >
+            {userDialogMode === 'create' ? 'Register' : 'Update'}
           </Button>
         </DialogActions>
       </Dialog>
       {/* ASSIGN BUILDING */}
       <Dialog
         open={openAssignBuilding}
-        onClose={() => setOpenAssignBuilding(false)}
+        onClose={() => {
+          setOpenAssignBuilding(false);
+          resetAssignBuildingForm();
+        }}
         fullWidth
         maxWidth="sm"
       >
@@ -494,7 +631,15 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
         </DialogActions>
       </Dialog>
       {/* CREATE GROUP DIALOG */}
-      <Dialog open={openCreate} onClose={() => setOpenCreate(false)} fullWidth maxWidth="sm">
+      <Dialog
+        open={openCreate}
+        onClose={() => {
+          setOpenCreate(false);
+          resetCreateGroupForm();
+        }}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>
           <Typography variant="h4" fontWeight={700}>
             New Group ({levelPriority})
@@ -510,6 +655,17 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
             onChange={(e: any) => setGroupName(e.target.value)}
             placeholder="Enter group name"
           />
+          <CustomFormLabel sx={{ mt: 2 }}>Is Head of Department?</CustomFormLabel>
+          <Button
+            variant={isHead ? 'contained' : 'outlined'}
+            onClick={() => setIsHead(true)}
+            sx={{ mr: 1 }}
+          >
+            Yes
+          </Button>
+          <Button variant={isHead ? 'outlined' : 'contained'} onClick={() => setIsHead(false)}>
+            No
+          </Button>
         </DialogContent>
 
         <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -613,3 +769,41 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
 };
 
 export default UserGroupList;
+
+interface YesNoSwitchProps<T> {
+  label: string;
+  value: boolean | null;
+  field: keyof T;
+  setState: React.Dispatch<React.SetStateAction<T>>;
+}
+
+const YesNoSwitch = <T extends object>({ label, value, field, setState }: YesNoSwitchProps<T>) => {
+  const handleChange = (event: React.MouseEvent<HTMLElement>, newValue: boolean | null) => {
+    if (newValue !== null) {
+      setState((prev) => ({
+        ...prev,
+        [field]: newValue,
+      }));
+    }
+  };
+
+  return (
+    <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
+      {/* LEFT: LABEL */}
+      <Typography sx={{ width: 220 }} fontWeight={500}>
+        {label}
+      </Typography>
+
+      {/* RIGHT: TOGGLE */}
+      <ToggleButtonGroup value={value} exclusive onChange={handleChange} size="small">
+        <ToggleButton value={true} color="success">
+          Yes
+        </ToggleButton>
+
+        <ToggleButton value={false} color="error">
+          No
+        </ToggleButton>
+      </ToggleButtonGroup>
+    </Box>
+  );
+};
