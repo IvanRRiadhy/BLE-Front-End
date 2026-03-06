@@ -31,14 +31,29 @@ const PatrolRouteDetailDialog = ({ open, route, onClose }: Props) => {
   const areas = route.patrolAreas ?? [];
   const rows = Math.ceil((areas.length + 1) / COLUMNS);
   const { data: patrolAreaData = [] } = useAllPatrolAreas();
-const resolvedAreas = useMemo<PatrolAreaType[]>(() => {
-  if (!route?.patrolAreas?.length) return [];
+  const resolvedAreas = useMemo<PatrolAreaType[]>(() => {
+    if (!route?.patrolAreas?.length) return [];
 
-  return [...route.patrolAreas]
-    .sort((a, b) => a.orderIndex - b.orderIndex)
-    .map((pa) => patrolAreaData.find((p) => p.id === pa.patrolAreaId))
-    .filter(Boolean) as PatrolAreaType[];
-}, [route?.patrolAreas, patrolAreaData]);
+    return [...route.patrolAreas]
+      .sort((a, b) => a.orderIndex - b.orderIndex)
+      .map((pa) => patrolAreaData.find((p) => p.id === pa.patrolAreaId))
+      .filter(Boolean) as PatrolAreaType[];
+  }, [route?.patrolAreas, patrolAreaData]);
+
+  const dwellMap = useMemo(() => {
+    if (!route?.patrolAreas) return new Map();
+
+    const map = new Map();
+
+    route.patrolAreas.forEach((a) => {
+      map.set(a.patrolAreaId, {
+        min: a.minDwellTime ?? 0,
+        max: a.maxDwellTime ?? 0,
+      });
+    });
+
+    return map;
+  }, [route?.patrolAreas]);
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg">
@@ -65,7 +80,6 @@ const resolvedAreas = useMemo<PatrolAreaType[]>(() => {
             py: 2,
           }}
         >
-
           {/* Content */}
           <Box sx={{ position: 'relative', zIndex: 1 }}>
             <Grid container spacing={3}>
@@ -74,7 +88,8 @@ const resolvedAreas = useMemo<PatrolAreaType[]>(() => {
                 const colIndex = index % COLUMNS;
                 const isRTL = rowIndex % 2 === 1;
                 const isEndOfRow = colIndex === COLUMNS - 1;
-
+                const dwell = dwellMap.get(area.id);
+                console.log("dwell time",dwell)
                 return (
                   <Grid key={area.id} size={{ xs: 12, sm: 6, md: 3 }}>
                     <SortablePatrolAreaCard
@@ -89,6 +104,8 @@ const resolvedAreas = useMemo<PatrolAreaType[]>(() => {
                       isLast={index === areas.length - 1}
                       onRemove={() => {}}
                       readOnly // 👈 IMPORTANT
+                      minDwellTime={dwell?.min ?? 0}
+                      maxDwellTime={dwell?.max ?? 0}
                     />
                   </Grid>
                 );

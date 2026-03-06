@@ -9,6 +9,8 @@ import {
   Button,
   Chip,
   CircularProgress,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useEffect, useState } from 'react';
@@ -34,8 +36,6 @@ import { RootState, useSelector } from 'src/store/Store';
 import { useSearchParams } from 'react-router';
 import { usePatrolAssignmentId, usePatrolRouteId } from 'src/hooks/usePatrolRoute';
 import { useTimeGroupList } from 'src/hooks/useTimeGroup';
-
-interface PatrolDetailPageProps {}
 
 const PatrolDetailPage = () => {
   const navigate = useNavigate();
@@ -67,6 +67,7 @@ const PatrolDetailPage = () => {
   const [selectedCase, setSelectedCase] = useState<CaseUploadType | undefined>(undefined);
   const [editId, setEditId] = useState<string | undefined>(undefined);
   const [patrolSessionId, setPatrolSessionId] = useState<string | undefined>(undefined);
+  const checkpoints = patrolSession?.checkpoints ?? [];
 
   const formatDate = (date?: string) => (date ? new Date(date).toLocaleDateString('en-GB') : '-');
 
@@ -164,7 +165,7 @@ const PatrolDetailPage = () => {
       setEndedAt(null);
     } catch (error) {
       console.error(error);
-      console.log("Time", timeGroups[0].timeBlocks);
+      console.log('Time', timeGroups[0].timeBlocks);
     }
   };
 
@@ -268,13 +269,6 @@ const PatrolDetailPage = () => {
     setOpenCaseDialog(false);
   };
 
-  if (!patrol) {
-    return (
-      <Box display="flex" justifyContent="center" mt={5}>
-        <CircularProgress />
-      </Box>
-    );
-  }
   console.log('patrol', patrolSession);
   // ===== Patrol Assignment Date Validation =====
   const today = new Date();
@@ -290,6 +284,35 @@ const PatrolDetailPage = () => {
   const assignmentOver = endDate && today > endDate;
 
   const assignmentActive = (!startDate || today >= startDate) && (!endDate || today <= endDate);
+
+  //Tab
+  const [detailTab, setDetailTab] = useState(0);
+
+  const handleChangeTab = (_: any, newValue: number) => {
+    setDetailTab(newValue);
+  };
+
+  const TabPanel = ({
+    children,
+    value,
+    index,
+  }: {
+    children: React.ReactNode;
+    value: number;
+    index: number;
+  }) => {
+    if (value !== index) return null;
+    return <Box mt={2}>{children}</Box>;
+  };
+
+  if (!patrol) {
+    return (
+      <Box display="flex" justifyContent="center" mt={5}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <>
       <Box p={isMobile ? 2 : 3}>
@@ -347,129 +370,224 @@ const PatrolDetailPage = () => {
               </Box>
             </Box>
             <Divider sx={{ my: 2 }} />
-            {/* Dates */}
-            <Box sx={{ cursor: 'pointer' }} onClick={() => setOpenSchedule(true)}>
-              <Stack spacing={1}>
-                <InfoRow label="Active From" value={formatDate(patrol.startDate)} />
-                <InfoRow label="Until" value={formatDate(patrol.endDate)} />
-              </Stack>
-            </Box>
-            <Divider sx={{ my: 2 }} />
-            {/* Route */}
-            <Box mt={2} sx={{ cursor: 'pointer' }} onClick={() => setOpenRoute(true)}>
-              <Typography fontSize={12} color="text.secondary" textAlign="center" mb={0.5}>
-                Route
-              </Typography>
 
-              <Typography fontWeight={600} textAlign="center" mb={1}>
-                {route?.name ?? 'Unknown Route'}
-              </Typography>
-
-              <Box display="flex" alignItems="center" gap={1}>
-                {/* LEFT */}
-                <Box minWidth={80} textAlign="right">
-                  <Typography fontSize={13} color="text.secondary">
-                    From {route?.startAreaName ?? '-'}
-                  </Typography>
-                </Box>
-
-                {/* MIDDLE */}
-                <Box flex={1} position="relative" height={20}>
-                  {/* dashed line */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: 0,
-                      right: 0,
-                      borderTop: '1px dashed',
-                      borderColor: theme.palette.text.primary,
-                      transform: 'translateY(-50%)',
-                    }}
-                  />
-
-                  {/* centered label */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      px: 1,
-                      backgroundColor: theme.palette.background.paper,
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    <Typography fontSize={12} color="text.secondary">
-                      {areaCount} Area{areaCount !== 1 ? 's' : ''}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                {/* RIGHT */}
-                <Box minWidth={80} textAlign="left">
-                  <Typography fontSize={13} color="text.secondary">
-                    To {route?.endAreaName ?? '-'}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-
-            <Divider sx={{ my: 2 }} />
-            {/* Securities */}
-            <Box display="flex" flexDirection="column" flexGrow={isMobile ? 0 : 1}>
+            {/* ================= DETAILS TABS ================= */}
+            <Box>
               <Typography fontWeight={600} mb={1}>
-                Securities
+                Details
               </Typography>
 
-              {/* LIST CONTAINER */}
-              <Box
-                sx={{
-                  overflowY: isMobile ? 'auto' : 'visible',
-                  maxHeight: isMobile ? 200 : 'none', // ± 3 items
-                  pr: isMobile ? 0.5 : 0,
-                }}
+              <Tabs
+                value={detailTab}
+                onChange={handleChangeTab}
+                variant="fullWidth"
+                // size="small"
               >
-                <Stack spacing={1}>
-                  {patrol.securities?.map((sec: SecurityType) => (
-                    <Box
-                      key={sec.id}
-                      display="flex"
-                      alignItems="center"
-                      gap={1.5}
-                      p={1}
-                      borderRadius={1}
-                      sx={{ backgroundColor: theme.palette.action.hover }}
-                    >
-                      <Avatar sx={{ width: 32, height: 32 }}>{sec.name.charAt(0)}</Avatar>
+                <Tab label="Dates" />
+                <Tab label="Route" />
+                <Tab label="Securities" />
+              </Tabs>
 
-                      <Box>
-                        <Typography fontWeight={600} fontSize={14}>
-                          {sec.name}
-                        </Typography>
+              {/* ===== Dates ===== */}
+              <TabPanel value={detailTab} index={0}>
+                <Box sx={{ cursor: 'pointer' }} onClick={() => setOpenSchedule(true)}>
+                  <Stack spacing={1}>
+                    <InfoRow label="Active From" value={formatDate(patrol.startDate)} />
+                    <InfoRow label="Until" value={formatDate(patrol.endDate)} />
+                  </Stack>
+                </Box>
+              </TabPanel>
+
+              {/* ===== Route ===== */}
+              <TabPanel value={detailTab} index={1}>
+                <Box sx={{ cursor: 'pointer' }} onClick={() => setOpenRoute(true)}>
+                  <Typography fontWeight={600} textAlign="center" mb={1}>
+                    {route?.name ?? 'Unknown Route'}
+                  </Typography>
+
+                  <Box display="flex" alignItems="center" gap={1}>
+                    {/* LEFT */}
+                    <Box minWidth={80} textAlign="right">
+                      <Typography fontSize={13} color="text.secondary">
+                        From {route?.startAreaName ?? '-'}
+                      </Typography>
+                    </Box>
+
+                    {/* LINE */}
+                    <Box flex={1} position="relative" height={20}>
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: 0,
+                          right: 0,
+                          borderTop: '1px dashed',
+                          borderColor: theme.palette.text.primary,
+                          transform: 'translateY(-50%)',
+                        }}
+                      />
+
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          px: 1,
+                          backgroundColor: theme.palette.background.paper,
+                        }}
+                      >
                         <Typography fontSize={12} color="text.secondary">
-                          {sec.identityId}
+                          {areaCount} Area{areaCount !== 1 ? 's' : ''}
                         </Typography>
                       </Box>
                     </Box>
+
+                    {/* RIGHT */}
+                    <Box minWidth={80} textAlign="left">
+                      <Typography fontSize={13} color="text.secondary">
+                        To {route?.endAreaName ?? '-'}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </TabPanel>
+
+              {/* ===== Securities ===== */}
+              <TabPanel value={detailTab} index={2}>
+                <Box
+                  sx={{
+                    maxHeight: isMobile ? 200 : 240,
+                    overflowY: 'auto',
+                  }}
+                >
+                  <Stack spacing={1}>
+                    {patrol.securities?.map((sec: SecurityType) => (
+                      <Box
+                        key={sec.id}
+                        display="flex"
+                        alignItems="center"
+                        gap={1.5}
+                        p={1}
+                        borderRadius={1}
+                        sx={{ backgroundColor: theme.palette.action.hover }}
+                      >
+                        <Avatar sx={{ width: 32, height: 32 }}>{sec.name.charAt(0)}</Avatar>
+
+                        <Box>
+                          <Typography fontWeight={600} fontSize={14}>
+                            {sec.name}
+                          </Typography>
+                          <Typography fontSize={12} color="text.secondary">
+                            {sec.identityId}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    ))}
+
+                    {!patrol.securities?.length && (
+                      <Typography fontSize={12} color="text.secondary">
+                        No securities assigned
+                      </Typography>
+                    )}
+                  </Stack>
+                </Box>
+              </TabPanel>
+            </Box>
+
+            <Divider sx={{ my: 2 }} />
+
+            {/* ================= CHECKPOINTS ================= */}
+            <Box>
+              <Typography fontWeight={600} mb={1}>
+                Checkpoints
+              </Typography>
+
+              <Box
+                sx={{
+                  maxHeight: 220,
+                  overflowY: 'auto',
+                  pr: 0.5,
+                  '&::-webkit-scrollbar': { width: 4 },
+                  '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: theme.palette.divider,
+                    borderRadius: 2,
+                  },
+                }}
+              >
+                <Stack spacing={1}>
+                  {checkpoints.map((cp: any) => (
+                    <Box
+                      key={cp.id}
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      p={1}
+                      borderRadius={1}
+                      sx={{
+                        backgroundColor: theme.palette.action.hover,
+                      }}
+                    >
+                      {/* LEFT */}
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Box
+                          sx={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: '50%',
+                            backgroundColor: theme.palette.primary.main,
+                            color: '#fff',
+                            fontSize: 12,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 600,
+                          }}
+                        >
+                          {cp.orderIndex}
+                        </Box>
+
+                        <Box>
+                          <Typography fontSize={13} fontWeight={600}>
+                            {cp.areaNameSnap}
+                          </Typography>
+
+                          <Typography fontSize={11} color="text.secondary">
+                            Cycle {cp.cycleIndex}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      {/* RIGHT */}
+                      <Chip
+                        size="small"
+                        label={cp.checkpointStatus}
+                        color={
+                          cp.checkpointStatus === 'Cleared'
+                            ? 'success'
+                            : cp.checkpointStatus === 'AutoDetected'
+                              ? 'info'
+                              : 'default'
+                        }
+                      />
+                    </Box>
                   ))}
 
-                  {!patrol.securities?.length && (
+                  {!checkpoints.length && (
                     <Typography fontSize={12} color="text.secondary">
-                      No securities assigned
+                      No checkpoints available
                     </Typography>
                   )}
                 </Stack>
               </Box>
-
-              {/* Spacer otomatis kalau list sedikit */}
-              {!isMobile && <Box flexGrow={1} />}
             </Box>
+
             <Divider sx={{ my: 2 }} />
 
             {/* ===== Patrol Status ===== */}
             <Box
               sx={{
+                mt: 'auto',
                 border: 1,
                 borderColor: 'divider',
                 borderRadius: 1,

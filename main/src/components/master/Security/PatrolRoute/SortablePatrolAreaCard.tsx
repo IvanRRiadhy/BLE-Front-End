@@ -81,8 +81,8 @@ const SortablePatrolAreaCard = ({
 
   // Hide trash when dragging starts
   useEffect(() => {
-    console.log('card Height: ', cardHeight);
-    console.log('Card Width', cardWidth);
+    // console.log('card Height: ', cardHeight);
+    // console.log('Card Width', cardWidth);
     if (isDragging) {
       hideImmediately();
     }
@@ -95,8 +95,8 @@ const SortablePatrolAreaCard = ({
           onMouseEnter={showWithTimeout}
           onMouseLeave={hideImmediately}
           sx={{
-            height: { xs: '100%', md: 340 },
-            width: { xs: '100%', md: 220 },
+            height: { xs: '100%', md: cardHeight },
+            width: { xs: '100%', md: cardWidth },
             borderRadius: 3,
             position: 'relative',
             opacity: isDragging ? 0.6 : 1,
@@ -204,7 +204,6 @@ const SortablePatrolAreaCard = ({
               {area.remarks || '—'}
             </Typography> */}
             {/* ⏱ Dwell Time */}
-            {!readOnly && (
               <Grid container spacing={1} mt={2}>
                 <Grid size={6}>
                   <TextField
@@ -217,6 +216,7 @@ const SortablePatrolAreaCard = ({
                     inputProps={{ min: 0 }}
                     label="Min (s)"
                     fullWidth
+                    disabled={readOnly}
                   />
                 </Grid>
 
@@ -231,10 +231,10 @@ const SortablePatrolAreaCard = ({
                     inputProps={{ min: 0 }}
                     label="Max (s)"
                     fullWidth
+                    disabled={readOnly}
                   />
                 </Grid>
               </Grid>
-            )}
           </Box>
 
           {/* ⠿ Drag Handle */}

@@ -217,6 +217,7 @@ export function usePatrolAssign() {
         createdBy,
         updatedAt,
         updatedBy,
+        shiftReplacements,
         ...cleanData
       } = patrolAssignment;
       const res = await axiosServices.post(API_URL_PATROL_ASSIGN, cleanData);
