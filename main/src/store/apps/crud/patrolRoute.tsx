@@ -29,6 +29,8 @@ export type PatrolAreas = {
   orderIndex: number;
   estimatedDistance: number;
   estimatedTime: number;
+  minDwellTime: number;
+  maxDwellTime: number;
   startAreaId: string;
   endAreaId: string;
 };
@@ -37,12 +39,18 @@ export type PatrolTimeGroups = {
   name: string;
   scheduleType: string;
 };
+export type RouteAreasType = {
+  patrolAreaId: string;
+  minDwellTime: number;
+  maxDwellTime: number;
+}
 
 export type PatrolRouteType = {
   id: string;
   name: string;
   description: string;
-  patrolAreaIds: string[];
+  // patrolAreaIds: string[];
+  routeAreas: RouteAreasType[];
 
   startAreaName?: string;
   endAreaName?: string;
@@ -58,6 +66,16 @@ export type SecurityType = {
   departmentName: string;
   districtName: string;
 };
+
+export type ShiftReplacementType = {
+  id: string;
+  patrolAssignmentId: string;
+  originalSecurity: SecurityType;
+  substituteSecurity: SecurityType;
+  replacementStartDate: string;
+  replacementEndDate: string;
+  reason: string;
+}
 
 export type PatrolAssignType = {
   id: string;
@@ -82,6 +100,7 @@ export type PatrolAssignType = {
   securityHead1?: SecurityType;
   securityHead2?: SecurityType;
   timeGroup?: PatrolTimeGroups;
+  shiftReplacements?: ShiftReplacementType[];
   applicationId?: string;
   status?: string;
   updatedAt?: string;

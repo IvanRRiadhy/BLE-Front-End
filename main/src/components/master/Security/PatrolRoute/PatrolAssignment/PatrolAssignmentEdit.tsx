@@ -34,6 +34,7 @@ import {
   PatrolAssignType,
   SecurityType,
   SelectPatrolAssign,
+  ShiftReplacementType,
 } from 'src/store/apps/crud/patrolRoute';
 import {
   useAssignmentReplacement,
@@ -217,10 +218,10 @@ const PatrolAssignmentEdit = () => {
 
   useEffect(() => {
     if (!startDate) return;
-
+    console.log("Start Date:", startDate.format('YYYY-MM-DD'));
     setFormData((prev) => ({
       ...prev,
-      startDate: startDate.hour(0).minute(0).second(0).millisecond(0).toISOString(),
+      startDate: startDate.format('YYYY-MM-DD'),
     }));
   }, [startDate]);
 
@@ -229,7 +230,7 @@ const PatrolAssignmentEdit = () => {
 
     setFormData((prev) => ({
       ...prev,
-      endDate: endDate.hour(23).minute(59).second(59).millisecond(999).toISOString(),
+      endDate: endDate.format('YYYY-MM-DD'),
     }));
   }, [endDate]);
 
@@ -335,6 +336,70 @@ const PatrolAssignmentEdit = () => {
     handleClose();
   };
 
+  //Shift Replacement
+  const ReplacementMutation = useAssignmentReplacement();
+  const [openShiftReplacement, setOpenShiftReplacement] = useState(false);
+
+  const [replacementForm, setReplacementForm] = useState<ShiftReplacementType>({
+    id: '',
+    patrolAssignmentId: '',
+    originalSecurity: {} as SecurityType,
+    substituteSecurity: {} as SecurityType,
+    replacementStartDate: '',
+    replacementEndDate: '',
+    reason: '',
+  });
+
+  const originalSecurityOptions = useMemo(() => {
+    return securityOptions.nonHead.filter((s) => formData.securityIds?.includes(s.id));
+  }, [securityOptions.nonHead, formData.securityIds]);
+
+  const substituteSecurityOptions = useMemo(() => {
+    return securityOptions.nonHead.filter((s) => !formData.securityIds?.includes(s.id));
+  }, [securityOptions.nonHead, formData.securityIds]);
+
+  const handleSubmitReplacement = async () => {
+    try {
+      if (selectedPatrolAssign?.id === undefined)
+        return toast.error('Please select a patrol assignment');
+      if (replacementForm.replacementStartDate === null)
+        return toast.error('Please select a replacement start date');
+      if (replacementForm.replacementEndDate === null)
+        return toast.error('Please select a replacement end date');
+      const payload = {
+        patrolAssignmentId: selectedPatrolAssign?.id,
+        originalSecurityId: replacementForm.originalSecurity.id,
+        substituteSecurityId: replacementForm.substituteSecurity.id,
+        replacementStartDate: replacementForm.replacementStartDate,
+        replacementEndDate: replacementForm.replacementEndDate,
+        reason: replacementForm.reason,
+      };
+
+      console.log('Replacement Payload', payload);
+      await ReplacementMutation.mutateAsync(payload);
+
+      // await createShiftReplacement(payload)
+
+      toast.success('Shift replacement created');
+
+      handleCloseShiftReplacement();
+    } catch (err) {
+      toast.error('Failed to create replacement');
+    }
+  };
+  const handleCloseShiftReplacement = () => {
+    setOpenShiftReplacement(false);
+    setReplacementForm({
+      id: '',
+      patrolAssignmentId: selectedPatrolAssign?.id || '',
+      originalSecurity: {} as SecurityType,
+      substituteSecurity: {} as SecurityType,
+      replacementStartDate: "",
+      replacementEndDate: "",
+      reason: '',
+    });
+  };
+
   //Calendar
 
   const calendarEvents = useMemo(() => {
@@ -364,14 +429,80 @@ const PatrolAssignmentEdit = () => {
           display: 'block',
           backgroundColor: '#e53935',
           borderColor: '#e53935',
+          type: 'schedule',
         });
       });
 
       current = current.add(1, 'day');
     }
 
+    /* =========================
+     SHIFT REPLACEMENT EVENTS
+     ========================= */
+
+    if (selectedPatrolAssign?.shiftReplacements) {
+      selectedPatrolAssign.shiftReplacements.forEach((rep) => {
+        let repDate = dayjs(rep.replacementStartDate);
+
+        const endRep = dayjs(rep.replacementEndDate);
+        console.log('Reason Rep: ', rep.reason);
+        while (repDate.isBefore(endRep) || repDate.isSame(endRep, 'day')) {
+          events.push({
+            title: `🔄 ${rep.originalSecurity.name} → ${rep.substituteSecurity.name}`,
+            start: `${repDate.format('YYYY-MM-DD')}T22:59:59`,
+            allDay: false,
+            display: 'block',
+            backgroundColor: '#ff9800',
+            borderColor: '#ff9800',
+            extendedProps: {
+              type: 'replacement',
+              reason: rep.reason,
+              original: rep.originalSecurity.name,
+              substitute: rep.substituteSecurity.name,
+              replacement: rep,
+            },
+          });
+
+          repDate = repDate.add(1, 'day');
+        }
+      });
+    }
+    if (replacementForm && !selectedPatrolAssign?.shiftReplacements?.includes(replacementForm)) {
+      console.log('ReplacementForm: ', replacementForm);
+      let repDate = dayjs(replacementForm.replacementStartDate);
+
+      const endRep = dayjs(replacementForm.replacementEndDate);
+
+      while (repDate.isBefore(endRep) || repDate.isSame(endRep, 'day')) {
+        events.push({
+          title: `🔄 ${replacementForm.originalSecurity.name} → ${replacementForm.substituteSecurity.name}`,
+          start: `${repDate.format('YYYY-MM-DD')}T22:59:59`,
+          allDay: false,
+          display: 'block',
+          backgroundColor: '#08aa00',
+          borderColor: '#69f962',
+          extendedProps: {
+            type: 'replacement',
+            reason: replacementForm.reason,
+            original: replacementForm.originalSecurity.name,
+            substitute: replacementForm.substituteSecurity.name,
+            replacement: replacementForm,
+          },
+        });
+
+        repDate = repDate.add(1, 'day');
+      }
+    }
+
     return events;
-  }, [startDate, endDate, formData.timeGroupId, timeGroupOptions]);
+  }, [
+    startDate,
+    endDate,
+    formData.timeGroupId,
+    replacementForm,
+    timeGroupOptions,
+    selectedPatrolAssign?.shiftReplacements,
+  ]);
 
   //Calendar Function
   const [calendarMenuAnchor, setCalendarMenuAnchor] = useState<HTMLElement | null>(null);
@@ -398,56 +529,6 @@ const PatrolAssignmentEdit = () => {
 
   const handleCloseCalendarMenu = () => {
     setCalendarMenuAnchor(null);
-  };
-
-  //Shift Replacement
-  const ReplacementMutation = useAssignmentReplacement();
-  const [openShiftReplacement, setOpenShiftReplacement] = useState(false);
-
-  const [replacementForm, setReplacementForm] = useState({
-    originalSecurityId: '',
-    substituteSecurityId: '',
-    replacementStartDate: null as Dayjs | null,
-    replacementEndDate: null as Dayjs | null,
-    reason: '',
-  });
-
-  const originalSecurityOptions = useMemo(() => {
-    return securityOptions.nonHead.filter((s) => formData.securityIds?.includes(s.id));
-  }, [securityOptions.nonHead, formData.securityIds]);
-
-  const substituteSecurityOptions = useMemo(() => {
-    return securityOptions.nonHead.filter((s) => !formData.securityIds?.includes(s.id));
-  }, [securityOptions.nonHead, formData.securityIds]);
-
-  const handleSubmitReplacement = async () => {
-    try {
-      if (selectedPatrolAssign?.id === undefined)
-        return toast.error('Please select a patrol assignment');
-      if (replacementForm.replacementStartDate === null)
-        return toast.error('Please select a replacement start date');
-      if (replacementForm.replacementEndDate === null)
-        return toast.error('Please select a replacement end date');
-      const payload = {
-        patrolAssignmentId: selectedPatrolAssign?.id,
-        originalSecurityId: replacementForm.originalSecurityId,
-        substituteSecurityId: replacementForm.substituteSecurityId,
-        replacementStartDate: replacementForm.replacementStartDate?.format('YYYY-MM-DD'),
-        replacementEndDate: replacementForm.replacementEndDate?.format('YYYY-MM-DD'),
-        reason: replacementForm.reason,
-      };
-
-      console.log('Replacement Payload', payload);
-      await ReplacementMutation.mutateAsync(payload);
-
-      // await createShiftReplacement(payload)
-
-      toast.success('Shift replacement created');
-
-      setOpenShiftReplacement(false);
-    } catch (err) {
-      toast.error('Failed to create replacement');
-    }
   };
 
   return (
@@ -1030,6 +1111,7 @@ const PatrolAssignmentEdit = () => {
               height="100%"
               fixedWeekCount={false}
               events={calendarEvents}
+              initialDate={startDate?.toDate()}
               dateClick={handleCalendarDateClick}
               dayCellClassNames={(arg) => {
                 if (!startDate || !endDate) return [];
@@ -1044,24 +1126,79 @@ const PatrolAssignmentEdit = () => {
 
                 return [];
               }}
-              eventContent={(arg) => (
-                <div
-                  style={{
-                    background: '#e53935',
-                    color: 'white',
-                    fontWeight: 600,
-                    padding: '2px 6px',
-                    borderRadius: '3px',
-                    fontSize: '12px',
-                    width: '100%',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {arg.event.title}
-                </div>
-              )}
+              eventContent={(arg) => {
+                const type = arg.event.extendedProps?.type;
+                const reason = arg.event.extendedProps?.reason;
+                const original = arg.event.extendedProps?.original;
+                const substitute = arg.event.extendedProps?.substitute;
+
+                if (type === 'replacement') {
+                  console.log('Reason: ', reason);
+                  return (
+                    <Tooltip
+                      arrow
+                      placement="top"
+                      title={
+                        <Box>
+                          <Typography fontWeight={700} fontSize={12}>
+                            Shift Replacement
+                          </Typography>
+
+                          <Typography fontSize={12}>
+                            {original} → {substitute}
+                          </Typography>
+
+                          <Divider sx={{ my: 0.5 }} />
+
+                          <Typography fontSize={11}>{reason}</Typography>
+                        </Box>
+                      }
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          background: `${arg.event.backgroundColor}`,
+                          color: 'white',
+                          fontSize: 11,
+                          px: 0.5,
+                          borderRadius: 1,
+                          cursor: 'pointer',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        🔄 {original} → {substitute}
+                      </Box>
+                    </Tooltip>
+                  );
+                }
+
+                return (
+                  <Box
+                    sx={{
+                      background: '#e53935',
+                      color: 'white',
+                      fontWeight: 600,
+                      px: 0.5,
+                      borderRadius: 1,
+                      fontSize: 12,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {arg.event.title}
+                  </Box>
+                );
+              }}
+              eventClick={(info) => {
+                const replacement = info.event.extendedProps?.replacement;
+
+                if (!replacement) return;
+
+                setReplacementForm(replacement);
+
+                setOpenShiftReplacement(true);
+              }}
             />
             <Menu
               anchorEl={calendarMenuAnchor}
@@ -1111,8 +1248,9 @@ const PatrolAssignmentEdit = () => {
 
                     setReplacementForm((prev) => ({
                       ...prev,
-                      replacementStartDate: calendarSelectedDate.startOf('day'),
-                      replacementEndDate: calendarSelectedDate.endOf('day'),
+                      patrolAssignmentId: selectedPatrolAssign?.id ?? '',
+                      replacementStartDate: calendarSelectedDate.format('YYYY-MM-DD'),
+                      replacementEndDate: calendarSelectedDate.format('YYYY-MM-DD'),
                     }));
 
                     setCalendarMenuAnchor(null);
@@ -1126,7 +1264,7 @@ const PatrolAssignmentEdit = () => {
           </Paper>
           <Dialog
             open={openShiftReplacement}
-            onClose={() => setOpenShiftReplacement(false)}
+            onClose={handleCloseShiftReplacement}
             maxWidth="sm"
             fullWidth
           >
@@ -1142,7 +1280,7 @@ const PatrolAssignmentEdit = () => {
                 onChange={(e, value) =>
                   setReplacementForm((prev) => ({
                     ...prev,
-                    originalSecurityId: value?.id || '',
+                    originalSecurity: value as SecurityType,
                   }))
                 }
                 renderInput={(params) => (
@@ -1160,7 +1298,7 @@ const PatrolAssignmentEdit = () => {
                 onChange={(e, value) =>
                   setReplacementForm((prev) => ({
                     ...prev,
-                    substituteSecurityId: value?.id || '',
+                    substituteSecurity: value as SecurityType,
                   }))
                 }
                 renderInput={(params) => (
@@ -1174,7 +1312,11 @@ const PatrolAssignmentEdit = () => {
 
               <DatePicker
                 disabled
-                value={replacementForm.replacementStartDate}
+                value={
+                  replacementForm.replacementStartDate
+                    ? dayjs(replacementForm.replacementStartDate)
+                    : null
+                }
                 format="DD/MM/YYYY"
               />
 
@@ -1183,12 +1325,20 @@ const PatrolAssignmentEdit = () => {
               <CustomFormLabel sx={{ mt: 2 }}>Replacement End</CustomFormLabel>
 
               <DatePicker
-                value={replacementForm.replacementEndDate}
-                minDate={replacementForm.replacementStartDate ?? undefined}
+                value={
+                  replacementForm.replacementEndDate
+                    ? dayjs(replacementForm.replacementEndDate)
+                    : null
+                }
+                minDate={
+                  replacementForm.replacementStartDate
+                    ? dayjs(replacementForm.replacementStartDate)
+                    : undefined
+                }
                 onChange={(v) =>
                   setReplacementForm((prev) => ({
                     ...prev,
-                    replacementEndDate: v,
+                    replacementEndDate: v ? v.format('YYYY-MM-DD') : '',
                   }))
                 }
                 format="DD/MM/YYYY"
@@ -1214,7 +1364,7 @@ const PatrolAssignmentEdit = () => {
             </DialogContent>
 
             <DialogActions>
-              <Button variant="outlined" onClick={() => setOpenShiftReplacement(false)}>
+              <Button variant="outlined" onClick={handleCloseShiftReplacement}>
                 Cancel
               </Button>
 

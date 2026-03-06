@@ -1,8 +1,7 @@
-
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import {  defaultPatrolSessionFilter } from '../defaultForm';
-import {  PatrolDetailPayload } from './patrolRoute';
+import { defaultPatrolSessionFilter } from '../defaultForm';
+import { PatrolDetailPayload } from './patrolRoute';
 
 // const API_URL = '/api/patrol-route/';
 // const API_URL_FILTER = '/api/patrol-route/filter/';
@@ -15,7 +14,7 @@ export type GetFilter = {
   sortColumn: string;
   sortDir: 'asc' | 'desc';
   searchValue: string;
-  timeRange?:string;
+  timeRange?: string;
   filters?: {
     PatrolAssignmentId?: string;
     SecurityId?: string[];
@@ -27,9 +26,15 @@ export type CheckpointType = {
   patrolAreaId: string;
   areaNameSnap: string;
   orderIndex: number;
+  cycleIndex: number;
+  checkpointStatus: string;
   arrivedAt: string;
   leftAt: string;
+  clearedAt: string;
+  minDwellTime: number;
+  maxDwellTime: number;
   distanceFromPrevMeters: number;
+  notes: string;
 };
 
 export type PatrolSessionType = {

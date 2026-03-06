@@ -9,7 +9,7 @@ import {
 import { SortableContext, useSortable, arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
 
 import { CSS } from '@dnd-kit/utilities';
-import { Box, Card, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Card, Grid2 as Grid, TextField, Typography } from '@mui/material';
 import { IconGripHorizontal } from '@tabler/icons-react';
 import { PatrolAreaType } from 'src/store/apps/crud/patrolArea';
 import { useEffect, useRef, useState } from 'react';
@@ -26,6 +26,9 @@ interface SortablePatrolAreaCardProps {
   isLast: boolean;
   onRemove: (id: string) => void;
   readOnly?: boolean;
+  minDwellTime: number;
+  maxDwellTime: number;
+  onDwellChange?: (id: string, field: 'minDwellTime' | 'maxDwellTime', value: number) => void;
 }
 
 const SortablePatrolAreaCard = ({
@@ -40,6 +43,9 @@ const SortablePatrolAreaCard = ({
   isLast,
   onRemove,
   readOnly,
+  minDwellTime,
+  maxDwellTime,
+  onDwellChange,
 }: SortablePatrolAreaCardProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: area.id,
@@ -75,8 +81,8 @@ const SortablePatrolAreaCard = ({
 
   // Hide trash when dragging starts
   useEffect(() => {
-    console.log("card Height: ", cardHeight)
-    console.log("Card Width", cardWidth)
+    console.log('card Height: ', cardHeight);
+    console.log('Card Width', cardWidth);
     if (isDragging) {
       hideImmediately();
     }
@@ -89,8 +95,8 @@ const SortablePatrolAreaCard = ({
           onMouseEnter={showWithTimeout}
           onMouseLeave={hideImmediately}
           sx={{
-            height: {xs: "100%", md: 320},
-            width: {xs: "100%", md: 220},
+            height: { xs: '100%', md: 340 },
+            width: { xs: '100%', md: 220 },
             borderRadius: 3,
             position: 'relative',
             opacity: isDragging ? 0.6 : 1,
@@ -191,12 +197,44 @@ const SortablePatrolAreaCard = ({
               {area.floorName}
             </Typography>
 
-            <Typography variant="caption" fontSize={12} color="text.secondary">
+            {/* <Typography variant="caption" fontSize={12} color="text.secondary">
               <Box component="span" fontWeight={700}>
                 Description:
               </Box>{' '}
               {area.remarks || '—'}
-            </Typography>
+            </Typography> */}
+            {/* ⏱ Dwell Time */}
+            {!readOnly && (
+              <Grid container spacing={1} mt={2}>
+                <Grid size={6}>
+                  <TextField
+                    size="small"
+                    type="number"
+                    value={minDwellTime}
+                    onChange={(e) =>
+                      onDwellChange?.(area.id, 'minDwellTime', parseInt(e.target.value))
+                    }
+                    inputProps={{ min: 0 }}
+                    label="Min (s)"
+                    fullWidth
+                  />
+                </Grid>
+
+                <Grid size={6}>
+                  <TextField
+                    size="small"
+                    type="number"
+                    value={maxDwellTime}
+                    onChange={(e) =>
+                      onDwellChange?.(area.id, 'maxDwellTime', parseInt(e.target.value))
+                    }
+                    inputProps={{ min: 0 }}
+                    label="Max (s)"
+                    fullWidth
+                  />
+                </Grid>
+              </Grid>
+            )}
           </Box>
 
           {/* ⠿ Drag Handle */}

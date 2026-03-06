@@ -148,7 +148,7 @@ const FullLayout: FC = () => {
         const now = Date.now();
         const alarmData = Array.isArray(data) ? data[0] : data;
 
-        // console.log('[MQTT] Received alarm data:', alarmData);
+        console.log('[MQTT] Received alarm data:', alarmData);
 
         setLatestAlarm(alarmData);
         setOpenAlarmPopup(true);

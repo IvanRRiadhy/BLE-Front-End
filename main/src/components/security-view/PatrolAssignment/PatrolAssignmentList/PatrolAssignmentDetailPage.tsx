@@ -275,7 +275,7 @@ const PatrolDetailPage = () => {
       </Box>
     );
   }
-  console.log('patrol', patrol);
+  console.log('patrol', patrolSession);
   // ===== Patrol Assignment Date Validation =====
   const today = new Date();
   today.setHours(0, 0, 0, 0);

@@ -99,6 +99,7 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
 
         // Compare time (assuming ISO string or Date-compatible)
         if (!existing || new Date(alarm.time).getTime() > new Date(existing.time).getTime()) {
+          // console.log(alarm);
           latestByFloorplan.set(floorId, alarm);
         }
       }

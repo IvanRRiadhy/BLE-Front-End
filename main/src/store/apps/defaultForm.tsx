@@ -725,7 +725,7 @@ export const defaultPatrolRouteForm: PatrolRouteType = {
   id: '',
   name: '',
   description: '',
-  patrolAreaIds: [],
+  routeAreas: [],
 };
 export const defaultPatrolRouteFilter: PatrolRouteFilter = {
   draw: 1,
@@ -749,6 +749,15 @@ export const defaultPatrolAssignForm: PatrolAssignType = {
   endDate: '',
   securityIds: [],
   timeGroupId: '',
+  securityHead1Id: '',
+  securityHead2Id: '',
+  shiftReplacements: [],
+  approvalType: '',
+  durationType: '',
+  startType: '',
+  cycleType: '',
+  cycleCount: 0,
+  
 };
 export const defaultPatrolAssignmentFilter: PatrolRouteFilter = {
   draw: 1,

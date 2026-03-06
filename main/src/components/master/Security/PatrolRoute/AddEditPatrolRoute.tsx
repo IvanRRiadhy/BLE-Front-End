@@ -47,7 +47,7 @@ interface FormType {
 }
 
 const COLUMNS = 4;
-const CARD_HEIGHT = 320;
+const CARD_HEIGHT = 340;
 const CARD_WIDTH = 220;
 
 const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
@@ -60,7 +60,14 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
   const [formData, setFormData] = useState({
     ...defaultPatrolRouteForm,
     ...patrolRoute,
-    patrolAreaIds: patrolRoute?.patrolAreas?.map((a) => a.patrolAreaId) || [],
+    routeAreas:
+      patrolRoute?.routeAreas ??
+      patrolRoute?.patrolAreas?.map((a) => ({
+        patrolAreaId: a.patrolAreaId,
+        minDwellTime: a.minDwellTime ?? 0,
+        maxDwellTime: a.maxDwellTime ?? 0,
+      })) ??
+      [],
   });
 
   /* ===== hooks ===== */
@@ -74,24 +81,38 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
   });
 
   /* ===== derived ===== */
-  const selectedAreas = formData.patrolAreaIds
-    .map((id) => patrolAreaData.find((a) => a.id === id))
+  const selectedAreas = formData.routeAreas
+    .map((r) => patrolAreaData.find((a) => a.id === r.patrolAreaId))
     .filter((a): a is NonNullable<typeof a> => a != null);
 
-  const availableAreas = patrolAreaData.filter((a) => !formData.patrolAreaIds.includes(a.id));
+  const availableAreas = patrolAreaData.filter(
+    (a) => !formData.routeAreas.some((r) => r.patrolAreaId === a.id),
+  );
 
   /* ===== dialog control ===== */
   const handleClickOpen = () => {
     setFormErrors({});
+
     setFormData(
       type === 'edit' && patrolRoute
         ? {
             ...defaultPatrolRouteForm,
             ...patrolRoute,
-            patrolAreaIds: patrolRoute.patrolAreas?.map((a) => a.patrolAreaId) || [],
+            routeAreas:
+              patrolRoute.routeAreas ??
+              patrolRoute.patrolAreas?.map((a) => ({
+                patrolAreaId: a.patrolAreaId,
+                minDwellTime: a.minDwellTime ?? 0,
+                maxDwellTime: a.maxDwellTime ?? 0,
+              })) ??
+              [],
           }
-        : { ...defaultPatrolRouteForm },
+        : {
+            ...defaultPatrolRouteForm,
+            routeAreas: [],
+          },
     );
+
     setOpen(true);
   };
 
@@ -101,7 +122,7 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
   const validateForm = () => {
     const errors: Record<string, string> = {};
     if (!formData.name?.trim()) errors.name = 'Route Name is required';
-    if (!formData.patrolAreaIds.length) errors.patrolAreaIds = 'Patrol Area is required';
+    if (!formData.routeAreas.length) errors.patrolAreaIds = 'Patrol Area is required';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -119,7 +140,7 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
         id: formData.id,
         name: formData.name,
         description: formData.description,
-        patrolAreaIds: formData.patrolAreaIds,
+        routeAreas: formData.routeAreas,
       };
 
       type === 'add'
@@ -152,20 +173,20 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    setFormData((prev) => ({
-      ...prev,
-      patrolAreaIds: arrayMove(
-        prev.patrolAreaIds,
-        prev.patrolAreaIds.indexOf(active.id as string),
-        prev.patrolAreaIds.indexOf(over.id as string),
-      ),
-    }));
-  };
+    setFormData((prev) => {
+      const oldIndex = prev.routeAreas.findIndex((r) => r.patrolAreaId === active.id);
+      const newIndex = prev.routeAreas.findIndex((r) => r.patrolAreaId === over.id);
 
+      return {
+        ...prev,
+        routeAreas: arrayMove(prev.routeAreas, oldIndex, newIndex),
+      };
+    });
+  };
   const handleRemoveArea = (id: string) => {
     setFormData((prev) => ({
       ...prev,
-      patrolAreaIds: prev.patrolAreaIds.filter((x) => x !== id),
+      routeAreas: prev.routeAreas.filter((x) => x.patrolAreaId !== id),
     }));
   };
 
@@ -174,7 +195,7 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
     <>
       {type === 'edit' && (
         <Tooltip title="Edit Patrol Route">
-          <IconButton color='primary' size="small" onClick={handleClickOpen}>
+          <IconButton color="primary" size="small" onClick={handleClickOpen}>
             <IconPencil size={20} />
           </IconButton>
         </Tooltip>
@@ -240,23 +261,39 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
               modifiers={[restrictToFirstScrollableAncestor]}
               onDragEnd={handleDragEnd}
             >
-              <SortableContext items={formData.patrolAreaIds} strategy={rectSortingStrategy}>
+              <SortableContext
+                items={formData.routeAreas.map((r) => r.patrolAreaId)}
+                strategy={rectSortingStrategy}
+              >
                 <Grid container spacing={3}>
-                  {selectedAreas.map((area, index) => (
-                    <SortablePatrolAreaCard
-                      key={area.id}
-                      area={area}
-                      cardWidth={CARD_WIDTH}
-                      cardHeight={CARD_HEIGHT}
-                      index={index + 1}
-                      rowIndex={Math.floor(index / COLUMNS)}
-                      colIndex={index % COLUMNS}
-                      isRTL={false}
-                      isEndOfRow={index % COLUMNS === COLUMNS - 1}
-                      isLast={index === selectedAreas.length - 1}
-                      onRemove={handleRemoveArea}
-                    />
-                  ))}
+                  {selectedAreas.map((area, index) => {
+                    const routeArea = formData.routeAreas.find((r) => r.patrolAreaId === area.id);
+                    return (
+                      <SortablePatrolAreaCard
+                        key={area.id}
+                        area={area}
+                        cardWidth={CARD_WIDTH}
+                        cardHeight={CARD_HEIGHT}
+                        index={index + 1}
+                        rowIndex={Math.floor(index / COLUMNS)}
+                        colIndex={index % COLUMNS}
+                        isRTL={false}
+                        isEndOfRow={index % COLUMNS === COLUMNS - 1}
+                        isLast={index === selectedAreas.length - 1}
+                        onRemove={handleRemoveArea}
+                        minDwellTime={routeArea?.minDwellTime ?? 0}
+                        maxDwellTime={routeArea?.maxDwellTime ?? 0}
+                        onDwellChange={(id, field, value) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            routeAreas: prev.routeAreas.map((r) =>
+                              r.patrolAreaId === id ? { ...r, [field]: value } : r,
+                            ),
+                          }));
+                        }}
+                      />
+                    );
+                  })}
 
                   <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                     <Card
@@ -289,7 +326,7 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
           <Button
             onClick={handleSave}
             variant="contained"
-            disabled={isSaving || formData.patrolAreaIds.length < 2}
+            disabled={isSaving || formData.routeAreas.length < 2}
           >
             {isSaving ? <CircularProgress size={20} /> : 'Save'}
           </Button>
@@ -316,7 +353,14 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
             onClick={() => {
               setFormData((prev) => ({
                 ...prev,
-                patrolAreaIds: [...prev.patrolAreaIds, selectedAreaToAdd!],
+                routeAreas: [
+                  ...prev.routeAreas,
+                  {
+                    patrolAreaId: selectedAreaToAdd!,
+                    minDwellTime: 0,
+                    maxDwellTime: 0,
+                  },
+                ],
               }));
               setSelectedAreaToAdd(null);
               setAddAreaOpen(false);

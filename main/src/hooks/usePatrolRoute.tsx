@@ -244,8 +244,11 @@ export function useEditPatrolAssign() {
         status,
         createdAt,
         createdBy,
-        updatedAt,
+        updatedAt, 
         updatedBy,
+        shiftReplacements,
+        securityHead1,
+        securityHead2,
         ...cleanData
       } = patrolAssignment;
       const res = await axiosServices.put(`${API_URL_PATROL_ASSIGN}${id}`, cleanData);
@@ -289,6 +292,22 @@ export function useAssignmentReplacement() {
     }) => {
       const res = await axiosServices.post(`${API_URL_PATROL_ASSIGN}replacement`, payload);
       return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-all'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-list'] });
+      queryClient.invalidateQueries({ queryKey: ['patrol-assignment-id'] });
+    },
+  });
+};
+
+export function useDeleteReplacement() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await axiosServices.delete(`${API_URL_PATROL_ASSIGN}replacement/${id}`);
+      return id;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['patrol-assignment-all'] });
