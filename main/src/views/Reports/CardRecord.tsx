@@ -41,7 +41,7 @@ const CardRecord = () => {
   const topCards: cardType[] = [
     {
       title: 'Total Card Records',
-      subtitle: cardRecordCount.toString(),
+      subtitle: cardRecordCount?.toString(),
       bgcolor: 'success',
     },
   ];

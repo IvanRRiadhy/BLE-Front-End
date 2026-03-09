@@ -36,6 +36,7 @@ const SKELETON_ROWS = 5;
 const CardRecordList = () => {
   const dispatch: AppDispatch = useDispatch();
   const cardRecordData = useSelector((state: RootState) => state.CardRecordReducer.cardRecords);
+  
   const CardRecordTotalCount = useSelector(
     (state: RootState) => state.CardRecordReducer.cardRecordTotalCount,
   );

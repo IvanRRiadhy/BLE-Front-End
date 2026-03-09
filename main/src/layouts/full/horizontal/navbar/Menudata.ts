@@ -200,7 +200,7 @@ const isBoundaryActive = isActive('boundary');
         // { id: uniqueId(), title: 'Alarm Notification', icon: IconBellExclamation, href: '/report/alarmRecord/' },
         { id: uniqueId(), title: 'Alarm Trigger', icon: IconBellExclamation, href: '/report/alarmTrigger/' },
         { id: uniqueId(), title: 'Alarm List', icon: IconBellExclamation, href: '/report/alarmlist/' },
-        { id: uniqueId(), title: 'Card Record', icon: IconBarrierBlock, href: '/report/cardrecord/' },
+        // { id: uniqueId(), title: 'Card Record', icon: IconBarrierBlock, href: '/report/cardrecord/' },
         // { id: uniqueId(), title: 'Test Record', icon: IconCalendar, href: '/report/testrecord/' },
         { id: uniqueId(), title: 'Visitor Report', icon: IconCalendar, href: '/report/visitorreport/filter/'},
         { id: uniqueId(), title: 'Investigate', icon: IconCalendar, href: '/report/investigate'},

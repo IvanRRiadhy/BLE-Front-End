@@ -185,7 +185,7 @@ const Notifications = () => {
   const getStatusText = (status: string) => {
     const actionMap = [...actionStatus, ...extraActionStatus];
     const s = actionMap.find((x) => x.value.toLowerCase() === status);
-    console.log("Status:", status, s);
+    // console.log("Status:", status, s);
     if (!s) return 'Unknown';
     switch (status) {
       case 'Idle':
@@ -202,7 +202,7 @@ const Notifications = () => {
     const rect = bellRef.current.getBoundingClientRect();
     const baseTop = rect.bottom + 8;
     const spacing = 125; // bubble height + gap
-    return { top: baseTop + index * spacing, left: rect.right - 370 };
+    return { top: baseTop + index * spacing, left: rect.right - 350 };
   };
 
   const notificationAudio = useMemo(() => {

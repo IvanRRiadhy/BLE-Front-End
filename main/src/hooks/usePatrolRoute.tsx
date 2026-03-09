@@ -64,6 +64,7 @@ export function usePatrolRouteId(id: string) {
     queryKey: ['patrol-route-id', id],
     queryFn: async () => {
       const response = await axiosServices.get(`${API_URL}${id}`);
+      // console.log(response, id)
       return response.data.collection.data;
     },
     select: mapPatrolRoute,
@@ -169,7 +170,9 @@ export function usePatrolAssignmentId(patrolAssignId: string) {
   return useQuery({
     queryKey: ['patrol-assignment-id', patrolAssignId],
     queryFn: async () => {
+      console.log("Patrol Assign Id: ", patrolAssignId);
       const response = await axiosServices.get(`${API_URL_PATROL_ASSIGN}${patrolAssignId}`);
+      console.log('Patrol Assign by Id: ', response.data);
       return response.data;
     },
   });

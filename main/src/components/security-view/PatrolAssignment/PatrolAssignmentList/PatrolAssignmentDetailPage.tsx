@@ -45,11 +45,11 @@ const PatrolDetailPage = () => {
 
   const [searchParams] = useSearchParams();
   const id = searchParams.get('id') ?? undefined;
-
+  console.log('id', id);
   const { data: patrolRes } = usePatrolAssignmentId(id ?? '');
 
   const patrol = patrolRes?.collection?.data;
-  const { data: route } = usePatrolRouteId(patrol?.patrolRouteId ?? '');
+  const { data: route } = usePatrolRouteId(patrol?.patrolRouteId ?? '');  
 
   const { data: timeGroupRes } = useTimeGroupList({
     ...defaultTimeGroupFilter,
@@ -60,6 +60,7 @@ const PatrolDetailPage = () => {
 
   const [openSchedule, setOpenSchedule] = useState(false);
   const [openRoute, setOpenRoute] = useState(false);
+  const [detailTab, setDetailTab] = useState(0);
 
   const [patrolSession, setPatrolSession] = useState<PatrolSessionType | null>(null);
   const [openCaseDialog, setOpenCaseDialog] = useState(false);
@@ -147,7 +148,13 @@ const PatrolDetailPage = () => {
 
   const StartPatrolMutation = useStartPatrol();
   const StopPatrolMutation = useStopPatrol();
-
+  if (!patrol) {
+    return (
+      <Box display="flex" justifyContent="center" mt={5}>
+        <CircularProgress />
+      </Box>
+    );
+  }
   const handleStart = async () => {
     if (!patrol) return;
     // if (!data.patrolAssignment) return;
@@ -269,7 +276,7 @@ const PatrolDetailPage = () => {
     setOpenCaseDialog(false);
   };
 
-  console.log('patrol', patrolSession);
+  console.log('patrol', patrol, 'patrolSession', patrolSession);
   // ===== Patrol Assignment Date Validation =====
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -286,7 +293,6 @@ const PatrolDetailPage = () => {
   const assignmentActive = (!startDate || today >= startDate) && (!endDate || today <= endDate);
 
   //Tab
-  const [detailTab, setDetailTab] = useState(0);
 
   const handleChangeTab = (_: any, newValue: number) => {
     setDetailTab(newValue);
@@ -304,14 +310,6 @@ const PatrolDetailPage = () => {
     if (value !== index) return null;
     return <Box mt={2}>{children}</Box>;
   };
-
-  if (!patrol) {
-    return (
-      <Box display="flex" justifyContent="center" mt={5}>
-        <CircularProgress />
-      </Box>
-    );
-  }
 
   return (
     <>

@@ -17,6 +17,7 @@ export function useCardUsage() {
         queryKey: ['card-usage'],
         queryFn: async () => {
             const response = await axiosServices.get(`${API_URL}/usage`);
+            console.log('Card Usage Data fetched: ', response.data);
             return response.data.collection.data as CardUsageType[];
         },
         placeholderData: [],
