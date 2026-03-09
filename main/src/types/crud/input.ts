@@ -167,6 +167,11 @@ export const visitorStatusEnumMap: Record<string, number> = {
     { label: "Done Investigate", value: 'DoneInvestigated', disabled: true},
     { label: "Postpone Investigation", value: 'PostponeInvestigated'},
   ];
+  export const extraActionStatus: inputDataType[] = [
+    { label: "Acknowledged", value: 'Acknowledged', disabled: true},
+    { label: "Investigated", value: 'Investigated', disabled: true},
+    { label: "Dispatched", value: 'Dispatched', disabled: true},
+  ]
 
   export const actionStatusColormap: Record<string, string> = {
   Idle: 'error.main',

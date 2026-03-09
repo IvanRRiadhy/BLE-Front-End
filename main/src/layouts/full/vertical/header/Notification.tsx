@@ -23,7 +23,7 @@ import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 import { IconBellRinging } from '@tabler/icons-react';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import { Link } from 'react-router';
-import { actionStatus } from 'src/types/crud/input';
+import { actionStatus, extraActionStatus } from 'src/types/crud/input';
 import { memberType } from 'src/store/apps/crud/member';
 import { VisitorType } from 'src/store/apps/crud/visitor';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
@@ -183,8 +183,9 @@ const Notifications = () => {
     'Unknown';
 
   const getStatusText = (status: string) => {
-    const s = actionStatus.find((x) => x.value.toLowerCase() === status);
-    // console.log("Status:", status, s);
+    const actionMap = [...actionStatus, ...extraActionStatus];
+    const s = actionMap.find((x) => x.value.toLowerCase() === status);
+    console.log("Status:", status, s);
     if (!s) return 'Unknown';
     switch (status) {
       case 'Idle':
