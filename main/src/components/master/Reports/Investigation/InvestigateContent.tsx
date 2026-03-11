@@ -247,7 +247,7 @@ if (isLoading) return <InvestigateSkeleton />;
 
           let timeRange = '-';
           if (startFormatted && endFormatted) {
-            const dur = dayjs.duration(s.durationInMinutes ?? 0, 'minutes');
+            const dur = dayjs.duration(s.durationMinutes ?? 0, 'minutes');
             // const durStr = dur.format('HH:mm');
 
             timeRange = `${startFormatted} ${append} ${endFormatted}`;

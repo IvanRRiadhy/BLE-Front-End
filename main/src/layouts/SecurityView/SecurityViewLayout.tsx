@@ -104,12 +104,8 @@ const SecurityViewLayout: FC = () => {
         image: person.image ? `${BASE_URL}${person.image}` : '',
         name: person.name,
         beacon: acceptedAlarm.beaconId ?? '-',
-        idleTime: acceptedAlarm.idleTimestamp
-          ? formatTime(acceptedAlarm.idleTimestamp)
-          : '-',
-        triggerTime: acceptedAlarm.triggerTime
-          ? formatTime(acceptedAlarm.triggerTime)
-          : '-',
+        idleTime: acceptedAlarm.idleTimestamp ? formatTime(acceptedAlarm.idleTimestamp) : '-',
+        triggerTime: acceptedAlarm.triggerTime ? formatTime(acceptedAlarm.triggerTime) : '-',
         firstGateway: acceptedAlarm.firstGatewayId ?? '-',
         secondGateway: acceptedAlarm.secondGatewayId ?? '-',
         action: acceptedAlarm.action ?? 'Unknown',
@@ -127,8 +123,10 @@ const SecurityViewLayout: FC = () => {
   }, [acceptedAlarm]);
 
   useEffect(() => {
-    if (focusAlarm === null) return;
-
+    console.log("Focus Alarm", focusAlarm)
+    if (focusAlarm === null || focusAlarm === undefined) return;
+    
+    if (!focusAlarm.beacon) return;
     const startTopic = `highlight/card/${focusAlarm.beacon}`;
     const payload = 'Start';
 
@@ -139,9 +137,11 @@ const SecurityViewLayout: FC = () => {
     console.log(`[MQTT] Subscribing to focus alarm topic: ${topic}`);
 
     const unsubscribe = startMQTTclient((msg: any) => {
+      if (!msg) return;
       if (!msg?.floorplanId || !msg?.beaconId) return;
       const payloadId = msg.beaconId;
       console.log(`[MQTT] Received message on focus alarm topic: ${topic} with payload:`, msg);
+
       if (payloadId !== focusAlarm.beacon) return;
       dispatch(
         SetFocusPosition({

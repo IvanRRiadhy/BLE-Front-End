@@ -23,6 +23,7 @@ import {
 import earcut from 'earcut';
 import { uniqueId } from 'lodash';
 import polylabel from 'polylabel';
+import toast from 'react-hot-toast';
 
 type NodeType = 'corner' | 'center';
 
@@ -539,7 +540,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
         setIsColliding(collision);
 
         if (collision) {
-          alert('Areas cannot overlap! Position reverted.');
+          toast.error('Areas cannot overlap! Position reverted.');
         } else if (dx !== 0 || dy !== 0) {
           await handleDragArea(areaName, dx, dy);
         }
@@ -653,6 +654,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
       });
 
       if (hasCollision && cornerDragData) {
+        toast.error('Areas cannot overlap! Position reverted.');
         handleDragCorner(
           cornerDragData.areaName,
           cornerDragData.cornerIndex,
@@ -924,7 +926,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
                 }}
                 onDragMove={(e) => {
                   // Don't stop propagation during drag move
-                  e.evt.stopPropagation();
+                  // e.evt.stopPropagation();
                   const stage = e.target.getStage();
                   const ptr = stage?.getPointerPosition();
                   const world = pointerToWorld(ptr || null);
@@ -935,7 +937,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
                 }}
                 onDragEnd={(e) => {
                   // Don't stop propagation on drag end
-                  e.evt.stopPropagation();
+                  // e.evt.stopPropagation();
                   const stage = e.target.getStage();
                   const ptr = stage?.getPointerPosition();
                   const world = pointerToWorld(ptr || null);

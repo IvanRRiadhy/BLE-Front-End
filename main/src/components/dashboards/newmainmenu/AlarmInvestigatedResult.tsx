@@ -8,9 +8,9 @@ import { investigationResultType } from 'src/types/crud/input';
 /* ---------------- Filter ---------------- */
 
 const defaultFilter = {
-//   timeRange: 'daily',
-from: "2026-02-01T00:00:00Z",
-to: "2026-02-23T23:59:59Z",
+  timeRange: 'daily',
+// from: "2026-02-01T00:00:00Z",
+// to: "2026-02-23T23:59:59Z",
   floorplanMaskedAreaId: null,
   operatorName: null,
   visitorId: null,

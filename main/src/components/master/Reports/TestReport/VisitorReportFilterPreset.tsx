@@ -237,7 +237,7 @@ const VisitorReportFilterPreset = ({
       ExitTime: r.exitTime,
       VisitorStatus: r.status ?? '-',
       HostName: r.hostName ?? '-',
-      DurationInMinutes: r.durationInMinutes,
+      DurationMinutes: r.durationMinutes,
     }));
   };
 

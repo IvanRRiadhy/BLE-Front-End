@@ -59,7 +59,7 @@ const VisitorReportPdf: React.FC<Props> = ({
               <TableCell>{r.AreaName}</TableCell>
               <TableCell>{formatDateTime(r.EnterTime)}</TableCell>
               <TableCell>{formatDateTime(r.ExitTime)}</TableCell>
-              <TableCell>{formatDuration(r.DurationInMinutes)}</TableCell>
+              <TableCell>{formatDuration(r.DurationMinutes)}</TableCell>
               <TableCell>{r.VisitorStatus}</TableCell>
               <TableCell>{r.HostName}</TableCell>
             </TableRow>

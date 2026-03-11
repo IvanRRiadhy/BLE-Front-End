@@ -33,7 +33,7 @@ export interface bleReaderType {
   name: string;
   gmac: string;
   ip: string;
-  isAssigned: boolean;
+  isAssigned?: boolean;
   createdBy: string;
   createdAt: string;
   updatedBy: string;

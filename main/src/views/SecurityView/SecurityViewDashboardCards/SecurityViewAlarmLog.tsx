@@ -63,7 +63,9 @@ const SecurityViewAlarmLog: React.FC = () => {
     };
   }
   const log = useMemo<AlarmLogItem[]>(() => {
-    return data.map((x: any) => {
+    const filtered = data.filter((x: any) => x.action === "Dispatched");
+
+    return filtered.map((x: any) => {
       const person = resolvePerson(x);
 
       return {

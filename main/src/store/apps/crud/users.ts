@@ -62,6 +62,7 @@ export type userGroupType = {
     accessibleBuildings: accessibleBuildingType[];
     memberCount: number;
     accessibleBuildingCount: number;
+    isHead: boolean;
     createdAt: string;
     createdBy: string;
     updatedAt: string;

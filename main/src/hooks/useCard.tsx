@@ -72,6 +72,24 @@ export function useAddCard() {
   });
 }
 
+export function useBulkAddCard() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (cards: Partial<CardType>[]) => {
+      console.log('payload: ', cards);
+      const res = await axiosServices.post(`${API_URL_V1}bulk`, cards);
+      console.log("Res: ", res)
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['card-list'] });
+      queryClient.invalidateQueries({ queryKey: ['card-all'] });
+      queryClient.invalidateQueries({ queryKey: ['card-unassigned'] });
+    },
+  });
+}
+
 export function useEditCard() {
   const queryClient = useQueryClient();
 

@@ -53,6 +53,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
     ip: false,
     gmac: false,
     id: false,
+    isAssigned: false,
     createdBy: false,
     createdAt: false,
     updatedBy: false,
@@ -69,7 +70,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
   // ───────────────────────────────
   // Dialog controls
   // ───────────────────────────────
-  const handleClickOpen = () => {
+  const handleClickOpen = () => { 
     if (type === 'edit' && initialData && initialData.length > 0) {
       setRows(initialData);
     } else {
@@ -83,6 +84,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
       ip: false,
       gmac: false,
       id: false,
+      isAssigned: false,
       createdBy: false,
       createdAt: false,
       updatedBy: false,
@@ -194,7 +196,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
   };
 
   // ───────────────────────────────
-  // UI (unchanged)
+  // UI 
   // ───────────────────────────────
   return (
     <>

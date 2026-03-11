@@ -59,7 +59,7 @@ const UpcomingVisitor: React.FC = () => {
     };
   }
   const upcomingVisitor = useMemo<UpcomingVisitorItem[]>(() => {
-    // console.log('Upcoming Visitor Data:', data);
+    console.log('Upcoming Visitor Data:', data);
     return data.map((x: any) => ({
       id: x.id,
       status: x.status,
@@ -112,67 +112,78 @@ const UpcomingVisitor: React.FC = () => {
           py: 1,
         }}
       >
-        {upcomingVisitor.map((item, index: number) => (
-          <Stack
-            key={`${index}-${item.id}`}
-            direction="row"
-            spacing={2}
-            alignItems="center"
+        {upcomingVisitor.length === 0 ? (
+          <Box
             sx={{
-              p: 1,
-              backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
-              borderBottom: '1px solid #e0e0e0',
-              width: '100%',
-              overflow: 'hidden',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#9e9e9e',
+              textAlign: 'center',
+              px: 2,
             }}
           >
-            {/* Avatar */}
-            <Avatar
-              src={item.image ? `${BASE_URL}${item.image}` : ''}
-              alt="visitor"
-              sx={{ width: 56, height: 56 }}
-            />
-
-            {/* Visitor info */}
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              {/* <Typography
-                sx={{
-                  fontSize: 16,
-                  fontWeight: 600,
-                  color: '#045498',
-                }}
-              >
-                {item.name}
-              </Typography> */}
-              <SmartScrollingText text={item.name} fontSize={16} fontWeight={600} color="#045498" />
-
-              {/* <Typography
-                sx={{
-                  fontSize: 12,
-                  color: '#045498',
-                }}
-              >
-                {item.checkInAt ? new Date(item.checkInAt).toLocaleString() : '-'}
-              </Typography> */}
-              <SmartScrollingText
-                text={item.checkInAt ? new Date(item.checkInAt).toLocaleString() : '-'}
-                fontSize={12}
-                color="#045498"
-              />
-            </Box>
-
-            {/* Status */}
             <Typography
               sx={{
                 fontSize: 16,
-                fontWeight: 700,
-                color: statusColorMap[item.status.toLowerCase()] ?? '#000',
+                fontWeight: 500,
               }}
             >
-              {item.status}
+              There are no visitors today
             </Typography>
-          </Stack>
-        ))}
+          </Box>
+        ) : (
+          upcomingVisitor.map((item, index: number) => (
+            <Stack
+              key={`${index}-${item.id}`}
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              sx={{
+                p: 1,
+                backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
+                borderBottom: '1px solid #e0e0e0',
+                width: '100%',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Avatar */}
+              <Avatar
+                src={item.image ? `${BASE_URL}${item.image}` : ''}
+                alt="visitor"
+                sx={{ width: 56, height: 56 }}
+              />
+
+              {/* Visitor info */}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <SmartScrollingText
+                  text={item.name}
+                  fontSize={16}
+                  fontWeight={600}
+                  color="#045498"
+                />
+
+                <SmartScrollingText
+                  text={item.checkInAt ? new Date(item.checkInAt).toLocaleString() : '-'}
+                  fontSize={12}
+                  color="#045498"
+                />
+              </Box>
+
+              {/* Status */}
+              <Typography
+                sx={{
+                  fontSize: 16,
+                  fontWeight: 700,
+                  color: statusColorMap[item.status.toLowerCase()] ?? '#000',
+                }}
+              >
+                {item.status}
+              </Typography>
+            </Stack>
+          ))
+        )}
       </Box>
     </Box>
   );

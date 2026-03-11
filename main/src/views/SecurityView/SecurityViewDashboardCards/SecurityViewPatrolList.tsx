@@ -79,8 +79,28 @@ const SecurityViewPatrolList = () => {
             py: 1,
           }}
         >
-          {patrolData &&
-            patrolData.length > 0 &&
+          {!isLoading && patrolData.length === 0 ? (
+            <Box
+              sx={{
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                color: '#9e9e9e',
+                px: 2,
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: 16,
+                  fontWeight: 500,
+                }}
+              >
+                No Patrol Assigned
+              </Typography>
+            </Box>
+          ) : (
             !isLoading &&
             patrolData.map((item, index) => (
               <Stack
@@ -97,7 +117,8 @@ const SecurityViewPatrolList = () => {
               >
                 <SecurityViewPatrolListItem patrol={item} openDetail={setSelectedPatrol} />
               </Stack>
-            ))}
+            ))
+          )}
         </Box>
       </Box>
       {/* Detail Dialog */}

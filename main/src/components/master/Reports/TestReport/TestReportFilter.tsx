@@ -141,7 +141,7 @@ const VisitorReportFilter = () => {
       ExitTime: r.exitTime,
       VisitorStatus: r.status ?? '-',
       HostName: r.hostName ?? '-',
-      DurationInMinutes: r.durationInMinutes,
+      DurationMinutes: r.durationMinutes,
     }));
 
   const adaptAlarm = (data: NewAlarmType[]) =>
@@ -162,7 +162,8 @@ const VisitorReportFilter = () => {
         visitorSessionMutation.mutateAsync(buildTrackingFilter()),
         alarmLogMutation.mutateAsync(buildAlarmFilter()),
       ]);
-
+      console.log("Tracking: ", tracking);
+      console.log("Alarms: ", alarms);
       setTrackingLogs(adaptTracking(tracking));
       setAlarmLogs(adaptAlarm(alarms));
       setOpenReport(true);

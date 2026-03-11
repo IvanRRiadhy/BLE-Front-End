@@ -165,6 +165,7 @@ export const visitorStatusEnumMap: Record<string, number> = {
     { label: "Arrived", value: 'Arrived', disabled: true},
     { label: "Accepted", value: 'Accepted', disabled: true},
     { label: "Done Investigate", value: 'DoneInvestigated', disabled: true},
+    { label: "Resolved", value: 'Resolved', disabled: true},
     { label: "Postpone Investigation", value: 'PostponeInvestigated'},
   ];
   export const extraActionStatus: inputDataType[] = [
@@ -185,6 +186,7 @@ export const visitorStatusEnumMap: Record<string, number> = {
   Arrived: 'primary.main',
   Investigated: 'primary.main',
   DoneInvestigated: 'success.main',
+  Resolved: 'success.main',
   PostponeInvestigated: 'warning.main',
 };
 

@@ -26,6 +26,7 @@ import {
   Stack,
   ToggleButtonGroup,
   ToggleButton,
+  CircularProgress,
 } from '@mui/material';
 import {
   IconPlus,
@@ -65,7 +66,7 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
   /* ---------------- STATE ---------------- */
   const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null);
   const expandedGroup = groups.find((g) => g.id === expandedGroupId);
-
+  // console.log(groups, 'groups')
   const [openCreate, setOpenCreate] = useState(false);
   const [groupName, setGroupName] = useState('');
   const [isHead, setIsHead] = useState(false);
@@ -425,7 +426,7 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
     <Grid container>
       <Grid size={12}>
         <TableContainer>
-          <Table>
+          <Table sx={{ tableLayout: 'fixed', width: '100%' }}>
             <TableHead>
               <TableRow>
                 {/* LEFT STICKY CREATE */}
@@ -436,7 +437,8 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
                     </IconButton>
                   </Tooltip>
                 </TableCell>
-                <TableCell>Group Name</TableCell>
+                <TableCell sx={{ width: 800 }}>Group Name</TableCell>
+                <TableCell>Is Head</TableCell>
                 <TableCell>User Count</TableCell>
                 <TableCell>Accessible Buildings</TableCell>
                 <TableCell width={80}>Actions</TableCell>
@@ -457,7 +459,19 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
                               {isOpen ? <IconChevronDown /> : <IconChevronRight />}
                             </IconButton>
                           </TableCell>
-                          <TableCell>{group.name}</TableCell>
+                          <Tooltip title={group.name}>
+                            <TableCell
+                              sx={{
+                                width: 800,
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                              }}
+                            >
+                              {group.name}
+                            </TableCell>
+                          </Tooltip>
+                          <TableCell>{group.isHead ? 'Yes' : 'No'}</TableCell>
                           <TableCell>{group.memberCount}</TableCell>
                           <TableCell>{group.accessibleBuildingCount}</TableCell>
                           <TableCell>
@@ -583,8 +597,17 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
                 handleUpdateUser();
               }
             }}
+            disabled={
+              !username || !email || registerUserMutation.isPending || editUserMutation.isPending
+            }
           >
-            {userDialogMode === 'create' ? 'Register' : 'Update'}
+            {registerUserMutation.isPending || editUserMutation.isPending ? (
+              <CircularProgress size={20} />
+            ) : userDialogMode === 'create' ? (
+              'Register'
+            ) : (
+              'Update'
+            )}
           </Button>
         </DialogActions>
       </Dialog>
@@ -625,7 +648,11 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
           <Button variant="outlined" onClick={() => setOpenAssignBuilding(false)}>
             Cancel
           </Button>
-          <Button variant="contained" onClick={() => handleAssignBuilding()}>
+          <Button
+            variant="contained"
+            onClick={() => handleAssignBuilding()}
+            disabled={assignBuildingMutation.isPending}
+          >
             Save
           </Button>
         </DialogActions>

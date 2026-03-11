@@ -5,6 +5,13 @@ import SidebarList from './SidebarList';
 import { useState } from 'react';
 import SidebarFilter from './SidebarFilter';
 
+type PersonFilter = {
+  Visitor: boolean;
+  Member: boolean;
+  Security: boolean;
+  FocusedPersonOnly: boolean;
+};
+
 const MonitoringSidebar = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const customizer = useSelector((state: RootState) => state.customizer);
@@ -13,6 +20,12 @@ const MonitoringSidebar = () => {
     ? customizer.SidebarWidth
     : customizer.MiniSidebarWidth;
   const [filterType, setFilterType] = useState<string[]>(['Tracking', 'Alarm']);
+  const [personFilter, setPersonFilter] = useState<PersonFilter>({
+    Visitor: true,
+    Member: true,
+    Security: true,
+    FocusedPersonOnly: false,
+  });
 
   if (lgUp) {
     return (
@@ -55,8 +68,17 @@ const MonitoringSidebar = () => {
               height: `calc(100% - ${customizer.TopbarHeight}px)`,
             }}
           >
-            <SidebarFilter filterType={filterType} setFilterType={setFilterType} />
-            <SidebarList filterType={filterType} />
+            <SidebarFilter
+              filterType={filterType}
+              setFilterType={setFilterType}
+              personFilter={personFilter}
+              setPersonFilter={setPersonFilter}
+            />
+
+            <SidebarList
+              filterType={filterType}
+              personFilter={personFilter}
+            />
           </Box>
         </Drawer>
       </Box>

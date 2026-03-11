@@ -130,102 +130,116 @@ const AlarmLog: React.FC = () => {
           py: 1,
         }}
       >
-        {log.map((item, index) => (
-          <Stack
-            key={index}
-            direction="row"
-            spacing={2}
-            alignItems="center"
+        {log.length === 0 ? (
+          <Box
             sx={{
-              p: 1,
-              backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
-              borderBottom: '1px solid #e0e0e0',
-              width: '100%',
-              overflow: 'hidden',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              color: '#9e9e9e',
+              px: 2,
             }}
           >
-            {/* Avatar */}
-            <Avatar src={item.image} alt="user" sx={{ width: 56, height: 56 }} />
-
-            {/* Left info */}
-            <Box
+            <Typography
               sx={{
-                flex: 1,
-                minWidth: 0,
+                fontSize: 16,
+                fontWeight: 500,
               }}
             >
-              {/* <Typography
-                sx={{
-                  fontSize: 16,
-                  fontWeight: 600,
-                  color: '#045498',
-                }}
-              >
-                {item.name}
-              </Typography> */}
-              <SmartScrollingText
-                text={item.name}
-                sx={{
-                  fontSize: 16,
-                  fontWeight: 600,
-                  color: '#045498',
-                }}
-              />
-              <SmartScrollingText
-                text={`${item.buildingName} | ${item.floorName}`}
-                sx={{
-                  fontSize: 12,
-                  color: '#045498',
-                }}
-              />
-              <Typography
-                sx={{
-                  fontSize: 12,
-                  color: '#045498',
-                }}
-              >
-                {item.idleTime}
-              </Typography>
-            </Box>
-
-            {/* Right info */}
-            <Box
+              There are no alarms yet
+            </Typography>
+          </Box>
+        ) : (
+          log.map((item, index) => (
+            <Stack
+              key={index}
+              direction="row"
+              spacing={2}
+              alignItems="center"
               sx={{
-                flex: 1,
-                minWidth: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
+                p: 1,
+                backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
+                borderBottom: '1px solid #e0e0e0',
+                width: '100%',
+                overflow: 'hidden',
               }}
             >
-              <Typography
+              {/* Avatar */}
+              <Avatar src={item.image} alt="user" sx={{ width: 56, height: 56 }} />
+
+              {/* Left info */}
+              <Box
                 sx={{
-                  fontSize: 16,
-                  fontWeight: 700,
-                  color: item.color,
+                  flex: 1,
+                  minWidth: 0,
                 }}
               >
-                {item.status}
-              </Typography>
-              <Typography
+                <SmartScrollingText
+                  text={item.name}
+                  sx={{
+                    fontSize: 16,
+                    fontWeight: 600,
+                    color: '#045498',
+                  }}
+                />
+                <SmartScrollingText
+                  text={`${item.buildingName} | ${item.floorName}`}
+                  sx={{
+                    fontSize: 12,
+                    color: '#045498',
+                  }}
+                />
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    color: '#045498',
+                  }}
+                >
+                  {item.idleTime}
+                </Typography>
+              </Box>
+
+              {/* Right info */}
+              <Box
                 sx={{
-                  fontSize: 12,
-                  color: '#045498',
+                  flex: 1,
+                  minWidth: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
                 }}
               >
-                {item.secondGateway}
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: 12,
-                  color: '#045498',
-                }}
-              >
-                {item.lastSeenTime}
-              </Typography>
-            </Box>
-          </Stack>
-        ))}
+                <Typography
+                  sx={{
+                    fontSize: 16,
+                    fontWeight: 700,
+                    color: item.color,
+                  }}
+                >
+                  {item.status}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    color: '#045498',
+                  }}
+                >
+                  {item.secondGateway}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    color: '#045498',
+                  }}
+                >
+                  {item.lastSeenTime}
+                </Typography>
+              </Box>
+            </Stack>
+          ))
+        )}
       </Box>
     </Box>
   );

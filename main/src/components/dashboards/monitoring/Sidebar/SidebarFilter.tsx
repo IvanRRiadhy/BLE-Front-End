@@ -15,6 +15,15 @@ import { MoreHorizOutlined } from '@mui/icons-material';
 type SidebarFilterProps = {
   filterType: string[];
   setFilterType: (filterType: string[]) => void;
+    personFilter: {
+    Visitor: boolean;
+    Member: boolean;
+    Security: boolean;
+    FocusedPersonOnly: boolean;
+  };
+
+  setPersonFilter: (filter: any) => void;
+
 };
 
 const TOGGLE_COLORS: Record<string, string> = {
@@ -27,15 +36,15 @@ const TOGGLE_OUTLINE_COLORS: Record<string, string> = {
   Alarm: '#D32F2F',
 };
 
-const SidebarFilter = ({ filterType, setFilterType }: SidebarFilterProps) => {
+const SidebarFilter = ({ filterType, setFilterType, personFilter, setPersonFilter }: SidebarFilterProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const [personFilter, setPersonFilter] = useState({
-    Visitor: true,
-    Member: true,
-    Security: true,
-    FocusedPersonOnly: false,
-  });
+  // const [personFilter, setPersonFilter] = useState({
+  //   Visitor: true,
+  //   Member: true,
+  //   Security: true,
+  //   FocusedPersonOnly: false,
+  // });
 
   const handleFilterChange = (_: React.MouseEvent<HTMLElement>, newValues: string[]) => {
     if (newValues.length === 0) return;

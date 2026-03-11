@@ -131,7 +131,7 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
     AreaName: r.AreaName,
     EnterTime: formatDateTime(r.EnterTime),
     ExitTime: formatDateTime(r.ExitTime),
-    DurationInMinutes: formatDuration(r.DurationInMinutes),
+    DurationMinutes: formatDuration(r.DurationMinutes),
     VisitorStatus: r.VisitorStatus,
     HostName: r.HostName,
   });
@@ -158,7 +158,7 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
         { header: 'Area', key: 'AreaName', width: 20 },
         { header: 'Enter Time', key: 'EnterTime', width: 25 },
         { header: 'Exit Time', key: 'ExitTime', width: 25 },
-        { header: 'Duration', key: 'DurationInMinutes', width: 25 },
+        { header: 'Duration', key: 'DurationMinutes', width: 25 },
         { header: 'Status', key: 'VisitorStatus', width: 15 },
         // { header: 'Host', key: 'HostName', width: 20 },
       ];
@@ -247,7 +247,7 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
       Area: t.AreaName,
       'Enter Time': t.EnterTime,
       'Exit Time': t.ExitTime,
-      Duration: t.DurationInMinutes,
+      Duration: t.DurationMinutes,
       Status: t.VisitorStatus,
       // Host: t.HostName,
     }));
@@ -309,7 +309,7 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
         r.AreaName,
         formatDateTime(r.EnterTime),
         formatDateTime(r.ExitTime),
-        formatDuration(r.DurationInMinutes),
+        formatDuration(r.DurationMinutes),
         r.VisitorStatus,
       ]),
     });
@@ -629,7 +629,7 @@ const VisitorReportDialog: React.FC<VisitorReportDialogProps> = ({
                             <TableCell>{row.AreaName}</TableCell>
                             <TableCell>{formatDateTime(row.EnterTime)}</TableCell>
                             <TableCell>{formatDateTime(row.ExitTime)}</TableCell>
-                            <TableCell>{formatDuration(row.DurationInMinutes)}</TableCell>
+                            <TableCell>{formatDuration(row.DurationMinutes)}</TableCell>
                             <TableCell>{row.VisitorStatus}</TableCell>
                             <TableCell>{row.HostName}</TableCell>
                           </>

@@ -71,7 +71,7 @@ export function useTrackingAreaAccessed(filter: DashboardFilterType) {
     queryKey: ['tracking-area-accessed', filter],
     queryFn: async () => {
       const res = await axiosServices.post(`${API_TRACKING}area-accessed`, filter);
-      console.log('Tracking Area Accessed Data fetched: ', res.data);
+      console.log('Tracking Area Accessed Data fetched: ', res.data, 'filter: ', filter);
       return res.data.collection.data;
     },
     refetchInterval: 10000,
@@ -200,6 +200,19 @@ export function useAlarmInvestigatedResult(filter: DashboardFilterType) {
     queryFn: async () => {
       const res = await axiosServices.post(`${API_ALARM}investigated-result`, filter);
       console.log('Alarm Investigated Result Data fetched: ', res.data);
+      return res.data.collection.data;
+    },
+    refetchInterval: 10000,
+    refetchIntervalInBackground: true,
+  });
+}
+
+export function useAlarmPerformance(filter: DashboardFilterType) {
+  return useQuery({
+    queryKey: ['alarm-performance', filter],
+    queryFn: async () => {
+      const res = await axiosServices.post(`${API_ALARM}average-duration`, filter);
+      console.log('Alarm Performance Data fetched: ', res.data);
       return res.data.collection.data;
     },
     refetchInterval: 10000,

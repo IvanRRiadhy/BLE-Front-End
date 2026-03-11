@@ -61,9 +61,28 @@ export type VisitorSessionType = {
   personType: string;
   enterTime: string | null;
   exitTime: string | null;
-  durationInMinutes: number | null;
+  durationMinutes: number | null;
   status: string | null;
   hostName: string | null;
+};
+
+export type NewSessionType = {
+  areaId: string | null;
+  areaName: string | null;
+  buildingId: string | null;
+  buildingName: string | null;
+  durationFormatted: string | null;
+  durationMinutes: number | null;
+  enterTime: string | null;
+  exitTime: string | null;
+  floorId: string | null;
+  floorName: string | null;
+  floorplanId: string | null;
+  floorplanName: string | null;
+  floorplanImage: string | null;
+  hasIncident: boolean;
+  incident: string | null;
+  sessionStatus: string | null;
 };
 
 interface StateType {

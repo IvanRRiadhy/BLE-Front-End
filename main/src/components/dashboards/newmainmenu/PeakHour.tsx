@@ -163,8 +163,6 @@ const PeakHour: React.FC = () => {
       >
         {isLoading ? (
           <CircularProgress />
-        ) : isError ? (
-          <Typography color="error">Failed to load data</Typography>
         ) : (
           <Chart options={options} series={series} type="area" height={'100%'} width={'100%'} />
         )}

@@ -21,6 +21,7 @@ import CardImport from 'src/components/master/Tag/card/CardImport';
 import CardExport from 'src/components/master/Tag/card/CardExport';
 import { useCardList, useCardStatus } from 'src/hooks/useCard';
 import CardSearch from 'src/components/master/Tag/card/CardSearch';
+import BulkAddEditCard from 'src/components/master/Tag/card/BulkAddEditCard';
 
 interface cardType {
   icon?: string;
@@ -36,7 +37,7 @@ const Card = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
   const { t } = useTranslation();
-  const { filteredCount: cardCount, hasLoaded} = useCardStatus();
+  const { filteredCount: cardCount, hasLoaded } = useCardStatus();
   const topCards: cardType[] = [
     {
       title: 'Total Cards',
@@ -46,21 +47,21 @@ const Card = () => {
   ];
 
   return (
-      <PageContainer title="Card" description="This is the Card CRUD Page">
-        <Grid container spacing={3} mb={3}>
-          {topCards.map((topcard, i) => (
-            <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>
-              <Box bgcolor={topcard.bgcolor + '.light'} textAlign="center">
-                <CardContent>
-                  <Typography
-                    color={topcard.bgcolor + '.dark'}
-                    mt={1}
-                    variant="subtitle1"
-                    fontWeight={600}
-                    fontSize={13}
-                  >
-                    {t(`${topcard.title}`)}
-                  </Typography>
+    <PageContainer title="Card" description="This is the Card CRUD Page">
+      <Grid container spacing={3} mb={3}>
+        {topCards.map((topcard, i) => (
+          <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>
+            <Box bgcolor={topcard.bgcolor + '.light'} textAlign="center">
+              <CardContent>
+                <Typography
+                  color={topcard.bgcolor + '.dark'}
+                  mt={1}
+                  variant="subtitle1"
+                  fontWeight={600}
+                  fontSize={13}
+                >
+                  {t(`${topcard.title}`)}
+                </Typography>
                 {!hasLoaded ? (
                   <CircularProgress
                     size={24}
@@ -76,36 +77,40 @@ const Card = () => {
                     {topcard.subtitle}
                   </Typography>
                 )}
-                </CardContent>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
-        <AppCard>
-          <Drawer
-            anchor="right"
-            open={isRightSidebarOpen}
-            onClose={() => setRightSidebarOpen(false)}
-            variant={mdUp ? 'permanent' : 'temporary'}
-            sx={{
-              width: mdUp ? drawerWidth : '100%',
-              zIndex: lgUp ? 0 : 1,
-              flex: mdUp ? 'auto' : '',
-              [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
-            }}
-          >
-            <ParentCard title="Card List" codeModel={[
+              </CardContent>
+            </Box>
+          </Grid>
+        ))}
+      </Grid>
+      <AppCard>
+        <Drawer
+          anchor="right"
+          open={isRightSidebarOpen}
+          onClose={() => setRightSidebarOpen(false)}
+          variant={mdUp ? 'permanent' : 'temporary'}
+          sx={{
+            width: mdUp ? drawerWidth : '100%',
+            zIndex: lgUp ? 0 : 1,
+            flex: mdUp ? 'auto' : '',
+            [`& .MuiDrawer-paper`]: { width: '100%', position: 'relative' },
+          }}
+        >
+          <ParentCard
+            title="Card List"
+            codeModel={[
               <CardSearch key="search" />,
               <CardImport key={'import'} />,
               <CardExport key={'export'} />,
-              <AddEditCard key={'add'} type='add' />
-              ]}>
-              <CardList />
-            </ParentCard>
-          </Drawer>
-        </AppCard>
-      </PageContainer>
-    );
+              <BulkAddEditCard key={'bulk'} type="add" />,
+              <AddEditCard key={'add'} type="add" />,
+            ]}
+          >
+            <CardList />
+          </ParentCard>
+        </Drawer>
+      </AppCard>
+    </PageContainer>
+  );
 };
 
 export default Card;

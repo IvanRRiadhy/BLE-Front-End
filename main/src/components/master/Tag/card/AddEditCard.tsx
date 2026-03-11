@@ -462,7 +462,7 @@ const AddEditCard = ({ type, card }: formType) => {
                 )}
               </Grid>
               <Grid size={{ lg: 4.5, md: 12, sm: 12 }}>
-                <CustomFormLabel>Card Group (--WIP--)</CustomFormLabel>
+                {/* <CustomFormLabel>Card Group (--WIP--)</CustomFormLabel>
                 <CustomSelect
                   id="cardType"
                   name="cardType"
@@ -476,7 +476,7 @@ const AddEditCard = ({ type, card }: formType) => {
                       {item.label}
                     </MenuItem>
                   ))}
-                </CustomSelect>
+                </CustomSelect> */}
                 <CustomFormLabel>Card Access</CustomFormLabel>
 
                 <CustomAutocomplete<CardAccessType>

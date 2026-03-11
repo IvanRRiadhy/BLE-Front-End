@@ -44,7 +44,7 @@ export type GetCardResponse = {
 export type CardType = {
     id: string,
     name: string,
-    remarks: string,
+    remarks: string | null,
     cardNumber: string,
     cardType: string,
     cardBarcode: string,

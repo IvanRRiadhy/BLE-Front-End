@@ -68,7 +68,17 @@ export interface SessionTimeline {
   durationFormatted: string | null;
   isDelayed: boolean;
   delaySeconds: number | null;
-  notes: string | null;
+  // notes: string | null;
+  dwellTimeFormatted: string | null;
+  dwellTimeSeconds: number | null;
+  dwellTimeStatus: "Under" | "Normal" | "Over"
+  isArrived: boolean;
+  isCleared: boolean;
+  maxDwellTimeSeconds: number | null;
+  minDwellTimeSeconds: number | null;
+  orderIndex: number;
+  travelTimeFormatted: string | null;
+  travelTimeSeconds: number | null
 }
 
 // ==========================

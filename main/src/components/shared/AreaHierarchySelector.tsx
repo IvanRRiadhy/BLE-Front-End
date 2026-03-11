@@ -21,11 +21,22 @@ type Props = {
   onChange: (v: SelectedNode) => void;
   error?: boolean;
   helperText?: string;
+  exclusive?: NodeType;
 };
 
 const AreaHierarchySelector: React.FC<Props> = forwardRef(
   (
-    { buildings, floors, floorplans, maskedAreas, value, onChange, error = false, helperText = '' },
+    {
+      buildings,
+      floors,
+      floorplans,
+      maskedAreas,
+      value,
+      onChange,
+      error = false,
+      helperText = '',
+      exclusive,
+    },
     ref,
   ) => {
     const anchorRef = React.useRef<HTMLDivElement | null>(null);
@@ -39,6 +50,11 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
     const openPopper = () => {
       setOpen(true);
       setTimeout(() => setClickAwayEnabled(true), 500);
+    };
+
+    const canSelect = (type: NodeType) => {
+      if (!exclusive) return true;
+      return exclusive === type;
     };
 
     // Group data by hierarchy
@@ -60,9 +76,11 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
       maByFp.get(ma.floorplanId)!.push(ma);
     });
 
-    const displayLabel = value ? value.data.name ?? value.data.areaName ?? '' : '';
+    const displayLabel = value ? (value.data.name ?? value.data.areaName ?? '') : '';
 
     const handleSelect = (type: NodeType, data: any) => {
+      if (!canSelect(type)) return;
+
       onChange({ type, data });
       setOpen(false);
     };

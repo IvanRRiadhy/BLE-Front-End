@@ -49,7 +49,17 @@ export function useAddCardAccess() {
 
   return useMutation({
     mutationFn: async (cardAccess: Partial<CardAccessType>) => {
-      const { id, createdBy, createdAt, updatedBy, updatedAt, ...cleanData } = cardAccess;
+      const {
+        id,
+        accessNumber,
+        maskedArea,
+        createdBy,
+        createdAt,
+        updatedBy,
+        updatedAt,
+        ...cleanData
+      } = cardAccess;
+      console.log('cleanData', cleanData);
       const res = await axiosServices.post(API_URL, cleanData);
       return res.data;
     },
@@ -65,7 +75,16 @@ export function useEditCardAccess() {
 
   return useMutation({
     mutationFn: async (cardAccess: Partial<CardAccessType>) => {
-      const { id, createdBy, createdAt, updatedBy, updatedAt, ...cleanData } = cardAccess;
+      const {
+        id,
+        createdBy,
+        accessNumber,
+        maskedArea,
+        createdAt,
+        updatedBy,
+        updatedAt,
+        ...cleanData
+      } = cardAccess;
       const res = await axiosServices.put(`${API_URL}${id}`, cleanData);
       return res.data;
     },

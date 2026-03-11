@@ -13,13 +13,29 @@ import {
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import SidebarListItem from './SidebarListItem';
-import { AlarmLogItem, ClearAlarmLogs, ClearTrackingLogs, SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
+import {
+  AlarmLogItem,
+  ClearAlarmLogs,
+  ClearTrackingLogs,
+  SetSelectedBeacon,
+} from 'src/store/apps/tracking/Beacon';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllVisitor } from 'src/hooks/useVisitor';
-import { CombinedLogItem, useCombinedEnrichedLogs, useEnrichedTrackingLogs, useTrackingLogs } from 'src/hooks/useTrackingLogs';
+import {
+  CombinedLogItem,
+  useCombinedEnrichedLogs,
+  useEnrichedTrackingLogs,
+  useTrackingLogs,
+} from 'src/hooks/useTrackingLogs';
 
 interface SidebarListProps {
-  filterType: string[]; // '', 'All', 'Tracking', 'Alarm'
+  filterType: string[];
+  personFilter: {
+    Visitor: boolean;
+    Member: boolean;
+    Security: boolean;
+    FocusedPersonOnly: boolean;
+  };
 }
 
 type ListType = {
@@ -44,7 +60,7 @@ function isAlarmLog(item: CombinedLogItem): item is AlarmLogItem {
 // Maximum number of items to keep in the list
 const MAX_LIST_ITEMS = 100;
 
-const SidebarList = ({ filterType }: SidebarListProps) => {
+const SidebarList = ({ filterType, personFilter }: SidebarListProps) => {
   const dispatch = useDispatch();
 
   const [openModal, setOpenModal] = useState(false);
@@ -52,10 +68,24 @@ const SidebarList = ({ filterType }: SidebarListProps) => {
   // const [list, setList] = useState<ListType[]>([]);
   const trackingLogs = useEnrichedTrackingLogs();
   const logs = useCombinedEnrichedLogs(100);
-const list =
-  filterType.length > 0
-    ? logs.filter((x) => filterType.includes(x.type))
-    : logs;
+  const list = logs.filter((x) => {
+    // Filter Tracking / Alarm
+    if (filterType.length > 0 && !filterType.includes(x.type)) {
+      return false;
+    }
+
+    // Focused person filter
+    // if (personFilter.FocusedPersonOnly) {
+    //   return x.isFocused === true; // adjust based on your data
+    // }
+
+    // Person type filtering
+    if (x.personType === 'Visitor' && !personFilter.Visitor) return false;
+    if (x.personType === 'Member' && !personFilter.Member) return false;
+    if (x.personType === 'Security' && !personFilter.Security) return false;
+
+    return true;
+  });
 
   // Get beaconsByTopic from Redux - now it's an object of objects
   const beaconsByTopicObj = useSelector((s: RootState) => s.BeaconReducer.beaconsByTopic || {});
@@ -86,7 +116,9 @@ const list =
 
   const handleOpenDetails = (cardNumber: string, area: string, floorplan: string, time: string) => {
     // console.log('🟡 handleOpenDetails called', cardNumber);
-    dispatch(SetSelectedBeacon({ active: true, id: cardNumber, area, floorplan, time, sourceScreenId: 1 }));
+    dispatch(
+      SetSelectedBeacon({ active: true, id: cardNumber, area, floorplan, time, sourceScreenId: 1 }),
+    );
     setOpenModal(false);
   };
 
@@ -107,7 +139,9 @@ const list =
             dispatch(ClearTrackingLogs());
             dispatch(ClearAlarmLogs());
           }}
-        >Clear All</Button>
+        >
+          Clear All
+        </Button>
         <Scrollbar sx={{ height: { lg: 'calc(100vh - 200px)', md: '100vh' }, maxHeight: '800px' }}>
           {list.map((item) => (
             <SidebarListItem key={item.id} item={item} onItemClick={() => handleItemClick(item)} />

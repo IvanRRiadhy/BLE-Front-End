@@ -1,5 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Dialog, Box, Button, Typography, Popover, Chip, Stack } from '@mui/material';
+import {
+  Dialog,
+  Box,
+  Button,
+  Typography,
+  Popover,
+  Chip,
+  Stack,
+  DialogContent,
+  DialogActions,
+  DialogTitle,
+  CircularProgress,
+} from '@mui/material';
 // import { AlarmType, MQTTAlarmType } from 'src/store/apps/tracking/Alarm';
 import { actionStatus, actionStatusColormap } from 'src/types/crud/input';
 import toast from 'react-hot-toast';
@@ -11,6 +23,7 @@ import {
   useAssignActionAlarmTriggerByDMAC,
   useAssignActionAlarmTriggerByID,
   useDispatchAlarmTrigger,
+  usePostponeAlarmTrigger,
 } from 'src/hooks/useAlarmTrigger';
 import { alpha, darken, useTheme } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -30,6 +43,13 @@ import AlarmMenuItem from './vertical/header/AlarmMenuItem';
 import { defaultAlarmTriggerFilter } from 'src/store/apps/defaultForm';
 import AlarmTriggerMenuItem from './shared/AlarmTriggerMenuItem';
 import { AlarmTriggerType } from 'src/store/apps/crud/alarmTrigger';
+import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
+import dayjs, { Dayjs } from 'dayjs';
+import duration from 'dayjs/plugin/duration';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+dayjs.extend(duration);
 
 interface AlarmPopupProps {
   alarm: AlarmLogItem | null | undefined;
@@ -61,6 +81,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
   const assignActionByIdMutation = useAssignActionAlarmTriggerByID();
   const acknowledgeMutation = useAcknowledgeAlarmTrigger();
   const dispatchMutation = useDispatchAlarmTrigger();
+  const postponeMutation = usePostponeAlarmTrigger();
 
   const { data: data } = useAlarmTriggerList({
     ...defaultAlarmTriggerFilter,
@@ -254,6 +275,11 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
       acknowledgeMutation.mutateAsync(alarm.triggerId);
     }
   };
+  const handleAcknowledgeClick = (clickedAlarm: string, action: string) => {
+    if (clickedAlarm && action === 'Idle') {
+      acknowledgeMutation.mutateAsync(clickedAlarm);
+    }
+  };
   useEffect(() => {
     if (!alarm) return;
 
@@ -308,6 +334,77 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
       window.removeEventListener('scroll', updateRect);
     };
   }, [alarm, actionOpen, openUnseenDialog]);
+
+  //Postpone
+  const [openPostponeDialog, setOpenPostponeDialog] = useState(false);
+  const [postponeDate, setPostponeDate] = useState<Dayjs | null>(null);
+  const [postponeReason, setPostponeReason] = useState('');
+
+  const handlePostpone = async () => {
+    if (!alarm?.dmac) {
+      toast.error('No alarm selected');
+      return;
+    }
+
+    if (!postponeDate) {
+      toast.error('Please select postpone date');
+      return;
+    }
+
+    if (!postponeReason.trim()) {
+      toast.error('Please provide reason');
+      return;
+    }
+
+    const alarmToProcess: AlarmType[] = [...selectedAlarms];
+
+    // include main alarm if not selected
+    if (alarm) {
+      const currentTriggerId = extractTriggerId(alarm?.id);
+      const exists = alarmToProcess.find((a) => a.id === currentTriggerId);
+
+      if (!exists) {
+        alarmToProcess.push({ ...alarm, id: currentTriggerId ?? alarm.id });
+      }
+    }
+
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (const a of alarmToProcess) {
+      if (!a.id) {
+        failedCount++;
+        continue;
+      }
+
+      try {
+        await postponeMutation.mutateAsync({
+          id: a.id.toUpperCase(),
+          postponedUntilDate: postponeDate.toISOString(),
+          postponeReason: postponeReason.trim(),
+        });
+
+        successCount++;
+      } catch (error) {
+        console.error('Error postponing alarm', error);
+        failedCount++;
+      }
+    }
+
+    if (successCount > 0) {
+      toast.success(`Processed: ${successCount} success`);
+    }
+
+    if (failedCount > 0) {
+      toast.error(`Processed: ${failedCount} failed`);
+    }
+
+    // reset state
+    setOpenPostponeDialog(false);
+    setPostponeDate(null);
+    setPostponeReason('');
+    setSelectedAlarms([]);
+  };
 
   return (
     <>
@@ -463,7 +560,10 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                       }}
                     >
                       <Button
-                        onClick={() => setActionAnchorEl(popupRef.current)}
+                        onClick={() => {
+                          setActionAnchorEl(popupRef.current);
+                          handleAcknowledgeClick(alarm.id, alarm.action);
+                        }}
                         sx={{
                           backgroundColor: '#fff',
                           color: priorityColor,
@@ -541,16 +641,17 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                               unseenBorder={unseenBorder}
                               seenBorder={seenBorder}
                               hoverBorder={hoverBorder}
-                              onClick={(t) =>
+                              onClick={(t) => {
+                                handleAcknowledgeClick(t.id, t.action);
                                 setSelectedAlarms((prev) => {
                                   const exists = prev.find((a) => a.id === t.id);
-                                  console.log("alarmtrigger clicked", t, exists);
+                                  console.log('alarmtrigger clicked', t, exists);
                                   if (exists) {
                                     return prev.filter((a) => a.id !== t.id);
                                   }
                                   return [...prev, t];
-                                })
-                              }
+                                });
+                              }}
                             />
                           ))}
                         </Stack>
@@ -618,7 +719,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                         </Box>
                       )}{' '}
                       {/* <Box display="flex" flexDirection="column" gap={1} mb={3}> {actionStatus .filter((item) => !item.disabled && item.value !== 'Idle') .map((item) => { const isSelected = selectedAction?.toLowerCase() === item.value.toLowerCase(); return ( <Box key={item.value} onClick={() => setSelectedAction(item.value)} sx={{ border: '1px solid', borderColor: isSelected ? 'primary.main' : 'grey.300', backgroundColor: isSelected ? 'primary.main' : 'transparent', color: isSelected ? 'white' : 'text.primary', borderRadius: 1, p: 2, cursor: 'pointer', transition: 'all 0.2s ease', '&:hover': { backgroundColor: isSelected ? 'primary.dark' : 'grey.50', borderColor: isSelected ? 'primary.dark' : 'grey.400', }, }} > <Box display="flex" alignItems="center" gap={1}> <Box sx={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: actionStatusColormap[item.value] || 'grey', border: isSelected ? '2px solid white' : 'none', }} /> <Typography variant="body1" fontWeight={500}> {item.label} </Typography> </Box> </Box> ); })} </Box> */}{' '}
-                      <AlarmActionForm
+                      {/* <AlarmActionForm
                         alarmTrigger={{ id: alarm?.id, isActive: true }}
                         selectedAction={selectedAction}
                         setSelectedAction={setSelectedAction}
@@ -629,6 +730,25 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                         securityData={securityData}
                         isLoadingSecurity={isLoadingSecurity}
                         compact
+                      /> */}
+                      <Typography variant="subtitle2" color="text.secondary" mb={1}>
+                        Assign Security Guard
+                      </Typography>
+                      <CustomAutocomplete
+                        label="Security Guard"
+                        options={securityData}
+                        value={selectedSecurity}
+                        loading={isLoadingSecurity}
+                        onChange={(newValue) => setSelectedSecurity(newValue)}
+                        getOptionLabel={(option) => option?.name ?? ''}
+                        isOptionEqualToValue={(o, v) => o.id === v.id}
+                        required
+                        sx={{
+                          '& .MuiInputBase-root': {
+                            minHeight: 36,
+                            fontSize: '0.9rem',
+                          },
+                        }}
                       />{' '}
                       <Box display="flex" gap={1} justifyContent="flex-end" mt={2}>
                         {' '}
@@ -642,13 +762,20 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                           Cancel{' '}
                         </Button>{' '}
                         <Button
+                          variant="outlined"
+                          color="warning"
+                          onClick={() => setOpenPostponeDialog(true)}
+                        >
+                          Postpone
+                        </Button>{' '}
+                        <Button
                           onClick={handleDispatchAction}
                           variant="contained"
                           color="primary"
-                          disabled={!selectedAction || assignActionMutation.isPending}
+                          disabled={!selectedSecurity || dispatchMutation.isPending}
                         >
                           {' '}
-                          {assignActionMutation.isPending ? 'Applying...' : 'Apply Action'}{' '}
+                          {dispatchMutation.isPending ? 'Dispatching...' : 'Dispatch Security'}{' '}
                         </Button>{' '}
                       </Box>
                     </Box>
@@ -658,6 +785,82 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
             )}
           </AnimatePresence>
         </Box>
+      </Dialog>
+      <Dialog
+        open={openPostponeDialog}
+        onClose={() => {
+          setOpenPostponeDialog(false);
+          setPostponeDate(null);
+          setPostponeReason('');
+        }}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>
+          <Typography variant="h5" fontWeight={700}>
+            Postpone Alarm
+          </Typography>
+        </DialogTitle>
+
+        <DialogContent>
+          <Stack spacing={3} mt={1}>
+            {/* DATE PICKER */}
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Postpone Until"
+                value={postponeDate}
+                onChange={(newValue) => setPostponeDate(newValue)}
+                disablePast
+                minDate={dayjs().add(1, 'day')} // ❌ block today
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    required: true,
+                  },
+                }}
+              />
+            </LocalizationProvider>
+
+            {/* REASON */}
+            <CustomTextField
+              label="Reason"
+              multiline
+              rows={4}
+              value={postponeReason}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setPostponeReason(e.target.value)
+              }
+              fullWidth
+              required
+            />
+          </Stack>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 3 }}>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => {
+              setOpenPostponeDialog(false);
+              setPostponeDate(null);
+              setPostponeReason('');
+            }}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            color="warning"
+            onClick={handlePostpone}
+            disabled={postponeMutation.isPending}
+            startIcon={
+              postponeMutation.isPending ? <CircularProgress size={16} color="inherit" /> : null
+            }
+          >
+            {postponeMutation.isPending ? 'Saving...' : 'Confirm Postpone'}
+          </Button>
+        </DialogActions>
       </Dialog>
     </>
   );

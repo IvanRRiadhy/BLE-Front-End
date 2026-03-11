@@ -45,6 +45,9 @@ const InvitationPage = Loadable(
   lazy(() => import('../views/MyVisit/MyVisitInvitation/InvitationPage')),
 );
 
+/* *****Register***** */
+const UserForm = Loadable(lazy(() => import('../components/UserForm/userForm')));
+
 /* ***Master**** */
 // const GatewayApp = Loadable(lazy(() => import('../views/master/gateway/gateway')));
 const MemberTag = Loadable(lazy(() => import('../views/master/tag/memberTag')));
@@ -542,6 +545,8 @@ const Router = [
       { path: '/visitor-form', exact: true, element: <InvitationForm /> },
       { path: '/visitor-info', exact: true, element: <InvitationInfo /> },
       { path: '/thank-you', exact: true, element: <ThankYouPage /> },
+      //User Form
+      { path: '/user-form', exact: true, element: <UserForm /> },
     ],
   },
 ];

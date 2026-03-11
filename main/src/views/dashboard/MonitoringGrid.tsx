@@ -128,7 +128,7 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
               Monitoring Dashboard
             </Typography>
             <Typography variant="h6" fontWeight={900} mt={0.5}>
-              Please select a Grid
+              Please select a Layout to Monitor
             </Typography>
           </Grid>
         </Grid>

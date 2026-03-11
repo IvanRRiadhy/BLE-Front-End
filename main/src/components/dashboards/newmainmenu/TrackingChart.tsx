@@ -26,7 +26,7 @@ dayjs.extend(isSameOrBefore);
 const defaultFilter = {
   from: '2025-10-01T00:00:00Z',
   to: '2025-10-30T23:59:59Z',
-  TimeRange: 'weekly',
+  TimeRange: '',
   operatorName: null,
   visitorId: null,
   buildingId: null,
@@ -49,7 +49,8 @@ interface WeekOption {
 /* ---------------- Component ---------------- */
 
 const Tracking: React.FC = () => {
-  const { data = {}, isLoading, isError } = useTrackingAreaAccessed(defaultFilter);
+  const [trackingFilter, setTrackingFilter] = useState({ ...defaultFilter });
+  const { data = {}, isLoading, isError } = useTrackingAreaAccessed(trackingFilter);
 
   const today = dayjs();
 
@@ -241,6 +242,25 @@ const Tracking: React.FC = () => {
 
     return { labels, series };
   }, [data, selectedWeek, emptyWeekSeries]);
+
+  const updateFilterByWeek = (week: WeekOption | undefined) => {
+    if (!week) return;
+
+    const from = week.start.startOf('day').toISOString();
+    const to = week.end.endOf('day').toISOString();
+    
+    setTrackingFilter((prev) => ({
+      ...prev,
+      from,
+      to,
+    }));
+  };
+
+  useEffect(() => {
+    if (!selectedWeek) return;
+
+    updateFilterByWeek(selectedWeek);
+  }, [selectedWeek]);
 
   return (
     <Box

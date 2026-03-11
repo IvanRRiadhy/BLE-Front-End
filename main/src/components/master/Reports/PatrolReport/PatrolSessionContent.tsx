@@ -29,7 +29,7 @@ interface Props {
 
 const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => {
   const theme = useTheme();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const timelineRef = useRef<HTMLDivElement>(null);
   const [isScrollable, setIsScrollable] = useState(false);
@@ -45,7 +45,7 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
   const patrolReportData = data?.data ?? [];
 
   const [selectedSession, setSelectedSession] = useState<PatrolReportType | null>(null);
-
+  console.log('Session: ', selectedSession);
   const totalSessions = patrolReportData.length;
 
   const totalCases = useMemo(
@@ -57,13 +57,14 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
 
   const formatDate = (date?: string) => (date ? new Date(date).toLocaleString('en-GB') : '-');
 
-    const formatTime = (isoString: string) => {
+  const formatTime = (isoString: string) => {
+    if (!isoString) return '';
     const date = new Date(isoString);
 
     // Extract the weekday
     const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
     const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-
+    console.log('Date: ', date, isoString);
     return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
       'en-GB',
       {
@@ -77,9 +78,7 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
   const sortedTimeline = useMemo(() => {
     if (!selectedSession?.timeline) return [];
 
-    return [...selectedSession.timeline].sort(
-      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-    );
+    return [...selectedSession.timeline].sort((a, b) => a.orderIndex - b.orderIndex);
   }, [selectedSession]);
 
   useEffect(() => {
@@ -104,6 +103,47 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
       window.removeEventListener('resize', checkScroll);
     };
   }, [sortedTimeline]);
+
+  const getTimelineColor = (item: any, index: number, timeline: any[]) => {
+    const stage = item.stage?.toLowerCase() ?? '';
+
+    // 🔵 Non checkpoint stages (Start / End / others)
+    if (!stage.startsWith('checkpoint')) {
+      return theme.palette.secondary.main;
+    }
+    const next = timeline[index + 1];
+
+    const arrived = item.isArrived === true;
+    const cleared = item.isCleared === true;
+
+    const nextArrivedCleared = next && next.isArrived === true && next.isCleared === true;
+
+    // 🔴 Under / Over always red
+    if (item.dwellTimeStatus === 'Under' || item.dwellTimeStatus === 'Over') {
+      return theme.palette.error.main;
+    }
+
+    // 🔴 Not arrived/cleared but next checkpoint finished
+    if (!arrived && !cleared && nextArrivedCleared) {
+      return theme.palette.error.main;
+    }
+    if (!arrived && !cleared && next?.isArrived === true) {
+      return theme.palette.divider;
+    }
+
+    // 🟢 Completed + Normal
+    if (arrived && cleared && item.dwellTimeStatus === 'Normal') {
+      return theme.palette.success.main;
+    }
+
+    // 🔵 Arrived but not cleared
+    if (arrived && !cleared) {
+      return theme.palette.warning.main;
+    }
+
+    // 🔵 default fallback
+    return theme.palette.primary.main;
+  };
 
   // ⬇ AFTER ALL HOOKS
   if (!data) {
@@ -190,7 +230,8 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
 
                 <Typography fontSize={12} color="text.secondary">
                   Duration: {session.durationFormatted ?? '-'} | Completion:{' '}
-                  {session.metrics?.completionPercentage ?? 0}% | Cases: {session.cases?.length ?? 0}
+                  {session.metrics?.completionPercentage ?? 0}% | Cases:{' '}
+                  {session.cases?.length ?? 0}
                 </Typography>
               </Box>
             ))}
@@ -333,9 +374,7 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
                               width: 26,
                               height: 26,
                               borderRadius: '50%',
-                              backgroundColor: item.isDelayed
-                                ? theme.palette.error.main
-                                : theme.palette.primary.main,
+                              backgroundColor: getTimelineColor(item, index, sortedTimeline),
                               border: `4px solid ${theme.palette.background.paper}`,
                               boxShadow: `0 0 0 3px ${theme.palette.divider}`,
                               zIndex: 2,
@@ -359,7 +398,7 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
                           <Box
                             sx={{
                               position: 'absolute',
-                              width: 200,
+                              width: 180,
                               textAlign: 'right',
                               right: '55%',
                               top: isTop ? 'calc(50% - 120px)' : 'calc(50% + 70px)',
@@ -367,12 +406,12 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
                           >
                             <Typography fontWeight={700}>{item.stageName}</Typography>
                             <Typography fontSize={12} color="text.secondary">
-                                {formatTime(item.timestamp)}
+                              {formatTime(item.timestamp)}
                             </Typography>
 
                             {item.durationFormatted && (
                               <Typography fontSize={13} color="text.secondary">
-                                Duration: {item.durationFormatted}
+                                Duration: {item.dwellTimeFormatted}
                               </Typography>
                             )}
 
@@ -382,11 +421,11 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
                               </Typography>
                             )}
 
-                            {item.notes && (
+                            {/* {item.notes && (
                               <Typography fontSize={12} color="text.secondary">
                                 {item.notes}
                               </Typography>
-                            )}
+                            )} */}
                           </Box>
                         </Box>
                       );

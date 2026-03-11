@@ -290,3 +290,17 @@ export function usePostponeAlarmTrigger() {
     },
   });
 }
+
+export function useResolveAlarmTrigger() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await axiosServices.put(`${API_URL}${id}/resolve`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list'] });
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
+    },
+  })
+}

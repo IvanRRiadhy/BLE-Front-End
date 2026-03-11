@@ -22,6 +22,7 @@ import {
 } from 'src/store/apps/crud/maskedArea';
 import earcut from 'earcut';
 import { uniqueId } from 'lodash';
+import toast from 'react-hot-toast';
 
 type CollisionResult =
   | { collided: false }
@@ -602,7 +603,8 @@ const EditAreaRenderer: React.FC<Props> = ({
         setIsColliding(collision);
 
         if (collision) {
-          alert('Areas cannot overlap! Position reverted.');
+          // alert('Areas cannot overlap! Position reverted.');
+          toast.error('Areas cannot overlap! Position reverted.');
         } else if (dx !== 0 || dy !== 0) {
           await handleDragArea(areaName, dx, dy);
         }
@@ -716,6 +718,7 @@ const EditAreaRenderer: React.FC<Props> = ({
       });
 
       if (hasCollision && cornerDragData) {
+        toast.error('Areas cannot overlap! Position reverted.');
         handleDragCorner(
           cornerDragData.areaName,
           cornerDragData.cornerIndex,
@@ -913,7 +916,7 @@ const EditAreaRenderer: React.FC<Props> = ({
             onMouseDown={(e) => {
               // Only stop propagation if we're actually going to handle the drag
               // Don't stop propagation if we're just clicking (not in editing mode)
-              if (isEditing && !drawingMaskedArea) {
+              if (isEditing && !drawingMaskedArea && e.evt) {
                 e.evt.stopPropagation();
               }
 
@@ -934,7 +937,7 @@ const EditAreaRenderer: React.FC<Props> = ({
             onDblClick={(e) => {
               if (isEditing) {
                 e.evt.preventDefault();
-                e.evt.stopPropagation();
+                e.evt.stopPropagation();  
                 const world = pointerToWorld(e.target.getStage()?.getPointerPosition() || null);
                 if (world) handleInsertCorner(area.name, world.x, world.y);
               }
@@ -1002,7 +1005,7 @@ const EditAreaRenderer: React.FC<Props> = ({
                 }}
                 onDragEnd={(e) => {
                   // Don't stop propagation on drag end
-                  e.evt.stopPropagation();
+                  // e.evt.stopPropagation();
                   const stage = e.target.getStage();
                   const ptr = stage?.getPointerPosition();
                   const world = pointerToWorld(ptr || null);

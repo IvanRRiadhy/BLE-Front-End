@@ -39,6 +39,7 @@ import {
   useAssignActionAlarmTriggerByID,
   useDispatchAlarmTrigger,
   usePostponeAlarmTrigger,
+  useResolveAlarmTrigger,
 } from 'src/hooks/useAlarmTrigger';
 import {
   AlarmTimelineType,
@@ -56,6 +57,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
+import { resolve } from 'path';
 dayjs.extend(duration);
 
 const AlarmContent = () => {
@@ -89,6 +91,7 @@ const AlarmContent = () => {
   const acknowledgeMutation = useAcknowledgeAlarmTrigger();
   const dispatchMutation = useDispatchAlarmTrigger();
   const postponeMutation = usePostponeAlarmTrigger();
+  const resolveMutation = useResolveAlarmTrigger();
 
   useEffect(() => {
     if (selectedIntruder) {
@@ -316,6 +319,23 @@ const AlarmContent = () => {
       setPostponeReason('');
     } catch (error) {
       toast.error('Failed to postpone alarm');
+    }
+  };
+
+  //Done Alarm
+  const handleResolve = async () => {
+    if (!selectedAlarmTrigger) {
+      toast.error('No alarm selected');
+      return;
+    }
+    try {
+      await resolveMutation.mutateAsync(selectedAlarmTrigger.id);
+
+      toast.success('Alarm done successfully');
+
+      setOpenActionDialog(false);
+    } catch (error) {
+      toast.error('Failed to done alarm');
     }
   };
 
@@ -945,6 +965,19 @@ const AlarmContent = () => {
                 {dispatchMutation.isPending ? 'Dispatching...' : 'Dispatch'}
               </Button>
             </>
+          )}
+          {selectedAlarmTrigger?.action.toLocaleLowerCase() === 'doneinvestigated' && (
+            <Button
+              variant="contained"
+              color="primary"
+              // disabled={!selectedSecurity || dispatchMutation.isPending}
+              onClick={handleResolve}
+              startIcon={
+                resolveMutation.isPending ? <CircularProgress size={16} color="inherit" /> : null
+              }
+            >
+              {resolveMutation.isPending ? 'Resolving...' : 'Resolve'}
+            </Button>
           )}
         </DialogActions>
       </Dialog>
