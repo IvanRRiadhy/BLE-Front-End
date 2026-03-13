@@ -36,6 +36,7 @@ import {
   IconArrowBackUp,
   IconBan,
   IconSettings,
+  IconPencil,
 } from '@tabler/icons-react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
@@ -47,6 +48,7 @@ import {
   useRevokeBuilding,
   useRevokeAllBuilding,
   useEditUser,
+  useEditUserGroup,
 } from 'src/hooks/useUser';
 import { useAllBuilding } from 'src/hooks/useBuilding';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
@@ -94,12 +96,15 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
     canCreateMonitoringConfig: null,
     canUpdateMonitoringConfig: null,
   });
+  // const [selectedGroup, setSelectedGroup] = useState<userGroupType | null>(null);
   const [selectedBuildings, setSelectedBuildings] = useState<BuildingType[]>([]);
   const [openRevokeOne, setOpenRevokeOne] = useState(false);
   const [openRevokeAll, setOpenRevokeAll] = useState(false);
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
+  const [groupDialogMode, setGroupDialogMode] = useState<'create' | 'edit'>('create');
 
   const addGroupMutation = useAddUserGroup();
+  const editGroupMutation = useEditUserGroup();
   const registerUserMutation = useRegisterUser();
   const editUserMutation = useEditUser();
   const assignBuildingMutation = useAssignBuilding();
@@ -140,6 +145,27 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
       levelPriority,
       isHead: isHead,
     });
+
+    setOpenCreate(false);
+    resetCreateGroupForm();
+  };
+
+  const handleEditGroup = async () => {
+    if (!selectedGroup) return;
+
+    try {
+      const res = await editGroupMutation.mutateAsync({
+        id: selectedGroup.id,
+        name: groupName,
+        levelPriority,
+        isHead: isHead,
+      });
+      
+      toast.success('Group updated successfully');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update group');
+    }
 
     setOpenCreate(false);
     resetCreateGroupForm();
@@ -432,7 +458,15 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
                 {/* LEFT STICKY CREATE */}
                 <TableCell sx={{ width: 60 }}>
                   <Tooltip title="Create new group">
-                    <IconButton color="primary" onClick={() => setOpenCreate(true)}>
+                    <IconButton
+                      color="primary"
+                      onClick={() => {
+                        setGroupDialogMode('create');
+                        setSelectedGroup(null);
+                        resetCreateGroupForm();
+                        setOpenCreate(true);
+                      }}
+                    >
                       <IconPlus size={20} />
                     </IconButton>
                   </Tooltip>
@@ -441,7 +475,19 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
                 <TableCell>Is Head</TableCell>
                 <TableCell>User Count</TableCell>
                 <TableCell>Accessible Buildings</TableCell>
-                <TableCell width={80}>Actions</TableCell>
+                <TableCell
+                  sx={{
+                    position: 'sticky',
+                    right: 0,
+                    background: 'white',
+                    zIndex: 2,
+                    width: 150, // Fixed width
+                    minWidth: 150,
+                    maxWidth: 150,
+                  }}
+                >
+                  Actions
+                </TableCell>
               </TableRow>
             </TableHead>
 
@@ -474,7 +520,32 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
                           <TableCell>{group.isHead ? 'Yes' : 'No'}</TableCell>
                           <TableCell>{group.memberCount}</TableCell>
                           <TableCell>{group.accessibleBuildingCount}</TableCell>
-                          <TableCell>
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              right: 0,
+                              background: 'white',
+                              zIndex: 1,
+                              gap: 1,
+                              alignItems: 'center',
+                              width: 150, // Fixed width
+                              minWidth: 150,
+                              maxWidth: 150,
+                            }}
+                          >
+                            <IconButton
+                              color="primary"
+                              size="small"
+                              onClick={() => {
+                                setGroupDialogMode('edit');
+                                setSelectedGroup(group);
+                                setGroupName(group.name);
+                                setIsHead(group.isHead);
+                                setOpenCreate(true);
+                              }}
+                            >
+                              <IconPencil size={18} />
+                            </IconButton>
                             <IconButton
                               color="error"
                               size="small"
@@ -669,7 +740,7 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
       >
         <DialogTitle>
           <Typography variant="h4" fontWeight={700}>
-            New Group ({levelPriority})
+            {groupDialogMode === 'create' ? `New Group (${levelPriority})` : `Edit Group`}
           </Typography>
           <Divider />
         </DialogTitle>
@@ -701,7 +772,13 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
           </Button>
           <Button
             variant="contained"
-            onClick={handleCreateGroup}
+            onClick={() => {
+              if (groupDialogMode === 'create') {
+                handleCreateGroup();
+              } else {
+                handleEditGroup();
+              }
+            }}
             disabled={addGroupMutation.isPending}
           >
             Save

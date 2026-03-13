@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, Paper, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Box, CircularProgress, Paper, Typography } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 
 import gedung from 'src/assets/images/backgrounds/gedung-bi.png';
@@ -9,6 +9,50 @@ import Footer from 'src/layouts/Footer';
 import AuthLogin from '../authForms/AuthLogin';
 
 const Login = () => {
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  const checkExistingLogin = async () => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      setCheckingAuth(false);
+      return;
+    }
+    const levelPriority = localStorage.getItem('levelPriority');
+
+    window.location.href =
+      levelPriority === 'Primary' ? '/security-view/dashboard' : '/dashboards/newmainmenu';
+    // setCheckingAuth(false);
+    // try {
+    //   const res = await axiosServices.get('/api/Auth/me', {
+    //     headers: {
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //   });
+
+    //   const data = res?.data?.collection?.data ?? res?.data;
+    //   // console.log
+    //   if (data) {
+
+    //   }
+    // } catch (err) {
+    //   // token invalid → clear
+    //   localStorage.removeItem('token');
+    //   localStorage.removeItem('refreshToken');
+    // }
+  };
+  useEffect(() => {
+    checkExistingLogin();
+  }, []);
+
+  if (checkingAuth) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <PageContainer title="Login" description="Login page">
       {/* PAGE WRAPPER */}
@@ -77,8 +121,8 @@ const Login = () => {
                   opacity: 0.9,
                 }}
               >
-                Indonesia adalah Bank Sentral Republik Indonesia dengan Satu Tujuan
-                Tunggal yaitu Mencapai dan Memelihara Kestabilan Nilai Rupiah.
+                Indonesia adalah Bank Sentral Republik Indonesia dengan Satu Tujuan Tunggal yaitu
+                Mencapai dan Memelihara Kestabilan Nilai Rupiah.
               </Typography>
             </Box>
 
@@ -118,4 +162,3 @@ const Login = () => {
 };
 
 export default Login;
-

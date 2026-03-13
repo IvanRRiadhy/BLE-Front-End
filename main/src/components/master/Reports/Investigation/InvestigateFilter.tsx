@@ -40,6 +40,7 @@ import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 import AreaHierarchySelector from 'src/components/shared/AreaHierarchySelector';
 import {
   fetchVisitorSession,
+  NewUpdateFilter,
   SetSelectedVisitor,
   UpdateFilter,
 } from 'src/store/apps/crud/visitorSession';
@@ -61,7 +62,7 @@ const InvestigateFilter = () => {
   const dispatch = useDispatch();
 
   const investigateFilter = useSelector(
-    (state: RootState) => state.VisitorSessionReducer.visitorSessionFilter,
+    (state: RootState) => state.VisitorSessionReducer.newVisitorSessionFilter,
   );
 
   const activeMode = useSelector(
@@ -484,8 +485,8 @@ const InvestigateFilter = () => {
       dispatch(SetSelectedVisitor(selectedVisitor));
     }
 
-    dispatch(UpdateFilter(finalFilter));
-    dispatch(fetchVisitorSession(finalFilter));
+    dispatch(NewUpdateFilter(finalFilter));
+    // dispatch(fetchVisitorSession(finalFilter));
 
     // Reset the tried submit state after successful submission
     setHasTriedSubmit(false);

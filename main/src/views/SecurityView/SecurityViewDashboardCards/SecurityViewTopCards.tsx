@@ -5,11 +5,12 @@ export type PaletteColorKey = 'primary' | 'secondary' | 'success' | 'error' | 'w
 
 interface TopStatBoxProps {
   label: string;
-  value?: number;
+  value?: string | number;
+  unit?: string;
   color?: PaletteColorKey;
 }
 
-const TopStatBox: React.FC<TopStatBoxProps> = ({ label, value = 0, color = 'primary' }) => {
+const TopStatBox: React.FC<TopStatBoxProps> = ({ label, value = 0, color = 'primary', unit }) => {
   const theme = useTheme();
   const palette = theme.palette[color];
 
@@ -38,7 +39,7 @@ const TopStatBox: React.FC<TopStatBoxProps> = ({ label, value = 0, color = 'prim
 
         py: {
           xs: 0.5, // 🔑 reduce mobile vertical gap
-          md: 1.5,
+          md: 0.5,
         },
       }}
     >
@@ -64,6 +65,19 @@ const TopStatBox: React.FC<TopStatBoxProps> = ({ label, value = 0, color = 'prim
       >
         {value}
       </Typography>
+
+      {unit && (
+        <Typography
+          sx={{
+            fontSize: { xs: 10, sm: 12 },
+            color: palette.main,
+            opacity: 0.7,
+            lineHeight: 1,
+          }}
+        >
+          {unit}
+        </Typography>
+      )}
     </Box>
   );
 };

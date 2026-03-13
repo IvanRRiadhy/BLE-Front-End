@@ -140,7 +140,7 @@ const SecurityViewLayout: FC = () => {
       if (!msg) return;
       if (!msg?.floorplanId || !msg?.beaconId) return;
       const payloadId = msg.beaconId;
-      console.log(`[MQTT] Received message on focus alarm topic: ${topic} with payload:`, msg);
+      // console.log(`[MQTT] Received message on focus alarm topic: ${topic} with payload:`, msg);
 
       if (payloadId !== focusAlarm.beacon) return;
       dispatch(

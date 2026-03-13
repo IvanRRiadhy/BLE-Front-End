@@ -121,6 +121,25 @@ export function useAddUserGroup() {
     },
   });
 }
+
+// -----------------------------------------------------------------------------
+// ✅ EDIT USER GROUPS
+// -----------------------------------------------------------------------------
+export function useEditUserGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async(payload: { name: string; levelPriority: string; isHead: boolean, id: string }) => {
+      const { id, ...restPayload } = payload;
+      const res = await axiosServices.put(`${GROUP_URL}/${id}`, restPayload);
+      console.log('Editing Result', res);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-group-all'] });
+    }
+  })
+}
+
 // -----------------------------------------------------------------------------
 // ✅ ASSIGN BUILDING TO USER GROUPS
 // -----------------------------------------------------------------------------

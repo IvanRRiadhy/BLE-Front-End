@@ -32,6 +32,8 @@ import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import BeaconRenderer from '../Renderer/BeaconRenderer';
 import { IconPlayerPlayFilled, IconPlayerPauseFilled } from '@tabler/icons-react';
 import { dummyTrackingData } from './DummyTrackingData';
+import { useAllBuilding } from 'src/hooks/useBuilding';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
 
 type TrackingDetailPopupProps = {
   bleNumber: string;
@@ -88,13 +90,13 @@ const TrackingDetailPopup = ({
   });
   const cameraAnimRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    // dispatch(fetchTrackingTrans());
-    // dispatch(fetchFloors());
-    // // dispatch(fetchMaskedAreas());
-    dispatch(fetchBuildings());
-    dispatch(fetchFloorplan());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   // dispatch(fetchTrackingTrans());
+  //   // dispatch(fetchFloors());
+  //   // // dispatch(fetchMaskedAreas());
+  //   dispatch(fetchBuildings());
+  //   dispatch(fetchFloorplan());
+  // }, [dispatch]);
 
   // const trackingData: trackingTransType[] = useSelector(
   //   (state: RootState) => state.trackingTransReducer.trackingTrans,
@@ -102,13 +104,15 @@ const TrackingDetailPopup = ({
   // const maskedAreaData: MaskedAreaType[] = useSelector(
   //   (state: RootState) => state.maskedAreaReducer.maskedAreas,
   // );
-  const floorplanData: FloorplanType[] = useSelector(
-    (state: RootState) => state.floorplanReducer.floorplanAll,
-  );
+  // const floorplanData: FloorplanType[] = useSelector(
+  //   (state: RootState) => state.floorplanReducer.floorplanAll,
+  // );
   // const floorData: floorType[] = useSelector((state: RootState) => state.floorReducer.floors);
-  const buildingData: BuildingType[] = useSelector(
-    (state: RootState) => state.buildingReducer.buildingAll,
-  );
+  // const buildingData: BuildingType[] = useSelector(
+  //   (state: RootState) => state.buildingReducer.buildingAll,
+  // );
+  const {data: floorplanData = []} = useAllFloorplans();
+  const {data: buildingData = []} = useAllBuilding();
 
   const filteredTracking = dummyTrackingData
     .filter((track) => track.beacon_id === bleNumber)

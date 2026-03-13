@@ -85,15 +85,93 @@ export type NewSessionType = {
   sessionStatus: string | null;
 };
 
+export type VisitorSessionPersonType = {
+  personId: string;
+  personName: string;
+  personType: string;
+
+  identityId: string | null;
+
+  cardId: string | null;
+  cardNumber: string | null;
+
+  memberId: string | null;
+  memberName: string | null;
+
+  visitorId: string | null;
+  visitorName: string | null;
+
+  currentArea: string | null;
+  firstAreaEntered: string | null;
+  lastAreaExited: string | null;
+
+  areasVisited: string[];
+  restrictedAreasVisited: number;
+
+  totalSessions: number;
+  totalDurationMinutes: number;
+  totalDurationFormatted: string | null;
+  totalIncidents: number;
+
+  sessions: NewSessionType[];
+};
+
+
+export type VisitorSessionSumaryType = {
+  totalDurationMinutes: number;
+  firstDetection: string;
+  lastDetection: string;
+  areasVisited: string[];
+  totalDetections: number;
+  totalSessions: number;
+  uniqueVisitors: number;
+  uniqueMembers: number;
+}
+
+export type VisualPathPointType = {
+  x: number;
+  y: number;
+  time: string;
+  area: string;
+  personName: string;
+  personId: string;
+};
+
+export type VisualPathFloorplanType = {
+  floorplanId: string;
+  floorplanName: string;
+  floorplanImage: string;
+  points: VisualPathPointType[];
+};
+
+export type VisualPathsType = {
+  floorplans: Record<string, VisualPathFloorplanType>;
+};
+
+export type VisitorSessionResponseType = {
+  draw: number;
+  recordsTotal: number;
+  recordsFiltered: number;
+
+  persons: VisitorSessionPersonType[];
+
+  summary: VisitorSessionSumaryType | null;
+
+  visualPaths: VisualPathsType;
+};
+
 interface StateType {
   visitorSessions: VisitorSessionType[];
   visitorSessionAll: VisitorSessionType[];
+  newVisitorSessions: NewSessionType[];
+  newVisitorSessionsAll: NewSessionType[];
   selectedVisitor: VisitorType;
   visitorSessionSearch: string;
   selectedVisitorSession?: VisitorSessionType | null;
   visitorSessionTotalCount: number;
   visitorSessionFilteredCount: number;
   visitorSessionFilter: GetFilter;
+  newVisitorSessionFilter: GetFilter;
   lastFilter?: GetFilter;
   isLoading: boolean;
   hasLoaded: boolean;
@@ -102,6 +180,8 @@ interface StateType {
 const initialState: StateType = {
   visitorSessions: [],
   visitorSessionAll: [],
+  newVisitorSessions: [],
+  newVisitorSessionsAll: [],
   selectedVisitor: {} as VisitorType,
   visitorSessionSearch: '',
   selectedVisitorSession: null,
@@ -122,6 +202,14 @@ const initialState: StateType = {
     //   alarm: true,
     //   alarmSubTypes: {},
     // },
+  },
+  newVisitorSessionFilter: {
+    timeRange: 'daily',
+    buildingId: null,
+    floorId: null,
+    floorplanId: null,
+    areaId: null,
+    visitorId: '',
   },
   isLoading: false,
   hasLoaded: false,
@@ -149,6 +237,9 @@ export const VisitorSessionSlice = createSlice({
     UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
       state.visitorSessionFilter = { ...state.visitorSessionFilter, ...action.payload };
     },
+    NewUpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
+      state.newVisitorSessionFilter = { ...state.newVisitorSessionFilter, ...action.payload };
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -173,6 +264,7 @@ export const {
   SetSelectedVisitorSession,
   SetSelectedVisitor,
   UpdateFilter,
+  NewUpdateFilter,
 } = VisitorSessionSlice.actions;
 
 export const fetchVisitorSession = createAsyncThunk(
