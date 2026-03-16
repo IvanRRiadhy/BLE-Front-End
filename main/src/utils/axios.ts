@@ -5,6 +5,7 @@ import { getConfig } from 'src/config';
 // ✔ USE THIS INSTEAD
 export let BASE_URL = '';
 export let CDN_URL = '';
+export let API_ENGINE_URL = '';
 
 let onSessionExpired: (() => void) | null = null;
 export const setSessionExpiredHandler = (handler: () => void) => {
@@ -22,7 +23,9 @@ export const setSessionExpiredHandler = (handler: () => void) => {
 export function initializeAxiosBaseURL() {
   BASE_URL = getConfig().API_BASE_URL;
   CDN_URL = getConfig().CDN_URL;
+  API_ENGINE_URL = getConfig().API_ENGINE_URL;
   axiosServices.defaults.baseURL = BASE_URL;
+  // console.log("API ENGINE URL: ", API_ENGINE_URL);
 }
 
 type AxiosServiceOptions = {
@@ -35,6 +38,10 @@ export const axiosServices = createAxiosService({
 
 export const axiosCdn = createAxiosService({
   getBaseUrl: () => CDN_URL,
+});
+
+export const axiosEngine = createAxiosService({
+  getBaseUrl: () => API_ENGINE_URL,
 });
 
 function createAxiosService({ getBaseUrl }: AxiosServiceOptions): AxiosInstance {

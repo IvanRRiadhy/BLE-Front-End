@@ -19,6 +19,7 @@ const MonitoringDash = Loadable(lazy(() => import('../views/dashboard/Monitoring
 const MonitoringConfig = Loadable(lazy(() => import('../views/dashboard/MonitoringConfig')));
 const MyVisitDashboard = Loadable(lazy(() => import('../views/MyVisit/MyVisitDashboard')));
 const WebView = Loadable(lazy(() => import('../components/dashboards/monitoring/FloorView')));
+const About = Loadable(lazy(() => import('../views/About/aboutPage')));
 
 /* Security View */
 const SecurityViewDashboard = Loadable(
@@ -487,6 +488,7 @@ const Router = [
         element: withAuth(<Integration />, '/master/integration'),
       },
       { path: '/master/user', exact: true, element: withAuth(<User />, '/master/user') },
+      { path: '/about', exact: true, element: withAuth(<About />, '/about') },
 
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],

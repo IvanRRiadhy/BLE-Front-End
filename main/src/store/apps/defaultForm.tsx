@@ -800,6 +800,7 @@ export const defaultPatrolCaseUploadForm: CaseUploadType = {
   caseType: '',
   threatLevel: '',
   patrolSessionId: '',
+  patrolAreaId: '',
   attachments: [],
 };
 

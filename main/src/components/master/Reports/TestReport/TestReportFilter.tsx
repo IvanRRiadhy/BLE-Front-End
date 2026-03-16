@@ -84,6 +84,7 @@ const VisitorReportFilter = () => {
   });
 
   const [selectedPersons, setSelectedPersons] = useState<PersonOption[]>([]);
+  const [selectedPerson, setSelectedPerson] = useState<PersonOption | null>(null);
   const [selectedArea, setSelectedArea] = useState<SelectedNode>(null);
   const [selectedHost, setSelectedHost] = useState<memberType | null>(null);
   const [selectedType, setSelectedType] = useState<any>(null);
@@ -107,7 +108,7 @@ const VisitorReportFilter = () => {
     floorId: selectedArea?.type === 'floor' ? selectedArea.data.id : null,
     floorplanId: selectedArea?.type === 'floorplan' ? selectedArea.data.id : null,
     areaId: selectedArea?.type === 'area' ? selectedArea.data.id : null,
-    visitorId: selectedPersons.find((p) => p.type === 'visitor')?.id ?? null,
+    visitorId: selectedPerson?.type === 'visitor' ? selectedPerson.id : null,
   });
 
   const buildAlarmFilter = (): NewGetFilter => {
@@ -117,7 +118,7 @@ const VisitorReportFilter = () => {
       floorId: selectedArea?.type === 'floor' ? selectedArea.data.id : null,
       floorplanId: selectedArea?.type === 'floorplan' ? selectedArea.data.id : null,
       areaId: selectedArea?.type === 'area' ? selectedArea.data.id : null,
-      visitorId: selectedPersons.find((p) => p.type === 'visitor')?.id ?? null,
+      visitorId: selectedPerson?.type === 'visitor' ? selectedPerson.id : null,
       from: null,
       to: null,
     };
@@ -141,7 +142,7 @@ const VisitorReportFilter = () => {
       ExitTime: r.exitTime,
       VisitorStatus: r.status ?? '-',
       HostName: r.hostName ?? '-',
-      DurationMinutes: r.durationMinutes,
+      DurationMinutes: r.durationInMinutes,
     }));
 
   const adaptAlarm = (data: NewAlarmType[]) =>
@@ -162,8 +163,8 @@ const VisitorReportFilter = () => {
         visitorSessionMutation.mutateAsync(buildTrackingFilter()),
         alarmLogMutation.mutateAsync(buildAlarmFilter()),
       ]);
-      console.log("Tracking: ", tracking);
-      console.log("Alarms: ", alarms);
+      console.log('Tracking: ', tracking);
+      console.log('Alarms: ', alarms);
       setTrackingLogs(adaptTracking(tracking));
       setAlarmLogs(adaptAlarm(alarms));
       setOpenReport(true);
@@ -187,8 +188,8 @@ const VisitorReportFilter = () => {
         floorId: selectedArea?.type === 'floor' ? selectedArea.data.id : null,
         floorplanId: selectedArea?.type === 'floorplan' ? selectedArea.data.id : null,
         areaId: selectedArea?.type === 'area' ? selectedArea.data.id : null,
-        visitorId: selectedPersons.find((p) => p.type === 'visitor')?.id ?? null,
-        memberId: selectedPersons.find((p) => p.type === 'member')?.id ?? null,
+        visitorId: selectedPerson?.type === 'visitor' ? selectedPerson.id : null,
+        memberId: selectedPerson?.type === 'member' ? selectedPerson.id : null,
         fromDate: timeType === 'Custom' ? dateRange.from : null,
         toDate: timeType === 'Custom' ? dateRange.to : null,
       });
@@ -256,18 +257,13 @@ const VisitorReportFilter = () => {
         {/* Filters */}
         <Grid container spacing={1}>
           <Grid size={{ xs: 12, md: 4 }}>
-            <Autocomplete
-              multiple
+            <Autocomplete<PersonOption>
               options={personOptions}
-              value={selectedPersons}
-              onChange={(_, v) => setSelectedPersons(v)}
-              getOptionLabel={(o) => o.name}
-              renderTags={(value, getTagProps) =>
-                value.map((o, i) => (
-                  <Chip {...getTagProps({ index: i })} label={`${o.name} (${o.type})`} />
-                ))
-              }
-              renderInput={(p) => <TextField {...p} label="Person" />}
+              value={selectedPerson}
+              onChange={(_, value) => setSelectedPerson(value)}
+              getOptionLabel={(option) => option?.name ?? ''}
+              renderInput={(params) => <TextField {...params} label="Person" />}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
             />
           </Grid>
 

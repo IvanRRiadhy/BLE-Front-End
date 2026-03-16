@@ -23,7 +23,7 @@ import { useEffect, useState } from 'react';
 import { useAddPatrolCase, useEditPatrolCase } from 'src/hooks/usePatrolCase';
 import { useUploadCDN } from 'src/hooks/usePatrolCase';
 import { defaultPatrolCaseUploadForm } from 'src/store/apps/defaultForm';
-import { CaseUploadType } from 'src/store/apps/crud/patrolCase';
+import { CaseUploadType, CheckpointType } from 'src/store/apps/crud/patrolCase';
 import toast from 'react-hot-toast';
 import { CaseType, ThreatLevel } from 'src/types/crud/input';
 import { useTranslation } from 'react-i18next';
@@ -35,11 +35,20 @@ interface Props {
   open: boolean;
   onClose: () => void;
   setEditId?: (id: string) => void;
+  checkpoints: CheckpointType[];
 }
 
 // const CASE_TYPES = ['Damage', 'Incident', 'Security', 'Other'];
 
-const PatrolCaseDialog = ({ open, onClose, id, type, initialData, setEditId }: Props) => {
+const PatrolCaseDialog = ({
+  open,
+  onClose,
+  id,
+  type,
+  initialData,
+  setEditId,
+  checkpoints,
+}: Props) => {
   const { t } = useTranslation();
   const addMutation = useAddPatrolCase();
   const editMutation = useEditPatrolCase();
@@ -162,6 +171,8 @@ const PatrolCaseDialog = ({ open, onClose, id, type, initialData, setEditId }: P
   const isVideo = (att: any) =>
     att?.mimeType?.startsWith('video') || /\.(mp4|webm|ogg)$/i.test(att?.fileUrl || '');
 
+  const uniqueCheckpoints = Array.from(new Map(checkpoints.map((cp) => [cp.patrolAreaId, cp])).values());
+
   /* ================== UI ================== */
 
   return (
@@ -202,6 +213,24 @@ const PatrolCaseDialog = ({ open, onClose, id, type, initialData, setEditId }: P
               {CaseType.map((item) => (
                 <MenuItem key={item.value} value={item.value} disabled={item.disabled}>
                   {item.label}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            <TextField
+              select
+              label="Area"
+              fullWidth
+              value={form.patrolAreaId || ''}
+              onChange={handleChange('patrolAreaId')}
+            >
+              <MenuItem value="" disabled>
+                Select a checkpoint
+              </MenuItem>
+
+              {uniqueCheckpoints.map((item) => (
+                <MenuItem key={item.id} value={item.patrolAreaId}>
+                  {item.areaNameSnap}
                 </MenuItem>
               ))}
             </TextField>

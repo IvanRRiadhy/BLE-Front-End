@@ -58,6 +58,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import { resolve } from 'path';
+import { useAlarmPlayback } from 'src/hooks/useAlarmPlayback';
+import { AlarmPlaybackDataType } from 'src/store/apps/crud/alarmPlayback';
+import AlarmPlaybackDialog from './AlarmPlaybackDialog';
 dayjs.extend(duration);
 
 const AlarmContent = () => {
@@ -92,6 +95,7 @@ const AlarmContent = () => {
   const dispatchMutation = useDispatchAlarmTrigger();
   const postponeMutation = usePostponeAlarmTrigger();
   const resolveMutation = useResolveAlarmTrigger();
+  const alarmPlaybackMutation = useAlarmPlayback();
 
   useEffect(() => {
     if (selectedIntruder) {
@@ -168,54 +172,10 @@ const AlarmContent = () => {
   const [openActionDialog, setOpenActionDialog] = useState(false);
   const [selectedAction, setSelectedAction] = useState<string>('');
   const [selectedAlarmTrigger, setSelectedAlarmTrigger] = useState<AlarmTriggerType | null>(null);
-  const [investigateResult, setInvestigateResult] = useState<string>('');
-
-  const handleOpenActionDialog = () => {
-    setSelectedAction('');
-    setOpenActionDialog(true);
-  };
 
   const handleCloseActionDialog = () => {
     setOpenActionDialog(false);
     setSelectedAction('');
-  };
-
-  const handleApplyAction = async () => {
-    if (!selectedAlarmTrigger) {
-      handleCloseActionDialog();
-      toast.error('Please select an alarm');
-      return;
-    }
-    if (!selectedAction) {
-      handleCloseActionDialog();
-      toast.error('Please select an action status');
-      return;
-    }
-    if (selectedAction === 'Done' && investigateResult.trim() === '') {
-      toast.error('Please provide investigation result');
-      return;
-    }
-
-    try {
-      const result = await assignActionMutation.mutateAsync({
-        triggerId: selectedAlarmTrigger.id.toUpperCase(),
-        actionStatus: selectedAction.toLowerCase(),
-        investigatedResult: investigateResult.trim() === '' ? null : investigateResult,
-        assignedSecurityId:
-          selectedAction.toLowerCase() === 'investigated' && selectedSecurity
-            ? selectedSecurity.id
-            : null,
-      });
-
-      toast.success('Action dispatched successfully');
-      handleCloseActionDialog();
-      setSelectedSecurity(null);
-      setSelectedAction('');
-    } catch (error: any) {
-      toast.error('Error dispatching action');
-      console.error('Error dispatching action', error);
-    } finally {
-    }
   };
 
   const handleDispatchAction = async () => {
@@ -274,9 +234,9 @@ const AlarmContent = () => {
     if (acknowledgeMutation.isPending) return;
 
     try {
-      console.log('acknowledgeMutation', acknowledgeMutation);
-      await acknowledgeMutation.mutateAsync(alarm.id.toUpperCase());
-
+      // console.log('acknowledgeMutation', acknowledgeMutation);
+      const res = await acknowledgeMutation.mutateAsync(alarm.id.toUpperCase());
+      console.log('acknowledgeMutation res', res);
       setOpenActionDialog(true);
     } catch (error) {
       console.error('Failed to acknowledge alarm:', error);
@@ -286,8 +246,10 @@ const AlarmContent = () => {
 
   //Postpone Alarm
   const [openPostponeDialog, setOpenPostponeDialog] = useState(false);
-  const [postponeDate, setPostponeDate] = useState<Dayjs | null>(null);
-  const [postponeReason, setPostponeReason] = useState('');
+  const [postponeDate, setPostponeDate] = useState<Dayjs | null>(
+    dayjs().add(1, 'day').startOf('day'),
+  );
+  const [postponeReason, setPostponeReason] = useState('Alarm is Postponed');
 
   const handlePostpone = async () => {
     if (!selectedAlarmTrigger) {
@@ -321,7 +283,11 @@ const AlarmContent = () => {
       toast.error('Failed to postpone alarm');
     }
   };
-
+  useEffect(() => {
+    if (openPostponeDialog) {
+      setPostponeDate(dayjs().add(1, 'day').startOf('day'));
+    }
+  }, [openPostponeDialog]);
   //Done Alarm
   const handleResolve = async () => {
     if (!selectedAlarmTrigger) {
@@ -336,6 +302,38 @@ const AlarmContent = () => {
       setOpenActionDialog(false);
     } catch (error) {
       toast.error('Failed to done alarm');
+    }
+  };
+
+
+  //Alarm Playback
+
+  const [playbackData, setPlaybackData] = useState<AlarmPlaybackDataType | null>(null);
+  const [openPlaybackDialog, setOpenPlaybackDialog] = useState(false);
+
+  const handleFetchPlayback = async () => {
+    if (!selectedAlarmTrigger) {
+      toast.error('No alarm selected');
+      return;
+    }
+
+    try {
+      const result = await alarmPlaybackMutation.mutateAsync({
+        alarm_trigger_id: selectedAlarmTrigger.id,
+        beforeMinutes: 1,
+        afterMinutes: 1,
+      });
+
+      if (!result) {
+        toast.error('Failed fetching alarm playback');
+        return;
+      }
+
+      setPlaybackData(result);
+      setOpenPlaybackDialog(true);
+    } catch (error) {
+      console.error('Playback fetch error:', error);
+      toast.error('Failed fetching alarm playback');
     }
   };
 
@@ -356,187 +354,196 @@ const AlarmContent = () => {
   //   }
   // };
 
-  if (!currentPerson)
-    return (
-      <Box p={3} display="flex" flexDirection="column" alignItems="center">
-        <Typography variant="h4">No {personType?.toLowerCase() || 'person'} selected</Typography>
-        <Typography variant="h6">
-          Please select a {personType?.toLowerCase() || 'person'}
-        </Typography>
-      </Box>
-    );
+  // if (!currentPerson)
+  //   return (
+  //     <Box p={3} display="flex" flexDirection="column" alignItems="center">
+  //       <Typography variant="h4">No {personType?.toLowerCase() || 'person'} selected</Typography>
+  //       <Typography variant="h6">
+  //         Please select a {personType?.toLowerCase() || 'person'}
+  //       </Typography>
+  //     </Box>
+  //   );
 
   return (
     <Box p={3}>
-      {/* ================= TOP SECTION ================== */}
-      <Box
-        display="flex"
-        alignItems="flex-start"
-        gap={4}
-        mb={2}
-        sx={{ borderBottom: '1px solid #DDD', pb: 3 }}
-      >
-        {/* ============ PERSON PHOTO ============ */}
+      {currentPerson && (
         <Box
           display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          sx={{ minWidth: 180 }}
+          alignItems="flex-start"
+          gap={4}
+          mb={2}
+          sx={{ borderBottom: '1px solid #DDD', pb: 3 }}
         >
-          <Avatar
-            alt={`${personType} Face`}
-            src={`${BASE_URL}${currentPerson.faceImage ?? ''}`}
-            sx={{
-              width: 160,
-              height: 160,
-              mb: 1,
-              border: '3px solid #1976d2',
-            }}
-          />
-          {/* Person Type Badge */}
-          <Chip
-            label={personType}
-            color={personType === 'Visitor' ? 'primary' : 'success'}
-            sx={{ fontWeight: 700, mt: 1 }}
-          />
-        </Box>
+          {/* ============ PERSON PHOTO ============ */}
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            sx={{ minWidth: 180 }}
+          >
+            <Avatar
+              alt={`${personType} Face`}
+              src={`${BASE_URL}${currentPerson.faceImage ?? ''}`}
+              sx={{
+                width: 160,
+                height: 160,
+                mb: 1,
+                border: ` ${
+                  'isBlacklist' in currentPerson && currentPerson.isBlacklist
+                    ? '5px solid #d32f2f'
+                    : '3px solid #1976d2'
+                }`,
+              }}
+            />
+            {/* Person Type Badge */}
+            <Chip
+              label={personType}
+              color={personType === 'Visitor' ? 'primary' : 'success'}
+              sx={{ fontWeight: 700, mt: 1 }}
+            />
+          </Box>
 
-        {/* ============ PERSON FIELDS ============ */}
-        <Box flexGrow={1}>
-          <Grid container spacing={2}>
-            {/* Common Fields for both Visitor and Member */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography sx={field}>Name</Typography>
-              <Box display="flex" gap={1}>
-                <Typography sx={value}>{currentPerson.name}</Typography>
-                {/* Blacklist Chip - common for both */}
-                {'isBlacklist' in currentPerson && currentPerson.isBlacklist ? (
-                  <Chip label="Blacklisted" color="error" size="small" sx={{ fontWeight: 700 }} />
-                ) : null}
-                {/* VIP Chip - only for Visitor */}
-                {personType === 'Visitor' && 'isVip' in currentPerson && currentPerson.isVip ? (
-                  <Chip label="VIP" color="warning" size="small" sx={{ fontWeight: 700 }} />
-                ) : null}
-              </Box>
-            </Grid>
-
-            {/* Gender - common */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography sx={field}>Gender</Typography>
-              <Typography sx={value}>{currentPerson.gender}</Typography>
-            </Grid>
-
-            {/* Address - common */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography sx={field}>Address</Typography>
-              <Typography sx={value}>{currentPerson.address}</Typography>
-            </Grid>
-
-            {/* Card Number - common */}
-            {'cardNumber' in currentPerson && (
+          {/* ============ PERSON FIELDS ============ */}
+          <Box flexGrow={1}>
+            <Grid container spacing={2}>
+              {/* Common Fields for both Visitor and Member */}
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography sx={field}>Card Number</Typography>
-                <Typography sx={value}>{currentPerson.cardNumber}</Typography>
+                <Typography sx={field}>Name</Typography>
+                <Box display="flex" gap={1}>
+                  <Typography sx={value}>{currentPerson.name}</Typography>
+                  {/* Blacklist Chip - common for both */}
+                  {'isBlacklist' in currentPerson && currentPerson.isBlacklist ? (
+                    <Chip label="Blacklisted" color="error" size="small" sx={{ fontWeight: 700 }} />
+                  ) : null}
+                  {/* VIP Chip - only for Visitor */}
+                  {personType === 'Visitor' && 'isVip' in currentPerson && currentPerson.isVip ? (
+                    <Chip label="VIP" color="warning" size="small" sx={{ fontWeight: 700 }} />
+                  ) : null}
+                </Box>
               </Grid>
-            )}
 
-            {/* BLE Card Number - common */}
-            {'bleCardNumber' in currentPerson && (
+              {/* Gender - common */}
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography sx={field}>BLE Card Number</Typography>
-                <Typography sx={value}>{currentPerson.bleCardNumber}</Typography>
+                <Typography sx={field}>Gender</Typography>
+                <Typography sx={value}>{currentPerson.gender}</Typography>
               </Grid>
-            )}
 
-            {/* Visitor Specific Fields */}
-            {personType === 'Visitor' && (
-              <>
+              {/* Address - common */}
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography sx={field}>Address</Typography>
+                <Typography sx={value}>{currentPerson.address}</Typography>
+              </Grid>
+
+              {/* Card Number - common */}
+              {'cardNumber' in currentPerson && (
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Typography sx={field}>Organization</Typography>
-                  <Typography sx={value}>
-                    {(currentPerson as VisitorType).organizationName}
-                  </Typography>
+                  <Typography sx={field}>Card Number</Typography>
+                  <Typography sx={value}>{currentPerson.cardNumber}</Typography>
                 </Grid>
+              )}
 
+              {/* BLE Card Number - common */}
+              {'bleCardNumber' in currentPerson && (
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Typography sx={field}>Department</Typography>
-                  <Typography sx={value}>
-                    {(currentPerson as VisitorType).departmentName}
-                  </Typography>
+                  <Typography sx={field}>BLE Card Number</Typography>
+                  <Typography sx={value}>{currentPerson.bleCardNumber}</Typography>
                 </Grid>
+              )}
 
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Typography sx={field}>District</Typography>
-                  <Typography sx={value}>{(currentPerson as VisitorType).districtName}</Typography>
-                </Grid>
+              {/* Visitor Specific Fields */}
+              {personType === 'Visitor' && (
+                <>
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Typography sx={field}>Organization</Typography>
+                    <Typography sx={value}>
+                      {(currentPerson as VisitorType).organizationName}
+                    </Typography>
+                  </Grid>
 
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Typography sx={field}>Identity Type</Typography>
-                  <Typography sx={value}>{(currentPerson as VisitorType).identityType}</Typography>
-                </Grid>
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Typography sx={field}>Department</Typography>
+                    <Typography sx={value}>
+                      {(currentPerson as VisitorType).departmentName}
+                    </Typography>
+                  </Grid>
 
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Typography sx={field}>Identity ID</Typography>
-                  <Typography sx={value}>{(currentPerson as VisitorType).identityId}</Typography>
-                </Grid>
-              </>
-            )}
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Typography sx={field}>District</Typography>
+                    <Typography sx={value}>
+                      {(currentPerson as VisitorType).districtName}
+                    </Typography>
+                  </Grid>
 
-            {/* Member Specific Fields */}
-            {personType === 'Member' && (
-              <>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Typography sx={field}>Organization</Typography>
-                  <Typography sx={value}>
-                    {(currentPerson as memberType).organization?.name || '-'}
-                  </Typography>
-                </Grid>
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Typography sx={field}>Identity Type</Typography>
+                    <Typography sx={value}>
+                      {(currentPerson as VisitorType).identityType}
+                    </Typography>
+                  </Grid>
 
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Typography sx={field}>Department</Typography>
-                  <Typography sx={value}>
-                    {(currentPerson as memberType).department?.name || '-'}
-                  </Typography>
-                </Grid>
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Typography sx={field}>Identity ID</Typography>
+                    <Typography sx={value}>{(currentPerson as VisitorType).identityId}</Typography>
+                  </Grid>
+                </>
+              )}
 
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Typography sx={field}>District</Typography>
-                  <Typography sx={value}>
-                    {(currentPerson as memberType).district?.name || '-'}
-                  </Typography>
-                </Grid>
+              {/* Member Specific Fields */}
+              {personType === 'Member' && (
+                <>
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Typography sx={field}>Organization</Typography>
+                    <Typography sx={value}>
+                      {(currentPerson as memberType).organization?.name || '-'}
+                    </Typography>
+                  </Grid>
 
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Typography sx={field}>Employee ID</Typography>
-                  <Typography sx={value}>
-                    {(currentPerson as memberType).personId || '-'}
-                  </Typography>
-                </Grid>
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Typography sx={field}>Department</Typography>
+                    <Typography sx={value}>
+                      {(currentPerson as memberType).department?.name || '-'}
+                    </Typography>
+                  </Grid>
 
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Typography sx={field}>Join Date</Typography>
-                  <Typography sx={value}>
-                    {(currentPerson as memberType).joinDate || '-'}
-                  </Typography>
-                </Grid>
-              </>
-            )}
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Typography sx={field}>District</Typography>
+                    <Typography sx={value}>
+                      {(currentPerson as memberType).district?.name || '-'}
+                    </Typography>
+                  </Grid>
 
-            {/* Email - common */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography sx={field}>Email</Typography>
-              <Typography sx={value}>{currentPerson.email}</Typography>
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Typography sx={field}>Employee ID</Typography>
+                    <Typography sx={value}>
+                      {(currentPerson as memberType).personId || '-'}
+                    </Typography>
+                  </Grid>
+
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Typography sx={field}>Join Date</Typography>
+                    <Typography sx={value}>
+                      {(currentPerson as memberType).joinDate || '-'}
+                    </Typography>
+                  </Grid>
+                </>
+              )}
+
+              {/* Email - common */}
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography sx={field}>Email</Typography>
+                <Typography sx={value}>{currentPerson.email}</Typography>
+              </Grid>
+
+              {/* Phone - common */}
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography sx={field}>Phone</Typography>
+                <Typography sx={value}>{currentPerson.phone}</Typography>
+              </Grid>
             </Grid>
-
-            {/* Phone - common */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography sx={field}>Phone</Typography>
-              <Typography sx={value}>{currentPerson.phone}</Typography>
-            </Grid>
-          </Grid>
+          </Box>
         </Box>
-      </Box>
+      )}
 
       {/* ================= ALARM TRIGGERS SECTION ================== */}
       <Typography variant="h5" fontWeight="bold" mb={2}>
@@ -713,6 +720,116 @@ const AlarmContent = () => {
           )}
         </DialogTitle>
         <DialogContent sx={{ mt: 1, p: 3 }}>
+          {/* ================= TOP SECTION ================== */}
+          {selectedAlarmTrigger && currentPerson && (
+            <Box
+              display="flex"
+              alignItems="flex-start"
+              gap={4}
+              mb={2}
+              sx={{ borderBottom: '1px solid #DDD', pb: 3 }}
+            >
+              {/* ============ PERSON PHOTO ============ */}
+              <Box
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                justifyContent="center"
+                sx={{ minWidth: 180 }}
+              >
+                <Avatar
+                  alt={`${personType} Face`}
+                  src={`${BASE_URL}${currentPerson.faceImage ?? ''}`}
+                  sx={{
+                    width: 160,
+                    height: 160,
+                    mb: 1,
+                    border: ` ${
+                      'isBlacklist' in currentPerson && currentPerson.isBlacklist
+                        ? '5px solid #d32f2f'
+                        : '3px solid #1976d2'
+                    }`,
+                  }}
+                />
+                {/* Person Type Badge */}
+                <Chip
+                  label={personType}
+                  color={personType === 'Visitor' ? 'primary' : 'success'}
+                  sx={{ fontWeight: 700, mt: 1 }}
+                />
+              </Box>
+
+              {/* ============ PERSON FIELDS ============ */}
+              <Box flexGrow={1}>
+                <Grid container spacing={2}>
+                  {/* Common Fields for both Visitor and Member */}
+                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                    <Typography sx={field}>Name</Typography>
+                    <Box display="flex" gap={1}>
+                      <Typography sx={value}>{currentPerson.name}</Typography>
+                      {/* Blacklist Chip - common for both */}
+                      {'isBlacklist' in currentPerson && currentPerson.isBlacklist ? (
+                        <Chip
+                          label="Blacklisted"
+                          color="error"
+                          size="small"
+                          sx={{ fontWeight: 700 }}
+                        />
+                      ) : null}
+                      {/* VIP Chip - only for Visitor */}
+                      {personType === 'Visitor' &&
+                      'isVip' in currentPerson &&
+                      currentPerson.isVip ? (
+                        <Chip label="VIP" color="warning" size="small" sx={{ fontWeight: 700 }} />
+                      ) : null}
+                    </Box>
+                  </Grid>
+
+                  {'floorName' in selectedAlarmTrigger &&
+                    'buildingName' in selectedAlarmTrigger && (
+                      <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                        <Typography sx={field}>Alarm At</Typography>
+                        <Typography sx={value}>
+                          {selectedAlarmTrigger?.floorName} | {selectedAlarmTrigger?.buildingName}
+                        </Typography>
+                      </Grid>
+                    )}
+
+                  {/* BLE Card Number - common */}
+                  {'bleCardNumber' in currentPerson && (
+                    <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                      <Typography sx={field}>BLE Card Number</Typography>
+                      <Typography sx={value}>{currentPerson.bleCardNumber}</Typography>
+                    </Grid>
+                  )}
+
+                  {'triggerTime' in selectedAlarmTrigger && (
+                    <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                      <Typography sx={field}>Triggered At</Typography>
+                      <Typography sx={value}>{selectedAlarmTrigger?.triggerTime}</Typography>
+                    </Grid>
+                  )}
+                  {/* BLE Card Number - common */}
+                  {'cardNumber' in currentPerson && (
+                    <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                      <Typography sx={field}> Card Number</Typography>
+                      <Typography sx={value}>{currentPerson.cardNumber}</Typography>
+                    </Grid>
+                  )}
+                  {'action' in selectedAlarmTrigger &&
+                    'actionUpdatedAt' in selectedAlarmTrigger && (
+                      <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                        <Typography sx={field}>Last Action</Typography>
+                        <Typography sx={value}>
+                          {selectedAlarmTrigger?.action} | {selectedAlarmTrigger?.actionUpdatedAt}
+                        </Typography>
+                      </Grid>
+                    )}
+                </Grid>
+              </Box>
+            </Box>
+          )}
+
           <Box
             sx={{
               width: '100%',
@@ -899,86 +1016,76 @@ const AlarmContent = () => {
               </Box>
             </>
           )}
-
-          {/* Investigate Result */}
-          {/* {selectedAction.toLowerCase() === 'done' && selectedAlarmTrigger?.isActive && (
-            <Box mt={3}>
-              <Typography variant="subtitle2" color="text.secondary" mb={1}>
-                Investigate Result
-              </Typography>
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                value={investigateResult}
-                onChange={(e) => setInvestigateResult(e.target.value)}
-              />
-            </Box>
-          )} */}
-
-          {/* Select Security Guard */}
-          {/* {selectedAction.toLowerCase() === 'investigated' && selectedAlarmTrigger?.isActive && (
-            <Box mt={3}>
-              <Typography variant="subtitle2" color="text.secondary" mb={1}>
-                Select Security Guard
-              </Typography>
-              <CustomAutocomplete
-                label="Security Guard"
-                options={securityData || []}
-                value={selectedSecurity}
-                loading={isLoadingSecurity}
-                onChange={(newValue) => setSelectedSecurity(newValue)}
-                getOptionLabel={(option) => option?.name ?? ''}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
-                required
-                helperText={!selectedSecurity ? 'Please select a security guard' : undefined}
-              />
-            </Box>
-          )} */}
         </DialogContent>
 
-        <DialogActions sx={{ p: 3 }}>
-          <Button onClick={handleCloseActionDialog} color="error" variant="outlined">
-            Close
+        <DialogActions
+          sx={{
+            p: 3,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          {/* LEFT SIDE */}
+          <Button
+            variant="outlined"
+            color="info"
+            onClick={handleFetchPlayback}
+            disabled={alarmPlaybackMutation.isPending}
+            startIcon={
+              alarmPlaybackMutation.isPending ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : null
+            }
+          >
+            {alarmPlaybackMutation.isPending ? 'Loading Playback...' : 'View Alarm Playback'}
           </Button>
 
-          {/* Only show confirm if alarm is active */}
-          {selectedAlarmTrigger?.action.toLocaleLowerCase() === 'acknowledged' && (
-            <>
-              <Button
-                variant="outlined"
-                color="warning"
-                onClick={() => setOpenPostponeDialog(true)}
-              >
-                Postpone
-              </Button>
+          {/* RIGHT SIDE BUTTON GROUP */}
+          <Box display="flex" gap={1}>
+            <Button onClick={handleCloseActionDialog} color="error" variant="outlined">
+              Close
+            </Button>
 
+            {selectedAlarmTrigger?.action.toLowerCase() === 'acknowledged' && (
+              <>
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  onClick={() => setOpenPostponeDialog(true)}
+                >
+                  Postpone
+                </Button>
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  disabled={!selectedSecurity || dispatchMutation.isPending}
+                  onClick={handleDispatchAction}
+                  startIcon={
+                    dispatchMutation.isPending ? (
+                      <CircularProgress size={16} color="inherit" />
+                    ) : null
+                  }
+                >
+                  {dispatchMutation.isPending ? 'Dispatching...' : 'Dispatch'}
+                </Button>
+              </>
+            )}
+
+            {selectedAlarmTrigger?.action.toLowerCase() === 'doneinvestigated' && (
               <Button
                 variant="contained"
                 color="primary"
-                disabled={!selectedSecurity || dispatchMutation.isPending}
-                onClick={handleDispatchAction}
+                onClick={handleResolve}
                 startIcon={
-                  dispatchMutation.isPending ? <CircularProgress size={16} color="inherit" /> : null
+                  resolveMutation.isPending ? <CircularProgress size={16} color="inherit" /> : null
                 }
               >
-                {dispatchMutation.isPending ? 'Dispatching...' : 'Dispatch'}
+                {resolveMutation.isPending ? 'Resolving...' : 'Resolve'}
               </Button>
-            </>
-          )}
-          {selectedAlarmTrigger?.action.toLocaleLowerCase() === 'doneinvestigated' && (
-            <Button
-              variant="contained"
-              color="primary"
-              // disabled={!selectedSecurity || dispatchMutation.isPending}
-              onClick={handleResolve}
-              startIcon={
-                resolveMutation.isPending ? <CircularProgress size={16} color="inherit" /> : null
-              }
-            >
-              {resolveMutation.isPending ? 'Resolving...' : 'Resolve'}
-            </Button>
-          )}
+            )}
+          </Box>
         </DialogActions>
       </Dialog>
       <Dialog
@@ -1055,6 +1162,11 @@ const AlarmContent = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <AlarmPlaybackDialog
+        open={openPlaybackDialog}
+        onClose={() => setOpenPlaybackDialog(false)}
+        data={playbackData}
+      />
     </Box>
   );
 };

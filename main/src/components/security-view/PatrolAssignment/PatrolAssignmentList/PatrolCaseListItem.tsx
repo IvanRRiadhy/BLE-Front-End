@@ -62,6 +62,9 @@ const PatrolCaseListItem = ({ data, onClick }: Props) => {
           <Typography fontSize={12} color="text.secondary" mt={0.5}>
             Security: {data.security?.name ?? '-'}
           </Typography>
+          <Typography fontSize={12} color="text.secondary" mt={0.5}>
+            Area: {data.security?.name ?? '-'}
+          </Typography>
         </Box>
 
         {/* ===== CHEVRON ===== */}

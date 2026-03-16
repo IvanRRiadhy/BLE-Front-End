@@ -4,6 +4,7 @@ import { VisitorSessionType, GetFilter,  VisitorSessionResponseType } from '../s
 import { RootState, useSelector } from 'src/store/Store';
 
 const API_URL = '/api/TrackingAnalytics/visitor-session/';
+const API_REPORT_URL = '/api/TrackingAnalytics/visitor-report/';
 
 interface PaginatedResponse<T> {
   data: T[];
@@ -28,7 +29,7 @@ export function useVisitorSession() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (filter: GetFilter) => {
-      const response = await axiosServices.post(`${API_URL}`, filter);
+      const response = await axiosServices.post(`${API_REPORT_URL}`, filter);
       const collection = response.data.collection;
       return collection.data as VisitorSessionType[];
     },

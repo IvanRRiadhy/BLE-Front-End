@@ -89,7 +89,7 @@ const PatrolRouteDetailDialog = ({ open, route, onClose }: Props) => {
                 const isRTL = rowIndex % 2 === 1;
                 const isEndOfRow = colIndex === COLUMNS - 1;
                 const dwell = dwellMap.get(area.id);
-                console.log("dwell time",dwell)
+                // console.log("dwell time",dwell)
                 return (
                   <Grid key={area.id} size={{ xs: 12, sm: 6, md: 3 }}>
                     <SortablePatrolAreaCard

@@ -46,10 +46,15 @@ const SidebarFilter = ({ filterType, setFilterType, personFilter, setPersonFilte
   //   FocusedPersonOnly: false,
   // });
 
-  const handleFilterChange = (_: React.MouseEvent<HTMLElement>, newValues: string[]) => {
-    if (newValues.length === 0) return;
-    setFilterType(newValues);
-  };
+const handleFilterChange = (_: React.MouseEvent<HTMLElement>, newValues: string[]) => {
+  if (newValues.length === 0) {
+    const other = filterType[0] === 'Tracking' ? 'Alarm' : 'Tracking';
+    setFilterType([other]);
+    return;
+  }
+
+  setFilterType(newValues);
+};
 
   const openMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);

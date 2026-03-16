@@ -132,98 +132,163 @@ const AlarmTimelineProgress = ({ timelineData }: Props) => {
         },
       ]
     : timelineData.timeline;
-  return (
-    <Box sx={{ mt: 3 }}>
-      <Timeline
-        position="right"
-        sx={{
-          '& .MuiTimelineItem-root:before': {
-            flex: 0,
-            padding: 0,
-          },
-        }}
-      >
-        {timelineWithActive.map((item, index) => {
-          const isOngoing = item.stage === 'ongoing';
-          const isSelected = selectedStage === index && !isOngoing;
-          const config = getStageConfig(item.stage);
 
-          return (
-            <TimelineItem
-              key={index}
-              onClick={!isOngoing ? () => setSelectedStage(index) : undefined}
-              sx={{
-                cursor: isOngoing ? 'default' : 'pointer',
-                opacity: isOngoing ? 0.5 : 1,
-              }}
-            >
-              {/* 🔹 LEFT SIDE (Timestamp) */}
-              <TimelineOppositeContent
+  const dispatchedStage = timelineData.timeline.find((t) => t.stage === 'dispatched');
+  const investigatedStage = timelineData.timeline.find((t) => t.stage === 'accepted');
+  const resolvedStage = timelineData.timeline.find((t) => t.stage === 'done_investigated');
+  const confirmedResolvedStage = timelineData.timeline.find((t) => t.stage === 'resolved');
+  return (
+    <Box sx={{ mt: 3, display: 'flex', gap: 4 }}>
+      {/* LEFT SECTION — TIMELINE (UNCHANGED) */}
+      <Box sx={{ flex: 1 }}>
+        <Timeline
+          position="right"
+          sx={{
+            '& .MuiTimelineItem-root:before': {
+              flex: 0,
+              padding: 0,
+            },
+          }}
+        >
+          {timelineWithActive.map((item, index) => {
+            const isOngoing = item.stage === 'ongoing';
+            const isSelected = selectedStage === index && !isOngoing;
+            const config = getStageConfig(item.stage);
+
+            return (
+              <TimelineItem
+                key={index}
+                onClick={!isOngoing ? () => setSelectedStage(index) : undefined}
                 sx={{
-                  flex: 0.25,
-                  pt: 2,
-                  fontSize: '0.75rem',
-                  color: isOngoing ? 'rgba(0,0,0,0.3)' : 'text.secondary',
+                  cursor: isOngoing ? 'default' : 'pointer',
+                  opacity: isOngoing ? 0.5 : 1,
                 }}
               >
-                {item.timestamp ? dayjs(item.timestamp).format('DD MMM YYYY HH:mm:ss') : 'TBA'}
-              </TimelineOppositeContent>
-
-              {/* 🔹 ICON SECTION */}
-              <TimelineSeparator>
-                <TimelineDot
+                <TimelineOppositeContent
                   sx={{
-                    ...config.sx,
-                    transform: isSelected ? 'scale(1.2)' : 'scale(1)',
-                    transition: 'all 0.2s ease',
+                    flex: 0.25,
+                    pt: 2,
+                    fontSize: '0.75rem',
+                    color: isOngoing ? 'rgba(0,0,0,0.3)' : 'text.secondary',
                   }}
                 >
-                  {config.icon}
-                </TimelineDot>
+                  {item.timestamp ? dayjs(item.timestamp).format('DD MMM YYYY HH:mm:ss') : 'TBA'}
+                </TimelineOppositeContent>
 
-                {index < timelineWithActive.length - 1 && (
-                  <TimelineConnector
+                <TimelineSeparator>
+                  <TimelineDot
                     sx={{
-                      borderLeftWidth: 3,
-                      boxShadow: '0 0 4px rgba(46,125,50,0.4)',
-                      borderLeftStyle:
-                        !isFinal && index === timelineWithActive.length - 2 ? 'dashed' : 'solid',
-                      borderColor:
-                        !isFinal && index === timelineWithActive.length - 2
-                          ? 'rgba(0,0,0,0.3)' // grey future
-                          : 'linear-gradient(to bottom, #2e7d32, #4caf50)', // green completed
+                      ...config.sx,
+                      transform: isSelected ? 'scale(1.2)' : 'scale(1)',
+                      transition: 'all 0.2s ease',
                     }}
-                  />
-                )}
-              </TimelineSeparator>
+                  >
+                    {config.icon}
+                  </TimelineDot>
 
-              {/* 🔹 RIGHT SIDE (Content) */}
-              <TimelineContent sx={{ pb: 4 }}>
-                <Typography
-                  fontWeight={700}
-                  sx={{
-                    color: isOngoing ? 'rgba(0,0,0,0.4)' : 'inherit',
-                  }}
-                >
-                  {formatStageLabel(item.stage)}
-                </Typography>
+                  {index < timelineWithActive.length - 1 && (
+                    <TimelineConnector
+                      sx={{
+                        borderLeftWidth: 3,
+                        borderLeftStyle:
+                          !isFinal && index === timelineWithActive.length - 2 ? 'dashed' : 'solid',
+                      }}
+                    />
+                  )}
+                </TimelineSeparator>
 
-                {isSelected && (
-                  <>
-                    <Typography variant="body2" sx={{ mt: 1 }}>
-                      {item.description}
-                    </Typography>
+                <TimelineContent sx={{ pb: 4 }}>
+                  <Typography
+                    fontWeight={700}
+                    sx={{
+                      color: isOngoing ? 'rgba(0,0,0,0.4)' : 'inherit',
+                    }}
+                  >
+                    {formatStageLabel(item.stage)}
+                  </Typography>
 
-                    <Typography variant="caption" color="text.secondary">
-                      Duration: {item.durationFormatted}
-                    </Typography>
-                  </>
-                )}
-              </TimelineContent>
-            </TimelineItem>
-          );
-        })}
-      </Timeline>
+                  {isSelected && (
+                    <>
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        {item.description}
+                      </Typography>
+
+                      <Typography variant="caption" color="text.secondary">
+                        Duration: {item.durationFormatted}
+                      </Typography>
+                    </>
+                  )}
+                </TimelineContent>
+              </TimelineItem>
+            );
+          })}
+        </Timeline>
+      </Box>
+
+      {/* RIGHT SECTION — STATUS INDICATORS */}
+      <Box
+        sx={{
+          width: 320,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+        }}
+      >
+        {dispatchedStage && (
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              bgcolor: '#fff3e0',
+              border: '1px solid #ffcc80',
+            }}
+          >
+            <Typography fontWeight={600}>Dispatched to</Typography>
+            <Typography variant="body2">{timelineData.investigation.dispatchedPerson}</Typography>
+          </Box>
+        )}
+
+        {investigatedStage && (
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              bgcolor: '#fff8e1',
+              border: '1px solid #ffe082',
+            }}
+          >
+            <Typography fontWeight={600}>Investigated by</Typography>
+            <Typography variant="body2">{investigatedStage.actor}</Typography>
+          </Box>
+        )}
+
+        {resolvedStage && (
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              bgcolor: '#e8f5e9',
+              border: '1px solid #a5d6a7',
+            }}
+          >
+            <Typography fontWeight={600}>Resolved by</Typography>
+            <Typography variant="body2">{resolvedStage.actor}</Typography>
+          </Box>
+        )}
+        {confirmedResolvedStage && (
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              bgcolor: '#e8f5e9',
+              border: '1px solid #a5d6a7',
+            }}
+          >
+            <Typography fontWeight={600}>Confirmed Resolved by</Typography>
+            <Typography variant="body2">{confirmedResolvedStage.actor}</Typography>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 };

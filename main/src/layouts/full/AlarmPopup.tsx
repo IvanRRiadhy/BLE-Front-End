@@ -337,8 +337,10 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
 
   //Postpone
   const [openPostponeDialog, setOpenPostponeDialog] = useState(false);
-  const [postponeDate, setPostponeDate] = useState<Dayjs | null>(null);
-  const [postponeReason, setPostponeReason] = useState('');
+  const [postponeDate, setPostponeDate] = useState<Dayjs | null>(
+    dayjs().add(1, 'day').startOf('day'),
+  );
+  const [postponeReason, setPostponeReason] = useState('Alarm is Postponed');
 
   const handlePostpone = async () => {
     if (!alarm?.dmac) {
@@ -357,6 +359,12 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
     }
 
     const alarmToProcess: AlarmType[] = [...selectedAlarms];
+
+    useEffect(() => {
+      if (openPostponeDialog) {
+        setPostponeDate(dayjs().add(1, 'day').startOf('day'));
+      }
+    }, [openPostponeDialog]);
 
     // include main alarm if not selected
     if (alarm) {

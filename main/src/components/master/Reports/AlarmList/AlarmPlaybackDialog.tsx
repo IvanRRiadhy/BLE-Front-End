@@ -15,54 +15,72 @@ import {
   TableBody,
   Paper,
   useTheme,
+  Chip,
 } from '@mui/material';
+
 import { Stage, Layer, Image as KonvaImage, Circle, Line, Shape } from 'react-konva';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import { IconPlayerPlayFilled, IconPlayerPauseFilled } from '@tabler/icons-react';
-import InvestigationBeaconRenderer from './InvestigationBeaconRenderer';
 
-type PointType = {
-  x: number;
-  y: number;
-  time: string;
-  area: string;
-  personName: string;
-  personId: string;
-};
+import InvestigationBeaconRenderer from 'src/components/master/Reports/Investigation/InvestigationBeaconRenderer';
 
-type SessionReplayProps = {
-  open: boolean;
-  onClose: () => void;
-  personName: string;
-  floorplanImage: string;
-  floorplanName: string;
-  points: PointType[];
-};
+import { AlarmPlaybackDataType } from 'src/store/apps/crud/alarmPlayback';
+import { uniqueId } from 'lodash';
 
 const MIN_DELAY = 500;
 const MAX_DELAY = 1000;
 
-const InvestigateReplayDialog = ({
-  open,
-  onClose,
-  personName,
-  floorplanImage,
-  floorplanName,
-  points,
-}: SessionReplayProps) => {
+type Props = {
+  open: boolean;
+  onClose: () => void;
+  data: AlarmPlaybackDataType | null;
+};
+
+const phaseRowColors: Record<string, { light: string; dark: string }> = {
+  'pre-alarm': {
+    light: 'rgba(25, 118, 210, 0.15)', // light blue
+    dark: 'rgba(25, 118, 210, 0.35)',
+  },
+  'during-alarm': {
+    light: 'rgba(244, 67, 54, 0.18)', // light red/orange
+    dark: 'rgba(244, 67, 54, 0.40)',
+  },
+  'post-alarm': {
+    light: 'rgba(76, 175, 80, 0.15)', // light green
+    dark: 'rgba(76, 175, 80, 0.35)',
+  },
+};
+
+const phaseColor = (phase: string) => {
+  switch (phase) {
+    case 'pre':
+      return '#1976d2';
+    case 'during':
+      return '#f44336';
+    case 'post':
+      return '#4caf50';
+    default:
+      return '#9e9e9e';
+  }
+};
+
+const AlarmPlaybackDialog = ({ open, onClose, data }: Props) => {
   const theme = useTheme();
+
   const tableContainerRef = useRef<HTMLDivElement | null>(null);
   const activeRowRef = useRef<HTMLTableRowElement | null>(null);
 
-  const [isUserScrolling, setIsUserScrolling] = useState(false);
+  const animationFrameRef = useRef<number | null>(null);
   const scrollCooldownRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+
   const [selectedIndex, setSelectedIndex] = useState(0);
+
   const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null);
   const [imageDimensions, setImageDimensions] = useState({ width: 1, height: 1 });
-
-  const [isPlaying, setIsPlaying] = useState(false);
-  const animationFrameRef = useRef<number | null>(null);
 
   const [animatedPosition, setAnimatedPosition] = useState<{ x: number; y: number } | null>(null);
 
@@ -71,18 +89,20 @@ const InvestigateReplayDialog = ({
   const minHeight = 200;
 
   const scale = Math.min(maxWidth / imageDimensions.width, maxHeight / imageDimensions.height);
+
   const stageWidth = imageDimensions.width * scale;
   const stageHeight = imageDimensions.height * scale;
 
-  const sortedPoints = useMemo(() => {
-    return [...points].sort((a, b) => dayjs(a.time).valueOf() - dayjs(b.time).valueOf());
-  }, [points]);
+  const frames = useMemo(() => {
+    if (!data) return [];
+    return [...data.frames].sort((a, b) => a.sequence - b.sequence);
+  }, [data]);
 
   useEffect(() => {
-    if (!floorplanImage) return;
+    if (!data?.meta.floorplanImage) return;
 
     const img = new window.Image();
-    img.src = `${BASE_URL}${floorplanImage}`;
+    img.src = `${BASE_URL}${data.meta.floorplanImage}`;
 
     img.onload = () => {
       setImageObj(img);
@@ -91,17 +111,17 @@ const InvestigateReplayDialog = ({
         height: img.height,
       });
     };
-  }, [floorplanImage]);
+  }, [data]);
 
   useEffect(() => {
-    if (sortedPoints.length > 0) {
-      const p = sortedPoints[0];
+    if (frames.length > 0) {
+      const first = frames[0];
       setAnimatedPosition({
-        x: p.x * scale,
-        y: p.y * scale,
+        x: first.x * scale,
+        y: first.y * scale,
       });
     }
-  }, [points, scale]);
+  }, [frames, scale]);
 
   const animateToPosition = (
     startX: number,
@@ -139,25 +159,22 @@ const InvestigateReplayDialog = ({
 
     const nextIdx = index + 1;
 
-    if (nextIdx >= sortedPoints.length) {
+    if (nextIdx >= frames.length) {
       setIsPlaying(false);
       return;
     }
 
-    const current = sortedPoints[index];
-    const next = sortedPoints[nextIdx];
+    const current = frames[index];
+    const next = frames[nextIdx];
 
-    const durationMs = Math.min(Math.max(
-      dayjs(next.time).diff(dayjs(current.time), 'millisecond'),
-      MIN_DELAY,
-    ), MAX_DELAY);
+    const duration = Math.min( Math.max(dayjs(next.time).diff(dayjs(current.time), 'millisecond'), MIN_DELAY), MAX_DELAY);
 
     animateToPosition(
       current.x * scale,
       current.y * scale,
       next.x * scale,
       next.y * scale,
-      durationMs,
+      duration,
       () => {
         setSelectedIndex(nextIdx);
         startPlayback(nextIdx);
@@ -166,19 +183,19 @@ const InvestigateReplayDialog = ({
   };
 
   const jumpToIndex = (index: number) => {
-    const point = sortedPoints[index];
-    if (!point) return;
+    const frame = frames[index];
+    if (!frame) return;
 
     setSelectedIndex(index);
 
     setAnimatedPosition({
-      x: point.x * scale,
-      y: point.y * scale,
+      x: frame.x * scale,
+      y: frame.y * scale,
     });
   };
 
   useEffect(() => {
-    if (isPlaying && sortedPoints.length > 0) {
+    if (isPlaying && frames.length > 0) {
       startPlayback(selectedIndex);
     }
   }, [isPlaying]);
@@ -196,7 +213,7 @@ const InvestigateReplayDialog = ({
 
       scrollCooldownRef.current = setTimeout(() => {
         setIsUserScrolling(false);
-      }, 2000); // 2s cooldown
+      }, 2000);
     };
 
     container.addEventListener('scroll', handleScroll);
@@ -215,15 +232,7 @@ const InvestigateReplayDialog = ({
         block: 'center',
       });
     }
-  }, [selectedIndex, isUserScrolling]);
-
-  useEffect(() => {
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, []);
+  }, [selectedIndex]);
 
   const handlePause = () => {
     setIsPlaying(false);
@@ -244,8 +253,8 @@ const InvestigateReplayDialog = ({
 
     setSelectedIndex(0);
 
-    if (sortedPoints.length > 0) {
-      const first = sortedPoints[0];
+    if (frames.length > 0) {
+      const first = frames[0];
 
       setAnimatedPosition({
         x: first.x * scale,
@@ -253,29 +262,41 @@ const InvestigateReplayDialog = ({
       });
     }
   };
+
   useEffect(() => {
-    if (!open) {
-      resetReplay();
-    }
+    if (!open) resetReplay();
   }, [open]);
 
-  const selectedPoint = sortedPoints[selectedIndex];
-  const prevPoint = selectedIndex > 0 ? sortedPoints[selectedIndex - 1] : null;
-  const nextPoint =
-    selectedIndex < sortedPoints.length - 1 ? sortedPoints[selectedIndex + 1] : null;
-  const currentPoint = sortedPoints[selectedIndex];
+  const current = frames[selectedIndex];
+  const prev = selectedIndex > 0 ? frames[selectedIndex - 1] : null;
+  const next = selectedIndex < frames.length - 1 ? frames[selectedIndex + 1] : null;
 
-  const currentPos = currentPoint ? { x: currentPoint.x * scale, y: currentPoint.y * scale } : null;
-  const prevPos = prevPoint ? { x: prevPoint.x * scale, y: prevPoint.y * scale } : null;
-
-  const nextPos = nextPoint ? { x: nextPoint.x * scale, y: nextPoint.y * scale } : null;
+  const currentPos = current ? { x: current.x * scale, y: current.y * scale } : null;
+  const prevPos = prev ? { x: prev.x * scale, y: prev.y * scale } : null;
+  const nextPos = next ? { x: next.x * scale, y: next.y * scale } : null;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth>
-      <DialogTitle>
+      <DialogTitle
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <Typography fontWeight={600}>
-          {personName} — Replay — {floorplanName}
+          {data?.meta.personName} — Alarm Playback — {data?.meta.floorplanName}
         </Typography>
+        {data && (
+          <Chip
+            label={data.meta.category}
+            sx={{
+              backgroundColor: '#d32f2f',
+              color: '#fff',
+              fontWeight: 600,
+            }}
+          />
+        )}
       </DialogTitle>
 
       <DialogContent
@@ -285,11 +306,31 @@ const InvestigateReplayDialog = ({
           height: 'calc(100vh - 200px)',
         }}
       >
+        {/* Alarm Info */}
+        {/* {data && (
+          <Box mb={2}>
+            <Typography variant="body2">
+              Alarm Time: {dayjs(data.meta.alarmTime).format('YYYY-MM-DD HH:mm:ss')}
+            </Typography>
+
+            <Typography variant="body2">
+              Category: {data.meta.category} — Action: {data.meta.action}
+            </Typography>
+
+            <Typography variant="body2">Duration: {data.meta.timeRange.totalDuration}</Typography>
+
+            <Typography variant="body2">
+              Frames: {data.summary.totalFrames} | Pre: {data.summary.preAlarmFrames} | During:{' '}
+              {data.summary.duringAlarmFrames} | Post: {data.summary.postAlarmFrames}
+            </Typography>
+          </Box>
+        )} */}
+
         {/* FLOORPLAN */}
         <Box
           sx={{
             border: '2px solid #000',
-            height: 350, // height: stageHeight > 0 ? stageHeight : minHeight,
+            height: 350,
             mb: 2,
             overflow: 'hidden',
             display: 'flex',
@@ -362,12 +403,12 @@ const InvestigateReplayDialog = ({
               )}
               {animatedPosition && (
                 <InvestigationBeaconRenderer
-                  id={selectedPoint.personId} // or bleCardNumber if you have it
+                  id={data?.meta.cardId || uniqueId()} // or bleCardNumber if you have it
                   x={animatedPosition.x}
                   y={animatedPosition.y}
-                  area={selectedPoint.area}
-                  floorplan={floorplanName}
-                  time={selectedPoint.time}
+                  area={current.areaId}
+                  floorplan={data?.meta.floorplanName || ''}
+                  time={current.time}
                   clickable={false}
                 />
               )}
@@ -375,69 +416,98 @@ const InvestigateReplayDialog = ({
           </Stage>
         </Box>
 
-        {/* PLAY CONTROLS */}
-        <Box display="flex" gap={2} mb={2}>
-          <Button
-            variant="contained"
-            startIcon={<IconPlayerPlayFilled size={18} />}
-            onClick={() => setIsPlaying(true)}
-            disabled={isPlaying}
-          >
-            Play
-          </Button>
+        {/* CONTROLS */}
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Box display="flex" gap={2}>
+            <Button
+              variant="contained"
+              startIcon={<IconPlayerPlayFilled size={18} />}
+              onClick={() => setIsPlaying(true)}
+              disabled={isPlaying}
+            >
+              Play
+            </Button>
 
-          <Button
-            variant="contained"
-            color="secondary"
-            startIcon={<IconPlayerPauseFilled size={18} />}
-            onClick={handlePause}
-            disabled={!isPlaying}
-          >
-            Pause
-          </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              startIcon={<IconPlayerPauseFilled size={18} />}
+              onClick={handlePause}
+              disabled={!isPlaying}
+            >
+              Pause
+            </Button>
+          </Box>
+          {data && (
+            <Box display="flex" gap={4}>
+              <Typography variant="body2">
+                <strong>Alarm Time:</strong>{' '}
+                {dayjs(data.meta.alarmTime).format('YYYY-MM-DD HH:mm:ss')}
+              </Typography>
+
+              <Typography variant="body2">
+                <strong>Duration:</strong> {data.meta.timeRange.totalDuration}
+              </Typography>
+            </Box>
+          )}
         </Box>
 
         {/* TABLE */}
         <TableContainer
           ref={tableContainerRef}
           component={Paper}
-          sx={{
-            height: 300,
-            overflow: 'auto',
-          }}
+          sx={{ height: 300, overflow: 'auto' }}
         >
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell>
-                  <strong>Area</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Time</strong>
-                </TableCell>
+                <TableCell>Time</TableCell>
+                <TableCell>Area</TableCell>
+                <TableCell>Phase</TableCell>
+                <TableCell>Restricted</TableCell>
+                {/* <TableCell>Source</TableCell> */}
               </TableRow>
             </TableHead>
 
             <TableBody>
-              {sortedPoints.map((p, i) => {
+              {frames.map((f, i) => {
                 const isSelected = i === selectedIndex;
 
                 return (
                   <TableRow
                     key={i}
                     ref={isSelected ? activeRowRef : undefined}
-                    hover
+                    // hover
                     onClick={() => {
-                      handlePause(); // stop playback
+                      handlePause();
                       jumpToIndex(i);
                     }}
                     sx={{
                       cursor: 'pointer',
-                      backgroundColor: isSelected ? theme.palette.primary.light : 'inherit',
+                      backgroundColor: (() => {
+                        const colors = phaseRowColors[f.phase] ?? {
+                          light: 'inherit',
+                          dark: 'inherit',
+                        };
+                        return isSelected ? colors.dark : colors.light;
+                      })(),
+                      '&:hover': {
+                        backgroundColor: (() => {
+                          const colors = phaseRowColors[f.phase] ?? {
+                            light: 'inherit',
+                            dark: 'inherit',
+                          };
+                          return isSelected ? colors.dark : colors.dark;
+                        })(),
+                      },
+                      transition: 'background-color 0.2s ease',
                     }}
                   >
-                    <TableCell>{p.area}</TableCell>
-                    <TableCell>{dayjs(p.time).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                    <TableCell>{dayjs(f.time).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                    <TableCell>{f.areaId}</TableCell>
+                    <TableCell>{f.phase}</TableCell>
+                    <TableCell>{f.restricted ? 'Yes' : 'No'}</TableCell>
+                    {/* <TableCell>{f.source}</TableCell> */}
                   </TableRow>
                 );
               })}
@@ -461,4 +531,4 @@ const InvestigateReplayDialog = ({
   );
 };
 
-export default InvestigateReplayDialog;
+export default AlarmPlaybackDialog;

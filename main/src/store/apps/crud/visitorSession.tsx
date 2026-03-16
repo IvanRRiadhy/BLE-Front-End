@@ -61,7 +61,7 @@ export type VisitorSessionType = {
   personType: string;
   enterTime: string | null;
   exitTime: string | null;
-  durationMinutes: number | null;
+  durationInMinutes: number | null;
   status: string | null;
   hostName: string | null;
 };

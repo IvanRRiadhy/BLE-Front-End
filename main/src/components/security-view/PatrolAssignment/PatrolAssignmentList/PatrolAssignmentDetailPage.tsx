@@ -259,6 +259,7 @@ const PatrolDetailPage = () => {
     caseType: data.caseType ?? '',
     threatLevel: data.threatLevel ?? '',
     patrolSessionId: data.patrolSessionId,
+    patrolAreaId: data.patrolAreaId,
     attachments: (data.attachments || []).map((a: any) => ({
       fileUrl: a.fileUrl.startsWith('http') ? a.fileUrl : `https://${a.fileUrl}`,
       fileType: a.fileType,
@@ -276,7 +277,7 @@ const PatrolDetailPage = () => {
     setOpenCaseDialog(false);
   };
 
-  console.log('patrol', patrol, 'patrolSession', patrolSession);
+  // console.log('patrol', patrol, 'patrolSession', patrolSession);
   // ===== Patrol Assignment Date Validation =====
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -767,6 +768,7 @@ const PatrolDetailPage = () => {
         type={caseDialogType}
         initialData={selectedCase}
         setEditId={setEditId}
+        checkpoints={checkpoints}
       />
     </>
   );

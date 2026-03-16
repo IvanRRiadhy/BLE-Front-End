@@ -135,7 +135,21 @@ const Profile = () => {
             </Box>
           </Box>
         ))} */}
-        <Box mt={2}>
+        <Box mt={2} gap={3}>
+          <Button
+            variant="outlined"
+            color="primary"
+            //component={Link}
+            onClick={() => {
+              window.location.href = '/about'; // Redirect to the login page
+            }}
+            fullWidth
+            sx={{
+              mb: 2
+            }}
+          >
+            About
+          </Button>
           <Button
             variant="outlined"
             color="primary"

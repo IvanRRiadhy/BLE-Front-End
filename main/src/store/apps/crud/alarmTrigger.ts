@@ -191,7 +191,7 @@ export type AlarmTimelineType = {
     timeline: TimelineItemType[];
     duration: DurationType;
     investigation: investigationType;
-}
+};
 
 
 
@@ -207,7 +207,7 @@ interface StateType {
     lastFilter?: GetFilter;
     isLoading: boolean;
     hasLoaded: boolean;
-}
+};
 
 const initialState: StateType = {
     alarmTriggers: [],
