@@ -82,7 +82,7 @@ const FloorView: React.FC<{
   const { data: visitorList = [] } = useAllVisitor();
   const [open, setOpen] = useState(false);
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
-
+  const FollowingPerson = useSelector((state: RootState) => state.layoutReducer.followingPerson);
   const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
   const activeLayout = layouts.find((l) => l.id === activeLayoutId);
   const activeScreen = activeLayout?.screens.find((s) => s.floorplanId === activeFloorplan);
@@ -687,7 +687,7 @@ const FloorView: React.FC<{
   };
 
   const handleParentClick = () => {
-    if (!zoomable) {
+    if (!zoomable && !FollowingPerson) {
       dispatch(swapScreen(screenNumber));
     }
   };

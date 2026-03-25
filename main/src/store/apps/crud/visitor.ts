@@ -107,7 +107,7 @@ interface StateType {
     visitors: VisitorType[];
     visitorAll: VisitorType[];
     visitorSearch: string;
-    selectedVisitor?: VisitorType;
+    selectedVisitor: VisitorType | null;
     currentFilter: string,
     visitorTotalCount: number,
     visitorFilteredCount: number,
@@ -122,7 +122,7 @@ const initialState: StateType = {
     visitors: [],
     visitorAll: [],
     visitorSearch: "",
-    selectedVisitor: undefined,
+    selectedVisitor: null,
     currentFilter: "show_all",
     visitorTotalCount: 0,
     visitorFilteredCount: 0,
@@ -141,7 +141,7 @@ export const VisitorSlice = createSlice({
       GetAllVisitor(state, action: PayloadAction<VisitorType[]>)  {
         state.visitorAll = action.payload;
       },
-      SelectVisitor(state, action: PayloadAction<VisitorType>) {
+      SelectVisitor(state, action: PayloadAction<VisitorType | null>) {
         state.selectedVisitor = action.payload;
       },
       SearchVisitor(state, action: PayloadAction<string>) {

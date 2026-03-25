@@ -8,6 +8,7 @@ import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 
 const defaultFilter = {
   TimeRange: 'daily',
+  timezone: 'Asia/Jakarta',
   operatorName: null,
   visitorId: null,
   buildingId: null,
@@ -15,15 +16,29 @@ const defaultFilter = {
   floorplanMaskedAreaId: null,
 };
 type DistributionLevel = 'building' | 'floor' | 'floorplan' | 'area';
+
+const getUserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 /* ---------------- Component ---------------- */
 
 const PeakHour: React.FC = () => {
   const [level, setLevel] = useState<DistributionLevel>('building');
-  const {
-    data: peakHourData,
-    isLoading,
-    isError,
-  } = usePeakHour(defaultFilter, { groupByMode: level });
+
+  const timezone = useMemo(() => getUserTimezone(), []);
+
+  const filter = useMemo(
+    () => ({
+      TimeRange: 'daily',
+      timezone,
+      operatorName: null,
+      visitorId: null,
+      buildingId: null,
+      floorId: null,
+      floorplanMaskedAreaId: null,
+    }),
+    [timezone],
+  );
+
+  const { data: peakHourData, isLoading, isError } = usePeakHour(filter, { groupByMode: level });
 
   /* ---------------- Memoized Chart Data ---------------- */
 

@@ -57,6 +57,7 @@ const PRIORITY_WEIGHT: Record<AlarmPriority, number> = {
   low: 1,
   medium: 2,
   high: 3,
+  critical: 99,
 };
 
 const FullLayout: FC = () => {
@@ -148,7 +149,7 @@ const FullLayout: FC = () => {
         const now = Date.now();
         const alarmData = Array.isArray(data) ? data[0] : data;
 
-        // console.log('[MQTT] Received alarm data:', alarmData);
+        console.log('[MQTT] Received alarm data:', alarmData);
 
         setLatestAlarm(alarmData);
         setOpenAlarmPopup(true);

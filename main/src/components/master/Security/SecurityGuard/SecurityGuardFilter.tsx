@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
   ListItemText,
@@ -43,7 +43,7 @@ const SecurityGuardFilter = () => {
     (state: RootState) => state.organizationReducer.organizationAll,
   );
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter.filters);
-
+  const [draftFilter, setDraftFilter] = useState(memberFilter);
   // -------------------------------------------------------------------------
   // ✅ Fetch lists once (if empty)
   // -------------------------------------------------------------------------
@@ -95,12 +95,51 @@ const SecurityGuardFilter = () => {
     { id: 'title-org', filterbyTitle: 'Organization' },
     ...organizationFilters,
   ];
-
+useEffect(() => {
+  setDraftFilter(memberFilter);
+}, [memberFilter]);
   // -------------------------------------------------------------------------
   // ✅ Handle Filter Selection
   // -------------------------------------------------------------------------
+  // const handleFilter = (filter: string, category?: string) => {
+  //   const currentFilters = { ...memberFilter };
+
+  //   const toggleSelection = (key: ArrayFilterKey, filter: string) => {
+  //     const selected = currentFilters[key] ?? [];
+
+  //     const newSelected = selected.includes(filter)
+  //       ? selected.filter((id: string) => id !== filter)
+  //       : [...selected, filter];
+
+  //     dispatch(
+  //       UpdateFilter({
+  //         filters: { ...currentFilters, [key]: newSelected },
+  //       }),
+  //     );
+  //   };
+
+  //   switch (category) {
+  //     case 'department':
+  //       toggleSelection('DepartmentId', filter);
+  //       break;
+  //     case 'district':
+  //       toggleSelection('DistrictId', filter);
+  //       break;
+  //     case 'organization':
+  //       toggleSelection('OrganizationId', filter);
+  //       break;
+  //     case 'all':
+  //     default:
+  //       dispatch(
+  //         UpdateFilter({
+  //           filters: { OrganizationId: [], DistrictId: [], DepartmentId: [] },
+  //         }),
+  //       );
+  //       break;
+  //   }
+  // };
   const handleFilter = (filter: string, category?: string) => {
-    const currentFilters = { ...memberFilter };
+    const currentFilters = { ...draftFilter };
 
     const toggleSelection = (key: ArrayFilterKey, filter: string) => {
       const selected = currentFilters[key] ?? [];
@@ -109,11 +148,10 @@ const SecurityGuardFilter = () => {
         ? selected.filter((id: string) => id !== filter)
         : [...selected, filter];
 
-      dispatch(
-        UpdateFilter({
-          filters: { ...currentFilters, [key]: newSelected },
-        }),
-      );
+      setDraftFilter({
+        ...currentFilters,
+        [key]: newSelected,
+      });
     };
 
     switch (category) {
@@ -128,11 +166,11 @@ const SecurityGuardFilter = () => {
         break;
       case 'all':
       default:
-        dispatch(
-          UpdateFilter({
-            filters: { OrganizationId: [], DistrictId: [], DepartmentId: [] },
-          }),
-        );
+        setDraftFilter({
+          OrganizationId: [],
+          DistrictId: [],
+          DepartmentId: [],
+        });
         break;
     }
   };
@@ -140,75 +178,85 @@ const SecurityGuardFilter = () => {
   // -------------------------------------------------------------------------
   // ✅ Helper: Check if all filters are empty
   // -------------------------------------------------------------------------
+  const isChanged = JSON.stringify(draftFilter) !== JSON.stringify(memberFilter);
+
   const isAllEmpty =
-    !memberFilter?.OrganizationId?.length &&
-    !memberFilter?.DepartmentId?.length &&
-    !memberFilter?.DistrictId?.length;
+    !draftFilter?.OrganizationId?.length &&
+    !draftFilter?.DepartmentId?.length &&
+    !draftFilter?.DistrictId?.length;
+
+  const totalSelected =
+    (draftFilter.OrganizationId?.length || 0) +
+    (draftFilter.DepartmentId?.length || 0) +
+    (draftFilter.DistrictId?.length || 0);
+
+  const handleApply = () => {
+    dispatch(
+      UpdateFilter({
+        filters: draftFilter,
+      }),
+    );
+  };
+
+  const handleReset = () => {
+    setDraftFilter({
+      OrganizationId: [],
+      DepartmentId: [],
+      DistrictId: [],
+    });
+  };
 
   // -------------------------------------------------------------------------
   // ✅ Render Component
   // -------------------------------------------------------------------------
-  return (
-    <>
-      <Box p={2}>
-        <AddEditSecurityGuard type="add" />
-      </Box>
+return (
+  <Box display="flex" flexDirection="column" height="100%">
+    {/* Add */}
+    <Box p={2}>
+      <AddEditMember type="add" />
+    </Box>
 
+    {/* Sticky ALL */}
+    <Box
+      sx={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 2,
+        backgroundColor: isChanged ? '#e3f2fd' : 'white',
+      }}
+    >
       <List>
-        <Box
-          sx={{
-            height: { lg: 'calc(100vh - 230px)', md: '100vh' },
-            maxHeight: '800px',
-            overflow: 'auto',
-          }}
-        >
-          {filterData.map((filter) => {
-            if (filter.filterbyTitle) {
-              return (
-                <Typography
-                  key={filter.id}
-                  variant="subtitle1"
-                  fontWeight={600}
-                  pl={5.1}
-                  mt={1}
-                  pb={2}
-                >
-                  {filter.filterbyTitle}
-                </Typography>
-              );
-            }
-
-            if (filter.divider) return <Divider key={filter.id} sx={{ mb: 3 }} />;
-
+        {filterData
+          .filter((f) => f.category === 'all')
+          .map((filter) => {
             const IconComponent = filter.icon;
 
             const isSelected =
-              (filter.category === 'department' &&
-                memberFilter.DepartmentId?.includes(filter.filter!)) ||
-              (filter.category === 'district' &&
-                memberFilter.DistrictId?.includes(filter.filter!)) ||
-              (filter.category === 'organization' &&
-                memberFilter.OrganizationId?.includes(filter.filter!)) ||
-              (filter.category === 'all' && isAllEmpty);
+              !draftFilter?.OrganizationId?.length &&
+              !draftFilter?.DepartmentId?.length &&
+              !draftFilter?.DistrictId?.length;
 
             return (
               <ListItemButton
                 key={filter.id}
+                selected={isSelected}
+                onClick={() => handleFilter(filter.filter!, filter.category)}
                 sx={{
-                  mb: 1,
                   mx: 3,
                   borderRadius: br,
+
                   '&.Mui-selected': {
                     backgroundColor: 'primary.main',
                     color: 'white',
-                    '&:hover': { backgroundColor: 'primary.dark' },
+                  },
+                  '&.Mui-selected:hover': {
+                    backgroundColor: 'primary.dark',
+                    color: 'white',
                   },
                 }}
-                selected={isSelected}
-                onClick={() => handleFilter(filter.filter!, filter.category)}
               >
                 {IconComponent && (
-                  <ListItemIcon sx={{ minWidth: '30px', color: filter.color }}>
+                  <ListItemIcon sx={{ minWidth: '30px' }}>
                     <IconComponent stroke="1.5" size={19} />
                   </ListItemIcon>
                 )}
@@ -216,10 +264,121 @@ const SecurityGuardFilter = () => {
               </ListItemButton>
             );
           })}
-        </Box>
       </List>
-    </>
-  );
+      <Divider />
+    </Box>
+
+    {/* Scroll */}
+    <Box sx={{ flex: 1, overflowY: 'auto' }}>
+      <List>
+        {filterData
+          .filter((f) => f.category !== 'all')
+          .map((filter) => {
+            if (filter.filterbyTitle) {
+              return (
+                <Typography key={filter.id} pl={5.1} mt={1} pb={2}>
+                  {filter.filterbyTitle}
+                </Typography>
+              );
+            }
+
+            if (filter.divider)
+              return <Divider key={filter.id} sx={{ mb: 3 }} />;
+
+            const IconComponent = filter.icon;
+
+            const isSelected =
+              (filter.category === 'department' &&
+                draftFilter.DepartmentId?.includes(filter.filter!)) ||
+              (filter.category === 'district' &&
+                draftFilter.DistrictId?.includes(filter.filter!)) ||
+              (filter.category === 'organization' &&
+                draftFilter.OrganizationId?.includes(filter.filter!));
+
+            return (
+              <ListItemButton
+                key={filter.id}
+                selected={isSelected}
+                onClick={() => handleFilter(filter.filter!, filter.category)}
+                sx={{
+                  mb: 1,
+                  mx: 3,
+                  borderRadius: br,
+
+                  '&.Mui-selected': {
+                    backgroundColor: 'primary.main',
+                    color: 'white',
+                  },
+                  '&.Mui-selected:hover': {
+                    backgroundColor: 'primary.dark',
+                    color: 'white',
+                  },
+                }}
+              >
+                {IconComponent && (
+                  <ListItemIcon sx={{ minWidth: '30px' }}>
+                    <IconComponent stroke="1.5" size={19} />
+                  </ListItemIcon>
+                )}
+                <ListItemText primary={filter.name} />
+              </ListItemButton>
+            );
+          })}
+      </List>
+    </Box>
+
+    {/* Bottom Actions */}
+    <Box
+      sx={{
+        position: 'sticky',
+        bottom: 0,
+        p: 2,
+        backgroundColor: 'white',
+        borderTop: '1px solid #eee',
+        display: 'flex',
+        gap: 1,
+      }}
+    >
+      <ListItemButton
+        onClick={handleReset}
+        disabled={totalSelected === 0}
+        sx={{
+          flex: 1,
+          justifyContent: 'center',
+          borderRadius: br,
+          backgroundColor: 'grey.200',
+        }}
+      >
+        <ListItemText primary="Reset" />
+      </ListItemButton>
+
+      <ListItemButton
+        disabled={!isChanged}
+        onClick={handleApply}
+        sx={{
+          flex: 2,
+          justifyContent: 'center',
+          borderRadius: br,
+          backgroundColor: isChanged ? 'primary.main' : 'grey.300',
+          color: isChanged ? 'white' : 'grey.500',
+
+          '&:hover': {
+            backgroundColor: isChanged ? 'primary.dark' : 'grey.300',
+            color: isChanged ? 'white' : 'grey.500',
+          },
+        }}
+      >
+        <ListItemText
+          primary={
+            totalSelected > 0
+              ? `Apply Filter (${totalSelected})`
+              : 'Apply Filter'
+          }
+        />
+      </ListItemButton>
+    </Box>
+  </Box>
+);
 };
 
 export default SecurityGuardFilter;

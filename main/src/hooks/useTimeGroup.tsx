@@ -104,7 +104,7 @@ export function useAddTimeGroup() {
   return useMutation({
     mutationFn: async (timeGroup: Partial<TimeGroupType>) => {
       const { id, ...cleanData } = timeGroup;
-      
+      console.log("Timegroup add: ", cleanData);
       const res = await axiosServices.post(API_URL, cleanData);
       return res.data;
     },
@@ -171,6 +171,7 @@ export function useAddTimeBlock() {
       endTime: string; 
       TimeGroupId: string;
     }) => {
+      console.log("TimeBlock: ", timeBlock);
       const res = await axiosServices.post(API_URL_TIME_BLOCK, timeBlock);
       return res.data;
     },

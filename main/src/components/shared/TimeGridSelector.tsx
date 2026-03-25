@@ -250,9 +250,9 @@ useEffect(() => {
       dayOfWeek: b.dayOfWeek.toLowerCase(),
       startTime: b.startTime, 
       endTime: b.endTime,
-      id: b.id.startsWith('block-') ? '' : b.id, // remove temp id
+      // id: b.id.startsWith('block-') ? '' : b.id, // remove temp id
     }));
-
+    console.log(normalizedBlocks);
     try {
       if (isNewTimeGroup) {
         // --------------------------------------

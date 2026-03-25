@@ -4,9 +4,7 @@ import { startMQTTclient } from './MQTT';
 import { uniqueId } from 'lodash';
 import { SecurityAlarmLogItem } from 'src/components/security-view/AlarmInvestigate/AlarmInvestigation';
 
-
-export type AlarmPriority = 'low' | 'medium' | 'high';
-
+export type AlarmPriority = 'low' | 'medium' | 'high' | 'critical';
 
 export interface BeaconType {
   beaconId: string; // This is the dmac
@@ -73,7 +71,7 @@ export type AlarmLogItem = {
   target: string;
   image: string;
   floor: string;
-  floorplanId:string;
+  floorplanId: string;
   area: string;
   time: string;
   color?: string;
@@ -136,15 +134,16 @@ interface StateType {
     sourceScreenId?: number;
   };
   trackingLogs: TrackingLogItem[];
+  showTracking: TrackingLogItem | null;
   alarmLogs: AlarmLogItem[];
   alarmPopupId: string | null;
-  showAlarm:AlarmLogItem | null;
-  focusAlarm: SecurityAlarmLogItem  | null;
+  showAlarm: AlarmLogItem | null;
+  focusAlarm: SecurityAlarmLogItem | null;
   focusPosition: {
     floorplanName: string;
     areaName: string;
     time: string;
-  }
+  };
 }
 
 const initialState: StateType = {
@@ -163,6 +162,7 @@ const initialState: StateType = {
     dmac: '',
   },
   trackingLogs: [],
+  showTracking: null,
   alarmLogs: [],
   alarmPopupId: null,
   showAlarm: null,
@@ -171,7 +171,7 @@ const initialState: StateType = {
     floorplanName: '',
     areaName: '',
     time: '',
-  }
+  },
 };
 
 export const BeaconSlice = createSlice({
@@ -346,8 +346,14 @@ export const BeaconSlice = createSlice({
     SetFocusAlarm: (state, action: PayloadAction<SecurityAlarmLogItem | null>) => {
       state.focusAlarm = action.payload;
     },
-    SetFocusPosition: (state, action: PayloadAction<{ floorplanName: string; areaName: string, time: string }>) => {
+    SetFocusPosition: (
+      state,
+      action: PayloadAction<{ floorplanName: string; areaName: string; time: string }>,
+    ) => {
       state.focusPosition = action.payload;
+    },
+    ShowTrackingDetail: (state, action: PayloadAction<TrackingLogItem | null>) => {
+      state.showTracking = action.payload;
     },
   },
 });
@@ -373,6 +379,7 @@ export const {
   ShowAlarmPopup,
   SetFocusAlarm,
   SetFocusPosition,
+  ShowTrackingDetail,
 } = BeaconSlice.actions;
 
 export const selectAlarmPopupId = (state: RootState) => state.BeaconReducer.alarmPopupId;

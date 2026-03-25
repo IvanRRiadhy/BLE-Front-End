@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Dialog,
   Box,
@@ -23,6 +23,7 @@ import {
   useAssignActionAlarmTriggerByDMAC,
   useAssignActionAlarmTriggerByID,
   useDispatchAlarmTrigger,
+  useNearestSecurity,
   usePostponeAlarmTrigger,
 } from 'src/hooks/useAlarmTrigger';
 import { alpha, darken, useTheme } from '@mui/material/styles';
@@ -42,7 +43,7 @@ import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import AlarmMenuItem from './vertical/header/AlarmMenuItem';
 import { defaultAlarmTriggerFilter } from 'src/store/apps/defaultForm';
 import AlarmTriggerMenuItem from './shared/AlarmTriggerMenuItem';
-import { AlarmTriggerType } from 'src/store/apps/crud/alarmTrigger';
+import { AlarmTriggerType, NearestSecurityType } from 'src/store/apps/crud/alarmTrigger';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 import dayjs, { Dayjs } from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -59,11 +60,20 @@ interface AlarmPopupProps {
 
 type AlarmType = AlarmTriggerType | AlarmLogItem;
 
+const proximityColorMap: Record<string, string> = {
+  SameArea: '#4caf50', // green
+  SameFloorplan: '#2196f3', // blue
+  SameFloor: '#ff9800', // orange
+  SameBuilding: '#9c27b0', // purple
+  DifferentBuilding: '#9e9e9e', // grey
+};
+
 // Priority color mapping
 const PRIORITY_COLORS: Record<string, string> = {
   low: '#ffc107', // Yellow
   medium: '#ff9800', // Orange
   high: '#f44336', // Red
+  critical: '#dc143c',
 };
 
 const getPriorityColor = (priority: string): string => {
@@ -74,7 +84,7 @@ const getPriorityColor = (priority: string): string => {
 const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
   const popupRef = useRef<HTMLDivElement | null>(null);
   const [panelRect, setPanelRect] = useState<DOMRect | null>(null);
-
+  const prevAlarmIdRef = useRef<string | null>(null);
   const theme = useTheme();
   // React Query mutation hook
   const assignActionMutation = useAssignActionAlarmTriggerByDMAC();
@@ -96,19 +106,62 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
   const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedAction, setSelectedAction] = useState<string>('');
 
-  const { data: securityData = [], isLoading: isLoadingSecurity } = useAllSecurityLookup();
+  // const { data: securityData = [], isLoading: isLoadingSecurity } = useAllSecurityLookup();
+  const { data: nearestSecurityData = [], isLoading: isLoadingSecurity } = useNearestSecurity(
+    alarm?.triggerId ?? '',
+  );
+
+  const [selectedSecurity, setSelectedSecurity] = useState<NearestSecurityType | null>(null);
+
+  const proximityRank: Record<string, number> = {
+    SameArea: 1,
+    SameFloorplan: 2,
+    SameFloor: 3,
+    SameBuilding: 4,
+    DifferentBuilding: 5,
+  };
+
+  const sortedSecurity = [...nearestSecurityData].sort((a, b) => {
+    const proxA = proximityRank[a.proximityLevel] ?? 999;
+    const proxB = proximityRank[b.proximityLevel] ?? 999;
+
+    if (proxA !== proxB) return proxA - proxB;
+
+    // distance logic (null last)
+    if (a.distanceInMeters == null && b.distanceInMeters == null) return 0;
+    if (a.distanceInMeters == null) return 1;
+    if (b.distanceInMeters == null) return -1;
+
+    return a.distanceInMeters - b.distanceInMeters;
+  });
 
   const [investigateResult, setInvestigateResult] = useState('');
-  const [selectedSecurity, setSelectedSecurity] = useState<memberType | null>(null);
+  // const [selectedSecurity, setSelectedSecurity] = useState<memberType | null>(null);
 
   const [openUnseenDialog, setOpenUnseenDialog] = useState(false);
   const [visuallySeenIds, setVisuallySeenIds] = useState<Set<string>>(new Set());
   const [selectedAlarms, setSelectedAlarms] = useState<AlarmType[]>([]);
 
+  const notificationAudio = useMemo(() => {
+    const audio = new Audio('/sfx/AlarmNotification/Calm-Warning.wav');
+    audio.volume = 0.6;
+    return audio;
+  }, []);
+
   useEffect(() => {
-    console.log('Alarm: ', alarm);
-    console.log('ALARM TRIGGERS: ', alarmLogs);
-  }, [alarm]);
+    if (!alarm?.id) return;
+    console.log('Alarm Popup: ', alarm);
+    // 🔥 only play if new alarm (avoid replay on rerender)
+    if (prevAlarmIdRef.current !== alarm.id) {
+      prevAlarmIdRef.current = alarm.id;
+
+      notificationAudio.currentTime = 0;
+
+      notificationAudio.play().catch((err) => {
+        console.warn('Audio playback blocked:', err);
+      });
+    }
+  }, [alarm?.id]);
 
   const handleDisarmClick = (event: React.MouseEvent<HTMLElement>) => {
     setActionAnchorEl(popupRef.current);
@@ -171,7 +224,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
             selectedAction.toLowerCase() === 'done' ? investigateResult.trim() : null,
           assignedSecurityId:
             selectedAction.toLowerCase() === 'investigated' && selectedSecurity
-              ? selectedSecurity.id
+              ? selectedSecurity.securityId
               : null,
         });
 
@@ -235,7 +288,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
       try {
         const result = await dispatchMutation.mutateAsync({
           id: a.id.toUpperCase(),
-          assignedSecurityId: selectedSecurity.id,
+          assignedSecurityId: selectedSecurity.securityId,
         });
         console.log('Success result', result);
         // toast.success('Action dispatched successfully');
@@ -342,6 +395,12 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
   );
   const [postponeReason, setPostponeReason] = useState('Alarm is Postponed');
 
+  useEffect(() => {
+    if (openPostponeDialog) {
+      setPostponeDate(dayjs().add(1, 'day').startOf('day'));
+    }
+  }, [openPostponeDialog]);
+
   const handlePostpone = async () => {
     if (!alarm?.dmac) {
       toast.error('No alarm selected');
@@ -359,12 +418,6 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
     }
 
     const alarmToProcess: AlarmType[] = [...selectedAlarms];
-
-    useEffect(() => {
-      if (openPostponeDialog) {
-        setPostponeDate(dayjs().add(1, 'day').startOf('day'));
-      }
-    }, [openPostponeDialog]);
 
     // include main alarm if not selected
     if (alarm) {
@@ -505,7 +558,18 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                           boxShadow: `0 6px 18px ${alpha(priorityColor, 0.5)}`,
                           border: `2px solid ${alpha('#fff', 0.6)}`,
                         }}
-                        onClick={() => setOpenUnseenDialog((v) => !v)}
+                        onClick={() => {
+                          setOpenUnseenDialog((v) => {
+                            const next = !v;
+
+                            // if closing panel → clear selections
+                            if (!next) {
+                              setSelectedAlarms([]);
+                            }
+
+                            return next;
+                          });
+                        }}
                       >
                         +{alarmLogs.length}
                       </Box>
@@ -555,6 +619,10 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
 
                     {/* ACTION BUTTON */}
                     <Box
+                      onClick={() => {
+                        setActionAnchorEl(popupRef.current);
+                        handleAcknowledgeClick(alarm.id, alarm.action);
+                      }}
                       sx={{
                         position: 'absolute',
                         bottom: -24,
@@ -562,25 +630,34 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                         transform: 'translateX(-50%)',
                         backgroundColor: '#fff',
                         borderRadius: 40,
-                        px: 5,
-                        py: 1.5,
+                        px: 6,
+                        py: 1.8,
+                        minWidth: 220,
                         boxShadow: 2,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          backgroundColor: theme.palette.warning.main,
+                          boxShadow: `0 0 12px ${alpha(priorityColor, 0.5)}`,
+                        },
+
+                        '&:active': {
+                          transform: 'translateX(-50%) scale(0.97)',
+                        },
                       }}
                     >
-                      <Button
-                        onClick={() => {
-                          setActionAnchorEl(popupRef.current);
-                          handleAcknowledgeClick(alarm.id, alarm.action);
-                        }}
+                      <Typography
                         sx={{
-                          backgroundColor: '#fff',
                           color: priorityColor,
                           fontWeight: 'bold',
                           fontSize: '1.15rem',
                         }}
                       >
                         Disarm
-                      </Button>
+                      </Typography>
                     </Box>
                   </Box>
                 </motion.div>
@@ -610,39 +687,52 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                         maxHeight: 460,
                       }}
                     >
+                      {/* HEADER ACTIONS */}
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          px: 2,
+                          py: 1.5,
+                          borderBottom: '1px solid #eee',
+                        }}
+                      >
+                        <Typography fontWeight="bold" fontSize="0.95rem">
+                          Unseen Alarms
+                        </Typography>
+
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            size="small"
+                            onClick={() => {
+                              alarmLogs.forEach((alarm) => {
+                                handleAcknowledgeClick(alarm.id, alarm.action);
+                              });
+
+                              setSelectedAlarms([...alarmLogs]);
+                            }}
+                          >
+                            Select All
+                          </Button>
+
+                          <Button
+                            size="small"
+                            color="inherit"
+                            onClick={() => setSelectedAlarms([])}
+                          >
+                            Clear
+                          </Button>
+                        </Stack>
+                      </Box>
+
                       <Scrollbar sx={{ height: 385 }}>
                         <Stack spacing={1} p={2}>
-                          {/* {unseenAlarms.map((a) => (
-                            <AlarmMenuItem
-                              key={a.id}
-                              alarm={a}
-                              isVisuallySeen={visuallySeenIds.has(a.id)}
-                              unseenBg={unseenBg}
-                              seenBg={seenBg}
-                              hoverBg={hoverBg}
-                              unseenBorder={unseenBorder}
-                              seenBorder={seenBorder}
-                              hoverBorder={hoverBorder}
-                              onClick={() => {
-                                setVisuallySeenIds((prev) => {
-                                  const updated = new Set(prev);
-
-                                  if (updated.has(a.id)) {
-                                    updated.delete(a.id); // 🔴 remove if already selected
-                                  } else {
-                                    updated.add(a.id); // 🟢 add if not selected
-                                  }
-
-                                  return updated;
-                                });
-                              }}
-                            />
-                          ))} */}
                           {alarmLogs.map((trigger) => (
                             <AlarmTriggerMenuItem
                               key={trigger.id}
                               trigger={trigger}
-                              isClicked={selectedAlarms.includes(trigger)}
+                              isClicked={selectedAlarms.some((a) => a.id === trigger.id)}
                               unseenBg={unseenBg}
                               seenBg={seenBg}
                               hoverBg={hoverBg}
@@ -653,7 +743,6 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                                 handleAcknowledgeClick(t.id, t.action);
                                 setSelectedAlarms((prev) => {
                                   const exists = prev.find((a) => a.id === t.id);
-                                  console.log('alarmtrigger clicked', t, exists);
                                   if (exists) {
                                     return prev.filter((a) => a.id !== t.id);
                                   }
@@ -726,23 +815,10 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                           </Typography>{' '}
                         </Box>
                       )}{' '}
-                      {/* <Box display="flex" flexDirection="column" gap={1} mb={3}> {actionStatus .filter((item) => !item.disabled && item.value !== 'Idle') .map((item) => { const isSelected = selectedAction?.toLowerCase() === item.value.toLowerCase(); return ( <Box key={item.value} onClick={() => setSelectedAction(item.value)} sx={{ border: '1px solid', borderColor: isSelected ? 'primary.main' : 'grey.300', backgroundColor: isSelected ? 'primary.main' : 'transparent', color: isSelected ? 'white' : 'text.primary', borderRadius: 1, p: 2, cursor: 'pointer', transition: 'all 0.2s ease', '&:hover': { backgroundColor: isSelected ? 'primary.dark' : 'grey.50', borderColor: isSelected ? 'primary.dark' : 'grey.400', }, }} > <Box display="flex" alignItems="center" gap={1}> <Box sx={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: actionStatusColormap[item.value] || 'grey', border: isSelected ? '2px solid white' : 'none', }} /> <Typography variant="body1" fontWeight={500}> {item.label} </Typography> </Box> </Box> ); })} </Box> */}{' '}
-                      {/* <AlarmActionForm
-                        alarmTrigger={{ id: alarm?.id, isActive: true }}
-                        selectedAction={selectedAction}
-                        setSelectedAction={setSelectedAction}
-                        investigateResult={investigateResult}
-                        setInvestigateResult={setInvestigateResult}
-                        selectedSecurity={selectedSecurity}
-                        setSelectedSecurity={setSelectedSecurity}
-                        securityData={securityData}
-                        isLoadingSecurity={isLoadingSecurity}
-                        compact
-                      /> */}
                       <Typography variant="subtitle2" color="text.secondary" mb={1}>
                         Assign Security Guard
                       </Typography>
-                      <CustomAutocomplete
+                      {/* <CustomAutocomplete
                         label="Security Guard"
                         options={securityData}
                         value={selectedSecurity}
@@ -757,6 +833,68 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                             fontSize: '0.9rem',
                           },
                         }}
+                      /> */}
+                      <CustomAutocomplete
+                        label="Security Guard"
+                        options={sortedSecurity}
+                        value={selectedSecurity}
+                        loading={isLoadingSecurity}
+                        onChange={(v) => setSelectedSecurity(v)}
+                        getOptionLabel={(o) => {
+                          if (!o) return '';
+
+                          const base = o.securityName;
+
+                          if (
+                            o.proximityLevel === 'SameArea' ||
+                            o.proximityLevel === 'SameFloorplan'
+                          ) {
+                            return `${base}`;
+                          }
+
+                          return `${base} • ${o.floorName} | ${o.buildingName}`;
+                        }}
+                        isOptionEqualToValue={(o, v) => o.securityId === v.securityId}
+                        renderOption={(props: any, option: NearestSecurityType) => {
+                          const isNear =
+                            option.proximityLevel === 'SameArea' ||
+                            option.proximityLevel === 'SameFloorplan';
+
+                          const label = isNear
+                            ? `${option.distanceInMeters?.toFixed(3) ?? '-'} m`
+                            : `${option.floorName} | ${option.buildingName}`;
+
+                          return (
+                            <li {...props} key={option.securityId}>
+                              <Box
+                                display="flex"
+                                justifyContent="space-between"
+                                alignItems="center"
+                                width="100%"
+                              >
+                                {/* LEFT: NAME */}
+                                <Box>
+                                  <Typography fontWeight={600}>{option.securityName}</Typography>
+
+                                  <Typography variant="caption" color="text.secondary">
+                                    {option.proximityLevel}
+                                  </Typography>
+                                </Box>
+
+                                {/* RIGHT: CHIP */}
+                                <Chip
+                                  label={label}
+                                  size="small"
+                                  sx={{
+                                    backgroundColor: proximityColorMap[option.proximityLevel],
+                                    color: '#fff',
+                                    fontWeight: 600,
+                                  }}
+                                />
+                              </Box>
+                            </li>
+                          );
+                        }}
                       />{' '}
                       <Box display="flex" gap={1} justifyContent="flex-end" mt={2}>
                         {' '}
@@ -764,7 +902,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                           onClick={handleActionClose}
                           variant="outlined"
                           color="inherit"
-                          disabled={assignActionMutation.isPending}
+                          disabled={dispatchMutation.isPending}
                         >
                           {' '}
                           Cancel{' '}

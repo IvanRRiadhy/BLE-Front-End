@@ -1,28 +1,31 @@
-import { Box, Typography, useTheme } from "@mui/material";
-import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import { Box, Typography, useTheme } from '@mui/material';
+import dayjs from 'dayjs';
+import { useEffect, useState } from 'react';
+import { utcTimeToLocal } from 'src/utils/timeConvert';
 
 const NextPatrolBox = ({ nextPatrol }: any) => {
   const theme = useTheme();
   const palette = theme.palette.secondary;
 
-  const [countdown, setCountdown] = useState("00:00:00");
+  const [countdown, setCountdown] = useState('00:00:00');
 
   useEffect(() => {
     if (!nextPatrol?.scheduleStart) return;
 
     const updateCountdown = () => {
       const now = dayjs();
-      const start = dayjs().hour(
-        Number(nextPatrol.scheduleStart.split(":")[0])
-      ).minute(
-        Number(nextPatrol.scheduleStart.split(":")[1])
-      ).second(0);
+
+      // convert backend UTC -> local
+      const localTime = utcTimeToLocal(nextPatrol.scheduleStart);
+
+      const [hour, minute] = localTime.split(':').map(Number);
+
+      const start = dayjs().hour(hour).minute(minute).second(0).millisecond(0);
 
       const diff = start.diff(now);
 
       if (diff <= 0) {
-        setCountdown("Started");
+        setCountdown('Started');
         return;
       }
 
@@ -31,7 +34,7 @@ const NextPatrolBox = ({ nextPatrol }: any) => {
       const s = Math.floor((diff % 60000) / 1000);
 
       setCountdown(
-        `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+        `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`,
       );
     };
 
@@ -49,9 +52,9 @@ const NextPatrolBox = ({ nextPatrol }: any) => {
           border: `1px solid ${palette.main}`,
           backgroundColor: palette.light,
           height: 110,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <Typography color={palette.main} fontWeight={600}>
@@ -60,6 +63,8 @@ const NextPatrolBox = ({ nextPatrol }: any) => {
       </Box>
     );
   }
+
+  const localSchedule = utcTimeToLocal(nextPatrol.scheduleStart);
 
   return (
     <Box
@@ -70,9 +75,9 @@ const NextPatrolBox = ({ nextPatrol }: any) => {
         px: 2,
         py: 1.5,
         height: 110,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
       }}
     >
       {/* LEFT */}
@@ -81,12 +86,7 @@ const NextPatrolBox = ({ nextPatrol }: any) => {
           Next Patrol in
         </Typography>
 
-        <Typography
-          fontSize={26}
-          fontWeight={700}
-          color={palette.main}
-          lineHeight={1}
-        >
+        <Typography fontSize={26} fontWeight={700} color={palette.main} lineHeight={1}>
           {countdown}
         </Typography>
       </Box>
@@ -98,7 +98,7 @@ const NextPatrolBox = ({ nextPatrol }: any) => {
         </Typography>
 
         <Typography fontSize={18} fontWeight={700} color={palette.main}>
-          {nextPatrol.scheduleStart}
+          {localSchedule}
         </Typography>
       </Box>
     </Box>

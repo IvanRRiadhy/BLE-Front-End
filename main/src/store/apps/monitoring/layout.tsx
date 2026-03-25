@@ -7,6 +7,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 const API_URL = '/api/MonitoringConfig/';
 
+export type PersonOption = {
+  id: string;
+  name: string;
+  bleCardNumber: string;
+  type: 'visitor' | 'member' | 'security';
+};
+
 export const screenOrderMap: { [grid: number]: Array<[number, number?, number?]> } = {
   1: [[0]],
   2: [[0], [1]],
@@ -197,6 +204,7 @@ export interface LayoutState {
   selectedFloorplanId: string | null;
   isLoading: boolean;
   hasLoaded: boolean;
+  followingPerson: PersonOption | null;
 }
 
 export const initialState: LayoutState = {
@@ -216,6 +224,7 @@ export const initialState: LayoutState = {
   selectedFloorplanId: null,
   isLoading: false,
   hasLoaded: false,
+  followingPerson: null,
 };
 
 export const LayoutSlice = createSlice({
@@ -367,6 +376,9 @@ export const LayoutSlice = createSlice({
       activeLayout.screens[targetIndex] = temp;
       console.log('Swapping screens after:', JSON.stringify(activeLayout.screens));
     },
+    setFollowingPerson: (state, action: PayloadAction<PersonOption | null>) => {
+      state.followingPerson = action.payload;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -404,6 +416,7 @@ export const {
   updateActiveLayoutInfo,
   clearActiveLayout,
   swapScreen,
+  setFollowingPerson
 } = LayoutSlice.actions;
 
 export const fetchMonitoringLayouts = () => async (dispatch: AppDispatch) => {

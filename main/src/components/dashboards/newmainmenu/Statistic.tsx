@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import Chart from "react-apexcharts";
-import { Box, Typography } from "@mui/material";
-import { useAlarmStatisticHourly, usePeakHour } from "src/hooks/useDashboard";
+import { useEffect, useMemo, useState } from 'react';
+import Chart from 'react-apexcharts';
+import { Box, Typography } from '@mui/material';
+import { useAlarmStatisticHourly, usePeakHour } from 'src/hooks/useDashboard';
 
 /* ---------------- Types ---------------- */
 
@@ -26,51 +26,56 @@ const defaultFilter = {
   floorplanMaskedAreaId: null,
 };
 
+const getUserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 /* ---------------- Component ---------------- */
 
 const Statistic: React.FC = () => {
-  const body = {
-    timeRange: "daily",
-  };
-
-  const { data = [], isLoading, isError } = useAlarmStatisticHourly(body);
-  const { data: peakHourData, isLoading: isLoading2, isError: isError2 } = usePeakHour(defaultFilter);
-  console.log('peakHourData', peakHourData);
-  
-const { categories, series } = useMemo(() => {
-  if (!data.length) {
-    return { categories: [], series: [] as ChartSeries };
-  }
-  const raw = data as StatisticRawItem[];
-  // X-axis
-  const categories = raw.map((item: any) => item.hourLabel);
-
-  // collect all unique status keys
-  const statusKeys = Array.from(
-    new Set(
-      raw.flatMap((item: any) => Object.keys(item.status ?? {}))
-    )
+  const timezone = useMemo(() => getUserTimezone(), []);
+  const body = useMemo(
+    () => ({
+      timerange: 'daily',
+      timezone,
+    }),
+    [timezone],
   );
 
-  // build chart series
-  const series: ChartSeries = statusKeys.map((key) => ({
-    name: key,
-    data: raw.map((item) => item.status?.[key] ?? 0),
-  }));
+  const { data = [], isLoading, isError } = useAlarmStatisticHourly(body);
+  // const { data: peakHourData, isLoading: isLoading2, isError: isError2 } = usePeakHour(defaultFilter);
+  // console.log('peakHourData', peakHourData);
 
-  return { categories, series };
-}, [data]);
+  const { categories, series } = useMemo(() => {
+    if (!data.length) {
+      return { categories: [], series: [] as ChartSeries };
+    }
+    const raw = data as StatisticRawItem[];
+    // X-axis
+    const categories = raw.map((item: any) => item.hourLabel);
+
+    // collect all unique status keys
+    const statusKeys = Array.from(
+      new Set(raw.flatMap((item: any) => Object.keys(item.status ?? {}))),
+    );
+
+    // build chart series
+    const series: ChartSeries = statusKeys.map((key) => ({
+      name: key,
+      data: raw.map((item) => item.status?.[key] ?? 0),
+    }));
+
+    return { categories, series };
+  }, [data]);
 
   /* ---------------- Chart Options ---------------- */
 
   const options: ApexCharts.ApexOptions = {
     chart: {
-      type: "line",
+      type: 'line',
       toolbar: { show: false },
     },
 
     stroke: {
-      curve: "straight",
+      curve: 'straight',
       width: 3,
     },
 
@@ -80,8 +85,8 @@ const { categories, series } = useMemo(() => {
       categories,
       labels: {
         style: {
-          fontSize: "13px",
-          colors: "#045498",
+          fontSize: '13px',
+          colors: '#045498',
         },
       },
     },
@@ -89,21 +94,21 @@ const { categories, series } = useMemo(() => {
     yaxis: {
       labels: {
         style: {
-          fontSize: "13px",
-          colors: "#045498",
+          fontSize: '13px',
+          colors: '#045498',
         },
       },
     },
 
     grid: {
-      borderColor: "#d3d3d380",
+      borderColor: '#d3d3d380',
     },
 
     legend: {
-      position: "top",
-      horizontalAlign: "right",
+      position: 'top',
+      horizontalAlign: 'right',
       labels: {
-        colors: "#045498",
+        colors: '#045498',
       },
     },
   };
@@ -113,10 +118,10 @@ const { categories, series } = useMemo(() => {
   return (
     <Box
       sx={{
-        width: "100%",
-        height: "32vh",
-        borderRadius: "25px",
-        boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+        width: '100%',
+        height: '32vh',
+        borderRadius: '25px',
+        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
         px: 2,
         py: 1,
       }}
@@ -124,9 +129,9 @@ const { categories, series } = useMemo(() => {
       {/* Title */}
       <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
-          p: 2
+          display: 'flex',
+          alignItems: 'center',
+          p: 2,
           // mb: 1,
         }}
       >
@@ -134,7 +139,7 @@ const { categories, series } = useMemo(() => {
           sx={{
             fontSize: 26,
             fontWeight: 700,
-            color: "#045498",
+            color: '#045498',
             // mt: 2,
           }}
         >
@@ -143,13 +148,8 @@ const { categories, series } = useMemo(() => {
       </Box>
 
       {/* Chart */}
-      <Box sx={{ height: "80%", width: "100%" }}>
-        <Chart
-          options={options}
-          series={series}
-          type="line"
-          height={"100%"}
-        />
+      <Box sx={{ height: '80%', width: '100%' }}>
+        <Chart options={options} series={series} type="line" height={'100%'} />
       </Box>
     </Box>
   );

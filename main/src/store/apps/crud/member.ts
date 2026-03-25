@@ -87,7 +87,7 @@ interface StateType {
     members: memberType[];
     memberAll: memberType[];
     memberSearch: string;
-    selectedMember?: memberType;
+    selectedMember: memberType | null;
     selectedMemberId?: string;
     curentFilter: string;
     memberTotalCount: number;
@@ -102,7 +102,7 @@ const initialState: StateType = {
     members: [],
     memberAll: [],
     memberSearch: "",
-    selectedMember: undefined,
+    selectedMember: null,
     selectedMemberId: "",
     curentFilter: "show_all",
     memberTotalCount: 0,
@@ -125,7 +125,7 @@ export const MemberSlice = createSlice({
         SelectMemberId(state, action: PayloadAction<string>) {
             state.selectedMemberId = action.payload;
         },
-        SelectMember(state, action: PayloadAction<memberType>) {
+        SelectMember(state, action: PayloadAction<memberType | null>) {
             state.selectedMember = action.payload;
         },
         SearchMember(state, action: PayloadAction<string>) {

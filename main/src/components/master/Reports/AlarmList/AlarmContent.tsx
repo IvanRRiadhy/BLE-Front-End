@@ -19,15 +19,18 @@ import {
   Divider,
   Stack,
   CircularProgress,
+  Tooltip,
+  IconButton,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BoltIcon from '@mui/icons-material/Bolt';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import PersonIcon from '@mui/icons-material/Person';
 import { BASE_URL } from 'src/utils/axios';
-import { VisitorType } from 'src/store/apps/crud/visitor';
-import { memberType } from 'src/store/apps/crud/member';
+import { SelectVisitor, VisitorType } from 'src/store/apps/crud/visitor';
+import { memberType, SelectMember } from 'src/store/apps/crud/member';
 import duration from 'dayjs/plugin/duration';
 import { useEffect, useState } from 'react';
 import { formatFullDateTime } from 'src/utils/time';
@@ -44,6 +47,7 @@ import {
 import {
   AlarmTimelineType,
   AlarmTriggerType,
+  SelectIntruder,
   UpdateFilter,
 } from 'src/store/apps/crud/alarmTrigger';
 import { actionStatus, actionStatusColormap } from 'src/types/crud/input';
@@ -77,7 +81,7 @@ const AlarmContent = () => {
   const alarmTriggerFilter = useSelector(
     (state: RootState) => state.alarmTriggerReducer.alarmTriggerFilter,
   );
-  const { data: data, isLoading } = useAlarmTriggerList(alarmTriggerFilter);
+  const { data: data, isLoading } = useAlarmTriggerList({ ...alarmTriggerFilter, Length: 999 });
   const alarmTriggerData = data?.data ?? [];
 
   const { data: securityData = [], isLoading: isLoadingSecurity } = useAllSecurityLookup();
@@ -167,6 +171,20 @@ const AlarmContent = () => {
       autoAlarmSelectDone.current = true;
     }
   }, [alarmTriggerData, searchParams]);
+
+  const handleClearPerson = () => {
+    setCurrentPerson(null);
+    setPersonType(null);
+    dispatch(SelectIntruder(null));
+    dispatch(SelectVisitor(null));
+    dispatch(SelectMember(null));
+    dispatch(
+      UpdateFilter({
+        ...alarmTriggerFilter,
+        filters: {}, // 🔥 remove visitorId/memberId filter
+      }),
+    );
+  };
 
   // Alarm Action
   const [openActionDialog, setOpenActionDialog] = useState(false);
@@ -305,7 +323,6 @@ const AlarmContent = () => {
     }
   };
 
-
   //Alarm Playback
 
   const [playbackData, setPlaybackData] = useState<AlarmPlaybackDataType | null>(null);
@@ -337,43 +354,183 @@ const AlarmContent = () => {
     }
   };
 
-  // const handleFetchTimeline = async (alarmId: string) => {
-  //   console.log('Fetching timeline for alarm:', alarmId);
-  //   if (!alarmId) return;
+  const onGoingAlarm = alarmTriggerData.filter(
+    (a) =>
+      a.isActive &&
+      (a.action?.toLowerCase() === 'dispatched' || a.action?.toLowerCase() === 'accepted'), // adjust if "accepted" is separate field
+  );
 
-  //   try {
-  //     const { data } = await refetchTimeline();
+  const activeAlarm = alarmTriggerData.filter(
+    (a) =>
+      a.isActive &&
+      a.action?.toLowerCase() !== 'dispatched' &&
+      a.action?.toLowerCase() !== 'accepted',
+  );
 
-  //     if (data) {
-  //       setAlarmTimeline(data);
-  //       console.log('Alarm Timeline:', data);
-  //     }
-  //   } catch (error) {
-  //     console.error('Failed to fetch timeline:', error);
-  //     toast.error('Failed to fetch timeline');
-  //   }
-  // };
+  const clearedAlarm = alarmTriggerData.filter((a) => !a.isActive);
 
-  // if (!currentPerson)
-  //   return (
-  //     <Box p={3} display="flex" flexDirection="column" alignItems="center">
-  //       <Typography variant="h4">No {personType?.toLowerCase() || 'person'} selected</Typography>
-  //       <Typography variant="h6">
-  //         Please select a {personType?.toLowerCase() || 'person'}
-  //       </Typography>
-  //     </Box>
-  //   );
+  const AlarmCard = ({ alarmTrigger }: { alarmTrigger: AlarmTriggerType }) => {
+    const imgSrc = alarmTrigger.floorplanImage
+      ? `${BASE_URL}${alarmTrigger.floorplanImage}`
+      : alarmTrigger.floorplan?.floorplanImage
+        ? `${BASE_URL}${alarmTrigger.floorplan.floorplanImage}`
+        : null;
+
+    const lang = language === 'id' ? 'id' : 'en';
+    const append = language === 'id' ? 'hingga' : 'to';
+
+    const startFormatted = alarmTrigger.triggerTime
+      ? formatFullDateTime(alarmTrigger.triggerTime, lang)
+      : '-';
+
+    const endFormatted = alarmTrigger.doneTimestamp
+      ? formatFullDateTime(alarmTrigger.doneTimestamp, lang)
+      : lang === 'id'
+        ? 'Aktif'
+        : 'Active';
+
+    return (
+      <Box
+        onClick={() => handleOpenAlarmWithAcknowledge(alarmTrigger)}
+        sx={{
+          border: '1px solid #CCC',
+          borderRadius: 1.5,
+          p: 1,
+          mb: 1,
+          bgcolor: '#fafafa',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease-in-out',
+          '&:hover': {
+            borderColor: 'primary.main',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            transform: 'translateY(-2px)',
+          },
+        }}
+      >
+        {/* Floorplan Image */}
+        <Box
+          sx={{
+            width: '100%',
+            height: 100,
+            borderRadius: 1,
+            overflow: 'hidden',
+            border: '1px solid #DDD',
+            mb: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: '#e1e1e1',
+            position: 'relative',
+          }}
+        >
+          {imgSrc ? (
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                position: 'relative',
+              }}
+            >
+              <img
+                src={imgSrc}
+                alt="Floorplan"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+              <Chip
+                label={formatActionLabel(alarmTrigger.alarm)}
+                sx={{
+                  bgcolor: alarmTrigger.alarmColor || 'secondary.dark',
+                  color: 'white',
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  zIndex: 1,
+                }}
+                size="small"
+              />
+            </Box>
+          ) : (
+            <Typography sx={{ color: '#777' }}>No Image</Typography>
+          )}
+        </Box>
+
+        {/* Floorplan Name */}
+        <Grid display="flex" alignItems="center" justifyContent="space-between">
+          <Typography
+            fontWeight={700}
+            fontSize="0.85rem"
+            sx={{
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {alarmTrigger.floorplanName ?? 'Unknown Floorplan'}
+          </Typography>
+          <Chip
+            sx={{
+              backgroundColor: actionStatusColormap[alarmTrigger.action] || 'grey',
+              color: 'white',
+              borderRadius: '8px',
+              minWidth: '50px',
+            }}
+            size="small"
+            label={alarmTrigger.action}
+          />
+        </Grid>
+
+        {/* Time Range */}
+        <Typography fontWeight={400} fontSize="0.75rem" color="text.secondary">
+          {startFormatted} {endFormatted.startsWith('A') ? '' : append} {endFormatted}
+        </Typography>
+      </Box>
+    );
+  };
 
   return (
-    <Box p={3}>
+    <Box
+      p={3}
+      sx={{
+        height: '90vh',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        minHeight: 0,
+      }}
+    >
       {currentPerson && (
         <Box
           display="flex"
           alignItems="flex-start"
-          gap={4}
-          mb={2}
-          sx={{ borderBottom: '1px solid #DDD', pb: 3 }}
+          sx={{
+            position: 'relative',
+            flexShrink: 0,
+            borderBottom: '1px solid #DDD',
+            pb: 3,
+            mb: 2,
+          }}
         >
+          <Tooltip title="Close person detail">
+            <IconButton
+              onClick={handleClearPerson}
+              size="small"
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                backgroundColor: 'rgba(255,255,255,0.9)',
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,1)',
+                },
+              }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
           {/* ============ PERSON PHOTO ============ */}
           <Box
             display="flex"
@@ -546,148 +703,129 @@ const AlarmContent = () => {
       )}
 
       {/* ================= ALARM TRIGGERS SECTION ================== */}
+ <Box
+      sx={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 0,
+      }}
+    >
       <Typography variant="h5" fontWeight="bold" mb={2}>
         Alarm Triggered
       </Typography>
 
-      <Grid
-        container
-        spacing={3}
-        padding={1}
-        sx={{
-          maxHeight: '440px',
-          overflowY: 'auto',
-        }}
-      >
-        {alarmTriggerData.length === 0 && !isLoading && (
-          <Typography>No alarm triggers found for this {personType?.toLowerCase()}.</Typography>
-        )}
-        {alarmTriggerData.map((alarmTrigger: AlarmTriggerType, index) => {
-          const imgSrc = alarmTrigger.floorplanImage
-            ? `${BASE_URL}${alarmTrigger.floorplanImage}`
-            : alarmTrigger.floorplan?.floorplanImage
-              ? `${BASE_URL}${alarmTrigger.floorplan.floorplanImage}`
-              : null;
+      {/* ================= 3 COLUMN MODE ================= */}
+      {!currentPerson ? (
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            gap: 2,
+            minHeight: 0,
+            overflow: 'hidden',
+          }}
+        >
+          {/* ACTIVE */}
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: 0,
+            }}
+          >
+            <Typography variant="h6" fontWeight={700} mb={1}>
+              Active Alarm ({activeAlarm.length})
+            </Typography>
 
-          const lang = language === 'id' ? 'id' : 'en';
-          const append = language === 'id' ? 'hingga' : 'to';
+            <Box
+              sx={{
+                flex: 1,
+                overflowY: 'auto',
+                minHeight: 0,
+                pr: 1,
+              }}
+            >
+              {activeAlarm.map((a) => (
+                <AlarmCard key={a.id} alarmTrigger={a} />
+              ))}
+            </Box>
+          </Box>
 
-          const startFormatted = alarmTrigger.triggerTime
-            ? formatFullDateTime(alarmTrigger.triggerTime, lang)
-            : '-';
-          const endFormatted = alarmTrigger.doneTimestamp
-            ? formatFullDateTime(alarmTrigger.doneTimestamp, lang)
-            : lang === 'id'
-              ? 'Aktif'
-              : 'Active';
+          {/* ON GOING */}
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: 0,
+            }}
+          >
+            <Typography variant="h6" fontWeight={700} mb={1}>
+              On-Going Alarm ({onGoingAlarm.length})
+            </Typography>
 
-          return (
-            <Grid key={index} size={{ xs: 12, sm: 6, md: 3, lg: 2 }}>
-              <Box
-                onClick={() => {
-                  handleOpenAlarmWithAcknowledge(alarmTrigger);
-                }}
-                sx={{
-                  border: '1px solid #CCC',
-                  borderRadius: 1.5,
-                  p: 1,
-                  height: '100%',
-                  bgcolor: '#fafafa',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease-in-out',
-                  '&:hover': {
-                    borderColor: 'primary.main',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    transform: 'translateY(-2px)',
-                    bgcolor: '#f5f5f5',
-                  },
-                }}
-              >
-                {/* Floorplan Image */}
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: 100,
-                    borderRadius: 1,
-                    overflow: 'hidden',
-                    border: '1px solid #DDD',
-                    mb: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    bgcolor: '#e1e1e1',
-                    position: 'relative',
-                  }}
-                >
-                  {imgSrc ? (
-                    <Box
-                      sx={{
-                        width: '100%',
-                        height: '100%',
-                        position: 'relative',
-                      }}
-                    >
-                      <img
-                        src={imgSrc}
-                        alt="Floorplan"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                        }}
-                      />
-                      <Chip
-                        label={formatActionLabel(alarmTrigger.alarm)}
-                        sx={{
-                          bgcolor: alarmTrigger.alarmColor || 'secondary.dark',
-                          color: 'white',
-                          position: 'absolute',
-                          top: 8,
-                          right: 8,
-                          zIndex: 1,
-                        }}
-                        size="small"
-                      />
-                    </Box>
-                  ) : (
-                    <Typography sx={{ color: '#777' }}>No Image</Typography>
-                  )}
-                </Box>
+            <Box
+              sx={{
+                flex: 1,
+                overflowY: 'auto',
+                minHeight: 0,
+                pr: 1,
+              }}
+            >
+              {onGoingAlarm.map((a) => (
+                <AlarmCard key={a.id} alarmTrigger={a} />
+              ))}
+            </Box>
+          </Box>
 
-                {/* Floorplan Name */}
-                <Grid display="flex" alignItems="center" justifyContent="space-between">
-                  <Typography
-                    fontWeight={700}
-                    fontSize="0.85rem"
-                    sx={{
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {alarmTrigger.floorplanName ?? 'Unknown Floorplan'}
-                  </Typography>
-                  <Chip
-                    sx={{
-                      backgroundColor: actionStatusColormap[alarmTrigger.action] || 'grey',
-                      color: 'white',
-                      borderRadius: '8px',
-                      minWidth: '50px',
-                    }}
-                    size="small"
-                    label={alarmTrigger.action}
-                  />
-                </Grid>
+          {/* CLEARED */}
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: 0,
+            }}
+          >
+            <Typography variant="h6" fontWeight={700} mb={1}>
+              Cleared Alarm ({clearedAlarm.length})
+            </Typography>
 
-                {/* Time Range */}
-                <Typography fontWeight={400} fontSize="0.75rem" color="text.secondary">
-                  {startFormatted} {endFormatted.startsWith('A') ? '' : append} {endFormatted}
-                </Typography>
-              </Box>
-            </Grid>
-          );
-        })}
-      </Grid>
+            <Box
+              sx={{
+                flex: 1,
+                overflowY: 'auto',
+                minHeight: 0,
+                pr: 1,
+              }}
+            >
+              {clearedAlarm.map((a) => (
+                <AlarmCard key={a.id} alarmTrigger={a} />
+              ))}
+            </Box>
+          </Box>
+        </Box>
+      ) : (
+        /* ================= ORIGINAL GRID ================= */
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: 'auto',
+            minHeight: 0,
+          }}
+        >
+          <Grid container spacing={3}>
+            {alarmTriggerData.map((alarmTrigger) => (
+              <Grid key={alarmTrigger.id} size={{ xs: 12, sm: 6, md: 3, lg: 2 }}>
+                <AlarmCard alarmTrigger={alarmTrigger} />
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      )}
+    </Box>
 
       {/* ⚙️ Apply Action Dialog */}
       <Dialog

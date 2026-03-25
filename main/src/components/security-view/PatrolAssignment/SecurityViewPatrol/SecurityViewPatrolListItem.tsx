@@ -8,6 +8,7 @@ import { TimeGroupType } from 'src/store/apps/crud/timeGroup';
 import { defaultTimeGroupFilter } from 'src/store/apps/defaultForm';
 import { PatrolDetailPayload } from 'src/store/apps/crud/patrolRoute';
 import SmartScrollingText from 'src/utils/SmartScrollingText';
+import { utcTimeToLocal } from 'src/utils/TimeConvert';
 
 /* ===================== types ===================== */
 
@@ -38,10 +39,15 @@ function buildDayTimeMap(timeGroups: TimeGroupType[] = []): DayTimeMap {
     .flatMap((tg) => tg.timeBlocks ?? [])
     .reduce((acc, block) => {
       acc[block.dayOfWeek] ??= [];
+
+      const localStart = utcTimeToLocal(block.startTime).slice(0, 5);
+      const localEnd = utcTimeToLocal(block.endTime).slice(0, 5);
+
       acc[block.dayOfWeek].push({
-        startTime: block.startTime.slice(0, 5),
-        endTime: block.endTime.slice(0, 5),
+        startTime: localStart,
+        endTime: localEnd,
       });
+
       return acc;
     }, {} as DayTimeMap);
 }
@@ -104,8 +110,8 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
   const getDayLabel = (date: Date) => {
     if (isSameDay(date, now)) return t('Today');
     if (isSameDay(date, tomorrow)) return t('Tomorrow');
-    console.log("asd ", date)
-    return (date.toLocaleString('en-GB', { weekday: 'long' }));
+    console.log('asd ', date);
+    return date.toLocaleString('en-GB', { weekday: 'long' });
   };
 
   const getPatrolColor = (date: Date) => {
@@ -119,7 +125,7 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
       hour: '2-digit',
       minute: '2-digit',
     });
-    console.log("Formatting nearest patrol date:", date, "->", getDayLabel(date), time);
+    console.log('Formatting nearest patrol date:', date, '->', getDayLabel(date), time);
     return `${getDayLabel(date)} • ${time}`;
   };
 

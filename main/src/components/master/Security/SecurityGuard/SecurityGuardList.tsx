@@ -34,13 +34,12 @@ const SecurityGuardList = () => {
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
   const selectedMemberId = useSelector((state: RootState) => state.memberReducer.selectedMemberId);
 
-
   // 🔹 React Query fetching
   const { data, isLoading, isFetching, isFetched } = useSecurityList({
     ...memberFilter,
     Length: 999, // show all for side list
   });
-  
+
   const deleteMutation = useDeleteSecurity();
 
   // 🔹 State for bulk select
@@ -51,7 +50,7 @@ const SecurityGuardList = () => {
 
   // 🔹 Derived members list
   const members = data?.data ?? [];
-const active = members?.find((member: memberType) => member.id === selectedMemberId);
+  const active = members?.find((member: memberType) => member.id === selectedMemberId);
   // ---------------------------------------------------------------------------
   // ✅ Initialization on mount
   // ---------------------------------------------------------------------------
@@ -120,7 +119,7 @@ const active = members?.find((member: memberType) => member.id === selectedMembe
   // ✅ UI Rendering
   // ---------------------------------------------------------------------------
   return (
-    <>
+    <Box display="flex" flexDirection="column" height="100%">
       <Box
         display="flex"
         flexDirection="row"
@@ -163,21 +162,17 @@ const active = members?.find((member: memberType) => member.id === selectedMembe
         )}
       </Box>
 
-      <List>
-        <Box
+      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+        <List>
+          {/* <Box
           sx={{
             height: { lg: 'calc(100vh - 220px)', md: '100vh' },
             maxHeight: '71vh',
             overflow: 'auto',
           }}
-        >
+        > */}
           {isManySelect && (
-            <Box
-              display="flex"
-              justifyContent="flex-end"
-              alignItems="center"
-              sx={{ mr: 2 }}
-            >
+            <Box display="flex" justifyContent="flex-end" alignItems="center" sx={{ mr: 2 }}>
               <Typography variant="body2" fontWeight={100}>
                 Select All
               </Typography>
@@ -195,11 +190,14 @@ const active = members?.find((member: memberType) => member.id === selectedMembe
                   manySelect={isManySelect}
                   setManySelectSecurityGuards={setManySelectSecurityGuards}
                   manySelectSecurityGuards={manySelectSecurityGuards}
-                  onSecurityGuardClick={() => {dispatch(SelectMemberId(member.id))}}
+                  onSecurityGuardClick={() => {
+                    dispatch(SelectMemberId(member.id));
+                  }}
                 />
               ))}
-        </Box>
-      </List>
+          {/* </Box> */}
+        </List>
+      </Box>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
@@ -218,7 +216,7 @@ const active = members?.find((member: memberType) => member.id === selectedMembe
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+    </Box>
   );
 };
 

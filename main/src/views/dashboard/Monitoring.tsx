@@ -16,6 +16,8 @@ import { hideAlarmPopup } from 'src/store/apps/monitoring/AlarmUI';
 import AlarmPopup from 'src/layouts/full/AlarmPopup';
 import { fetchMonitoringLayouts, ScreenSettings } from 'src/store/apps/monitoring/layout';
 import { selectAlarmById } from 'src/store/apps/tracking/Beacon';
+import AlarmDetailDialog from 'src/components/dashboards/monitoring/Popup/AlarmDetailDialog';
+import TrackingDetailDialog from 'src/components/dashboards/monitoring/Popup/TrackingDetailDialog';
 
 const Monitoring = () => {
   const dispatch = useDispatch();
@@ -55,7 +57,7 @@ const Monitoring = () => {
     sType[grid] = [];
     sSettings[grid] = [];
 
-    screens.forEach((s, idx) => {
+    screens.forEach((s: any, idx: number) => {
       sIds[grid][idx] = s.id;
       fIds[grid][idx] = s.floorplanId ?? '';
       sDisplay[grid][idx] = s.display.displayOutput ?? '';
@@ -123,6 +125,8 @@ const Monitoring = () => {
 
       <MonitoringFooter />
       <AlarmPopup alarm={latest} />
+      <AlarmDetailDialog />
+      <TrackingDetailDialog />
     </>
   );
 };

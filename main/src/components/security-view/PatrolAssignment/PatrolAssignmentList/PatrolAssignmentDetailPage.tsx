@@ -155,26 +155,37 @@ const PatrolDetailPage = () => {
       </Box>
     );
   }
-  const handleStart = async () => {
-    if (!patrol) return;
-    // if (!data.patrolAssignment) return;
-    try {
-      const res = await StartPatrolMutation.mutateAsync(patrol.id);
-      console.log('Start Patrol res', res);
-      if (!res?.success || !res?.collection?.data) return;
+const handleStart = async () => {
+  if (!patrol) return;
 
-      const session = res.collection.data;
+  try {
+    const res = await StartPatrolMutation.mutateAsync(patrol.id);
 
-      setPatrolSession(session);
+    console.log('Start Patrol res', res);
 
-      // backend is source of truth
-      setStartedAt(new Date(session.startedAt));
-      setEndedAt(null);
-    } catch (error) {
-      console.error(error);
-      console.log('Time', timeGroups[0].timeBlocks);
-    }
-  };
+    if (!res?.success || !res?.collection?.data) return;
+
+    const session = res.collection.data;
+
+    setPatrolSession(session);
+    toast.success('Patrol started');
+
+    setStartedAt(new Date(session.startedAt));
+    setEndedAt(null);
+
+  } catch (error: any) {
+    console.error(error);
+
+    const backendMsg =
+      error?.response?.data?.msg ||
+      error?.message ||
+      "Failed to start patrol";
+
+    toast.error(backendMsg);
+
+    console.log("Backend error:", backendMsg);
+  }
+};
 
   const handleDone = async () => {
     if (!patrol) return;

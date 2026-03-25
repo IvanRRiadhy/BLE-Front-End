@@ -60,6 +60,7 @@ const PRIORITY_COLORS: Record<string, string> = {
   low: '#ffc107', // Yellow
   medium: '#ff9800', // Orange
   high: '#f44336', // Red
+  critical: '#dc143c',
 };
 
 const getPriorityColor = (priority: string): string => {

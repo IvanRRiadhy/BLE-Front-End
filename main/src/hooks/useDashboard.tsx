@@ -18,6 +18,7 @@ export type DashboardFilterType = {
   from?: string | null;
   to?: string | null;
   TimeRange?: string | null;
+  timezone?: string | null;
   floorplanMaskedAreaId: string | null;
   operatorName: string | null;
   visitorId: string | null;

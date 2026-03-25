@@ -118,7 +118,7 @@ const TagList = () => {
   // ✅ UI Rendering
   // ---------------------------------------------------------------------------
   return (
-    <>
+    <Box display="flex" flexDirection="column" height="100%">
       <Box
         display="flex"
         flexDirection="row"
@@ -161,14 +161,15 @@ const TagList = () => {
         )}
       </Box>
 
-      <List>
-        <Box
+      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+        <List>
+          {/* <Box
           sx={{
-            height: { lg: 'calc(100vh - 220px)', md: '100vh' },
-            maxHeight: '71vh',
+            height: '100%',
+            maxHeight: '100%',
             overflow: 'auto',
           }}
-        >
+        > */}
           {isManySelect && (
             <Box display="flex" justifyContent="flex-end" alignItems="center" sx={{ mr: 2 }}>
               <Typography variant="body2" fontWeight={100}>
@@ -193,8 +194,9 @@ const TagList = () => {
                   }}
                 />
               ))}
-        </Box>
-      </List>
+          {/* </Box> */}
+        </List>
+      </Box>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
@@ -211,7 +213,7 @@ const TagList = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+    </Box>
   );
 };
 

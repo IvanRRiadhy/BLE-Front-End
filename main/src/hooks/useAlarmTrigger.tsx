@@ -11,6 +11,7 @@ import {
   IntruderType,
   GetFilter,
   AlarmTimelineType,
+  NearestSecurityType,
 } from 'src/store/apps/crud/alarmTrigger';
 import { RootState, useSelector } from 'src/store/Store';
 
@@ -61,6 +62,34 @@ export function useAllAlarmTriggers() {
       const res = await axiosServices.get(API_URL);
       return res.data.collection.data as AlarmTriggerType[];
     },
+    placeholderData: [],
+  });
+}
+
+// export function useAlarmTriggerByID( id: string ) {
+//   return useQuery({
+//     queryKey: ['alarmTrigger', id],
+//     queryFn: async () => {
+//       const res = await axiosServices.get(API_URL, { params: { id } });
+//       return res.data.collection.data as AlarmTriggerType[];
+//     },
+//     enabled: !!id,
+//     placeholderData: [],
+//   });
+// }
+export const alarmTriggerByIdQuery = (id: string) => ({
+  queryKey: ['alarmTrigger', id], 
+  queryFn: async () => {
+
+    const res = await axiosServices.get(`${API_URL}${id}`);
+    console.log('Response: ', res, "With Id: ", id);
+    return res.data.collection.data as AlarmTriggerType[];
+  },
+});
+export function useAlarmTriggerByID(id: string) {
+  return useQuery({
+    ...alarmTriggerByIdQuery(id),
+    enabled: !!id,
     placeholderData: [],
   });
 }
@@ -212,6 +241,7 @@ export function useAcknowledgeAlarmTrigger() {
   return useMutation({
     mutationFn: async (id: string) => {
       const res = await axiosServices.put(`${API_URL}${id}/acknowledge`);
+      console.log("Acknowledge res", res);
       return res.data;
     },
     onSuccess: () => {
@@ -305,3 +335,14 @@ export function useResolveAlarmTrigger() {
   })
 }
 
+export function useNearestSecurity(triggerId: string) {
+  const queryClient = useQueryClient();
+  return useQuery({
+    queryKey: ['alarmTrigger-nearest-security', triggerId],
+    queryFn: async () => {
+      const res = await axiosServices.get(`${API_URL}${triggerId}/nearest-securities`);
+      return res.data.collection.data as NearestSecurityType[];
+    },
+    enabled: !!triggerId,
+  });
+}

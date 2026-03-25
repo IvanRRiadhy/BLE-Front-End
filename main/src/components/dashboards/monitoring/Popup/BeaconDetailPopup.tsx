@@ -18,7 +18,8 @@ import { VisitorType } from 'src/store/apps/crud/visitor';
 import { SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import { setScreenDisplay } from 'src/store/apps/monitoring/layout';
-import { publishMQTT, startMQTTclient } from 'src/store/apps/tracking/MQTT'; // ✅ use your existing MQTT file
+import { publishMQTT, startMQTTclient } from 'src/store/apps/tracking/MQTT';
+import { setFollowingPerson } from 'src/store/apps/monitoring/layout';
 
 type BeaconDetailPopupProps = {
   dmac?: string;
@@ -53,7 +54,10 @@ const BeaconDetailPopup = ({
   const activeLayout = useSelector((state: RootState) =>
     state.layoutReducer.layouts.find((l) => l.id === state.layoutReducer.activeLayoutId),
   );
-
+  const followingPerson = useSelector((state: RootState) => state.layoutReducer.followingPerson);
+  const currentPersonId = memberDetail?.id || visitorDetail?.id;
+  const currentName = memberDetail?.name || visitorDetail?.name || 'Unknown';
+  const isFollowingCurrent = followingPerson?.id === currentPersonId;
   const handleClose = () => {
     setDetailDialogOpen(false);
     dispatch(SetSelectedBeacon({ active: false, sourceScreenid: null }));
@@ -66,43 +70,103 @@ const BeaconDetailPopup = ({
     return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()}`;
   };
 
-const handleFollowOnThisScreen = () => {
-  if (!activeLayoutId || !activeLayout) {
-    console.warn('No active layout found.');
-    return;
-  }
+  const handleFollowOnThisScreen = () => {
+    if (!activeLayoutId || !activeLayout) {
+      console.warn('No active layout found.');
+      return;
+    }
 
-  // 🟢 Always use the FIRST screen of the active layout
-  const firstScreen = activeLayout.screens[0];
-  if (!firstScreen) {
-    console.warn('No screens available in active layout.');
-    return;
-  }
+    // 🟢 Always use the FIRST screen of the active layout
+    const firstScreen = activeLayout.screens[0];
+    if (!firstScreen) {
+      console.warn('No screens available in active layout.');
+      return;
+    }
 
-  const topic = `highlight/card/${bleNumber}`;
-  const payload = 'Start';
+    const topic = `highlight/card/${bleNumber}`;
+    const payload = 'Start';
 
-  // ✅ Publish Start via shared MQTT client
-  publishMQTT(topic, payload);
-  console.log(
-    `Published Start message to ${topic} for beacon ${bleNumber} → screen ${firstScreen.id}`
-  );
+    // ✅ Publish Start via shared MQTT client
+    publishMQTT(topic, payload);
+    console.log(
+      `Published Start message to ${topic} for beacon ${bleNumber} → screen ${firstScreen.id}`,
+    );
 
-  // ✅ Switch first screen into Follow Mode
-  dispatch(
-    setScreenDisplay({
-      layoutId: activeLayoutId,
-      screenId: firstScreen.id,
-      display: {
-        displayType: 3, // Follow Mode
-        displayOutput: bleNumber, // DMAC of beacon
-      },
-    }),
-  );
+    // ✅ Switch first screen into Follow Mode
+    dispatch(
+      setScreenDisplay({
+        layoutId: activeLayoutId,
+        screenId: firstScreen.id,
+        display: {
+          displayType: 3, // Follow Mode
+          displayOutput: bleNumber, // DMAC of beacon
+        },
+      }),
+    );
 
-  handleClose();
-};
+    handleClose();
+  };
 
+  const handleFollow = () => {
+    if (!activeLayoutId || !activeLayout) return;
+    if (!currentPersonId) return;
+
+    const firstScreen = activeLayout.screens[0];
+    if (!firstScreen) return;
+
+    publishMQTT(`highlight/card/${bleNumber}`, 'Start');
+
+    dispatch(
+      setScreenDisplay({
+        layoutId: activeLayoutId,
+        screenId: firstScreen.id,
+        display: {
+          displayType: 3,
+          displayOutput: bleNumber,
+        },
+      }),
+    );
+
+    dispatch(
+      setFollowingPerson({
+        id: currentPersonId,
+        name: currentName,
+        bleCardNumber: bleNumber,
+        type: memberDetail ? 'member' : 'visitor',
+      }),
+    );
+
+    handleClose();
+  };
+
+  const handleCancelFollowing = () => {
+    if (!activeLayoutId || !activeLayout) return;
+
+    const firstScreen = activeLayout.screens[0];
+    if (!firstScreen) return;
+
+    if (followingPerson?.bleCardNumber) {
+      publishMQTT(`highlight/card/${followingPerson.bleCardNumber}`, 'Stop');
+    }
+
+    dispatch(
+      setScreenDisplay({
+        layoutId: activeLayoutId,
+        screenId: firstScreen.id,
+        display: {
+          displayType: 0,
+          displayOutput: '',
+        },
+      }),
+    );
+
+    dispatch(setFollowingPerson(null));
+
+    handleClose();
+  };
+  const isDisabled = followingPerson && followingPerson.id !== currentPersonId;
+  const buttonLabel = isFollowingCurrent ? 'Cancel Following' : 'Follow';
+  const handleAction = isFollowingCurrent ? handleCancelFollowing : handleFollow;
 
   return (
     <Dialog fullWidth maxWidth={'md'} open={detailDialogOpen} onClose={handleClose}>
@@ -124,24 +188,6 @@ const handleFollowOnThisScreen = () => {
                 }`}
                 sx={{ width: '128px', height: '128px', ml: 2 }}
               />
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={handleFollowOnThisScreen}
-                sx={{
-                  position: 'absolute',
-                  right: 0,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  borderRadius: 2,
-                  minWidth: 0,
-                  px: 2,
-                  py: 1,
-                }}
-              >
-                Follow
-              </Button>
             </Grid>
           </Grid>
 
@@ -153,8 +199,8 @@ const handleFollowOnThisScreen = () => {
                   {memberDetail
                     ? memberDetail.name
                     : visitorDetail
-                    ? visitorDetail.name
-                    : 'Unknown Person'}
+                      ? visitorDetail.name
+                      : 'Unknown Person'}
                 </Box>
               </Typography>
             </Grid>
@@ -165,8 +211,8 @@ const handleFollowOnThisScreen = () => {
                   {memberDetail
                     ? memberDetail.phone
                     : visitorDetail
-                    ? visitorDetail.phone
-                    : 'Unknown Person'}
+                      ? visitorDetail.phone
+                      : 'Unknown Person'}
                 </Box>
               </Typography>
             </Grid>
@@ -179,8 +225,8 @@ const handleFollowOnThisScreen = () => {
                   {memberDetail
                     ? memberDetail.email
                     : visitorDetail
-                    ? visitorDetail.email
-                    : 'Unknown Person'}
+                      ? visitorDetail.email
+                      : 'Unknown Person'}
                 </Box>
               </Typography>
             </Grid>
@@ -191,8 +237,8 @@ const handleFollowOnThisScreen = () => {
                   {memberDetail
                     ? memberDetail.address
                     : visitorDetail
-                    ? visitorDetail.address
-                    : 'Unknown Person'}
+                      ? visitorDetail.address
+                      : 'Unknown Person'}
                 </Box>
               </Typography>
             </Grid>
@@ -205,8 +251,8 @@ const handleFollowOnThisScreen = () => {
                   {memberDetail
                     ? memberDetail.gender
                     : visitorDetail
-                    ? visitorDetail.gender
-                    : 'Unknown Person'}
+                      ? visitorDetail.gender
+                      : 'Unknown Person'}
                 </Box>
               </Typography>
             </Grid>
@@ -324,8 +370,8 @@ const handleFollowOnThisScreen = () => {
                   {memberDetail
                     ? memberDetail.cardNumber
                     : visitorDetail
-                    ? visitorDetail.cardNumber
-                    : 'Unknown Person'}
+                      ? visitorDetail.cardNumber
+                      : 'Unknown Person'}
                 </Box>
               </Typography>
             </Grid>
@@ -348,10 +394,8 @@ const handleFollowOnThisScreen = () => {
           bgcolor: 'background.paper',
           borderTop: '1px solid #e0e0e0',
           display: 'flex',
-          justifyContent: 'space-between',
           px: 0,
           py: 0,
-          zIndex: 1,
         }}
       >
         <Box sx={{ flex: 1 }}>
@@ -366,6 +410,21 @@ const handleFollowOnThisScreen = () => {
             }}
           >
             Tracking Details
+          </Button>
+        </Box>
+        <Box sx={{ flex: 1 }}>
+          <Button
+            variant="contained"
+            color={isFollowingCurrent ? 'error' : 'primary'}
+            onClick={handleAction}
+            disabled={isDisabled !== null ? isDisabled : false} // Set to false if isDisabled is null
+            sx={{
+              width: '100%',
+              height: '64px',
+              borderRadius: 0,
+            }}
+          >
+            {buttonLabel}
           </Button>
         </Box>
 

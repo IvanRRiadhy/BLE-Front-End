@@ -17,6 +17,7 @@ import { EventClickArg } from '@fullcalendar/core';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { TimeGroupType } from 'src/store/apps/crud/timeGroup';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
+import { utcTimeToLocal } from 'src/utils/TimeConvert';
 
 interface Props {
   open: boolean;
@@ -49,13 +50,16 @@ function normalizeTimeBlocks(timeGroups: TimeGroupType[]): NormalizedBlock[] {
 
   for (const group of timeGroups) {
     for (const block of group.timeBlocks ?? []) {
-      const key = `${block.dayOfWeek}|${block.startTime}|${block.endTime}`;
+      const localStart = utcTimeToLocal(block.startTime);
+      const localEnd = utcTimeToLocal(block.endTime);
+
+      const key = `${block.dayOfWeek}|${localStart}|${localEnd}`;
 
       if (!map.has(key)) {
         map.set(key, {
           dayOfWeek: block.dayOfWeek,
-          startTime: block.startTime,
-          endTime: block.endTime,
+          startTime: localStart,
+          endTime: localEnd,
           title: group.name,
           description: group.description,
         });

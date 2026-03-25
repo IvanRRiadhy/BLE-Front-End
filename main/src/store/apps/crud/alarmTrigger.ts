@@ -194,6 +194,27 @@ export type AlarmTimelineType = {
 };
 
 
+export type NearestSecurityType = {
+    securityId: string;
+    securityName: string;
+    email: string;
+    phone: string;
+    floorplanId: string;
+    floorplanName: string;
+    floorId: string;
+    floorName: string;
+    buildingId: string;
+    buildingName: string;
+    maskedAreaId: string;
+    maskedAreaName: string;
+    coordinateX: number;
+    coordinateY: number;
+    distanceInMeters: number | null;
+    proximityLevel: 'SameArea' | 'SameFloorplan' | 'SameFloor' | 'SameBuilding' | 'DifferentBuilding';
+    lastLocationUpdate: string;
+    isDispatched: boolean;
+}
+
 
 interface StateType {
     alarmTriggers: AlarmTriggerType[];
@@ -235,11 +256,12 @@ export const AlarmTriggerSlice = createSlice({
         SearchAlarmTrigger: (state, action: PayloadAction<string>) => {
             state.alarmTriggerSearch = action.payload;
         },
-        SelectAlarmTrigger: (state, action: PayloadAction<string>) => {
-            const selected = state.alarmTriggers.find((alarmTrigger: AlarmTriggerType) => alarmTrigger.id === action.payload);
-            state.selectedAlarmTrigger = selected || null;
+        SelectAlarmTrigger: (state, action: PayloadAction<AlarmTriggerType | null>) => {
+            // const selected = state.alarmTriggers.find((alarmTrigger: AlarmTriggerType) => alarmTrigger.id === action.payload);
+            console.log("Selected Alarm Trigger: ", JSON.stringify(action.payload));
+            state.selectedAlarmTrigger = action.payload;
         },
-        SelectIntruder: (state, action: PayloadAction<IntruderType>) => {
+        SelectIntruder: (state, action: PayloadAction<IntruderType | null>) => {
             state.selectedIntruder = action.payload;
         },
         UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {

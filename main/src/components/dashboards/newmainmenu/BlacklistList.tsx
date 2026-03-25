@@ -2,10 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { Box, Typography, Avatar, Stack, Tooltip } from '@mui/material';
 import { useBlacklistLog } from 'src/hooks/useDashboard';
 import SmartScrollingText from 'src/utils/SmartScrollingText';
+import { BASE_URL } from 'src/utils/axios';
 
 interface BlacklistItem {
   id: string;
   name: string;
+  image: string;
 }
 
 const NewBlacklist: React.FC = () => {
@@ -14,6 +16,7 @@ const NewBlacklist: React.FC = () => {
     return data.map((x: any) => ({
       id: x.id,
       name: x.name,
+      image: x.faceImage ? `${BASE_URL}${x.faceImage}` : '',
     }));
   }, [data]);
 
@@ -74,7 +77,7 @@ const NewBlacklist: React.FC = () => {
             }}
           >
             {/* Avatar */}
-            <Avatar src="/dummy-avatar.jpg" alt="user" sx={{ width: 56, height: 56 }} />
+            <Avatar src={item.image} alt="user" sx={{ width: 56, height: 56 }} />
 
             {/* Info */}
             <Box sx={{ flex: 1, minWidth: 0 }}>

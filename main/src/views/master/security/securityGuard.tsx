@@ -18,7 +18,7 @@ const SecurityGuard = () => {
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 
   return (
-    <PageContainer title="Member" description="this is Member Page">
+    <PageContainer title="Security Guard" description="this is Security Guard Page">
       <AppCard>
         {/* ------------------------------------------- */}
         {/* Left Part */}
@@ -31,6 +31,7 @@ const SecurityGuard = () => {
             width: drawerWidth,
             [`& .MuiDrawer-paper`]: { width: drawerWidth, position: 'relative', zIndex: 2 },
             flexShrink: 0,
+            maxHeight: 'calc(100vh - 100px)',
           }}
           variant={lgUp ? 'permanent' : 'temporary'}
         >
@@ -45,6 +46,7 @@ const SecurityGuard = () => {
             minWidth: secdrawerWidth,
             width: { xs: '100%', md: secdrawerWidth, lg: secdrawerWidth },
             flexShrink: 0,
+            maxHeight: 'calc(100vh - 175px)',
           }}
         >
           {/* <ContactSearch onClick={() => setLeftSidebarOpen(true)} /> */}
