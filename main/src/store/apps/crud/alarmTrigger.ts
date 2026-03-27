@@ -144,6 +144,16 @@ export type SecurityType = {
     name: string;
     email: string;
 };
+
+export type attachmentType ={
+    id: string;
+    fileUrl: string;
+    fileType: string;
+    mimeType: string;
+    uploadedAt: string;
+    uploadedBy: string;
+}
+
 export type IncidentType = {
     alarmTriggerId: string;
     triggerTime: string;
@@ -155,6 +165,7 @@ export type IncidentType = {
     location: LocationType;
     person: PersonType;
     security: SecurityType;
+    attachments: attachmentType[];
 };
 
 export type TimelineItemType = {
@@ -187,7 +198,7 @@ export type investigationType = {
 };
 
 export type AlarmTimelineType = {
-    incident: IncidentType;
+    incidentInfo: IncidentType;
     timeline: TimelineItemType[];
     duration: DurationType;
     investigation: investigationType;

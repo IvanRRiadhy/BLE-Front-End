@@ -162,8 +162,8 @@ const PatrolCaseDialog = ({
 
   const getCdnUrl = (url?: string) => {
     if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `https://${url}`;
+    if (url.startsWith('https://ble-cdn.tunnel.piranticerdasindonesia.com/')) return url;
+    return `https://ble-cdn.tunnel.piranticerdasindonesia.com/${url}`;
   };
   const isImage = (att: any) =>
     att?.mimeType?.startsWith('image') || /\.(png|jpg|jpeg|gif|webp)$/i.test(att?.fileUrl || '');

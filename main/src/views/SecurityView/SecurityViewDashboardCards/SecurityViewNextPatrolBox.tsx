@@ -1,7 +1,7 @@
 import { Box, Typography, useTheme } from '@mui/material';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
-import { utcTimeToLocal } from 'src/utils/timeConvert';
+import { utcTimeToLocal } from 'src/utils/TimeConvert';
 
 const NextPatrolBox = ({ nextPatrol }: any) => {
   const theme = useTheme();

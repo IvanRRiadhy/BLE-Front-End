@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import { Box, Typography, Avatar, Stack } from '@mui/material';
 import { useRealtimeAlarmLog } from 'src/hooks/useDashboard';
 import { BASE_URL } from 'src/utils/axios';
 import SmartScrollingText from 'src/utils/SmartScrollingText';
+import { toast } from 'react-hot-toast';
 
 const defaultFilter = {
   draw: 1,
@@ -28,7 +29,52 @@ export interface AlarmLogItem {
 }
 
 const SecurityViewAlarmLog: React.FC = () => {
+  const prevDataRef = useRef<any[]>([]);
+
   const { data = [], isLoading, isError } = useRealtimeAlarmLog(defaultFilter);
+
+  useEffect(() => {
+    if (!data || data.length === 0) return;
+
+    const prevData = prevDataRef.current;
+
+    // First load → just store, no toast
+    if (prevData.length === 0) {
+      prevDataRef.current = data;
+      return;
+    }
+
+    // 🔥 Detect NEW items
+    const prevIds = new Set(prevData.map((x) => x.id));
+    const newItems = data.filter((x: any) => !prevIds.has(x.id));
+
+    if (newItems.length > 0) {
+      // 🔥 Show toast
+      toast(`${newItems.length} new alarm(s) detected!`, {
+        duration: 4000,
+        style: {
+          borderRadius: '10px',
+          background: '#f44336',
+          color: '#fff',
+        }
+      });
+      newItems.forEach((x: any) => {
+        toast(`New Alarm: ${x.memberName || x.visitorName || x.securityName}`, {
+          duration: 4000,
+          style: {
+            borderRadius: '10px',
+            background: '#f44336',
+            color: '#fff',
+          },
+        });
+      });
+      console.log('New alarms:', newItems);
+    }
+
+    // Update ref
+    prevDataRef.current = data;
+  }, [data]);
+
   function resolvePerson(x: any) {
     // console.log("Resolving Person:", x);
     if (x.visitorId) {
@@ -63,7 +109,7 @@ const SecurityViewAlarmLog: React.FC = () => {
     };
   }
   const log = useMemo<AlarmLogItem[]>(() => {
-    const filtered = data.filter((x: any) => x.action === "Dispatched");
+    const filtered = data.filter((x: any) => x.action === 'Dispatched');
 
     return filtered.map((x: any) => {
       const person = resolvePerson(x);
@@ -129,30 +175,30 @@ const SecurityViewAlarmLog: React.FC = () => {
       >
         {log.length > 0 ? (
           log.map((item, index) => (
-          <Stack
-            key={index}
-            direction="row"
-            spacing={2}
-            alignItems="center"
-            sx={{
-              p: 1,
-              backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
-              borderBottom: '1px solid #e0e0e0',
-              width: '100%',
-              overflow: 'hidden',
-            }}
-          >
-            {/* Avatar */}
-            <Avatar src={item.image} alt="user" sx={{ width: 56, height: 56 }} />
-
-            {/* Left info */}
-            <Box
+            <Stack
+              key={index}
+              direction="row"
+              spacing={2}
+              alignItems="center"
               sx={{
-                flex: 1,
-                minWidth: 0,
+                p: 1,
+                backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
+                borderBottom: '1px solid #e0e0e0',
+                width: '100%',
+                overflow: 'hidden',
               }}
             >
-              {/* <Typography
+              {/* Avatar */}
+              <Avatar src={item.image} alt="user" sx={{ width: 56, height: 56 }} />
+
+              {/* Left info */}
+              <Box
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                }}
+              >
+                {/* <Typography
                 sx={{
                   fontSize: 16,
                   fontWeight: 600,
@@ -161,68 +207,68 @@ const SecurityViewAlarmLog: React.FC = () => {
               >
                 {item.name}
               </Typography> */}
-              <SmartScrollingText
-                text={item.name}
-                sx={{
-                  fontSize: 16,
-                  fontWeight: 600,
-                  color: '#045498',
-                }}
-              />
-              <SmartScrollingText
-                text={`${item.buildingName} | ${item.floorName}`}
-                sx={{
-                  fontSize: 12,
-                  color: '#045498',
-                }}
-              />
-              <Typography
-                sx={{
-                  fontSize: 12,
-                  color: '#045498',
-                }}
-              >
-                {item.idleTime}
-              </Typography>
-            </Box>
+                <SmartScrollingText
+                  text={item.name}
+                  sx={{
+                    fontSize: 16,
+                    fontWeight: 600,
+                    color: '#045498',
+                  }}
+                />
+                <SmartScrollingText
+                  text={`${item.buildingName} | ${item.floorName}`}
+                  sx={{
+                    fontSize: 12,
+                    color: '#045498',
+                  }}
+                />
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    color: '#045498',
+                  }}
+                >
+                  {item.idleTime}
+                </Typography>
+              </Box>
 
-            {/* Right info */}
-            <Box
-              sx={{
-                flex: 1,
-                minWidth: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-              }}
-            >
-              <Typography
+              {/* Right info */}
+              <Box
                 sx={{
-                  fontSize: 16,
-                  fontWeight: 700,
-                  color: item.color,
+                  flex: 1,
+                  minWidth: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
                 }}
               >
-                {item.status}
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: 12,
-                  color: '#045498',
-                }}
-              >
-                {item.secondGateway}
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: 12,
-                  color: '#045498',
-                }}
-              >
-                {item.lastSeenTime}
-              </Typography>
-            </Box>
-          </Stack>
+                <Typography
+                  sx={{
+                    fontSize: 16,
+                    fontWeight: 700,
+                    color: item.color,
+                  }}
+                >
+                  {item.status}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    color: '#045498',
+                  }}
+                >
+                  {item.secondGateway}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    color: '#045498',
+                  }}
+                >
+                  {item.lastSeenTime}
+                </Typography>
+              </Box>
+            </Stack>
           ))
         ) : (
           <Box

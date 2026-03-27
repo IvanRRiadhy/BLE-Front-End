@@ -161,7 +161,8 @@ export function usePatrolAssignList(filter: GetFilter) {
       } satisfies PaginatedResponse<PatrolAssignType>;
     },
     placeholderData: keepPreviousData,
-    staleTime: 5_000, // fresh for 1 minute
+    refetchInterval: 5000,
+    staleTime: 5000, // fresh for 5 seconds
     gcTime: 5 * 60_000, // cache for 5 minutes
   });
 }

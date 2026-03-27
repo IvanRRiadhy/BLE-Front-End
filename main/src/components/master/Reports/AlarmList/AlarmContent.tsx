@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useDispatch } from 'src/store/Store';
@@ -41,12 +41,15 @@ import {
   useAllIntruders,
   useAssignActionAlarmTriggerByID,
   useDispatchAlarmTrigger,
+  useDispatchMultipleAlarmTrigger,
+  useNearestSecurity,
   usePostponeAlarmTrigger,
   useResolveAlarmTrigger,
 } from 'src/hooks/useAlarmTrigger';
 import {
   AlarmTimelineType,
   AlarmTriggerType,
+  NearestSecurityType,
   SelectIntruder,
   UpdateFilter,
 } from 'src/store/apps/crud/alarmTrigger';
@@ -67,6 +70,14 @@ import { AlarmPlaybackDataType } from 'src/store/apps/crud/alarmPlayback';
 import AlarmPlaybackDialog from './AlarmPlaybackDialog';
 dayjs.extend(duration);
 
+const proximityColorMap: Record<string, string> = {
+  SameArea: '#4caf50', // green
+  SameFloorplan: '#2196f3', // blue
+  SameFloor: '#ff9800', // orange
+  SameBuilding: '#9c27b0', // purple
+  DifferentBuilding: '#9e9e9e', // grey
+};
+
 const AlarmContent = () => {
   const dispatch: AppDispatch = useDispatch();
   const language = useSelector((state: RootState) => state.customizer.isLanguage);
@@ -85,7 +96,7 @@ const AlarmContent = () => {
   const alarmTriggerData = data?.data ?? [];
 
   const { data: securityData = [], isLoading: isLoadingSecurity } = useAllSecurityLookup();
-  const [selectedSecurity, setSelectedSecurity] = useState<memberType | null>(null);
+  // const [selectedSecurity, setSelectedSecurity] = useState<memberType | null>(null);
 
   // const [alarmTimeline, setAlarmTimeline] = useState<AlarmTimelineType | null>(null);
 
@@ -96,7 +107,8 @@ const AlarmContent = () => {
   //UseQuery Mutation
   const assignActionMutation = useAssignActionAlarmTriggerByID();
   const acknowledgeMutation = useAcknowledgeAlarmTrigger();
-  const dispatchMutation = useDispatchAlarmTrigger();
+  // const dispatchMutation = useDispatchAlarmTrigger();
+  const dispatchMutation = useDispatchMultipleAlarmTrigger();
   const postponeMutation = usePostponeAlarmTrigger();
   const resolveMutation = useResolveAlarmTrigger();
   const alarmPlaybackMutation = useAlarmPlayback();
@@ -205,18 +217,18 @@ const AlarmContent = () => {
       toast.error('Alarm is not acknowledged');
       return;
     }
-    if (!selectedSecurity) {
+    if (!selectedSecurity.length) {
       toast.error('Please select a security');
       return;
     }
     try {
       const result = await dispatchMutation.mutateAsync({
-        id: selectedAlarmTrigger.id.toUpperCase(),
-        assignedSecurityId: selectedSecurity.id,
+        AlarmTriggerIds: [selectedAlarmTrigger.id.toUpperCase()],
+        assignedSecurityIds: selectedSecurity.map((s) => s.securityId),
       });
       toast.success('Action dispatched successfully');
       handleCloseActionDialog();
-      setSelectedSecurity(null);
+      setSelectedSecurity([]);
       setSelectedAction('');
     } catch (error: any) {
       toast.error('Error dispatching action');
@@ -236,6 +248,36 @@ const AlarmContent = () => {
       enabled: !!selectedAlarmTrigger?.id,
     },
   );
+
+  const { data: nearestSecurityData = [], isFetching: isFetchingNearestSecurity } =
+    useNearestSecurity(selectedAlarmTrigger?.id ?? '', {
+      enabled: !!selectedAlarmTrigger?.id,
+    });
+
+  // const [selectedSecurity, setSelectedSecurity] = useState<NearestSecurityType | null>(null);
+  const [selectedSecurity, setSelectedSecurity] = useState<NearestSecurityType[]>([]);
+
+  const proximityRank: Record<string, number> = {
+    SameArea: 1,
+    SameFloorplan: 2,
+    SameFloor: 3,
+    SameBuilding: 4,
+    DifferentBuilding: 5,
+  };
+
+  const sortedSecurity = [...nearestSecurityData].sort((a, b) => {
+    const proxA = proximityRank[a.proximityLevel] ?? 999;
+    const proxB = proximityRank[b.proximityLevel] ?? 999;
+
+    if (proxA !== proxB) return proxA - proxB;
+
+    // distance logic (null last)
+    if (a.distanceInMeters == null && b.distanceInMeters == null) return 0;
+    if (a.distanceInMeters == null) return 1;
+    if (b.distanceInMeters == null) return -1;
+
+    return a.distanceInMeters - b.distanceInMeters;
+  });
 
   const handleOpenAlarmWithAcknowledge = async (alarm: AlarmTriggerType) => {
     // Always set selected alarm first (so dialog can use it later)
@@ -388,7 +430,6 @@ const AlarmContent = () => {
       : lang === 'id'
         ? 'Aktif'
         : 'Active';
-
     return (
       <Box
         onClick={() => handleOpenAlarmWithAcknowledge(alarmTrigger)}
@@ -490,6 +531,34 @@ const AlarmContent = () => {
       </Box>
     );
   };
+
+  //Attachment
+
+  const incidentAttachments = useMemo(() => {
+    const attachments = timelineData?.incidentInfo?.attachments ?? [];
+
+    return attachments.map((att) => ({
+      id: att.id,
+      fileUrl: att.fileUrl,
+      fileType: att.fileType,
+      mimeType: att.mimeType,
+      uploadedAt: att.uploadedAt,
+      uploadedBy: att.uploadedBy,
+    }));
+  }, [timelineData]);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeAttachment = incidentAttachments[activeIndex];
+
+  const getCdnUrl = (url?: string) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `https://ble-cdn.tunnel.piranticerdasindonesia.com/${url}`;
+  };
+  const isImage = (att: any) =>
+    att?.mimeType?.startsWith('image') || /\.(png|jpg|jpeg|gif|webp)$/i.test(att?.fileUrl || '');
+
+  const isVideo = (att: any) =>
+    att?.mimeType?.startsWith('video') || /\.(mp4|webm|ogg)$/i.test(att?.fileUrl || '');
 
   return (
     <Box
@@ -703,129 +772,129 @@ const AlarmContent = () => {
       )}
 
       {/* ================= ALARM TRIGGERS SECTION ================== */}
- <Box
-      sx={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: 0,
-      }}
-    >
-      <Typography variant="h5" fontWeight="bold" mb={2}>
-        Alarm Triggered
-      </Typography>
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0,
+        }}
+      >
+        <Typography variant="h5" fontWeight="bold" mb={2}>
+          Alarm Triggered
+        </Typography>
 
-      {/* ================= 3 COLUMN MODE ================= */}
-      {!currentPerson ? (
-        <Box
-          sx={{
-            flex: 1,
-            display: 'flex',
-            gap: 2,
-            minHeight: 0,
-            overflow: 'hidden',
-          }}
-        >
-          {/* ACTIVE */}
+        {/* ================= 3 COLUMN MODE ================= */}
+        {!currentPerson ? (
           <Box
             sx={{
               flex: 1,
               display: 'flex',
-              flexDirection: 'column',
+              gap: 2,
               minHeight: 0,
+              overflow: 'hidden',
             }}
           >
-            <Typography variant="h6" fontWeight={700} mb={1}>
-              Active Alarm ({activeAlarm.length})
-            </Typography>
-
+            {/* ACTIVE */}
             <Box
               sx={{
                 flex: 1,
-                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
                 minHeight: 0,
-                pr: 1,
               }}
             >
-              {activeAlarm.map((a) => (
-                <AlarmCard key={a.id} alarmTrigger={a} />
-              ))}
+              <Typography variant="h6" fontWeight={700} mb={1}>
+                Active Alarm ({activeAlarm.length})
+              </Typography>
+
+              <Box
+                sx={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  minHeight: 0,
+                  pr: 1,
+                }}
+              >
+                {activeAlarm.map((a) => (
+                  <AlarmCard key={a.id} alarmTrigger={a} />
+                ))}
+              </Box>
+            </Box>
+
+            {/* ON GOING */}
+            <Box
+              sx={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: 0,
+              }}
+            >
+              <Typography variant="h6" fontWeight={700} mb={1}>
+                On-Going Alarm ({onGoingAlarm.length})
+              </Typography>
+
+              <Box
+                sx={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  minHeight: 0,
+                  pr: 1,
+                }}
+              >
+                {onGoingAlarm.map((a) => (
+                  <AlarmCard key={a.id} alarmTrigger={a} />
+                ))}
+              </Box>
+            </Box>
+
+            {/* CLEARED */}
+            <Box
+              sx={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: 0,
+              }}
+            >
+              <Typography variant="h6" fontWeight={700} mb={1}>
+                Cleared Alarm ({clearedAlarm.length})
+              </Typography>
+
+              <Box
+                sx={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  minHeight: 0,
+                  pr: 1,
+                }}
+              >
+                {clearedAlarm.map((a) => (
+                  <AlarmCard key={a.id} alarmTrigger={a} />
+                ))}
+              </Box>
             </Box>
           </Box>
-
-          {/* ON GOING */}
+        ) : (
+          /* ================= ORIGINAL GRID ================= */
           <Box
             sx={{
               flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
+              overflowY: 'auto',
               minHeight: 0,
             }}
           >
-            <Typography variant="h6" fontWeight={700} mb={1}>
-              On-Going Alarm ({onGoingAlarm.length})
-            </Typography>
-
-            <Box
-              sx={{
-                flex: 1,
-                overflowY: 'auto',
-                minHeight: 0,
-                pr: 1,
-              }}
-            >
-              {onGoingAlarm.map((a) => (
-                <AlarmCard key={a.id} alarmTrigger={a} />
+            <Grid container spacing={3}>
+              {alarmTriggerData.map((alarmTrigger) => (
+                <Grid key={alarmTrigger.id} size={{ xs: 12, sm: 6, md: 3, lg: 2 }}>
+                  <AlarmCard alarmTrigger={alarmTrigger} />
+                </Grid>
               ))}
-            </Box>
+            </Grid>
           </Box>
-
-          {/* CLEARED */}
-          <Box
-            sx={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              minHeight: 0,
-            }}
-          >
-            <Typography variant="h6" fontWeight={700} mb={1}>
-              Cleared Alarm ({clearedAlarm.length})
-            </Typography>
-
-            <Box
-              sx={{
-                flex: 1,
-                overflowY: 'auto',
-                minHeight: 0,
-                pr: 1,
-              }}
-            >
-              {clearedAlarm.map((a) => (
-                <AlarmCard key={a.id} alarmTrigger={a} />
-              ))}
-            </Box>
-          </Box>
-        </Box>
-      ) : (
-        /* ================= ORIGINAL GRID ================= */
-        <Box
-          sx={{
-            flex: 1,
-            overflowY: 'auto',
-            minHeight: 0,
-          }}
-        >
-          <Grid container spacing={3}>
-            {alarmTriggerData.map((alarmTrigger) => (
-              <Grid key={alarmTrigger.id} size={{ xs: 12, sm: 6, md: 3, lg: 2 }}>
-                <AlarmCard alarmTrigger={alarmTrigger} />
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-      )}
-    </Box>
+        )}
+      </Box>
 
       {/* ⚙️ Apply Action Dialog */}
       <Dialog
@@ -1116,6 +1185,76 @@ const AlarmContent = () => {
                       <Typography variant="body2">{timelineData.investigation.notes}</Typography>
                     </>
                   )}
+                  {/* Alarm Attachments */}
+                  {incidentAttachments.length > 0 && (
+                    <Box width="65%">
+                      <Typography fontWeight={600} mb={1}>
+                        Investigation Attachments
+                      </Typography>
+
+                      <Divider sx={{ mb: 2 }} />
+
+                      {/* PREVIEW AREA */}
+                      <Box
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        sx={{
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          borderRadius: 2,
+                          minHeight: 260,
+                          mb: 2,
+                          backgroundColor: '#fafafa',
+                        }}
+                      >
+                        {!activeAttachment && (
+                          <Typography color="text.secondary">No attachment available</Typography>
+                        )}
+
+                        {activeAttachment && isImage(activeAttachment) && (
+                          <Box
+                            component="img"
+                            src={getCdnUrl(activeAttachment.fileUrl)}
+                            sx={{
+                              maxWidth: '100%',
+                              maxHeight: 400,
+                              objectFit: 'contain',
+                              borderRadius: 2,
+                            }}
+                          />
+                        )}
+
+                        {activeAttachment && isVideo(activeAttachment) && (
+                          <Box
+                            component="video"
+                            src={getCdnUrl(activeAttachment.fileUrl)}
+                            controls
+                            sx={{
+                              maxWidth: '100%',
+                              maxHeight: 400,
+                              borderRadius: 2,
+                              backgroundColor: 'black',
+                            }}
+                          />
+                        )}
+                      </Box>
+
+                      {/* ATTACHMENT SELECTOR */}
+                      <Stack direction="row" spacing={1} justifyContent="center">
+                        {incidentAttachments.map((_, idx) => (
+                          <Chip
+                            key={idx}
+                            label={idx + 1}
+                            clickable
+                            color={idx === activeIndex ? 'primary' : 'default'}
+                            onClick={() => setActiveIndex(idx)}
+                            size="small"
+                          />
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
                 </>
               )}
             </Box>
@@ -1140,7 +1279,7 @@ const AlarmContent = () => {
                 <Typography variant="subtitle2" color="text.secondary" mb={1}>
                   Dispatch Security Guard
                 </Typography>
-                <CustomAutocomplete
+                {/* <CustomAutocomplete
                   label="Security Guard"
                   options={securityData || []}
                   value={selectedSecurity}
@@ -1150,6 +1289,67 @@ const AlarmContent = () => {
                   isOptionEqualToValue={(option, value) => option.id === value.id}
                   required
                   helperText={!selectedSecurity ? 'Please select a security guard' : undefined}
+                /> */}
+                <CustomAutocomplete
+                  label="Security Guard"
+                  multiple
+                  options={sortedSecurity}
+                  value={selectedSecurity}
+                  loading={isLoadingSecurity}
+                  // onChange={(v) => setSelectedSecurity(v)}
+                  onChange={(newValue) => setSelectedSecurity(newValue ?? [])}
+                  getOptionLabel={(o) => {
+                    if (!o) return '';
+
+                    const base = o.securityName;
+
+                    if (o.proximityLevel === 'SameArea' || o.proximityLevel === 'SameFloorplan') {
+                      return `${base}`;
+                    }
+
+                    return `${base} • ${o.floorName} | ${o.buildingName}`;
+                  }}
+                  isOptionEqualToValue={(o, v) => o.securityId === v.securityId}
+                  renderOption={(props: any, option: NearestSecurityType) => {
+                    const isNear =
+                      option.proximityLevel === 'SameArea' ||
+                      option.proximityLevel === 'SameFloorplan';
+
+                    const label = isNear
+                      ? `${option.distanceInMeters?.toFixed(3) ?? '-'} m`
+                      : `${option.floorName} | ${option.buildingName}`;
+
+                    return (
+                      <li {...props} key={option.securityId}>
+                        <Box
+                          display="flex"
+                          justifyContent="space-between"
+                          alignItems="center"
+                          width="100%"
+                        >
+                          {/* LEFT: NAME */}
+                          <Box>
+                            <Typography fontWeight={600}>{option.securityName}</Typography>
+
+                            <Typography variant="caption" color="text.secondary">
+                              {option.proximityLevel}
+                            </Typography>
+                          </Box>
+
+                          {/* RIGHT: CHIP */}
+                          <Chip
+                            label={label}
+                            size="small"
+                            sx={{
+                              backgroundColor: proximityColorMap[option.proximityLevel],
+                              color: '#fff',
+                              fontWeight: 600,
+                            }}
+                          />
+                        </Box>
+                      </li>
+                    );
+                  }}
                 />
               </Box>
             </>
@@ -1198,7 +1398,7 @@ const AlarmContent = () => {
                 <Button
                   variant="contained"
                   color="primary"
-                  disabled={!selectedSecurity || dispatchMutation.isPending}
+                  disabled={!selectedSecurity.length || dispatchMutation.isPending}
                   onClick={handleDispatchAction}
                   startIcon={
                     dispatchMutation.isPending ? (

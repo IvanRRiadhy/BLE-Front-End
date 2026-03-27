@@ -64,8 +64,8 @@ export interface SessionTimeline {
   stage: string;
   stageName: string;
   timestamp: string;
-  durationSeconds: number | null;
-  durationFormatted: string | null;
+  // durationSeconds: number | null;
+  // durationFormatted: string | null;
   isDelayed: boolean;
   delaySeconds: number | null;
   // notes: string | null;

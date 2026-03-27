@@ -96,17 +96,17 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
   );
   const areaCount = route?.patrolAreas?.length ? Math.max(route.patrolAreas.length - 2, 0) : 0;
 
-  const mapCaseToForm = (data: any): CaseUploadType => ({
-    title: data.title ?? '',
-    description: data.description ?? '',
-    caseType: data.caseType ?? '',
-    threatLevel: data.threatLevel ?? '',
-    patrolSessionId: data.patrolSessionId,
-    attachments: (data.attachments || []).map((a: any) => ({
-      fileUrl: a.fileUrl.startsWith('http') ? a.fileUrl : `https://${a.fileUrl}`,
-      fileType: a.fileType,
-    })),
-  });
+  // const mapCaseToForm = (data: any): CaseUploadType => ({
+  //   title: data.title ?? '',
+  //   description: data.description ?? '',
+  //   caseType: data.caseType ?? '',
+  //   threatLevel: data.threatLevel ?? '',
+  //   patrolSessionId: data.patrolSessionId,
+  //   attachments: (data.attachments || []).map((a: any) => ({
+  //     fileUrl: a.fileUrl.startsWith('http') ? a.fileUrl : `https://${a.fileUrl}`,
+  //     fileType: a.fileType,
+  //   })),
+  // });
 
   //   const handleEditCase = (item: any) => {
   //     setCaseDialogType('edit');

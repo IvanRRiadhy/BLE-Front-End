@@ -65,7 +65,8 @@ const SidebarList = ({ filterType, personFilter }: SidebarListProps) => {
         // 🔥 reuse SAME query config
         let data = await queryClient.fetchQuery(alarmTriggerByIdQuery(item.triggerId.toLowerCase()));
 
-        let trigger = data?.[0];
+        let trigger = data;
+        console.log("ALarm By Id Response : ", data);
         if (!trigger) return;
         
         // 🔥 check real backend state
@@ -75,7 +76,7 @@ const SidebarList = ({ filterType, personFilter }: SidebarListProps) => {
           // 🔥 refetch updated
           data = await queryClient.fetchQuery(alarmTriggerByIdQuery(item.triggerId));
 
-          trigger = data?.[0];
+          trigger = data;
         }
         console.log("Selected Trigger", trigger, item)
         dispatch(ShowAlarmPopup(item));

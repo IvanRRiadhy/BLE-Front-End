@@ -2,7 +2,7 @@ import { Box, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { usePatrolAssignList } from 'src/hooks/usePatrolRoute';
 import SecurityViewPatrolListItem from 'src/components/security-view/PatrolAssignment/SecurityViewPatrol/SecurityViewPatrolListItem';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   PatrolAssignType,
   PatrolDetailPayload,
@@ -10,6 +10,7 @@ import {
 } from 'src/store/apps/crud/patrolRoute';
 import { TimeGroupType } from 'src/store/apps/crud/timeGroup';
 import PatrolDetailDialog from 'src/components/security-view/PatrolAssignment/SecurityViewPatrol/PatrolDetailDialog';
+import { toast} from 'react-hot-toast';
 
 const defaultFilter = {
   draw: 1,
@@ -24,9 +25,53 @@ const defaultFilter = {
 };
 
 const SecurityViewPatrolList = () => {
+  const prevPatrolRef = useRef<PatrolAssignType[]>([]);
   const { t } = useTranslation();
   const { data: patrols, isLoading } = usePatrolAssignList(defaultFilter);
   const patrolData = patrols?.data || [];
+  
+  useEffect(() => {
+  if (!patrolData || patrolData.length === 0) return;
+
+  const prev = prevPatrolRef.current;
+
+  // first load → don't trigger toast
+  if (prev.length === 0) {
+    prevPatrolRef.current = patrolData;
+    return;
+  }
+
+  // 🔥 detect new patrols
+  const prevIds = new Set(prev.map((x) => x.id));
+  const newItems = patrolData.filter((x) => !prevIds.has(x.id));
+
+  if (newItems.length > 0) {
+    toast(`${newItems.length} new patrol assignment(s)!`, {
+      duration: 4000,
+      style: {
+            borderRadius: '10px',
+            background: '#ffc107',
+            color: '#fff',
+          }
+    });
+    newItems.forEach((x) => {
+      toast(
+        `New Patrol: ${x.name} | ${formatTime(x.startDate)} - ${formatTime(x.endDate)}`,
+        {
+          duration: 4000,
+          style: {
+            borderRadius: '10px',
+            background: '#ffc107',
+            color: '#fff',
+          }
+        }
+      );
+    })
+    console.log('New patrols:', newItems);
+  }
+
+  prevPatrolRef.current = patrolData;
+}, [patrolData]);
   // const [detail, setDetail] = useState<PatrolDetailPayload | null>(null);
   const [selectedPatrol, setSelectedPatrol] = useState<PatrolAssignType | null>(null);
 

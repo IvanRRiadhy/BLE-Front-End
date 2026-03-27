@@ -9,7 +9,12 @@ import {
   CircularProgress,
   Chip,
   Button,
+  Dialog,
+  DialogTitle,
+  IconButton,
+  DialogContent,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
@@ -20,6 +25,9 @@ import { PatrolAssignType, SecurityType } from 'src/store/apps/crud/patrolRoute'
 import { defaultPatrolReportFilter } from 'src/store/apps/defaultForm';
 import { getCaseStatusColor } from 'src/utils/caseStatus';
 import { useTranslation } from 'react-i18next';
+import PatrolCaseOverview from 'src/components/security-view/PatrolCaseList/PatrolCaseOverview';
+import { PatrolCaseType } from 'src/store/apps/crud/patrolCase';
+import PatrolCaseListItem from 'src/components/security-view/PatrolAssignment/PatrolAssignmentList/PatrolCaseListItem';
 
 interface Props {
   sec: SecurityType;
@@ -78,7 +86,8 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
   const sortedTimeline = useMemo(() => {
     if (!selectedSession?.timeline) return [];
 
-    return [...selectedSession.timeline].sort((a, b) => a.orderIndex - b.orderIndex);
+    return [...selectedSession.timeline]
+    // .sort((a, b) => a.orderIndex - b.orderIndex);
   }, [selectedSession]);
 
   useEffect(() => {
@@ -143,6 +152,14 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
 
     // 🔵 default fallback
     return theme.palette.primary.main;
+  };
+
+  //Case Dialog
+  const [openCaseDialog, setOpenCaseDialog] = useState(false);
+  const [selectedCase, setSelectedCase] = useState<PatrolCaseType | undefined>(undefined);
+
+  const handleCloseCaseDialog = () => {
+    setOpenCaseDialog(false);
   };
 
   // ⬇ AFTER ALL HOOKS
@@ -409,9 +426,15 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
                               {formatTime(item.timestamp)}
                             </Typography>
 
-                            {item.durationFormatted && (
+                            {item.dwellTimeStatus !== 'Normal' && (
+                              <Typography fontSize={13} fontWeight={800} color="error.main">
+                                {item.dwellTimeStatus}
+                              </Typography>
+                            )}
+
+                            {item.dwellTimeFormatted && (
                               <Typography fontSize={13} color="text.secondary">
-                                Duration: {item.dwellTimeFormatted}
+                                Security stays for: {item.dwellTimeFormatted}
                               </Typography>
                             )}
 
@@ -485,7 +508,7 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
                         border: `1px solid ${theme.palette.divider}`,
                       }}
                     >
-                      <Typography fontWeight={600}>{item.title}</Typography>
+                      {/* <Typography fontWeight={600}>{item.title}</Typography>
 
                       <Typography fontSize={12} color="text.secondary">
                         {formatDate(item.reportedAt)}
@@ -497,7 +520,15 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
                           label={item.caseStatus}
                           color={getCaseStatusColor(item.caseStatus)}
                         />
-                      </Box>
+                      </Box> */}
+                      <PatrolCaseListItem
+                        data={item}
+                        onClick={(c) => {
+                          setSelectedCase(c);
+                          setOpenCaseDialog(true);
+                          //   handleEditCase(c);
+                        }}
+                      />
                     </Box>
                   ))}
                 </Stack>
@@ -510,6 +541,39 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
           </Box>
         </Box>
       </Box>
+      {/* ================= CASE DIALOG ================= */}
+      <Dialog open={openCaseDialog} onClose={() => handleCloseCaseDialog()} fullWidth maxWidth="lg">
+        <DialogTitle display="flex" justifyContent="space-between" alignItems="center">
+          <Stack
+            direction={isMobile ? 'column' : 'row'}
+            spacing={isMobile ? 0.5 : 2}
+            alignItems={isMobile ? 'flex-start' : 'center'}
+          >
+            {/* Title */}
+            <Typography fontWeight={800} fontSize={24}>
+              Patrol Case Overview
+            </Typography>
+            {/* Status Chip */}
+            <Chip
+              size="small"
+              label={selectedCase?.caseStatus}
+              color={getCaseStatusColor(selectedCase?.caseStatus)}
+            />
+          </Stack>
+          {/* Patrol Case Overview */}
+          <IconButton onClick={() => handleCloseCaseDialog()}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent dividers>
+          {selectedCase ? (
+            <PatrolCaseOverview data={selectedCase} />
+          ) : (
+            <Typography color="text.secondary">No data selected</Typography>
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

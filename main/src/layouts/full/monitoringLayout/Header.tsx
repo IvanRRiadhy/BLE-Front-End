@@ -41,6 +41,8 @@ import { useAllVisitor } from 'src/hooks/useVisitor';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
 import { memberType } from 'src/store/apps/crud/member';
+import toast from 'react-hot-toast';
+import { useLatestPosition } from 'src/hooks/useDashboard';
 
 const Header = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
@@ -57,6 +59,8 @@ const Header = () => {
   const { data: visitorList = [], isLoading: loading } = useAllVisitor();
   const { data: memberList = [], isLoading: memberLoading } = useAllMembers();
   const { data: securityList = [], isLoading: securityLoading } = useAllSecuritys();
+  const { data: personList = [], isLoading: personLoading } = useLatestPosition('daily');
+  console.log('personList', personList);
   const filteredVisitorList = visitorList.filter(
     (v: VisitorType) => v.bleCardNumber && v.bleCardNumber.trim() !== '',
   );
@@ -130,6 +134,7 @@ const Header = () => {
     const firstScreen = activeLayout.screens[0];
     if (!firstScreen) {
       console.warn('No screens available in active layout.');
+      toast.error('No screens available in active layout.');
       return;
     }
     const personId = person.id;

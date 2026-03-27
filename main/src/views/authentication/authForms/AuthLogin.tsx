@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { Link } from 'react-router';
 import { AnimatePresence, motion, MotionProps } from 'framer-motion';
-
+import { jwtDecode } from 'jwt-decode';
 import { loginType } from 'src/types/auth/auth';
 import CustomCheckbox from '../../../components/forms/theme-elements/CustomCheckbox';
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
@@ -24,6 +24,21 @@ import axiosServices from 'src/utils/axios';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
 
 type NativeFormProps = React.ComponentPropsWithoutRef<'form'>;
+
+type JwtPayload = {
+  'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier': string;
+  'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress': string;
+  'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name': string;
+  fullName: string;
+  groupId: string;
+  ApplicationId: string;
+  groupName: string;
+  'http://schemas.microsoft.com/ws/2008/06/identity/claims/role': string;
+  level: string;
+  isHead: string;
+  accessibleBuildings: string;
+  exp: number;
+};
 
 const MotionForm = motion(
   React.forwardRef<HTMLFormElement, NativeFormProps & MotionProps>((props, ref) => (
@@ -56,7 +71,6 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   const isAdmin = activeTab === 'admin';
   const creds = isAdmin ? adminCreds : visitorCreds;
 
-
   const handleTabChange = (_: React.SyntheticEvent, next: TabKey) => {
     setDirection(activeTab === 'admin' && next === 'visitor' ? 1 : -1);
     setActiveTab(next);
@@ -71,6 +85,54 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         : setVisitorCreds((prev) => ({ ...prev, [field]: e.target.value }));
     };
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setLoginError('');
+
+  //   const url = isAdmin ? ADMIN_API_URL : VISITOR_API_URL;
+
+  //   try {
+  //     const res = await axiosServices.post(url, creds);
+  //     const data = res?.data?.collection?.data ?? res?.data;
+
+  //     if (data?.token) localStorage.setItem('token', data.token);
+  //     if (data?.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+  //     if (data?.applicationId) localStorage.setItem('applicationId', data.applicationId);
+  //     if (data?.levelPriority) {
+  //       localStorage.setItem('levelPriority', data.levelPriority.trim());
+  //     }
+  //     if (data?.username) localStorage.setItem('username', data.username);
+  //     if (data?.email) localStorage.setItem('email', data.email);
+
+  //     localStorage.setItem('response', JSON.stringify(data));
+  //     localStorage.setItem('welcomePopupShown', 'false');
+  //     if (isAdmin && data.levelPriority === 'Primary') {
+  //       setLoginError('You do not have permission to login as Admin');
+  //       return;
+  //     }
+
+  //     setTimeout(() => {
+  //       window.location.href = isAdmin
+  //         ? '/dashboards/newmainmenu'
+  //         : data.levelPriority === 'Primary'
+  //           ? '/security-view/dashboard'
+  //           : '/my-visit';
+  //       console.log('data', data);
+  //     }, 300);
+  //   } catch (err) {
+  //     setLoginError('Invalid username or password. Please try again.');
+
+  //     isAdmin
+  //       ? setAdminCreds({ username: '', password: '' })
+  //       : setVisitorCreds({ username: '', password: '' });
+
+  //     // UX: refocus username
+  //     requestAnimationFrame(() => {
+  //       usernameRef.current?.focus();
+  //     });
+  //   }
+  // };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
@@ -81,18 +143,43 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       const res = await axiosServices.post(url, creds);
       const data = res?.data?.collection?.data ?? res?.data;
 
-      if (data?.token) localStorage.setItem('token', data.token);
-      if (data?.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
-      if (data?.applicationId) localStorage.setItem('applicationId', data.applicationId);
-      if (data?.levelPriority) {
-        localStorage.setItem('levelPriority', data.levelPriority.trim());
+      if (data?.token) {
+        localStorage.setItem('token', data.token);
+
+        // ✅ decode JWT
+        const decoded = jwtDecode<JwtPayload>(data.token);
+
+        // mapping from JWT
+        const username = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
+        const email = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
+        const levelPriority =
+          decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+        const applicationId = decoded['ApplicationId'];
+
+        // save to localStorage
+        if (username) localStorage.setItem('username', username);
+        if (email) localStorage.setItem('email', email);
+        if (levelPriority) localStorage.setItem('levelPriority', levelPriority.trim());
+        if (applicationId) localStorage.setItem('applicationId', applicationId);
+
+        // optional extras
+        if (decoded.fullName) localStorage.setItem('fullName', decoded.fullName);
+        if (decoded.groupName) localStorage.setItem('groupName', decoded.groupName);
       }
-      if (data?.username) localStorage.setItem('username', data.username);
-      if (data?.email) localStorage.setItem('email', data.email);
+
+      if (data?.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+      }
 
       localStorage.setItem('response', JSON.stringify(data));
       localStorage.setItem('welcomePopupShown', 'false');
-      if (isAdmin && data.levelPriority === 'Primary') {
+
+      // ❗ IMPORTANT: use decoded role instead of data.levelPriority
+      const role = jwtDecode<JwtPayload>(data.token)[
+        'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+      ];
+
+      if (isAdmin && role === 'Primary') {
         setLoginError('You do not have permission to login as Admin');
         return;
       }
@@ -100,10 +187,11 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       setTimeout(() => {
         window.location.href = isAdmin
           ? '/dashboards/newmainmenu'
-          : data.levelPriority === 'Primary'
+          : role === 'Primary'
             ? '/security-view/dashboard'
             : '/my-visit';
-        console.log('data', data);
+
+        console.log('decoded', jwtDecode(data.token));
       }, 300);
     } catch (err) {
       setLoginError('Invalid username or password. Please try again.');
@@ -112,7 +200,6 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         ? setAdminCreds({ username: '', password: '' })
         : setVisitorCreds({ username: '', password: '' });
 
-      // UX: refocus username
       requestAnimationFrame(() => {
         usernameRef.current?.focus();
       });

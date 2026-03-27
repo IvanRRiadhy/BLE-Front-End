@@ -103,18 +103,18 @@ const MaskedAreaList2 = () => {
     }
   };
 
-  useEffect(() => {
-    dispatch(UpdateFilter(defaultFloorplanFilter));
-    dispatch(fetchBuildings());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(UpdateFilter(defaultFloorplanFilter));
+  //   dispatch(fetchBuildings());
+  // }, [dispatch]);
 
   useEffect(() => {
     dispatch(GetAllMaskedArea(maskedAreaAll));
   }, [dispatch, maskedAreaAll]);
 
-  useEffect(() => {
-    dispatch(fetchFloorplanDT(floorplanFilter));
-  }, [dispatch, floorplanFilter]);
+  // useEffect(() => {
+  //   dispatch(fetchFloorplanDT(floorplanFilter));
+  // }, [dispatch, floorplanFilter]);
 
   const handleOnClick = (floorplanToEdit: FloorplanType) => {
     // console.log('floorplanToEdit: ', floorplanToEdit);

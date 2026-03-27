@@ -213,7 +213,7 @@ return (
   <Box display="flex" flexDirection="column" height="100%">
     {/* Add */}
     <Box p={2}>
-      <AddEditMember type="add" />
+      <AddEditSecurityGuard type="add" />
     </Box>
 
     {/* Sticky ALL */}

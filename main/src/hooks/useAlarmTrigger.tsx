@@ -78,19 +78,18 @@ export function useAllAlarmTriggers() {
 //   });
 // }
 export const alarmTriggerByIdQuery = (id: string) => ({
-  queryKey: ['alarmTrigger', id], 
+  queryKey: ['alarmTrigger', id],
   queryFn: async () => {
-
     const res = await axiosServices.get(`${API_URL}${id}`);
-    console.log('Response: ', res, "With Id: ", id);
-    return res.data.collection.data as AlarmTriggerType[];
+    console.log('Response: ', res, 'With Id: ', id);
+    return res.data.collection.data as AlarmTriggerType;
   },
 });
 export function useAlarmTriggerByID(id: string) {
   return useQuery({
     ...alarmTriggerByIdQuery(id),
     enabled: !!id,
-    placeholderData: [],
+    placeholderData: {} as AlarmTriggerType,
   });
 }
 
@@ -216,6 +215,7 @@ export function useAlarmTimeline(
     queryKey: ['alarmTrigger-timeline', id],
     queryFn: async (): Promise<AlarmTimelineType> => {
       const res = await axiosServices.get(`${API_URL}${id}/timeline`);
+      console.log('Response: ', res, 'With Id: ', id);
       return res.data.collection.data as AlarmTimelineType;
     },
     enabled: !!id,
@@ -241,7 +241,7 @@ export function useAcknowledgeAlarmTrigger() {
   return useMutation({
     mutationFn: async (id: string) => {
       const res = await axiosServices.put(`${API_URL}${id}/acknowledge`);
-      console.log("Acknowledge res", res);
+      console.log('Acknowledge res', res);
       return res.data;
     },
     onSuccess: () => {
@@ -263,6 +263,20 @@ export function useDispatchAlarmTrigger() {
       queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
     },
   });
+}
+
+export function useDispatchMultipleAlarmTrigger() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async({AlarmTriggerIds, assignedSecurityIds}: {AlarmTriggerIds: string[], assignedSecurityIds: string[]}) => {
+      const res = await axiosServices.post(`${API_URL}dispatch-multiple`, { AlarmTriggerIds, assignedSecurityIds });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list'] });
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
+    }
+  })
 }
 
 export function useAcceptInvestigate() {
@@ -332,10 +346,21 @@ export function useResolveAlarmTrigger() {
       queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list'] });
       queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
     },
-  })
+  });
 }
 
-export function useNearestSecurity(triggerId: string) {
+export function useNearestSecurity(
+  triggerId: string,
+  options?: Omit<
+    UseQueryOptions<
+      NearestSecurityType, // TQueryFnData
+      Error, // TError
+      NearestSecurityType, // TData
+      ['alarmTrigger-nearest-security', string] // TQueryKey
+    >,
+    'queryKey' | 'queryFn'
+  >,
+) {
   const queryClient = useQueryClient();
   return useQuery({
     queryKey: ['alarmTrigger-nearest-security', triggerId],
@@ -344,5 +369,25 @@ export function useNearestSecurity(triggerId: string) {
       return res.data.collection.data as NearestSecurityType[];
     },
     enabled: !!triggerId,
+  });
+}
+
+export type attachmentType = {
+  fileUrl: string;
+  fileType: string;
+};
+
+export function useAlarmAttachmentSend() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, attachments }: { id: string; attachments: attachmentType[] }) => {
+      const res = await axiosServices.post(`${API_URL}${id}/attachments`, { attachments });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list'] });
+      queryClient.invalidateQueries({ queryKey: ['alarmTrigger-all'] });
+    },
   });
 }

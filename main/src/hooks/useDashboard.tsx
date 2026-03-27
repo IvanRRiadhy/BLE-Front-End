@@ -34,7 +34,7 @@ export function useAreaDistributionData(filter: DashboardFilterType) {
       console.log('Area Distribution Data fetched: ', response.data);
       return response.data.collection.data as AreaReportType[];
     },
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     refetchIntervalInBackground: true,
     placeholderData: [],
   });
@@ -48,7 +48,7 @@ export function useTopButtonSummary() {
       console.log('Top Button Summary Data fetched: ', res.data);
       return res.data.collection.data;
     },
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     refetchIntervalInBackground: true,
     placeholderData: {},
   });
@@ -62,7 +62,7 @@ export function useBeaconCount() {
       console.log('Beacon Count Data fetched: ', res.data.collection.data);
       return res.data.collection.data;
     },
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     refetchIntervalInBackground: true,
   });
 }
@@ -75,7 +75,7 @@ export function useTrackingAreaAccessed(filter: DashboardFilterType) {
       console.log('Tracking Area Accessed Data fetched: ', res.data, 'filter: ', filter);
       return res.data.collection.data;
     },
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     refetchIntervalInBackground: true,
     enabled: !!filter,
   });
@@ -89,7 +89,7 @@ export function useUpcomingVisitor(filter: any) {
       console.log('Upcoming Visitor Data fetched: ', res.data);
       return res.data.collection.data;
     },
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     refetchIntervalInBackground: true,
     enabled: !!filter,
   });
@@ -102,7 +102,7 @@ export function useAreaDistribution(filter: DashboardFilterType, params?: Record
       const res = await axiosServices.post(`${API_TRACKING}area`, filter, { params });
       return res.data.collection.data;
     },
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     refetchIntervalInBackground: true,
   });
 }
@@ -114,7 +114,7 @@ export function useBlacklistLog() {
       const res = await axiosServices.get(`${API_DASHBOARD}blacklist-logs`);
       return res.data.collection.data;
     },
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     refetchIntervalInBackground: true,
   });
 }
@@ -127,7 +127,7 @@ export function useAlarmByStatus(filter: any) {
       console.log('Result', res);
       return res.data.collection.data;
     },
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     refetchIntervalInBackground: true,
   });
 }
@@ -140,7 +140,7 @@ export function useAlarmByArea(filter: any) {
       console.log('Result', res);
       return res.data.collection.data;
     },
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     refetchIntervalInBackground: true,
   });
 }
@@ -152,7 +152,7 @@ export function useAlarmStatisticHourly(filter: any) {
       const res = await axiosServices.post(`${API_ALARM}hourly`, filter);
       return res.data.collection.data;
     },
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     refetchIntervalInBackground: true,
   });
 }
@@ -165,7 +165,7 @@ export function useRealtimeAlarmLog(filter: any) {
       console.log('Realtime Alarm Log Data fetched: ', res.data);
       return res.data.collection.data;
     },
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     refetchIntervalInBackground: true,
   });
 }
@@ -177,7 +177,7 @@ export function useNotificationLog() {
       const res = await axiosServices.get(`${API_TRIGGER}lookup`);
       return res.data.collection.data;
     },
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     refetchIntervalInBackground: true,
   });
 }
@@ -190,7 +190,7 @@ export function usePeakHour(filter: DashboardFilterType, params?: Record<string,
       console.log('Peak Hour Data fetched: ', res.data);
       return res.data.collection.data;
     },
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     refetchIntervalInBackground: true,
   });
 }
@@ -203,7 +203,7 @@ export function useAlarmInvestigatedResult(filter: DashboardFilterType) {
       console.log('Alarm Investigated Result Data fetched: ', res.data);
       return res.data.collection.data;
     },
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     refetchIntervalInBackground: true,
   });
 }
@@ -216,7 +216,48 @@ export function useAlarmPerformance(filter: DashboardFilterType) {
       console.log('Alarm Performance Data fetched: ', res.data);
       return res.data.collection.data;
     },
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     refetchIntervalInBackground: true,
   });
+}
+
+export type LatestPositionType = {
+  areaId: string;
+  areaName: string;
+  bleCardNumber: string;
+  buildingId: string;
+  buildingName: string;
+  cardId: string;
+  cardName: string;
+  cardNumber: string;
+  floorId: string;
+  floorName: string;
+  floorplanId: string;
+  floorplanName: string;
+  floorplanImage: string;
+  identityId: string;
+  lastDetectedAt: string;
+  lastX: number;
+  lastY: number;
+  memberId: string | null;
+  memberName: string | null;
+  personId: string;
+  personName: string;
+  securityId: string | null;
+  securityName: string | null;
+  visitorId: string | null;
+  visitorName: string | null;
+};
+
+export function useLatestPosition(timeRange: string) {
+  return useQuery({
+    queryKey: ['latest-position', timeRange],
+    queryFn: async () => {
+      const res = await axiosServices.post(`${API_TRACKING}latest-position`, { timeRange });
+      console.log('Latest Position Data fetched: ', res.data);
+      return res.data.collection.data;
+    },
+    refetchInterval: 5000,
+    refetchIntervalInBackground: true,
+  }) 
 }

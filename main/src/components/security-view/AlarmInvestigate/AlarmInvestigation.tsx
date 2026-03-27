@@ -64,7 +64,7 @@ const AlarmInvestigation = () => {
     isError,
   } = useAlarmTriggerList({ ...defaultAlarmTriggerFilter, Length: 999 });
   const alarmTriggerData = data?.data ?? [];
-  
+
   function resolvePerson(x: any) {
     // console.log("Resolving Person:", x);
     if (x.visitorId) {
@@ -151,6 +151,7 @@ const AlarmInvestigation = () => {
     try {
       await AcceptMutation.mutateAsync(alarm.id);
       toast.success('Investigation accepted successfully!');
+      setSelectedAlarm((prev) => (prev ? { ...prev, action: 'Accepted' } : prev));
       dispatch(SetFocusAlarm(alarm));
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Failed to accept investigation');
