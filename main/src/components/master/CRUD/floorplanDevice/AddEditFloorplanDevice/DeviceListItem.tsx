@@ -27,7 +27,7 @@ type Props = {
   onListClick: (event: React.MouseEvent<HTMLElement>) => void;
   onEditClick: (event: React.MouseEvent<HTMLElement>) => void;
   onDeleteClick: (event: React.MouseEvent<HTMLElement>) => void;
-  device?: FloorplanDeviceType;
+  device?: FloorplanDeviceType; 
   active: any;
 };
 

@@ -69,7 +69,7 @@ const PatrolAssignmentList = () => {
             overflow: 'auto',
           }}
         >
-          {!showLoading && patrolAssignmentData.length > 0 ? (
+          {!isLoading && patrolAssignmentData.length > 0 ? (
             patrolAssignmentData.map((patrolAssignment: PatrolAssignType) => (
               <PatrolAssignmentListItem
                 key={patrolAssignment.id}
@@ -81,7 +81,7 @@ const PatrolAssignmentList = () => {
                 }}
               />
             ))
-          ) : showLoading ? (
+          ) : isLoading ? (
             renderSkeletonItems(SKELETON_ROWS)
           ) : (
             <Box sx={{ p: 2, textAlign: 'center' }}>No time groups found</Box>

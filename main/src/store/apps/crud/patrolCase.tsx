@@ -79,6 +79,8 @@ export type PatrolCaseType = {
     approvedByHeadId: string;
     patrolAssignmentId: string;
     patrolRouteId: string;
+    patrolAreaId: string;
+    patrolAreaName?: string;
     security?: memberType;
     patrolAssignment?: PatrolAssignType;
     patrolRoute?: PatrolRouteType;

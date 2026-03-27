@@ -74,11 +74,11 @@ const DeviceList = () => {
   //   useSelector((state: RootState) => state.floorplanDeviceReducer.addedFloorplanDevice) || [];
 
   // External data from Redux (keep these as they're used for new device defaults)
-  const firstCCTV = useSelector((state: RootState) => state.CCTVReducer.cctvs[0]);
-  const firstAccessControl = useSelector(
-    (state: RootState) => state.accessControlReducer.accessControls[0],
-  );
-  const firstBleReader = useSelector((state: RootState) => state.bleReaderReducer.bleReaders[0]);
+  // const firstCCTV = useSelector((state: RootState) => state.CCTVReducer.cctvs[0]);
+  // const firstAccessControl = useSelector(
+  //   (state: RootState) => state.accessControlReducer.accessControls[0],
+  // );
+  // const firstBleReader = useSelector((state: RootState) => state.bleReaderReducer.bleReaders[0]);
 
   // React Query hooks for server state
   const {

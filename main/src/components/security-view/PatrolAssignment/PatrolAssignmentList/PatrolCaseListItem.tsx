@@ -11,7 +11,7 @@ interface Props {
 const PatrolCaseListItem = ({ data, onClick }: Props) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
+  console.log("Case Data: ", data);
   return (
     <Box
       onClick={() => onClick?.(data)}
@@ -63,7 +63,7 @@ const PatrolCaseListItem = ({ data, onClick }: Props) => {
             Security: {data.security?.name ?? '-'}
           </Typography>
           <Typography fontSize={12} color="text.secondary" mt={0.5}>
-            Area: {data.security?.name ?? '-'}
+            Area: {data.patrolAreaName ??  '-'}
           </Typography>
         </Box>
 

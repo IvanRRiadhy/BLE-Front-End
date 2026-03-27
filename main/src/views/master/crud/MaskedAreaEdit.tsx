@@ -8,6 +8,7 @@ import AddEditMaskedAreaSidebar from 'src/components/master/CRUD/maskedArea/AddE
 import { RootState, useSelector } from 'src/store/Store';
 import EditAreaFloorView from 'src/components/master/CRUD/maskedArea/AddEditMaskedArea/Preview/EditAreaFloorView';
 import AreaDetailSidebar from 'src/components/master/CRUD/maskedArea/AddEditMaskedArea/AreaDetailSidebar';
+import FloorplanOverviewSidebar from 'src/components/master/CRUD/floorplan/FloorplanOverview/FloorplanOverviewSidebar/FloorplanOverviewSidebar';
 
 const MaskedAreaEdit = () => {
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(true);
@@ -32,6 +33,7 @@ const MaskedAreaEdit = () => {
             isMobileSidebarOpen={isMobileSidebarOpen}
             onSidebarClose={() => setMobileSidebarOpen(false)}
           />
+          {/* <FloorplanOverviewSidebar /> */}
                   {editingArea && (
           <Box
             position="absolute"
@@ -48,6 +50,7 @@ const MaskedAreaEdit = () => {
               isEditingSidebarOpen={isMobileSidebarOpen}
               onEditingSidebarClose={() => setMobileSidebarOpen(false)}
             />
+            
           </Box>
         )}
         </Box>

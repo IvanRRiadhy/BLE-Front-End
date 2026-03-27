@@ -86,7 +86,7 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
   const sortedTimeline = useMemo(() => {
     if (!selectedSession?.timeline) return [];
 
-    return [...selectedSession.timeline]
+    return [...selectedSession.timeline];
     // .sort((a, b) => a.orderIndex - b.orderIndex);
   }, [selectedSession]);
 
@@ -370,6 +370,11 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
                     {sortedTimeline.map((item, index) => {
                       const isTop = index % 2 === 0;
 
+                      const hasDwell =
+                        item.dwellTimeFormatted &&
+                        item.dwellTimeFormatted !== '' &&
+                        item.dwellTimeStatus;
+
                       return (
                         <Box
                           key={index}
@@ -418,7 +423,13 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
                               width: 180,
                               textAlign: 'right',
                               right: '55%',
-                              top: isTop ? 'calc(50% - 120px)' : 'calc(50% + 70px)',
+                              ...(isTop
+                                ? {
+                                    bottom: 'calc(50% + 24px)', // anchor from center line upward
+                                  }
+                                : {
+                                    top: 'calc(50% + 24px)', // anchor from center line downward
+                                  }),
                             }}
                           >
                             <Typography fontWeight={700}>{item.stageName}</Typography>
@@ -426,16 +437,34 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
                               {formatTime(item.timestamp)}
                             </Typography>
 
-                            {item.dwellTimeStatus !== 'Normal' && (
-                              <Typography fontSize={13} fontWeight={800} color="error.main">
-                                {item.dwellTimeStatus}
-                              </Typography>
-                            )}
+                            {/* ===== DWELL INFO ===== */}
+                            {hasDwell ? (
+                              <>
+                                <Typography fontSize={13}>
+                                  Security stayed for <b>{item.dwellTimeFormatted}</b>
+                                </Typography>
 
-                            {item.dwellTimeFormatted && (
-                              <Typography fontSize={13} color="text.secondary">
-                                Security stays for: {item.dwellTimeFormatted}
+                                {item.dwellTimeStatus !== 'Normal' && (
+                                  <Typography fontSize={13} color="error.main">
+                                    {item.dwellTimeStatus === 'Over'
+                                      ? 'Stayed too long (Overstay)'
+                                      : 'Left too early (Understay)'}
+                                  </Typography>
+                                )}
+
+                                {(item.minDwellTimeSeconds || item.maxDwellTimeSeconds) && (
+                                  <Typography fontSize={12} color="text.secondary">
+                                    Expected stay: {item.minDwellTimeSeconds ?? '-'}s –{' '}
+                                    {item.maxDwellTimeSeconds ?? '-'}s
+                                  </Typography>
+                                )}
+                              </>
+                            ) : item.orderIndex !== 0 ? (
+                              <Typography fontSize={13} color="text.secondary" fontStyle="italic">
+                                Security hasn’t checked this checkpoint
                               </Typography>
+                            ) : (
+                              <></>
                             )}
 
                             {item.isDelayed && item.delaySeconds && (
