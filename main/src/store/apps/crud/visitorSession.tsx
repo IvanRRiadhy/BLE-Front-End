@@ -47,6 +47,10 @@ export type GetVisitorSession = {
 export type VisitorSessionType = {
   visitorId: string | null;
   visitorName: string | null;
+  personId: string | null;
+  personName: string | null;
+  memberId: string | null;
+  memberName: string | null;
   cardId: string | null;
   cardName: string | null;
   buildingId: string | null;

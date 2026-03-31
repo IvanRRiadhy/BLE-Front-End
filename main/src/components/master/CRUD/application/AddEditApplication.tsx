@@ -22,6 +22,7 @@ import { orgType, appType, licenseType } from 'src/types/crud/input';
 import {
   editApplication,
   addApplication,
+  CreateApplicationRequest,
   ApplicationType,
   fetchApplications,
 } from 'src/store/apps/crud/application';
@@ -33,33 +34,31 @@ interface FormType {
 
 const AddEditApplication = ({ type, application }: FormType) => {
   const [open, setOpen] = React.useState(false);
-  const [formData, setFormData] = React.useState<ApplicationType>(
-    application || {
-      id: '',
-      applicationName: '',
-      organizationType: '',
-      organizationAddress: '',
-      applicationType: '',
-      applicationRegistered: '',
-      applicationExpired: '',
-      hostName: '',
-      hostPhone: '',
-      hostEmail: '',
-      hostAddress: '',
-      applicationCustomName: '',
-      applicationCustomDomain: '',
-      applicationCustomPort: '',
-      licenseCode: '',
-      licenseType: '',
-    },
+  const [formData, setFormData] = React.useState<CreateApplicationRequest>(
+    {} as CreateApplicationRequest,
   );
 
   const dispatch: AppDispatch = useDispatch();
   const handleClickOpen = () => {
     if (type === 'edit' && application) {
-      setFormData(application);
+      setFormData({
+        applicationName: application.applicationName,
+        organizationType: application.organizationType,
+        organizationAddress: application.organizationAddress,
+        applicationType: application.applicationType,
+        hostName: application.hostName,
+        hostPhone: application.hostPhone,
+        hostEmail: application.hostEmail,
+        hostAddress: application.hostAddress,
+        applicationCustomName: application.applicationCustomName,
+        applicationCustomDomain: application.applicationCustomDomain,
+        applicationCustomPort: application.applicationCustomPort,
+        adminUsername: '',
+        adminEmail: '',
+        adminPassword: '',
+      });
     } else {
-      setFormData({} as ApplicationType);
+      setFormData({} as CreateApplicationRequest);
     }
     setOpen(true);
   };
@@ -70,9 +69,9 @@ const AddEditApplication = ({ type, application }: FormType) => {
 
   const handleSave = async () => {
     try {
-      if (type === 'edit') {
-        await dispatch(editApplication(formData)); // Await ensures the update completes
-      }
+      // if (type === 'edit') {
+      //   await dispatch(editApplication(formData)); // Await ensures the update completes
+      // }
       if (type === 'add') {
         await dispatch(addApplication(formData)); // Await ensures the add completes
       }
@@ -270,6 +269,40 @@ const AddEditApplication = ({ type, application }: FormType) => {
             </Grid>
           </Grid>
           <Typography variant="h6" fontWeight={600} mb={2} mt={5}>
+            Admin Details
+          </Typography>
+          <Divider />
+          <Grid container spacing={5} mb={3}>
+            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
+              <CustomFormLabel htmlFor="app-cust-name">Admin Username</CustomFormLabel>
+              <CustomTextField
+                id="adminUsername"
+                value={formData.adminUsername}
+                onChange={handleInputChange}
+                fullWidth
+                variant="outlined"
+              />
+              <CustomFormLabel htmlFor="app-cust-port">Admin Email</CustomFormLabel>
+              <CustomTextField
+                id="adminEmail"
+                value={formData.adminEmail}
+                onChange={handleInputChange}
+                fullWidth
+                variant="outlined"
+              />
+            </Grid>
+            <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
+              <CustomFormLabel htmlFor="app-cust-domain">Admin Password</CustomFormLabel>
+              <CustomTextField
+                id="adminPassword"
+                value={formData.adminPassword}
+                onChange={handleInputChange}
+                fullWidth
+                variant="outlined"
+              />
+            </Grid>
+          </Grid>
+          {/* <Typography variant="h6" fontWeight={600} mb={2} mt={5}>
             License Details
           </Typography>
           <Divider />
@@ -300,7 +333,7 @@ const AddEditApplication = ({ type, application }: FormType) => {
                 variant="outlined"
               />
             </Grid>
-          </Grid>
+          </Grid> */}
         </DialogContent>
         <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
           <Button onClick={handleClose} variant="outlined" sx={{ fontSize: '1rem', py: 1, px: 3 }}>

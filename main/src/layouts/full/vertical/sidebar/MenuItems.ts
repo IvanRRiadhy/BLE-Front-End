@@ -21,6 +21,10 @@ import {
   IconCalendar,
   IconBell,
   IconUsers,
+  IconEye,
+  IconBadge,
+  IconMapSearch,
+  IconRoute,
 } from '@tabler/icons-react';
 import { AlarmSettingType } from 'src/store/apps/alarmsetting/alarmSettings';
 
@@ -86,6 +90,12 @@ const getMenuItems = (alarmSettings: AlarmSettingType[]): MenuitemsType[] => {
           href: '/dashboards/monitoring/config',
         },
       ],
+    },
+    {
+      id: uniqueId(),
+      title: 'Evacuate',
+      icon: IconAppWindow,
+      href: '/dashboards/evacuation/',
     },
 
     {
@@ -210,6 +220,16 @@ const getMenuItems = (alarmSettings: AlarmSettingType[]): MenuitemsType[] => {
         },
       ],
     },
+    {
+              id: uniqueId(),
+              title: 'Security',
+              icon: IconEye,
+              children: [
+                { id: uniqueId(), title: 'Security Guard', icon: IconBadge, href: '/master/securityguard/' },
+                { id: uniqueId(), title: 'Patrol Area', icon: IconMapSearch, href: '/master/patrolarea/' },
+                { id: uniqueId(), title: 'Patrol Route', icon: IconRoute, href: '/master/patrolroute/' },
+              ]
+            },
     {
       id: uniqueId(),
       title: 'Member Data',

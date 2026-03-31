@@ -9,10 +9,7 @@ import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
 import { isEqual } from 'lodash';
 import { lazy, useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
-import { fetchBuildings } from 'src/store/apps/crud/building';
-import { fetchFloors } from 'src/store/apps/crud/floor';
 import { UpdateFilter } from 'src/store/apps/crud/floorplan';
-import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 // import AutocompleteFilter from 'src/layouts/full/horizontal/navbar/AutocompleteFilter';
 

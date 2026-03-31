@@ -96,7 +96,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
   const { data: data } = useAlarmTriggerList({
     ...defaultAlarmTriggerFilter,
     Length: 999,
-    filters: { isActive: true },
+    // filters: { isActive: true },
   });
   const alarmLogs =
     data?.data.filter((a) => a.action === 'Idle' || a.action === 'Acknowledged') || [];

@@ -39,9 +39,19 @@ export type GetFilter = {
     SearchValue: string,
     // timeRange: string,
     dateFilters: {
-
+        TriggerTime?: {
+            DateFrom: string | null;
+            DateTo: string | null;
+        }
     }
     filters: {
+        alarm?: string[];
+        buildingId?: string[];
+        floorId?: string[];
+        floorplanId?: string[];
+        action?: string[];
+        visitorId?: string[];
+        memberId?: string[];
     }
 }
 

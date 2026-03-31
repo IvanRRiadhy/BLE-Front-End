@@ -2,7 +2,7 @@
   "API_BASE_URL": "http://192.168.1.116:5000",
   "API_ENGINE_URL": "http://192.168.1.116:3300",
   "MQTT_URL": "ws://192.168.1.116:9005",
-  
+  "ALARM_TOPIC": "people_tracking/alarm/+/+/+/+/+",
   "CDN_URL": "https://ble-cdn.tunnel.piranticerdasindonesia.com",
   "API_KEY": "FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK",
   "NTFY_TOPIC": "alarm-ntfy",

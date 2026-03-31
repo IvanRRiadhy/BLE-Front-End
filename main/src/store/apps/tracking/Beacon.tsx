@@ -401,7 +401,7 @@ export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
       // Filter to only include beacons for this floorplan
       const filteredBeacons = beaconArray.filter(
         (beacon: any) =>
-          beacon.floorplanId && `tracking/${beacon.floorplanId.toUpperCase()}` === topic,
+          beacon.floorplanId && `people_tracking/tracking/+/+/${beacon.floorplanId.toUpperCase()}/+/+` === topic,
       );
 
       if (filteredBeacons.length > 0) {
@@ -452,7 +452,7 @@ export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
 
 // Thunk to subscribe to counting data
 export const fetchCountingData = () => (dispatch: AppDispatch) => {
-  const countingTopic = 'tracking/counting'; // Adjust the topic as needed
+  const countingTopic = 'people_tracking/counting'; // Adjust the topic as needed
 
   // console.log(`[MQTT] Subscribing to counting topic: ${countingTopic}`);
 

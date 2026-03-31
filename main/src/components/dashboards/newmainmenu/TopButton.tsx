@@ -24,7 +24,7 @@ const TopButton: React.FC<TopButtonProps> = ({
     <Box
       sx={{
         width: "8.85vw",
-        height: "7.15vh",
+        height: "9.7vh",
         px: 1.5,
         borderRadius: "15px",
         border: `1px solid ${color}`,

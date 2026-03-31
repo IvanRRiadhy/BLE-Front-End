@@ -160,11 +160,21 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         if (username) localStorage.setItem('username', username);
         if (email) localStorage.setItem('email', email);
         if (levelPriority) localStorage.setItem('levelPriority', levelPriority.trim());
-        if (applicationId) localStorage.setItem('applicationId', applicationId);
+        if (applicationId && levelPriority.trim() !== 'System')
+          localStorage.setItem('applicationId', applicationId);
 
         // optional extras
         if (decoded.fullName) localStorage.setItem('fullName', decoded.fullName);
         if (decoded.groupName) localStorage.setItem('groupName', decoded.groupName);
+        // handle accessibleBuildings (comma-separated string → array)
+        if (decoded.accessibleBuildings) {
+          const buildingsArray = decoded.accessibleBuildings
+            .split(',')
+            .map((id) => id.trim())
+            .filter(Boolean); // remove empty values
+
+          localStorage.setItem('accessibleBuildings', JSON.stringify(buildingsArray));
+        }
       }
 
       if (data?.refreshToken) {

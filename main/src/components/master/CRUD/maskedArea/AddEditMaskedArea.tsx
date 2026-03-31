@@ -44,6 +44,7 @@ const AddEditMaskedArea = ({ type, maskedArea }: FormType) => {
       restrictedStatus: '',
       // engineAreaId: '',
       allowFloorChange: false,
+      labels: [],
       // wideArea: 0,
       // positionPxX: 0,
       // positionPxY: 0,

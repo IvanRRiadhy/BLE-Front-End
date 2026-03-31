@@ -5,7 +5,7 @@ import { Box, Grid2 as Grid, Stack } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import TopCards from 'src/components/dashboards/mainmenu/TopCards';
 import TrackingGraph from 'src/components/dashboards/mainmenu/Tracking';
-import AlarmWarning from 'src/components/dashboards/mainmenu/AlarmWarning';
+// import AlarmWarning from 'src/components/dashboards/mainmenu/AlarmWarning';
 import BlacklistTable from 'src/components/dashboards/mainmenu/Blacklist';
 import WelcomePopup from 'src/components/dashboards/mainmenu/WelcomePopup';
 import { blacklistType, fetchBlacklistDT } from 'src/store/apps/crud/blacklist';
@@ -20,7 +20,7 @@ import { fetchFloorDT, floorType } from 'src/store/apps/crud/floor';
 import BeaconDistribution from 'src/components/dashboards/mainmenu/BeaconDistribution';
 import AreaDistribution from 'src/components/dashboards/mainmenu/AreaDistribution';
 import { CardType, fetchCardDT } from 'src/store/apps/crud/card';
-import DynamicSwitcherCard from 'src/components/dashboards/mainmenu/DynamicCardSwitcher';
+// import DynamicSwitcherCard from 'src/components/dashboards/mainmenu/DynamicCardSwitcher';
 import ChartSwitcher from 'src/components/dashboards/mainmenu/ChartSwitcher';
 import {
   CountCardType,
@@ -294,7 +294,7 @@ const Modern = () => {
             </Grid>
 
             <Grid size={{ xs: 12, lg: 3 }} sx={{ display: 'flex', flexDirection: 'column' }}>
-              <DynamicSwitcherCard
+              {/* <DynamicSwitcherCard
                 defaultType="Alarm"
                 availableTypes={['Alarm', 'Blacklist']}
                 componentProps={{
@@ -305,7 +305,7 @@ const Modern = () => {
                   Tracking: {},
                   Visitor: {},
                 }}
-              />
+              /> */}
             </Grid>
             <Grid size={{ xs: 12, lg: 3 }} sx={{ display: 'flex', flexDirection: 'column' }}>
               <ChartSwitcher

@@ -440,7 +440,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   useEffect(() => {
     if (!focusBeaconId) return;
 
-    const topic = `highlight/positions/${focusBeaconId}`;
+    const topic = `people_tracking/highlight/positions/${focusBeaconId}`;
     console.log(`[MQTT] Subscribing to highlight topic: ${topic}`);
 
     const unsubscribe = startMQTTclient((msg: any) => {

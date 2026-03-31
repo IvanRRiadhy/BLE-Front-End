@@ -38,6 +38,8 @@ import {
 } from 'src/store/apps/tracking/Beacon';
 import { fetchEventLogs } from 'src/store/apps/tracking/Event';
 
+
+
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
   minHeight: '100vh',
@@ -64,7 +66,25 @@ const FullLayout: FC = () => {
   const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
   const dispatch: AppDispatch = useDispatch();
   const config = getConfig();
-  const topic = config.ALARM_TOPIC || 'tracking/engine/alarm'; // Use MQTT topic from config
+  const storedBuildings = localStorage.getItem('accessibleBuildings');
+  let topics: string[] = [];
+
+  if (storedBuildings) {
+    try {
+      const parsed: string[] = JSON.parse(storedBuildings);
+
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        topics = parsed.map((id) => `people_tracking/alarm/${id.toUpperCase()}/+/+/+/+`);
+      }
+    } catch (err) {
+      console.warn('Failed to parse accessibleBuildings', err);
+    }
+  }
+
+  // fallback 
+  if (topics.length === 0) {
+    topics = ['people_tracking/alarm/+/+/+/+/+'];
+  }
   const customizer = useSelector((state: RootState) => state.customizer);
   const evacState = useSelector((state: RootState) => state.customizer.evacState);
   const theme = useTheme();
@@ -141,111 +161,142 @@ const FullLayout: FC = () => {
       dispatch(hydrateEvacState(JSON.parse(savedEvac)));
     }
 
-    // MQTT subscription for alarms
-    console.log(`[MQTT] Subscribing to alarm topic "${topic}"`);
-    const unsubscribe = startMQTTclient(
-      (data: any) => {
-        // ⭐ Same callback logic, but now receiving data from MQTT
-        const now = Date.now();
-        const alarmData = Array.isArray(data) ? data[0] : data;
+    // ✅ MULTI TOPIC LOGIC START
+    const storedBuildings = localStorage.getItem('accessibleBuildings');
+    let topics: string[] = [];
 
-        console.log('[MQTT] Received alarm data:', alarmData);
+    if (storedBuildings) {
+      try {
+        const parsed: string[] = JSON.parse(storedBuildings);
 
-        setLatestAlarm(alarmData);
-        setOpenAlarmPopup(true);
-        // dispatch(showAlarmPopup(alarmData));
-        window.postMessage({ type: 'app:new-alarm', detail: { alarm: alarmData } }, '*');
-        dispatch(
-          pushItem({
-            id: `${alarmData?.beaconId ?? 'unknown'}-${Date.now()}`,
-            alarm: alarmData,
-            title: 'Alarm Triggered',
-            message: `Beacon ${getName(alarmData?.beaconId || 'Unknown')} · ${
-              alarmData?.maskedAreaName ?? 'Unknown'
-            } · ${alarmData?.floorplanName ?? 'Unknown'}`,
-          }),
-        );
-        dispatch(openPanel());
-
-        if (
-          'Notification' in window &&
-          Notification.permission === 'granted' &&
-          !document.hasFocus()
-        ) {
-          const title = 'Alarm Triggered!';
-          const body = `Beacon ${getName(alarmData.beaconId || 'Unknown')} is in ${
-            alarmData.maskedAreaName || 'Unknown Area'
-          } on ${alarmData.floorplanName || 'Unknown Floor'}.`;
-
-          const notification = new Notification(title, { body, icon: '/icon.png' });
-          notification.onclick = () => {
-            window.focus();
-            notification.close();
-          };
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          topics = parsed.map((id) => `people_tracking/alarm/${id.toUpperCase()}/+/+/+/+`);
         }
+      } catch (err) {
+        console.warn('[MQTT] Failed to parse accessibleBuildings', err);
+      }
+    }
 
-        if (now - lastDispatchRef.current > 1500) {
-          lastDispatchRef.current = now;
-          dispatch(fetchAlarmTrigger());
-        }
-        const alarmLog: AlarmLogItem = {
-          id: `alarm-${alarmData.triggerId}-${Date.now()}-${alarmData.status}`, // ✅ stable & unique
-          // device: 'Alarm',
-          type: 'Alarm',
+    if (topics.length === 0) {
+      topics = [config.ALARM_TOPIC || 'people_tracking/alarm/+/+/+/+/+'];
+    }
+    // ✅ MULTI TOPIC LOGIC END
 
-          target: alarmData.visitorName || alarmData.cardName || alarmData.dmac,
-          image: alarmData.faceImage || '',
-          color: alarmData.color || 'gray',
-          dmac: alarmData.dmac,
-          floor: alarmData.floorplanName || 'Unknown Floor',
-          floorplanId: alarmData.floorplanId,
-          area: alarmData.maskedAreaName || 'Unknown Area',
-          personId: alarmData.personId || '',
-          triggerId: alarmData.triggerId,
-          alarmStatus: alarmData.status, // e.g. blacklist / restricted
-          action: alarmData.action, // idle / dispatched / etc
-          priority: alarmData.priority,
-          time: new Date().toISOString(),
-          seen: false,
-          personType: alarmData.visitorName ? 'Visitor' : 'Member',
+    const unsubscribeList: (() => void)[] = [];
+
+    const callback = (data: any) => {
+      const now = Date.now();
+      const alarmData = Array.isArray(data) ? data[0] : data;
+
+      console.log('[MQTT] Received alarm data:', alarmData);
+
+      setLatestAlarm(alarmData);
+      setOpenAlarmPopup(true);
+
+      window.postMessage({ type: 'app:new-alarm', detail: { alarm: alarmData } }, '*');
+
+      dispatch(
+        pushItem({
+          id: `${alarmData?.beaconId ?? 'unknown'}-${Date.now()}`,
+          alarm: alarmData,
+          title: 'Alarm Triggered',
+          message: `Beacon ${getName(alarmData?.beaconId || 'Unknown')} · ${
+            alarmData?.maskedAreaName ?? 'Unknown'
+          } · ${alarmData?.floorplanName ?? 'Unknown'}`,
+        }),
+      );
+
+      dispatch(openPanel());
+
+      if (
+        'Notification' in window &&
+        Notification.permission === 'granted' &&
+        !document.hasFocus()
+      ) {
+        const title = 'Alarm Triggered!';
+        const body = `Beacon ${getName(alarmData.beaconId || 'Unknown')} is in ${
+          alarmData.maskedAreaName || 'Unknown Area'
+        } on ${alarmData.floorplanName || 'Unknown Floor'}.`;
+
+        const notification = new Notification(title, { body, icon: '/icon.png' });
+        notification.onclick = () => {
+          window.focus();
+          notification.close();
         };
-        const incomingAlarm: AlarmLogItem = alarmLog; // your mapped object
+      }
 
-        const currentAlarm = alarmPopupRef.current;
+      if (now - lastDispatchRef.current > 1500) {
+        lastDispatchRef.current = now;
+        dispatch(fetchAlarmTrigger());
+      }
 
-        const shouldShowPopup =
-          !currentAlarm || isHigherPriority(incomingAlarm.priority, currentAlarm.priority);
-        // console.log('ShouldShowPopup', shouldShowPopup);
-        // console.log('Incoming Alarm', incomingAlarm, 'Current Alarm', currentAlarm, "AlarmData", alarmData);
-        if (shouldShowPopup) {
-          dispatch(ShowAlarmPopup(incomingAlarm));
-          dispatch(NotifyAlarmPopup(incomingAlarm.id));
+      const alarmLog: AlarmLogItem = {
+        id: `alarm-${alarmData.triggerId}-${Date.now()}-${alarmData.status}`,
+        type: 'Alarm',
+        target: alarmData.visitorName || alarmData.cardName || alarmData.dmac,
+        image: alarmData.faceImage || '',
+        color: alarmData.color || 'gray',
+        dmac: alarmData.dmac,
+        floor: alarmData.floorplanName || 'Unknown Floor',
+        floorplanId: alarmData.floorplanId,
+        area: alarmData.maskedAreaName || 'Unknown Area',
+        personId: alarmData.personId || '',
+        triggerId: alarmData.triggerId,
+        alarmStatus: alarmData.status,
+        action: alarmData.action,
+        priority: alarmData.priority,
+        time: new Date().toISOString(),
+        seen: false,
+        personType: alarmData.visitorName ? 'Visitor' : 'Member',
+      };
 
-          // Update refs immediately to prevent race
-          alarmPopupRef.current = incomingAlarm;
-          alarmPopupIdRef.current = incomingAlarm.id;
-        }
-        dispatch(AppendAlarmLogs([alarmLog]));
-      },
-      topic, // MQTT topic
-    );
+      const incomingAlarm: AlarmLogItem = alarmLog;
+      const currentAlarm = alarmPopupRef.current;
 
-    if (!unsubscribe) {
-      console.error(`[MQTT] Failed to subscribe to alarm topic "${topic}"`);
-    } else {
-      unsubscriberRef.current = unsubscribe;
-      console.log(`[MQTT] Successfully subscribed to topic "${topic}"`);
+      const shouldShowPopup =
+        !currentAlarm || isHigherPriority(incomingAlarm.priority, currentAlarm.priority);
+
+      if (shouldShowPopup) {
+        dispatch(ShowAlarmPopup(incomingAlarm));
+        dispatch(NotifyAlarmPopup(incomingAlarm.id));
+
+        alarmPopupRef.current = incomingAlarm;
+        alarmPopupIdRef.current = incomingAlarm.id;
+      }
+
+      dispatch(AppendAlarmLogs([alarmLog]));
+    };
+
+    // ✅ SUBSCRIBE MULTIPLE TOPICS
+    topics.forEach((t) => {
+      console.log(`[MQTT] Subscribing to alarm topic "${t}"`);
+
+      const unsub = startMQTTclient(callback, t);
+
+      if (unsub) {
+        unsubscribeList.push(unsub);
+      } else {
+        console.error(`[MQTT] Failed to subscribe to topic "${t}"`);
+      }
+    });
+
+    if (unsubscribeList.length > 0) {
+      unsubscriberRef.current = () => {
+        unsubscribeList.forEach((fn) => fn());
+      };
+      console.log('[MQTT] Successfully subscribed to topics:', topics);
     }
 
     return () => {
       setSessionExpiredHandler(() => {});
+
       if (unsubscriberRef.current) {
         unsubscriberRef.current();
         unsubscriberRef.current = null;
-        console.log(`[MQTT] Unsubscribed from topic "${topic}"`);
+        console.log('[MQTT] Unsubscribed from all alarm topics');
       }
     };
-  }, [dispatch, memberList, visitorList, topic]);
+  }, [dispatch, memberList, visitorList, config.ALARM_TOPIC]);
 
   return (
     <>

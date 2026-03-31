@@ -133,7 +133,7 @@ const SecurityViewLayout: FC = () => {
     publishMQTT(startTopic, payload);
     console.log(`[MQTT] Published Start message to ${startTopic}`);
 
-    const topic = `highlight/positions/${focusAlarm.beacon}`;
+    const topic = `people_tracking/highlight/positions/${focusAlarm.beacon}`;
     console.log(`[MQTT] Subscribing to focus alarm topic: ${topic}`);
 
     const unsubscribe = startMQTTclient((msg: any) => {

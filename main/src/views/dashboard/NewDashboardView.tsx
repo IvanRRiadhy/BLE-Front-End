@@ -139,12 +139,12 @@ const DashboardView: React.FC = () => {
                   num={alarmFilteredCount}
                   color="#045498"
                 />
-                <TopButton
+                {/* <TopButton
                   icon={IconClock}
                   label="Active Alarm"
                   num={alarmFilteredCount}
                   color="#D73D3D"
-                />
+                /> */}
                 <TopButton
                   icon={IconCircleX}
                   label="Blacklist"
@@ -176,7 +176,7 @@ const DashboardView: React.FC = () => {
                   num={maskedAreaFilteredCount}
                   color="#045498"
                 />
-                <TopButton icon={IconMapPin} label="Placeholder" num={123} color="#045498" />
+                {/* <TopButton icon={IconMapPin} label="Placeholder" num={123} color="#045498" /> */}
               </Box>
             </Grid>
 

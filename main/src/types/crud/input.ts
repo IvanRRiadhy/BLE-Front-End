@@ -135,24 +135,24 @@ export const visitorStatusEnumMap: Record<string, number> = {
     { label: "Active", value: "Active" },
   ];
 
-  export const alarmRecordStatus: inputDataType[] = [
-    { label: "Please select Status", value: '', disabled: true},
-    { label: "Block", value: 'Block'},
-    { label: "Help", value: 'Help'},
-    { label: "Wrong Zone", value: 'WrongZone'},
-    { label: "Expired", value: 'Expired'},
-    { label: "Lost", value: 'Lost'},
-    { label: "Blacklist", value: "Blacklist"},
-  ];
+  // export const alarmRecordStatus: inputDataType[] = [
+  //   { label: "Please select Status", value: '', disabled: true},
+  //   { label: "Block", value: 'Block'},
+  //   { label: "Help", value: 'Help'},
+  //   { label: "Wrong Zone", value: 'WrongZone'},
+  //   { label: "Expired", value: 'Expired'},
+  //   { label: "Lost", value: 'Lost'},
+  //   { label: "Blacklist", value: "Blacklist"},
+  // ];
 
-  export const alarmRecordStatusColormap: Record<string, string> = {
-    Block: 'error.dark',
-    Help: 'success.main',
-    WrongZone: 'error.dark',
-    Expired: 'warning.main',
-    Lost: 'primary.main',
-    Blacklist: 'black',
-  };
+  // export const alarmRecordStatusColormap: Record<string, string> = {
+  //   Block: 'error.dark',
+  //   Help: 'success.main',
+  //   WrongZone: 'error.dark',
+  //   Expired: 'warning.main',
+  //   Lost: 'primary.main',
+  //   Blacklist: 'black',
+  // };
 
   export const actionStatus: inputDataType[] = [
     { label: "Please select Status", value: '', disabled: true},

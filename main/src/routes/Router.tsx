@@ -397,9 +397,9 @@ const Router = [
         element: withAuth(<AlarmTrigger />, '/report/alarmtrigger'),
       },
       {
-        path: '/report/alarmlist',
+        path: '/alarm/alarmlist',
         exact: true,
-        element: withAuth(<AlarmList />, '/report/alarmlist'),
+        element: withAuth(<AlarmList />, '/alarm/alarmlist'),
       },
       {
         path: '/report/cardrecord',

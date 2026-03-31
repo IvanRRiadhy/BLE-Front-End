@@ -189,7 +189,7 @@ const isBoundaryActive = isActive('boundary');
         // { id: uniqueId(), title: 'Blacklist', icon: IconBarrierBlock, href: '/visitor/blacklist/' },
       ],
     },
-
+{ id: uniqueId(), title: 'Alarm List', icon: IconBellExclamation, href: '/alarm/alarmlist/' },
     {
       id: uniqueId(),
       title: 'Report',
@@ -199,7 +199,7 @@ const isBoundaryActive = isActive('boundary');
         // { id: uniqueId(), title: 'Tracking Transaction', icon: IconLiveView, href: '/report/trackingtransaction/' },
         // { id: uniqueId(), title: 'Alarm Notification', icon: IconBellExclamation, href: '/report/alarmRecord/' },
         { id: uniqueId(), title: 'Alarm Trigger', icon: IconBellExclamation, href: '/report/alarmTrigger/' },
-        { id: uniqueId(), title: 'Alarm List', icon: IconBellExclamation, href: '/report/alarmlist/' },
+        
         // { id: uniqueId(), title: 'Card Record', icon: IconBarrierBlock, href: '/report/cardrecord/' },
         // { id: uniqueId(), title: 'Test Record', icon: IconCalendar, href: '/report/testrecord/' },
         { id: uniqueId(), title: 'Visitor Report', icon: IconCalendar, href: '/report/visitorreport/filter/'},

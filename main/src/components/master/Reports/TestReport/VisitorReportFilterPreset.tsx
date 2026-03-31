@@ -189,11 +189,25 @@ const VisitorReportFilterPreset = ({
     }
     console.log('Generating report with preset: ', selectedPreset);
     try {
-      const result = await applyMutation.mutateAsync(selectedPreset.id);
+      const result = await applyMutation.mutateAsync({
+  id: selectedPreset.id,
+  payload: {
+    from:
+      selectedPreset.timeRange === 'Custom' && selectedPreset.fromDate
+        ? new Date(selectedPreset.fromDate).toISOString()
+        : null,
+    to:
+      selectedPreset.timeRange === 'Custom' && selectedPreset.toDate
+        ? new Date(selectedPreset.toDate).toISOString()
+        : null,
+    personType: 'visitor',
+  },
+});
       const alarmFilter = mapPresetToAlarmLogFilter(selectedPreset);
       const alarmLog = await alarmLogMutation.mutateAsync(alarmFilter);
       console.log('Fetched Alarm Log for Report:', alarmLog);
-      setApiTrackingData(result.data.data);
+      console.log('Fetched Tracking Data for Report:', result.data);
+      setApiTrackingData(result.data.collection.data);
       setApiAlarmData(alarmLog);
       // toast.success(`Applied preset: ${selectedPreset.name}`);
       // console.log('Visitor filter preset applied successfully: ', result.data);
@@ -514,7 +528,7 @@ const VisitorReportFilterPreset = ({
                             isLoading || deleteMutation.isPending || applyMutation.isPending
                           }
                         >
-                          {applyMutation.isPending ? 'Applying Preset...' : 'Generate Report'}
+                          {applyMutation.isPending ? 'Applying Preset...' : 'Generate By Preset'}
                         </Button>
                       </Grid>
                     </Grid>

@@ -134,7 +134,7 @@ const VisitorReportFilter = () => {
   /* ===================== ADAPTERS ===================== */
   const adaptTracking = (data: VisitorSessionType[]) =>
     data.map((r) => ({
-      VisitorName: r.visitorName ?? '-',
+      PersonName: r.personName ?? '-',
       BuildingName: r.buildingName ?? '-',
       FloorName: r.floorName ?? '-',
       AreaName: r.areaName ?? '-',
@@ -147,10 +147,25 @@ const VisitorReportFilter = () => {
 
   const adaptAlarm = (data: NewAlarmType[]) =>
     data.map((r) => ({
-      VisitorName: r.visitorName ?? '-',
-      AreaName: r.floorplanName ?? '-',
+      PersonName: r.personName ?? '-',
+      BuildingName: r.buildingName ?? '-',
+      FloorName: r.floorName ?? '-',
+      AreaName: r.areaName ?? '-',
       AlarmTriggered: r.triggeredAt,
+      AcknowledgedAt: r.acknowledgedAt,
+      AcknowledgedBy: r.acknowledgedBy ?? '-',
+      DispatchedAt: r.dispatchedAt,
+      DispatchedBy: r.dispatchedBy ?? '-',
+      AssignedSecurityName: r.assignedSecurityName ?? '-',
+      AcceptedAt: r.acceptedAt,
+      AcceptedBy: r.acceptedBy ?? '-',
+      responseTimeSeconds: r.responseTimeSeconds,
+      responseTimeFormatted: r.responseTimeFormatted,
+      resolutionTimeSeconds: r.resolutionTimeSeconds,
+      resolutionTimeFormatted: r.resolutionTimeFormatted,
+      
       AlarmDone: r.doneAt,
+      DoneBy: r.doneBy ?? '-',
       VisitorStatus: r.actionStatus,
       HostName: '-', // explicitly excluded
       AlarmCategory: r.alarmStatus,

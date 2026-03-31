@@ -68,6 +68,7 @@ import { resolve } from 'path';
 import { useAlarmPlayback } from 'src/hooks/useAlarmPlayback';
 import { AlarmPlaybackDataType } from 'src/store/apps/crud/alarmPlayback';
 import AlarmPlaybackDialog from './AlarmPlaybackDialog';
+import AlarmTriggeredFilter from './AlarmFilter';
 dayjs.extend(duration);
 
 const proximityColorMap: Record<string, string> = {
@@ -129,13 +130,18 @@ const AlarmContent = () => {
           UpdateFilter({
             ...alarmTriggerFilter,
             Length: 999,
-            filters: { visitorId: selectedVisitor.id },
+            filters: { ...alarmTriggerFilter.filters, visitorId: [selectedVisitor.id], memberId: undefined },
           }),
         );
       } else if (type === 'Member' && selectedMember) {
         setCurrentPerson(selectedMember);
         // Update filter for member
-        dispatch(UpdateFilter({ ...alarmTriggerFilter, filters: { memberId: selectedMember.id } }));
+        dispatch(
+          UpdateFilter({
+            ...alarmTriggerFilter,
+            filters: { ...alarmTriggerFilter.filters, memberId: [selectedMember.id], visitorId: undefined },
+          }),
+        );
       } else {
         setCurrentPerson(null);
       }
@@ -780,9 +786,20 @@ const AlarmContent = () => {
           minHeight: 0,
         }}
       >
-        <Typography variant="h5" fontWeight="bold" mb={2}>
-          Alarm Triggered
-        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 2,
+          }}
+        >
+          <Typography variant="h5" fontWeight="bold">
+            Alarm Triggered
+          </Typography>
+
+          <AlarmTriggeredFilter />
+        </Box>
 
         {/* ================= 3 COLUMN MODE ================= */}
         {!currentPerson ? (

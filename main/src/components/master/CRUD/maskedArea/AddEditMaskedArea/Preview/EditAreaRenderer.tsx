@@ -511,10 +511,11 @@ const EditAreaRenderer: React.FC<Props> = ({
             const newArea: MaskedAreaType = {
               id: drawingMaskedArea,
               name: drawingMaskedArea,
-              colorArea: '#363636',
+              colorArea: '#FF4D4F',
               areaShape: JSON.stringify(prevNodes),
               restrictedStatus: '',
               allowFloorChange: false,
+              labels: [],
               // wideArea: 0,
               // positionPxX: 0,
               // positionPxY: 0,

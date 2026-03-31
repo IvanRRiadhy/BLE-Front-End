@@ -55,9 +55,12 @@ function createAxiosService({ getBaseUrl }: AxiosServiceOptions): AxiosInstance 
   // ✅ Set baseURL dynamically (after config.json loaded)
   instance.interceptors.request.use(request => {
     request.baseURL = getBaseUrl();
-
-    const ApplicationId = localStorage.getItem('applicationId');
+    
+    let ApplicationId: string | null = null;
     const levelPriority = localStorage.getItem('levelPriority');
+    if(levelPriority !== 'System') {
+      ApplicationId = localStorage.getItem('applicationId');
+    }
     const accessToken = localStorage.getItem('token');
 
     if (accessToken) {
@@ -66,16 +69,25 @@ function createAxiosService({ getBaseUrl }: AxiosServiceOptions): AxiosInstance 
 
     if (request.method === 'post' && levelPriority === 'System') {
       if (request.data instanceof FormData) {
-        if (ApplicationId) request.data.append('ApplicationId', ApplicationId);
+        if (ApplicationId){ 
+          console.log("Appending ApplicationId to FormData: ", ApplicationId, levelPriority);
+          request.data.append('ApplicationId', ApplicationId)};
       } else if (
         request.headers['Content-Type'] === 'application/json' &&
         typeof request.data === 'string'
       ) {
         const dataObj = JSON.parse(request.data);
+        if(ApplicationId){
+        console.log("Appending ApplicationId to JSON string data: ", ApplicationId, levelPriority);
+        
         dataObj.ApplicationId = ApplicationId;
+      }
         request.data = JSON.stringify(dataObj);
       } else if (typeof request.data === 'object' && request.data !== null) {
+        if(ApplicationId) {
+        console.log("Appending ApplicationId to request.data: ", ApplicationId, levelPriority);
         request.data.ApplicationId = ApplicationId;
+        }
       }
     }
 

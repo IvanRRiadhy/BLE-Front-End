@@ -38,7 +38,7 @@ export function useAlarmTriggerList(filter: GetFilter) {
     queryFn: async () => {
       const res = await axiosServices.post(API_DT_URL, filter);
       const col = res.data.collection;
-      // console.log('Fetched AlarmTrigger List:', col);
+      console.log('Fetched AlarmTrigger List:', col);
       return {
         data: col.data as AlarmTriggerType[],
         draw: col.draw,

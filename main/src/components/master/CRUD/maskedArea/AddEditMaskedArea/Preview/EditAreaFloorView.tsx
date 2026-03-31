@@ -52,7 +52,7 @@ const EditAreaFloorView: React.FC<{
   const [isDragging, setIsDragging] = useState('');
   const [isHovered, setIsHovered] = useState(false);
   useEffect(() => {
-    console.log('CURSOR: ', Cursor);
+    // console.log('CURSOR: ', Cursor);
   }, [Cursor]);
   // Container and stage management
   const containerRef = useRef<HTMLDivElement>(null);

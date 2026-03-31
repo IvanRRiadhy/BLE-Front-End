@@ -17,6 +17,23 @@ export function initializeMQTTConfig() {
   MQTT_PASSWORD = getConfig().MQTT_PASSWORD;
 }
 
+function matchTopic(subscribed: string, actual: string): boolean {
+  const subLevels = subscribed.split('/');
+  const actLevels = actual.split('/');
+
+  for (let i = 0; i < subLevels.length; i++) {
+    const sub = subLevels[i];
+    const act = actLevels[i];
+
+    if (sub === '#') return true;
+    if (sub === '+') continue;
+
+    if (sub !== act) return false;
+  }
+
+  return subLevels.length === actLevels.length;
+}
+
 const generateClientId = () => {
   return (
     'Klien_FrontEnd_' +
@@ -84,7 +101,13 @@ export function startMQTTclient(messagecallback: any, topic: string) {
       try {
         data = JSON.parse(message_str);
         // console.log(`[MQTT] Message received on topic "${msgTopic}":`, data);
-        (messageCallbacks[msgTopic] || []).forEach((cb) => cb(data));
+        Object.keys(messageCallbacks).forEach((subscribedTopic) => {
+          const isMatch = matchTopic(subscribedTopic, msgTopic);
+
+          if (isMatch) {
+            messageCallbacks[subscribedTopic].forEach((cb) => cb(data));
+          }
+        });
       } catch (e) {
         console.warn(` Invalid JSON received on topic`, msgTopic);
       }

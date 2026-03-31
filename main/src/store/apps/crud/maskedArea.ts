@@ -50,6 +50,11 @@ type Nodes = {
     y_px: number;
   };
 
+  export type MaskedAreaLabelType = {
+    id: string;
+    labelName: string;
+}
+
 export interface MaskedAreaType {
     id: string,
     floorplanId: string,
@@ -69,6 +74,8 @@ export interface MaskedAreaType {
     generate?: number,
     status?: number
     nodes?: Nodes[],
+    labels?: MaskedAreaLabelType[],
+    labelIds?: string[],
 }
 
 interface StateType {

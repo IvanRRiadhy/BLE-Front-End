@@ -87,6 +87,7 @@ export function useAddMaskedArea() {
         floor,
         floorplan,
         nodes,
+        labels,
         ...cleanData
       } = maskedArea;
 
@@ -130,6 +131,7 @@ export function useEditMaskedArea() {
         floor,
         floorplan,
         nodes,
+        labels,
         applicationId,
         ...cleanData
       } = maskedArea;

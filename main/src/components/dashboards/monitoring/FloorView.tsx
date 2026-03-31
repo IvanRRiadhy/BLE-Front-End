@@ -340,7 +340,7 @@ const FloorView: React.FC<{
   }, [activeFloorplan, dispatch]);
 
   // Also update the topic construction
-  const topic = `tracking/${activeFloorplan.toUpperCase()}`;
+  const topic = `people_tracking/tracking/+/+/${activeFloorplan.toUpperCase()}/+/+`;
 
   // Panning handler - Modified for following mode
   const handleMouseDown = useCallback(

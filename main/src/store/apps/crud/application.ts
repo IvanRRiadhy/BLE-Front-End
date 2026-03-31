@@ -36,6 +36,23 @@ export interface ApplicationType {
   licenseType: string;
 }
 
+export type CreateApplicationRequest = {
+  applicationName: string;
+  organizationType: string;
+  organizationAddress: string;
+  applicationType: string;
+  hostName: string;
+  hostPhone: string;
+  hostEmail: string;
+  hostAddress: string;
+  applicationCustomName: string;
+  applicationCustomDomain: string;
+  applicationCustomPort: string;
+  adminUsername: string;
+  adminEmail: string;
+  adminPassword: string;
+}
+
 // State structure
 interface StateType {
   applications: ApplicationType[];
@@ -177,10 +194,11 @@ export const fetchApplications = () => async (dispatch: AppDispatch) => {
 
 export const addApplication = createAsyncThunk(
   "applications/addApplication",
-  async (newApplication: ApplicationType, { rejectWithValue }) => {
+  async (newApplication: CreateApplicationRequest, { rejectWithValue }) => {
     try {
-      const {id, applicationRegistered, applicationExpired, ...filteredAppData} = newApplication
-      const response = await axiosServices.post(API_URL, filteredAppData);
+      // const {id, applicationRegistered, applicationExpired, ...filteredAppData} = newApplication
+      console.log("Adding application with data: ", newApplication);
+      const response = await axiosServices.post(API_URL, newApplication);
       return response.data;
     } catch (error: any) {
       console.error("Error adding application:", error);

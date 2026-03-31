@@ -118,7 +118,7 @@ const Notifications = () => {
   const { data: data, isLoading } = useAlarmTriggerList({
     ...defaultAlarmTriggerFilter,
     Length: 999,
-    filters: { isActive: true },
+    // filters: { isActive: true },
   });
   const alarmTriggerData = data?.data || [];
   const memberList: memberType[] = useAllMembers().data || [];

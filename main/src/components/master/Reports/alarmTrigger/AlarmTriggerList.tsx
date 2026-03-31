@@ -166,6 +166,8 @@ const handleApplyAction = async () => {
     const result = await assignActionMutation.mutateAsync({
       dmac: selectedAlarmTrigger.beaconId.toUpperCase(),
       actionStatus: selectedAction.toLowerCase(),
+      investigatedResult:  '',
+      assignedSecurityId: null,
     });
     
     // With React Query, if mutateAsync resolves, it means the mutation was successful
@@ -307,7 +309,7 @@ const handleApplyAction = async () => {
                                 minWidth: '50px',
                               }}
                               size="small"
-                              label={formatActionLabel(row.alarmRecordStatus)}
+                              label={formatActionLabel(row.alarm)}
                             />
                           </TableCell>
                           <TableCell>
@@ -324,7 +326,7 @@ const handleApplyAction = async () => {
                             />
                           </TableCell>
                           <TableCell>
-                            {row.actionStatus ? (
+                            {row.action ? (
                               <Box
                                 component="span"
                                 sx={{
@@ -336,10 +338,10 @@ const handleApplyAction = async () => {
                                   fontWeight: 600,
                                   color: 'white',
                                   textTransform: 'capitalize',
-                                  backgroundColor: actionStatusColormap[row.actionStatus] || 'grey',
+                                  backgroundColor: actionStatusColormap[row.action] || 'grey',
                                 }}
                               >
-                                {formatActionLabel(row.actionStatus)}
+                                {formatActionLabel(row.action)}
                               </Box>
                             ) : (
                               '-'
@@ -450,7 +452,7 @@ const handleApplyAction = async () => {
                       .filter((item) => !item.disabled)
                       .map((item) => {
                         const isActiveStatus =
-                          selectedAlarmTrigger?.actionStatus?.toLowerCase() ===
+                          selectedAlarmTrigger?.action?.toLowerCase() ===
                           item.value.toLowerCase();
 
                         const isSelected =

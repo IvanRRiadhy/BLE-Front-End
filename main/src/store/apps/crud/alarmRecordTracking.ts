@@ -63,10 +63,47 @@ export type GetFilter = {
     }
 }
 
-export type NewAlarmType = {
-  visitorId: string;
-  visitorName: string;
+// export type NewAlarmType = {
+//   visitorId: string;
+//   visitorName: string;
 
+//   buildingId: string;
+//   buildingName: string;
+
+//   floorId: string;
+//   floorName: string;
+
+//   floorplanId: string;
+//   floorplanName: string;
+
+//   alarmStatus: string;
+//   actionStatus: string;
+
+//   investigatedResult: string | null;
+//   triggeredAt: string;           // ISO datetime
+//   doneAt: string | null;         // ISO datetime | null
+//   lastNotifiedAt: string | null; // ISO datetime | null
+
+//   assignedSecurityName: string | null;
+//   handleDurationMinutes: number | null;
+
+//   isActive: boolean;
+
+// };
+export type NewAlarmType = {
+  // 🔹 Person Info (generalized)
+  personId: string;
+  personName: string;
+  personType: 'Visitor' | 'Member';
+  identityId: string;
+
+  // 🔹 Visitor / Member (nullable depending on type)
+  visitorId: string | null;
+  visitorName: string | null;
+  memberId: string | null;
+  memberName: string | null;
+
+  // 🔹 Location
   buildingId: string;
   buildingName: string;
 
@@ -76,19 +113,45 @@ export type NewAlarmType = {
   floorplanId: string;
   floorplanName: string;
 
+  areaId: string | null;
+  areaName: string | null;
+
+  // 🔹 Alarm Status
   alarmStatus: string;
   actionStatus: string;
+  alarmColor: string;
+  isInRestrictedArea: boolean;
 
-  investigatedResult: string | null;
-  triggeredAt: string;           // ISO datetime
-  doneAt: string | null;         // ISO datetime | null
-  lastNotifiedAt: string | null; // ISO datetime | null
+  // 🔹 Timeline
+  triggeredAt: string;
+  doneAt: string | null;
+  lastNotifiedAt: string | null;
+
+  acknowledgedAt: string | null;
+  dispatchedAt: string | null;
+  acceptedAt: string | null;
+
+  // 🔹 Actor
+  acknowledgedBy: string | null;
+  dispatchedBy: string | null;
+  acceptedBy: string | null;
+  doneBy: string | null;
 
   assignedSecurityName: string | null;
+
+  // 🔹 Handling
+  investigatedResult: string | null;
   handleDurationMinutes: number | null;
 
-  isActive: boolean;
+  // 🔹 Metrics
+  responseTimeSeconds: number | null;
+  responseTimeFormatted: string | null;
 
+  resolutionTimeSeconds: number | null;
+  resolutionTimeFormatted: string | null;
+
+  // 🔹 Flags
+  isActive: boolean;
 };
 
 

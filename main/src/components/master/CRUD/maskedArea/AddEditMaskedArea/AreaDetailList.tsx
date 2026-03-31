@@ -7,6 +7,14 @@ import {
   Typography,
   Switch,
   FormControlLabel,
+  Autocomplete,
+  TextField,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
@@ -20,9 +28,12 @@ import {
   RevertMaskedArea,
   SaveMaskedArea,
   SaveEditingArea,
+  MaskedAreaLabelType,
 } from 'src/store/apps/crud/maskedArea';
 import { restrictedStatus } from 'src/types/crud/input';
 import isEqual from 'lodash/isEqual';
+import { useCreateMaskedAreaLabel, useMaskedAreaLabels } from 'src/hooks/useMaskedAreaLabel';
+import toast from 'react-hot-toast';
 
 // Define the form data type for better type safety
 interface AreaFormData {
@@ -31,6 +42,8 @@ interface AreaFormData {
   colorArea: string;
   areaShape: string;
   restrictedStatus: string;
+  // labels: MaskedAreaLabelType[];
+  labelIds?: string[];
   // wideArea: number;
   // positionPxX: number;
   // positionPxY: number;
@@ -44,9 +57,19 @@ interface AreaFormData {
   updatedAt: string;
 }
 
+const CREATE_OPTION = {
+  id: '__create__',
+  labelName: '➕ Create new label',
+};
+
 const AreaDetailList = () => {
   const dispatch: AppDispatch = useDispatch();
   const area = useSelector((state: RootState) => state.maskedAreaReducer.editingMaskedArea);
+  const { data: labels } = useMaskedAreaLabels();
+
+  //   const labelMap = React.useMemo(() => {
+  //   return new Map((labels || []).map(l => [l.id, l]));
+  // }, [labels]);
 
   // Initialize form data with area data or defaults
   const [formData, setFormData] = useState<AreaFormData>({
@@ -55,6 +78,8 @@ const AreaDetailList = () => {
     colorArea: '#363636',
     areaShape: '',
     restrictedStatus: '',
+    // labels: [],
+    labelIds: [],
     // wideArea: 0,
     // positionPxX: 0,
     // positionPxY: 0,
@@ -77,6 +102,8 @@ const AreaDetailList = () => {
         colorArea: area.colorArea || '#363636',
         areaShape: area.areaShape || '',
         restrictedStatus: area.restrictedStatus || '',
+        // labels: area.labels || [],
+        labelIds: area.labels?.map((l) => l.id) || area.labelIds || [],
         // wideArea: area.wideArea || 0,
         // positionPxX: area.positionPxX || 0,
         // positionPxY: area.positionPxY || 0,
@@ -95,7 +122,7 @@ const AreaDetailList = () => {
         setFormData(newFormData);
       }
     }
-  }, [area]); // Remove formData from dependencies to avoid infinite loops
+  }, [area?.id]); // Remove formData from dependencies to avoid infinite loops
 
   const handleClose = () => {
     // Reset to current area data or empty form
@@ -106,6 +133,8 @@ const AreaDetailList = () => {
         colorArea: area.colorArea || '#363636',
         areaShape: area.areaShape || '',
         restrictedStatus: area.restrictedStatus || '',
+        // labels: area.labels || [],
+        labelIds: area.labels?.map((l: MaskedAreaLabelType) => l.id) || area.labelIds || [],
         // wideArea: area.wideArea || 0,
         // positionPxX: area.positionPxX || 0,
         // positionPxY: area.positionPxY || 0,
@@ -156,6 +185,14 @@ const AreaDetailList = () => {
     handleClose();
   };
 
+  // const selectedLabelObjects = React.useMemo(() => {
+  //   if (!labels || !formData.labelIds?.length) return [];
+
+  //   return formData.labelIds
+  //     .map(id => labels.find(l => l.id === id))
+  //     .filter((item): item is MaskedAreaLabelType => Boolean(item));
+  // }, [formData.labelIds, labels]);
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
   ) => {
@@ -172,12 +209,41 @@ const AreaDetailList = () => {
     dispatch(EditUnsavedMaskedArea({ ...formData, [fieldName]: value }));
   };
   const updateField = <K extends keyof AreaFormData>(field: K, value: AreaFormData[K]) => {
+    console.log('Labels: ', labels);
+    console.log(`Updating field ${field} to value:`, value);
     setFormData((prev) => {
       const next = { ...prev, [field]: value };
       dispatch(EditUnsavedMaskedArea(next));
       return next;
     });
   };
+  // console.log({
+  //   labelIds: formData.labelIds,
+  //   labels,
+  //   // selectedLabelObjects
+  // });
+
+  //Create New Label
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [newLabelName, setNewLabelName] = useState('');
+  const { mutateAsync: createLabel, isPending } = useCreateMaskedAreaLabel();
+
+  const handleCreateLabel = async () => {
+  try {
+    const res = await createLabel(newLabelName);
+
+    const newId = res?.collection?.data?.id || res?.id;
+
+    // auto select new label
+    updateField('labelIds', [...(formData.labelIds || []), newId]);
+
+    setNewLabelName('');
+    setOpenCreateDialog(false);
+  } catch (err) {
+    console.error(err);
+    toast.error('Failed to create label');
+  }
+};
 
   // Color palette for the area
   const colorPalette = [
@@ -245,6 +311,64 @@ const AreaDetailList = () => {
                 variant="outlined"
                 fullWidth
                 placeholder="Enter area name"
+              />
+            </Grid>
+            {/* Area Labels */}
+            <Grid size={12}>
+              <CustomFormLabel>Area Label</CustomFormLabel>
+
+              <Autocomplete<MaskedAreaLabelType, true, false, false>
+                multiple
+                options={[CREATE_OPTION, ...(labels || [])]}
+                value={(labels || []).filter((x) => formData.labelIds?.includes(x.id))}
+                loading={!labels}
+                onChange={(_, newValue) => {
+                  const isCreate = newValue.find((v) => v.id === '__create__');
+
+                  if (isCreate) {
+                    setOpenCreateDialog(true);
+                    return;
+                  }
+
+                  updateField(
+                    'labelIds',
+                    newValue.map((v) => v.id),
+                  );
+                }}
+                getOptionLabel={(option) => option?.labelName ?? ''}
+                isOptionEqualToValue={(option, val) => option.id === val.id}
+                filterSelectedOptions
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip label={option.labelName} {...getTagProps({ index })} key={option.id} />
+                  ))
+                }
+                renderOption={(props, option) => {
+                  if (option.id === '__create__') {
+                    return (
+                      <li {...props} style={{ fontWeight: 600, color: '#1976d2' }}>
+                        ➕ Create new label
+                      </li>
+                    );
+                  }
+
+                  return <li {...props}>{option.labelName}</li>;
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder="Search or select labels"
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {!labels ? <CircularProgress size={20} /> : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    }}
+                  />
+                )}
               />
             </Grid>
 
@@ -374,6 +498,25 @@ const AreaDetailList = () => {
           </Button>
         </Box>
       </Box>
+      <Dialog open={openCreateDialog} onClose={() => setOpenCreateDialog(false)}>
+        <DialogTitle>Create New Label</DialogTitle>
+
+        <DialogContent>
+          <CustomTextField
+            fullWidth
+            value={newLabelName}
+            onChange={(e: any) => setNewLabelName(e.target.value)}
+            placeholder="Enter label name"
+          />
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenCreateDialog(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleCreateLabel} disabled={!newLabelName.trim()}>
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

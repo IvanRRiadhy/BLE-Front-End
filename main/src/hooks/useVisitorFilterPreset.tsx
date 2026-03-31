@@ -90,19 +90,38 @@ export function useDeleteVisitorFilterPreset() {
   });
 }
 
+type ApplyVisitorFilterPresetPayload = {
+  from: string | null;
+  to: string | null;
+  personType: 'visitor' | 'member';
+};
+
 export function useApplyVisitorFilterPreset() {
   const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: async (id: string) => {
-      const result = await axiosServices.post(`${VISITOR_FILTER_PRESET_API_URL}apply/${id}`);
+    mutationFn: async ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: ApplyVisitorFilterPresetPayload;
+    }) => {
+      const result = await axiosServices.post(
+        `${VISITOR_FILTER_PRESET_API_URL}apply/${id}`,
+        payload
+      );
+
       console.log('Visitor filter preset applied successfully: ', result.data);
       return result;
     },
+
     onSuccess: () => {
+      // optional invalidate kalau perlu refresh data
       // queryClient.invalidateQueries({ queryKey: ['visitor-filter-preset-list'] });
       // queryClient.invalidateQueries({ queryKey: ['visitor-filter-preset-all'] });
-    }
-  })
+    },
+  });
 }
 
 export function useVisitorFilterPresetStatus() {
