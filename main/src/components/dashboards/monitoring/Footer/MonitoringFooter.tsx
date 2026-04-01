@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Box, Typography } from '@mui/material';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { RootState, useSelector } from 'src/store/Store';
 import TrackingRecord from './TrackingRecord';
 import AlarmList from './Alarm';
@@ -9,7 +11,6 @@ import Statistic from './Statistic';
 const MonitoringFooter = () => {
   const customizer = useSelector((state: RootState) => state.customizer);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
-
 
   const footerRef = useRef<HTMLDivElement>(null); // Reference to the footer
   const toggleHeight = '50px';
@@ -25,7 +26,6 @@ const MonitoringFooter = () => {
     },
     { id: 'section4', title: 'Occupancy', content: <Statistic /> },
   ];
-
 
   // Close the expanded section when clicking outside the footer
   useEffect(() => {
@@ -78,28 +78,50 @@ const MonitoringFooter = () => {
           borderBottom: '1px solid #ddd',
         }}
       >
-        {sections.map((section) => (
-          <Box
-            key={section.id}
-            sx={{
-              flex: 1,
-              textAlign: 'center',
-              cursor: 'pointer',
-              padding: '10px',
-              backgroundColor: expandedSection === section.id ? '#f5f5f5' : 'white',
-              transition: 'background-color 0.3s',
-            }}
-            onClick={() => handleSectionClick(section.id)}
-          >
-            <Typography
-              variant="subtitle1"
-              fontWeight="bold"
-              borderBottom={expandedSection === section.id ? '2px solid #1976d2' : 'none'}
+        {sections.map((section) => {
+          const isActive = expandedSection === section.id;
+
+          return (
+            <Box
+              key={section.id}
+              onClick={() => handleSectionClick(section.id)}
+              sx={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 1,
+                cursor: 'pointer',
+                position: 'relative',
+
+                // 🔥 Make it feel like a button
+                backgroundColor: isActive ? '#e3f2fd' : 'white',
+                borderRight: '1px solid #eee',
+
+                // 🔥 Hover effect
+                '&:hover': {
+                  backgroundColor: '#f5f5f5',
+                },
+
+                // 🔥 Active "raised tab" effect
+                boxShadow: isActive ? 'inset 0 -3px 0 #1976d2' : 'none',
+
+                transition: 'all 0.2s ease',
+              }}
             >
-              {section.title}
-            </Typography>
-          </Box>  
-        ))}
+              <Typography
+                variant="subtitle2"
+                fontWeight={isActive ? 700 : 500}
+                color={isActive ? 'primary' : 'textPrimary'}
+              >
+                {section.title}
+              </Typography>
+
+              {/* Expand / Collapse Icon */}
+              {isActive ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+            </Box>
+          );
+        })}
       </Box>
 
       {/* Expanded Section Content */}
