@@ -339,3 +339,17 @@ export function useAddBatchFloorplanDevice() {
     },
   });
 }
+
+export function useReleaseFloorplanDevice() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (deviceIds: string[]) => {
+      const res = await axiosServices.post(`${API_URL}release/`, { deviceIds });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['floorplan-device-list'] });
+      queryClient.invalidateQueries({ queryKey: ['floorplan-device-all'] });
+    },
+  });
+}

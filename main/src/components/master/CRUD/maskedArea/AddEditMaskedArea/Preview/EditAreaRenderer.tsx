@@ -8,8 +8,11 @@ import {
   lighten,
   darken,
 } from '@mui/material';
+import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
+import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
+import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Stage, Layer, Circle, Image as KonvaImage, Line, FastLayer, Group } from 'react-konva';
+import { Stage, Layer, Circle, Image as KonvaImage, Line, FastLayer, Group, Text } from 'react-konva';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
   MaskedAreaType,
@@ -23,6 +26,7 @@ import {
 import earcut from 'earcut';
 import { uniqueId } from 'lodash';
 import toast from 'react-hot-toast';
+import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 
 type CollisionResult =
   | { collided: false }
@@ -47,6 +51,8 @@ interface Props {
   scale: number; // meter per pixel
   maskedAreas: MaskedAreaType[];
   activeMaskedArea?: MaskedAreaType | null;
+  devices: FloorplanDeviceType[];
+  showDevices: boolean;
   setIsDragging: (isDragging: string) => void;
   // setCursor: (cursor: string) => void;
   onAreaHoverChange: (areaHover: boolean) => void;
@@ -70,6 +76,8 @@ const EditAreaRenderer: React.FC<Props> = ({
   scale,
   maskedAreas,
   activeMaskedArea,
+  devices,  
+  showDevices,
   setIsDragging,
   onAreaHoverChange,
   onAreaDragChange,
@@ -1045,6 +1053,53 @@ const EditAreaRenderer: React.FC<Props> = ({
     ],
   );
 
+    const useDeviceIcon = (src: string) => {
+      const [img, setImg] = useState<HTMLImageElement | undefined>(undefined);
+      useEffect(() => {
+        const image = new window.Image();
+        image.src = src;
+        image.onload = () => setImg(image);
+      }, [src]);
+      return img;
+    };
+    const iconCCTV = useDeviceIcon(CCTVSVG);
+    const iconGateway = useDeviceIcon(GatewaySVG);
+    const iconUnknown = useDeviceIcon(UnknownDevice);
+
+    const renderDeviceShape = (device: FloorplanDeviceType) => {
+      let deviceIcon = iconUnknown;
+      switch (device.type) {
+        case 'Cctv':
+          deviceIcon = iconCCTV;
+          break;
+        case 'BleReader':
+          deviceIcon = iconGateway;
+          break;
+      }
+      // Use original coordinates directly (no scaling)
+      const x = device.posPxX - 20;
+      const y = device.posPxY - 20;
+      return (
+        <Group
+          key={`device-${device.id}`}
+          name="device"
+        >
+          <Text
+            x={x - 40}
+            y={y - 5}
+            text={device.reader?.gmac || device.id}
+            fontSize={9}
+            fill="#1976d2"
+            fontStyle="bold"
+            width={120}
+            align="center"
+            listening={false}
+          />
+          <KonvaImage name="device" image={deviceIcon} x={x} y={y} width={40} height={40} />
+        </Group>
+      );
+    };
+
   const imageToDraw = bgImage || previewImage;
 
   return (
@@ -1117,7 +1172,7 @@ const EditAreaRenderer: React.FC<Props> = ({
                 ))}
               </>
             )}
-
+            {showDevices && devices.map((d: FloorplanDeviceType) => renderDeviceShape(d))}
             {/* Drawing lines */}
             {drawingNodes.length > 0 && cursorWorld && (
               <>

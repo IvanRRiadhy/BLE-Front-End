@@ -1,7 +1,7 @@
 import { BASE_URL } from 'src/utils/axios';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
-import { Box, FormLabel } from '@mui/material';
+import { Box, FormControlLabel, FormLabel, Switch } from '@mui/material';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import ZoomControls from 'src/components/shared/ZoomControls';
 import FloorplanHouse from 'src/assets/images/masters/Floorplan/Floorplan-House.png';
@@ -11,6 +11,8 @@ import MouseDoubleClickIcon from 'src/assets/images/svgs/mouse-double-click-icon
 import MouseLeftClickIcon from 'src/assets/images/svgs/mouse-left-click-icon.svg';
 import MouseRightClickIcon from 'src/assets/images/svgs/mouse-right-click-icon.svg';
 import ShiftButtonIcon from 'src/assets/images/svgs/shift-button-icon.svg';
+import { useFloorplanDeviceList } from 'src/hooks/useFloorplanDevice';
+import { defaultFloorplanDeviceFilter } from 'src/store/apps/defaultForm';
 
 const EditAreaFloorView: React.FC<{
   zoomable: boolean;
@@ -32,6 +34,13 @@ const EditAreaFloorView: React.FC<{
   const drawingMaskedArea = useSelector(
     (state: RootState) => state.maskedAreaReducer.drawingMaskedArea,
   );
+
+  const { data: devicesResponse } = useFloorplanDeviceList({
+    ...defaultFloorplanDeviceFilter,
+    filters: { FloorplanId: [activeFloorPlan?.id ?? ''] },
+  });
+  const devices = devicesResponse?.data || [];
+  const [showDevices, setShowDevices] = useState(true);
 
   const [isDraggingView, setIsDraggingView] = useState(false);
   const [isHoveringView, setIsHoveringView] = useState(false);
@@ -429,6 +438,33 @@ const EditAreaFloorView: React.FC<{
           </Box>
         </Box>
       )}
+      {!editingMaskedArea && !drawingMaskedArea && zoomable && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 160,
+            right: 40,
+            zIndex: 10,
+            width: '280px',
+            background: 'rgba(124, 123, 123, 0.6)',
+            borderRadius: 2,
+            boxShadow: 2,
+            p: 1,
+            // display: 'flex',
+          }}
+        >
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showDevices}
+                onChange={() => setShowDevices((prev) => !prev)}
+                color="primary"
+              />
+            }
+            label="Show Devices"
+          />
+        </Box>
+      )}
 
       {drawingMaskedArea && (
         <Box
@@ -553,6 +589,8 @@ const EditAreaFloorView: React.FC<{
           scale={activeFloorPlan?.meterPerPx || 1}
           maskedAreas={filteredUnsavedMaskedArea}
           activeMaskedArea={activeMaskedArea}
+          devices={devices}
+          showDevices={showDevices}
           setIsDragging={setIsDragging}
           // setCursor={setCursor}
           onAreaHoverChange={setIsHoveringAreaShape}
