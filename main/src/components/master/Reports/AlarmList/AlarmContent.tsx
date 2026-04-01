@@ -69,6 +69,8 @@ import { useAlarmPlayback } from 'src/hooks/useAlarmPlayback';
 import { AlarmPlaybackDataType } from 'src/store/apps/crud/alarmPlayback';
 import AlarmPlaybackDialog from './AlarmPlaybackDialog';
 import AlarmTriggeredFilter from './AlarmFilter';
+import { useMemberByID } from 'src/hooks/useMember';
+import { useVisitorByID } from 'src/hooks/useVisitor';
 dayjs.extend(duration);
 
 const proximityColorMap: Record<string, string> = {
@@ -104,6 +106,7 @@ const AlarmContent = () => {
   // Determine which person to display based on selectedIntruder
   const [currentPerson, setCurrentPerson] = useState<VisitorType | memberType | null>(null);
   const [personType, setPersonType] = useState<'Visitor' | 'Member' | null>(null);
+  const [personId, setPersonId] = useState<string | null>(null);
 
   //UseQuery Mutation
   const assignActionMutation = useAssignActionAlarmTriggerByID();
@@ -114,6 +117,33 @@ const AlarmContent = () => {
   const resolveMutation = useResolveAlarmTrigger();
   const alarmPlaybackMutation = useAlarmPlayback();
 
+  const { data: currentMemberById, isLoading: isLoadingCurrentMember } = useMemberByID(
+    personType === 'Member' && personId ? personId : '',
+  );
+  const { data: currentVisitorById, isLoading: isLoadingCurrentVisitor } = useVisitorByID(
+    personType === 'Visitor' && personId ? personId : '',
+  );
+
+  const alarmCardPerson = useMemo(() => {
+    if (personType === 'Member') {
+      return currentMemberById;
+    } else if (personType === 'Visitor') {
+      return currentVisitorById;
+    }
+    return null;
+  }, [personType, currentMemberById, currentVisitorById]);
+
+  // useEffect(() => {
+  //   if (currentMemberById) {
+  //     setCurrentPerson(currentMemberById);
+  //   } else if (currentVisitorById) {
+  //     setCurrentPerson(currentVisitorById);
+  //   } else {
+  //     setCurrentPerson(null);
+  //   }
+  // }, [currentMemberById, currentVisitorById]);
+
+  // console.log('Current Person Data:', { currentMemberById, currentVisitorById });
   useEffect(() => {
     if (selectedIntruder) {
       console.log('Selected intruder:', selectedIntruder);
@@ -130,7 +160,11 @@ const AlarmContent = () => {
           UpdateFilter({
             ...alarmTriggerFilter,
             Length: 999,
-            filters: { ...alarmTriggerFilter.filters, visitorId: [selectedVisitor.id], memberId: undefined },
+            filters: {
+              ...alarmTriggerFilter.filters,
+              visitorId: [selectedVisitor.id],
+              memberId: undefined,
+            },
           }),
         );
       } else if (type === 'Member' && selectedMember) {
@@ -139,7 +173,11 @@ const AlarmContent = () => {
         dispatch(
           UpdateFilter({
             ...alarmTriggerFilter,
-            filters: { ...alarmTriggerFilter.filters, memberId: [selectedMember.id], visitorId: undefined },
+            filters: {
+              ...alarmTriggerFilter.filters,
+              memberId: [selectedMember.id],
+              visitorId: undefined,
+            },
           }),
         );
       } else {
@@ -289,6 +327,17 @@ const AlarmContent = () => {
     // Always set selected alarm first (so dialog can use it later)
     console.log('Alarm: ', alarm);
     setSelectedAlarmTrigger(alarm);
+    const personType = alarm.visitorId ? 'Visitor' : alarm.memberId ? 'Member' : null;
+    console.log('Determined person type:', personType);
+    if (personType === 'Visitor' && alarm.visitorId) {
+      setPersonType('Visitor');
+      setPersonId(alarm.visitorId);
+      console.log('Set personId for Visitor:', alarm.visitorId);
+    } else if (personType === 'Member' && alarm.memberId) {
+      setPersonType('Member');
+      setPersonId(alarm.memberId);
+      console.log('Set personId for Member:', alarm.memberId);
+    }
     // await handleFetchTimeline(alarm.id);
     // ✅ Only call API if action is "Idle"
     if (alarm.action?.toLowerCase() !== 'idle') {
@@ -516,6 +565,11 @@ const AlarmContent = () => {
               textOverflow: 'ellipsis',
             }}
           >
+            {currentPerson
+              ? ''
+              : alarmTrigger.visitorName
+                ? `${alarmTrigger.visitorName} | `
+                : `${alarmTrigger.memberName} | `}
             {alarmTrigger.floorplanName ?? 'Unknown Floorplan'}
           </Typography>
           <Chip
@@ -945,113 +999,129 @@ const AlarmContent = () => {
         </DialogTitle>
         <DialogContent sx={{ mt: 1, p: 3 }}>
           {/* ================= TOP SECTION ================== */}
-          {selectedAlarmTrigger && currentPerson && (
+
+          {isLoadingCurrentMember || isLoadingCurrentVisitor ? (
             <Box
-              display="flex"
-              alignItems="flex-start"
-              gap={4}
-              mb={2}
-              sx={{ borderBottom: '1px solid #DDD', pb: 3 }}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                height: 300,
+              }}
             >
-              {/* ============ PERSON PHOTO ============ */}
+              <CircularProgress />
+            </Box>
+          ) : (
+            selectedAlarmTrigger &&
+            alarmCardPerson && (
               <Box
                 display="flex"
-                flexDirection="column"
-                alignItems="center"
-                justifyContent="center"
-                sx={{ minWidth: 180 }}
+                alignItems="flex-start"
+                gap={4}
+                mb={2}
+                sx={{ borderBottom: '1px solid #DDD', pb: 3 }}
               >
-                <Avatar
-                  alt={`${personType} Face`}
-                  src={`${BASE_URL}${currentPerson.faceImage ?? ''}`}
-                  sx={{
-                    width: 160,
-                    height: 160,
-                    mb: 1,
-                    border: ` ${
-                      'isBlacklist' in currentPerson && currentPerson.isBlacklist
-                        ? '5px solid #d32f2f'
-                        : '3px solid #1976d2'
-                    }`,
-                  }}
-                />
-                {/* Person Type Badge */}
-                <Chip
-                  label={personType}
-                  color={personType === 'Visitor' ? 'primary' : 'success'}
-                  sx={{ fontWeight: 700, mt: 1 }}
-                />
-              </Box>
+                {/* ============ PERSON PHOTO ============ */}
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="center"
+                  justifyContent="center"
+                  sx={{ minWidth: 180 }}
+                >
+                  <Avatar
+                    alt={`${personType} Face`}
+                    src={`${BASE_URL}${alarmCardPerson.faceImage ?? ''}`}
+                    sx={{
+                      width: 160,
+                      height: 160,
+                      mb: 1,
+                      border: ` ${
+                        'isBlacklist' in alarmCardPerson && alarmCardPerson.isBlacklist
+                          ? '5px solid #d32f2f'
+                          : '3px solid #1976d2'
+                      }`,
+                    }}
+                  />
+                  {/* Person Type Badge */}
+                  <Chip
+                    label={personType}
+                    color={personType === 'Visitor' ? 'primary' : 'success'}
+                    sx={{ fontWeight: 700, mt: 1 }}
+                  />
+                </Box>
 
-              {/* ============ PERSON FIELDS ============ */}
-              <Box flexGrow={1}>
-                <Grid container spacing={2}>
-                  {/* Common Fields for both Visitor and Member */}
-                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                    <Typography sx={field}>Name</Typography>
-                    <Box display="flex" gap={1}>
-                      <Typography sx={value}>{currentPerson.name}</Typography>
-                      {/* Blacklist Chip - common for both */}
-                      {'isBlacklist' in currentPerson && currentPerson.isBlacklist ? (
-                        <Chip
-                          label="Blacklisted"
-                          color="error"
-                          size="small"
-                          sx={{ fontWeight: 700 }}
-                        />
-                      ) : null}
-                      {/* VIP Chip - only for Visitor */}
-                      {personType === 'Visitor' &&
-                      'isVip' in currentPerson &&
-                      currentPerson.isVip ? (
-                        <Chip label="VIP" color="warning" size="small" sx={{ fontWeight: 700 }} />
-                      ) : null}
-                    </Box>
+                {/* ============ PERSON FIELDS ============ */}
+                <Box flexGrow={1}>
+                  <Grid container spacing={2}>
+                    {/* Common Fields for both Visitor and Member */}
+                    <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                      <Typography sx={field}>Name</Typography>
+                      <Box display="flex" gap={1}>
+                        <Typography sx={value}>{alarmCardPerson.name}</Typography>
+                        {/* Blacklist Chip - common for both */}
+                        {'isBlacklist' in alarmCardPerson && alarmCardPerson.isBlacklist ? (
+                          <Chip
+                            label="Blacklisted"
+                            color="error"
+                            size="small"
+                            sx={{ fontWeight: 700 }}
+                          />
+                        ) : null}
+                        {/* VIP Chip - only for Visitor */}
+                        {personType === 'Visitor' &&
+                        'isVip' in alarmCardPerson &&
+                        alarmCardPerson.isVip ? (
+                          <Chip label="VIP" color="warning" size="small" sx={{ fontWeight: 700 }} />
+                        ) : null}
+                      </Box>
+                    </Grid>
+
+                    {'floorName' in selectedAlarmTrigger &&
+                      'buildingName' in selectedAlarmTrigger && (
+                        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                          <Typography sx={field}>Alarm At</Typography>
+                          <Typography sx={value}>
+                            {selectedAlarmTrigger?.floorName} | {selectedAlarmTrigger?.buildingName}
+                          </Typography>
+                        </Grid>
+                      )}
+
+                    {/* BLE Card Number - common */}
+                    {'bleCardNumber' in alarmCardPerson && (
+                      <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                        <Typography sx={field}>BLE Card Number</Typography>
+                        <Typography sx={value}>{alarmCardPerson.bleCardNumber}</Typography>
+                      </Grid>
+                    )}
+
+                    {'triggerTime' in selectedAlarmTrigger && (
+                      <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                        <Typography sx={field}>Triggered At</Typography>
+                        <Typography sx={value}>{selectedAlarmTrigger?.triggerTime}</Typography>
+                      </Grid>
+                    )}
+                    {/* BLE Card Number - common */}
+                    {'cardNumber' in alarmCardPerson && (
+                      <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                        <Typography sx={field}> Card Number</Typography>
+                        <Typography sx={value}>{alarmCardPerson.cardNumber}</Typography>
+                      </Grid>
+                    )}
+                    {'action' in selectedAlarmTrigger &&
+                      'actionUpdatedAt' in selectedAlarmTrigger && (
+                        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                          <Typography sx={field}>Last Action</Typography>
+                          <Typography sx={value}>
+                            {selectedAlarmTrigger?.action} | {selectedAlarmTrigger?.actionUpdatedAt}
+                          </Typography>
+                        </Grid>
+                      )}
                   </Grid>
-
-                  {'floorName' in selectedAlarmTrigger &&
-                    'buildingName' in selectedAlarmTrigger && (
-                      <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                        <Typography sx={field}>Alarm At</Typography>
-                        <Typography sx={value}>
-                          {selectedAlarmTrigger?.floorName} | {selectedAlarmTrigger?.buildingName}
-                        </Typography>
-                      </Grid>
-                    )}
-
-                  {/* BLE Card Number - common */}
-                  {'bleCardNumber' in currentPerson && (
-                    <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                      <Typography sx={field}>BLE Card Number</Typography>
-                      <Typography sx={value}>{currentPerson.bleCardNumber}</Typography>
-                    </Grid>
-                  )}
-
-                  {'triggerTime' in selectedAlarmTrigger && (
-                    <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                      <Typography sx={field}>Triggered At</Typography>
-                      <Typography sx={value}>{selectedAlarmTrigger?.triggerTime}</Typography>
-                    </Grid>
-                  )}
-                  {/* BLE Card Number - common */}
-                  {'cardNumber' in currentPerson && (
-                    <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                      <Typography sx={field}> Card Number</Typography>
-                      <Typography sx={value}>{currentPerson.cardNumber}</Typography>
-                    </Grid>
-                  )}
-                  {'action' in selectedAlarmTrigger &&
-                    'actionUpdatedAt' in selectedAlarmTrigger && (
-                      <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                        <Typography sx={field}>Last Action</Typography>
-                        <Typography sx={value}>
-                          {selectedAlarmTrigger?.action} | {selectedAlarmTrigger?.actionUpdatedAt}
-                        </Typography>
-                      </Grid>
-                    )}
-                </Grid>
+                </Box>
               </Box>
-            </Box>
+            )
           )}
 
           <Box

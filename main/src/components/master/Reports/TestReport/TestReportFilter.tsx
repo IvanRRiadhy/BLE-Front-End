@@ -156,7 +156,7 @@ const VisitorReportFilter = () => {
       AcknowledgedBy: r.acknowledgedBy ?? '-',
       DispatchedAt: r.dispatchedAt,
       DispatchedBy: r.dispatchedBy ?? '-',
-      AssignedSecurityName: r.assignedSecurityName ?? '-',
+      AssignedSecurityName: r.assignedSecurityName.length > 0 ? r.assignedSecurityName.join(', ') : '-',
       AcceptedAt: r.acceptedAt,
       AcceptedBy: r.acceptedBy ?? '-',
       responseTimeSeconds: r.responseTimeSeconds,

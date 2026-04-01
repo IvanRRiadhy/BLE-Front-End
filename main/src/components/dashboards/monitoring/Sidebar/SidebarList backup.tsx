@@ -139,7 +139,7 @@ const SidebarList = ({ filterType, personFilter }: SidebarListProps) => {
   const { data: alarmTriggerDetail, isLoading: isLoadingTrigger } = useAlarmTriggerByID(
     selectedTriggerId || '',
   );
-const trigger = alarmTriggerDetail?.[0] ?? null;
+const trigger = alarmTriggerDetail ?? null;
   const isFollowingCurrent = followingPerson?.id === currentPersonId;
   const isDisabled = followingPerson && followingPerson.id !== currentPersonId;
 

@@ -34,6 +34,22 @@ export function useVisitorList(filter: GetFilter) {
   });
 }
 
+export const visitorByIdQuery = (id: string) => ({
+  queryKey: ['visitor', id],
+  queryFn: async () => {
+    const res = await axiosServices.get(`${API_URL}${id}`);
+    console.log('Response Visitor: ', res, 'With Id: ', id);
+    return res.data.collection.data as VisitorType;
+  },
+});
+export function useVisitorByID(id: string) {
+  return useQuery({
+    ...visitorByIdQuery(id),
+    enabled: !!id,
+    placeholderData: {} as VisitorType,
+  });
+}
+
 export function useAllVisitor() {
   return useQuery({
     queryKey: ['visitor-all'],

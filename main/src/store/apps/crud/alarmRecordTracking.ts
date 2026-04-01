@@ -137,7 +137,7 @@ export type NewAlarmType = {
   acceptedBy: string | null;
   doneBy: string | null;
 
-  assignedSecurityName: string | null;
+  assignedSecurityName: string[];
 
   // 🔹 Handling
   investigatedResult: string | null;

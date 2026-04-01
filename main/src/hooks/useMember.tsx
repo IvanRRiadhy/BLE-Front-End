@@ -54,6 +54,25 @@ export function useAllMembers() {
 }
 
 // -----------------------------------------------------------------------------
+// ✅ FETCH MEMBERS By ID (for dropdowns, etc.)
+// -----------------------------------------------------------------------------
+export const memberByIdQuery = (id: string) => ({
+  queryKey: ['member', id],
+  queryFn: async () => {
+    const res = await axiosServices.get(`${API_URL}${id}`);
+    console.log('Response Member: ', res, 'With Id: ', id);
+    return res.data.collection.data as memberType;
+  },
+});
+export function useMemberByID(id: string) {
+  return useQuery({
+    ...memberByIdQuery(id),
+    enabled: !!id,
+    placeholderData: {} as memberType,
+  });
+}
+
+// -----------------------------------------------------------------------------
 // ✅ ADD MEMBER (POST with FormData)
 // -----------------------------------------------------------------------------
 export function useAddMember() {
