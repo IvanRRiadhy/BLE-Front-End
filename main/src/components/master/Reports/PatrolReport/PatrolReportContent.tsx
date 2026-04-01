@@ -17,7 +17,11 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from '@mui/icons-material/Close';
 import { useEffect, useState } from 'react';
-import { PatrolAssignType, PatrolDetailPayload, SecurityType } from 'src/store/apps/crud/patrolRoute';
+import {
+  PatrolAssignType,
+  PatrolDetailPayload,
+  SecurityType,
+} from 'src/store/apps/crud/patrolRoute';
 import PatrolRouteDetailDialog from 'src/components/security-view/PatrolAssignment/SecurityViewPatrol/PatrolRouteDetailDialog';
 import PatrolScheduleCalendarDialog from 'src/components/security-view/PatrolAssignment/SecurityViewPatrol/PatrolScheduleCalendarDialog';
 import { useNavigate } from 'react-router';
@@ -26,6 +30,7 @@ import { PatrolSessionType } from 'src/store/apps/crud/patrolSession';
 import {
   defaultPatrolCaseFilter,
   defaultPatrolCaseUploadForm,
+  defaultPatrolReportFilter,
   defaultPatrolSessionFilter,
   defaultTimeGroupFilter,
 } from 'src/store/apps/defaultForm';
@@ -41,10 +46,12 @@ import { useSearchParams } from 'react-router';
 import { usePatrolAssignmentId, usePatrolRouteId } from 'src/hooks/usePatrolRoute';
 import { useTimeGroupList } from 'src/hooks/useTimeGroup';
 import { getCaseStatusColor } from 'src/utils/caseStatus';
+import { usePatrolReport } from 'src/hooks/usePatrolReport';
+import { downloadPatrolReportExcel } from 'src/utils/exportPatrolReport';
 
 interface Props {
   patrol: PatrolAssignType;
- onSecurityClick: (sec: SecurityType | null) => void;
+  onSecurityClick: (sec: SecurityType | null) => void;
 }
 
 const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
@@ -119,6 +126,27 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
     setOpenCaseDialog(false);
   };
 
+  //Patrol Report Dialog helper
+  const patrolReportMutation = usePatrolReport();
+
+  const handlePatrolReport = async () => {
+    if (!patrol) return;
+    try {
+      const report = await patrolReportMutation.mutateAsync({
+        ...defaultPatrolReportFilter,
+        filters: { assignmentId: [patrol.id] },
+      });
+      
+      await downloadPatrolReportExcel(report, `PatrolReport_${patrol.name.replace(/\s+/g, '_')}.xlsx`);
+
+      toast.success('Patrol report generated successfully');
+    } catch (error) {
+      toast.error('Failed to generate patrol report');
+      console.error('Error generating patrol report:', error);
+      return;
+    }
+  };
+
   if (!patrol) {
     return (
       <Box display="flex" justifyContent="center" mt={5}>
@@ -126,7 +154,7 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
       </Box>
     );
   }
-  console.log('patrol', patrol);
+  // console.log('patrol', patrol);
 
   return (
     <>
@@ -148,10 +176,23 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
                 : `calc(100vh - ${(customizer.TopbarHeight ?? 70) * 2}px)`,
             }}
           >
-            {/* Name */}
-            <Typography fontWeight={700} fontSize={20}>
-              {patrol.name}
-            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mb: 2,
+              }}
+            >
+              {/* Name */}
+              <Typography fontWeight={700} fontSize={20}>
+                {patrol.name}
+              </Typography>
+              <Button variant="outlined" color="primary" size="small" onClick={handlePatrolReport}>
+                Generate Report
+              </Button>
+            </Box>
+
             {/* Description */}
             <Box mt={1}>
               <Box
@@ -302,7 +343,10 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
             flex={1}
             borderRadius={2}
             p={2}
-            sx={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}` }}
+            sx={{
+              backgroundColor: theme.palette.background.paper,
+              border: `1px solid ${theme.palette.divider}`,
+            }}
           >
             {/* Title */}
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>

@@ -16,7 +16,7 @@ export type GetFilter = {
     securityId?: string;
     routeId?: string;
     isCompleted?: boolean;
-    assignmentId?: string;
+    assignmentId?: string[];
   };
 };
 

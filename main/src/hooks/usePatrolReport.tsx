@@ -30,3 +30,17 @@ export function usePatrolReportList(filter: GetFilter) {
         gcTime: 5 * 60_000, // cache for 5 minutes
     });
 }
+
+export function usePatrolReport() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (filter: GetFilter) => {
+            const response = await axiosServices.post(API_URL, filter);
+            console.log('Generate Patrol Report: ', response.data, 'With Filter: ', filter);
+            return response.data.collection.data;
+        },
+        onSuccess: () => {
+            // queryClient.invalidateQueries({ queryKey: ['patrol-report-list'] });
+        },
+    });
+}

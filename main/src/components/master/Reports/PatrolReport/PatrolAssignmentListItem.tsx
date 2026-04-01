@@ -17,7 +17,7 @@ import { PatrolAssignType } from 'src/store/apps/crud/patrolRoute';
 type Props = {
   onAssignmentClick: (event: React.MouseEvent<HTMLElement>) => void;
   assignment?: PatrolAssignType;
-  active: any;
+  active?: PatrolAssignType | null;
 };
 
 const PatrolAssignmentListItem = ({ onAssignmentClick, assignment, active }: Props) => {
@@ -27,7 +27,7 @@ const PatrolAssignmentListItem = ({ onAssignmentClick, assignment, active }: Pro
   const br = `${customizer.borderRadius}px`;
 
   return (
-    <ListItemButton sx={{ mb: 1 }} selected={active} onClick={onAssignmentClick}>
+    <ListItemButton sx={{ mb: 1 }} selected={active?.id === assignment?.id} onClick={onAssignmentClick}>
       <ListItemText>
         <Stack direction="row" gap="10px" alignItems="center">
           <Box mr="auto">

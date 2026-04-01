@@ -47,7 +47,7 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
 
   const { data: data } = usePatrolReportList({
     ...defaultPatrolReportFilter,
-    filters: { assignmentId: patrol.id, securityId: sec.id },
+    filters: { assignmentId: [patrol.id], securityId: sec.id },
   });
 
   const patrolReportData = data?.data ?? [];
