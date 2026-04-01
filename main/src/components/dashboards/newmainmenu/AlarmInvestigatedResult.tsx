@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 
 import { useAlarmInvestigatedResult } from 'src/hooks/useDashboard';
 import { investigationResultType } from 'src/types/crud/input';
+import { useSelector } from 'src/store/Store';
 
 /* ---------------- Filter ---------------- */
 
@@ -19,7 +20,9 @@ const defaultFilter = {
 };
 
 const InvestigatedResultColumn: React.FC = () => {
-  const { data: investigatedData = [] } = useAlarmInvestigatedResult(defaultFilter);
+  const dashboardFilter = useSelector((state: any) => state.customizer.dashboardFilter);
+
+  const { data: investigatedData = [] } = useAlarmInvestigatedResult({ ...defaultFilter, ...dashboardFilter });
 
   /* ---------------- Transform & Sort ---------------- */
 

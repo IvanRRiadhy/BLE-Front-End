@@ -8,6 +8,10 @@ import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
 import AutocompleteFilter from './AutocompleteFilter';
 import { setDashboardFilter } from 'src/store/customizer/CustomizerSlice';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
+import { useAllBuilding } from 'src/hooks/useBuilding';
+import { useAllFloors } from 'src/hooks/useFloor';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 type FilterState = {
   BuildingId: string[];
   FloorId: string[];
@@ -28,10 +32,10 @@ const DashboardFilter = () => {
     setOpen(false);
   };
 
-  const buildingList = useSelector((state: RootState) => state.buildingReducer.buildingAll);
-  const floorList = useSelector((state: RootState) => state.floorReducer.floorAll);
-  const floorplanList = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
-  const maskedAreaList = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
+  const buildingList = useAllBuilding().data || [];
+  const floorList = useAllFloors().data || [];
+  const floorplanList = useAllFloorplans().data || [];
+  const maskedAreaList = useAllMaskedAreas().data || [];
   const dashboardFilter = useSelector((state: RootState) => state.customizer.dashboardFilter);
   const [appliedFilter, setAppliedFilter] = useState<FilterState>({
     BuildingId: dashboardFilter?.BuildingId ?? [],
@@ -39,12 +43,12 @@ const DashboardFilter = () => {
     FloorplanId: dashboardFilter?.FloorplanId ?? [],
     MaskedAreaId: dashboardFilter?.FloorplanMaskedAreaId ?? [],
   });
-  useEffect(() => {
-    dispatch(fetchBuildings());
-    dispatch(fetchFloors());
-    dispatch(fetchFloorplan());
-    // // dispatch(fetchMaskedAreas());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchBuildings());
+  //   dispatch(fetchFloors());
+  //   dispatch(fetchFloorplan());
+  //   // // dispatch(fetchMaskedAreas());
+  // }, [dispatch]);
   useEffect(() => {
     console.log('Building List:', buildingList);
   }, [buildingList]);

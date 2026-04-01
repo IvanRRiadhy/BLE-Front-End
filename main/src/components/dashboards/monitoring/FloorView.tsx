@@ -622,7 +622,7 @@ const FloorView: React.FC<{
 
   // Cancel following
   const layoutState = useSelector((state: RootState) => state.layoutReducer);
-  const activeLayouts = layoutState.layouts.find((l) => l.id === layoutState.activeLayoutId);
+  const activeLayouts = layoutState.layouts.find((l: any) => l.id === layoutState.activeLayoutId);
 
   const handleCancelFollowing = () => {
     if (!activeLayouts?.id || !screenNumber) {

@@ -20,6 +20,7 @@ interface StateType {
   isMonitorSidebar?: boolean;
   isMainMenu?: boolean;
   dashboardFilter?:{
+    TimeRange?: string;
     BuildingId: string[];
     FloorId: string[];
     FloorplanId: string[];
@@ -47,7 +48,14 @@ const initialState: StateType = {
   isMonitor: false,
   isMonitorSidebar: false,
   isMainMenu: false,
-    evacState: 'idle',
+  dashboardFilter: {
+    TimeRange: 'daily',
+    BuildingId: [],
+    FloorId: [],
+    FloorplanId: [],
+    FloorplanMaskedAreaId: [],
+  },
+  evacState: 'idle',
 };
 
 export const CustomizerSlice = createSlice({

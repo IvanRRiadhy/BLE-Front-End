@@ -2,12 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import Chart from 'react-apexcharts';
 import { Box, Typography } from '@mui/material';
 import { useBeaconCount } from 'src/hooks/useDashboard';
+import { useSelector } from 'src/store/Store';
 
 
 const COLORS = ['#045498', '#3676AC', '#B3CBE0', '#02325B'];
 
 const NewBeaconDistribution: React.FC = () => {
-  const { data = [], isLoading, isError } = useBeaconCount();
+  const dashboardFilter = useSelector((state: any) => state.customizer.dashboardFilter);
+  const { data = [], isLoading, isError } = useBeaconCount(dashboardFilter);
   const { labels, series } = useMemo(() => {
     if (!data) {
       return { labels: [], series: [] };

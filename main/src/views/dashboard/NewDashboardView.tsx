@@ -67,7 +67,13 @@ const DashboardView: React.FC = () => {
   // useEffect(() => {
   //   dispatch(fetchDashboardTopCards());
   // }, [dispatch, dashboardFilter]);
-  const { data: topSummary, isLoading: isTopSummaryLoading } = useTopButtonSummary();
+  const { data: topSummary, isLoading: isTopSummaryLoading } = useTopButtonSummary({
+    buildingId: dashboardFilter?.BuildingId ?? [],
+    floorId: dashboardFilter?.FloorId ?? [],
+    floorplanId: dashboardFilter?.FloorplanId ?? [],
+    areaId: dashboardFilter?.FloorplanMaskedAreaId ?? [],
+    TimeRange: 'daily',
+  });
 
   const blacklistFilteredCount = topSummary?.blacklistedCount ?? 0;
   const maskedAreaFilteredCount = topSummary?.areaCount ?? 0;
@@ -76,10 +82,19 @@ const DashboardView: React.FC = () => {
   const activeTag = topSummary?.activeBeaconCount ?? 0;
   const nonActiveTag = topSummary?.nonActiveBeaconCount ?? 0;
   const { data: alarmByStatus = [], isLoading: isAlarmByStatusLoading } = useAlarmByStatus({
-    timeRange: 'daily',
+    TimeRange: 'daily',
+    buildingId: dashboardFilter?.BuildingId ?? [],
+    floorId: dashboardFilter?.FloorId ?? [],
+    floorplanId: dashboardFilter?.FloorplanId ?? [],
+    areaId: dashboardFilter?.FloorplanMaskedAreaId ?? [],
   });
   const { data: alarmByArea = [], isLoading: isAlarmByAreaLoading } = useAlarmByArea({
-    timeRange: 'daily',
+    TimeRange: 'daily',
+
+    buildingId: dashboardFilter?.BuildingId ?? [],
+    floorId: dashboardFilter?.FloorId ?? [],
+    floorplanId: dashboardFilter?.FloorplanId ?? [],
+    areaId: dashboardFilter?.FloorplanMaskedAreaId ?? [],
   });
 
   const topAlarmAreas = useMemo(() => {
@@ -97,10 +112,10 @@ const DashboardView: React.FC = () => {
       .sort((a: any, b: any) => b.total - a.total)
       .slice(0, 3);
   }, [alarmByArea]);
-// console.log("alarrm by status", alarmByStatus, "alarm by area", topAlarmAreas);
+  // console.log("alarrm by status", alarmByStatus, "alarm by area", topAlarmAreas);
   return (
     <PageContainer title="Dashboard" description="This is Dashboard">
-      <Box id='dashboard'>
+      <Box id="dashboard">
         <Grid container spacing={1}>
           {/* First Row */}
           {/* <Grid container size={12} spacing={1} mt={0}>
@@ -242,7 +257,6 @@ const DashboardView: React.FC = () => {
             </Grid>
 
             <Grid size={4.75}>
-              
               <AlarmInvestigatedResult />
             </Grid>
           </Grid>

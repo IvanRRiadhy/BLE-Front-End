@@ -3,6 +3,7 @@ import Chart from 'react-apexcharts';
 import { Box, Typography } from '@mui/material';
 import ApexCharts from 'apexcharts';
 import { useAlarmPerformance } from 'src/hooks/useDashboard';
+import { useSelector } from 'src/store/Store';
 
 // const ALARM_CATEGORIES = [
 //   'CardAccess',
@@ -86,7 +87,8 @@ const defaultFilter = {
 const AlarmRadarChart: React.FC = () => {
   // const rawData = useMemo(() => generateDummyAlarmData(), []);
   // const aggregated = useMemo(() => aggregateRadarData(rawData), [rawData]);
-  const { data: realData = [] } = useAlarmPerformance(defaultFilter);
+  const dashboardFilter = useSelector((state: any) => state.customizer.dashboardFilter);
+  const { data: realData = [] } = useAlarmPerformance(dashboardFilter);
   // console.log("RealData", realData);
   const categories = useMemo(() => {
     if (!realData || realData.length === 0) return [];

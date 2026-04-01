@@ -16,6 +16,7 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import { useSelector } from 'src/store/Store';
 
 dayjs.extend(isoWeek);
 dayjs.extend(isSameOrAfter);
@@ -27,11 +28,7 @@ const defaultFilter = {
   from: '2025-10-01T00:00:00Z',
   to: '2025-10-30T23:59:59Z',
   TimeRange: '',
-  operatorName: null,
-  visitorId: null,
-  buildingId: null,
-  floorId: null,
-  floorplanMaskedAreaId: null,
+
 };
 
 interface TrackingSummary {
@@ -50,7 +47,8 @@ interface WeekOption {
 
 const Tracking: React.FC = () => {
   const [trackingFilter, setTrackingFilter] = useState({ ...defaultFilter });
-  const { data = {}, isLoading, isError } = useTrackingAreaAccessed(trackingFilter);
+  const dashboardFilter = useSelector((state: any) => state.customizer.dashboardFilter);
+  const { data = {}, isLoading, isError } = useTrackingAreaAccessed({  ...dashboardFilter, ...trackingFilter  });
 
   const today = dayjs();
 

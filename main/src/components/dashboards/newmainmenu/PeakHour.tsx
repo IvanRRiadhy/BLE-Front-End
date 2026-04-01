@@ -3,6 +3,7 @@ import Chart from 'react-apexcharts';
 import { Box, Typography, CircularProgress, SelectChangeEvent, MenuItem } from '@mui/material';
 import { usePeakHour } from 'src/hooks/useDashboard';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
+import { useSelector } from 'src/store/Store';
 
 /* ---------------- Default Filter ---------------- */
 
@@ -22,6 +23,7 @@ const getUserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 const PeakHour: React.FC = () => {
   const [level, setLevel] = useState<DistributionLevel>('building');
+  const dashboardFilter = useSelector((state: any) => state.customizer.dashboardFilter);
 
   const timezone = useMemo(() => getUserTimezone(), []);
 
@@ -31,11 +33,13 @@ const PeakHour: React.FC = () => {
       timezone,
       operatorName: null,
       visitorId: null,
-      buildingId: null,
-      floorId: null,
-      floorplanMaskedAreaId: null,
+      buildingId: dashboardFilter?.BuildingId ?? null,
+      floorId: dashboardFilter?.FloorId ?? null,
+      floorplanId: dashboardFilter?.FloorplanId ?? null,
+      areaId: dashboardFilter?.FloorplanmaskedAreaId ?? null,
+
     }),
-    [timezone],
+    [timezone, dashboardFilter],
   );
 
   const { data: peakHourData, isLoading, isError } = usePeakHour(filter, { groupByMode: level });

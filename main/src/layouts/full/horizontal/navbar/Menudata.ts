@@ -133,7 +133,7 @@ const isBoundaryActive = isActive('boundary');
           icon: IconMapPin,
           children: [
             { id: uniqueId(), title: 'Card', icon: IconMapPin, href: '/master/card/' },
-            { id: uniqueId(), title: 'Card Group', icon: IconMapPin, href: '/master/cardgroup/' },
+            // { id: uniqueId(), title: 'Card Group', icon: IconMapPin, href: '/master/cardgroup/' },
             { id: uniqueId(), title: 'Card Access', icon: IconMapPin, href: '/master/cardaccess/' },
           ],
         },

@@ -15,10 +15,11 @@ import MouseDoubleClickIcon from 'src/assets/images/svgs/mouse-double-click-icon
 import MouseLeftClickIcon from 'src/assets/images/svgs/mouse-left-click-icon.svg';
 import MouseRightClickIcon from 'src/assets/images/svgs/mouse-right-click-icon.svg';
 import ShiftButtonIcon from 'src/assets/images/svgs/shift-button-icon.svg';
-import { defaultGeoFencingFilter } from 'src/store/apps/defaultForm';
+import { defaultFloorplanDeviceFilter, defaultGeoFencingFilter } from 'src/store/apps/defaultForm';
 import { useAllFloorplans } from 'src/hooks/useFloorplan';
 import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 import { useGeoFencingAlarms } from 'src/hooks/AlarmSetting/useGeofence';
+import { useAllFloorplanDevices, useFloorplanDeviceList } from 'src/hooks/useFloorplanDevice';
 
 const EditGeoFenceFloorView = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -27,6 +28,7 @@ const EditGeoFenceFloorView = () => {
   );
 const { data: floorplans = [] } = useAllFloorplans();
 const { data: maskedAreas = [] } = useAllMaskedAreas();
+const { data: devices = []} = useAllFloorplanDevices();
 const { data: geoFencingAlarmsData } = useGeoFencingAlarms({
   ...defaultGeoFencingFilter,
   filters: { FloorplanId: geoFenceData?.floorplanId } // Dynamic filter
@@ -38,6 +40,9 @@ const otherGeoFence = geoFencingAlarms.filter((alarm) => alarm.id !== geoFenceDa
   const filteredArea = maskedAreas.filter((area) => area.floorplanId === activeFloorPlan?.id);
   const drawGeoFence = useSelector((state: RootState) => state.GeoFencingReducer.drawingGeoFence);
   const [showArea, setShowArea] = useState(true);
+
+  const filteredDevices = devices.filter((device) => device.floorplanId === activeFloorPlan?.id);
+  const [ showDevices, setShowDevices] = useState(true);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
@@ -348,6 +353,17 @@ const otherGeoFence = geoFencingAlarms.filter((alarm) => alarm.id !== geoFenceDa
           label="Show Areas"
           sx={{ color: 'white' }}
         />
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showDevices}
+              onChange={() => setShowDevices((prev) => !prev)}
+              color="primary"
+            />
+          }
+          label="Show Devices"
+          sx={{ color: 'white' }}
+        />
       </Box>
 
       {/* Zoomable Content */}
@@ -417,6 +433,8 @@ const otherGeoFence = geoFencingAlarms.filter((alarm) => alarm.id !== geoFenceDa
                   otherGeoFences={otherGeoFence}
                   areas={filteredArea}
                   showAreas={showArea}
+                  devices = {filteredDevices}
+                  showDevices={showDevices}
                 />
               </>
             )}

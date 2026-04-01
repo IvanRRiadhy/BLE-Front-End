@@ -26,7 +26,7 @@ import {
 import earcut from 'earcut';
 import { uniqueId } from 'lodash';
 import toast from 'react-hot-toast';
-import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
+import { FloorplanDeviceType, addDeviceToDisable, removeDeviceToDisable } from 'src/store/apps/crud/floorplanDevice';
 
 type CollisionResult =
   | { collided: false }
@@ -104,6 +104,10 @@ const EditAreaRenderer: React.FC<Props> = ({
     (state: RootState) => state.maskedAreaReducer.drawingMaskedArea,
   );
 
+  const deviceToDisable = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.deviceToDisable,
+  );
+
   const [activeArea, setActiveArea] = useState(activeMaskedArea?.name || '');
   const [editingArea, setEditingArea] = useState(editingMaskedArea?.name || '');
   const [areaDragging, setAreaDragging] = useState(false);
@@ -147,6 +151,60 @@ const EditAreaRenderer: React.FC<Props> = ({
 
   return Array.from(map.values());
 }, [filteredUnsavedArea, editingMaskedArea]);
+
+  // ----------- device-out-of-area detection -----------
+  // Stable ray-casting helper (no closure dependencies — pure math)
+  const pointInPolygon = useCallback((px: number, py: number, nodes: Nodes[]): boolean => {
+    let inside = false;
+    for (let i = 0, j = nodes.length - 1; i < nodes.length; j = i++) {
+      const xi = nodes[i].x_px, yi = nodes[i].y_px;
+      const xj = nodes[j].x_px, yj = nodes[j].y_px;
+      const intersect = (yi > py) !== (yj > py) && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi;
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }, []);
+
+  // Keep a ref so the effect below can read the latest list without
+  // putting deviceToDisable in the dependency array (which would cause loops).
+  const deviceToDisableRef = React.useRef<string[]>(deviceToDisable);
+  useEffect(() => {
+    deviceToDisableRef.current = deviceToDisable;
+  }, [deviceToDisable]);
+
+  // Build an area-id → nodes map once per renderAreas change for O(1) lookup.
+  const areaNodesMap = useMemo(() => {
+    const map = new Map<string, Nodes[]>();
+    renderAreas.forEach((area) => {
+      if (area.nodes && area.nodes.length >= 3) map.set(area.id, area.nodes);
+    });
+    return map;
+  }, [renderAreas]);
+
+  // Main check: runs whenever devices or areas change.
+  useEffect(() => {
+    devices.forEach((device) => {
+      // Only check devices that are assigned to a masked area.
+      if (!device.floorplanMaskedAreaId) return;
+
+      const nodes = areaNodesMap.get(device.floorplanMaskedAreaId);
+      const currentlyDisabled = deviceToDisableRef.current.includes(device.id);
+
+      if (!nodes) {
+        // Area not found in current render set — treat as outside.
+        if (!currentlyDisabled) dispatch(addDeviceToDisable(device.id));
+        return;
+      }
+
+      const inside = pointInPolygon(device.posPxX, device.posPxY, nodes);
+
+      if (!inside && !currentlyDisabled) {
+        dispatch(addDeviceToDisable(device.id));
+      } else if (inside && currentlyDisabled) {
+        dispatch(removeDeviceToDisable(device.id));
+      }
+    });
+  }, [devices, areaNodesMap, pointInPolygon, dispatch]);
 
   // ----------- helpers: pointer -> world coords (image pixels) -----------
   const pointerToWorld = useCallback(
@@ -1066,6 +1124,20 @@ const EditAreaRenderer: React.FC<Props> = ({
     const iconGateway = useDeviceIcon(GatewaySVG);
     const iconUnknown = useDeviceIcon(UnknownDevice);
 
+    const isPointInPolygon = (point: { x: number; y: number }, vs: Nodes[]) => {
+      let x = point.x, y = point.y;
+      let inside = false;
+      for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+        let xi = vs[i].x_px, yi = vs[i].y_px;
+        let xj = vs[j].x_px, yj = vs[j].y_px;
+
+        let intersect = ((yi > y) !== (yj > y))
+            && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    };
+
     const renderDeviceShape = (device: FloorplanDeviceType) => {
       let deviceIcon = iconUnknown;
       switch (device.type) {
@@ -1079,11 +1151,25 @@ const EditAreaRenderer: React.FC<Props> = ({
       // Use original coordinates directly (no scaling)
       const x = device.posPxX - 20;
       const y = device.posPxY - 20;
+
+      const parentArea = renderAreas.find((a) => a.id === device.floorplanMaskedAreaId);
+      const isInside = parentArea?.nodes ? isPointInPolygon({ x: device.posPxX, y: device.posPxY }, parentArea.nodes) : true;
+
       return (
         <Group
           key={`device-${device.id}`}
           name="device"
         >
+          {!isInside && (
+            <Line
+              points={[x - 2, y - 2, x + 42, y - 2, x + 42, y + 42, x - 2, y + 42]}
+              closed
+              stroke="red"
+              strokeWidth={2}
+              dash={[4, 2]}
+              listening={false}
+            />
+          )}
           <Text
             x={x - 40}
             y={y - 5}

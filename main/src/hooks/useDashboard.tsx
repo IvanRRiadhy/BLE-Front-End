@@ -19,12 +19,20 @@ export type DashboardFilterType = {
   to?: string | null;
   TimeRange?: string | null;
   timezone?: string | null;
-  floorplanMaskedAreaId: string | null;
+  areaId: string[] | null;
   operatorName: string | null;
   visitorId: string | null;
-  buildingId: string | null;
-  floorId: string | null;
+  buildingId: string[] | null;
+  floorId: string[] | null;
+  floorplanId: string[] | null;
 };
+export type newDashboardFilterType = {
+  buildingId: string[];
+  floorId: string[] ;
+  floorplanId: string[];
+  areaId: string[];
+  TimeRange: string;
+}
 
 export function useAreaDistributionData(filter: DashboardFilterType) {
   return useQuery({
@@ -40,11 +48,11 @@ export function useAreaDistributionData(filter: DashboardFilterType) {
   });
 }
 
-export function useTopButtonSummary() {
+export function useTopButtonSummary(filter: newDashboardFilterType) {
   return useQuery({
     queryKey: ['dashboard-count-summary'],
     queryFn: async () => {
-      const res = await axiosServices.get(`${API_DASHBOARD}count-summary`);
+      const res = await axiosServices.post(`${API_DASHBOARD}count-summary`, filter );
       console.log('Top Button Summary Data fetched: ', res.data);
       return res.data.collection.data;
     },
@@ -54,11 +62,11 @@ export function useTopButtonSummary() {
   });
 }
 
-export function useBeaconCount() {
+export function useBeaconCount(filter: newDashboardFilterType) {
   return useQuery({
     queryKey: ['dashboard-count-card'],
     queryFn: async () => {
-      const res = await axiosServices.get(`${API_DASHBOARD}count-card`);
+      const res = await axiosServices.post(`${API_DASHBOARD}count-card`, filter);
       console.log('Beacon Count Data fetched: ', res.data.collection.data);
       return res.data.collection.data;
     },
@@ -132,7 +140,7 @@ export function useAlarmByStatus(filter: any) {
   });
 }
 
-export function useAlarmByArea(filter: any) {
+export function useAlarmByArea(filter: newDashboardFilterType) {
   return useQuery({
     queryKey: ['alarm-by-area', filter],
     queryFn: async () => {
@@ -145,7 +153,7 @@ export function useAlarmByArea(filter: any) {
   });
 }
 
-export function useAlarmStatisticHourly(filter: any) {
+export function useAlarmStatisticHourly(filter: DashboardFilterType) {
   return useQuery({
     queryKey: ['alarm-hourly', filter],
     queryFn: async () => {

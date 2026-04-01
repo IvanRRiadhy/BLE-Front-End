@@ -118,9 +118,15 @@ interface StateType {
     floorplanDeviceTotalCount: number;
     floorplanDeviceFilteredCount: number;
     floorplanDeviceFilter: GetFilter;
+
+
     lastFilter?: GetFilter;
     isLoading: boolean;
     hasLoaded: boolean;
+
+        //Device to Disable
+    deviceToDisable: string[];
+
 };
 
 const initialState: StateType = {
@@ -138,6 +144,7 @@ const initialState: StateType = {
     floorplanDeviceFilter: defaultFloorplanDeviceFilter,
     isLoading: false,
     hasLoaded: false,
+    deviceToDisable: [],
 };
 
 export const FloorplanDeviceSlice = createSlice({
@@ -560,6 +567,15 @@ CancelAllDevicesEditing: (state) => {
             state.drawingDevicePath = '';
             state.selectDevicePath = '';
         },
+
+        //Device to Disable
+        addDeviceToDisable: (state, action: PayloadAction<string>) => {
+            state.deviceToDisable.push(action.payload);
+            console.log("Device to Disable: ", action.payload);
+        },
+        removeDeviceToDisable: (state, action: PayloadAction<string>) => {
+            state.deviceToDisable = state.deviceToDisable.filter((device) => device !== action.payload);
+        },
     },
 
     extraReducers: (builder) => {
@@ -659,6 +675,8 @@ export const {
     selectDevicePath,
     ApplyUnsavedToSaved,
     ResetState,
+    addDeviceToDisable,
+    removeDeviceToDisable,
 } = FloorplanDeviceSlice.actions;
 
 export const fetchFloorplanDevices = () => async (dispatch: AppDispatch) => {

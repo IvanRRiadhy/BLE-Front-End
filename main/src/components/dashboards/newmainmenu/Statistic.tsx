@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Chart from 'react-apexcharts';
 import { Box, Typography } from '@mui/material';
 import { useAlarmStatisticHourly, usePeakHour } from 'src/hooks/useDashboard';
+import { useSelector } from 'src/store/Store';
 
 /* ---------------- Types ---------------- */
 
@@ -32,12 +33,20 @@ const getUserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 const Statistic: React.FC = () => {
   const timezone = useMemo(() => getUserTimezone(), []);
+  const dashboardFilter = useSelector((state: any) => state.customizer.dashboardFilter);
   const body = useMemo(
     () => ({
       timerange: 'daily',
       timezone,
+            operatorName: null,
+      visitorId: null,
+      buildingId: dashboardFilter?.BuildingId ?? null,
+      floorId: dashboardFilter?.FloorId ?? null,
+      floorplanId: dashboardFilter?.FloorplanId ?? null,
+      areaId: dashboardFilter?.FloorplanmaskedAreaId ?? null,
+
     }),
-    [timezone],
+    [timezone, dashboardFilter],
   );
 
   const { data = [], isLoading, isError } = useAlarmStatisticHourly(body);

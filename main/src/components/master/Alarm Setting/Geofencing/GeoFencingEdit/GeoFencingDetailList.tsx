@@ -183,7 +183,7 @@ const GeoFencingDetailList = () => {
             {geoFenceData?.floorplanId && (
               <Grid size={12}>
                 <Box display="flex" alignItems="center">
-                  <CustomFormLabel>Masked Area (Optional)</CustomFormLabel>
+                  <CustomFormLabel>Masked Area</CustomFormLabel>
                   <Tooltip title="Use Area for GeoFence">
                     <IconButton size="small" sx={{ color: 'text.secondary', p: 0.5 }}>
                       <Typography
@@ -242,7 +242,7 @@ const GeoFencingDetailList = () => {
                   ))}
                 </CustomSelect>
 
-                {geoFenceData?.areaShape === '' && (
+                {/* {geoFenceData?.areaShape === '' && (
                   <Box mt={2} textAlign="center">
                     <Typography variant="body2" color="text.secondary" gutterBottom>
                       ----- OR -----
@@ -259,7 +259,7 @@ const GeoFencingDetailList = () => {
                       Create New Area
                     </Button>
                   </Box>
-                )}
+                )} */}
               </Grid>
             )}
 

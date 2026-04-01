@@ -64,7 +64,13 @@ const DashboardView: React.FC = () => {
   // useEffect(() => {
   //   dispatch(fetchDashboardTopCards());
   // }, [dispatch, dashboardFilter]);
-  const { data: topSummary, isLoading: isTopSummaryLoading } = useTopButtonSummary();
+  const { data: topSummary, isLoading: isTopSummaryLoading } = useTopButtonSummary({
+    buildingId: dashboardFilter?.BuildingId ?? [],
+    floorId: dashboardFilter?.FloorId ?? [],
+    floorplanId: dashboardFilter?.FloorplanId ?? [],
+    areaId: dashboardFilter?.FloorplanMaskedAreaId ?? [],
+    TimeRange: 'daily',
+  });
 
   const blacklistFilteredCount = topSummary?.blacklistedCount ?? 0;
   const maskedAreaFilteredCount = topSummary?.areaCount ?? 0;
@@ -73,10 +79,19 @@ const DashboardView: React.FC = () => {
   const activeTag = topSummary?.activeBeaconCount ?? 0;
   const nonActiveTag = topSummary?.nonActiveBeaconCount ?? 0;
   const { data: alarmByStatus = [], isLoading: isAlarmByStatusLoading } = useAlarmByStatus({
-    timeRange: 'daily',
+    TimeRange: 'daily',
+    buildingId: dashboardFilter?.BuildingId ?? [],
+    floorId: dashboardFilter?.FloorId ?? [],
+    floorplanId: dashboardFilter?.FloorplanId ?? [],
+    areaId: dashboardFilter?.FloorplanMaskedAreaId ?? [],
   });
   const { data: alarmByArea = [], isLoading: isAlarmByAreaLoading } = useAlarmByArea({
-    timeRange: 'daily',
+    TimeRange: 'daily',
+
+    buildingId: dashboardFilter?.BuildingId ?? [],
+    floorId: dashboardFilter?.FloorId ?? [],
+    floorplanId: dashboardFilter?.FloorplanId ?? [],
+    areaId: dashboardFilter?.FloorplanMaskedAreaId ?? [],
   });
 
   const topAlarmAreas = useMemo(() => {

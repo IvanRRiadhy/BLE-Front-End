@@ -249,12 +249,12 @@ const Modern = () => {
     console.log('Area Chart Data', areaChartData, areaChartLoaded);
   }, [areaChartData, areaChartLoaded]);
 
-  const { data: alarmByStatus = [], isLoading: isAlarmByStatusLoading } = useAlarmByStatus({
-    timeRange: 'daily',
-  });
-  const { data: alarmByArea = [], isLoading: isAlarmByAreaLoading } = useAlarmByArea({
-    timeRange: 'daily',
-  });
+  // const { data: alarmByStatus = [], isLoading: isAlarmByStatusLoading } = useAlarmByStatus({
+  //   timeRange: 'daily',
+  // });
+  // const { data: alarmByArea = [], isLoading: isAlarmByAreaLoading } = useAlarmByArea({
+  //   timeRange: 'daily',
+  // });
   return (
     <PageContainer title="Dashboard" description="this is Dashboard page">
       <Box>
@@ -376,8 +376,8 @@ const Modern = () => {
             <Grid size={{ xs: 12, lg: 6 }} sx={{ display: 'flex', gap: 2, flexDirection: 'row' }}>
               <Grid size={4}>
                 <Stack spacing={1}>
-                  <AlarmCategorized title="Alarm By Status" data={alarmByStatus} />
-                  <AlarmCategorized title="Alarm By Area" data={alarmByArea} />
+                  {/* <AlarmCategorized title="Alarm By Status" data={alarmByStatus} />
+                  <AlarmCategorized title="Alarm By Area" data={alarmByArea} /> */}
                 </Stack>
               </Grid>
               <Grid size={8}>

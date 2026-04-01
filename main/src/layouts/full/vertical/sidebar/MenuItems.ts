@@ -206,12 +206,12 @@ const getMenuItems = (alarmSettings: AlarmSettingType[]): MenuitemsType[] => {
           icon: IconMapPin,
           href: '/master/card/',
         },
-        {
-          id: uniqueId(),
-          title: 'Card Group',
-          icon: IconMapPin,
-          href: '/master/cardgroup/',
-        },
+        // {
+        //   id: uniqueId(),
+        //   title: 'Card Group',
+        //   icon: IconMapPin,
+        //   href: '/master/cardgroup/',
+        // },
         {
           id: uniqueId(),
           title: 'Card Access',

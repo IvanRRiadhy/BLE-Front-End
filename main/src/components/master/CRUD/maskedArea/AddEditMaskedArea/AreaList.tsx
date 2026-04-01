@@ -40,12 +40,13 @@ import AreaListItem from './AreaListItem';
 import { useNavigate } from 'react-router';
 import { uniqueId } from 'lodash';
 import toast from 'react-hot-toast';
+import { useReleaseFloorplanDevice } from 'src/hooks/useFloorplanDevice';
 
 const AreaList = () => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Redux state for UI management
   const activeFloorplan = useSelector(
     (state: RootState) => state.floorplanReducer.selectedFloorplan,
@@ -59,12 +60,17 @@ const AreaList = () => {
   const editingMaskedArea = useSelector(
     (state: RootState) => state.maskedAreaReducer.editingMaskedArea,
   );
+  const deviceToDisable = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.deviceToDisable,
+  );
   const drawingArea = useSelector((state: RootState) => state.maskedAreaReducer.drawingMaskedArea);
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
-  
+
   // Fix: Provide default empty arrays for potentially undefined values
-  const deletedArea = useSelector((state: RootState) => state.maskedAreaReducer.deletedMaskedArea) || [];
-  const addedArea = useSelector((state: RootState) => state.maskedAreaReducer.addedMaskedArea) || [];
+  const deletedArea =
+    useSelector((state: RootState) => state.maskedAreaReducer.deletedMaskedArea) || [];
+  const addedArea =
+    useSelector((state: RootState) => state.maskedAreaReducer.addedMaskedArea) || [];
 
   // React Query hooks for server state
   const {
@@ -88,6 +94,7 @@ const AreaList = () => {
   const addMutation = useAddMaskedArea();
   const editMutation = useEditMaskedArea();
   const deleteMutation = useDeleteMaskedArea();
+  const disableDeviceMutation = useReleaseFloorplanDevice();
 
   // Derived data from React Query
   const maskedAreasData = maskedAreasResponse?.data || [];
@@ -106,6 +113,7 @@ const AreaList = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteAreaId, setDeleteAreaId] = useState<string | null>(null);
   const [cancelEditDialogOpen, setCancelEditDialogOpen] = useState(false);
+  const [saveWarningDialogOpen, setSaveWarningDialogOpen] = useState(false);
 
   // Initialize unsaved areas when data loads
   useEffect(() => {
@@ -212,112 +220,130 @@ const AreaList = () => {
     navigate('/master/floorplanmaskedarea');
   };
 
-// OPTIMIZED Save Function
-const handleSaveEdits = async () => {
-  setIsSaving(true);
-
-  try {
-    // Get original areas from React Query cache (server state)
-    const originalAreas = maskedAreasData;
-    
-    // Get current unsaved areas from Redux (client state with modifications)
-    const currentUnsavedAreas = filteredUnsavedMaksedArea;
-
-    // Create a map of original areas for quick lookup
-    const originAreaMap = new Map(
-      originalAreas.map((area: MaskedAreaType) => [area.id, area])
-    );
-
-    // 1. Identify edited areas - compare unsaved areas with original areas
-    const areasToEdit = currentUnsavedAreas.filter((unsavedArea: MaskedAreaType) => {
-      const originalArea = originAreaMap.get(unsavedArea.id);
-      // If area exists in original data and has changes
-      return originalArea && JSON.stringify(unsavedArea) !== JSON.stringify(originalArea);
-    });
-
-    // 2. Identify deleted areas - areas that are in original but not in unsaved
-    const areasToDelete = originalAreas.filter((originalArea: MaskedAreaType) => {
-      return !currentUnsavedAreas.find((unsavedArea: MaskedAreaType) => 
-        unsavedArea.id === originalArea.id
-      );
-    });
-
-    // 3. Identify added areas - areas that are in unsaved but not in original
-    const areasToAdd = currentUnsavedAreas.filter((unsavedArea: MaskedAreaType) => {
-      return !originAreaMap.has(unsavedArea.id);
-    });
-
-    // Group operations by type
-    const operations = {
-      edits: areasToEdit,
-      additions: areasToAdd,
-      deletions: areasToDelete,
-    };
-
-    console.log('Save Operations:', operations);
-    console.log('Original Areas:', originalAreas);
-    console.log('Current Unsaved Areas:', currentUnsavedAreas);
-
-    // Execute operations with better error handling
-    let successCount = 0;
-    let errorCount = 0;
-
-    // Process deletions first (to avoid conflicts)
-    for (const area of operations.deletions) {
-      try {
-        await deleteMutation.mutateAsync(area.id);
-        successCount++;
-      } catch (error) {
-        console.error(`Failed to delete area ${area.id}:`, error);
-        errorCount++;
-      }
-    }
-
-    // Process edits
-    for (const area of operations.edits) {
-      try {
-        await editMutation.mutateAsync(area);
-        successCount++;
-      } catch (error) {
-        console.error(`Failed to edit area ${area.id}:`, error);
-        errorCount++;
-      }
-    }
-
-    // Process additions last
-    for (const area of operations.additions) {
-      try {
-        await addMutation.mutateAsync(area);
-        successCount++;
-      } catch (error) {
-        console.error(`Failed to add area ${area.id}:`, error);
-        errorCount++;
-      }
-    }
-
-    // Show appropriate toast message
-    if (errorCount === 0 && successCount > 0) {
-      toast.success(`Successfully completed ${successCount} operations`);
-    } else if (errorCount > 0) {
-      toast.error(`Completed ${successCount} operations, ${errorCount} failed`);
+  // Guard: show warning if devices will be disabled on save
+  const handleSaveClick = () => {
+    if (deviceToDisable.length > 0) {
+      setSaveWarningDialogOpen(true);
     } else {
-      toast.error('No changes to save');
+      handleSaveEdits();
     }
+  };
 
-    // Refetch data to ensure UI is in sync
-    await refetchMaskedAreas();
-    dispatch(fetchFloorplanDT(floorplanFilter));
+  // OPTIMIZED Save Function
+  const handleSaveEdits = async () => {
+    setIsSaving(true);
 
-  } catch (error) {
-    console.error('Error during save operations:', error);
-    toast.error('Save operation failed');
-  } finally {
-    setTimeout(() => {
-      setIsSaving(false);
-      handleCloseEditing();
-    }, 1000);
-  }
-};
+    try {
+      // Get original areas from React Query cache (server state)
+      const originalAreas = maskedAreasData;
+
+      // Get current unsaved areas from Redux (client state with modifications)
+      const currentUnsavedAreas = filteredUnsavedMaksedArea;
+
+      // Create a map of original areas for quick lookup
+      const originAreaMap = new Map(originalAreas.map((area: MaskedAreaType) => [area.id, area]));
+
+      // 1. Identify edited areas - compare unsaved areas with original areas
+      const areasToEdit = currentUnsavedAreas.filter((unsavedArea: MaskedAreaType) => {
+        const originalArea = originAreaMap.get(unsavedArea.id);
+        // If area exists in original data and has changes
+        return originalArea && JSON.stringify(unsavedArea) !== JSON.stringify(originalArea);
+      });
+
+      // 2. Identify deleted areas - areas that are in original but not in unsaved
+      const areasToDelete = originalAreas.filter((originalArea: MaskedAreaType) => {
+        return !currentUnsavedAreas.find(
+          (unsavedArea: MaskedAreaType) => unsavedArea.id === originalArea.id,
+        );
+      });
+
+      // 3. Identify added areas - areas that are in unsaved but not in original
+      const areasToAdd = currentUnsavedAreas.filter((unsavedArea: MaskedAreaType) => {
+        return !originAreaMap.has(unsavedArea.id);
+      });
+
+      // Group operations by type
+      const operations = {
+        edits: areasToEdit,
+        additions: areasToAdd,
+        deletions: areasToDelete,
+      };
+
+      console.log('Save Operations:', operations);
+      console.log('Original Areas:', originalAreas);
+      console.log('Current Unsaved Areas:', currentUnsavedAreas);
+      console.log('Devices to Disable:', deviceToDisable);
+
+      // Execute operations with better error handling
+      let successCount = 0;
+      let errorCount = 0;
+      let disableDevice = false;
+      // Process deletions first (to avoid conflicts)
+      for (const area of operations.deletions) {
+        try {
+          await deleteMutation.mutateAsync(area.id);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to delete area ${area.id}:`, error);
+          errorCount++;
+        }
+      }
+
+      // Process edits
+      for (const area of operations.edits) {
+        try {
+          await editMutation.mutateAsync(area);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to edit area ${area.id}:`, error);
+          errorCount++;
+        }
+      }
+
+      // Process additions last
+      for (const area of operations.additions) {
+        try {
+          await addMutation.mutateAsync(area);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to add area ${area.id}:`, error);
+          errorCount++;
+        }
+      }
+      if (deviceToDisable.length > 0) {
+        const res = await disableDeviceMutation.mutateAsync(deviceToDisable);
+        if (res.success) {
+          console.log('Devices disabled successfully');
+          toast.success('Devices disabled successfully');
+          disableDevice = true;
+        } else {
+          console.error('Failed to disable devices:', res.message);
+          toast.error('Failed to disable devices');
+        }
+      }
+
+      // Show appropriate toast message
+      if (errorCount === 0 && successCount > 0) {
+        toast.success(`Successfully completed ${successCount} operations`);
+      } else if (errorCount > 0) {
+        toast.error(`Completed ${successCount} operations, ${errorCount} failed`);
+      } else {
+        toast.error('No changes to save');
+      }
+
+      // Refetch data to ensure UI is in sync
+      await refetchMaskedAreas();
+      dispatch(fetchFloorplanDT(floorplanFilter));
+    } catch (error) {
+      console.error('Error during save operations:', error);
+      toast.error('Save operation failed');
+    } finally {
+      setTimeout(() => {
+        setIsSaving(false);
+        handleCloseEditing();
+      }, 1000);
+    }
+  };
 
   if (isMaskedAreasLoading) {
     return (
@@ -349,7 +375,7 @@ const handleSaveEdits = async () => {
           <Typography variant="h6" mt={0}>
             Masked Areas
           </Typography>
-          {(!editingMaskedArea && !drawingArea) && (
+          {!editingMaskedArea && !drawingArea && (
             <Tooltip title="Add Masked Area">
               <IconButton color="primary" onClick={handleAddAreaClick}>
                 <AddIcon />
@@ -393,7 +419,7 @@ const handleSaveEdits = async () => {
             <Button variant="outlined" onClick={handleOpenCancelEditingDialog}>
               Cancel
             </Button>
-            <Button variant="contained" onClick={handleSaveEdits} disabled={isSaving}>
+            <Button variant="contained" onClick={handleSaveClick} disabled={isSaving}>
               {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </Box>
@@ -449,6 +475,48 @@ const handleSaveEdits = async () => {
           </Button>
           <Button onClick={handleCloseEditing} color="error">
             Yes, Cancel Editing
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Save Warning — devices will be disabled */}
+      <Dialog
+        open={saveWarningDialogOpen}
+        onClose={() => setSaveWarningDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 700 }}>⚠️ Devices Outside Their Area</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            <strong>
+              {deviceToDisable.length} device{deviceToDisable.length > 1 ? 's are' : ' is'}
+            </strong>{' '}
+            currently positioned outside of their assigned masked area. Saving these changes will{' '}
+            <strong>disable those devices</strong> — they must be re-confirmed as active before they
+            can be used again.
+          </DialogContentText>
+          <DialogContentText sx={{ mt: 1.5 }}>
+            Do you want to proceed with saving?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setSaveWarningDialogOpen(false)}
+            color="primary"
+            variant="outlined"
+          >
+            Cancel
+          </Button>
+          <Button
+            color="warning"
+            variant="contained"
+            onClick={() => {
+              setSaveWarningDialogOpen(false);
+              handleSaveEdits();
+            }}
+          >
+            Proceed Anyway
           </Button>
         </DialogActions>
       </Dialog>

@@ -8,8 +8,11 @@ import {
   // useTheme,
 } from '@mui/material';
 import Konva from 'konva';
+import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
+import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
+import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
 import React, { useEffect, useState } from 'react';
-import { Stage, Layer, Circle, Image as KonvaImage, Line } from 'react-konva';
+import { Stage, Layer, Circle, Image as KonvaImage, Line, Group, Text } from 'react-konva';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import earcut from 'earcut';
@@ -20,6 +23,7 @@ import {
   GeoFencingAlarmType,
   UpdateSelectedGeoFencingAlarm,
 } from 'src/store/apps/alarmsetting/geofencing';
+import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 
 type Nodes = {
   id: string;
@@ -42,6 +46,8 @@ const EditGeoFenceRenderer: React.FC<{
   otherGeoFences?: GeoFencingAlarmType[];
   areas: MaskedAreaType[];
   showAreas: boolean;
+  devices: FloorplanDeviceType[];
+  showDevices: boolean;
 }> = ({
   width,
   height,
@@ -55,6 +61,8 @@ const EditGeoFenceRenderer: React.FC<{
   otherGeoFences,
   areas,
   showAreas,
+  devices,
+  showDevices,
 }) => {
   const stageRef = React.useRef<Konva.Stage>(null);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
@@ -646,6 +654,55 @@ const EditGeoFenceRenderer: React.FC<{
     console.log('Drawing cancelled by right click');
   };
 
+  //Device Renderer
+      const useDeviceIcon = (src: string) => {
+        const [img, setImg] = useState<HTMLImageElement | undefined>(undefined);
+        useEffect(() => {
+          const image = new window.Image();
+          image.src = src;
+          image.onload = () => setImg(image);
+        }, [src]);
+        return img;
+      };
+      const iconCCTV = useDeviceIcon(CCTVSVG);
+      const iconGateway = useDeviceIcon(GatewaySVG);
+      const iconUnknown = useDeviceIcon(UnknownDevice);
+
+          const renderDeviceShape = (device: FloorplanDeviceType) => {
+            let deviceIcon = iconUnknown;
+            switch (device.type) {
+              case 'Cctv':
+                deviceIcon = iconCCTV;
+                break;
+              case 'BleReader':
+                deviceIcon = iconGateway;
+                break;
+            }
+            // Use original coordinates directly (no scaling)
+            const x = device.posPxX - 20;
+            const y = device.posPxY - 20;
+      
+            return (
+              <Group
+                key={`device-${device.id}`}
+                name="device"
+              >
+                <Text
+                  x={x - 40}
+                  y={y - 5}
+                  text={device.reader?.gmac || device.id}
+                  fontSize={9}
+                  fill="#1976d2"
+                  fontStyle="bold"
+                  width={120}
+                  align="center"
+                  listening={false}
+                />
+                <KonvaImage name="device" image={deviceIcon} x={x} y={y} width={40} height={40} />
+              </Group>
+            );
+          };
+
   return (
     <>
       <Stage
@@ -709,55 +766,55 @@ const EditGeoFenceRenderer: React.FC<{
                 closed
                 fill={activeGeoFence.color}
                 opacity={0.7}
-                draggable
-                onMouseEnter={() => {
-                  if (!drawingGeoFence) setCursor('move');
-                }}
-                onMouseLeave={() => {
-                  if (!drawingGeoFence) setCursor('grab');
-                }}
-                onMouseDown={(e) => {
-                  if (!drawingGeoFence) {
-                    setIsDragging(activeGeoFence.name);
-                    handleDragStart(activeGeoFence.name);
-                    const isShiftPressed = e.evt.shiftKey;
-                    const stage = e.target.getStage();
-                    const mousePos = stage?.getPointerPosition();
-                    if (isShiftPressed && mousePos) {
-                      e.evt.preventDefault();
-                      handleInsertCorner(activeGeoFence.name, mousePos.x, mousePos.y);
-                    }
-                  }
-                }}
-                onDblClick={(e) => {
-                  const stage = e.target.getStage();
-                  const mousePos = stage?.getPointerPosition();
+                // draggable
+                // onMouseEnter={() => {
+                //   if (!drawingGeoFence) setCursor('move');
+                // }}
+                // onMouseLeave={() => {
+                //   if (!drawingGeoFence) setCursor('grab');
+                // }}
+                // onMouseDown={(e) => {
+                //   if (!drawingGeoFence) {
+                //     setIsDragging(activeGeoFence.name);
+                //     handleDragStart(activeGeoFence.name);
+                //     const isShiftPressed = e.evt.shiftKey;
+                //     const stage = e.target.getStage();
+                //     const mousePos = stage?.getPointerPosition();
+                //     if (isShiftPressed && mousePos) {
+                //       e.evt.preventDefault();
+                //       handleInsertCorner(activeGeoFence.name, mousePos.x, mousePos.y);
+                //     }
+                //   }
+                // }}
+                // onDblClick={(e) => {
+                //   const stage = e.target.getStage();
+                //   const mousePos = stage?.getPointerPosition();
 
-                  if (mousePos) {
-                    e.evt.preventDefault();
-                    handleInsertCorner(
-                      activeGeoFence.name,
-                      mousePos.x * scaleX,
-                      mousePos.y * scaleY,
-                    );
-                  }
-                }}
-                onMouseUp={handleMouseUp}
-                onDragStart={() => {
-                  setIsDragging(activeGeoFence.name);
-                  setAreaDragging(true);
-                }}
-                onDragMove={(e) => {
-                  handleDragMove(e.target.x() * scaleX, e.target.y() * scaleY);
-                }}
-                onDragEnd={(e) => {
-                  handleDragEnd(activeGeoFence.name);
-                  e.target.x(0);
-                  e.target.y(0);
-                  setIsDragging('');
-                }}
+                //   if (mousePos) {
+                //     e.evt.preventDefault();
+                //     handleInsertCorner(
+                //       activeGeoFence.name,
+                //       mousePos.x * scaleX,
+                //       mousePos.y * scaleY,
+                //     );
+                //   }
+                // }}
+                // onMouseUp={handleMouseUp}
+                // onDragStart={() => {
+                //   setIsDragging(activeGeoFence.name);
+                //   setAreaDragging(true);
+                // }}
+                // onDragMove={(e) => {
+                //   handleDragMove(e.target.x() * scaleX, e.target.y() * scaleY);
+                // }}
+                // onDragEnd={(e) => {
+                //   handleDragEnd(activeGeoFence.name);
+                //   e.target.x(0);
+                //   e.target.y(0);
+                //   setIsDragging('');
+                // }}
               />
-              {!areaDragging &&
+              {/* {!areaDragging &&
                 activeGeoFence.nodes &&
                 activeGeoFence.nodes.map((node, index) => (
                   <Circle
@@ -819,9 +876,10 @@ const EditGeoFenceRenderer: React.FC<{
                       handleDeleteCorner(activeGeoFence.name, index); // Call the function to delete the corner
                     }}
                   />
-                ))}
+                ))} */}
             </React.Fragment>
           )}
+          {showDevices && devices.map((d: FloorplanDeviceType) => renderDeviceShape(d))}
           {drawingGeoFence && (
             <>
               {drawingNodes.map((node) => (
