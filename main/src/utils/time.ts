@@ -17,3 +17,5 @@ export const formatFullDateTime = (dateString: string, lang: 'en' | 'id' = 'en')
     .format(date)
     .replace(/\./g, ':'); // make sure seconds use ":"
 };
+
+export const getUserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;

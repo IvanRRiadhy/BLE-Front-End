@@ -6,10 +6,14 @@ import RTL from './layouts/full/shared/customizer/RTL';
 import { RouterProvider } from 'react-router';
 import router from './routes/Router';
 import { RootState } from './store/Store';
+import usePreventWindowClose from './hooks/usePreventWindowClose';
 
 function App() {
   const theme = ThemeSettings();
   const customizer = useSelector((state: RootState) => state.customizer);
+
+  // Global browser close preventer
+  // usePreventWindowClose(true);
 
   return (
     <ThemeProvider theme={theme}>

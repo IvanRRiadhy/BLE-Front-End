@@ -4,6 +4,7 @@ import { Box, Typography, CircularProgress, SelectChangeEvent, MenuItem } from '
 import { usePeakHour } from 'src/hooks/useDashboard';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { useSelector } from 'src/store/Store';
+import { getUserTimezone } from 'src/utils/time';
 
 /* ---------------- Default Filter ---------------- */
 
@@ -18,7 +19,7 @@ const defaultFilter = {
 };
 type DistributionLevel = 'building' | 'floor' | 'floorplan' | 'area';
 
-const getUserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
+// const getUserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 /* ---------------- Component ---------------- */
 
 const PeakHour: React.FC = () => {

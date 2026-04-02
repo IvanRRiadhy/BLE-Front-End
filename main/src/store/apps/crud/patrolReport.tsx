@@ -1,9 +1,30 @@
-import axiosServices, { BASE_URL } from '../../../utils/axios';
 import { createSlice } from '@reduxjs/toolkit';
-import { AppDispatch, dispatch } from 'src/store/Store';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { createAsyncThunk } from '@reduxjs/toolkit';
 import { SecurityType } from './patrolRoute';
+
+
+export type SessionStatus =
+  | 'scheduled'
+  | 'active'
+  | 'completed'
+  | 'absent'
+  | 'partialcompleted'
+  | 'timedout';
+
+export type TimeRangeOption =
+  | 'today'
+  | 'yesterday'
+  | 'weekly'
+  | 'last_week'
+  | 'monthly'
+  | 'last_month'
+  | 'yearly'
+  | 'last_year'
+  | 'last_7_days'
+  | 'last_30_days'
+  | 'last_90_days'
+  | 'custom';
+
 
 export type GetFilter = {
   draw: number;
@@ -12,19 +33,31 @@ export type GetFilter = {
   sortColumn: string;
   sortDir: 'asc' | 'desc';
   searchValue: string;
+  timeRange?: TimeRangeOption | '';
+  timezone?: string;
+  dateFilters?: {
+    StartedAt?: {
+      dateFrom: string | null;
+      dateTo: string | null;
+    };
+  };
   filters?: {
-    securityId?: string;
-    routeId?: string;
-    isCompleted?: boolean;
+    securityId?: string[];
+    routeId?: string[];
+    isCompleted?: boolean | null;
     assignmentId?: string[];
+    sessionStatus?: SessionStatus | null;
   };
 };
+
+
 
 // ==========================
 // Main Session Type
 // ==========================
 export interface PatrolReportType {
   sessionId: string;
+  sessionStatus: string;
   startedAt: string;
   endedAt: string | null;
   durationFormatted: string | null;

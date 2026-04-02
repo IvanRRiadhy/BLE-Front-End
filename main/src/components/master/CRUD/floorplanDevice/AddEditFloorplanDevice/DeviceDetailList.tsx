@@ -273,7 +273,7 @@ const DeviceDetailList = () => {
         updatedAt: new Date().toISOString(),
         updatedBy: 'admin', // You might want to get this from auth context
       };
-
+      // console.log('Updated device to save:', JSON.stringify(updatedDevice, null, 2));
       // Save to saved layer
       dispatch(SaveAllDevicesToSavedLayer());
 

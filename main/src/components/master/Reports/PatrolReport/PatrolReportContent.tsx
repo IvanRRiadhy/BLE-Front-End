@@ -49,6 +49,7 @@ import { useTimeGroupList } from 'src/hooks/useTimeGroup';
 import { getCaseStatusColor } from 'src/utils/caseStatus';
 import { usePatrolReport } from 'src/hooks/usePatrolReport';
 import { buildPatrolReportRows } from 'src/utils/exportPatrolReport';
+import { getUserTimezone } from 'src/utils/time';
 
 interface Props {
   patrol: PatrolAssignType;
@@ -136,6 +137,7 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
     try {
       const report = await patrolReportMutation.mutateAsync({
         ...defaultPatrolReportFilter,
+        timezone: getUserTimezone(),
         filters: { assignmentId: [patrol.id] },
       });
 
@@ -144,7 +146,14 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
 
       sessionStorage.setItem('patrolReportPreviewData', JSON.stringify({ rows, filename }));
 
-      window.open('/report/patrolreport/preview', '_blank');
+      const w = 1200, h = window.screen.height * 0.9;
+      const left = (window.screen.width - w) / 2;
+      const top  = (window.screen.height - h) / 2;
+      window.open(
+        '/report/patrolreport/preview',
+        'PatrolReportPreview',
+        `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`,
+      );
       toast.success('Preview opened in a new tab');
     } catch (error) {
       toast.error('Failed to generate patrol report');

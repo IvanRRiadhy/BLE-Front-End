@@ -360,6 +360,7 @@ CancelAllDevicesEditing: (state) => {
                 state.unsavedFloorplanDevices[index] = {
                     ...state.unsavedFloorplanDevices[index],
                     floorplanMaskedAreaId: action.payload.floorplanMaskedAreaId,
+                    deviceStatus: action.payload.deviceStatus,
                     posX: action.payload.posX,
                     posY: action.payload.posY,
                     posPxX: action.payload.posPxX,
@@ -370,6 +371,7 @@ CancelAllDevicesEditing: (state) => {
                     state.editingFloorplanDevice = {
                         ...state.editingFloorplanDevice,
                         floorplanMaskedAreaId: action.payload.floorplanMaskedAreaId,
+                        deviceStatus: action.payload.deviceStatus,
                         posX: action.payload.posX,
                         posY: action.payload.posY,
                         posPxX: action.payload.posPxX,

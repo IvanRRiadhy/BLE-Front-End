@@ -8,6 +8,7 @@ export const PATROL_REPORT_COLUMNS = [
   { header: 'Checkpoints',       key: 'totalCheckpoints', width: 30 },
   { header: 'Security',          key: 'securityName',    width: 20 },
   { header: 'Session',           key: 'session',         width: 22 },
+  { header: 'Session Status',    key: 'sessionStatus',   width: 22 },
   { header: 'Completed Checkpoint',  key: 'completedCheckpoints', width: 20 },
   { header: 'Completion Percentage', key: 'completionPercentage', width: 20 },
   { header: 'Total Duration',    key: 'totalDuration',   width: 15 },
@@ -31,6 +32,7 @@ export interface PatrolReportRow {
   totalCheckpoints?: string | null;
   securityName?: string | null;
   session?: string | null;            // ISO date string for data rows
+  sessionStatus?: string | null;
   completedCheckpoints?: number | null;
   completionPercentage?: number | null;
   totalDuration?: string | null;
@@ -98,6 +100,7 @@ export const buildPatrolReportRows = (data: any[]): PatrolReportRow[] => {
       _type: 'data',
       securityName:        printSecurity ? (session.securityName || '-') : null,
       session:             session.startedAt ?? null,
+      sessionStatus:       session.sessionStatus || '-',
       completedCheckpoints: session.metrics?.completedCheckpoints ?? 0,
       completionPercentage: session.metrics?.completionPercentage ?? 0,
       totalDuration:       session.metrics?.totalDuration || '-',
@@ -155,6 +158,7 @@ export const downloadPatrolReportExcel = async (
       totalCheckpoints:    row.totalCheckpoints ?? undefined,
       securityName:        row.securityName ?? undefined,
       session:             row.session ? dayjs(row.session).toDate() : undefined,
+      sessionStatus:       row.sessionStatus ?? undefined,
       completedCheckpoints: row.completedCheckpoints ?? undefined,
       completionPercentage: row.completionPercentage ?? undefined,
       totalDuration:       row.totalDuration ?? undefined,

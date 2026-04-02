@@ -512,7 +512,7 @@ const InvestigateFilter = () => {
         <Divider sx={{ mt: -5 }} />
 
         {/* Active Mode Toggle */}
-        <Box>
+        {/* <Box>
           <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
             Mode
           </Typography>
@@ -541,7 +541,7 @@ const InvestigateFilter = () => {
             <ToggleButton value="alarm">Alarm</ToggleButton>
             <ToggleButton value="area">Area</ToggleButton>
           </ToggleButtonGroup>
-        </Box>
+        </Box> */}
 
         {/* Fixed content section - this doesn't scroll */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, flexShrink: 0 }}>

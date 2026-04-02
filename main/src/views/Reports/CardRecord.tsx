@@ -100,6 +100,7 @@ const CardRecord = () => {
             title="Card Record List"
             codeModel={[]}
           >
+            
             <CardRecordList />
           </ParentCard>
         </Drawer>

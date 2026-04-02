@@ -141,7 +141,7 @@ const DeviceList = () => {
     posPxY: 100,
     floorplanMaskedAreaId: '',
     applicationId: activeFloorplan?.applicationId || localStorage.getItem('applicationId') || '',
-    deviceStatus: 'Active',
+    deviceStatus: 'NonActive',
     createdAt: new Date().toISOString(),
     createdBy: 'admin',
     updatedAt: new Date().toISOString(),

@@ -826,5 +826,7 @@ export const defaultPatrolReportFilter: PatrolReportFilter = {
   sortColumn: '',
   sortDir: 'desc',
   searchValue: '',
+  timeRange: '',
+  dateFilters: {},
   filters: {},
 };

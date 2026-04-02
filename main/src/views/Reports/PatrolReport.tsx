@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react';
 import {
-  Button,
-  Box,
   Drawer,
   useMediaQuery,
   Theme,
   CircularProgress,
-  Typography,
 } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import AppCard from 'src/components/shared/AppCard';
@@ -17,6 +14,8 @@ import { SecurityType } from 'src/store/apps/crud/patrolRoute';
 import { RootState, useSelector } from 'src/store/Store';
 import PatrolReportSessionContent from 'src/components/master/Reports/PatrolReport/PatrolSessionContent';
 import PatrolAssignmentSearch from 'src/components/master/Reports/PatrolReport/PatrolAssignmentSearch';
+import PatrolReportFilter from 'src/components/master/Reports/PatrolReport/PatrolReportFilter';
+
 const drawerWidth = 240;
 const secdrawerWidth = 320;
 
@@ -79,11 +78,7 @@ const PatrolReport = () => {
               <PatrolReportContent patrol={patrolAssign} onSecurityClick={setSelectedSecurity} />
             )
           ) : (
-            <Box display="flex" justifyContent="center" mt={5}>
-              <Typography variant="h4" color="text.secondary">
-                Please select a patrol assignment to view the report.
-              </Typography>
-            </Box>
+            <PatrolReportFilter />
           )}
         </Drawer>
       </AppCard>

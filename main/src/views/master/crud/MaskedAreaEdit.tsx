@@ -26,7 +26,7 @@ const MaskedAreaEdit = () => {
           display="flex"
           flexDirection="column"
           height={'90vh'}
-          maxHeight={855}
+          // maxHeight={855}
           sx={{ border: '1px solid', borderColor: 'divider' }}
         >
           <AddEditMaskedAreaSidebar

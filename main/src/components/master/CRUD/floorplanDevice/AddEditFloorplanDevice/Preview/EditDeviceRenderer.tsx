@@ -468,12 +468,13 @@ const EditDeviceRenderer: React.FC<Props> = ({
     const newDevice = {
       ...device,
       floorplanMaskedAreaId: intersectedArea ? intersectedArea.id : '',
+      deviceStatus: intersectedArea ? 'Active' : 'NonActive',
       posPxX: newPosX,
       posPxY: newPosY,
       posX: newPosX * scale,
       posY: newPosY * scale,
     };
-
+    console.log("New device position:", newDevice);
     setIsDragging(false);
     setDeviceDragging(false);
     dispatch(editDevicePosition(newDevice));

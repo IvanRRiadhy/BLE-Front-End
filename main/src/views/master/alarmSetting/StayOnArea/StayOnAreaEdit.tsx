@@ -42,7 +42,7 @@ const StayOnAreaEdit = () => {
             display="flex"
             flexDirection="column"
             minHeight={'90vh'}
-            maxHeight={855}
+            // maxHeight={855}
             sx={{ border: '1px solid', borderColor: 'divider' }}
           >
             <StayOnAreaSidebar
