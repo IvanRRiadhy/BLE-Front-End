@@ -2,49 +2,65 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import dayjs from 'dayjs';
 
-/**
- * Generates an Excel (.xlsx) file for a given list of Patrol Reports (Sessions + Cases)
- * with the exact columns defined from the reference PatrolReport.xlsx.
- */
-  const getCdnUrl = (url?: string) => {
-    if (!url) return '';
-    if (url.startsWith('https://ble-cdn.tunnel.piranticerdasindonesia.com/')) return url;
-    return `https://ble-cdn.tunnel.piranticerdasindonesia.com/${url}`;
-  };
-export const downloadPatrolReportExcel = async (
-  data: any[],
-  filename = 'PatrolReport.xlsx'
-) => {
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Patrol Report');
+export const PATROL_REPORT_COLUMNS = [
+  { header: 'Patrol Assignment', key: 'assignmentName', width: 20 },
+  { header: 'Route',             key: 'routeName',       width: 20 },
+  { header: 'Checkpoints',       key: 'totalCheckpoints', width: 30 },
+  { header: 'Security',          key: 'securityName',    width: 20 },
+  { header: 'Session',           key: 'session',         width: 22 },
+  { header: 'Completed Checkpoint',  key: 'completedCheckpoints', width: 20 },
+  { header: 'Completion Percentage', key: 'completionPercentage', width: 20 },
+  { header: 'Total Duration',    key: 'totalDuration',   width: 15 },
+  { header: 'Total Case',        key: 'totalCases',      width: 12 },
+  { header: 'Cases',             key: 'cases',           width: 25 },
+  { header: 'Case Type',         key: 'caseType',        width: 15 },
+  { header: 'Threat Level',      key: 'threatLevel',     width: 15 },
+  { header: 'Area',              key: 'area',            width: 20 },
+  { header: 'Report Time',       key: 'reportTime',      width: 22 },
+  { header: 'Case Status',       key: 'caseStatus',      width: 15 },
+  { header: 'Attachment',        key: 'attachment',      width: 30 },
+] as const;
 
-  // Define columns matching the reference PatrolReport.xlsx
-  worksheet.columns = [
-    { header: 'Patrol Assignment', key: 'assignmentName', width: 20 },
-    { header: 'Route', key: 'routeName', width: 20 },
-    { header: 'Checkpoints', key: 'totalCheckpoints', width: 12 },
-    { header: 'Security', key: 'securityName', width: 20 },
-    { header: 'Session', key: 'session', width: 35 },
-    { header: 'Completed Checkpoint', key: 'completedCheckpoints', width: 20 },
-    { header: 'Completion Percentage', key: 'completionPercentage', width: 20 },
-    { header: 'Total Duration', key: 'totalDuration', width: 15 },
-    { header: 'Total Case', key: 'totalCases', width: 12 },
-    { header: 'Cases', key: 'cases', width: 25 },
-    { header: 'Case Type', key: 'caseType', width: 15 },
-    { header: 'Threat Level', key: 'threatLevel', width: 15 },
-    { header: 'Area', key: 'area', width: 20 },
-    { header: 'Report Time', key: 'reportTime', width: 20 },
-    { header: 'Case Status', key: 'caseStatus', width: 15 },
-    { header: 'Attachment', key: 'attachment', width: 30 },
-  ];
+// ─────────────────────────────────────────────────────────────
+// Plain row type for preview + export
+// ─────────────────────────────────────────────────────────────
+export interface PatrolReportRow {
+  _type: 'header' | 'data';
+  assignmentName?: string | null;
+  routeName?: string | null;
+  totalCheckpoints?: string | null;
+  securityName?: string | null;
+  session?: string | null;            // ISO date string for data rows
+  completedCheckpoints?: number | null;
+  completionPercentage?: number | null;
+  totalDuration?: string | null;
+  totalCases?: number | null;
+  cases?: string | null;
+  caseType?: string | null;
+  threatLevel?: string | null;
+  area?: string | null;
+  reportTime?: string | null;         // ISO date string
+  caseStatus?: string | null;
+  attachment?: string | null;
+}
 
-  // Apply bold font to the header row
-  worksheet.getRow(1).font = { bold: true };
+const getCdnUrl = (url?: string) => {
+  if (!url) return '';
+  if (url.startsWith('https://ble-cdn.tunnel.piranticerdasindonesia.com/')) return url;
+  return `https://ble-cdn.tunnel.piranticerdasindonesia.com/${url}`;
+};
 
-  // Sort data by assignmentId -> securityId -> startedAt to ensure proper grouping
+// ─────────────────────────────────────────────────────────────
+// Build flat rows from API data (shared by preview & download)
+// ─────────────────────────────────────────────────────────────
+export const buildPatrolReportRows = (data: any[]): PatrolReportRow[] => {
+  const rows: PatrolReportRow[] = [];
+
   const sortedData = [...data].sort((a, b) => {
-    if (a.assignmentId !== b.assignmentId) return (a.assignmentId || '').localeCompare(b.assignmentId || '');
-    if (a.securityId !== b.securityId) return (a.securityId || '').localeCompare(b.securityId || '');
+    if (a.assignmentId !== b.assignmentId)
+      return (a.assignmentId || '').localeCompare(b.assignmentId || '');
+    if (a.securityId !== b.securityId)
+      return (a.securityId || '').localeCompare(b.securityId || '');
     const aTime = a.startedAt ? new Date(a.startedAt).getTime() : 0;
     const bTime = b.startedAt ? new Date(b.startedAt).getTime() : 0;
     return aTime - bTime;
@@ -54,93 +70,112 @@ export const downloadPatrolReportExcel = async (
   let currentSecurityId: string | null = null;
 
   sortedData.forEach((session) => {
-    // 1. Check if new assignment
+    // ── Assignment header row ─────────────────────────────────
     if (session.assignmentId !== currentAssignmentId) {
       currentAssignmentId = session.assignmentId;
-      currentSecurityId = null; // reset security tracking for new assignment
+      currentSecurityId = null;
 
-      // Extract unique checkpoints from the first session's timeline
-      const checkpointsList = session.timeline
-        ?.filter((t: any) => t.stage?.startsWith('checkpoint_'))
-        ?.map((t: any) => t.stageName?.replace('Checkpoint: ', '') || t.stageName)
-        ?.filter((v: any, i: any, s: any) => s.indexOf(v) === i)
-        ?.join(', ') || '-';
+      const checkpointsList =
+        session.timeline
+          ?.filter((t: any) => t.stage?.startsWith('checkpoint_'))
+          ?.map((t: any) => t.stageName?.replace('Checkpoint: ', '') || t.stageName)
+          ?.filter((v: any, i: any, s: any) => s.indexOf(v) === i)
+          ?.join(', ') || '-';
 
-      worksheet.addRow({
+      rows.push({
+        _type: 'header',
         assignmentName: session.assignmentName || '-',
-        routeName: session.routeName || '-',
+        routeName:      session.routeName || '-',
         totalCheckpoints: checkpointsList,
       });
     }
 
-    // 2. Check if new security within this assignment
+    // ── Security de-duplication ───────────────────────────────
     const printSecurity = session.securityId !== currentSecurityId;
-    if (printSecurity) {
-      currentSecurityId = session.securityId;
-    }
+    if (printSecurity) currentSecurityId = session.securityId;
 
-    const sessionRowBase = {
-      securityName: printSecurity ? (session.securityName || '-') : null,
-      session: session.startedAt ? dayjs(session.startedAt).toDate() : '-',
+    const sessionBase: Partial<PatrolReportRow> = {
+      _type: 'data',
+      securityName:        printSecurity ? (session.securityName || '-') : null,
+      session:             session.startedAt ?? null,
       completedCheckpoints: session.metrics?.completedCheckpoints ?? 0,
       completionPercentage: session.metrics?.completionPercentage ?? 0,
-      totalDuration: session.metrics?.totalDuration || '-',
-      totalCases: session.metrics?.totalCases ?? 0,
+      totalDuration:       session.metrics?.totalDuration || '-',
+      totalCases:          session.metrics?.totalCases ?? 0,
     };
 
-    // 3. Handle cases
+    // ── Cases ─────────────────────────────────────────────────
     if (session.cases && session.cases.length > 0) {
       session.cases.forEach((c: any, index: number) => {
         const attachmentUrls = Array.isArray(c.attachments)
-          ? c.attachments.map((a: any) => a?.fileUrl || a).join(', ')
+          ? c.attachments.map((a: any) => getCdnUrl(a?.fileUrl || a)).join(', ')
           : '';
 
+        const caseFields: Partial<PatrolReportRow> = {
+          cases:       c.title || '-',
+          caseType:    c.caseType || '-',
+          threatLevel: c.threatLevel || '-',
+          area:        c.patrolAreaName || '-',
+          reportTime:  c.reportedAt ?? null,
+          caseStatus:  c.caseStatus || '-',
+          attachment:  attachmentUrls || '-',
+        };
+
         if (index === 0) {
-          // First case goes on the same row as session details
-          worksheet.addRow({
-            ...sessionRowBase,
-            cases: c.title || '-',
-            caseType: c.caseType || '-',
-            threatLevel: c.threatLevel || '-',
-            area: c.patrolAreaName || '-',
-            reportTime: c.reportedAt ? dayjs(c.reportedAt).toDate() : '-',
-            caseStatus: c.caseStatus || '-',
-            attachment: getCdnUrl(attachmentUrls) || '-',
-          });
+          rows.push({ ...sessionBase, ...caseFields } as PatrolReportRow);
         } else {
-          // Additional cases get their own row with session/security columns empty
-          worksheet.addRow({
-            cases: c.title || '-',
-            caseType: c.caseType || '-',
-            threatLevel: c.threatLevel || '-',
-            area: c.patrolAreaName || '-',
-            reportTime: c.reportedAt ? dayjs(c.reportedAt).toDate() : '-',
-            caseStatus: c.caseStatus || '-',
-            attachment: getCdnUrl(attachmentUrls) || '-',
-          });
+          rows.push({ _type: 'data', ...caseFields });
         }
       });
     } else {
-      // No cases, emit a single session row
-      worksheet.addRow({
-        ...sessionRowBase,
-        cases: null,
-        caseType: null,
-        threatLevel: null,
-        area: null,
-        reportTime: null,
-        caseStatus: null,
-        attachment: null,
-      });
+      rows.push({ ...sessionBase } as PatrolReportRow);
     }
   });
 
-  // Calculate buffer
+  return rows;
+};
+
+// ─────────────────────────────────────────────────────────────
+// Excel download
+// ─────────────────────────────────────────────────────────────
+export const downloadPatrolReportExcel = async (
+  rows: PatrolReportRow[],
+  filename = 'PatrolReport.xlsx',
+) => {
+  const workbook  = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Patrol Report');
+
+  worksheet.columns = PATROL_REPORT_COLUMNS.map((c) => ({ ...c }));
+  worksheet.getRow(1).font = { bold: true };
+
+  rows.forEach((row) => {
+    const xlRow = worksheet.addRow({
+      assignmentName:      row.assignmentName ?? undefined,
+      routeName:           row.routeName ?? undefined,
+      totalCheckpoints:    row.totalCheckpoints ?? undefined,
+      securityName:        row.securityName ?? undefined,
+      session:             row.session ? dayjs(row.session).toDate() : undefined,
+      completedCheckpoints: row.completedCheckpoints ?? undefined,
+      completionPercentage: row.completionPercentage ?? undefined,
+      totalDuration:       row.totalDuration ?? undefined,
+      totalCases:          row.totalCases ?? undefined,
+      cases:               row.cases ?? undefined,
+      caseType:            row.caseType ?? undefined,
+      threatLevel:         row.threatLevel ?? undefined,
+      area:                row.area ?? undefined,
+      reportTime:          row.reportTime ? dayjs(row.reportTime).toDate() : undefined,
+      caseStatus:          row.caseStatus ?? undefined,
+      attachment:          row.attachment ?? undefined,
+    });
+
+    if (row._type === 'header') {
+      xlRow.font = { bold: true };
+    }
+  });
+
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   });
-  
-  // Trigger user download
   saveAs(blob, filename);
 };

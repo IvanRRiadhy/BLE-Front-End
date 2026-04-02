@@ -130,6 +130,7 @@ const Investigate = Loadable(lazy(() => import('../views/Reports/Investigate')))
 const EventLog = Loadable(lazy(() => import('../views/Reports/EventLog')));
 const CardHistory = Loadable(lazy(() => import('../views/Reports/CardHistory')));
 const PatrolReport = Loadable(lazy(() => import('../views/Reports/PatrolReport')));
+const PatrolReportPreview = Loadable(lazy(() => import('../views/Reports/PatrolReportPreview')));
 
 // Evacuation
 const EvacuationDashboard = Loadable(
@@ -549,6 +550,8 @@ const Router = [
       { path: '/thank-you', exact: true, element: <ThankYouPage /> },
       //User Form
       { path: '/user-form', exact: true, element: <UserForm /> },
+      // Patrol Report Preview
+      { path: '/report/patrolreport/preview', exact: true, element: withAuth(<PatrolReportPreview />, '/report/patrolreport/preview') },
     ],
   },
 ];

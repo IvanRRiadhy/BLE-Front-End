@@ -21,6 +21,7 @@ import {
   PatrolAssignType,
   PatrolDetailPayload,
   SecurityType,
+  SelectPatrolAssign,
 } from 'src/store/apps/crud/patrolRoute';
 import PatrolRouteDetailDialog from 'src/components/security-view/PatrolAssignment/SecurityViewPatrol/PatrolRouteDetailDialog';
 import PatrolScheduleCalendarDialog from 'src/components/security-view/PatrolAssignment/SecurityViewPatrol/PatrolScheduleCalendarDialog';
@@ -41,13 +42,13 @@ import { CaseUploadType, PatrolCaseType } from 'src/store/apps/crud/patrolCase';
 import PatrolCaseListItem from 'src/components/security-view/PatrolAssignment/PatrolAssignmentList/PatrolCaseListItem';
 import toast from 'react-hot-toast';
 import { use } from 'i18next';
-import { RootState, useSelector } from 'src/store/Store';
+import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import { useSearchParams } from 'react-router';
 import { usePatrolAssignmentId, usePatrolRouteId } from 'src/hooks/usePatrolRoute';
 import { useTimeGroupList } from 'src/hooks/useTimeGroup';
 import { getCaseStatusColor } from 'src/utils/caseStatus';
 import { usePatrolReport } from 'src/hooks/usePatrolReport';
-import { downloadPatrolReportExcel } from 'src/utils/exportPatrolReport';
+import { buildPatrolReportRows } from 'src/utils/exportPatrolReport';
 
 interface Props {
   patrol: PatrolAssignType;
@@ -55,6 +56,7 @@ interface Props {
 }
 
 const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
+  const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
   const customizer = useSelector((state: RootState) => state.customizer);
@@ -136,14 +138,17 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
         ...defaultPatrolReportFilter,
         filters: { assignmentId: [patrol.id] },
       });
-      
-      await downloadPatrolReportExcel(report, `PatrolReport_${patrol.name.replace(/\s+/g, '_')}.xlsx`);
 
-      toast.success('Patrol report generated successfully');
+      const rows = buildPatrolReportRows(report);
+      const filename = `PatrolReport_${patrol.name.replace(/\s+/g, '_')}.xlsx`;
+
+      sessionStorage.setItem('patrolReportPreviewData', JSON.stringify({ rows, filename }));
+
+      window.open('/report/patrolreport/preview', '_blank');
+      toast.success('Preview opened in a new tab');
     } catch (error) {
       toast.error('Failed to generate patrol report');
       console.error('Error generating patrol report:', error);
-      return;
     }
   };
 
@@ -176,6 +181,7 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
                 : `calc(100vh - ${(customizer.TopbarHeight ?? 70) * 2}px)`,
             }}
           >
+            {/* Back Button */}
             <Box
               sx={{
                 display: 'flex',
@@ -184,14 +190,23 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
                 mb: 2,
               }}
             >
-              {/* Name */}
-              <Typography fontWeight={700} fontSize={20}>
-                {patrol.name}
-              </Typography>
+              <Button
+                size="small"
+                startIcon={<ArrowBackIcon />}
+                onClick={() => dispatch(SelectPatrolAssign(null))}
+              >
+                Back
+              </Button>
               <Button variant="outlined" color="primary" size="small" onClick={handlePatrolReport}>
                 Generate Report
               </Button>
             </Box>
+
+              {/* Name */}
+              <Typography fontWeight={700} fontSize={20}>
+                {patrol.name}
+              </Typography>
+
 
             {/* Description */}
             <Box mt={1}>
