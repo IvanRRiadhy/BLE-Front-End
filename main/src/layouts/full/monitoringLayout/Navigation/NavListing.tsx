@@ -5,9 +5,8 @@ import { useSelector } from 'src/store/Store';
 import MonitorNavItem from './MonitorNavItem';
 import { RootState } from 'src/store/Store';
 
-const NavListing = () => {
-  const { pathname } = useLocation();
-  const pathDirect = pathname;
+const NavListing = ({ pathDirect }: { pathDirect: string }) => {
+
   const customizer = useSelector((state: RootState) => state.customizer);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const hideMenu = lgUp ? customizer.isCollapse && !customizer.isSidebarHover : '';

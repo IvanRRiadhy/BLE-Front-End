@@ -43,10 +43,13 @@ import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
 import { memberType } from 'src/store/apps/crud/member';
 import toast from 'react-hot-toast';
 import { useLatestPosition } from 'src/hooks/useDashboard';
+import { useLocation } from 'react-router';
 
 const Header = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+    const { pathname }   = useLocation();
+    const pathDirect = pathname;
   // drawer
   const customizer = useSelector((state: RootState) => state.customizer);
   const dispatch = useDispatch();
@@ -230,104 +233,107 @@ const Header = () => {
           <Box px={3}>
             <Logo />
           </Box>
-          <NavListing />
+          <NavListing pathDirect={pathDirect} />
 
           {/* ------------------------------------------- */}
           {/* Search Dropdown */}
           {/* ------------------------------------------- */}
           {/* <Search /> */}
           {/* {lgUp ? (
-        <>
+        <>\\
           <Navigation />
         </>
       ) : null} */}
 
           <Box flexGrow={1} />
-          <Stack spacing={1} direction="row" alignItems="center">
-            <Typography variant="h5" fontWeight={900}>
-              Layout :
-            </Typography>
+          {!pathDirect.includes('/config') && (
+            <Stack spacing={1} direction="row" alignItems="center">
+              <Typography variant="h5" fontWeight={900}>
+                Layout :
+              </Typography>
 
-            <Select
-              value={activeLayoutId ?? ''}
-              onChange={(e) => dispatch(setActiveLayout(e.target.value))}
-              variant="outlined"
-              size="small"
-              sx={{ minWidth: '220px', fontWeight: 'bold' }}
-              displayEmpty
-            >
-              <MenuItem value="" disabled>
-                -- Select Layout --
-              </MenuItem>
-              {layouts.map((layout) => (
-                <MenuItem key={layout.id} value={layout.id}>
-                  {layout.name || 'Unnamed Layout'}
+              <Select
+                value={activeLayoutId ?? ''}
+                onChange={(e) => dispatch(setActiveLayout(e.target.value))}
+                variant="outlined"
+                size="small"
+                sx={{ minWidth: '220px', fontWeight: 'bold' }}
+                displayEmpty
+              >
+                <MenuItem value="" disabled>
+                  -- Select Layout --
                 </MenuItem>
-              ))}
-            </Select>
-            {/* 🔍 Visitor Search Autocomplete and Download Logs Button */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {followingPerson ? (
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    px: 2,
-                    py: 0.5,
-                    borderRadius: 2,
-                    bgcolor: 'grey.100',
-                  }}
-                >
-                  <Typography fontWeight={700}>Following : {followingPerson.name}</Typography>
+                {layouts.map((layout: any) => (
+                  <MenuItem key={layout.id} value={layout.id}>
+                    {layout.name || 'Unnamed Layout'}
+                  </MenuItem>
+                ))}
+              </Select>
+              {/* 🔍 Visitor Search Autocomplete */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {followingPerson ? (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      px: 2,
+                      py: 0.5,
+                      borderRadius: 2,
+                      bgcolor: 'grey.100',
+                    }}
+                  >
+                    <Typography fontWeight={700}>Following : {followingPerson.name}</Typography>
 
-                  <Typography variant="body2" sx={{ ml: 1 }}>
-                    ({followingPerson.type})
-                  </Typography>
+                    <Typography variant="body2" sx={{ ml: 1 }}>
+                      ({followingPerson.type})
+                    </Typography>
 
-                  <IconButton size="small" onClick={handleCancelFollowing}>
-                    ✕
-                  </IconButton>
-                </Box>
-              ) : (
-                // Autocomplete here
-                <Autocomplete
-                  value={null}
-                  onChange={(e, newValue) => {
-                    if (newValue) handleFollowPerson(newValue);
-                  }}
-                  options={allPeople}
-                  loading={loading || memberLoading || securityLoading}
-                  getOptionLabel={(option) => option.name}
-                  isOptionEqualToValue={(option, value) => option.id === value.id}
-                  sx={{ width: 300 }}
-                  renderInput={(params) => (
-                    <TextField {...params} label="Search People" size="small" />
-                  )}
-                  renderOption={(props, option) => (
-                    <li {...props} key={option.id}>
-                      <Box>
-                        <Typography fontWeight={700}>{option.name}</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {option.bleCardNumber} • {option.type}
-                        </Typography>
-                      </Box>
-                    </li>
-                  )}
-                />
-              )}
-            </Box>
-            {/* Right side clock */}
-            <Tooltip title="Restart Engine">
-              <IconButton size="large" color="inherit">
-                <IconRestore size="21" stroke="1.5" onClick={handleClick} />
-              </IconButton>
-            </Tooltip>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <TimeDisplay />
-            </Box>
+                    <IconButton size="small" onClick={handleCancelFollowing}>
+                      ✕
+                    </IconButton>
+                  </Box>
+                ) : (
+                  // Autocomplete here
+                  <Autocomplete
+                    value={null}
+                    onChange={(e, newValue) => {
+                      if (newValue) handleFollowPerson(newValue);
+                    }}
+                    options={allPeople}
+                    loading={loading || memberLoading || securityLoading}
+                    getOptionLabel={(option) => option.name}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    sx={{ width: 300 }}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Search People" size="small" />
+                    )}
+                    renderOption={(props, option) => (
+                      <li {...props} key={option.id}>
+                        <Box>
+                          <Typography fontWeight={700}>{option.name}</Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {option.bleCardNumber} • {option.type}
+                          </Typography>
+                        </Box>
+                      </li>
+                    )}
+                  />
+                )}
+              </Box>
+              {/* Right side clock */}
+              <Tooltip title="Restart Engine">
+                <IconButton size="large" color="inherit">
+                  <IconRestore size="21" stroke="1.5" onClick={handleClick} />
+                </IconButton>
+              </Tooltip>
 
-            {/* <Profile /> */}
-          </Stack>
+
+              {/* <Profile /> */}
+            </Stack>
+          )}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <TimeDisplay />
+          </Box>
         </ToolbarStyled>
         <Divider />
       </AppBarStyled>
