@@ -71,6 +71,7 @@
     "jspdf-autotable": "^5.0.2",
     "jwt-decode": "^4.0.0",
     "konva": "^9.3.18",
+    "localforage": "^1.10.0",
     "lodash": "^4.17.21",
     "main-vite-ts": "file:",
     "moment": "^2.29.4",

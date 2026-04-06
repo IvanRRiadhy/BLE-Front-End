@@ -30,6 +30,12 @@ const queryClient = new QueryClient({
 });
 
 async function startApp() {
+  // 🧹 Clean up large localStorage entry before starting (Freeing space for tokens)
+  if (localStorage.getItem('persist:root')) {
+    console.log('Cleaning up large Redux state from localStorage...');
+    localStorage.removeItem('persist:root');
+  }
+
   await loadRuntimeConfig();
   initializeAxiosBaseURL();
   initializeMQTTConfig();

@@ -1,7 +1,8 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
-import { PersistPartial } from 'redux-persist/es/persistReducer';
-import storage from 'redux-persist/lib/storage';
+// import { PersistPartial } from 'redux-persist/es/persistReducer';
+import localForage from 'localforage';
+// import storage from 'redux-persist/lib/storage';
 import CustomizerReducer from './customizer/CustomizerSlice';
 // import EcommerceReducer from './apps/eCommerce/ECommerceSlice';
 // import ChatsReducer from './apps/chat/ChatSlice';
@@ -64,7 +65,6 @@ import PatrolRouteReducer from './apps/crud/patrolRoute';
 import PatrolSessionReducer from './apps/crud/patrolSession';
 import EventLogReducer from './apps/tracking/Event';
 import SessionReducer from './apps/session';
-import { combineReducers } from 'redux';
 import {
   useDispatch as useAppDispatch,
   useSelector as useAppSelector,
@@ -134,6 +134,11 @@ const rootReducer = combineReducers({
   PatrolSessionReducer: PatrolSessionReducer,
   InvestigateReducer: InvestigateReducer,
   EventLogReducer: EventLogReducer,
+});
+
+const storage = localForage.createInstance({
+  name: "Modernize-ERP",
+  storeName: "root-state"
 });
 
 const persistConfig = {
