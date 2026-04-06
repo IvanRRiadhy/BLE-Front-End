@@ -84,8 +84,7 @@ const VisitorReportFilter = () => {
   });
 
   const [selectedPersons, setSelectedPersons] = useState<PersonOption[]>([]);
-  const [selectedPerson, setSelectedPerson] = useState<PersonOption | null>(null);
-  const [selectedArea, setSelectedArea] = useState<SelectedNode>(null);
+  const [selectedAreas, setSelectedAreas] = useState<SelectedNode[]>([]);
   const [selectedHost, setSelectedHost] = useState<memberType | null>(null);
   const [selectedType, setSelectedType] = useState<any>(null);
 
@@ -104,21 +103,23 @@ const VisitorReportFilter = () => {
   /* ===================== FILTER BUILDERS ===================== */
   const buildTrackingFilter = () => ({
     timeRange: timeType.toLowerCase(),
-    buildingId: selectedArea?.type === 'building' ? selectedArea.data.id : null,
-    floorId: selectedArea?.type === 'floor' ? selectedArea.data.id : null,
-    floorplanId: selectedArea?.type === 'floorplan' ? selectedArea.data.id : null,
-    areaId: selectedArea?.type === 'area' ? selectedArea.data.id : null,
-    visitorId: selectedPerson?.type === 'visitor' ? selectedPerson.id : null,
+    buildingId: selectedAreas.filter((a) => a?.type === 'building').map((a) => a?.data?.id),
+    floorId: selectedAreas.filter((a) => a?.type === 'floor').map((a) => a?.data?.id),
+    floorplanId: selectedAreas.filter((a) => a?.type === 'floorplan').map((a) => a?.data?.id),
+    areaId: selectedAreas.filter((a) => a?.type === 'area').map((a) => a?.data?.id),
+    visitorId: selectedPersons.filter((p) => p.type === 'visitor').map((p) => p.id),
+    memberId: selectedPersons.filter((p) => p.type === 'member').map((p) => p.id),
   });
 
   const buildAlarmFilter = (): NewGetFilter => {
-    const filter: NewGetFilter = {
+    const filter: any = {
       timeRange: timeType.toLowerCase() as NewGetFilter['timeRange'],
-      buildingId: selectedArea?.type === 'building' ? selectedArea.data.id : null,
-      floorId: selectedArea?.type === 'floor' ? selectedArea.data.id : null,
-      floorplanId: selectedArea?.type === 'floorplan' ? selectedArea.data.id : null,
-      areaId: selectedArea?.type === 'area' ? selectedArea.data.id : null,
-      visitorId: selectedPerson?.type === 'visitor' ? selectedPerson.id : null,
+      buildingId: selectedAreas.filter((a) => a?.type === 'building').map((a) => a?.data?.id),
+      floorId: selectedAreas.filter((a) => a?.type === 'floor').map((a) => a?.data?.id),
+      floorplanId: selectedAreas.filter((a) => a?.type === 'floorplan').map((a) => a?.data?.id),
+      areaId: selectedAreas.filter((a) => a?.type === 'area').map((a) => a?.data?.id),
+      visitorId: selectedPersons.filter((p) => p.type === 'visitor').map((p) => p.id),
+      memberId: selectedPersons.filter((p) => p.type === 'member').map((p) => p.id),
       from: null,
       to: null,
     };
@@ -156,7 +157,7 @@ const VisitorReportFilter = () => {
       AcknowledgedBy: r.acknowledgedBy ?? '-',
       DispatchedAt: r.dispatchedAt,
       DispatchedBy: r.dispatchedBy ?? '-',
-      AssignedSecurityName: r.assignedSecurityName.length > 0 ? r.assignedSecurityName.join(', ') : '-',
+      AssignedSecurityName: r.assignedSecurityName?.length > 0 ? r.assignedSecurityName.join(', ') : '-',
       AcceptedAt: r.acceptedAt,
       AcceptedBy: r.acceptedBy ?? '-',
       responseTimeSeconds: r.responseTimeSeconds,
@@ -199,15 +200,15 @@ const VisitorReportFilter = () => {
       await addPresetMutation.mutateAsync({
         name: presetName,
         timeRange: timeType,
-        buildingId: selectedArea?.type === 'building' ? selectedArea.data.id : null,
-        floorId: selectedArea?.type === 'floor' ? selectedArea.data.id : null,
-        floorplanId: selectedArea?.type === 'floorplan' ? selectedArea.data.id : null,
-        areaId: selectedArea?.type === 'area' ? selectedArea.data.id : null,
-        visitorId: selectedPerson?.type === 'visitor' ? selectedPerson.id : null,
-        memberId: selectedPerson?.type === 'member' ? selectedPerson.id : null,
+        buildingId: selectedAreas.filter((a) => a?.type === 'building').map((a) => a?.data?.id),
+        floorId: selectedAreas.filter((a) => a?.type === 'floor').map((a) => a?.data?.id),
+        floorplanId: selectedAreas.filter((a) => a?.type === 'floorplan').map((a) => a?.data?.id),
+        areaId: selectedAreas.filter((a) => a?.type === 'area').map((a) => a?.data?.id),
+        visitorId: selectedPersons.filter((p) => p.type === 'visitor').map((p) => p.id),
+        memberId: selectedPersons.filter((p) => p.type === 'member').map((p) => p.id),
         fromDate: timeType === 'Custom' ? dateRange.from : null,
         toDate: timeType === 'Custom' ? dateRange.to : null,
-      });
+      } as any);
 
       toast.success('Preset saved');
       setOpenPresetDialog(false);
@@ -272,10 +273,11 @@ const VisitorReportFilter = () => {
         {/* Filters */}
         <Grid container spacing={1}>
           <Grid size={{ xs: 12, md: 4 }}>
-            <Autocomplete<PersonOption>
+            <Autocomplete<PersonOption, true>
+              multiple
               options={personOptions}
-              value={selectedPerson}
-              onChange={(_, value) => setSelectedPerson(value)}
+              value={selectedPersons}
+              onChange={(_, value) => setSelectedPersons(value)}
               getOptionLabel={(option) => option?.name ?? ''}
               renderInput={(params) => <TextField {...params} label="Person" />}
               isOptionEqualToValue={(option, value) => option.id === value.id}
@@ -284,12 +286,13 @@ const VisitorReportFilter = () => {
 
           <Grid size={{ xs: 12, md: 4 }}>
             <AreaHierarchySelector
+              multiple
               buildings={buildings}
               floors={floors}
               floorplans={floorplans}
               maskedAreas={areas}
-              value={selectedArea}
-              onChange={setSelectedArea}
+              value={selectedAreas}
+              onChange={setSelectedAreas}
             />
           </Grid>
 

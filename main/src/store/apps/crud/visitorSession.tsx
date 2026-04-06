@@ -18,12 +18,18 @@ export interface EventTypesFilter {
 
 export type GetFilter = {
   timeRange: string;
-  buildingId: string | null;
-  floorId: string | null;
-  floorplanId: string | null;
-  areaId: string | null;
-  visitorId?: string | null;
-  memberId?: string | null;
+  // buildingId?: string | null;
+  // floorId?: string | null;
+  // floorplanId?: string | null;
+  // areaId?: string | null;
+  // visitorId?: string | null;
+  // memberId?: string | null;
+  buildingId?: string[];
+  floorId?: string[];
+  floorplanId?: string[];
+  areaId?: string[];
+  visitorId?: string[];
+  memberId?: string[];
   personType?: 'member' | 'visitor' | 'all' | null;
   // eventTypes: EventTypesFilter;
 };
@@ -193,12 +199,12 @@ const initialState: StateType = {
   visitorSessionFilteredCount: 0,
   visitorSessionFilter: {
     timeRange: 'daily',
-    buildingId: null,
-    floorId: null,
-    floorplanId: null,
-    areaId: null,
-    visitorId: '',
-    memberId: '',
+    buildingId: [],
+    floorId: [],
+    floorplanId: [],
+    areaId: [],
+    visitorId: [],
+    memberId: [],
     personType: null,
     // eventTypes: {
     //   all: true,
@@ -209,11 +215,12 @@ const initialState: StateType = {
   },
   newVisitorSessionFilter: {
     timeRange: 'daily',
-    buildingId: null,
-    floorId: null,
-    floorplanId: null,
-    areaId: null,
-    visitorId: '',
+    buildingId: [],
+    floorId: [],
+    floorplanId: [],
+    areaId: [],
+    visitorId: [],
+    memberId: [],
   },
   isLoading: false,
   hasLoaded: false,

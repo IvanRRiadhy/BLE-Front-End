@@ -84,7 +84,7 @@ const UserForm = () => {
       console.log('res', res);
       toast.success(type === 'reset' ? 'Password successfully reset' : 'Registration confirmed');
 
-      navigate('/login');
+      navigate('/auth/login');
     } catch (err) {
       toast.error('Something went wrong');
     } finally {

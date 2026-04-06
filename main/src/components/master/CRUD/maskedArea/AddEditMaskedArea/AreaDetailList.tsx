@@ -464,7 +464,7 @@ const AreaDetailList = () => {
               </CustomSelect>
             </Grid>
             {/* Allow Changing Floor */}
-            <Grid size={12}>
+            {/* <Grid size={12}>
               <CustomFormLabel htmlFor="allow-floor-change">Allow Floor Change</CustomFormLabel>
               <FormControlLabel
                 control={
@@ -475,7 +475,7 @@ const AreaDetailList = () => {
                 }
                 label={formData.allowFloorChange ? 'Enabled' : 'Disabled'}
               />
-            </Grid>
+            </Grid> */}
           </Grid>
         </Box>
       </Box>

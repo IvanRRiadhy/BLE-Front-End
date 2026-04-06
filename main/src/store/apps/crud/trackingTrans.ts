@@ -299,8 +299,9 @@ export const deleteTrackingTrans = createAsyncThunk("trackingTrans/deleteTrackin
 export const ExportTrackingTrans = createAsyncThunk(
     "trackingTrans/exportTrackingTrans",
     async (filter: "pdf" | "excel", { rejectWithValue }) => {
-        const BASE_URL = getConfig().API_BASE_URL;
-    const API_KEY = import.meta.env.VITE_API_KEY;
+    const config = getConfig();
+    const BASE_URL = config.API_BASE_URL;
+    const API_KEY = config.API_KEY;
         const url = `${BASE_URL}${API_URL}export/${filter}`;
         const accessToken = localStorage.getItem("token");
         try {

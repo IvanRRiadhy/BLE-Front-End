@@ -17,11 +17,12 @@ type Props = {
   floors: any[];
   floorplans: any[];
   maskedAreas: any[];
-  value: SelectedNode;
-  onChange: (v: SelectedNode) => void;
+  value: SelectedNode | SelectedNode[];
+  onChange: (v: any) => void;
   error?: boolean;
   helperText?: string;
   exclusive?: NodeType;
+  multiple?: boolean;
 };
 
 const AreaHierarchySelector: React.FC<Props> = forwardRef(
@@ -36,6 +37,7 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
       error = false,
       helperText = '',
       exclusive,
+      multiple = false,
     },
     ref,
   ) => {
@@ -76,13 +78,40 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
       maByFp.get(ma.floorplanId)!.push(ma);
     });
 
-    const displayLabel = value ? (value.data.name ?? value.data.areaName ?? '') : '';
+    const displayLabel = (() => {
+      if (multiple && Array.isArray(value)) {
+        if (value.length === 0) return '';
+        if (value.length === 1) return value[0]?.data?.name ?? value[0]?.data?.areaName ?? '';
+        return `${value.length} Items Selected`;
+      }
+      const singleValue = value as SelectedNode;
+      return singleValue ? (singleValue.data?.name ?? singleValue.data?.areaName ?? '') : '';
+    })();
+
+    const isSelected = (type: NodeType, id: string) => {
+      if (multiple && Array.isArray(value)) {
+        return value.some((v) => v?.type === type && v?.data?.id === id);
+      }
+      const singleValue = value as SelectedNode;
+      return singleValue?.type === type && singleValue?.data?.id === id;
+    };
 
     const handleSelect = (type: NodeType, data: any) => {
       if (!canSelect(type)) return;
 
-      onChange({ type, data });
-      setOpen(false);
+      if (multiple && Array.isArray(value)) {
+        const index = value.findIndex((v) => v?.type === type && v?.data?.id === data.id);
+        if (index > -1) {
+          const newValue = [...value];
+          newValue.splice(index, 1);
+          onChange(newValue);
+        } else {
+          onChange([...value, { type, data }]);
+        }
+      } else {
+        onChange({ type, data });
+        setOpen(false);
+      }
     };
 
     // Auto-expand based on selected value
@@ -90,32 +119,33 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
       if (!value) return;
 
       const expandKeys: string[] = [];
+      const nodes = Array.isArray(value) ? value : ([value] as SelectedNode[]);
 
-      if (value.type === 'building') {
-        expandKeys.push(`B-${value.data.id}`);
-      }
+      nodes.forEach((node) => {
+        if (!node) return;
+        if (node.type === 'building') {
+          expandKeys.push(`B-${node.data.id}`);
+        }
+        if (node.type === 'floor') {
+          expandKeys.push(`B-${node.data.buildingId}`);
+          expandKeys.push(`F-${node.data.id}`);
+        }
+        if (node.type === 'floorplan') {
+          const fp = node.data;
+          expandKeys.push(`B-${fp.buildingId}`);
+          expandKeys.push(`F-${fp.floorId}`);
+          expandKeys.push(`FP-${fp.id}`);
+        }
+        if (node.type === 'area') {
+          const area = node.data;
+          expandKeys.push(`B-${area.buildingId}`);
+          expandKeys.push(`F-${area.floorId}`);
+          expandKeys.push(`FP-${area.floorplanId}`);
+          expandKeys.push(`MA-${area.id}`);
+        }
+      });
 
-      if (value.type === 'floor') {
-        expandKeys.push(`B-${value.data.buildingId}`);
-        expandKeys.push(`F-${value.data.id}`);
-      }
-
-      if (value.type === 'floorplan') {
-        const fp = value.data;
-        expandKeys.push(`B-${fp.buildingId}`);
-        expandKeys.push(`F-${fp.floorId}`);
-        expandKeys.push(`FP-${fp.id}`);
-      }
-
-      if (value.type === 'area') {
-        const area = value.data;
-        expandKeys.push(`B-${area.buildingId}`);
-        expandKeys.push(`F-${area.floorId}`);
-        expandKeys.push(`FP-${area.floorplanId}`);
-        expandKeys.push(`MA-${area.id}`);
-      }
-
-      setExpanded(expandKeys);
+      setExpanded((prev) => Array.from(new Set([...prev, ...expandKeys])));
     }, [value]);
 
     // Auto-scroll to selected node
@@ -293,14 +323,13 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
                         <Typography
                           sx={{
                             cursor: 'pointer',
-                            fontWeight:
-                              value?.type === 'building' && value.data.id === b.id ? 700 : 400,
-                            color:
-                              value?.type === 'building' && value.data.id === b.id
-                                ? '#1976d2'
-                                : 'inherit',
+                            fontWeight: isSelected('building', b.id) ? 700 : 400,
+                            color: isSelected('building', b.id) ? '#1976d2' : 'inherit',
                           }}
-                          onClick={() => handleSelect('building', b)}
+                          onClick={(e) => {
+                            if (multiple) e.stopPropagation();
+                            handleSelect('building', b);
+                          }}
                         >
                           🏢 {b.name}
                         </Typography>
@@ -314,14 +343,13 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
                             <Typography
                               sx={{
                                 cursor: 'pointer',
-                                fontWeight:
-                                  value?.type === 'floor' && value.data.id === f.id ? 700 : 400,
-                                color:
-                                  value?.type === 'floor' && value.data.id === f.id
-                                    ? '#1976d2'
-                                    : 'inherit',
+                                fontWeight: isSelected('floor', f.id) ? 700 : 400,
+                                color: isSelected('floor', f.id) ? '#1976d2' : 'inherit',
                               }}
-                              onClick={() => handleSelect('floor', f)}
+                              onClick={(e) => {
+                                if (multiple) e.stopPropagation();
+                                handleSelect('floor', f);
+                              }}
                             >
                               ⬜ {f.name}
                             </Typography>
@@ -335,16 +363,13 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
                                 <Typography
                                   sx={{
                                     cursor: 'pointer',
-                                    fontWeight:
-                                      value?.type === 'floorplan' && value.data.id === fp.id
-                                        ? 700
-                                        : 400,
-                                    color:
-                                      value?.type === 'floorplan' && value.data.id === fp.id
-                                        ? '#1976d2'
-                                        : 'inherit',
+                                    fontWeight: isSelected('floorplan', fp.id) ? 700 : 400,
+                                    color: isSelected('floorplan', fp.id) ? '#1976d2' : 'inherit',
                                   }}
-                                  onClick={() => handleSelect('floorplan', fp)}
+                                  onClick={(e) => {
+                                    if (multiple) e.stopPropagation();
+                                    handleSelect('floorplan', fp);
+                                  }}
                                 >
                                   🗺️ {fp.name}
                                 </Typography>
@@ -358,16 +383,13 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
                                     <Typography
                                       sx={{
                                         cursor: 'pointer',
-                                        fontWeight:
-                                          value?.type === 'area' && value.data.id === ma.id
-                                            ? 700
-                                            : 400,
-                                        color:
-                                          value?.type === 'area' && value.data.id === ma.id
-                                            ? '#1976d2'
-                                            : 'inherit',
+                                        fontWeight: isSelected('area', ma.id) ? 700 : 400,
+                                        color: isSelected('area', ma.id) ? '#1976d2' : 'inherit',
                                       }}
-                                      onClick={() => handleSelect('area', ma)}
+                                      onClick={(e) => {
+                                        if (multiple) e.stopPropagation();
+                                        handleSelect('area', ma);
+                                      }}
                                     >
                                       📍 {ma.name}
                                     </Typography>

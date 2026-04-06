@@ -21,11 +21,16 @@ export const setSessionExpiredHandler = (handler: () => void) => {
 
 // ✔ Set BASE_URL only after config.json is loaded
 export function initializeAxiosBaseURL() {
-  BASE_URL = getConfig().API_BASE_URL;
-  CDN_URL = getConfig().CDN_URL;
-  API_ENGINE_URL = getConfig().API_ENGINE_URL;
-  axiosServices.defaults.baseURL = BASE_URL;
-  // console.log("API ENGINE URL: ", API_ENGINE_URL);
+  const config = getConfig();
+  BASE_URL = config.API_BASE_URL;
+  CDN_URL = config.CDN_URL;
+  API_ENGINE_URL = config.API_ENGINE_URL;
+
+  const instances = [axiosServices, axiosCdn, axiosEngine];
+  instances.forEach((instance) => {
+    instance.defaults.baseURL = instance === axiosServices ? BASE_URL : (instance === axiosCdn ? CDN_URL : API_ENGINE_URL);
+    instance.defaults.headers.common['X-BIOPEOPLETRACKING-API-KEY'] = config.API_KEY;
+  });
 }
 
 type AxiosServiceOptions = {
@@ -48,13 +53,14 @@ function createAxiosService({ getBaseUrl }: AxiosServiceOptions): AxiosInstance 
   const instance = axios.create({
     headers: {
       'Content-Type': 'application/json',
-      'X-BIOPEOPLETRACKING-API-KEY': import.meta.env.VITE_API_KEY,
     },
   });
 
-  // ✅ Set baseURL dynamically (after config.json loaded)
+  // ✅ Set baseURL and API Key dynamically (after config.json loaded)
   instance.interceptors.request.use(request => {
+    const config = getConfig();
     request.baseURL = getBaseUrl();
+    request.headers['X-BIOPEOPLETRACKING-API-KEY'] = config.API_KEY;
     
     let ApplicationId: string | null = null;
     const levelPriority = localStorage.getItem('levelPriority');
@@ -120,7 +126,7 @@ function createAxiosService({ getBaseUrl }: AxiosServiceOptions): AxiosInstance 
             { refreshToken },
             {
               headers: {
-                'X-BIOPEOPLETRACKING-API-KEY': import.meta.env.VITE_API_KEY,
+                'X-BIOPEOPLETRACKING-API-KEY': getConfig().API_KEY,
               },
             }
           );

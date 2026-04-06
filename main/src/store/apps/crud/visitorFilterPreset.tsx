@@ -40,13 +40,19 @@ export type VisitorFilterPresetType = {
   timeRange: string;
   fromDate: string | null;
   toDate: string | null;
-  areaId: string | null;
-  floorplanId: string | null;
-  floorId: string | null;
-  buildingId: string | null;
-  hostName: string | null;
-  visitorId: string | null;
-  memberId: string | null;
+  areaId?: string | null;
+  floorplanId?: string | null;
+  floorId?: string | null;
+  buildingId?: string | null;
+  hostName?: string | null;
+  visitorId?: string | null;
+  memberId?: string | null;
+  areaIds?: string[];
+  floorplanIds?: string[];
+  floorIds?: string[];
+  buildingIds?: string[];
+  visitorIds?: string[];
+  memberIds?: string[];
 };
 
 interface StateType {

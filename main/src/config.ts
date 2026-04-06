@@ -7,6 +7,8 @@ export interface RuntimeConfig {
   ALARM_TOPIC: string;
   MQTT_USERNAME: string;
   MQTT_PASSWORD: string;
+  API_KEY: string;
+  NTFY_TOPIC: string;
 }
 
 let runtimeConfig: RuntimeConfig | null = null;

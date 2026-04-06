@@ -101,7 +101,8 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
   });
 
   const timeGroups = timeGroupRes?.data ?? [];
-  console.log('Time Groups: ', timeGroups, 'for', patrol.name);
+  console.log('Time Groups: ', timeGroups, 'Time', patrol.timeGroup, 'for', patrol);
+
   /* ===== compute nearest patrol ===== */
   const timeMap = buildDayTimeMap(timeGroups);
   const nearestPatrol = getNearestPatrol(timeMap);
@@ -130,6 +131,7 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
   };
 
   const startAreaName = !isLoading ? (routeData?.startAreaName ?? null) : null;
+  const isPatrolEnded = patrol.endDate ? new Date(patrol.endDate) < now : false;
 
   /* ===== payload for detail dialog ===== */
   // const payload: PatrolDetailPayload = {
@@ -156,6 +158,7 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
       //   console.log('payload', payload);
       // }}
       onClick={() => {
+        // if (isPatrolEnded) return; // Prevent opening detail if patrol has ended
         openDetail(patrol);
       }}
     >
@@ -193,8 +196,46 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
           <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#045498' }}>
             {isLoading ? 'Loading...' : startAreaName || 'Unknown Area'}
           </Typography>
+          {isPatrolEnded ? (
+            <>
+              {' '}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: theme.palette.error.dark,
+                    textAlign: 'right',
+                  }}
+                >
+                  {t('Patrol has Ended')}
+                </Typography>
+              </Box>
+            </>
+          ) : nearestPatrol ? (
+            <>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: getPatrolColor(nearestPatrol),
+                    textAlign: 'right',
+                  }}
+                >
+                  {t('Next patrol')}: {formatNearestPatrol(nearestPatrol)}
+                </Typography>
 
-          {nearestPatrol && (
+                {isSameDay(nearestPatrol, now) && (
+                  <IconExclamationCircleFilled size={20} color={theme.palette.error.dark} />
+                )}
+              </Box>
+            </>
+          ) : (
+            <></>
+          )}
+
+          {/* {nearestPatrol && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
               <Typography
                 sx={{
@@ -211,7 +252,7 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
                 <IconExclamationCircleFilled size={20} color={theme.palette.error.dark} />
               )}
             </Box>
-          )}
+          )} */}
         </Box>
 
         <Tooltip title="See Patrol Detail" placement="right">

@@ -120,7 +120,7 @@ const EventLogList = () => {
   const eventLogData = useSelector((state: RootState) =>
     state.EventLogReducer.logs.map((log: any) => {
       const safeEvent: EventType = isValidEventType(log.event) ? log.event : 'OTHER'; // fallback
-      console.log(log.event);
+      // console.log(log.event);
       return {
         event: safeEvent,
         eventTime: log.eventTime,
@@ -132,7 +132,7 @@ const EventLogList = () => {
       };
     }),
   );
-  console.log('eventLogData', eventLogData);
+  // console.log('eventLogData', eventLogData);
   // useEffect(() => {
   //   if (!isDummy) return;
 

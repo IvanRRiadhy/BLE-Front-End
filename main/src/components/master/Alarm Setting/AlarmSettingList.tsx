@@ -138,7 +138,7 @@ const AlarmSettingList = () => {
       default:
         console.log(name);
         toast.error('No route defined for this alarm type');
-        return '/alarmsetting';
+        return '/alarmsetting/';
     }
   };
 
@@ -215,7 +215,7 @@ const AlarmSettingList = () => {
 
   const handleApplyNotifyInterval = async () => {
     if (!selectedAlarm || tempNotifyInterval === null) return;
-const updatedAlarm = { ...selectedAlarm, notifyIntervalSec: tempNotifyInterval };
+    const updatedAlarm = { ...selectedAlarm, notifyIntervalSec: tempNotifyInterval };
     try {
       await editMutation.mutateAsync(updatedAlarm);
 
@@ -387,20 +387,27 @@ const updatedAlarm = { ...selectedAlarm, notifyIntervalSec: tempNotifyInterval }
                           </TableCell>
 
                           <TableCell>
-                            <Box display="grid" gridTemplateColumns="80px auto" alignItems="center">
-                              <Typography
-                                variant="body2"
-                                color={alarmSetting.isEnabled ? 'green' : 'text.secondary'}
-                              >
-                                {alarmSetting.isEnabled ? 'Active' : 'Inactive'}
-                              </Typography>
-                              <Switch
-                                checked={alarmSetting.isEnabled}
-                                onChange={() => handleToggleStatus(alarmSetting)}
-                                color="primary"
-                                size="small"
-                              />
-                            </Box>
+                            {alarmSetting.alarmCategory.toLowerCase() !== 'cardaccess' &&
+                              alarmSetting.alarmCategory.toLowerCase() !== 'blacklist' && (
+                                <Box
+                                  display="grid"
+                                  gridTemplateColumns="80px auto"
+                                  alignItems="center"
+                                >
+                                  <Typography
+                                    variant="body2"
+                                    color={alarmSetting.isEnabled ? 'green' : 'text.secondary'}
+                                  >
+                                    {alarmSetting.isEnabled ? 'Active' : 'Inactive'}
+                                  </Typography>
+                                  <Switch
+                                    checked={alarmSetting.isEnabled}
+                                    onChange={() => handleToggleStatus(alarmSetting)}
+                                    color="primary"
+                                    size="small"
+                                  />
+                                </Box>
+                              )}
                           </TableCell>
 
                           {/* Color column */}
@@ -421,78 +428,80 @@ const updatedAlarm = { ...selectedAlarm, notifyIntervalSec: tempNotifyInterval }
                           </TableCell>
 
                           <TableCell>
-                            {alarmSetting.isEnabled && (
-                              <Box display="flex" alignItems="center" gap={1}>
-                                {/* Priority Badge */}
-                                {alarmSetting.alarmLevelPriority === 'High' && (
-                                  <Button
-                                    size="small"
-                                    variant="contained"
-                                    sx={{
-                                      backgroundColor: '#f44336',
-                                      color: 'white',
-                                      borderRadius: '16px',
-                                      textTransform: 'none',
-                                      fontWeight: 'bold',
-                                      px: 2,
-                                    }}
-                                    disableElevation
-                                  >
-                                    High
-                                  </Button>
-                                )}
-                                {alarmSetting.alarmLevelPriority === 'Medium' && (
-                                  <Button
-                                    size="small"
-                                    variant="contained"
-                                    sx={{
-                                      backgroundColor: '#ff9800',
-                                      color: 'white',
-                                      borderRadius: '16px',
-                                      textTransform: 'none',
-                                      fontWeight: 'bold',
-                                      px: 2,
-                                    }}
-                                    disableElevation
-                                  >
-                                    Medium
-                                  </Button>
-                                )}
-                                {alarmSetting.alarmLevelPriority === 'Low' && (
-                                  <Button
-                                    size="small"
-                                    variant="contained"
-                                    sx={{
-                                      backgroundColor: '#ffc107',
-                                      color: 'white',
-                                      borderRadius: '16px',
-                                      textTransform: 'none',
-                                      fontWeight: 'bold',
-                                      px: 2,
-                                    }}
-                                    disableElevation
-                                  >
-                                    Low
-                                  </Button>
-                                )}
+                            {alarmSetting.isEnabled &&
+                              alarmSetting.alarmCategory.toLowerCase() !== 'cardaccess' &&
+                              alarmSetting.alarmCategory.toLowerCase() !== 'blacklist' && (
+                                <Box display="flex" alignItems="center" gap={1}>
+                                  {/* Priority Badge */}
+                                  {alarmSetting.alarmLevelPriority === 'High' && (
+                                    <Button
+                                      size="small"
+                                      variant="contained"
+                                      sx={{
+                                        backgroundColor: '#f44336',
+                                        color: 'white',
+                                        borderRadius: '16px',
+                                        textTransform: 'none',
+                                        fontWeight: 'bold',
+                                        px: 2,
+                                      }}
+                                      disableElevation
+                                    >
+                                      High
+                                    </Button>
+                                  )}
+                                  {alarmSetting.alarmLevelPriority === 'Medium' && (
+                                    <Button
+                                      size="small"
+                                      variant="contained"
+                                      sx={{
+                                        backgroundColor: '#ff9800',
+                                        color: 'white',
+                                        borderRadius: '16px',
+                                        textTransform: 'none',
+                                        fontWeight: 'bold',
+                                        px: 2,
+                                      }}
+                                      disableElevation
+                                    >
+                                      Medium
+                                    </Button>
+                                  )}
+                                  {alarmSetting.alarmLevelPriority === 'Low' && (
+                                    <Button
+                                      size="small"
+                                      variant="contained"
+                                      sx={{
+                                        backgroundColor: '#ffc107',
+                                        color: 'white',
+                                        borderRadius: '16px',
+                                        textTransform: 'none',
+                                        fontWeight: 'bold',
+                                        px: 2,
+                                      }}
+                                      disableElevation
+                                    >
+                                      Low
+                                    </Button>
+                                  )}
 
-                                {/* Up / Down Buttons */}
-                                <Box display="flex" flexDirection="column" alignItems="center">
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => handlePriorityUp(alarmSetting)}
-                                  >
-                                    <IconChevronUp size={16} />
-                                  </IconButton>
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => handlePriorityDown(alarmSetting)}
-                                  >
-                                    <IconChevronDown size={16} />
-                                  </IconButton>
+                                  {/* Up / Down Buttons */}
+                                  <Box display="flex" flexDirection="column" alignItems="center">
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => handlePriorityUp(alarmSetting)}
+                                    >
+                                      <IconChevronUp size={16} />
+                                    </IconButton>
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => handlePriorityDown(alarmSetting)}
+                                    >
+                                      <IconChevronDown size={16} />
+                                    </IconButton>
+                                  </Box>
                                 </Box>
-                              </Box>
-                            )}
+                              )}
                           </TableCell>
                           {/* Notification Interval */}
                           <TableCell>
