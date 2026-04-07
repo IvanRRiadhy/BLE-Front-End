@@ -15,11 +15,12 @@ import {
   Select,
   MenuItem,
   Tooltip,
+  Button,
 } from '@mui/material';
 
 import { useSelector, useDispatch } from 'src/store/Store';
 import { toggleMobileSidebar, hoverSidebar } from 'src/store/customizer/CustomizerSlice';
-import { IconMenu2, IconRestore } from '@tabler/icons-react';
+import { IconMenu2, IconRestore, IconBellRinging } from '@tabler/icons-react';
 import Profile from '../vertical/header/Profile';
 import { RootState } from 'src/store/Store';
 import Logo from '../shared/logo/Logo';
@@ -44,12 +45,18 @@ import { memberType } from 'src/store/apps/crud/member';
 import toast from 'react-hot-toast';
 import { useLatestPosition } from 'src/hooks/useDashboard';
 import { useLocation } from 'react-router';
+import {
+  AppendAlarmLogs,
+  NotifyAlarmPopup,
+  ShowAlarmPopup,
+  AlarmLogItem,
+} from 'src/store/apps/tracking/Beacon';
 
 const Header = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-    const { pathname }   = useLocation();
-    const pathDirect = pathname;
+  const { pathname } = useLocation();
+  const pathDirect = pathname;
   // drawer
   const customizer = useSelector((state: RootState) => state.customizer);
   const dispatch = useDispatch();
@@ -203,6 +210,32 @@ const Header = () => {
     stringify: (option) => `${option.name} ${option.bleCardNumber}`,
   });
 
+  const handleDummyAlarm = () => {
+    const dummyAlarm: AlarmLogItem = {
+      id: `alarm-dummy-${Date.now()}`,
+      type: 'Alarm',
+      target: 'Test Dummy Alarm',
+      image: '',
+      color: '#f44336',
+      dmac: 'DE:AD:BE:EF:00:01',
+      floor: 'Testing Room 1',
+      floorplanId: 'dummy-floor-id',
+      area: 'Restricted Zone A',
+      personId: 'dummy-p-1',
+      triggerId: 'dummy-t-1',
+      alarmStatus: 'Test Alarm',
+      action: 'Idle',
+      priority: 'high',
+      time: new Date().toISOString(),
+      seen: false,
+      personType: 'Visitor',
+    };
+
+    dispatch(AppendAlarmLogs([dummyAlarm]));
+    dispatch(ShowAlarmPopup(dummyAlarm));
+    dispatch(NotifyAlarmPopup(dummyAlarm.id));
+  };
+
   const handleClick = async () => {
     try {
       await dispatch(restartEngine('admin'));
@@ -320,13 +353,27 @@ const Header = () => {
                   />
                 )}
               </Box>
+              <Tooltip title="Send Test Alarm">
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={handleDummyAlarm}
+                  sx={{
+                    minWidth: 0,
+                    width: 48,
+                    height: 48,
+                    padding: 0,
+                  }}
+                >
+                  <IconBellRinging size="21" stroke="1.5" />
+                </Button>
+              </Tooltip>
               {/* Right side clock */}
               <Tooltip title="Restart Engine">
                 <IconButton size="large" color="inherit">
                   <IconRestore size="21" stroke="1.5" onClick={handleClick} />
                 </IconButton>
               </Tooltip>
-
 
               {/* <Profile /> */}
             </Stack>

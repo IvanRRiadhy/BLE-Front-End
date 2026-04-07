@@ -1,8 +1,20 @@
-import React, { useMemo } from 'react';
-import { Box, Typography, Avatar, Stack, Tooltip } from '@mui/material';
+import React, { useMemo, useState } from 'react';
+import {
+  Box,
+  Typography,
+  Avatar,
+  Stack,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from '@mui/material';
 import { useRealtimeAlarmLog } from 'src/hooks/useDashboard';
 import { BASE_URL } from 'src/utils/axios';
 import SmartScrollingText from 'src/utils/SmartScrollingText';
+import { AlarmTriggerType } from 'src/store/apps/crud/alarmTrigger';
 
 const defaultFilter = {
   draw: 1,
@@ -34,6 +46,7 @@ const statusColorMap: Record<string, string> = {
 
 const AlarmLog: React.FC = () => {
   const { data = [], isLoading, isError } = useRealtimeAlarmLog(defaultFilter);
+
   function resolvePerson(x: any) {
     // console.log("Resolving Person:", x);
     if (x.visitorId) {
@@ -87,6 +100,26 @@ const AlarmLog: React.FC = () => {
       };
     });
   }, [data]);
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedTrigger, setSelectedTrigger] = useState<AlarmTriggerType | null>(null);
+
+  const redirectToAlarmList = (trigger: AlarmTriggerType) => {
+    const params = new URLSearchParams();
+
+    if (trigger.visitorId) {
+      params.set('visitorId', trigger.visitorId);
+    }
+
+    if (trigger.memberId) {
+      params.set('memberId', trigger.memberId);
+    }
+
+    params.set('alarmTriggerId', trigger.id);
+    console.log('Redirecting to alarm list with params:', params.toString());
+    window.location.href = `/alarm/alarmlist?${params.toString()}`;
+  };
+
   return (
     <Box
       sx={{
@@ -165,6 +198,11 @@ const AlarmLog: React.FC = () => {
                 width: '100%',
                 overflow: 'hidden',
               }}
+              onClick={() => {
+                const trigger = data[index];
+                setSelectedTrigger(trigger);
+                setConfirmOpen(true);
+              }}
             >
               {/* Avatar */}
               <Avatar src={item.image} alt="user" sx={{ width: 56, height: 56 }} />
@@ -241,6 +279,34 @@ const AlarmLog: React.FC = () => {
           ))
         )}
       </Box>
+      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle fontWeight={700}>Open Alarm Detail?</DialogTitle>
+
+        <DialogContent>
+          <Typography variant="body2">
+            You are about to navigate to the Alarm Detail page. Do you want to continue?
+          </Typography>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)} color="inherit">
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              if (selectedTrigger) {
+                redirectToAlarmList(selectedTrigger);
+              }
+              setConfirmOpen(false);
+            }}
+          >
+            Go to Detail
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
