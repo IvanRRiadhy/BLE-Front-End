@@ -26,6 +26,7 @@ type BeaconDetailPopupProps = {
   bleNumber: string;
   memberDetail?: memberType;
   visitorDetail?: VisitorType;
+  securityDetail?: memberType; // Define a proper type if available
   area: string;
   floorplan: string;
   time: string;
@@ -35,11 +36,32 @@ type BeaconDetailPopupProps = {
   screenId?: string; // 🆕 use screenId instead of grid/screen
 };
 
+type PersonType = 'member' | 'visitor' | 'security' | 'unknown';
+const themeConfig = {
+  member: {
+    color: '#1976d2', // blue
+    label: 'Member Detail',
+  },
+  visitor: {
+    color: '#d32f2f', // red
+    label: 'Visitor Detail',
+  },
+  security: {
+    color: '#2e7d32', // green
+    label: 'Security Detail',
+  },
+  unknown: {
+    color: '#616161',
+    label: 'Unknown Person',
+  },
+};
+
 const BeaconDetailPopup = ({
   dmac,
   bleNumber,
   memberDetail,
   visitorDetail,
+  securityDetail,
   area,
   floorplan,
   time,
@@ -50,18 +72,25 @@ const BeaconDetailPopup = ({
 }: BeaconDetailPopupProps) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+
+  const personType: PersonType = memberDetail ? 'member' : visitorDetail ? 'visitor' : 'security';
+
+  const personDetail = memberDetail || visitorDetail || securityDetail;
+
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
   const activeLayout = useSelector((state: RootState) =>
     state.layoutReducer.layouts.find((l) => l.id === state.layoutReducer.activeLayoutId),
   );
   const followingPerson = useSelector((state: RootState) => state.layoutReducer.followingPerson);
-  const currentPersonId = memberDetail?.id || visitorDetail?.id;
+  const currentPersonId = memberDetail?.id || visitorDetail?.id || securityDetail?.id;
   const currentName = memberDetail?.name || visitorDetail?.name || 'Unknown';
   const isFollowingCurrent = followingPerson?.id === currentPersonId;
   const handleClose = () => {
     setDetailDialogOpen(false);
     dispatch(SetSelectedBeacon({ active: false, sourceScreenid: null }));
   };
+
+  const theme = themeConfig[personType];
 
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
@@ -132,7 +161,7 @@ const BeaconDetailPopup = ({
         id: currentPersonId,
         name: currentName,
         bleCardNumber: bleNumber,
-        type: memberDetail ? 'member' : 'visitor',
+        type: personType,
       }),
     );
 
@@ -171,8 +200,15 @@ const BeaconDetailPopup = ({
   return (
     <Dialog fullWidth maxWidth={'md'} open={detailDialogOpen} onClose={handleClose}>
       <DialogTitle>
-        <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
-          {memberDetail ? 'Member Detail' : visitorDetail ? 'Visitor Detail' : 'Unknown Person'}
+        <Typography
+          component="div"
+          variant="h4"
+          mb={2}
+          mt={2}
+          fontWeight={700}
+          sx={{ color: theme.color }}
+        >
+          {theme.label}
         </Typography>
         <Divider />
       </DialogTitle>
@@ -182,11 +218,14 @@ const BeaconDetailPopup = ({
           <Grid container size={12} direction={'row'} mb={2}>
             <Grid size={12} display={'flex'} justifyContent={'center'} position="relative">
               <Avatar
-                alt="Member Profile"
-                src={`${BASE_URL}${
-                  memberDetail ? memberDetail.faceImage : visitorDetail?.faceImage
-                }`}
-                sx={{ width: '128px', height: '128px', ml: 2 }}
+                alt="Profile"
+                src={`${BASE_URL}${personDetail?.faceImage}`}
+                sx={{
+                  width: '128px',
+                  height: '128px',
+                  ml: 2,
+                  border: `4px solid ${theme.color}`,
+                }}
               />
             </Grid>
           </Grid>
@@ -196,11 +235,7 @@ const BeaconDetailPopup = ({
               <Typography component="div" variant="h6" fontWeight={700}>
                 <Box component="span">Name :</Box>{' '}
                 <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                  {memberDetail
-                    ? memberDetail.name
-                    : visitorDetail
-                      ? visitorDetail.name
-                      : 'Unknown Person'}
+                  {personDetail?.name || 'Unknown Person'}
                 </Box>
               </Typography>
             </Grid>
@@ -208,11 +243,7 @@ const BeaconDetailPopup = ({
               <Typography component="div" variant="h6" fontWeight={700}>
                 <Box component="span">Phone :</Box>{' '}
                 <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                  {memberDetail
-                    ? memberDetail.phone
-                    : visitorDetail
-                      ? visitorDetail.phone
-                      : 'Unknown Person'}
+                  {personDetail?.phone || 'Unknown Person'}
                 </Box>
               </Typography>
             </Grid>
@@ -222,11 +253,7 @@ const BeaconDetailPopup = ({
               <Typography component="div" variant="h6" fontWeight={700}>
                 <Box component="span">Email :</Box>{' '}
                 <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                  {memberDetail
-                    ? memberDetail.email
-                    : visitorDetail
-                      ? visitorDetail.email
-                      : 'Unknown Person'}
+                  {personDetail?.email || 'Unknown Person'}
                 </Box>
               </Typography>
             </Grid>
@@ -234,11 +261,7 @@ const BeaconDetailPopup = ({
               <Typography component="div" variant="h6" fontWeight={700}>
                 <Box component="span">Address :</Box>{' '}
                 <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                  {memberDetail
-                    ? memberDetail.address
-                    : visitorDetail
-                      ? visitorDetail.address
-                      : 'Unknown Person'}
+                  {personDetail?.address || 'Unknown Person'}
                 </Box>
               </Typography>
             </Grid>
@@ -248,11 +271,7 @@ const BeaconDetailPopup = ({
               <Typography component="div" variant="h6" fontWeight={700}>
                 <Box component="span">Gender :</Box>{' '}
                 <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                  {memberDetail
-                    ? memberDetail.gender
-                    : visitorDetail
-                      ? visitorDetail.gender
-                      : 'Unknown Person'}
+                  {personDetail?.gender || 'Unknown Person'}
                 </Box>
               </Typography>
             </Grid>
@@ -281,12 +300,14 @@ const BeaconDetailPopup = ({
           </Grid>
           <Grid container size={12} direction={'row'}>
             <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
-              {memberDetail && (
+              {personType !== 'visitor' && (
                 <Box>
                   <Typography variant="h6" fontWeight={700} component="div">
                     <Box component="span">Organization :</Box>{' '}
                     <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                      {memberDetail.organization?.name || 'Unknown Organization'}
+                      {memberDetail?.organization?.name ||
+                        securityDetail?.organization?.name ||
+                        'Unknown Organization'}
                     </Box>
                     <br />
                     <Box
@@ -294,8 +315,13 @@ const BeaconDetailPopup = ({
                       typography={{ fontSize: '12px', fontWeight: '400' }}
                       sx={{ display: 'inline-block', ml: 'calc(1ch * 13)' }} // aligns after "Organization :"
                     >
-                      {memberDetail.department?.name || 'Unknown Department'} |{' '}
-                      {memberDetail.district?.name || 'Unknown District'}
+                      {memberDetail?.organization?.name ||
+                        securityDetail?.organization?.name ||
+                        'Unknown Department'}{' '}
+                      |{' '}
+                      {memberDetail?.organization?.name ||
+                        securityDetail?.organization?.name ||
+                        'Unknown District'}
                     </Box>
                   </Typography>
                 </Box>
@@ -312,23 +338,24 @@ const BeaconDetailPopup = ({
               )}
             </Grid>
             <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
-              {memberDetail && (
+              {personType !== 'visitor' && (
                 <Box>
                   <Typography variant="h6" fontWeight={700} component="div">
                     <Box component="span">Head Member :</Box>{' '}
                     <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                      1. {memberDetail.headMember1}
+                      1. {memberDetail?.headMember1 || securityDetail?.headMember1}
                     </Box>
                     <br />
-                    {memberDetail.headMember2 && memberDetail.headMember2 !== '' && (
-                      <Box
-                        component="span"
-                        typography={{ fontSize: '14px', fontWeight: '500' }}
-                        sx={{ display: 'inline-block', ml: 'calc(1ch * 12)' }} // aligns after "Organization :"
-                      >
-                        2. {memberDetail.headMember2}
-                      </Box>
-                    )}
+                    {(memberDetail?.headMember2 && memberDetail.headMember2 !== '') ||
+                      (securityDetail?.headMember2 && securityDetail.headMember2 !== '' && (
+                        <Box
+                          component="span"
+                          typography={{ fontSize: '14px', fontWeight: '500' }}
+                          sx={{ display: 'inline-block', ml: 'calc(1ch * 12)' }} // aligns after "Organization :"
+                        >
+                          2. {memberDetail?.headMember2 || securityDetail?.headMember2}
+                        </Box>
+                      ))}
                   </Typography>
                 </Box>
               )}

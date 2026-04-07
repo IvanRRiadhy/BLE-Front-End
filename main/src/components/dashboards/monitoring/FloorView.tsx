@@ -34,6 +34,7 @@ import {
 } from 'src/store/apps/alarmsetting/geofencing';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllVisitor } from 'src/hooks/useVisitor';
+import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
 import { useAllFloors } from 'src/hooks/useFloor';
 import { useAllFloorplans } from 'src/hooks/useFloorplan';
 import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
@@ -80,6 +81,7 @@ const FloorView: React.FC<{
   const [dummyAlarm, setDummyAlarm] = useState<AlarmType>();
   const { data: memberList = [] } = useAllMembers();
   const { data: visitorList = [] } = useAllVisitor();
+  const { data: securityList = [] } = useAllSecuritys();
   const [open, setOpen] = useState(false);
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
   const FollowingPerson = useSelector((state: RootState) => state.layoutReducer.followingPerson);
@@ -1046,8 +1048,11 @@ const FloorView: React.FC<{
           const visitor = visitorList?.find(
             (v: VisitorType) => v.bleCardNumber === selectedBeacon.id,
           );
-          const person = member || visitor;
-
+          const security = securityList?.find(
+            (s: memberType) => s.bleCardNumber === selectedBeacon.id,
+          );
+          const person = member || visitor || security;
+          // console.log('🟡 Selected Beacon Person Details', { member, visitor, security }, "Selected Beacon", selectedBeacon) ;
           return (
             <>
               <BeaconDetailPopup
@@ -1055,6 +1060,7 @@ const FloorView: React.FC<{
                 bleNumber={selectedBeacon.id}
                 memberDetail={member}
                 visitorDetail={visitor}
+                securityDetail={security}
                 detailDialogOpen={detailDialogOpen}
                 setDetailDialogOpen={setDetailDialogOpen}
                 setOpenTrackDetail={setOpenTrackDetail}
