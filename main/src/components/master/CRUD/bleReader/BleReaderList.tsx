@@ -241,9 +241,9 @@ const BleReaderList = () => {
                         left: 0,
                         background: 'white',
                         zIndex: 2,
-                        width: 35, // Fixed width
-                        minWidth: 35,
-                        maxWidth: 35,
+                        width: 50, // Fixed width
+                        minWidth: 50,
+                        maxWidth: 50,
                       }}
                     >
                       <Checkbox

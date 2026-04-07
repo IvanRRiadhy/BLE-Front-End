@@ -11,17 +11,20 @@ import { PictureAsPdf, TableChart, Upload } from '@mui/icons-material';
 import { useMutation } from '@tanstack/react-query';
 import { saveAs } from 'file-saver';
 import toast from 'react-hot-toast';
-import api from 'src/utils/axios'; // adjust path if needed
+import axiosService from 'src/utils/axios'; // adjust path if needed
+import { AppDispatch,  useDispatch } from 'src/store/Store';
+import { ExportBleReader } from 'src/store/apps/crud/bleReader';
 
 const BleReaderExport = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isExporting, setIsExporting] = useState(false);
   const open = Boolean(anchorEl);
+  const dispatch: AppDispatch = useDispatch();
 
   const exportMutation = useMutation({
     mutationFn: async (type: 'pdf' | 'excel') => {
       // Example endpoint: /ble-reader/export/pdf or /ble-reader/export/excel
-      const response = await api.get(`/ble-reader/export/${type}`, {
+      const response = await axiosService.get(`/MstBleReader/export/${type}`, {
         responseType: 'blob', // we expect a file
       });
       return { blob: response.data, type };
@@ -51,7 +54,8 @@ const BleReaderExport = () => {
 
   const handleExport = (type: 'pdf' | 'excel') => {
     setIsExporting(true);
-    exportMutation.mutate(type);
+    // exportMutation.mutate(type);
+    dispatch(ExportBleReader(type));
     handleClose();
   };
 

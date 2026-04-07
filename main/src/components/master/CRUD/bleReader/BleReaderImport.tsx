@@ -11,12 +11,15 @@ import { Download, TableChart } from '@mui/icons-material';
 import toast from 'react-hot-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from 'src/utils/axios'; // Adjust if your axios instance is in another path
+import { AppDispatch, useDispatch } from 'src/store/Store';
+import { ImportBleReader } from 'src/store/apps/crud/bleReader';
 
 const BleReaderImport = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const open = Boolean(anchorEl);
+  const dispatch: AppDispatch = useDispatch();
 
   const queryClient = useQueryClient();
 
@@ -60,8 +63,8 @@ const BleReaderImport = () => {
 
     const formData = new FormData();
     formData.append('file', file);
-
-    importMutation.mutate(formData);
+    dispatch(ImportBleReader(formData));
+    // importMutation.mutate(formData);
     event.target.value = ''; // reset file input
   };
 
