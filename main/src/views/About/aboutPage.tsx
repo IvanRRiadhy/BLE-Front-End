@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Grid2 as Grid, Box, Card, CardContent, Typography, List, ListItem, ListItemText, Chip, Divider, CircularProgress, ListItemButton, Switch, Tooltip, styled } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Grid2 as Grid, Box, Card, CardContent, Typography, List, ListItem, ListItemText, Chip, Divider, CircularProgress, ListItemButton, Switch, Tooltip, styled, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
-import { useLicenseInfo, toggleFeatures } from 'src/hooks/useInfo';
+import { useLicenseInfo, toggleFeatures, getMachineId, activateLicense } from 'src/hooks/useInfo';
+import { IconCpu, IconUpload } from '@tabler/icons-react';
+import toast from 'react-hot-toast';
 
 const sections = [
   { id: 'app-details', title: 'App Details' },
@@ -61,7 +63,12 @@ const IOSSwitch = styled((props: any) => (
 const AboutPage = () => {
   const { data, isLoading, isError } = useLicenseInfo();
   const { mutate: toggleFeatureStatus } = toggleFeatures();
+  const { refetch: fetchMachineId, isFetching: isFetchingMachineId } = getMachineId(false);
+  const { mutate: uploadLicense, isPending: isUploading } = activateLicense();
   const [activeSection, setActiveSection] = useState('app-details');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [machineIdDialogOpen, setMachineIdDialogOpen] = useState(false);
+  const [fetchedMachineId, setFetchedMachineId] = useState('');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -88,6 +95,39 @@ const AboutPage = () => {
     if (element) {
       const top = element.getBoundingClientRect().top + window.scrollY - 100;
       window.scrollTo({ top, behavior: 'smooth' });
+    }
+  };
+
+  const handleGetMachineId = async () => {
+    try {
+      const result = await fetchMachineId();
+      console.log("Machine ID Result: ", result.data);
+      if (result.data) {
+        setFetchedMachineId(result.data);
+        setMachineIdDialogOpen(true);
+      }
+    } catch (error) {
+      toast.error('Failed to get Machine ID');
+    }
+  };
+
+  const handleCopyMachineId = () => {
+    navigator.clipboard.writeText(fetchedMachineId);
+    toast.success('Machine ID copied to clipboard');
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      uploadLicense({ file });
+      // Clear the input so the same file can be selected again if needed
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -160,6 +200,18 @@ const AboutPage = () => {
                     <Box display="flex" alignItems="center" gap={2}>
                       <Typography variant="h6" fontWeight={500}>{data.validationMessage}</Typography>
                       <Chip label={data.isValid ? "Valid" : "Invalid"} color={data.isValid ? "success" : "error"} size="medium" />
+                      {!data.isValid && (
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          color="primary"
+                          startIcon={<IconCpu size={18} />}
+                          onClick={handleGetMachineId}
+                          disabled={isFetchingMachineId}
+                        >
+                          {isFetchingMachineId ? 'Getting...' : 'Get Machine ID'}
+                        </Button>
+                      )}
                     </Box>
                   </ListItem>
                   <Divider component="li" />
@@ -168,11 +220,31 @@ const AboutPage = () => {
                     <Box pl={2}>
                       <Typography variant="h6" color="textSecondary">License</Typography>
                     </Box>
-                    <Box>
+                    <Box display="flex" alignItems="center" gap={2}>
                       <Typography variant="h6" fontWeight={500}>{`${data.licenseType} - ${data.licenseTier}`}</Typography>
+                      {!data.isValid && (
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          color="secondary"
+                          startIcon={<IconUpload size={18} />}
+                          onClick={handleUploadClick}
+                          disabled={isUploading}
+                        >
+                          {isUploading ? 'Uploading...' : 'Upload License'}
+                        </Button>
+                      )}
                     </Box>
                   </ListItem>
                   <Divider component="li" />
+
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept=".lic"
+                    style={{ display: 'none' }}
+                    onChange={handleFileChange}
+                  />
                   
                   <ListItem disableGutters sx={{ py: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box pl={2}>
@@ -292,6 +364,44 @@ const AboutPage = () => {
           </Grid>
         </Grid>
       </Box>
+
+      {/* Machine ID Modal */}
+      <Dialog
+        open={machineIdDialogOpen}
+        onClose={() => setMachineIdDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Machine ID Retrieval</DialogTitle>
+        <DialogContent sx={{ mt: 1 }}>
+          <Typography variant="body1" mb={2}>
+            Please provide this Machine ID to your administrator to retrieve a valid license.
+          </Typography>
+          <TextField
+            fullWidth
+            variant="outlined"
+            label="Machine ID"
+            value={fetchedMachineId}
+            InputProps={{
+              readOnly: true,
+            }}
+            sx={{
+              '& .MuiOutlinedInput-input': {
+                fontFamily: 'monospace',
+                fontSize: '0.875rem',
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={() => setMachineIdDialogOpen(false)} color="inherit">
+            Close
+          </Button>
+          <Button onClick={handleCopyMachineId} color="primary" variant="contained">
+            Copy to Clipboard
+          </Button>
+        </DialogActions>
+      </Dialog>
     </PageContainer>
   );
 };

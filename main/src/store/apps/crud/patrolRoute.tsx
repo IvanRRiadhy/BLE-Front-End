@@ -94,6 +94,8 @@ export type PatrolAssignType = {
   securityHead2Id?: string;
   securityIds: string[];
   timeGroupId: string;
+  nextPatrolStatus: string;
+  isEnded: boolean;
   patrolRoute?: PatrolRouteType;
   // headSecurities?: SecurityType[];
   securities?: SecurityType[];

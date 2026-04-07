@@ -329,11 +329,11 @@ const PatrolRouteList = () => {
                   zIndex: 1,
                 }}
               >
-                <AssignPatrol
+                {/* <AssignPatrol
                   type="edit"
                   patrolRouteId={assign.patrolRouteId}
                   patrolAssign={assign}
-                />
+                /> */}
                 <IconButton
                   color="primary"
                   size="small"

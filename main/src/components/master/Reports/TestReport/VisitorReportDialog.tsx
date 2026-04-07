@@ -53,7 +53,7 @@ const formatDuration = (totalMinutes?: number | null) => {
   const minutes = Math.floor(totalMinutes % 60);
   const days = Math.floor(hours / 24);
   const finalHours = hours % 24;
-
+console.log("duration",totalMinutes)
   if (days > 0) return `${days}d ${finalHours}h ${minutes}m`;
   if (hours > 0) return `${hours}h ${minutes}m`;
   return `${minutes}m`;

@@ -157,7 +157,20 @@ const Profile = () => {
             color="primary"
             //component={Link}
             onClick={() => {
-              localStorage.clear();
+              // 🧹 Targeted logout: Clear session data but preserve "Remember this Device"
+              const itemsToKeep = [
+                'rememberedAdminUsername',
+                'rememberedVisitorUsername',
+                'rememberMePreference',
+                'rememberedLoginMode',
+              ];
+
+              Object.keys(localStorage).forEach((key) => {
+                if (!itemsToKeep.includes(key)) {
+                  localStorage.removeItem(key);
+                }
+              });
+
               window.location.href = '/auth/login'; // Redirect to the login page
             }}
             fullWidth

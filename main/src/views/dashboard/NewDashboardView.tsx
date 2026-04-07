@@ -262,7 +262,7 @@ const DashboardView: React.FC = () => {
           </Grid>
         </Grid>
       </Box>
-      {/* Welcome Popup */}
+      {/* Welcome Popup */} 
       <WelcomePopup open={showWelcomePopup} onClose={handleClosePopup} />
     </PageContainer>
   );

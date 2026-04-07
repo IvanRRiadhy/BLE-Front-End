@@ -84,7 +84,7 @@ const PatrolAssignmentList = () => {
           ) : isLoading ? (
             renderSkeletonItems(SKELETON_ROWS)
           ) : (
-            <Box sx={{ p: 2, textAlign: 'center' }}>No time groups found</Box>
+            <Box sx={{ p: 2, textAlign: 'center' }}>No patrol report found</Box>
           )}
         </Box>
       </List>

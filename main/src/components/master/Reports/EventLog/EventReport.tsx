@@ -17,7 +17,6 @@ import {
   Stack,
   Paper,
   Divider,
-  CircularProgress,
   TableContainer,
   TableSortLabel,
   Chip,
@@ -25,14 +24,17 @@ import {
   MenuItem,
   Tooltip,
   IconButton,
+  Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { EVENT_TYPE, EventType } from 'src/types/crud/input';
 import { useTranslation } from 'react-i18next';
-import { RootState, useDispatch, useSelector } from 'src/store/Store';
+import { useDispatch } from 'src/store/Store';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { ClearEventLogs, fetchEventLogs } from 'src/store/apps/tracking/Event';
-import { IconEraser } from '@tabler/icons-react';
+import { ClearEventLogs } from 'src/store/apps/tracking/Event';
+import { IconEraser, IconRefresh } from '@tabler/icons-react';
+import { useEvents } from 'src/hooks/useEvents';
+import { defaultEventFilter } from 'src/store/apps/defaultForm';
 
 const columns = [
   { label: 'Event', field: 'Building.Name', sortAble: true },
@@ -66,23 +68,6 @@ type EventLogType = {
   details: string;
 };
 
-const ACTORS = [
-  { name: 'Ace Cenanda', role: 'Admin' },
-  { name: 'Security System', role: 'System' },
-  { name: 'BLE Tracker', role: 'System' },
-  { name: 'Scheduler', role: 'System' },
-];
-const DETAILS_MAP: Record<EventType, string[]> = {
-  CREATE: ['Created visitor data', 'Created access rule'],
-  UPDATE: ['Updated visitor access area', 'Updated card status'],
-  DELETE: ['Deleted expired visitor record', 'Removed access rule'],
-  REPORT: ['Daily activity report generated', 'Weekly alarm report generated'],
-  ALARM: ['Restricted area breach detected', 'Unauthorized access detected'],
-  User: ['Created user account', 'Deleted user account'],
-  ACTION: ['Assigned security action to guard', 'Assigned follow-up task'],
-  LOGIN: ['User logged in', 'User logged out'],
-  OTHER: ['Performed system maintenance', 'Updated application settings'],
-};
 const EVENT_OPTIONS: EventType[] = [
   'CREATE',
   'UPDATE',
@@ -98,15 +83,15 @@ const ACTOR_ROLE_OPTIONS = ['SuperAdmin', 'PrimaryAdmin', 'Primary', 'Secondary'
 
 const ENTITY_OPTIONS = ['Organization', 'Department', 'District', 'Building'];
 
-const EventLogList = () => {
+const SKELETON_ROWS = 5;
+
+const EventReport = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   useEffect(() => {
-    // dispatch(fetchAlarmSettingsDT(defaultAlarmSettingFilter));
-    dispatch(fetchEventLogs());
+    // initial fetch or periodic refresh handled by useEvents
   }, []);
-
-  const isDummy = true;
+  const { data: eventResponse, refetch, isFetching } = useEvents(defaultEventFilter);
 
   const isValidEventType = (value: any): value is EventType =>
     Object.values(EVENT_TYPE).includes(value);
@@ -117,21 +102,21 @@ const EventLogList = () => {
   const [filterEndDate, setFilterEndDate] = useState<string>('');
   const [openClearDialog, setOpenClearDialog] = useState(false);
 
-  const eventLogData = useSelector((state: RootState) =>
-    state.EventLogReducer.logs.map((log: any) => {
-      const safeEvent: EventType = isValidEventType(log.event) ? log.event : 'OTHER'; // fallback
-      // console.log(log.event);
+  const eventLogData = useMemo(() => {
+    if (!eventResponse) return [];
+    return eventResponse.map((log: any) => {
+      const safeEvent: EventType = isValidEventType(log.eventName) ? log.eventName : 'OTHER';
       return {
         event: safeEvent,
         eventTime: log.eventTime,
-        serverTime: log.serverTime,
-        actor: log.actor?.name ?? '-',
-        actorRole: log.actor?.role ?? '-',
-        entity: log.entity ?? '-',
+        serverTime: log.eventTime, // Fallback since serverTime is not in the audit-log API snippet
+        actor: log.actor ?? '-',
+        actorRole: '-', // Fallback since actorRole is not in the audit-log API snippet
+        entity: log.entityName ?? '-',
         details: log.details ?? '-',
       };
-    }),
-  );
+    });
+  }, [eventResponse]);
   // console.log('eventLogData', eventLogData);
   // useEffect(() => {
   //   if (!isDummy) return;
@@ -216,6 +201,49 @@ const EventLogList = () => {
   //     details: getRandomItem(DETAILS_MAP[event]),
   //   };
   // };
+
+  const renderSkeletonRows = (rows: number) => (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <TableRow key={`skeleton-${i}`}>
+          <TableCell
+            sx={{
+              position: 'sticky',
+              left: 0,
+              background: 'white',
+              zIndex: 1,
+              width: 35,
+              minWidth: 35,
+              maxWidth: 35,
+            }}
+          >
+            <Skeleton variant="text" width={18} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={80} height={24} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={200} height={24} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={200} height={24} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={120} height={24} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={100} height={24} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={120} height={24} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={300} height={24} />
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
 
   return (
     <Grid container spacing={3}>
@@ -311,6 +339,26 @@ const EventLogList = () => {
                     >
                       Reset Filter
                     </Button>
+                    <Tooltip title="Refresh Data">
+                      <IconButton color="primary" onClick={() => refetch()} disabled={isFetching}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            animation: isFetching ? 'spin 1s linear infinite' : 'none',
+                            '@keyframes spin': {
+                              '0%': {
+                                transform: 'rotate(0deg)',
+                              },
+                              '100%': {
+                                transform: 'rotate(360deg)',
+                              },
+                            },
+                          }}
+                        >
+                          <IconRefresh size={20} />
+                        </Box>
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip title="Clear Event Logs">
                       <IconButton color="error" onClick={() => setOpenClearDialog(true)}>
                         <IconEraser size={20} />
@@ -352,7 +400,18 @@ const EventLogList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredData.map((row: any, index: number) => (
+                  {isFetching ? (
+                    renderSkeletonRows(SKELETON_ROWS)
+                  ) : filteredData.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={columns.length + 1} align="center">
+                        <Typography variant="body1" sx={{ p: 3 }}>
+                          No event logs found.
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredData.map((row: any, index: number) => (
                     <TableRow
                       key={index}
                       sx={{
@@ -404,24 +463,9 @@ const EventLogList = () => {
                         </Typography>
                       </TableCell>
 
-                      {/* Right sticky Actions */}
-                      {/* <TableCell
-                        sx={{
-                          position: 'sticky',
-                          right: 0,
-                          background: index % 2 === 0 ? 'grey.50' : 'white',
-                          zIndex: 1,
-                          minWidth: 150,
-                        }}
-                      >
-                        <Stack direction="row" spacing={1}>
-                          <Button size="small" variant="outlined">
-                            View
-                          </Button>
-                        </Stack>
-                      </TableCell> */}
-                    </TableRow>
-                  ))}
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -464,4 +508,4 @@ const EventLogList = () => {
   );
 };
 
-export default EventLogList;
+export default EventReport;

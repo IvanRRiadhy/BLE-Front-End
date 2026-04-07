@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 
 import { useAllAlarmCategory } from 'src/hooks/AlarmSetting/useAlarmCategory';
 import { useAlarmByArea } from 'src/hooks/useDashboard';
+import { useSelector } from 'src/store/Store';
 
 /* ---------------- Filter ---------------- */
 
@@ -20,7 +21,8 @@ const defaultFilter = {
 
 const Bar: React.FC = () => {
   const { data: alarmCategories = [] } = useAllAlarmCategory();
-  const { data: alarmByArea, isLoading } = useAlarmByArea(defaultFilter);
+  const dashboardFilter = useSelector((state: any) => state.customizer.dashboardFilter);
+  const { data: alarmByArea, isLoading } = useAlarmByArea(dashboardFilter);
 
   /* ---------------- Transform API → Chart ---------------- */
 

@@ -38,7 +38,7 @@ const columns = [
   { label: 'Brand Name', field: 'Brand.Name', sortAble: true },
   { label: 'Name', field: 'Name', sortAble: true },
   { label: 'IP', field: 'Ip', sortAble: true },
-  { label: 'GMAC', field: 'Gmac', sortAble: false },
+  { label: 'MAC', field: 'Gmac', sortAble: false },
 ];
 
 const SKELETON_ROWS = 5;

@@ -33,11 +33,12 @@ export type GetAlarmRecordResponse = {
 };
 export type NewGetFilter = {
     timeRange: "daily" | "weekly" | "monthly" | "yearly" | "custom";
-    buildingId: string | null;
-    floorId: string | null;
-    floorplanId: string | null;
-    areaId: string | null;
-    visitorId: string | null;
+    buildingId: string[];
+    floorId: string[];
+    floorplanId: string[];
+    areaId: string[];
+    visitorId?: string[];
+    memberId?: string[];
     from: string | null;
     to: string | null;
 }

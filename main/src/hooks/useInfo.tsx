@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
 import toast from 'react-hot-toast';
 
@@ -61,3 +61,39 @@ export function toggleFeatures() {
     })
 }
 
+export function getMachineId(enabled: boolean = true) {
+    return useQuery ({
+        queryKey: ['machineId'],
+        queryFn: async() => {
+            const res = await axiosServices.get(`${API_URL}machine-id`);
+            console.log("Machine ID Result: ", res.data);
+            return res.data.collection.data.machineId as string
+        },
+        enabled: enabled,
+    })
+}
+
+export function activateLicense() {
+    const queryClient = useQueryClient();
+
+    return useMutation ({
+        mutationFn: async({ file }: { file: File }) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await axiosServices.post(`${API_URL}activate`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            console.log("Activate Result: ", res.data);
+            return res.data.collection.data as AboutDataType
+        },
+        onSuccess: () => {
+            toast.success("License Activated");
+            queryClient.invalidateQueries({ queryKey: ['info'] });
+        },
+        onError: () => {
+            toast.error("Failed to activate license");
+        }
+    })
+}

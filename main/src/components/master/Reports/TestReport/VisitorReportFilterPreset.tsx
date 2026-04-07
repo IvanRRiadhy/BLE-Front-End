@@ -63,9 +63,9 @@ type PersonOption = {
 
 type AlarmLogFilter = {
   timeRange: 'daily' | 'weekly' | 'monthly';
-  buildingId: string | null;
-  floorId: string | null;
-  floorplanId: string | null;
+  buildingId: string[] | null;
+  floorId: string[] | null;
+  floorplanId: string[] | null;
   areaId: string | null;
   visitorId: string | null;
   from?: string;
@@ -75,11 +75,11 @@ type AlarmLogFilter = {
 export function mapPresetToAlarmLogFilter(preset: VisitorFilterPresetType): NewGetFilter {
   const filter: NewGetFilter = {
     timeRange: preset.timeRange.toLowerCase() as NewGetFilter['timeRange'],
-    buildingId: preset.buildingId ?? null,
-    floorId: preset.floorId ?? null,
-    floorplanId: preset.floorplanId ?? null,
-    areaId: preset.areaId ?? null,
-    visitorId: preset.visitorId ?? null,
+    buildingId: preset.buildingIds ?? [],
+    floorId: preset.floorIds ?? [],
+    floorplanId: preset.floorplanIds ?? [],
+    areaId: preset.areaIds ?? [],
+    visitorId: preset.visitorIds ?? [],
     from: null,
     to: null,
   };
@@ -241,9 +241,10 @@ const VisitorReportFilterPreset = ({
   };
 
   const adaptTrackingFromApi = (apiData: any[]) => {
+    // console.log("Adapting Tracking Data from API:", apiData);
     return apiData.map((r) => ({
-      Id: r.visitorId,
-      VisitorName: r.visitorName,
+      Id: r.personId,
+      PersonName: r.personName,
       BuildingName: r.buildingName,
       FloorName: r.floorName,
       AreaName: r.areaName,
@@ -251,14 +252,14 @@ const VisitorReportFilterPreset = ({
       ExitTime: r.exitTime,
       VisitorStatus: r.status ?? '-',
       HostName: r.hostName ?? '-',
-      DurationMinutes: r.durationMinutes,
+      DurationMinutes: r.durationInMinutes,
     }));
   };
 
   const adaptAlarmFromApi = (apiData: any[]) => {
     // console.log('Adapting Alarm Data from API:', apiData);
     return apiData.map((r) => ({
-      VisitorName: r.visitorName ?? '-',
+      PersonName: r.personName ?? '-',
       BuildingName: r.buildingName ?? '-',
       FloorName: r.floorName ?? '-',
       AreaName: r.floorplanName ?? '-', // or masked area if available later

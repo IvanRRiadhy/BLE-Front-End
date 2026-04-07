@@ -65,8 +65,30 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
 
   const [adminCreds, setAdminCreds] = useState({ username: '', password: '' });
   const [visitorCreds, setVisitorCreds] = useState({ username: '', password: '' });
+  const [rememberMe, setRememberMe] = useState(true);
 
   const usernameRef = useRef<HTMLInputElement>(null);
+
+  // ✅ Auto-fill remembered usernames on mount
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem('rememberedAdminUsername');
+    const savedVisitor = localStorage.getItem('rememberedVisitorUsername');
+    const savedRememberMe = localStorage.getItem('rememberMePreference');
+    const savedLoginMode = localStorage.getItem('rememberedLoginMode') as TabKey | null;
+
+    if (savedAdmin) {
+      setAdminCreds((prev) => ({ ...prev, username: savedAdmin }));
+    }
+    if (savedVisitor) {
+      setVisitorCreds((prev) => ({ ...prev, username: savedVisitor }));
+    }
+    if (savedRememberMe !== null) {
+      setRememberMe(savedRememberMe === 'true');
+    }
+    if (savedLoginMode && (savedLoginMode === 'admin' || savedLoginMode === 'visitor')) {
+      setActiveTab(savedLoginMode);
+    }
+  }, []);
 
   const isAdmin = activeTab === 'admin';
   const creds = isAdmin ? adminCreds : visitorCreds;
@@ -174,6 +196,22 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
             .filter(Boolean); // remove empty values
 
           localStorage.setItem('accessibleBuildings', JSON.stringify(buildingsArray));
+        }
+
+        // ✅ Handle "Remember this Device" logic
+        if (rememberMe) {
+          if (isAdmin) {
+            localStorage.setItem('rememberedAdminUsername', creds.username);
+          } else {
+            localStorage.setItem('rememberedVisitorUsername', creds.username);
+          }
+          localStorage.setItem('rememberMePreference', 'true');
+          localStorage.setItem('rememberedLoginMode', activeTab);
+        } else {
+          localStorage.removeItem('rememberedAdminUsername');
+          localStorage.removeItem('rememberedVisitorUsername');
+          localStorage.removeItem('rememberedLoginMode');
+          localStorage.setItem('rememberMePreference', 'false');
         }
       }
 
@@ -303,7 +341,14 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <FormGroup>
                 <FormControlLabel
-                  control={<CustomCheckbox defaultChecked />}
+                  control={
+                    <CustomCheckbox
+                      checked={rememberMe}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setRememberMe(e.target.checked)
+                      }
+                    />
+                  }
                   label="Remember this Device"
                 />
               </FormGroup>

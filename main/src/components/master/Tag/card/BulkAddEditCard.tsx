@@ -201,7 +201,7 @@ const BulkAddEditCard = ({ type, initialData, setSelectedIds }: Props) => {
       if (!row.cardNumber?.trim()) e.cardNumber = 'Card Number is required';
     //   if (!row.cardType?.trim()) e.cardType = 'Card Type is required';
     //   if (!row.cardBarcode?.trim()) e.cardBarcode = 'Card Barcode is required';
-      if (!row.dmac?.trim()) e.dmac = 'DMAC is required';
+      if (!row.dmac?.trim()) e.dmac = 'MAC is required';
       if (Object.keys(e).length) errors[rowIndex] = e;
     });
 

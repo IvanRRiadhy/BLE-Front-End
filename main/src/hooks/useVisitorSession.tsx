@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
-import { VisitorSessionType, GetFilter,  VisitorSessionResponseType } from '../store/apps/crud/visitorSession';
+import { VisitorSessionType, GetFilter,  VisitorSessionResponseType, OldGetFilter } from '../store/apps/crud/visitorSession';
 import { RootState, useSelector } from 'src/store/Store';
 
 const API_URL = '/api/TrackingAnalytics/visitor-session/';
@@ -28,7 +28,7 @@ export type VisitorSessionQueryRequest = {
 export function useVisitorSession() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (filter: GetFilter) => {
+    mutationFn: async (filter: OldGetFilter) => {
       const response = await axiosServices.post(`${API_REPORT_URL}`, filter);
       const collection = response.data.collection;
       return collection.data as VisitorSessionType[];

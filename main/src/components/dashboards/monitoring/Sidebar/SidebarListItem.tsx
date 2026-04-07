@@ -115,7 +115,7 @@ const SidebarListItem = ({ item, isNew, onItemClick }: Props) => {
             Card Number: {item?.personId ?? '-'}
           </Typography>
           <Typography variant="body2">
-            DMAC: {item?.dmac ?? '-'}
+            MAC: {item?.dmac ?? '-'}
           </Typography>
         </Box>
 

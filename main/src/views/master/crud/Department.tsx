@@ -97,7 +97,7 @@ const Department = () => {
         >
           <ParentCard title="Department List" codeModel={[
             <DepartmentSearch key={'search'} />,
-            <BulkAddEditDepartment key="bulkAdd" type="add" />,
+            // <BulkAddEditDepartment key="bulkAdd" type="add" />,
             <AddEditDepartment key="add" type="add" />
             ]}>
             <DepartmentList />

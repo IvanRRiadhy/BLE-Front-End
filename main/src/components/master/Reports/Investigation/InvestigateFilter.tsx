@@ -439,26 +439,26 @@ const InvestigateFilter = () => {
       return;
     }
 
-    let buildingId: string[] = [];
-    let floorId: string[] = [];
-    let floorplanId: string[] = [];
-    let areaId: string[] = [];
+    let buildingId: string = '';
+    let floorId: string = '';
+    let floorplanId: string = '';
+    let areaId: string = '';
 
     if (selectedArea) {
       const data = selectedArea.data;
 
       switch (selectedArea.type) {
         case 'building':
-          buildingId = [data.id];
+          buildingId = data.id;
           break;
         case 'floor':
-          floorId = [data.id];
+          floorId = data.id;
           break;
         case 'floorplan':
-          floorplanId = [data.id];
+          floorplanId = data.id;
           break;
         case 'area':
-          areaId = [data.id];
+          areaId = data.id;
           break;
       }
     }
@@ -473,7 +473,7 @@ const InvestigateFilter = () => {
 
     const finalFilter = {
       timeRange: timeRange,
-      visitorId: [selectedVisitor?.id || ''],
+      visitorId: selectedVisitor?.id || '',
       buildingId,
       floorId,
       floorplanId,

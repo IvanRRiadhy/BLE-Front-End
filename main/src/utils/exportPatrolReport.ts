@@ -144,11 +144,12 @@ export const buildPatrolReportRows = (data: any[]): PatrolReportRow[] => {
 export const downloadPatrolReportExcel = async (
   rows: PatrolReportRow[],
   filename = 'PatrolReport.xlsx',
+  customColumns?: readonly any[],
 ) => {
   const workbook  = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Patrol Report');
 
-  worksheet.columns = PATROL_REPORT_COLUMNS.map((c) => ({ ...c }));
+  worksheet.columns = (customColumns || PATROL_REPORT_COLUMNS).map((c) => ({ ...c }));
   worksheet.getRow(1).font = { bold: true };
 
   rows.forEach((row) => {

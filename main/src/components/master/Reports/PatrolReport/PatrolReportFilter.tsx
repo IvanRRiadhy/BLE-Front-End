@@ -19,6 +19,7 @@ import {
   Chip,
   ToggleButtonGroup,
   ToggleButton,
+  Switch,
 } from '@mui/material';
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
@@ -76,6 +77,8 @@ const timezone = useMemo(() => getUserTimezone(), []);
   const [selectedRoutes,     setSelectedRoutes]     = useState<PatrolRouteType[]>([]);
   const [completedFilter,    setCompletedFilter]    = useState<CompletedFilter>('all');
   const [sessionStatus,      setSessionStatus]      = useState<SessionStatus | null>(null);
+  const [reportTitle,        setReportTitle]        = useState('');
+  const [includeCase,        setIncludeCase]        = useState(true);
 
   /* ===================== MUTATION ===================== */
   const patrolReportMutation = usePatrolReport();
@@ -111,7 +114,13 @@ const timezone = useMemo(() => getUserTimezone(), []);
       const rows     = buildPatrolReportRows(report);
       const filename = `PatrolReport_${dayjs().format('YYYY-MM-DD')}.xlsx`;
 
-      sessionStorage.setItem('patrolReportPreviewData', JSON.stringify({ rows, filename }));
+      sessionStorage.setItem('patrolReportPreviewData', JSON.stringify({
+        rows,
+        filename,
+        reportTitle: reportTitle || 'Patrol Report',
+        generatedAt: dayjs().toISOString(),
+        includeCase,
+      }));
       const w    = 1200, h = window.screen.height * 0.9;
       const left = (window.screen.width  - w) / 2;
       const top  = (window.screen.height - h) / 2;
@@ -145,6 +154,36 @@ const timezone = useMemo(() => getUserTimezone(), []);
 
         {/* ── Time Range ──────────────────────────────── */}
         <Grid container spacing={2}>
+                  {/* ── Report Title ────────────────────────────── */}
+        <TextField
+          fullWidth
+          label="Report Title"
+          placeholder="Enter a title for the report (e.g. Laporan Patrol -Bulan- -Tahun-)"
+          value={reportTitle}
+          onChange={(e) => setReportTitle(e.target.value)}
+          variant="outlined"
+          size="small"
+          sx={{ mb: 1 }}
+        />
+
+        {/* ── Report Filter Divider ──────────────────────── */}
+        <Box sx={{ width: '100%', height: '1px', bgcolor: 'divider', my: 1, position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <Typography
+            sx={{
+              bgcolor: 'background.paper',
+              px: 2,
+              color: 'primary.main',
+              fontWeight: 800,
+              fontSize: '0.75rem',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              position: 'absolute'
+            }}
+          >
+            Report Filter
+          </Typography>
+        </Box>
+
           <Grid size={{ xs: 12, md: timeRange === 'custom' ? 4 : 12 }}>
             <FormControl fullWidth>
               <InputLabel>Time Range</InputLabel>
@@ -237,48 +276,23 @@ const timezone = useMemo(() => getUserTimezone(), []);
           </Grid>
         </Grid>
 
-        {/* ── Completion + Session Status (compact) ───── */}
-        <Grid container spacing={2} alignItems="flex-start">
-          {/* Completion radio */}
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <FormControl component="fieldset">
-              <FormLabel component="legend" sx={{ fontSize: 12, mb: 0.5 }}>
-                Completion
-              </FormLabel>
-              <RadioGroup
-                row
-                value={completedFilter}
-                onChange={(e) => setCompletedFilter(e.target.value as CompletedFilter)}
-              >
-                {[
-                  { value: 'all',        label: 'All'        },
-                  { value: 'completed',  label: 'Completed'        },
-                  { value: 'incomplete', label: 'Incomplete'         },
-                ].map(({ value, label }) => (
-                  <FormControlLabel
-                    key={value}
-                    value={value}
-                    control={<Radio size="small" />}
-                    label={<Typography fontSize={13}>{label}</Typography>}
-                    sx={{ mr: 2.5 }}
-                  />
-                ))}
-              </RadioGroup>
-            </FormControl>
-          </Grid>
+        {/* ── Extra Options ────────────────────────────── */}
+        <Box sx={{ pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'text.primary', mb: 2 }}>
+            Extra Options
+          </Typography>
 
-          {/* Session Status toggle */}
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <FormLabel component="legend" sx={{ fontSize: 12, display: 'block', mb: 0.75 }}>
+          {/* Session Status */}
+          <Box sx={{ mb: 3 }}>
+            <FormLabel component="legend" sx={{ fontSize: 13, fontWeight: 600, display: 'block', mb: 1 }}>
               Session Status
             </FormLabel>
-            
             <ToggleButtonGroup
               exclusive
               value={sessionStatus}
               onChange={(_, v) => setSessionStatus(v)}
               size="small"
-              sx={{ flexWrap: 'wrap', gap: 0.5 }}
+              sx={{ flexWrap: 'wrap', gap: 1 }}
             >
               {SESSION_STATUSES.map(({ value, label }) => (
                 <ToggleButton
@@ -286,9 +300,8 @@ const timezone = useMemo(() => getUserTimezone(), []);
                   value={value}
                   sx={{
                     px: 1.5,
-                    py: 0.4,
-                    fontSize: 12,
-                    lineHeight: 1.4,
+                    py: 0.5,
+                    fontSize: 13,
                     textTransform: 'none',
                     borderRadius: '16px !important',
                     border: '1px solid',
@@ -303,19 +316,63 @@ const timezone = useMemo(() => getUserTimezone(), []);
                   {label}
                 </ToggleButton>
               ))}
-                          <Typography
-              fontSize={11}
-              color="text.secondary"
-              mt={0.5}
-              sx={{ cursor: 'pointer', display: 'inline-block' }}
-              onClick={() => setSessionStatus(null)}
-            >
-              {sessionStatus ? '✕ Clear' : 'Any status'}
-            </Typography>
+              <Typography
+                fontSize={13}
+                color="text.secondary"
+                sx={{ cursor: 'pointer', alignSelf: 'center', ml: 1 }}
+                onClick={() => setSessionStatus(null)}
+              >
+                {sessionStatus ? '✕ Clear' : 'Any status'}
+              </Typography>
             </ToggleButtonGroup>
+          </Box>
 
-          </Grid>
-        </Grid>
+          {/* Completion */}
+          <Box sx={{ mb: 3 }}>
+            <FormControl component="fieldset">
+              <FormLabel component="legend" sx={{ fontSize: 13, fontWeight: 600, mb: 1 }}>
+                Completion
+              </FormLabel>
+              <RadioGroup
+                row
+                value={completedFilter}
+                onChange={(e) => setCompletedFilter(e.target.value as CompletedFilter)}
+              >
+                {[
+                  { value: 'all',        label: 'All' },
+                  { value: 'completed',  label: 'Completed' },
+                  { value: 'incomplete', label: 'Incomplete' },
+                ].map(({ value, label }) => (
+                  <FormControlLabel
+                    key={value}
+                    value={value}
+                    control={<Radio size="small" />}
+                    label={<Typography fontSize={14}>{label}</Typography>}
+                    sx={{ mr: 3 }}
+                  />
+                ))}
+              </RadioGroup>
+            </FormControl>
+          </Box>
+
+          {/* Include Case Details */}
+          <Box>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={includeCase}
+                  onChange={(e) => setIncludeCase(e.target.checked)}
+                  size="small"
+                />
+              }
+              label={<Typography fontSize={14} fontWeight={600}>Include Case Details</Typography>}
+            />
+          </Box>
+        </Box>
+
+
+
+
 
         {/* ── Action ──────────────────────────────────── */}
         <Button

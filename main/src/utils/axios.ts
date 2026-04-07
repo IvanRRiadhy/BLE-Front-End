@@ -87,7 +87,7 @@ function createAxiosService({ getBaseUrl }: AxiosServiceOptions): AxiosInstance 
         console.log("Appending ApplicationId to JSON string data: ", ApplicationId, levelPriority);
         
         dataObj.ApplicationId = ApplicationId;
-      }
+        }
         request.data = JSON.stringify(dataObj);
       } else if (typeof request.data === 'object' && request.data !== null) {
         if(ApplicationId) {

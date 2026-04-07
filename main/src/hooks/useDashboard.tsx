@@ -28,11 +28,11 @@ export type DashboardFilterType = {
 };
 export type newDashboardFilterType = {
   buildingId: string[];
-  floorId: string[] ;
+  floorId: string[];
   floorplanId: string[];
   areaId: string[];
   TimeRange: string;
-}
+};
 
 export function useAreaDistributionData(filter: DashboardFilterType) {
   return useQuery({
@@ -52,7 +52,7 @@ export function useTopButtonSummary(filter: newDashboardFilterType) {
   return useQuery({
     queryKey: ['dashboard-count-summary'],
     queryFn: async () => {
-      const res = await axiosServices.post(`${API_DASHBOARD}count-summary`, filter );
+      const res = await axiosServices.post(`${API_DASHBOARD}count-summary`, filter);
       console.log('Top Button Summary Data fetched: ', res.data);
       return res.data.collection.data;
     },
@@ -119,7 +119,7 @@ export function useBlacklistLog() {
   return useQuery({
     queryKey: ['blacklist-log'],
     queryFn: async () => {
-      const res = await axiosServices.get(`${API_DASHBOARD}blacklist-logs`);
+      const res = await axiosServices.post(`${API_DASHBOARD}blacklist-logs`, {});
       return res.data.collection.data;
     },
     refetchInterval: 5000,
@@ -267,5 +267,5 @@ export function useLatestPosition(timeRange: string) {
     },
     refetchInterval: 5000,
     refetchIntervalInBackground: true,
-  }) 
+  });
 }

@@ -40,6 +40,7 @@ import { PatrolSessionType, GetFilter as PatrolSessionFilter } from './crud/patr
 import { PatrolCaseType, GetFilter as PatrolCaseFilter, CaseUploadType } from './crud/patrolCase';
 import {GetFilter as UserFilter} from './crud/users';
 import {GetFilter as PatrolReportFilter} from './crud/patrolReport';
+import { EventFilter} from 'src/hooks/useEvents';
 
 //#region AccessCCTV
 export const defaultAccessCCTVForm: CCTVType = {
@@ -752,6 +753,8 @@ export const defaultPatrolAssignForm: PatrolAssignType = {
   securityHead1Id: '',
   securityHead2Id: '',
   shiftReplacements: [],
+  nextPatrolStatus: '',
+  isEnded: false,
   approvalType: '',
   durationType: '',
   startType: '',
@@ -830,3 +833,15 @@ export const defaultPatrolReportFilter: PatrolReportFilter = {
   dateFilters: {},
   filters: {},
 };
+//#endregion
+
+//#region Event Log
+export const defaultEventFilter: EventFilter = {
+  draw: 1,
+  start: 0,
+  length: 999,
+  sortColumn: '',
+  sortDir: 'desc',
+  searchValue: '',
+};
+//#endregion

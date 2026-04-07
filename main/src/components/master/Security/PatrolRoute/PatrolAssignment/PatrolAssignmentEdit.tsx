@@ -190,6 +190,7 @@ const PatrolAssignmentEdit = () => {
     return ApprovalType;
   }, [selectedHeadSecurities]);
 
+
   useEffect(() => {
     const validValues = filteredApprovalTypes.map((x) => x.value);
 
@@ -200,6 +201,13 @@ const PatrolAssignmentEdit = () => {
       }));
     }
   }, [filteredApprovalTypes]);
+
+  // Cleanup on unmount to ensure state is cleared if user navigates away
+  useEffect(() => {
+    return () => {
+      dispatch(SelectPatrolAssign(null));
+    };
+  }, [dispatch]);
 
   const handleInputChange = (
     e:
@@ -218,7 +226,7 @@ const PatrolAssignmentEdit = () => {
 
   useEffect(() => {
     if (!startDate) return;
-    console.log("Start Date:", startDate.format('YYYY-MM-DD'));
+    console.log('Start Date:', startDate.format('YYYY-MM-DD'));
     setFormData((prev) => ({
       ...prev,
       startDate: startDate.format('YYYY-MM-DD'),
@@ -394,8 +402,8 @@ const PatrolAssignmentEdit = () => {
       patrolAssignmentId: selectedPatrolAssign?.id || '',
       originalSecurity: {} as SecurityType,
       substituteSecurity: {} as SecurityType,
-      replacementStartDate: "",
-      replacementEndDate: "",
+      replacementStartDate: '',
+      replacementEndDate: '',
       reason: '',
     });
   };
@@ -441,7 +449,7 @@ const PatrolAssignmentEdit = () => {
      ========================= */
 
     if (selectedPatrolAssign?.shiftReplacements) {
-      selectedPatrolAssign.shiftReplacements.forEach((rep) => {
+      selectedPatrolAssign.shiftReplacements.forEach((rep: ShiftReplacementType) => {
         let repDate = dayjs(rep.replacementStartDate);
 
         const endRep = dayjs(rep.replacementEndDate);

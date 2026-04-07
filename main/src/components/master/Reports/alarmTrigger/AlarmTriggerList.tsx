@@ -416,7 +416,7 @@ const handleApplyAction = async () => {
             <DialogContent sx={{ mt: 1 }}>
               {/* Alarm Info */}
               <Typography variant="body2" color="text.secondary" mb={1}>
-                Alarm DMAC:
+                Alarm MAC:
               </Typography>
               <Typography variant="body1" fontWeight={600} mb={2}>
                 {selectedAlarmTrigger?.beaconId?.toUpperCase() || '-'}

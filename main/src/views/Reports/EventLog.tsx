@@ -4,6 +4,7 @@ import PageContainer from 'src/components/container/PageContainer';
 // import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import AppCard from 'src/components/shared/AppCard';
 import EventLogList from 'src/components/master/Reports/EventLog/EventLogList';
+import EventReport from 'src/components/master/Reports/EventLog/EventReport';
 
 const EventLog = () => {
   return (
@@ -17,7 +18,7 @@ const EventLog = () => {
             flexShrink: 0,
           }}
         >
-            <EventLogList />
+            <EventReport />
         </Box>
       </AppCard>
     </PageContainer>

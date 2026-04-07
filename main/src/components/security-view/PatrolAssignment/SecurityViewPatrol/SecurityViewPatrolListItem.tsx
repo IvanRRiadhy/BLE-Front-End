@@ -131,7 +131,7 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
   };
 
   const startAreaName = !isLoading ? (routeData?.startAreaName ?? null) : null;
-  const isPatrolEnded = patrol.endDate ? new Date(patrol.endDate) < now : false;
+  const isPatrolEnded = patrol.isEnded;
 
   /* ===== payload for detail dialog ===== */
   // const payload: PatrolDetailPayload = {
@@ -196,7 +196,7 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
           <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#045498' }}>
             {isLoading ? 'Loading...' : startAreaName || 'Unknown Area'}
           </Typography>
-          {isPatrolEnded ? (
+          {/* {isPatrolEnded ? (
             <>
               {' '}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
@@ -233,26 +233,27 @@ const SecurityViewPatrolListItem = ({ patrol, openDetail }: PatrolListItemProps)
             </>
           ) : (
             <></>
-          )}
+          )} */}
 
-          {/* {nearestPatrol && (
+          {nearestPatrol && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
               <Typography
                 sx={{
                   fontSize: 12,
                   fontWeight: 700,
-                  color: getPatrolColor(nearestPatrol),
+                  color: isPatrolEnded ? theme.palette.error.dark : getPatrolColor(nearestPatrol),
                   textAlign: 'right',
                 }}
               >
-                {t('Next patrol')}: {formatNearestPatrol(nearestPatrol)}
+                {/* {t('Next patrol')}: {formatNearestPatrol(nearestPatrol)} */}
+                {patrol.nextPatrolStatus}
               </Typography>
 
               {isSameDay(nearestPatrol, now) && (
                 <IconExclamationCircleFilled size={20} color={theme.palette.error.dark} />
               )}
             </Box>
-          )} */}
+          )}
         </Box>
 
         <Tooltip title="See Patrol Detail" placement="right">
