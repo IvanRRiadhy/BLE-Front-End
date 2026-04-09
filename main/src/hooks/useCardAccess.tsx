@@ -51,6 +51,7 @@ export function useAddCardAccess() {
     mutationFn: async (cardAccess: Partial<CardAccessType>) => {
       const {
         id,
+        applicationId,
         accessNumber,
         maskedArea,
         createdBy,
@@ -78,6 +79,7 @@ export function useEditCardAccess() {
       const {
         id,
         createdBy,
+        applicationId,
         accessNumber,
         maskedArea,
         createdAt,

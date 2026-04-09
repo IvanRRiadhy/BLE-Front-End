@@ -22,10 +22,11 @@ import {
   CircularProgress,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconTrash } from '@tabler/icons-react';
+import { IconEye, IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import {
   FloorplanType,
+  SelectFloorplan,
   UpdateFilter,
   deleteFloorplan,
   fetchFloorplanDT,
@@ -38,6 +39,7 @@ import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
 import { BASE_URL } from 'src/utils/axios';
 import { fetchFloors } from 'src/store/apps/crud/floor';
 import { fetchEngines } from 'src/store/apps/crud/engine';
+import { useNavigate } from 'react-router';
 const columns = [
   { label: 'Floorplan Name', field: 'Name', sortAble: true },
   { label: 'Floor Name', field: 'Floor.Name', sortAble: true },
@@ -52,6 +54,7 @@ const SKELETON_ROWS = 5;
 
 const FloorplanList = () => {
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
 
   const buildingData: BuildingType[] = useSelector(
     (state: RootState) => state.buildingReducer.buildingAll,
@@ -209,6 +212,11 @@ console.log("Floorplan Data:", floorplanData);
     const building = buildingData.find((b) => b.id === buildingId);
     return building ? building.name : 'Unknown Building';
   };
+
+    const handleOverviewClick = (floorplanToEdit: FloorplanType) => {
+      dispatch(SelectFloorplan(floorplanToEdit));
+      navigate('/master/floorplan/overview');
+    };
 
   const renderSkeletonRows = (rows: number) => (
     <>
@@ -380,6 +388,13 @@ console.log("Floorplan Data:", floorplanData);
                             }}
                           >
                             <AddEditFloorplan type="edit" floorplan={floorplan} />
+                            <IconButton
+                              color="primary"
+                              size="small"
+                              onClick={() => handleOverviewClick  (floorplan)}
+                            >
+                              <IconEye size={20} />
+                            </IconButton>
                             <IconButton
                               color="error"
                               size="small"

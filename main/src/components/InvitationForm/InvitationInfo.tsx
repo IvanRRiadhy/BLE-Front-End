@@ -14,7 +14,7 @@ import {
   Paper,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router';
 import {
   declineInvitation,
   fetchVisitorbyId,
@@ -214,30 +214,30 @@ const InvitationInfo = () => {
       </Box>
     );
   }
-  if(!visitorInfo && !loading){
+  if (!visitorInfo && !loading) {
     return (
-          <Box
-      sx={{
-        minHeight: '100vh',
-        // colored gutters (left/right)
-        bgcolor: '#e3edfd', // pick any soft color you like
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        py: { xs: 0, sm: 1 }, // top/bottom breathing room
-      }}
-    >
-      <Container maxWidth="sm" disableGutters>
-        <Paper elevation={3} sx={{ borderRadius: 3, overflow: 'hidden', padding: 3 }}>
-              <Box sx={{ bgcolor: '#f44242ff', color: '#fff', p: 2 }}>
-                <Typography variant="h4" align="center" fontWeight={700}>
-                  Invitation Not Found
-                </Typography>
-              </Box>
-        </Paper>
-      </Container>
-    </Box>
-    )
+      <Box
+        sx={{
+          minHeight: '100vh',
+          // colored gutters (left/right)
+          bgcolor: '#e3edfd', // pick any soft color you like
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          py: { xs: 0, sm: 1 }, // top/bottom breathing room
+        }}
+      >
+        <Container maxWidth="sm" disableGutters>
+          <Paper elevation={3} sx={{ borderRadius: 3, overflow: 'hidden', padding: 3 }}>
+            <Box sx={{ bgcolor: '#f44242ff', color: '#fff', p: 2 }}>
+              <Typography variant="h4" align="center" fontWeight={700}>
+                Invitation Not Found
+              </Typography>
+            </Box>
+          </Paper>
+        </Container>
+      </Box>
+    );
   }
 
   return (

@@ -87,7 +87,7 @@ const NewestTrack = () => {
   };
 
   // Ambil semua topic tracking/*
-  const trackingTopics = Object.keys(beaconsByTopic).filter((x) => x.startsWith('tracking/'));
+  const trackingTopics = Object.keys(beaconsByTopic).filter((x) => x.startsWith('people_tracking/tracking/'));
 
   // Gabungkan semua beacon
   const allBeacons = Object.values(
@@ -121,6 +121,7 @@ const NewestTrack = () => {
       sensitivity: 'base', // case-insensitive
     }),
   );
+  // console.log('All Beacons:', allBeacons);
   // Urutkan berdasarkan waktu terbaru
 //   allBeacons.sort((a, b) =>
 //   (b.lastSeen ?? new Date(b.time).getTime()) -

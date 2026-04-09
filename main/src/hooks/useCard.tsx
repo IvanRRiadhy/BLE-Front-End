@@ -37,7 +37,8 @@ export function useAllCard() {
   return useQuery({
     queryKey: ['card-all'],
     queryFn: async () => {
-      const response = await axiosServices.get(API_URL_V2);
+      const response = await axiosServices.get(API_URL_V1);
+      console.log('All Cards fetched: ', response.data.collection.data);
       return response.data.collection.data as CardType[];
     },
     placeholderData: [],

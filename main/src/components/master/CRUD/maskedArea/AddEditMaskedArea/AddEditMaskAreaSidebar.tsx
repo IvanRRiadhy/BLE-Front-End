@@ -6,12 +6,12 @@ import AreaList from './AreaList';
 const drawerWidth = 260;
 
 
-interface Props {
-  isMobileSidebarOpen: boolean;
-  onSidebarClose: (event: React.MouseEvent<HTMLElement>) => void;
-}
-
-const AddEditMaksedAreaSidebar = ({ isMobileSidebarOpen, onSidebarClose }: Props) => {
+// interface Props {
+//   isMobileSidebarOpen: boolean;
+//   onSidebarClose: (event: React.MouseEvent<HTMLElement>) => void;
+// }
+// const AddEditMaksedAreaSidebar = ({ isMobileSidebarOpen, onSidebarClose }: Props) => {
+const AddEditMaksedAreaSidebar = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   // const theme = useTheme();
 
@@ -33,8 +33,9 @@ const AddEditMaksedAreaSidebar = ({ isMobileSidebarOpen, onSidebarClose }: Props
             overflowY: 'auto',
           },
         }}
-        open={isMobileSidebarOpen}
-        onClose={onSidebarClose}
+        open={true}
+        // open={isMobileSidebarOpen}
+        // onClose={onSidebarClose}
         variant="permanent"
       >
         <AreaList />

@@ -53,8 +53,8 @@ const FloorplanDeviceEdit = () => {
           sx={{ border: '1px solid', borderColor: 'divider' }}
         >
           <AddEditDeviceSidebar
-            isMobileSidebarOpen={isMobileSidebarOpen}
-            onSidebarClose={() => setMobileSidebarOpen(false)}
+            // isMobileSidebarOpen={isMobileSidebarOpen}
+            // onSidebarClose={() => setMobileSidebarOpen(false)}
           />
           {editingDevice && !drawingPath && (
             <Box

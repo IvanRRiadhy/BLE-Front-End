@@ -270,9 +270,9 @@ useEffect(() => {
         // --------------------------------------
 
         // 1. Identify brand new blocks that must be created separately
-        const newBlocks = selectedTimeGroup.timeBlocks.filter((b: TimeBlockType) =>
-          b.id.startsWith('block-'),
-        );
+        // const newBlocks = selectedTimeGroup.timeBlocks.filter((b: TimeBlockType) =>
+        //   b.id.startsWith('block-'),
+        // );
 
         // 2. Prepare payload for editing main group
         const editPayload = {
@@ -287,16 +287,16 @@ useEffect(() => {
         await editTG.mutateAsync(editPayload);
 
         // 3. Add new time blocks (same as old addTimeBlock)
-        for (const b of newBlocks) {
-          const addPayload = {
-            dayOfWeek: b.dayOfWeek.toLowerCase(),
-            startTime: b.startTime,
-            endTime: b.endTime,
-            TimeGroupId: selectedTimeGroup.id,
-          };
+        // for (const b of newBlocks) {
+        //   const addPayload = {
+        //     dayOfWeek: b.dayOfWeek.toLowerCase(),
+        //     startTime: b.startTime,
+        //     endTime: b.endTime,
+        //     TimeGroupId: selectedTimeGroup.id,
+        //   };
 
-          await addBlock.mutateAsync(addPayload);
-        }
+          // await addBlock.mutateAsync(addPayload);
+        // }
 
         toast.success('Time group updated successfully');
       }

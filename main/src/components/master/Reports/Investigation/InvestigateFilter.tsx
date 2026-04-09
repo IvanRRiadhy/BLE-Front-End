@@ -439,10 +439,10 @@ const InvestigateFilter = () => {
       return;
     }
 
-    let buildingId: string = '';
-    let floorId: string = '';
-    let floorplanId: string = '';
-    let areaId: string = '';
+    let buildingId: string | null = null;
+    let floorId: string | null = null;
+    let floorplanId: string | null = null;
+    let areaId: string | null = null;
 
     if (selectedArea) {
       const data = selectedArea.data;
@@ -631,7 +631,7 @@ const InvestigateFilter = () => {
           </Box>
 
           {/* Simplified Event Types Filter - Segmented Control */}
-          <Box>
+          {/* <Box>
             <Typography
               variant="subtitle1"
               fontWeight="bold"
@@ -681,11 +681,11 @@ const InvestigateFilter = () => {
                   Required for alarm mode
                 </Typography>
               )}
-          </Box>
+          </Box> */}
         </Box>
 
         {/* Scrollable alarm types section */}
-        {showAlarmTypesSection ? (
+        {/* {showAlarmTypesSection ? (
           <Paper
             elevation={0}
             sx={{
@@ -701,7 +701,7 @@ const InvestigateFilter = () => {
               flexDirection: 'column',
             }}
           >
-            {/* Alarm Types Header - Fixed */}
+
             <Box
               sx={{
                 display: 'flex',
@@ -737,10 +737,10 @@ const InvestigateFilter = () => {
                   />
                 )}
               </Typography>
-              {/* {alarmTypesExpanded ? <ExpandLess /> : <ExpandMore />} */}
+
             </Box>
 
-            {/* Scrollable Alarm Types Content */}
+
             <Collapse in={alarmTypesExpanded} timeout="auto" sx={{ flex: 1, overflow: 'auto' }}>
               <Box
                 sx={{
@@ -752,7 +752,7 @@ const InvestigateFilter = () => {
                   gap: 1,
                 }}
               >
-                {/* Select All / Clear All buttons */}
+
                 <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
                   <Button
                     size="small"
@@ -774,7 +774,7 @@ const InvestigateFilter = () => {
                   </Button>
                 </Stack>
 
-                {/* Alarm type checkboxes */}
+
                 <FormGroup sx={{ flex: 1 }}>
                   {activeAlarmTypes.map((alarmType) => (
                     <FormControlLabel
@@ -794,7 +794,6 @@ const InvestigateFilter = () => {
                   ))}
                 </FormGroup>
 
-                {/* Legend */}
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 1, flexShrink: 0 }}>
                   {selectedAlarmTypesCount === 0
                     ? 'No specific types selected = All alarm types'
@@ -812,8 +811,8 @@ const InvestigateFilter = () => {
           </Paper>
         ) : (
           <Box flexGrow={1} />
-        )}
-
+        )} */}
+<Box flexGrow={1} />
         {/* Investigate Button - Fixed at bottom */}
         <Box sx={{ flexShrink: 0, pt: 1 }}>
           <Tooltip title={getTooltipMessage} arrow>

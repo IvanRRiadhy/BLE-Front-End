@@ -108,6 +108,7 @@ const FloorplanDeviceEdit = Loadable(
   lazy(() => import('../views/master/crud/FloorplanDeviceEdit')),
 );
 const MaskedAreaEdit = Loadable(lazy(() => import('../views/master/crud/MaskedAreaEdit')));
+const FloorplanOverview = Loadable(lazy(() => import('../views/master/crud/FloorplanOverview')));
 const RulesEdit = Loadable(lazy(() => import('../views/master/rules/rulesEdit')));
 
 /* ****Security**** */
@@ -300,6 +301,11 @@ const Router = [
         path: '/master/device/edit',
         exact: true,
         element: withAuth(<FloorplanDeviceEdit />, '/master/device/edit'),
+      },
+      {
+        path: '/master/floorplan/overview',
+        exact: true,
+        element: withAuth(<FloorplanOverview />, '/master/floorplan/overview'),
       },
       {
         path: '/master/rules/edit',

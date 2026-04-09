@@ -15,7 +15,15 @@ export default defineConfig({
     ],
     headers: {
       'referrer-policy': 'same-origin',
-    }
+    },
+    proxy: {
+      // In case they have an existing backend on port 5000
+      '/api-backend': {
+        target: 'http://192.168.1.10:5000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-backend/, ''),
+      },
+    },
   },
   resolve: {
     alias: {
@@ -48,6 +56,42 @@ export default defineConfig({
   },
 
   plugins: [
+    {
+      name: 'image-proxy',
+      configureServer(server) {
+        server.middlewares.use(async (req, res, next) => {
+          if (req.url && req.url.includes('/api/proxy-image')) {
+            const urlParams = new URL(req.url, `http://${req.headers.host}`).searchParams;
+            const imageUrl = urlParams.get('url');
+            
+            if (!imageUrl) {
+              res.statusCode = 400;
+              res.end('URL is required');
+              return;
+            }
+
+            try {
+              const { default: axios } = await import('axios');
+              const resp = await axios.get(imageUrl, {
+                responseType: 'arraybuffer',
+                validateStatus: false,
+              });
+              
+              if (resp.headers['content-type']) {
+                res.setHeader('Content-Type', resp.headers['content-type']);
+              }
+              res.end(Buffer.from(resp.data));
+            } catch (error) {
+              console.error('Vite Image proxy error:', error.message);
+              res.statusCode = 500;
+              res.end('Failed to proxy image');
+            }
+            return;
+          }
+          next();
+        });
+      },
+    },
     {
       name: 'remove-object-freeze',
       transform(code, id) {

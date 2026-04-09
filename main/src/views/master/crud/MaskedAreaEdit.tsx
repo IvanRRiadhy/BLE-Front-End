@@ -30,8 +30,8 @@ const MaskedAreaEdit = () => {
           sx={{ border: '1px solid', borderColor: 'divider' }}
         >
           <AddEditMaskedAreaSidebar
-            isMobileSidebarOpen={isMobileSidebarOpen}
-            onSidebarClose={() => setMobileSidebarOpen(false)}
+            // isMobileSidebarOpen={isMobileSidebarOpen}
+            // onSidebarClose={() => setMobileSidebarOpen(false)}
           />
           {/* <FloorplanOverviewSidebar /> */}
                   {editingArea && (

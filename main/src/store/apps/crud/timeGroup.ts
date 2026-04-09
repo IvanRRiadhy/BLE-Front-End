@@ -26,7 +26,7 @@ export type GetFilter = {
 }
 
 export type TimeBlockType = {
-  id: string;
+  id?: string;
   dayOfWeek: "Sunday" | "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday";
   startTime: string;   // "HH:mm:ss"
   endTime: string;     // "HH:mm:ss"

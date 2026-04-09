@@ -4,12 +4,12 @@ import React from 'react';
 
 const drawerWidth = 260;
 
-interface Props {
-  isMobileSidebarOpen: boolean;
-  onSidebarClose: (event: React.MouseEvent<HTMLElement>) => void;
-}
-
-const AddEditDeviceSidebar = ({ isMobileSidebarOpen, onSidebarClose }: Props) => {
+// interface Props {
+//   isMobileSidebarOpen: boolean;
+//   onSidebarClose: (event: React.MouseEvent<HTMLElement>) => void;
+// }
+// const AddEditDeviceSidebar = ({ isMobileSidebarOpen, onSidebarClose }: Props) => {
+const AddEditDeviceSidebar = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
 
   return (
@@ -28,8 +28,9 @@ const AddEditDeviceSidebar = ({ isMobileSidebarOpen, onSidebarClose }: Props) =>
             overflowY: 'hidden',
           },
         }}
-        open={isMobileSidebarOpen}
-        onClose={onSidebarClose}
+        open={true}
+        // open={isMobileSidebarOpen}
+        // onClose={onSidebarClose}
         variant="permanent"
       >
         <DeviceList />

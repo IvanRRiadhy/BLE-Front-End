@@ -99,7 +99,7 @@ const UpcomingVisitor: React.FC = () => {
             color: '#045498',
           }}
         >
-          Upcoming Visitor
+          Visitor Today
         </Typography>
       </Box>
 

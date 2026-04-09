@@ -1,7 +1,18 @@
 import { useState } from 'react';
 import { useSelector, RootState } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import { Box, Typography, IconButton, Divider } from '@mui/material';
+import {
+  Box,
+  Typography,
+  IconButton,
+  Divider,
+  Button,
+  CircularProgress,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material';
 
 import {
   IconChevronRight,
@@ -26,18 +37,40 @@ import { useOverPopulatingAlarms } from 'src/hooks/AlarmSetting/useOverPopulate'
 import { useBoundaryAlarms } from 'src/hooks/AlarmSetting/useBoundary';
 
 import FloorplanOverviewSidebarItem from './FloorplanOverviewSidebarItem';
+import { SectionKey, VisibilityState } from 'src/views/master/crud/FloorplanOverviewTypes';
+import { PictureAsPdf, TableChart } from '@mui/icons-material';
+import { useNavigate } from 'react-router';
 
-type SectionKey = 'areas' | 'patrol' | 'devices' | 'geofence' | 'stay' | 'over' | 'boundary';
-
-type VisibilityState = {
-  accordionHidden: boolean;
-  items: Record<string, boolean>;
+type Props = {
+  visibility: Record<SectionKey, VisibilityState>;
+  toggleSectionHide: (section: SectionKey) => void;
+  toggleItem: (section: SectionKey, id: string, list: any[]) => void;
+  isVisible: (section: SectionKey, id: string) => boolean;
+  onExport: (type: 'pdf' | 'png') => void;
 };
 
-const FloorplanOverviewSidebar = () => {
+const FloorplanOverviewSidebar = ({
+  visibility,
+  toggleSectionHide,
+  toggleItem,
+  isVisible,
+  onExport,
+}: Props) => {
+  const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
   const activeFloorplan = useSelector(
     (state: RootState) => state.floorplanReducer.selectedFloorplan,
   );
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget );
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   // ================= DATA =================
   const { data: areas } = useMaskedAreaList({
@@ -122,7 +155,7 @@ const FloorplanOverviewSidebar = () => {
   // ================= STATE =================
   const [expanded, setExpanded] = useState<Record<SectionKey, boolean>>({
     areas: true,
-    patrol: true,
+    patrol: false,
     devices: false,
     geofence: false,
     stay: false,
@@ -130,69 +163,9 @@ const FloorplanOverviewSidebar = () => {
     boundary: false,
   });
 
-  const [visibility, setVisibility] = useState<Record<SectionKey, VisibilityState>>({
-    areas: { accordionHidden: false, items: {} },
-    patrol: { accordionHidden: false, items: {} },
-    devices: { accordionHidden: false, items: {} },
-    geofence: { accordionHidden: false, items: {} },
-    stay: { accordionHidden: false, items: {} },
-    over: { accordionHidden: false, items: {} },
-    boundary: { accordionHidden: false, items: {} },
-  });
-
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
   // ================= LOGIC =================
-  const isVisible = (section: SectionKey, id: string) => {
-    const s = visibility[section];
-    if (s.items[id] !== undefined) return s.items[id];
-    return !s.accordionHidden;
-  };
-
-  const toggleSectionHide = (section: SectionKey) => {
-    setVisibility((prev) => {
-      const nextHidden = !prev[section].accordionHidden;
-
-      return {
-        ...prev,
-        [section]: {
-          accordionHidden: nextHidden,
-          items: {}, // 🔥 RESET ALL OVERRIDES
-        },
-      };
-    });
-  };
-
-  const toggleItem = (section: SectionKey, id: string, list: any[]) => {
-    setVisibility((prev) => {
-      const sectionState = prev[section];
-
-      // toggle current item
-      const newItems = {
-        ...sectionState.items,
-        [id]: !isVisible(section, id),
-      };
-
-      // 🔥 check if ALL items are visible
-      const allVisible = list.every((item) => {
-        if (newItems[item.id] !== undefined) return newItems[item.id];
-        return !sectionState.accordionHidden;
-      });
-      const allHidden = list.every((item) => {
-        if (newItems[item.id] !== undefined) return !newItems[item.id];
-        return sectionState.accordionHidden;
-      });
-
-      return {
-        ...prev,
-        [section]: {
-          accordionHidden: allVisible ? false : allHidden ? true : sectionState.accordionHidden,
-          items: newItems,
-        },
-      };
-    });
-  };
-
   const toggleExpand = (section: SectionKey) => {
     setExpanded((prev) => ({
       ...prev,
@@ -200,6 +173,16 @@ const FloorplanOverviewSidebar = () => {
     }));
   };
 
+  const handleExport = (type: 'pdf' | 'png') => {
+    onExport(type);
+    handleClose();
+  };
+
+  const handleBack = () => {
+    setSelectedItem(null);
+    setIsExporting(false);
+    navigate('/master/floorplan');
+  }
   // ================= UI =================
   const renderSection = (
     section: SectionKey,
@@ -293,7 +276,7 @@ const FloorplanOverviewSidebar = () => {
       </Box>
       <Divider />
       {/* BODY */}
-      <Box sx={{ flex: 1, overflowY: 'auto', px: 1, mt: 1 }}>
+      <Box sx={{ flex: 1, overflowY: 'auto', px: 1, mt: 1, minHeight: 0 }}>
         {renderSection('areas', 'Area(s)', <IconMap size={16} />, areas?.data || [])}
         {renderSection('devices', 'BLE Readers', <IconDeviceIpad size={16} />, devices?.data || [])}
         {renderSection('patrol', 'Patrol Area(s)', <IconRoute size={16} />, patrol?.data || [])}
@@ -307,6 +290,42 @@ const FloorplanOverviewSidebar = () => {
         {renderSection('stay', 'Stay On Area', <IconClock size={16} />, stay?.data || [])}
         {renderSection('over', 'Overpopulate', <IconUsers size={16} />, over?.data || [])}
         {renderSection('boundary', 'Boundary', <IconSquare size={16} />, boundary?.data || [])}
+      </Box>
+      <Box flexGrow="0" />
+      {/* FOOTER */}
+      <Box p={2} display="flex" justifyContent="space-between" alignItems="center">
+        <Button variant="outlined" onClick={handleBack}>
+          Cancel
+        </Button>
+        <Button variant="contained" onClick={handleClick} disabled={isExporting}>
+          {isExporting ? <CircularProgress size={20} color="inherit" /> : 'Export'}
+        </Button>
+        <Menu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+          transformOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+        >
+          <MenuItem onClick={() => handleExport('pdf')}>
+            <ListItemIcon>
+              <PictureAsPdf fontSize="small" color="error" />
+            </ListItemIcon>
+            <ListItemText>as PDF</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={() => handleExport('png')}>
+            <ListItemIcon>
+              <TableChart fontSize="small" color="success" />
+            </ListItemIcon>
+            <ListItemText>as PNG</ListItemText>
+          </MenuItem>
+        </Menu>
       </Box>
     </Box>
   );

@@ -41,6 +41,7 @@ const buildEditPayload = (tg: Partial<TimeGroupType>) => {
 
       return normalized;
     }),
+    cardAccessIds: tg.cardAccessIds || [],
   };
 };
 
@@ -119,7 +120,7 @@ export function useAddTimeGroup() {
 // -----------------------------------------------------------------------------
 // ✅ EDIT TIME GROUP (PUT JSON)
 // -----------------------------------------------------------------------------
-export function useEditTimeGroup() {
+export function  useEditTimeGroup() {
   const queryClient = useQueryClient();
 
   return useMutation({

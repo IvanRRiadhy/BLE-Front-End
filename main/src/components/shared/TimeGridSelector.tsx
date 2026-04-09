@@ -230,12 +230,14 @@ export const TimeGridSelector = ({
 
   const handleSave = async () => {
     if (!selectedTimeGroup) return;
-
-    const normalizedBlocks = selectedTimeGroup.timeBlocks.map((b: TimeBlockType) => ({
-      ...b,
-      dayOfWeek: b.dayOfWeek.toLowerCase(),
-      id: b.id.startsWith('block-') ? '' : b.id, // remove temp id
-    }));
+    console.log("selectedTimeGroup before save: ", selectedTimeGroup);
+    const normalizedBlocks = selectedTimeGroup.timeBlocks.map((b: TimeBlockType) => {
+      const { id, ...rest } = b; // ⛔ buang id
+      return {
+        ...rest,
+        dayOfWeek: b.dayOfWeek.toLowerCase(),
+      };
+    });
 
     try {
       if (isNewTimeGroup) {
@@ -254,9 +256,9 @@ export const TimeGridSelector = ({
         // --------------------------------------
 
         // 1. Identify brand new blocks that must be created separately
-        const newBlocks = selectedTimeGroup.timeBlocks.filter((b: TimeBlockType) =>
-          b.id.startsWith('block-'),
-        );
+        // const newBlocks = selectedTimeGroup.timeBlocks.filter((b: TimeBlockType) =>
+        //   b.id.startsWith('block-'),
+        // );
 
         // 2. Prepare payload for editing main group
         const editPayload = {
@@ -271,16 +273,16 @@ export const TimeGridSelector = ({
         await editTG.mutateAsync(editPayload);
 
         // 3. Add new time blocks (same as old addTimeBlock)
-        for (const b of newBlocks) {
-          const addPayload = {
-            dayOfWeek: b.dayOfWeek.toLowerCase(),
-            startTime: b.startTime,
-            endTime: b.endTime,
-            TimeGroupId: selectedTimeGroup.id,
-          };
+        // for (const b of newBlocks) {
+        //   const addPayload = {
+        //     dayOfWeek: b.dayOfWeek.toLowerCase(),
+        //     startTime: b.startTime,
+        //     endTime: b.endTime,
+        //     TimeGroupId: selectedTimeGroup.id,
+        //   };
 
-          await addBlock.mutateAsync(addPayload);
-        }
+        //   await addBlock.mutateAsync(addPayload);
+        // }
 
         toast.success('Time group updated successfully');
       }

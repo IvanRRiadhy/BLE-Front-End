@@ -89,7 +89,7 @@ const BeaconDetailPopup = ({
     setDetailDialogOpen(false);
     dispatch(SetSelectedBeacon({ active: false, sourceScreenid: null }));
   };
-
+  
   const theme = themeConfig[personType];
 
   const formatDate = (isoString: string) => {
@@ -98,7 +98,6 @@ const BeaconDetailPopup = ({
     const month = t(date.toLocaleString('en-GB', { month: 'short' }));
     return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()}`;
   };
-
   const handleFollowOnThisScreen = () => {
     if (!activeLayoutId || !activeLayout) {
       console.warn('No active layout found.');

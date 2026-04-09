@@ -26,6 +26,7 @@ export type GetFilter = {
 export type CardAccessType = {
     id: string,
     name: string,
+    applicationId: string,
     accessNumber: string,
     remarks: string,
     accessScope: string,

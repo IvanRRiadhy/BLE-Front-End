@@ -63,6 +63,30 @@ const AddEditMember = ({ type, member }: FormType) => {
   const organizationData = useAllOrganizations().data || [];
   const filteredCard = useUnassignedCard().data || [];
   const cardData = useAllCard().data || [];
+  const cardOptions = React.useMemo(() => {
+    const base = filteredCard.map((c) => ({
+      label: c.cardNumber,
+      id: c.id,
+      bleCardNumber: c.dmac,
+    }));
+    console.log('Filtered Cards (unassigned):', filteredCard);
+    console.log('All Cards:', cardData);
+    // ensure selected card always exists
+    if (formData.cardId && !base.find((c) => c.id === formData.cardId)) {
+      const existing = cardData.find((c) => c.id === formData.cardId);
+      if (existing) {
+        base.push({ label: existing.cardNumber, id: existing.id, bleCardNumber: existing.dmac });
+      }
+    }
+
+    return base;
+  }, [filteredCard, cardData, formData.cardId]);
+
+  const selectedCard = React.useMemo(
+    () => cardOptions.find((c) => c.id === formData.cardId) || null,
+    [cardOptions, formData.cardId],
+  );
+
   const headMemberData = useMemberList({ ...memberFilter, Length: 999 }).data?.data || [];
   const headOptions = headMemberData.map((m: any) => ({
     id: m.id,
@@ -409,22 +433,20 @@ const AddEditMember = ({ type, member }: FormType) => {
             <Divider />
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
-                <CustomFormLabel htmlFor="ble-card-number">Card Number</CustomFormLabel>
-                <CustomAutocomplete<{ label: string; id: string }>
+                <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
+                <CustomAutocomplete<{ label: string; id: string; bleCardNumber: string }>
                   label="Card Number"
-                  options={filteredCard.map((card: CardType) => ({
-                    label: card.cardNumber,
-                    id: card.id,
-                  }))}
-                  value={
-                    cardData
-                      .map((c) => ({ label: c.cardNumber, id: c.id }))
-                      .find((c) => c.id === formData.cardId) || null
-                  }
+                  options={cardOptions}
+                  value={selectedCard}
                   onChange={(val) => {
                     const id = val?.id ?? '';
                     const number = val?.label ?? '';
-                    setFormData((prev) => ({ ...prev, cardId: id, cardNumber: number }));
+                    setFormData((prev) => ({
+                      ...prev,
+                      cardId: id,
+                      cardNumber: number,
+                      bleCardNumber: val?.bleCardNumber || '',
+                    }));
                     setFormErrors((prev) => {
                       if (!prev.cardNumber) return prev;
                       const next = { ...prev };
@@ -439,6 +461,29 @@ const AddEditMember = ({ type, member }: FormType) => {
                 {formErrors.cardNumber && (
                   <FormHelperText error sx={{ mt: 0.5 }}>
                     {formErrors.cardNumber}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+                <CustomFormLabel htmlFor="ble-card-number">BLE Card Number</CustomFormLabel>
+                <Tooltip
+                  title="This is automatically fetched from the selected card. It is used for BLE-based access control."
+                  placement="top"
+                >
+                  <CustomTextField
+                    id="bleCardNumber"
+                    value={formData.bleCardNumber}
+                    onChange={handleInputChange}
+                    fullWidth
+                    variant="outlined"
+                    error={!!formErrors.bleCardNumber}
+                    helperText={formErrors.bleCardNumber}
+                    disabled
+                  />
+                </Tooltip>
+                {formErrors.bleCardNumber && (
+                  <FormHelperText error sx={{ mt: 0.5 }}>
+                    {formErrors.bleCardNumber}
                   </FormHelperText>
                 )}
               </Grid>
@@ -525,7 +570,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                 </CustomSelect>
                 <CustomFormLabel htmlFor="head-Member-1">Head Member 1</CustomFormLabel>
                 <CustomAutocomplete
-                  label="Head Security 1"
+                  label="Head Member 1"
                   options={filteredHead1Options}
                   value={filteredHead1Options.find((h) => h.id === formData.headMember1) || null}
                   onChange={(val) => {
@@ -548,7 +593,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                 />
                 <CustomFormLabel htmlFor="head-Member-2">Head Member 2</CustomFormLabel>
                 <CustomAutocomplete
-                  label="Head Security 2"
+                  label="Head Member 2"
                   options={filteredHead2Options}
                   value={filteredHead2Options.find((h) => h.id === formData.headMember2) || null}
                   onChange={(val) => {

@@ -18,18 +18,18 @@ export interface EventTypesFilter {
 
 export type GetFilter = {
   timeRange: string;
-  // buildingId?: string | null;
-  // floorId?: string | null;
-  // floorplanId?: string | null;
-  // areaId?: string | null;
-  // visitorId?: string | null;
-  // memberId?: string | null;
-  buildingId?: string;
-  floorId?: string;
-  floorplanId?: string;
-  areaId?: string;
-  visitorId?: string;
-  memberId?: string;
+  buildingId?: string | null;
+  floorId?: string | null;
+  floorplanId?: string | null;
+  areaId?: string | null;
+  visitorId?: string | null;
+  memberId?: string | null;
+  // buildingId?: string;
+  // floorId?: string;
+  // floorplanId?: string;
+  // areaId?: string;
+  // visitorId?: string;
+  // memberId?: string;
   personType?: 'member' | 'visitor' | 'all' | null;
   // eventTypes: EventTypesFilter;
 };
