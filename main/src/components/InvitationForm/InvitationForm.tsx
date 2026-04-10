@@ -15,11 +15,12 @@ import {
   Grid2 as Grid,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router';
 import { fetchVisitorbyId, fillFormVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import { AppDispatch, dispatch, useDispatch } from 'src/store/Store';
 import toast from 'react-hot-toast';
 import { BASE_URL } from 'src/utils/axios';
+import { IdentityType } from 'src/types/crud/input';
 
 const useQuery = () => {
   return new URLSearchParams(useLocation().search);
@@ -256,8 +257,8 @@ const VisitorFormPage = () => {
                   error={!!formErrors.identityType}
                   helperText={formErrors.identityType}
                 >
-                  {identityTypes.map((item) => (
-                    <MenuItem key={item.value} value={item.value}>
+                  {IdentityType.map((item) => (
+                    <MenuItem key={item.value} value={item.value} disabled={item.disabled}>
                       {item.label}
                     </MenuItem>
                   ))}
