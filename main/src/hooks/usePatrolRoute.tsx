@@ -171,7 +171,7 @@ export function usePatrolAssignmentId(patrolAssignId: string) {
   return useQuery({
     queryKey: ['patrol-assignment-id', patrolAssignId],
     queryFn: async () => {
-      console.log("Patrol Assign Id: ", patrolAssignId);
+      console.log('Patrol Assign Id: ', patrolAssignId);
       const response = await axiosServices.get(`${API_URL_PATROL_ASSIGN}${patrolAssignId}`);
       console.log('Patrol Assign by Id: ', response.data);
       return response.data;
@@ -222,6 +222,8 @@ export function usePatrolAssign() {
         updatedAt,
         updatedBy,
         shiftReplacements,
+        nextPatrolStatus,
+        isEnded,
         ...cleanData
       } = patrolAssignment;
       const res = await axiosServices.post(API_URL_PATROL_ASSIGN, cleanData);
@@ -249,7 +251,7 @@ export function useEditPatrolAssign() {
         status,
         createdAt,
         createdBy,
-        updatedAt, 
+        updatedAt,
         updatedBy,
         shiftReplacements,
         securityHead1,
@@ -304,7 +306,7 @@ export function useAssignmentReplacement() {
       queryClient.invalidateQueries({ queryKey: ['patrol-assignment-id'] });
     },
   });
-};
+}
 
 export function useDeleteReplacement() {
   const queryClient = useQueryClient();

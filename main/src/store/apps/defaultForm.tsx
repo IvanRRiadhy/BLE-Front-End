@@ -581,6 +581,7 @@ export const defaultCardAccessForm: CardAccessType = {
   accessNumber: '',
   remarks: '',
   accessScope: 'specific',
+  
   maskedAreaIds: [],
   maskedArea: [],
   timeGroupIds: [],
