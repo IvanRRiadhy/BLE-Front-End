@@ -127,7 +127,7 @@ const ConfigSidebar: React.FC<ConfigSidebarProps> = ({
 
   const handleCreateLayout = () => {
     const newLayoutName = `Layout ${layouts.length + 1}`;
-    dispatch(addLayout({ name: newLayoutName, grid: 1 }));
+    dispatch(addLayout({ name: newLayoutName, grid: 7 }));
   };
 
   const handleGridChange = (e: SelectChangeEvent<string>) => {
@@ -172,14 +172,14 @@ const ConfigSidebar: React.FC<ConfigSidebarProps> = ({
   };
 
   // --- Load reference data on mount ---
-  useEffect(() => {
-    dispatch(fetchMonitoringLayouts());
-    dispatch(fetchBuildingDT(filter));
-    dispatch(fetchFloorDT(filter));
-    dispatch(fetchFloorplanDT(filter));
-    dispatch(fetchMaskedAreaDT(filter));
-    dispatch(fetchAccessCCTV());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchMonitoringLayouts());
+  //   dispatch(fetchBuildingDT(filter));
+  //   dispatch(fetchFloorDT(filter));
+  //   dispatch(fetchFloorplanDT(filter));
+  //   dispatch(fetchMaskedAreaDT(filter));
+  //   dispatch(fetchAccessCCTV());
+  // }, [dispatch]);
 
   useEffect(() => {
     if (activeLayoutId) {
@@ -287,7 +287,7 @@ const ConfigSidebar: React.FC<ConfigSidebarProps> = ({
           )}
 
           {/* Grid selector */}
-          {activeLayout && (
+          {/* {activeLayout && (
             <>
               <CustomFormLabel>Grid</CustomFormLabel>
               <CustomSelect value={String(activeLayout.grid)} onChange={handleGridChange} fullWidth>
@@ -298,7 +298,7 @@ const ConfigSidebar: React.FC<ConfigSidebarProps> = ({
                 ))}
               </CustomSelect>
             </>
-          )}
+          )} */}
 
           {/* Screen selector */}
           {activeLayout && (

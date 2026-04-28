@@ -255,7 +255,7 @@ export const LayoutSlice = createSlice({
       // ensure layouts exists
       if (!state.layouts) state.layouts = [];
       state.layouts.push(newLayout);
-      state.activeLayoutId = newId;
+      state.activeLayoutId = `layout-${newId}`;
     },
 
     // Update layout name
