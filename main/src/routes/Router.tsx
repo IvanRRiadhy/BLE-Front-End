@@ -133,6 +133,7 @@ const MovementLog = Loadable(lazy(() => import('../views/Reports/MovementLog')))
 const CardHistory = Loadable(lazy(() => import('../views/Reports/CardHistory')));
 const PatrolReport = Loadable(lazy(() => import('../views/Reports/PatrolReport')));
 const PatrolReportPreview = Loadable(lazy(() => import('../views/Reports/PatrolReportPreview')));
+const ReaderReport = Loadable(lazy(() => import('../views/Reports/ReaderReport')));
 
 // Evacuation
 const EvacuationDashboard = Loadable(
@@ -448,6 +449,11 @@ const Router = [
         path: '/report/patrolreport',
         exact: true,
         element: withAuth(<PatrolReport />, '/report/patrolreport'),
+      },
+      {
+        path: '/report/readerreport',
+        exact: true,
+        element: withAuth(<ReaderReport />, '/report/readerreport'),
       },
 
       // ***Alarm Setting*** //

@@ -52,7 +52,7 @@ import { NewGetFilter } from 'src/store/apps/crud/alarmRecordTracking';
 
 interface VisitorReportFilterPresetProps {
   onApplyPreset: (preset: VisitorFilterPresetType) => void;
-  onGenerateReport: () => void;
+  // onGenerateReport: () => void;
 }
 
 type PersonOption = {
@@ -98,7 +98,7 @@ export function mapPresetToAlarmLogFilter(preset: VisitorFilterPresetType): NewG
 
 const VisitorReportFilterPreset = ({
   onApplyPreset,
-  onGenerateReport,
+  // onGenerateReport,
 }: VisitorReportFilterPresetProps) => {
   const dispatch: AppDispatch = useDispatch();
   const { data: presets, isLoading, error } = useAllVisitorFilterPreset();
@@ -212,7 +212,7 @@ const VisitorReportFilterPreset = ({
       // toast.success(`Applied preset: ${selectedPreset.name}`);
       // console.log('Visitor filter preset applied successfully: ', result.data);
       setOpenReport(true);
-      onGenerateReport();
+      // onGenerateReport();
     } catch (error) {
       console.error(error);
       toast.error('Failed to apply filter preset');

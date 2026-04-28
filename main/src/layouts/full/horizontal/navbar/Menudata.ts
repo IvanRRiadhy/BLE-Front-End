@@ -206,6 +206,7 @@ const isBoundaryActive = isActive('boundary');
         { id: uniqueId(), title: 'Card History', icon: IconCards, href: '/report/cardhistory'},
         { id: uniqueId(), title: 'Patrol Report', icon: IconCalendar, href: '/report/patrolreport/' },
         { id: uniqueId(), title: 'Movement Log (--WIP--)', icon: IconCalendar, href: '/report/movementlog/' },
+        { id: uniqueId(), title: 'Reader Report', icon: IconCalendar, href: '/report/readerreport/'},
       ],
     },
   ];

@@ -39,11 +39,12 @@ import { VisitorSessionType } from 'src/store/apps/crud/visitorSession';
 import { NewAlarmType, NewGetFilter } from 'src/store/apps/crud/alarmRecordTracking';
 import { PersonType } from 'src/types/crud/input';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
+import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
 
 type PersonOption = {
   id: string;
   name: string;
-  type: 'visitor' | 'member';
+  type: 'visitor' | 'member' | 'security';
 };
 
 export type SelectedNode =
@@ -61,6 +62,7 @@ const VisitorReportFilter = () => {
   const areas = useAllMaskedAreas().data || [];
   const visitors = useAllVisitor().data || [];
   const members = useAllMembers().data || [];
+  const securitys = useAllSecuritys().data || [];
 
   const personOptions: PersonOption[] = [
     ...visitors.map((v) => ({
@@ -72,6 +74,11 @@ const VisitorReportFilter = () => {
       id: m.id,
       name: m.name,
       type: 'member' as const,
+    })),
+    ...securitys.map((s) => ({
+      id: s.id,
+      name: s.name,
+      type: 'security' as const,
     })),
   ];
 

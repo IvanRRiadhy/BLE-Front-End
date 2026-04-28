@@ -236,6 +236,7 @@ export const visitorStatusEnumMap: Record<string, number> = {
     {label: "Please select Type", value: '', disabled: true},
     {label: "Member", value: 'member'},
     {label: "Visitor", value: 'visitor'},
+    {label: "Security", value: 'security'},
     {label: "All", value: 'all'},
   ]
 

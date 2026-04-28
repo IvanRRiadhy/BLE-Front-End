@@ -19,11 +19,11 @@ const TestReport = () => {
     console.log('Applied preset:', preset);
   };
 
-  const handleGenerateReport = () => {
-    // Implement your report generation logic here
-    console.log('Generating report with filter:', currentFilter);
-    // You can use the currentFilter state to generate the report
-  };
+  // const handleGenerateReport = () => {
+  //   // Implement your report generation logic here
+  //   console.log('Generating report with filter:', currentFilter);
+  //   // You can use the currentFilter state to generate the report
+  // };
 
   return (
     <PageContainer title="Test Report" description="this is Test Report Page">
@@ -39,7 +39,7 @@ const TestReport = () => {
             <VisitorReportFilter />
             <VisitorReportFilterPreset
               onApplyPreset={handleApplyPreset}
-              onGenerateReport={handleGenerateReport}
+              // onGenerateReport={handleGenerateReport}
               />
         </Box>
       </AppCard>
