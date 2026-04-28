@@ -94,7 +94,7 @@ const CardAccessList = () => {
       );
     }
   };
-
+  console.log('Card Access Data: ', cardAccessData);
   // useEffect(() => {
   //   dispatch(UpdateFilter(defaultCardAccessFilter));
   //   try {

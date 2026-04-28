@@ -1,5 +1,5 @@
 import React from 'react';
-import { Autocomplete, TextField, CircularProgress, SxProps, Theme } from '@mui/material';
+import { Autocomplete, TextField, CircularProgress, SxProps, Theme, AutocompleteRenderGetTagProps } from '@mui/material';
 
 type SingleSelectProps<T> = {
   multiple?: false;
@@ -11,10 +11,12 @@ type MultiSelectProps<T> = {
   multiple: true;
   value: T[];
   onChange: (value: T[]) => void;
+  renderTags?: (value: T[], getTagProps: AutocompleteRenderGetTagProps) => React.ReactNode;
 };
 
 export type CustomAutocompleteProps<T> = {
-  label: string;
+  label?: string;
+  placeholder?: string;
   options: T[];
   getOptionLabel: (option: T) => string;
   isOptionEqualToValue: (option: T, value: T) => boolean;
@@ -26,11 +28,13 @@ export type CustomAutocompleteProps<T> = {
   loading?: boolean;
   renderOption?: any;
   sx?: SxProps<Theme>;
+  filterSelectedOptions?: boolean;
 } & (SingleSelectProps<T> | MultiSelectProps<T>);
 
 export default function CustomAutocomplete<T>(props: CustomAutocompleteProps<T>) {
   const {
     label,
+    placeholder,
     options,
     getOptionLabel,
     isOptionEqualToValue,
@@ -40,6 +44,7 @@ export default function CustomAutocomplete<T>(props: CustomAutocompleteProps<T>)
     loading = false,
     renderOption,
     sx,
+    filterSelectedOptions,
   } = props;
   return (
     <Autocomplete
@@ -51,6 +56,8 @@ export default function CustomAutocomplete<T>(props: CustomAutocompleteProps<T>)
       getOptionLabel={getOptionLabel}
       isOptionEqualToValue={isOptionEqualToValue}
       renderOption={renderOption}
+      renderTags={props.multiple ? props.renderTags : undefined}
+      filterSelectedOptions={filterSelectedOptions}
       clearOnEscape
       fullWidth
       sx={sx}
@@ -87,6 +94,7 @@ export default function CustomAutocomplete<T>(props: CustomAutocompleteProps<T>)
         <TextField
           {...params}
           label={label}
+          placeholder={placeholder}
           variant="outlined"
           required={required}
           error={error}

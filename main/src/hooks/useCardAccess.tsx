@@ -80,6 +80,7 @@ export function useEditCardAccess() {
         id,
         createdBy,
         applicationId,
+        status,
         accessNumber,
         maskedArea,
         createdAt,

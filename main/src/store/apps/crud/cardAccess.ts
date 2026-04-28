@@ -36,7 +36,8 @@ export type CardAccessType = {
     createdBy: string,
     createdAt: string,
     updatedBy: string,
-    updatedAt: string
+    updatedAt: string,
+    status?: number,
 };
 
 interface StateType {

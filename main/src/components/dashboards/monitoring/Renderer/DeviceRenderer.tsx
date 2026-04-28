@@ -114,6 +114,8 @@ type DeviceRendererProps = {
   showBoundary: boolean;
   showPatrolAreas: boolean;
   showBeacons: boolean;
+  beaconSize: number;
+  gateSize: number;
   topic: string;
   detailDialogOpen?: boolean;
   setDetailDialogOpen?: (open: boolean) => void;
@@ -163,6 +165,9 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     showBoundary,
     showPatrolAreas,
     showBeacons,
+    beaconSize,
+    gateSize,
+
     topic,
     detailDialogOpen,
     setDetailDialogOpen,
@@ -489,8 +494,8 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
         break;
     }
     // Use original coordinates directly (no scaling)
-    const x = device.posPxX - 20;
-    const y = device.posPxY - 20;
+    const x = device.posPxX - (20 * gateSize);
+    const y = device.posPxY - (20 * gateSize);
     return (
       <Group
         key={`device-${device.id}`}
@@ -501,17 +506,17 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
         }}
       >
         <Text
-          x={x - 40}
-          y={y - 5}
-          text={device.reader?.gmac || device.id}
-          fontSize={9}
+          x={x - (40 * gateSize)}
+          y={y - (5 * gateSize)}
+          text={device.name}
+          fontSize={9 * gateSize}
           fill="#1976d2"
           fontStyle="bold"
-          width={120}
+          width={120 * gateSize}
           align="center"
           listening={false}
         />
-        <KonvaImage name="device" image={deviceIcon} x={x} y={y} width={40} height={40} />
+        <KonvaImage name="device" image={deviceIcon} x={x} y={y} width={40 * gateSize} height={40 * gateSize} />
       </Group>
     );
   };
@@ -731,12 +736,20 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                 // Convert meters to pixels for beacon position
                 const xPx = anim.x;
                 const yPx = anim.y;
+
+                const now = Date.now();
+                const age = now - beacon.lastSeen;
+                const opacity = age > 5000 ? 0.4 : 1.0;
+
                 return (
                   <BeaconRenderer
                     key={`beacon-${beaconId}`}
                     id={beaconId}
                     x={xPx}
                     y={yPx}
+                    beaconSize={beaconSize}
+                    opacity={opacity}
+                    lastSeen={beacon.lastSeen}
                     area={beacon.area}
                     floorplan={beacon.floorplan}
                     time={beacon.time}

@@ -13,6 +13,9 @@ type BeaconRendererProps = {
   id: string;
   x: number;
   y: number;
+  beaconSize: number;
+  opacity?: number;
+  lastSeen?: number;
   area: string;
   floorplan: string;
   time: string;
@@ -28,6 +31,9 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   id,
   x,
   y,
+  beaconSize,
+  opacity = 1,
+  lastSeen = Date.now(),
   area,
   floorplan,
   time,
@@ -41,6 +47,8 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   const groupRef = useRef<any>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
+  const [isHovered, setIsHovered] = useState(false);
+
   const dispatch = useDispatch();
   const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null);
   // useEffect(() => {
@@ -49,7 +57,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
 
   // useEffect(() => {
   //   dispatch(fetchMembers());
-  //   dispatch(fetchVisitor());
+  //   dispatch(fetchVisitor());  
   // }, [dispatch]);
 
   // const membersData = useSelector(
@@ -131,6 +139,15 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
       <Group
         name="beacon"
         ref={groupRef}
+        x={x}
+        y={y}
+        offsetX={x}
+        offsetY={y}
+        scaleX={beaconSize}
+        scaleY={beaconSize}
+        opacity={opacity}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         onClick={(e) => {
           if (!clickable) return;
           e.cancelBubble = true; // Prevent propagation
@@ -246,6 +263,50 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
           </>
         )}
       </Group>
+
+      {/* Tooltip for stale beacons */}
+      {isHovered && Date.now() - lastSeen > 5000 && (
+        <Group x={x} y={y - 80}>
+          <Shape
+            sceneFunc={(context, shape) => {
+              const width = 120;
+              const height = 24;
+              const xPos = -width / 2;
+              const yPos = -height;
+              const radius = 4;
+
+              context.beginPath();
+              context.moveTo(xPos + radius, yPos);
+              context.lineTo(xPos + width - radius, yPos);
+              context.quadraticCurveTo(xPos + width, yPos, xPos + width, yPos + radius);
+              context.lineTo(xPos + width, yPos + height - radius);
+              context.quadraticCurveTo(xPos + width, yPos + height, xPos + width - radius, yPos + height);
+              context.lineTo(5, yPos + height);
+              context.lineTo(0, yPos + height + 6);
+              context.lineTo(-5, yPos + height);
+              context.lineTo(xPos + radius, yPos + height);
+              context.quadraticCurveTo(xPos, yPos + height, xPos, yPos + height - radius);
+              context.lineTo(xPos, yPos + radius);
+              context.quadraticCurveTo(xPos, yPos, xPos + radius, yPos);
+              context.closePath();
+              context.fillStrokeShape(shape);
+            }}
+            fill="rgba(0,0,0,0.8)"
+            stroke="#fff"
+            strokeWidth={1}
+          />
+          <Text
+            text={`Last seen: ${new Date(lastSeen).toLocaleTimeString()}`}
+            fill="white"
+            fontSize={10}
+            width={120}
+            align="center"
+            x={-60}
+            y={-18}
+            fontStyle="bold"
+          />
+        </Group>
+      )}
     </>
   );
 };

@@ -129,6 +129,7 @@ const TestRecord = Loadable(lazy(() => import('../views/Reports/TestRecord')));
 const TestReport = Loadable(lazy(() => import('../views/Reports/TestReport')));
 const Investigate = Loadable(lazy(() => import('../views/Reports/Investigate')));
 const EventLog = Loadable(lazy(() => import('../views/Reports/EventLog')));
+const MovementLog = Loadable(lazy(() => import('../views/Reports/MovementLog')));
 const CardHistory = Loadable(lazy(() => import('../views/Reports/CardHistory')));
 const PatrolReport = Loadable(lazy(() => import('../views/Reports/PatrolReport')));
 const PatrolReportPreview = Loadable(lazy(() => import('../views/Reports/PatrolReportPreview')));
@@ -432,6 +433,11 @@ const Router = [
         path: '/report/eventlog',
         exact: true,
         element: withAuth(<EventLog />, '/report/eventlog'),
+      },
+      {
+        path: '/report/movementlog',
+        exact: true,
+        element: withAuth(<MovementLog />, '/report/movementlog'),
       },
       {
         path: '/report/cardhistory',

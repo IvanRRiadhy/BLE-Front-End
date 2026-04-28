@@ -53,7 +53,7 @@ const formatDuration = (totalMinutes?: number | null) => {
   const minutes = Math.floor(totalMinutes % 60);
   const days = Math.floor(hours / 24);
   const finalHours = hours % 24;
-console.log("duration",totalMinutes)
+  console.log('duration', totalMinutes);
   if (days > 0) return `${days}d ${finalHours}h ${minutes}m`;
   if (hours > 0) return `${hours}h ${minutes}m`;
   return `${minutes}m`;
@@ -112,11 +112,12 @@ const TABLE_CONFIG = {
       'Building',
       'Floor',
       'Area',
+      `Area's Labels`,
       'Triggered Time',
       'Acknowledged By',
       'Acknowledged Time',
       'Dispatched By',
-      "Dispatched To",
+      'Dispatched To',
       'Dispatched Time',
       'Investigated By',
       'Investigated Time',
@@ -132,6 +133,7 @@ const TABLE_CONFIG = {
       r.BuildingName,
       r.FloorName,
       r.AreaName,
+      r.AreaLabel,
       formatDateTime(r.AlarmTriggered),
       r.AcknowledgedBy,
       formatDateTime(r.AcknowledgedAt),
@@ -181,17 +183,17 @@ const VisitorReportDialog: React.FC<Props> = ({ open, onClose, trackingLogs, ala
   ];
   const chartIdsAlarm = ['chart-alarm-1', 'chart-alarm-2', 'chart-alarm-4', 'chart-alarm-5'];
 
-const getFormattedFileName = (base: string, ext: string) => {
-  const now = new Date();
+  const getFormattedFileName = (base: string, ext: string) => {
+    const now = new Date();
 
-  const date = now.toISOString().split('T')[0]; // YYYY-MM-DD
-  const time = now
-    .toTimeString()
-    .split(' ')[0] // HH:MM:SS
-    .replace(/:/g, '-'); // ⬅️ replace colon (Windows safe)
+    const date = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    const time = now
+      .toTimeString()
+      .split(' ')[0] // HH:MM:SS
+      .replace(/:/g, '-'); // ⬅️ replace colon (Windows safe)
 
-  return `${base}_${date}_${time}.${ext}`;
-};
+    return `${base}_${date}_${time}.${ext}`;
+  };
 
   /* =========================
      🔹 EXPORT EXCEL
@@ -248,6 +250,7 @@ const getFormattedFileName = (base: string, ext: string) => {
           { header: 'Building', key: 'BuildingName' },
           { header: 'Floor', key: 'FloorName' },
           { header: 'Area', key: 'AreaName' },
+          { header: `Area's Labels`, key: 'AreaLabel' },
           { header: 'Triggered', key: 'AlarmTriggered' },
           { header: 'Acknowledged By', key: 'AcknowledgedBy' },
           { header: 'Acknowledged At', key: 'AcknowledgedAt' },

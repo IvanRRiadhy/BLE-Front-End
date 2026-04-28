@@ -7,6 +7,8 @@ import {
   Dialog,
   FormControlLabel,
   Grid2 as Grid,
+  Slider,
+  Stack,
   Switch,
   Typography,
 } from '@mui/material';
@@ -132,6 +134,9 @@ const FloorView: React.FC<{
   const [showPatrolArea, setShowPatrolArea] = useState(false);
   const [showOtherBeacons, setShowOtherBeacons] = useState(true);
 
+  const [beaconSize, setBeaconSize] = useState(1);
+  const [gateSize, setGateSize] = useState(1);
+
   const [focusArea, setFocusArea] = useState<{
     minX: number;
     minY: number;
@@ -165,6 +170,38 @@ const FloorView: React.FC<{
   const [isUserDragging, setIsUserDragging] = useState(false);
   const lastBeaconPosition = useRef<{ x: number; y: number } | null>(null);
   const isManualDragRef = useRef(false);
+  const [stickyOpacity, setStickyOpacity] = useState(1);
+  const [zoomOpacity, setZoomOpacity] = useState(1);
+  const stickyTimerRef = useRef<any>(null);
+  const zoomTimerRef = useRef<any>(null);
+
+  const startStickyTimer = useCallback(() => {
+    if (stickyTimerRef.current) clearTimeout(stickyTimerRef.current);
+    stickyTimerRef.current = setTimeout(() => setStickyOpacity(0), 5000);
+  }, []);
+
+  const startZoomTimer = useCallback(() => {
+    if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current);
+    zoomTimerRef.current = setTimeout(() => setZoomOpacity(0), 5000);
+  }, []);
+
+  const wakeUpOverlays = useCallback(() => {
+    setStickyOpacity(1);
+    setZoomOpacity(1);
+    startStickyTimer();
+    startZoomTimer();
+  }, [startStickyTimer, startZoomTimer]);
+
+  useEffect(() => {
+    if (isHovered && !isDragging && zoomable) {
+      wakeUpOverlays();
+    } else {
+      if (stickyTimerRef.current) clearTimeout(stickyTimerRef.current);
+      if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current);
+      setStickyOpacity(0);
+      setZoomOpacity(0);
+    }
+  }, [isHovered, isDragging, zoomable, wakeUpOverlays]);
 
   const floorplanImage = actFloorplan?.floorplanImage
     ? actFloorplan.floorplanImage.startsWith('/Uploads/')
@@ -728,6 +765,11 @@ const FloorView: React.FC<{
     <Box
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onMouseMove={() => {
+        if (isHovered && !isDragging && zoomable) {
+          wakeUpOverlays();
+        }
+      }}
       sx={{
         position: 'relative',
         width: '100%',
@@ -742,123 +784,178 @@ const FloorView: React.FC<{
         touchAction: 'none', // Prevent touch zoom
       }}
     >
-      {/* Sticky Overlay Toggle */}
+      {/* Sticky Overlay Containers */}
       {isHovered && !isDragging && zoomable && (
-        <Box
+        <Stack
+          onMouseEnter={() => {
+            if (stickyTimerRef.current) clearTimeout(stickyTimerRef.current);
+            setStickyOpacity(1);
+          }}
+          onMouseLeave={() => {
+            startStickyTimer();
+          }}
+          spacing={1}
           sx={{
             position: 'absolute',
             top: 12,
             right: 12,
             zIndex: 10,
-            width: 'fit-content',
-            background: 'rgba(255,255,255,0.9)',
-            borderRadius: 2,
-            boxShadow: 2,
-            p: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 1,
+            alignItems: 'flex-end',
+            opacity: stickyOpacity,
+            transition: 'opacity 0.5s ease-in-out',
+            pointerEvents: stickyOpacity === 0 ? 'none' : 'auto',
           }}
         >
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showArea}
-                onChange={() => setShowArea((prev) => !prev)}
-                color="primary"
-              />
-            }
-            label="Show Areas"
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showGates}
-                onChange={() => setShowGates((prev) => !prev)}
-                color="primary"
-              />
-            }
-            label="Show Gateways"
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showGeoFence}
-                onChange={() => setShowGeoFence((prev) => !prev)}
-                color="primary"
-              />
-            }
-            label="Show GeoFence Areas"
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showOverPopulate}
-                onChange={() => setShowOverPopulate((prev) => !prev)}
-                color="primary"
-              />
-            }
-            label="Show Over Population Areas"
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showStayOnArea}
-                onChange={() => setShowStayOnArea((prev) => !prev)}
-                color="primary"
-              />
-            }
-            label="Show Stay on Areas"
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showBoundary}
-                onChange={() => setShowBoundary((prev) => !prev)}
-                color="primary"
-              />
-            }
-            label="Show Boundary Areas"
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showPatrolArea}
-                onChange={() => setShowPatrolArea((prev) => !prev)}
-                color="primary"
-              />
-            }
-            label="Show Patrol Areas"
-          />
-          {Boolean(focusBeacon) && isFollowing && (
-            <>
+          {/* Visibility Toggles Overlay */}
+          <Box
+            sx={{
+              width: 'fit-content',
+              background: 'rgba(255,255,255,0.9)',
+              borderRadius: 2,
+              boxShadow: 2,
+              p: 0.75,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 0.25,
+            }}
+          >
+            {[
+              { label: 'Show Areas', checked: showArea, onChange: setShowArea },
+              { label: 'Show Gateways', checked: showGates, onChange: setShowGates },
+              { label: 'Show GeoFence Areas', checked: showGeoFence, onChange: setShowGeoFence },
+              {
+                label: 'Show Over Population Areas',
+                checked: showOverPopulate,
+                onChange: setShowOverPopulate,
+              },
+              { label: 'Show Stay on Areas', checked: showStayOnArea, onChange: setShowStayOnArea },
+              { label: 'Show Boundary Areas', checked: showBoundary, onChange: setShowBoundary },
+              { label: 'Show Patrol Areas', checked: showPatrolArea, onChange: setShowPatrolArea },
+            ].map((item, idx) => (
               <FormControlLabel
+                key={idx}
+                sx={{
+                  m: 0,
+                  '& .MuiFormControlLabel-label': { fontSize: '0.7rem', fontWeight: 500 },
+                }}
                 control={
                   <Switch
-                    checked={showOtherBeacons}
-                    onChange={() => setShowOtherBeacons((prev) => !prev)}
+                    size="small"
+                    checked={item.checked}
+                    onChange={() => item.onChange((prev) => !prev)}
                     color="primary"
                   />
                 }
-                label="Show Other People"
+                label={item.label}
               />
-              <Button variant="contained" color="error" onClick={handleCancelFollowing}>
-                Cancel Following
-              </Button>
-            </>
-          )}
-        </Box>
+            ))}
+
+            {/* {Boolean(focusBeacon) && isFollowing && (
+              <Stack spacing={0.5} sx={{ mt: 0.5, borderTop: '1px solid rgba(0,0,0,0.1)', pt: 0.5 }}>
+                <FormControlLabel
+                  sx={{
+                    m: 0,
+                    '& .MuiFormControlLabel-label': { fontSize: '0.7rem', fontWeight: 600 },
+                  }}
+                  control={
+                    <Switch
+                      size="small"
+                      checked={showOtherBeacons}
+                      onChange={() => setShowOtherBeacons((prev) => !prev)}
+                      color="primary"
+                    />
+                  }
+                  label="Show Other People"
+                />
+                <Button
+                  variant="contained"
+                  color="error"
+                  size="small"
+                  onClick={handleCancelFollowing}
+                  sx={{ fontSize: '0.65rem', py: 0.25 }}
+                >
+                  Cancel Following
+                </Button>
+              </Stack>
+            )} */}
+          </Box>
+
+          {/* Size Controls Overlay */}
+          <Box
+            sx={{
+              width: 140,
+              background: 'rgba(255,255,255,0.9)',
+              borderRadius: 2,
+              boxShadow: 2,
+              p: 1.5,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1,
+            }}
+          >
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 700 }}>
+                Beacon Size: {beaconSize.toFixed(1)}
+              </Typography>
+              <Slider
+                size="small"
+                value={beaconSize}
+                min={0}
+                max={2}
+                step={0.1}
+                onChange={(_, val) => setBeaconSize(val as number)}
+                valueLabelDisplay="auto"
+                sx={{ py: 1 }}
+              />
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 700 }}>
+                Gateway Size: {gateSize.toFixed(1)}
+              </Typography>
+              <Slider
+                size="small"
+                value={gateSize}
+                min={0}
+                max={2}
+                step={0.1}
+                onChange={(_, val) => setGateSize(val as number)}
+                valueLabelDisplay="auto"
+                sx={{ py: 1 }}
+              />
+            </Box>
+          </Box>
+        </Stack>
       )}
 
       {/* Zoom Controls - EXACTLY like EditDeviceFloorView */}
       {isHovered && zoomable && !isDragging && (
-        <ZoomControls
-          scale={scale}
-          setScale={setScale}
-          applyZoom={applyZoom}
-          minScale={MIN_SCALE}
-          maxScale={MAX_SCALE}
-        />
+        <Box
+          onMouseEnter={() => {
+            if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current);
+            setZoomOpacity(1);
+          }}
+          onMouseLeave={() => {
+            startZoomTimer();
+          }}
+          sx={{
+            position: 'absolute',
+            top: 16,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 2,
+            opacity: zoomOpacity,
+            transition: 'opacity 0.5s ease-in-out',
+            pointerEvents: zoomOpacity === 0 ? 'none' : 'auto',
+          }}
+        >
+          <ZoomControls
+            scale={scale}
+            setScale={setScale}
+            applyZoom={applyZoom}
+            minScale={MIN_SCALE}
+            maxScale={MAX_SCALE}
+          />
+        </Box>
       )}
 
       {/* Container for Konva - EXACTLY like EditDeviceFloorView */}
@@ -914,6 +1011,8 @@ const FloorView: React.FC<{
               showBoundary={zoomable && showBoundary}
               showPatrolAreas={zoomable && showPatrolArea}
               showBeacons={zoomable}
+              beaconSize={beaconSize}
+              gateSize={gateSize}
               topic={topic}
               onSelectBeacon={handleSelectBeacon}
               detailDialogOpen={detailDialogOpen}

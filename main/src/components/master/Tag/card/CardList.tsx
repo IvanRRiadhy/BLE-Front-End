@@ -34,6 +34,7 @@ const columns = [
   { label: 'Remarks', field: 'Remarks', sortAble: false },
   { label: 'Card Type', field: 'CardType', sortAble: true },
   { label: 'Card Number', field: 'CardNumber', sortAble: true },
+  { label: 'MAC Address', field: 'dmac', sortAble: false},
   { label: 'Registered Site', field: 'RegisteredSite', sortAble: false },
   { label: 'Active', field: 'IsUsed', sortAble: true },
   { label: 'Last Used By', field: 'LastUsed', sortAble: false },
@@ -199,6 +200,7 @@ const CardList = () => {
                       </TableCell>
                       <TableCell>{card.cardType}</TableCell>
                       <TableCell>{card.cardNumber}</TableCell>
+                      <TableCell>{card.dmac}</TableCell>
                       <TableCell>{card.isMultiMaskedArea ? 'Multi-Area' : 'Single-Area'}</TableCell>
                       <TableCell>{card.isUsed ? 'Yes' : 'No'}</TableCell>
                       <TableCell>{card.lastUsed || 'N/A'}</TableCell>

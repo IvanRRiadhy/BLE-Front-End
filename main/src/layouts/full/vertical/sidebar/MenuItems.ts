@@ -373,6 +373,12 @@ const getMenuItems = (alarmSettings: AlarmSettingType[]): MenuitemsType[] => {
       icon: IconBarrierBlock,
       href: '/report/cardrecord/',
     },
+    {
+      id: uniqueId(),
+      title: 'Movement Log',
+      icon: IconRoute,
+      href: '/report/movementlog',
+    },
   ];
 
   return Menuitems;

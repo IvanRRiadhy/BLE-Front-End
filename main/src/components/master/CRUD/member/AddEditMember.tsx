@@ -69,22 +69,23 @@ const AddEditMember = ({ type, member }: FormType) => {
       id: c.id,
       bleCardNumber: c.dmac,
     }));
-    console.log('Filtered Cards (unassigned):', filteredCard);
-    console.log('All Cards:', cardData);
+    // console.log('Filtered Cards (unassigned):', filteredCard);
+    // console.log('All Cards:', cardData);
+    // console.log('Current form cardId:', formData.cardNumber);
     // ensure selected card always exists
-    if (formData.cardId && !base.find((c) => c.id === formData.cardId)) {
-      const existing = cardData.find((c) => c.id === formData.cardId);
+    if (formData.cardNumber && !base.find((c) => c.label === formData.cardNumber)) {
+      const existing = cardData.find((c) => c.cardNumber === formData.cardNumber);
       if (existing) {
         base.push({ label: existing.cardNumber, id: existing.id, bleCardNumber: existing.dmac });
       }
     }
 
     return base;
-  }, [filteredCard, cardData, formData.cardId]);
+  }, [filteredCard, cardData, formData.cardNumber]);
 
   const selectedCard = React.useMemo(
-    () => cardOptions.find((c) => c.id === formData.cardId) || null,
-    [cardOptions, formData.cardId],
+    () => cardOptions.find((c) => c.label === formData.cardNumber) || null,
+    [cardOptions, formData.cardNumber],
   );
 
   const headMemberData = useMemberList({ ...memberFilter, Length: 999 }).data?.data || [];

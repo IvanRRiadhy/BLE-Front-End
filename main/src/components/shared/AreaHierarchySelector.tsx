@@ -23,6 +23,7 @@ type Props = {
   helperText?: string;
   exclusive?: NodeType;
   multiple?: boolean;
+  highlightedAreaIds?: string[];
 };
 
 const AreaHierarchySelector: React.FC<Props> = forwardRef(
@@ -38,6 +39,7 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
       helperText = '',
       exclusive,
       multiple = false,
+      highlightedAreaIds,
     },
     ref,
   ) => {
@@ -93,7 +95,27 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
         return value.some((v) => v?.type === type && v?.data?.id === id);
       }
       const singleValue = value as SelectedNode;
-      return singleValue?.type === type && singleValue?.data?.id === id;
+      if (singleValue?.type === type && singleValue?.data?.id === id) return true;
+
+      if (highlightedAreaIds && highlightedAreaIds.length > 0) {
+        if (type === 'area') {
+          return highlightedAreaIds.includes(id);
+        } else if (type === 'floorplan') {
+          const areas = maByFp.get(id) ?? [];
+          return areas.length > 0 && areas.every((a) => highlightedAreaIds.includes(a.id));
+        } else if (type === 'floor') {
+          const fps = fpsByFloor.get(id) ?? [];
+          const areas = fps.flatMap((fp) => maByFp.get(fp.id) ?? []);
+          return areas.length > 0 && areas.every((a) => highlightedAreaIds.includes(a.id));
+        } else if (type === 'building') {
+          const fs = floorsByBuilding.get(id) ?? [];
+          const fps = fs.flatMap((f) => fpsByFloor.get(f.id) ?? []);
+          const areas = fps.flatMap((fp) => maByFp.get(fp.id) ?? []);
+          return areas.length > 0 && areas.every((a) => highlightedAreaIds.includes(a.id));
+        }
+      }
+
+      return false;
     };
 
     const handleSelect = (type: NodeType, data: any) => {

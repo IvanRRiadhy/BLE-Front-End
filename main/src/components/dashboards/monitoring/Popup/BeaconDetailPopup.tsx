@@ -393,11 +393,7 @@ const BeaconDetailPopup = ({
               <Typography component="div" variant="h6" fontWeight={700}>
                 <Box component="span">Card Number :</Box>{' '}
                 <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                  {memberDetail
-                    ? memberDetail.cardNumber
-                    : visitorDetail
-                      ? visitorDetail.cardNumber
-                      : 'Unknown Person'}
+                  {personDetail?.cardNumber || '-'}
                 </Box>
               </Typography>
             </Grid>

@@ -152,19 +152,21 @@ const VisitorReportFilter = () => {
       BuildingName: r.buildingName ?? '-',
       FloorName: r.floorName ?? '-',
       AreaName: r.areaName ?? '-',
+      AreaLabel: r.areaLabel?.map((l) => l.labelName).join(', ') ?? '-',
       AlarmTriggered: r.triggeredAt,
       AcknowledgedAt: r.acknowledgedAt,
       AcknowledgedBy: r.acknowledgedBy ?? '-',
       DispatchedAt: r.dispatchedAt,
       DispatchedBy: r.dispatchedBy ?? '-',
-      AssignedSecurityName: r.assignedSecurityName?.length > 0 ? r.assignedSecurityName.join(', ') : '-',
+      AssignedSecurityName:
+        r.assignedSecurityName?.length > 0 ? r.assignedSecurityName.join(', ') : '-',
       AcceptedAt: r.acceptedAt,
       AcceptedBy: r.acceptedBy ?? '-',
       responseTimeSeconds: r.responseTimeSeconds,
       responseTimeFormatted: r.responseTimeFormatted,
       resolutionTimeSeconds: r.resolutionTimeSeconds,
       resolutionTimeFormatted: r.resolutionTimeFormatted,
-      
+
       AlarmDone: r.doneAt,
       DoneBy: r.doneBy ?? '-',
       VisitorStatus: r.actionStatus,

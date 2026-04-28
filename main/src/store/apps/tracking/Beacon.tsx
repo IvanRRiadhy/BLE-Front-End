@@ -214,7 +214,7 @@ export const BeaconSlice = createSlice({
 
     // Clean up old beacons for a specific topic
     CleanupTopicBeacons: (state, action) => {
-      const { topic, maxAge = 10000 } = action.payload; // Default 10 seconds
+      const { topic, maxAge = 15000 } = action.payload; // Default 15 seconds
       const now = Date.now();
 
       if (!state.beaconsByTopic[topic]) return;
@@ -235,7 +235,7 @@ export const BeaconSlice = createSlice({
 
     // Clean up ALL old beacons across all topics
     CleanupAllBeacons: (state, action) => {
-      const { maxAge = 10000 } = action.payload;
+      const { maxAge = 15000 } = action.payload;
       const now = Date.now();
 
       Object.keys(state.beaconsByTopic).forEach((topic) => {
@@ -525,12 +525,12 @@ const parseEntityCounts = (entities: any): { [id: string]: EntityCount } => {
 
 // Thunk to cleanup old beacons for a topic
 export const cleanupTopicBeacons = (topic: string) => (dispatch: AppDispatch) => {
-  dispatch(CleanupTopicBeacons({ topic, maxAge: 10000 }));
+  dispatch(CleanupTopicBeacons({ topic, maxAge: 15000 }));
 };
 
 // Thunk to cleanup all old beacons
 export const cleanupAllBeacons = () => (dispatch: AppDispatch) => {
-  dispatch(CleanupAllBeacons({ maxAge: 10000 }));
+  dispatch(CleanupAllBeacons({ maxAge: 15000 }));
 };
 
 // Helper functions to get specific counts

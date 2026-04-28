@@ -4,7 +4,7 @@ import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { masterVisitorType, VisitorType } from "./visitor";
 import { bleReaderType } from "./bleReader";
-import { MaskedAreaType } from "./maskedArea";
+import { MaskedAreaLabelType, MaskedAreaType } from "./maskedArea";
 import { defaultAlarmRecordFilter } from "../defaultForm";
 import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 import { AlarmTriggerType } from "./alarmTrigger";
@@ -116,6 +116,7 @@ export type NewAlarmType = {
 
   areaId: string | null;
   areaName: string | null;
+  areaLabel: MaskedAreaLabelType[] | null;
 
   // 🔹 Alarm Status
   alarmStatus: string;

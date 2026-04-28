@@ -255,19 +255,48 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
                     floorplans={filteredFloorplans}
                     maskedAreas={maskedAreas}
                     value={selectedAreaNode}
+                    highlightedAreaIds={formData.maskedAreaIds ?? []}
                     onChange={(node) => {
-                      // 🚫 Ignore anything except area
-                      if (!node || node.type !== 'area') return;
+                      if (!node) return;
 
                       setSelectedAreaNode(null); // reset picker after select
 
                       setFormData((prev) => {
-                        const exists = (prev.maskedAreaIds ?? []).includes(node.data.id);
-                        if (exists) return prev; // prevent duplicates
+                        let areasToAdd: string[] = [];
+
+                        if (node.type === 'area') {
+                          areasToAdd = [node.data.id];
+                        } else if (node.type === 'floorplan') {
+                          areasToAdd = maskedAreas
+                            .filter((ma) => ma.floorplanId === node.data.id)
+                            .map((ma) => ma.id);
+                        } else if (node.type === 'floor') {
+                          const fpIds = floorplans
+                            .filter((fp) => fp.floorId === node.data.id)
+                            .map((fp) => fp.id);
+                          areasToAdd = maskedAreas
+                            .filter((ma) => fpIds.includes(ma.floorplanId))
+                            .map((ma) => ma.id);
+                        } else if (node.type === 'building') {
+                          const fIds = floors
+                            .filter((f) => f.buildingId === node.data.id)
+                            .map((f) => f.id);
+                          const fpIds = floorplans
+                            .filter((fp) => fIds.includes(fp.floorId))
+                            .map((fp) => fp.id);
+                          areasToAdd = maskedAreas
+                            .filter((ma) => fpIds.includes(ma.floorplanId))
+                            .map((ma) => ma.id);
+                        }
+
+                        const currentAreas = prev.maskedAreaIds ?? [];
+                        const newAreas = areasToAdd.filter((id) => !currentAreas.includes(id));
+
+                        if (newAreas.length === 0) return prev;
 
                         return {
                           ...prev,
-                          maskedAreaIds: [...(prev.maskedAreaIds ?? []), node.data.id],
+                          maskedAreaIds: [...currentAreas, ...newAreas],
                         };
                       });
                     }}
@@ -283,6 +312,8 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
                       p: 1,
                       flexGrow: 1,
                       minHeight: 120,
+                      maxHeight: 180,
+                      overflowY: 'auto',
                       display: 'flex',
                       flexDirection: 'column',
                     }}
