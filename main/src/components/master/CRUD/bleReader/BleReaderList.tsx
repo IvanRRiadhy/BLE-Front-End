@@ -319,7 +319,7 @@ const BleReaderList = () => {
                             />
                             {index + 1 + page * rowsPerPage}
                           </TableCell>
-                          <TableCell>{getBrandName(ble.brandId)}</TableCell>
+                          <TableCell>{ble.brand?.name}</TableCell>
                           <TableCell>{ble.name}</TableCell>
                           <TableCell>{ble.ip}</TableCell>
                           <TableCell>{ble.gmac}</TableCell>

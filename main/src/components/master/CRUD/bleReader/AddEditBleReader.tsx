@@ -14,8 +14,11 @@ import {
   TextField,
   Box,
   IconButton,
+  MenuItem,
+  Collapse,
+  Stack,
 } from '@mui/material';
-import { IconPencil, IconPlus } from '@tabler/icons-react';
+import { IconPencil, IconPlus, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import toast from 'react-hot-toast';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
@@ -40,6 +43,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
     ...bleReader,
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const addMutation = useAddReader();
   const editMutation = useEditReader();
@@ -55,7 +59,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
     setLoading(true);
     setFormErrors({});
     if (type === 'edit' && bleReader) {
-      setFormData({ ...defaultBleReaderForm, ...bleReader });
+      setFormData({ ...defaultBleReaderForm, ...bleReader, brandId: bleReader.brand?.id || '', });
     } else {
       setFormData({ ...defaultBleReaderForm });
     }
@@ -76,6 +80,17 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
     if (!formData.ip?.trim()) errors.ip = 'Reader IP is required';
     if (!formData.gmac?.trim()) errors.gmac = 'Reader MAC is required';
     if (!formData.brandId) errors.brandId = 'Reader Brand is required';
+    if (formData.readerType === null || formData.readerType === undefined)
+      errors.readerType = 'Reader Type is required';
+    if (formData.measuredPower === null || formData.measuredPower === undefined)
+      errors.measuredPower = 'Measured Power is required';
+    if (
+      formData.pathLossExponent === null ||
+      formData.pathLossExponent === undefined
+    )
+      errors.pathLossExponent = 'Path Loss Exponent is required';
+    if (formData.heightMeter === null || formData.heightMeter === undefined)
+      errors.heightMeter = 'Height Meter is required';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -128,8 +143,11 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
+    const { id, value, type } = e.target;
+    setFormData((prev) => ({ 
+      ...prev, 
+      [id]: type === 'number' ? (value === '' ? '' : Number(value)) : value 
+    }));
   };
 
   // ────────────────────────────────
@@ -174,6 +192,42 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
             <Grid container spacing={5} mb={3}>
               {/* Brand */}
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+                
+                <CustomFormLabel htmlFor="ble-name">Name</CustomFormLabel>
+                <CustomTextField
+                  id="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                  error={!!formErrors.name}
+                  helperText={formErrors.name}
+                />
+                <CustomFormLabel htmlFor="ble-ip">IP</CustomFormLabel>
+                <CustomTextField
+                  id="ip"
+                  value={formData.ip}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                  error={!!formErrors.ip}
+                  helperText={formErrors.ip}
+                />
+                <CustomFormLabel htmlFor="ble-gmac">GMAC</CustomFormLabel>
+                <CustomTextField
+                  id="gmac"
+                  value={formData.gmac}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                  error={!!formErrors.gmac}
+                  helperText={formErrors.gmac}
+                />
+
+              </Grid>
+
+              {/* GMAC */}
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="brand-id">Brand</CustomFormLabel>
                 <Autocomplete
                   options={brandData.map((b) => ({ id: b.id, label: b.name }))}
@@ -206,42 +260,99 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                     />
                   )}
                 />
-                <CustomFormLabel htmlFor="ble-name">Name</CustomFormLabel>
-                <CustomTextField
-                  id="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
+                
+                <CustomFormLabel htmlFor="reader-type">Reader Type</CustomFormLabel>
+                <CustomSelect
+                  id="reader-type"
                   fullWidth
                   variant="outlined"
-                  error={!!formErrors.name}
-                  helperText={formErrors.name}
-                />
-                <CustomFormLabel htmlFor="ble-ip">IP</CustomFormLabel>
-                <CustomTextField
-                  id="ip"
-                  value={formData.ip}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  error={!!formErrors.ip}
-                  helperText={formErrors.ip}
-                />
+                  value={formData.readerType}
+                  onChange={(e: any) => {
+                    const { value } = e.target;
+                    setFormData((prev) => ({ ...prev, readerType: value }));
+                    setFormErrors((prev) => {
+                      if (!prev.readerType) return prev;
+                      const next = { ...prev };
+                      delete next.readerType;
+                      return next;
+                    });
+                  }}
+                  
+                  error={!!formErrors.readerType}
+                  helperText={formErrors.readerType}
+                >
+                  <MenuItem value="Indoor">Indoor</MenuItem>
+                  <MenuItem value="Outdoor">Outdoor</MenuItem>
+                </CustomSelect>
               </Grid>
-
-              {/* GMAC */}
-              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
-                <CustomFormLabel htmlFor="ble-gmac">GMAC</CustomFormLabel>
-                <CustomTextField
-                  id="gmac"
-                  value={formData.gmac}
-                  onChange={handleInputChange}
-                  fullWidth
-                  variant="outlined"
-                  error={!!formErrors.gmac}
-                  helperText={formErrors.gmac}
-                />
-              </Grid>
+                             
             </Grid>
+            {/* ────────────── Advanced Settings ────────────── */}
+            <Box mt={3} mb={1}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={1}
+                sx={{ cursor: 'pointer', display: 'inline-flex' }}
+                onClick={() => setShowAdvanced(!showAdvanced)}
+              >
+                <Typography variant="h6" fontWeight={600}>
+                  Advanced Settings
+                </Typography>
+                <IconButton size="small">
+                  {showAdvanced ? <IconChevronUp size={20} /> : <IconChevronDown size={20} />}
+                </IconButton>
+              </Stack>
+              <Divider sx={{ mt: 1 }} />
+            </Box>
+
+            <Collapse in={showAdvanced}>
+              <Grid container spacing={5} mb={3} mt={1}>
+                {/* Advanced Set 1 */}
+                <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+                  <CustomFormLabel htmlFor="measuredPower">Measured Power</CustomFormLabel>
+                  <CustomTextField
+                    id="measuredPower"
+                    type="number"
+                    value={formData.measuredPower}
+                    onChange={handleInputChange}
+                    fullWidth
+                    variant="outlined"
+                    error={!!formErrors.measuredPower}
+                    helperText={formErrors.measuredPower}
+                  />
+                  <CustomFormLabel htmlFor="pathLossExponent">Path Loss Exponent</CustomFormLabel>
+                  <CustomTextField
+                    id="pathLossExponent"
+                    type="number"
+                    value={formData.pathLossExponent}
+                    onChange={handleInputChange}
+                    fullWidth
+                    variant="outlined"
+                    inputProps={{ min: 0, step: 'any' }}
+                    error={!!formErrors.pathLossExponent}
+                    helperText={formErrors.pathLossExponent}
+                  />
+                </Grid>
+
+                {/* Advanced Set 2 */}
+                <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+                  <CustomFormLabel htmlFor="heightMeter">Height</CustomFormLabel>
+                  <CustomTextField
+                    id="heightMeter"
+                    type="number"
+                    value={formData.heightMeter}
+                    onChange={handleInputChange}
+                    fullWidth
+                    variant="outlined"
+                    inputProps={{ min: 0, step: 'any' }}
+                    error={!!formErrors.heightMeter}
+                    helperText={formErrors.heightMeter}
+                  />
+                </Grid>
+              </Grid>
+            </Collapse>
+             
           </DialogContent>
 
           <DialogActions sx={{ justifyContent: 'space-between', px: 3, pb: 2 }}>

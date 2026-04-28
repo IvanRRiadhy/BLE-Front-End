@@ -3,6 +3,7 @@ import axiosServices from 'src/utils/axios';
 import { RootState, useSelector } from 'src/store/Store';
 import { defaultBleReaderFilter } from 'src/store/apps/defaultForm';
 import { json } from 'stream/consumers';
+import { BrandType } from 'src/store/apps/crud/brand';
 
 // ---------------------------------------------------
 // ✅ API Constants
@@ -34,6 +35,11 @@ export interface bleReaderType {
   gmac: string;
   ip: string;
   isAssigned?: boolean;
+  readerType: 'Outdoor' | 'Indoor';
+  measuredPower: number;
+  pathLossExponent: number;
+  heightMeter: number;
+  brand?: BrandType;
   createdBy: string;
   createdAt: string;
   updatedBy: string;

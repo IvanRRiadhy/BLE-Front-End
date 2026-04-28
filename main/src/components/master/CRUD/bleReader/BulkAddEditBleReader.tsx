@@ -15,6 +15,8 @@ import {
   Tooltip,
   CircularProgress,
   Autocomplete,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
   IconPencil,
@@ -52,12 +54,17 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
     name: false,
     ip: false,
     gmac: false,
+    readerType: false,
+    measuredPower: false,
+    pathLossExponent: false,
+    heightMeter: false,
     id: false,
     isAssigned: false,
     createdBy: false,
     createdAt: false,
     updatedBy: false,
     updatedAt: false,
+    brand: false,
   });
 
   const queryClient = useQueryClient();
@@ -83,12 +90,17 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
       name: false,
       ip: false,
       gmac: false,
+      readerType: false,
+      measuredPower: false,
+      pathLossExponent: false,
+      heightMeter: false,
       id: false,
       isAssigned: false,
       createdBy: false,
       createdAt: false,
       updatedBy: false,
       updatedAt: false,
+      brand: false,
     });
     setOpenBulk(true);
   };
@@ -97,7 +109,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
   // ───────────────────────────────
   // Input / Lock handlers
   // ───────────────────────────────
-  const handleChange = (index: number, key: keyof bleReaderType, value: string) => {
+  const handleChange = (index: number, key: keyof bleReaderType, value: any) => {
     setRows((prev) => prev.map((row, i) => (i === index ? { ...row, [key]: value } : row)));
     setRowErrors((prev) => {
       const newErrors = { ...prev };
@@ -142,6 +154,11 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
       if (!r.name?.trim()) e.name = 'Name is required';
       if (!r.ip?.trim()) e.ip = 'IP is required';
       if (!r.gmac?.trim()) e.gmac = 'GMAC is required';
+      if (!r.readerType) e.readerType = 'Type is required';
+      if (r.measuredPower === null || r.measuredPower === undefined) e.measuredPower = 'Measured Power is required';
+      if (r.pathLossExponent === null || r.pathLossExponent === undefined) e.pathLossExponent = 'Path Loss is required';
+      if (r.heightMeter === null || r.heightMeter === undefined) e.heightMeter = 'Height is required';
+      
       if (Object.keys(e).length) errors[idx] = e;
     });
     setRowErrors(errors);
@@ -221,7 +238,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
         </Tooltip>
       )}
 
-      <Dialog open={openBulk} onClose={handleClose} fullWidth maxWidth="lg">
+      <Dialog open={openBulk} onClose={handleClose} fullWidth maxWidth="xl">
         <DialogTitle>
           <Typography variant="h4" component="span" p={2} fontWeight={700}>
             Bulk Add/Edit BLE Reader
@@ -277,7 +294,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                       }}
                       disabled={!useDefault.brandId}
                       renderInput={(params) => <TextField {...params} placeholder="Brand" />}
-                      sx={{ minWidth: 200 }}
+                      sx={{ minWidth: 150 }}
                     />
                   </div>
                 </TableCell>
@@ -293,6 +310,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                     />
                     <TextField
                       size="small"
+                      sx={{ minWidth: 120 }}
                       value={columnDefaults.name || ''}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -320,6 +338,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                     />
                     <TextField
                       size="small"
+                      sx={{ minWidth: 120 }}
                       value={columnDefaults.ip || ''}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -347,6 +366,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                     />
                     <TextField
                       size="small"
+                      sx={{ minWidth: 120 }}
                       value={columnDefaults.gmac || ''}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -359,6 +379,126 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                           );
                       }}
                       disabled={!useDefault.gmac}
+                    />
+                  </div>
+                </TableCell>
+
+                {/* READER TYPE HEADER */}
+                <TableCell>
+                  <Typography fontWeight={600}>Type</Typography>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <input
+                      type="checkbox"
+                      checked={useDefault.readerType}
+                      onChange={(e) => setUseDefault({ ...useDefault, readerType: e.target.checked })}
+                    />
+                    <Select
+                      size="small"
+                      sx={{ minWidth: 100 }}
+                      value={columnDefaults.readerType || 'Indoor'}
+                      onChange={(e) => {
+                        const val = e.target.value as 'Indoor' | 'Outdoor';
+                        setColumnDefaults((prev) => ({ ...prev, readerType: val }));
+                        if (useDefault.readerType)
+                          setRows((prev) =>
+                            prev.map((r, i) =>
+                              lockedRows[i] || lockedCells[i]?.readerType ? r : { ...r, readerType: val },
+                            ),
+                          );
+                      }}
+                      disabled={!useDefault.readerType}
+                    >
+                      <MenuItem value="Indoor">Indoor</MenuItem>
+                      <MenuItem value="Outdoor">Outdoor</MenuItem>
+                    </Select>
+                  </div>
+                </TableCell>
+
+                {/* MEASURED POWER HEADER */}
+                <TableCell>
+                  <Typography fontWeight={600}>Meas. Pwr</Typography>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <input
+                      type="checkbox"
+                      checked={useDefault.measuredPower}
+                      onChange={(e) => setUseDefault({ ...useDefault, measuredPower: e.target.checked })}
+                    />
+                    <TextField
+                      size="small"
+                      type="number"
+                      sx={{ minWidth: 100 }}
+                      value={columnDefaults.measuredPower ?? 0}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? '' : Number(e.target.value);
+                        setColumnDefaults((prev) => ({ ...prev, measuredPower: val as any }));
+                        if (useDefault.measuredPower)
+                          setRows((prev) =>
+                            prev.map((r, i) =>
+                              lockedRows[i] || lockedCells[i]?.measuredPower ? r : { ...r, measuredPower: val as number },
+                            ),
+                          );
+                      }}
+                      disabled={!useDefault.measuredPower}
+                    />
+                  </div>
+                </TableCell>
+
+                {/* PATH LOSS HEADER */}
+                <TableCell>
+                  <Typography fontWeight={600}>Path Loss</Typography>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <input
+                      type="checkbox"
+                      checked={useDefault.pathLossExponent}
+                      onChange={(e) => setUseDefault({ ...useDefault, pathLossExponent: e.target.checked })}
+                    />
+                    <TextField
+                      size="small"
+                      type="number"
+                      inputProps={{ min: 0, step: 'any' }}
+                      sx={{ minWidth: 100 }}
+                      value={columnDefaults.pathLossExponent ?? 0}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? '' : Number(e.target.value);
+                        setColumnDefaults((prev) => ({ ...prev, pathLossExponent: val as any }));
+                        if (useDefault.pathLossExponent)
+                          setRows((prev) =>
+                            prev.map((r, i) =>
+                              lockedRows[i] || lockedCells[i]?.pathLossExponent ? r : { ...r, pathLossExponent: val as number },
+                            ),
+                          );
+                      }}
+                      disabled={!useDefault.pathLossExponent}
+                    />
+                  </div>
+                </TableCell>
+
+                {/* HEIGHT HEADER */}
+                <TableCell>
+                  <Typography fontWeight={600}>Height</Typography>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <input
+                      type="checkbox"
+                      checked={useDefault.heightMeter}
+                      onChange={(e) => setUseDefault({ ...useDefault, heightMeter: e.target.checked })}
+                    />
+                    <TextField
+                      size="small"
+                      type="number"
+                      inputProps={{ min: 0, step: 'any' }}
+                      sx={{ minWidth: 100 }}
+                      value={columnDefaults.heightMeter ?? 0}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? '' : Number(e.target.value);
+                        setColumnDefaults((prev) => ({ ...prev, heightMeter: val as any }));
+                        if (useDefault.heightMeter)
+                          setRows((prev) =>
+                            prev.map((r, i) =>
+                              lockedRows[i] || lockedCells[i]?.heightMeter ? r : { ...r, heightMeter: val as number },
+                            ),
+                          );
+                      }}
+                      disabled={!useDefault.heightMeter}
                     />
                   </div>
                 </TableCell>
@@ -403,7 +543,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         renderInput={(params) => (
                           <TextField {...params} error={!!rowErrors[idx]?.brandId} helperText={rowErrors[idx]?.brandId} />
                         )}
-                        sx={{ minWidth: 200 }}
+                        sx={{ minWidth: 150 }}
                       />
                     </div>
                   </TableCell>
@@ -423,6 +563,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         {lockedCells[idx]?.name ? <IconLock size={16} /> : <IconLockOpen size={16} />}
                       </IconButton>
                       <TextField
+                        sx={{ minWidth: 120 }}
                         value={row.name}
                         onChange={(e) => handleChange(idx, 'name', e.target.value)}
                         fullWidth
@@ -447,6 +588,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         {lockedCells[idx]?.ip ? <IconLock size={16} /> : <IconLockOpen size={16} />}
                       </IconButton>
                       <TextField
+                        sx={{ minWidth: 120 }}
                         value={row.ip}
                         onChange={(e) => handleChange(idx, 'ip', e.target.value)}
                         fullWidth
@@ -471,11 +613,119 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                         {lockedCells[idx]?.gmac ? <IconLock size={16} /> : <IconLockOpen size={16} />}
                       </IconButton>
                       <TextField
+                        sx={{ minWidth: 120 }}
                         value={row.gmac}
                         onChange={(e) => handleChange(idx, 'gmac', e.target.value)}
                         fullWidth
                         error={!!rowErrors[idx]?.gmac}
                         helperText={rowErrors[idx]?.gmac}
+                      />
+                    </div>
+                  </TableCell>
+
+                  {/* READER TYPE */}
+                  <TableCell>
+                    <div style={{ display: 'flex', alignItems: 'center', ...getCellStyle(idx, 'readerType') }}>
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          setLockedCells((prev) => ({
+                            ...prev,
+                            [idx]: { ...prev[idx], readerType: !prev[idx]?.readerType },
+                          }))
+                        }
+                      >
+                        {lockedCells[idx]?.readerType ? <IconLock size={16} /> : <IconLockOpen size={16} />}
+                      </IconButton>
+                      <Select
+                        size="small"
+                        sx={{ minWidth: 100 }}
+                        value={row.readerType}
+                        onChange={(e) => handleChange(idx, 'readerType', e.target.value as 'Indoor' | 'Outdoor')}
+                        error={!!rowErrors[idx]?.readerType}
+                      >
+                        <MenuItem value="Indoor">Indoor</MenuItem>
+                        <MenuItem value="Outdoor">Outdoor</MenuItem>
+                      </Select>
+                    </div>
+                  </TableCell>
+
+                  {/* MEASURED POWER */}
+                  <TableCell>
+                    <div style={{ display: 'flex', alignItems: 'center', ...getCellStyle(idx, 'measuredPower') }}>
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          setLockedCells((prev) => ({
+                            ...prev,
+                            [idx]: { ...prev[idx], measuredPower: !prev[idx]?.measuredPower },
+                          }))
+                        }
+                      >
+                        {lockedCells[idx]?.measuredPower ? <IconLock size={16} /> : <IconLockOpen size={16} />}
+                      </IconButton>
+                      <TextField
+                        sx={{ minWidth: 100 }}
+                        type="number"
+                        value={row.measuredPower}
+                        onChange={(e) => handleChange(idx, 'measuredPower', e.target.value === '' ? '' : Number(e.target.value))}
+                        fullWidth
+                        error={!!rowErrors[idx]?.measuredPower}
+                        helperText={rowErrors[idx]?.measuredPower}
+                      />
+                    </div>
+                  </TableCell>
+
+                  {/* PATH LOSS */}
+                  <TableCell>
+                    <div style={{ display: 'flex', alignItems: 'center', ...getCellStyle(idx, 'pathLossExponent') }}>
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          setLockedCells((prev) => ({
+                            ...prev,
+                            [idx]: { ...prev[idx], pathLossExponent: !prev[idx]?.pathLossExponent },
+                          }))
+                        }
+                      >
+                        {lockedCells[idx]?.pathLossExponent ? <IconLock size={16} /> : <IconLockOpen size={16} />}
+                      </IconButton>
+                      <TextField
+                        sx={{ minWidth: 100 }}
+                        type="number"
+                        inputProps={{ min: 0, step: 'any' }}
+                        value={row.pathLossExponent}
+                        onChange={(e) => handleChange(idx, 'pathLossExponent', e.target.value === '' ? '' : Number(e.target.value))}
+                        fullWidth
+                        error={!!rowErrors[idx]?.pathLossExponent}
+                        helperText={rowErrors[idx]?.pathLossExponent}
+                      />
+                    </div>
+                  </TableCell>
+
+                  {/* HEIGHT */}
+                  <TableCell>
+                    <div style={{ display: 'flex', alignItems: 'center', ...getCellStyle(idx, 'heightMeter') }}>
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          setLockedCells((prev) => ({
+                            ...prev,
+                            [idx]: { ...prev[idx], heightMeter: !prev[idx]?.heightMeter },
+                          }))
+                        }
+                      >
+                        {lockedCells[idx]?.heightMeter ? <IconLock size={16} /> : <IconLockOpen size={16} />}
+                      </IconButton>
+                      <TextField
+                        sx={{ minWidth: 100 }}
+                        type="number"
+                        inputProps={{ min: 0, step: 'any' }}
+                        value={row.heightMeter}
+                        onChange={(e) => handleChange(idx, 'heightMeter', e.target.value === '' ? '' : Number(e.target.value))}
+                        fullWidth
+                        error={!!rowErrors[idx]?.heightMeter}
+                        helperText={rowErrors[idx]?.heightMeter}
                       />
                     </div>
                   </TableCell>
@@ -492,7 +742,7 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
                             setLockedCells((prev) => ({
                               ...prev,
                               [idx]: isLocked
-                                ? { brandId: true, name: true, ip: true, gmac: true }
+                                ? { brandId: true, name: true, ip: true, gmac: true, readerType: true, measuredPower: true, pathLossExponent: true, heightMeter: true }
                                 : {},
                             }));
                           }}
