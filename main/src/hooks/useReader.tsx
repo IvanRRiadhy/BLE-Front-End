@@ -39,6 +39,8 @@ export interface bleReaderType {
   measuredPower: number;
   pathLossExponent: number;
   heightMeter: number;
+  forceReading: boolean;
+  soloRadiusMeter: number;
   brand?: BrandType;
   createdBy: string;
   createdAt: string;

@@ -17,8 +17,10 @@ import {
   MenuItem,
   Collapse,
   Stack,
+  FormControlLabel,
 } from '@mui/material';
-import { IconPencil, IconPlus, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
+import CustomSwitch from 'src/components/forms/theme-elements/CustomSwitch';
+import { IconPencil, IconPlus, IconChevronDown, IconChevronUp, IconInfoCircle } from '@tabler/icons-react';
 import toast from 'react-hot-toast';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
@@ -143,10 +145,10 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
-    const { id, value, type } = e.target;
+    const { id, value, type, checked } = e.target as HTMLInputElement;
     setFormData((prev) => ({ 
       ...prev, 
-      [id]: type === 'number' ? (value === '' ? '' : Number(value)) : value 
+      [id]: type === 'checkbox' ? checked : (type === 'number' ? (value === '' ? '' : Number(value)) : value)
     }));
   };
 
@@ -337,7 +339,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
 
                 {/* Advanced Set 2 */}
                 <Grid size={{ lg: 6, md: 12, sm: 12 }}>
-                  <CustomFormLabel htmlFor="heightMeter">Height</CustomFormLabel>
+                  <CustomFormLabel htmlFor="heightMeter">Height (in meter)</CustomFormLabel>
                   <CustomTextField
                     id="heightMeter"
                     type="number"
@@ -349,6 +351,56 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                     error={!!formErrors.heightMeter}
                     helperText={formErrors.heightMeter}
                   />
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <CustomFormLabel sx={{ mt: 3 }}>Single Reader Settings</CustomFormLabel>
+                    <Tooltip
+                      title={
+                        <Box sx={{ p: 0.5 }}>
+                          <Typography variant="caption" display="block" sx={{ color: 'white' }}>
+                            Make Reader able to detect without pairing to another Reader,
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: 'error.main', fontWeight: 'bold' }}>
+                            Significantly reduce Accuracy
+                          </Typography>
+                        </Box>
+                      }
+                    >
+                      <IconButton size="small" sx={{ p: 0, mt: 2 }}>
+                        <IconInfoCircle size={20} stroke={1.5} />
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+                  <Grid container spacing={2} alignItems="flex-end">
+                    <Grid size={{ lg: formData.forceReading ? 6 : 12, md: 12, sm: 12 }}>
+                      <FormControlLabel
+                        control={
+                          <CustomSwitch
+                            id="forceReading"
+                            checked={formData.forceReading}
+                            onChange={handleInputChange}
+                          />
+                        }
+                        label="Force Reading"
+                      />
+                    </Grid>
+                    
+
+                    {formData.forceReading && (
+                      <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+                        <CustomTextField
+                          id="soloRadiusMeter"
+                          type="number"
+                          label="Radius (in meter)"
+                          placeholder="e.g. 5"
+                          value={formData.soloRadiusMeter}
+                          onChange={handleInputChange}
+                          fullWidth
+                          variant="outlined"
+                          inputProps={{ min: 0, step: 'any' }}
+                        />
+                      </Grid>
+                    )}
+                  </Grid>
                 </Grid>
               </Grid>
             </Collapse>
