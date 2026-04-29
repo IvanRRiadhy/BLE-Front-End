@@ -32,7 +32,7 @@ export function useTrackingLogs(): TrackingLogItem[] {
     alarmTriggers.forEach((a) => {
       logs.push({
         id: `alarm-${a.id}`,
-        // device: 'Alarm',
+        device: 'Alarm',
         type: 'Alarm',
         target: getName(a.beaconId),
         image: getImage(a.beaconId),
@@ -51,7 +51,7 @@ export function useTrackingLogs(): TrackingLogItem[] {
       Object.values(topic).forEach((b: any) => {
         logs.push({
           id: `trk-${b.beaconId}-${b.time}`,
-          // device: 'Tracking Event',
+          device: b.firstReaderId,
           type: 'Tracking',
           target: getName(b.beaconId),
           image: getImage(b.beaconId),
@@ -74,7 +74,7 @@ export function useEnrichedTrackingLogs(): TrackingLogItem[] {
   const { data: members = [] } = useAllMembers();
   const { data: visitors = [] } = useAllVisitor();
   const { data: security = []} = useAllSecuritys();
-
+// console.log("Tracking Log: ", logs);
   return useMemo(() => {
     const memberMap = new Map(members.map((m) => [m.bleCardNumber, m]));
     const visitorMap = new Map(visitors.map((v) => [v.bleCardNumber, v]));
@@ -84,7 +84,7 @@ export function useEnrichedTrackingLogs(): TrackingLogItem[] {
       const m = memberMap.get(log.dmac);
       const v = visitorMap.get(log.dmac);
       const s = securityMap.get(log.dmac);
-
+      
       return {
         ...log,
         target: m?.name || v?.name || s?.name || 'Unknown',

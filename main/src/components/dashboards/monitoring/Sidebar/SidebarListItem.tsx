@@ -26,6 +26,7 @@ type ListType = {
   type?: 'Alarm' | 'Tracking';
   personId?: string;
   dmac?: string;
+  reader?:string;
 };
 
 type Props = {
@@ -92,14 +93,17 @@ const SidebarListItem = ({ item, isNew, onItemClick }: Props) => {
         alignItems="center"
       >
         <Typography variant="body2" fontWeight={500}>
-          {item?.area} - {item?.floor}
+          Area: {item?.area} - {item?.floor}
         </Typography>
 
         <Typography variant="body2">
           {formatTime(item?.time ?? '')}
         </Typography>
       </Box>
-
+      <Typography variant="caption"
+        fontWeight={500} sx={{ fontSize: '0.65rem' }}>
+        Nearest Reader: {item?.reader ?? '-'}
+      </Typography>
       <Divider sx={{ my: 1 }} />
 
       {/* ================= BODY ================= */}
@@ -117,6 +121,7 @@ const SidebarListItem = ({ item, isNew, onItemClick }: Props) => {
           <Typography variant="body2">
             MAC: {item?.dmac ?? '-'}
           </Typography>
+
         </Box>
 
         {/* Alarm Status */}

@@ -52,7 +52,7 @@ export interface BeaconType {
 export type TrackingLogItem = {
   id: string;
   personId: string;
-  // device: string;
+  device: string;
   target: string;
   image: string;
   dmac: string;
@@ -68,6 +68,7 @@ export type TrackingLogItem = {
 export type AlarmLogItem = {
   id: string;
   dmac: string;
+  device?:string;
   target: string;
   image: string;
   floor: string;
@@ -420,14 +421,14 @@ export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
 
           const currentArea = b.maskedAreaName || 'Unknown Area';
           const prevArea = prevAreaByBeacon[beaconId];
-
+          
           // 🔥 only log when area changes
           if (prevArea !== currentArea) {
             prevAreaByBeacon[beaconId] = currentArea;
             // console.log(`[MQTT] Beacon ${beaconId} moved to area: ${currentArea}, from ${prevArea || 'N/A'}`);
             newLogs.push({
               id: `trk-${beaconId}-${b.time}`, // keep unique
-              // device: 'Tracking Event',
+              device: b.firstReaderId,
               type: 'Tracking',
               target: b.cardName, // raw, will be enriched later
               personId: b.memberCardNumber || b.visitorCardNumber || 'unk',

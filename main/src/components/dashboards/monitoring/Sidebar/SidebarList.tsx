@@ -18,6 +18,7 @@ import {
 } from 'src/hooks/useAlarmTrigger';
 import { AlarmTriggerType, SelectAlarmTrigger } from 'src/store/apps/crud/alarmTrigger';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAllFloorplanDevices } from 'src/hooks/useFloorplanDevice';
 // import {
 //   ShowAlarmPopup,
 //   SelectAlarmTrigger,
@@ -44,19 +45,36 @@ const SidebarList = ({ filterType, personFilter }: SidebarListProps) => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const acknowledgeMutation = useAcknowledgeAlarmTrigger();
-
+  const  devicesResponse = useAllFloorplanDevices().data || [];
+    // console.log("Devices", devicesResponse) "8BA26686-63C3-4D0C-928A-32A79BF6CE7E"
   const logs = useCombinedEnrichedLogs(100);
 
-  // ✅ Filter logic stays
-  const list = logs.filter((x) => {
-    if (filterType.length > 0 && !filterType.includes(x.type)) return false;
+  // 🔹 Create a mapping of readerId -> device name for quick lookup
+  const deviceMap = useMemo(() => {
+    const map = new Map();
+    devicesResponse.forEach((d: any) => {
+      if (d.readerId) {
+        map.set(d.readerId.toLowerCase(), d.name);
+      }
+    });
+    return map;
+  }, [devicesResponse]);
 
-    if (x.personType === 'Visitor' && !personFilter.Visitor) return false;
-    if (x.personType === 'Member' && !personFilter.Member) return false;
-    if (x.personType === 'Security' && !personFilter.Security) return false;
-
-    return true;
-  });
+  // ✅ Filter and enrich logic
+  const list = useMemo(() => {
+    return logs
+      .filter((x) => {
+        if (filterType.length > 0 && !filterType.includes(x.type)) return false;
+        if (x.personType === 'Visitor' && !personFilter.Visitor) return false;
+        if (x.personType === 'Member' && !personFilter.Member) return false;
+        if (x.personType === 'Security' && !personFilter.Security) return false;
+        return true;
+      })
+      .map((log) => ({
+        ...log,
+        reader: deviceMap.get(log.device?.toLowerCase()) || (log.type === 'Alarm' ? 'Alarm System' : 'Unknown Device'),
+      }));
+  }, [logs, filterType, personFilter, deviceMap]);
 
   // ✅ NEW: async click handler with proper flow
   const handleItemClick = async (item: CombinedLogItem) => {
