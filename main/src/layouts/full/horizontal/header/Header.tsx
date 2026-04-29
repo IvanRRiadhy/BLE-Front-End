@@ -25,7 +25,7 @@ import Logo from 'src/layouts/full/shared/logo/Logo';
 import { RootState } from 'src/store/Store';
 import Notifications from '../../vertical/header/Notification';
 import { restartEngine } from 'src/store/apps/crud/engine';
-import NavListing from '../navbar/NavListing/NavListing';
+import SkylineNavbar from '../navbar/SkylineNavbar';
 import DashboardFilter from '../navbar/DashboardFilter';
 import TimeDisplay from '../navbar/TimeDisplay';
 import { fetchAlarmSetting } from 'src/store/apps/alarmsetting/alarmSettings';
@@ -147,7 +147,7 @@ const Header = () => {
                     maxWidth: '100%',
                   }}
                 >
-                  <NavListing />
+                  <SkylineNavbar />
                 </Box>
               )}
 

@@ -2,7 +2,7 @@ import { useMediaQuery, Box, Drawer, Container, Theme, Button } from '@mui/mater
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-import NavListing from './NavListing/NavListing';
+import SkylineNavbar from './SkylineNavbar';
 import Logo from '../../shared/logo/Logo';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { toggleMobileSidebar } from 'src/store/customizer/CustomizerSlice';
@@ -61,7 +61,7 @@ const Navigation = () => {
           }}
         >
           <Box display="flex" justifyContent="space-between" alignItems="center">
-            <NavListing />
+            <SkylineNavbar />
 
             {/* Right section */}
             <Box display="flex" alignItems="center" sx={{ gap: 2 }}>
