@@ -501,7 +501,8 @@ const EditDeviceRenderer: React.FC<Props> = ({
   const renderDeviceIcon = (device: FloorplanDeviceType) => {
     const isActive = activeDevice?.id === device.id;
     const isEditing = editingDevice?.id === device.id;
-
+    const statusActive = device.deviceStatus.toLowerCase() === 'active';
+    const strokeColor = device.deviceStatus.toLowerCase() === 'active' ? 'lightgreen' : 'red';
     // Get appropriate icon
     let icon: HTMLImageElement | null = iconUnknown;
     switch (device.type) {
@@ -628,8 +629,8 @@ const EditDeviceRenderer: React.FC<Props> = ({
             onMouseDown={(e) => {
               e.evt.stopPropagation();
             }}
-            stroke={isActive ? 'lightgreen' : 'transparent'}
-            strokeWidth={isActive ? 5 : 0}
+            stroke={!statusActive ? 'red' : isActive ? 'lightgreen' : 'transparent'}
+            strokeWidth={!statusActive ? 3 : isActive ? 5 : 0} 
           />
         )}
         {isDrawingPath && device.id !== drawingPath && (

@@ -11,6 +11,8 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  FormControlLabel,
+  Tooltip,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
@@ -38,6 +40,7 @@ import { DeviceType, readerType } from 'src/types/crud/input';
 import { isEqual } from 'lodash';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 import { Delete } from '@mui/icons-material';
+import CustomSwitch from 'src/components/forms/theme-elements/CustomSwitch';
 
 // Define form data type for better type safety
 interface DeviceFormData {
@@ -294,15 +297,27 @@ const DeviceDetailList = () => {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
   ) => {
-    const { value, name, id } = e.target as
+    const { value, name, id, checked } = e.target as
       | HTMLInputElement
-      | { value: string; name: string; id?: string };
+      | { value: string; name: string; id?: string; checked?: boolean };
 
     const fieldName = (id || name) as keyof DeviceFormData;
 
+    // Determine the new value based on the field type
+    let newValue: any;
+    
+    if (fieldName === 'deviceStatus') {
+      // For checkbox, the value is boolean (checked) or string ('Active'/'Inactive')
+      // We store 'Active' or 'Inactive' to match the expected type
+      newValue = checked ? 'active' : 'nonactive';
+    } else {
+      // For other fields, use the value from the event
+      newValue = value;
+    }
+    
     const newFormData = {
       ...formData,
-      [fieldName]: value,
+      [fieldName]: newValue,
     };
 
     setFormData(newFormData);
@@ -363,8 +378,22 @@ const DeviceDetailList = () => {
       {/* Header */}
       <Box p={3} sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
         <Typography variant="h5" fontWeight={700} mb={2}>
-          Edit Device Details
+          Details
         </Typography>
+        <Tooltip
+          title={formData.deviceStatus?.toLowerCase() === 'active' ? 'Turn Off Device' : 'Turn On Device'}
+        >
+          <FormControlLabel
+            control={
+              <CustomSwitch
+                id="deviceStatus"
+                checked={formData.deviceStatus?.toLowerCase() === 'active'}
+                onChange={handleInputChange}
+              />
+            }
+            label={formData.deviceStatus?.toLowerCase() === 'active' ? 'Active' : 'Inactive'}
+          />
+        </Tooltip>
       </Box>
 
       {/* Form Content */}
