@@ -22,6 +22,7 @@ import {
   Tooltip,
   IconButton,
 } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from '@mui/icons-material/Close';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -644,7 +645,23 @@ const AlarmContent = () => {
           }}
         >
           <Tooltip title="Close person detail">
-            <IconButton
+            <Button
+                          sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                // backgroundColor: 'rgba(255,255,255,0.9)',
+                // '&:hover': {
+                //   backgroundColor: 'rgba(255,255,255,1)',
+                // },
+              }}
+                            size="small"
+                            startIcon={<ArrowBackIcon />}
+                            onClick={handleClearPerson}
+                          >
+                            Back
+                          </Button>
+            {/* <IconButton
               onClick={handleClearPerson}
               size="small"
               sx={{
@@ -658,7 +675,7 @@ const AlarmContent = () => {
               }}
             >
               <CloseIcon fontSize="small" />
-            </IconButton>
+            </IconButton> */}
           </Tooltip>
           {/* ============ PERSON PHOTO ============ */}
           <Box
