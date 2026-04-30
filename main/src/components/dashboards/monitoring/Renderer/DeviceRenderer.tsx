@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
-import { Stage, Layer, Image as KonvaImage, Text, Line, Label, Tag, Group } from 'react-konva';
+import { Stage, Layer, Image as KonvaImage, Text, Line, Label, Tag, Group, Circle } from 'react-konva';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
   fetchBeacon,
@@ -497,6 +497,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     const x = device.posPxX - (20 * gateSize);
     const y = device.posPxY - (20 * gateSize);
     const statusActive = device.deviceStatus.toLocaleLowerCase() === 'active';
+    // console.log("Device", device.reader)
     return (
       <Group
         key={`device-${device.id}`}
@@ -538,6 +539,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                     stroke={!statusActive ? 'red' :  'transparent'}
             strokeWidth={!statusActive ? 3  : 0} 
         />
+        <Circle x={x + (20 * gateSize)} y={y + (20 * gateSize)} radius={((device.reader?.soloRadiusMeter || 2) / meterPx) * gateSize} fill="transparent"  stroke="#1976d2" strokeWidth={2}/>
       </Group>
     );
   };
