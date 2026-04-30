@@ -46,6 +46,7 @@ import { useAllDistricts } from 'src/hooks/useDistrict';
 import { useAllDepartments } from 'src/hooks/useDepartment';
 import { useAllOrganizations } from 'src/hooks/useOrganization';
 import AddEditSecurityGuard from './AddEditSecurityGuard';
+import { useReleaseCard } from 'src/hooks/useCard';
 
 const SecurityGuardContent = () => {
   const { t } = useTranslation();
@@ -196,6 +197,37 @@ const SecurityGuardContent = () => {
     }
     handleCloseUnblacklistDialog();
   };
+
+   //Release Pop-up
+        const [selectedCardNumber, setSelectedCardNumber] = useState('');
+        const [releasePopupOpen, setReleasePopupOpen] = useState(false);
+        const releaseMutation = useReleaseCard();
+        //Open release pop-up
+        const handleOpenReleasePopup = (cardNumber: string) => {
+          setSelectedCardNumber(cardNumber);
+          setReleasePopupOpen(true);
+        };
+      
+        // Close release pop-up
+        const handleCloseReleasePopup = () => {
+          setReleasePopupOpen(false);
+          setSelectedCardNumber('');
+        };
+      
+        // Confirm release action
+        const handleConfirmRelease = async () => {
+          if (selectedCardNumber) {
+            try {
+              await releaseMutation.mutateAsync(selectedCardNumber);
+              toast.success('Card Released');
+            } catch (error) {
+              toast.error('Release failed');
+              console.error(error);
+            }
+          }
+          handleCloseReleasePopup();
+        };
+  
 
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
@@ -361,8 +393,27 @@ const SecurityGuardContent = () => {
                       },
                     }}
                   >
-                    {securityGuardDetail.isBlacklist ? 'Unblacklist Member' : 'Blacklist Member'}
+                    {securityGuardDetail.isBlacklist ? 'Unblacklist Security Guard' : 'Blacklist Security Guard'}
                   </Button>
+                                    {
+                                      securityGuardDetail.cardNumber && (
+                                        <Button
+                                          size='large'
+                                          variant='contained'
+                                          color='info'
+                                          onClick={() => {
+                                            handleOpenReleasePopup(securityGuardDetail.cardNumber)
+                                          }}
+                                          sx={{
+                                            boxShadow: 2,
+                                            width: '12vw',
+                                            height: 50,
+                                          }}
+                                        >
+                                          Release Card
+                                        </Button>
+                                      )
+                                    }
                 </Stack>
               </Box>
               <Typography variant="h4" fontWeight={800}>
@@ -547,6 +598,23 @@ const SecurityGuardContent = () => {
           </Button>
         </DialogActions>
       </Dialog>
+                        {/* Delete Release Dialog */}
+                  <Dialog open={releasePopupOpen} onClose={handleCloseReleasePopup}>
+                    <DialogTitle>Confirm Card Release</DialogTitle>
+                    <DialogContent>
+                      <DialogContentText>
+                        Are you sure you want to release the Card <strong>{selectedCardNumber}</strong> from its user <strong>{selectedMember?.name}</strong>?
+                      </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={handleCloseReleasePopup} color="primary">
+                        Cancel
+                      </Button>
+                      <Button onClick={handleConfirmRelease} color="error">
+                        Confirm
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
       {loading &&
         createPortal(
           <Backdrop

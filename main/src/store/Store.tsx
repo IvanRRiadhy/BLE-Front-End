@@ -63,6 +63,7 @@ import InvestigateReducer from './apps/crud/investigate';
 import PatrolAreaReducer from './apps/crud/patrolArea';
 import PatrolRouteReducer from './apps/crud/patrolRoute';
 import PatrolSessionReducer from './apps/crud/patrolSession';
+import ReaderHealthReducer from './apps/tracking/ReaderHealth';
 import EventLogReducer from './apps/tracking/Event';
 import SessionReducer from './apps/session';
 import {
@@ -132,6 +133,7 @@ const rootReducer = combineReducers({
   PatrolAreaReducer: PatrolAreaReducer,
   PatrolRouteReducer: PatrolRouteReducer,
   PatrolSessionReducer: PatrolSessionReducer,
+  ReaderHealthReducer: ReaderHealthReducer,
   InvestigateReducer: InvestigateReducer,
   EventLogReducer: EventLogReducer,
 });

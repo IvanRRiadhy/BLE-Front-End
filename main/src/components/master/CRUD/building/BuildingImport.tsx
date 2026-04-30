@@ -1,13 +1,27 @@
 import React, { useRef, useState } from 'react';
-import { Button, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
-import { Download, TableChart, Upload } from '@mui/icons-material';
+import {
+  Button,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Backdrop,
+  CircularProgress,
+  Typography,
+  Stack,
+} from '@mui/material';
+import { Download, TableChart } from '@mui/icons-material';
 import { ImportBuilding } from 'src/store/apps/crud/building';
 import { AppDispatch, useDispatch } from 'src/store/Store';
+import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 const BuildingImport = () => {
   const dispatch: AppDispatch = useDispatch();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const [importLoading, setImportLoading] = useState(false);
+  const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -28,12 +42,28 @@ const BuildingImport = () => {
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const formData = new FormData();
-    formData.append('file', file);
 
-    await dispatch(ImportBuilding(formData));
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    setImportLoading(true);
 
-    event.target.value = ''; // Reset input
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Run import and minimum 1s delay in parallel
+      await Promise.all([dispatch(ImportBuilding(formData)).unwrap(), delay(1000)]);
+
+      queryClient.invalidateQueries({ queryKey: ['building-list'] });
+      queryClient.invalidateQueries({ queryKey: ['building-all'] });
+
+      event.target.value = ''; // Reset input
+      toast.success('Import Success');
+    } catch (err) {
+      console.log('Import Error:', err);
+      toast.error('Import Error');
+    } finally {
+      setImportLoading(false);
+    }
   };
 
   return (
@@ -62,8 +92,31 @@ const BuildingImport = () => {
         style={{ display: 'none' }}
         onChange={handleFileChange}
       />
+
+      <Backdrop
+        sx={{
+          color: '#fff',
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+        }}
+        open={importLoading}
+      >
+        <CircularProgress color="inherit" size={60} thickness={4} />
+        <Stack alignItems="center">
+          <Typography variant="h5" fontWeight="bold">
+            Importing Data...
+          </Typography>
+          <Typography variant="body2" color="rgba(255,255,255,0.7)">
+            Please wait while we process your file
+          </Typography>
+        </Stack>
+      </Backdrop>
     </>
   );
 };
 
 export default BuildingImport;
+

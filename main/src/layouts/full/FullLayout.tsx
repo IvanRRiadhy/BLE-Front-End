@@ -37,6 +37,7 @@ import {
   TrackingLogItem,
 } from 'src/store/apps/tracking/Beacon';
 import { fetchEventLogs } from 'src/store/apps/tracking/Event';
+import { fetchReaderHealth } from 'src/store/apps/tracking/ReaderHealth';
 
 
 
@@ -297,6 +298,14 @@ const FullLayout: FC = () => {
       }
     };
   }, [dispatch, memberList, visitorList, config.ALARM_TOPIC]);
+
+  useEffect(() => {
+    const unsubscribe = dispatch(fetchReaderHealth());
+    // console.log("ini unsubscribe", unsubscribe)
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [dispatch]);
 
   return (
     <>

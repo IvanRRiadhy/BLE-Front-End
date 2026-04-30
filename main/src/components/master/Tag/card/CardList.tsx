@@ -20,13 +20,13 @@ import {
   TableSortLabel,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconTrash } from '@tabler/icons-react';
+import { IconLogout2, IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
 import { CardType, UpdateFilter, fetchCard, fetchCardDT } from 'src/store/apps/crud/card';
 import AddEditCard from './AddEditCard';
 import { defaultCardFilter } from 'src/store/apps/defaultForm';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import { useCardList, useDeleteCard } from 'src/hooks/useCard';
+import { useCardList, useDeleteCard, useReleaseCard } from 'src/hooks/useCard';
 import toast from 'react-hot-toast';
 
 const columns = [
@@ -123,8 +123,8 @@ const CardList = () => {
   const [selectedCard, setselectedCard] = useState<CardType | null>(null);
   const deleteMutation = useDeleteCard();
   // Open delete confirmation dialog
-  const handleOpenDeleteDialog = (org: CardType) => {
-    setselectedCard(org);
+  const handleOpenDeleteDialog = (card: CardType) => {
+    setselectedCard(card);
     setDeleteDialogOpen(true);
   };
 
@@ -146,6 +146,35 @@ const CardList = () => {
       }
     }
     handleCloseDeleteDialog();
+  };
+
+  //Release Pop-up
+  const [releasePopupOpen, setReleasePopupOpen] = useState(false);
+  const releaseMutation = useReleaseCard();
+  //Open release pop-up
+  const handleOpenReleasePopup = (card: CardType) => {
+    setselectedCard(card);
+    setReleasePopupOpen(true);
+  };
+
+  // Close release pop-up
+  const handleCloseReleasePopup = () => {
+    setReleasePopupOpen(false);
+    setselectedCard(null);
+  };
+
+  // Confirm release action
+  const handleConfirmRelease = async () => {
+    if (selectedCard) {
+      try {
+        await releaseMutation.mutateAsync(selectedCard.id);
+        toast.success('Card Released');
+      } catch (error) {
+        toast.error('Release failed');
+        console.error(error);
+      }
+    }
+    handleCloseReleasePopup();
   };
 
   return (
@@ -215,6 +244,15 @@ const CardList = () => {
                         >
                           <IconTrash />
                         </IconButton>
+                        {card.isUsed && (
+                          <IconButton
+                            color="error"
+                            onClick={() => handleOpenReleasePopup(card)}
+                            size="small"
+                          >
+                            <IconLogout2 />
+                          </IconButton>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -248,6 +286,23 @@ const CardList = () => {
           </Button>
           <Button onClick={handleConfirmDelete} color="error">
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+            {/* Delete Release Dialog */}
+      <Dialog open={releasePopupOpen} onClose={handleCloseReleasePopup}>
+        <DialogTitle>Confirm Card Release</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to release the Card <strong>{selectedCard?.name}</strong> from its user <strong>{selectedCard?.lastUsed}</strong>?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseReleasePopup} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmRelease} color="error">
+            Confirm
           </Button>
         </DialogActions>
       </Dialog>

@@ -124,6 +124,28 @@ export function useDeleteCard() {
   });
 }
 
+export function useReleaseCard() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await axiosServices.put(`${API_URL_V1}${id}/release-ownership`);
+      return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['card-list'] });
+      queryClient.invalidateQueries({ queryKey: ['card-all'] });
+      queryClient.invalidateQueries({ queryKey: ['card-unassigned'] });
+      queryClient.invalidateQueries({ queryKey: ['member-list'] });
+      queryClient.invalidateQueries({ queryKey: ['security-list'] });
+      queryClient.invalidateQueries({ queryKey: ['member-all'] });
+      queryClient.invalidateQueries({ queryKey: ['security-all'] });
+      queryClient.invalidateQueries({ queryKey: ['member'] });
+      queryClient.invalidateQueries({ queryKey: ['security-lookup'] });
+    },
+  });
+}
+
 export function useCardStatus() {
   const filter = useSelector((state: RootState) => state.CardReducer.cardFilter);
   const query = useCardList(filter);
@@ -136,3 +158,4 @@ export function useCardStatus() {
     filteredCount: query.data?.recordsFiltered || 0,
   };
 }
+

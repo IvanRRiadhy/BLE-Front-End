@@ -67,7 +67,7 @@ const SkylineSubMenu = ({ item, onCloseAll }: SubMenuProps) => {
           transformOrigin={{ vertical: 'top', horizontal: 'left' }}
           sx={{ pointerEvents: 'none' }}
           PaperProps={{
-            sx: { pointerEvents: 'auto', mt: -1, ml: 0.5, boxShadow: (theme) => theme.shadows[8] }
+            sx: { pointerEvents: 'auto', mt: -1, boxShadow: (theme) => theme.shadows[8] }
           }}
           MenuListProps={{
             onMouseLeave: handleClose
@@ -205,7 +205,6 @@ const SkylineNavbar = () => {
                   PaperProps={{
                     sx: { 
                       pointerEvents: 'auto', 
-                      mt: 0.5, 
                       boxShadow: theme.shadows[8],
                       borderRadius: `${customizer.borderRadius}px`,
                       minWidth: '200px'

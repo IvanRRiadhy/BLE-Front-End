@@ -6,13 +6,13 @@ import {
   ListItemIcon,
   ListItemText,
   CircularProgress,
+  Backdrop,
+  Stack,
+  Typography,
 } from '@mui/material';
 import { PictureAsPdf, TableChart, Upload } from '@mui/icons-material';
-import { useMutation } from '@tanstack/react-query';
-import { saveAs } from 'file-saver';
 import toast from 'react-hot-toast';
-import axiosService from 'src/utils/axios'; // adjust path if needed
-import { AppDispatch,  useDispatch } from 'src/store/Store';
+import { AppDispatch, useDispatch } from 'src/store/Store';
 import { ExportBleReader } from 'src/store/apps/crud/bleReader';
 
 const BleReaderExport = () => {
@@ -21,42 +21,27 @@ const BleReaderExport = () => {
   const open = Boolean(anchorEl);
   const dispatch: AppDispatch = useDispatch();
 
-  const exportMutation = useMutation({
-    mutationFn: async (type: 'pdf' | 'excel') => {
-      // Example endpoint: /ble-reader/export/pdf or /ble-reader/export/excel
-      const response = await axiosService.get(`/MstBleReader/export/${type}`, {
-        responseType: 'blob', // we expect a file
-      });
-      return { blob: response.data, type };
-    },
-    onSuccess: (data) => {
-      const fileType =
-        data.type === 'pdf'
-          ? 'application/pdf'
-          : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-      const extension = data.type === 'pdf' ? 'pdf' : 'xlsx';
-      const blob = new Blob([data.blob], { type: fileType });
-      saveAs(blob, `ble_reader_export.${extension}`);
-      toast.success(`Exported BLE Reader data as ${data.type.toUpperCase()}`);
-    },
-    onError: (error) => {
-      console.error(error);
-      toast.error('Failed to export BLE Reader data');
-    },
-    onSettled: () => setIsExporting(false),
-  });
-
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => setAnchorEl(null);
 
-  const handleExport = (type: 'pdf' | 'excel') => {
-    setIsExporting(true);
-    // exportMutation.mutate(type);
-    dispatch(ExportBleReader(type));
+  const handleExport = async (type: 'pdf' | 'excel') => {
     handleClose();
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    setIsExporting(true);
+
+    try {
+      // Run export and minimum 1s delay in parallel
+      await Promise.all([dispatch(ExportBleReader(type)).unwrap(), delay(1000)]);
+      toast.success(`Exported BLE Reader as ${type.toUpperCase()}`);
+    } catch (error) {
+      console.error('Export Error:', error);
+      toast.error('Failed to export BLE Reader');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -87,8 +72,31 @@ const BleReaderExport = () => {
           <ListItemText>as XLS/CSV</ListItemText>
         </MenuItem>
       </Menu>
+
+      <Backdrop
+        sx={{
+          color: '#fff',
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+        }}
+        open={isExporting}
+      >
+        <CircularProgress color="inherit" size={60} thickness={4} />
+        <Stack alignItems="center">
+          <Typography variant="h5" fontWeight="bold">
+            Exporting Data...
+          </Typography>
+          <Typography variant="body2" color="rgba(255,255,255,0.7)">
+            Please wait while we generate your file
+          </Typography>
+        </Stack>
+      </Backdrop>
     </>
   );
 };
 
 export default BleReaderExport;
+

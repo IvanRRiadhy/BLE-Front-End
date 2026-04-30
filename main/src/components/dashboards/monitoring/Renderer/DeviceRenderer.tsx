@@ -496,6 +496,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     // Use original coordinates directly (no scaling)
     const x = device.posPxX - (20 * gateSize);
     const y = device.posPxY - (20 * gateSize);
+    const statusActive = device.deviceStatus.toLocaleLowerCase() === 'active';
     return (
       <Group
         key={`device-${device.id}`}
@@ -507,7 +508,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
       >
         <Text
           x={x - (40 * gateSize)}
-          y={y - (5 * gateSize)}
+          y={y - (statusActive ? 5 * gateSize : 25 * gateSize)}
           text={device.name}
           fontSize={9 * gateSize}
           fill="#1976d2"
@@ -516,7 +517,27 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
           align="center"
           listening={false}
         />
-        <KonvaImage name="device" image={deviceIcon} x={x} y={y} width={40 * gateSize} height={40 * gateSize} />
+        {!statusActive && (
+          <Text
+            x={x - (40 * gateSize)}
+            y={y - (12 * gateSize)}
+            text="Non-Active"
+            fontSize={9 * gateSize}
+            fill="red"
+            fontStyle="bold"
+            width={120 * gateSize}
+            align="center"
+            listening={false}
+          />
+        )}
+        <KonvaImage 
+        name="device" 
+        image={deviceIcon} 
+        x={x} 
+        y={y} width={40 * gateSize} height={40 * gateSize} 
+                    stroke={!statusActive ? 'red' :  'transparent'}
+            strokeWidth={!statusActive ? 3  : 0} 
+        />
       </Group>
     );
   };

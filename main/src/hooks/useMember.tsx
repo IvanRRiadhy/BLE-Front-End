@@ -89,6 +89,7 @@ export function useAddMember() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['member-list'] });
       queryClient.invalidateQueries({ queryKey: ['member-all'] });
+      queryClient.invalidateQueries({ queryKey: ['member'] });
     },
   });
 }
@@ -111,6 +112,7 @@ export function useEditMember() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['member-list'] });
       queryClient.invalidateQueries({ queryKey: ['member-all'] });
+      queryClient.invalidateQueries({ queryKey: ['member'] });
     },
   });
 }
@@ -129,6 +131,7 @@ export function useBlacklistMember() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['member-list'] });
       queryClient.invalidateQueries({ queryKey: ['member-all'] });
+      queryClient.invalidateQueries({ queryKey: ['member'] });
     },
   });
 }
@@ -143,6 +146,7 @@ export function useUnBlacklistMember() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['member-list'] });
       queryClient.invalidateQueries({ queryKey: ['member-all'] });
+      queryClient.invalidateQueries({ queryKey: ['member'] });
     },
   });
 }

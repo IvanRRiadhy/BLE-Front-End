@@ -4,6 +4,7 @@ import { RootState, useSelector } from 'src/store/Store';
 import { defaultBleReaderFilter } from 'src/store/apps/defaultForm';
 import { json } from 'stream/consumers';
 import { BrandType } from 'src/store/apps/crud/brand';
+import { string } from 'prop-types';
 
 // ---------------------------------------------------
 // ✅ API Constants
@@ -46,6 +47,12 @@ export interface bleReaderType {
   createdAt: string;
   updatedBy: string;
   updatedAt: string;
+}
+
+export interface bleReaderGmacType {
+  id: string;
+  gmac: string;
+  ip: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -138,7 +145,7 @@ export function useEditReader() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (updatedReader: bleReaderType) => {
-      const { id, isAssigned, createdBy, createdAt, updatedBy, updatedAt, ...payload } = updatedReader;
+      const { id, isAssigned, createdBy, createdAt, updatedBy, updatedAt, brand, ...payload } = updatedReader;
       const response = await axiosServices.put(`${API_URL}${id}`, payload);
       return response.data;
     },
@@ -206,6 +213,21 @@ export function useExportReader() {
       a.remove();
       window.URL.revokeObjectURL(downloadUrl);
     },
+  });
+}
+
+// ---------------------------------------------------
+// ✅ Hook: Get Readers Mac
+// ---------------------------------------------------
+export function useGMACList() {
+    return useQuery({
+    queryKey: ['ble-reader-gmac-list'],
+    queryFn: async () => {
+      const response = await axiosServices.get(`${API_URL}gmac-list`);
+      console.log("BLE Reader GMAC List Data",response)
+      return response.data.collection.data as bleReaderGmacType[];
+    },
+    placeholderData: [],
   });
 }
 

@@ -64,6 +64,31 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
   const organizationData = useAllOrganizations().data || [];
   const filteredCard = useUnassignedCard().data || [];
   const cardData = useAllCard().data || [];
+  const cardOptions = React.useMemo(() => {
+    const base = filteredCard.map((c) => ({
+      label: c.cardNumber,
+      id: c.id,
+      bleCardNumber: c.dmac,
+    }));
+    // console.log('Filtered Cards (unassigned):', filteredCard);
+    // console.log('All Cards:', cardData);
+    // console.log('Current form cardId:', formData.cardNumber);
+    // ensure selected card always exists
+    if (formData.cardNumber && !base.find((c) => c.label === formData.cardNumber)) {
+      const existing = cardData.find((c) => c.cardNumber === formData.cardNumber);
+      if (existing) {
+        base.push({ label: existing.cardNumber, id: existing.id, bleCardNumber: existing.dmac });
+      }
+    }
+
+    return base;
+  }, [filteredCard, cardData, formData.cardNumber]);
+
+  const selectedCard = React.useMemo(
+    () => cardOptions.find((c) => c.label === formData.cardNumber) || null,
+    [cardOptions, formData.cardNumber],
+  );
+
   const headMemberData = useSecurityList({ ...memberFilter, Length: 999, filters: {isHead: true} }).data?.data || [];
   const headOptions = headMemberData.map((m: any) => ({
     id: m.id,
@@ -148,32 +173,8 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
       const data = new FormData();
 
       Object.entries(formData).forEach(([key, value]) => {
-        if (
-          ![
-            'faceImage',
-            'createdBy',
-            'createdAt',
-            'updatedBy',
-            'updatedAt',
-            // 'applicationId',
-            'cardNumber',
-            'bleCardNumber',
-            'uploadFr',
-            'uploadFrError',
-            'isBlacklist',
-            'blacklistAt',
-            'blacklistReason',
-            'generate',
-            'status',
-          ].includes(key)
-        ) {
-          // 🔥 Rename logic
-          let newKey = key;
-
-          // if (key === 'headMember1') newKey = 'headSecurity1';
-          // if (key === 'headMember2') newKey = 'headSecurity2';
-
-          data.append(newKey, value?.toString() ?? '');
+        if (!['faceImage', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key)) {
+          data.append(key, value?.toString() ?? '');
         }
       });
 
@@ -434,22 +435,20 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
             <Divider />
             <Grid container spacing={5} mb={3}>
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
-                <CustomFormLabel htmlFor="ble-card-number">Card Number</CustomFormLabel>
-                <CustomAutocomplete<{ label: string; id: string }>
+                <CustomFormLabel htmlFor="card-number">Card Number</CustomFormLabel>
+                <CustomAutocomplete<{ label: string; id: string; bleCardNumber: string }>
                   label="Card Number"
-                  options={filteredCard.map((card: CardType) => ({
-                    label: card.cardNumber,
-                    id: card.id,
-                  }))}
-                  value={
-                    cardData
-                      .map((c) => ({ label: c.cardNumber, id: c.id }))
-                      .find((c) => c.id === formData.cardId) || null
-                  }
+                  options={cardOptions}
+                  value={selectedCard}
                   onChange={(val) => {
                     const id = val?.id ?? '';
                     const number = val?.label ?? '';
-                    setFormData((prev) => ({ ...prev, cardId: id, cardNumber: number }));
+                    setFormData((prev) => ({
+                      ...prev,
+                      cardId: id,
+                      cardNumber: number,
+                      bleCardNumber: val?.bleCardNumber || '',
+                    }));
                     setFormErrors((prev) => {
                       if (!prev.cardNumber) return prev;
                       const next = { ...prev };
@@ -467,6 +466,29 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
                   </FormHelperText>
                 )}
               </Grid>
+               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+                              <CustomFormLabel htmlFor="ble-card-number">BLE Card Number</CustomFormLabel>
+                              <Tooltip
+                                title="This is automatically fetched from the selected card. It is used for BLE-based access control."
+                                placement="top"
+                              >
+                                <CustomTextField
+                                  id="bleCardNumber"
+                                  value={formData.bleCardNumber}
+                                  onChange={handleInputChange}
+                                  fullWidth
+                                  variant="outlined"
+                                  error={!!formErrors.bleCardNumber}
+                                  helperText={formErrors.bleCardNumber}
+                                  disabled
+                                />
+                              </Tooltip>
+                              {formErrors.bleCardNumber && (
+                                <FormHelperText error sx={{ mt: 0.5 }}>
+                                  {formErrors.bleCardNumber}
+                                </FormHelperText>
+                              )}
+                            </Grid>
             </Grid>
             <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
               Security Details

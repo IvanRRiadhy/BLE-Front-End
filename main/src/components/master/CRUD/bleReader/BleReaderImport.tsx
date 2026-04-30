@@ -6,6 +6,9 @@ import {
   ListItemIcon,
   ListItemText,
   CircularProgress,
+  Backdrop,
+  Stack,
+  Typography,
 } from '@mui/material';
 import { Download, TableChart } from '@mui/icons-material';
 import toast from 'react-hot-toast';
@@ -22,24 +25,6 @@ const BleReaderImport = () => {
   const dispatch: AppDispatch = useDispatch();
 
   const queryClient = useQueryClient();
-
-  // React Query mutation for import
-  const importMutation = useMutation({
-    mutationFn: async (formData: FormData) => {
-      return await api.post('/ble-reader/import', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['ble-reader-list'] });
-      toast.success('BLE Reader data imported successfully!');
-    },
-    onError: (err: any) => {
-      console.error(err);
-      toast.error('Failed to import BLE Reader data');
-    },
-    onSettled: () => setIsUploading(false),
-  });
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -59,14 +44,28 @@ const BleReaderImport = () => {
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     setIsUploading(true);
 
-    const formData = new FormData();
-    formData.append('file', file);
-    dispatch(ImportBleReader(formData));
-    // importMutation.mutate(formData);
-    event.target.value = ''; // reset file input
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Run import and minimum 1s delay in parallel
+      await Promise.all([dispatch(ImportBleReader(formData)).unwrap(), delay(1000)]);
+
+      event.target.value = ''; // reset file input
+      toast.success('Success to import ble reader');
+      queryClient.invalidateQueries({ queryKey: ['ble-reader-list'] });
+      queryClient.invalidateQueries({ queryKey: ['ble-reader-all'] });
+    } catch (error) {
+      toast.error('Failed to import ble reader');
+    } finally {
+      setIsUploading(false);
+    }
   };
+
 
   return (
     <>
@@ -97,6 +96,28 @@ const BleReaderImport = () => {
         style={{ display: 'none' }}
         onChange={handleFileChange}
       />
+
+            <Backdrop
+              sx={{
+                color: '#fff',
+                zIndex: (theme) => theme.zIndex.drawer + 1,
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+              }}
+              open={isUploading}
+            >
+              <CircularProgress color="inherit" size={60} thickness={4} />
+              <Stack alignItems="center">
+                <Typography variant="h5" fontWeight="bold">
+                  Importing Data...
+                </Typography>
+                <Typography variant="body2" color="rgba(255,255,255,0.7)">
+                  Please wait while we process your file
+                </Typography>
+              </Stack>
+            </Backdrop>
     </>
   );
 };
