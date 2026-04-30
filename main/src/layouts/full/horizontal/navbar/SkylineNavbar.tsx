@@ -16,13 +16,22 @@ const SkylineSubMenu = ({ item, onCloseAll }: SubMenuProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const { pathname } = useLocation();
+  const closeTimeout = React.useRef<any>(null);
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+    if (closeTimeout.current) clearTimeout(closeTimeout.current);
     setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
-    setAnchorEl(null);
+    if (closeTimeout.current) clearTimeout(closeTimeout.current);
+    closeTimeout.current = setTimeout(() => {
+      setAnchorEl(null);
+    }, 100);
+  };
+
+  const handleMenuEnter = () => {
+    if (closeTimeout.current) clearTimeout(closeTimeout.current);
   };
 
   const checkActive = (navItem: any): boolean => {
@@ -37,7 +46,7 @@ const SkylineSubMenu = ({ item, onCloseAll }: SubMenuProps) => {
 
   if (item.children) {
     return (
-      <div onMouseLeave={handleClose}>
+      <div onMouseLeave={handleClose} onMouseEnter={handleMenuEnter}>
         <MenuItem
           onMouseEnter={handleOpen}
           sx={{ 
@@ -70,6 +79,7 @@ const SkylineSubMenu = ({ item, onCloseAll }: SubMenuProps) => {
             sx: { pointerEvents: 'auto', mt: -1, boxShadow: (theme) => theme.shadows[8] }
           }}
           MenuListProps={{
+            onMouseEnter: handleMenuEnter,
             onMouseLeave: handleClose
           }}
         >
@@ -116,6 +126,7 @@ const SkylineNavbar = () => {
   const [activeTitle, setActiveTitle] = useState<string | null>(null);
   const [lockedTitle, setLockedTitle] = useState<string | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const closeTimeout = React.useRef<any>(null);
 
   const checkActive = useCallback((navItem: any): boolean => {
     if (navItem.href && pathname === navItem.href) return true;
@@ -127,18 +138,27 @@ const SkylineNavbar = () => {
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>, title: string) => {
     if (lockedTitle) return; 
+    if (closeTimeout.current) clearTimeout(closeTimeout.current);
     setAnchorEl(event.currentTarget);
     setActiveTitle(title);
   };
 
   const handleClose = () => {
     if (!lockedTitle) {
-      setAnchorEl(null);
-      setActiveTitle(null);
+      if (closeTimeout.current) clearTimeout(closeTimeout.current);
+      closeTimeout.current = setTimeout(() => {
+        setAnchorEl(null);
+        setActiveTitle(null);
+      }, 100); // 100ms grace period
     }
   };
 
+  const handleMenuEnter = () => {
+    if (closeTimeout.current) clearTimeout(closeTimeout.current);
+  };
+
   const handleToggleLock = (event: React.MouseEvent<HTMLElement>, title: string) => {
+    if (closeTimeout.current) clearTimeout(closeTimeout.current);
     if (lockedTitle === title) {
       setLockedTitle(null);
       setAnchorEl(null);
@@ -207,11 +227,12 @@ const SkylineNavbar = () => {
                       pointerEvents: 'auto', 
                       boxShadow: theme.shadows[8],
                       borderRadius: `${customizer.borderRadius}px`,
-                      minWidth: '200px'
+                      minWidth: '200px',
+                      mt: 1, // Restored some breathing room
                     }
                   }}
                   MenuListProps={{
-                    onMouseEnter: () => {}, 
+                    onMouseEnter: handleMenuEnter, 
                     onMouseLeave: handleClose
                   }}
                 >
