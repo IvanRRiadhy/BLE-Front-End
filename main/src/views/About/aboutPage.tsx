@@ -2,14 +2,37 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Grid2 as Grid, Box, Card, CardContent, Typography, List, ListItem, ListItemText, Chip, Divider, CircularProgress, ListItemButton, Switch, Tooltip, styled, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import { useLicenseInfo, toggleFeatures, getMachineId, activateLicense } from 'src/hooks/useInfo';
-import { IconCpu, IconUpload } from '@tabler/icons-react';
+import { IconCpu, IconUpload, IconCheck, IconSettings } from '@tabler/icons-react';
 import toast from 'react-hot-toast';
+import { useSelector, useDispatch } from 'src/store/Store';
+import {
+  setTheme,
+  toggleLayout,
+  toggleSidebar,
+  toggleHorizontal,
+  setBorderRadius,
+  setCardShadow,
+  setDir,
+  setDarkMode,
+} from 'src/store/customizer/CustomizerSlice';
+import { RootState } from 'src/store/Store';
+import WbSunnyTwoToneIcon from '@mui/icons-material/WbSunnyTwoTone';
+import DarkModeTwoToneIcon from '@mui/icons-material/DarkModeTwoTone';
+import SwipeLeftAltTwoToneIcon from '@mui/icons-material/SwipeLeftAltTwoTone';
+import SwipeRightAltTwoToneIcon from '@mui/icons-material/SwipeRightAltTwoTone';
+import { ViewComfyTwoTone, PaddingTwoTone, BorderOuter } from '@mui/icons-material';
+import CallToActionTwoToneIcon from '@mui/icons-material/CallToActionTwoTone';
+import AspectRatioTwoToneIcon from '@mui/icons-material/AspectRatioTwoTone';
+import WebAssetTwoToneIcon from '@mui/icons-material/WebAssetTwoTone';
+import ViewSidebarTwoToneIcon from '@mui/icons-material/ViewSidebarTwoTone';
+import { Stack, Slider } from '@mui/material';
 
 const sections = [
   { id: 'app-details', title: 'App Details' },
+  { id: 'web-customizer', title: 'Web Customizer' },
   { id: 'capacity', title: 'Capacity' },
   { id: 'core-features', title: 'Core Features' },
-  { id: 'modules', title: 'Modules' }
+  { id: 'modules', title: 'Modules' },
 ];
 
 const IOSSwitch = styled((props: any) => (
@@ -60,7 +83,32 @@ const IOSSwitch = styled((props: any) => (
   },
 }));
 
+const StyledBox = styled(Box)(({ theme }) => ({
+  boxShadow: theme.shadows[8],
+  padding: '20px',
+  cursor: 'pointer',
+  justifyContent: 'center',
+  display: 'flex',
+  transition: '0.1s ease-in',
+  border: '1px solid rgba(145, 158, 171, 0.12)',
+  borderRadius: '12px',
+  '&:hover': {
+    transform: 'scale(1.05)',
+  },
+}));
+
+const thColors = [
+  { id: 1, bgColor: '#5D87FF', disp: 'BLUE_THEME' },
+  { id: 2, bgColor: '#0074BA', disp: 'AQUA_THEME' },
+  { id: 3, bgColor: '#763EBD', disp: 'PURPLE_THEME' },
+  { id: 4, bgColor: '#0A7EA4', disp: 'GREEN_THEME' },
+  { id: 5, bgColor: '#01C0C8', disp: 'CYAN_THEME' },
+  { id: 6, bgColor: '#FA896B', disp: 'ORANGE_THEME' },
+];
+
 const AboutPage = () => {
+  const customizer = useSelector((state: RootState) => state.customizer);
+  const dispatch = useDispatch();
   const { data, isLoading, isError } = useLicenseInfo();
   const { mutate: toggleFeatureStatus } = toggleFeatures();
   const { refetch: fetchMachineId, isFetching: isFetchingMachineId } = getMachineId(false);
@@ -285,6 +333,315 @@ const AboutPage = () => {
                     </Box>
                   </ListItem>
                 </List>
+              </CardContent>
+            </Card>
+
+            {/* Customizer Section */}
+            <Card variant="outlined" sx={{ mb: 4 }}>
+              <CardContent>
+                <Typography id="web-customizer" variant="h4" mb={3}>
+                  Web Customizer
+                </Typography>
+
+                <Grid container spacing={3}>
+                  {/* Theme Option */}
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Typography variant="h6" gutterBottom>
+                      Theme Option
+                    </Typography>
+                    <Stack direction={'row'} gap={2} my={2}>
+                      <StyledBox
+                        onClick={() => dispatch(setDarkMode('light'))}
+                        display="flex"
+                        gap={1}
+                        flex={1}
+                        sx={{
+                          borderColor: customizer.activeMode === 'light' ? 'primary.main' : 'inherit',
+                          bgcolor: customizer.activeMode === 'light' ? 'primary.light' : 'transparent',
+                        }}
+                      >
+                        <WbSunnyTwoToneIcon
+                          color={customizer.activeMode === 'light' ? 'primary' : 'inherit'}
+                        />
+                        Light
+                      </StyledBox>
+                      <StyledBox
+                        onClick={() => dispatch(setDarkMode('dark'))}
+                        display="flex"
+                        gap={1}
+                        flex={1}
+                        sx={{
+                          borderColor: customizer.activeMode === 'dark' ? 'primary.main' : 'inherit',
+                          bgcolor: customizer.activeMode === 'dark' ? 'primary.light' : 'transparent',
+                        }}
+                      >
+                        <DarkModeTwoToneIcon
+                          color={customizer.activeMode === 'dark' ? 'primary' : 'inherit'}
+                        />
+                        Dark
+                      </StyledBox>
+                    </Stack>
+                  </Grid>
+
+                  {/* Theme Direction */}
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Typography variant="h6" gutterBottom>
+                      Theme Direction
+                    </Typography>
+                    <Stack direction={'row'} gap={2} my={2}>
+                      <StyledBox
+                        onClick={() => dispatch(setDir('ltr'))}
+                        display="flex"
+                        gap={1}
+                        flex={1}
+                        sx={{
+                          borderColor: customizer.activeDir === 'ltr' ? 'primary.main' : 'inherit',
+                          bgcolor: customizer.activeDir === 'ltr' ? 'primary.light' : 'transparent',
+                        }}
+                      >
+                        <SwipeLeftAltTwoToneIcon
+                          color={customizer.activeDir === 'ltr' ? 'primary' : 'inherit'}
+                        />{' '}
+                        LTR
+                      </StyledBox>
+                      <StyledBox
+                        onClick={() => dispatch(setDir('rtl'))}
+                        display="flex"
+                        gap={1}
+                        flex={1}
+                        sx={{
+                          borderColor: customizer.activeDir === 'rtl' ? 'primary.main' : 'inherit',
+                          bgcolor: customizer.activeDir === 'rtl' ? 'primary.light' : 'transparent',
+                        }}
+                      >
+                        <SwipeRightAltTwoToneIcon
+                          color={customizer.activeDir === 'rtl' ? 'primary' : 'inherit'}
+                        />{' '}
+                        RTL
+                      </StyledBox>
+                    </Stack>
+                  </Grid>
+
+                  {/* Theme Colors */}
+                  <Grid size={12}>
+                    <Typography variant="h6" gutterBottom mt={2}>
+                      Theme Colors
+                    </Typography>
+                    <Grid container spacing={2} my={1}>
+                      {thColors.map((thcolor) => (
+                        <Grid key={thcolor.id} size={{ xs: 4, sm: 2 }}>
+                          <StyledBox
+                            onClick={() => dispatch(setTheme(thcolor.disp))}
+                            sx={{
+                              borderColor:
+                                customizer.activeTheme === thcolor.disp
+                                  ? 'primary.main'
+                                  : 'inherit',
+                              bgcolor:
+                                customizer.activeTheme === thcolor.disp
+                                  ? 'primary.light'
+                                  : 'transparent',
+                            }}
+                          >
+                            <Tooltip title={`${thcolor.disp}`} placement="top">
+                              <Box
+                                sx={{
+                                  backgroundColor: thcolor.bgColor,
+                                  width: '25px',
+                                  height: '25px',
+                                  borderRadius: '60px',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  display: 'flex',
+                                  color: 'white',
+                                }}
+                              >
+                                {customizer.activeTheme === thcolor.disp ? (
+                                  <IconCheck width={13} />
+                                ) : (
+                                  ''
+                                )}
+                              </Box>
+                            </Tooltip>
+                          </StyledBox>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Grid>
+
+                  {/* Layout Type */}
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Typography variant="h6" gutterBottom mt={2}>
+                      Layout Type
+                    </Typography>
+                    <Stack direction={'row'} gap={2} my={2}>
+                      <StyledBox
+                        onClick={() => dispatch(toggleHorizontal(false))}
+                        display="flex"
+                        gap={1}
+                        flex={1}
+                        sx={{
+                          borderColor: !customizer.isHorizontal ? 'primary.main' : 'inherit',
+                          bgcolor: !customizer.isHorizontal ? 'primary.light' : 'transparent',
+                        }}
+                      >
+                        <ViewComfyTwoTone
+                          color={customizer.isHorizontal === false ? 'primary' : 'inherit'}
+                        />
+                        Vertical
+                      </StyledBox>
+                      <StyledBox
+                        onClick={() => dispatch(toggleHorizontal(true))}
+                        display="flex"
+                        gap={1}
+                        flex={1}
+                        sx={{
+                          borderColor: customizer.isHorizontal ? 'primary.main' : 'inherit',
+                          bgcolor: customizer.isHorizontal ? 'primary.light' : 'transparent',
+                        }}
+                      >
+                        <PaddingTwoTone
+                          color={customizer.isHorizontal === true ? 'primary' : 'inherit'}
+                        />
+                        Horizontal
+                      </StyledBox>
+                    </Stack>
+                  </Grid>
+
+                  {/* Container Option */}
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Typography variant="h6" gutterBottom mt={2}>
+                      Container Option
+                    </Typography>
+                    <Stack direction={'row'} gap={2} my={2}>
+                      <StyledBox
+                        onClick={() => dispatch(toggleLayout('boxed'))}
+                        display="flex"
+                        gap={1}
+                        flex={1}
+                        sx={{
+                          borderColor: customizer.isLayout === 'boxed' ? 'primary.main' : 'inherit',
+                          bgcolor: customizer.isLayout === 'boxed' ? 'primary.light' : 'transparent',
+                        }}
+                      >
+                        <CallToActionTwoToneIcon
+                          color={customizer.isLayout === 'boxed' ? 'primary' : 'inherit'}
+                        />
+                        Boxed
+                      </StyledBox>
+                      <StyledBox
+                        onClick={() => dispatch(toggleLayout('full'))}
+                        display="flex"
+                        gap={1}
+                        flex={1}
+                        sx={{
+                          borderColor: customizer.isLayout === 'full' ? 'primary.main' : 'inherit',
+                          bgcolor: customizer.isLayout === 'full' ? 'primary.light' : 'transparent',
+                        }}
+                      >
+                        <AspectRatioTwoToneIcon
+                          color={customizer.isLayout === 'full' ? 'primary' : 'inherit'}
+                        />
+                        Full
+                      </StyledBox>
+                    </Stack>
+                  </Grid>
+
+                  {/* Sidebar Type */}
+                  {!customizer.isHorizontal && (
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <Typography variant="h6" gutterBottom mt={2}>
+                        Sidebar Type
+                      </Typography>
+                      <Stack direction={'row'} gap={2} my={2}>
+                        <StyledBox
+                          onClick={() => dispatch(toggleSidebar())}
+                          display="flex"
+                          gap={1}
+                          flex={1}
+                          sx={{
+                            borderColor: !customizer.isCollapse ? 'primary.main' : 'inherit',
+                            bgcolor: !customizer.isCollapse ? 'primary.light' : 'transparent',
+                          }}
+                        >
+                          <WebAssetTwoToneIcon
+                            color={!customizer.isCollapse ? 'primary' : 'inherit'}
+                          />
+                          Full
+                        </StyledBox>
+                        <StyledBox
+                          onClick={() => dispatch(toggleSidebar())}
+                          display="flex"
+                          gap={1}
+                          flex={1}
+                          sx={{
+                            borderColor: customizer.isCollapse ? 'primary.main' : 'inherit',
+                            bgcolor: customizer.isCollapse ? 'primary.light' : 'transparent',
+                          }}
+                        >
+                          <ViewSidebarTwoToneIcon
+                            color={customizer.isCollapse ? 'primary' : 'inherit'}
+                          />
+                          Mini
+                        </StyledBox>
+                      </Stack>
+                    </Grid>
+                  )}
+
+                  {/* Card Shadow */}
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Typography variant="h6" gutterBottom mt={2}>
+                      Card Option
+                    </Typography>
+                    <Stack direction={'row'} gap={2} my={2}>
+                      <StyledBox
+                        onClick={() => dispatch(setCardShadow(false))}
+                        display="flex"
+                        gap={1}
+                        flex={1}
+                        sx={{
+                          borderColor: !customizer.isCardShadow ? 'primary.main' : 'inherit',
+                          bgcolor: !customizer.isCardShadow ? 'primary.light' : 'transparent',
+                        }}
+                      >
+                        <BorderOuter color={!customizer.isCardShadow ? 'primary' : 'inherit'} />
+                        Border
+                      </StyledBox>
+                      <StyledBox
+                        onClick={() => dispatch(setCardShadow(true))}
+                        display="flex"
+                        gap={1}
+                        flex={1}
+                        sx={{
+                          borderColor: customizer.isCardShadow ? 'primary.main' : 'inherit',
+                          bgcolor: customizer.isCardShadow ? 'primary.light' : 'transparent',
+                        }}
+                      >
+                        <CallToActionTwoToneIcon
+                          color={customizer.isCardShadow ? 'primary' : 'inherit'}
+                        />
+                        Shadow
+                      </StyledBox>
+                    </Stack>
+                  </Grid>
+
+                  {/* Border Radius */}
+                  <Grid size={12}>
+                    <Typography variant="h6" gutterBottom mt={2}>
+                      Theme Border Radius
+                    </Typography>
+                    <Box px={2} py={1}>
+                      <Slider
+                        size="small"
+                        value={customizer.borderRadius}
+                        min={4}
+                        max={24}
+                        onChange={(event: any) => dispatch(setBorderRadius(event.target.value))}
+                        valueLabelDisplay="auto"
+                      />
+                    </Box>
+                  </Grid>
+                </Grid>
               </CardContent>
             </Card>
 
