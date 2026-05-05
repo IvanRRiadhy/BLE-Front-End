@@ -126,8 +126,8 @@ const AlarmLog: React.FC = () => {
         width: '100%',
         height: '32vh',
         borderRadius: '25px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-        backgroundColor: 'white',
+        boxShadow: (theme) => theme.shadows[10],
+        backgroundColor: 'background.paper',
         px: 2,
         py: 2,
         display: 'flex',
@@ -147,7 +147,7 @@ const AlarmLog: React.FC = () => {
           sx={{
             fontSize: 24,
             fontWeight: 700,
-            color: '#045498',
+            color: 'primary.main',
           }}
         >
           Real-Time Alarm Log
@@ -193,10 +193,16 @@ const AlarmLog: React.FC = () => {
               alignItems="center"
               sx={{
                 p: 1,
-                backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
-                borderBottom: '1px solid #e0e0e0',
+                backgroundColor: 'transparent',
+                '&:hover': {
+                  backgroundColor: 'action.hover',
+                },
+                borderBottom: '1px solid',
+                borderColor: 'divider',
                 width: '100%',
                 overflow: 'hidden',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s ease',
               }}
               onClick={() => {
                 const trigger = data[index];
@@ -219,20 +225,20 @@ const AlarmLog: React.FC = () => {
                   sx={{
                     fontSize: 16,
                     fontWeight: 600,
-                    color: '#045498',
+                    color: 'textPrimary',
                   }}
                 />
                 <SmartScrollingText
                   text={`${item.buildingName} | ${item.floorName}`}
                   sx={{
                     fontSize: 12,
-                    color: '#045498',
+                    color: 'textSecondary',
                   }}
                 />
                 <Typography
                   sx={{
                     fontSize: 12,
-                    color: '#045498',
+                    color: 'textSecondary',
                   }}
                 >
                   {item.idleTime}
@@ -261,7 +267,7 @@ const AlarmLog: React.FC = () => {
                 <Typography
                   sx={{
                     fontSize: 12,
-                    color: '#045498',
+                    color: 'textSecondary',
                   }}
                 >
                   {item.secondGateway}
@@ -269,7 +275,7 @@ const AlarmLog: React.FC = () => {
                 <Typography
                   sx={{
                     fontSize: 12,
-                    color: '#045498',
+                    color: 'textSecondary',
                   }}
                 >
                   {item.lastSeenTime}

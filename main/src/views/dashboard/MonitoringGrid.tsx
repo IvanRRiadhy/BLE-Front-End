@@ -186,9 +186,9 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
                         flexShrink: 0,
                         borderRadius: 2,
                         p: 1,
-                        bgcolor: '#e1e1e1',
+                        bgcolor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : '#e1e1e1',
                         border: '2.5px solid',
-                        borderColor: isMiniAlarm ? theme.palette.error.main : '#a1a1a1',
+                        borderColor: isMiniAlarm ? 'error.main' : (theme.palette.mode === 'dark' ? 'grey.800' : '#a1a1a1'),
 
                         ...(isMiniAlarm && {
                           animation: 'alarmAura 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -246,9 +246,9 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
                 height: item.height,
                 p: 1.5,
                 borderRadius: 2,
-                bgcolor: '#e1e1e1',
+                bgcolor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : '#e1e1e1',
                 border: '2.5px solid',
-                borderColor: isAlarmActive ? theme.palette.error.main : '#a1a1a1',
+                borderColor: isAlarmActive ? 'error.main' : (theme.palette.mode === 'dark' ? 'grey.800' : '#a1a1a1'),
 
                 // 🔥 AURA EFFECT
                 ...(isAlarmActive && {

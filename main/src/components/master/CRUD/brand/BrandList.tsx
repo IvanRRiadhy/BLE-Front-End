@@ -152,7 +152,7 @@ const BrandList = () => {
             sx={{
               position: 'sticky',
               left: 0,
-              background: 'white',
+              backgroundColor: 'background.paper',
               zIndex: 1,
               width: 35,
               minWidth: 35,
@@ -172,7 +172,7 @@ const BrandList = () => {
             sx={{
               position: 'sticky',
               right: 0,
-              background: 'white',
+              backgroundColor: 'background.paper',
               zIndex: 2,
               width: 150,
               minWidth: 150,
@@ -206,7 +206,7 @@ const BrandList = () => {
                       sx={{
                         position: 'sticky',
                         left: 0,
-                        background: 'white',
+                        backgroundColor: 'background.paper',
                         zIndex: 2,
                         width: 35, // Fixed width
                         minWidth: 35,
@@ -235,7 +235,7 @@ const BrandList = () => {
                       sx={{
                         position: 'sticky',
                         right: 0,
-                        background: 'white',
+                        backgroundColor: 'background.paper',
                         zIndex: 2,
                         width: 150, // Fixed width
                         minWidth: 150,
@@ -255,7 +255,7 @@ const BrandList = () => {
                         sx={{
                           position: 'sticky',
                           left: 0,
-                          background: 'white',
+                          backgroundColor: 'background.paper',
                           zIndex: 1,
                           width: 35, // Fixed width
                           minWidth: 35,
@@ -273,7 +273,7 @@ const BrandList = () => {
                         sx={{
                           position: 'sticky',
                           right: 0,
-                          background: 'white',
+                          backgroundColor: 'background.paper',
                           zIndex: 1,
                           // display: 'flex',
                           gap: 1,
@@ -322,8 +322,13 @@ const BrandList = () => {
           <Button onClick={handleCloseDeleteDialog} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleConfirmDelete} color="error">
-            Delete
+          <Button
+            onClick={handleConfirmDelete}
+            color={deleteMutation.isPending ? 'primary' : 'error'}
+            disabled={deleteMutation.isPending}
+            startIcon={deleteMutation.isPending ? <CircularProgress size={20} /> : null}
+          >
+            {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

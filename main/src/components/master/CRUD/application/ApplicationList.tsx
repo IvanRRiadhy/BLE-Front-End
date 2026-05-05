@@ -105,7 +105,7 @@ const ApplicationList = () => {
                 <TableHead>
                   <TableRow>
                     {/* Left Sticky Empty Column */}
-                    <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
+                    <TableCell sx={{ position: 'sticky', left: 0, backgroundColor: 'background.paper', zIndex: 2 }}>
                       <Typography variant="h6"> Left </Typography>
                     </TableCell>
                     {[
@@ -132,7 +132,7 @@ const ApplicationList = () => {
                     ))}
                     {/* Right Sticky Empty Column */}
                     <TableCell
-                      sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
+                      sx={{ position: 'sticky', right: 0, backgroundColor: 'background.paper', zIndex: 2 }}
                     >
                       <Typography variant="h6"> Actions </Typography>
                     </TableCell>
@@ -144,7 +144,7 @@ const ApplicationList = () => {
                     .map((app) => (
                       <TableRow key={app.id}>
                         <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                          sx={{ position: 'sticky', left: 0, backgroundColor: 'background.paper', zIndex: 1 }}
                         ></TableCell>
                         <TableCell>{app.id}</TableCell>
                         <TableCell>{app.applicationName}</TableCell>
@@ -167,7 +167,7 @@ const ApplicationList = () => {
                           sx={{
                             position: 'sticky',
                             right: 0,
-                            background: 'white',
+                            backgroundColor: 'background.paper',
                             zIndex: 2,
                             display: 'flex',
                             gap: 1,

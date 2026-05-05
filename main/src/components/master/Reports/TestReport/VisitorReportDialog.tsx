@@ -392,10 +392,10 @@ const VisitorReportDialog: React.FC<Props> = ({ open, onClose, trackingLogs, ala
                         left: head === 'Person' ? 0 : undefined,
                         zIndex: head === 'Person' ? 3 : 1,
 
-                        backgroundColor: '#fff', // ⬅️ solid
+                        backgroundColor: 'background.paper', // ⬅️ solid
                         backgroundClip: 'padding-box',
 
-                        borderRight: head === 'Person' ? '1px solid #e0e0e0' : undefined,
+                        borderRight: head === 'Person' ? (theme) => `1px solid ${theme.palette.divider}` : undefined,
                       }}
                     >
                       {head}
@@ -432,13 +432,13 @@ const VisitorReportDialog: React.FC<Props> = ({ open, onClose, trackingLogs, ala
 
                             // ⬇️ WAJIB: solid background
                             backgroundColor:
-                              idx === 0 ? (i % 2 === 1 ? '#fff' : 'action.hover') : undefined,
+                              idx === 0 ? (i % 2 === 1 ? 'background.paper' : 'action.hover') : undefined,
 
                             // ⬇️ ini yang hilangkan "ghost"
                             backgroundClip: 'padding-box',
 
                             // ⬇️ separator biar clean
-                            borderRight: idx === 0 ? '1px solid #e0e0e0' : undefined,
+                            borderRight: idx === 0 ? (theme) => `1px solid ${theme.palette.divider}` : undefined,
                           }}
                         >
                           {cell ?? '-'}

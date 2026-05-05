@@ -26,7 +26,8 @@ const NewBlacklist: React.FC = () => {
         width: '100%',
         height: '32vh', // ✅ ikut Grid
         borderRadius: '25px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+        boxShadow: (theme) => theme.shadows[10],
+        bgcolor: 'background.paper',
         px: 2,
         py: 2,
         display: 'flex',
@@ -46,7 +47,7 @@ const NewBlacklist: React.FC = () => {
           sx={{
             fontSize: 24,
             fontWeight: 700,
-            color: '#045498',
+            color: 'primary.main',
           }}
         >
           Blacklisted
@@ -70,10 +71,16 @@ const NewBlacklist: React.FC = () => {
             alignItems="center"
             sx={{
               p: 1,
-              backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
-              borderBottom: '1px solid #e0e0e0',
+              backgroundColor: 'transparent',
+              '&:hover': {
+                backgroundColor: 'action.hover',
+              },
+              borderBottom: '1px solid',
+              borderColor: 'divider',
               width: '100%',
               overflow: 'hidden',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s ease',
             }}
           >
             {/* Avatar */}
@@ -95,7 +102,7 @@ const NewBlacklist: React.FC = () => {
                   {item.name}
                 </Typography>
               </Tooltip> */}
-              <SmartScrollingText text={item.name} fontSize={16} fontWeight={600} color="#045498" />
+              <SmartScrollingText text={item.name} fontSize={16} fontWeight={600} color="textPrimary" />
             </Box>
           </Stack>
         ))}

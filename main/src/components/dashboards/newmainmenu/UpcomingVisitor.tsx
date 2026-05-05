@@ -26,8 +26,9 @@ interface UpcomingVisitorItem {
 }
 
 const statusColorMap: Record<string, string> = {
-  denied: '#d73d3d',
-  checkout: '#00ce00',
+  denied: 'error.dark',
+  checkout: 'primary.dark',
+  checkin: 'success.dark',
 };
 
 const UpcomingVisitor: React.FC = () => {
@@ -76,7 +77,8 @@ const UpcomingVisitor: React.FC = () => {
         width: '100%',
         height: '32vh',
         borderRadius: '25px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+        boxShadow: (theme) => theme.shadows[10],
+        bgcolor: 'background.paper',
         px: 2,
         py: 2,
         display: 'flex',
@@ -96,7 +98,7 @@ const UpcomingVisitor: React.FC = () => {
           sx={{
             fontSize: 24,
             fontWeight: 700,
-            color: '#045498',
+            color: 'primary.main',
           }}
         >
           Visitor Today
@@ -119,7 +121,7 @@ const UpcomingVisitor: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#9e9e9e',
+              color: 'text.secondary',
               textAlign: 'center',
               px: 2,
             }}
@@ -142,10 +144,16 @@ const UpcomingVisitor: React.FC = () => {
               alignItems="center"
               sx={{
                 p: 1,
-                backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
-                borderBottom: '1px solid #e0e0e0',
+                backgroundColor: 'transparent',
+                '&:hover': {
+                  backgroundColor: 'action.hover',
+                },
+                borderBottom: '1px solid',
+                borderColor: 'divider',
                 width: '100%',
                 overflow: 'hidden',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s ease',
               }}
             >
               {/* Avatar */}
@@ -161,13 +169,13 @@ const UpcomingVisitor: React.FC = () => {
                   text={item.name}
                   fontSize={16}
                   fontWeight={600}
-                  color="#045498"
+                  color="textPrimary"
                 />
 
                 <SmartScrollingText
                   text={item.checkInAt ? new Date(item.checkInAt).toLocaleString() : '-'}
                   fontSize={12}
-                  color="#045498"
+                  color="textSecondary"
                 />
               </Box>
 
@@ -176,7 +184,7 @@ const UpcomingVisitor: React.FC = () => {
                 sx={{
                   fontSize: 16,
                   fontWeight: 700,
-                  color: statusColorMap[item.status.toLowerCase()] ?? '#000',
+                  color: statusColorMap[item.status.toLowerCase()] ?? 'text.primary',
                 }}
               >
                 {item.status}

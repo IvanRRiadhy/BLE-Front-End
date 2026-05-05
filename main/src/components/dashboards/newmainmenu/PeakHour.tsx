@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import Chart from 'react-apexcharts';
-import { Box, Typography, CircularProgress, SelectChangeEvent, MenuItem } from '@mui/material';
+import { Box, Typography, CircularProgress, SelectChangeEvent, MenuItem, useTheme } from '@mui/material';
 import { usePeakHour } from 'src/hooks/useDashboard';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { useSelector } from 'src/store/Store';
@@ -23,6 +23,7 @@ type DistributionLevel = 'building' | 'floor' | 'floorplan' | 'area';
 /* ---------------- Component ---------------- */
 
 const PeakHour: React.FC = () => {
+  const theme = useTheme();
   const [level, setLevel] = useState<DistributionLevel>('building');
   const dashboardFilter = useSelector((state: any) => state.customizer.dashboardFilter);
 
@@ -64,6 +65,11 @@ const PeakHour: React.FC = () => {
     chart: {
       type: 'area',
       toolbar: { show: false },
+      foreColor: theme.palette.text.secondary,
+      background: 'transparent',
+    },
+    theme: {
+      mode: theme.palette.mode as 'light' | 'dark',
     },
 
     stroke: {
@@ -94,7 +100,6 @@ const PeakHour: React.FC = () => {
       labels: {
         style: {
           fontSize: '12px',
-          colors: '#045498',
         },
       },
     },
@@ -103,26 +108,22 @@ const PeakHour: React.FC = () => {
       labels: {
         style: {
           fontSize: '12px',
-          colors: '#045498',
         },
       },
     },
 
     grid: {
-      borderColor: '#d3d3d350',
+      borderColor: theme.palette.divider,
       strokeDashArray: 4,
     },
 
     legend: {
       position: 'top',
       horizontalAlign: 'left',
-      labels: {
-        colors: '#045498',
-      },
     },
 
     tooltip: {
-      theme: 'light',
+      theme: theme.palette.mode as 'light' | 'dark',
     },
   };
 
@@ -134,7 +135,8 @@ const PeakHour: React.FC = () => {
         width: '100%',
         height: '32vh',
         borderRadius: '25px',
-        boxShadow: '0 6px 18px rgba(4,84,152,0.15)',
+        boxShadow: (theme) => theme.shadows[10],
+        bgcolor: 'background.paper',
         px: 2,
         py: 1,
       }}
@@ -152,7 +154,7 @@ const PeakHour: React.FC = () => {
           sx={{
             fontSize: 24,
             fontWeight: 700,
-            color: '#045498',
+            color: 'primary.main',
           }}
         >
           Peak Hour
@@ -164,7 +166,7 @@ const PeakHour: React.FC = () => {
           sx={{
             minWidth: 140,
             borderRadius: 2,
-            backgroundColor: '#f5f7fa',
+            backgroundColor: theme.palette.mode === 'dark' ? 'action.hover' : '#f5f7fa',
           }}
         >
           <MenuItem value="building">Building</MenuItem>

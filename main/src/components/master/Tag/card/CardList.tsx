@@ -187,7 +187,7 @@ const CardList = () => {
                 <TableHead>
                   <TableRow>
                     {/* Left Sticky Empty Column */}
-                    <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
+                    <TableCell sx={{ position: 'sticky', left: 0, backgroundColor: 'background.paper', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
                     {columns.map((col) => (
@@ -207,7 +207,7 @@ const CardList = () => {
                     ))}
                     {/* Right Sticky Empty Column */}
                     <TableCell
-                      sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
+                      sx={{ position: 'sticky', right: 0, backgroundColor: 'background.paper', zIndex: 2 }}
                     >
                       <Typography variant="h6"> Actions </Typography>
                     </TableCell>
@@ -217,7 +217,7 @@ const CardList = () => {
                   {cardData.map((card, index) => (
                     <TableRow key={card.id}>
                       <TableCell
-                        sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                        sx={{ position: 'sticky', left: 0, backgroundColor: 'background.paper', zIndex: 1 }}
                       >
                         {index + 1 + page * rowsPerPage}
                       </TableCell>
@@ -234,7 +234,7 @@ const CardList = () => {
                       <TableCell>{card.isUsed ? 'Yes' : 'No'}</TableCell>
                       <TableCell>{card.lastUsed || 'N/A'}</TableCell>
                       <TableCell
-                        sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 1 }}
+                        sx={{ position: 'sticky', right: 0, backgroundColor: 'background.paper', zIndex: 1 }}
                       >
                         <AddEditCard type="edit" card={card} />
                         <IconButton

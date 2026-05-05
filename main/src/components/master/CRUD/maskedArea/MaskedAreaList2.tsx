@@ -201,7 +201,7 @@ const MaskedAreaList2 = () => {
                       sx={{
                         position: 'sticky',
                         right: 0,
-                        background: 'white',
+                        background: 'background.paper',
                         zIndex: 2,
                         width: 150, // Fixed width
                         minWidth: 150,
@@ -218,7 +218,7 @@ const MaskedAreaList2 = () => {
                     : floorplanData.map((floorplan: any, index: number) => (
                         <TableRow key={index}>
                           <TableCell
-                            sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                            sx={{ position: 'sticky', left: 0, background: 'background.paper', zIndex: 1 }}
                           >
                             {getbuildingName(floorplan.floor?.buildingId || '')}
                           </TableCell>
@@ -239,7 +239,7 @@ const MaskedAreaList2 = () => {
                             sx={{
                               position: 'sticky',
                               right: 0,
-                              background: 'white',
+                              background: 'background.paper',
                               zIndex: 1,
                               gap: 1,
                               alignItems: 'center',

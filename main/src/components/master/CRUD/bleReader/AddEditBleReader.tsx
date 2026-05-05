@@ -18,6 +18,7 @@ import {
   Collapse,
   Stack,
   FormControlLabel,
+  Slider,
 } from '@mui/material';
 import CustomSwitch from 'src/components/forms/theme-elements/CustomSwitch';
 import { IconPencil, IconPlus, IconChevronDown, IconChevronUp, IconInfoCircle } from '@tabler/icons-react';
@@ -312,7 +313,9 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
               <Grid container spacing={5} mb={3} mt={1}>
                 {/* Advanced Set 1 */}
                 <Grid size={{ lg: 6, md: 12, sm: 12 }}>
-                  <CustomFormLabel htmlFor="measuredPower">Measured Power</CustomFormLabel>
+                  <CustomFormLabel htmlFor="measuredPower" sx={{ mt: 0 }}>
+                    Measured Power
+                  </CustomFormLabel>
                   <CustomTextField
                     id="measuredPower"
                     type="number"
@@ -335,11 +338,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                     error={!!formErrors.pathLossExponent}
                     helperText={formErrors.pathLossExponent}
                   />
-                </Grid>
-
-                {/* Advanced Set 2 */}
-                <Grid size={{ lg: 6, md: 12, sm: 12 }}>
-                  <CustomFormLabel htmlFor="heightMeter">Height (in meter)</CustomFormLabel>
+                                    <CustomFormLabel htmlFor="heightMeter">Height (in meter)</CustomFormLabel>
                   <CustomTextField
                     id="heightMeter"
                     type="number"
@@ -351,8 +350,13 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                     error={!!formErrors.heightMeter}
                     helperText={formErrors.heightMeter}
                   />
+                </Grid>
+
+                {/* Advanced Set 2 */}
+                <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+
                   <Stack direction="row" spacing={1} alignItems="center">
-                    <CustomFormLabel sx={{ mt: 3 }}>Single Reader Settings</CustomFormLabel>
+                    <CustomFormLabel sx={{ mt: 0 }}>Single Reader Settings</CustomFormLabel>
                     <Tooltip
                       title={
                         <Box sx={{ p: 0.5 }}>
@@ -365,7 +369,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                         </Box>
                       }
                     >
-                      <IconButton size="small" sx={{ p: 0, mt: 2 }}>
+                      <IconButton size="small" sx={{ p: 0 }}>
                         <IconInfoCircle size={20} stroke={1.5} />
                       </IconButton>
                     </Tooltip>
@@ -386,19 +390,46 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                     
 
                     {formData.forceReading && (
-                      <Grid size={{ lg: 6, md: 12, sm: 12 }}>
-                        <CustomTextField
-                          id="soloRadiusMeter"
-                          type="number"
-                          label="Radius (in meter)"
-                          placeholder="e.g. 5"
-                          value={formData.soloRadiusMeter}
-                          onChange={handleInputChange}
-                          fullWidth
-                          variant="outlined"
-                          inputProps={{ min: 0, step: 'any' }}
-                        />
-                      </Grid>
+                      <>
+                        <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+                          <CustomTextField
+                            id="soloRadiusMeter"
+                            type="number"
+                            label="Radius (in meter)"
+                            placeholder="e.g. 5"
+                            value={formData.soloRadiusMeter}
+                            onChange={handleInputChange}
+                            fullWidth
+                            variant="outlined"
+                            inputProps={{ min: 0, step: 'any' }}
+                          />
+                        </Grid>
+                        <Grid size={12} sx={{ mt: -1 }}>
+                          <CustomFormLabel sx={{ mb: 1 }}>
+                            Force Radius Threshold: {formData.forceRadiusThreshold}
+                          </CustomFormLabel>
+                          <Box sx={{ px: 1 }}>
+                            <Slider
+                              value={Number(formData.forceRadiusThreshold) || 0.01}
+                              min={0.01}
+                              max={1.00}
+                              step={0.01}
+                              onChange={(_, value) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  forceRadiusThreshold: value as number,
+                                }))
+                              }
+                              valueLabelDisplay="auto"
+                              marks={[
+                                { value: 0.01, label: '1%' },
+                                { value: 0.5, label: '50%' },
+                                { value: 1.0, label: '100%' },
+                              ]}
+                            />
+                          </Box>
+                        </Grid>
+                      </>
                     )}
                   </Grid>
                 </Grid>

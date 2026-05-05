@@ -70,7 +70,8 @@ export default function CustomAutocomplete<T>(props: CustomAutocompleteProps<T>)
             borderRadius: 2,
             mt: 1,
             py: 1,
-            backgroundColor: '#fff',
+            backgroundColor: 'background.paper',
+            border: '1px solid #f0f0f0',
             boxShadow: '0px 4px 12px rgba(0,0,0,0.12), 0px 0px 4px rgba(0,0,0,0.05)',
             '& .MuiAutocomplete-option': {
               px: 2,

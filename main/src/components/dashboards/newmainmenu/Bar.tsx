@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import Chart from 'react-apexcharts';
 import { useMemo } from 'react';
 
@@ -20,6 +20,7 @@ const defaultFilter = {
 /* ---------------- Component ---------------- */
 
 const Bar: React.FC = () => {
+  const theme = useTheme();
   const { data: alarmCategories = [] } = useAllAlarmCategory();
   const dashboardFilter = useSelector((state: any) => state.customizer.dashboardFilter);
   const { data: alarmByArea, isLoading } = useAlarmByArea(dashboardFilter);
@@ -81,6 +82,11 @@ const Bar: React.FC = () => {
         show: true,
         offsetX: -10,
       },
+      foreColor: theme.palette.text.secondary,
+      background: 'transparent',
+    },
+    theme: {
+      mode: theme.palette.mode as 'light' | 'dark',
     },
 
     title: {
@@ -89,7 +95,7 @@ const Bar: React.FC = () => {
       style: {
         fontSize: '22px',
         fontWeight: 'bold',
-        color: '#045498',
+        color: theme.palette.primary.main,
       },
     },
 
@@ -105,7 +111,6 @@ const Bar: React.FC = () => {
       categories: chartData.categories,
       labels: {
         style: {
-          colors: '#045498',
           fontSize: '12px',
         },
       },
@@ -115,14 +120,13 @@ const Bar: React.FC = () => {
       tickAmount: 4,
       labels: {
         style: {
-          colors: '#045498',
           fontSize: '12px',
         },
       },
     },
 
     grid: {
-      borderColor: '#d3d3d360',
+      borderColor: theme.palette.divider,
     },
 
     legend: {
@@ -146,7 +150,8 @@ const Bar: React.FC = () => {
         width: '100%',
         height: '30vh',
         borderRadius: '25px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+        boxShadow: (theme) => theme.shadows[10],
+        bgcolor: 'background.paper',
         px: 2,
         py: 2,
       }}

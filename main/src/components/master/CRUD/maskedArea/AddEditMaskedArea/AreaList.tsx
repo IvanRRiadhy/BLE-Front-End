@@ -410,7 +410,7 @@ const AreaList = () => {
         sx={{
           borderTop: '1px solid',
           borderColor: 'divider',
-          bgcolor: '#fafafa',
+          bgcolor: 'background.paper',
           m: 0,
         }}
       >

@@ -564,13 +564,15 @@ const DeviceDetailList = () => {
 
                   <Box
                     sx={{
-                      border: '1px solid #DDD',
+                      bgcolor: 'background.paper',
+                      border: '1px solid',
+                      borderColor: 'divider',
                       borderRadius: 1,
                       overflow: 'hidden',
                     }}
                   >
                     <Table>
-                      <TableHead sx={{ bgcolor: '#f5f5f5' }}>
+                      <TableHead sx={{ bgcolor: 'background.paper' }}>
                         <TableRow>
                           <TableCell sx={{ fontWeight: 600 }}>#</TableCell>
                           <TableCell sx={{ fontWeight: 600 }}>Destination Reader</TableCell>
@@ -628,7 +630,7 @@ const DeviceDetailList = () => {
         sx={{
           borderTop: '1px solid',
           borderColor: 'divider',
-          bgcolor: '#fafafa',
+          bgcolor: 'background.paper',
         }}
       >
         <Box display="flex" justifyContent="space-between">

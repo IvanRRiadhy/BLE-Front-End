@@ -61,7 +61,11 @@ const NewBeaconDistribution: React.FC = () => {
         size: 12,
         shape: 'square',
       },
+      labels: {
+        colors: 'text.primary',
+      },
     },
+    
 
     stroke: {
       colors: ['#fff'],
@@ -101,6 +105,7 @@ const NewBeaconDistribution: React.FC = () => {
             paddingTop: '50px',
             paddingLeft: '20px',
             position: 'relative',
+            
             // maxWidth: "40%",
           },
 
@@ -111,7 +116,7 @@ const NewBeaconDistribution: React.FC = () => {
             left: 20, 
             fontSize: 24,
             fontWeight: 700,
-            color: '#045498',
+            color: 'primary.main',
             whiteSpace: 'nowrap',
 
           },

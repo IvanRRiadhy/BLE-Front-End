@@ -199,7 +199,7 @@ const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
                         position: 'sticky',
                         top: 0,
                         left: 0,
-                        background: 'white',
+                        background: 'background.paper',
                         zIndex: 2,
                         width: '70px',
                       }}
@@ -218,7 +218,7 @@ const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
                     ].map((header) => (
                       <TableCell
                         key={header}
-                        sx={{ position: 'sticky', top: 0, background: 'white', zIndex: 1 }}
+                        sx={{ position: 'sticky', top: 0, background: 'background.paper', zIndex: 1 }}
                       >
                         <Typography variant="h6">{header}</Typography>
                       </TableCell>
@@ -241,7 +241,7 @@ const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
                             sx={{
                               position: 'sticky',
                               left: 0,
-                              background: 'white',
+                              background: 'background.paper',
                               zIndex: 1,
                               width: '70px',
                             }}

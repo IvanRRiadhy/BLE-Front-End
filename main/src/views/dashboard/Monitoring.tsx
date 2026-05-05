@@ -83,13 +83,13 @@ const Monitoring = () => {
   useEffect(() => {
     dispatch(toggleHorizontal(false));
     dispatch(setMonitorSidebar(true));
-    dispatch(toggleSidebar());
+    // dispatch(toggleSidebar());
     dispatch(fetchMonitoringLayouts());
 
     return () => {
       dispatch(toggleHorizontal(true));
       dispatch(setMonitorSidebar(false));
-      dispatch(toggleSidebar());
+      // dispatch(toggleSidebar());
     };
   }, [dispatch]);
 

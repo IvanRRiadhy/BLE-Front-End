@@ -63,7 +63,7 @@ const MonitoringFooter = () => {
         left: customizer.isMonitorSidebar ? customizer.SidebarWidth : customizer.MiniSidebarWidth,
         right: 0,
         height: expandedSection ? '300px' : toggleHeight,
-        backgroundColor: 'white',
+        backgroundColor: 'background.paper',
         boxShadow: '0px -2px 5px rgba(0, 0, 0, 0.1)',
         zIndex: 1000,
         transition: 'height 0.3s',
@@ -75,7 +75,8 @@ const MonitoringFooter = () => {
           display: 'flex',
           flexDirection: 'row',
           height: '50px',
-          borderBottom: '1px solid #ddd',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
         }}
       >
         {sections.map((section) => {
@@ -95,16 +96,17 @@ const MonitoringFooter = () => {
                 position: 'relative',
 
                 // 🔥 Make it feel like a button
-                backgroundColor: isActive ? '#e3f2fd' : 'white',
-                borderRight: '1px solid #eee',
+                backgroundColor: isActive ? 'secondary.light' : 'info.main',
+                borderRight: '1px solid',
+                borderRightColor: 'divider',
 
                 // 🔥 Hover effect
                 '&:hover': {
-                  backgroundColor: '#f5f5f5',
+                  backgroundColor: 'action.hover',
                 },
 
                 // 🔥 Active "raised tab" effect
-                boxShadow: isActive ? 'inset 0 -3px 0 #1976d2' : 'none',
+                boxShadow: isActive ? (theme) => `inset 0 -3px 0 ${theme.palette.primary.main}` : 'none',
 
                 transition: 'all 0.2s ease',
               }}

@@ -142,7 +142,7 @@ const BleReaderList = () => {
           sx={{
             position: 'sticky',
             left: 0,
-            background: 'white',
+            backgroundColor: 'background.paper',
             zIndex: 1,
             width: 35,
             minWidth: 35,
@@ -167,7 +167,7 @@ const BleReaderList = () => {
           sx={{
             position: 'sticky',
             right: 0,
-            background: 'white',
+            backgroundColor: 'background.paper',
             zIndex: 2,
             width: 150,
             minWidth: 150,
@@ -239,7 +239,7 @@ const BleReaderList = () => {
                       sx={{
                         position: 'sticky',
                         left: 0,
-                        background: 'white',
+                        backgroundColor: 'background.paper',
                         zIndex: 2,
                         width: 50, // Fixed width
                         minWidth: 50,
@@ -287,7 +287,7 @@ const BleReaderList = () => {
                       sx={{
                         position: 'sticky',
                         right: 0,
-                        background: 'white',
+                        backgroundColor: 'background.paper',
                         zIndex: 2,
                         width: 150, // Fixed width
                         minWidth: 150,
@@ -327,7 +327,7 @@ const BleReaderList = () => {
                             sx={{
                               position: 'sticky',
                               right: 0,
-                              background: 'white',
+                              backgroundColor: 'background.paper',
                               zIndex: 1,
                               gap: 1,
                               alignItems: 'center',

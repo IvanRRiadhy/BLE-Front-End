@@ -384,7 +384,7 @@ const AboutPage = () => {
                   </Grid>
 
                   {/* Theme Direction */}
-                  <Grid size={{ xs: 12, sm: 6 }}>
+                  {/* <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="h6" gutterBottom>
                       Theme Direction
                     </Typography>
@@ -420,7 +420,7 @@ const AboutPage = () => {
                         RTL
                       </StyledBox>
                     </Stack>
-                  </Grid>
+                  </Grid> */}
 
                   {/* Theme Colors */}
                   <Grid size={12}>
@@ -470,7 +470,7 @@ const AboutPage = () => {
                   </Grid>
 
                   {/* Layout Type */}
-                  <Grid size={{ xs: 12, sm: 6 }}>
+                  {/* <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="h6" gutterBottom mt={2}>
                       Layout Type
                     </Typography>
@@ -506,10 +506,10 @@ const AboutPage = () => {
                         Horizontal
                       </StyledBox>
                     </Stack>
-                  </Grid>
+                  </Grid> */}
 
                   {/* Container Option */}
-                  <Grid size={{ xs: 12, sm: 6 }}>
+                  {/* <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="h6" gutterBottom mt={2}>
                       Container Option
                     </Typography>
@@ -545,10 +545,10 @@ const AboutPage = () => {
                         Full
                       </StyledBox>
                     </Stack>
-                  </Grid>
+                  </Grid> */}
 
                   {/* Sidebar Type */}
-                  {!customizer.isHorizontal && (
+                  {/* {!customizer.isHorizontal && (
                     <Grid size={{ xs: 12, sm: 6 }}>
                       <Typography variant="h6" gutterBottom mt={2}>
                         Sidebar Type
@@ -586,10 +586,10 @@ const AboutPage = () => {
                         </StyledBox>
                       </Stack>
                     </Grid>
-                  )}
+                  )} */}
 
                   {/* Card Shadow */}
-                  <Grid size={{ xs: 12, sm: 6 }}>
+                  {/* <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="h6" gutterBottom mt={2}>
                       Card Option
                     </Typography>
@@ -623,10 +623,10 @@ const AboutPage = () => {
                         Shadow
                       </StyledBox>
                     </Stack>
-                  </Grid>
+                  </Grid> */}
 
                   {/* Border Radius */}
-                  <Grid size={12}>
+                  {/* <Grid size={12}>
                     <Typography variant="h6" gutterBottom mt={2}>
                       Theme Border Radius
                     </Typography>
@@ -640,7 +640,7 @@ const AboutPage = () => {
                         valueLabelDisplay="auto"
                       />
                     </Box>
-                  </Grid>
+                  </Grid> */}
                 </Grid>
               </CardContent>
             </Card>

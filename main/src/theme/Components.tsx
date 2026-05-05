@@ -12,6 +12,8 @@ const components: any = (theme: Theme) => {
         html: {
           height: '100%',
           width: '100%',
+          scrollbarWidth: 'thin',
+          scrollbarColor: `${theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300]} transparent`,
         },
         a: {
           textDecoration: 'none',
@@ -85,7 +87,18 @@ const components: any = (theme: Theme) => {
           width: '1px !important',
         },
         ' .simplebar-scrollbar:before': {
-          background: `${theme.palette.grey[300]} !important`,
+          background: `${theme.palette.mode === 'dark' ? theme.palette.grey[600] : theme.palette.grey[300]} !important`,
+        },
+        '::-webkit-scrollbar': {
+          width: '8px',
+          height: '8px',
+        },
+        '::-webkit-scrollbar-thumb': {
+          background: theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300],
+          borderRadius: '10px',
+        },
+        '::-webkit-scrollbar-track': {
+          background: 'transparent',
         },
         '@keyframes gradient': {
           '0%': {

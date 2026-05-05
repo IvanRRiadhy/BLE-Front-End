@@ -51,6 +51,7 @@ export interface bleReaderType {
     pathLossExponent: number,
     heightMeter: number,
     forceReading: boolean,
+    forceRadiusThreshold: number,
     soloRadiusMeter: number,
     // engineReaderId: string,
     createdBy: string,

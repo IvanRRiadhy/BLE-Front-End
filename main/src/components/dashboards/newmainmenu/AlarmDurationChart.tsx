@@ -3,6 +3,7 @@ import Chart from 'react-apexcharts';
 import { Box, Typography } from '@mui/material';
 import ApexCharts from 'apexcharts';
 import { useAlarmPerformance } from 'src/hooks/useDashboard';
+import { useTheme } from '@mui/material';
 import { useSelector } from 'src/store/Store';
 
 // const ALARM_CATEGORIES = [
@@ -85,6 +86,7 @@ const defaultFilter = {
 // };
 
 const AlarmRadarChart: React.FC = () => {
+  const theme = useTheme();
   // const rawData = useMemo(() => generateDummyAlarmData(), []);
   // const aggregated = useMemo(() => aggregateRadarData(rawData), [rawData]);
   const dashboardFilter = useSelector((state: any) => state.customizer.dashboardFilter);
@@ -125,14 +127,19 @@ const AlarmRadarChart: React.FC = () => {
       type: 'radar',
       height: '100%',
       animations: { enabled: true },
+      foreColor: theme.palette.text.secondary,
+      background: 'transparent',
+    },
+    theme: {
+      mode: theme.palette.mode as 'light' | 'dark',
     },
     plotOptions: {
       radar: {
         size: 90, // 🔥 increase this
         polygons: {
-          strokeColors: '#e9ecef',
+          strokeColors: theme.palette.divider,
           fill: {
-            colors: ['#f8f9fa', '#fff'],
+            colors: [theme.palette.mode === 'dark' ? '#1c1f25' : '#f8f9fa', theme.palette.background.paper],
           },
         },
       },
@@ -191,13 +198,14 @@ const AlarmRadarChart: React.FC = () => {
         width: '100%',
         height: '32vh',
         borderRadius: '25px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+        boxShadow: (theme) => theme.shadows[10],
+        bgcolor: 'background.paper',
         p: 2,
         display: 'flex',
         flexDirection: 'column',
       }}
     >
-      <Typography sx={{ fontSize: 22, fontWeight: 700, color: '#045498' }}>
+      <Typography sx={{ fontSize: 22, fontWeight: 700, color: 'primary.main' }}>
         Alarm Performance Overview
       </Typography>
       <Box

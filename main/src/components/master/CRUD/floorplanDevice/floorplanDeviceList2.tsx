@@ -187,7 +187,7 @@ const FloorplanDeviceList2 = () => {
                       sx={{
                         position: 'sticky',
                         right: 0,
-                        background: 'white',
+                        background: 'background.paper',
                         width: 150,
                         minWidth: 150,
                         maxWidth: 150,
@@ -204,7 +204,7 @@ const FloorplanDeviceList2 = () => {
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : floorplanData.map((floorplan: FloorplanType, index) => (
                         <TableRow key={index}>
-                          <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}>
+                          <TableCell sx={{ position: 'sticky', left: 0, background: 'background.paper', zIndex: 1 }}>
                             {getBuildingName(floorplan.floor?.buildingId || "")}
                           </TableCell>
 
@@ -227,7 +227,7 @@ const FloorplanDeviceList2 = () => {
                             sx={{
                               position: 'sticky',
                               right: 0,
-                              background: 'white',
+                              background: 'background.paper',
                               width: 150,
                               zIndex: 1,
                             }}

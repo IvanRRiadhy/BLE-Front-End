@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  useTheme,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
@@ -63,6 +64,7 @@ const CREATE_OPTION = {
 };
 
 const AreaDetailList = () => {
+  const theme = useTheme();
   const dispatch: AppDispatch = useDispatch();
   const area = useSelector((state: RootState) => state.maskedAreaReducer.editingMaskedArea);
   const { data: labels } = useMaskedAreaLabels();
@@ -381,9 +383,10 @@ const AreaDetailList = () => {
                   flexWrap: 'wrap',
                   gap: 1,
                   p: 1,
-                  border: '1px solid #ccc',
+                  border: '1px solid',
+                  borderColor: theme.palette.divider,
                   borderRadius: 1,
-                  backgroundColor: '#f9f9f9',
+                  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#f9f9f9',
                   justifyContent: 'space-between',
                 }}
               >
@@ -399,13 +402,13 @@ const AreaDetailList = () => {
                       backgroundColor: color,
                       border:
                         formData.colorArea === color
-                          ? '3px solid #000'
-                          : '2px solid rgba(0,0,0,0.2)',
+                          ? `3px solid ${theme.palette.mode === 'dark' ? '#fff' : '#000'}`
+                          : `2px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
                       transition: 'all 0.25s ease',
                       boxShadow:
                         formData.colorArea === color
-                          ? '0 0 0 3px rgba(0,0,0,0.15)'
-                          : '0 1px 4px rgba(0,0,0,0.1)',
+                          ? `0 0 0 3px ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`
+                          : `0 1px 4px ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
                       '&:hover': {
                         transform: 'scale(1.12)',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
@@ -486,7 +489,7 @@ const AreaDetailList = () => {
         sx={{
           borderTop: '1px solid',
           borderColor: 'divider',
-          bgcolor: '#fafafa',
+          bgcolor: 'background.paper',
         }}
       >
         <Box display="flex" justifyContent="space-between">

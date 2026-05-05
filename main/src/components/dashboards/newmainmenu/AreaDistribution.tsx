@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Chart from 'react-apexcharts';
 import ApexCharts from 'apexcharts';
-import { Box, Typography, Stack, Grid2 as Grid, SelectChangeEvent, MenuItem } from '@mui/material';
+import { Box, Typography, Stack, Grid2 as Grid, SelectChangeEvent, MenuItem, useTheme } from '@mui/material';
 import { useAreaDistributionData } from 'src/hooks/useDashboard';
 import { DashboardAreaChartFilter } from 'src/store/apps/dashboard/Dashboard';
 import { useSelector } from 'react-redux';
@@ -83,6 +83,7 @@ const CHART_ID = 'area-distribution-pie';
 /* ---------------- Component ---------------- */
 
 const NewAreaDistribution: React.FC = () => {
+  const theme = useTheme();
   const countingData = useSelector(
     (state: RootState) => state.BeaconReducer.countingData,
   ) as CountingData;
@@ -167,6 +168,11 @@ const NewAreaDistribution: React.FC = () => {
     chart: {
       id: CHART_ID,
       type: 'pie',
+      foreColor: theme.palette.text.secondary,
+      background: 'transparent',
+    },
+    theme: {
+      mode: theme.palette.mode as 'light' | 'dark',
     },
 
     labels,
@@ -208,7 +214,8 @@ const NewAreaDistribution: React.FC = () => {
         width: '100%',
         height: '100%',
         borderRadius: '25px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+        boxShadow: (theme) => theme.shadows[10],
+        bgcolor: 'background.paper',
         p: 2,
         display: 'flex',
         flexDirection: 'column',
@@ -222,7 +229,7 @@ const NewAreaDistribution: React.FC = () => {
         width="100%"
         spacing={2}
       >
-        <Typography sx={{ fontSize: 24, fontWeight: 700, color: '#045498' }}>
+        <Typography sx={{ fontSize: 24, fontWeight: 700, color: 'primary.main' }}>
           Area Distribution
         </Typography>
 
@@ -233,7 +240,7 @@ const NewAreaDistribution: React.FC = () => {
           sx={{
             minWidth: 140,
             borderRadius: 2,
-            backgroundColor: '#f5f7fa',
+            backgroundColor: theme.palette.mode === 'dark' ? 'action.hover' : '#f5f7fa',
           }}
         >
           <MenuItem value="building">Building</MenuItem>

@@ -131,7 +131,7 @@ const BulkAddEditDepartment = ({ type, initialData, setSelectedIds }: Props) => 
   const getCellStyle = (rowIndex: number, key: keyof DepartmentType) => {
     const isLocked = lockedRows[rowIndex] || lockedCells[rowIndex]?.[key];
     return {
-      backgroundColor: isLocked ? '#e3f2fd' : 'transparent',
+      backgroundColor: isLocked ? 'info.light' : 'transparent',
     };
   };
 
@@ -349,7 +349,7 @@ const BulkAddEditDepartment = ({ type, initialData, setSelectedIds }: Props) => 
 
             <TableBody>
               {rows.map((row, idx) => (
-                <TableRow key={idx} sx={{ backgroundColor: lockedRows[idx] ? '#e3f2fd' : 'white' }}>
+                <TableRow key={idx} sx={{ backgroundColor: lockedRows[idx] ? 'info.light' : 'background.paper' }}>
                   {/* CODE */}
                   <TableCell>
                     <div style={{ display: 'flex', alignItems: 'center', ...getCellStyle(idx, 'code') }}>
@@ -439,7 +439,7 @@ const BulkAddEditDepartment = ({ type, initialData, setSelectedIds }: Props) => 
                                 : {},
                             }));
                           }}
-                          sx={{ color: lockedRows[idx] ? '#1976d2' : 'inherit' }}
+                          sx={{ color: lockedRows[idx] ? 'primary.main' : 'inherit' }}
                         >
                           {lockedRows[idx] ? <IconLock size={16} /> : <IconLockOpen size={16} />}
                         </IconButton>

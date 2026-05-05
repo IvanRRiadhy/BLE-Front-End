@@ -40,10 +40,10 @@ const Config = () => {
   // --- Lifecycle setup (hide sidebar, switch layout) ---
   useEffect(() => {
     dispatch(toggleHorizontal(false)); // horizontal off
-    dispatch(toggleSidebar()); // hide sidebar
+    // dispatch(toggleSidebar()); // hide sidebar
     return () => {
       dispatch(toggleHorizontal(true)); // restore on cleanup
-      dispatch(toggleSidebar()); // restore sidebar
+      // dispatch(toggleSidebar()); // restore sidebar
     };
   }, [dispatch]);
 

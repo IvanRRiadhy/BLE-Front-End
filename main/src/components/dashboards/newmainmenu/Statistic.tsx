@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Chart from 'react-apexcharts';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import { useAlarmStatisticHourly, usePeakHour } from 'src/hooks/useDashboard';
 import { useSelector } from 'src/store/Store';
 
@@ -32,6 +32,7 @@ const getUserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 /* ---------------- Component ---------------- */
 
 const Statistic: React.FC = () => {
+  const theme = useTheme();
   const timezone = useMemo(() => getUserTimezone(), []);
   const dashboardFilter = useSelector((state: any) => state.customizer.dashboardFilter);
   const body = useMemo(
@@ -81,6 +82,11 @@ const Statistic: React.FC = () => {
     chart: {
       type: 'line',
       toolbar: { show: false },
+      foreColor: theme.palette.text.secondary,
+      background: 'transparent',
+    },
+    theme: {
+      mode: theme.palette.mode as 'light' | 'dark',
     },
 
     stroke: {
@@ -95,7 +101,6 @@ const Statistic: React.FC = () => {
       labels: {
         style: {
           fontSize: '13px',
-          colors: '#045498',
         },
       },
     },
@@ -104,21 +109,17 @@ const Statistic: React.FC = () => {
       labels: {
         style: {
           fontSize: '13px',
-          colors: '#045498',
         },
       },
     },
 
     grid: {
-      borderColor: '#d3d3d380',
+      borderColor: theme.palette.divider,
     },
 
     legend: {
       position: 'top',
       horizontalAlign: 'right',
-      labels: {
-        colors: '#045498',
-      },
     },
   };
 
@@ -130,7 +131,8 @@ const Statistic: React.FC = () => {
         width: '100%',
         height: '32vh',
         borderRadius: '25px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+        boxShadow: (theme) => theme.shadows[10],
+        bgcolor: 'background.paper',
         px: 2,
         py: 1,
       }}
@@ -148,8 +150,7 @@ const Statistic: React.FC = () => {
           sx={{
             fontSize: 26,
             fontWeight: 700,
-            color: '#045498',
-            // mt: 2,
+            color: 'primary.main',
           }}
         >
           Alarm Statistic

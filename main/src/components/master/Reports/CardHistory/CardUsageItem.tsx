@@ -34,14 +34,14 @@ const CardUsageItem = ({ data, onClick }: CardUsageItemProps) => {
           borderRadius: 1.5,
           p: 1,
           height: '100%',
-          bgcolor: '#fafafa',
+          bgcolor: 'background.paper',
           cursor: 'pointer',
           transition: 'all 0.2s ease-in-out',
           '&:hover': {
             borderColor: 'primary.main',
             boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
             transform: 'translateY(-2px)',
-            bgcolor: '#f5f5f5',
+            bgcolor: 'action.hover',
           },
         }}
       >

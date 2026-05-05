@@ -9,6 +9,7 @@ import {
   TableHead,
   TableRow,
   Paper,
+  useTheme,
 } from '@mui/material';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
@@ -77,7 +78,7 @@ const Statistic = () => {
   }, [visitorData]);
 
   // Function to generate HTML for the new window
-  const generatePersonWindowHTML = (title: string, personsData: any[], type: 'building' | 'floor' | 'floorplan' | 'area') => {
+  const generatePersonWindowHTML = (title: string, personsData: any[], type: 'building' | 'floor' | 'floorplan' | 'area', isDarkMode: boolean) => {
     // Separate visitors and members
     const visitors = personsData.filter(person => person.type === 'visitor');
     const members = personsData.filter(person => person.type === 'member');
@@ -97,15 +98,15 @@ const Statistic = () => {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
               margin: 0;
               padding: 20px;
-              background-color: #f5f5f5;
-              color: #333;
+              background-color: ${isDarkMode ? '#1a1f26' : '#f5f5f5'};
+              color: ${isDarkMode ? '#eef2f6' : '#333'};
             }
             .container {
               max-width: 1400px;
               margin: 0 auto;
-              background: white;
+              background: ${isDarkMode ? '#242b34' : 'white'};
               border-radius: 8px;
-              box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+              box-shadow: 0 2px 10px rgba(0,0,0,${isDarkMode ? '0.4' : '0.1'});
               padding: 24px;
             }
             .header {
@@ -114,7 +115,7 @@ const Statistic = () => {
               align-items: center;
               margin-bottom: 24px;
               padding-bottom: 16px;
-              border-bottom: 2px solid #e0e0e0;
+              border-bottom: 2px solid ${isDarkMode ? '#333' : '#e0e0e0'};
             }
             h1 {
               margin: 0;
@@ -123,11 +124,11 @@ const Statistic = () => {
             }
             h2 {
               margin: 24px 0 16px 0;
-              color: #333;
+              color: ${isDarkMode ? '#eef2f6' : '#333'};
               font-size: 20px;
             }
             .timestamp {
-              color: #666;
+              color: ${isDarkMode ? '#aaa' : '#666'};
               font-size: 14px;
             }
             .stats-container {
@@ -137,7 +138,7 @@ const Statistic = () => {
               margin-bottom: 24px;
             }
             .stat-card {
-              background: #f8f9fa;
+              background: ${isDarkMode ? '#2c343f' : '#f8f9fa'};
               border-radius: 6px;
               padding: 16px;
               border-left: 4px solid #1976d2;
@@ -150,13 +151,13 @@ const Statistic = () => {
             }
             .stat-label {
               font-size: 14px;
-              color: #666;
+              color: ${isDarkMode ? '#aaa' : '#666'};
             }
             .table-container {
               overflow-x: auto;
               margin-bottom: 24px;
               border-radius: 6px;
-              border: 1px solid #e0e0e0;
+              border: 1px solid ${isDarkMode ? '#333' : '#e0e0e0'};
             }
             table {
               width: 100%;
@@ -164,23 +165,23 @@ const Statistic = () => {
               min-width: 1200px;
             }
             th {
-              background-color: #f8f9fa;
+              background-color: ${isDarkMode ? '#333e4d' : '#f8f9fa'};
               padding: 12px 16px;
               text-align: left;
               font-weight: 600;
-              color: #333;
-              border-bottom: 2px solid #e0e0e0;
+              color: ${isDarkMode ? '#eef2f6' : '#333'};
+              border-bottom: 2px solid ${isDarkMode ? '#444' : '#e0e0e0'};
               position: sticky;
               top: 0;
               z-index: 10;
             }
             td {
               padding: 10px 16px;
-              border-bottom: 1px solid #e0e0e0;
+              border-bottom: 1px solid ${isDarkMode ? '#333' : '#e0e0e0'};
               vertical-align: top;
             }
             tr:hover {
-              background-color: #f5f5f5;
+              background-color: ${isDarkMode ? '#3d4857' : '#f5f5f5'};
             }
             .badge {
               display: inline-block;
@@ -190,12 +191,12 @@ const Statistic = () => {
               font-weight: 500;
             }
             .badge-visitor {
-              background-color: #e3f2fd;
-              color: #1976d2;
+              background-color: ${isDarkMode ? 'rgba(25, 118, 210, 0.2)' : '#e3f2fd'};
+              color: ${isDarkMode ? '#64b5f6' : '#1976d2'};
             }
             .badge-member {
-              background-color: #e8f5e9;
-              color: #2e7d32;
+              background-color: ${isDarkMode ? 'rgba(46, 125, 50, 0.2)' : '#e8f5e9'};
+              color: ${isDarkMode ? '#81c784' : '#2e7d32'};
             }
             .no-data {
               text-align: center;
@@ -378,14 +379,14 @@ const Statistic = () => {
   };
 
   // Function to open a new window with person data
-  const openPersonDataWindow = (title: string, personsData: any[], type: 'building' | 'floor' | 'floorplan' | 'area') => {
+  const openPersonDataWindow = (title: string, personsData: any[], type: 'building' | 'floor' | 'floorplan' | 'area', isDarkMode: boolean) => {
     if (personsData.length === 0) {
       alert(`No person data available for ${title}`);
       return null;
     }
     
     // Generate HTML content
-    const htmlContent = generatePersonWindowHTML(title, personsData, type);
+    const htmlContent = generatePersonWindowHTML(title, personsData, type, isDarkMode);
     
     // Open new window
     const newWindow = window.open('', '_blank', 'width=1400,height=800,menubar=no,toolbar=no,location=no,status=no');
@@ -478,6 +479,9 @@ const Statistic = () => {
     return persons;
   };
 
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
+
   // Function to handle building click
   const handleBuildingClick = (buildingId: string) => {
     console.log(`Building ID: ${buildingId}`);
@@ -491,7 +495,7 @@ const Statistic = () => {
     
     if (personsData.length > 0) {
       // Open new window with static data snapshot
-      openPersonDataWindow(`Persons in ${buildingName}`, personsData, 'building');
+      openPersonDataWindow(`Persons in ${buildingName}`, personsData, 'building', isDarkMode);
       
       // Also log to console for debugging
       console.log(`Found ${personsData.length} person(s) in building ${buildingName} (snapshot)`);
@@ -515,7 +519,7 @@ const Statistic = () => {
     
     if (personsData.length > 0) {
       // Open new window with static data snapshot
-      openPersonDataWindow(`Persons in ${floorName}`, personsData, 'floor');
+      openPersonDataWindow(`Persons in ${floorName}`, personsData, 'floor', isDarkMode);
       
       // Also log to console for debugging
       console.log(`Found ${personsData.length} person(s) in floor ${floorName} (snapshot)`);
@@ -538,7 +542,7 @@ const Statistic = () => {
     
     if (personsData.length > 0) {
       // Open new window with static data snapshot
-      openPersonDataWindow(`Persons in ${floorplanName}`, personsData, 'floorplan');
+      openPersonDataWindow(`Persons in ${floorplanName}`, personsData, 'floorplan', isDarkMode);
       
       // Also log to console for debugging
       console.log(`Found ${personsData.length} person(s) in floorplan ${floorplanName} (snapshot)`);
@@ -561,7 +565,7 @@ const Statistic = () => {
     
     if (personsData.length > 0) {
       // Open new window with static data snapshot
-      openPersonDataWindow(`Persons in ${areaName}`, personsData, 'area');
+      openPersonDataWindow(`Persons in ${areaName}`, personsData, 'area', isDarkMode);
       
       // Also log to console for debugging
       console.log(`Found ${personsData.length} person(s) in area ${areaName} (snapshot)`);

@@ -229,7 +229,7 @@ const AlarmList = () => {
                         position: 'sticky',
                         top: 0,
                         left: 0,
-                        background: 'white',
+                        background: 'background.paper',
                         zIndex: 2,
                         width: 35,
                       }}
@@ -239,7 +239,7 @@ const AlarmList = () => {
                     {columns.map((col) => (
                       <TableCell
                         key={col.label}
-                        sx={{ position: 'sticky', top: 0, background: 'white', zIndex: 1 }}
+                        sx={{ position: 'sticky', top: 0, background: 'background.paper', zIndex: 1 }}
                       >
                         {col.sortAble && col.field ? (
                           <TableSortLabel
@@ -260,7 +260,7 @@ const AlarmList = () => {
                         position: 'sticky',
                         top: 0,
                         right: 0,
-                        background: 'white',
+                        background: 'background.paper',
                         zIndex: 2,
                         width: 150, // Fixed width
                         minWidth: 150,
@@ -281,7 +281,7 @@ const AlarmList = () => {
                             sx={{
                               position: 'sticky',
                               left: 0,
-                              background: 'white',
+                              background: 'background.paper',
                               zIndex: 1,
                               width: 35,
                               textAlign: 'center',
@@ -333,7 +333,7 @@ const AlarmList = () => {
                             sx={{
                               position: 'sticky',
                               right: 0,
-                              background: 'white',
+                              background: 'background.paper',
                               zIndex: 1,
                               gap: 1,
                               alignItems: 'center',

@@ -434,7 +434,7 @@ const AddEditCard = ({ type, card }: formType) => {
                       borderRadius: 4,
                       padding: 8,
                       flexGrow: 1,
-                      background: '#fafbfc',
+                      background: 'background.paper',
                       display: 'flex',
                       minHeight: 258,
                       flexDirection: 'column',
@@ -512,7 +512,7 @@ const AddEditCard = ({ type, card }: formType) => {
                     display: 'flex',
                     minHeight: 258,
                     flexDirection: 'column',
-                    bgcolor: '#fafbfc',
+                    bgcolor: 'background.default',
                   }}
                 >
                   {(formData.cardAccesses ?? []).length === 0 ? (

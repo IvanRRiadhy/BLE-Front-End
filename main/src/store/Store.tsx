@@ -146,7 +146,7 @@ const storage = localForage.createInstance({
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['layoutReducer', 'AlarmActiveReducer'], // Only persist layout state
+  whitelist: ['layoutReducer', 'AlarmActiveReducer', 'customizer'], // Only persist layout state
 };
 
 // Create persisted root reducer

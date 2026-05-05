@@ -479,7 +479,7 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
                   sx={{
                     position: 'sticky',
                     right: 0,
-                    background: 'white',
+                    backgroundColor: 'background.paper',
                     zIndex: 2,
                     width: 150, // Fixed width
                     minWidth: 150,
@@ -524,7 +524,7 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
                             sx={{
                               position: 'sticky',
                               right: 0,
-                              background: 'white',
+                              backgroundColor: 'background.paper',
                               zIndex: 1,
                               gap: 1,
                               alignItems: 'center',

@@ -454,14 +454,15 @@ const VisitorRegister = () => {
                   {/* Notes Input */}
 
                   <CustomFormLabel>Area(s) to Visit</CustomFormLabel>
-                  <div
-                    style={{
-                      border: '1px solid #ced4da',
-                      borderRadius: 4,
-                      padding: 8,
+                  <Box
+                    sx={{
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      borderRadius: 1,
+                      padding: 1,
                       minHeight: 180,
                       maxHeight: 250,
-                      background: '#fafbfc',
+                      background: 'background.paper',
                       display: 'flex',
                       flexDirection: 'column',
                       width: '100%',
@@ -484,7 +485,7 @@ const VisitorRegister = () => {
                         Selected Area: {getAreaPath(selectedMaskedArea)}
                       </Typography>
                     </div>
-                  </div>
+                  </Box>
                   {/* Member Input */}
                   <CustomFormLabel> Purpose Visit (member) </CustomFormLabel>
                   <CustomAutocomplete<memberType>
@@ -541,7 +542,7 @@ const VisitorRegister = () => {
                                     position: 'sticky',
                                     width: '35%',
                                     top: 0,
-                                    backgroundColor: '#fff',
+                                    backgroundColor: 'background.paper',
                                     zIndex: 2,
                                   }}
                                 >
@@ -553,7 +554,7 @@ const VisitorRegister = () => {
                                     position: 'sticky',
                                     width: '35%',
                                     top: 0,
-                                    backgroundColor: '#fff',
+                                    backgroundColor: 'background.paper',
                                     zIndex: 2,
                                   }}
                                 >
@@ -565,7 +566,7 @@ const VisitorRegister = () => {
                                     position: 'sticky',
                                     width: 15,
                                     top: 0,
-                                    backgroundColor: '#fff',
+                                    backgroundColor: 'background.paper',
                                     zIndex: 2,
                                   }}
                                 >
@@ -578,7 +579,7 @@ const VisitorRegister = () => {
                                     right: 0,
                                     width: 25,
                                     top: 0,
-                                    backgroundColor: '#fff',
+                                    backgroundColor: 'background.paper',
                                     zIndex: 2,
                                   }}
                                 >
@@ -597,7 +598,7 @@ const VisitorRegister = () => {
                                 return (
                                   <TableRow
                                     key={index}
-                                    sx={{ backgroundColor: isRegistered ? '#f5f5f5' : 'inherit' }}
+                                    sx={{ backgroundColor: isRegistered ? 'action.hover' : 'inherit' }}
                                   >
                                     <TableCell>
                                       <TextField
@@ -711,8 +712,8 @@ const VisitorRegister = () => {
       position: 'sticky',
       top: 0,
       zIndex: 2,
-      backgroundColor: '#fff',
-      borderBottom: '1px solid #eee',
+      backgroundColor: 'background.paper',
+      borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
     }}
   >
     {/* Sticky Add New */}
@@ -831,7 +832,7 @@ const renderTreeItems = (
             fontSize: isLeaf ? '0.875rem' : '0.875rem',
             color: isSelected ? 'primary.main' : isAncestor ? 'secondary.main' : 'inherit',
             cursor: isLeaf ? 'pointer' : 'default',
-            backgroundColor: isSelected || isAncestor ? 'rgba(25, 118, 210, 0.08)' : 'transparent',
+            backgroundColor: isSelected || isAncestor ? 'action.selected' : 'transparent',
             borderRadius: 1,
             px: 0.5,
           }}

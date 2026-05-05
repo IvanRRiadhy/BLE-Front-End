@@ -63,6 +63,7 @@ const BuildingImport = () => {
       toast.error('Import Error');
     } finally {
       setImportLoading(false);
+      
     }
   };
 

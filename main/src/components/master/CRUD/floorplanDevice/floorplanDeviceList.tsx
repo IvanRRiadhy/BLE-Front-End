@@ -88,7 +88,7 @@ const FloorplanDeviceList = () => {
                 <TableHead>
                   <TableRow>
                     {/* Left Sticky Empty Column */}
-                    <TableCell sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 2 }}>
+                    <TableCell sx={{ position: 'sticky', left: 0, background: 'background.paper', zIndex: 2 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
                     {[
@@ -115,7 +115,7 @@ const FloorplanDeviceList = () => {
                     ))}
                     {/* Right Sticky Empty Column */}
                     <TableCell
-                      sx={{ position: 'sticky', right: 0, background: 'white', zIndex: 2 }}
+                      sx={{ position: 'sticky', right: 0, background: 'background.paper', zIndex: 2 }}
                     >
                       <Typography variant="h6"> Actions </Typography>
                     </TableCell>
@@ -127,7 +127,7 @@ const FloorplanDeviceList = () => {
                     .map((device: FloorplanDeviceType, index: number) => (
                       <TableRow key={index}>
                         <TableCell
-                          sx={{ position: 'sticky', left: 0, background: 'white', zIndex: 1 }}
+                          sx={{ position: 'sticky', left: 0, background: 'background.paper', zIndex: 1 }}
                         >
                           {index + 1}
                         </TableCell>
@@ -151,7 +151,7 @@ const FloorplanDeviceList = () => {
                           sx={{
                             position: 'sticky',
                             right: 0,
-                            background: 'white',
+                            background: 'background.paper',
                             zIndex: 2,
                             display: 'flex',
                             gap: 1,

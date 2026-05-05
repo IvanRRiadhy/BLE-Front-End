@@ -234,9 +234,9 @@ const ReaderReportDialog: React.FC<Props> = ({ open, onClose, reportData }) => {
                         top: 0,
                         left: head === 'Reader Name' ? 0 : undefined,
                         zIndex: head === 'Reader Name' ? 3 : 1,
-                        backgroundColor: '#fff',
+                        backgroundColor: 'background.paper',
                         backgroundClip: 'padding-box',
-                        borderRight: head === 'Reader Name' ? '1px solid #e0e0e0' : undefined,
+                        borderRight: head === 'Reader Name' ? (theme) => `1px solid ${theme.palette.divider}` : undefined,
                       }}
                     >
                       {head}
@@ -272,9 +272,9 @@ const ReaderReportDialog: React.FC<Props> = ({ open, onClose, reportData }) => {
                             left: idx === 0 ? 0 : undefined,
                             zIndex: idx === 0 ? 2 : 0,
                             backgroundColor:
-                              idx === 0 ? (i % 2 === 1 ? '#fff' : 'action.hover') : undefined,
+                              idx === 0 ? (i % 2 === 1 ? 'background.paper' : 'action.hover') : undefined,
                             backgroundClip: 'padding-box',
-                            borderRight: idx === 0 ? '1px solid #e0e0e0' : undefined,
+                            borderRight: idx === 0 ? (theme) => `1px solid ${theme.palette.divider}` : undefined,
                           }}
                         >
                           {cell}

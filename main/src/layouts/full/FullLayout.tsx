@@ -47,13 +47,13 @@ const MainWrapper = styled('div')(() => ({
   width: '100%',
 }));
 
-const PageWrapper = styled('div')(() => ({
+const PageWrapper = styled('div')(({ theme }) => ({
   display: 'flex',
   flexGrow: 1,
   flexDirection: 'column',
   zIndex: 1,
   width: '100%',
-  backgroundColor: '#ffffffff',
+  backgroundColor: theme.palette.background.default,
 }));
 
 const PRIORITY_WEIGHT: Record<AlarmPriority, number> = {

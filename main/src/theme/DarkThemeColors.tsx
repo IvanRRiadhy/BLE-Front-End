@@ -4,20 +4,15 @@ const DarkThemeColors = [
     palette: {
       primary: {
         main: '#5D87FF',
-        light: '#253662',
+        light: '#2a3547',
         dark: '#4570EA',
         contrastText: '#ffffff',
       },
       secondary: {
         main: '#49BEFF',
-        light: '#1C455D',
+        light: '#1c3444',
         dark: '#23afdb',
         contrastText: '#ffffff',
-      },
-      background: {
-        default: '#2A3447',
-        dark: '#2A3547',
-        paper: '#2A3447',
       },
     },
   },
@@ -26,13 +21,13 @@ const DarkThemeColors = [
     palette: {
       primary: {
         main: '#0074BA',
-        light: '#103247',
+        light: '#1a3141',
         dark: '#006DAF',
         contrastText: '#ffffff',
       },
       secondary: {
         main: '#47D7BC',
-        light: '#0C4339',
+        light: '#1c3834',
         dark: '#39C7AD',
         contrastText: '#ffffff',
       },
@@ -43,13 +38,13 @@ const DarkThemeColors = [
     palette: {
       primary: {
         main: '#763EBD',
-        light: '#26153C',
+        light: '#2c1e40',
         dark: '#6E35B7',
         contrastText: '#ffffff',
       },
       secondary: {
         main: '#95CFD5',
-        light: '#09454B',
+        light: '#1c383b',
         dark: '#8BC8CE',
         contrastText: '#ffffff',
       },
@@ -60,13 +55,13 @@ const DarkThemeColors = [
     palette: {
       primary: {
         main: '#0A7EA4',
-        light: '#05313F',
+        light: '#14313d',
         dark: '#06769A',
         contrastText: '#ffffff',
       },
       secondary: {
         main: '#CCDA4E',
-        light: '#282917',
+        light: '#2d2e1c',
         dark: '#C3D046',
         contrastText: '#ffffff',
       },
@@ -77,13 +72,13 @@ const DarkThemeColors = [
     palette: {
       primary: {
         main: '#01C0C8',
-        light: '#003638',
+        light: '#14383a',
         dark: '#00B9C0',
         contrastText: '#ffffff',
       },
       secondary: {
         main: '#FB9678',
-        light: '#40241C',
+        light: '#3d2b25',
         dark: '#F48B6C',
         contrastText: '#ffffff',
       },
@@ -94,13 +89,13 @@ const DarkThemeColors = [
     palette: {
       primary: {
         main: '#FA896B',
-        light: '#402E32',
+        light: '#3d2e31',
         dark: '#F48162',
         contrastText: '#ffffff',
       },
       secondary: {
         main: '#0074BA',
-        light: '#082E45',
+        light: '#1a2e3b',
         dark: '#006FB1',
         contrastText: '#ffffff',
       },

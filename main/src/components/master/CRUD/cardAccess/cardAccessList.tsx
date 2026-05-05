@@ -36,7 +36,7 @@ import {
 import { defaultCardAccessFilter } from 'src/store/apps/defaultForm';
 import AddEditCardAccess from './AddEditCardAccess';
 import toast from 'react-hot-toast';
-import { useCardAccessList } from 'src/hooks/useCardAccess';
+import { useCardAccessList, useDeleteCardAccess } from 'src/hooks/useCardAccess';
 
 const columns = [
   { label: 'Access Name', field: 'Name', sortAble: true },
@@ -123,15 +123,16 @@ const CardAccessList = () => {
     setSelectedCardAccess(null);
   };
 
+  const deleteMutation = useDeleteCardAccess();
+
   // Confirm delete action
   const handleConfirmDelete = async () => {
     if (selectedCardAccess) {
       try {
-        const result = await dispatch(deleteCardAccess(selectedCardAccess.id));
-        if (result && result.type && result.type.endsWith('/fulfilled')) {
-          await dispatch(fetchCardAccessDT(cardAccessFilter));
-          toast.success('Data Deleted');
-        }
+         await deleteMutation.mutateAsync(selectedCardAccess.id);
+
+          toast.success('Data Deleted');  
+
       } catch (error) {
         toast.error('Delete Data Unsuccessful');
         console.error('Error deleting Card Access:', error);
@@ -149,7 +150,7 @@ const CardAccessList = () => {
             sx={{
               position: 'sticky',
               left: 0,
-              background: 'white',
+              backgroundColor: 'background.paper',
               zIndex: 1,
               width: 35,
               minWidth: 35,
@@ -176,7 +177,7 @@ const CardAccessList = () => {
             sx={{
               position: 'sticky',
               right: 0,
-              background: 'white',
+              backgroundColor: 'background.paper',
               zIndex: 2,
               width: 150,
               minWidth: 150,
@@ -210,7 +211,7 @@ const CardAccessList = () => {
                       sx={{
                         position: 'sticky',
                         left: 0,
-                        background: 'white',
+                        backgroundColor: 'background.paper',
                         zIndex: 2,
                         width: 35, // Fixed width
                         minWidth: 35,
@@ -239,7 +240,7 @@ const CardAccessList = () => {
                       sx={{
                         position: 'sticky',
                         right: 0,
-                        background: 'white',
+                        backgroundColor: 'background.paper',
                         zIndex: 1,
                         width: 150, // Fixed width
                         minWidth: 150,
@@ -259,7 +260,7 @@ const CardAccessList = () => {
                             sx={{
                               position: 'sticky',
                               left: 0,
-                              background: 'white',
+                              backgroundColor: 'background.paper',
                               zIndex: 1,
                               width: 35, // Fixed width
                               minWidth: 35,
@@ -278,7 +279,7 @@ const CardAccessList = () => {
                             sx={{
                               position: 'sticky',
                               right: 0,
-                              background: 'white',
+                              backgroundColor: 'background.paper',
                               zIndex: 2,
                               gap: 1,
                               alignItems: 'center',

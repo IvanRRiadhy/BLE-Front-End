@@ -222,7 +222,7 @@ return (
         position: 'sticky',
         top: 0,
         zIndex: 2,
-        backgroundColor: isChanged ? '#e3f2fd' : 'white',
+        backgroundColor: isChanged ? 'info.light' : 'background.paper',
       }}
     >
       <List>
@@ -333,8 +333,8 @@ return (
         position: 'sticky',
         bottom: 0,
         p: 2,
-        backgroundColor: 'white',
-        borderTop: '1px solid #eee',
+        backgroundColor: 'background.paper',
+        borderTop: (theme) => `1px solid ${theme.palette.divider}`,
         display: 'flex',
         gap: 1,
       }}

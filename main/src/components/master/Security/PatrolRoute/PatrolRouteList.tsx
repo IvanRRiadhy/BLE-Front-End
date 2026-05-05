@@ -174,7 +174,7 @@ const PatrolRouteList = () => {
             sx={{
               position: 'sticky',
               left: 0,
-              background: 'white',
+              backgroundColor: 'background.paper',
               zIndex: 1,
               width: 35,
               minWidth: 35,
@@ -201,7 +201,7 @@ const PatrolRouteList = () => {
             sx={{
               position: 'sticky',
               right: 0,
-              background: 'white',
+              backgroundColor: 'background.paper',
               zIndex: 2,
               width: 150,
               minWidth: 150,
@@ -370,7 +370,7 @@ const PatrolRouteList = () => {
                       sx={{
                         position: 'sticky',
                         left: 0,
-                        background: 'white',
+                        backgroundColor: 'background.paper',
                         zIndex: 2,
                         width: 35, // Fixed width
                         minWidth: 35,
@@ -399,7 +399,7 @@ const PatrolRouteList = () => {
                       sx={{
                         position: 'sticky',
                         right: 0,
-                        background: 'white',
+                        backgroundColor: 'background.paper',
                         zIndex: 2,
                         width: 150, // Fixed width
                         minWidth: 150,
@@ -438,7 +438,7 @@ const PatrolRouteList = () => {
                                 sx={{
                                   position: 'sticky',
                                   right: 0,
-                                  background: 'white',
+                                  backgroundColor: 'background.paper',
                                 }}
                               >
                                 <AddEditPatrolRoute patrolRoute={patrolRoute} type="edit" />

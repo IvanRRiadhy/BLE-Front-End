@@ -26,12 +26,12 @@ const CardHistoryItem = ({ history, index, isLatest }: CardHistoryItemProps) => 
   return (
     <Box
       sx={{
-        border: isLatest ? '2px solid' : '1px solid #DDD',
-        borderColor: isLatest ? 'primary.main' : '#DDD',
+        border: isLatest ? '2px solid' : '1px solid',
+        borderColor: isLatest ? 'primary.main' : 'divider',
         borderRadius: 1.5,
         p: 2,
         height: '100%',
-        bgcolor: isLatest ? 'primary.lighter' : '#fafafa',
+        bgcolor: isLatest ? 'primary.light' : 'background.paper',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -40,7 +40,7 @@ const CardHistoryItem = ({ history, index, isLatest }: CardHistoryItemProps) => 
           borderColor: 'secondary.main',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           transform: 'translateY(-2px)',
-          bgcolor: '#f5f5f5',
+          bgcolor: 'action.hover',
         },
       }}
     >

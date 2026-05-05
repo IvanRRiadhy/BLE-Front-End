@@ -17,6 +17,7 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useSelector } from 'src/store/Store';
+import { useTheme } from '@mui/material';
 
 dayjs.extend(isoWeek);
 dayjs.extend(isSameOrAfter);
@@ -46,6 +47,7 @@ interface WeekOption {
 /* ---------------- Component ---------------- */
 
 const Tracking: React.FC = () => {
+  const theme = useTheme();
   const [trackingFilter, setTrackingFilter] = useState({ ...defaultFilter });
   const dashboardFilter = useSelector((state: any) => state.customizer.dashboardFilter);
   const { data = {}, isLoading, isError } = useTrackingAreaAccessed({  ...dashboardFilter, ...trackingFilter  });
@@ -79,6 +81,11 @@ const Tracking: React.FC = () => {
         stacked: false,
         toolbar: { show: false },
         parentHeightOffset: 0,
+        foreColor: theme.palette.text.secondary,
+        background: 'transparent',
+      },
+      theme: {
+        mode: theme.palette.mode as 'light' | 'dark',
       },
 
       plotOptions: {
@@ -95,8 +102,8 @@ const Tracking: React.FC = () => {
         categories: data?.chart?.labels ?? [],
         labels: {
           style: {
+
             fontSize: '12px',
-            colors: '#045498',
           },
         },
       },
@@ -106,14 +113,13 @@ const Tracking: React.FC = () => {
         labels: {
           style: {
             fontSize: '12px',
-            colors: '#045498',
             fontWeight: 600,
           },
         },
       },
 
       grid: {
-        borderColor: '#d3d3d366',
+        borderColor: theme.palette.divider,
       },
 
       legend: { show: false },
@@ -266,7 +272,8 @@ const Tracking: React.FC = () => {
         width: '100%',
         height: '25vh', //32vh
         borderRadius: '25px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+        boxShadow: (theme) => theme.shadows[10],
+        bgcolor: 'background.paper',
         px: 2,
         py: 2,
         display: 'flex',
@@ -287,7 +294,7 @@ const Tracking: React.FC = () => {
             sx={{
               fontSize: 'clamp(18px, 1.4vw, 26px)',
               fontWeight: 700,
-              color: '#045498',
+              color: 'primary.main',
             }}
           >
             Tracking Graphic
@@ -303,7 +310,7 @@ const Tracking: React.FC = () => {
               sx={{
                 height: 36,
                 borderRadius: '12px',
-                color: '#045498',
+                color: 'textPrimary',
               }}
             >
               {availableMonths.map((m) => (
@@ -330,7 +337,7 @@ const Tracking: React.FC = () => {
               sx={{
                 height: 36,
                 borderRadius: '12px',
-                color: '#045498',
+                color: 'textPrimary',
                 minWidth: 120,
               }}
             >
@@ -379,10 +386,10 @@ const Tracking: React.FC = () => {
         {/* SUMMARY */}
         <Stack spacing={2} sx={{ minWidth: 180, justifyContent: 'center' }}>
           <Box>
-            <Typography sx={{ fontSize: 24, fontWeight: 700, color: '#045498' }}>
+            <Typography sx={{ fontSize: 24, fontWeight: 700, color: 'textPrimary' }}>
               {trackingSummary?.accessedAreaTotal ?? '-'}
             </Typography>
-            <Typography sx={{ fontSize: 13, color: '#045498' }}>Accessed Area</Typography>
+            <Typography sx={{ fontSize: 13, color: 'textSecondary' }}>Accessed Area</Typography>
           </Box>
 
           <Box>

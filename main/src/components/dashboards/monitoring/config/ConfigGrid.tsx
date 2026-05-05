@@ -308,13 +308,22 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
                     height: '18vh',
                     flexShrink: 0,
                     borderRadius: 2,
-                    border: selectedScreen === miniIndex + 1 ? '4px solid green' : '2px solid #777',
-                    bgcolor: 'white',
+                    // border: selectedScreen === miniIndex + 1 ? '4px solid green' : '2px solid #777',
+                    border: `${selectedScreen === miniIndex + 1 ? '5px' : '2.5px'} solid ${
+                      selectedScreen === miniIndex + 1
+                        ? (theme.palette.mode === 'dark' ? theme.palette.success.main : theme.palette.success.dark)
+                        : (theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[300])
+                    }`,
+                    bgcolor: theme.palette.mode === 'dark' ? 'background.paper' : 'white',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative',
                     cursor: 'pointer',
+                    '&:hover': {
+                      borderColor: theme.palette.success.main,
+                      backgroundColor: theme.palette.mode === 'dark' ? 'action.hover' : 'success.light',
+                    },
                   }}
                 >
                   {/* Mini screen preview */}
@@ -332,7 +341,7 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
                       right: 4,
                       width: 22,
                       height: 22,
-                      bgcolor: 'red',
+                      bgcolor: 'error.main',
                       color: 'white',
                       borderRadius: '50%',
                       display: 'flex',
@@ -355,14 +364,21 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
                   height: '18vh',
                   flexShrink: 0,
                   borderRadius: 2,
-                  border: '2px dashed #aaa',
-                  bgcolor: '#fafafa',
+                  border: '2px dashed',
+                  borderColor: 'divider',
+                  bgcolor: 'background.default',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
                   fontSize: 40,
-                  color: '#777',
+                  color: 'text.secondary',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    borderColor: 'success.main',
+                    color: 'success.main',
+                    bgcolor: 'action.hover',
+                  },
                 }}
               >
                 +
@@ -388,15 +404,15 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
               overflow: 'hidden',
               border: `${selectedScreen === screenIndex ? '5px' : '2.5px'} solid ${
                 selectedScreen === screenIndex
-                  ? theme.palette.success.dark
-                  : theme.palette.grey[800]
+                  ? (theme.palette.mode === 'dark' ? theme.palette.success.main : theme.palette.success.dark)
+                  : (theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[300])
               }`,
               bgcolor:
                 screen?.type === 2
                   ? 'black'
                   : screen?.type === 1
-                  ? theme.palette.grey[200]
-                  : 'white',
+                  ? 'background.default'
+                  : (theme.palette.mode === 'dark' ? 'background.paper' : 'white'),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -404,7 +420,7 @@ const ConfigGrid: React.FC<ConfigGridProps> = ({
               transition: '0.3s ease',
               '&:hover': {
                 borderColor: theme.palette.success.main,
-                backgroundColor: theme.palette.success.light,
+                backgroundColor: theme.palette.mode === 'dark' ? 'action.hover' : 'success.light',
               },
             }}
           >

@@ -156,6 +156,7 @@ export const defaultBleReaderForm: bleReaderType = {
   pathLossExponent: 2.2,
   heightMeter: 2.6,
   forceReading: false,
+  forceRadiusThreshold: 1,
   soloRadiusMeter: 5,
   // engineReaderId: '',
   createdBy: '',
