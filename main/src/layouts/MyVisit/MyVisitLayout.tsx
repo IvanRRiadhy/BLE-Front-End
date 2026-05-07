@@ -33,6 +33,7 @@ const PageWrapper = styled('div')(() => ({
 const MyVisitLayout: FC = () => {
   const dispatch = useDispatch();
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const evacState = useSelector((state: RootState) => state.customizer.evacState);
   const theme = useTheme();
 
@@ -51,7 +52,7 @@ const MyVisitLayout: FC = () => {
       <SessionExp open={sessionExpired} />
       <LoadingBar />
       <MainWrapper
-        className={customizer.activeMode === 'dark' ? 'darkbg mainwrapper' : 'mainwrapper'}
+        className={settings.activeMode === 'dark' ? 'darkbg mainwrapper' : 'mainwrapper'}
       >
         {evacState === 'running' && (
           <Box
@@ -89,7 +90,7 @@ const MyVisitLayout: FC = () => {
           className="page-wrapper"
           sx={{
             ...(customizer.isCollapse && {
-              [theme.breakpoints.up('lg')]: { ml: `${customizer.MiniSidebarWidth}px` },
+              [theme.breakpoints.up('lg')]: { ml: `${settings.MiniSidebarWidth}px` },
             }),
           }}
         >
@@ -108,7 +109,7 @@ const MyVisitLayout: FC = () => {
             <Container
               sx={{
                 pt: '5px',
-                maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',
+                maxWidth: settings.isLayout === 'boxed' ? 'lg' : '100%!important',
                 flexGrow: 1, // Allow content to take remaining space
               }}
             >

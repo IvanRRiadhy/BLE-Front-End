@@ -34,11 +34,12 @@ interface ItemType {
 
 const MonitorNavItem = ({ item, level, pathDirect, onClick }: ItemType) => {
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const theme = useTheme();
   const ListItemStyled2 = styled(ListItemButton)(() => ({
     padding: '5px 10px',
     gap: '10px',
-    borderRadius: `${customizer.borderRadius}px`,
+    borderRadius: `${settings.borderRadius}px`,
     marginBottom: level > 1 ? '3px' : '0px',
     color:
       level > 1 && pathDirect === item.href

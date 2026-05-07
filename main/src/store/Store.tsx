@@ -4,6 +4,7 @@ import { persistStore, persistReducer } from 'redux-persist';
 import localForage from 'localforage';
 // import storage from 'redux-persist/lib/storage';
 import CustomizerReducer from './customizer/CustomizerSlice';
+import SettingsReducer from "./customizer/SettingsSlice";
 // import EcommerceReducer from './apps/eCommerce/ECommerceSlice';
 // import ChatsReducer from './apps/chat/ChatSlice';
 // import NotesReducer from './apps/notes/NotesSlice';
@@ -74,6 +75,7 @@ import {
 
 const rootReducer = combineReducers({
   customizer: CustomizerReducer,
+  settings: SettingsReducer,
   // ecommerceReducer: EcommerceReducer,
   // chatReducer: ChatsReducer,
   // emailReducer: EmailReducer,
@@ -146,7 +148,7 @@ const storage = localForage.createInstance({
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['layoutReducer', 'AlarmActiveReducer', 'customizer'], // Only persist layout state
+  whitelist: ['layoutReducer', 'AlarmActiveReducer', 'settings'], // Persist layout, alarms, and settings
 };
 
 // Create persisted root reducer

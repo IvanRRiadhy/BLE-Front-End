@@ -12,6 +12,15 @@ import MonitoringHeader from './monitoringLayout/Header';
 import { setSessionExpiredHandler } from 'src/utils/axios';
 import SessionExp from './shared/SessionExp';
 import { hydrateEvacState } from 'src/store/customizer/CustomizerSlice';
+import {
+  setTheme,
+  setDarkMode,
+  setDir,
+  setLanguage,
+  setCardShadow,
+  toggleLayout,
+  setBorderRadius,
+} from 'src/store/customizer/SettingsSlice';
 import { Toaster } from 'react-hot-toast';
 import { startMQTTclient } from 'src/store/apps/tracking/MQTT'; // Changed from NTFY to MQTT
 import { fetchAlarmTrigger } from 'src/store/apps/crud/alarmTrigger';
@@ -87,6 +96,7 @@ const FullLayout: FC = () => {
     topics = ['people_tracking/alarm/+/+/+/+/+'];
   }
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const evacState = useSelector((state: RootState) => state.customizer.evacState);
   const theme = useTheme();
   const memberList: memberType[] = useSelector((s: RootState) => s.memberReducer.members);
@@ -314,7 +324,7 @@ const FullLayout: FC = () => {
       <SessionExp open={sessionExpired} />
       <LoadingBar />
       <MainWrapper
-        className={customizer.activeMode === 'dark' ? 'darkbg mainwrapper' : 'mainwrapper'}
+        className={settings.activeMode === 'dark' ? 'darkbg mainwrapper' : 'mainwrapper'}
       >
         {evacState === 'running' && (
           <Box
@@ -348,7 +358,7 @@ const FullLayout: FC = () => {
           className="page-wrapper"
           sx={{
             ...(customizer.isCollapse && {
-              [theme.breakpoints.up('lg')]: { ml: `${customizer.MiniSidebarWidth}px` },
+              [theme.breakpoints.up('lg')]: { ml: `${settings.MiniSidebarWidth}px` },
             }),
           }}
         >
@@ -367,7 +377,7 @@ const FullLayout: FC = () => {
             <Container
               sx={{
                 pt: '0px',
-                maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',
+                maxWidth: settings.isLayout === 'boxed' ? 'lg' : '100%!important',
                 flexGrow: 1,
               }}
             >

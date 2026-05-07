@@ -45,6 +45,7 @@ interface ItemType {
 
 const NavItem = ({ item, level, pathDirect, hideMenu, onClick }: ItemType) => {
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const Icon = item?.icon;
   const theme = useTheme();
   const { t } = useTranslation();
@@ -55,7 +56,7 @@ const NavItem = ({ item, level, pathDirect, hideMenu, onClick }: ItemType) => {
     whiteSpace: 'nowrap',
     marginBottom: '2px',
     padding: '8px 10px',
-    borderRadius: `${customizer.borderRadius}px`,
+    borderRadius: `${settings.borderRadius}px`,
     backgroundColor: level > 1 ? 'transparent !important' : 'inherit',
     color:
       level > 1 && pathDirect === item?.href

@@ -121,6 +121,7 @@ const SkylineNavbar = () => {
   const { pathname } = useLocation();
   const alarmSettings = useSelector((state: RootState) => state.AlarmSettingReducer.alarmSettingAll);
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const menuItems = useMenuItems(alarmSettings);
 
   const [activeTitle, setActiveTitle] = useState<string | null>(null);
@@ -194,7 +195,7 @@ const SkylineNavbar = () => {
                   sx={{
                     px: 2,
                     py: 1,
-                    borderRadius: `${customizer.borderRadius}px`,
+                    borderRadius: `${settings.borderRadius}px`,
                     textTransform: 'none',
                     fontSize: '15px',
                     fontWeight: isActivePath ? 600 : 400,
@@ -226,7 +227,7 @@ const SkylineNavbar = () => {
                     sx: { 
                       pointerEvents: 'auto', 
                       boxShadow: theme.shadows[8],
-                      borderRadius: `${customizer.borderRadius}px`,
+                      borderRadius: `${settings.borderRadius}px`,
                       minWidth: '200px',
                       mt: 1, // Restored some breathing room
                     }
@@ -252,7 +253,7 @@ const SkylineNavbar = () => {
               sx={{
                 px: 2,
                 py: 1,
-                borderRadius: `${customizer.borderRadius}px`,
+                borderRadius: `${settings.borderRadius}px`,
                 textTransform: 'none',
                 fontSize: '15px',
                 fontWeight: isActivePath ? 600 : 400,

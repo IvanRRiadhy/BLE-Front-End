@@ -52,6 +52,7 @@ const NavCollapse = ({
   onClick,
 }: NavCollapseProps) => {
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const Icon = menu?.icon;
   const theme = useTheme();
   const { pathname } = useLocation();
@@ -93,7 +94,7 @@ const NavCollapse = ({
         : level > 1 && open
         ? theme.palette.primary.main
         : theme.palette.text.secondary,
-    borderRadius: `${customizer.borderRadius}px`,
+    borderRadius: `${settings.borderRadius}px`,
   }));
 
   // If Menu has Children

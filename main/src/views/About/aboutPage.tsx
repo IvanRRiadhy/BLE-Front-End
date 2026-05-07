@@ -6,15 +6,18 @@ import { IconCpu, IconUpload, IconCheck, IconSettings } from '@tabler/icons-reac
 import toast from 'react-hot-toast';
 import { useSelector, useDispatch } from 'src/store/Store';
 import {
-  setTheme,
-  toggleLayout,
   toggleSidebar,
   toggleHorizontal,
-  setBorderRadius,
-  setCardShadow,
-  setDir,
-  setDarkMode,
 } from 'src/store/customizer/CustomizerSlice';
+import {
+  setTheme,
+  setDarkMode,
+  setDir,
+  setLanguage,
+  setCardShadow,
+  toggleLayout,
+  setBorderRadius,
+} from 'src/store/customizer/SettingsSlice';
 import { RootState } from 'src/store/Store';
 import WbSunnyTwoToneIcon from '@mui/icons-material/WbSunnyTwoTone';
 import DarkModeTwoToneIcon from '@mui/icons-material/DarkModeTwoTone';
@@ -108,6 +111,7 @@ const thColors = [
 
 const AboutPage = () => {
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const dispatch = useDispatch();
   const { data, isLoading, isError } = useLicenseInfo();
   const { mutate: toggleFeatureStatus } = toggleFeatures();
@@ -344,7 +348,6 @@ const AboutPage = () => {
                 </Typography>
 
                 <Grid container spacing={3}>
-                  {/* Theme Option */}
                   <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="h6" gutterBottom>
                       Theme Option
@@ -356,12 +359,12 @@ const AboutPage = () => {
                         gap={1}
                         flex={1}
                         sx={{
-                          borderColor: customizer.activeMode === 'light' ? 'primary.main' : 'inherit',
-                          bgcolor: customizer.activeMode === 'light' ? 'primary.light' : 'transparent',
+                          borderColor: settings.activeMode === 'light' ? 'primary.main' : 'inherit',
+                          bgcolor: settings.activeMode === 'light' ? 'primary.light' : 'transparent',
                         }}
                       >
                         <WbSunnyTwoToneIcon
-                          color={customizer.activeMode === 'light' ? 'primary' : 'inherit'}
+                          color={settings.activeMode === 'light' ? 'primary' : 'inherit'}
                         />
                         Light
                       </StyledBox>
@@ -371,56 +374,17 @@ const AboutPage = () => {
                         gap={1}
                         flex={1}
                         sx={{
-                          borderColor: customizer.activeMode === 'dark' ? 'primary.main' : 'inherit',
-                          bgcolor: customizer.activeMode === 'dark' ? 'primary.light' : 'transparent',
+                          borderColor: settings.activeMode === 'dark' ? 'primary.main' : 'inherit',
+                          bgcolor: settings.activeMode === 'dark' ? 'primary.light' : 'transparent',
                         }}
                       >
                         <DarkModeTwoToneIcon
-                          color={customizer.activeMode === 'dark' ? 'primary' : 'inherit'}
+                          color={settings.activeMode === 'dark' ? 'primary' : 'inherit'}
                         />
                         Dark
                       </StyledBox>
                     </Stack>
                   </Grid>
-
-                  {/* Theme Direction */}
-                  {/* <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="h6" gutterBottom>
-                      Theme Direction
-                    </Typography>
-                    <Stack direction={'row'} gap={2} my={2}>
-                      <StyledBox
-                        onClick={() => dispatch(setDir('ltr'))}
-                        display="flex"
-                        gap={1}
-                        flex={1}
-                        sx={{
-                          borderColor: customizer.activeDir === 'ltr' ? 'primary.main' : 'inherit',
-                          bgcolor: customizer.activeDir === 'ltr' ? 'primary.light' : 'transparent',
-                        }}
-                      >
-                        <SwipeLeftAltTwoToneIcon
-                          color={customizer.activeDir === 'ltr' ? 'primary' : 'inherit'}
-                        />{' '}
-                        LTR
-                      </StyledBox>
-                      <StyledBox
-                        onClick={() => dispatch(setDir('rtl'))}
-                        display="flex"
-                        gap={1}
-                        flex={1}
-                        sx={{
-                          borderColor: customizer.activeDir === 'rtl' ? 'primary.main' : 'inherit',
-                          bgcolor: customizer.activeDir === 'rtl' ? 'primary.light' : 'transparent',
-                        }}
-                      >
-                        <SwipeRightAltTwoToneIcon
-                          color={customizer.activeDir === 'rtl' ? 'primary' : 'inherit'}
-                        />{' '}
-                        RTL
-                      </StyledBox>
-                    </Stack>
-                  </Grid> */}
 
                   {/* Theme Colors */}
                   <Grid size={12}>
@@ -434,11 +398,11 @@ const AboutPage = () => {
                             onClick={() => dispatch(setTheme(thcolor.disp))}
                             sx={{
                               borderColor:
-                                customizer.activeTheme === thcolor.disp
+                                settings.activeTheme === thcolor.disp
                                   ? 'primary.main'
                                   : 'inherit',
                               bgcolor:
-                                customizer.activeTheme === thcolor.disp
+                                settings.activeTheme === thcolor.disp
                                   ? 'primary.light'
                                   : 'transparent',
                             }}
@@ -456,7 +420,7 @@ const AboutPage = () => {
                                   color: 'white',
                                 }}
                               >
-                                {customizer.activeTheme === thcolor.disp ? (
+                                {settings.activeTheme === thcolor.disp ? (
                                   <IconCheck width={13} />
                                 ) : (
                                   ''

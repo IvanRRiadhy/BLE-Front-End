@@ -10,6 +10,7 @@ import Statistic from './Statistic';
 
 const MonitoringFooter = () => {
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   const footerRef = useRef<HTMLDivElement>(null); // Reference to the footer
@@ -60,7 +61,7 @@ const MonitoringFooter = () => {
         flexDirection: 'column',
         position: 'fixed',
         bottom: 0,
-        left: customizer.isMonitorSidebar ? customizer.SidebarWidth : customizer.MiniSidebarWidth,
+        left: customizer.isMonitorSidebar ? settings.SidebarWidth : settings.MiniSidebarWidth,
         right: 0,
         height: expandedSection ? '300px' : toggleHeight,
         backgroundColor: 'background.paper',

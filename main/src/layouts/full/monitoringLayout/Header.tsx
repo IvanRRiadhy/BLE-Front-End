@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 
 import { useSelector, useDispatch } from 'src/store/Store';
-import { toggleMobileSidebar, hoverSidebar } from 'src/store/customizer/CustomizerSlice';
+import { toggleMobileSidebar, hoverSidebar, setMonitorSidebar } from 'src/store/customizer/CustomizerSlice';
 import { IconMenu2, IconRestore, IconBellRinging } from '@tabler/icons-react';
 import Profile from '../vertical/header/Profile';
 import { RootState } from 'src/store/Store';
@@ -59,6 +59,7 @@ const Header = () => {
   const pathDirect = pathname;
   // drawer
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const dispatch = useDispatch();
   const isSidebarHover = useSelector((state: RootState) => state.customizer.isSidebarHover);
   const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
@@ -110,7 +111,7 @@ const Header = () => {
     justifyContent: 'center',
     backdropFilter: 'blur(4px)',
     [theme.breakpoints.up('lg')]: {
-      minHeight: customizer.TopbarHeight,
+      minHeight: settings.TopbarHeight,
     },
   }));
   const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
@@ -255,6 +256,8 @@ const Header = () => {
           <IconButton
             color="inherit"
             aria-label="menu"
+            onMouseEnter={() => dispatch(hoverSidebar(true))}
+            onMouseLeave={() => dispatch(hoverSidebar(false))}
             onClick={
               lgUp
                 ? () => dispatch(hoverSidebar(!isSidebarHover))

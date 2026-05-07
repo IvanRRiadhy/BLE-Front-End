@@ -15,15 +15,18 @@ import { useSelector, useDispatch } from 'src/store/Store';
 import Box, { BoxProps } from '@mui/material/Box';
 import { IconX, IconSettings, IconCheck } from '@tabler/icons-react';
 import {
-  setTheme,
-  toggleLayout,
   toggleSidebar,
   toggleHorizontal,
-  setBorderRadius,
-  setCardShadow,
-  setDir,
-  setDarkMode,
 } from 'src/store/customizer/CustomizerSlice';
+import {
+  setTheme,
+  setDarkMode,
+  setDir,
+  setLanguage,
+  setCardShadow,
+  toggleLayout,
+  setBorderRadius,
+} from 'src/store/customizer/SettingsSlice';
 import { RootState } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import AspectRatioTwoToneIcon from '@mui/icons-material/AspectRatioTwoTone';
@@ -46,6 +49,7 @@ interface colors {
 const Customizer: FC = () => {
   const [showDrawer, setShowDrawer] = useState(false);
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
 
   const dispatch = useDispatch();
 
@@ -142,13 +146,13 @@ const Customizer: FC = () => {
             <Stack direction={'row'} gap={2} my={2}>
               <StyledBox onClick={() => dispatch(setDarkMode('light'))} display="flex" gap={1}>
                 <WbSunnyTwoToneIcon
-                  color={customizer.activeMode === 'light' ? 'primary' : 'inherit'}
+                  color={settings.activeMode === 'light' ? 'primary' : 'inherit'}
                 />
                 Light
               </StyledBox>
               <StyledBox onClick={() => dispatch(setDarkMode('dark'))} display="flex" gap={1}>
                 <DarkModeTwoToneIcon
-                  color={customizer.activeMode === 'dark' ? 'primary' : 'inherit'}
+                  color={settings.activeMode === 'dark' ? 'primary' : 'inherit'}
                 />
                 Dark
               </StyledBox>
@@ -164,13 +168,13 @@ const Customizer: FC = () => {
             <Stack direction={'row'} gap={2} my={2}>
               <StyledBox onClick={() => dispatch(setDir('ltr'))} display="flex" gap={1}>
                 <SwipeLeftAltTwoToneIcon
-                  color={customizer.activeDir === 'ltr' ? 'primary' : 'inherit'}
+                  color={settings.activeDir === 'ltr' ? 'primary' : 'inherit'}
                 />{' '}
                 LTR
               </StyledBox>
               <StyledBox onClick={() => dispatch(setDir('rtl'))} display="flex" gap={1}>
                 <SwipeRightAltTwoToneIcon
-                  color={customizer.activeDir === 'rtl' ? 'primary' : 'inherit'}
+                  color={settings.activeDir === 'rtl' ? 'primary' : 'inherit'}
                 />{' '}
                 RTL
               </StyledBox>
@@ -201,7 +205,7 @@ const Customizer: FC = () => {
                         }}
                         aria-label={`${thcolor.bgColor}`}
                       >
-                        {customizer.activeTheme === thcolor.disp ? <IconCheck width={13} /> : ''}
+                        {settings.activeTheme === thcolor.disp ? <IconCheck width={13} /> : ''}
                       </Box>
                     </Tooltip>
                   </StyledBox>
@@ -237,13 +241,13 @@ const Customizer: FC = () => {
             <Stack direction={'row'} gap={2} my={2}>
               <StyledBox onClick={() => dispatch(toggleLayout('boxed'))} display="flex" gap={1}>
                 <CallToActionTwoToneIcon
-                  color={customizer.isLayout === 'boxed' ? 'primary' : 'inherit'}
+                  color={settings.isLayout === 'boxed' ? 'primary' : 'inherit'}
                 />
                 Boxed
               </StyledBox>
               <StyledBox onClick={() => dispatch(toggleLayout('full'))} display="flex" gap={1}>
                 <AspectRatioTwoToneIcon
-                  color={customizer.isLayout === 'full' ? 'primary' : 'inherit'}
+                  color={settings.isLayout === 'full' ? 'primary' : 'inherit'}
                 />
                 Full
               </StyledBox>
@@ -275,17 +279,13 @@ const Customizer: FC = () => {
                 </Stack>
               </>
             )}
-              <StyledBox onClick={() => dispatch(setCardShadow(false))} display="flex" gap={1}>
-                {/* <BorderOutlinedIcon color={!customizer.isCardShadow ? 'primary' : 'inherit'} /> */}
-                Border
-              </StyledBox>
             <Stack direction={'row'} gap={2} my={2}>
               <StyledBox onClick={() => dispatch(setCardShadow(false))} display="flex" gap={1}>
-                <BorderOuter color={!customizer.isCardShadow ? 'primary' : 'inherit'} />
+                <BorderOuter color={!settings.isCardShadow ? 'primary' : 'inherit'} />
                 Border
               </StyledBox>
               <StyledBox onClick={() => dispatch(setCardShadow(true))} display="flex" gap={1}>
-                <CallToActionTwoToneIcon color={customizer.isCardShadow ? 'primary' : 'inherit'} />
+                <CallToActionTwoToneIcon color={settings.isCardShadow ? 'primary' : 'inherit'} />
                 Shadow
               </StyledBox>
             </Stack>
@@ -299,7 +299,7 @@ const Customizer: FC = () => {
 
             <Slider
               size="small"
-              value={customizer.borderRadius}
+              value={settings.borderRadius}
               aria-label="Small"
               min={4}
               max={24}

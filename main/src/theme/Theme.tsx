@@ -15,15 +15,16 @@ export const BuildTheme = (config: any = {}) => {
   const themeOptions = LightThemeColors.find((theme) => theme.name === config.theme);
   const darkthemeOptions = DarkThemeColors.find((theme) => theme.name === config.theme);
   const customizer = useSelector((state: RootState) => state.customizer);
-  const defaultTheme = customizer.activeMode === 'dark' ? baseDarkTheme : baselightTheme;
-  const defaultShadow = customizer.activeMode === 'dark' ? darkshadows : shadows;
-  const themeSelect = customizer.activeMode === 'dark' ? darkthemeOptions : themeOptions;
+  const settings = useSelector((state: RootState) => state.settings);
+  const defaultTheme = settings.activeMode === 'dark' ? baseDarkTheme : baselightTheme;
+  const defaultShadow = settings.activeMode === 'dark' ? darkshadows : shadows;
+  const themeSelect = settings.activeMode === 'dark' ? darkthemeOptions : themeOptions;
   const baseMode = {
     palette: {
-      mode: customizer.activeMode,
+      mode: settings.activeMode,
     },
     shape: {
-      borderRadius: customizer.borderRadius,
+      borderRadius: settings.borderRadius,
     },
     shadows: defaultShadow,
     typography: typography,
@@ -39,8 +40,8 @@ export const BuildTheme = (config: any = {}) => {
 };
 
 const ThemeSettings = () => {
-  const activDir = useSelector((state: RootState) => state.customizer.activeDir);
-  const activeTheme = useSelector((state: RootState) => state.customizer.activeTheme);
+  const activDir = useSelector((state: RootState) => state.settings.activeDir);
+  const activeTheme = useSelector((state: RootState) => state.settings.activeTheme);
   const theme = BuildTheme({
     direction: activDir,
     theme: activeTheme,

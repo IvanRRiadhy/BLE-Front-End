@@ -4,7 +4,7 @@ import { useSelector } from 'src/store/Store';
 
 const TimeDisplay = () => {
   const [currentDateTime, setCurrentDateTime] = useState<string>('');
-  const language = useSelector((state) => state.customizer.isLanguage);
+  const language = useSelector((state) => state.settings.isLanguage);
 
   const getLanguageLabel = () => {
     switch (language) {

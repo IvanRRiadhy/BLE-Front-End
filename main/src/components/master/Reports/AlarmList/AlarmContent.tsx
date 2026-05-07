@@ -84,7 +84,8 @@ const proximityColorMap: Record<string, string> = {
 
 const AlarmContent = () => {
   const dispatch: AppDispatch = useDispatch();
-  const language = useSelector((state: RootState) => state.customizer.isLanguage);
+  const language = useSelector((state: RootState) => state.settings.isLanguage);
+  
   const searchParams = new URLSearchParams(window.location.search);
   const autoAlarmSelectDone = useRef(false);
   const selectedIntruder = useSelector(

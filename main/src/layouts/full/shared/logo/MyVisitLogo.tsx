@@ -8,9 +8,10 @@ import { RootState } from 'src/store/Store';
 
 const Logo: FC = () => {
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
 
   const LinkStyled = styled(Link)(() => ({
-    height: customizer.TopbarHeight,
+    height: settings.TopbarHeight,
     width: customizer.isCollapse ? '60px' : '220px',
     overflow: 'hidden',
     display: 'block',

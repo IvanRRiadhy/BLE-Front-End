@@ -1,9 +1,10 @@
 import { useMediaQuery, Box, Drawer, useTheme } from '@mui/material';
-import { useSelector } from 'src/store/Store';
+import { useSelector, useDispatch } from 'src/store/Store';
 import { RootState } from 'src/store/Store';
 import SidebarList from './SidebarList';
 import { useState } from 'react';
 import SidebarFilter from './SidebarFilter';
+import { setMonitorSidebar } from 'src/store/customizer/CustomizerSlice';
 
 type PersonFilter = {
   Visitor: boolean;
@@ -14,11 +15,13 @@ type PersonFilter = {
 
 const MonitoringSidebar = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
-  const customizer = useSelector((state: RootState) => state.customizer);
+  const customizer = useSelector((state: RootState) => state.customizer);   
+  const settings = useSelector((state: RootState) => state.settings);
+  const dispatch = useDispatch();
   const theme = useTheme();
   const toggleWidth = customizer.isMonitorSidebar
-    ? customizer.SidebarWidth
-    : customizer.MiniSidebarWidth;
+    ? settings.SidebarWidth
+    : settings.MiniSidebarWidth;
   const [filterType, setFilterType] = useState<string[]>(['Tracking', 'Alarm']);
   const [personFilter, setPersonFilter] = useState<PersonFilter>({
     Visitor: true,
@@ -33,12 +36,8 @@ const MonitoringSidebar = () => {
         sx={{
           width: toggleWidth,
           flexShrink: 0,
-          marginTop: `${customizer.TopbarHeight}px)`,
+          marginTop: `${settings.TopbarHeight}px`,
           position: 'relative',
-          //marginLeft: customizer.isCollapse ? 0 : `${customizer.SidebarWidth}px`,
-          //   ...(customizer.isCollapse && {
-          //     position: 'relative',
-          //   }),
         }}
       >
         {/* ------------------------------------------- */}
@@ -55,7 +54,7 @@ const MonitoringSidebar = () => {
               }),
               width: toggleWidth,
               boxSizing: 'border-box',
-              marginTop: `${customizer.TopbarHeight}px`,
+              marginTop: `${settings.TopbarHeight}px`,
               //marginLeft: customizer.isCollapse ? 0 : `${customizer.SidebarWidth}px`,
             },
           }}
@@ -65,7 +64,7 @@ const MonitoringSidebar = () => {
           {/* ------------------------------------------- */}
           <Box
             sx={{
-              height: `calc(100% - ${customizer.TopbarHeight}px)`,
+              height: `calc(100% - ${settings.TopbarHeight}px)`,
             }}
           >
             <SidebarFilter

@@ -15,6 +15,7 @@ const Header = () => {
 
   // drawer
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const dispatch = useDispatch();
 
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
@@ -23,7 +24,7 @@ const Header = () => {
     justifyContent: 'center',
     backdropFilter: 'blur(4px)',
     [theme.breakpoints.up('lg')]: {
-      minHeight: customizer.TopbarHeight,
+      minHeight: settings.TopbarHeight,
     },
   }));
   const ToolbarStyled = styled(Toolbar)(({ theme }) => ({

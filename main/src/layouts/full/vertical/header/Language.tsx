@@ -3,7 +3,7 @@
 import React from 'react';
 import { Avatar, IconButton, Menu, MenuItem, Typography, Stack } from '@mui/material';
 import { useSelector, useDispatch } from 'src/store/Store';
-import { setLanguage } from 'src/store/customizer/CustomizerSlice';
+import { setLanguage } from 'src/store/customizer/SettingsSlice';
 import FlagEn from 'src/assets/images/flag/icon-flag-en.svg';
 import FlagId from 'src/assets/images/flag/icon-flag-idn.svg';
 import { useTranslation } from 'react-i18next';
@@ -28,9 +28,9 @@ const Language = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const dispatch = useDispatch();
   const open = Boolean(anchorEl);
-  const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const currentLang =
-    Languages.find((_lang) => _lang.value === customizer.isLanguage) || Languages[1];
+    Languages.find((_lang) => _lang.value === settings.isLanguage) || Languages[1];
   const { i18n } = useTranslation();
   const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
@@ -39,7 +39,7 @@ const Language = () => {
     setAnchorEl(null);
   };
   useEffect(() => {
-    i18n.changeLanguage(customizer.isLanguage);
+    i18n.changeLanguage(settings.isLanguage);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

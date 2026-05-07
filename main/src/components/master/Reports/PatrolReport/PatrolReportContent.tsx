@@ -61,6 +61,7 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
   const navigate = useNavigate();
   const theme = useTheme();
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [searchParams] = useSearchParams();
@@ -187,7 +188,7 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
               backgroundColor: theme.palette.background.paper,
               minHeight: isMobile
                 ? 'auto'
-                : `calc(100vh - ${(customizer.TopbarHeight ?? 70) * 2}px)`,
+                : `calc(100vh - ${(settings.TopbarHeight ?? 70) * 2}px)`,
             }}
           >
             {/* Back Button */}

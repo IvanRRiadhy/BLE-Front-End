@@ -9,12 +9,13 @@ import { RootState } from 'src/store/Store';
 const Sidebar = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const dispatch = useDispatch();
   const theme = useTheme();
   const toggleWidth =
     customizer.isCollapse && !customizer.isSidebarHover
-      ? customizer.MiniSidebarWidth
-      : customizer.SidebarWidth;
+      ? settings.MiniSidebarWidth
+      : settings.SidebarWidth;
   console.log('toggleWidth', toggleWidth);
   const onHoverEnter = () => {
     if (customizer.isCollapse) {
@@ -92,7 +93,7 @@ const Sidebar = () => {
       variant="temporary"
       PaperProps={{
         sx: {
-          width: customizer.SidebarWidth,
+          width: settings.SidebarWidth,
 
           // backgroundColor:
           //   customizer.activeMode === 'dark'

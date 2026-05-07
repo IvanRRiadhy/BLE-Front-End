@@ -41,6 +41,7 @@ const Header = () => {
 
   // drawer
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const dispatch = useDispatch();
 
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
@@ -49,7 +50,7 @@ const Header = () => {
     backdropFilter: 'blur(4px)',
 
     [theme.breakpoints.up('lg')]: {
-      minHeight: customizer.TopbarHeight,
+      minHeight: settings.TopbarHeight,
     },
   }));
   const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
@@ -96,7 +97,7 @@ const Header = () => {
     <AppBarStyled position="sticky" color="default" elevation={8}>
       <ToolbarStyled
         sx={{
-          maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',
+          maxWidth: settings.isLayout === 'boxed' ? 'lg' : '100%!important',
         }}
       >
         <Box
@@ -134,7 +135,7 @@ const Header = () => {
         ) : (
           <Container
             sx={{
-              maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',
+              maxWidth: settings.isLayout === 'boxed' ? 'lg' : '100%!important',
             }}
           >
             <Box display="flex" justifyContent="space-between" alignItems="center">

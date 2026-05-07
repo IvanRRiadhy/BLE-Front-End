@@ -28,10 +28,11 @@ const ImgStyled = styled('img')({
 
 const Logo: FC = () => {
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
 
   const logoSrc = customizer.isCollapse ? LogoIcon : LogoImage;
   const linkWidth = customizer.isCollapse ? '60px' : '180px';
-  const topbarHeight = customizer.TopbarHeight ?? 64;
+  const topbarHeight = settings.TopbarHeight ?? 64;
 
   return (
     <LinkStyled

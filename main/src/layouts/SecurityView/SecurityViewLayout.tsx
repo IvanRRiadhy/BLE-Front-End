@@ -38,6 +38,7 @@ const PageWrapper = styled('div')(() => ({
 const SecurityViewLayout: FC = () => {
   const dispatch = useDispatch();
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const evacState = useSelector((state: RootState) => state.customizer.evacState);
   const focusAlarm = useSelector((state: RootState) => state.BeaconReducer.focusAlarm);
   const theme = useTheme();
@@ -81,7 +82,7 @@ const SecurityViewLayout: FC = () => {
   const { data: data } = useAlarmTriggerList({
     ...defaultAlarmTriggerFilter,
     Length: 1,
-    filters: { action: 'Accepted' },
+    filters: { action: ['Accepted'] },
   });
   const acceptedAlarm = data?.data?.[0] ?? null;
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -163,7 +164,7 @@ const SecurityViewLayout: FC = () => {
       <SessionExp open={sessionExpired} />
       <LoadingBar />
       <MainWrapper
-        className={customizer.activeMode === 'dark' ? 'darkbg mainwrapper' : 'mainwrapper'}
+        className={settings.activeMode === 'dark' ? 'darkbg mainwrapper' : 'mainwrapper'}
       >
         {evacState === 'running' && (
           <Box
@@ -201,7 +202,7 @@ const SecurityViewLayout: FC = () => {
           className="page-wrapper"
           sx={{
             ...(customizer.isCollapse && {
-              [theme.breakpoints.up('lg')]: { ml: `${customizer.MiniSidebarWidth}px` },
+              [theme.breakpoints.up('lg')]: { ml: `${settings.MiniSidebarWidth}px` },
             }),
           }}
         >
@@ -220,7 +221,7 @@ const SecurityViewLayout: FC = () => {
             <Container
               sx={{
                 pt: '5px',
-                maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',
+                maxWidth: settings.isLayout === 'boxed' ? 'lg' : '100%!important',
                 flexGrow: 1, // Allow content to take remaining space
               }}
             >
