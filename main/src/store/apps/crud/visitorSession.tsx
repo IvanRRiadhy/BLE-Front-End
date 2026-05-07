@@ -5,6 +5,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { ensureMinLatency, retryUntilSuccess } from 'src/utils/retry';
 import { VisitorType } from './visitor';
+import { memberType } from './member';
 
 const API_URL = '/api/TrackingAnalytics/visitor-session/';
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -30,7 +31,8 @@ export type GetFilter = {
   // areaId?: string;
   // visitorId?: string;
   // memberId?: string;
-  personType?: 'member' | 'visitor' | 'all' | null;
+  personType?: 'member' | 'visitor' | 'security' | 'all' | null;
+  identityId?: string | null;
   // eventTypes: EventTypesFilter;
 };
 
@@ -188,6 +190,8 @@ interface StateType {
   newVisitorSessions: NewSessionType[];
   newVisitorSessionsAll: NewSessionType[];
   selectedVisitor: VisitorType;
+  selectedMember: memberType;
+  selectedSecurity: memberType;
   visitorSessionSearch: string;
   selectedVisitorSession?: VisitorSessionType | null;
   visitorSessionTotalCount: number;
@@ -205,6 +209,8 @@ const initialState: StateType = {
   newVisitorSessions: [],
   newVisitorSessionsAll: [],
   selectedVisitor: {} as VisitorType,
+  selectedMember: {} as memberType,
+  selectedSecurity: {} as memberType,
   visitorSessionSearch: '',
   selectedVisitorSession: null,
   visitorSessionTotalCount: 0,
@@ -257,6 +263,12 @@ export const VisitorSessionSlice = createSlice({
     SetSelectedVisitor: (state, action: PayloadAction<VisitorType>) => {
       state.selectedVisitor = action.payload;
     },
+        SetSelectedMember: (state, action: PayloadAction<memberType>) => {
+      state.selectedMember = action.payload;
+    },
+    SetSelectedSecurity: (state, action: PayloadAction<memberType>) => {
+      state.selectedSecurity = action.payload;
+    },
     UpdateFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
       state.visitorSessionFilter = { ...state.visitorSessionFilter, ...action.payload };
     },
@@ -286,6 +298,8 @@ export const {
   SearchVisitorSession,
   SetSelectedVisitorSession,
   SetSelectedVisitor,
+  SetSelectedMember,
+  SetSelectedSecurity,
   UpdateFilter,
   NewUpdateFilter,
 } = VisitorSessionSlice.actions;

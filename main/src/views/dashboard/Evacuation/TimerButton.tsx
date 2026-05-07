@@ -241,7 +241,7 @@ const TimerButton: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        bgcolor: '#fff',
+        bgcolor: 'background.paper',
         mx: 2,
       }}
     >
@@ -256,7 +256,7 @@ const TimerButton: React.FC = () => {
             letterSpacing: '0.1em',
             width: '14ch',
             textAlign: 'center',
-            background: 'rgba(255,255,255,0.7)',
+            background: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
             borderRadius: 2,
             userSelect: 'none',
           }}
@@ -330,7 +330,7 @@ const TimerButton: React.FC = () => {
         </DialogActions>
       </Dialog>
       <Box sx={{ mt: 4, width: '100%' }}>
-        <List disablePadding sx={{ width: '100%', border: '1px solid #ccc', borderRadius: 2 }}>
+        <List disablePadding sx={{ width: '100%', border: (theme) => `1px solid ${theme.palette.divider}`, borderRadius: 2 }}>
           <Box sx={{ mt: 2, width: '100%' }}>
             <Typography
               variant="subtitle1"
@@ -367,7 +367,7 @@ const TimerButton: React.FC = () => {
                         sx={{
                           display: 'flex',
                           alignItems: 'center',
-                          borderRight: '1px solid #eee',
+                          borderRight: (theme) => `1px solid ${theme.palette.divider}`,
                         }}
                       >
                         <Avatar

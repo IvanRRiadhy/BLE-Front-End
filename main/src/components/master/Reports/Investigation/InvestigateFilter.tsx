@@ -41,11 +41,16 @@ import AreaHierarchySelector from 'src/components/shared/AreaHierarchySelector';
 import {
   fetchVisitorSession,
   NewUpdateFilter,
+  SetSelectedMember,
+  SetSelectedSecurity,
   SetSelectedVisitor,
   UpdateFilter,
 } from 'src/store/apps/crud/visitorSession';
 import { VisitorType } from 'src/store/apps/crud/visitor';
 import { setActiveMode } from 'src/store/apps/crud/investigate';
+import { useAllMembers } from 'src/hooks/useMember';
+import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
+import { memberType } from 'src/store/apps/crud/member';
 
 type TimeRangeKey = 'daily' | 'weekly' | 'monthly' | 'custom';
 
@@ -76,13 +81,18 @@ const InvestigateFilter = () => {
 
   // Master Data
   const { data: visitorData = [] } = useAllVisitor();
+  const { data: memberData = [] } = useAllMembers();
+  const { data: securityData = [] } = useAllSecuritys();
   const { data: buildingData = [] } = useAllBuilding();
   const { data: floorData = [] } = useAllFloors();
   const { data: floorplanData = [] } = useAllFloorplans();
   const { data: areaData = [] } = useAllMaskedAreas();
 
   // States
+  const [selectedPersonType, setSelectedPersonType] = useState<'visitor' | 'member' | 'security'>('visitor');
   const [selectedVisitor, setSelectedVisitor] = useState<VisitorType | null>(null);
+  const [selectedMember, setSelectedMember] = useState<memberType | null>(null);
+  const [selectedSecurity, setSelectedSecurity] = useState<memberType | null>(null);
   const [selectedArea, setSelectedArea] = useState<SelectedNode>(null);
   const [timeRange, setTimeRange] = useState<TimeRangeKey>('daily');
   const [startTime, setStartTime] = useState<Dayjs | null>(null);
@@ -264,12 +274,15 @@ const InvestigateFilter = () => {
   }, [selectedVisitor, selectedArea, selectedAlarmTypes, eventTypeFilter, activeMode]);
 
   // Handle activeMode change
-  const handleActiveModeChange = (
+  const handlePersonTypeChange = (
     event: React.MouseEvent<HTMLElement>,
-    newMode: 'visitor' | 'alarm' | 'area',
+    newMode: 'visitor' | 'security' | 'member',
   ) => {
     if (newMode !== null) {
-      dispatch(setActiveMode(newMode));
+      setSelectedPersonType(newMode);
+      setSelectedVisitor(null);
+      setSelectedSecurity(null);
+      setSelectedMember(null);
     }
   };
 
@@ -352,20 +365,17 @@ const InvestigateFilter = () => {
              CHECK IF REQUIRED FIELDS ARE FILLED
      ---------------------------------------------------*/
   const isRequiredFieldFilled = useMemo(() => {
-    switch (activeMode) {
+    switch (selectedPersonType) {
       case 'visitor':
         return !!selectedVisitor;
-      case 'area':
-        return !!selectedArea;
-      case 'alarm':
-        // For alarm mode, we need at least one alarm type selected
-        // AND event type should be 'alarm' or 'both'
-        const hasSelectedAlarmType = Object.values(selectedAlarmTypes).some((v) => v);
-        return hasSelectedAlarmType && (eventTypeFilter === 'alarm' || eventTypeFilter === 'both');
+      case 'member':
+        return !!selectedMember;
+      case 'security':
+        return !!selectedSecurity;
       default:
         return false;
     }
-  }, [activeMode, selectedVisitor, selectedArea, selectedAlarmTypes, eventTypeFilter]);
+  }, [selectedPersonType, selectedVisitor, selectedMember, selectedSecurity]);
 
   // Get tooltip message based on active mode
   const getTooltipMessage = useMemo(() => {
@@ -392,19 +402,17 @@ const InvestigateFilter = () => {
   }, [activeMode, eventTypeFilter, selectedAlarmTypes, isRequiredFieldFilled]);
 
   // Check if a specific field should show error
-  const shouldShowError = (fieldType: 'visitor' | 'area' | 'alarm') => {
+  const shouldShowError = (fieldType: 'visitor' | 'member' | 'security') => {
     if (!hasTriedSubmit) return false;
 
     switch (fieldType) {
       case 'visitor':
-        return activeMode === 'visitor' && !selectedVisitor;
-      case 'area':
-        return activeMode === 'area' && !selectedArea;
-      case 'alarm':
+        return selectedPersonType === 'visitor' && !selectedVisitor;
+      case 'member':
+        return selectedPersonType === 'member' && !selectedMember;
+      case 'security':
         return (
-          activeMode === 'alarm' &&
-          (!(eventTypeFilter === 'alarm' || eventTypeFilter === 'both') ||
-            Object.values(selectedAlarmTypes).every((v) => !v))
+          selectedPersonType === 'security' && !selectedSecurity
         );
       default:
         return false;
@@ -421,19 +429,15 @@ const InvestigateFilter = () => {
       setHasTriedSubmit(true);
 
       // Show alert with specific message
-      switch (activeMode) {
+      switch (selectedPersonType) {
         case 'visitor':
           alert('Please select a visitor first.');
           break;
-        case 'area':
-          alert('Please select an area first.');
+        case 'member':
+          alert('Please select a member first.');
           break;
-        case 'alarm':
-          if (!(eventTypeFilter === 'alarm' || eventTypeFilter === 'both')) {
-            alert('Please set Event Types to "Alarm" or "Both" for alarm investigation.');
-          } else if (Object.values(selectedAlarmTypes).every((v) => !v)) {
-            alert('Please select at least one alarm type to investigate.');
-          }
+        case 'security':
+          alert('Please select a security first.');
           break;
       }
       return;
@@ -443,6 +447,7 @@ const InvestigateFilter = () => {
     let floorId: string | null = null;
     let floorplanId: string | null = null;
     let areaId: string | null = null;
+    let identityId: string | null = null;
 
     if (selectedArea) {
       const data = selectedArea.data;
@@ -463,17 +468,40 @@ const InvestigateFilter = () => {
       }
     }
 
+          switch (selectedPersonType) {
+        case 'visitor':
+          identityId = selectedVisitor?.identityId || "";
+              if (selectedVisitor) {
+      dispatch(SetSelectedVisitor(selectedVisitor));
+    }
+          break;
+        case 'member':
+          identityId = selectedMember?.identityId || "";
+              if (selectedMember) {
+      dispatch(SetSelectedMember(selectedMember));
+    }
+          break;
+        case 'security':
+          identityId = selectedSecurity?.identityId || "";
+          if (selectedSecurity) {
+      dispatch(SetSelectedSecurity(selectedSecurity));
+    }
+          break;
+      }
+
     // Map simplified filter to the expected event types structure
     const eventTypes = {
       all: eventTypeFilter === 'both',
       accessTracking: eventTypeFilter === 'both' || eventTypeFilter === 'tracking',
       alarm: eventTypeFilter === 'both' || eventTypeFilter === 'alarm',
       alarmSubTypes: selectedAlarmTypes,
-    };
+    };  
 
     const finalFilter = {
       timeRange: timeRange,
-      visitorId: selectedVisitor?.id || '',
+      // visitorId: selectedVisitor?.id || '',
+      personType: selectedPersonType,
+      identityId: identityId,
       buildingId,
       floorId,
       floorplanId,
@@ -486,7 +514,7 @@ const InvestigateFilter = () => {
     }
 
     dispatch(NewUpdateFilter(finalFilter));
-    // dispatch(fetchVisitorSession(finalFilter));
+    dispatch(fetchVisitorSession(finalFilter));
 
     // Reset the tried submit state after successful submission
     setHasTriedSubmit(false);
@@ -576,17 +604,50 @@ const InvestigateFilter = () => {
             </>
           )}
 
+                  {/* Active Mode Toggle */}
+        <Box>
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+            Person Type
+          </Typography>
+          <ToggleButtonGroup
+            value={selectedPersonType}
+            exclusive
+            onChange={handlePersonTypeChange}
+            fullWidth
+            size="small"
+            sx={{
+              '& .MuiToggleButton-root': {
+                py: 1,
+                fontWeight: 500,
+                '&.Mui-selected': {
+                  background: 'linear-gradient(45deg, #355CFF, #00CFFF)',
+                  color: 'white',
+                  '&:hover': {
+                    background: 'linear-gradient(45deg, #355CFF, #00CFFF)',
+                    opacity: 0.9,
+                  },
+                },
+              },
+            }}
+          >
+            <ToggleButton value="visitor">Visitor</ToggleButton>
+            <ToggleButton value="member">Member</ToggleButton>
+            <ToggleButton value="security">Security</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+
           {/* Visitor */}
-          <Box>
+            {selectedPersonType === 'visitor' && (
+                        <Box>
             <Typography
               variant="subtitle2"
               sx={{
                 mb: 0.5,
                 color: shouldShowError('visitor') ? 'error.main' : 'text.primary',
-                fontWeight: activeMode === 'visitor' ? 600 : 400,
+                fontWeight: selectedPersonType === 'visitor' ? 600 : 400,
               }}
             >
-              Visitor Name {activeMode === 'visitor' && '*'}
+              Visitor Name {selectedPersonType === 'visitor' && '*'}
             </Typography>
             <Autocomplete
               options={visitorData}
@@ -600,11 +661,76 @@ const InvestigateFilter = () => {
                   size="medium"
                   placeholder="Select visitor"
                   error={shouldShowError('visitor')}
-                  helperText={shouldShowError('visitor') ? 'Required for visitor mode' : ''}
+                  helperText={shouldShowError('visitor') ? 'Required for visitor type' : ''}
                 />
               )}
             />
           </Box>
+            )}
+            
+          {/* Member */}
+            {selectedPersonType === 'member' && (
+                        <Box>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                mb: 0.5,
+                color: shouldShowError('member') ? 'error.main' : 'text.primary',
+                fontWeight: selectedPersonType === 'member' ? 600 : 400,
+              }}
+            >
+              Member Name {selectedPersonType === 'member' && '*'}
+            </Typography>
+            <Autocomplete
+              options={memberData}
+              getOptionLabel={(opt) => opt.name ?? ''}
+              isOptionEqualToValue={(opt, val) => opt?.id === val?.id}
+              value={selectedMember}
+              onChange={(e, val) => setSelectedMember(val)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="medium"
+                  placeholder="Select member"
+                  error={shouldShowError('member')}
+                  helperText={shouldShowError('member') ? 'Required for member type' : ''}
+                />
+              )}
+            />
+          </Box>
+            )}
+
+                      {/* Member */}
+            {selectedPersonType === 'security' && (
+                        <Box>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                mb: 0.5,
+                color: shouldShowError('security') ? 'error.main' : 'text.primary',
+                fontWeight: selectedPersonType === 'security' ? 600 : 400,
+              }}
+            >
+              Security Name {selectedPersonType === 'security' && '*'}
+            </Typography>
+            <Autocomplete
+              options={securityData}
+              getOptionLabel={(opt) => opt.name ?? ''}
+              isOptionEqualToValue={(opt, val) => opt?.id === val?.id}
+              value={selectedSecurity}
+              onChange={(e, val) => setSelectedSecurity(val)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="medium"
+                  placeholder="Select security"
+                  error={shouldShowError('security')}
+                  helperText={shouldShowError('security') ? 'Required for security type' : ''}
+                />
+              )}
+            />
+          </Box>
+            )}
 
           {/* Area */}
           <Box>
@@ -612,11 +738,10 @@ const InvestigateFilter = () => {
               variant="subtitle2"
               sx={{
                 mb: 0.5,
-                color: shouldShowError('area') ? 'error.main' : 'text.primary',
-                fontWeight: activeMode === 'area' ? 600 : 400,
+                fontWeight: 400,
               }}
             >
-              Area {activeMode === 'area' && '*'}
+              Area 
             </Typography>
             <AreaHierarchySelector
               buildings={buildingData}
@@ -625,8 +750,6 @@ const InvestigateFilter = () => {
               maskedAreas={areaData}
               value={selectedArea}
               onChange={setSelectedArea}
-              error={shouldShowError('area')}
-              helperText={shouldShowError('area') ? 'Required for area mode' : ''}
             />
           </Box>
 

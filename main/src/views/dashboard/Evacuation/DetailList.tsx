@@ -173,7 +173,7 @@ const DetailList: React.FC = () => (
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      bgcolor: '#fff',
+      bgcolor: 'background.paper',
       mx: 0,
     }}
   >
@@ -271,7 +271,7 @@ const DetailList: React.FC = () => (
 
     {/* Visitor List Scrollable */}
     <Box sx={{ mt: 2, width: '100%' }}>
-      <List disablePadding sx={{ width: '100%', border: '1px solid #ccc', borderRadius: 2 }}>
+      <List disablePadding sx={{ width: '100%', border: (theme) => `1px solid ${theme.palette.divider}`, borderRadius: 2 }}>
         <Box sx={{ mt: 2, width: '100%' }}>
           <Typography variant="subtitle1" fontWeight={700} sx={{ px: 2, mb: 1, textAlign: 'left' }}>
             Remaining Visitor
@@ -302,7 +302,7 @@ const DetailList: React.FC = () => (
               <TableBody>
                 {remainingVisitors.map((visitor) => (
                   <TableRow key={visitor.id} hover>
-                    <TableCell align="left" sx={{ borderRight: '1px solid #eee' }}>
+                    <TableCell align="left" sx={{ borderRight: (theme) => `1px solid ${theme.palette.divider}` }}>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <Avatar
                           src={visitor.faceUrl}
@@ -319,7 +319,7 @@ const DetailList: React.FC = () => (
                         </Box>
                       </Box>
                     </TableCell>
-                    <TableCell align="center" sx={{ borderRight: '1px solid #eee', width: 100 }}>
+                    <TableCell align="center" sx={{ borderRight: (theme) => `1px solid ${theme.palette.divider}`, width: 100 }}>
                       <Chip
                         label={visitor.status === 'confirmed' ? 'Confirmed' : 'Not Confirmed'}
                         color={visitor.status === 'confirmed' ? 'warning' : 'error'}

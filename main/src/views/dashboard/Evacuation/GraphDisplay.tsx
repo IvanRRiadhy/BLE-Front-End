@@ -233,7 +233,7 @@ const GraphDisplay: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        bgcolor: '#fff',
+        bgcolor: 'background.paper',
         mx: 0,
       }}
     >
@@ -357,7 +357,7 @@ const GraphDisplay: React.FC = () => {
                 <Typography variant="body2">Evacuated</Typography>
               </Stack>
               <Stack direction="row" alignItems="center" spacing={1}>
-                <Box sx={{ width: 16, height: 16, bgcolor: '#ffca28', borderRadius: '3px' }} />
+                <Box sx={{ width: 16, height: 16, bgcolor: 'warning.main', borderRadius: '3px' }} />
                 <Typography variant="body2">Confirmed</Typography>
               </Stack>
               <Stack direction="row" alignItems="center" spacing={1}>
@@ -518,7 +518,7 @@ const GraphDisplay: React.FC = () => {
                     <Typography variant="body2">Evacuated</Typography>
                   </Stack>
                   <Stack direction="row" alignItems="center" spacing={1}>
-                    <Box sx={{ width: 16, height: 16, bgcolor: '#ffca28', borderRadius: '3px' }} />
+                    <Box sx={{ width: 16, height: 16, bgcolor: 'warning.main', borderRadius: '3px' }} />
                     <Typography variant="body2">Confirmed</Typography>
                   </Stack>
                   <Stack direction="row" alignItems="center" spacing={1}>

@@ -15,7 +15,7 @@ import { VisitorType } from 'src/store/apps/crud/visitor';
 import { fontWeight } from '@mui/system';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { formatFullDateTime } from 'src/utils/time';
 import { useNewVisitorSession } from 'src/hooks/useVisitorSession';
 import {
@@ -24,11 +24,18 @@ import {
 } from 'src/store/apps/crud/visitorSession';
 import toast from 'react-hot-toast';
 import InvestigateReplayDialog from './InvestigateReplayDialog';
+import { memberType } from 'src/store/apps/crud/member';
 dayjs.extend(duration);
 
 const InvestigateContent = () => {
-  const selectedVisitor: VisitorType = useSelector(
+  const selectedVisitor: VisitorType  = useSelector(
     (state: RootState) => state.VisitorSessionReducer.selectedVisitor,
+  );
+  const selectedMember: memberType  = useSelector(
+    (state: RootState) => state.VisitorSessionReducer.selectedMember, 
+  );
+    const selectedSecurity: memberType  = useSelector(
+    (state: RootState) => state.VisitorSessionReducer.selectedSecurity, 
   );
   const investigateFilter = useSelector(
     (state: RootState) => state.VisitorSessionReducer.newVisitorSessionFilter,
@@ -43,9 +50,25 @@ const InvestigateContent = () => {
   //   (state: RootState) => state.VisitorSessionReducer.isLoading,
   // );
   const [isLoading, setIsLoading] = useState(false);
-  const language = useSelector((state: RootState) => state.customizer.isLanguage);
+  const language = useSelector((state: RootState) => state.settings.isLanguage);
 
   const [openReplay, setOpenReplay] = useState(false);
+
+  const selectedPerson = useMemo(() => {
+    switch (investigateFilter.personType) {
+      case 'member':
+        return selectedMember;
+      case 'security':
+        return selectedSecurity;
+      case 'visitor':
+      default:
+        return selectedVisitor;
+    }
+  }, [investigateFilter.personType, selectedVisitor, selectedMember, selectedSecurity]);
+
+  const personName = selectedPerson?.name || '';
+  const personId = selectedPerson?.id || '';
+
   const [replayData, setReplayData] = useState<{
     personName: string;
     floorplanImage: string;
@@ -55,14 +78,13 @@ const InvestigateContent = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!selectedVisitor?.id) return;
+      if (!personId) return;
 
       try {
         setIsLoading(true);
 
         const res = await investigateMutation.mutateAsync({
           filter: {
-            visitorId: selectedVisitor.id,
             ...investigateFilter,
           },
           options: {
@@ -154,11 +176,12 @@ const InvestigateContent = () => {
 
   if (isLoading) return <InvestigateSkeleton />;
 
-  if (!selectedVisitor.id) {
+  if (!personId) {
+    const personLabel = investigateFilter.personType || 'person';
     return (
       <Box p={3} textAlign="center" mt={5}>
         <Typography variant="h4" color="text.secondary" align="center">
-          No visitor selected. Please use the filter to choose a visitor.
+          No {personLabel} selected. Please use the filter to choose a {personLabel}.
         </Typography>
       </Box>
     );
@@ -198,19 +221,20 @@ const InvestigateContent = () => {
         </Box>
       )}
 
-      {/* ================= NO VISITOR SELECTED ================= */}
-      {!isLoading && !selectedVisitor?.id && (
+      {/* ================= NO PERSON SELECTED ================= */}
+      {!isLoading && !personId && (
         <Box p={3} textAlign="center" mt={5}>
           <Typography variant="h4" color="text.secondary">
-            No visitor selected. Please use the filter to choose a visitor.
+            No {investigateFilter.personType || 'person'} selected. Please use the filter to choose
+            one.
           </Typography>
         </Box>
       )}
 
       {/* ================= MAIN CONTENT ================= */}
-      {!isLoading && selectedVisitor?.id && sessionData && (
+      {!isLoading && personId && sessionData && (
         <Box p={3}>
-          {/* ================= VISITOR PROFILE ================= */}
+          {/* ================= PERSON PROFILE ================= */}
           <Box
             display="flex"
             alignItems="flex-start"
@@ -227,8 +251,8 @@ const InvestigateContent = () => {
               sx={{ minWidth: 180 }}
             >
               <Avatar
-                alt="Visitor Face"
-                src={`${BASE_URL}${selectedVisitor.faceImage}`}
+                alt="Person Face"
+                src={`${BASE_URL}${selectedPerson.faceImage}`}
                 sx={{
                   width: 160,
                   height: 160,
@@ -238,23 +262,23 @@ const InvestigateContent = () => {
               />
             </Box>
 
-            {/* VISITOR INFO */}
+            {/* PERSON INFO */}
             <Box flexGrow={1}>
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Typography sx={field}>Name</Typography>
 
                   <Box display="flex" gap={1}>
-                    <Typography sx={value}>{selectedVisitor.name}</Typography>
+                    <Typography sx={value}>{selectedPerson.name}</Typography>
 
-                    {selectedVisitor.isBlacklist ? (
+                    {(selectedPerson as any).isBlacklist ? (
                       <Chip
                         label="Blacklisted"
                         color="error"
                         size="small"
                         sx={{ fontWeight: 700 }}
                       />
-                    ) : selectedVisitor.isVip ? (
+                    ) : (selectedPerson as any).isVip ? (
                       <Chip label="VIP" color="warning" size="small" sx={{ fontWeight: 700 }} />
                     ) : null}
                   </Box>
@@ -262,57 +286,68 @@ const InvestigateContent = () => {
 
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Typography sx={field}>Organization</Typography>
-                  <Typography sx={value}>{selectedVisitor.organizationName}</Typography>
+                  <Typography sx={value}>
+                    {(selectedPerson as VisitorType).organizationName ||
+                      (selectedPerson as memberType).organization?.name}
+                  </Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Typography sx={field}>Gender</Typography>
-                  <Typography sx={value}>{selectedVisitor.gender}</Typography>
+                  <Typography sx={value}>{selectedPerson.gender}</Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Typography sx={field}>Address</Typography>
-                  <Typography sx={value}>{selectedVisitor.address}</Typography>
+                  <Typography sx={value}>{selectedPerson.address}</Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Typography sx={field}>Card Number</Typography>
-                  <Typography sx={value}>{selectedVisitor.cardNumber}</Typography>
+                  <Typography sx={value}>{selectedPerson.cardNumber}</Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Typography sx={field}>BLE Card Number</Typography>
-                  <Typography sx={value}>{selectedVisitor.bleCardNumber}</Typography>
+                  <Typography sx={value}>{selectedPerson.bleCardNumber}</Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Typography sx={field}>Department</Typography>
-                  <Typography sx={value}>{selectedVisitor.departmentName}</Typography>
+                  <Typography sx={value}>
+                    {(selectedPerson as VisitorType).departmentName ||
+                      (selectedPerson as memberType).department?.name}
+                  </Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Typography sx={field}>District</Typography>
-                  <Typography sx={value}>{selectedVisitor.districtName}</Typography>
+                  <Typography sx={value}>
+                    {(selectedPerson as VisitorType).districtName ||
+                      (selectedPerson as memberType).district?.name}
+                  </Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Typography sx={field}>Identity Type</Typography>
-                  <Typography sx={value}>{selectedVisitor.identityType}</Typography>
+                  <Typography sx={value}>
+                    {(selectedPerson as VisitorType).identityType || 'Identity'}
+                  </Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Typography sx={field}>Identity ID</Typography>
-                  <Typography sx={value}>{selectedVisitor.identityId}</Typography>
+                  <Typography sx={value}>{selectedPerson.identityId}</Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Typography sx={field}>Email</Typography>
-                  <Typography sx={value}>{selectedVisitor.email}</Typography>
+                  <Typography sx={value}>{selectedPerson.email}</Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Typography sx={field}>Phone</Typography>
-                  <Typography sx={value}>{selectedVisitor.phone}</Typography>
+                  <Typography sx={value}>{selectedPerson.phone}</Typography>
                 </Grid>
               </Grid>
             </Box>

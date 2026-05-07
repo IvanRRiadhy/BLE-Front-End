@@ -12,7 +12,7 @@ const Evacuation: React.FC = () => (
     alignItems="center"
     justifyContent="center"
     gap={2}
-    bgcolor="#f5f5f5"
+    bgcolor="background.default"
     p={2}
   >
     <DetailList />
