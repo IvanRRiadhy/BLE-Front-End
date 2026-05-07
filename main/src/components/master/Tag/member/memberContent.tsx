@@ -55,9 +55,7 @@ const MemberContent = () => {
   );
 
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
-  const districtData = useAllDistricts();
-  const departmentData = useAllDepartments();
-  const organizationData = useAllOrganizations();
+
   // Get cached data for the member list
   const memberCache = queryClient.getQueryData<PaginatedResponse<memberType>>([
     'member-list',
@@ -70,11 +68,6 @@ const MemberContent = () => {
   // const theme = useTheme();
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    dispatch(fetchDistricts());
-    dispatch(fetchDepartments());
-    dispatch(fetchOrganizations());
-  }, [dispatch]);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<memberType | null>(null);

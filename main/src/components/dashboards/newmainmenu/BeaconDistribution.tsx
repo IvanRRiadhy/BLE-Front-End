@@ -5,7 +5,7 @@ import { useBeaconCount } from 'src/hooks/useDashboard';
 import { useSelector } from 'src/store/Store';
 
 
-const COLORS = ['#045498', '#3676AC', '#B3CBE0', '#02325B'];
+const COLORS = ['#02325B','#045498', '#3676AC',  '#B3CBE0'];
 
 const NewBeaconDistribution: React.FC = () => {
   const dashboardFilter = useSelector((state: any) => state.customizer.dashboardFilter);
@@ -17,14 +17,15 @@ const NewBeaconDistribution: React.FC = () => {
 
     const memberCard = data.memberCardCount ?? 0;
     const visitorCard = data.visitorCardCount ?? 0;
+    const securityCard = data.securityCardCount ?? 0;
     const totalCard = data.totalCardCount ?? 0;
     const totalUsed = data.totalCardUse ?? 0;
-
+    // console.log("Beacons: ", data)
     const unusedCard = Math.max(totalCard - totalUsed, 0);
 
     return {
-      labels: ['Member Card', 'Visitor Card', 'Unused Card'],
-      series: [memberCard, visitorCard, unusedCard],
+      labels: ['Member Card', 'Visitor Card', 'Security Card', 'Unused Card'],
+      series: [memberCard, visitorCard, securityCard, unusedCard],
     };
   }, [data]);
 

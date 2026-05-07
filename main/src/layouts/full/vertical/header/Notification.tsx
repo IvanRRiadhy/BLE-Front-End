@@ -121,8 +121,8 @@ const Notifications = () => {
     // filters: { isActive: true },
   });
   const alarmTriggerData = data?.data || [];
-  const memberList: memberType[] = useAllMembers().data || [];
-  const visitorList: VisitorType[] = useAllVisitor().data || [];
+  // const memberList: memberType[] = useAllMembers().data || [];
+  // const visitorList: VisitorType[] = useAllVisitor().data || [];
   const MAX_BUBBLES = 4;
   const ONE_HOUR_MS = 60 * 60 * 1000;
   const toMs = (v: any) => (v instanceof Date ? v.getTime() : Date.parse(v));
@@ -177,11 +177,11 @@ const Notifications = () => {
     window.location.href = `/alarm/alarmlist?${params.toString()}`;
   };
 
-  const getName = (ble: string) =>
-    memberList.find((x) => x.bleCardNumber === ble)?.name ||
-    visitorList.find((x) => x.bleCardNumber === ble)?.name ||
-    ble ||
-    'Unknown';
+  // const getName = (ble: string) =>
+  //   memberList.find((x) => x.bleCardNumber === ble)?.name ||
+  //   visitorList.find((x) => x.bleCardNumber === ble)?.name ||
+  //   ble ||
+  //   'Unknown';
 
   const getStatusText = (status: string) => {
     const actionMap = [...actionStatus, ...extraActionStatus];
@@ -268,7 +268,7 @@ const Notifications = () => {
       window.removeEventListener('message', onNewAlarm);
       Object.values(hideTimers.current).forEach((t) => window.clearTimeout(t));
     };
-  }, [memberList, visitorList]);
+  }, []);
 
   // 🧊 Bubble animation variants
   const bubbleVariants = {

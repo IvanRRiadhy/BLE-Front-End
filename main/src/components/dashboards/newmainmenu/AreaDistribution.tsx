@@ -256,7 +256,7 @@ const NewAreaDistribution: React.FC = () => {
           height: { lg: 400, md: '100%', sm: '100%', xs: '100%' },
           mt: 2,
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'center',
           '& .apexcharts-legend': {
             maxHeight: 180,
@@ -265,7 +265,7 @@ const NewAreaDistribution: React.FC = () => {
         }}
       >
         {hasData ? (
-          <Chart options={options} series={series} type="pie" height="100%" />
+          <Chart options={options} series={series} type="pie" height="75%" />
         ) : (
           <Stack spacing={1} alignItems="center">
             <Typography

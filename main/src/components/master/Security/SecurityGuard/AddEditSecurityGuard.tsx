@@ -68,6 +68,9 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
   const districtData = useAllDistricts().data || [];
   const departmentData = useAllDepartments().data || [];
   const organizationData = useAllOrganizations().data || [];
+  //   const districtData: DistrictType[] =  [];
+  // const departmentData: DepartmentType[] =[];
+  // const organizationData: OrganizationType[] =  [];
   const filteredCard = useUnassignedCard().data || [];
   const cardData = useAllCard().data || [];
   const cardOptions = React.useMemo(() => {

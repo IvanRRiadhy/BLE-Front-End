@@ -17,6 +17,9 @@ import { fetchDistricts, DistrictType } from 'src/store/apps/crud/district';
 import { UpdateFilter } from 'src/store/apps/crud/member';
 import { defaultMemberFilter } from 'src/store/apps/defaultForm';
 import AddEditSecurityGuard from './AddEditSecurityGuard';
+import { useAllDepartments } from 'src/hooks/useDepartment';
+import { useAllDistricts } from 'src/hooks/useDistrict';
+import { useAllOrganizations } from 'src/hooks/useOrganization';
 
 type ArrayFilterKey = 'OrganizationId' | 'DepartmentId' | 'DistrictId';
 
@@ -34,24 +37,27 @@ interface DataType {
 const SecurityGuardFilter = () => {
   const dispatch = useDispatch();
 
-  const customizer = useSelector((state: RootState) => state.customizer);
-  const br = `${customizer.borderRadius}px`;
+  const settings = useSelector((state: RootState) => state.settings);
+  const br = `${settings.borderRadius}px`;
 
-  const departmentData = useSelector((state: RootState) => state.departmentReducer.departmentAll);
-  const districtData = useSelector((state: RootState) => state.districtReducer.districtAll);
-  const organizationData = useSelector(
-    (state: RootState) => state.organizationReducer.organizationAll,
-  );
+  // const departmentData = useSelector((state: RootState) => state.departmentReducer.departmentAll);
+  // const districtData = useSelector((state: RootState) => state.districtReducer.districtAll);
+  // const organizationData = useSelector(
+  //   (state: RootState) => state.organizationReducer.organizationAll,
+  // );
+  const departmentData = useAllDepartments().data || [];
+  const districtData = useAllDistricts().data || [];
+  const organizationData = useAllOrganizations().data || [];
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter.filters);
   const [draftFilter, setDraftFilter] = useState(memberFilter);
   // -------------------------------------------------------------------------
   // ✅ Fetch lists once (if empty)
   // -------------------------------------------------------------------------
-  useEffect(() => {
-    if (departmentData.length === 0) dispatch(fetchDepartments());
-    if (districtData.length === 0) dispatch(fetchDistricts());
-    if (organizationData.length === 0) dispatch(fetchOrganizations());
-  }, [dispatch, departmentData, districtData, organizationData]);
+  // useEffect(() => {
+  //   if (departmentData.length === 0) dispatch(fetchDepartments());
+  //   if (districtData.length === 0) dispatch(fetchDistricts());
+  //   if (organizationData.length === 0) dispatch(fetchOrganizations());
+  // }, [dispatch, departmentData, districtData, organizationData]);
 
   // -------------------------------------------------------------------------
   // ✅ Transform Data into Filter Format

@@ -16,6 +16,8 @@ import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organi
 import { fetchDistricts, DistrictType } from 'src/store/apps/crud/district';
 import { UpdateFilter } from 'src/store/apps/crud/member';
 import { defaultMemberFilter } from 'src/store/apps/defaultForm';
+import { useQueryClient } from '@tanstack/react-query';
+import { PaginatedResponse } from 'src/hooks/useDepartment';
 
 type ArrayFilterKey = 'OrganizationId' | 'DepartmentId' | 'DistrictId';
 
@@ -31,26 +33,30 @@ interface DataType {
 }
 
 const SecurityGuardFilter = () => {
+  const queryClient = useQueryClient();
   const dispatch = useDispatch();
 
-  const customizer = useSelector((state: RootState) => state.customizer);
-  const br = `${customizer.borderRadius}px`;
+  const settings = useSelector((state: RootState) => state.settings);
+  const br = `${settings.borderRadius}px`;
 
-  const departmentData = useSelector((state: RootState) => state.departmentReducer.departmentAll);
-  const districtData = useSelector((state: RootState) => state.districtReducer.districtAll);
-  const organizationData = useSelector(
-    (state: RootState) => state.organizationReducer.organizationAll,
-  );
+  // const departmentData = useSelector((state: RootState) => state.departmentReducer.departmentAll);
+  // const districtData = useSelector((state: RootState) => state.districtReducer.districtAll);
+  // const organizationData = useSelector(
+  //   (state: RootState) => state.organizationReducer.organizationAll,
+  // );
+  const departmentData = queryClient.getQueryData<PaginatedResponse<DepartmentType>>(['department-list'])?.data || [];
+  const districtData = queryClient.getQueryData<PaginatedResponse<DistrictType>>(['district-list'])?.data || [];
+  const organizationData = queryClient.getQueryData<PaginatedResponse<OrganizationType>>(['organization-list'])?.data || [];
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter.filters);
   const [draftFilter, setDraftFilter] = useState(memberFilter);
   // -------------------------------------------------------------------------
   // ✅ Fetch lists once (if empty)
   // -------------------------------------------------------------------------
-  useEffect(() => {
-    if (departmentData.length === 0) dispatch(fetchDepartments());
-    if (districtData.length === 0) dispatch(fetchDistricts());
-    if (organizationData.length === 0) dispatch(fetchOrganizations());
-  }, [dispatch, departmentData, districtData, organizationData]);
+  // useEffect(() => {
+  //   if (departmentData.length === 0) dispatch(fetchDepartments());
+  //   if (districtData.length === 0) dispatch(fetchDistricts());
+  //   if (organizationData.length === 0) dispatch(fetchOrganizations());
+  // }, [dispatch, departmentData, districtData, organizationData]);
 
   // -------------------------------------------------------------------------
   // ✅ Transform Data into Filter Format
