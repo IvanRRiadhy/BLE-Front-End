@@ -42,7 +42,7 @@ export interface bleReaderType {
   heightMeter: number;
   forceReading: boolean;
   forceRadiusThreshold: number;
-  soloRadiusMeter: number;
+  forceRadiusMeter: number;
   brand?: BrandType;
   createdBy: string;
   createdAt: string;

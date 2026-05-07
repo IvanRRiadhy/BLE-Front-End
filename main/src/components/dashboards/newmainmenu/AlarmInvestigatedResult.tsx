@@ -154,7 +154,7 @@ const chartData = useMemo(() => {
         width: '100%',
         height: '30vh',
         borderRadius: '25px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+        boxShadow: (theme) => theme.shadows[10],
         px: 2,
         py: 2,
       }}

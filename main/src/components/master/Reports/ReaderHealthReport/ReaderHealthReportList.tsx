@@ -182,7 +182,7 @@ const GaugeChart = ({ label, value, percentage, unit, minMax }: GaugeChartProps)
 
 
 
-const ReaderHealthCard = ({ data }: { data: healthCheckMessage }) => {
+const ReaderHealthCard = ({ data }: { data: any }) => {
   const theme = useTheme();
 
   // Calculate percentages for gauges
@@ -198,6 +198,10 @@ const ReaderHealthCard = ({ data }: { data: healthCheckMessage }) => {
         border: `1px solid ${theme.palette.divider}`,
         boxShadow: theme.shadows[1],
         overflow: 'visible',
+        backgroundColor: data.isWarning ? theme.palette.error.light : 'inherit',
+        '&:hover': {
+          backgroundColor: data.isWarning ? theme.palette.error.light : 'inherit',
+        }
       }}
     >
       <CardContent sx={{ p: '24px !important' }}>
@@ -277,9 +281,10 @@ const ReaderHealthCard = ({ data }: { data: healthCheckMessage }) => {
   );
 };
 
-const ReaderHealthTable = ({ data }: { data: healthCheckMessage[] }) => {
+const ReaderHealthTable = ({ data }: { data: any[] }) => {
+  const theme = useTheme();
   return (
-    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '12px', overflow: 'hidden', maxHeight: "75vh", overflowY: "auto" }}>
+    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '12px', overflow: 'hidden', maxHeight: "60vh", overflowY: "auto" }}>
       <Table stickyHeader sx={{ minWidth: 650 }} aria-label="reader health table">
         <TableHead sx={{ backgroundColor: '#F5F5F5' }}>
           <TableRow>
@@ -297,7 +302,17 @@ const ReaderHealthTable = ({ data }: { data: healthCheckMessage[] }) => {
         </TableHead>
         <TableBody>
           {data.map((row) => (
-            <TableRow key={row.gmac} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+            <TableRow 
+              key={row.gmac} 
+              hover 
+              sx={{ 
+                '&:last-child td, &:last-child th': { border: 0 },
+                backgroundColor: row.isWarning ? theme.palette.error.light : 'inherit',
+                '&:hover': {
+                  backgroundColor: row.isWarning ? `${theme.palette.error.light} !important` : 'inherit',
+                }
+              }}
+            >
               <TableCell><Typography variant="body2" fontWeight={600}>{row.gmac}</Typography></TableCell>
               <TableCell>
                 <Chip
@@ -317,17 +332,17 @@ const ReaderHealthTable = ({ data }: { data: healthCheckMessage[] }) => {
                 </Typography>
               </TableCell>
               <TableCell align="right">
-                <Typography variant="body2" fontWeight={700} color={row.temp > 80 ? 'error.main' : 'inherit'}>
+                <Typography variant="body2" fontWeight={700} color={row.temp >= 50 ? 'error.main' : 'inherit'}>
                   {row.temp}°C
                 </Typography>
               </TableCell>
               <TableCell align="right">
-                <Typography variant="body2" fontWeight={700} color={row.load > 0.8 ? 'warning.main' : 'inherit'}>
+                <Typography variant="body2" fontWeight={700} color={row.load >= 0.6 ? 'error.main' : 'inherit'}>
                   {Math.round(row.load * 100)}%
                 </Typography>
               </TableCell>
               <TableCell align="right">
-                <Typography variant="body2" fontWeight={700} color={row.mem_free < 20 ? 'error.main' : 'inherit'}>
+                <Typography variant="body2" fontWeight={700} color={row.mem_free <= 15 ? 'error.main' : 'inherit'}>
                   {row.mem_free}%
                 </Typography>
               </TableCell>
@@ -359,6 +374,12 @@ const ReaderHealthReportList = ({ viewMode = 'visual' }: { viewMode?: 'visual' |
         status = health.msg || 'alive';
       }
 
+      const isWarning = status !== 'Non-Active' && (
+        (health?.temp ?? 0) >= 50 ||
+        (health?.load ?? 0) >= 0.6 ||
+        (health?.mem_free ?? 100) <= 15
+      );
+
       return {
         ...health,
         gmac: reader.gmac,
@@ -372,6 +393,7 @@ const ReaderHealthReportList = ({ viewMode = 'visual' }: { viewMode?: 'visual' |
         blever: health?.blever || '-',
         lowVoltage: health?.lowVoltage ?? 0,
         utc: health?.utc ?? 0,
+        isWarning,
       };
     });
   }, [allReader, readerHealthByTopic]);

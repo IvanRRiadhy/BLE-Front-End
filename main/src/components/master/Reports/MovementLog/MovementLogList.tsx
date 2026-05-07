@@ -236,7 +236,7 @@ const MovementLogList = () => {
                       <TableRow
                         key={index}
                         sx={{
-                          backgroundColor: index % 2 === 0 ? 'grey.50' : 'white',
+                          backgroundColor: index % 2 === 0 ? 'background.default' : 'background.paper',
                         }}
                       >
                         <TableCell>

@@ -393,11 +393,11 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                       <>
                         <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                           <CustomTextField
-                            id="soloRadiusMeter"
+                            id="forceRadiusMeter"
                             type="number"
                             label="Radius (in meter)"
                             placeholder="e.g. 5"
-                            value={formData.soloRadiusMeter}
+                            value={formData.forceRadiusMeter}
                             onChange={handleInputChange}
                             fullWidth
                             variant="outlined"

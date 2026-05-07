@@ -540,7 +540,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
             strokeWidth={!statusActive ? 3  : 0} 
         />
         {device.reader?.forceReading && (
-          <Circle x={x + (20 * gateSize)} y={y + (20 * gateSize)} radius={((device.reader?.soloRadiusMeter || 2) / meterPx)} fill="transparent"  stroke="#1976d2" strokeWidth={2}/>
+          <Circle x={x + (20 * gateSize)} y={y + (20 * gateSize)} radius={((device.reader?.forceRadiusMeter || 2) / meterPx)} fill="transparent"  stroke="#1976d2" strokeWidth={2}/>
         )}
       </Group>
     );

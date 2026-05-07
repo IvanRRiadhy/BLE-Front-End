@@ -10,7 +10,7 @@ import {
   Typography,
   Stack,
 } from '@mui/material';
-import { Download, TableChart } from '@mui/icons-material';
+import { Download, TableChart, FileDownload } from '@mui/icons-material';
 import { AppDispatch, useDispatch } from 'src/store/Store';
 import { ImportFloor } from 'src/store/apps/crud/floor';
 import toast from 'react-hot-toast';
@@ -78,12 +78,24 @@ const FloorImport = () => {
         Import
       </Button>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                <MenuItem
+          component="a"
+          href="/importTemplate/import_template_floor.xlsx"
+          download="import_template_floor.xlsx"
+          onClick={handleClose}
+        >
+          <ListItemIcon>
+            <FileDownload fontSize="small" color="primary" />
+          </ListItemIcon>
+          <ListItemText>Download Template</ListItemText>
+        </MenuItem>
         <MenuItem onClick={() => handleImport('xls')}>
           <ListItemIcon>
             <TableChart fontSize="small" color="success" />
           </ListItemIcon>
           <ListItemText>XLS</ListItemText>
         </MenuItem>
+
       </Menu>
       <input
         ref={fileInputRef}

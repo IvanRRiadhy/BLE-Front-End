@@ -93,6 +93,10 @@ const Statistic = () => {
         <head>
           <title>${title} - Person Data</title>
           <meta charset="UTF-8">
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
           <style>
             body {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
@@ -204,19 +208,38 @@ const Statistic = () => {
               color: #999;
               font-style: italic;
             }
+            .export-buttons {
+              display: flex;
+              gap: 12px;
+              margin-top: 24px;
+              padding-top: 24px;
+              border-top: 1px solid ${isDarkMode ? '#333' : '#e0e0e0'};
+            }
             .export-btn {
-              background-color: #1976d2;
-              color: white;
-              border: none;
               padding: 10px 20px;
-              border-radius: 4px;
+              border-radius: 6px;
               cursor: pointer;
               font-size: 14px;
-              font-weight: 500;
-              margin-top: 20px;
+              font-weight: 600;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              transition: all 0.2s;
+              border: none;
             }
-            .export-btn:hover {
-              background-color: #1565c0;
+            .btn-excel {
+              background-color: #2e7d32;
+              color: white;
+            }
+            .btn-excel:hover {
+              background-color: #1b5e20;
+            }
+            .btn-pdf {
+              background-color: #d32f2f;
+              color: white;
+            }
+            .btn-pdf:hover {
+              background-color: #b71c1c;
             }
             .person-type {
               font-weight: 500;
@@ -346,36 +369,169 @@ const Statistic = () => {
               </div>
             ` : ''}
             
-            <button class="export-btn" onclick="exportData()">Export as JSON</button>
+            <div class="export-buttons">
+              <button class="export-btn btn-excel" onclick="exportToExcel()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Export as Excel
+              </button>
+              <button class="export-btn btn-pdf" onclick="exportToPdf()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="m9 15 3-3 3 3"></path><path d="M12 12v9"></path></svg>
+                Export as PDF
+              </button>
+            </div>
           </div>
           
           <script>
-            function exportData() {
-              const data = ${JSON.stringify(personsData, null, 2)};
-              const dataStr = JSON.stringify(data, null, 2);
-              const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-              const exportFileDefaultName = '${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.json';
+            const personsData = ${JSON.stringify(personsData)};
+            const filename = '${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_' + new Date().toISOString().split('T')[0];
+
+            async function exportToExcel() {
+              const workbook = new ExcelJS.Workbook();
+              const worksheet = workbook.addWorksheet('Person Data');
+
+              // Setup Columns
+              const visitors = personsData.filter(p => p.type === 'visitor');
+              const members = personsData.filter(p => p.type === 'member');
+
+              if (visitors.length > 0) {
+                worksheet.addRow(['VISITORS']).font = { bold: true, size: 14 };
+                worksheet.addRow(['#', 'Name', 'Visitor Type', 'Card Number', 'BLE Card Number', 'Organization', 'Phone', 'Email', 'VIP', 'Blacklist']).font = { bold: true };
+                
+                visitors.forEach((p, i) => {
+                  worksheet.addRow([
+                    i + 1,
+                    p.name || 'N/A',
+                    p.visitorType || 'N/A',
+                    p.cardNumber || 'N/A',
+                    p.bleCardNumber || 'N/A',
+                    p.organizationName || 'N/A',
+                    p.phone || 'N/A',
+                    p.email || 'N/A',
+                    p.isVip ? 'Yes' : 'No',
+                    p.isBlacklist ? 'Yes' : 'No'
+                  ]);
+                });
+                worksheet.addRow([]); // Empty row
+              }
+
+              if (members.length > 0) {
+                worksheet.addRow(['MEMBERS']).font = { bold: true, size: 14 };
+                worksheet.addRow(['#', 'Name', 'Status', 'Card Number', 'BLE Card Number', 'Organization', 'Department', 'Phone', 'Email', 'Blacklist']).font = { bold: true };
+                
+                members.forEach((p, i) => {
+                  worksheet.addRow([
+                    i + 1,
+                    p.name || 'N/A',
+                    p.statusEmployee || 'N/A',
+                    p.cardNumber || 'N/A',
+                    p.bleCardNumber || 'N/A',
+                    p.organization?.name || p.organizationName || 'N/A',
+                    p.department?.name || p.departmentName || 'N/A',
+                    p.phone || 'N/A',
+                    p.email || 'N/A',
+                    p.isBlacklist ? 'Yes' : 'No'
+                  ]);
+                });
+              }
+
+              // Auto-width columns
+              worksheet.columns.forEach(column => {
+                column.width = 20;
+              });
+
+              const buffer = await workbook.xlsx.writeBuffer();
+              const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+              saveAs(blob, filename + '.xlsx');
+            }
+
+            function exportToPdf() {
+              const { jsPDF } = window.jspdf;
+              const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
               
-              const linkElement = document.createElement('a');
-              linkElement.setAttribute('href', dataUri);
-              linkElement.setAttribute('download', exportFileDefaultName);
-              linkElement.style.display = 'none';
-              document.body.appendChild(linkElement);
-              linkElement.click();
-              document.body.removeChild(linkElement);
+              doc.setFontSize(20);
+              doc.text('${title}', doc.internal.pageSize.getWidth() / 2, 40, { align: 'center' });
+              
+              doc.setFontSize(10);
+              doc.text('Generated: ' + new Date().toLocaleString(), doc.internal.pageSize.getWidth() / 2, 60, { align: 'center' });
+
+              const visitors = personsData.filter(p => p.type === 'visitor');
+              const members = personsData.filter(p => p.type === 'member');
+
+              let currentY = 80;
+
+              if (visitors.length > 0) {
+                doc.setFontSize(14);
+                doc.text('Visitors', 40, currentY);
+                currentY += 10;
+
+                doc.autoTable({
+                  startY: currentY,
+                  head: [['#', 'Name', 'Type', 'Card #', 'BLE Card #', 'Organization', 'Phone', 'Email', 'VIP', 'Blacklist']],
+                  body: visitors.map((p, i) => [
+                    i + 1,
+                    p.name || 'N/A',
+                    p.visitorType || 'N/A',
+                    p.cardNumber || 'N/A',
+                    p.bleCardNumber || 'N/A',
+                    p.organizationName || 'N/A',
+                    p.phone || 'N/A',
+                    p.email || 'N/A',
+                    p.isVip ? 'Yes' : 'No',
+                    p.isBlacklist ? 'Yes' : 'No'
+                  ]),
+                  theme: 'striped',
+                  styles: { fontSize: 8 },
+                  headStyles: { fillColor: [25, 118, 210] }
+                });
+                currentY = doc.lastAutoTable.finalY + 30;
+              }
+
+              if (members.length > 0) {
+                if (currentY + 50 > doc.internal.pageSize.getHeight()) {
+                  doc.addPage();
+                  currentY = 40;
+                }
+                
+                doc.setFontSize(14);
+                doc.text('Members', 40, currentY);
+                currentY += 10;
+
+                doc.autoTable({
+                  startY: currentY,
+                  head: [['#', 'Name', 'Status', 'Card #', 'BLE Card #', 'Org', 'Dept', 'Phone', 'Email', 'Blacklist']],
+                  body: members.map((p, i) => [
+                    i + 1,
+                    p.name || 'N/A',
+                    p.statusEmployee || 'N/A',
+                    p.cardNumber || 'N/A',
+                    p.bleCardNumber || 'N/A',
+                    p.organization?.name || p.organizationName || 'N/A',
+                    p.department?.name || p.departmentName || 'N/A',
+                    p.phone || 'N/A',
+                    p.email || 'N/A',
+                    p.isBlacklist ? 'Yes' : 'No'
+                  ]),
+                  theme: 'striped',
+                  styles: { fontSize: 8 },
+                  headStyles: { fillColor: [46, 125, 50] }
+                });
+              }
+
+              doc.save(filename + '.pdf');
             }
             
-            // Add keyboard shortcut for export (Ctrl+E or Cmd+E)
+            // Add keyboard shortcut for export (Ctrl+E or Cmd+E defaults to Excel)
             document.addEventListener('keydown', function(e) {
               if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
                 e.preventDefault();
-                exportData();
+                exportToExcel();
               }
             });
           </script>
         </body>
       </html>
     `;
+
   };
 
   // Function to open a new window with person data

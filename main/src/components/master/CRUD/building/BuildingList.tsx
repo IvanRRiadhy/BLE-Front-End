@@ -38,6 +38,7 @@ import { useBuildingList, useDeleteBuilding } from 'src/hooks/useBuilding';
 
 const columns = [
   { label: 'Building Name', field: 'name', sortAble: true },
+  { label: 'Building Tag', field: 'tag', sortAble: false },
   { label: 'Building Image', field: '', sortAble: false },
 ];
 
@@ -281,6 +282,7 @@ const BuildingList = () => {
                             {index + 1 + page * rowsPerPage}
                           </TableCell>
                           <TableCell>{building.name}</TableCell>
+                          <TableCell>{building.tag}</TableCell>
                           <TableCell>
                             {building.image ? (
                               <img

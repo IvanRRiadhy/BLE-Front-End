@@ -157,7 +157,7 @@ export const defaultBleReaderForm: bleReaderType = {
   heightMeter: 2.6,
   forceReading: false,
   forceRadiusThreshold: 1,
-  soloRadiusMeter: 5,
+  forceRadiusMeter: 5,
   // engineReaderId: '',
   createdBy: '',
   createdAt: '',
@@ -200,6 +200,7 @@ export const defaultBrandFilter: BrandFilter = {
 export const defaultBuildingForm: BuildingType = {
   id: '',
   name: '',
+  tag: '',
   image: '',
   applicationId: localStorage.getItem('applicationId') || '',
   createdBy: '',

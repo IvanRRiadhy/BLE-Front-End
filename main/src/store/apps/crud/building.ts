@@ -40,6 +40,7 @@ export type GetBuildingResponse = {
 
 export interface BuildingType {
     id: string;
+    tag: string;
     name: string;
     image: string;
     applicationId: string;

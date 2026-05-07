@@ -494,7 +494,7 @@ const AlarmContent = () => {
           borderRadius: 1.5,
           p: 1,
           mb: 1,
-          bgcolor: '#fafafa',
+          bgcolor: 'background.default',
           cursor: 'pointer',
           transition: 'all 0.2s ease-in-out',
           '&:hover': {

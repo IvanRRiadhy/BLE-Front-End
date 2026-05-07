@@ -10,7 +10,7 @@ import {
   Typography,
   Stack,
 } from '@mui/material';
-import { Download, TableChart } from '@mui/icons-material';
+import { Download, TableChart, FileDownload } from '@mui/icons-material';
 import { AppDispatch, useDispatch } from 'src/store/Store';
 import { ImportCard } from 'src/store/apps/crud/card';
 import toast from 'react-hot-toast';
@@ -80,12 +80,24 @@ const CardImport = () => {
         Import
       </Button>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                <MenuItem
+          component="a"
+          href="/importTemplate/import_template_card.xlsx"
+          download="import_template_card.xlsx"
+          onClick={handleClose}
+        >
+          <ListItemIcon>
+            <FileDownload fontSize="small" color="primary" />
+          </ListItemIcon>
+          <ListItemText>Download Template</ListItemText>
+        </MenuItem>
         <MenuItem onClick={() => handleImport('xls')}>
           <ListItemIcon>
             <TableChart fontSize="small" color="success" />
           </ListItemIcon>
           <ListItemText>XLS</ListItemText>
         </MenuItem>
+
       </Menu>
       <input
         ref={fileInputRef}

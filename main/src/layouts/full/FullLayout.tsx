@@ -138,6 +138,7 @@ const FullLayout: FC = () => {
       if (unsubscribe) unsubscribe();
     };
   }, [dispatch]);
+  
   useEffect(() => {
     dispatch(fetchAlarmSettingsDT(defaultAlarmSettingFilter));
     // dispatch(fetchEventLogs());

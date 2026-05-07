@@ -165,7 +165,7 @@ const BleReaderFilter = () => {
               ))}
             </CustomSelect>
           </Grid>
-          <Grid size={12}>
+          {/* <Grid size={12}>
             <CustomFormLabel htmlFor="engineReader">
               <Typography variant="caption">Engine Reader :</Typography>
             </CustomFormLabel>
@@ -180,7 +180,7 @@ const BleReaderFilter = () => {
               variant="outlined"
               disabled
             />
-          </Grid>
+          </Grid> */}
         </Grid>
 
         <Box mt={3}>

@@ -83,7 +83,7 @@ const NewBeaconDistribution: React.FC = () => {
         height: '25vh',//32vh
         minHeight: 0,
         borderRadius: '25px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+        boxShadow: (theme) => theme.shadows[10],
         px: 2,
         py: 1,
         display: 'flex',

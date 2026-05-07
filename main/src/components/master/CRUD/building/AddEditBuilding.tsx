@@ -218,6 +218,20 @@ const handleSave = async () => {
                   required
                 />
               </Grid>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
+                <CustomFormLabel htmlFor="department-Name">Building Tag</CustomFormLabel>
+                <CustomTextField
+                  id="tag"
+                  value={formData.tag}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Enter Building Tag"
+                  error={!!formErrors.tag}
+                  helperText={formErrors.tag}
+                  required
+                />
+              </Grid>
             </Grid>
             <Grid container spacing={5} mb={3}>
               <Grid size={6}>

@@ -10,7 +10,7 @@ import {
   Typography,
   Stack,
 } from '@mui/material';
-import { Download, TableChart } from '@mui/icons-material';
+import { Download, TableChart, FileDownload } from '@mui/icons-material';
 import { ImportBuilding } from 'src/store/apps/crud/building';
 import { AppDispatch, useDispatch } from 'src/store/Store';
 import toast from 'react-hot-toast';
@@ -79,12 +79,24 @@ const BuildingImport = () => {
         Import
       </Button>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                <MenuItem
+          component="a"
+          href="/importTemplate/import_template_building.xlsx"
+          download="import_template_building.xlsx"
+          onClick={handleClose}
+        >
+          <ListItemIcon>
+            <FileDownload fontSize="small" color="primary" />
+          </ListItemIcon>
+          <ListItemText>Download Template</ListItemText>
+        </MenuItem>
         <MenuItem onClick={() => handleImport('xls')}>
           <ListItemIcon>
             <TableChart fontSize="small" color="success" />
           </ListItemIcon>
           <ListItemText>XLS</ListItemText>
         </MenuItem>
+
       </Menu>
       <input
         ref={fileInputRef}
