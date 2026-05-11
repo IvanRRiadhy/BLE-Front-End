@@ -41,6 +41,8 @@ import { useNavigate } from 'react-router';
 import { uniqueId } from 'lodash';
 import toast from 'react-hot-toast';
 import { useReleaseFloorplanDevice } from 'src/hooks/useFloorplanDevice';
+import { useBlocker } from 'react-router';
+import usePreventWindowClose from 'src/hooks/usePreventWindowClose';
 
 const AreaList = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -115,6 +117,21 @@ const AreaList = () => {
   const [cancelEditDialogOpen, setCancelEditDialogOpen] = useState(false);
   const [saveWarningDialogOpen, setSaveWarningDialogOpen] = useState(false);
 
+  // Browser level protection (close tab, refresh)
+  usePreventWindowClose(true);
+
+  // Router level protection (internal navigation, browser back button)
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      currentLocation.pathname !== nextLocation.pathname
+  );
+
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      setCancelEditDialogOpen(true);
+    }
+  }, [blocker.state]);
+
   // Initialize unsaved areas when data loads
   useEffect(() => {
     if (maskedAreasData.length > 0) {
@@ -132,6 +149,7 @@ const AreaList = () => {
     // positionPxX: 0,
     // positionPxY: 0,
     // engineAreaId: 'ENG001',
+    isAssemblyPoint: false,
     allowFloorChange: false,
     floorId: activeFloorplan?.floorId || '',
     floorplanId: activeFloorplan?.id || '',
@@ -212,12 +230,19 @@ const AreaList = () => {
   };
 
   const handleCloseCancelEditingDialog = () => {
+    if (blocker.state === 'blocked') {
+      blocker.reset();
+    }
     setCancelEditDialogOpen(false);
   };
 
   const handleCloseEditing = () => {
     dispatch(ResetAreaState());
-    navigate('/master/floorplanmaskedarea');
+    if (blocker.state === 'blocked') {
+      blocker.proceed();
+    } else {
+      navigate('/master/floorplanmaskedarea');
+    }
   };
 
   // Guard: show warning if devices will be disabled on save
@@ -356,7 +381,7 @@ const AreaList = () => {
   return (
     <Box
       sx={{
-        height: '90vh',
+        height: '88vh',
         display: 'grid',
         minHeight: 0,
         gridTemplateRows: 'auto 1fr auto',
@@ -385,7 +410,7 @@ const AreaList = () => {
         </Box>
         <Divider />
         <Scrollbar
-          sx={{ height: { lg: 'calc(100vh - 370px)', sm: '100vh' }, maxHeight: 'fit-content' }}
+          sx={{ height: { lg: 'calc(88vh - 205px)', sm: '100vh' }, maxHeight: 'fit-content' }}
         >
           {filteredUnsavedMaksedArea.length > 0 ? (
             filteredUnsavedMaksedArea.map((area: MaskedAreaType) => (
@@ -414,16 +439,20 @@ const AreaList = () => {
           m: 0,
         }}
       >
-        {!editingMaskedArea && (
+        {/* {!editingMaskedArea && ( */}
           <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Button variant="outlined" onClick={handleOpenCancelEditingDialog}>
+            <Button 
+              variant="outlined" 
+              onClick={() => navigate('/master/floorplanmaskedarea')} 
+              disabled={!!editingMaskedArea || isSaving}
+            >
               Cancel
             </Button>
-            <Button variant="contained" onClick={handleSaveClick} disabled={isSaving}>
+            <Button variant="contained" onClick={handleSaveClick} disabled={isSaving || !!editingMaskedArea}>
               {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </Box>
-        )}
+        {/* )} */}
       </Box>
 
       {/* Confirmation Dialogs */}

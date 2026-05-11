@@ -40,6 +40,8 @@ import PatrolAreaListItem from './PatrolAreaListItem';
 import { useNavigate } from 'react-router';
 import { uniqueId } from 'lodash';
 import toast from 'react-hot-toast';
+import { useBlocker } from 'react-router';
+import usePreventWindowClose from 'src/hooks/usePreventWindowClose';
 
 const PatrolAreaList = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -106,6 +108,21 @@ const PatrolAreaList = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteAreaId, setDeleteAreaId] = useState<string | null>(null);
   const [cancelEditDialogOpen, setCancelEditDialogOpen] = useState(false);
+
+  // Browser level protection (close tab, refresh)
+  usePreventWindowClose(true);
+
+  // Router level protection (internal navigation, browser back button)
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      currentLocation.pathname !== nextLocation.pathname
+  );
+
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      setCancelEditDialogOpen(true);
+    }
+  }, [blocker.state]);
 
   // Initialize unsaved areas when data loads
   useEffect(() => {
@@ -199,12 +216,19 @@ const PatrolAreaList = () => {
   };
 
   const handleCloseCancelEditingDialog = () => {
+    if (blocker.state === 'blocked') {
+      blocker.reset();
+    }
     setCancelEditDialogOpen(false);
   };
 
   const handleCloseEditing = () => {
     dispatch(ResetAreaState());
-    navigate('/master/patrolarea');
+    if (blocker.state === 'blocked') {
+      blocker.proceed();
+    } else {
+      navigate('/master/patrolarea');
+    }
   };
 
 // OPTIMIZED Save Function
@@ -383,16 +407,20 @@ const handleSaveEdits = async () => {
           m: 0,
         }}
       >
-        {!editingPatrolArea && (
+        {/* {!editingPatrolArea && ( */}
           <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Button variant="outlined" onClick={handleOpenCancelEditingDialog}>
+            <Button 
+              variant="outlined" 
+              onClick={() => navigate('/master/patrolarea')}  
+              disabled={!!editingPatrolArea || isSaving}
+            >
               Cancel
             </Button>
-            <Button variant="contained" onClick={handleSaveEdits} disabled={isSaving}>
+            <Button variant="contained" onClick={handleSaveEdits} disabled={isSaving || !!editingPatrolArea}>
               {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </Box>
-        )}
+        {/* )} */}
       </Box>
 
       {/* Confirmation Dialogs */}

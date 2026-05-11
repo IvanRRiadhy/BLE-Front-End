@@ -225,8 +225,7 @@ const GraphDisplay: React.FC = () => {
     <Card
       sx={{
         minWidth: 260,
-        minHeight: '80vh',
-        maxHeight: '80vh',
+        height: '100%',
         p: 2,
         borderRadius: 4,
         boxShadow: 8,
@@ -235,9 +234,11 @@ const GraphDisplay: React.FC = () => {
         alignItems: 'center',
         bgcolor: 'background.paper',
         mx: 0,
+        overflow: 'hidden',
+        border: '1px solid #E0E0E0',
       }}
     >
-      <CardContent sx={{ width: '100%', textAlign: 'center', flex: 1 }}>
+      <CardContent sx={{ width: '100%', textAlign: 'center', flex: 1, overflowY: 'auto' }}>
         <Typography variant="h6" fontWeight={700} mb={3}>
           Evacuation Statistics
         </Typography>

@@ -67,6 +67,7 @@ import PatrolSessionReducer from './apps/crud/patrolSession';
 import ReaderHealthReducer from './apps/tracking/ReaderHealth';
 import EventLogReducer from './apps/tracking/Event';
 import SessionReducer from './apps/session';
+import EvacuationReducer from './apps/tracking/Evacuation';
 import {
   useDispatch as useAppDispatch,
   useSelector as useAppSelector,
@@ -138,6 +139,7 @@ const rootReducer = combineReducers({
   ReaderHealthReducer: ReaderHealthReducer,
   InvestigateReducer: InvestigateReducer,
   EventLogReducer: EventLogReducer,
+  evacuationReducer: EvacuationReducer,
 });
 
 const storage = localForage.createInstance({

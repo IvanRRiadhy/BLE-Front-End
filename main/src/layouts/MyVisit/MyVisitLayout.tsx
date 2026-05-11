@@ -10,7 +10,6 @@ import ScrollToTop from '../../components/shared/ScrollToTop';
 import LoadingBar from '../../LoadingBar';
 import { setSessionExpiredHandler } from 'src/utils/axios';
 import SessionExp from 'src/layouts/full/shared/SessionExp';
-import { hydrateEvacState } from 'src/store/customizer/CustomizerSlice';
 import Header from './Header/Header';
 import { Toaster } from 'react-hot-toast';
 
@@ -34,17 +33,12 @@ const MyVisitLayout: FC = () => {
   const dispatch = useDispatch();
   const customizer = useSelector((state: RootState) => state.customizer);
   const settings = useSelector((state: RootState) => state.settings);
-  const evacState = useSelector((state: RootState) => state.customizer.evacState);
+  const evacState = useSelector((state: RootState) => state.evacuationReducer.evacState);
   const theme = useTheme();
 
   const [sessionExpired, setSessionExpired] = useState(false);
   useEffect(() => {
     setSessionExpiredHandler(() => setSessionExpired(true));
-    // Hydrate evacState from localStorage
-    const savedEvac = localStorage.getItem('evacState');
-    if (savedEvac) {
-      dispatch(hydrateEvacState(JSON.parse(savedEvac)));
-    }
     return () => setSessionExpiredHandler(() => {});
   }, []);
   return (

@@ -87,7 +87,7 @@ export type AlarmLogItem = {
 };
 
 interface StoredBeacon extends BeaconType {
-  lastSeen: number;
+  lastSeen: number; 
   dmac: string; // Set to beaconId since they're the same
 }
 
@@ -190,7 +190,7 @@ export const BeaconSlice = createSlice({
       if (!state.allBeacons[topic]) {
         state.allBeacons[topic] = {};
       }
-
+      // console.log("topic", topic, "Beacons", beacons);
       // Update or add each beacon
       beacons.forEach((beacon: any) => {
         if (!beacon.beaconId) return;
@@ -391,6 +391,7 @@ export const selectAlarmById = (id: string | null) => (state: RootState) =>
 export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
   let lastDispatch = 0;
   const prevAreaByBeacon: Record<string, string | undefined> = {};
+
   const unsubscribe = startMQTTclient((data: any) => {
     const now = Date.now();
     if (now - lastDispatch > 200) {
@@ -399,33 +400,41 @@ export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
       // Ensure data is an array
       const beaconArray = Array.isArray(data) ? data : [data];
 
-      // Filter to only include beacons for this floorplan
-      const filteredBeacons = beaconArray.filter(
-        (beacon: any) =>
-          beacon.floorplanId && `people_tracking/tracking/+/+/${beacon.floorplanId.toUpperCase()}/+/+` === topic,
-      );
+      // Filter to only include beacons with a floorplanId
+      const filteredBeacons = beaconArray.filter((beacon: any) => !!beacon.floorplanId);
 
       if (filteredBeacons.length > 0) {
-        // console.log(`[MQTT] Received ${filteredBeacons.length} beacons for topic ${topic}`);
-        dispatch(
-          UpdateBeacon({
-            topic,
-            beacons: filteredBeacons,
-          }),
-        );
+        // Group beacons by floorplanId
+        const groupedByFloorplan: Record<string, any[]> = {};
+        filteredBeacons.forEach((beacon) => {
+          const fid = beacon.floorplanId.toUpperCase();
+          if (!groupedByFloorplan[fid]) {
+            groupedByFloorplan[fid] = [];
+          }
+          groupedByFloorplan[fid].push(beacon);
+        });
+
+        // Dispatch UpdateBeacon for each floorplanId group
+        Object.keys(groupedByFloorplan).forEach((fid) => {
+          dispatch(
+            UpdateBeacon({
+              topic: fid,
+              beacons: groupedByFloorplan[fid],
+            }),
+          );
+        });
+
         const newLogs: TrackingLogItem[] = [];
-        // console.log('🟡 filteredBeacons', filteredBeacons);
         filteredBeacons.forEach((b: any) => {
           const beaconId = b.beaconId;
           if (!beaconId) return;
 
           const currentArea = b.maskedAreaName || 'Unknown Area';
           const prevArea = prevAreaByBeacon[beaconId];
-          
+
           // 🔥 only log when area changes
           if (prevArea !== currentArea) {
             prevAreaByBeacon[beaconId] = currentArea;
-            // console.log(`[MQTT] Beacon ${beaconId} moved to area: ${currentArea}, from ${prevArea || 'N/A'}`);
             newLogs.push({
               id: `trk-${beaconId}-${b.time}`, // keep unique
               device: b.firstReaderId,

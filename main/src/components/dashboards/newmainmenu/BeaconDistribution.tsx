@@ -86,7 +86,7 @@ const NewBeaconDistribution: React.FC = () => {
         borderRadius: '25px',
         boxShadow: (theme) => theme.shadows[10],
         px: 2,
-        py: 1,
+        py: 0,
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -102,8 +102,8 @@ const NewBeaconDistribution: React.FC = () => {
             maxHeight: '100%',
             width: 'fit-content',
             minWidth: '255px',
-            overflowY: 'auto',
-            paddingTop: '50px',
+            overflowY: 'hidden',
+            paddingTop: '30px',
             paddingLeft: '20px',
             position: 'relative',
             

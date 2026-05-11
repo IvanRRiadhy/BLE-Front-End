@@ -35,6 +35,7 @@ import { restrictedStatus } from 'src/types/crud/input';
 import isEqual from 'lodash/isEqual';
 import { useCreateMaskedAreaLabel, useMaskedAreaLabels } from 'src/hooks/useMaskedAreaLabel';
 import toast from 'react-hot-toast';
+import CustomSwitch from 'src/components/forms/theme-elements/CustomSwitch';
 
 // Define the form data type for better type safety
 interface AreaFormData {
@@ -49,6 +50,7 @@ interface AreaFormData {
   // positionPxX: number;
   // positionPxY: number;
   // engineAreaId: string;
+  isAssemblyPoint: boolean;
   floorId: string;
   floorplanId: string;
   allowFloorChange: boolean;
@@ -86,6 +88,7 @@ const AreaDetailList = () => {
     // positionPxX: 0,
     // positionPxY: 0,
     // engineAreaId: '',
+    isAssemblyPoint: false,
     floorId: '',
     floorplanId: '',
     allowFloorChange: false,
@@ -94,6 +97,8 @@ const AreaDetailList = () => {
     updatedBy: '',
     updatedAt: '',
   });
+
+  const [showErrorBorder, setShowErrorBorder] = useState(false);
 
   // Update form data when area changes - optimized version
   useEffect(() => {
@@ -110,6 +115,7 @@ const AreaDetailList = () => {
         // positionPxX: area.positionPxX || 0,
         // positionPxY: area.positionPxY || 0,
         // engineAreaId: area.engineAreaId || '',
+        isAssemblyPoint: area.isAssemblyPoint || false,
         floorId: area.floorId || '',
         floorplanId: area.floorplanId || '',
         allowFloorChange: area.allowFloorChange || false,
@@ -141,6 +147,7 @@ const AreaDetailList = () => {
         // positionPxX: area.positionPxX || 0,
         // positionPxY: area.positionPxY || 0,
         // engineAreaId: area.engineAreaId || '',
+        isAssemblyPoint: area.isAssemblyPoint || false,
         floorId: area.floorId || '',
         floorplanId: area.floorplanId || '',
         allowFloorChange: area.allowFloorChange || false,
@@ -283,7 +290,7 @@ const AreaDetailList = () => {
   return (
     <Box
       sx={{
-        height: '90vh',
+        height: '88vh',
         display: 'grid',
         minHeight: 0,
         gridTemplateRows: 'auto 1fr auto',
@@ -446,25 +453,29 @@ const AreaDetailList = () => {
             {/* Restriction Status */}
             <Grid size={12}>
               <CustomFormLabel htmlFor="area-restriction">Area Restriction</CustomFormLabel>
-              <CustomSelect
-                id="restrictedStatus"
-                name="restrictedStatus"
-                value={formData.restrictedStatus}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-                required
-              >
-                {restrictedStatus.map((status) => (
-                  <MenuItem
-                    key={status.value}
-                    value={status.value}
-                    disabled={status.disabled || false}
-                  >
-                    {status.label}
-                  </MenuItem>
-                ))}
-              </CustomSelect>
+              <FormControlLabel
+                control={
+                  <CustomSwitch
+                    id="restrictedStatus"
+                    checked={formData.restrictedStatus === 'Restrict'}
+                    onChange={(e: any) => {
+                      const isRestricted = e.target.checked;
+                      const newStatus = isRestricted ? 'Restrict' : 'Non-Restrict';
+                      
+                      setFormData((prev) => {
+                        const next = { 
+                          ...prev, 
+                          restrictedStatus: newStatus,
+                          ...(isRestricted ? { isAssemblyPoint: false } : {})
+                        };
+                        dispatch(EditUnsavedMaskedArea(next));
+                        return next;
+                      });
+                    }}
+                  />
+                }
+                label={formData.restrictedStatus === 'Restrict' ? 'Restrict' : 'Non-Restrict'}
+              />
             </Grid>
             {/* Allow Changing Floor */}
             {/* <Grid size={12}>
@@ -479,6 +490,35 @@ const AreaDetailList = () => {
                 label={formData.allowFloorChange ? 'Enabled' : 'Disabled'}
               />
             </Grid> */}
+            {/* Assembly Point checkbox */}
+            <Grid 
+              size={12}
+              sx={{
+                border: showErrorBorder ? '2px solid red' : '2px solid transparent',
+                borderRadius: 2,
+                transition: 'border 0.2s ease',
+              }}
+            >
+              <CustomFormLabel htmlFor="isAssemblyPoint">Assembly Point</CustomFormLabel>
+              <FormControlLabel
+                control={
+                  <CustomSwitch
+                  id="isAssemblyPoint"
+                    checked={formData.isAssemblyPoint}
+                    onChange={(e: any) => {
+                      if (e.target.checked && formData.restrictedStatus === 'Restrict') {
+                        toast.error('Assembly Point cannot be Restricted');
+                        setShowErrorBorder(true);
+                        setTimeout(() => setShowErrorBorder(false), 2000);
+                        return;
+                      }
+                      updateField('isAssemblyPoint', e.target.checked);
+                    }}
+                  />
+                }
+                label={formData.isAssemblyPoint ? 'Yes' : 'No'}
+              />
+            </Grid>
           </Grid>
         </Box>
       </Box>

@@ -27,6 +27,7 @@ import { useAllMembers } from 'src/hooks/useMember';
 import { useAllVisitor } from 'src/hooks/useVisitor';
 import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
 import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useAllReaders } from 'src/hooks/useReader';
 
 const columns = [
   { label: 'Person Name', field: 'personName' },
@@ -34,7 +35,7 @@ const columns = [
   { label: 'Person Type', field: 'personType' },
   { label: 'Card Number', field: 'cardNumber' },
   { label: 'Beacon ID', field: 'beaconId' },
-  { label: 'First Reader ID', field: 'firstReaderId' },
+  { label: 'Nearest Reader', field: 'firstReaderId' },
   { label: 'Area', field: 'area' },
   { label: 'Floor', field: 'floor' },
   { label: 'Building', field: 'building' },
@@ -44,10 +45,11 @@ const columns = [
 const MovementLogList = () => {
   const { t } = useTranslation();
   const beaconsByTopic = useSelector((state: RootState) => state.BeaconReducer.allBeacons);
-  
+  // console.log("Beacons" , beaconsByTopic);
   const { data: visitorsData = [], refetch: refetchVisitors, isFetching: isFetchingVisitors } = useAllVisitor();
   const { data: membersData = [], refetch: refetchMembers, isFetching: isFetchingMembers } = useAllMembers();
   const { data: securityData = [], refetch: refetchSecurity, isFetching: isFetchingSecurity } = useAllSecuritys();
+  const { data: readerData = []} = useAllReaders();
 
   const isFetching = isFetchingVisitors || isFetchingMembers || isFetchingSecurity;
 
@@ -63,8 +65,9 @@ const MovementLogList = () => {
   const [filterType, setFilterType] = useState<'ALL' | 'Visitor' | 'Member' | 'Security'>('ALL');
 
   const processedData = useMemo(() => {
-    const trackingTopics = Object.keys(beaconsByTopic).filter((x) => x.startsWith('people_tracking/tracking/'));
-    console.log("Beacons: ", beaconsByTopic)
+    // Keys in beaconsByTopic are now floorplanIds (as set in fetchBeacon)
+    const trackingTopics = Object.keys(beaconsByTopic);
+    // console.log("Beacons: ", beaconsByTopic)
     const acc: Record<string, any> = {};
 
     trackingTopics.forEach((topic) => {
@@ -136,6 +139,11 @@ const MovementLogList = () => {
       second: '2-digit',
       hour12: false,
     });
+  };
+
+  const getReaderName = (readerId: string) => {
+    const reader = readerData.find((r) => r.id.toUpperCase() === readerId.toUpperCase());
+    return reader?.name || reader?.gmac || readerId;
   };
 
   return (
@@ -263,7 +271,7 @@ const MovementLogList = () => {
                           <Typography variant="body2">{row.beaconId}</Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2">{row.firstReaderId}</Typography>
+                          <Typography variant="body2">{getReaderName(row.firstReaderId) || '-'}</Typography>
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2">{row.area}</Typography>

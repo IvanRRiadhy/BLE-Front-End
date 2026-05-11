@@ -586,6 +586,7 @@ const EditAreaRenderer: React.FC<Props> = ({
               // positionPxX: 0,
               // positionPxY: 0,
               // engineAreaId: 'ENG001',
+              isAssemblyPoint: false,
               nodes: prevNodes,
               floorId: selectedFloorplan?.floorId || '',
               floorplanId: selectedFloorplan?.id || '',

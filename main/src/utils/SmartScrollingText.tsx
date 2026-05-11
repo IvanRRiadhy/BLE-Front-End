@@ -10,7 +10,7 @@ interface SmartScrollingTextProps extends TypographyProps {
 }
 
 const SmartScrollingText: React.FC<SmartScrollingTextProps> = ({
-  text,
+  text: rawText,
   containerSx,
   pauseDuration = 1000,
   speed = 80,
@@ -18,6 +18,7 @@ const SmartScrollingText: React.FC<SmartScrollingTextProps> = ({
   sx,
   ...typographyProps
 }) => {
+  const text = rawText || '';
   const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | null>(null);
   const isActiveRef = useRef(false);

@@ -339,12 +339,12 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   const iconUnknown = useDeviceIcon(UnknownDevice);
 
   // fetch beacons
-  useEffect(() => {
-    const unsubscribe = dispatch(fetchBeacon(topic));
-    return () => {
-      if (typeof unsubscribe === 'function') unsubscribe();
-    };
-  }, [dispatch, topic]);
+  // useEffect(() => {
+  //   const unsubscribe = dispatch(fetchBeacon(topic));
+  //   return () => {
+  //     if (typeof unsubscribe === 'function') unsubscribe();
+  //   };
+  // }, [dispatch, topic]);
 
   // maintain beacon state from Redux data
   useEffect(() => {

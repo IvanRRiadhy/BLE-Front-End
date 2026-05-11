@@ -1,4 +1,4 @@
-import { FC, useEffect, useState, useRef } from 'react';
+import { FC, useEffect, useState, useRef, useMemo } from 'react';
 import { styled, Container, Box, useTheme, useMediaQuery } from '@mui/material';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { Outlet } from 'react-router';
@@ -11,7 +11,8 @@ import LoadingBar from '../../LoadingBar';
 import MonitoringHeader from './monitoringLayout/Header';
 import { setSessionExpiredHandler } from 'src/utils/axios';
 import SessionExp from './shared/SessionExp';
-import { hydrateEvacState } from 'src/store/customizer/CustomizerSlice';
+import { setEvacuationId, setEvacuationState, setEvacuationStartTime, updateEvacuationData, resetEvacuation } from 'src/store/apps/tracking/Evacuation';
+import { startMQTTclient } from 'src/store/apps/tracking/MQTT';
 import {
   setTheme,
   setDarkMode,
@@ -22,7 +23,6 @@ import {
   setBorderRadius,
 } from 'src/store/customizer/SettingsSlice';
 import { Toaster } from 'react-hot-toast';
-import { startMQTTclient } from 'src/store/apps/tracking/MQTT'; // Changed from NTFY to MQTT
 import { fetchAlarmTrigger } from 'src/store/apps/crud/alarmTrigger';
 import { memberType } from 'src/store/apps/crud/member';
 import { VisitorType } from 'src/store/apps/crud/visitor';
@@ -39,6 +39,7 @@ import {
   AlarmPriority,
   AppendAlarmLogs,
   AppendTrackingLogs,
+  fetchBeacon,
   fetchCountingData,
   NotifyAlarmPopup,
   selectAlarmById,
@@ -76,28 +77,36 @@ const FullLayout: FC = () => {
   const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
   const dispatch: AppDispatch = useDispatch();
   const config = getConfig();
-  const storedBuildings = localStorage.getItem('accessibleBuildings');
-  let topics: string[] = [];
+  const { alarmTopics, trackingTopics } = useMemo(() => {
+    let aTopics: string[] = [];
+    let tTopics: string[] = [];
 
-  if (storedBuildings) {
-    try {
-      const parsed: string[] = JSON.parse(storedBuildings);
-
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        topics = parsed.map((id) => `people_tracking/alarm/${id.toUpperCase()}/+/+/+/+`);
+    const storedBuildings = localStorage.getItem('accessibleBuildings');
+    if (storedBuildings) {
+      try {
+        const parsed: string[] = JSON.parse(storedBuildings);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          aTopics = parsed.map((id) => `people_tracking/alarm/${id.toUpperCase()}/+/+/+/+`);
+          tTopics = parsed.map((id) => `people_tracking/tracking/${id.toUpperCase()}/`);
+        }
+      } catch (err) {
+        console.warn('Failed to parse accessibleBuildings', err);
       }
-    } catch (err) {
-      console.warn('Failed to parse accessibleBuildings', err);
     }
-  }
 
-  // fallback 
-  if (topics.length === 0) {
-    topics = ['people_tracking/alarm/+/+/+/+/+'];
-  }
+    // fallback 
+    if (aTopics.length === 0) {
+      aTopics = [config.ALARM_TOPIC || 'people_tracking/alarm/+/+/+/+/+'];
+    }
+    if (tTopics.length === 0) {
+      tTopics = ['people_tracking/tracking/#'];
+    }
+
+    return { alarmTopics: aTopics, trackingTopics: tTopics };
+  }, [config.ALARM_TOPIC]);
   const customizer = useSelector((state: RootState) => state.customizer);
   const settings = useSelector((state: RootState) => state.settings);
-  const evacState = useSelector((state: RootState) => state.customizer.evacState);
+  const evacState = useSelector((state: RootState) => state.evacuationReducer.evacState || 'idle');
   const theme = useTheme();
   const memberList: memberType[] = useSelector((s: RootState) => s.memberReducer.members);
   const visitorList: VisitorType[] = useSelector((s: RootState) => s.visitorReducer.visitors);
@@ -168,32 +177,10 @@ const FullLayout: FC = () => {
 
     // Set up session expiration handler
     setSessionExpiredHandler(() => setSessionExpired(true));
-    const savedEvac = localStorage.getItem('evacState');
-    if (savedEvac) {
-      dispatch(hydrateEvacState(JSON.parse(savedEvac)));
-    }
 
-    // ✅ MULTI TOPIC LOGIC START
-    const storedBuildings = localStorage.getItem('accessibleBuildings');
-    let topics: string[] = [];
+    // ✅ MULTI TOPIC LOGIC REMOVED FROM HERE (using component-level topics)
 
-    if (storedBuildings) {
-      try {
-        const parsed: string[] = JSON.parse(storedBuildings);
-
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          topics = parsed.map((id) => `people_tracking/alarm/${id.toUpperCase()}/+/+/+/+`);
-        }
-      } catch (err) {
-        console.warn('[MQTT] Failed to parse accessibleBuildings', err);
-      }
-    }
-
-    if (topics.length === 0) {
-      topics = [config.ALARM_TOPIC || 'people_tracking/alarm/+/+/+/+/+'];
-    }
-    // ✅ MULTI TOPIC LOGIC END
-
+    const applicationId = localStorage.getItem('applicationId') || '';
     const unsubscribeList: (() => void)[] = [];
 
     const callback = (data: any) => {
@@ -279,8 +266,8 @@ const FullLayout: FC = () => {
       dispatch(AppendAlarmLogs([alarmLog]));
     };
 
-    // ✅ SUBSCRIBE MULTIPLE TOPICS
-    topics.forEach((t) => {
+    // ✅ SUBSCRIBE MULTIPLE alarmTOPICS
+    alarmTopics.forEach((t) => {
       console.log(`[MQTT] Subscribing to alarm topic "${t}"`);
 
       const unsub = startMQTTclient(callback, t);
@@ -291,12 +278,60 @@ const FullLayout: FC = () => {
         console.error(`[MQTT] Failed to subscribe to topic "${t}"`);
       }
     });
+    trackingTopics.forEach((t) => {
+      console.log(`[MQTT] Subscribing to tracking topic "${t}"`);
+
+      const unsub = dispatch(fetchBeacon(t));
+
+      if (typeof unsub === 'function') {
+        unsubscribeList.push(unsub);
+      } else {
+        console.error(`[MQTT] Failed to subscribe to tracking topic "${t}"`);
+      }
+    });
+
+    // 🚀 EVACUATION MQTT SUBSCRIPTIONS
+    if (applicationId) {
+      // 1. Status Monitoring
+      const unsubEvac = startMQTTclient((data: any) => {
+        dispatch(updateEvacuationData(data));
+        console.log("Evacc", data)
+        if (data.status === 'Completed' && evacState !== 'finished') {
+          dispatch(setEvacuationState('finished'));
+        } else if (data.status === 'Active' && evacState !== 'running') {
+          dispatch(setEvacuationState('running'));
+          const triggeredAt = data.TriggeredAt ? new Date(data.TriggeredAt).getTime() : Date.now();
+          dispatch(setEvacuationStartTime(triggeredAt));
+        }
+      }, `evacuation/status/${applicationId}`);
+      if (unsubEvac) unsubscribeList.push(unsubEvac);
+
+      // 2. Trigger Monitoring
+      const unsubTrigger = startMQTTclient((data: any) => {
+        if (data.ApplicationId === applicationId || !data.ApplicationId) {
+          dispatch(setEvacuationId(data.EvacuationAlertId));
+          dispatch(setEvacuationState('running'));
+          const triggeredAt = data.TriggeredAt ? new Date(data.TriggeredAt).getTime() : Date.now();
+          dispatch(setEvacuationStartTime(triggeredAt));
+        }
+      }, `evacuation/trigger/${applicationId}`);
+      if (unsubTrigger) unsubscribeList.push(unsubTrigger);
+
+      // 3. Complete Monitoring
+      const unsubComplete = startMQTTclient((data: any) => {
+        if (data.Status === 'Completed') {
+          dispatch(setEvacuationState('finished'));
+        }
+      }, `evacuation/complete/${applicationId}`);
+      if (unsubComplete) unsubscribeList.push(unsubComplete);
+    }
 
     if (unsubscribeList.length > 0) {
       unsubscriberRef.current = () => {
         unsubscribeList.forEach((fn) => fn());
       };
-      console.log('[MQTT] Successfully subscribed to topics:', topics);
+      console.log('[MQTT] Successfully subscribed to alarm topics:', alarmTopics);
+      console.log('[MQTT] Successfully subscribed to tracking topics:', trackingTopics);
     }
 
     return () => {
@@ -305,10 +340,10 @@ const FullLayout: FC = () => {
       if (unsubscriberRef.current) {
         unsubscriberRef.current();
         unsubscriberRef.current = null;
-        console.log('[MQTT] Unsubscribed from all alarm topics');
+        console.log('[MQTT] Unsubscribed from all topics');
       }
     };
-  }, [dispatch, memberList, visitorList, config.ALARM_TOPIC]);
+  }, [dispatch, memberList, visitorList, alarmTopics, trackingTopics]);
 
   useEffect(() => {
     const unsubscribe = dispatch(fetchReaderHealth());

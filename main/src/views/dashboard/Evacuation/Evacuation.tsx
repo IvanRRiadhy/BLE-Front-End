@@ -6,14 +6,17 @@ import GraphDisplay from './GraphDisplay';
 
 const Evacuation: React.FC = () => (
   <Box
-    minHeight="80vh"
-    width="100%"
-    display="flex"
-    alignItems="center"
-    justifyContent="center"
-    gap={2}
-    bgcolor="background.default"
-    p={2}
+    sx={{
+      height: '90vh',
+      width: '100%',
+      display: 'flex',
+      alignItems: 'stretch',
+      justifyContent: 'center',
+      gap: 0,
+      bgcolor: 'background.default',
+      p: 2,
+      overflow: 'hidden',
+    }}
   >
     <DetailList />
     <TimerButton />

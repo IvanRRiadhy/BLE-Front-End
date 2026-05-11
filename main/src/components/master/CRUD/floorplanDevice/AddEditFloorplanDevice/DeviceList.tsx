@@ -43,6 +43,9 @@ import { fetchAccessCCTV } from 'src/store/apps/crud/accessCCTV';
 import { fetchAccessControls } from 'src/store/apps/crud/accessControl';
 import { fetchBleReaders } from 'src/store/apps/crud/bleReader';
 import toast from 'react-hot-toast';
+import { useBlocker } from 'react-router';
+import usePreventWindowClose from 'src/hooks/usePreventWindowClose';
+
 
 const DeviceList = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -124,6 +127,21 @@ const DeviceList = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteDeviceId, setDeleteDeviceId] = useState<string | null>(null);
   const [cancelEditDialogOpen, setCancelEditDialogOpen] = useState(false);
+
+  // Browser level protection (close tab, refresh)
+  usePreventWindowClose(true);
+
+  // Router level protection (internal navigation, browser back button)
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      currentLocation.pathname !== nextLocation.pathname
+  );
+
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      setCancelEditDialogOpen(true);
+    }
+  }, [blocker.state]);
 
   // New device template
   const newDevice: FloorplanDeviceType = {
@@ -240,12 +258,19 @@ const DeviceList = () => {
   };
 
   const handleCloseCancelEditingDialog = () => {
+    if (blocker.state === 'blocked') {
+      blocker.reset();
+    }
     setCancelEditDialogOpen(false);
   };
 
   const handleCloseEditing = () => {
     dispatch(ResetState());
-    navigate('/master/device');
+    if (blocker.state === 'blocked') {
+      blocker.proceed();
+    } else {
+      navigate('/master/device');
+    }
   };
 
   // UPDATED Save Function using three-layer state management
@@ -448,16 +473,20 @@ const DeviceList = () => {
           m: 0,
         }}
       >
-        {!editingDevice && (
+        {/* {!editingDevice && ( */}
           <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Button variant="outlined" onClick={handleOpenCancelEditingDialog}>
+            <Button 
+              variant="outlined" 
+              onClick={() => navigate('/master/device')}  
+              disabled={!!editingDevice || isSaving}
+            >
               Cancel
             </Button>
-            <Button variant="contained" onClick={handleSaveEdits} disabled={isSaving}>
+            <Button variant="contained" onClick={handleSaveEdits} disabled={isSaving || !!editingDevice}>
               {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </Box>
-        )}
+        {/* )} */}
       </Box>
 
       {/* Confirmation Dialogs */}

@@ -10,7 +10,6 @@ import ScrollToTop from '../../components/shared/ScrollToTop';
 import LoadingBar from '../../LoadingBar';
 import { BASE_URL, setSessionExpiredHandler } from 'src/utils/axios';
 import SessionExp from 'src/layouts/full/shared/SessionExp';
-import { hydrateEvacState } from 'src/store/customizer/CustomizerSlice';
 import Header from './HeaderSecurity/Header';
 import { Toaster } from 'react-hot-toast';
 import { publishMQTT, startMQTTclient } from 'src/store/apps/tracking/MQTT';
@@ -39,7 +38,7 @@ const SecurityViewLayout: FC = () => {
   const dispatch = useDispatch();
   const customizer = useSelector((state: RootState) => state.customizer);
   const settings = useSelector((state: RootState) => state.settings);
-  const evacState = useSelector((state: RootState) => state.customizer.evacState);
+  const evacState = useSelector((state: RootState) => state.evacuationReducer.evacState);
   const focusAlarm = useSelector((state: RootState) => state.BeaconReducer.focusAlarm);
   const theme = useTheme();
   function resolvePerson(x: any) {
@@ -88,11 +87,6 @@ const SecurityViewLayout: FC = () => {
   const [sessionExpired, setSessionExpired] = useState(false);
   useEffect(() => {
     setSessionExpiredHandler(() => setSessionExpired(true));
-    // Hydrate evacState from localStorage
-    const savedEvac = localStorage.getItem('evacState');
-    if (savedEvac) {
-      dispatch(hydrateEvacState(JSON.parse(savedEvac)));
-    }
     return () => setSessionExpiredHandler(() => {});
   }, []);
 

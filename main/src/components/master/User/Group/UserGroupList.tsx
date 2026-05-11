@@ -381,7 +381,7 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
     onTabChange: (tab: 'members' | 'buildings') => void;
   }) => {
     return (
-      <Paper sx={{ bgcolor: '#f5f8fa', p: 2 }}>
+      <Paper sx={{ bgcolor: 'background.paper', p: 2 }}>
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
           <Tabs value={tab} onChange={(_, v) => onTabChange(v)}>
             <Tab value="members" label="Members" />

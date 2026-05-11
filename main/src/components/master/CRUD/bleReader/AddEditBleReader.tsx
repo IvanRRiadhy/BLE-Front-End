@@ -378,7 +378,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
                     <Grid size={{ lg: formData.forceReading ? 6 : 12, md: 12, sm: 12 }}>
                       <FormControlLabel
                         control={
-                          <CustomSwitch
+                          <CustomSwitch 
                             id="forceReading"
                             checked={formData.forceReading}
                             onChange={handleInputChange}
