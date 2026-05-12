@@ -47,8 +47,8 @@ const StayOnArea = () => {
   ];
   return (
     <PageContainer
-      title="Stay On Area Alarm"
-      description="This is the Stay On Area Alarm CRUD Page"
+      title="People Tracking System"
+      description="People Tracking System"
     >
       {/* <Breadcrumb title="Stay On Area Alarm Table" /> */}
       <Grid container spacing={3} mb={3}>

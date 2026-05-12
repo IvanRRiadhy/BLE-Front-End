@@ -46,7 +46,7 @@ const Floor = () => {
     },
   ];
   return (
-    <PageContainer title="Floor" description="This is the Floor CRUD Page">
+    <PageContainer title="People Tracking System" description="People Tracking System">
       {/* <Breadcrumb title="Floor" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (

@@ -47,7 +47,7 @@ const CardRecord = () => {
   ];
 
   return (
-    <PageContainer title="Card Record" description="This is the Card Record CRUD Page">
+    <PageContainer title="People Tracking System" description="This is the Card Record CRUD Page">
       {/* <Breadcrumb title="Card Record Table" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (

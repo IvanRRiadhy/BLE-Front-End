@@ -47,7 +47,7 @@ const TrackingTrans = () => {
   ];
   return (
     <PageContainer
-      title="Tracking Transaction"
+      title="People Tracking System"
       description="This is the Tracking Transaction CRUD Page"
     >
       <Breadcrumb title="Tracking Transaction Table" />

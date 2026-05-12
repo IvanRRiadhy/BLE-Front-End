@@ -24,8 +24,8 @@ const PatrolAssignmentEditView = () => {
 
   return (
     <PageContainer
-      title="Edit Patrol Assignment"
-      description="This is the edit patrol assignment page"
+      title="People Tracking System"
+      description="People Tracking System"
     >
       {/* <AppCard> */}
       <Box

@@ -18,7 +18,7 @@ const VisitorTag = () => {
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 
   return (
-    <PageContainer title="Visitor" description="this is Visitor Page">
+    <PageContainer title="People Tracking System" description="People Tracking System">
       <AppCard>
         {/* ------------------------------------------- */}
         {/* Left Part */}

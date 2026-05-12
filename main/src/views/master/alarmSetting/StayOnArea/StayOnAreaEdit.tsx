@@ -24,7 +24,7 @@ const StayOnAreaEdit = () => {
 //   }
   if (loading) {
     return (
-      <PageContainer title="Stay On Area" description="this is stay on area Edit page">
+      <PageContainer title="People Tracking System" description="People Tracking System">
         <AppCard>
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="90vh">
             Loading...
@@ -35,7 +35,7 @@ const StayOnAreaEdit = () => {
   }
 
     return (
-      <PageContainer title="Stay On Area" description="this is Stay On Area Edit page">
+      <PageContainer title="People Tracking System" description="People Tracking System">
         {/* <Breadcrumb title="Stay On Area Edit" subtitle="See the stay on area edit" /> */}
         <AppCard>
           <Box

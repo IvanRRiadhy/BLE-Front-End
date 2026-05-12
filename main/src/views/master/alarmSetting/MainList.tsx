@@ -52,7 +52,7 @@ const MainAlarmList = () => {
     },
   ];
   return (
-    <PageContainer title="Alarm Setting" description="This is the Alarm Setting CRUD Page">
+    <PageContainer title="People Tracking System" description="People Tracking System">
       <Grid container spacing={3} my={2}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

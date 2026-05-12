@@ -16,7 +16,7 @@ const TimeGroup = () => {
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 
   return (
-    <PageContainer title="Time Group" description="this is Time Group Page">
+    <PageContainer title="People Tracking System" description="People Tracking System">
       <AppCard>
         {/* ------------------------------------------- */}
         {/* Left Part */}

@@ -16,7 +16,7 @@ const TestRecord = () => {
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 
       return (
-    <PageContainer title="Investigation" description="this is Investigation Page">
+    <PageContainer title="People Tracking System" description="this is Investigation Page">
       <AppCard>
         {/* ------------------------------------------- */}
         {/* Left Part */}

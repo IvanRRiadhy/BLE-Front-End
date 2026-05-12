@@ -114,7 +114,7 @@ const DashboardView: React.FC = () => {
   }, [alarmByArea]);
   // console.log("alarrm by status", alarmByStatus, "alarm by area", topAlarmAreas);
   return (
-    <PageContainer title="Dashboard" description="This is Dashboard">
+    <PageContainer title="People Tracking System" description="This is Dashboard page">
       <Box id="dashboard">
         <Grid container spacing={1}>
           {/* First Row */}

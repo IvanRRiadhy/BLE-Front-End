@@ -100,7 +100,7 @@ const Monitoring = () => {
       </ToolbarStyled> */}
 
       <PageContainer
-        title="Monitoring Dashboard"
+        title="People Tracking System"
         description="This is the Monitoring Dashboard page"
       >
         <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%', height: 'calc(100vh - 100px)' }}>

@@ -48,7 +48,7 @@ const AlarmRecord = () => {
     },
   ];
   return (
-    <PageContainer title="Alarm Record" description="This is the Alarm Record CRUD Page">
+    <PageContainer title="People Tracking System" description="This is the Alarm Record CRUD Page">
       <Breadcrumb title="Alarm Record Table" />
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (

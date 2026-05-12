@@ -14,7 +14,7 @@ const OverPopulatingEdit = () => {
   );
   if (loading) {
     return (
-      <PageContainer title="OverPopulating" description="this is OverPopulating Edit page">
+      <PageContainer title="People Tracking System" description="People Tracking System">
         <AppCard>
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="90vh">
             Loading...
@@ -25,7 +25,7 @@ const OverPopulatingEdit = () => {
   }
 
     return (
-      <PageContainer title="OverPopulating" description="this is OverPopulating Edit page">
+      <PageContainer title="People Tracking System" description="People Tracking System">
         <AppCard>
           <Box
             display="flex"

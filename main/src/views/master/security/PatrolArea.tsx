@@ -55,8 +55,8 @@ const PatrolArea = () => {
   ];
   return (
     <PageContainer
-      title="Floorplan Patrol Area"
-      description="This is the Floorplan Patrol Area CRUD Page"
+      title="People Tracking System"
+      description="People Tracking System"
     >
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => {

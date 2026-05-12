@@ -46,7 +46,7 @@ const Department = () => {
     },
   ];
   return (
-    <PageContainer title="Department" description="This is the Department CRUD Page">
+    <PageContainer title="People Tracking System" description="People Tracking System">
       {/* <Breadcrumb title="Department" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (

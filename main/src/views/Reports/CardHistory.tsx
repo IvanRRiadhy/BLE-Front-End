@@ -15,7 +15,7 @@ const CardHistory = () => {
     const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 
     return (
-        <PageContainer title="Card History" description="this is Card History Page">
+        <PageContainer title="People Tracking System" description="this is Card History Page">
             <AppCard>
                 {/* ------------------------------------------- */}
         {/* Left Part */}

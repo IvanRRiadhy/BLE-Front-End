@@ -20,7 +20,7 @@ const MaskedAreaEdit = () => {
     window.location.href = '/master/floorplanmaskedarea/';
   }
   return (
-    <PageContainer title="Masked Area" description="this is masked area page">
+    <PageContainer title="People Tracking System" description="People Tracking System">
       <AppCard>
         <Box
           display="flex"

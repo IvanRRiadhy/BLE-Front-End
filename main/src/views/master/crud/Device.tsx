@@ -42,7 +42,7 @@ const Device = () => {
     },
   ];
   return (
-    <PageContainer title="Floorplan Device" description="This is the Floorplan Device CRUD Page">
+    <PageContainer title="People Tracking System" description="People Tracking System">
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (
           <Grid key={i} size={{ xs: 12, sm: 4, lg: 2 }}>

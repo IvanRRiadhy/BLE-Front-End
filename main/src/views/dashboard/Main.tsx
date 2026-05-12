@@ -256,7 +256,7 @@ const Modern = () => {
   //   timeRange: 'daily',
   // });
   return (
-    <PageContainer title="Dashboard" description="this is Dashboard page">
+    <PageContainer title="People Tracking System" description="this is Dashboard page">
       <Box>
         <Grid container spacing={3} mb={3}>
           {/* column */}

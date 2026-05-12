@@ -164,9 +164,9 @@ const EvacuationSummaryDialog: React.FC<Props> = ({ open, onClose, evacuation })
                           label={person.personStatus}
                           size="small"
                           color={
-                            person.personStatus === 'Evacuated'
+                            person.personStatus === 'ConfirmedEvacuated'
                               ? 'success'
-                              : person.personStatus === 'Confirmed'
+                              : person.personStatus === 'Evacuated'
                               ? 'info'
                               : 'error'
                           }

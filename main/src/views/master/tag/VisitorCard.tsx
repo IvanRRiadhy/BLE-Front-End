@@ -40,7 +40,7 @@ const VisitorCard = () => {
   ];
 
   return (
-      <PageContainer title="Visitor Card" description="This is the Visitor Card CRUD Page">
+      <PageContainer title="People Tracking System" description="People Tracking System">
         <Breadcrumb title="Visitor Card Table" />
         <Grid container spacing={3} mb={3}>
           {topCards.map((topcard, i) => (

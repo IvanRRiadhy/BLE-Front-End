@@ -86,7 +86,7 @@ const FloorplanOverview = () => {
   }
 
   return (
-    <PageContainer title="Floorplan Overview" description="this is floorplan overview page">
+    <PageContainer title="People Tracking System" description="People Tracking System">
       <AppCard>
         <Box
           display="flex"

@@ -32,7 +32,7 @@ const FloorplanDeviceEdit = () => {
 
   if (loading) {
     return (
-      <PageContainer title="Floorplan Device" description="this is floorplan device page">
+      <PageContainer title="People Tracking System" description="People Tracking System">
         <AppCard>
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="90vh">
             Loading...
@@ -42,7 +42,7 @@ const FloorplanDeviceEdit = () => {
     );
   }
   return (
-    <PageContainer title="Floorplan Device" description="this is floorplan device page">
+    <PageContainer title="People Tracking System" description="People Tracking System">
       {/* <Breadcrumb title="Floorplan Device Edit" subtitle="See the floorplan device" /> */}
       <AppCard>
         <Box

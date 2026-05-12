@@ -46,7 +46,7 @@ const AlarmTrigger = () => {
     },
   ];
   return (
-    <PageContainer title="Alarm Trigger" description="This is the Alarm Trigger CRUD Page">
+    <PageContainer title="People Tracking System" description="This is the Alarm Trigger CRUD Page">
       {/* <Breadcrumb title="Alarm Trigger Table" /> */}
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => (

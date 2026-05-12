@@ -14,7 +14,7 @@ const GeoFencingEdit = () => {
   );
   if (loading) {
     return (
-      <PageContainer title="GeoFence" description="this is GeoFence Edit page">
+      <PageContainer title="People Tracking System" description="People Tracking System">
         <AppCard>
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
             Loading...
@@ -25,7 +25,7 @@ const GeoFencingEdit = () => {
   }
 
     return (
-      <PageContainer title="GeoFence" description="this is GeoFence Edit page">
+      <PageContainer title="People Tracking System" description="People Tracking System">
         {/* <Breadcrumb title="GeoFence Edit" subtitle="See the GeoFence Edit" /> */}
         <AppCard>
           <Box

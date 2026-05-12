@@ -14,7 +14,7 @@ const MyVisitDashboard = () => {
   const filteredInvitationData = invitationData.filter((item) => item.visitorId === visitorId);
 
   return (
-    <PageContainer title="Dashboard" description="this is dashboard page">
+    <PageContainer title="My Visit" description="My Visit">
       <Box>
         <Grid container spacing={3} mb={3}>
           <Grid

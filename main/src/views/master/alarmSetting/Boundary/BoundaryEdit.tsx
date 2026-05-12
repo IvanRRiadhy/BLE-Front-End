@@ -24,7 +24,7 @@ const BoundaryEdit = () => {
 //   }
   if (loading) {
     return (
-      <PageContainer title="Boundary" description="this is Boundary Edit page">
+      <PageContainer title="People Tracking System" description="People Tracking System">
         <AppCard>
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="90vh">
             Loading...
@@ -35,7 +35,7 @@ const BoundaryEdit = () => {
   }
 
     return (
-      <PageContainer title="Boundary" description="this is Boundary Edit page">
+      <PageContainer title="People Tracking System" description="People Tracking System">
         {/* <Breadcrumb title="Boundary Edit" subtitle="See the stay on area edit" /> */}
         <AppCard>
           <Box

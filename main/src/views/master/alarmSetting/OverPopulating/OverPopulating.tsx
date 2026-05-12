@@ -47,8 +47,8 @@ const FloorplanDevice = () => {
   ];
   return (
     <PageContainer
-      title="OverPopulating Alarm"
-      description="This is the OverPopulating Alarm CRUD Page"
+      title="People Tracking System"
+      description="People Tracking System"
     >
       {/* <Breadcrumb title="OverPopulating Alarm Table" /> */}
       <Grid container spacing={3} mb={3}>

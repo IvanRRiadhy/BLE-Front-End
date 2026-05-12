@@ -5,7 +5,7 @@ import MovementLogList from 'src/components/master/Reports/MovementLog/MovementL
 
 const MovementLog = () => {
   return (
-    <PageContainer title="Movement Log" description="Display the last detected area of each person">
+    <PageContainer title="People Tracking System" description="Display the last detected area of each person">
       <AppCard>
         <Box
           sx={{

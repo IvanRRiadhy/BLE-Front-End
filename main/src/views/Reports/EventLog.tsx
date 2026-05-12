@@ -8,7 +8,7 @@ import EventReport from 'src/components/master/Reports/EventLog/EventReport';
 
 const EventLog = () => {
   return (
-    <PageContainer title="Event Log" description="this is Event Log Page">
+    <PageContainer title="People Tracking System" description="this is Event Log Page">
       <AppCard>
         <Box
           sx={{

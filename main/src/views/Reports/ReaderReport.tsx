@@ -5,7 +5,7 @@ import ReaderReportFilter from 'src/components/master/Reports/ReaderReport/Reade
 
 const ReaderReport = () => {
   return (
-    <PageContainer title="Reader Report" description="this is Reader Report Page">
+    <PageContainer title="People Tracking System" description="this is Reader Report Page">
       <AppCard>
         <Box
           sx={{

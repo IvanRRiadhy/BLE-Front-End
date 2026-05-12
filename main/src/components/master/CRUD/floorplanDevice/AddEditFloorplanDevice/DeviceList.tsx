@@ -129,12 +129,12 @@ const DeviceList = () => {
   const [cancelEditDialogOpen, setCancelEditDialogOpen] = useState(false);
 
   // Browser level protection (close tab, refresh)
-  usePreventWindowClose(true);
+  usePreventWindowClose(!isSaving);
 
   // Router level protection (internal navigation, browser back button)
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      currentLocation.pathname !== nextLocation.pathname
+      !isSaving && currentLocation.pathname !== nextLocation.pathname,
   );
 
   useEffect(() => {
@@ -397,8 +397,8 @@ const DeviceList = () => {
       toast.error('Save operation failed');
     } finally {
       setTimeout(() => {
-        setIsSaving(false);
         handleCloseEditing();
+        setIsSaving(false);
       }, 1000);
     }
   };

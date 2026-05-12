@@ -18,7 +18,7 @@ const SecurityGuard = () => {
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 
   return (
-    <PageContainer title="Security Guard" description="this is Security Guard Page">
+    <PageContainer title="People Tracking System" description="People Tracking System">
       <AppCard>
         {/* ------------------------------------------- */}
         {/* Left Part */}

@@ -220,7 +220,8 @@ const TimerButton: React.FC = () => {
         id: selectedPersonTransId,
         payload: { personStatus: 'ConfirmedEvacuated' },
       });
-      if (res.success) {
+      console.log("Confirm Person: ", res)
+      if (res.success || res.status === 204) {
         toast.success('Person status confirmed');
         setOpenPersonConfirm(false);
       }

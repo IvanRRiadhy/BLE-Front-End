@@ -19,7 +19,7 @@ const PatrolAreaEdit = () => {
     window.location.href = '/master/patrolarea/';
   }
   return (
-    <PageContainer title="Patrol Area" description="this is patrol area page">
+    <PageContainer title="People Tracking System" description="People Tracking System">
       <AppCard>
         <Box
           display="flex"

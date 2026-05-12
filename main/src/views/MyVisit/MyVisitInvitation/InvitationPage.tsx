@@ -33,7 +33,7 @@ const InvitationPage = () => {
     const { t } = useTranslation();
 
     return (
-        <PageContainer title="Invitation Page" description='Invite Visitor/Member'>
+        <PageContainer title="My Visit" description='My Visit'>
             <Grid container spacing={3} mb={3}>
 
             </Grid>

@@ -34,7 +34,7 @@ const PatrolReport = () => {
     setSelectedSecurity(null);
   }, [patrolAssign?.id]);
   return (
-    <PageContainer title="Patrol Route" description="this is Patrol Route Page">
+    <PageContainer title="People Tracking System" description="this is Patrol Route Page">
       <AppCard>
         {/* ------------------------------------------- */}
         {/* Left Part */}

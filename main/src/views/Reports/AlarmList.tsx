@@ -22,7 +22,7 @@ const AlarmList = () => {
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 
   return (
-    <PageContainer title="Alarm List" description="this is Alarm List Page">
+    <PageContainer title="People Tracking System" description="People Tracking System">
       <AppCard>
         {/* ── Outer container ───────────────────────── */}
         <Box sx={{ display: 'flex', width: '100%', position: 'relative', overflow: 'hidden' }}>

@@ -46,8 +46,8 @@ const Boundary = () => {
   ];
   return (
     <PageContainer
-      title="Boundary Alarm"
-      description="This is the Boundary Alarm CRUD Page"
+      title="People Tracking System"
+      description="People Tracking System"
     >
       {/* <Breadcrumb title="Boundary Alarm Table" /> */}
       <Grid container spacing={3} mb={3}>

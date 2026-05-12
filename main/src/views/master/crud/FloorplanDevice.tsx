@@ -52,7 +52,7 @@ const FloorplanDevice = () => {
     },
   ];
   return (
-    <PageContainer title="Device Mapping" description="This is the Device Mapping CRUD Page">
+    <PageContainer title="People Tracking System" description="People Tracking System">
       <Grid container spacing={3} mb={3}>
         {topCards.map((topcard, i) => {
           return(

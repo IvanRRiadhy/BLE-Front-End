@@ -18,7 +18,7 @@ const MemberTag = () => {
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 
   return (
-    <PageContainer title="Member" description="this is Member Page">
+    <PageContainer title="People Tracking System" description="People Tracking System">
       <AppCard>
         {/* ------------------------------------------- */}
         {/* Left Part */}

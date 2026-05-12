@@ -26,7 +26,7 @@ const TestReport = () => {
   // };
 
   return (
-    <PageContainer title="Test Report" description="this is Test Report Page">
+    <PageContainer title="People Tracking System" description="this is Visitor Report Page">
       <AppCard>
         <Box
           sx={{

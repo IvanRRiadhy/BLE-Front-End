@@ -100,7 +100,7 @@ const Config = () => {
   const memoizedScreens = useMemo(() => previewScreens, [previewScreens]);
 
   return (
-    <PageContainer title="Monitoring Config" description="Monitoring Config">
+    <PageContainer title="People Tracking System" description="This is Monitoring Config page">
       <Box sx={{ flexGrow: 1, mt: 2 }}>
         <Grid container spacing={2}>
           {/* Sidebar on the left */}
