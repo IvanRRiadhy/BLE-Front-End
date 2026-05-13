@@ -63,7 +63,6 @@ type Props = {
   onChangeFilter: (f: FilterState) => void;
   resetToken?: number;
   hideSelectedAreas?: boolean;
-  returnAll?: boolean;
 };
 
 // === Component ===
@@ -76,7 +75,6 @@ const AutocompleteFilter: React.FC<Props> = ({
   onChangeFilter,
   resetToken,
   hideSelectedAreas,
-  returnAll = false,
 }) => {
   const [open, setOpen] = React.useState(false);
   const [clickAwayEnabled, setClickAwayEnabled] = useState(false);
@@ -120,14 +118,6 @@ const AutocompleteFilter: React.FC<Props> = ({
     }
     return m;
   }, [maskedAreas]);
-
-  const parentKeyMap = React.useMemo(() => {
-    const m = new Map<string, string>();
-    for (const f of floors) m.set(kF(f.id), kB(f.buildingId));
-    for (const fp of floorplans) m.set(kFP(fp.id), kF(fp.floorId));
-    for (const ma of maskedAreas) m.set(kMA(ma.id), kFP(ma.floorplanId));
-    return m;
-  }, [floors, floorplans, maskedAreas]);
 
   // === State ===
   const [expanded, setExpanded] = React.useState<string[]>([]);
@@ -199,97 +189,6 @@ const AutocompleteFilter: React.FC<Props> = ({
     setQuery('');
   }, [resetToken, onChangeFilter]);
 
-  // === Filtering logic ===
-  const lowerQuery = query.toLowerCase();
-
-  const getFilteredFloors = React.useCallback(
-    (bId: string) => {
-      const fls = floorsByBuilding.get(bId) ?? [];
-      if (!lowerQuery) return fls;
-
-      return fls.filter((f) => {
-        if (f.name.toLowerCase().includes(lowerQuery)) return true;
-        const fps = fpsByFloor.get(f.id) ?? [];
-        return fps.some((fp) => {
-          if (fp.name.toLowerCase().includes(lowerQuery)) return true;
-          const mas = masByFp.get(fp.id) ?? [];
-          return mas.some((ma) => ma.name.toLowerCase().includes(lowerQuery));
-        });
-      });
-    },
-    [floorsByBuilding, fpsByFloor, masByFp, lowerQuery],
-  );
-
-  const getFilteredFloorplans = React.useCallback(
-    (fId: string) => {
-      const fps = fpsByFloor.get(fId) ?? [];
-      if (!lowerQuery) return fps;
-
-      return fps.filter((fp) => {
-        if (fp.name.toLowerCase().includes(lowerQuery)) return true;
-        const mas = masByFp.get(fp.id) ?? [];
-        return mas.some((ma) => ma.name.toLowerCase().includes(lowerQuery));
-      });
-    },
-    [fpsByFloor, masByFp, lowerQuery],
-  );
-
-  const getFilteredAreas = React.useCallback(
-    (fpId: string) => {
-      const mas = masByFp.get(fpId) ?? [];
-      if (!lowerQuery) return mas;
-      return mas.filter((ma) => ma.name.toLowerCase().includes(lowerQuery));
-    },
-    [masByFp, lowerQuery],
-  );
-
-  const filteredBuildings = React.useMemo(() => {
-    if (!lowerQuery) return buildings;
-
-    return buildings.filter((b) => {
-      if (b.name.toLowerCase().includes(lowerQuery)) return true;
-      const fls = getFilteredFloors(b.id);
-      return fls.length > 0;
-    });
-  }, [buildings, lowerQuery, getFilteredFloors]);
-
-  // Auto-expand on search
-  React.useEffect(() => {
-    if (!lowerQuery) return;
-
-    const newExpanded = new Set<string>();
-    for (const b of buildings) {
-      const fls = getFilteredFloors(b.id);
-      const bMatches = b.name.toLowerCase().includes(lowerQuery);
-      const hasMatchingChild = fls.length > 0;
-
-      if (hasMatchingChild || bMatches) {
-        if (hasMatchingChild) newExpanded.add(kB(b.id));
-
-        for (const f of fls) {
-          const fps = getFilteredFloorplans(f.id);
-          const fMatches = f.name.toLowerCase().includes(lowerQuery);
-          const hasMatchingFp = fps.length > 0;
-
-          if (hasMatchingFp || fMatches) {
-            if (hasMatchingFp) newExpanded.add(kF(f.id));
-
-            for (const fp of fps) {
-              const mas = getFilteredAreas(fp.id);
-              const fpMatches = fp.name.toLowerCase().includes(lowerQuery);
-              const hasMatchingMa = mas.length > 0;
-
-              if (hasMatchingMa || fpMatches) {
-                if (hasMatchingMa) newExpanded.add(kFP(fp.id));
-              }
-            }
-          }
-        }
-      }
-    }
-    setExpanded(Array.from(newExpanded));
-  }, [lowerQuery, buildings, getFilteredFloors, getFilteredFloorplans, getFilteredAreas]);
-
   // === Tree helpers ===
   const getChildren = React.useCallback(
     (key: string): string[] => {
@@ -305,9 +204,24 @@ const AutocompleteFilter: React.FC<Props> = ({
     [floorsByBuilding, fpsByFloor, masByFp, hasFloors, hasFloorplans, hasMaskedAreas],
   );
 
-  const getParentKey = React.useCallback((key: string): string | null => {
-    return parentKeyMap.get(key) ?? null;
-  }, [parentKeyMap]);
+  const getParentKey = (key: string): string | null => {
+    const { type, id } = parseKey(key);
+    if (type === 'MA') {
+      const ma = maskedAreas.find((m) => m.id === id);
+      const fp = floorplans.find((f) => f.id === ma?.floorplanId);
+      return fp ? kFP(fp.id) : null;
+    }
+    if (type === 'FP') {
+      const fp = floorplans.find((f) => f.id === id);
+      const fl = floors.find((f) => f.id === fp?.floorId);
+      return fl ? kF(fl.id) : null;
+    }
+    if (type === 'F') {
+      const fl = floors.find((f) => f.id === id);
+      return fl ? kB(fl.buildingId) : null;
+    }
+    return null;
+  };
 
   const getAllDescendants = React.useCallback(
     (key: string): string[] => {
@@ -363,16 +277,7 @@ const AutocompleteFilter: React.FC<Props> = ({
   // === Build Filter State ===
   const toFilterState = React.useCallback((): FilterState => {
     const f: FilterState = { BuildingId: [], FloorId: [], FloorplanId: [], MaskedAreaId: [] };
-
     for (const key of selectedKeys) {
-      if (!returnAll) {
-        const parent = getParentKey(key);
-        // If parent exists and is also selected, this node is not the "highest tier"
-        if (parent && selectedKeys.has(parent)) {
-          continue;
-        }
-      }
-
       const { type, id } = parseKey(key);
       if (type === 'B') f.BuildingId.push(id);
       else if (type === 'F') f.FloorId.push(id);
@@ -380,14 +285,11 @@ const AutocompleteFilter: React.FC<Props> = ({
       else if (type === 'MA') f.MaskedAreaId.push(id);
     }
     return f;
-  }, [selectedKeys, returnAll, getParentKey]);
+  }, [selectedKeys]);
 
   React.useEffect(() => {
-    if (!disabled) {
-      const state = toFilterState();
-      onChangeFilter(state);
-    }
-  }, [disabled, toFilterState, onChangeFilter]);
+    if (!disabled) onChangeFilter(toFilterState());
+  }, [selectedKeys, disabled, toFilterState, onChangeFilter]);
 
   // === Selected Display ===
   const displayTree = React.useMemo<DisplayTree>(() => {
@@ -458,6 +360,7 @@ const AutocompleteFilter: React.FC<Props> = ({
     : 'Selected Buildings';
 
   // --- 🧠 Compute compressed display selection ---
+  // --- 🧠 Compute compressed display selection with icons ---
   const computeDisplaySelection = React.useCallback(() => {
     const selected = new Set(selectedKeys);
 
@@ -550,9 +453,9 @@ const AutocompleteFilter: React.FC<Props> = ({
           autoComplete="off"
           inputProps={{
             title: '', // remove browser tooltip
+            readOnly: true, // prevent manual typing
           }}
-          value={query || (hideSelectedAreas && selectedKeys.size > 0 ? computeDisplaySelection() : '')}
-          onChange={(e) => setQuery(e.target.value)}
+          value={hideSelectedAreas ? (selectedKeys.size > 0 ? computeDisplaySelection() : '') : ''}
           onClick={openPopper}
           onFocus={openPopper}
           sx={{
@@ -589,9 +492,9 @@ const AutocompleteFilter: React.FC<Props> = ({
               expandedItems={expanded}
               onExpandedItemsChange={(_e, ids) => setExpanded(Array.isArray(ids) ? ids : [ids])}
             >
-              {filteredBuildings.map((b) => {
+              {buildings.map((b) => {
                 const bKey = kB(b.id);
-                const floorsForB = getFilteredFloors(b.id);
+                const floorsForB = hasFloors ? floorsByBuilding.get(b.id) ?? [] : [];
                 return (
                   <TreeItem
                     key={bKey}
@@ -606,74 +509,77 @@ const AutocompleteFilter: React.FC<Props> = ({
                       </Box>
                     }
                   >
-                    {floorsForB.map((f) => {
-                      const fKey = kF(f.id);
-                      const fps = getFilteredFloorplans(f.id);
-                      return (
-                        <TreeItem
-                          key={fKey}
-                          itemId={fKey}
-                          label={
-                            <Box
-                              onClick={() => toggleNode(fKey)}
-                              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                            >
-                              <Checkbox
-                                checked={allChecked(fKey)}
-                                indeterminate={someChecked(fKey)}
-                              />
-                              <Typography title="">⬜ {f.name}</Typography>
-                            </Box>
-                          }
-                        >
-                          {fps.map((fp) => {
-                            const fpKey = kFP(fp.id);
-                            const mas = getFilteredAreas(fp.id);
-                            return (
-                              <TreeItem
-                                key={fpKey}
-                                itemId={fpKey}
-                                label={
-                                  <Box
-                                    onClick={() => toggleNode(fpKey)}
-                                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                                  >
-                                    <Checkbox
-                                      checked={allChecked(fpKey)}
-                                      indeterminate={someChecked(fpKey)}
-                                    />
-                                    <Typography title="">🗺️ {fp.name}</Typography>
-                                  </Box>
-                                }
+                    {hasFloors &&
+                      floorsForB.map((f) => {
+                        const fKey = kF(f.id);
+                        const fps = hasFloorplans ? fpsByFloor.get(f.id) ?? [] : [];
+                        return (
+                          <TreeItem
+                            key={fKey}
+                            itemId={fKey}
+                            label={
+                              <Box
+                                onClick={() => toggleNode(fKey)}
+                                sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
                               >
-                                {mas.map((ma) => {
-                                  const maKey = kMA(ma.id);
-                                  return (
-                                    <TreeItem
-                                      key={maKey}
-                                      itemId={maKey}
-                                      label={
-                                        <Box
-                                          onClick={() => toggleNode(maKey)}
-                                          sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 1,
-                                          }}
-                                        >
-                                          <Checkbox checked={selectedKeys.has(maKey)} />
-                                          <Typography title="">📍 {ma.name}</Typography>
-                                        </Box>
-                                      }
-                                    />
-                                  );
-                                })}
-                              </TreeItem>
-                            );
-                          })}
-                        </TreeItem>
-                      );
-                    })}
+                                <Checkbox
+                                  checked={allChecked(fKey)}
+                                  indeterminate={someChecked(fKey)}
+                                />
+                                <Typography title="">⬜ {f.name}</Typography>
+                              </Box>
+                            }
+                          >
+                            {hasFloorplans &&
+                              fps.map((fp) => {
+                                const fpKey = kFP(fp.id);
+                                const mas = hasMaskedAreas ? masByFp.get(fp.id) ?? [] : [];
+                                return (
+                                  <TreeItem
+                                    key={fpKey}
+                                    itemId={fpKey}
+                                    label={
+                                      <Box
+                                        onClick={() => toggleNode(fpKey)}
+                                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                                      >
+                                        <Checkbox
+                                          checked={allChecked(fpKey)}
+                                          indeterminate={someChecked(fpKey)}
+                                        />
+                                        <Typography title="">🗺️ {fp.name}</Typography>
+                                      </Box>
+                                    }
+                                  >
+                                    {hasMaskedAreas &&
+                                      mas.map((ma) => {
+                                        const maKey = kMA(ma.id);
+                                        return (
+                                          <TreeItem
+                                            key={maKey}
+                                            itemId={maKey}
+                                            label={
+                                              <Box
+                                                onClick={() => toggleNode(maKey)}
+                                                sx={{
+                                                  display: 'flex',
+                                                  alignItems: 'center',
+                                                  gap: 1,
+                                                }}
+                                              >
+                                                <Checkbox checked={selectedKeys.has(maKey)} />
+                                                <Typography title="">📍 {ma.name}</Typography>
+                                              </Box>
+                                            }
+                                          />
+                                        );
+                                      })}
+                                  </TreeItem>
+                                );
+                              })}
+                          </TreeItem>
+                        );
+                      })}
                   </TreeItem>
                 );
               })}

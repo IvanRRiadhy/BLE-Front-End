@@ -24,7 +24,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconTrash, IconX } from '@tabler/icons-react';
+import { IconEye, IconTrash, IconX } from '@tabler/icons-react';
 import { defaultBleReaderFilter } from 'src/store/apps/defaultForm';
 import AddEditBleReader from './AddEditBleReader';
 import BulkAddEditBleReader from './BulkAddEditBleReader';
@@ -33,6 +33,7 @@ import { useReaderList, useDeleteReader } from 'src/hooks/useReader';
 import { useAllBrands } from 'src/hooks/useBrand'; // optional if you migrate brand too
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import { UpdateFilter } from 'src/store/apps/crud/bleReader';
+import { ReaderHealthCard } from 'src/components/master/Reports/ReaderHealthReport/ReaderHealthReportList';
 
 const columns = [
   { label: 'Brand Name', field: 'Brand.Name', sortAble: true },
@@ -48,6 +49,7 @@ const BleReaderList = () => {
   // 🔹 Local filter state (instead of Redux)
   const [filter, setFilter] = useState(defaultBleReaderFilter);
   const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
+  const readerHealthByTopic = useSelector((state: RootState) => state.ReaderHealthReducer.readerHealthByTopic);
 
   // 🔹 React Query hooks
   const { data, isFetching, isLoading, isFetched, refetch } = useReaderList(bleReaderFilter);
@@ -63,6 +65,10 @@ const BleReaderList = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
+
+  // 🔹 Health Dialog state
+  const [healthDialogOpen, setHealthDialogOpen] = useState(false);
+  const [selectedReader, setSelectedReader] = useState<any>(null);
 
   // 🔹 Pagination and sorting
   const page = Math.floor(bleReaderFilter.Start / bleReaderFilter.Length);
@@ -127,6 +133,54 @@ const BleReaderList = () => {
     } finally {
       setDeleteDialogOpen(false);
     }
+  };
+
+  // 🔹 Health Dialog handling
+  const handleOpenHealthDialog = (ble: any) => {
+    setSelectedReader(ble);
+    setHealthDialogOpen(true);
+  };
+
+  const handleCloseHealthDialog = () => {
+    setHealthDialogOpen(false);
+    setSelectedReader(null);
+  };
+
+  const getReaderHealthData = (gmac: string) => {
+    if (!gmac) return null;
+    const now = Math.floor(Date.now() / 1000);
+    const oneMinuteAgo = now - 60;
+
+    const health = readerHealthByTopic[gmac] || 
+                   readerHealthByTopic[gmac.toLowerCase()] || 
+                   readerHealthByTopic[gmac.toUpperCase()];
+
+    let status = 'Non-Active';
+    if (health && health.utc >= oneMinuteAgo) {
+      status = health.msg || 'alive';
+    }
+
+    const isWarning = status !== 'Non-Active' && (
+      (health?.temp ?? 0) >= 50 ||
+      (health?.load ?? 0) >= 0.6 ||
+      (health?.mem_free ?? 100) <= 15
+    );
+
+    return {
+      ...health,
+      gmac: gmac,
+      wanIP: selectedReader?.ip || health?.wanIP || '-',
+      msg: status,
+      temp: status === 'Non-Active' ? 0 : (health?.temp ?? 0),
+      load: status === 'Non-Active' ? 0 : (health?.load ?? 0),
+      mem_free: status === 'Non-Active' ? 0 : (health?.mem_free ?? 0),
+      uptime: status === 'Non-Active' ? 0 : (health?.uptime ?? 0),
+      ver: health?.ver || '-',
+      blever: health?.blever || '-',
+      lowVoltage: health?.lowVoltage ?? 0,
+      utc: health?.utc ?? 0,
+      isWarning,
+    };
   };
 
   const getBrandName = (brandID: string) => {
@@ -337,12 +391,22 @@ const BleReaderList = () => {
                             }}
                           >
                             <AddEditBleReader type="edit" bleReader={ble} />
-                            <IconButton
-                              color="error"
-                              onClick={() => handleOpenDeleteDialog(ble.id)}
-                            >
-                              <IconTrash size={20} />
-                            </IconButton>
+                            <Tooltip title="View Reader Health" arrow>
+                              <IconButton
+                                color="primary"
+                                onClick={() => handleOpenHealthDialog(ble)}
+                              >
+                                <IconEye size={20} />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete Reader" arrow>
+                              <IconButton
+                                color="error"
+                                onClick={() => handleOpenDeleteDialog(ble.id)}
+                              >
+                                <IconTrash size={20} />
+                              </IconButton>
+                            </Tooltip>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -363,6 +427,33 @@ const BleReaderList = () => {
           </BlankCard>
         </Box>
       </Grid>
+
+      {/* --- Reader Health Dialog --- */}
+      <Dialog 
+        open={healthDialogOpen} 
+        onClose={handleCloseHealthDialog}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: '20px' }
+        }}
+      >
+        <DialogTitle sx={{ pb: 0 }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Typography variant="h5" fontWeight="bold">Reader Health Details</Typography>
+            <IconButton onClick={handleCloseHealthDialog}>
+              <IconX size={24} />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          {selectedReader && (
+            <Box mt={2}>
+              <ReaderHealthCard data={getReaderHealthData(selectedReader.gmac)} />
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* --- Delete Confirmation --- */}
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
@@ -397,3 +488,4 @@ const BleReaderList = () => {
 };
 
 export default BleReaderList;
+

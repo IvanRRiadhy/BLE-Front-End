@@ -173,6 +173,16 @@ const DeviceList = () => {
     }
   }, [floorplanDevicesData, dispatch]);
 
+  // Auto-scroll to selected device
+  useEffect(() => {
+    if (selectedDevice?.id) {
+      const element = document.getElementById(`device-item-${selectedDevice.id}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }, [selectedDevice?.id]);
+
   // Fetch external data on mount
   useEffect(() => {
     dispatch(fetchFloorplan());

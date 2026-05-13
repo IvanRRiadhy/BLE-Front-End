@@ -27,6 +27,7 @@ const PatrolAreaListItem = ({ onListClick, onEditClick, onDeleteClick, patrolAre
   const isEditing = useSelector((state: RootState) => state.PatrolAreaReducer.editingPatrolArea);
   return (
     <ListItemButton
+      id={`patrol-area-item-${patrolArea?.id}`}
       sx={{ mb: 1 }}
       selected={active}
       onClick={(event) => {

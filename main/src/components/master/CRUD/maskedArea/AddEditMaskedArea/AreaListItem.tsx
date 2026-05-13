@@ -27,6 +27,7 @@ const AreaListItem = ({ onListClick, onEditClick, onDeleteClick, area, active }:
   const isEditing = useSelector((state: RootState) => state.maskedAreaReducer.editingMaskedArea);
   return (
     <ListItemButton
+      id={`area-item-${area?.id}`}
       sx={{ mb: 1 }}
       selected={active}
       onClick={(event) => {

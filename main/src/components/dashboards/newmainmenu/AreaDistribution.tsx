@@ -120,20 +120,20 @@ const NewAreaDistribution: React.FC = () => {
     const floorIds = normalizeIds(dashboardFilter.FloorId);
     const floorplanIds = normalizeIds(dashboardFilter.FloorplanId);
     const areaIds = normalizeIds(dashboardFilter.FloorplanMaskedAreaId);
-
+    console.log("Area Dist 2", countingData, buildingIds, floorIds, floorplanIds, areaIds)
     const filterRecord = (source?: Record<string, CountingEntity>, allowedIds?: string[]) => {
       if (!source) return source;
       if (!allowedIds || allowedIds.length === 0) return source;
 
-      return Object.fromEntries(Object.entries(source).filter(([id]) => allowedIds.includes(id)));
+      return Object.fromEntries(Object.entries(source).filter(([id]) => allowedIds.includes(id.toLowerCase())));
     };
 
     return {
       ...countingData,
-      building: filterRecord(countingData.building, buildingIds),
-      floor: filterRecord(countingData.floor, floorIds),
-      floorplan: filterRecord(countingData.floorplan, floorplanIds),
-      area: filterRecord(countingData.area, areaIds),
+      building: filterRecord(countingData.building, buildingIds.map(x => x.toLowerCase())),
+      floor: filterRecord(countingData.floor, floorIds.map(x => x.toLowerCase())),
+      floorplan: filterRecord(countingData.floorplan, floorplanIds.map(x => x.toLowerCase())),
+      area: filterRecord(countingData.area, areaIds.map(x => x.toLowerCase())),
     };
   }
 
@@ -141,9 +141,25 @@ const NewAreaDistribution: React.FC = () => {
     return filterCountingData(countingData, dashboardFilter);
   }, [countingData, dashboardFilter]);
 
+  useEffect(() => {
+    if(dashboardFilter) {
+      console.log("DashboardFilter", dashboardFilter)
+      if(dashboardFilter.FloorplanMaskedAreaId.length > 0 && !dashboardFilter.FloorplanMaskedAreaId[0].toLowerCase().includes("empty")) {
+        setLevel('area');
+      } else if(dashboardFilter.FloorplanId.length > 0 && !dashboardFilter.FloorplanId[0].toLowerCase().includes("empty")) {
+        setLevel('area');
+      } else if(dashboardFilter.FloorId.length > 0 && !dashboardFilter.FloorId[0].toLowerCase().includes("empty")) {
+        setLevel('floorplan');
+      } else if(dashboardFilter.BuildingId.length > 0 && !dashboardFilter.BuildingId[0].toLowerCase().includes("empty")) {
+        setLevel('floor');
+      }
+    }
+  }, [dashboardFilter]);
+
   /* ---------------- Chart Options ---------------- */
 
   const chartData = useMemo<AreaCountState>(() => {
+    console.log("Area Dist 1 ", filteredCountingData, "Level", level);
     const source = filteredCountingData?.[level];
 
     if (!source) {
@@ -171,9 +187,9 @@ const NewAreaDistribution: React.FC = () => {
       foreColor: theme.palette.text.secondary,
       background: 'transparent',
     },
-    theme: {
-      mode: theme.palette.mode as 'light' | 'dark',
-    },
+    // theme: {
+    //   mode: theme.palette.mode as 'light' | 'dark',
+    // },
 
     labels,
     colors: COLORS,
@@ -182,7 +198,7 @@ const NewAreaDistribution: React.FC = () => {
       show: true,
       position: 'bottom',
       markers: {
-        size: 12, // ✅ replaces width & height
+        size: 12, 
         shape: 'square', // optional
         offsetX: 0,
         offsetY: 0,

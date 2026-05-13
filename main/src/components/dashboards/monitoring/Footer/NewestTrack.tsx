@@ -87,7 +87,7 @@ const NewestTrack = () => {
   };
 
   // Ambil semua topic tracking/*
-  const trackingTopics = Object.keys(beaconsByTopic).filter((x) => x.startsWith('people_tracking/tracking/'));
+  const trackingTopics = Object.keys(beaconsByTopic) ;
 
   // Gabungkan semua beacon
   const allBeacons = Object.values(
@@ -277,7 +277,7 @@ const NewestTrack = () => {
   );
 
   return (
-    <Box sx={{ width: '100%', height: '100%', overflowY: 'auto', p: 0.5 }}>
+    <Box sx={{ width: '100%', height: '100%', overflowY: 'auto', p: 0.5, scrollSnapType: 'y mandatory' }}>
       {allBeacons.map((beacon: any, idx) => {
         const isVisitor = !!beacon.visitorCardId;
         const isMember = !!beacon.memberCardId;
@@ -314,6 +314,8 @@ const NewestTrack = () => {
               background: getItemBackground(isVisitor, isMember, isSecurity, isBlacklisted),
               color: isBlacklisted ? '#fff' : 'inherit', // 🔥 important for readability
               overflow: 'hidden',
+              scrollSnapAlign: 'start',
+              scrollSnapStop: 'always',
               transition: 'all 0.2s ease',
               '&:hover': {
                 boxShadow: isBlacklisted ? 6 : 3,

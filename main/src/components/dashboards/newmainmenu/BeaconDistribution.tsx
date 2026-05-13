@@ -20,7 +20,7 @@ const NewBeaconDistribution: React.FC = () => {
     const securityCard = data.securityCardCount ?? 0;
     const totalCard = data.totalCardCount ?? 0;
     const totalUsed = data.totalCardUse ?? 0;
-    // console.log("Beacons: ", data)
+    console.log("Beacons: ", data)
     const unusedCard = Math.max(totalCard - totalUsed, 0);
 
     return {

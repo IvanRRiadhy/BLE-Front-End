@@ -64,7 +64,7 @@ export const CustomizerSlice = createSlice({
     setMainMenu: (state: StateType, action) => {
       state.isMainMenu = action.payload;
     },
-    setDashboardFilter: (state: StateType, action) => {
+    setDashboardFilter: (state: StateType, action ) => {
       state.dashboardFilter = action.payload;
       console.log('Dashboard Filter Set:', state.dashboardFilter);
     },

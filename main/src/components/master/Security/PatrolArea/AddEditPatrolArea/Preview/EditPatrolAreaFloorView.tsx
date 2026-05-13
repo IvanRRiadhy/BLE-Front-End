@@ -1,5 +1,5 @@
 import { BASE_URL } from 'src/utils/axios';
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import { Box, FormLabel } from '@mui/material';
 import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
@@ -33,8 +33,29 @@ const EditPatrolAreaFloorView: React.FC<{
     (state: RootState) => state.PatrolAreaReducer.drawingPatrolArea,
   );
 
+  const [isDraggingView, setIsDraggingView] = useState(false);
+  const [isHoveringView, setIsHoveringView] = useState(false);
+  const [isHoveringAreaShape, setIsHoveringAreaShape] = useState(false);
+  const [isOnArea, setIsOnArea] = useState(false);
+  const isDrawingPatrolArea = drawingPatrolArea !== '';
   const [filteredUnsavedPatrolArea, setFilteredUnsavedPatrolArea] = useState<PatrolAreaType[]>([]);
-  const [cursor, setCursor] = useState('grab');
+  const [cursor, setCursor] = useState(drawingPatrolArea ? 'crosshair' : 'grab');
+  const Cursor = useMemo(() => {
+    if (isDrawingPatrolArea) return 'crosshair';
+    if (isDraggingView) return 'grabbing';
+    if (editingPatrolArea && isHoveringAreaShape) return 'move';
+    if (isOnArea && !isDraggingView && !isDrawingPatrolArea) return 'pointer';
+    if (isHoveringView) return 'grab';
+    return 'default';
+  }, [
+    isDrawingPatrolArea,
+    isDraggingView,
+    editingPatrolArea,
+    isHoveringAreaShape,
+    isOnArea,
+    isHoveringView,
+  ]);
+
   const [isDragging, setIsDragging] = useState('');
   const [isHovered, setIsHovered] = useState(false);
 
@@ -168,8 +189,9 @@ const EditPatrolAreaFloorView: React.FC<{
 
       // If we get here, we're either clicking on the container background
       // or on empty canvas area
-      container.style.cursor = 'grabbing';
-      setCursor('grabbing');
+      // container.style.cursor = 'grabbing';
+      // setCursor('grabbing');
+      setIsDraggingView(true);
 
       const startX = e.clientX;
       const startY = e.clientY;
@@ -189,9 +211,10 @@ const EditPatrolAreaFloorView: React.FC<{
       const handleMouseUp = () => {
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
-        if (container) {
-          container.style.cursor = 'grab';
-          setCursor('grab');
+        if (container && !drawingPatrolArea) {
+          // container.style.cursor = 'grab';
+          // setCursor('grab');
+          setIsDraggingView(false);
         }
       };
 
@@ -260,17 +283,17 @@ const EditPatrolAreaFloorView: React.FC<{
   }, []);
 
   // Update cursor based on state
-  useEffect(() => {
-    if (!zoomable) {
-      setCursor('default');
-    } else if (drawingPatrolArea) {
-      setCursor('crosshair');
-    } else if (isDragging) {
-      setCursor('move');
-    } else {
-      setCursor('grab');
-    }
-  }, [zoomable, drawingPatrolArea, isDragging]);
+  // useEffect(() => {
+  //   if (!zoomable) {
+  //     setCursor('default');
+  //   } else if (drawingPatrolArea) {
+  //     setCursor('crosshair');
+  //   } else if (isDragging) {
+  //     setCursor('move');
+  //   } else {
+  //     setCursor('grab');
+  //   }
+  // }, [zoomable, drawingPatrolArea, isDragging]);
 
   if (!naturalSize.width || !naturalSize.height) {
     return <div>Loading floorplan...</div>;
@@ -278,8 +301,8 @@ const EditPatrolAreaFloorView: React.FC<{
 
   return (
     <Box
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => setIsHoveringView(true)}
+      onMouseLeave={() => setIsHoveringView(false)}
       sx={{
         position: 'relative',
         width: '100%',
@@ -289,7 +312,7 @@ const EditPatrolAreaFloorView: React.FC<{
         justifyContent: 'center',
         alignItems: 'center',
         overflow: 'visible',
-        cursor: cursor,
+        cursor: Cursor,
         // Add CSS to prevent browser zoom
         touchAction: 'none', // Prevent touch zoom
       }}
@@ -515,7 +538,10 @@ const EditPatrolAreaFloorView: React.FC<{
           patrolAreas={filteredUnsavedPatrolArea}
           activePatrolArea={activePatrolArea}
           setIsDragging={setIsDragging}
-          setCursor={setCursor}
+          // setCursor={setCursor}
+          onAreaHoverChange={setIsHoveringAreaShape}
+          onAreaDragChange={setIsDraggingView}
+          onOnArea={setIsOnArea}
           preview={preview}
           stageScale={stageScale}
           stageX={stagePos.x}

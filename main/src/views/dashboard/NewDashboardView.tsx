@@ -98,12 +98,13 @@ const DashboardView: React.FC = () => {
   });
 
   const topAlarmAreas = useMemo(() => {
+    console.log("Result by area", alarmByArea)
     if (!alarmByArea?.areas?.length) return [];
 
     return alarmByArea.areas
       .map((area: any) => {
         const total = area.series.reduce((sum: number, s: any) => sum + (s.data?.[0] ?? 0), 0);
-        // console.log("alarm by area", area, "total", total);
+        console.log("alarm by area", area, "total", total);
         return {
           areaName: area.name, // reuse existing prop name
           total,

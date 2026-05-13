@@ -245,6 +245,17 @@ const MovementLogList = () => {
                         key={index}
                         sx={{
                           backgroundColor: index % 2 === 0 ? 'background.default' : 'background.paper',
+                          position: 'relative',
+                          // transition: 'background-color 0.3s ease',
+                          // animation: (row.lastSeen && (Date.now() - row.lastSeen) < 15000) ? 'breathe-blue 3s infinite ease-in-out' : 'none',
+                          // '@keyframes breathe-blue': {
+                          //   '0%': { backgroundColor: index % 2 === 0 ? 'background.default' : 'background.paper' },
+                          //   '50%': { backgroundColor: 'rgba(0, 155, 255, 0.07)' },
+                          //   '100%': { backgroundColor: index % 2 === 0 ? 'background.default' : 'background.paper' },
+                          // },
+                          // '&:hover': {
+                          //   backgroundColor: 'rgba(0, 0, 0, 0.04) !important',
+                          // }
                         }}
                       >
                         <TableCell>

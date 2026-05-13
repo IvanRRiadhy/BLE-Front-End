@@ -929,10 +929,10 @@ const EditAreaRenderer: React.FC<Props> = ({
         if (pointer) {
           const shape = stage.getIntersection(pointer);
 
-          // If there's no shape under the mouse, ensure cursor is grab
+          // If there's no shape under the mouse, ensure we reset area-specific hover states
           if (!shape && !drawingMaskedArea) {
-            // setCursor('grab');
-            onAreaDragChange(false);
+            onAreaHoverChange(false);
+            onOnArea(false);
           }
         }
       }

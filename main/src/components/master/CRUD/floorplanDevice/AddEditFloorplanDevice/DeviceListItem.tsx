@@ -51,6 +51,7 @@ const DeviceListItem = ({ onListClick, onEditClick, onDeleteClick, device, activ
 
   return (
     <ListItemButton
+      id={`device-item-${device?.id}`}
       sx={{ mb: 1 }}
       selected={active}
       onClick={(event) => {

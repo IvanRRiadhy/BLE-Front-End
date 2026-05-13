@@ -46,7 +46,10 @@ interface Props {
   patrolAreas: PatrolAreaType[];
   activePatrolArea?: PatrolAreaType | null;
   setIsDragging: (isDragging: string) => void;
-  setCursor: (cursor: string) => void;
+  // setCursor: (cursor: string) => void;
+  onAreaHoverChange: (areaHover: boolean) => void;
+  onAreaDragChange: (areaDrag: boolean) => void;
+  onOnArea: (onArea: boolean) => void;
   preview?: boolean;
   // Stage transform props (from parent)
   stageScale: number;
@@ -87,7 +90,9 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
   patrolAreas,
   activePatrolArea,
   setIsDragging,
-  setCursor,
+  onAreaHoverChange,
+  onAreaDragChange,
+  onOnArea,
   preview = false,
   stageScale,
   stageX,
@@ -189,13 +194,13 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
   }, [editingPatrolArea]);
 
   // ----------- cursor style management -----------
-  useEffect(() => {
-    if (drawingPatrolArea !== '') {
-      setCursor('crosshair');
-    } else {
-      setCursor('default');
-    }
-  }, [drawingPatrolArea, setCursor]);
+  // useEffect(() => {
+  //   if (drawingPatrolArea !== '') {
+  //     setCursor('crosshair');
+  //   } else {
+  //     setCursor('default');
+  //   }
+  // }, [drawingPatrolArea, setCursor]);
   //----------- Center Node Helper -----------
   function withRecomputedCenter(nodes: Nodes[], scale: number): Nodes[] {
     const cornerNodes = nodes.filter((n) => n.type === 'corner');
@@ -494,12 +499,12 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
       if (editingArea) {
         setPendingAreaId(id);
         setConfirmDialogOpen(true);
-        setCursor('move');
+        // setCursor('move');
         return;
       }
       dispatch(SelectPatrolArea(id));
     },
-    [drawingPatrolArea, patrolAreas, activeArea, editingArea, dispatch, setCursor],
+    [drawingPatrolArea, patrolAreas, activeArea, editingArea, dispatch],
   );
 
   // FIXED: handleDragStart - track the starting position
@@ -801,14 +806,15 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
         if (pointer) {
           const shape = stage.getIntersection(pointer);
 
-          // If there's no shape under the mouse, ensure cursor is grab
+          // If there's no shape under the mouse, ensure we reset area-specific hover states
           if (!shape && !drawingPatrolArea) {
-            setCursor('grab');
+            onAreaHoverChange(false);
+            onOnArea(false);
           }
         }
       }
     },
-    [pointerToWorld, drawingPatrolArea, setCursor],
+    [pointerToWorld, drawingPatrolArea],
   );
 
   const renderArea = useCallback(
@@ -834,17 +840,21 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
               if (isEditing) {
                 if (preview) return;
                 if (!drawingPatrolArea) {
-                  setCursor('move');
+                  // setCursor('move');
+                  onAreaHoverChange(true);
                 }
               } else {
                 if (!drawingPatrolArea) {
-                  setCursor('pointer');
+                  // setCursor('pointer');
+                  onOnArea(true);
                 }
               }
             }}
             onMouseLeave={() => {
               if (!preview && !drawingPatrolArea) {
-                setCursor('grab');
+                // setCursor('grab');
+                onAreaHoverChange(false);
+                onOnArea(false);
               }
             }}
             onMouseDown={(e) => {
@@ -905,7 +915,8 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
                     shape.radius(10);
                     shape.stroke('black');
                     shape.strokeWidth(3);
-                    setCursor('move');
+                    // setCursor('move');
+                    onAreaHoverChange(true);
                     shape.getLayer()?.batchDraw();
                   }
                 }}
@@ -915,7 +926,8 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
                     shape.radius(7);
                     shape.stroke('');
                     shape.strokeWidth(1);
-                    setCursor('grab');
+                    // setCursor('grab');
+                    onAreaHoverChange(false);
                     shape.getLayer()?.batchDraw();
                   }
                 }}
@@ -1035,14 +1047,16 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
                     const shape = e.target as any;
                     shape.radius(12);
                     shape.fill('green');
-                    setCursor('pointer');
+                    // setCursor('pointer');
+                    onOnArea(true);
                     shape.getLayer()?.batchDraw();
                   }}
                   onMouseLeave={(e) => {
                     const shape = e.target as any;
                     shape.radius(8);
                     shape.fill('blue');
-                    setCursor('crosshair');
+                    // setCursor('crosshair');
+                    onOnArea(false);
                     shape.getLayer()?.batchDraw();
                   }}
                 />

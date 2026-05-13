@@ -180,7 +180,7 @@ const DetailList: React.FC = () => {
                 <TableBody>
                   {persons.map((person) => {
                     let chipColor: "success" | "primary" | "warning" | "error" = 'error';
-                    if (person.personStatus === 'ConfirmedEvacuated') chipColor = 'success';
+                    if (person.personStatus === 'Confirmed Evacuated') chipColor = 'success';
                     else if (person.personStatus === 'Evacuated') chipColor = 'primary';
                     else if (person.personStatus === 'ConfirmedAlertNotification') chipColor = 'warning';
                     

@@ -51,12 +51,19 @@ const EditAreaFloorView: React.FC<{
   const [cursor, setCursor] = useState(drawingMaskedArea ? 'crosshair' : 'grab');
   const Cursor = useMemo(() => {
     if (isDrawingMaskedArea) return 'crosshair';
-    if (isOnArea) return 'pointer';
     if (isDraggingView) return 'grabbing';
-    if (isHoveringAreaShape) return 'move';
+    if (editingMaskedArea && isHoveringAreaShape) return 'move';
+    if (isOnArea && !isDraggingView && !isDrawingMaskedArea) return 'pointer';
     if (isHoveringView) return 'grab';
     return 'default';
-  }, [isDrawingMaskedArea, isDraggingView, isHoveringAreaShape, isHoveringView]);
+  }, [
+    isDrawingMaskedArea,
+    isDraggingView,
+    editingMaskedArea,
+    isHoveringAreaShape,
+    isOnArea,
+    isHoveringView,
+  ]);
 
   const [isDragging, setIsDragging] = useState('');
   const [isHovered, setIsHovered] = useState(false);

@@ -23,7 +23,7 @@ import { useSelector } from 'src/store/Store';
 import { healthCheckMessage } from 'src/store/apps/tracking/ReaderHealth';
 import { bleReaderGmacType, useAllReaders, useGMACList } from 'src/hooks/useReader';
 
-const formatUptime = (seconds: number) => {
+export const formatUptime = (seconds: number) => {
   const d = Math.floor(seconds / (3600 * 24));
   const h = Math.floor((seconds % (3600 * 24)) / 3600);
   const m = Math.floor((seconds % 3600) / 60);
@@ -70,7 +70,7 @@ const getColorAt = (p: number) => {
   return interpolateColor('#eab308', '#ef4444', (p - 50) / 50);
 };
 
-const GaugeChart = ({ label, value, percentage, unit, minMax }: GaugeChartProps) => {
+export const GaugeChart = ({ label, value, percentage, unit, minMax }: GaugeChartProps) => {
   const theme = useTheme();
 
   // Extract min and max from minMax string "0 - 90" or "0% - 100%"
@@ -182,7 +182,7 @@ const GaugeChart = ({ label, value, percentage, unit, minMax }: GaugeChartProps)
 
 
 
-const ReaderHealthCard = ({ data }: { data: any }) => {
+export const ReaderHealthCard = ({ data }: { data: any }) => {
   const theme = useTheme();
 
   // Calculate percentages for gauges

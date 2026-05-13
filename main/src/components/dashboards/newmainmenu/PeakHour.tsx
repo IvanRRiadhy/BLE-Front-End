@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Chart from 'react-apexcharts';
 import { Box, Typography, CircularProgress, SelectChangeEvent, MenuItem, useTheme } from '@mui/material';
 import { usePeakHour } from 'src/hooks/useDashboard';
@@ -45,6 +45,21 @@ const PeakHour: React.FC = () => {
   );
 
   const { data: peakHourData, isLoading, isError } = usePeakHour(filter, { groupByMode: level });
+
+    useEffect(() => {
+      if(dashboardFilter) {
+        console.log("DashboardFilter", dashboardFilter)
+        if(dashboardFilter.FloorplanMaskedAreaId.length > 0) {
+          setLevel('area');
+        } else if(dashboardFilter.FloorplanId.length > 0) {
+          setLevel('area');
+        } else if(dashboardFilter.FloorId.length > 0) {
+          setLevel('floorplan');
+        } else if(dashboardFilter.BuildingId.length > 0) {
+          setLevel('floor');
+        }
+      }
+    }, [dashboardFilter]);
 
   /* ---------------- Memoized Chart Data ---------------- */
 

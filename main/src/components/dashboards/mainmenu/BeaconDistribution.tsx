@@ -38,6 +38,7 @@ const BeaconDistribution: React.FC<BeaconDistributionProps> = ({
   outerRadius = 100,
   innerRadius = 80,
 }) => {
+  // console.log("BBeacon Dist", data);
   if (data.length === 1 && data[0].name === 'Loading...') {
     return (
       <Box

@@ -177,6 +177,10 @@ const BuildingList = () => {
           <TableCell>
             <Skeleton variant="text" width={220} height={22} />
           </TableCell>
+          {/* Building Tag */}
+          <TableCell>
+            <Skeleton variant="text" width={220} height={22} />
+          </TableCell>
           {/* Building Image */}
           <TableCell>
             <Skeleton variant="rectangular" width={80} height={60} />

@@ -88,7 +88,7 @@ const TimerButton: React.FC = () => {
   const persons = evacuationData?.persons;
   // const totalPersons = evacuationData?.persons?.length;
   const evacuatedPersons = evacuationData?.persons?.filter((person) => person.personStatus === 'Evacuated') || [];
-  const confirmedPersons = evacuationData?.persons?.filter((person) => person.personStatus === 'ConfirmedEvacuated') || [];
+  const confirmedPersons = evacuationData?.persons?.filter((person) => person.personStatus === 'Confirmed Evacuated') || [];
   const combinedEvacuated = [...evacuatedPersons, ...confirmedPersons];
   //  console.log("Persons", persons);
   // const [ms, setMs] = useState(0);
@@ -442,15 +442,19 @@ const TimerButton: React.FC = () => {
                   {combinedEvacuated.map((person) => (
                     <TableRow
                       key={person.transactionId}
-                      hover
+                      hover={person.personStatus !== 'Confirmed Evacuated'}
                       sx={{
                         backgroundColor:
-                          person.personStatus === 'ConfirmedEvacuated'
+                          person.personStatus === 'Confirmed Evacuated'
                             ? 'rgba(144, 238, 144, 0.3)'
                             : 'rgba(255, 255, 224, 0.5)',
-                        cursor: 'pointer',
+                        cursor: person.personStatus === 'Confirmed Evacuated' ? 'default' : 'pointer',
                       }}
-                      onClick={() => handlePersonRowClick(person.transactionId)}
+                      onClick={
+                        person.personStatus === 'Confirmed Evacuated'
+                          ? undefined
+                          : () => handlePersonRowClick(person.transactionId)
+                      }
                     >
                       <TableCell
                         align="left"

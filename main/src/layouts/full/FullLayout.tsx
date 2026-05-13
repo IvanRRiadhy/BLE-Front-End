@@ -367,10 +367,10 @@ const FullLayout: FC = () => {
               pointerEvents: 'none',
               position: 'fixed',
               zIndex: 9999,
-              inset: 0,
+              inset: '-10px',
               background: `
         radial-gradient(
-          ellipse at center,
+          ellipse farthest-corner at center,
           rgba(255,255,255,0.0) 40%,
           rgba(255,0,0,0.15) 65%,
           rgba(130, 0, 0, 0.45) 100%

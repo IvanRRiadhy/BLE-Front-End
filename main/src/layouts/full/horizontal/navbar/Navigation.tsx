@@ -17,6 +17,7 @@ import { fetchDailyReport } from 'src/store/apps/crud/analytics';
 const Navigation = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const dispatch = useDispatch();
   const isMain = useSelector((state: RootState) => state.customizer.isMainMenu);
 
@@ -44,7 +45,7 @@ const Navigation = () => {
       <Box
         sx={{
           position: 'sticky',
-          top: customizer.TopbarHeight,
+          top: settings.TopbarHeight,
           width: '100%',
           zIndex: 100, // Ensures it's above other content
           backgroundColor: 'background.paper',
@@ -57,7 +58,7 @@ const Navigation = () => {
         {/* ------------------------------------------- */}
         <Container
           sx={{
-            maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',
+            maxWidth: settings.isLayout === 'boxed' ? 'lg' : '100%!important',
           }}
         >
           <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -94,7 +95,7 @@ const Navigation = () => {
       variant="temporary"
       PaperProps={{
         sx: {
-          width: customizer.SidebarWidth,
+          width: settings.SidebarWidth,
           border: '0 !important',
           boxShadow: (theme) => theme.shadows[8],
         },

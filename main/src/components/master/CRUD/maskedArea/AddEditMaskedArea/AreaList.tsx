@@ -139,6 +139,16 @@ const AreaList = () => {
     }
   }, [maskedAreasData, dispatch]);
 
+  // Auto-scroll to selected area
+  useEffect(() => {
+    if (selectedMaskedArea?.id) {
+      const element = document.getElementById(`area-item-${selectedMaskedArea.id}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }, [selectedMaskedArea?.id]);
+
   const newArea: MaskedAreaType = {
     id: uniqueId('maskedArea_'),
     name: uniqueId('Masked Area '),

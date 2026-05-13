@@ -20,9 +20,10 @@ import {
   TableSortLabel,
   Skeleton,
   CircularProgress,
+  Tooltip,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconTrash } from '@tabler/icons-react';
+import {  IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { deleteFloor, fetchFloorDT, floorType, UpdateFilter } from 'src/store/apps/crud/floor';
 import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
@@ -313,13 +314,16 @@ const FloorList = () => {
                             }}
                           >
                             <AddEditFloor type="edit" floor={floor} />
-                            <IconButton
+                             
+                            <Tooltip title="Delete Floor" arrow>
+                              <IconButton
                               color="error"
                               size="small"
                               onClick={() => handleOpenDeleteDialog(floor)}
                             >
                               <IconTrash size={20} />
                             </IconButton>
+                            </Tooltip>
                           </TableCell>
                         </TableRow>
                       ))}

@@ -132,6 +132,16 @@ const PatrolAreaList = () => {
     }
   }, [patrolAreasData, dispatch]);
 
+  // Auto-scroll to selected area
+  useEffect(() => {
+    if (selectedPatrolArea?.id) {
+      const element = document.getElementById(`patrol-area-item-${selectedPatrolArea.id}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }, [selectedPatrolArea?.id]);
+
   const newArea: PatrolAreaType = {
     id: uniqueId('patrolArea_'),
     name: uniqueId('Patrol Area '),

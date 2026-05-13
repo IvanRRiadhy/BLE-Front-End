@@ -67,7 +67,7 @@ type Props = {
 };
 
 // === Component ===
-const AutocompleteFilter: React.FC<Props> = ({
+const AutocompleteFilterNew: React.FC<Props> = ({
   buildings,
   floors = [],
   floorplans = [],
@@ -132,61 +132,28 @@ const AutocompleteFilter: React.FC<Props> = ({
   // === State ===
   const [expanded, setExpanded] = React.useState<string[]>([]);
   const [selectedKeys, setSelectedKeys] = React.useState<Set<string>>(new Set());
-  // --- Track readiness ---
-  const [dataReady, setDataReady] = React.useState(false);
-  const initialApplied = React.useRef(false);
+  // Simplified initialization: apply initial prop on mount or when it genuinely changes
+  React.useEffect(() => {
+    if (!initial) return;
+    const isReal = (arr?: string[]) => (arr ?? []).filter((x) => x && x !== 'Empty').length > 0;
+    const hasData = isReal(initial.BuildingId) || isReal(initial.FloorId) || isReal(initial.FloorplanId) || isReal(initial.MaskedAreaId);
+    
+    if (hasData) {
+      console.log('AutocompleteFilterNew: Initializing with data:', initial);
+      const pre = new Set<string>();
+      (initial.BuildingId ?? []).forEach((id) => pre.add(kB(id)));
+      (initial.FloorId ?? []).forEach((id) => pre.add(kF(id)));
+      (initial.FloorplanId ?? []).forEach((id) => pre.add(kFP(id)));
+      (initial.MaskedAreaId ?? []).forEach((id) => pre.add(kMA(id)));
+      setSelectedKeys(pre);
 
-  // Detect when all data is ready
-
-  const hasInitialData = React.useMemo(() => {
-    if (!initial) return false;
-    return (
-      (initial.BuildingId?.length ?? 0) > 0 ||
-      (initial.FloorId?.length ?? 0) > 0 ||
-      (initial.FloorplanId?.length ?? 0) > 0 ||
-      (initial.MaskedAreaId?.length ?? 0) > 0
-    );
+      const expandedKeys: string[] = [];
+      (initial.BuildingId ?? []).forEach((id) => expandedKeys.push(kB(id)));
+      (initial.FloorId ?? []).forEach((id) => expandedKeys.push(kF(id)));
+      (initial.FloorplanId ?? []).forEach((id) => expandedKeys.push(kFP(id)));
+      setExpanded([...new Set(expandedKeys)]);
+    }
   }, [initial]);
-  React.useEffect(() => {
-    const ready =
-      buildings.length > 0 &&
-      (!hasFloors || floors.length > 0) &&
-      (!hasFloorplans || floorplans.length > 0) &&
-      (!hasMaskedAreas || maskedAreas.length > 0);
-
-    if (ready) setDataReady(true);
-  }, [buildings, floors, floorplans, maskedAreas, hasFloors, hasFloorplans, hasMaskedAreas]);
-
-  // Apply initial once dataReady becomes true
-  React.useEffect(() => {
-    if (!dataReady || !hasInitialData || initialApplied.current || !initial) return;
-
-    console.log('🟢 Applying initial filter now (final fix):', initial);
-
-    const pre = new Set<string>();
-    (initial.BuildingId ?? []).forEach((id) => pre.add(kB(id)));
-    (initial.FloorId ?? []).forEach((id) => pre.add(kF(id)));
-    (initial.FloorplanId ?? []).forEach((id) => pre.add(kFP(id)));
-    (initial.MaskedAreaId ?? []).forEach((id) => pre.add(kMA(id)));
-
-    setSelectedKeys(pre);
-
-    const expandedKeys: string[] = [];
-    (initial.BuildingId ?? []).forEach((id) => expandedKeys.push(kB(id)));
-    (initial.FloorId ?? []).forEach((id) => expandedKeys.push(kF(id)));
-    (initial.FloorplanId ?? []).forEach((id) => expandedKeys.push(kFP(id)));
-    setExpanded([...new Set(expandedKeys)]);
-
-    onChangeFilter({
-      BuildingId: initial.BuildingId ?? [],
-      FloorId: initial.FloorId ?? [],
-      FloorplanId: initial.FloorplanId ?? [],
-      MaskedAreaId: initial.MaskedAreaId ?? [],
-    });
-
-    initialApplied.current = true;
-    console.log('✅ Initial selection fully applied (after data + initial ready)');
-  }, [dataReady, hasInitialData, initial, onChangeFilter]);
 
   // === Reset handler ===
   const prevReset = React.useRef<number>();
@@ -260,27 +227,16 @@ const AutocompleteFilter: React.FC<Props> = ({
     const newExpanded = new Set<string>();
     for (const b of buildings) {
       const fls = getFilteredFloors(b.id);
-      const bMatches = b.name.toLowerCase().includes(lowerQuery);
-      const hasMatchingChild = fls.length > 0;
-
-      if (hasMatchingChild || bMatches) {
-        if (hasMatchingChild) newExpanded.add(kB(b.id));
-
+      if (fls.length > 0 || b.name.toLowerCase().includes(lowerQuery)) {
+        if (fls.length > 0) newExpanded.add(kB(b.id));
         for (const f of fls) {
           const fps = getFilteredFloorplans(f.id);
-          const fMatches = f.name.toLowerCase().includes(lowerQuery);
-          const hasMatchingFp = fps.length > 0;
-
-          if (hasMatchingFp || fMatches) {
-            if (hasMatchingFp) newExpanded.add(kF(f.id));
-
+          if (fps.length > 0 || f.name.toLowerCase().includes(lowerQuery)) {
+            if (fps.length > 0) newExpanded.add(kF(f.id));
             for (const fp of fps) {
               const mas = getFilteredAreas(fp.id);
-              const fpMatches = fp.name.toLowerCase().includes(lowerQuery);
-              const hasMatchingMa = mas.length > 0;
-
-              if (hasMatchingMa || fpMatches) {
-                if (hasMatchingMa) newExpanded.add(kFP(fp.id));
+              if (mas.length > 0 || fp.name.toLowerCase().includes(lowerQuery)) {
+                if (mas.length > 0) newExpanded.add(kFP(fp.id));
               }
             }
           }
@@ -295,14 +251,14 @@ const AutocompleteFilter: React.FC<Props> = ({
     (key: string): string[] => {
       const { type, id } = parseKey(key);
       if (type === 'B')
-        return hasFloors ? (floorsByBuilding.get(id) ?? []).map((f) => kF(f.id)) : [];
+        return (floorsByBuilding.get(id) ?? []).map((f) => kF(f.id));
       if (type === 'F')
-        return hasFloorplans ? (fpsByFloor.get(id) ?? []).map((fp) => kFP(fp.id)) : [];
+        return (fpsByFloor.get(id) ?? []).map((fp) => kFP(fp.id));
       if (type === 'FP')
-        return hasMaskedAreas ? (masByFp.get(id) ?? []).map((ma) => kMA(ma.id)) : [];
+        return (masByFp.get(id) ?? []).map((ma) => kMA(ma.id));
       return [];
     },
-    [floorsByBuilding, fpsByFloor, masByFp, hasFloors, hasFloorplans, hasMaskedAreas],
+    [floorsByBuilding, fpsByFloor, masByFp],
   );
 
   const getParentKey = React.useCallback((key: string): string | null => {
@@ -333,66 +289,106 @@ const AutocompleteFilter: React.FC<Props> = ({
     if (isSelecting) includeSelf.forEach((k) => next.add(k));
     else includeSelf.forEach((k) => next.delete(k));
 
+    // Handle indeterminate state / auto-select parents
     let parent = getParentKey(key);
     while (parent) {
       const children = getChildren(parent);
       const allChecked = children.length > 0 && children.every((c) => next.has(c));
-      const someCheckedChildren = children.some((c) => next.has(c) || someChecked(c));
       if (allChecked) next.add(parent);
-      else if (someCheckedChildren) next.delete(parent); // keep parent indeterminate
       else next.delete(parent);
       parent = getParentKey(parent);
     }
     setSelectedKeys(next);
+    // Sync immediately on interaction
+    const state = toFilterStateWithKeys(next);
+    console.log('AutocompleteFilterNew: Interaction sync:', state);
+    onChangeFilter(state);
   };
 
-  const allChecked = (key: string) => selectedKeys.has(key);
-  const someChecked = React.useCallback(
+  const isSelected = React.useCallback(
     (key: string): boolean => {
-      if (selectedKeys.has(key)) return false;
-      const children = getChildren(key);
-      if (children.length === 0) return false;
-      const anyChildChecked = children.some((c) => selectedKeys.has(c));
-      const anyChildIndet = children.some((c) => someChecked(c));
-      const allChildChecked = children.every((c) => selectedKeys.has(c));
-      return (anyChildChecked && !allChildChecked) || anyChildIndet;
+      console.log('Checking selection for:', key);
+      const res = selectedKeys.has(key);
+      if (res) return true;
+      const parent = getParentKey(key);
+      if (parent) return isSelected(parent);
+      return false;
     },
-    [getChildren, selectedKeys],
+    [selectedKeys, getParentKey],
   );
 
-  // === Build Filter State ===
-  const toFilterState = React.useCallback((): FilterState => {
+  const isIndeterminate = React.useCallback(
+    (key: string): boolean => {
+      if (isSelected(key)) return false;
+      const children = getChildren(key);
+      if (children.length === 0) return false;
+      return children.some((c) => isSelected(c) || isIndeterminate(c));
+    },
+    [isSelected, getChildren],
+  );
+
+  const toFilterStateWithKeys = (keys: Set<string>): FilterState => {
     const f: FilterState = { BuildingId: [], FloorId: [], FloorplanId: [], MaskedAreaId: [] };
 
-    for (const key of selectedKeys) {
-      if (!returnAll) {
-        const parent = getParentKey(key);
-        // If parent exists and is also selected, this node is not the "highest tier"
-        if (parent && selectedKeys.has(parent)) {
+    if (returnAll) {
+      for (const key of keys) {
+        const { type, id } = parseKey(key);
+        if (type === 'B') f.BuildingId.push(id);
+        else if (type === 'F') f.FloorId.push(id);
+        else if (type === 'FP') f.FloorplanId.push(id);
+        else if (type === 'MA') f.MaskedAreaId.push(id);
+      }
+      return f;
+    }
+
+    const isFullInternal = (key: string, currentKeys: Set<string>): boolean => {
+      if (currentKeys.has(key)) return true;
+      const children = getChildren(key);
+      if (children.length === 0) return false;
+      return children.every((c) => isFullInternal(c, currentKeys));
+    };
+
+    for (const b of buildings) {
+      if (isFullInternal(kB(b.id), keys)) {
+        f.BuildingId.push(b.id);
+        continue;
+      }
+      const fls = floorsByBuilding.get(b.id) ?? [];
+      for (const fl of fls) {
+        if (isFullInternal(kF(fl.id), keys)) {
+          f.FloorId.push(fl.id);
           continue;
         }
+        const fps = fpsByFloor.get(fl.id) ?? [];
+        for (const fp of fps) {
+          if (isFullInternal(kFP(fp.id), keys)) {
+            f.FloorplanId.push(fp.id);
+            continue;
+          }
+          const mas = masByFp.get(fp.id) ?? [];
+          for (const ma of mas) {
+            if (keys.has(kMA(ma.id))) {
+              f.MaskedAreaId.push(ma.id);
+            }
+          }
+        }
       }
-
-      const { type, id } = parseKey(key);
-      if (type === 'B') f.BuildingId.push(id);
-      else if (type === 'F') f.FloorId.push(id);
-      else if (type === 'FP') f.FloorplanId.push(id);
-      else if (type === 'MA') f.MaskedAreaId.push(id);
     }
     return f;
-  }, [selectedKeys, returnAll, getParentKey]);
+  };
 
-  React.useEffect(() => {
-    if (!disabled) {
-      const state = toFilterState();
-      onChangeFilter(state);
-    }
-  }, [disabled, toFilterState, onChangeFilter]);
+  const toFilterState = React.useCallback((): FilterState => {
+    return toFilterStateWithKeys(selectedKeys);
+  }, [selectedKeys, returnAll, buildings, floorsByBuilding, fpsByFloor, masByFp, getChildren]);
+
+
 
   // === Selected Display ===
   const displayTree = React.useMemo<DisplayTree>(() => {
-    if (!dataReady) return new Map();
-
+    console.log('AutocompleteFilterNew: Computing display tree...', {
+      buildings: buildings.length,
+      selectedKeys: selectedKeys.size,
+    });
     const tree: DisplayTree = new Map();
     const buildingById = new Map(buildings.map((b) => [b.id, b]));
     const floorById = new Map(floors.map((f) => [f.id, f]));
@@ -447,7 +443,7 @@ const AutocompleteFilter: React.FC<Props> = ({
       if (b) ensure(b.id);
     }
     return tree;
-  }, [dataReady, buildings, floors, floorplans, maskedAreas, selectedKeys, toFilterState]);
+  }, [buildings, floors, floorplans, maskedAreas, toFilterState]);
 
   const selectedTitle = hasMaskedAreas
     ? 'Selected Areas'
@@ -485,40 +481,31 @@ const AutocompleteFilter: React.FC<Props> = ({
     const displayNames: string[] = [];
 
     for (const b of buildings) {
-      const bKey = kB(b.id);
-      if (selected.has(bKey) || isAllFloorsSelectedForBuilding(b.id)) {
+      if (selected.has(kB(b.id)) || isAllFloorsSelectedForBuilding(b.id)) {
         displayNames.push(`🏢 ${b.name}`);
         continue;
       }
-
       const fls = floorsByBuilding.get(b.id) ?? [];
       for (const fl of fls) {
-        const fKey = kF(fl.id);
-        if (selected.has(fKey) || isAllFpSelectedForFloor(fl.id)) {
+        if (selected.has(kF(fl.id)) || isAllFpSelectedForFloor(fl.id)) {
           displayNames.push(`⬜ ${fl.name}`);
           continue;
         }
-
         const fps = fpsByFloor.get(fl.id) ?? [];
         for (const fp of fps) {
-          const fpKey = kFP(fp.id);
-          if (selected.has(fpKey) || isAllAreasSelectedForFp(fp.id)) {
+          if (selected.has(kFP(fp.id)) || isAllAreasSelectedForFp(fp.id)) {
             displayNames.push(`🗺️ ${fp.name}`);
             continue;
           }
-
           const mas = masByFp.get(fp.id) ?? [];
           for (const ma of mas) {
-            const maKey = kMA(ma.id);
-            if (selected.has(maKey)) {
+            if (selected.has(kMA(ma.id))) {
               displayNames.push(`📍 ${ma.name}`);
             }
           }
         }
       }
     }
-
-    // Compact display: show max 3 names + ellipsis if more
     return displayNames.slice(0, 3).join(', ') + (displayNames.length > 3 ? '…' : '');
   }, [selectedKeys, buildings, floorsByBuilding, fpsByFloor, masByFp]);
 
@@ -531,7 +518,7 @@ const AutocompleteFilter: React.FC<Props> = ({
         value="No Building data available"
         InputProps={{
           startAdornment: (
-            <Box sx={{ display: 'flex', alignItems: 'center', pl: 1 }}>
+            <Box sx={{ pl: 1 }}>
               <IconAdjustmentsHorizontal size={16} />
             </Box>
           ),
@@ -545,21 +532,13 @@ const AutocompleteFilter: React.FC<Props> = ({
       <Box ref={anchorRef}>
         <TextField
           fullWidth
-          placeholder="Building / Floor / Floorplan / Area"
-          spellCheck={false}
+          placeholder="Search Building / Floor / Area"
           autoComplete="off"
-          inputProps={{
-            title: '', // remove browser tooltip
-          }}
-          value={query || (hideSelectedAreas && selectedKeys.size > 0 ? computeDisplaySelection() : '')}
+          value={query || computeDisplaySelection()}
           onChange={(e) => setQuery(e.target.value)}
           onClick={openPopper}
           onFocus={openPopper}
-          sx={{
-            '& input': {
-              cursor: 'pointer',
-            },
-          }}
+          sx={{ '& input': { cursor: 'pointer' } }}
           InputProps={{
             startAdornment: (
               <Box sx={{ display: 'flex', alignItems: 'center', pl: 1 }}>
@@ -570,12 +549,7 @@ const AutocompleteFilter: React.FC<Props> = ({
         />
       </Box>
 
-      <Popper
-        open={open}
-        anchorEl={anchorRef.current}
-        placement="bottom-start"
-        sx={{ zIndex: 2000 }}
-      >
+      <Popper open={open} anchorEl={anchorRef.current} placement="bottom-start" sx={{ zIndex: 2000 }}>
         <ClickAwayListener
           onClickAway={() => {
             if (clickAwayEnabled) {
@@ -584,7 +558,7 @@ const AutocompleteFilter: React.FC<Props> = ({
             }
           }}
         >
-          <Paper sx={{ p: 1, mt: 1, minWidth: 300, maxHeight: 420, overflowY: 'auto' }}>
+          <Paper sx={{ p: 1, mt: 1, minWidth: 320, maxHeight: 420, overflowY: 'auto' }}>
             <SimpleTreeView
               expandedItems={expanded}
               onExpandedItemsChange={(_e, ids) => setExpanded(Array.isArray(ids) ? ids : [ids])}
@@ -597,12 +571,9 @@ const AutocompleteFilter: React.FC<Props> = ({
                     key={bKey}
                     itemId={bKey}
                     label={
-                      <Box
-                        onClick={() => toggleNode(bKey)}
-                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                      >
-                        <Checkbox checked={allChecked(bKey)} indeterminate={someChecked(bKey)} />
-                        <Typography title="">🏢 {b.name}</Typography>
+                      <Box onClick={() => toggleNode(bKey)} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Checkbox checked={isSelected(bKey)} indeterminate={isIndeterminate(bKey)} />
+                        <Typography variant="body2">🏢 {b.name}</Typography>
                       </Box>
                     }
                   >
@@ -614,15 +585,12 @@ const AutocompleteFilter: React.FC<Props> = ({
                           key={fKey}
                           itemId={fKey}
                           label={
-                            <Box
-                              onClick={() => toggleNode(fKey)}
-                              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                            >
+                            <Box onClick={() => toggleNode(fKey)} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Checkbox
-                                checked={allChecked(fKey)}
-                                indeterminate={someChecked(fKey)}
+                                checked={isSelected(fKey)}
+                                indeterminate={isIndeterminate(fKey)}
                               />
-                              <Typography title="">⬜ {f.name}</Typography>
+                              <Typography variant="body2">⬜ {f.name}</Typography>
                             </Box>
                           }
                         >
@@ -634,15 +602,12 @@ const AutocompleteFilter: React.FC<Props> = ({
                                 key={fpKey}
                                 itemId={fpKey}
                                 label={
-                                  <Box
-                                    onClick={() => toggleNode(fpKey)}
-                                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                                  >
+                                  <Box onClick={() => toggleNode(fpKey)} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <Checkbox
-                                      checked={allChecked(fpKey)}
-                                      indeterminate={someChecked(fpKey)}
+                                      checked={isSelected(fpKey)}
+                                      indeterminate={isIndeterminate(fpKey)}
                                     />
-                                    <Typography title="">🗺️ {fp.name}</Typography>
+                                    <Typography variant="body2">🗺️ {fp.name}</Typography>
                                   </Box>
                                 }
                               >
@@ -653,16 +618,9 @@ const AutocompleteFilter: React.FC<Props> = ({
                                       key={maKey}
                                       itemId={maKey}
                                       label={
-                                        <Box
-                                          onClick={() => toggleNode(maKey)}
-                                          sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 1,
-                                          }}
-                                        >
-                                          <Checkbox checked={selectedKeys.has(maKey)} />
-                                          <Typography title="">📍 {ma.name}</Typography>
+                                        <Box onClick={() => toggleNode(maKey)} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                          <Checkbox checked={isSelected(maKey)} />
+                                          <Typography variant="body2">📍 {ma.name}</Typography>
                                         </Box>
                                       }
                                     />
@@ -682,46 +640,27 @@ const AutocompleteFilter: React.FC<Props> = ({
         </ClickAwayListener>
       </Popper>
 
-      {/* === Selected Hierarchical Display === */}
       {!hideSelectedAreas && displayTree.size > 0 && (
-        <Box
-          sx={{
-            mt: 1,
-            maxHeight: 150,
-            overflowY: 'auto',
-            px: 1,
-            mb: 5,
-            borderRadius: 1,
-            backgroundColor: (theme) => theme.palette.background.paper,
-          }}
-        >
-          <Typography variant="body1" fontWeight={700} mb={1}>
-            {selectedTitle} :
+        <Box sx={{ mt: 2, maxHeight: 200, overflowY: 'auto', px: 1, mb: 2 }}>
+          <Typography variant="subtitle2" fontWeight={700} color="primary" mb={1}>
+            {selectedTitle}:
           </Typography>
           {[...displayTree.entries()].map(([bId, bNode]) => (
-            <Box key={bId} sx={{ mb: 0.75 }}>
-              <Typography variant="body1" fontWeight={700}>
-                {bNode.name}
-              </Typography>
+            <Box key={bId} sx={{ mb: 1 }}>
+              <Typography variant="body2" fontWeight={700}>{bNode.name}</Typography>
               {[...bNode.floors.entries()].map(([fId, fNode]) => (
-                <Box key={fId} sx={{ pl: 2, mt: 0.25 }}>
-                  <Typography variant="body1" fontWeight={500}>
-                    {fNode.name}
-                  </Typography>
+                <Box key={fId} sx={{ pl: 2 }}>
+                  <Typography variant="caption" fontWeight={600} display="block">{fNode.name}</Typography>
                   {[...fNode.floorplans.entries()].map(([fpId, fpNode]) => (
-                    <Box key={fpId} sx={{ pl: 2, mt: 0.25 }}>
-                      <Typography variant="body2" fontWeight={500}>
-                        {fpNode.name}
-                      </Typography>
-                      {fpNode.areas.length > 0 && (
-                        <Box sx={{ pl: 2, mt: 0.25 }}>
-                          {fpNode.areas.map((a) => (
-                            <Typography variant="body2" key={a.id}>
-                              {a.name}
-                            </Typography>
-                          ))}
-                        </Box>
-                      )}
+                    <Box key={fpId} sx={{ pl: 2 }}>
+                      <Typography variant="caption" display="block">{fpNode.name}</Typography>
+                      <Box sx={{ pl: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        {fpNode.areas.map((a) => (
+                          <Typography key={a.id} variant="caption" sx={{ opacity: 0.8 }}>
+                            • {a.name}
+                          </Typography>
+                        ))}
+                      </Box>
                     </Box>
                   ))}
                 </Box>
@@ -734,4 +673,4 @@ const AutocompleteFilter: React.FC<Props> = ({
   );
 };
 
-export default AutocompleteFilter;
+export default AutocompleteFilterNew;
