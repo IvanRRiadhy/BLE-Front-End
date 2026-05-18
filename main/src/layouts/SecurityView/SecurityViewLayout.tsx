@@ -24,14 +24,14 @@ const MainWrapper = styled('div')(() => ({
   width: '100%',
 }));
 
-const PageWrapper = styled('div')(() => ({
+const PageWrapper = styled('div')(({ theme}) => ({
   display: 'flex',
   flexGrow: 1,
   // paddingBottom: '60px',
   flexDirection: 'column',
   zIndex: 1,
   // width: '100%',
-  backgroundColor: '#f5f5f5',
+  backgroundColor: theme.palette.background.default,
 }));
 
 const SecurityViewLayout: FC = () => {

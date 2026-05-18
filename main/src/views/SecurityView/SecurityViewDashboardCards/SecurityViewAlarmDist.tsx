@@ -8,12 +8,13 @@ import { useAlarmByArea } from 'src/hooks/useDashboard';
 /* ---------------- Filter ---------------- */
 
 const defaultFilter = {
-  timeRange: 'daily',
-  floorplanMaskedAreaId: null,
-  operatorName: null,
-  visitorId: null,
-  buildingId: null,
-  floorId: null,
+  TimeRange: 'daily',
+  areaId: [],
+  // operatorName: null,
+  // visitorId: null,
+  buildingId: [],
+  floorId: [],
+  floorplanId: [],
 };
 
 /* ---------------- Component ---------------- */

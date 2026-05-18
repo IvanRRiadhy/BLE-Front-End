@@ -64,7 +64,7 @@ const AlarmInvestigation = () => {
     isError,
   } = useAlarmTriggerList({ ...defaultAlarmTriggerFilter, Length: 999 });
   const alarmTriggerData = data?.data ?? [];
-
+const settings = useSelector((state: RootState) => state.settings);
   function resolvePerson(x: any) {
     // console.log("Resolving Person:", x);
     if (x.visitorId) {
@@ -159,15 +159,15 @@ const AlarmInvestigation = () => {
     // const res = await AcceptMutation.mutate(alarm.id);
     // console.log('Accept response:', res);
   };
-
+const listHeight = `calc(100% - ${settings.TopbarHeight}px)`;
   return (
     <Box
       sx={{
         width: '100%',
-        height: '90vh',
-        backgroundColor: 'white',
+        height: listHeight,
+        backgroundColor: 'background.default',
         borderRadius: '25px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+        boxShadow: (theme) => theme.shadows[10],
         px: 2,
         py: 2,
         display: 'flex',
@@ -199,7 +199,7 @@ const AlarmInvestigation = () => {
             sx={{
               fontSize: { xs: 20, md: 24 },
               fontWeight: 700,
-              color: '#045498',
+              color: 'primary.main',
             }}
           >
             Alarm to Investigate
@@ -230,10 +230,10 @@ const AlarmInvestigation = () => {
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              height: '100%',
+              height: '50%',
             }}
           >
-            <Typography sx={{ color: '#045498', fontSize: 16 }}>
+            <Typography sx={{ color: 'primary.main', fontSize: 16 }}>
               No Investigation Assigned yet
             </Typography>
           </Box>

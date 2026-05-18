@@ -28,6 +28,7 @@ import { useAllVisitor } from 'src/hooks/useVisitor';
 import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
 import { useAllFloorplans } from 'src/hooks/useFloorplan';
 import { useAllReaders } from 'src/hooks/useReader';
+import { downloadMovementLogExcel } from 'src/utils/exportMovementLog';
 
 const columns = [
   { label: 'Person Name', field: 'personName' },
@@ -67,7 +68,7 @@ const MovementLogList = () => {
   const processedData = useMemo(() => {
     // Keys in beaconsByTopic are now floorplanIds (as set in fetchBeacon)
     const trackingTopics = Object.keys(beaconsByTopic);
-    // console.log("Beacons: ", beaconsByTopic)
+    console.log("Beacons: ", beaconsByTopic)
     const acc: Record<string, any> = {};
 
     trackingTopics.forEach((topic) => {
@@ -146,6 +147,22 @@ const MovementLogList = () => {
     return reader?.name || reader?.gmac || readerId;
   };
 
+  const handleExportExcel = () => {
+    const exportData = filteredData.map((row) => ({
+      personName: row.personName,
+      personId: row.personId,
+      personType: row.personType,
+      cardNumber: row.cardNumber,
+      beaconId: row.beaconId,
+      readerName: getReaderName(row.firstReaderId) || '-',
+      area: row.area,
+      floor: row.floor,
+      building: row.building,
+      formattedTime: formatTime(row.lastDetectedTime),
+    }));
+    downloadMovementLogExcel(exportData);
+  };
+
   return (
     <Grid container spacing={3}>
       <Grid size={12}>
@@ -197,6 +214,13 @@ const MovementLogList = () => {
                     >
                       Reset Filter
                     </Button>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleExportExcel}
+                    >
+                      Export XLS
+                    </Button>
                     <Tooltip title="Refresh Data">
                       <IconButton color="primary" onClick={handleRefresh} disabled={isFetching}>
                         <Box
@@ -216,6 +240,14 @@ const MovementLogList = () => {
                   </Stack>
                 </Grid>
               </Grid>
+              <Box mt={2} display="flex" justifyContent="flex-start">
+                <Chip
+                  label={`Showing: ${filteredData.length} rows / beacons`}
+                  color="primary"
+                  variant="outlined"
+                  size="small"
+                />
+              </Box>
             </Box>
 
             <Divider />

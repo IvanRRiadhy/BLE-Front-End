@@ -22,7 +22,7 @@ const AlarmList = ({
           onClick={() => onAccept(item)}
           sx={{
             p: 1,
-            backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
+            backgroundColor: index % 2 !== 0 ? 'grey.50' : 'background.default',
             borderBottom: '1px solid #e0e0e0',
             width: '100%',
             overflow: 'hidden',
@@ -34,13 +34,13 @@ const AlarmList = ({
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <SmartScrollingText
               text={item.name}
-              sx={{ fontSize: 16, fontWeight: 600, color: '#045498' }}
+              sx={{ fontSize: 16, fontWeight: 600, color: 'primary.main' }}
             />
             <SmartScrollingText
               text={`${item.buildingName} | ${item.floorName}`}
-              sx={{ fontSize: 12, color: '#045498' }}
+              sx={{ fontSize: 12, color: 'primary.main' }}
             />
-            <Typography sx={{ fontSize: 12, color: '#045498' }}>
+            <Typography sx={{ fontSize: 12, color: 'primary.main' }}>
               {item.triggerTime}
             </Typography>
           </Box>
@@ -63,10 +63,10 @@ const AlarmList = ({
             >
               {item.status}
             </Typography>
-            <Typography sx={{ fontSize: 12, color: '#045498' }}>
+            <Typography sx={{ fontSize: 12, color: 'primary.main' }}>
               {item.secondGateway}
             </Typography>
-            <Typography sx={{ fontSize: 12, color: '#045498' }}>
+            <Typography sx={{ fontSize: 12, color: 'primary.main' }}>
               {item.lastSeenTime}
             </Typography>
           </Box>

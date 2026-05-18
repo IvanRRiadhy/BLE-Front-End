@@ -219,6 +219,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   // Convert object to array for easier processing
   const beaconData = useMemo(() => {
     if (!beaconDataObj) return [];
+    // console.log("BEACON data", beaconDataObj)
     return Object.values(beaconDataObj);
   }, [beaconDataObj]);
 
@@ -354,7 +355,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
       return;
     }
 
-    // console.log(`Processing ${beaconData.length} beacons for topic ${topic}`);
+    console.log(`Processing ${beaconData.length} beacons for topic ${topic}`);
 
     setLastSeenBeacons((prev) => {
       const updated = { ...prev };

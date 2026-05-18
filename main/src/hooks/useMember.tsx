@@ -90,6 +90,9 @@ export function useAddMember() {
       queryClient.invalidateQueries({ queryKey: ['member-list'] });
       queryClient.invalidateQueries({ queryKey: ['member-all'] });
       queryClient.invalidateQueries({ queryKey: ['member'] });
+      queryClient.invalidateQueries({ queryKey: ['card-unassigned'] });
+      queryClient.invalidateQueries({ queryKey: ['card-all'] });
+      queryClient.invalidateQueries({ queryKey: ['card-list'] });
     },
   });
 }
@@ -113,6 +116,9 @@ export function useEditMember() {
       queryClient.invalidateQueries({ queryKey: ['member-list'] });
       queryClient.invalidateQueries({ queryKey: ['member-all'] });
       queryClient.invalidateQueries({ queryKey: ['member'] });
+      queryClient.invalidateQueries({ queryKey: ['card-unassigned'] });
+      queryClient.invalidateQueries({ queryKey: ['card-all'] });
+      queryClient.invalidateQueries({ queryKey: ['card-list'] });
     },
   });
 }
@@ -165,6 +171,9 @@ export function useDeleteMember() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['member-list'] });
       queryClient.invalidateQueries({ queryKey: ['member-all'] });
+      queryClient.invalidateQueries({ queryKey: ['card-unassigned'] });
+      queryClient.invalidateQueries({ queryKey: ['card-all'] });
+      queryClient.invalidateQueries({ queryKey: ['card-list'] });
     },
   });
 }

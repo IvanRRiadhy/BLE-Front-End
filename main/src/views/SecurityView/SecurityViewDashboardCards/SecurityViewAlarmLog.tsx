@@ -135,9 +135,9 @@ const SecurityViewAlarmLog: React.FC = () => {
       sx={{
         width: '100%',
         height: '40vh',
-        backgroundColor: 'white',
+        backgroundColor: 'background.default',
         borderRadius: '25px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+        boxShadow: (theme) => theme.shadows[10],
         px: 2,
         py: 2,
         display: 'flex',
@@ -157,7 +157,7 @@ const SecurityViewAlarmLog: React.FC = () => {
           sx={{
             fontSize: { xs: 20, md: 24 },
             fontWeight: 700,
-            color: '#045498',
+            color: 'primary.main',
           }}
         >
           Alarm to Investigate
@@ -182,7 +182,7 @@ const SecurityViewAlarmLog: React.FC = () => {
               alignItems="center"
               sx={{
                 p: 1,
-                backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
+                backgroundColor: index % 2 !== 0 ? 'grey.50' : 'background.paper',
                 borderBottom: '1px solid #e0e0e0',
                 width: '100%',
                 overflow: 'hidden',

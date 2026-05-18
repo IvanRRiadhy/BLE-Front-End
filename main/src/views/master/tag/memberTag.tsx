@@ -46,7 +46,7 @@ const MemberTag = () => {
             minWidth: secdrawerWidth,
             width: { xs: '100%', md: secdrawerWidth, lg: secdrawerWidth },
             flexShrink: 0,
-            maxHeight: 'calc(100vh - 175px)',
+            maxHeight: 'calc(100vh - 100px)',
           }}
         >
           {/* <ContactSearch onClick={() => setLeftSidebarOpen(true)} /> */}

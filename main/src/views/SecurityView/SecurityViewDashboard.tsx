@@ -30,7 +30,7 @@ const SecurityViewDashboard = () => {
     floorId: null,
   };
   const { data: dashboardData = {} } = useSecurityViewDashboard(dashboardFilter);
-  console.log('dashboardData: ', dashboardData);
+  // console.log('dashboardData: ', dashboardData);
 
   const stats = [
     {
@@ -112,13 +112,13 @@ const SecurityViewDashboard = () => {
           </Grid>
           <Grid
             key={'Patrol-List'}
-            size={{ xs: 12, sm: 12, md: 5 }} // full width
+            size={{ xs: 12, sm: 12, md: 5 }} 
           >
             <SecurityViewPatrolList />
           </Grid>
           <Grid
             key={'Alarm Log'}
-            size={{ xs: 12, sm: 12, md: 4 }} // full width
+            size={{ xs: 12, sm: 12, md: 4 }} 
           >
             <SecurityViewAlarmLog />
           </Grid>

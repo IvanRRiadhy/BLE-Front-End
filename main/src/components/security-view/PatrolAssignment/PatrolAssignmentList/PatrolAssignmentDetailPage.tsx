@@ -41,6 +41,7 @@ const PatrolDetailPage = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [searchParams] = useSearchParams();
@@ -325,21 +326,23 @@ const handleStart = async () => {
 
   return (
     <>
-      <Box p={isMobile ? 2 : 3}>
+      <Box p={isMobile ? 2 : 1}>
         <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} gap={3}>
           {/* ================= LEFT PANEL ================= */}
           <Box
             flexShrink={0}
             width={isMobile ? '100%' : 360}
-            borderRadius={2}
+            // borderRadius={2}
+            // borderColor={theme.palette.divider}
             p={2}
             display="flex"
             flexDirection="column"
             sx={{
               backgroundColor: theme.palette.background.paper,
+              border: `1px solid ${theme.palette.divider}`,
               minHeight: isMobile
                 ? 'auto'
-                : `calc(100vh - ${(customizer.TopbarHeight ?? 70) * 2}px)`,
+                : `calc(100vh - ${(settings.TopbarHeight ?? 70) * 2}px)`,
             }}
           >
             {/* Back Button */}
@@ -687,7 +690,7 @@ const handleStart = async () => {
             flex={1}
             borderRadius={2}
             p={2}
-            sx={{ backgroundColor: theme.palette.background.paper }}
+            sx={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}` }}
           >
             {/* Title */}
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>

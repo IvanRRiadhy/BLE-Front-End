@@ -58,6 +58,9 @@ const TagList = () => {
     dispatch(UpdateFilter({ ...defaultMemberFilter, Length: 999 }));
   }, [dispatch]);
 
+  const tempMemberWithoutCard = members.filter((member) => !member.cardNumber);
+  console.log('tempMemberWithoutCard', tempMemberWithoutCard);
+
   // ---------------------------------------------------------------------------
   // ✅ Delete Handlers
   // ---------------------------------------------------------------------------

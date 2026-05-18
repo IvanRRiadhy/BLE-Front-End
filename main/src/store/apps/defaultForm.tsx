@@ -419,7 +419,9 @@ export const defaultMemberFilter: MemberFilter = {
   SortColumn: 'Name',
   SortDir: 'desc',
   SearchValue: '',
-  filters: {},
+  filters: {
+    // cardNumber: '',
+  },
 };
 //#endregion
 

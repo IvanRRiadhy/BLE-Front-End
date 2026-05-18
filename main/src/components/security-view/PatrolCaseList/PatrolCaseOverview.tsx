@@ -1,4 +1,5 @@
 import { Box, Typography, Stack, Paper, Chip, Divider, Button } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useApproveCase, useCloseCase, useRejectCase } from 'src/hooks/usePatrolCase';
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const PatrolCaseOverview = ({ data }: Props) => {
+  const theme = useTheme();
   const [activeIndex, setActiveIndex] = useState(0);
   const attachments = data.attachments || [];
   const activeAttachment = attachments[activeIndex];
@@ -114,7 +116,7 @@ const PatrolCaseOverview = ({ data }: Props) => {
               borderRadius: 2,
               minHeight: 260,
               mb: 2,
-              backgroundColor: '#fafafa',
+              backgroundColor: theme.palette.background.paper,
             }}
           >
             {!activeAttachment && (

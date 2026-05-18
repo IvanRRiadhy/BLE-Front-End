@@ -387,7 +387,8 @@ const AlarmSettingList = () => {
                           </TableCell>
 
                           <TableCell>
-                            {alarmSetting.alarmCategory.toLowerCase() !== 'cardaccess' &&
+                            {
+                            alarmSetting.alarmCategory.toLowerCase() !== 'cardaccess' &&
                               alarmSetting.alarmCategory.toLowerCase() !== 'blacklist' && (
                                 <Box
                                   display="grid"

@@ -80,17 +80,17 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   const isMember = membersData.some((m) => m.bleCardNumber === id);
   const isSecurity = securityData.some((s) => s.bleCardNumber === id);
   const label = person?.name || id;
-  const imageUrl = person?.faceImage ? `${BASE_URL}${person.faceImage}` : '';
+  // const imageUrl = person?.faceImage ? `${BASE_URL}${person.faceImage}` : '';
 
-  useEffect(() => {
-    if (imageUrl) {
-      const img = new window.Image();
-      img.crossOrigin = '';
-      img.src = imageUrl;
-      console.log('Loading image for beacon:', img);
-      img.onload = () => setImageObj(img);
-    }
-  }, [imageUrl]);
+  // useEffect(() => {
+  //   if (imageUrl) {
+  //     const img = new window.Image();
+  //     img.crossOrigin = '';
+  //     img.src = imageUrl;
+  //     console.log('Loading image for beacon:', img);
+  //     img.onload = () => setImageObj(img);
+  //   }
+  // }, [imageUrl]);
 
   const handleClick = () => {
     console.log('clicked', person);
@@ -227,7 +227,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
             />
 
             {/* Face Image */}
-            {imageObj && (
+            {/* {imageObj && (
               <Shape
                 sceneFunc={(ctx) => {
                   ctx.beginPath();
@@ -243,7 +243,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
                 height={radius * 2}
                 shadowBlur={3}
               />
-            )}
+            )} */}
 
             {/* Triangle pointer */}
             <Shape

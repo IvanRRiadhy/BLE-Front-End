@@ -402,7 +402,7 @@ export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
 
       // Filter to only include beacons with a floorplanId
       const filteredBeacons = beaconArray.filter((beacon: any) => !!beacon.floorplanId);
-
+      // console.log("FilteredBeacons", filteredBeacons, "Message: ", data)
       if (filteredBeacons.length > 0) {
         // Group beacons by floorplanId
         const groupedByFloorplan: Record<string, any[]> = {};

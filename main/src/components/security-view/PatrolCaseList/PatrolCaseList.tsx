@@ -24,6 +24,7 @@ import { getCaseStatusColor } from 'src/utils/caseStatus';
 const PatrolCaseList = () => {
   const theme = useTheme();
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const { t } = useTranslation();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { data: patrolCaseData = [], isLoading: isCaseLoading } = useAllPatrolCase();
@@ -38,16 +39,16 @@ const PatrolCaseList = () => {
     return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()}`;
   };
 
-  const listHeight = `calc(100% - ${customizer.TopbarHeight}px)`;
+  const listHeight = `calc(100% - ${settings.TopbarHeight}px)`;
   return (
     <>
       <Box
         sx={{
           width: '100%',
           height: listHeight,
-          backgroundColor: 'white',
+          backgroundColor: 'background.default',
           borderRadius: '25px',
-          boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+          boxShadow: (theme) => theme.shadows[10],
           px: 2,
           py: 2,
           display: 'flex',
@@ -66,7 +67,7 @@ const PatrolCaseList = () => {
             sx={{
               fontSize: { xs: 20, md: 24 },
               fontWeight: 700,
-              color: '#045498',
+              color: 'primary.main',
             }}
           >
             Patrol Cases
@@ -90,9 +91,8 @@ const PatrolCaseList = () => {
                 <Box
                   key={item.id}
                   sx={{
-                    backgroundColor: index % 2 ? 'grey.50' : 'transparent',
-                    borderBottom: '1px solid',
-                    borderColor: 'divider',
+                    backgroundColor: index % 2 ? 'grey.50' : 'background.paper',
+                    borderBottom: '1px solid #e0e0e0',
                   }}
                 >
                   <PatrolCaseListItem

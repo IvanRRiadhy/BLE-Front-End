@@ -20,7 +20,7 @@ const defaultFilter = {
   sortDir: 'desc' as 'asc' | 'desc',
   searchValue: '',
   filters: {
-    'Securities.Id': ['eba4833a-6e5d-4181-8e18-5776cadd0998'],
+    // 'Securities.Id': ['eba4833a-6e5d-4181-8e18-5776cadd0998'],
   },
 };
 
@@ -87,9 +87,9 @@ const SecurityViewPatrolList = () => {
         sx={{
           width: '100%',
           height: '40vh',
-          backgroundColor: 'white',
+          backgroundColor: 'background.default',
           borderRadius: '25px',
-          boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+          boxShadow: (theme) => theme.shadows[10],
           px: 2,
           py: 2,
           display: 'flex',
@@ -108,7 +108,7 @@ const SecurityViewPatrolList = () => {
             sx={{
               fontSize: { xs: 20, md: 24 },
               fontWeight: 700,
-              color: '#045498',
+              color: 'primary.main',
             }}
           >
             Patrol Assignment
@@ -132,7 +132,7 @@ const SecurityViewPatrolList = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 textAlign: 'center',
-                color: '#9e9e9e',
+                color: 'text.secondary',
                 px: 2,
               }}
             >
@@ -156,7 +156,7 @@ const SecurityViewPatrolList = () => {
                 sx={{
                   p: 1,
                   width: '100%',
-                  backgroundColor: index % 2 !== 0 ? 'grey.50' : 'white',
+                  backgroundColor: index % 2 !== 0 ? 'grey.50' : 'background.paper',
                   borderBottom: '1px solid #e0e0e0',
                 }}
               >

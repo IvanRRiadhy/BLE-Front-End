@@ -18,6 +18,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { TimeGroupType } from 'src/store/apps/crud/timeGroup';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import { utcTimeToLocal } from 'src/utils/TimeConvert';
+import { useTheme } from '@mui/material/styles';
 
 interface Props {
   open: boolean;
@@ -89,6 +90,7 @@ function buildCalendarEvents(timeGroups: TimeGroupType[], startDate: string, end
 }
 
 const PatrolScheduleCalendarDialog = ({ open, onClose, startDate, endDate, timeGroups }: Props) => {
+  const theme = useTheme();
   const calendarRef = useRef<FullCalendar | null>(null);
   const today = new Date();
 
@@ -259,8 +261,30 @@ const PatrolScheduleCalendarDialog = ({ open, onClose, startDate, endDate, timeG
         </DialogTitle>
 
         <DialogContent>
-          <FullCalendar
-            ref={calendarRef}
+          <Box
+            sx={{
+              '& .fc': {
+                '--fc-page-bg-color': theme.palette.background.paper,
+                '--fc-neutral-bg-color': theme.palette.background.default,
+                '--fc-neutral-text-color': theme.palette.text.secondary,
+                '--fc-border-color': theme.palette.divider,
+                '--fc-button-text-color': theme.palette.text.primary,
+                '--fc-button-bg-color': theme.palette.background.paper,
+                '--fc-button-border-color': theme.palette.divider,
+                '--fc-button-hover-bg-color': theme.palette.action.hover,
+                '--fc-button-hover-border-color': theme.palette.divider,
+                '--fc-button-active-bg-color': theme.palette.action.selected,
+                '--fc-button-active-border-color': theme.palette.divider,
+                '--fc-today-bg-color': theme.palette.action.hover,
+                color: theme.palette.text.primary,
+              },
+              '& .fc-theme-standard td, .fc-theme-standard th, .fc-theme-standard .fc-scrollgrid': {
+                borderColor: theme.palette.divider,
+              },
+            }}
+          >
+            <FullCalendar
+              ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
             headerToolbar={false}
@@ -321,6 +345,7 @@ const PatrolScheduleCalendarDialog = ({ open, onClose, startDate, endDate, timeG
             slotMinTime="00:00:00"
             slotMaxTime="24:00:00"
           />
+          </Box>
         </DialogContent>
       </Dialog>
       <Dialog open={!!selectedEvent} onClose={() => setSelectedEvent(null)} fullWidth maxWidth="xs">
