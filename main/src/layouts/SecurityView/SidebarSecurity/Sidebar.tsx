@@ -4,27 +4,18 @@ import { useSelector, useDispatch } from 'src/store/Store';
 import { hoverSidebar, toggleMobileSidebar } from 'src/store/customizer/CustomizerSlice';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import { Profile } from './SidebarProfile/Profile';
+import Logo from 'src/layouts/full/shared/logo/SecurityViewLogo';
 import { RootState } from 'src/store/Store';
 
 const Sidebar = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const dispatch = useDispatch();
   const theme = useTheme();
-  const toggleWidth =
-    customizer.isCollapse && !customizer.isSidebarHover
-      ? customizer.MiniSidebarWidth
-      : customizer.SidebarWidth;
+  const toggleWidth = settings.SidebarWidth;
 
-  const onHoverEnter = () => {
-    if (customizer.isCollapse) {
-      dispatch(hoverSidebar(true));
-    }
-  };
 
-  const onHoverLeave = () => {
-    dispatch(hoverSidebar(false));
-  };
 
   if (lgUp) {
     return (
@@ -33,9 +24,6 @@ const Sidebar = () => {
           width: toggleWidth,
           flexShrink: 0,
           zIndex: 1300,
-          ...(customizer.isCollapse && {
-            position: 'absolute',
-          }),
         }}
       >
         {/* ------------------------------------------- */}
@@ -44,8 +32,6 @@ const Sidebar = () => {
         <Drawer
           anchor="left"
           open
-          onMouseEnter={onHoverEnter}
-          onMouseLeave={onHoverLeave}
           variant="permanent"
           PaperProps={{
             sx: {
@@ -63,15 +49,17 @@ const Sidebar = () => {
           <Box
             sx={{
               height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
             {/* ------------------------------------------- */}
             {/* Logo */}
             {/* ------------------------------------------- */}
-            {/* <Box px={3}>
+            <Box px={1} py={1}>
               <Logo />
-            </Box> */}
-            <Scrollbar sx={{ height: 'calc(100% - 110px)' }}>
+            </Box>
+            <Scrollbar sx={{ flexGrow: 1 }}>
               {/* ------------------------------------------- */}
               {/* Sidebar Items */}
               {/* ------------------------------------------- */}
@@ -92,7 +80,7 @@ const Sidebar = () => {
       variant="temporary"
       PaperProps={{
         sx: {
-          width: customizer.SidebarWidth,
+          width: settings.SidebarWidth,
 
           // backgroundColor:
           //   customizer.activeMode === 'dark'
@@ -113,7 +101,15 @@ const Sidebar = () => {
       {/* ------------------------------------------- */}
       {/* Sidebar For Mobile */}
       {/* ------------------------------------------- */}
-      <SidebarItems />
+      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Box px={2} py={1}>
+          <Logo />
+        </Box>
+        <Scrollbar sx={{ flexGrow: 1 }}>
+          <SidebarItems />
+        </Scrollbar>
+        <Profile />
+      </Box>
     </Drawer>
   );
 };

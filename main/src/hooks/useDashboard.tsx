@@ -94,7 +94,7 @@ export function useUpcomingVisitor(filter: any) {
     queryKey: ['upcoming-visitor', filter],
     queryFn: async () => {
       const res = await axiosServices.post('/api/TrxVisitor/filter', filter);
-      // console.log('Upcoming Visitor Data fetched: ', res.data);
+      console.log('Upcoming Visitor Data fetched: ', res.data);
       return res.data.collection.data;
     },
     refetchInterval: 15000,

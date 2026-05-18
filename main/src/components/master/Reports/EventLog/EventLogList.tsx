@@ -323,8 +323,11 @@ const EventLogList = () => {
 
             <Divider />
             <TableContainer
+              component={Paper}
+              variant="outlined"
               sx={{
-                maxHeight: '75vh', // or any fixed height
+                maxHeight: '75vh',
+                bgcolor: 'background.paper',
               }}
             >
               <Table stickyHeader aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
@@ -334,11 +337,13 @@ const EventLogList = () => {
                       sx={{
                         position: 'sticky',
                         left: 0,
-                        background: 'white',
+                        backgroundColor: (theme) => theme.palette.background.paper,
                         zIndex: 2,
                         width: 35, // Fixed width
                         minWidth: 35,
                         maxWidth: 35,
+                        borderRight: (theme) => `1px solid ${theme.palette.divider}`,
+                        backgroundClip: 'padding-box',
                       }}
                     >
                       <Typography variant="h6"></Typography>
@@ -355,8 +360,13 @@ const EventLogList = () => {
                   {filteredData.map((row: any, index: number) => (
                     <TableRow
                       key={index}
+                      hover
                       sx={{
-                        backgroundColor: index % 2 === 0 ? 'grey.50' : 'white',
+                        '&:nth-of-type(odd)': { backgroundColor: 'action.hover' },
+                        '&:hover': {
+                          backgroundColor: 'action.selected',
+                          // cursor: 'pointer',
+                        },
                       }}
                     >
                       {/* Left sticky spacer */}
@@ -364,9 +374,12 @@ const EventLogList = () => {
                         sx={{
                           position: 'sticky',
                           left: 0,
-                          background: index % 2 === 0 ? 'grey.50' : 'white',
+                          backgroundColor: (theme) =>
+                            index % 2 === 0 ? theme.palette.action.hover : theme.palette.background.paper,
                           zIndex: 1,
                           width: 35,
+                          borderRight: (theme) => `1px solid ${theme.palette.divider}`,
+                          backgroundClip: 'padding-box',
                         }}
                       />
 

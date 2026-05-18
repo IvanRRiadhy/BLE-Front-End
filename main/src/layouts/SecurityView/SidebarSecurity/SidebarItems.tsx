@@ -17,7 +17,7 @@ const SidebarItems = () => {
   const pathWithoutLastPart = pathname.slice(0, pathname.lastIndexOf('/'));
   const customizer = useSelector((state: RootState) => state.customizer);
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
-  const hideMenu: any = lgUp ? customizer.isCollapse && !customizer.isSidebarHover : '';
+  const hideMenu: any = false;
   const dispatch = useDispatch();
 
   return (

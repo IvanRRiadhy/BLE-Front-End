@@ -52,6 +52,7 @@ const NavCollapse = ({
   onClick,
 }: NavCollapseProps) => {
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const Icon = menu?.icon;
   const theme = useTheme();
   const { pathname } = useLocation();
@@ -93,7 +94,7 @@ const NavCollapse = ({
         : level > 1 && open
         ? theme.palette.primary.main
         : theme.palette.text.secondary,
-    borderRadius: `${customizer.borderRadius}px`,
+    borderRadius: `${settings.borderRadius}px`,
   }));
 
   // If Menu has Children
@@ -140,7 +141,7 @@ const NavCollapse = ({
         >
           {menuIcon}
         </ListItemIcon>
-        <ListItemText color="inherit">{hideMenu ? '' : <>{t(`${menu.title}`)}</>}</ListItemText>
+        <ListItemText color="inherit"><>{t(`${menu.title}`)}</></ListItemText>
         {!open ? <IconChevronDown size="1rem" /> : <IconChevronUp size="1rem" />}
       </ListItemStyled>
       <Collapse in={open} timeout="auto" unmountOnExit>

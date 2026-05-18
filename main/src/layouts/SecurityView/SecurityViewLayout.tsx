@@ -30,7 +30,7 @@ const PageWrapper = styled('div')(() => ({
   // paddingBottom: '60px',
   flexDirection: 'column',
   zIndex: 1,
-  width: '100%',
+  // width: '100%',
   backgroundColor: '#f5f5f5',
 }));
 
@@ -192,14 +192,7 @@ const SecurityViewLayout: FC = () => {
         {/* ------------------------------------------- */}
         {/* Main Wrapper */}
         {/* ------------------------------------------- */}
-        <PageWrapper
-          className="page-wrapper"
-          sx={{
-            ...(customizer.isCollapse && {
-              [theme.breakpoints.up('lg')]: { ml: `${settings.MiniSidebarWidth}px` },
-            }),
-          }}
-        >
+        <PageWrapper className="page-wrapper">
           {/* ------------------------------------------- */}
           {/* Header */}
           {/* ------------------------------------------- */}

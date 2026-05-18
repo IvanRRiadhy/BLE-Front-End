@@ -12,6 +12,8 @@ import {
   Tab,
   InputAdornment,
   IconButton,
+  ThemeProvider,
+  createTheme,
 } from '@mui/material';
 import { Link } from 'react-router';
 import { AnimatePresence, motion, MotionProps } from 'framer-motion';
@@ -22,6 +24,11 @@ import CustomTextField from '../../../components/forms/theme-elements/CustomText
 import CustomFormLabel from '../../../components/forms/theme-elements/CustomFormLabel';
 import axiosServices from 'src/utils/axios';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
+import _ from 'lodash';
+import { baselightTheme } from 'src/theme/DefaultColors';
+import typography from 'src/theme/Typography';
+import { shadows } from 'src/theme/Shadows';
+import components from 'src/theme/Components';
 
 type NativeFormProps = React.ComponentPropsWithoutRef<'form'>;
 
@@ -56,6 +63,20 @@ const slideVariants = {
   center: { x: 0, opacity: 1 },
   exit: (direction: number) => ({ x: direction > 0 ? -40 : 40, opacity: 0 }),
 };
+
+const baseMode: any = {
+  palette: {
+    mode: 'light',
+  },
+  shape: {
+    borderRadius: 7,
+  },
+  shadows: shadows,
+  typography: typography,
+};
+
+const loginTheme = createTheme(_.merge({}, baseMode, baselightTheme));
+loginTheme.components = components(loginTheme);
 
 const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   const [activeTab, setActiveTab] = useState<TabKey>('admin');
@@ -255,7 +276,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   };
 
   return (
-    <>
+    <ThemeProvider theme={loginTheme}>
       {title && (
         <Typography fontWeight={700} variant="h3" mb={1}>
           {title}
@@ -371,7 +392,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       </AnimatePresence>
 
       {subtitle}
-    </>
+    </ThemeProvider>
   );
 };
 

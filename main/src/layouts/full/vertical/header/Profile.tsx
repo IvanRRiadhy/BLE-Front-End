@@ -84,22 +84,25 @@ const Profile = () => {
         </Stack>
         <Divider />
         <Box mt={2} gap={3}>
-          {localStorage.getItem('levelPriority')?.toLowerCase() === 'superadmin' && (
-            <Button
-              variant="outlined"
-              color="primary"
-              //component={Link}
-              onClick={() => {
-                window.location.href = '/about'; // Redirect to the login page
-              }}
-              fullWidth
-              sx={{
-                mb: 2,
-              }}
-            >
-              About
-            </Button>
-          )}
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => {
+              if (window.location.pathname.startsWith('/my-visit')) {
+                window.location.href = '/my-visit/about';
+              } else if (window.location.pathname.startsWith('/security-view')) {
+                window.location.href = '/security-view/about';
+              } else {
+                window.location.href = '/about';
+              }
+            }}
+            fullWidth
+            sx={{
+              mb: 2,
+            }}
+          >
+            About
+          </Button>
           <Button
             variant="outlined"
             color="primary"

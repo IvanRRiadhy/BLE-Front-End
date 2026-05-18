@@ -210,11 +210,13 @@ const EventReport = () => {
             sx={{
               position: 'sticky',
               left: 0,
-              background: 'white',
+              backgroundColor: 'background.paper',
               zIndex: 1,
               width: 35,
               minWidth: 35,
               maxWidth: 35,
+              borderRight: (theme) => `1px solid ${theme.palette.divider}`,
+              backgroundClip: 'padding-box',
             }}
           >
             <Skeleton variant="text" width={18} />
@@ -371,26 +373,31 @@ const EventReport = () => {
 
             <Divider />
             <TableContainer
+              component={Paper}
+              variant="outlined"
               sx={{
-                maxHeight: '75vh', // or any fixed height
+                maxHeight: '75vh',
+                bgcolor: 'background.paper',
               }}
             >
               <Table stickyHeader aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
                 <TableHead>
                   <TableRow>
-                    <TableCell
+                    {/* <TableCell
                       sx={{
                         position: 'sticky',
                         left: 0,
-                        background: 'white',
+                        backgroundColor: (theme) => theme.palette.background.paper,
                         zIndex: 2,
                         width: 35, // Fixed width
                         minWidth: 35,
                         maxWidth: 35,
+                        borderRight: (theme) => `1px solid ${theme.palette.divider}`,
+                        backgroundClip: 'padding-box',
                       }}
                     >
                       <Typography variant="h6"></Typography>
-                    </TableCell>
+                    </TableCell> */}
                     {/* Main Table Header */}
                     {columns.map((col) => (
                       <TableCell key={col.label}>
@@ -414,20 +421,28 @@ const EventReport = () => {
                     filteredData.map((row: any, index: number) => (
                     <TableRow
                       key={index}
+                      // hover
                       sx={{
-                        backgroundColor: index % 2 === 0 ? 'grey.50' : 'white',
+                        backgroundColor: (theme) =>
+                          index % 2 === 0 ? theme.palette.action.hover : theme.palette.background.paper,
+                        // '&:hover': {
+                        //   backgroundColor: 'action.selected',
+                        // },
                       }}
                     >
                       {/* Left sticky spacer */}
-                      <TableCell
+                      {/* <TableCell
                         sx={{
                           position: 'sticky',
                           left: 0,
-                          background: index % 2 === 0 ? 'grey.50' : 'white',
+                          backgroundColor: (theme) =>
+                            index % 2 === 0 ? theme.palette.action.hover : theme.palette.background.paper,
                           zIndex: 1,
                           width: 35,
+                          borderRight: (theme) => `1px solid ${theme.palette.divider}`,
+                          backgroundClip: 'padding-box',
                         }}
-                      />
+                      /> */}
 
                       <TableCell>
                         <Chip

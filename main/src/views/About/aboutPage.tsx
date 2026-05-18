@@ -120,8 +120,9 @@ const AboutPage = () => {
   const { mutate: toggleFeatureStatus } = toggleFeatures();
   const { refetch: fetchMachineId, isFetching: isFetchingMachineId } = getMachineId(false);
   const { mutate: uploadLicense, isPending: isUploading } = activateLicense();
-  const [activeTab, setActiveTab] = useState<'info' | 'customizer'>('info');
-  const [activeSection, setActiveSection] = useState('app-details');
+  const isSuperadmin = typeof window !== 'undefined' && localStorage.getItem('levelPriority')?.toLowerCase() === 'superadmin';
+  const [activeTab, setActiveTab] = useState<'info' | 'customizer'>(isSuperadmin ? 'info' : 'customizer');
+  const [activeSection, setActiveSection] = useState(isSuperadmin ? 'app-details' : 'web-customizer');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [machineIdDialogOpen, setMachineIdDialogOpen] = useState(false);
   const [fetchedMachineId, setFetchedMachineId] = useState('');
@@ -193,7 +194,7 @@ const AboutPage = () => {
     }
   };
 
-  if (isLoading) {
+  if (isSuperadmin && isLoading) {
     return (
       <PageContainer title="About" description="Loading About Page">
         <Box mt={2} mb={3} display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
@@ -203,7 +204,7 @@ const AboutPage = () => {
     );
   }
 
-  if (isError || !data || !data.features || !data.features.core) {
+  if ((isError || !data || !data.features || !data.features.core) && isSuperadmin) {
     return (
       <PageContainer title="About" description="Error loading about page">
         <Box mt={2} mb={3} display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
@@ -221,34 +222,36 @@ const AboutPage = () => {
           <Grid size={{ xs: 12, md: 3 }} sx={{ display: { xs: 'none', md: 'block' } }}>
             <Box sx={{ position: 'sticky', top: 100 }}>
               {/* Application Info Group */}
-              <Card variant="outlined" sx={{ mb: 2, borderRadius: 2, overflow: 'hidden' }}>
-                <Typography variant="subtitle2" fontWeight={700} px={2} py={1.5} sx={{ bgcolor: 'action.hover' }}>
-                  APPLICATION INFO
-                </Typography>
-                <Divider />
-                <List component="nav" sx={{ p: 0 }}>
-                  {infoSections.map((section) => (
-                    <ListItemButton
-                      key={section.id}
-                      selected={activeTab === 'info' && activeSection === section.id}
-                      onClick={() => handleScrollTo(section.id, 'info')}
-                      sx={{
-                        borderLeft: '4px solid transparent',
-                        '&.Mui-selected': {
-                          borderLeftColor: 'primary.main',
-                          bgcolor: 'primary.light',
-                          '& .MuiTypography-root': {
-                            color: 'primary.main',
-                            fontWeight: 600,
+              {isSuperadmin && (
+                <Card variant="outlined" sx={{ mb: 2, borderRadius: 2, overflow: 'hidden' }}>
+                  <Typography variant="subtitle2" fontWeight={700} px={2} py={1.5} sx={{ bgcolor: 'action.hover' }}>
+                    APPLICATION INFO
+                  </Typography>
+                  <Divider />
+                  <List component="nav" sx={{ p: 0 }}>
+                    {infoSections.map((section) => (
+                      <ListItemButton
+                        key={section.id}
+                        selected={activeTab === 'info' && activeSection === section.id}
+                        onClick={() => handleScrollTo(section.id, 'info')}
+                        sx={{
+                          borderLeft: '4px solid transparent',
+                          '&.Mui-selected': {
+                            borderLeftColor: 'primary.main',
+                            bgcolor: 'primary.light',
+                            '& .MuiTypography-root': {
+                              color: 'primary.main',
+                              fontWeight: 600,
+                            }
                           }
-                        }
-                      }}
-                    >
-                      <ListItemText primary={section.title} />
-                    </ListItemButton>
-                  ))}
-                </List>
-              </Card>
+                        }}
+                      >
+                        <ListItemText primary={section.title} />
+                      </ListItemButton>
+                    ))}
+                  </List>
+                </Card>
+              )}
 
               {/* Web Customizer Group */}
               <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
@@ -284,7 +287,7 @@ const AboutPage = () => {
 
           {/* Content area */}
           <Grid size={{ xs: 12, md: 9 }}>
-            {activeTab === 'info' ? (
+            {activeTab === 'info' && isSuperadmin && data && data.features ? (
               <>
                 {/* Top Section: App Details */}
                 <Card variant="outlined" sx={{ mb: 4 }}>

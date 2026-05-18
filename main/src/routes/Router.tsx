@@ -158,10 +158,10 @@ const Maintenance = Loadable(lazy(() => import('../views/authentication/Maintena
 const roleAccessRules: Record<string, string[]> = {
   System: ['*'], // all routes
   SuperAdmin: ['*', '!/master/application'], // all except application
-  PrimaryAdmin: ['/dashboards/', '/report/', '/visitor/visitorinvitation'],
-  Primary: ['/dashboards/monitoring', '/security-view/'],
-  Secondary: ['/my-visit/'],
-  UserCreated: ['/my-visit/'],
+  PrimaryAdmin: ['/dashboards/', '/report/', '/visitor/visitorinvitation', '/about'],
+  Primary: ['/dashboards/monitoring', '/security-view/', '/about'],
+  Secondary: ['/my-visit/', '/about'],
+  UserCreated: ['/my-visit/', '/about'],
 };
 
 const withAuth = (element: JSX.Element, path: string): JSX.Element => {
@@ -524,6 +524,7 @@ const Router = [
     children: [
       { path: '/my-visit', element: withAuth(<MyVisitDashboard />, '/my-visit') },
       { path: '/my-visit/invite', element: withAuth(<InvitationPage />, '/my-visit/invite') },
+      { path: '/my-visit/about', element: withAuth(<About />, '/my-visit/about') },
     ],
   },
   {
@@ -549,6 +550,10 @@ const Router = [
       {
         path: '/security-view/alarm-investigate',
         element: withAuth(<SecurityViewAlarmInvestigatePage />, '/security-view/alarm-investigate'),
+      },
+      {
+        path: '/security-view/about',
+        element: withAuth(<About />, '/security-view/about'),
       },
     ],
   },

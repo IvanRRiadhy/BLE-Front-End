@@ -23,6 +23,8 @@ interface UpcomingVisitorItem {
   image: string;
   checkInAt?: string | null;
   checkOutAt?: string | null;
+  visitorPeriodStart?: string | null;
+  visitorPeriodEnd?: string | null;
 }
 
 const statusColorMap: Record<string, string> = {
@@ -68,6 +70,8 @@ const UpcomingVisitor: React.FC = () => {
       image: resolvePerson(x).image,
       checkInAt: x.checkedInAt,
       checkOutAt: x.checkedOutAt,
+      visitorPeriodStart: x.visitorPeriodStart,
+      visitorPeriodEnd: x.visitorPeriodEnd,
     }));
   }, [data]);
 
@@ -173,7 +177,7 @@ const UpcomingVisitor: React.FC = () => {
                 />
 
                 <SmartScrollingText
-                  text={item.checkInAt ? new Date(item.checkInAt).toLocaleString() : '-'}
+                  text={item.visitorPeriodStart ? new Date(item.visitorPeriodStart).toLocaleString() : '-'}
                   fontSize={12}
                   color="textSecondary"
                 />

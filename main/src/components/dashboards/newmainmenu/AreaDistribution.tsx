@@ -269,7 +269,7 @@ const NewAreaDistribution: React.FC = () => {
       <Box
         sx={{
           width: '100%',
-          height: { lg: 400, md: '100%', sm: '100%', xs: '100%' },
+          height: { lg: 375, md: '100%', sm: '100%', xs: '100%' },
           mt: 2,
           display: 'flex',
           alignItems: 'flex-start',
@@ -281,7 +281,7 @@ const NewAreaDistribution: React.FC = () => {
         }}
       >
         {hasData ? (
-          <Chart options={options} series={series} type="pie" height="75%" />
+          <Chart options={options} series={series} type="pie" height="100%" />
         ) : (
           <Stack spacing={1} alignItems="center">
             <Typography

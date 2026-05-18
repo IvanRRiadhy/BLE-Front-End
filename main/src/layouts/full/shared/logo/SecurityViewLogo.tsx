@@ -12,7 +12,7 @@ const Logo: FC = () => {
 
   const LinkStyled = styled(Link)(() => ({
     height: settings.TopbarHeight,
-    width: customizer.isCollapse ? '60px' : '220px',
+    width: '220px',
     overflow: 'hidden',
     display: 'block',
     padding: '4px', // Added padding for spacing
@@ -27,7 +27,7 @@ const Logo: FC = () => {
       }}
     >
       <img
-        src={customizer.isCollapse ? LogoIcon : LogoImage}
+        src={LogoImage}
         alt="Logo"
         style={{
           height: '100%', // Reduce the logo size

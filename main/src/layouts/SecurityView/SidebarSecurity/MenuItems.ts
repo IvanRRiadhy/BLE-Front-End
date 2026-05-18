@@ -40,7 +40,7 @@ import {
 const Menuitems: MenuitemsType[] = [    
   {
         navlabel: true,
-        subheader: 'My Visit',
+        subheader: 'Security App',
     },
     {
         id: uniqueId(),

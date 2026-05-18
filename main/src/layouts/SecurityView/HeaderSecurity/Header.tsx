@@ -15,7 +15,7 @@ import { toggleMobileSidebar } from 'src/store/customizer/CustomizerSlice';
 import { IconMenu2 } from '@tabler/icons-react';
 import Profile from 'src/layouts/full/vertical/header/Profile';
 import Language from 'src/layouts/full/vertical/header/Language';
-import Logo from 'src/layouts/full/shared/logo/SecurityViewLogo';
+
 import { RootState } from 'src/store/Store';
 
 const Header = () => {
@@ -23,6 +23,7 @@ const Header = () => {
 
   // drawer
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const dispatch = useDispatch();
 
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
@@ -31,7 +32,7 @@ const Header = () => {
     backdropFilter: 'blur(4px)',
 
     [theme.breakpoints.up('lg')]: {
-      minHeight: customizer.TopbarHeight,
+      minHeight: settings.TopbarHeight,
     },
   }));
   const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
@@ -44,12 +45,10 @@ const Header = () => {
     <AppBarStyled position="sticky" color="default" elevation={8}>
       <ToolbarStyled
         sx={{
-          maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',
+          maxWidth: settings.isLayout === 'boxed' ? 'lg' : '100%!important',
         }}
       >
-        <Box sx={{ width: lgDown ? '45px' : 'auto', overflow: 'hidden' }}>
-          <Logo />
-        </Box>
+
         {/* ------------------------------------------- */}
         {/* Toggle Button Sidebar */}
         {/* ------------------------------------------- */}
