@@ -28,6 +28,9 @@ import { OverPopulatingAlarmType } from 'src/store/apps/alarmsetting/overpopulat
 import { StayOnAreaAlarmType } from 'src/store/apps/alarmsetting/stayonarea';
 import { BoundaryAlarmType } from 'src/store/apps/alarmsetting/boundary';
 import { PatrolAreaType } from 'src/store/apps/crud/patrolArea';
+import { useAllMembers } from 'src/hooks/useMember';
+import { useAllVisitor } from 'src/hooks/useVisitor';
+import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
 
 // Common node type that all area types should have
 interface BaseNode {
@@ -187,6 +190,50 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     onWheel,
   } = props;
   const dispatch = useDispatch();
+
+  const { data: membersData = [] } = useAllMembers();
+  const { data: visitorsData = [] } = useAllVisitor();
+  const { data: securityData = [] } = useAllSecuritys();
+
+  // Create a memoized lookup map of bleCardNumber -> person info for O(1) performance
+  const beaconPersonMap = useMemo(() => {
+    const map = new Map<string, { label: string; isSecurity: boolean; isMember: boolean; isVisitor: boolean }>();
+    
+    membersData.forEach((m) => {
+      if (m.bleCardNumber) {
+        map.set(m.bleCardNumber, {
+          label: m.name || m.bleCardNumber,
+          isSecurity: false,
+          isMember: true,
+          isVisitor: false,
+        });
+      }
+    });
+
+    visitorsData.forEach((v) => {
+      if (v.bleCardNumber) {
+        map.set(v.bleCardNumber, {
+          label: v.name || v.bleCardNumber,
+          isSecurity: false,
+          isMember: false,
+          isVisitor: true,
+        });
+      }
+    });
+
+    securityData.forEach((s) => {
+      if (s.bleCardNumber) {
+        map.set(s.bleCardNumber, {
+          label: s.name || s.bleCardNumber,
+          isSecurity: true,
+          isMember: false,
+          isVisitor: false,
+        });
+      }
+    });
+
+    return map;
+  }, [membersData, visitorsData, securityData]);
 
   // Image state like EditAreaRenderer
   const [bgImage, setBgImage] = useState<HTMLImageElement | undefined>(undefined);
@@ -355,7 +402,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
       return;
     }
 
-    console.log(`Processing ${beaconData.length} beacons for topic ${topic}`);
+    // console.log(`Processing ${beaconData.length} beacons for topic ${topic}`);
 
     setLastSeenBeacons((prev) => {
       const updated = { ...prev };
@@ -540,9 +587,9 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                     stroke={!statusActive ? 'red' :  'transparent'}
             strokeWidth={!statusActive ? 3  : 0} 
         />
-        {device.reader?.forceReading && (
+        {/* {device.reader?.forceReading && (
           <Circle x={x + (20 * gateSize)} y={y + (20 * gateSize)} radius={((device.reader?.forceRadiusMeter || 2) / meterPx)} fill="transparent"  stroke="#1976d2" strokeWidth={2}/>
-        )}
+        )} */}
       </Group>
     );
   };
@@ -767,6 +814,14 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                 const age = now - beacon.lastSeen;
                 const opacity = age > 5000 ? 0.4 : 1.0;
 
+                // Lookup person details in O(1)
+                const personInfo = beaconPersonMap.get(beaconId) || {
+                  label: beaconId,
+                  isSecurity: false,
+                  isMember: false,
+                  isVisitor: false,
+                };
+
                 return (
                   <BeaconRenderer
                     key={`beacon-${beaconId}`}
@@ -784,6 +839,10 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                     setDetailDialogOpen={setDetailDialogOpen}
                     openTrackDetail={openTrackDetail}
                     setOpenTrackDetail={setOpenTrackDetail}
+                    label={personInfo.label}
+                    isSecurity={personInfo.isSecurity}
+                    isMember={personInfo.isMember}
+                    isVisitor={personInfo.isVisitor}
                     onClick={() =>
                       onSelectBeacon({
                         id: beaconId,

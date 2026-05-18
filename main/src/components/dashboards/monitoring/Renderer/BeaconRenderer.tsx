@@ -1,13 +1,5 @@
-import { BASE_URL } from 'src/utils/axios';
-import React, { useEffect, useRef, useState } from 'react';
-import { Text, Circle, Shape, Group } from 'react-konva';
-import { fetchMembers, memberType } from 'src/store/apps/crud/member';
-import { fetchVisitor, masterVisitorType, VisitorType } from 'src/store/apps/crud/visitor';
-import { RootState, useDispatch, useSelector } from 'src/store/Store';
-import { Html } from 'react-konva-utils';
-import { useAllMembers } from 'src/hooks/useMember';
-import { useAllVisitor } from 'src/hooks/useVisitor';
-import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
+import React, { useRef, useState } from 'react';
+import { Text, Group, Path } from 'react-konva';
 
 type BeaconRendererProps = {
   id: string;
@@ -25,6 +17,11 @@ type BeaconRendererProps = {
   openTrackDetail?: boolean;
   setOpenTrackDetail?: (open: boolean) => void;
   onClick?: () => void;
+  // Resolved props passed from parent for O(1) performance
+  label: string;
+  isSecurity: boolean;
+  isMember: boolean;
+  isVisitor: boolean;
 };
 
 const BeaconRenderer: React.FC<BeaconRendererProps> = ({
@@ -34,106 +31,25 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   beaconSize,
   opacity = 1,
   lastSeen = Date.now(),
-  area,
-  floorplan,
-  time,
   clickable,
-  detailDialogOpen,
-  setDetailDialogOpen,
-  openTrackDetail,
-  setOpenTrackDetail,
   onClick = () => {},
+  label,
+  isSecurity,
+  isMember,
+  isVisitor,
 }) => {
   const groupRef = useRef<any>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
-
   const [isHovered, setIsHovered] = useState(false);
 
-  const dispatch = useDispatch();
-  const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null);
-  // useEffect(() => {
-  //   console.log('openTrackDetail', openTrackDetail);
-  // }, [openTrackDetail]);
-
-  // useEffect(() => {
-  //   dispatch(fetchMembers());
-  //   dispatch(fetchVisitor());  
-  // }, [dispatch]);
-
-  // const membersData = useSelector(
-  //   (state: RootState) => state.memberReducer.members,
-  // ) as memberType[];
-  // const visitorsData = useSelector(
-  //   (state: RootState) => state.visitorReducer.visitors,
-  // ) as VisitorType[];
-  const { data: membersData = [] } = useAllMembers();
-  const { data: visitorsData = [] } = useAllVisitor();
-  const { data: securityData = [] } = useAllSecuritys();
-
-  const radius = 7.5;
-  const triangleHeight = 8;
-
-  const person = [...membersData, ...visitorsData, ...securityData].find(
-    (p) => p.bleCardNumber === id,
-  );
-  const isVisitor = visitorsData.some((v) => v.bleCardNumber === id);
-  const isMember = membersData.some((m) => m.bleCardNumber === id);
-  const isSecurity = securityData.some((s) => s.bleCardNumber === id);
-  const label = person?.name || id;
-  // const imageUrl = person?.faceImage ? `${BASE_URL}${person.faceImage}` : '';
-
-  // useEffect(() => {
-  //   if (imageUrl) {
-  //     const img = new window.Image();
-  //     img.crossOrigin = '';
-  //     img.src = imageUrl;
-  //     console.log('Loading image for beacon:', img);
-  //     img.onload = () => setImageObj(img);
-  //   }
-  // }, [imageUrl]);
-
-  const handleClick = () => {
-    console.log('clicked', person);
-    if (setDetailDialogOpen) {
-      setDetailDialogOpen(!detailDialogOpen);
-    }
-  };
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const tooltipEl = tooltipRef.current;
-      const groupNode = groupRef.current;
-      const stage = groupNode?.getStage();
-      const pointer = stage?.getPointerPosition();
-
-      const isClickInsideGroup = (() => {
-        if (!pointer || !groupNode) return false;
-        const box = groupNode.getClientRect();
-        return (
-          pointer.x >= box.x &&
-          pointer.x <= box.x + box.width &&
-          pointer.y >= box.y &&
-          pointer.y <= box.y + box.height
-        );
-      })();
-
-      const clickedTooltip = tooltipEl?.contains(event.target as Node);
-
-      // Close if click is NOT on group AND NOT on tooltip
-      // if (!isClickInsideGroup && !clickedTooltip) {
-      //   if (setDetailDialogOpen) {
-      //     setDetailDialogOpen(!detailDialogOpen);
-      //   }
-      // }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
   const beaconColor = isSecurity ? '#00c853' : isMember ? '#1976d2' : '#f50057';
-  // console.log('person', isSecurity, isMember, isVisitor, person);
+
+  // SVG Person Icon Path (viewBox: 0 0 32 32)
+  const svgPathData = "M16 15.503A5.041 5.041 0 1 0 16 5.42a5.041 5.041 0 0 0 0 10.083zm0 2.215c-6.703 0-11 3.699-11 5.5v3.363h22v-3.363c0-2.178-4.068-5.5-11-5.5z";
+
+  // Icon dimensions
+  const iconSize = 22;
+  const iconScale = iconSize / 32;
+
   return (
     <>
       <Group
@@ -154,9 +70,10 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
           if (onClick) onClick();
         }}
       >
+        {/* Label text placed cleanly above the person icon */}
         <Text
           x={x - 55}
-          y={y - triangleHeight - radius - 25}
+          y={y - (iconSize / 2) - 16}
           text={label}
           fontSize={10}
           fill={beaconColor}
@@ -164,136 +81,31 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
           width={120}
           align="center"
         />
-        {isSecurity ? (
-          <>
-            {/* Green Hexagon (bottom center = anchor) */}
-            <Shape
-              x={x}
-              y={y}
-              sceneFunc={(context, shape) => {
-                const hexHeight = 28; // 🔥 control size here
-                const hexWidth = 24;
 
-                context.beginPath();
-
-                // bottom center (anchor stays SAME)
-                context.moveTo(0, 0);
-
-                context.lineTo(hexWidth / 2, -hexHeight * 0.3);
-                context.lineTo(hexWidth / 2, -hexHeight * 0.7);
-                context.lineTo(0, -hexHeight);
-                context.lineTo(-hexWidth / 2, -hexHeight * 0.7);
-                context.lineTo(-hexWidth / 2, -hexHeight * 0.3);
-
-                context.closePath();
-                context.fillStrokeShape(shape);
-              }}
-              fill="#00c853"
-              stroke="#ffffff"
-              strokeWidth={2}
-              shadowBlur={6}
-            />
-
-            {/* Face image clipped inside */}
-            {imageObj && (
-              <Shape
-                x={x - 9}
-                y={y - 22}
-                width={18}
-                height={18}
-                sceneFunc={(ctx) => {
-                  ctx.save();
-                  ctx.beginPath();
-                  ctx.arc(9, 9, 9, 0, Math.PI * 2);
-                  ctx.closePath();
-                  ctx.clip();
-                  ctx.drawImage(imageObj, 0, 0, 18, 18);
-                  ctx.restore();
-                }}
-              />
-            )}
-          </>
-        ) : (
-          <>
-            {/* Background circle */}
-            <Circle
-              x={x}
-              y={y - triangleHeight - radius}
-              radius={radius + 2}
-              fill={beaconColor}
-              stroke="#fff"
-              strokeWidth={1}
-              shadowBlur={3}
-            />
-
-            {/* Face Image */}
-            {/* {imageObj && (
-              <Shape
-                sceneFunc={(ctx) => {
-                  ctx.beginPath();
-                  ctx.arc(radius, radius, radius, 0, Math.PI * 2, false);
-                  ctx.closePath();
-                  ctx.clip();
-                  ctx.drawImage(imageObj, 0, 0, radius * 2, radius * 2);
-                  // Circular border
-                }}
-                x={x - radius}
-                y={y - triangleHeight - radius * 2}
-                width={radius * 2}
-                height={radius * 2}
-                shadowBlur={3}
-              />
-            )} */}
-
-            {/* Triangle pointer */}
-            <Shape
-              x={x}
-              y={y - triangleHeight}
-              sceneFunc={(context, shape) => {
-                context.beginPath();
-                context.moveTo(0, triangleHeight);
-                context.lineTo(radius * 0.7, 0);
-                context.quadraticCurveTo(0, 5, -radius * 0.7, 0);
-                context.closePath();
-                context.fillStrokeShape(shape);
-              }}
-              fill={beaconColor}
-              shadowBlur={2}
-            />
-          </>
-        )}
+        {/* Clean Vector SVG Person Silhouette */}
+        <Path
+          data={svgPathData}
+          fill={beaconColor}
+          scaleX={iconScale}
+          scaleY={iconScale}
+          x={x - iconSize / 2}
+          y={y - iconSize / 2}
+          shadowColor="rgba(0,0,0,0.12)"
+          shadowBlur={3}
+          shadowOffset={{ x: 0, y: 1.5 }}
+        />
       </Group>
 
       {/* Tooltip for stale beacons */}
       {isHovered && Date.now() - lastSeen > 5000 && (
-        <Group x={x} y={y - 80}>
-          <Shape
-            sceneFunc={(context, shape) => {
-              const width = 120;
-              const height = 24;
-              const xPos = -width / 2;
-              const yPos = -height;
-              const radius = 4;
-
-              context.beginPath();
-              context.moveTo(xPos + radius, yPos);
-              context.lineTo(xPos + width - radius, yPos);
-              context.quadraticCurveTo(xPos + width, yPos, xPos + width, yPos + radius);
-              context.lineTo(xPos + width, yPos + height - radius);
-              context.quadraticCurveTo(xPos + width, yPos + height, xPos + width - radius, yPos + height);
-              context.lineTo(5, yPos + height);
-              context.lineTo(0, yPos + height + 6);
-              context.lineTo(-5, yPos + height);
-              context.lineTo(xPos + radius, yPos + height);
-              context.quadraticCurveTo(xPos, yPos + height, xPos, yPos + height - radius);
-              context.lineTo(xPos, yPos + radius);
-              context.quadraticCurveTo(xPos, yPos, xPos + radius, yPos);
-              context.closePath();
-              context.fillStrokeShape(shape);
-            }}
-            fill="rgba(0,0,0,0.8)"
-            stroke="#fff"
+        <Group x={x} y={y - 45}>
+          <Path
+            data="M-60,-24 L60,-24 Q64,-24 64,-20 L64,-4 Q64,0 60,0 L5,0 L0,6 L-5,0 L-60,0 Q-64,0 -64,-4 L-64,-20 Q-64,-24 -60,-24 Z"
+            fill="rgba(0,0,0,0.85)"
+            stroke="#ffffff"
             strokeWidth={1}
+            shadowColor="rgba(0,0,0,0.15)"
+            shadowBlur={4}
           />
           <Text
             text={`Last seen: ${new Date(lastSeen).toLocaleTimeString()}`}
@@ -302,7 +114,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
             width={120}
             align="center"
             x={-60}
-            y={-18}
+            y={-15}
             fontStyle="bold"
           />
         </Group>
@@ -311,4 +123,21 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   );
 };
 
-export default BeaconRenderer;
+// Extremely performant memoized component:
+// Prevents re-rendering unless the exact position or critical props change
+const MemoizedBeaconRenderer = React.memo(BeaconRenderer, (prevProps, nextProps) => {
+  return (
+    prevProps.id === nextProps.id &&
+    prevProps.x === nextProps.x &&
+    prevProps.y === nextProps.y &&
+    prevProps.beaconSize === nextProps.beaconSize &&
+    prevProps.opacity === nextProps.opacity &&
+    prevProps.lastSeen === nextProps.lastSeen &&
+    prevProps.label === nextProps.label &&
+    prevProps.isSecurity === nextProps.isSecurity &&
+    prevProps.isMember === nextProps.isMember &&
+    prevProps.isVisitor === nextProps.isVisitor
+  );
+});
+
+export default MemoizedBeaconRenderer;

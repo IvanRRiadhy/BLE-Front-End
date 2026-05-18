@@ -850,7 +850,7 @@ const FloorView: React.FC<{
               />
             ))}
 
-            {/* {Boolean(focusBeacon) && isFollowing && (
+            {Boolean(focusBeacon) && isFollowing && (
               <Stack spacing={0.5} sx={{ mt: 0.5, borderTop: '1px solid rgba(0,0,0,0.1)', pt: 0.5 }}>
                 <FormControlLabel
                   sx={{
@@ -867,7 +867,7 @@ const FloorView: React.FC<{
                   }
                   label="Show Other People"
                 />
-                <Button
+                {/* <Button
                   variant="contained"
                   color="error"
                   size="small"
@@ -875,9 +875,9 @@ const FloorView: React.FC<{
                   sx={{ fontSize: '0.65rem', py: 0.25 }}
                 >
                   Cancel Following
-                </Button>
+                </Button> */}
               </Stack>
-            )} */}
+            )}
           </Box>
 
           {/* Size Controls Overlay */}

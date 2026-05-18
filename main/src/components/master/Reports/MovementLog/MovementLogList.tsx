@@ -16,6 +16,7 @@ import {
   Tooltip,
   IconButton,
   Chip,
+  TableSortLabel,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { useTranslation } from 'react-i18next';
@@ -34,13 +35,13 @@ const columns = [
   { label: 'Person Name', field: 'personName' },
   { label: 'Person ID', field: 'personId' },
   { label: 'Person Type', field: 'personType' },
-  { label: 'Card Number', field: 'cardNumber' },
+  { label: 'Card Number', field: 'cardNumber', sortable: true },
   { label: 'Beacon ID', field: 'beaconId' },
   { label: 'Nearest Reader', field: 'firstReaderId' },
-  { label: 'Area', field: 'area' },
-  { label: 'Floor', field: 'floor' },
-  { label: 'Building', field: 'building' },
-  { label: 'Last Detected Time', field: 'lastDetectedTime' },
+  { label: 'Area', field: 'area', sortable: true },
+  { label: 'Floor', field: 'floor', sortable: true },
+  { label: 'Building', field: 'building', sortable: true },
+  { label: 'Last Detected Time', field: 'lastDetectedTime', sortable: true },
 ];
 
 const MovementLogList = () => {
@@ -65,10 +66,19 @@ const MovementLogList = () => {
   const [filterPersonId, setFilterPersonId] = useState('');
   const [filterType, setFilterType] = useState<'ALL' | 'Visitor' | 'Member' | 'Security'>('ALL');
 
+  const [orderBy, setOrderBy] = useState<string>('lastDetectedTime');
+  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
+
+  const handleSort = (field: string) => {
+    const isAsc = orderBy === field && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(field);
+  };
+
   const processedData = useMemo(() => {
     // Keys in beaconsByTopic are now floorplanIds (as set in fetchBeacon)
     const trackingTopics = Object.keys(beaconsByTopic);
-    console.log("Beacons: ", beaconsByTopic)
+    // console.log("Beacons: ", beaconsByTopic)
     const acc: Record<string, any> = {};
 
     trackingTopics.forEach((topic) => {
@@ -112,13 +122,43 @@ const MovementLogList = () => {
   }, [beaconsByTopic, visitorMap, memberMap, securityMap, floorplanMap]);
 
   const filteredData = useMemo(() => {
-    return processedData.filter((row) => {
+    const filtered = processedData.filter((row) => {
       if (filterName && !row.personName.toLowerCase().includes(filterName.toLowerCase())) return false;
       if (filterPersonId && !row.personId.toLowerCase().includes(filterPersonId.toLowerCase())) return false;
       if (filterType !== 'ALL' && row.personType !== filterType) return false;
       return true;
-    }).sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0));
-  }, [processedData, filterName, filterPersonId, filterType]);
+    });
+
+    return filtered.sort((a, b) => {
+      let aVal = a[orderBy as keyof typeof a];
+      let bVal = b[orderBy as keyof typeof b];
+
+      // Special handling for lastDetectedTime or lastSeen
+      if (orderBy === 'lastDetectedTime') {
+        aVal = a.lastSeen || (a.lastDetectedTime !== '-' ? new Date(a.lastDetectedTime).getTime() : 0);
+        bVal = b.lastSeen || (b.lastDetectedTime !== '-' ? new Date(b.lastDetectedTime).getTime() : 0);
+      }
+
+      // Convert values to string for generic comparison if they are not already numbers
+      if (typeof aVal === 'string') {
+        aVal = aVal.toLowerCase();
+      }
+      if (typeof bVal === 'string') {
+        bVal = bVal.toLowerCase();
+      }
+
+      if (aVal === undefined || aVal === null || aVal === '-') return order === 'asc' ? 1 : -1;
+      if (bVal === undefined || bVal === null || bVal === '-') return order === 'asc' ? -1 : 1;
+
+      if (aVal < bVal) {
+        return order === 'asc' ? -1 : 1;
+      }
+      if (aVal > bVal) {
+        return order === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }, [processedData, filterName, filterPersonId, filterType, orderBy, order]);
 
   const handleRefresh = () => {
     refetchVisitors();
@@ -257,7 +297,17 @@ const MovementLogList = () => {
                   <TableRow>
                     {columns.map((col) => (
                       <TableCell key={col.label}>
-                        <Typography variant="h6">{col.label}</Typography>
+                        {col.sortable ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : 'desc'}
+                            onClick={() => handleSort(col.field)}
+                          >
+                            <Typography variant="h6">{col.label}</Typography>
+                          </TableSortLabel>
+                        ) : (
+                          <Typography variant="h6">{col.label}</Typography>
+                        )}
                       </TableCell>
                     ))}
                   </TableRow>
@@ -272,7 +322,7 @@ const MovementLogList = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredData.map((row, index) => (
+                    filteredData.map((row, index) => (  
                       <TableRow
                         key={index}
                         sx={{

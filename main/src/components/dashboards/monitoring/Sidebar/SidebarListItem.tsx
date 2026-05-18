@@ -39,7 +39,8 @@ const SidebarListItem = ({ item, isNew, onItemClick }: Props) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const customizer = useSelector((state) => state.customizer);
-  const br = `${customizer.borderRadius}px`;
+  const settings = useSelector((state) => state.settings);
+  const br = `${settings.borderRadius}px`;
 
   const isAlarm = item?.type === 'Alarm';
 
@@ -108,10 +109,10 @@ const SidebarListItem = ({ item, isNew, onItemClick }: Props) => {
 
       {/* ================= BODY ================= */}
       <Box display="flex" alignItems="center" gap={2}>
-        <Avatar
+        {/* <Avatar
           src={item?.image ? `${BASE_URL}${item.image}` : undefined}
           alt={item?.target}
-        />
+        /> */}
 
         <Box flex={1}>
           <Typography fontWeight={700}>{item?.target}</Typography>

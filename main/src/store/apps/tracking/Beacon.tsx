@@ -394,7 +394,7 @@ export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
 
   const unsubscribe = startMQTTclient((data: any) => {
     const now = Date.now();
-    if (now - lastDispatch > 200) {
+    if (now - lastDispatch > 0) {
       lastDispatch = now;
 
       // Ensure data is an array
