@@ -39,8 +39,9 @@ import { useAllReaders, useAllUnassignedReaders } from 'src/hooks/useReader';
 import { DeviceType, readerType } from 'src/types/crud/input';
 import { isEqual } from 'lodash';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
-import { Delete } from '@mui/icons-material';
+import { Delete, Settings } from '@mui/icons-material';
 import CustomSwitch from 'src/components/forms/theme-elements/CustomSwitch';
+import AddEditBleReader from 'src/components/master/CRUD/bleReader/AddEditBleReader';
 
 // Define form data type for better type safety
 interface DeviceFormData {
@@ -52,7 +53,7 @@ interface DeviceFormData {
   readerId: string | null;
   accessControlId: string | null;
   // readerType: 'Indoor' | 'Outdoor';
-  posX: number;
+  posX: number; 
   posY: number;
   posPxX: number;
   posPxY: number;
@@ -125,13 +126,24 @@ const DeviceDetailList = () => {
     updatedBy: '',
     updatedAt: '',
   });
-
+  const currentDevice = savedDevices.find((d) => d.id === device?.id) || null;
+  console.log("Current Device", currentDevice)
   const [otherReader, setOtherReader] = useState<FloorplanDeviceType[]>([]);
   const currentReader = bleReaderData.find((r) => r.id === formData.readerId) || null;
-  const availableBleReaderOptions = [
-    ...(currentReader ? [currentReader] : []),
-    ...allUnassignedReaders.filter((r) => r.id !== formData.readerId),
-  ];
+  const availableBleReaderOptions = React.useMemo(() => {
+    const rawOptions = [
+      // ...(currentReader ? [currentReader] : []),
+      ...(currentDevice?.reader ? [currentDevice.reader] : []),
+      ...allUnassignedReaders,
+    ];
+    const seen = new Set<string>();
+    return rawOptions.filter((r) => {
+      if (!r || !r.id) return false;
+      if (seen.has(r.id)) return false;
+      seen.add(r.id);
+      return true;
+    });
+  }, [currentReader, currentDevice?.reader, allUnassignedReaders]);
 
   // When device is selected for editing, initialize form
   useEffect(() => {
@@ -518,7 +530,29 @@ const DeviceDetailList = () => {
             {/* BLE Reader Selection (only for BleReader type) */}
             {formData.type === 'BleReader' && (
               <Grid size={12}>
-                <CustomFormLabel htmlFor="reader-id">BLE Reader</CustomFormLabel>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <CustomFormLabel htmlFor="reader-id" sx={{ mt: 0 }}>
+                    BLE Reader
+                  </CustomFormLabel>
+                  {formData.readerId && currentReader && (
+                    <AddEditBleReader
+                      type="edit"
+                      bleReader={currentReader}
+                      trigger={(onClick) => (
+                        <Tooltip title="Edit BLE Reader Settings" arrow>
+                          <IconButton
+                            color="primary"
+                            size="small"
+                            onClick={onClick}
+                            sx={{ mt: 1 }}
+                          >
+                            <Settings fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    />
+                  )}
+                </Box>
                 <CustomAutocomplete
                   label="BLE Reader"
                   options={availableBleReaderOptions}

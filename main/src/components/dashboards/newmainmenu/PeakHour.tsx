@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import Chart from 'react-apexcharts';
 import { Box, Typography, CircularProgress, SelectChangeEvent, MenuItem, useTheme } from '@mui/material';
 import { usePeakHour } from 'src/hooks/useDashboard';
@@ -52,11 +52,11 @@ const PeakHour: React.FC = () => {
         if(dashboardFilter.FloorplanMaskedAreaId.length > 0) {
           setLevel('area');
         } else if(dashboardFilter.FloorplanId.length > 0) {
-          setLevel('area');
-        } else if(dashboardFilter.FloorId.length > 0) {
           setLevel('floorplan');
-        } else if(dashboardFilter.BuildingId.length > 0) {
+        } else if(dashboardFilter.FloorId.length > 0) {
           setLevel('floor');
+        } else if(dashboardFilter.BuildingId.length > 0) {
+          setLevel('building');
         }
       }
     }, [dashboardFilter]);
@@ -67,6 +67,7 @@ const PeakHour: React.FC = () => {
     if (!peakHourData) {
       return { categories: [], series: [] };
     }
+    console.log("PeakHourData", peakHourData);
 
     return {
       categories: peakHourData.labels ?? [],
@@ -76,10 +77,38 @@ const PeakHour: React.FC = () => {
 
   /* ---------------- Chart Options ---------------- */
 
+  const hasZoomed = useRef(false);
+
+  useEffect(() => {
+    hasZoomed.current = false;
+  }, [peakHourData]);
+
   const options: ApexCharts.ApexOptions = {
     chart: {
       type: 'area',
-      toolbar: { show: false },
+      toolbar: { 
+        show: true,
+        tools: {
+          download: false,
+          selection: false,
+          zoom: true,
+          zoomin: true,
+          zoomout: true,
+          pan: true,
+          reset: true,
+        }
+      },
+      zoom: {
+        enabled: true,
+      },
+      events: {
+        updated: (chartContext) => {
+          if (!hasZoomed.current && chartContext.w.config.series[0]?.data?.length > 0) {
+            hasZoomed.current = true;
+            chartContext.zoomX(0, new Date().getHours());
+          }
+        }
+      },
       foreColor: theme.palette.text.secondary,
       background: 'transparent',
     },
@@ -112,6 +141,7 @@ const PeakHour: React.FC = () => {
 
     xaxis: {
       categories,
+      tickPlacement: 'on',
       labels: {
         style: {
           fontSize: '12px',

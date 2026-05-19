@@ -35,9 +35,10 @@ import { useQueryClient } from '@tanstack/react-query';
 interface FormType {
   type?: 'add' | 'edit';
   bleReader?: bleReaderType;
+  trigger?: (onClick: () => void) => React.ReactNode;
 }
 
-const AddEditBleReader = ({ type, bleReader }: FormType) => {
+const AddEditBleReader = ({ type, bleReader, trigger }: FormType) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -158,17 +159,16 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
   // ────────────────────────────────
   return (
     <>
-      {/* ────────────── Edit Button ────────────── */}
-      {type === 'edit' && (
+      {/* ────────────── Custom/Edit/Add Button ────────────── */}
+      {trigger ? (
+        trigger(handleClickOpen)
+      ) : type === 'edit' ? (
         <Tooltip title="Edit BLE Reader">
           <IconButton color="primary" size="small" onClick={handleClickOpen}>
             <IconPencil size={20} />
           </IconButton>
         </Tooltip>
-      )}
-
-      {/* ────────────── Add Button ────────────── */}
-      {type === 'add' && (
+      ) : type === 'add' ? (
         <Tooltip title="Add BLE Reader">
           <Button
             variant="contained"
@@ -179,7 +179,7 @@ const AddEditBleReader = ({ type, bleReader }: FormType) => {
             {isSaving ? <CircularProgress color="inherit" size={20} /> : <IconPlus size={20} />}
           </Button>
         </Tooltip>
-      )}
+      ) : null}
 
       {/* ────────────── Dialog Form ────────────── */}
       {!loading && (

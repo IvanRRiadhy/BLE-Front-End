@@ -545,7 +545,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     const x = device.posPxX - (20 * gateSize);
     const y = device.posPxY - (20 * gateSize);
     const statusActive = device.deviceStatus.toLocaleLowerCase() === 'active';
-    // console.log("Device", device.reader)
+    console.log("Device", device.reader)
     return (
       <Group
         key={`device-${device.id}`}
@@ -587,9 +587,9 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                     stroke={!statusActive ? 'red' :  'transparent'}
             strokeWidth={!statusActive ? 3  : 0} 
         />
-        {/* {device.reader?.forceReading && (
+        {device.reader?.forceReading && (
           <Circle x={x + (20 * gateSize)} y={y + (20 * gateSize)} radius={((device.reader?.forceRadiusMeter || 2) / meterPx)} fill="transparent"  stroke="#1976d2" strokeWidth={2}/>
-        )} */}
+        )}
       </Group>
     );
   };
