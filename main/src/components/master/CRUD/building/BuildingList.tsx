@@ -21,9 +21,15 @@ import {
   TableSortLabel,
   Skeleton,
   CircularProgress,
+  Collapse,
+  Paper,
+  Tooltip,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconTrash } from '@tabler/icons-react';
+import { IconTrash, IconChevronDown, IconChevronRight, IconPlus, IconExternalLink } from '@tabler/icons-react';
+import { useNavigate } from 'react-router';
+import { floorType, SetSelectedFloor, UpdateFilter as UpdateFloorFilter } from 'src/store/apps/crud/floor';
+import AddEditFloor from 'src/components/master/CRUD/floor/AddEditFloor';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import {
   BuildingType,
@@ -35,6 +41,7 @@ import AddEditBuilding from './AddEditBuilding';
 import { defaultBuildingFilter } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
 import { useBuildingList, useDeleteBuilding } from 'src/hooks/useBuilding';
+import { useAllFloors, useFloorList, useDeleteFloor } from 'src/hooks/useFloor';
 
 const columns = [
   { label: 'Building Name', field: 'name', sortAble: true },
@@ -44,34 +51,158 @@ const columns = [
 
 const SKELETON_ROWS = 5;
 
+const FloorTable = ({
+  floors,
+  onDeleteClick,
+}: {
+  floors: floorType[];
+  onDeleteClick: (floor: floorType) => void;
+}) => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  
+  return (
+  <Table size="small">
+    <TableHead>
+      <TableRow>
+        <TableCell sx={{ fontWeight: 600, width: 80 }}>No</TableCell>
+        <TableCell sx={{ fontWeight: 600 }}>Floor Name</TableCell>
+        <TableCell align="right" sx={{ fontWeight: 600, width: 120 }}>Actions</TableCell>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      {floors.length === 0 ? (
+        <TableRow>
+          <TableCell colSpan={3}>
+            <Typography variant="body2" color="text.secondary">
+              No floors registered for this building.
+            </Typography>
+          </TableCell>
+        </TableRow>
+      ) : (
+        floors.map((floor, i) => (
+          <TableRow key={floor.id}>
+            <TableCell>{i + 1}</TableCell>
+            <TableCell>{floor.name}</TableCell>
+            <TableCell align="right">
+              <Box display="flex" justifyContent="flex-end" alignItems="center" gap={1}>
+                <AddEditFloor type="edit" floor={floor} fixedBuildingId={floor.buildingId} />
+                <Tooltip title="View Floor" arrow>
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={() => {
+                      dispatch(SetSelectedFloor(floor));
+                      navigate('/master/floor', { state: { expandFloorId: floor.id, floorName: floor.name } });
+                    }}
+                  >
+                    <IconExternalLink size={18} />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Delete Floor" arrow>
+                  <IconButton
+                    color="error"
+                    size="small"
+                    onClick={() => onDeleteClick(floor)}
+                  >
+                    <IconTrash size={18} />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </TableCell>
+          </TableRow>
+        ))
+      )}
+    </TableBody>
+  </Table>
+  );
+};
+
+const BuildingAccordionContent = ({
+  floors,
+  buildingId,
+  onDeleteClick,
+}: {
+  floors: floorType[];
+  buildingId: string;
+  onDeleteClick: (floor: floorType) => void;
+}) => {
+  return (
+    <Paper variant="outlined" sx={{ p: 2, bgcolor: 'action.hover', my: 1 }}>
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+        <Typography variant="subtitle1" fontWeight={700}>
+          Floors
+        </Typography>
+        <AddEditFloor
+          type="add"
+          fixedBuildingId={buildingId}
+          trigger={(onClick) => (
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              startIcon={<IconPlus size={16} />}
+              onClick={onClick}
+            >
+              Add Floor
+            </Button>
+          )}
+        />
+      </Box>
+      <FloorTable floors={floors} onDeleteClick={onDeleteClick} />
+    </Paper>
+  );
+};
+
 const BuildingList = () => {
   const dispatch: AppDispatch = useDispatch();
-  // const buildingData: BuildingType[] = useSelector(
-  //   (state: RootState) => state.buildingReducer.buildings,
-  // );
-  // const buildingTotalCount = useSelector(
-  //   (state: RootState) => state.buildingReducer.buildingTotalCount,
-  // );
-  // const buildingFilteredCount = useSelector(
-  //   (state: RootState) => state.buildingReducer.buildingFilteredCount,
-  // );
+  const isChildShown = useSelector((state: RootState) => state.customizer.isChildShown);
   const buildingFilter = useSelector((state: RootState) => state.buildingReducer.buildingFilter);
-  // const {
-  //   data: buildingData = [],
-  //   isLoading: queryLoading,
-  //   isFetching,
-  // } = useBuildingList(buildingFilter);
+
   const { data, isLoading: queryLoading } = useBuildingList(buildingFilter);
+  const { data: floorData, isLoading: floorLoading } = useAllFloors();
   const buildingData = data?.data || [];
   const buildingTotalCount = data?.recordsTotal || 0;
   const buildingFilteredCount = data?.recordsFiltered || 0;
-  const isLoading = useSelector((state) => state.buildingReducer.isLoading);
-  const hasLoaded = useSelector((state) => state.buildingReducer.hasLoaded);
   // Pagination State
   const page = Math.floor(buildingFilter.Start / buildingFilter.Length);
   const rowsPerPage = buildingFilter.Length;
   const orderBy = buildingFilter.SortColumn;
   const order = buildingFilter.SortDir;
+
+  const [expandedBuildingId, setExpandedBuildingId] = useState<string | null>(null);
+
+  const toggleExpand = (buildingId: string) => {
+    setExpandedBuildingId((prev) => (prev === buildingId ? null : buildingId));
+  };
+
+  // Delete Floor Dialog State
+  const [deleteFloorDialogOpen, setDeleteFloorDialogOpen] = useState(false);
+  const [selectedFloor, setSelectedFloor] = useState<floorType | null>(null);
+  const deleteFloorMutation = useDeleteFloor();
+
+  const handleOpenDeleteFloorDialog = (floor: floorType) => {
+    setSelectedFloor(floor);
+    setDeleteFloorDialogOpen(true);
+  };
+
+  const handleCloseDeleteFloorDialog = () => {
+    setDeleteFloorDialogOpen(false);
+    setSelectedFloor(null);
+  };
+
+  const handleConfirmDeleteFloor = async () => {
+    if (selectedFloor) {
+      try {
+        await deleteFloorMutation.mutateAsync(selectedFloor.id);
+        toast.success('Floor deleted successfully');
+      } catch (error) {
+        toast.error('Delete failed');
+        console.error(error);
+      }
+    }
+    handleCloseDeleteFloorDialog();
+  };
 
   const handleChangePage = (_: unknown, newPage: number) => {
     dispatch(UpdateFilter({ Start: newPage * buildingFilter.Length }));
@@ -214,7 +345,7 @@ const BuildingList = () => {
           <BlankCard>
             <TableContainer
               sx={{
-                maxHeight: '55vh',
+                maxHeight: '58vh',
               }}
             >
               <Table stickyHeader aria-label="simple-table" sx={{ whiteSpace: 'nowrap' }}>
@@ -268,60 +399,91 @@ const BuildingList = () => {
                 <TableBody>
                   {queryLoading
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
-                    : buildingData.map((building, index) => (
-                        <TableRow key={index}>
-                          <TableCell
-                            sx={{
-                              position: 'sticky',
-                              left: 0,
-                              backgroundColor: 'background.paper',
-                              zIndex: 1,
-                              width: 35, // Fixed width
-                              minWidth: 35,
-                              maxWidth: 35,
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                          >
-                            {index + 1 + page * rowsPerPage}
-                          </TableCell>
-                          <TableCell>{building.name}</TableCell>
-                          <TableCell>{building.tag}</TableCell>
-                          <TableCell>
-                            {building.image ? (
-                              <img
-                                src={`${BASE_URL}${building.image}`}
-                                alt="Building"
-                                style={{ width: 80, height: 80, objectFit: 'cover' }}
-                              />
-                            ) : (
-                              'No Image'
+                    : buildingData.map((building, index) => {
+                        const isOpen = expandedBuildingId === building.id;
+                        const buildingFloors = (floorData || []).filter(
+                          (f) => f.buildingId === building.id,
+                        );
+                        return (
+                          <React.Fragment key={building.id || index}>
+                            <TableRow hover>
+                              <TableCell
+                                sx={{
+                                  position: 'sticky',
+                                  left: 0,
+                                  backgroundColor: 'background.paper',
+                                  zIndex: 1,
+                                  width: 35, // Fixed width
+                                  minWidth: 35,
+                                  maxWidth: 35,
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                              >
+                                {index + 1 + page * rowsPerPage}
+                              </TableCell>
+                              <TableCell>{building.name}</TableCell>
+                              <TableCell>{building.tag}</TableCell>
+                              <TableCell>
+                                {building.image ? (
+                                  <img
+                                    src={`${BASE_URL}${building.image}`}
+                                    alt="Building"
+                                    style={{ width: 80, height: 80, objectFit: 'cover' }}
+                                  />
+                                ) : (
+                                  'No Image'
+                                )}
+                              </TableCell>
+                              <TableCell
+                                sx={{
+                                  position: 'sticky',
+                                  right: 0,
+                                  backgroundColor: 'background.paper',
+                                  zIndex: 1,
+                                  width: 150, // Fixed width
+                                  minWidth: 150,
+                                  maxWidth: 150,
+                                }}
+                              >
+                                <Box display="flex" alignItems="center" gap={1}>
+                                  <AddEditBuilding type="edit" building={building} />
+                                  <IconButton
+                                    color="error"
+                                    size="small"
+                                    onClick={() => handleOpenDeleteDialog(building)}
+                                  >
+                                    <IconTrash size={20} />
+                                  </IconButton>
+                                  {isChildShown && (
+                                      <Tooltip title={isOpen ? 'Hide Floors' : 'Show Floors'} arrow>
+                                          <IconButton size="small" onClick={() => toggleExpand(building.id)}>
+                                            {isOpen ? <IconChevronDown size={20} /> : <IconChevronRight size={20} />}
+                                          </IconButton>
+                                        </Tooltip>
+                                  )}
+                                </Box>
+                              </TableCell>
+                            </TableRow>
+                            {/* ACCORDION ROW */}
+                            {isChildShown && (
+                              <TableRow>
+                                <TableCell colSpan={5} sx={{ p: 0, borderBottom: 0 }}>
+                                  <Collapse in={isOpen} timeout="auto" unmountOnExit>
+                                    <Box pl={6} pr={2} pb={2}>
+                                      <BuildingAccordionContent
+                                        floors={buildingFloors}
+                                        buildingId={building.id}
+                                        onDeleteClick={handleOpenDeleteFloorDialog}
+                                      />
+                                    </Box>
+                                  </Collapse>
+                                </TableCell>
+                              </TableRow>
                             )}
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              position: 'sticky',
-                              right: 0,
-                              backgroundColor: 'background.paper',
-                              zIndex: 1,
-                              gap: 1,
-                              alignItems: 'center',
-                              width: 150, // Fixed width
-                              minWidth: 150,
-                              maxWidth: 150,
-                            }}
-                          >
-                            <AddEditBuilding type="edit" building={building} />
-                            <IconButton
-                              color="error"
-                              size="small"
-                              onClick={() => handleOpenDeleteDialog(building)}
-                            >
-                              <IconTrash size={20} />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                          </React.Fragment>
+                        );
+                      })}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -357,6 +519,28 @@ const BuildingList = () => {
             startIcon={deleteMutation.isPending ? <CircularProgress size={20} /> : null}
           >
             {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Delete Floor Confirmation Dialog */}
+      <Dialog open={deleteFloorDialogOpen} onClose={handleCloseDeleteFloorDialog}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete the floor <strong>{selectedFloor?.name}</strong>?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteFloorDialog} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmDeleteFloor}
+            color={deleteFloorMutation.isPending ? 'primary' : 'error'}
+            disabled={deleteFloorMutation.isPending}
+            startIcon={deleteFloorMutation.isPending ? <CircularProgress size={20} /> : null}
+          >
+            {deleteFloorMutation.isPending ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

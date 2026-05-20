@@ -1,4 +1,5 @@
 import React, { lazy, useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import {
   Box,
   Grid2 as Grid,
@@ -39,7 +40,6 @@ import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
 import { BASE_URL } from 'src/utils/axios';
 import { fetchFloors } from 'src/store/apps/crud/floor';
 import { fetchEngines } from 'src/store/apps/crud/engine';
-import { useNavigate } from 'react-router';
 const columns = [
   { label: 'Floorplan Name', field: 'Name', sortAble: true },
   { label: 'Floor Name', field: 'Floor.Name', sortAble: true },
@@ -55,6 +55,7 @@ const SKELETON_ROWS = 5;
 const FloorplanList = () => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const buildingData: BuildingType[] = useSelector(
     (state: RootState) => state.buildingReducer.buildingAll,
@@ -71,10 +72,10 @@ const FloorplanList = () => {
   //   isLoading: queryLoading,
   //   isFetching,
   // } = useFloorplanList(floorplanFilter);
-  
+
   const { data, isLoading: queryLoading } = useFloorplanList(floorplanFilter);
   const floorplanData = data?.data || [];
-  const floorplanTotalCount = data?.recordsTotal || 0;
+  const floorplanTotalCount = data?.recordsTotal || 0;  
   const floorplanFilteredCount = data?.recordsFiltered || 0;
   // const { t } = useTranslation();
   const isLoading = useSelector((state: RootState) => state.floorplanReducer.isLoading);
@@ -135,16 +136,22 @@ const FloorplanList = () => {
   // }, [dispatch]);
 
   useEffect(() => {
-  Promise.all([
-    dispatch(fetchBuildings()),
-    dispatch(fetchFloors()),
-    dispatch(fetchEngines())
-  ]);
-}, [dispatch]);
+    Promise.all([
+      dispatch(fetchBuildings()),
+      dispatch(fetchFloors()),
+      dispatch(fetchEngines())
+    ]);
 
-useEffect(() => {
-console.log("Floorplan Data:", floorplanData);
-},[floorplanData]);
+    const initialFilter = location.state?.floorplanName
+      ? { ...defaultFloorplanFilter, SearchValue: location.state.floorplanName }
+      : defaultFloorplanFilter;
+
+    dispatch(UpdateFilter(initialFilter));
+  }, [dispatch]);
+
+  useEffect(() => {
+    console.log("Floorplan Data:", floorplanData);
+  }, [floorplanData]);
 
 
   // useEffect(() => {
@@ -213,10 +220,10 @@ console.log("Floorplan Data:", floorplanData);
     return building ? building.name : 'Unknown Building';
   };
 
-    const handleOverviewClick = (floorplanToEdit: FloorplanType) => {
-      dispatch(SelectFloorplan(floorplanToEdit));
-      navigate('/master/floorplan/overview');
-    };
+  const handleOverviewClick = (floorplanToEdit: FloorplanType) => {
+    dispatch(SelectFloorplan(floorplanToEdit));
+    navigate('/master/floorplan/overview');
+  };
 
   const renderSkeletonRows = (rows: number) => (
     <>
@@ -282,7 +289,7 @@ console.log("Floorplan Data:", floorplanData);
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
           <BlankCard>
-            <TableContainer  sx={{
+            <TableContainer sx={{
               maxHeight: '55vh',
             }}>
               <Table stickyHeader aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
@@ -337,74 +344,74 @@ console.log("Floorplan Data:", floorplanData);
                   {queryLoading
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : floorplanData.map((floorplan: FloorplanType, index: number) => (
-                        <TableRow key={index}>
-                          <TableCell
-                            sx={{
-                              position: 'sticky',
-                              left: 0,
-                              backgroundColor: 'background.paper',
-                              zIndex: 1,
-                              width: 35, // Fixed width
-                              minWidth: 35,
-                              maxWidth: 35,
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                          >
-                            {index + 1 + page * rowsPerPage}
-                          </TableCell>
-                          <TableCell>{floorplan.name}</TableCell>
-                          <TableCell>{floorplan.floor?.name}</TableCell>
-                          <TableCell>
-                            {' '}
-                            {getbuildingName(floorplan.floor?.buildingId || '')}
-                          </TableCell>
-                          <TableCell>
-                            {floorplan.floorplanImage ? (
-                              <img
-                                src={`${BASE_URL}${floorplan.floorplanImage}`}
-                                alt="Floor"
-                                loading="lazy"
-                                style={{ width: 80, height: 80, objectFit: 'cover' }}
-                              />
-                            ) : (
-                              'No Image'
-                            )}
-                          </TableCell>
-                          <TableCell>{`(${floorplan.floorX}, ${floorplan.floorY})`}</TableCell>
+                      <TableRow key={index}>
+                        <TableCell
+                          sx={{
+                            position: 'sticky',
+                            left: 0,
+                            backgroundColor: 'background.paper',
+                            zIndex: 1,
+                            width: 35, // Fixed width
+                            minWidth: 35,
+                            maxWidth: 35,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          {index + 1 + page * rowsPerPage}
+                        </TableCell>
+                        <TableCell>{floorplan.name}</TableCell>
+                        <TableCell>{floorplan.floor?.name}</TableCell>
+                        <TableCell>
+                          {' '}
+                          {getbuildingName(floorplan.floor?.buildingId || '')}
+                        </TableCell>
+                        <TableCell>
+                          {floorplan.floorplanImage ? (
+                            <img
+                              src={`${BASE_URL}${floorplan.floorplanImage}`}
+                              alt="Floor"
+                              loading="lazy"
+                              style={{ width: 80, height: 80, objectFit: 'cover' }}
+                            />
+                          ) : (
+                            'No Image'
+                          )}
+                        </TableCell>
+                        <TableCell>{`(${floorplan.floorX}, ${floorplan.floorY})`}</TableCell>
 
-                          {/* <TableCell>{floorplan.engine?.name}</TableCell> */}
-                          <TableCell
-                            sx={{
-                              position: 'sticky',
-                              right: 0,
-                              backgroundColor: 'background.paper',
-                              zIndex: 1,
-                              gap: 1,
-                              alignItems: 'center',
-                              width: 150, // Fixed width
-                              minWidth: 150,
-                              maxWidth: 150,
-                            }}
+                        {/* <TableCell>{floorplan.engine?.name}</TableCell> */}
+                        <TableCell
+                          sx={{
+                            position: 'sticky',
+                            right: 0,
+                            backgroundColor: 'background.paper',
+                            zIndex: 1,
+                            gap: 1,
+                            alignItems: 'center',
+                            width: 150, // Fixed width
+                            minWidth: 150,
+                            maxWidth: 150,
+                          }}
+                        >
+                          <AddEditFloorplan type="edit" floorplan={floorplan} />
+                          <IconButton
+                            color="primary"
+                            size="small"
+                            onClick={() => handleOverviewClick(floorplan)}
                           >
-                            <AddEditFloorplan type="edit" floorplan={floorplan} />
-                            <IconButton
-                              color="primary"
-                              size="small"
-                              onClick={() => handleOverviewClick  (floorplan)}
-                            >
-                              <IconEye size={20} />
-                            </IconButton>
-                            <IconButton
-                              color="error"
-                              size="small"
-                              onClick={() => handleOpenDeleteDialog(floorplan)}
-                            >
-                              <IconTrash size={20} />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                            <IconEye size={20} />
+                          </IconButton>
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={() => handleOpenDeleteDialog(floorplan)}
+                          >
+                            <IconTrash size={20} />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </TableContainer>

@@ -51,6 +51,7 @@ import { getConfig } from 'src/config';
 import { useAllFloorplanDevices } from 'src/hooks/useFloorplanDevice';
 import { useAllPatrolAreas } from 'src/hooks/usePatrolArea';
 import { fetchAlarmSettingsDT } from 'src/store/apps/alarmsetting/alarmSettings';
+import { useAllAlarmCategory } from 'src/hooks/AlarmSetting/useAlarmCategory';
 
 const MQTT_URL = getConfig().MQTT_URL;
 
@@ -78,7 +79,7 @@ const FloorView: React.FC<{
   screenId,
 }) => {
   const dispatch: AppDispatch = useDispatch();
-
+  const alarmCategory = useAllAlarmCategory().data || [];
   // DUMMY
   const [dummyAlarm, setDummyAlarm] = useState<AlarmType>();
   const { data: memberList = [] } = useAllMembers();
@@ -730,6 +731,17 @@ const FloorView: React.FC<{
       dispatch(swapScreen(screenNumber));
     }
   };
+const alarms = Array.isArray(alarmCategory) ? alarmCategory : [];
+  const normalize = (v: any) => (typeof v === 'string' ? v.toLowerCase() : '');
+
+const isActive = (name: string) =>
+  alarms.some(a => normalize(a?.alarmCategory) === name && a?.isEnabled);
+
+const isGeoFencingActive = isActive('geofence');
+const isOverPopulatingActive = isActive('overpopulating');
+const isStayOnAreaActive = isActive('stayonarea');
+const isBoundaryActive = isActive('boundary');
+
 
   if (floorplanImage === 'No Active Floorplan') {
     return (
@@ -822,14 +834,10 @@ const FloorView: React.FC<{
             {[
               { label: 'Show Areas', checked: showArea, onChange: setShowArea },
               { label: 'Show Gateways', checked: showGates, onChange: setShowGates },
-              { label: 'Show GeoFence Areas', checked: showGeoFence, onChange: setShowGeoFence },
-              {
-                label: 'Show Over Population Areas',
-                checked: showOverPopulate,
-                onChange: setShowOverPopulate,
-              },
-              { label: 'Show Stay on Areas', checked: showStayOnArea, onChange: setShowStayOnArea },
-              { label: 'Show Boundary Areas', checked: showBoundary, onChange: setShowBoundary },
+              ...(isGeoFencingActive ? [{ label: 'Show GeoFence Areas', checked: showGeoFence, onChange: setShowGeoFence }] : []),
+              ...(isOverPopulatingActive ? [{ label: 'Show Over Population Areas', checked: showOverPopulate, onChange: setShowOverPopulate }] : []),
+              ...(isStayOnAreaActive ? [{ label: 'Show Stay on Areas', checked: showStayOnArea, onChange: setShowStayOnArea }] : []),
+              ...(isBoundaryActive ? [{ label: 'Show Boundary Areas', checked: showBoundary, onChange: setShowBoundary }] : []),
               { label: 'Show Patrol Areas', checked: showPatrolArea, onChange: setShowPatrolArea },
             ].map((item, idx) => (
               <FormControlLabel
@@ -1175,6 +1183,9 @@ const FloorView: React.FC<{
                   personId={person.id}
                   openTrackDetail={openTrackDetail}
                   setOpenTrackDetail={setOpenTrackDetail}
+                  isSecurity={!!security}
+                  isMember={!!member}
+                  isVisitor={!!visitor}
                 />
               )}
             </>

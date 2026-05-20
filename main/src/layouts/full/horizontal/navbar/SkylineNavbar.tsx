@@ -5,6 +5,7 @@ import { IconChevronDown, IconChevronRight } from '@tabler/icons-react';
 import useMenuItems from './Menudata';
 import { useSelector } from 'src/store/Store';
 import { RootState } from 'src/store/Store';
+import { useAllAlarmCategory } from 'src/hooks/AlarmSetting/useAlarmCategory';
 
 // --- Recursive SubMenu Component (Simple Hover Only) ---
 interface SubMenuProps {
@@ -120,9 +121,10 @@ const SkylineNavbar = () => {
   const theme = useTheme();
   const { pathname } = useLocation();
   const alarmSettings = useSelector((state: RootState) => state.AlarmSettingReducer.alarmSettingAll);
+  const alarmCategory = useAllAlarmCategory().data || [];
   const customizer = useSelector((state: RootState) => state.customizer);
   const settings = useSelector((state: RootState) => state.settings);
-  const menuItems = useMenuItems(alarmSettings);
+  const menuItems = useMenuItems(alarmCategory);
 
   const [activeTitle, setActiveTitle] = useState<string | null>(null);
   const [lockedTitle, setLockedTitle] = useState<string | null>(null);

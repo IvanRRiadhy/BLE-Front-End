@@ -198,7 +198,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   // Create a memoized lookup map of bleCardNumber -> person info for O(1) performance
   const beaconPersonMap = useMemo(() => {
     const map = new Map<string, { label: string; isSecurity: boolean; isMember: boolean; isVisitor: boolean }>();
-    
+
     membersData.forEach((m) => {
       if (m.bleCardNumber) {
         map.set(m.bleCardNumber, {
@@ -545,7 +545,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     const x = device.posPxX - (20 * gateSize);
     const y = device.posPxY - (20 * gateSize);
     const statusActive = device.deviceStatus.toLocaleLowerCase() === 'active';
-    console.log("Device", device.reader)
+    // console.log("Device", device.reader)
     return (
       <Group
         key={`device-${device.id}`}
@@ -579,16 +579,16 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
             listening={false}
           />
         )}
-        <KonvaImage 
-        name="device" 
-        image={deviceIcon} 
-        x={x} 
-        y={y} width={40 * gateSize} height={40 * gateSize} 
-                    stroke={!statusActive ? 'red' :  'transparent'}
-            strokeWidth={!statusActive ? 3  : 0} 
+        <KonvaImage
+          name="device"
+          image={deviceIcon}
+          x={x}
+          y={y} width={40 * gateSize} height={40 * gateSize}
+          stroke={!statusActive ? 'red' : 'transparent'}
+          strokeWidth={!statusActive ? 3 : 0}
         />
         {device.reader?.forceReading && (
-          <Circle x={x + (20 * gateSize)} y={y + (20 * gateSize)} radius={((device.reader?.forceRadiusMeter || 2) / meterPx)} fill="transparent"  stroke="#1976d2" strokeWidth={2}/>
+          <Circle x={x + (20 * gateSize)} y={y + (20 * gateSize)} radius={((device.reader?.forceRadiusMeter || 2) / meterPx)} fill="transparent" stroke="#1976d2" strokeWidth={2} />
         )}
       </Group>
     );

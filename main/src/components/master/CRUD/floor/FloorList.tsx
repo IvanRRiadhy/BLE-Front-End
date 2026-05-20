@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import {
   Box,
   Grid2 as Grid,
@@ -23,7 +24,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import {  IconTrash } from '@tabler/icons-react';
+import { IconChevronDown, IconChevronRight, IconTrash, IconPlus, IconExternalLink } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import { deleteFloor, fetchFloorDT, floorType, UpdateFilter } from 'src/store/apps/crud/floor';
 import { fetchBuildings, BuildingType } from 'src/store/apps/crud/building';
@@ -31,14 +32,124 @@ import AddEditFloor from './AddEditFloor';
 import { defaultFloorFilter } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
 import { useDeleteFloor, useFloorList } from 'src/hooks/useFloor';
+import { useAllFloorplans, useDeleteFloorplan } from 'src/hooks/useFloorplan';
+import { FloorplanType, SelectFloorplan } from 'src/store/apps/crud/floorplan';
+import AddEditFloorplan from 'src/components/master/CRUD/floorplan/AddEditFloorplan';
+import { Collapse, Paper } from '@mui/material';
 // import { useTranslation } from 'react-i18next';
 
 const columns = [
+    { label: 'Floor Name', field: 'Name', sortAble: true },
   { label: 'Building Name', field: 'Building.Name', sortAble: true },
-  { label: 'Floor Name', field: 'Name', sortAble: true },
+
 ];
 
 const SKELETON_ROWS = 5;
+
+const FloorplanTable = ({
+  floorplans,
+  onDeleteClick,
+}: {
+  floorplans: FloorplanType[];
+  onDeleteClick: (floorplan: FloorplanType) => void;
+}) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  return (
+  <Table size="small">
+    <TableHead>
+      <TableRow>
+        <TableCell sx={{ fontWeight: 600, width: 80 }}>No</TableCell>
+        <TableCell sx={{ fontWeight: 600 }}>Floorplan Name</TableCell>
+        <TableCell sx={{ fontWeight: 600 }}>Floorplan Dimension (meter)</TableCell>
+        <TableCell align="right" sx={{ fontWeight: 600, width: 120 }}>Actions</TableCell>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      {floorplans.length === 0 ? (
+        <TableRow>
+          <TableCell colSpan={3}>
+            <Typography variant="body2" color="text.secondary">
+              No floorplans registered for this floor.
+            </Typography>
+          </TableCell>
+        </TableRow>
+      ) : (
+        floorplans.map((floorplan, i) => (
+          <TableRow key={floorplan.id}>
+            <TableCell>{i + 1}</TableCell>
+            <TableCell>{floorplan.name}</TableCell>
+            <TableCell>{`(${floorplan.floorX}, ${floorplan.floorY})`}</TableCell>
+            <TableCell align="right">
+              <Box display="flex" justifyContent="flex-end" alignItems="center" gap={1}>
+                <AddEditFloorplan type="edit" floorplan={floorplan} fixedFloorId={floorplan.floorId} />
+                <Tooltip title="View Floorplan" arrow>
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={() => {
+                      dispatch(SelectFloorplan(floorplan));
+                      navigate('/master/floorplan', { state: { expandFloorplanId: floorplan.id, floorplanName: floorplan.name } });
+                    }}
+                  >
+                    <IconExternalLink size={18} />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Delete Floorplan" arrow>
+                  <IconButton
+                    color="error"
+                    size="small"
+                    onClick={() => onDeleteClick(floorplan)}
+                  >
+                    <IconTrash size={18} />
+                  </IconButton>
+                </Tooltip>  
+              </Box>
+            </TableCell>
+          </TableRow>
+        ))
+      )}
+    </TableBody>
+  </Table>
+  );
+};
+
+const FloorAccordionContent = ({
+  floorplans,
+  floorId,
+  onDeleteClick,
+}: {
+  floorplans: FloorplanType[];
+  floorId: string;
+  onDeleteClick: (floorplan: FloorplanType) => void;
+}) => {
+  return (
+    <Paper variant="outlined" sx={{ p: 2, bgcolor: 'action.hover', my: 1 }}>
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+        <Typography variant="subtitle1" fontWeight={700}>
+          Floorplans
+        </Typography>
+        <AddEditFloorplan
+          type="add"
+          fixedFloorId={floorId}
+          trigger={(onClick) => (
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              startIcon={<IconPlus size={16} />}
+              onClick={onClick}
+            >
+              Add Floorplan
+            </Button>
+          )}
+        />
+      </Box>
+      <FloorplanTable floorplans={floorplans} onDeleteClick={onDeleteClick} />
+    </Paper>
+  );
+};
 
 const FloorList = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -47,12 +158,49 @@ const FloorList = () => {
   // const floorFilteredCount = useSelector(
   //   (state: RootState) => state.floorReducer.floorFilteredCount,
   // );
+  const isChildShown = useSelector((state: RootState) => state.customizer.isChildShown);
   const floorFilter = useSelector((state: RootState) => state.floorReducer.floorFilter);
   // const { data: floorData = [], isLoading: queryLoading, isFetching } = useFloorList(floorFilter);
   const { data, isLoading: queryLoading } = useFloorList(floorFilter);
+  const { data: floorplanData, isLoading: floorplanLoading} = useAllFloorplans();
   const floorData = data?.data || [];
   const floorTotalCount = data?.recordsTotal || 0;
   const floorFilteredCount = data?.recordsFiltered || 0;
+
+  const location = useLocation();
+  const [expandedFloorId, setExpandedFloorId] = useState<string | null>(location.state?.expandFloorId || null);
+
+  const toggleExpand = (floorId: string) => {
+    setExpandedFloorId((prev) => (prev === floorId ? null : floorId));
+  };
+
+  // Delete Floorplan Dialog State
+  const [deleteFloorplanDialogOpen, setDeleteFloorplanDialogOpen] = useState(false);
+  const [selectedFloorplan, setSelectedFloorplan] = useState<FloorplanType | null>(null);
+  const deleteFloorplanMutation = useDeleteFloorplan();
+
+  const handleOpenDeleteFloorplanDialog = (floorplan: FloorplanType) => {
+    setSelectedFloorplan(floorplan);
+    setDeleteFloorplanDialogOpen(true);
+  };
+
+  const handleCloseDeleteFloorplanDialog = () => {
+    setDeleteFloorplanDialogOpen(false);
+    setSelectedFloorplan(null);
+  };
+
+  const handleConfirmDeleteFloorplan = async () => {
+    if (selectedFloorplan) {
+      try {
+        await deleteFloorplanMutation.mutateAsync(selectedFloorplan.id);
+        toast.success('Floorplan deleted successfully');
+      } catch (error) {
+        toast.error('Delete failed');
+        console.error(error);
+      }
+    }
+    handleCloseDeleteFloorplanDialog();
+  };
 
   const prevFilterRef = useRef(floorFilter);
   // const { t } = useTranslation();
@@ -97,17 +245,22 @@ const FloorList = () => {
 
   useEffect(() => {
     dispatch(fetchBuildings());
-    dispatch(UpdateFilter(defaultFloorFilter));
+    
+    const initialFilter = location.state?.floorName 
+      ? { ...defaultFloorFilter, SearchValue: location.state.floorName }
+      : defaultFloorFilter;
+      
+    dispatch(UpdateFilter(initialFilter));
     try {
       setLoading(true);
-      dispatch(fetchFloorDT(defaultFloorFilter));
+      dispatch(fetchFloorDT(initialFilter));
     } catch (error) {
       console.log(error);
     }
     setTimeout(() => {
       setLoading(false);
     }, 500);
-  }, [dispatch]);
+  }, [dispatch, location.state?.floorName]);
 
   useEffect(() => {
     const prevFilter = prevFilterRef.current;
@@ -281,52 +434,84 @@ const FloorList = () => {
                 <TableBody>
                   {queryLoading
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
-                    : floorData.map((floor: floorType, index: number) => (
-                        <TableRow key={index}>
-                          <TableCell
-                            sx={{
-                              position: 'sticky',
-                              left: 0,
-                              backgroundColor: 'background.paper',
-                              zIndex: 1,
-                              width: 35, // Fixed width
-                              minWidth: 35,
-                              maxWidth: 35,
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                          >
-                            {index + 1 + page * rowsPerPage}
-                          </TableCell>
-                          <TableCell>{floor.building?.name}</TableCell>
-                          <TableCell>{floor.name}</TableCell>
-                          <TableCell
-                            sx={{
-                              position: 'sticky',
-                              right: 0,
-                              backgroundColor: 'background.paper',
-                              zIndex: 1,
-                              gap: 1,
-                              alignItems: 'center',
-                              width: 150, // Fixed width
-                              minWidth: 150,
-                              maxWidth: 150,
-                            }}
-                          >
-                            <AddEditFloor type="edit" floor={floor} />
-                             
-                            <Tooltip title="Delete Floor" arrow>
-                              <IconButton
-                              color="error"
-                              size="small"
-                              onClick={() => handleOpenDeleteDialog(floor)}
-                            >
-                              <IconTrash size={20} />
-                            </IconButton>
-                            </Tooltip>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                    : floorData.map((floor: floorType, index: number) => {
+                        const isOpen = expandedFloorId === floor.id;
+                        const floorFloorplans = (floorplanData || []).filter(
+                          (fp: any) => fp.floorId === floor.id
+                        );
+                        return (
+                          <React.Fragment key={floor.id}>
+                            <TableRow>
+                              <TableCell
+                                sx={{
+                                  position: 'sticky',
+                                  left: 0,
+                                  backgroundColor: 'background.paper',
+                                  zIndex: 1,
+                                  width: 35, // Fixed width
+                                  minWidth: 35,
+                                  maxWidth: 35,
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                              >
+                                {index + 1 + page * rowsPerPage}
+                              </TableCell>
+                              <TableCell>{floor.name}</TableCell>
+                              <TableCell>{floor.building?.name}</TableCell>
+                              
+                              <TableCell
+                                sx={{
+                                  position: 'sticky',
+                                  right: 0,
+                                  backgroundColor: 'background.paper',
+                                  zIndex: 1,
+                                  gap: 1,
+                                  alignItems: 'center',
+                                  width: 150, // Fixed width
+                                  minWidth: 150,
+                                  maxWidth: 150,
+                                }}
+                              >
+                                <AddEditFloor type="edit" floor={floor} />
+                                 
+                                <Tooltip title="Delete Floor" arrow>
+                                  <IconButton
+                                    color="error"
+                                    size="small"
+                                    onClick={() => handleOpenDeleteDialog(floor)}
+                                  >
+                                    <IconTrash size={20} />
+                                  </IconButton>
+                                </Tooltip>
+                                {isChildShown && (
+                                  <Tooltip title={isOpen ? 'Hide Floorplans' : 'Show Floorplans'} arrow>
+                                    <IconButton size="small" onClick={() => toggleExpand(floor.id)}>
+                                      {isOpen ? <IconChevronDown size={20} /> : <IconChevronRight size={20} />}
+                                    </IconButton>
+                                  </Tooltip>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                            {/* ACCORDION ROW */}
+                            {isChildShown && (
+                              <TableRow>
+                                <TableCell colSpan={4} sx={{ p: 0, borderBottom: 0 }}>
+                                  <Collapse in={isOpen} timeout="auto" unmountOnExit>
+                                    <Box pl={6} pr={2} pb={2}>
+                                      <FloorAccordionContent
+                                        floorplans={floorFloorplans}
+                                        floorId={floor.id}
+                                        onDeleteClick={handleOpenDeleteFloorplanDialog}
+                                      />
+                                    </Box>
+                                  </Collapse>
+                                </TableCell>
+                              </TableRow>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -364,8 +549,31 @@ const FloorList = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      {/* Delete Floorplan Confirmation Dialog */}
+      <Dialog open={deleteFloorplanDialogOpen} onClose={handleCloseDeleteFloorplanDialog}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete the floorplan <strong>{selectedFloorplan?.name}</strong>?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteFloorplanDialog} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmDeleteFloorplan}
+            color={deleteFloorplanMutation.isPending ? 'primary' : 'error'}
+            disabled={deleteFloorplanMutation.isPending}
+            startIcon={deleteFloorplanMutation.isPending ? <CircularProgress size={20} /> : null}
+          >
+            {deleteFloorplanMutation.isPending ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 };
 
 export default FloorList;
+

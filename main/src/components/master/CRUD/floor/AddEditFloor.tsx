@@ -32,9 +32,11 @@ import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 interface FormType {
   type?: 'add' | 'edit';
   floor?: floorType;
+  fixedBuildingId?: string;
+  trigger?: (onClick: () => void) => React.ReactNode;
 }
 
-const AddEditFloor = ({ type, floor }: FormType) => {
+const AddEditFloor = ({ type, floor, fixedBuildingId, trigger }: FormType) => {
   const [open, setOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -54,7 +56,10 @@ const AddEditFloor = ({ type, floor }: FormType) => {
     if (type === 'edit' && floor) {
       setFormData({ ...defaultFloorForm, ...floor });
     } else {
-      setFormData({ ...defaultFloorForm });
+      setFormData({ 
+        ...defaultFloorForm,
+        buildingId: fixedBuildingId || '',
+      });
     }
     setOpen(true);
   };
@@ -122,7 +127,9 @@ const AddEditFloor = ({ type, floor }: FormType) => {
   return (
     <>
       {/* Trigger buttons */}
-      {type === 'edit' && (
+      {trigger ? (
+        trigger(handleClickOpen)
+      ) : type === 'edit' && (
         <Tooltip title="Edit Floor">
           <IconButton color="primary" size="small" onClick={handleClickOpen}>
             <IconPencil size={20} />
@@ -130,7 +137,7 @@ const AddEditFloor = ({ type, floor }: FormType) => {
         </Tooltip>
       )}
 
-      {type === 'add' && (
+      {!trigger && type === 'add' && (
         <Tooltip title="Add Floor">
           <Button
             variant="contained"
@@ -177,8 +184,9 @@ const AddEditFloor = ({ type, floor }: FormType) => {
                   error={!!formErrors.buildingId}
                   helperText={formErrors.buildingId}
                   sx={{ flex: 1 }}
+                  disabled={!!fixedBuildingId}
                 />
-                <AddEditBuilding type="add" />
+                {!fixedBuildingId && <AddEditBuilding type="add" />}
               </Box>
 
               {/* Floor Name */}

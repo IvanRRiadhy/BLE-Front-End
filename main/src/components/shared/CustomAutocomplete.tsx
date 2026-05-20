@@ -26,6 +26,7 @@ export type CustomAutocompleteProps<T> = {
   helperText?: string;
 
   loading?: boolean;
+  disabled?: boolean;
   renderOption?: any;
   sx?: SxProps<Theme>;
   filterSelectedOptions?: boolean;
@@ -42,6 +43,7 @@ export default function CustomAutocomplete<T>(props: CustomAutocompleteProps<T>)
     error,
     helperText,
     loading = false,
+    disabled = false,
     renderOption,
     sx,
     filterSelectedOptions,
@@ -52,6 +54,7 @@ export default function CustomAutocomplete<T>(props: CustomAutocompleteProps<T>)
       options={options}
       value={props.value as any}
       loading={loading} // <-- pass to Autocomplete
+      disabled={disabled}
       onChange={(_, newVal) => props.onChange(newVal as any)}
       getOptionLabel={getOptionLabel}
       isOptionEqualToValue={isOptionEqualToValue}

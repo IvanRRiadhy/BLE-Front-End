@@ -41,6 +41,9 @@ type TrackingDetailPopupProps = {
   personId: string;
   openTrackDetail: boolean;
   setOpenTrackDetail: React.Dispatch<React.SetStateAction<boolean>>;
+  isSecurity?: boolean;
+  isMember?: boolean;
+  isVisitor?: boolean;
 };
 
 type TrackType = {
@@ -65,6 +68,9 @@ const TrackingDetailPopup = ({
   personId,
   openTrackDetail,
   setOpenTrackDetail,
+  isSecurity = false,
+  isMember = false,
+  isVisitor = false,
 }: TrackingDetailPopupProps) => {
   const dispatch = useDispatch();
   // const theme = useTheme();
@@ -426,6 +432,11 @@ const TrackingDetailPopup = ({
                         floorplan={floorplan?.name || '-'}
                         time={track.timestamp}
                         clickable={false}
+                        beaconSize={1}
+                        label={person.name || track.beacon_id}
+                        isSecurity={isSecurity}
+                        isMember={isMember}
+                        isVisitor={isVisitor}
                       />
                     </>
                   );

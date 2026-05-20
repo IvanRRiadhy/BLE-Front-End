@@ -63,7 +63,7 @@ export function useAddFloorplan() {
       queryClient.invalidateQueries({ queryKey: ['floorplan-all'] });
     },
   });
-}
+} 
 
 // Edit floorplan
 export function useEditFloorplan() {

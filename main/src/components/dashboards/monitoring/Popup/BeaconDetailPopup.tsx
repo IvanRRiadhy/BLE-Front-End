@@ -420,7 +420,7 @@ const BeaconDetailPopup = ({
           py: 0,
         }}
       >
-        <Box sx={{ flex: 1 }}>
+        {/* <Box sx={{ flex: 1 }}>
           <Button
             variant="contained"
             color="secondary"
@@ -433,7 +433,7 @@ const BeaconDetailPopup = ({
           >
             Tracking Details
           </Button>
-        </Box>
+        </Box> */}
         <Box sx={{ flex: 1 }}>
           <Button
             variant="contained"

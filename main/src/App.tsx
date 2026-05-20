@@ -11,13 +11,14 @@ import usePreventWindowClose from './hooks/usePreventWindowClose';
 function App() {
   const theme = ThemeSettings();
   const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
 
   // Global browser close preventer
   // usePreventWindowClose(true);
 
   return (
     <ThemeProvider theme={theme}>
-      <RTL direction={customizer.activeDir}>
+      <RTL direction={settings.activeDir}>
         <CssBaseline />
         <RouterProvider router={router} />
       </RTL>

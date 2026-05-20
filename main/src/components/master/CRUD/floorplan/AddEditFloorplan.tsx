@@ -36,9 +36,11 @@ import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 interface FormType {
   type?: string;
   floorplan?: FloorplanType;
+  fixedFloorId?: string;
+  trigger?: (onClick: () => void) => React.ReactNode;
 }
 
-const AddEditFloorplan = ({ type, floorplan }: FormType) => {
+const AddEditFloorplan = ({ type, floorplan, fixedFloorId, trigger }: FormType) => {
   const [open, setOpen] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const [image, setImage] = React.useState<File | null>(null);
@@ -70,7 +72,10 @@ const AddEditFloorplan = ({ type, floorplan }: FormType) => {
       }
       setFormData({ ...defaultFloorplanForm, ...floorplan });
     } else {
-      setFormData({ ...defaultFloorplanForm });
+      setFormData({
+        ...defaultFloorplanForm,
+        floorId: fixedFloorId || '',
+      });
     }
     setTimeout(() => {
       setOpen(true);
@@ -241,14 +246,15 @@ const floorOptions = React.useMemo(
 
   return (
     <>
-      {type === 'edit' && (
+      {trigger ? (
+        trigger(handleClickOpen)
+      ) : type === 'edit' ? (
         <Tooltip title="Edit Floorplan">
           <IconButton color="primary" size="small" onClick={handleClickOpen}>
             <IconPencil size={20} />
           </IconButton>
         </Tooltip>
-      )}
-      {type === 'add' && (
+      ) : type === 'add' ? (
         <Tooltip title="Add Floorplan">
           <Button
             variant="contained"
@@ -259,7 +265,7 @@ const floorOptions = React.useMemo(
             <IconPlus size={20} />
           </Button>
         </Tooltip>
-      )}
+      ) : null}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
         <DialogTitle>
           <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
@@ -326,6 +332,7 @@ const floorOptions = React.useMemo(
                 error={!!formErrors.floorId}
                 helperText={formErrors.floorId}
                 loading={floorLoading}
+                disabled={!!fixedFloorId}
                 renderOption={(props: any, option: (typeof floorOptions)[number]) => (
                   <li {...props} key={option.id}>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>

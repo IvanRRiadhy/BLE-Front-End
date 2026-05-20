@@ -18,6 +18,7 @@ const VisitorTrackingPopup: React.FC<VisitorTrackingPopupProps> = ({ open, onClo
       personId={visitor.id}
       openTrackDetail={open}
       setOpenTrackDetail={onClose}
+      isVisitor={true}
     />
   );
 };

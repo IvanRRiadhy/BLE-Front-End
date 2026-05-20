@@ -20,7 +20,7 @@ const Navigation = () => {
   const settings = useSelector((state: RootState) => state.settings);
   const dispatch = useDispatch();
   const isMain = useSelector((state: RootState) => state.customizer.isMainMenu);
-
+  
   useEffect(() => {
     dispatch(fetchAlarmSetting());
   }, [dispatch]);

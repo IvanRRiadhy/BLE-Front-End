@@ -94,6 +94,9 @@ export const FloorSlice = createSlice({
             const selected = state.floors.find((floor: floorType) => floor.id === action.payload);
             state.selectedFloor = selected || null;
         },
+        SetSelectedFloor: (state, action: PayloadAction<floorType | null>) => {
+            state.selectedFloor = action.payload;
+        },
         SearchFloor: (state, action: PayloadAction<string>) => {
             state.floorSearch = action.payload;
         },
@@ -202,6 +205,7 @@ export const {
     GetFloor,
     GetAllFloor,
     SelectFloor,
+    SetSelectedFloor,
     SearchFloor,
     UpdateFilter
 } = FloorSlice.actions;

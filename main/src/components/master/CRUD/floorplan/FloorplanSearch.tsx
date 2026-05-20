@@ -6,27 +6,36 @@ import { UpdateFilter } from 'src/store/apps/crud/floorplan';
 
 const FloorplanSearch = () => {
   const dispatch: AppDispatch = useDispatch();
-  const [searchValue, setSearchValue] = useState('');
   const floorplanFilter = useSelector(
     (state: RootState) => state.floorplanReducer.floorplanFilter,
   );
+  // Initialize from Redux so it doesn't clear an external filter on mount
+  const [searchValue, setSearchValue] = useState(floorplanFilter.SearchValue || '');
+
+  // Keep internal state synced if Redux changes externally (like on mount from location state)
+  useEffect(() => {
+    setSearchValue(floorplanFilter.SearchValue || '');
+  }, [floorplanFilter.SearchValue]);
 
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      dispatch(UpdateFilter({ ...floorplanFilter, SearchValue: searchValue.trim() }));
-    }, 1000);
-    return () => clearTimeout(delayDebounce);
-  }, [searchValue, dispatch, floorplanFilter]);
+    // Only dispatch if the local searchValue differs from Redux
+    if (searchValue.trim() !== (floorplanFilter.SearchValue || '')) {
+      const delayDebounce = setTimeout(() => {
+        dispatch(UpdateFilter({ SearchValue: searchValue.trim() }));
+      }, 1000);
+      return () => clearTimeout(delayDebounce);
+    }
+  }, [searchValue, dispatch, floorplanFilter.SearchValue]);
 
   const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      dispatch(UpdateFilter({ ...floorplanFilter, SearchValue: searchValue.trim() }));
+      dispatch(UpdateFilter({ SearchValue: searchValue.trim() }));
     }
   };
 
   const handleClearSearch = () => {
     setSearchValue('');
-    dispatch(UpdateFilter({ ...floorplanFilter, SearchValue: '' }));
+    dispatch(UpdateFilter({ SearchValue: '' }));
   };
 
   return (

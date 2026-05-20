@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 interface StateType {
+  isChildShown?:boolean;
   isCollapse?: boolean;
   isSidebarHover?: boolean;
   isMobileSidebar?: boolean;
@@ -19,6 +20,7 @@ interface StateType {
 }
 
 const initialState: StateType = {
+  isChildShown: true,
   isCollapse: true, // to make sidebar Mini by default
   isSidebarHover: false,
   isMobileSidebar: false,
