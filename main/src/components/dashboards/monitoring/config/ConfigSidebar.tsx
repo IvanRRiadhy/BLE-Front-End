@@ -38,6 +38,7 @@ import toast from 'react-hot-toast';
 import { useAllBuilding } from 'src/hooks/useBuilding';
 import { useAllFloors } from 'src/hooks/useFloor';
 import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
 
 interface ConfigSidebarProps {
   onGridChange: (grid: number) => void;
@@ -65,9 +66,9 @@ const ConfigSidebar: React.FC<ConfigSidebarProps> = ({
   const dispatch = useDispatch();
 
   // --- Redux data ---
-  const floorplanLists: FloorplanType[] = useSelector(
-    (s: RootState) => s.floorplanReducer.floorplans,
-  );
+  // const floorplanLists: FloorplanType[] = useSelector(
+  //   (s: RootState) => s.floorplanReducer.floorplans,
+  // );
   // const buildingLists: BuildingType[] = useSelector((s: RootState) => s.buildingReducer.buildings);
   const { data: buildingLists = [] } = useAllBuilding();
   // const floorLists: floorType[] = useSelector((s: RootState) => s.floorReducer.floors);
@@ -75,12 +76,13 @@ const ConfigSidebar: React.FC<ConfigSidebarProps> = ({
   // const areaLists: MaskedAreaType[] = useSelector(
   //   (s: RootState) => s.maskedAreaReducer.maskedAreas,
   // );
+  const { data: floorplanLists = []} = useAllFloorplans();
   const { data: areaLists = [] } = useAllMaskedAreas();
   // const cctvLists: CCTVType[] = useSelector((s: RootState) => s.CCTVReducer.cctvs);
   // const floorplanDeviceLists: FloorplanDeviceType[] = useSelector(
   //   (s: RootState) => s.floorplanDeviceReducer.floorplanDevices,
   // );
-
+// console.log("Layout: ", floorplanLists, areaLists)
   const layouts = useSelector((s: RootState) => s.layoutReducer.layouts ?? []);
   const activeLayoutId = useSelector((s: RootState) => s.layoutReducer.activeLayoutId);
   const activeLayout = layouts.find((l) => l.id === activeLayoutId) || null;

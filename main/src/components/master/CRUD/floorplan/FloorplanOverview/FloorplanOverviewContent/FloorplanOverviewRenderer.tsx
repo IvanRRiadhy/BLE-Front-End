@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
-import { Stage, Layer, Image as KonvaImage, Text, Line, Label, Tag, Group } from 'react-konva';
+import { Stage, Layer, Image as KonvaImage, Text, Line, Label, Tag, Group, Rect } from 'react-konva';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
@@ -106,6 +106,7 @@ type FloorplanOverviewRendererProps = {
   stageY: number;
   stageRef?: React.RefObject<any>;
   onWheel?: (e: any) => void;
+  selectedItem: string | null;
 };
 
 const FloorplanOverviewRenderer: React.FC<FloorplanOverviewRendererProps> = (props) => {
@@ -135,6 +136,7 @@ const FloorplanOverviewRenderer: React.FC<FloorplanOverviewRendererProps> = (pro
     stageY,
     stageRef,
     onWheel,
+    selectedItem,
   } = props;
   const dispatch = useDispatch();
 
@@ -252,6 +254,18 @@ const FloorplanOverviewRenderer: React.FC<FloorplanOverviewRendererProps> = (pro
           listening={false}
         />
         <KonvaImage name="device" image={deviceIcon} x={x} y={y} width={40} height={40} />
+        {selectedItem === device.id && (
+          <Rect
+            x={x - 2}
+            y={y - 2}
+            width={44}
+            height={44}
+            stroke="#4caf50"
+            strokeWidth={3}
+            cornerRadius={4}
+            listening={false}
+          />
+        )}
       </Group>
     );
   };
@@ -347,7 +361,7 @@ const FloorplanOverviewRenderer: React.FC<FloorplanOverviewRendererProps> = (pro
                 lineJoin="round"
                 lineCap="round"
                 closed
-                fill={alpha(area.colorArea, 0.15)}
+                fill={selectedItem === area.id ? alpha(area.colorArea, 0.25) : 'transparent'}
                 opacity={0.5}
                 onMouseEnter={() => setHoveredAreaId(area.id)}
                 onMouseLeave={() => setHoveredAreaId((id) => (id === area.id ? null : id))}
@@ -364,7 +378,7 @@ const FloorplanOverviewRenderer: React.FC<FloorplanOverviewRendererProps> = (pro
                 lineJoin="round"
                 lineCap="round"
                 closed
-                fill={alpha(geofence.color, 0.1)}
+                fill={selectedItem === geofence.id ? alpha(geofence.color, 0.2) : 'transparent'}
                 fillOpacity={0.5}
                 onMouseEnter={() => setHoveredAreaId(geofence.id)}
                 onMouseLeave={() => setHoveredAreaId((id) => (id === geofence.id ? null : id))}
@@ -381,7 +395,7 @@ const FloorplanOverviewRenderer: React.FC<FloorplanOverviewRendererProps> = (pro
                 lineJoin="round"
                 lineCap="round"
                 closed
-                fill={alpha(overpopulate.color, 0.1)}
+                fill={selectedItem === overpopulate.id ? alpha(overpopulate.color, 0.2) : 'transparent'}
                 opacity={0.5}
                 onMouseEnter={() => setHoveredAreaId(overpopulate.id)}
                 onMouseLeave={() => setHoveredAreaId((id) => (id === overpopulate.id ? null : id))}
@@ -398,7 +412,7 @@ const FloorplanOverviewRenderer: React.FC<FloorplanOverviewRendererProps> = (pro
                 lineJoin="round"
                 lineCap="round"
                 closed
-                fill={alpha(stayonarea.color, 0.1)}
+                fill={selectedItem === stayonarea.id ? alpha(stayonarea.color, 0.2) : 'transparent'}
                 opacity={0.5}
                 onMouseEnter={() => setHoveredAreaId(stayonarea.id)}
                 onMouseLeave={() => setHoveredAreaId((id) => (id === stayonarea.id ? null : id))}
@@ -416,7 +430,7 @@ const FloorplanOverviewRenderer: React.FC<FloorplanOverviewRendererProps> = (pro
                 lineJoin="round"
                 lineCap="round"
                 closed
-                fill={alpha(boundary.color, 0.1)}
+                fill={selectedItem === boundary.id ? alpha(boundary.color, 0.2) : 'transparent'}
                 opacity={0.5}
                 onMouseEnter={() => setHoveredAreaId(boundary.id)}
                 onMouseLeave={() => setHoveredAreaId((id) => (id === boundary.id ? null : id))}
@@ -439,7 +453,7 @@ const FloorplanOverviewRenderer: React.FC<FloorplanOverviewRendererProps> = (pro
                   lineJoin="round"
                   lineCap="round"
                   closed
-                  fill={alpha(patrolArea.color, 0.1)}
+                  fill={selectedItem === patrolArea.id ? alpha(patrolArea.color, 0.2) : 'transparent'}
                   opacity={0.5}
                   onMouseEnter={() => setHoveredAreaId(patrolArea.id)}
                   onMouseLeave={() => setHoveredAreaId((id) => (id === patrolArea.id ? null : id))}

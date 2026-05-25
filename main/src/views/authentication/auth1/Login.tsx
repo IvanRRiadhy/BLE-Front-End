@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { jwtDecode } from 'jwt-decode';
 import { Box, CircularProgress, Paper, Typography, ThemeProvider, createTheme } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 
@@ -37,7 +38,22 @@ const Login = () => {
       setCheckingAuth(false);
       return;
     }
-    const levelPriority = localStorage.getItem('levelPriority');
+
+    // 🔹 Read levelPriority from localStorage, fallback to JWT decode if missing
+    let levelPriority = localStorage.getItem('levelPriority');
+    if (!levelPriority) {
+      try {
+        const decoded: any = jwtDecode(token);
+        const role = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+        levelPriority = role ? role.trim() : null;
+        if (levelPriority) localStorage.setItem('levelPriority', levelPriority);
+      } catch {
+        // invalid token → let user log in fresh
+        localStorage.removeItem('token');
+        setCheckingAuth(false);
+        return;
+      }
+    }
 
     window.location.href =
       levelPriority === 'Primary' ? '/security-view/dashboard' : '/dashboards/newmainmenu';

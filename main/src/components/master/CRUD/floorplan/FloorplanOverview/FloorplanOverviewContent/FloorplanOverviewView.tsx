@@ -30,8 +30,9 @@ const FloorplanOverviewView = React.forwardRef<
     visibility: Record<SectionKey, VisibilityState>;
     toggleSectionHide: (section: SectionKey) => void;
     isVisible: (section: SectionKey, id: string) => boolean;
+    selectedItem: string | null;
   }
->(({ zoomable, visibility, toggleSectionHide, isVisible }, ref) => {
+>(({ zoomable, visibility, toggleSectionHide, isVisible, selectedItem }, ref) => {
   const dispatch: AppDispatch = useDispatch();
   const activeFloorPlan = useSelector((state: RootState) => state.floorplanReducer.selectedFloorplan);
 
@@ -92,6 +93,7 @@ const FloorplanOverviewView = React.forwardRef<
 
   const { data: maskedAreasResponse } = useMaskedAreaList({
     ...defaultFloorplanDeviceFilter,
+    Length: 999,
     filters: { FloorplanId: [activeFloorPlan?.id ?? ''], FloorId: [] },
   });
   const maskedAreas = useMemo(
@@ -102,16 +104,19 @@ const FloorplanOverviewView = React.forwardRef<
 
   const { data: devicesResponse } = useFloorplanDeviceList({
     ...defaultFloorplanDeviceFilter,
+    Length: 999,
     filters: { FloorplanId: [activeFloorPlan?.id ?? ''] },
   });
   const devices = useMemo(
     () => (devicesResponse?.data || []).filter((item) => isVisible('devices', item.id)),
     [devicesResponse, isVisible],
   );
+  // console.log("Devices", devices)
   const showDevices = !visibility.devices.accordionHidden;
 
   const { data: patrolAreasResponse } = usePatrolAreaList({
     ...defaultFloorplanDeviceFilter,
+    Length: 999,
     filters: { FloorplanId: activeFloorPlan?.id ?? '', FloorId: '' },
   });
   const patrolAreas = useMemo(
@@ -122,6 +127,7 @@ const FloorplanOverviewView = React.forwardRef<
 
   const { data: geofenceAlarmsResponse } = useGeoFencingAlarms({
     ...defaultFloorplanDeviceFilter,
+    Length: 999,
     filters: { FloorplanId: activeFloorPlan?.id ?? '' },
   });
   const geofenceAlarms = useMemo(
@@ -132,6 +138,7 @@ const FloorplanOverviewView = React.forwardRef<
 
   const { data: stayOnAreaAlarmsResponse } = useStayOnAreaAlarms({
     ...defaultFloorplanDeviceFilter,
+    Length: 999,
     filters: { FloorplanId: activeFloorPlan?.id ?? '' },
   });
   const stayOnAreaAlarms = useMemo(
@@ -142,6 +149,7 @@ const FloorplanOverviewView = React.forwardRef<
 
   const { data: overpopulatingAlarmsResponse } = useOverPopulatingAlarms({
     ...defaultFloorplanDeviceFilter,
+    Length: 999,
     filters: { FloorplanId: activeFloorPlan?.id ?? '' },
   });
   const overpopulatingAlarms = useMemo(
@@ -152,6 +160,7 @@ const FloorplanOverviewView = React.forwardRef<
 
   const { data: boundaryAlarmsResponse } = useBoundaryAlarms({
     ...defaultFloorplanDeviceFilter,
+    Length: 999,
     filters: { FloorplanId: activeFloorPlan?.id ?? '' },
   });
   const boundaryAlarms = useMemo(
@@ -537,6 +546,7 @@ const FloorplanOverviewView = React.forwardRef<
             stageX={stagePos.x}
             stageY={stagePos.y}
             stageRef={stageRef}
+            selectedItem={selectedItem}
             // Pass the preventDefault function to Konva stage
             onWheel={(e: any) => {
               if (e.evt.ctrlKey) {

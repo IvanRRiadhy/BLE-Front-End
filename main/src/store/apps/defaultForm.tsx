@@ -298,7 +298,7 @@ export const defaultFloorplanForm: FloorplanType = {
   floorX: 0,
   floorY: 0,
   meterPerPx: 0,
-  engineId: '',
+  // engineId: '',
   applicationId: localStorage.getItem('applicationId') || '',
   createdBy: '',
   createdAt: '',

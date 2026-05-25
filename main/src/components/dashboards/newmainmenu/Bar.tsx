@@ -148,7 +148,7 @@ const Bar: React.FC = () => {
     <Box
       sx={{
         width: '100%',
-        height: '30vh',
+        height: '28vh',
         borderRadius: '25px',
         boxShadow: (theme) => theme.shadows[10],
         bgcolor: 'background.paper',

@@ -2,6 +2,7 @@
 // @ts-ignore
 import React, { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
+import { jwtDecode } from 'jwt-decode';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 import VisitorCard from 'src/views/master/tag/VisitorCard';
 import AlarmList from 'src/views/Reports/AlarmList';
@@ -14,7 +15,7 @@ const MyVisitLayout = Loadable(lazy(() => import('../layouts/MyVisit/MyVisitLayo
 
 /* ****Pages***** */
 const MainMenuDash = Loadable(lazy(() => import('../views/dashboard/Main')));
-const NewDashboardView = Loadable(lazy(() => import('../views/dashboard/NewDashboardView')));
+const NewDashboardView = Loadable(lazy(() => import('../views/dashboard/NewerDashboardView')));
 const MonitoringDash = Loadable(lazy(() => import('../views/dashboard/Monitoring')));
 const MonitoringConfig = Loadable(lazy(() => import('../views/dashboard/MonitoringConfig')));
 const MyVisitDashboard = Loadable(lazy(() => import('../views/MyVisit/MyVisitDashboard')));
@@ -165,7 +166,22 @@ const roleAccessRules: Record<string, string[]> = {
 };
 
 const withAuth = (element: JSX.Element, path: string): JSX.Element => {
-  const userRole = localStorage.getItem('levelPriority');
+  // 🔹 Read levelPriority from localStorage, fallback to decoding from JWT if missing
+  let userRole = localStorage.getItem('levelPriority');
+  if (!userRole) {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded: any = jwtDecode(token);
+        const role = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+        userRole = role ? role.trim() : null;
+        // Restore the key so navigation is seamless going forward
+        if (userRole) localStorage.setItem('levelPriority', userRole);
+      } catch {
+        // token is invalid — fall through to redirect to login
+      }
+    }
+  }
   const normalize = (p: string) => (p || '').replace(/\/+$/, ''); // remove trailing slash
 
   // 🚨 if no role found

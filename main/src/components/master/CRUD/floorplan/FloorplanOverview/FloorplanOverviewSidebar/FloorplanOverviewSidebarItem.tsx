@@ -20,6 +20,7 @@ type Props = {
   onHideClick: (event: boolean) => void;
   title: string;
   subtitle?: string;
+  color?: string;
   icon?: any;
   show: boolean;
 };
@@ -30,6 +31,7 @@ const FloorplanOverviewSidebarItem = ({
   onHideClick,
   title,
   subtitle,
+  color,
   icon,
   show,
 }: Props) => {
@@ -49,19 +51,22 @@ const FloorplanOverviewSidebarItem = ({
         borderRadius: 1,
         opacity: show ? 1 : 0.4,
         transition: 'all 0.2s',
+        border: color ? `2px solid ${color}` : '1px solid transparent',
+        backgroundColor: color ? `${color}12` : 'transparent',
 
         '&:hover': {
-          backgroundColor: 'action.hover',
+          backgroundColor: color ? `${color}26` : 'action.hover',
         },
 
         '&.Mui-selected': {
-          backgroundColor: 'primary.lighter',
+          backgroundColor: color ? `${color}3D` : 'primary.lighter',
+          borderColor: color ? color : 'primary.main',
         },
       }}
     >
       <ListItemText
         primary={
-          <Typography variant="body2" fontWeight={500} noWrap>
+          <Typography variant="body2" fontWeight={600} noWrap sx={{ color: color ? color : 'text.primary' }}>
             {title}
           </Typography>
         }

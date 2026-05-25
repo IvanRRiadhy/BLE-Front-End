@@ -67,40 +67,46 @@ const Header = () => {
   const activeLayout = layouts.find((l: any) => l.id === activeLayoutId) ?? null;
   const followingPerson = useSelector((state: RootState) => state.layoutReducer.followingPerson);
   // const [visitorList, setVisitorList] = useState<VisitorType[]>([]);
-  const { data: visitorList = [], isLoading: loading } = useAllVisitor();
-  const { data: memberList = [], isLoading: memberLoading } = useAllMembers();
-  const { data: securityList = [], isLoading: securityLoading } = useAllSecuritys();
+  // const { data: visitorList = [], isLoading: loading } = useAllVisitor();
+  // const { data: memberList = [], isLoading: memberLoading } = useAllMembers();
+  // const { data: securityList = [], isLoading: securityLoading } = useAllSecuritys();
   const { data: personList = [], isLoading: personLoading } = useLatestPosition('daily');
   console.log('personList', personList);
-  const filteredVisitorList = visitorList.filter(
-    (v: VisitorType) => v.bleCardNumber && v.bleCardNumber.trim() !== '',
-  );
-  const filteredMemberList = memberList.filter(
-    (m: memberType) => m.bleCardNumber && m.bleCardNumber.trim() !== '',
-  );
-  const filteredSecurityList = securityList.filter(
-    (s: memberType) => s.bleCardNumber && s.bleCardNumber.trim() !== '',
-  );
+  // const filteredVisitorList = visitorList.filter(
+  //   (v: VisitorType) => v.bleCardNumber && v.bleCardNumber.trim() !== '',
+  // );
+  // const filteredMemberList = memberList.filter(
+  //   (m: memberType) => m.bleCardNumber && m.bleCardNumber.trim() !== '',
+  // );
+  // const filteredSecurityList = securityList.filter(
+  //   (s: memberType) => s.bleCardNumber && s.bleCardNumber.trim() !== '',
+  // );
 
   const allPeople: PersonOption[] = [
-    ...filteredVisitorList.map((v) => ({
-      id: v.id,
-      name: v.name,
-      bleCardNumber: v.bleCardNumber,
-      type: 'visitor' as const,
-    })),
-    ...filteredMemberList.map((m) => ({
-      id: m.id,
-      name: m.name,
-      bleCardNumber: m.bleCardNumber,
-      type: 'member' as const,
-    })),
-    ...filteredSecurityList.map((s) => ({
-      id: s.id,
-      name: s.name,
-      bleCardNumber: s.bleCardNumber,
-      type: 'security' as const,
-    })),
+    // ...filteredVisitorList.map((v) => ({
+    //   id: v.id,
+    //   name: v.name,
+    //   bleCardNumber: v.bleCardNumber,
+    //   type: 'visitor' as const,
+    // })),
+    // ...filteredMemberList.map((m) => ({
+    //   id: m.id,
+    //   name: m.name,
+    //   bleCardNumber: m.bleCardNumber,
+    //   type: 'member' as const,
+    // })),
+    // ...filteredSecurityList.map((s) => ({
+    //   id: s.id,
+    //   name: s.name,
+    //   bleCardNumber: s.bleCardNumber,
+    //   type: 'security' as const,
+    // })),
+    ...personList.map((person: any) => ({
+      id: person.personId,
+      name: person.personName,
+      bleCardNumber: person.bleCardNumber,
+      type: person.personType,
+    }))
   ];
   // const [loading, setLoading] = useState(false);
   const [selectedVisitor, setSelectedVisitor] = useState<VisitorType | null>(null);
@@ -119,21 +125,21 @@ const Header = () => {
     color: theme.palette.text.secondary,
   }));
 
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement); // Update state based on fullscreenElement
-    };
-    console.log('isFullscreen', isFullscreen);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange); // Safari
-    document.addEventListener('msfullscreenchange', handleFullscreenChange); // IE/Edge
+  // useEffect(() => {
+  //   const handleFullscreenChange = () => {
+  //     setIsFullscreen(!!document.fullscreenElement); // Update state based on fullscreenElement
+  //   };
+  //   console.log('isFullscreen', isFullscreen);
+  //   document.addEventListener('fullscreenchange', handleFullscreenChange);
+  //   document.addEventListener('webkitfullscreenchange', handleFullscreenChange); // Safari
+  //   document.addEventListener('msfullscreenchange', handleFullscreenChange); // IE/Edge
 
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
-    };
-  }, []);
+  //   return () => {
+  //     document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  //     document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+  //     document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+  //   };
+  // }, []);
 
   // 🟢 When a visitor is chosen → Follow them
   const handleFollowPerson = (person: PersonOption) => {
@@ -336,7 +342,7 @@ const Header = () => {
                       if (newValue) handleFollowPerson(newValue);
                     }}
                     options={allPeople}
-                    loading={loading || memberLoading || securityLoading}
+                    loading={personLoading}
                     getOptionLabel={(option) => option.name}
                     isOptionEqualToValue={(option, value) => option.id === value.id}
                     sx={{ width: 300 }}

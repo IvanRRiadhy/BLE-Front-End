@@ -419,6 +419,7 @@ const FullLayout: FC = () => {
               <Box
                 sx={{
                   minHeight: 'calc(100vh - 170px)',
+                  overflow: 'hidden',
                   py: customizer.isHorizontal ? 1 : 0,
                 }}
               >

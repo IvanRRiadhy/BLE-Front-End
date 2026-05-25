@@ -270,7 +270,7 @@ const Tracking: React.FC = () => {
     <Box
       sx={{
         width: '100%',
-        height: '25vh', //32vh
+        height: '28vh', //32vh
         borderRadius: '25px',
         boxShadow: (theme) => theme.shadows[10],
         bgcolor: 'background.paper',

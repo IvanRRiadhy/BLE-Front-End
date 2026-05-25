@@ -25,6 +25,8 @@ const FloorplanOverview = () => {
     boundary: { accordionHidden: false, items: {} },
   });
 
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+
   const isVisible = useCallback((section: SectionKey, id: string) => {
     const s = visibility[section];
     if (s.items[id] !== undefined) return s.items[id];
@@ -100,6 +102,8 @@ const FloorplanOverview = () => {
             toggleItem={toggleItem}
             isVisible={isVisible}
             onExport={handleExport}
+            selectedItem={selectedItem}
+            setSelectedItem={setSelectedItem}
           />
         </Box>
 
@@ -110,6 +114,7 @@ const FloorplanOverview = () => {
             visibility={visibility}
             toggleSectionHide={toggleSectionHide}
             isVisible={isVisible}
+            selectedItem={selectedItem}
           />
         </Box>
       </AppCard>

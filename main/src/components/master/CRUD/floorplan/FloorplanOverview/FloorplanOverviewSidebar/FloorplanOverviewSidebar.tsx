@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useSelector, RootState } from 'src/store/Store';
+import { useSelector, RootState, useDispatch } from 'src/store/Store';
+import { SelectFloorplan } from 'src/store/apps/crud/floorplan';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import {
   Box,
@@ -12,6 +13,7 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
+  Tooltip,
 } from '@mui/material';
 
 import {
@@ -26,6 +28,7 @@ import {
   IconUsers,
   IconSquare,
   IconDeviceIpad,
+  IconExternalLink,
 } from '@tabler/icons-react';
 
 import { useMaskedAreaList } from 'src/hooks/useMaskedArea';
@@ -40,6 +43,7 @@ import FloorplanOverviewSidebarItem from './FloorplanOverviewSidebarItem';
 import { SectionKey, VisibilityState } from 'src/views/master/crud/FloorplanOverviewTypes';
 import { PictureAsPdf, TableChart } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
+import { useAllAlarmCategory } from 'src/hooks/AlarmSetting/useAlarmCategory';
 
 type Props = {
   visibility: Record<SectionKey, VisibilityState>;
@@ -47,6 +51,8 @@ type Props = {
   toggleItem: (section: SectionKey, id: string, list: any[]) => void;
   isVisible: (section: SectionKey, id: string) => boolean;
   onExport: (type: 'pdf' | 'png') => void;
+  selectedItem: string | null;
+  setSelectedItem: (id: string | null) => void;
 };
 
 const FloorplanOverviewSidebar = ({
@@ -55,14 +61,68 @@ const FloorplanOverviewSidebar = ({
   toggleItem,
   isVisible,
   onExport,
+  selectedItem,
+  setSelectedItem,
 }: Props) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isExporting, setIsExporting] = useState(false);
+
+  const handleSectionRedirect = (section: SectionKey) => {
+    if (!activeFloorplan) return;
+
+    if (['areas', 'devices', 'patrol'].includes(section)) {
+      dispatch(SelectFloorplan(activeFloorplan));
+    }
+
+    switch (section) {
+      case 'areas':
+        navigate('/master/floorplanmaskedarea/edit');
+        break;
+      case 'devices':
+        navigate('/master/device/edit');
+        break;
+      case 'patrol':
+        navigate('/master/patrolarea/edit');
+        break;
+      case 'geofence':
+        navigate('/alarmsetting/geofencing');
+        break;
+      case 'stay':
+        navigate('/alarmsetting/stayonarea');
+        break;
+      case 'over':
+        navigate('/alarmsetting/peoplecounting');
+        break;
+      case 'boundary':
+        navigate('/alarmsetting/boundary');
+        break;
+      default:
+        break;
+    }
+  };
+const alarmCategory = useAllAlarmCategory().data || [];
+const normalize = (v: any) => (typeof v === 'string' ? v.toLowerCase() : '');
+
+const isActive = (name: string) =>
+  alarmCategory.some(a => normalize(a?.alarmCategory) === name && a?.isEnabled);
+
+const isGeoFencingActive = isActive('geofence');
+const isOverPopulatingActive = isActive('overpopulating');
+const isStayOnAreaActive = isActive('stayonarea');
+const isBoundaryActive = isActive('boundary');
 
   const activeFloorplan = useSelector(
     (state: RootState) => state.floorplanReducer.selectedFloorplan,
   );
+  const activeFeatures = useSelector(
+    (state: RootState) => state.sessionReducer.activeFeatures,
+  );
+
+  const hasFeature = (keys: string[]) =>
+    Array.isArray(activeFeatures) && keys.some((k) => activeFeatures.includes(k));
+
   const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -163,7 +223,6 @@ const FloorplanOverviewSidebar = ({
     boundary: false,
   });
 
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
   // ================= LOGIC =================
   const toggleExpand = (section: SectionKey) => {
@@ -230,15 +289,30 @@ const FloorplanOverviewSidebar = ({
             </Typography>
           </Box>
 
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleSectionHide(section);
-            }}
-          >
-            {hidden ? <IconEyeOff size={18} /> : <IconEye size={18} />}
-          </IconButton>
+          <Box display="flex" alignItems="center" gap={0.5}>
+            <Tooltip title={`Go to ${title} edit page`} arrow>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSectionRedirect(section);
+                }}
+                sx={{ color: 'primary.main' }}
+              >
+                <IconExternalLink size={18} />
+              </IconButton>
+            </Tooltip>
+
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleSectionHide(section);
+              }}
+            >
+              {hidden ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+            </IconButton>
+          </Box>
         </Box>
 
         {/* CONTENT */}
@@ -247,11 +321,12 @@ const FloorplanOverviewSidebar = ({
             <Scrollbar sx={{}}>
               {list?.map((item: any) => {
                 const visible = isVisible(section, item.id);
-
+                console.log("Item", item);
                 return (
                   <FloorplanOverviewSidebarItem
                     key={item.id}
                     title={item.name || item.label}
+                    color={item.color || item.colorArea}
                     selected={selectedItem === item.id}
                     onClick={() => setSelectedItem(item.id)}
                     show={visible}
@@ -267,7 +342,7 @@ const FloorplanOverviewSidebar = ({
   };
 
   return (
-    <Box sx={{ width: '260px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ width: '320px', height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* HEADER */}
       <Box px={2} py={2}>
         <Typography variant="h5" fontWeight={700}>
@@ -279,23 +354,23 @@ const FloorplanOverviewSidebar = ({
       <Box sx={{ flex: 1, overflowY: 'auto', px: 1, mt: 1, minHeight: 0 }}>
         {renderSection('areas', 'Area(s)', <IconMap size={16} />, areas?.data || [])}
         {renderSection('devices', 'BLE Readers', <IconDeviceIpad size={16} />, devices?.data || [])}
-        {renderSection('patrol', 'Patrol Area(s)', <IconRoute size={16} />, patrol?.data || [])}
+        {hasFeature(['module.patrol']) && renderSection('patrol', 'Patrol Area(s)', <IconRoute size={16} />, patrol?.data || [])}
 
-        {renderSection(
+        {isGeoFencingActive && hasFeature(['module.alarm.geofence']) && renderSection(
           'geofence',
           'Geofence Alarm(s)',
           <IconRadar size={16} />,
           geofence?.data || [],
         )}
-        {renderSection('stay', 'Stay On Area', <IconClock size={16} />, stay?.data || [])}
-        {renderSection('over', 'Overpopulate', <IconUsers size={16} />, over?.data || [])}
-        {renderSection('boundary', 'Boundary', <IconSquare size={16} />, boundary?.data || [])}
+        {isStayOnAreaActive && hasFeature(['module.alarm.stayOnArea']) && renderSection('stay', 'Stay On Area', <IconClock size={16} />, stay?.data || [])}
+        {isOverPopulatingActive && hasFeature(['module.alarm.overpopulating']) && renderSection('over', 'Overpopulate', <IconUsers size={16} />, over?.data || [])}
+        {isBoundaryActive && hasFeature(['module.alarm.boundary']) && renderSection('boundary', 'Boundary', <IconSquare size={16} />, boundary?.data || [])}
       </Box>
       <Box flexGrow="0" />
       {/* FOOTER */}
       <Box p={2} display="flex" justifyContent="space-between" alignItems="center">
         <Button variant="outlined" onClick={handleBack}>
-          Cancel
+          Back
         </Button>
         <Button variant="contained" onClick={handleClick} disabled={isExporting}>
           {isExporting ? <CircularProgress size={20} color="inherit" /> : 'Export'}

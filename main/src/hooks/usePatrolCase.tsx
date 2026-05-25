@@ -84,7 +84,9 @@ export function useUploadCDN() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (formData: FormData) => {
-        // console.log('formData', JSON.stringify(formData));
+      for (const [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
       const response = await axiosCdn.post(API_CDN, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });

@@ -32,6 +32,7 @@ import { useAddFloorplan, useEditFloorplan } from 'src/hooks/useFloorplan';
 import { useAllFloors } from 'src/hooks/useFloor';
 import { useAllEngines } from 'src/hooks/useEngine';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
+import { useUploadCDN } from 'src/hooks/usePatrolCase';
 
 interface FormType {
   type?: string;
@@ -52,6 +53,14 @@ const AddEditFloorplan = ({ type, floorplan, fixedFloorId, trigger }: FormType) 
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
   const addMutation = useAddFloorplan();
   const editMutation = useEditFloorplan();
+  const uploadMutation = useUploadCDN();
+
+  const getCdnUrl = (url?: string | null) => {
+    if (!url) return '';
+    // console.log("URL: ", url)
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return `https://ble-cdn.tunnel.piranticerdasindonesia.com/${url}`;
+  };
 
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
   const dispatch: AppDispatch = useDispatch();
@@ -87,7 +96,7 @@ const AddEditFloorplan = ({ type, floorplan, fixedFloorId, trigger }: FormType) 
     setImage(null);
     setPreview(floorplan?.floorplanImage || null);
   };
-  useEffect(() => {
+  /* useEffect(() => {
     // Only run for edit mode and if floorplanImage is a string path
     if (
       type === 'edit' &&
@@ -117,14 +126,20 @@ const AddEditFloorplan = ({ type, floorplan, fixedFloorId, trigger }: FormType) 
         });
     }
     // eslint-disable-next-line
-  }, [open]);
+  }, [open]); */
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
     if (!formData.name?.trim()) errors.name = 'Floorplan name is required';
     if (!formData.floorId?.trim()) errors.floorId = 'Floor is required';
-    if (!image) errors.floorplanImage = 'Floor Image is required';
+    
+    // Old validation:
+    // if (!image) errors.floorplanImage = 'Floor Image is required';
+    
+    // New CDN validation (requires either a new local image selected or an existing URL string)
+    if (!image && !formData.floorplanImage) errors.floorplanImage = 'Floor Image is required';
+    
     if (!formData.floorX) errors.floorX = 'Floor Length is required';
     if (!formData.floorY) errors.floorY = 'Floor Width is required';
 
@@ -138,13 +153,51 @@ const AddEditFloorplan = ({ type, floorplan, fixedFloorId, trigger }: FormType) 
       return;
     }
 
-    const data = new FormData();
+    setIsSaving(true);
+
+    let finalImageUrl = formData.floorplanImage;
+
+    // If there is a new image selected, upload to CDN first
+    if (image) {
+      const uploadData = new FormData();
+      uploadData.append('file', image);
+
+      try {
+        const uploadRes = await uploadMutation.mutateAsync(uploadData);
+        const uploaded = uploadRes?.collection?.data?.[0];
+        if (!uploaded || !uploaded.fileUrl) {
+          throw new Error('Invalid response from CDN upload');
+        }
+        finalImageUrl = uploaded.fileUrl;
+      } catch (err) {
+        console.error('CDN upload failed:', err);
+        toast.error('Failed to uploading image.');
+        setIsSaving(false);
+        return; // Aborts saving, keeps dialog open
+      }
+    }
+
+    // Comment out original file-upload logic:
+    /*const data = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       if (!['floorplanImage', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key)) {
         data.append(key, value?.toString() ?? '');
       }
     });
     if (image) data.append('floorplanImage', image);
+    */
+
+    // New logic: Construct FormData using the CDN URL string
+    const data = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      if (!['createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key)) {
+        if (key === 'floorplanImage') {
+          data.append('floorplanImage', finalImageUrl || '');
+        } else {
+          data.append(key, value?.toString() ?? '');
+        }
+      }
+    });
 
     try {
       if (type === 'add') {
@@ -158,6 +211,8 @@ const AddEditFloorplan = ({ type, floorplan, fixedFloorId, trigger }: FormType) 
     } catch (error) {
       console.error('Save failed:', error);
       toast.error('Failed to save floorplan.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -382,8 +437,16 @@ const floorOptions = React.useMemo(
                 )}
                 {preview && (
                   <>
+                    {/* Old image tag using BASE_URL (kept as comment):
                     <img
                       src={preview?.startsWith('blob:') ? preview : `${BASE_URL}${preview}`}
+                      alt="Floorplan Preview"
+                      style={{ width: '100%', marginTop: '10px', borderRadius: '5px' }}
+                    />
+                    */}
+                    {/* New image tag using CDN URL */}
+                    <img
+                      src={preview?.startsWith('blob:') ? preview : getCdnUrl(preview)}
                       alt="Floorplan Preview"
                       style={{ width: '100%', marginTop: '10px', borderRadius: '5px' }}
                     />

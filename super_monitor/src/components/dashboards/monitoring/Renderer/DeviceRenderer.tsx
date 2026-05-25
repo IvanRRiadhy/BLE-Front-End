@@ -1,0 +1,787 @@
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import { Stage, Layer, Image as KonvaImage, Text, Line, Label, Tag, Group, Circle } from 'react-konva';
+import { useSelector, useDispatch, RootState } from 'src/store/Store';
+import {
+  fetchBeacon,
+  RefreshBeaconState,
+  cleanupTopicBeacons,
+  AlarmLogItem,
+} from 'src/store/apps/tracking/Beacon';
+import BeaconRenderer from './BeaconRenderer';
+import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
+import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
+import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
+import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
+import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
+import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { darken } from '@mui/material';
+import {
+  LayoutSet,
+  ScreenItem,
+  setFocus,
+  setScreenFloorplan,
+} from 'src/store/apps/monitoring/layout';
+import polylabel from 'polylabel';
+import { startMQTTclient } from 'src/store/apps/tracking/MQTT';
+import { useAllMembers } from 'src/hooks/useMember';
+import { useAllVisitor } from 'src/hooks/useVisitor';
+import { useAllFloorplan } from 'src/hooks/dataFetch';
+
+// Common node type that all area types should have
+interface BaseNode {
+  x_px: number;
+  y_px: number;
+}
+
+// Specific node types for different area types
+type Nodes = {
+  id: string;
+  x: number;
+  y: number;
+  x_px: number;
+  y_px: number;
+  type?: 'corner' | 'center';
+};
+
+// Type guard to check if a value is an array
+const isArray = (value: any): value is any[] => Array.isArray(value);
+
+// Type guard to check if a node has x_px and y_px properties
+const hasPxProperties = (node: any): node is { x_px: number; y_px: number } => {
+  return node && typeof node.x_px === 'number' && typeof node.y_px === 'number';
+};
+
+// Type guard to check if a node has x and y properties
+const hasXYProperties = (node: any): node is { x: number; y: number } => {
+  return node && typeof node.x === 'number' && typeof node.y === 'number';
+};
+
+const closeRing = (ring: number[][]) => {
+  if (!ring.length) return ring;
+  const [fx, fy] = ring[0];
+  const [lx, ly] = ring[ring.length - 1];
+  if (fx !== lx || fy !== ly) return [...ring, [fx, fy]];
+  return ring;
+};
+
+function areaToPolygonRings(area: any): number[][][] {
+  let nodes = area.nodes;
+  if (!nodes && area.areaShape) {
+    try {
+      nodes = JSON.parse(area.areaShape);
+    } catch (e) {
+      nodes = [];
+    }
+  }
+  const outer: number[][] = (nodes ?? []).map((n: Nodes) => [n.x_px, n.y_px]);
+  const holesRaw: Nodes[][] = area.holes ?? [];
+  const holes: number[][][] = holesRaw.map((nodes) => nodes.map((n) => [n.x_px, n.y_px]));
+  return [closeRing(outer), ...holes.map(closeRing)];
+}
+
+const getCornerNodes = (nodes?: Nodes[]) => (nodes ?? []).filter((n) => n.type === 'corner');
+
+// Updated toCanvas function - no scaling needed since we use original coordinates
+function toCanvas(
+  x_px: number,
+  y_px: number,
+  width: number,
+  height: number,
+  originalWidth: number,
+  originalHeight: number,
+) {
+  // Return original coordinates since image is rendered at original size
+  return {
+    x: x_px,
+    y: y_px,
+  };
+}
+
+// DeviceRenderer.tsx
+type DeviceRendererProps = {
+  width: number;
+  height: number;
+  originalWidth: number;
+  originalHeight: number;
+  meterPx: number;
+  imageSrc: HTMLImageElement;
+  devices: FloorplanDeviceType[];
+  areas: any[];
+  showAreas: boolean;
+  showGates: boolean;
+  showBeacons: boolean;
+  beaconSize: number;
+  gateSize: number;
+  topic: string;
+  detailDialogOpen?: boolean;
+  setDetailDialogOpen?: (open: boolean) => void;
+  openTrackDetail?: boolean;
+  setOpenTrackDetail?: (open: boolean) => void;
+  selectedBeaconId?: string;
+  onSelectBeacon: (info: {
+    id: string;
+    area: string;
+    floorplan: string;
+    time: string;
+    dmac: string;
+  }) => void;
+  screenId: string;
+  focusBeaconId?: string;
+  onFocusPosition?: (pt: { x: number; y: number }) => void;
+  focusDmac?: string;
+  showOtherBeacons?: boolean;
+  // Stage transform props (from parent)
+  stageScale: number;
+  stageX: number;
+  stageY: number;
+  stageRef?: React.RefObject<any>;
+  onWheel?: (e: any) => void;
+};
+
+const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
+  const {
+    width,
+    height,
+    originalWidth,
+    originalHeight,
+    meterPx,
+    imageSrc,
+    devices,
+    areas,
+    showAreas,
+    showGates,
+    showBeacons,
+    beaconSize,
+    gateSize,
+    topic,
+    detailDialogOpen,
+    setDetailDialogOpen,
+    openTrackDetail,
+    setOpenTrackDetail,
+    onSelectBeacon,
+    selectedBeaconId,
+    focusBeaconId,
+    focusDmac,
+    onFocusPosition,
+    showOtherBeacons,
+    screenId,
+    stageScale,
+    stageX,
+    stageY,
+    stageRef,
+    onWheel,
+  } = props;
+  const dispatch = useDispatch();
+
+  // const { data: membersData = [] } = useAllMembers();
+  // const { data: visitorsData = [] } = useAllVisitor();
+
+  // Create a memoized lookup map of bleCardNumber -> person info for O(1) performance
+  // const beaconPersonMap = useMemo(() => {
+  //   const map = new Map<string, { label: string; isSecurity: boolean; isMember: boolean; isVisitor: boolean }>();
+
+  //   membersData.forEach((m) => {
+  //     if (m.bleCardNumber) {
+  //       map.set(m.bleCardNumber, {
+  //         label: m.name || m.bleCardNumber,
+  //         isSecurity: false,
+  //         isMember: true,
+  //         isVisitor: false,
+  //       });
+  //     }
+  //   });
+
+  //   visitorsData.forEach((v) => {
+  //     if (v.bleCardNumber) {
+  //       map.set(v.bleCardNumber, {
+  //         label: v.name || v.bleCardNumber,
+  //         isSecurity: false,
+  //         isMember: false,
+  //         isVisitor: true,
+  //       });
+  //     }
+  //   });
+
+  //   return map;
+  // }, [membersData, visitorsData]);
+
+  // Image state like EditAreaRenderer
+  const [bgImage, setBgImage] = useState<HTMLImageElement | undefined>(undefined);
+  const [previewImage, setPreviewImage] = useState<HTMLImageElement | undefined>(undefined);
+  const alarmData = useSelector((state: RootState) => state.BeaconReducer.alarmLogs);
+  const activeAlarm = alarmData.find((a: AlarmLogItem) => a.action === 'active');
+  const investigatedAlarm = alarmData.find((a: AlarmLogItem) => a.action === 'investigated');
+  const [animatedBeacons, setAnimatedBeacons] = useState<{
+    [id: string]: { x: number; y: number };
+  }>({});
+  const [lastSeenBeacons, setLastSeenBeacons] = useState<{
+    [id: string]: {
+      x: number;
+      y: number;
+      lastSeen: number;
+      area: string;
+      floorplan: string;
+      time: string;
+      dmac: string;
+      personInfo: {
+        name: string;
+        type: string;
+      };
+    };
+  }>({});
+
+  const refreshTrigger = useSelector((state: RootState) => state.BeaconReducer.refreshTrigger);
+
+  // Get beacon data from Redux - now an object keyed by beaconId
+  const beaconDataObj = useSelector(
+    (state: RootState) => state.BeaconReducer.beaconsByTopic[topic],
+  );
+
+  // Convert object to array for easier processing
+  const beaconData = useMemo(() => {
+    if (!beaconDataObj) return [];
+    // console.log("BEACON data", beaconDataObj)
+    return Object.values(beaconDataObj);
+  }, [beaconDataObj]);
+
+  // console.log('DeviceRenderer render - topic:', topic, 'beaconData count:', beaconData.length);
+
+  const beacons = useSelector((state: RootState) => state.BeaconReducer.beaconsByTopic);
+  const [highlightTopic, setHighlightTopic] = useState<string | null>(null);
+  const [highlightedFloorplan, setHighlightedFloorplan] = useState<string | null>(null);
+  const [highlightedArea, setHighlightedArea] = useState<string | null>(null);
+  const { data: floorplans = [] } = useAllFloorplan();
+
+  // layout info to know what this screen is displaying
+  const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
+  const layouts = useSelector((state: RootState) =>
+    state.layoutReducer.layouts.find((l: LayoutSet) => l.id === activeLayoutId),
+  );
+  const thisScreen = layouts?.screens.find((s: ScreenItem) => s.id === screenId);
+
+  // Track previous topic to detect changes
+  const prevTopicRef = useRef<string>(topic);
+
+  // background image - like EditAreaRenderer
+  useEffect(() => {
+    if (!imageSrc) {
+      setPreviewImage(undefined);
+      setBgImage(undefined);
+      return;
+    }
+
+    // Create a preview image first
+    const previewUrl = imageSrc.src;
+    const p = new window.Image();
+    // p.crossOrigin = 'anonymous';
+    p.src = previewUrl;
+
+    p.onload = () => {
+      setPreviewImage(p);
+      // Then load the full image
+      const full = new window.Image();
+      // full.crossOrigin = 'anonymous';
+      full.src = imageSrc.src;
+      full.onload = () => setBgImage(full);
+      full.onerror = () => {
+        // Fallback to preview if full image fails
+        if (!bgImage) setBgImage(p);
+      };
+    };
+
+    p.onerror = () => {
+      // If preview fails, try to load the full image directly
+      const f = new window.Image();
+      f.crossOrigin = 'anonymous';
+      f.src = imageSrc.src;
+      f.onload = () => setBgImage(f);
+      f.onerror = () => {
+        console.error('Failed to load image:', imageSrc.src);
+      };
+    };
+  }, [imageSrc]);
+
+  // Reset beacons immediately when topic changes
+  useEffect(() => {
+    // Only reset if topic actually changed
+    if (prevTopicRef.current !== topic) {
+      console.log(
+        `Topic changed from ${prevTopicRef.current} to ${topic}, resetting local beacon state`,
+      );
+      setLastSeenBeacons({});
+      setAnimatedBeacons({});
+      prevTopicRef.current = topic;
+    }
+  }, [topic]);
+
+  // Set up interval to clean up old beacons in Redux
+  useEffect(() => {
+    const interval = setInterval(() => {
+      dispatch(cleanupTopicBeacons(topic));
+    }, 1000); // Clean up every second
+
+    return () => clearInterval(interval);
+  }, [dispatch, topic]);
+
+  // background image effect
+  useEffect(() => {
+    if (
+      !highlightedFloorplan ||
+      !activeLayoutId ||
+      !thisScreen?.id ||
+      thisScreen.display.displayType !== 3
+    )
+      return;
+
+    // ✅ Only the follow screen for this beacon updates floorplan
+    if (thisScreen.display.displayOutput?.toLowerCase() !== focusBeaconId?.toLowerCase()) return;
+
+    dispatch(
+      setScreenFloorplan({
+        layoutId: activeLayoutId,
+        screenId: thisScreen.id,
+        floorplanId: highlightedFloorplan,
+      }),
+    );
+  }, [highlightedFloorplan, activeLayoutId, thisScreen, dispatch, focusBeaconId]);
+
+  // load device icons
+  const useDeviceIcon = (src: string) => {
+    const [img, setImg] = useState<HTMLImageElement | undefined>(undefined);
+    useEffect(() => {
+      const image = new window.Image();
+      image.src = src;
+      image.onload = () => setImg(image);
+    }, [src]);
+    return img;
+  };
+  const iconCCTV = useDeviceIcon(CCTVSVG);
+  const iconGateway = useDeviceIcon(GatewaySVG);
+  const iconFaceRecog = useDeviceIcon(FaceRecog);
+  const iconUnknown = useDeviceIcon(UnknownDevice);
+
+  // fetch beacons
+  // useEffect(() => {
+  //   const unsubscribe = dispatch(fetchBeacon(topic));
+  //   return () => {
+  //     if (typeof unsubscribe === 'function') unsubscribe();
+  //   };
+  // }, [dispatch, topic]);
+
+  // maintain beacon state from Redux data
+  useEffect(() => {
+    if (!beaconData || beaconData.length === 0) {
+      // If no beacon data, clear local state
+      setLastSeenBeacons({});
+      return;
+    }
+
+    // console.log(`Processing ${beaconData.length} beacons for topic ${topic}`);
+
+    setLastSeenBeacons((prev) => {
+      const updated = { ...prev };
+
+      beaconData.forEach((b: any) => {
+        if (!b.point) return;
+
+        // beaconId is the dmac
+        const beaconId = b.beaconId;
+        const dmac = beaconId; // Same as beaconId
+
+        updated[beaconId] = {
+          x: b.point.x,
+          y: b.point.y,
+          lastSeen: b.lastSeen || Date.now(), // Use Redux lastSeen or current time
+          area: b.maskedAreaName || '',
+          floorplan: b.floorplanName || '',
+          time: b.time || '',
+          dmac: dmac,
+          personInfo: {
+            name: b.personName || b.visitorCardName || b.memberCardName || b.securityCardName || 'Unknown',
+            type: b.personCategory,
+          },
+        };
+      });
+      // console.log('updated', updated);
+      // Clean up beacons that are no longer in Redux data
+      Object.keys(updated).forEach((beaconId) => {
+        if (!beaconData.find((b: any) => b.beaconId === beaconId)) {
+          delete updated[beaconId];
+        }
+      });
+
+      return updated;
+    });
+    // dispatch(buildTrackingLogs());
+  }, [beaconData, topic]);
+
+  // animate beacons
+  useEffect(() => {
+    Object.entries(lastSeenBeacons).forEach(([beaconId, beacon]) => {
+      const point = { x: beacon.x, y: beacon.y };
+      const prev = animatedBeacons[beaconId] || point;
+      if (prev.x === point.x && prev.y === point.y) {
+        setAnimatedBeacons((s) => ({ ...s, [beaconId]: point }));
+        return;
+      }
+
+      const startX = prev.x;
+      const startY = prev.y;
+      const endX = point.x;
+      const endY = point.y;
+      const distX = endX - startX;
+      const distY = endY - startY;
+      const distance = Math.sqrt(distX * distX + distY * distY);
+      const speed = 2 / meterPx;
+      const duration = Math.min(Math.max(500, (distance / speed) * 500), 2000);
+      const startTime = performance.now();
+      function animate(now: number) {
+        const t = Math.min(1, (now - startTime) / duration);
+        const nx = startX + (endX - startX) * t;
+        const ny = startY + (endY - startY) * t;
+        setAnimatedBeacons((s) => ({ ...s, [beaconId]: { x: nx, y: ny } }));
+        if (t < 1) requestAnimationFrame(animate);
+      }
+      requestAnimationFrame(animate);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastSeenBeacons]);
+
+  useEffect(() => {
+    if (!refreshTrigger) return;
+    dispatch(RefreshBeaconState());
+    setLastSeenBeacons({});
+    setAnimatedBeacons({});
+  }, [refreshTrigger, dispatch]);
+
+  // Convert beacon position from meters to pixels for focus position
+  useEffect(() => {
+    if (!focusBeaconId || !onFocusPosition) return;
+    const b = animatedBeacons[focusBeaconId];
+    if (!b) return;
+
+    // Convert meters to pixels using meterPx
+    const xPx = b.x;
+    const yPx = b.y;
+
+    // Pass the position in original image coordinates (pixels)
+    onFocusPosition({ x: xPx, y: yPx });
+  }, [animatedBeacons, focusBeaconId, onFocusPosition, meterPx]);
+
+  useEffect(() => {
+    if (!focusBeaconId) return;
+
+    const topic = `people_tracking/highlight/positions/${focusBeaconId}`;
+    console.log(`[MQTT] Subscribing to highlight topic: ${topic}`);
+
+    const unsubscribe = startMQTTclient((msg: any) => {
+      if (!msg?.floorplanId || !msg?.beaconId) return;
+      const payloadId = msg.beaconId;
+
+      if (payloadId !== focusBeaconId) return;
+      // console.log(`[MQTT] Received message on highlight topic: ${topic} with payload:`, msg);
+      setHighlightedFloorplan(msg.floorplanId);
+      setHighlightedArea(msg.area || null);
+    }, topic);
+
+    return () => {
+      console.log(`[MQTT] Unsubscribing from ${topic}`);
+      unsubscribe();
+    };
+  }, [focusBeaconId]);
+
+  // compute static centers for each area
+  const areaCenters = useMemo(() => {
+    const map: Record<string, { x: number; y: number }> = {};
+    for (const area of areas) {
+      const rings = areaToPolygonRings(area);
+      if (!rings.length) continue;
+      const [cx, cy] = polylabel(rings, 1.0);
+      map[area.id] = toCanvas(cx, cy, width, height, originalWidth, originalHeight);
+    }
+    return map;
+  }, [areas, width, height, originalWidth, originalHeight]);
+
+  // track which area is hovered
+  const [hoveredAreaId, setHoveredAreaId] = useState<string | null>(null);
+
+  // render devices - using original image coordinates
+  const renderDeviceShape = (device: FloorplanDeviceType) => {
+    let deviceIcon = iconUnknown;
+    switch (device.type) {
+      case 'Cctv':
+        deviceIcon = iconCCTV;
+        break;
+      case 'BleReader':
+        deviceIcon = iconGateway;
+        break;
+      case 'AccessDoor':
+        deviceIcon = iconFaceRecog;
+        break;
+    }
+    // Use original coordinates directly (no scaling)
+    const x = device.posPxX - (20 * gateSize);
+    const y = device.posPxY - (20 * gateSize);
+    const statusActive = device.deviceStatus.toLocaleLowerCase() === 'active';
+    // console.log("Device", device.reader)
+    return (
+      <Group
+        key={`device-${device.id}`}
+        name="device"
+        onClick={(e: any) => {
+          e.cancelBubble = true;
+          dispatch(setFocus({ type: 'device', id: device.id }));
+        }}
+      >
+        <Text
+          x={x - (40 * gateSize)}
+          y={y - (statusActive ? 5 * gateSize : 25 * gateSize)}
+          text={device.name}
+          fontSize={9 * gateSize}
+          fill="#1976d2"
+          fontStyle="bold"
+          width={120 * gateSize}
+          align="center"
+          listening={false}
+        />
+        {!statusActive && (
+          <Text
+            x={x - (40 * gateSize)}
+            y={y - (12 * gateSize)}
+            text="Non-Active"
+            fontSize={9 * gateSize}
+            fill="red"
+            fontStyle="bold"
+            width={120 * gateSize}
+            align="center"
+            listening={false}
+          />
+        )}
+        <KonvaImage
+          name="device"
+          image={deviceIcon}
+          x={x}
+          y={y} width={40 * gateSize} height={40 * gateSize}
+          stroke={!statusActive ? 'red' : 'transparent'}
+          strokeWidth={!statusActive ? 3 : 0}
+        />
+        {device.reader?.forceReading && (
+          <Circle x={x + (20 * gateSize)} y={y + (20 * gateSize)} radius={((device.reader?.forceRadiusMeter || 2) / meterPx)} fill="transparent" stroke="#1976d2" strokeWidth={2} />
+        )}
+      </Group>
+    );
+  };
+
+  // Generic function to extract points from any node structure
+  const setPointsFromNodes = (nodes: any): number[] => {
+    if (!nodes) return [];
+
+    // If nodes is already an array
+    if (isArray(nodes)) {
+      return nodes.flatMap((node: any) => {
+        if (hasPxProperties(node)) {
+          return [node.x_px, node.y_px];
+        } else if (hasXYProperties(node)) {
+          return [node.x, node.y];
+        }
+        return [];
+      });
+    }
+
+    // If nodes is not an array but has some structure
+    // Try to extract points based on common patterns
+    if (typeof nodes === 'object') {
+      // Check if it has a 'points' property
+      if (nodes.points && isArray(nodes.points)) {
+        return nodes.points.flat();
+      }
+      // Check if it has 'x' and 'y' properties directly
+      if (hasPxProperties(nodes)) {
+        return [nodes.x_px, nodes.y_px];
+      } else if (hasXYProperties(nodes)) {
+        return [nodes.x, nodes.y];
+      }
+    }
+
+    return [];
+  };
+
+  // Specific handler for BoundaryAlarm nodes
+  const setPointsFromBoundaryNodes = (boundaryNodes: any): number[] => {
+    // First try the generic function
+    const points = setPointsFromNodes(boundaryNodes);
+    if (points.length > 0) return points;
+
+    // If that doesn't work, try to inspect the structure
+    console.log('Boundary nodes structure:', boundaryNodes);
+
+    // Return empty array if we can't extract points
+    return [];
+  };
+
+  // Use the image that's actually loaded (like EditAreaRenderer)
+  const imageToDraw = bgImage || previewImage;
+
+  // Don't render if image isn't loaded yet
+  if (!imageToDraw || width <= 0 || height <= 0 || originalWidth <= 0 || originalHeight <= 0) {
+    return null;
+  }
+
+  return (
+    <div style={{ width, height }}>
+      <Stage
+        pixelRatio={1}
+        width={width}
+        height={height}
+        ref={stageRef as any}
+        scaleX={stageScale}
+        scaleY={stageScale}
+        x={stageX}
+        y={stageY}
+        onMouseDown={(e) => {
+          const nm = (e.target && (e.target as any).name && (e.target as any).name()) || '';
+          if (!['area', 'device', 'beacon'].includes(nm)) {
+            dispatch(setFocus({ type: '', id: '' }));
+          }
+        }}
+        onWheel={onWheel}
+      >
+        <Layer>
+          {/* Render image at original size - only when image is loaded */}
+          {imageToDraw && (
+            <KonvaImage
+              name="background"
+              image={imageToDraw}
+              width={originalWidth}
+              height={originalHeight}
+            />
+          )}
+
+          {/* Areas */}
+          {showAreas &&
+            areas.map((area: any) => {
+              let nodes = area.nodes;
+              if (!nodes && area.areaShape) {
+                try {
+                  nodes = JSON.parse(area.areaShape);
+                } catch (e) {
+                  nodes = [];
+                }
+              }
+              const color = area.colorArea || '#1976d2';
+              return (
+                <Line
+                  key={area.id}
+                  name="area"
+                  points={setPointsFromNodes(nodes)}
+                  stroke={darken(color, 0.5)}
+                  strokeWidth={5}
+                  lineJoin="round"
+                  lineCap="round"
+                  closed
+                  fill={color}
+                  opacity={0.5}
+                  onMouseEnter={() => setHoveredAreaId(area.id)}
+                  onMouseLeave={() => setHoveredAreaId((id) => (id === area.id ? null : id))}
+                  onClick={() => dispatch(setFocus({ type: 'area', id: area.id }))}
+                />
+              );
+            })}
+          {/* Devices */}
+          {showGates && devices.map((d: FloorplanDeviceType) => renderDeviceShape(d))}
+
+          {/* Beacons */}
+          {showBeacons &&
+            Object.entries(lastSeenBeacons)
+              .filter(([beaconId]) => showOtherBeacons || beaconId === focusBeaconId)
+              .map(([beaconId, beacon]) => {
+                const anim = animatedBeacons[beaconId] || beacon;
+                // Convert meters to pixels for beacon position
+                const xPx = anim.x;
+                const yPx = anim.y;
+
+                const now = Date.now();
+                const age = now - beacon.lastSeen;
+                const opacity = age > 5000 ? 0.4 : 1.0;
+
+                // Lookup person details in O(1)
+                // const personInfo = beaconPersonMap.get(beaconId) || {
+                //   label: beaconId,
+                //   isSecurity: false,
+                //   isMember: false,
+                //   isVisitor: false,
+                // };
+                const personInfo = {
+                  label: beacon.personInfo.name,
+                  isSecurity: beacon.personInfo.type === 'Security',
+                  isMember: beacon.personInfo.type === 'Member',
+                  isVisitor: beacon.personInfo.type === 'Visitor',
+                }
+
+                return (
+                  <BeaconRenderer
+                    key={`beacon-${beaconId}`}
+                    id={beaconId}
+                    x={xPx}
+                    y={yPx}
+                    beaconSize={beaconSize}
+                    opacity={opacity}
+                    lastSeen={beacon.lastSeen}
+                    area={beacon.area}
+                    floorplan={beacon.floorplan}
+                    time={beacon.time}
+                    clickable
+                    detailDialogOpen={detailDialogOpen}
+                    setDetailDialogOpen={setDetailDialogOpen}
+                    openTrackDetail={openTrackDetail}
+                    setOpenTrackDetail={setOpenTrackDetail}
+                    label={personInfo.label}
+                    isSecurity={personInfo.isSecurity}
+                    isMember={personInfo.isMember}
+                    isVisitor={personInfo.isVisitor}
+                    onClick={() =>
+                      onSelectBeacon({
+                        id: beaconId,
+                        area: beacon.area,
+                        floorplan: beacon.floorplan,
+                        time: beacon.time,
+                        dmac: beacon.dmac || beaconId, // Use beaconId as fallback for dmac
+                      })
+                    }
+                  />
+                );
+              })}
+        </Layer>
+
+        {/* Hover label Layer (non-interactive) */}
+        <Layer listening={false}>
+          {hoveredAreaId && areaCenters[hoveredAreaId] && (
+            <Label
+              x={areaCenters[hoveredAreaId].x}
+              y={areaCenters[hoveredAreaId].y}
+              listening={false}
+            >
+              <Tag
+                fill="rgba(0,0,0,0.75)"
+                cornerRadius={4}
+                pointerDirection="down"
+                pointerWidth={8}
+                pointerHeight={6}
+              />
+              <Text
+                text={areas.find((a: any) => a.id === hoveredAreaId)?.name || ''}
+                fill="#fff"
+                fontSize={16}
+                padding={6}
+                align="center"
+                listening={false}
+              />
+            </Label>
+          )}
+        </Layer>
+      </Stage>
+    </div>
+  );
+};
+
+export default DeviceRenderer;

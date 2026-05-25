@@ -10,6 +10,9 @@ import { FloorplanType, fetchFloorplan } from 'src/store/apps/crud/floorplan';
 import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { setScreenSettings } from 'src/store/apps/monitoring/layout';
+import { useAllFloors } from 'src/hooks/useFloor';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 
 const ConfigFloorView: React.FC<{
   activeFloorplan: string;
@@ -21,22 +24,25 @@ const ConfigFloorView: React.FC<{
   // setScreenSettings?: (settings: { scale: number; translateX: number; translateY: number }) => void;
 }> = ({ activeFloorplan, zoomable, activeMaskedArea, screenSettings }) => {
   const dispatch: AppDispatch = useDispatch();
-  useEffect(() => {
-    dispatch(fetchFloorplan());
-    dispatch(fetchFloors());
-    dispatch(fetchFloorplanDevices());
-    // dispatch(fetchMaskedAreas());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchFloorplan());
+  //   dispatch(fetchFloors());
+  //   dispatch(fetchFloorplanDevices());
+  //   // dispatch(fetchMaskedAreas());
+  // }, [dispatch]);
   // console.log('testing', useSelector((state: RootState) => state.floorReducer.floors));
   const containerRef = useRef<HTMLDivElement>(null);
-  const floor = useSelector((state: RootState) => state.floorReducer.floors);
-  const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplans);
+  // const floor = useSelector((state: RootState) => state.floorReducer.floors);
+  const {data: floor = []} = useAllFloors();
+  // const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplans);
+  const {data: floorplans = []} = useAllFloorplans();
   const actFloorplan = floorplans.find(
     (floorplan: FloorplanType) => floorplan.id === activeFloorplan,
   );
-  const Areas: MaskedAreaType[] = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
-  );
+  // const Areas: MaskedAreaType[] = useSelector(
+  //   (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
+  // );
+  const {data: Areas = []} = useAllMaskedAreas();
   const filteredArea = Areas.filter((area) => area.floorplanId === activeFloorplan);
   const [showArea, setShowArea] = useState(true);
   const [showGates, setShowGates] = useState(true);

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Grid2 as Grid, Box, Card, CardContent, Typography, List, ListItem, ListItemText, Chip, Divider, CircularProgress, ListItemButton, Switch, Tooltip, styled, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
+import { Grid2 as Grid, Box, Card, CardContent, Typography, List, ListItem, ListItemText, Chip, Divider, CircularProgress, ListItemButton, Switch, Tooltip, styled, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Collapse } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import { useLicenseInfo, toggleFeatures, getMachineId, activateLicense } from 'src/hooks/useInfo';
-import { IconCpu, IconUpload, IconCheck, IconSettings } from '@tabler/icons-react';
+import axiosServices from 'src/utils/axios';
+import { IconCpu, IconUpload, IconCheck, IconSettings, IconChevronDown } from '@tabler/icons-react';
 import toast from 'react-hot-toast';
 import { useSelector, useDispatch } from 'src/store/Store';
 import {
@@ -21,13 +22,6 @@ import {
 import { RootState } from 'src/store/Store';
 import WbSunnyTwoToneIcon from '@mui/icons-material/WbSunnyTwoTone';
 import DarkModeTwoToneIcon from '@mui/icons-material/DarkModeTwoTone';
-import SwipeLeftAltTwoToneIcon from '@mui/icons-material/SwipeLeftAltTwoTone';
-import SwipeRightAltTwoToneIcon from '@mui/icons-material/SwipeRightAltTwoTone';
-import { ViewComfyTwoTone, PaddingTwoTone, BorderOuter } from '@mui/icons-material';
-import CallToActionTwoToneIcon from '@mui/icons-material/CallToActionTwoTone';
-import AspectRatioTwoToneIcon from '@mui/icons-material/AspectRatioTwoTone';
-import WebAssetTwoToneIcon from '@mui/icons-material/WebAssetTwoTone';
-import ViewSidebarTwoToneIcon from '@mui/icons-material/ViewSidebarTwoTone';
 import { Stack, Slider } from '@mui/material';
 
 const infoSections = [
@@ -126,7 +120,93 @@ const AboutPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [machineIdDialogOpen, setMachineIdDialogOpen] = useState(false);
   const [fetchedMachineId, setFetchedMachineId] = useState('');
+  const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
 
+  const toggleModuleExpand = (moduleKey: string) => {
+    setExpandedModules(prev => ({
+      ...prev,
+      [moduleKey]: !prev[moduleKey]
+    }));
+  };
+
+  const [localFeatures, setLocalFeatures] = useState<Record<string, boolean>>({});
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
+
+  useEffect(() => {
+    if (data?.features) {
+      const initial: Record<string, boolean> = {};
+      if (data.features.modules) {
+        Object.values(data.features.modules).forEach((mod: any) => {
+          initial[mod.key] = mod.isEnabled;
+        });
+      }
+      if (data.features.subModules) {
+        Object.values(data.features.subModules).forEach((subMod: any) => {
+          initial[subMod.key] = subMod.isEnabled;
+        });
+      }
+      setLocalFeatures(initial);
+    }
+  }, [data]);
+
+  const handleToggle = (key: string, enabled: boolean) => {
+    setLocalFeatures((prev) => ({
+      ...prev,
+      [key]: enabled,
+    }));
+  };
+
+  const hasChanges = data?.features?.modules
+    ? Object.values(data.features.modules).some((mod: any) => {
+        const localVal = localFeatures[mod.key];
+        return localVal !== undefined && localVal !== mod.isEnabled;
+      })
+    : false;
+
+  const handleApplyChanges = async () => {
+    if (!data?.features?.modules) return;
+    setIsApplying(true);
+    const changedModules = Object.values(data.features.modules).filter((mod: any) => {
+      const localVal = localFeatures[mod.key];
+      return localVal !== undefined && localVal !== mod.isEnabled;
+    });
+
+    try {
+      await Promise.all(
+        changedModules.map((mod: any) =>
+          axiosServices.post('/api/license/module/toggle', {
+            featureKey: mod.key,
+            enabled: localFeatures[mod.key],
+          })
+        )
+      );
+      toast.success('Module changes applied successfully.');
+
+      // 🧹 Targeted logout: Clear session data but preserve "Remember this Device"
+      const itemsToKeep = [
+        'rememberedAdminUsername',
+        'rememberedVisitorUsername',
+        'rememberMePreference',
+        'rememberedLoginMode',
+      ];
+
+      Object.keys(localStorage).forEach((key) => {
+        if (!itemsToKeep.includes(key)) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      window.location.href = '/auth/login'; // Redirect to the login page
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to apply module changes.');
+    } finally {
+      setIsApplying(false);
+      setConfirmDialogOpen(false);
+    }
+  };
+  console.log("data", data);
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 200; // Offset for navbar
@@ -430,29 +510,128 @@ const AboutPage = () => {
 
                     <Typography id="modules" variant="h4" mt={6} mb={2}>Modules</Typography>
                     <List dense disablePadding>
-                      {Object.values(data.features.modules).map((mod, idx) => (
-                        <Box key={idx}>
-                          <ListItem disableGutters sx={{ py: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Box pl={2}>
-                              <Typography variant="h6">{mod.displayName}</Typography>
-                              <Typography variant="body1" color="textSecondary">{mod.description}</Typography>
-                            </Box>
-                            <Box display="flex" alignItems="center" gap={2}>
-                              <Chip label={mod.isEnabled ? "Enabled" : "Disabled"} color={mod.isEnabled ? "success" : "default"} size="medium" />
-                              <Tooltip title={`Toggle ${mod.displayName}`} arrow placement="top">
+                      {Object.values(data.features.modules).map((mod, idx) => {
+                        const children = data.features.subModules
+                          ? Object.values(data.features.subModules).filter(subMod => subMod.key.startsWith(`${mod.key}.`))
+                          : [];
+                        const isExpanded = !!expandedModules[mod.key];
+
+                        return (
+                          <Box key={idx}>
+                            <ListItem disableGutters sx={{ py: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Box pl={2} display="flex" alignItems="center" gap={1}>
+                                {children.length > 0 && (
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => toggleModuleExpand(mod.key)}
+                                    sx={{
+                                      p: 0.5,
+                                      transition: 'transform 0.2s',
+                                      transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                                    }}
+                                  >
+                                    <IconChevronDown size={20} />
+                                  </IconButton>
+                                )}
                                 <Box>
-                                  <IOSSwitch 
-                                    checked={mod.isEnabled} 
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => toggleFeatureStatus({ featureKey: mod.key, enabled: e.target.checked })} 
-                                  />
+                                  <Typography variant="h6">{mod.displayName}</Typography>
+                                  <Typography variant="body1" color="textSecondary">{mod.description}</Typography>
                                 </Box>
-                              </Tooltip>
-                            </Box>
-                          </ListItem>
-                          {idx < Object.values(data.features.modules).length - 1 && <Divider component="li" />}
-                        </Box>
-                      ))}
+                              </Box>
+                              <Box display="flex" alignItems="center" gap={2}>
+                                <Chip
+                                  label={(localFeatures[mod.key] ?? mod.isEnabled) ? "Enabled" : "Disabled"}
+                                  color={(localFeatures[mod.key] ?? mod.isEnabled) ? "success" : "default"}
+                                  size="medium"
+                                />
+                                <Tooltip title={`Toggle ${mod.displayName}`} arrow placement="top">
+                                  <Box>
+                                    <IOSSwitch 
+                                      checked={localFeatures[mod.key] ?? mod.isEnabled} 
+                                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleToggle(mod.key, e.target.checked)} 
+                                    />
+                                  </Box>
+                                </Tooltip>
+                              </Box>
+                            </ListItem>
+
+                            {children.length > 0 && (
+                              <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                                <List component="div" disablePadding sx={{ pl: 6, pr: 2, bgcolor: 'action.hover', borderRadius: 2, mb: 2 }}>
+                                  {children.map((subMod, subIdx) => (
+                                    <Box key={subMod.key}>
+                                      <ListItem
+                                        disableGutters
+                                        sx={{
+                                          py: 2,
+                                          display: 'flex',
+                                          justifyContent: 'space-between',
+                                          alignItems: 'center'
+                                        }}
+                                      >
+                                        <Box>
+                                          <Typography variant="subtitle1" fontWeight={600}>{subMod.displayName}</Typography>
+                                          <Typography variant="body2" color="textSecondary">{subMod.description}</Typography>
+                                        </Box>
+                                        <Box display="flex" alignItems="center" gap={2}>
+                                          <Chip
+                                            label={(localFeatures[subMod.key] ?? subMod.isEnabled) ? "Enabled" : "Disabled"}
+                                            color={(localFeatures[subMod.key] ?? subMod.isEnabled) ? "success" : "default"}
+                                            size="small"
+                                          />
+                                          {/* <Tooltip title={`Toggle ${subMod.displayName}`} arrow placement="top">
+                                            <Box>
+                                              <IOSSwitch
+                                                size="small"
+                                                checked={localFeatures[subMod.key] ?? subMod.isEnabled}
+                                                disabled={!(localFeatures[mod.key] ?? mod.isEnabled)}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleToggle(subMod.key, e.target.checked)}
+                                              />
+                                            </Box>
+                                          </Tooltip> */}
+                                        </Box>
+                                      </ListItem>
+                                      {subIdx < children.length - 1 && <Divider />}
+                                    </Box>
+                                  ))}
+                                </List>
+                              </Collapse>
+                            )}
+                            {idx < Object.values(data.features.modules).length - 1 && <Divider component="li" />}
+                          </Box>
+                        );
+                      })}
                     </List>
+                    {hasChanges && (
+                      <Box
+                        sx={{
+                          position: 'sticky',
+                          bottom: 24,
+                          display: 'flex',
+                          justifyContent: 'flex-end',
+                          zIndex: 10,
+                          mt: 2,
+                          pointerEvents: 'none',
+                        }}
+                      >
+                        <Button
+                          variant="contained"
+                          color="success"
+                          onClick={() => setConfirmDialogOpen(true)}
+                          sx={{
+                            pointerEvents: 'auto',
+                            boxShadow: (theme) => theme.shadows[10],
+                            borderRadius: '50px',
+                            px: 4,
+                            py: 1.5,
+                            fontSize: '1rem',
+                            fontWeight: 600,
+                          }}
+                        >
+                          Apply
+                        </Button>
+                      </Box>
+                    )}
                   </CardContent>
                 </Card>
               </>
@@ -591,6 +770,29 @@ const AboutPage = () => {
           </Button>
           <Button onClick={handleCopyMachineId} color="primary" variant="contained">
             Copy to Clipboard
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Apply Changes Confirmation Modal */}
+      <Dialog
+        open={confirmDialogOpen}
+        onClose={() => !isApplying && setConfirmDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Confirm Module Changes</DialogTitle>
+        <DialogContent sx={{ mt: 1 }}>
+          <Typography variant="body1">
+            Are you sure you want to apply these changes? This will save the module configuration, log you out of the system, and redirect you to the login page.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={() => setConfirmDialogOpen(false)} color="inherit" disabled={isApplying}>
+            Cancel
+          </Button>
+          <Button onClick={handleApplyChanges} color="primary" variant="contained" disabled={isApplying}>
+            {isApplying ? <CircularProgress size={20} color="inherit" /> : 'Confirm'}
           </Button>
         </DialogActions>
       </Dialog>

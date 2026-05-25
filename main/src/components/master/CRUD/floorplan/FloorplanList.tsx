@@ -37,7 +37,6 @@ import { useFloorplanList, useDeleteFloorplan } from 'src/hooks/useFloorplan';
 import { defaultFloorplanFilter } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
 import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
-import { BASE_URL } from 'src/utils/axios';
 import { fetchFloors } from 'src/store/apps/crud/floor';
 import { fetchEngines } from 'src/store/apps/crud/engine';
 const columns = [
@@ -49,6 +48,12 @@ const columns = [
   // { label: 'Engine', field: 'Engine.Name', sortAble: true },
 ];
 const AddEditFloorplan = lazy(() => import('./AddEditFloorplan'));
+
+const getCdnUrl = (url?: string | null) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `https://ble-cdn.tunnel.piranticerdasindonesia.com/${url}`;
+};
 
 const SKELETON_ROWS = 5;
 
@@ -369,7 +374,7 @@ const FloorplanList = () => {
                         <TableCell>
                           {floorplan.floorplanImage ? (
                             <img
-                              src={`${BASE_URL}${floorplan.floorplanImage}`}
+                              src={getCdnUrl(floorplan.floorplanImage)}
                               alt="Floor"
                               loading="lazy"
                               style={{ width: 80, height: 80, objectFit: 'cover' }}

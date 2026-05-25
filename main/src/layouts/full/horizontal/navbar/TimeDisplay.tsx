@@ -35,7 +35,9 @@ const TimeDisplay = () => {
 
   useEffect(() => {
     setCurrentDateTime(formatDateTime());
+
     const interval = setInterval(() => setCurrentDateTime(formatDateTime()), 1000);
+        console.log("CurrentDateTime", currentDateTime)
     return () => clearInterval(interval);
   }, [language]);
 

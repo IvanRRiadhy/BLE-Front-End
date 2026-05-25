@@ -36,9 +36,10 @@ interface FormType {
   type?: 'add' | 'edit';
   bleReader?: bleReaderType;
   trigger?: (onClick: () => void) => React.ReactNode;
+  fixedBrandId?: string;
 }
 
-const AddEditBleReader = ({ type, bleReader, trigger }: FormType) => {
+const AddEditBleReader = ({ type, bleReader, trigger, fixedBrandId }: FormType) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -65,7 +66,7 @@ const AddEditBleReader = ({ type, bleReader, trigger }: FormType) => {
     if (type === 'edit' && bleReader) {
       setFormData({ ...defaultBleReaderForm, ...bleReader, brandId: bleReader.brand?.id || '', });
     } else {
-      setFormData({ ...defaultBleReaderForm });
+      setFormData({ ...defaultBleReaderForm, brandId: fixedBrandId || '' });
     }
     setTimeout(() => {
       setLoading(false);
@@ -233,6 +234,7 @@ const AddEditBleReader = ({ type, bleReader, trigger }: FormType) => {
               <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel htmlFor="brand-id">Brand</CustomFormLabel>
                 <Autocomplete
+                  disabled={!!fixedBrandId}
                   options={brandData.map((b) => ({ id: b.id, label: b.name }))}
                   value={
                     brandData

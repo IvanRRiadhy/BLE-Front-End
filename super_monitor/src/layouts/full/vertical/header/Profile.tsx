@@ -1,0 +1,137 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import React, { useState } from 'react';
+import { Link } from 'react-router';
+import { Box, Menu, Avatar, Typography, Divider, Button, IconButton, Stack } from '@mui/material';
+// import * as dropdownData from './data';
+
+import { IconMail } from '@tabler/icons-react';
+
+import ProfileImg from 'src/assets/images/profile/user-1.jpg';
+
+const Profile = () => {
+  const [anchorEl2, setAnchorEl2] = useState(null);
+  const handleClick2 = (event: any) => {
+    setAnchorEl2(event.currentTarget);
+  };
+  const handleClose2 = () => {
+    setAnchorEl2(null);
+  };
+
+  return (
+    <Box>
+      <IconButton
+        size="large"
+        aria-label="show 11 new notifications"
+        color="inherit"
+        aria-controls="msgs-menu"
+        aria-haspopup="true"
+        sx={{
+          ...(typeof anchorEl2 === 'object' && {
+            color: 'primary.main',
+          }),
+        }}
+        onClick={handleClick2}
+      >
+        <Avatar
+          src={ProfileImg}
+          alt={ProfileImg}
+          sx={{
+            width: 35,
+            height: 35,
+          }}
+        />
+      </IconButton>
+      {/* ------------------------------------------- */}
+      {/* Message Dropdown */}
+      {/* ------------------------------------------- */}
+      <Menu
+        id="msgs-menu"
+        anchorEl={anchorEl2}
+        keepMounted
+        open={Boolean(anchorEl2)}
+        onClose={handleClose2}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        sx={{
+          '& .MuiMenu-paper': {
+            width: '360px',
+            p: 4,
+          },
+        }}
+      >
+        <Typography variant="h5">User Profile</Typography>
+        <Stack direction="row" py={3} spacing={2} alignItems="center">
+          <Avatar src={ProfileImg} alt={ProfileImg} sx={{ width: 95, height: 95 }} />
+          <Box>
+            <Typography variant="subtitle2" color="textPrimary" fontWeight={600}>
+              {localStorage.getItem('fullName')}
+            </Typography>
+            <Typography variant="subtitle2" color="textSecondary">
+              {localStorage.getItem('groupName')}
+            </Typography>
+            <Typography
+              variant="subtitle2"
+              color="textSecondary"
+              display="flex"
+              alignItems="center"
+              gap={1}
+            >
+              <IconMail width={15} height={15} />
+              {localStorage.getItem('email')}
+            </Typography>
+          </Box>
+        </Stack>
+        <Divider />
+        <Box mt={2} gap={3}>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => {
+              if (window.location.pathname.startsWith('/my-visit')) {
+                window.location.href = '/my-visit/about';
+              } else if (window.location.pathname.startsWith('/security-view')) {
+                window.location.href = '/security-view/about';
+              } else {
+                window.location.href = '/about';
+              }
+            }}
+            fullWidth
+            sx={{
+              mb: 2,
+            }}
+          >
+            About
+          </Button>
+          <Button
+            variant="outlined"
+            color="primary"
+            //component={Link}
+            onClick={() => {
+              // 🧹 Targeted logout: Clear session data but preserve "Remember this Device"
+              const itemsToKeep = [
+                'rememberedAdminUsername',
+                'rememberedVisitorUsername',
+                'rememberMePreference',
+                'rememberedLoginMode',
+              ];
+
+              Object.keys(localStorage).forEach((key) => {
+                if (!itemsToKeep.includes(key)) {
+                  localStorage.removeItem(key);
+                }
+              });
+
+              window.location.href = '/auth/login'; // Redirect to the login page
+            }}
+            fullWidth
+          >
+            Logout
+          </Button>
+        </Box>
+      </Menu>
+    </Box>
+  );
+};
+
+export default Profile;
