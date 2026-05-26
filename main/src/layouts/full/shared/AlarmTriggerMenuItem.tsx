@@ -77,49 +77,8 @@ const AlarmTriggerMenuItem = ({
     });
   }, [isSeen, isClicked]);
 
-  const handleHoverStart = async () => {
-    if (!onMarkSeen || isSeen) return;
-    // console.log('Hover Start');
-    if (isSeen || isClicked || completedRef.current) return;
-
-    hoverActiveRef.current = true;
-
-    await controls.start({
-      backgroundColor: hoverBg,
-      borderLeftColor: hoverBorder,
-      transition: { duration: 2, ease: 'linear' },
-    });
-
-    if (hoverActiveRef.current && !completedRef.current) {
-      completedRef.current = true;
-
-      await controls.start({
-        backgroundColor: seenBg,
-        borderLeftColor: seenBorder,
-        transition: { duration: 0.2 },
-      });
-
-      onMarkSeen(trigger);
-    }
-  };
-
-  const handleHoverEnd = () => {
-    if (!onMarkSeen || isSeen) return;
-    hoverActiveRef.current = false;
-
-    if (!completedRef.current && !isClicked) {
-      controls.start({
-        backgroundColor: unseenBg,
-        borderLeftColor: unseenBorder,
-        transition: { duration: 0.25 },
-      });
-    }
-  };
-
   return (
     <motion.div
-      onHoverStart={handleHoverStart}
-      onHoverEnd={handleHoverEnd}
       animate={controls}
       initial={{
         backgroundColor: isSeen ? seenBg : unseenBg,
@@ -137,6 +96,10 @@ const AlarmTriggerMenuItem = ({
           p: 1.5,
           cursor: 'pointer',
           backgroundColor: 'transparent',
+          transition: 'background-color 0.2s ease',
+          '&:hover': {
+            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+          },
         }}
       >
         {/* HEADER */}

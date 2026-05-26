@@ -73,6 +73,10 @@ const SkylineSubMenu = ({ item, onCloseAll }: SubMenuProps) => {
           anchorEl={anchorEl}
           open={open}
           onClose={handleClose}
+          disableAutoFocusItem
+          disableRestoreFocus
+          disableEnforceFocus
+          autoFocus={false}
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
           transformOrigin={{ vertical: 'top', horizontal: 'left' }}
           sx={{ pointerEvents: 'none' }}
@@ -222,6 +226,10 @@ const SkylineNavbar = () => {
                   anchorEl={anchorEl}
                   open={isCurrentActive || isCurrentLocked}
                   onClose={handleGlobalClose}
+                  disableAutoFocusItem
+                  disableRestoreFocus
+                  disableEnforceFocus
+                  autoFocus={false}
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                   transformOrigin={{ vertical: 'top', horizontal: 'left' }}
                   sx={{ pointerEvents: isCurrentLocked ? 'auto' : 'none' }}

@@ -32,6 +32,22 @@ import { fetchAlarmSetting } from 'src/store/apps/alarmsetting/alarmSettings';
 import { fetchDailyReport } from 'src/store/apps/crud/analytics';
 import { useHorizontalOverflow } from '../../shared/useHorizontalOverflow';
 
+const AppBarStyled = styled(AppBar)<{ topbarheight: number | string }>(({ theme, topbarheight }) => ({
+  background: theme.palette.background.paper,
+  justifyContent: 'center',
+  backdropFilter: 'blur(4px)',
+
+  [theme.breakpoints.up('lg')]: {
+    minHeight: topbarheight,
+  },
+}));
+
+const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
+  margin: '0 auto',
+  width: '100%',
+  color: `${theme.palette.text.secondary} !important`,
+}));
+
 const Header = () => {
   const lgDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('lg'));
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
@@ -44,20 +60,7 @@ const Header = () => {
   const settings = useSelector((state: RootState) => state.settings);
   const dispatch = useDispatch();
 
-  const AppBarStyled = styled(AppBar)(({ theme }) => ({
-    background: theme.palette.background.paper,
-    justifyContent: 'center',
-    backdropFilter: 'blur(4px)',
 
-    [theme.breakpoints.up('lg')]: {
-      minHeight: settings.TopbarHeight,
-    },
-  }));
-  const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
-    margin: '0 auto',
-    width: '100%',
-    color: `${theme.palette.text.secondary} !important`,
-  }));
 
   useEffect(() => {
     dispatch(fetchAlarmSetting());
@@ -94,7 +97,7 @@ const Header = () => {
   };
 
   return (
-    <AppBarStyled position="sticky" color="default" elevation={8}>
+    <AppBarStyled position="sticky" color="default" elevation={8} topbarheight={settings.TopbarHeight}>
       <ToolbarStyled
         sx={{
           maxWidth: settings.isLayout === 'boxed' ? 'lg' : '100%!important',
@@ -139,18 +142,16 @@ const Header = () => {
             }}
           >
             <Box display="flex" justifyContent="space-between" alignItems="center">
-              {!isOverflowing && (
-                <Box
-                  ref={navRef}
-                  sx={{
-                    // overflowx: 'hidden',
-                    whiteSpace: 'nowrap',
-                    maxWidth: '100%',
-                  }}
-                >
-                  <SkylineNavbar />
-                </Box>
-              )}
+              <Box
+                ref={navRef}
+                sx={{
+                  display: isOverflowing ? 'none' : 'block',
+                  whiteSpace: 'nowrap',
+                  maxWidth: '100%',
+                }}
+              >
+                <SkylineNavbar />
+              </Box>
 
               {/* Right section */}
               <Box display="flex" alignItems="center" sx={{ gap: 2 }}>
