@@ -29,7 +29,7 @@ import { VisitorType } from 'src/store/apps/crud/visitor';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import { AlarmTriggerType } from 'src/store/apps/crud/alarmTrigger';
 import { uniqueId } from 'lodash';
-import { useAlarmTriggerList, useAllAlarmTriggers } from 'src/hooks/useAlarmTrigger';
+import { useAlarmTriggerList, useAllAlarmTriggers, useAcknowledgeAlarmTrigger } from 'src/hooks/useAlarmTrigger';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllVisitor } from 'src/hooks/useVisitor';
 import { AlarmLogItem, ClearSeenAlarms, MarkAllAlarmsSeen } from 'src/store/apps/tracking/Beacon';
@@ -72,6 +72,7 @@ const Notifications = () => {
   const dispatch: AppDispatch = useDispatch();
   // const navigate = useNavigate();
   const theme = useTheme();
+  const acknowledgeMutation = useAcknowledgeAlarmTrigger();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const bellRef = useRef<HTMLButtonElement | null>(null);
   const [bubbles, setBubbles] = useState<BubbleData[]>([]);
@@ -515,8 +516,13 @@ const Notifications = () => {
                 <span>
                   <IconButton
                     size="small"
-                    disabled={unseenCount === 0}
+                    disabled={unseenCount === 0 && categorizedTriggers.idle.length === 0}
                     onClick={() => {
+                      categorizedTriggers.idle.forEach((alarm) => {
+                        if (alarm.id && (alarm.action === 'Idle' || alarm.action?.toLowerCase() === 'idle')) {
+                          acknowledgeMutation.mutateAsync(alarm.id);
+                        }
+                      });
                       dispatch(MarkAllAlarmsSeen());
                       setSoftSeenIds(new Set());
                     }}
