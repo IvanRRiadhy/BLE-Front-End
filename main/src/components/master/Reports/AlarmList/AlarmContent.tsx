@@ -470,9 +470,9 @@ const AlarmContent = () => {
 
   const AlarmCard = ({ alarmTrigger }: { alarmTrigger: AlarmTriggerType }) => {
     const imgSrc = alarmTrigger.floorplanImage
-      ? `${BASE_URL}${alarmTrigger.floorplanImage}`
+      ? `${alarmTrigger.floorplanImage}`
       : alarmTrigger.floorplan?.floorplanImage
-        ? `${BASE_URL}${alarmTrigger.floorplan.floorplanImage}`
+        ? `${alarmTrigger.floorplan.floorplanImage}`
         : null;
 
     const lang = language === 'id' ? 'id' : 'en';

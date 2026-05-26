@@ -16,6 +16,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Backdrop,
+  CircularProgress,
 } from '@mui/material';
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
@@ -98,6 +100,7 @@ const VisitorReportFilter = () => {
   const [openReport, setOpenReport] = useState(false);
   const [trackingLogs, setTrackingLogs] = useState<any[]>([]);
   const [alarmLogs, setAlarmLogs] = useState<any[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const [openPresetDialog, setOpenPresetDialog] = useState(false);
   const [presetName, setPresetName] = useState('');
@@ -183,6 +186,7 @@ const VisitorReportFilter = () => {
 
   /* ===================== HANDLERS ===================== */
   const handleGenerate = async () => {
+    setIsGenerating(true);
     try {
       const [tracking, alarms] = await Promise.all([
         visitorSessionMutation.mutateAsync(buildTrackingFilter()),
@@ -196,6 +200,8 @@ const VisitorReportFilter = () => {
     } catch (err) {
       console.error(err);
       toast.error('Failed to generate report');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -229,7 +235,19 @@ const VisitorReportFilter = () => {
 
   /* ===================== UI ===================== */
   return (
-    <Box p={2}>
+    <>
+      <Backdrop
+        sx={{
+          color: '#fff',
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        }}
+        open={isGenerating}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+
+      <Box p={2}>
       <Typography variant="h6" fontWeight={700} textAlign="center" mb={2}>
         Visitor Report Filter
       </Typography>
@@ -337,12 +355,12 @@ const VisitorReportFilter = () => {
         {/* Actions */}
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <Button fullWidth variant="contained" onClick={handleGenerate}>
-              Generate Report
+            <Button fullWidth variant="contained" onClick={handleGenerate} disabled={isGenerating}>
+              {isGenerating ? 'Generating...' : 'Generate Report'}
             </Button>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <Button fullWidth variant="outlined" onClick={() => setOpenPresetDialog(true)}>
+            <Button fullWidth variant="outlined" onClick={() => setOpenPresetDialog(true)} disabled={isGenerating}>
               Save as Preset
             </Button>
           </Grid>
@@ -381,6 +399,7 @@ const VisitorReportFilter = () => {
         alarmLogs={alarmLogs}
       />
     </Box>
+    </>
   );
 };
 

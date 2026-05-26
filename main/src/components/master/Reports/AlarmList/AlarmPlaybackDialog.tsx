@@ -102,7 +102,7 @@ const AlarmPlaybackDialog = ({ open, onClose, data }: Props) => {
     if (!data?.meta.floorplanImage) return;
 
     const img = new window.Image();
-    img.src = `${BASE_URL}${data.meta.floorplanImage}`;
+    img.src = `${data.meta.floorplanImage}`;
 
     img.onload = () => {
       setImageObj(img);

@@ -153,6 +153,7 @@ const FloorAccordionContent = ({
 
 const FloorList = () => {
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
   // const floorData = useSelector((state: RootState) => state.floorReducer.floors);
   // const floorTotalCount = useSelector((state: RootState) => state.floorReducer.floorTotalCount);
   // const floorFilteredCount = useSelector(
@@ -434,11 +435,12 @@ const FloorList = () => {
                 <TableBody>
                   {queryLoading
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
-                    : floorData.map((floor: floorType, index: number) => {
+                      : floorData.map((floor: floorType, index: number) => {
                         const isOpen = expandedFloorId === floor.id;
                         const floorFloorplans = (floorplanData || []).filter(
                           (fp: any) => fp.floorId === floor.id
                         );
+                        const building = floor.building;
                         return (
                           <React.Fragment key={floor.id}>
                             <TableRow>
@@ -458,7 +460,34 @@ const FloorList = () => {
                                 {index + 1 + page * rowsPerPage}
                               </TableCell>
                               <TableCell>{floor.name}</TableCell>
-                              <TableCell>{floor.building?.name}</TableCell>
+                              <TableCell>
+                                {building ? (
+                                  <Tooltip title="View Building" arrow>
+                                    <Box
+                                    component="span"
+                                    onClick={() => navigate('/master/building', { state: { buildingName: building.name } })}
+                                    sx={{
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: 0.5,
+                                      color: 'primary.main',
+                                      fontWeight: 500,
+                                      position: 'relative',
+                                      '&:hover': {
+                                        textDecoration: 'underline',
+                                        color: 'primary.dark',
+                                      },
+                                    }}
+                                  >
+                                    <IconExternalLink size={14} style={{ flexShrink: 0 }} />
+                                    <span>{building.name}</span>
+                                  </Box>
+                                  </Tooltip>
+                                ) : (
+                                  '-'
+                                )}
+                              </TableCell>
                               
                               <TableCell
                                 sx={{

@@ -209,7 +209,7 @@ console.log("active features: ", activeFeatures)
         { id: uniqueId(), title: 'Event Log', icon: IconCalendar, href: '/report/eventlog', key: ['core.reporting', 'core.monitoring'] }, //Reports & Analytics & Monitoring Dashboard
         { id: uniqueId(), title: 'Card History', icon: IconCards, href: '/report/cardhistory' }, 
         { id: uniqueId(), title: 'Patrol Report', icon: IconCalendar, href: '/report/patrolreport/', key: ['module.patrol'] }, //Patrol Management
-        { id: uniqueId(), title: 'Movement Log (--WIP--)', icon: IconCalendar, href: '/report/movementlog/', key: ['core.reporting', 'core.monitoring'] }, //Reports & Analytics & Monitoring Dashboard
+        { id: uniqueId(), title: 'Movement Log', icon: IconCalendar, href: '/report/movementlog/', key: ['core.reporting', 'core.monitoring'] }, //Reports & Analytics & Monitoring Dashboard
         { id: uniqueId(), title: 'Reader Report', icon: IconCalendar, href: '/report/readerreport/', key: ['core.reporting', 'core.monitoring'] }, //Reports & Analytics & Monitoring Dashboard
         { id: uniqueId(), title: 'Reader Health Report', icon: IconCalendar, href: '/report/readerhealthreport/', key: ['core.reporting', 'core.monitoring'] },//Reports & Analytics & Monitoring Dashboard
       ],

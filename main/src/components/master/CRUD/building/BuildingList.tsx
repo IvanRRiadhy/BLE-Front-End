@@ -27,7 +27,7 @@ import {
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
 import { IconTrash, IconChevronDown, IconChevronRight, IconPlus, IconExternalLink } from '@tabler/icons-react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { floorType, SetSelectedFloor, UpdateFilter as UpdateFloorFilter } from 'src/store/apps/crud/floor';
 import AddEditFloor from 'src/components/master/CRUD/floor/AddEditFloor';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
@@ -156,8 +156,17 @@ const BuildingAccordionContent = ({
 
 const BuildingList = () => {
   const dispatch: AppDispatch = useDispatch();
+  const location = useLocation();
   const isChildShown = useSelector((state: RootState) => state.customizer.isChildShown);
   const buildingFilter = useSelector((state: RootState) => state.buildingReducer.buildingFilter);
+
+  useEffect(() => {
+    const initialFilter = location.state?.buildingName
+      ? { ...defaultBuildingFilter, SearchValue: location.state.buildingName }
+      : defaultBuildingFilter;
+
+    dispatch(UpdateFilter(initialFilter));
+  }, [dispatch, location.state?.buildingName]);
 
   const { data, isLoading: queryLoading } = useBuildingList(buildingFilter);
   const { data: floorData, isLoading: floorLoading } = useAllFloors();

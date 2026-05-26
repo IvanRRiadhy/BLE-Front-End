@@ -162,7 +162,7 @@ const TrackingDetailPopup = ({
       // console.log('activeFloorImage', activeFloorImage);
       const img = new window.Image();
       // img.crossOrigin = 'anonymous';
-      img.src = `${BASE_URL}${activeFloorImage}`;
+      img.src = activeFloorImage;
       // console.log('Image', img);
       img.onload = () => {
         setImageObj(img);

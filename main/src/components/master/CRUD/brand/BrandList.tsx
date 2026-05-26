@@ -58,9 +58,9 @@ const ReaderTable = ({
       <Table size="small" stickyHeader aria-label="sticky table">
         <TableHead>
           <TableRow>
-            <TableCell sx={{ fontWeight: 600, width: 80 }}>No</TableCell>
-            <TableCell sx={{ fontWeight: 600 }}>Reader Name</TableCell>
-            <TableCell align="right" sx={{ fontWeight: 600, width: 120 }}>Actions</TableCell>
+            <TableCell sx={{ fontWeight: 600, width: 80, bgcolor: 'action.hover' }}>No</TableCell>
+            <TableCell sx={{ fontWeight: 600, bgcolor: 'action.hover' }}>Reader Name</TableCell>
+            <TableCell align="right" sx={{ fontWeight: 600, width: 120, bgcolor: 'action.hover' }}>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -86,7 +86,7 @@ const ReaderTable = ({
                         size="small"
                         onClick={() => {
                           dispatch(SelectBleReader(reader.id));
-                          navigate('/master/blereader');
+                          navigate('/master/blereader', { state: { readerName: reader.name } });
                         }}
                       >
                         <IconExternalLink size={18} />

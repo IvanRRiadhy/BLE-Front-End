@@ -82,7 +82,7 @@ const InvestigateReplayDialog = ({
     if (!floorplanImage) return;
 
     const img = new window.Image();
-    img.src = `${BASE_URL}${floorplanImage}`;
+    img.src = `${floorplanImage}`;
 
     img.onload = () => {
       setImageObj(img);

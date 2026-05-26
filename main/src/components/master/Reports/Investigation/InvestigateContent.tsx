@@ -362,7 +362,7 @@ const InvestigateContent = () => {
             {sessionData.persons.flatMap((person) =>
               person.sessions.map((session, idx) => {
                 const imgSrc = session.floorplanImage
-                  ? `${BASE_URL}${session.floorplanImage}`
+                  ? `${session.floorplanImage}`
                   : null;
 
                 const lang = language === 'id' ? 'id' : 'en';

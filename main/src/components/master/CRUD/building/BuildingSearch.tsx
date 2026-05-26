@@ -6,17 +6,27 @@ import { UpdateFilter } from 'src/store/apps/crud/building';
 
 const BuildingSearch = () => {
   const dispatch: AppDispatch = useDispatch();
-  const [searchValue, setSearchValue] = useState('');
   const buildingFilter = useSelector(
     (state: RootState) => state.buildingReducer.buildingFilter,
   );
 
+  // Initialize from Redux so it doesn't clear an external filter on mount
+  const [searchValue, setSearchValue] = useState(buildingFilter.SearchValue || '');
+
+  // Keep internal state synced if Redux changes externally (like on mount from location state)
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      dispatch(UpdateFilter({ ...buildingFilter, SearchValue: searchValue.trim() }));
-    }, 1000);
-    return () => clearTimeout(delayDebounce);
-  }, [searchValue, dispatch, buildingFilter]);
+    setSearchValue(buildingFilter.SearchValue || '');
+  }, [buildingFilter.SearchValue]);
+
+  useEffect(() => {
+    // Only dispatch if the local searchValue differs from Redux
+    if (searchValue.trim() !== (buildingFilter.SearchValue || '')) {
+      const delayDebounce = setTimeout(() => {
+        dispatch(UpdateFilter({ ...buildingFilter, SearchValue: searchValue.trim() }));
+      }, 1000);
+      return () => clearTimeout(delayDebounce);
+    }
+  }, [searchValue, dispatch, buildingFilter.SearchValue]);
 
   const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {

@@ -23,7 +23,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconEye, IconTrash } from '@tabler/icons-react';
+import { IconEye, IconTrash, IconExternalLink } from '@tabler/icons-react';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
 import {
   FloorplanType,
@@ -366,10 +366,65 @@ const FloorplanList = () => {
                           {index + 1 + page * rowsPerPage}
                         </TableCell>
                         <TableCell>{floorplan.name}</TableCell>
-                        <TableCell>{floorplan.floor?.name}</TableCell>
                         <TableCell>
-                          {' '}
-                          {getbuildingName(floorplan.floor?.buildingId || '')}
+                          {(() => {
+                            const floor = floorplan.floor;
+                            return floor ? (
+                              <Box
+                                component="span"
+                                onClick={() => navigate('/master/floor', { state: { floorName: floor.name } })}
+                                sx={{
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: 0.5,
+                                  color: 'primary.main',
+                                  fontWeight: 500,
+                                  position: 'relative',
+                                  '&:hover': {
+                                    textDecoration: 'underline',
+                                    color: 'primary.dark',
+                                  },
+                                }}
+                              >
+                                <IconExternalLink size={14} style={{ flexShrink: 0 }} />
+                                <span>{floor.name}</span>
+                              </Box>
+                            ) : (
+                              '-'
+                            );
+                          })()}
+                        </TableCell>
+                        <TableCell>
+                          {(() => {
+                            const floor = floorplan.floor;
+                            const buildingId = floor?.buildingId || '';
+                            const building = buildingData.find((b) => b.id === buildingId);
+                            return building ? (
+                              <Box
+                                component="span"
+                                onClick={() => navigate('/master/building', { state: { buildingName: building.name } })}
+                                sx={{
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: 0.5,
+                                  color: 'primary.main',
+                                  fontWeight: 500,
+                                  position: 'relative',
+                                  '&:hover': {
+                                    textDecoration: 'underline',
+                                    color: 'primary.dark',
+                                  },
+                                }}
+                              >
+                                <IconExternalLink size={14} style={{ flexShrink: 0 }} />
+                                <span>{building.name}</span>
+                              </Box>
+                            ) : (
+                              '-'
+                            );
+                          })()}
                         </TableCell>
                         <TableCell>
                           {floorplan.floorplanImage ? (

@@ -6,17 +6,27 @@ import { UpdateFilter } from 'src/store/apps/crud/bleReader';
 
 const BleReaderSearch = () => {
   const dispatch: AppDispatch = useDispatch();
-  const [searchValue, setSearchValue] = useState('');
   const bleReaderFilter = useSelector(
     (state: RootState) => state.bleReaderReducer.bleReaderFilter,
   );
 
+  // Initialize from Redux so it doesn't clear an external filter on mount
+  const [searchValue, setSearchValue] = useState(bleReaderFilter.SearchValue || '');
+
+  // Keep internal state synced if Redux changes externally (like on mount from location state)
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      dispatch(UpdateFilter({ ...bleReaderFilter, SearchValue: searchValue.trim() }));
-    }, 1000);
-    return () => clearTimeout(delayDebounce);
-  }, [searchValue, dispatch, bleReaderFilter]);
+    setSearchValue(bleReaderFilter.SearchValue || '');
+  }, [bleReaderFilter.SearchValue]);
+
+  useEffect(() => {
+    // Only dispatch if the local searchValue differs from Redux
+    if (searchValue.trim() !== (bleReaderFilter.SearchValue || '')) {
+      const delayDebounce = setTimeout(() => {
+        dispatch(UpdateFilter({ ...bleReaderFilter, SearchValue: searchValue.trim() }));
+      }, 1000);
+      return () => clearTimeout(delayDebounce);
+    }
+  }, [searchValue, dispatch, bleReaderFilter.SearchValue]);
 
   const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {

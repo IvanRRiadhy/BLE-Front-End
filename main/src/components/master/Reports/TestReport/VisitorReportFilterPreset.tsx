@@ -123,6 +123,7 @@ const VisitorReportFilterPreset = ({
   ];
 
   const [selectedPreset, setSelectedPreset] = useState<VisitorFilterPresetType | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [presetToDelete, setPresetToDelete] = useState<VisitorFilterPresetType | null>(null);
@@ -188,6 +189,7 @@ const VisitorReportFilterPreset = ({
       return;
     }
     console.log('Generating report with preset: ', selectedPreset);
+    setIsGenerating(true);
     try {
       const result = await applyMutation.mutateAsync({
   id: selectedPreset.id,
@@ -216,6 +218,8 @@ const VisitorReportFilterPreset = ({
     } catch (error) {
       console.error(error);
       toast.error('Failed to apply filter preset');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -281,7 +285,7 @@ const VisitorReportFilterPreset = ({
           zIndex: (theme) => theme.zIndex.drawer + 1,
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
         }}
-        open={isLoading || deleteMutation.isPending}
+        open={isLoading || deleteMutation.isPending || isGenerating}
       >
         <CircularProgress color="inherit" />
       </Backdrop>
@@ -526,10 +530,10 @@ const VisitorReportFilterPreset = ({
                           onClick={handleGenerateReportClick}
                           sx={{ height: 40 }}
                           disabled={
-                            isLoading || deleteMutation.isPending || applyMutation.isPending
+                            isLoading || deleteMutation.isPending || applyMutation.isPending || isGenerating
                           }
                         >
-                          {applyMutation.isPending ? 'Applying Preset...' : 'Generate By Preset'}
+                          {isGenerating ? 'Generating...' : applyMutation.isPending ? 'Applying Preset...' : 'Generate By Preset'}
                         </Button>
                       </Grid>
                     </Grid>

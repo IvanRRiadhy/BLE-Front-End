@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'react-router';
 import {
   Box,
   Grid2 as Grid,
@@ -46,10 +47,20 @@ const SKELETON_ROWS = 5;
 
 const BleReaderList = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
+
   // 🔹 Local filter state (instead of Redux)
   const [filter, setFilter] = useState(defaultBleReaderFilter);
   const bleReaderFilter = useSelector((state: RootState) => state.bleReaderReducer.bleReaderFilter);
   const readerHealthByTopic = useSelector((state: RootState) => state.ReaderHealthReducer.readerHealthByTopic);
+
+  useEffect(() => {
+    const initialFilter = location.state?.readerName
+      ? { ...defaultBleReaderFilter, SearchValue: location.state.readerName }
+      : defaultBleReaderFilter;
+
+    dispatch(UpdateFilter(initialFilter));
+  }, [dispatch, location.state?.readerName]);
 
   // 🔹 React Query hooks
   const { data, isFetching, isLoading, isFetched, refetch } = useReaderList(bleReaderFilter);

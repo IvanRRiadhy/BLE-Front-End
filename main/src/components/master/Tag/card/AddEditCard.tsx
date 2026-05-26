@@ -315,7 +315,7 @@ const AddEditCard = ({ type, card }: formType) => {
           </DialogTitle>
           <DialogContent>
             <Grid container spacing={3}>
-              <Grid size={{ lg: 3, md: 12, sm: 12 }}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 <CustomFormLabel>Card Details</CustomFormLabel>
                 <CustomTextField
                   id="name"
@@ -357,8 +357,8 @@ const AddEditCard = ({ type, card }: formType) => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid size={{ lg: 4.5, md: 12, sm: 12 }}>
-                <CustomFormLabel>Card Type</CustomFormLabel>
+              {/* <Grid size={{ lg: 4.5, md: 12, sm: 12 }}> */}
+                {/* <CustomFormLabel>Card Type</CustomFormLabel>
                 <CustomSelect
                   id="cardType"
                   name="cardType"
@@ -372,10 +372,10 @@ const AddEditCard = ({ type, card }: formType) => {
                       {item.label}
                     </MenuItem>
                   ))}
-                </CustomSelect>
-                <CustomFormLabel>Registered Area for Returning</CustomFormLabel>
+                </CustomSelect> */}
+                {/* <CustomFormLabel>Registered Area for Returning</CustomFormLabel> */}
 
-                <FormControlLabel
+                {/* <FormControlLabel
                   sx={{ mb: 1 }}
                   control={
                     <Switch
@@ -424,9 +424,9 @@ const AddEditCard = ({ type, card }: formType) => {
                       </Tooltip>
                     </Box>
                   }
-                />
+                /> */}
 
-                {!formData.isMultiMaskedArea && (
+                {/* {!formData.isMultiMaskedArea && (
                   <div
                     style={{
                       marginTop: 8,
@@ -459,9 +459,9 @@ const AddEditCard = ({ type, card }: formType) => {
                       </Typography>
                     </div>
                   </div>
-                )}
-              </Grid>
-              <Grid size={{ lg: 4.5, md: 12, sm: 12 }}>
+                )} */}
+              {/* </Grid> */}
+              <Grid size={{ lg: 6, md: 12, sm: 12 }}>
                 {/* <CustomFormLabel>Card Group (--WIP--)</CustomFormLabel>
                 <CustomSelect
                   id="cardType"

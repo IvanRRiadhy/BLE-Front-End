@@ -293,7 +293,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
           sx={{ mb: 2, '& .MuiTab-root': { textTransform: 'none', fontWeight: 600 } }}
         >
           <Tab value="admin" label="Admin" />
-          <Tab value="visitor" label="Visitor / Guest" />
+          <Tab value="visitor" label="Security" />
         </Tabs>
       </Box>
 
