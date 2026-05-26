@@ -11,6 +11,11 @@ interface SettingsState {
   isLanguage: string;
   isCardShadow: boolean;
   borderRadius: number;
+  beaconIconType: 'person' | 'pin' | 'custom';
+  customSvgPath: string;
+  customSvgScale: number;
+  customSvgOffsetX: number;
+  customSvgOffsetY: number;
 }
 
 const initialState: SettingsState = {
@@ -24,6 +29,11 @@ const initialState: SettingsState = {
   isLanguage: 'en',
   isCardShadow: true,
   borderRadius: 7,
+  beaconIconType: 'person',
+  customSvgPath: '',
+  customSvgScale: 1,
+  customSvgOffsetX: 0,
+  customSvgOffsetY: 0,
 };
 
 export const SettingsSlice = createSlice({
@@ -51,6 +61,21 @@ export const SettingsSlice = createSlice({
     setBorderRadius: (state, action) => {
       state.borderRadius = action.payload;
     },
+    setBeaconIconType: (state, action) => {
+      state.beaconIconType = action.payload;
+    },
+    setCustomSvgPath: (state, action) => {
+      state.customSvgPath = action.payload;
+    },
+    setCustomSvgScale: (state, action) => {
+      state.customSvgScale = action.payload;
+    },
+    setCustomSvgOffsetX: (state, action) => {
+      state.customSvgOffsetX = action.payload;
+    },
+    setCustomSvgOffsetY: (state, action) => {
+      state.customSvgOffsetY = action.payload;
+    },
   },
 });
 
@@ -62,6 +87,11 @@ export const {
   setCardShadow,
   toggleLayout,
   setBorderRadius,
+  setBeaconIconType,
+  setCustomSvgPath,
+  setCustomSvgScale,
+  setCustomSvgOffsetX,
+  setCustomSvgOffsetY,
 } = SettingsSlice.actions;
 
 export default SettingsSlice.reducer;

@@ -18,6 +18,8 @@ import {
   setCardShadow,
   toggleLayout,
   setBorderRadius,
+  setBeaconIconType,
+  setCustomSvgPath,
 } from 'src/store/customizer/SettingsSlice';
 import { RootState } from 'src/store/Store';
 import WbSunnyTwoToneIcon from '@mui/icons-material/WbSunnyTwoTone';
@@ -33,6 +35,7 @@ const infoSections = [
 
 const customizerSections = [
   { id: 'web-customizer', title: 'Web Customizer' },
+  { id: 'monitoring-customizer', title: 'Monitoring Customizer' },
 ];
 
 const IOSSwitch = styled((props: any) => (
@@ -118,6 +121,7 @@ const AboutPage = () => {
   const [activeTab, setActiveTab] = useState<'info' | 'customizer'>(isSuperadmin ? 'info' : 'customizer');
   const [activeSection, setActiveSection] = useState(isSuperadmin ? 'app-details' : 'web-customizer');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const customSvgInputRef = useRef<HTMLInputElement>(null);
   const [machineIdDialogOpen, setMachineIdDialogOpen] = useState(false);
   const [fetchedMachineId, setFetchedMachineId] = useState('');
   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
@@ -274,6 +278,46 @@ const AboutPage = () => {
     }
   };
 
+  const handleCustomIconClick = () => {
+    customSvgInputRef.current?.click();
+  };
+
+  const handleCustomSvgChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.type !== 'image/svg+xml' && !file.name.endsWith('.svg')) {
+        toast.error('Please upload a valid SVG file.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, 'image/svg+xml');
+        const paths = doc.querySelectorAll('path');
+        if (paths.length > 0) {
+          const dAttributes = Array.from(paths)
+            .map((p) => p.getAttribute('d'))
+            .filter(Boolean)
+            .join(' ');
+          if (dAttributes) {
+            dispatch(setCustomSvgPath(dAttributes));
+            dispatch(setBeaconIconType('custom'));
+            toast.success('Custom SVG icon uploaded successfully!');
+          } else {
+            toast.error('No valid path elements found in the SVG.');
+          }
+        } else {
+          toast.error('No path elements found in the SVG.');
+        }
+      };
+      reader.readAsText(file);
+      if (customSvgInputRef.current) {
+        customSvgInputRef.current.value = '';
+      }
+    }
+  };
+
   if (isSuperadmin && isLoading) {
     return (
       <PageContainer title="About" description="Loading About Page">
@@ -336,7 +380,7 @@ const AboutPage = () => {
               {/* Web Customizer Group */}
               <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
                 <Typography variant="subtitle2" fontWeight={700} px={2} py={1.5} sx={{ bgcolor: 'action.hover' }}>
-                  WEB CUSTOMIZER
+                  APP CUSTOMIZER
                 </Typography>
                 <Divider />
                 <List component="nav" sx={{ p: 0 }}>
@@ -637,100 +681,164 @@ const AboutPage = () => {
               </>
             ) : (
               /* Customizer Section */
-              <Card variant="outlined" sx={{ mb: 4 }}>
-                <CardContent>
-                  <Typography id="web-customizer" variant="h4" mb={3}>
-                    Web Customizer
-                  </Typography>
+              <>
+                <Card variant="outlined" sx={{ mb: 4 }}>
+                  <CardContent>
+                    <Typography id="web-customizer" variant="h4" mb={3}>
+                      Web Customizer
+                    </Typography>
 
-                  <Grid container spacing={3}>
-                    <Grid size={{ xs: 12, sm: 6 }}>
-                      <Typography variant="h6" gutterBottom>
-                        Theme Option
-                      </Typography>
-                      <Stack direction={'row'} gap={2} my={2}>
-                        <StyledBox
-                          onClick={() => dispatch(setDarkMode('light'))}
-                          display="flex"
-                          gap={1}
-                          flex={1}
-                          sx={{
-                            borderColor: settings.activeMode === 'light' ? 'primary.main' : 'inherit',
-                            bgcolor: settings.activeMode === 'light' ? 'primary.light' : 'transparent',
-                          }}
-                        >
-                          <WbSunnyTwoToneIcon
-                            color={settings.activeMode === 'light' ? 'primary' : 'inherit'}
-                          />
-                          Light
-                        </StyledBox>
-                        <StyledBox
-                          onClick={() => dispatch(setDarkMode('dark'))}
-                          display="flex"
-                          gap={1}
-                          flex={1}
-                          sx={{
-                            borderColor: settings.activeMode === 'dark' ? 'primary.main' : 'inherit',
-                            bgcolor: settings.activeMode === 'dark' ? 'primary.light' : 'transparent',
-                          }}
-                        >
-                          <DarkModeTwoToneIcon
-                            color={settings.activeMode === 'dark' ? 'primary' : 'inherit'}
-                          />
-                          Dark
-                        </StyledBox>
-                      </Stack>
-                    </Grid>
+                    <Grid container spacing={3}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <Typography variant="h6" gutterBottom>
+                          Theme Option
+                        </Typography>
+                        <Stack direction={'row'} gap={2} my={2}>
+                          <StyledBox
+                            onClick={() => dispatch(setDarkMode('light'))}
+                            display="flex"
+                            gap={1}
+                            flex={1}
+                            sx={{
+                              borderColor: settings.activeMode === 'light' ? 'primary.main' : 'inherit',
+                              bgcolor: settings.activeMode === 'light' ? 'primary.light' : 'transparent',
+                            }}
+                          >
+                            <WbSunnyTwoToneIcon
+                              color={settings.activeMode === 'light' ? 'primary' : 'inherit'}
+                            />
+                            Light
+                          </StyledBox>
+                          <StyledBox
+                            onClick={() => dispatch(setDarkMode('dark'))}
+                            display="flex"
+                            gap={1}
+                            flex={1}
+                            sx={{
+                              borderColor: settings.activeMode === 'dark' ? 'primary.main' : 'inherit',
+                              bgcolor: settings.activeMode === 'dark' ? 'primary.light' : 'transparent',
+                            }}
+                          >
+                            <DarkModeTwoToneIcon
+                              color={settings.activeMode === 'dark' ? 'primary' : 'inherit'}
+                            />
+                            Dark
+                          </StyledBox>
+                        </Stack>
+                      </Grid>
 
-                    {/* Theme Colors */}
-                    <Grid size={12}>
-                      <Typography variant="h6" gutterBottom mt={2}>
-                        Theme Colors
-                      </Typography>
-                      <Grid container spacing={2} my={1}>
-                        {thColors.map((thcolor) => (
-                          <Grid key={thcolor.id} size={{ xs: 4, sm: 2 }}>
-                            <StyledBox
-                              onClick={() => dispatch(setTheme(thcolor.disp))}
-                              sx={{
-                                borderColor:
-                                  settings.activeTheme === thcolor.disp
-                                    ? 'primary.main'
-                                    : 'inherit',
-                                bgcolor:
-                                  settings.activeTheme === thcolor.disp
-                                    ? 'primary.light'
-                                    : 'transparent',
-                              }}
-                            >
-                              <Tooltip title={`${thcolor.disp}`} placement="top">
-                                <Box
-                                  sx={{
-                                    backgroundColor: thcolor.bgColor,
-                                    width: '25px',
-                                    height: '25px',
-                                    borderRadius: '60px',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    display: 'flex',
-                                    color: 'white',
-                                  }}
-                                >
-                                  {settings.activeTheme === thcolor.disp ? (
-                                    <IconCheck width={13} />
-                                  ) : (
-                                    ''
-                                  )}
-                                </Box>
-                              </Tooltip>
-                            </StyledBox>
-                          </Grid>
-                        ))}
+                      {/* Theme Colors */}
+                      <Grid size={12}>
+                        <Typography variant="h6" gutterBottom mt={2}>
+                          Theme Colors
+                        </Typography>
+                        <Grid container spacing={2} my={1}>
+                          {thColors.map((thcolor) => (
+                            <Grid key={thcolor.id} size={{ xs: 4, sm: 2 }}>
+                              <StyledBox
+                                onClick={() => dispatch(setTheme(thcolor.disp))}
+                                sx={{
+                                  borderColor:
+                                    settings.activeTheme === thcolor.disp
+                                      ? 'primary.main'
+                                      : 'inherit',
+                                  bgcolor:
+                                    settings.activeTheme === thcolor.disp
+                                      ? 'primary.light'
+                                      : 'transparent',
+                                }}
+                              >
+                                <Tooltip title={`${thcolor.disp}`} placement="top">
+                                  <Box
+                                    sx={{
+                                      backgroundColor: thcolor.bgColor,
+                                      width: '25px',
+                                      height: '25px',
+                                      borderRadius: '60px',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      display: 'flex',
+                                      color: 'white',
+                                    }}
+                                  >
+                                    {settings.activeTheme === thcolor.disp ? (
+                                      <IconCheck width={13} />
+                                    ) : (
+                                      ''
+                                    )}
+                                  </Box>
+                                </Tooltip>
+                              </StyledBox>
+                            </Grid>
+                          ))}
+                        </Grid>
                       </Grid>
                     </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+
+                {/* Monitoring Customizer */}
+                <Card variant="outlined" sx={{ mb: 4 }}>
+                  <CardContent>
+                    <Typography id="monitoring-customizer" variant="h4" mb={3}>
+                      Monitoring Customizer
+                    </Typography>
+
+                    <Grid container spacing={3}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <Typography variant="h6" gutterBottom>
+                          Beacon Icon Type
+                        </Typography>
+                        <Stack direction={'row'} gap={2} my={2}>
+                          <StyledBox
+                            onClick={() => dispatch(setBeaconIconType('person'))}
+                            display="flex"
+                            gap={1}
+                            flex={1}
+                            sx={{
+                              borderColor: settings.beaconIconType === 'person' ? 'primary.main' : 'inherit',
+                              bgcolor: settings.beaconIconType === 'person' ? 'primary.light' : 'transparent',
+                            }}
+                          >
+                            Person Icon
+                          </StyledBox>
+                          <StyledBox
+                            onClick={() => dispatch(setBeaconIconType('pin'))}
+                            display="flex"
+                            gap={1}
+                            flex={1}
+                            sx={{
+                              borderColor: settings.beaconIconType === 'pin' ? 'primary.main' : 'inherit',
+                              bgcolor: settings.beaconIconType === 'pin' ? 'primary.light' : 'transparent',
+                            }}
+                          >
+                            Pin Icon
+                          </StyledBox>
+                          <StyledBox
+                            onClick={handleCustomIconClick}
+                            display="flex"
+                            gap={1}
+                            flex={1}
+                            sx={{
+                              borderColor: settings.beaconIconType === 'custom' ? 'primary.main' : 'inherit',
+                              bgcolor: settings.beaconIconType === 'custom' ? 'primary.light' : 'transparent',
+                            }}
+                          >
+                            {settings.customSvgPath ? 'Custom Icon (Uploaded)' : 'Upload Custom SVG'}
+                          </StyledBox>
+                        </Stack>
+                        <input
+                          type="file"
+                          ref={customSvgInputRef}
+                          accept=".svg"
+                          style={{ display: 'none' }}
+                          onChange={handleCustomSvgChange}
+                        />
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              </>
             )}
           </Grid>
         </Grid>

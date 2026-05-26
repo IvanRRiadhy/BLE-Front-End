@@ -1,5 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Text, Group, Path } from 'react-konva';
+import { useSelector } from 'src/store/Store';
+import { RootState } from 'src/store/Store';
 
 type BeaconRendererProps = {
   id: string;
@@ -38,10 +40,16 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   isSecurity,
   isMember,
   isVisitor: _isVisitor,
-  iconType = 'person',
+  iconType,
 }) => {
   const groupRef = useRef<any>(null);
   const [isHovered, setIsHovered] = useState(false);
+
+  const iconTypeSetting = useSelector((state: RootState) => state.settings.beaconIconType || 'person');
+  const customSvgPath = useSelector((state: RootState) => state.settings.customSvgPath || '');
+  const customSvgScale = useSelector((state: RootState) => state.settings.customSvgScale ?? 1);
+  const customSvgOffsetX = useSelector((state: RootState) => state.settings.customSvgOffsetX ?? 0);
+  const customSvgOffsetY = useSelector((state: RootState) => state.settings.customSvgOffsetY ?? 0);
 
   const beaconColor = isSecurity ? '#00c853' : isMember ? '#1976d2' : '#f50057';
 
@@ -49,12 +57,24 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   const personPath = "M16 15.503A5.041 5.041 0 1 0 16 5.42a5.041 5.041 0 0 0 0 10.083zm0 2.215c-6.703 0-11 3.699-11 5.5v3.363h22v-3.363c0-2.178-4.068-5.5-11-5.5z";
   const pinPath = "M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6";
 
-  const isPin = iconType === 'pin';
-  const svgPathData = isPin ? pinPath : personPath;
+  const resolvedIconType = iconType || iconTypeSetting;
+  const isPin = resolvedIconType === 'pin';
+  const isCustom = resolvedIconType === 'custom';
+  const svgPathData = isCustom ? customSvgPath : isPin ? pinPath : personPath;
 
   // Icon dimensions
   const iconSize = 22;
-  const iconScale = iconSize / (isPin ? 16 : 32);
+  
+  // Custom SVG scale and offsets
+  const baseScale = iconSize / (isPin ? 16 : 32);
+  const finalScale = isCustom ? (iconSize / 24) * customSvgScale : baseScale;
+  
+  const finalX = isCustom 
+    ? (x - iconSize / 2) + customSvgOffsetX * (iconSize / 24) * customSvgScale 
+    : x - iconSize / 2;
+  const finalY = isCustom 
+    ? (y - iconSize / 2) + customSvgOffsetY * (iconSize / 24) * customSvgScale 
+    : y - iconSize / 2;
 
   return (
     <>
@@ -92,10 +112,10 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
         <Path
           data={svgPathData}
           fill={beaconColor}
-          scaleX={iconScale}
-          scaleY={iconScale}
-          x={x - iconSize / 2}
-          y={y - iconSize / 2}
+          scaleX={finalScale}
+          scaleY={finalScale}
+          x={finalX}
+          y={finalY}
           shadowColor="rgba(0,0,0,0.12)"
           shadowBlur={3}
           shadowOffset={{ x: 0, y: 1.5 }}
