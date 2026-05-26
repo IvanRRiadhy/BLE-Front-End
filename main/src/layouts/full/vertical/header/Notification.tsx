@@ -18,6 +18,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Portal,
 } from '@mui/material';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 import { IconBellRinging } from '@tabler/icons-react';
@@ -369,122 +370,124 @@ const Notifications = () => {
       </IconButton> */}
 
       {/* 🎨 Animated Bubble Stack */}
-      <AnimatePresence>
-        {bubbles.map((b, i) => {
-          const pos = computeBubblePos(i);
-          const isTop = i === 0; // Only top bubble gets triangle
-          return (
-            <motion.div
-              key={b.id}
-              variants={bubbleVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              layout
-              style={{
-                position: 'fixed',
-                top: pos?.top ?? 64,
-                left: pos ? pos.left : undefined,
-                zIndex: 2000,
-                width: 360,
-              }}
-            >
-              <Paper
-                onClick={() => {
-                  if (hideTimers.current[b.id]) {
-                    window.clearTimeout(hideTimers.current[b.id]);
-                    delete hideTimers.current[b.id];
-                  }
-                  setBubbles((prev) => prev.filter((x) => x.id !== b.id));
-                  const trigger = findAlarmTrigger(b.triggerId!);
-                  if (trigger) {
-                    setSelectedTrigger(trigger);
-                    setConfirmOpen(true);
-                  } else {
-                    toast.error('Alarm trigger not found');
-                  }
-                }}
-                elevation={6}
-                sx={{
-                  position: 'relative',
-                  px: 2,
-                  py: 1.5,
-                  borderRadius: 3,
-                  color: 'white',
-                  cursor: 'pointer',
-                  background: `linear-gradient(135deg, ${alpha(b.priorityColor, 0.95)}, ${darken(
-                    b.priorityColor,
-                    0.25,
-                  )})`,
-                  border: `1px solid ${alpha(b.priorityColor, 0.4)}`,
-                  boxShadow: `0 8px 30px ${alpha(b.priorityColor, 0.5)}`,
-                  backdropFilter: 'blur(6px)',
-                  overflow: 'visible',
-                  ...(isTop && {
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: -8,
-                      right: 24,
-                      borderWidth: '0 8px 8px 8px',
-                      borderStyle: 'solid',
-                      borderColor: `transparent transparent ${darken(b.priorityColor, 0.1)} transparent`,
-                    },
-                  }),
+      <Portal>
+        <AnimatePresence>
+          {bubbles.map((b, i) => {
+            const pos = computeBubblePos(i);
+            const isTop = i === 0; // Only top bubble gets triangle
+            return (
+              <motion.div
+                key={b.id}
+                variants={bubbleVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                layout
+                style={{
+                  position: 'fixed',
+                  top: pos?.top ?? 64,
+                  left: pos ? pos.left : undefined,
+                  zIndex: 2000,
+                  width: 360,
                 }}
               >
-                {/* Category Chip - Top Right */}
-                <Chip
-                  label={b.category}
-                  size="small"
-                  sx={{
-                    position: 'absolute',
-                    top: 8,
-                    right: 8,
-                    backgroundColor: b.chipColor,
-                    color: 'white',
-                    fontWeight: 'bold',
-                    fontSize: '0.65rem',
-                    height: '20px',
-                    borderRadius: 1.2,
-                    '& .MuiChip-label': {
-                      px: 1,
-                    },
+                <Paper
+                  onClick={() => {
+                    if (hideTimers.current[b.id]) {
+                      window.clearTimeout(hideTimers.current[b.id]);
+                      delete hideTimers.current[b.id];
+                    }
+                    setBubbles((prev) => prev.filter((x) => x.id !== b.id));
+                    const trigger = findAlarmTrigger(b.triggerId!);
+                    if (trigger) {
+                      setSelectedTrigger(trigger);
+                      setConfirmOpen(true);
+                    } else {
+                      toast.error('Alarm trigger not found');
+                    }
                   }}
-                />
-
-                <Stack spacing={0.5}>
-                  <Typography variant="subtitle2" sx={{ opacity: 0.75, pt: 0.5 }}>
-                    Alarm Triggered
-                  </Typography>
-                  <Typography variant="h6" fontWeight={700}>
-                    {b.title}
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    {b.subtitle}
-                  </Typography>
-                  {/* Priority indicator */}
-                  <Box
+                  elevation={6}
+                  sx={{
+                    position: 'relative',
+                    px: 2,
+                    py: 1.5,
+                    borderRadius: 3,
+                    color: 'white',
+                    cursor: 'pointer',
+                    background: `linear-gradient(135deg, ${alpha(b.priorityColor, 0.95)}, ${darken(
+                      b.priorityColor,
+                      0.25,
+                    )})`,
+                    border: `1px solid ${alpha(b.priorityColor, 0.4)}`,
+                    boxShadow: `0 8px 30px ${alpha(b.priorityColor, 0.5)}`,
+                    backdropFilter: 'blur(6px)',
+                    overflow: 'visible',
+                    ...(isTop && {
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: -8,
+                        right: 24,
+                        borderWidth: '0 8px 8px 8px',
+                        borderStyle: 'solid',
+                        borderColor: `transparent transparent ${darken(b.priorityColor, 0.1)} transparent`,
+                      },
+                    }),
+                  }}
+                >
+                  {/* Category Chip - Top Right */}
+                  <Chip
+                    label={b.category}
+                    size="small"
                     sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      mt: 0.5,
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      backgroundColor: b.chipColor,
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: '0.65rem',
+                      height: '20px',
+                      borderRadius: 1.2,
+                      '& .MuiChip-label': {
+                        px: 1,
+                      },
                     }}
-                  >
-                    <Typography variant="caption" sx={{ opacity: 0.8 }}>
-                      Priority: <strong>{b.priority.toUpperCase()}</strong>
+                  />
+
+                  <Stack spacing={0.5}>
+                    <Typography variant="subtitle2" sx={{ opacity: 0.75, pt: 0.5 }}>
+                      Alarm Triggered
                     </Typography>
-                    <Typography variant="caption" sx={{ opacity: 0.8 }}>
-                      Status: {b.status}
+                    <Typography variant="h6" fontWeight={700}>
+                      {b.title}
                     </Typography>
-                  </Box>
-                </Stack>
-              </Paper>
-            </motion.div>
-          );
-        })}
-      </AnimatePresence>
+                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                      {b.subtitle}
+                    </Typography>
+                    {/* Priority indicator */}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        mt: 0.5,
+                      }}
+                    >
+                      <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                        Priority: <strong>{b.priority.toUpperCase()}</strong>
+                      </Typography>
+                      <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                        Status: {b.status}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Paper>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </Portal>
 
       {/* 🔔 Notifications Menu */}
       <Menu
