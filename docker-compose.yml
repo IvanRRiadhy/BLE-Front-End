@@ -7,12 +7,17 @@ services:
       context: .
     image: dev1pci2025/tracking-people-front-end:latest
     container_name: main-ble-app
+    user: root
     environment:
       - PORT=3000
       - NODE_ENV=production
       - API_KEY=FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK
     volumes:
       - .env:/app/.env
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .:/app-host
+      # Uncomment the line below if pulling via SSH from a private repository:
+      # - ~/.ssh:/root/.ssh:ro
     ports:
       - "3000:3000"
     restart: always
@@ -23,12 +28,17 @@ services:
       context: .
     image: dev1pci2025/tracking-people-front-end:latest
     container_name: patrol-app-3031
+    user: root
     environment:
       - PORT=3000
       - NODE_ENV=production
       - API_KEY=T4OBTUILZPL59QNHF304QXU5RN1HZD9J
     volumes:
       - .env:/app/.env
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .:/app-host
+      # Uncomment the line below if pulling via SSH from a private repository:
+      # - ~/.ssh:/root/.ssh:ro
     ports:
       - "3031:3000"
     restart: always

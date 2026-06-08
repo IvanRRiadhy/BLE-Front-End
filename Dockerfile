@@ -22,6 +22,9 @@ RUN npm run build
 FROM node:${NODE_VERSION}-alpine AS runtime
 WORKDIR /app
 
+# Install git and docker CLI utilities to check/rebuild from inside container
+RUN apk add --no-cache git docker-cli docker-cli-compose
+
 # Install only production dependencies
 COPY --chown=node:node package*.json ./
 RUN npm install --production --legacy-peer-deps
