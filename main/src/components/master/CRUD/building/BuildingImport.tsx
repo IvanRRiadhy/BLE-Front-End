@@ -10,11 +10,12 @@ import {
   Typography,
   Stack,
 } from '@mui/material';
-import { Download, TableChart, FileDownload } from '@mui/icons-material';
+import { Download, TableChart, FileDownload, Settings } from '@mui/icons-material';
 import { ImportBuilding } from 'src/store/apps/crud/building';
 import { AppDispatch, useDispatch } from 'src/store/Store';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { useImportBuildingConfig } from 'src/hooks/useBuilding';
 
 const BuildingImport = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -23,6 +24,8 @@ const BuildingImport = () => {
   const [importLoading, setImportLoading] = useState(false);
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const configFileInputRef = useRef<HTMLInputElement>(null);
+  const importConfigMutation = useImportBuildingConfig();
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -32,9 +35,11 @@ const BuildingImport = () => {
     setAnchorEl(null);
   };
 
-  const handleImport = (type: 'pdf' | 'xls') => {
+  const handleImport = (type: 'pdf' | 'xls' | 'config') => {
     if (type === 'xls' && fileInputRef.current) {
       fileInputRef.current.click();
+    } else if (type === 'config' && configFileInputRef.current) {
+      configFileInputRef.current.click();
     }
     handleClose();
   };
@@ -67,6 +72,26 @@ const BuildingImport = () => {
     }
   };
 
+  const handleConfigFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImportLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      await importConfigMutation.mutateAsync(formData);
+      event.target.value = ''; // Reset input
+      toast.success('Building Configuration Imported Successfully');
+    } catch (err) {
+      console.log('Import Config Error:', err);
+      toast.error('Import Config Failed');
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
   return (
     <>
       <Button
@@ -96,6 +121,12 @@ const BuildingImport = () => {
           </ListItemIcon>
           <ListItemText>XLS</ListItemText>
         </MenuItem>
+        <MenuItem onClick={() => handleImport('config')}>
+          <ListItemIcon>
+            <Settings fontSize="small" color="primary" />
+          </ListItemIcon>
+          <ListItemText>Building Configuration</ListItemText>
+        </MenuItem>
 
       </Menu>
       <input
@@ -104,6 +135,13 @@ const BuildingImport = () => {
         accept=".xls,.xlsx"
         style={{ display: 'none' }}
         onChange={handleFileChange}
+      />
+      <input
+        ref={configFileInputRef}
+        type="file"
+        accept=".bcp"
+        style={{ display: 'none' }}
+        onChange={handleConfigFileChange}
       />
 
       <Backdrop

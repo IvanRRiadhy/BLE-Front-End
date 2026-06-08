@@ -3,13 +3,11 @@ import { Button, Box, Drawer, useMediaQuery, Theme } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 // import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import AppCard from 'src/components/shared/AppCard';
-import CardHistoryList from 'src/components/master/Reports/CardHistory/CardHIstoryList';
+import CardHistoryTable from 'src/components/master/Reports/CardHistory/CardHIstoryList copy';
 
-const drawerWidth = 320;
 const secdrawerWidth = 320;
 
 const CardHistory = () => {
-    const [isLeftSidebarOpen, setLeftSidebarOpen] = useState(false);
     const [isRightSidebarOpen, setRightSidebarOpen] = useState(false);
     const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
     const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
@@ -20,15 +18,15 @@ const CardHistory = () => {
                 {/* ------------------------------------------- */}
         {/* Left Part */}
         {/* ------------------------------------------- */}
-        <Box
+        {/* <Box
           sx={{
             minWidth: secdrawerWidth,
             width: { xs: '100%', md: secdrawerWidth, lg: secdrawerWidth },
             flexShrink: 0,
           }}
         >
-          {/* <IntruderList /> */}
-        </Box>
+
+        </Box> */}
                 <Drawer
                   anchor="right"
                   open={isRightSidebarOpen}
@@ -57,7 +55,7 @@ const CardHistory = () => {
                       </Button>
                     </Box>
                   )}
-                  <CardHistoryList />
+                  <CardHistoryTable />
                 </Drawer>
             </AppCard>
         </PageContainer>

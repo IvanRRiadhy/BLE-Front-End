@@ -20,6 +20,9 @@ import {
   setBorderRadius,
   setBeaconIconType,
   setCustomSvgPath,
+  setCustomSvgScale,
+  setCustomSvgOffsetX,
+  setCustomSvgOffsetY,
 } from 'src/store/customizer/SettingsSlice';
 import { RootState } from 'src/store/Store';
 import WbSunnyTwoToneIcon from '@mui/icons-material/WbSunnyTwoTone';
@@ -109,9 +112,245 @@ const thColors = [
   { id: 6, bgColor: '#FA896B', disp: 'ORANGE_THEME' },
 ];
 
+// Pure, high-performance mathematical parser for SVG Path bounding box
+const getPathBounds = (d: string) => {
+  let curX = 0;
+  let curY = 0;
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+  
+  let idx = 0;
+  const len = d.length;
+  
+  const updateBounds = (x: number, y: number) => {
+    minX = Math.min(minX, x);
+    maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y);
+    maxY = Math.max(maxY, y);
+  };
+
+  const skipWhitespace = () => {
+    while (idx < len) {
+      const c = d[idx];
+      if (c === ' ' || c === ',' || c === '\t' || c === '\n' || c === '\r') {
+        idx++;
+      } else {
+        break;
+      }
+    }
+  };
+
+  const parseNumber = (): number => {
+    skipWhitespace();
+    if (idx >= len) return 0;
+
+    const start = idx;
+    let c = d[idx];
+
+    // Sign
+    if (c === '+' || c === '-') {
+      idx++;
+    }
+
+    let hasDigit = false;
+    while (idx < len && d[idx] >= '0' && d[idx] <= '9') {
+      idx++;
+      hasDigit = true;
+    }
+
+    if (idx < len && d[idx] === '.') {
+      idx++;
+      while (idx < len && d[idx] >= '0' && d[idx] <= '9') {
+        idx++;
+        hasDigit = true;
+      }
+    }
+
+    if (hasDigit && idx < len && (d[idx] === 'e' || d[idx] === 'E')) {
+      const expIdx = idx;
+      idx++;
+      if (idx < len && (d[idx] === '+' || d[idx] === '-')) {
+        idx++;
+      }
+      let hasExpDigits = false;
+      while (idx < len && d[idx] >= '0' && d[idx] <= '9') {
+        idx++;
+        hasExpDigits = true;
+      }
+      if (!hasExpDigits) {
+        idx = expIdx; // Backtrack
+      }
+    }
+
+    if (idx > start) {
+      const val = parseFloat(d.substring(start, idx));
+      return isNaN(val) ? 0 : val;
+    }
+
+    return 0;
+  };
+
+  const parseFlag = (): number => {
+    skipWhitespace();
+    if (idx >= len) return 0;
+    const c = d[idx];
+    if (c === '0' || c === '1') {
+      idx++;
+      return c === '1' ? 1 : 0;
+    }
+    return 0;
+  };
+
+  let cmd = '';
+  
+  while (idx < len) {
+    skipWhitespace();
+    if (idx >= len) break;
+    
+    const c = d[idx];
+    const isCommand = /^[a-df-z]$/i.test(c);
+    
+    if (isCommand) {
+      cmd = c;
+      idx++;
+    } else {
+      if (cmd === '') cmd = 'M'; 
+    }
+    
+    const cmdLower = cmd.toLowerCase();
+    
+    if (cmdLower === 'm' || cmdLower === 'l') {
+      const xVal = parseNumber();
+      const yVal = parseNumber();
+      if (cmd === 'M' || cmd === 'L') {
+        curX = xVal;
+        curY = yVal;
+      } else {
+        curX += xVal;
+        curY += yVal;
+      }
+      updateBounds(curX, curY);
+      
+      if (cmd === 'M') cmd = 'L';
+      if (cmd === 'm') cmd = 'l';
+    } else if (cmdLower === 'h') {
+      const xVal = parseNumber();
+      if (cmd === 'H') {
+        curX = xVal;
+      } else {
+        curX += xVal;
+      }
+      updateBounds(curX, curY);
+    } else if (cmdLower === 'v') {
+      const yVal = parseNumber();
+      if (cmd === 'V') {
+        curY = yVal;
+      } else {
+        curY += yVal;
+      }
+      updateBounds(curX, curY);
+    } else if (cmdLower === 'c') {
+      const x1 = parseNumber();
+      const y1 = parseNumber();
+      const x2 = parseNumber();
+      const y2 = parseNumber();
+      const x = parseNumber();
+      const y = parseNumber();
+      
+      const targetX = cmd === 'C' ? x : curX + x;
+      const targetY = cmd === 'C' ? y : curY + y;
+      
+      const ctrl1X = cmd === 'C' ? x1 : curX + x1;
+      const ctrl1Y = cmd === 'C' ? y1 : curY + y1;
+      const ctrl2X = cmd === 'C' ? x2 : curX + x2;
+      const ctrl2Y = cmd === 'C' ? y2 : curY + y2;
+      
+      updateBounds(ctrl1X, ctrl1Y);
+      updateBounds(ctrl2X, ctrl2Y);
+      updateBounds(targetX, targetY);
+      
+      curX = targetX;
+      curY = targetY;
+    } else if (cmdLower === 's') {
+      const x2 = parseNumber();
+      const y2 = parseNumber();
+      const x = parseNumber();
+      const y = parseNumber();
+      
+      const targetX = cmd === 'S' ? x : curX + x;
+      const targetY = cmd === 'S' ? y : curY + y;
+      
+      const ctrl2X = cmd === 'S' ? x2 : curX + x2;
+      const ctrl2Y = cmd === 'S' ? y2 : curY + y2;
+      
+      updateBounds(ctrl2X, ctrl2Y);
+      updateBounds(targetX, targetY);
+      
+      curX = targetX;
+      curY = targetY;
+    } else if (cmdLower === 'q') {
+      const x1 = parseNumber();
+      const y1 = parseNumber();
+      const x = parseNumber();
+      const y = parseNumber();
+      
+      const targetX = cmd === 'Q' ? x : curX + x;
+      const targetY = cmd === 'Q' ? y : curY + y;
+      
+      const ctrl1X = cmd === 'Q' ? x1 : curX + x1;
+      const ctrl1Y = cmd === 'Q' ? y1 : curY + y1;
+      
+      updateBounds(ctrl1X, ctrl1Y);
+      updateBounds(targetX, targetY);
+      
+      curX = targetX;
+      curY = targetY;
+    } else if (cmdLower === 't') {
+      const x = parseNumber();
+      const y = parseNumber();
+      
+      curX = cmd === 'T' ? x : curX + x;
+      curY = cmd === 'T' ? y : curY + y;
+      updateBounds(curX, curY);
+    } else if (cmdLower === 'a') {
+      const rx = parseNumber();
+      const ry = parseNumber();
+      const xAxisRotation = parseNumber();
+      const largeArcFlag = parseFlag();
+      const sweepFlag = parseFlag();
+      const x = parseNumber();
+      const y = parseNumber();
+      
+      curX = cmd === 'A' ? x : curX + x;
+      curY = cmd === 'A' ? y : curY + y;
+      updateBounds(curX, curY);
+    } else if (cmdLower === 'z') {
+      // closed path
+    } else {
+      idx++;
+    }
+  }
+
+  if (minX === Infinity || minY === Infinity || maxX === -Infinity || maxY === -Infinity) {
+    return { x: 0, y: 0, width: 24, height: 24 };
+  }
+
+  return {
+    x: minX,
+    y: minY,
+    width: maxX - minX,
+    height: maxY - minY,
+  };
+};
+
 const AboutPage = () => {
   const customizer = useSelector((state: RootState) => state.customizer);
   const settings = useSelector((state: RootState) => state.settings);
+  const customBBox = settings.customSvgPath 
+    ? getPathBounds(settings.customSvgPath)
+    : { x: 0, y: 0, width: 24, height: 24 };
   const dispatch = useDispatch();
   const { data, isLoading, isError } = useLicenseInfo();
   const { mutate: toggleFeatureStatus } = toggleFeatures();
@@ -301,7 +540,54 @@ const AboutPage = () => {
             .filter(Boolean)
             .join(' ');
           if (dAttributes) {
+            // Layout-visible offscreen SVG for perfect getBBox
+            const tempSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            tempSvg.style.position = 'fixed';
+            tempSvg.style.left = '-9999px';
+            tempSvg.style.top = '-9999px';
+            tempSvg.style.width = '2000px';
+            tempSvg.style.height = '2000px';
+            tempSvg.style.visibility = 'visible';
+            
+            const tempPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            tempPath.setAttribute('d', dAttributes);
+            tempSvg.appendChild(tempPath);
+            document.body.appendChild(tempSvg);
+            
+            let bbox = tempPath.getBBox();
+            document.body.removeChild(tempSvg);
+
+            // Fallback parsing if layout calculation returns zero bounds
+            if (!bbox.width || !bbox.height) {
+              const numbers = dAttributes.match(/-?[\d.]+/g)?.map(Number) || [];
+              if (numbers.length > 0) {
+                const xs = numbers.filter((_, idx) => idx % 2 === 0);
+                const ys = numbers.filter((_, idx) => idx % 2 === 1);
+                if (xs.length > 0 && ys.length > 0) {
+                  const minX = Math.min(...xs);
+                  const maxX = Math.max(...xs);
+                  const minY = Math.min(...ys);
+                  const maxY = Math.max(...ys);
+                  bbox = {
+                    x: minX,
+                    y: minY,
+                    width: maxX - minX,
+                    height: maxY - minY,
+                  } as DOMRect;
+                }
+              }
+            }
+
+            const targetSize = 24;
+            const maxDim = Math.max(bbox.width, bbox.height) || 24;
+            const scaleFactor = targetSize / maxDim;
+            const offsetX = -bbox.x;
+            const offsetY = -bbox.y;
+
             dispatch(setCustomSvgPath(dAttributes));
+            dispatch(setCustomSvgScale(scaleFactor));
+            dispatch(setCustomSvgOffsetX(offsetX));
+            dispatch(setCustomSvgOffsetY(offsetY));
             dispatch(setBeaconIconType('custom'));
             toast.success('Custom SVG icon uploaded successfully!');
           } else {
@@ -787,12 +1073,13 @@ const AboutPage = () => {
                     <Grid container spacing={3}>
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <Typography variant="h6" gutterBottom>
-                          Beacon Icon Type
+                          Beacon Icon Type (Format SVG, size 24x24 px)
                         </Typography>
                         <Stack direction={'row'} gap={2} my={2}>
                           <StyledBox
                             onClick={() => dispatch(setBeaconIconType('person'))}
                             display="flex"
+                            alignItems="center"
                             gap={1}
                             flex={1}
                             sx={{
@@ -800,11 +1087,15 @@ const AboutPage = () => {
                               bgcolor: settings.beaconIconType === 'person' ? 'primary.light' : 'transparent',
                             }}
                           >
+                            <svg width="20" height="20" viewBox="0 0 32 32" style={{ fill: '#1976d2', flexShrink: 0 }}>
+                              <path d="M16 15.503A5.041 5.041 0 1 0 16 5.42a5.041 5.041 0 0 0 0 10.083zm0 2.215c-6.703 0-11 3.699-11 5.5v3.363h22v-3.363c0-2.178-4.068-5.5-11-5.5z" />
+                            </svg>
                             Person Icon
                           </StyledBox>
                           <StyledBox
                             onClick={() => dispatch(setBeaconIconType('pin'))}
                             display="flex"
+                            alignItems="center"
                             gap={1}
                             flex={1}
                             sx={{
@@ -812,11 +1103,15 @@ const AboutPage = () => {
                               bgcolor: settings.beaconIconType === 'pin' ? 'primary.light' : 'transparent',
                             }}
                           >
+                            <svg width="20" height="20" viewBox="0 0 16 16" style={{ fill: '#1976d2', flexShrink: 0 }}>
+                              <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6" />
+                            </svg>
                             Pin Icon
                           </StyledBox>
                           <StyledBox
                             onClick={handleCustomIconClick}
                             display="flex"
+                            alignItems="center"
                             gap={1}
                             flex={1}
                             sx={{
@@ -824,6 +1119,16 @@ const AboutPage = () => {
                               bgcolor: settings.beaconIconType === 'custom' ? 'primary.light' : 'transparent',
                             }}
                           >
+                            {settings.customSvgPath && (
+                              <svg 
+                                width="20" 
+                                height="20" 
+                                viewBox={`${customBBox.x} ${customBBox.y} ${customBBox.width} ${customBBox.height}`} 
+                                style={{ fill: '#1976d2', flexShrink: 0 }}
+                              >
+                                <path d={settings.customSvgPath} />
+                              </svg>
+                            )}
                             {settings.customSvgPath ? 'Custom Icon (Uploaded)' : 'Upload Custom SVG'}
                           </StyledBox>
                         </Stack>

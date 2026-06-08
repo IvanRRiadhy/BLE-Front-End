@@ -31,6 +31,7 @@ export function useCardHistory(cardId: string, options?: { enabled?: boolean }) 
             const response = await axiosServices.post(`${API_URL}/history`, {
                     cardId: cardId,
             });
+            console.log("Card History: ", response.data.collection.data);
             return response.data.collection.data as CardHistoryType[];
         },
         enabled: options?.enabled ?? true,

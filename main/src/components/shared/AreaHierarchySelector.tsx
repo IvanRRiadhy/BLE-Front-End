@@ -24,6 +24,8 @@ type Props = {
   exclusive?: NodeType;
   multiple?: boolean;
   highlightedAreaIds?: string[];
+  disabled?: boolean;
+  label?: string;
 };
 
 const AreaHierarchySelector: React.FC<Props> = forwardRef(
@@ -40,6 +42,8 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
       exclusive,
       multiple = false,
       highlightedAreaIds,
+      disabled = false,
+      label = 'Area',
     },
     ref,
   ) => {
@@ -52,6 +56,7 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
     const selectedRef = React.useRef<HTMLDivElement | null>(null);
 
     const openPopper = () => {
+      if (disabled) return;
       setOpen(true);
       setTimeout(() => setClickAwayEnabled(true), 500);
     };
@@ -284,8 +289,9 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
         <Box ref={anchorRef}>
           <TextField
             fullWidth
-            label="Area"
+            label={label}
             value={displayLabel}
+            disabled={disabled}
             inputProps={{ readOnly: true }}
             onClick={openPopper}
             onFocus={openPopper}
@@ -299,7 +305,7 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
             error={error}
             helperText={helperText}
             sx={{
-              '& input': { cursor: 'pointer' },
+              '& input': { cursor: disabled ? 'default' : 'pointer' },
               marginBottom: helperText ? 0.5 : 0,
             }}
           />

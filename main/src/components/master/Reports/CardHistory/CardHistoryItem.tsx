@@ -11,7 +11,7 @@ interface CardHistoryItemProps {
 }
 
 const CardHistoryItem = ({ history, index, isLatest }: CardHistoryItemProps) => {
-  const language = useSelector((state: RootState) => state.customizer.isLanguage);
+  const language = useSelector((state: RootState) => state.settings.isLanguage);
   const lang = language === 'id' ? 'id' : 'en';
   const append = language === 'id' ? 'hingga' : 'to';
 

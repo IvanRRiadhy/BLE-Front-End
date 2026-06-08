@@ -26,7 +26,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconTrash, IconChevronDown, IconChevronRight, IconPlus, IconExternalLink } from '@tabler/icons-react';
+import { IconTrash, IconChevronDown, IconChevronRight, IconPlus, IconExternalLink, IconDownload } from '@tabler/icons-react';
 import { useNavigate, useLocation } from 'react-router';
 import { floorType, SetSelectedFloor, UpdateFilter as UpdateFloorFilter } from 'src/store/apps/crud/floor';
 import AddEditFloor from 'src/components/master/CRUD/floor/AddEditFloor';
@@ -40,7 +40,7 @@ import {
 import AddEditBuilding from './AddEditBuilding';
 import { defaultBuildingFilter } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
-import { useBuildingList, useDeleteBuilding } from 'src/hooks/useBuilding';
+import { useBuildingList, useDeleteBuilding, useExportBuildingConfig } from 'src/hooks/useBuilding';
 import { useAllFloors, useFloorList, useDeleteFloor } from 'src/hooks/useFloor';
 
 const columns = [
@@ -259,6 +259,29 @@ const BuildingList = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingType | null>(null);
   const deleteMutation = useDeleteBuilding();
+  const exportMutation = useExportBuildingConfig();
+  const [exportingId, setExportingId] = useState<string | null>(null);
+
+  const handleExport = async (building: BuildingType) => {
+    setExportingId(building.id);
+    try {
+      const blob = await exportMutation.mutateAsync(building.id);
+      const url = window.URL.createObjectURL(blob);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.href = url;
+      downloadAnchor.download = `building_${building.id.toLowerCase()}.bcp`;
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success('Configuration exported successfully');
+    } catch (error) {
+      toast.error('Failed to export configuration');
+      console.error(error);
+    } finally {
+      setExportingId(null);
+    }
+  };
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (building: BuildingType) => {
     setSelectedBuilding(building);
@@ -396,9 +419,9 @@ const BuildingList = () => {
                         right: 0,
                         backgroundColor: 'background.paper',
                         zIndex: 2,
-                        width: 150, // Fixed width
-                        minWidth: 150,
-                        maxWidth: 150,
+                        width: 180, // Fixed width
+                        minWidth: 180,
+                        maxWidth: 180,
                       }}
                     >
                       <Typography variant="h6"> Actions </Typography>
@@ -450,9 +473,9 @@ const BuildingList = () => {
                                   right: 0,
                                   backgroundColor: 'background.paper',
                                   zIndex: 1,
-                                  width: 150, // Fixed width
-                                  minWidth: 150,
-                                  maxWidth: 150,
+                                  width: 180, // Fixed width
+                                  minWidth: 180,
+                                  maxWidth: 180,
                                 }}
                               >
                                 <Box display="flex" alignItems="center" gap={1}>
@@ -464,6 +487,20 @@ const BuildingList = () => {
                                   >
                                     <IconTrash size={20} />
                                   </IconButton>
+                                  <Tooltip title="Export Configuration" arrow>
+                                    <IconButton
+                                      color="primary"
+                                      size="small"
+                                      onClick={() => handleExport(building)}
+                                      disabled={exportingId !== null}
+                                    >
+                                      {exportingId === building.id ? (
+                                        <CircularProgress size={20} color="inherit" />
+                                      ) : (
+                                        <IconDownload size={20} />
+                                      )}
+                                    </IconButton>
+                                  </Tooltip>
                                   {isChildShown && (
                                       <Tooltip title={isOpen ? 'Hide Floors' : 'Show Floors'} arrow>
                                           <IconButton size="small" onClick={() => toggleExpand(building.id)}>

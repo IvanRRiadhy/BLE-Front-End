@@ -5,6 +5,7 @@ import { RootState, useSelector } from 'src/store/Store';
 
 const Building_API_URL = '/api/MstBuilding/';
 const Building_DT_URL = '/api/MstBuilding/filter/';
+const Config_URL = '/api/config-exchange/';
 
 interface PaginatedResponse<T> {
   data: T[];
@@ -102,4 +103,32 @@ export function useBuildingStatus(){
         hasLoaded: query.isFetched, // ✅ substitusi untuk redux.hasLoaded
         totalCount: query.data?.recordsFiltered || 0,
     }
+}
+
+export function useExportBuildingConfig(){
+    return useMutation({
+        mutationFn: async (building_id: string) => {
+            const response = await axiosServices.get(`${Config_URL}export/${building_id}`, {
+                responseType: 'blob',
+            });
+            return response.data;
+        }, 
+    });
+}
+
+export function useImportBuildingConfig(){
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (formData: FormData) => {
+            const response = await axiosServices.post(Config_URL + 'import', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            // console.log('Building added successfully: ', response.data);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['building-list']});
+            queryClient.invalidateQueries({queryKey: ['building-all']});
+        },
+    });
 }

@@ -127,7 +127,7 @@ const AlarmRecord = Loadable(lazy(() => import('../views/Reports/AlarmRecord')))
 const AlarmTrigger = Loadable(lazy(() => import('../views/Reports/AlarmTrigger')));
 const CardRecord = Loadable(lazy(() => import('../views/Reports/CardRecord')));
 const TestRecord = Loadable(lazy(() => import('../views/Reports/TestRecord')));
-const TestReport = Loadable(lazy(() => import('../views/Reports/TestReport')));
+const TestReport = Loadable(lazy(() => import('../views/Reports/VisitorReport')));
 const Investigate = Loadable(lazy(() => import('../views/Reports/Investigate')));
 const EventLog = Loadable(lazy(() => import('../views/Reports/EventLog')));
 const MovementLog = Loadable(lazy(() => import('../views/Reports/MovementLog')));

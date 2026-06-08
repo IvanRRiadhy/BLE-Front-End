@@ -33,6 +33,8 @@ import { useAllFloors } from 'src/hooks/useFloor';
 import { useAllEngines } from 'src/hooks/useEngine';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 import { useUploadCDN } from 'src/hooks/usePatrolCase';
+import AreaHierarchySelector, { SelectedNode } from 'src/components/shared/AreaHierarchySelector';
+import { useAllBuilding } from 'src/hooks/useBuilding';
 
 interface FormType {
   type?: string;
@@ -71,7 +73,13 @@ const AddEditFloorplan = ({ type, floorplan, fixedFloorId, trigger }: FormType) 
   // }, [dispatch]);
 
   const { data: floorData = [], isLoading: floorLoading } = useAllFloors();
+  const { data: buildingData = [] } = useAllBuilding();
   const { data: engineData = [], isLoading: engineLoading } = useAllEngines();
+
+  const filteredBuildings = React.useMemo(() => {
+    const buildingIdsWithFloors = new Set(floorData.map((f) => f.buildingId));
+    return buildingData.filter((b) => buildingIdsWithFloors.has(b.id));
+  }, [buildingData, floorData]);
 
   const handleClickOpen = () => {
     setFormErrors({});
@@ -284,15 +292,12 @@ const AddEditFloorplan = ({ type, floorplan, fixedFloorId, trigger }: FormType) 
     }
   };
 
-const floorOptions = React.useMemo(
-  () =>
-    floorData.map((f) => ({
-      label: f.name,
-      id: f.id,
-      buildingName: f.building?.name ?? 'Unknown Building',
-    })),
-  [floorData]
-);
+  const selectedFloorNode = React.useMemo<SelectedNode>(() => {
+    if (!formData.floorId) return null;
+    const floor = floorData.find((f) => f.id === formData.floorId);
+    if (!floor) return null;
+    return { type: 'floor', data: floor };
+  }, [formData.floorId, floorData]);
 
   const engineOptions = engineData.map((e) => ({
     label: e.name,
@@ -368,12 +373,14 @@ const floorOptions = React.useMemo(
             <Grid size={{ lg: 6, md: 12, sm: 12 }}>
               {/* <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel> */}
               <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel>
-              <CustomAutocomplete
-                label="Floor"
-                options={floorOptions}
-                value={floorOptions.find((f) => f.id === formData.floorId) || null}
-                onChange={(val) => {
-                  const id = val?.id ?? '';
+              <AreaHierarchySelector
+                buildings={filteredBuildings}
+                floors={floorData}
+                floorplans={[]}
+                maskedAreas={[]}
+                value={selectedFloorNode}
+                onChange={(val: SelectedNode) => {
+                  const id = val?.data?.id ?? '';
                   setFormData((prev) => ({ ...prev, floorId: id }));
                   setFormErrors((prev) => {
                     const next = { ...prev };
@@ -381,24 +388,11 @@ const floorOptions = React.useMemo(
                     return next;
                   });
                 }}
-                getOptionLabel={(opt) => opt.label}
-                isOptionEqualToValue={(a, b) => a.id === b.id}
-                required
                 error={!!formErrors.floorId}
                 helperText={formErrors.floorId}
-                loading={floorLoading}
+                exclusive="floor"
                 disabled={!!fixedFloorId}
-                renderOption={(props: any, option: (typeof floorOptions)[number]) => (
-                  <li {...props} key={option.id}>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <Typography variant="body1">{option.label}</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {option.buildingName}
-                      </Typography>
-                    </div>
-                  </li>
-                )}
-                sx={{ flex: 1 }}
+                label="Floor"
               />
 
               <CustomFormLabel htmlFor="floorY">Floor Width (in meters)</CustomFormLabel>

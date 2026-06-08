@@ -474,7 +474,6 @@ const AlarmContent = () => {
       : alarmTrigger.floorplan?.floorplanImage
         ? `${alarmTrigger.floorplan.floorplanImage}`
         : null;
-
     const lang = language === 'id' ? 'id' : 'en';
     const append = language === 'id' ? 'hingga' : 'to';
 
