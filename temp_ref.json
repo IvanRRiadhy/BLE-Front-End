@@ -1,0 +1,138 @@
+[
+  {
+    "row": 1,
+    "values": [
+      null,
+      "Patrol Assignment",
+      "Route",
+      "Checkpoints",
+      "Security",
+      "Session",
+      "Completed Checkpoint",
+      "Completion Percentage",
+      "Total Duration",
+      "Total Case",
+      "Cases",
+      "Case Type",
+      "Threat Level",
+      "Area",
+      "Report Time",
+      "Case Status",
+      "Attachment"
+    ]
+  },
+  {
+    "row": 2,
+    "values": [
+      null,
+      "Patrol lantai 1",
+      "Patroli Buni",
+      "Patrol_L1_A, Patrol_L1_B, Patrol_L1_C"
+    ]
+  },
+  {
+    "row": 3,
+    "values": [
+      null,
+      null,
+      null,
+      null,
+      "Rina Hoppe",
+      "2026-03-27T00:00:00.000Z",
+      4,
+      0.8,
+      "11m",
+      2,
+      "AC Mati",
+      "Damage",
+      "Low",
+      "Patrol_L1_C",
+      "2026-03-27T07:09:25.031Z",
+      "Approved"
+    ]
+  },
+  {
+    "row": 4,
+    "values": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      "Keran Mati",
+      "Damage",
+      "Low",
+      "Patrol_L1_A",
+      "2026-03-27T07:10:44.250Z",
+      "Approved",
+      "{cdn_Link}/uploads/images/3a3a5d9b-61da-4026-b0b9-a42bd4f5230a.jpg"
+    ]
+  },
+  {
+    "row": 5,
+    "values": [
+      null,
+      null,
+      null,
+      null,
+      "Lazaro VonRueden",
+      "2026-03-26T00:00:00.000Z",
+      0,
+      0,
+      "n/a",
+      1,
+      "a",
+      "Damage",
+      "Low",
+      "Patrol_L1_C",
+      "2026-03-26T09:33:22.850Z",
+      "Approved",
+      "{cdn_Link}/uploads/images/fa92f912-385d-4e6e-b4bb-138ddb4202f3.jpg"
+    ]
+  },
+  {
+    "row": 6,
+    "values": [
+      null,
+      null,
+      null,
+      null,
+      "…other security"
+    ]
+  },
+  {
+    "row": 8,
+    "values": [
+      null,
+      "Patrol April",
+      "Patroli Buni",
+      "Patrol_L1_A, Patrol_L1_B, Patrol_L1_C"
+    ]
+  },
+  {
+    "row": 9,
+    "values": [
+      null,
+      null,
+      null,
+      null,
+      "Anton Hermes",
+      "2026-04-01T00:00:00.000Z",
+      0,
+      0,
+      "24m",
+      1,
+      "ada Badak",
+      "Incident",
+      "Low",
+      "Patrol_L1_A",
+      "2026-04-01T02:57:05.366Z",
+      "Approved"
+    ]
+  }
+]

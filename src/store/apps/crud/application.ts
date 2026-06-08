@@ -1,0 +1,239 @@
+import axiosServices from "../../../utils/axios";
+import { createSlice } from "@reduxjs/toolkit";
+import { AppDispatch, RootState } from "src/store/Store";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk } from "@reduxjs/toolkit";
+
+const API_URL = "/api/MstApplication/";
+
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    SearchValue: string,
+}
+
+
+// Define the TypeScript type
+export interface ApplicationType {
+  id: string;
+  applicationName: string;
+  organizationType: string;
+  organizationAddress: string;
+  applicationType: string;
+  applicationRegistered: string;
+  applicationExpired: string;
+  hostName: string;
+  hostPhone: string;
+  hostEmail: string;
+  hostAddress: string;
+  applicationCustomName: string;
+  applicationCustomDomain: string;
+  applicationCustomPort: string;
+  licenseCode: string;
+  licenseType: string;
+}
+
+export type CreateApplicationRequest = {
+  applicationName: string;
+  organizationType: string;
+  organizationAddress: string;
+  applicationType: string;
+  hostName: string;
+  hostPhone: string;
+  hostEmail: string;
+  hostAddress: string;
+  applicationCustomName: string;
+  applicationCustomDomain: string;
+  applicationCustomPort: string;
+  adminUsername: string;
+  adminEmail: string;
+  adminPassword: string;
+}
+
+// State structure
+interface StateType {
+  applications: ApplicationType[];
+  applicationSearch: string;
+  selectedApplication?: ApplicationType | null;
+}
+
+const initialState: StateType = {
+  applications: [],
+  applicationSearch: "",
+  selectedApplication: null,
+};
+
+export const ApplicationSlice = createSlice({
+  name: "applications",
+  initialState,
+
+  reducers: {
+    GetApplications: (state, action: PayloadAction<ApplicationType[]>) => {
+      state.applications = action.payload;
+    },
+
+    SelectApplication: (state, action: PayloadAction<string>) => {
+      const selected = state.applications.find(
+        (app: ApplicationType) => app.id === action.payload
+      );
+      state.selectedApplication = selected || null;
+    },
+
+    SearchApplication: (state, action: PayloadAction<string>) => {
+      state.applicationSearch = action.payload;
+    },
+
+    UpdateApplication: {
+      reducer: (state: StateType, action: PayloadAction<any>) => {
+        state.applications = state.applications.map((app) =>
+          app.id === action.payload.id
+            ? { ...app, [action.payload.field]: action.payload.value }
+            : app
+        );
+      },
+      prepare: (id: string, field: keyof ApplicationType, value: any) => {
+        return {
+          payload: { id, field, value },
+        };
+      },
+    },
+
+    AddApplication: {
+      reducer: (state: StateType, action: PayloadAction<ApplicationType>) => {
+        state.applications.push(action.payload);
+      },
+      prepare: (
+        applicationName: string,
+        organizationType: string,
+        organizationAddress: string
+      ) => {
+        return {
+          payload: {
+            id: `${Date.now()}`, // Generate unique ID
+            applicationName,
+            organizationType,
+            organizationAddress,
+            applicationType: "",
+            applicationRegistered: "",
+            applicationExpired: "",
+            hostName: "",
+            hostPhone: "",
+            hostEmail: "",
+            hostAddress: "",
+            applicationCustomName: "",
+            applicationCustomDomain: "",
+            applicationCustomPort: "",
+            licenseCode: "",
+            licenseType: "",
+          } as ApplicationType,
+        };
+      },
+    },
+    
+  },
+  extraReducers: (builder) => {
+    builder
+    .addCase(addApplication.fulfilled, (state, action) => {
+      state.applications.push(action.payload); // Add new application to state
+    })
+    .addCase(addApplication.rejected, (_state, action) => {
+      console.error("Add App failed: ", action.payload);
+    })
+    .addCase(editApplication.fulfilled, (state, action) => {
+      const index = state.applications.findIndex((app) => app.id === action.payload.id);
+      if(index !== -1){
+        state.applications[index] = action.payload;
+        state.selectedApplication = action.payload;
+      }
+    })
+    .addCase(editApplication.rejected, (_state, action) => {
+      console.error("Update failed: ", action.payload);
+    })
+    .addCase(deleteApplication.fulfilled, (state, action) => {
+      state.applications = state.applications.filter(app => app.id !== action.payload);
+      if (state.selectedApplication?.id === action.payload) {
+        state.selectedApplication = null; // Clear selected app if deleted
+      }
+    })
+    .addCase(deleteApplication.rejected, (_state, action) => {
+      console.error("Delete failed: ", action.payload);
+    });
+  }
+});
+
+export const selectApplication =
+  (applicationId: string) =>
+  (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState();
+    console.log(state)
+
+    const isEditing = false; // Add logic if needed
+
+    if (!isEditing) {
+      dispatch(SelectApplication(applicationId));
+    } else {
+      console.warn("Cannot switch applications while editing.");
+    }
+  };
+
+export const { GetApplications, SelectApplication, SearchApplication, UpdateApplication, AddApplication } =
+  ApplicationSlice.actions;
+
+export const fetchApplications = () => async (dispatch: AppDispatch) => {
+  try {
+    const response = await axiosServices.get(`${API_URL}`);
+
+    dispatch(GetApplications(response.data?.collection?.data || []));
+  } catch (err: any) {
+    console.error("Error fetching applications:", err);
+  }
+};
+
+export const addApplication = createAsyncThunk(
+  "applications/addApplication",
+  async (newApplication: CreateApplicationRequest, { rejectWithValue }) => {
+    try {
+      // const {id, applicationRegistered, applicationExpired, ...filteredAppData} = newApplication
+      console.log("Adding application with data: ", newApplication);
+      const response = await axiosServices.post(API_URL, newApplication);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error adding application:", error);
+      return rejectWithValue(error.response?.data || "Unknown error");
+    }
+  }
+);
+
+
+export const editApplication = createAsyncThunk(
+  "applications/editApplication",
+  async (updateApp: ApplicationType, {rejectWithValue}) => {
+    try {
+      const { id, applicationRegistered, applicationExpired, ...filteredAppData } = updateApp;
+      const response = await axiosServices.put(`${API_URL}${id}`, filteredAppData);
+      return response.data;
+    } catch (error: any){
+      console.error("Error updating app: ", error);
+      return rejectWithValue(error.response?.data || "Unknown error");
+    }
+  }
+);
+
+export const deleteApplication = createAsyncThunk(
+  "applications/deleteApplication",
+  async (applicationId: string, { rejectWithValue }) => {
+    try {
+      await axiosServices.delete(`${API_URL}${applicationId}`);
+      return applicationId; // Return the deleted application's ID to update the state
+    } catch (error: any) {
+      console.error("Error deleting application:", error);
+      return rejectWithValue(error.response?.data || "Unknown error");
+    }
+  },
+);
+
+
+export default ApplicationSlice.reducer;

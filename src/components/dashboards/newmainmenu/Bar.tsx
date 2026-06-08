@@ -1,0 +1,169 @@
+import { Box, useTheme } from '@mui/material';
+import Chart from 'react-apexcharts';
+import { useMemo } from 'react';
+
+import { useAllAlarmCategory } from 'src/hooks/AlarmSetting/useAlarmCategory';
+import { useAlarmByArea } from 'src/hooks/useDashboard';
+import { useSelector } from 'src/store/Store';
+
+/* ---------------- Filter ---------------- */
+
+const defaultFilter = {
+  timeRange: 'daily',
+  floorplanMaskedAreaId: null,
+  operatorName: null,
+  visitorId: null,
+  buildingId: null,
+  floorId: null,
+};
+
+/* ---------------- Component ---------------- */
+
+const Bar: React.FC = () => {
+  const theme = useTheme();
+  const { data: alarmCategories = [] } = useAllAlarmCategory();
+  const dashboardFilter = useSelector((state: any) => state.customizer.dashboardFilter);
+  const { data: alarmByArea, isLoading } = useAlarmByArea(dashboardFilter);
+
+  /* ---------------- Transform API → Chart ---------------- */
+
+  const chartData = useMemo(() => {
+    if (!alarmByArea?.areas?.length) {
+      return {
+        categories: [],
+        series: [],
+      };
+    }
+
+    const areas = alarmByArea.areas;
+
+    // X-axis categories (area names)
+    const categories = areas.map((a: any) => a.name);
+
+    // Collect all unique alarm category names
+    const categorySet = new Set<string>();
+    areas.forEach((area: any) => {
+      area.series.forEach((s: any) => {
+        categorySet.add(s.name);
+      });
+    });
+
+    const categoryNames = Array.from(categorySet);
+
+    // Build stacked series (one per alarm category)
+    const series = categoryNames.map((categoryName) => {
+      const color =
+        alarmCategories.find(
+          (c: any) => c.alarmCategory === categoryName
+        )?.alarmColor ?? '#999999';
+
+      return {
+        name: categoryName,
+        color,
+        data: areas.map((area: any) => {
+          const found = area.series.find(
+            (s: any) => s.name === categoryName
+          );
+          return found ? found.data[0] : 0;
+        }),
+      };
+    });
+
+    return { categories, series };
+  }, [alarmByArea, alarmCategories]);
+
+  /* ---------------- Chart Options ---------------- */
+
+  const options: ApexCharts.ApexOptions = {
+    chart: {
+      type: 'bar',
+      stacked: true,
+      toolbar: {
+        show: true,
+        offsetX: -10,
+      },
+      foreColor: theme.palette.text.secondary,
+      background: 'transparent',
+    },
+    theme: {
+      mode: theme.palette.mode as 'light' | 'dark',
+    },
+
+    title: {
+      text: 'Alarm Distribution by Area',
+      align: 'left',
+      style: {
+        fontSize: '22px',
+        fontWeight: 'bold',
+        color: theme.palette.primary.main,
+      },
+    },
+
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: '55%',
+        borderRadius: 4,
+      },
+    },
+
+    xaxis: {
+      categories: chartData.categories,
+      labels: {
+        style: {
+          fontSize: '12px',
+        },
+      },
+    },
+
+    yaxis: {
+      tickAmount: 4,
+      labels: {
+        style: {
+          fontSize: '12px',
+        },
+      },
+    },
+
+    grid: {
+      borderColor: theme.palette.divider,
+    },
+
+    legend: {
+      position: 'top',
+      horizontalAlign: 'right',
+      offsetX: -30,
+    },
+
+    tooltip: {
+      y: {
+        formatter: (val) => (val === 0 ? '0' : val.toString()),
+      },
+    },
+  };
+
+  /* ---------------- Render ---------------- */
+
+  return (
+    <Box
+      sx={{
+        width: '100%',
+        height: '28vh',
+        borderRadius: '25px',
+        boxShadow: (theme) => theme.shadows[10],
+        bgcolor: 'background.paper',
+        px: 2,
+        py: 2,
+      }}
+    >
+      <Chart
+        options={options}
+        series={chartData.series}
+        type="bar"
+        height="100%"
+      />
+    </Box>
+  );
+};
+
+export default Bar;

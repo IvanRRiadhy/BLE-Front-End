@@ -1,0 +1,212 @@
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import axiosServices from 'src/utils/axios';
+import { OverPopulatingAlarmType, GetFilter } from 'src/store/apps/alarmsetting/overpopulating';
+import { useSelector } from 'react-redux';
+import { RootState } from 'src/store/Store';
+
+const API_URL = '/api/Overpopulating/';
+const API_DT_URL = '/api/Overpopulating/filter/';
+
+interface Nodes {
+  id: string;
+  x: number;
+  y: number;
+  x_px: number;
+  y_px: number;
+}
+
+interface PaginatedResponse<T> {
+  data: T[];
+  draw: number;
+  recordsTotal: number;
+  recordsFiltered: number;
+}
+
+// Normalize the data (same logic as your Redux thunk)
+const normalizeOverPopulatingData = (data: any[]): OverPopulatingAlarmType[] => {
+  return (data || []).map((item: any) => {
+    let nodes: Nodes[] | undefined = undefined;
+    try {
+      if (item.areaShape) {
+        const parsed = JSON.parse(item.areaShape);
+        if (Array.isArray(parsed)) {
+          nodes = parsed;
+        }
+      }
+    } catch (err) {
+      console.error("Invalid areaShape JSON:", item.areaShape, err);
+    }
+
+    return {
+      ...item,
+      isActive: item.isActive === 1, // Convert 1/0 to boolean
+      nodes, // Add parsed nodes
+    };
+  });
+};
+
+// Get all over-populating alarms
+export function useOverPopulatingAlarmsAll() {
+  return useQuery({
+    queryKey: ['over-populating-all'],
+    queryFn: async () => {
+      const response = await axiosServices.get(API_URL);
+      return normalizeOverPopulatingData(response.data.collection.data || []);
+    },
+    staleTime: 5_000, // 5 minutes for static data
+  });
+}
+
+// Get filtered/paginated over-populating alarms
+export function useOverPopulatingAlarms(filter: GetFilter) {
+  return useQuery({
+    queryKey: ['over-populating-list', filter],
+    queryFn: async () => {
+      const response = await axiosServices.post(API_DT_URL, filter);
+      const collection = response.data.collection;
+      const normalizedData = normalizeOverPopulatingData(collection.data);
+      
+      return {
+        data: normalizedData,
+        draw: collection.draw,
+        recordsTotal: collection.recordsTotal,
+        recordsFiltered: collection.recordsFiltered,
+      } satisfies PaginatedResponse<OverPopulatingAlarmType>;
+    },
+    placeholderData: keepPreviousData,
+    staleTime: 5_000, // 30 seconds
+  });
+}
+
+// Get single over-populating alarm by ID
+export function useOverPopulatingAlarm(id: string | null) {
+  return useQuery({
+    queryKey: ['over-populating-detail', id],
+    queryFn: async () => {
+      if (!id) throw new Error('No over-populating alarm ID provided');
+      const response = await axiosServices.get(`${API_URL}${id}`);
+      const normalizedData = normalizeOverPopulatingData([response.data.collection])[0];
+      return normalizedData;
+    },
+    enabled: !!id,
+  });
+}
+
+// Add new over-populating alarm
+export function useAddOverPopulatingAlarm() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (alarm: OverPopulatingAlarmType) => {
+      const { id, nodes, floorplan, ...rest } = alarm;
+      const filteredData = {
+        ...rest,
+        isActive: rest.isActive ? 1 : 0,
+      };
+
+      console.log('Adding over-populating alarm:', filteredData);
+      const response = await axiosServices.post(API_URL, filteredData);
+      return response.data;
+    },
+    onSuccess: () => {
+      // Invalidate relevant queries
+      queryClient.invalidateQueries({ queryKey: ['over-populating-all'] });
+      queryClient.invalidateQueries({ queryKey: ['over-populating-list'] });
+    },
+  });
+}
+
+// Edit over-populating alarm
+export function useEditOverPopulatingAlarm() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (alarm: OverPopulatingAlarmType) => {
+      const { id, nodes, floorplan, ...rest } = alarm;
+      const filteredData = {
+        ...rest,
+        isActive: rest.isActive ? 1 : 0,
+      };
+
+      if (!id) throw new Error('Over-populating alarm ID is required for edit');
+      const response = await axiosServices.put(`${API_URL}${id}`, filteredData);
+      return response.data;
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate list queries
+      queryClient.invalidateQueries({ queryKey: ['over-populating-all'] });
+      queryClient.invalidateQueries({ queryKey: ['over-populating-list'] });
+      
+      // Update the specific item in cache if it exists
+      if (variables.id) {
+        queryClient.setQueryData(
+          ['over-populating-detail', variables.id],
+          (old: OverPopulatingAlarmType) => ({ ...old, ...variables })
+        );
+      }
+    },
+  });
+}
+
+// Delete over-populating alarm
+export function useDeleteOverPopulatingAlarm() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await axiosServices.delete(`${API_URL}${id}`);
+      return response.data;
+    },
+    onSuccess: (_, deletedId) => {
+      // Invalidate list queries
+      console.log('deletedId', deletedId);
+      queryClient.invalidateQueries({ queryKey: ['over-populating-all'] });
+      queryClient.invalidateQueries({ queryKey: ['over-populating-list'] });
+      
+      // Remove the specific item from cache
+      queryClient.removeQueries({ queryKey: ['over-populating-detail', deletedId] });
+    },
+  });
+}
+
+// Toggle active status
+export function useToggleOverPopulatingAlarm() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+      const response = await axiosServices.patch(`${API_URL}${id}/status`, { 
+        isActive: isActive ? 1 : 0 
+      });
+      return response.data;
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate list queries
+      queryClient.invalidateQueries({ queryKey: ['over-populating-all'] });
+      queryClient.invalidateQueries({ queryKey: ['over-populating-list'] });
+      
+      // Optimistically update the specific item
+      if (variables.id) {
+        queryClient.setQueryData(
+          ['over-populating-detail', variables.id],
+          (old: OverPopulatingAlarmType) => ({ ...old, isActive: variables.isActive })
+        );
+      }
+    },
+  });
+}
+
+// Hook for over-populating alarm statistics
+export function useOverPopulatingAlarmStats() {
+  const filter = useSelector((state: RootState) => state.OverPopulatingReducer.overPopulatingAlarmFilter);
+  const  listData = useOverPopulatingAlarms(filter);
+
+  return {
+    totalCount: listData.data?.recordsTotal || 0,
+    filteredCount: listData.data?.recordsFiltered || 0,
+    activeCount: listData.data?.data.filter(item => item.isActive).length || 0,
+    inactiveCount: listData.data?.data.filter(item => !item.isActive).length || 0,
+    hasLoaded: listData?.isFetched,
+    isFetching: listData?.isFetching,
+  };
+}

@@ -1,0 +1,265 @@
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid2 as Grid,
+  IconButton,
+  Typography,
+  MenuItem,
+  SelectChangeEvent,
+  Tooltip,
+  CircularProgress,
+} from '@mui/material';
+import { IconPencil, IconPlus } from '@tabler/icons-react';
+import React, { useEffect } from 'react';
+import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
+import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
+import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
+import {
+  AccessControlType,
+  editAccessControl,
+  addAccessControl,
+  fetchAccessControls,
+  fetchAccessControlsDT,
+} from 'src/store/apps/crud/accessControl';
+import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
+import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
+import toast from 'react-hot-toast';
+import { defaultAccessControlForm } from 'src/store/apps/defaultForm';
+
+interface FormType {
+  type?: string;
+  accessControl?: AccessControlType;
+}
+
+const AddEditAccessControl = ({ type, accessControl }: FormType) => {
+  const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [formData, setFormData] = React.useState<AccessControlType>({
+    ...defaultAccessControlForm,
+    ...accessControl,
+  });
+    const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
+
+  const accessControlFilter = useSelector(
+    (state: RootState) => state.accessControlReducer.accessControlFilter,
+  );
+  const brandData: BrandType[] = useSelector((state: RootState) => state.brandReducer.brandAll);
+  const dispatch: AppDispatch = useDispatch();
+  useEffect(() => {
+    dispatch(fetchBrands());
+  }, [dispatch]);
+
+  const handleClickOpen = async () => {
+    setLoading(true);
+    setFormErrors({});
+    if (type === 'edit' && accessControl) {
+      if (!accessControl.id) {
+        await dispatch(fetchAccessControlsDT(accessControlFilter));
+      }
+      setFormData({ ...defaultAccessControlForm, ...accessControl });
+    } else {
+      setFormData({ ...defaultAccessControlForm });
+    }
+    console.log(formData.controllerBrandId);
+    setTimeout(() => {
+      setLoading(false);
+      setOpen(true);
+    }, 100);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      let result;
+      if (type === 'edit') {
+        result = await dispatch(editAccessControl(formData)); // Dispatch update
+      }
+      if (type === 'add') {
+        result = await dispatch(addAccessControl(formData));
+      }
+      if (result && result.type && result.type.endsWith('/fulfilled')) {
+        await dispatch(fetchAccessControlsDT(accessControlFilter));
+        console.log('Access Control Saved!');
+        toast.success('Data Saved');
+        handleClose();
+      } else {
+        toast.error('Saving Data Unsuccessful');
+      }
+    } catch (error) {
+      toast.error('Saving Data Unsuccessful');
+      console.error('Error saving Access Control:', error);
+    }
+    setTimeout(() => {
+      setIsSaving(false);
+    }, 1000);
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
+  ) => {
+    const { value, name, id } = e.target as
+      | HTMLInputElement
+      | { value: string; name: string; id?: string };
+    setFormData((prev) => ({ ...prev, [id || name]: value }));
+  };
+
+  return (
+    <>
+      {type === 'edit' && (
+        <Tooltip title="Edit Access Control">
+          <IconButton color="primary" size="small" onClick={handleClickOpen}>
+            <IconPencil size={20} />
+          </IconButton>
+        </Tooltip>
+      )}
+      {type === 'add' && (
+        <Tooltip title="Add Access Control">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<IconPlus size={20} />}
+            onClick={handleClickOpen}
+          >
+            Add Access Control
+          </Button>
+        </Tooltip>
+      )}
+      {!loading && (
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogTitle>
+            <Typography component="div" variant="h4" mb={2} mt={2} fontWeight={700}>
+              {type === 'add' ? 'Add Access Control' : 'Edit Access Control'}
+            </Typography>
+            <Divider />
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              Access Control Details
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
+                <CustomFormLabel htmlFor="ctrl-brand-id">Controller Brand</CustomFormLabel>
+                <CustomSelect
+                  id="controllerBrandId"
+                  name="controllerBrandId"
+                  value={formData.controllerBrandId}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                >
+                  {brandData.map((brand) => (
+                    <MenuItem key={brand.id} value={brand.id}>
+                      {brand.name}
+                    </MenuItem>
+                  ))}
+                </CustomSelect>
+                <CustomFormLabel htmlFor="ctrl-type">Controller Type</CustomFormLabel>
+                <CustomTextField
+                  id="type"
+                  value={formData.type}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
+                <CustomFormLabel htmlFor="ctrl-name">Name</CustomFormLabel>
+                <CustomTextField
+                  id="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+                <CustomFormLabel htmlFor="ctrl-description">Description</CustomFormLabel>
+                <CustomTextField
+                  id="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
+            </Grid>
+            <Typography variant="h6" fontWeight={600} mb={2} mt={2}>
+              Other Details
+            </Typography>
+            <Divider />
+            <Grid container spacing={5} mb={3}>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
+                <CustomFormLabel htmlFor="door-id">Door ID</CustomFormLabel>
+                <CustomTextField
+                  id="doorId"
+                  value={formData.doorId}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+                <CustomFormLabel htmlFor="raw">Raw Data</CustomFormLabel>
+                <CustomTextField
+                  id="raw"
+                  value={formData.raw}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid size={{ lg: 6, md: 12, sm: 12 }} direction="column">
+                <CustomFormLabel htmlFor="ctrl-channel">Channel</CustomFormLabel>
+                <CustomTextField
+                  id="channel"
+                  value={formData.channel}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 2 }}>
+            <Button
+              onClick={handleClose}
+              variant="outlined"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              variant="contained"
+              sx={{ fontSize: '1rem', py: 1, px: 3 }}
+              disabled={isSaving}
+            >
+              {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
+      {loading && (
+        <Dialog open={true} fullWidth maxWidth="sm">
+          <DialogContent sx={{ textAlign: 'center', py: 10 }}>
+            <Typography variant="h1" mb={5}>
+              Loading...{' '}
+            </Typography>
+            <CircularProgress size={50} color="primary" />
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
+  );
+};
+
+export default AddEditAccessControl;
