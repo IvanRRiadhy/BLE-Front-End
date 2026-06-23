@@ -73,7 +73,7 @@ const AlarmList = () => {
                   height: 36,
                   boxShadow: 3,
                   // Animated pulse only when hidden
-                  animation: !showIntruders ? `${pulse} 2s infinite` : 'none',
+                  // animation: !showIntruders ? `${pulse} 2s infinite` : 'none',
                   '&:hover': {
                     backgroundColor: 'primary.dark',
                   },

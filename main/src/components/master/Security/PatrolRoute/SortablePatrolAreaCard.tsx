@@ -13,9 +13,13 @@ import { Box, Card, Grid2 as Grid, TextField, Typography } from '@mui/material';
 import { IconGripHorizontal } from '@tabler/icons-react';
 import { PatrolAreaType } from 'src/store/apps/crud/patrolArea';
 import { useEffect, useRef, useState } from 'react';
+import { FloorplanType } from 'src/store/apps/crud/floorplan';
+import { BASE_URL } from 'src/utils/axios';
+import AreaHighlightRenderer from 'src/layouts/full/shared/AreaHighlightRenderer';
 
 interface SortablePatrolAreaCardProps {
   area: PatrolAreaType;
+  floorplan: FloorplanType;
   index: number;
   cardWidth: number;
   cardHeight: number;
@@ -33,6 +37,7 @@ interface SortablePatrolAreaCardProps {
 
 const SortablePatrolAreaCard = ({
   area,
+  floorplan,
   index,
   cardWidth,
   cardHeight,
@@ -50,12 +55,23 @@ const SortablePatrolAreaCard = ({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: area.id,
   });
+const [img, setImg] = useState<HTMLImageElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
+
+    const floorplanImage = floorplan?.floorplanImage
+      ? floorplan.floorplanImage.startsWith('/Uploads/')
+        ? `${BASE_URL}${floorplan.floorplanImage}`
+        : floorplan.floorplanImage
+      : '';
+
+      
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
-
+  // console.log("Area: ", area)
   const [showTrash, setShowTrash] = useState(false);
   const hideTimer = useRef<number | null>(null);
 
@@ -87,6 +103,40 @@ const SortablePatrolAreaCard = ({
       hideImmediately();
     }
   }, [isDragging]);
+
+    useEffect(() => {
+      if (floorplanImage) {
+        const image = new Image();
+        image.src = floorplanImage;
+        image.onload = () => {
+          setImg(image);
+          setImgSize({ width: image.width, height: image.height });
+        };
+      }
+    }, [floorplanImage]);
+
+    const [containerSize, setContainerSize] = useState({
+  width: 0,
+  height: 0,
+});
+
+useEffect(() => {
+  if (!containerRef.current) return;
+
+  const observer = new ResizeObserver((entries) => {
+    const entry = entries[0];
+
+    setContainerSize({
+      width: entry.contentRect.width,
+      height: entry.contentRect.height,
+    });
+  });
+
+  observer.observe(containerRef.current);
+
+  return () => observer.disconnect();
+}, []);
+  
 
   return (
     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -174,6 +224,10 @@ const SortablePatrolAreaCard = ({
           )}
           {/* 🔳 Area Preview */}
           <Box
+            onClick={() => {
+              console.log("Area: ", area, "Floorplan: ", floorplanImage)
+            }}
+            ref={containerRef}
             sx={{
               width: '80%',
               aspectRatio: '1 / 1',
@@ -181,8 +235,27 @@ const SortablePatrolAreaCard = ({
               borderBottom: 1,
               borderColor: 'divider',
               mx: 'auto',
+                      display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden',
             }}
-          />
+          >
+  {img &&
+    imgSize &&
+    containerSize.width > 0 &&
+    containerSize.height > 0 && (
+      <AreaHighlightRenderer
+        width={containerSize.width}
+        height={containerSize.height}
+        originalWidth={imgSize.width}
+        originalHeight={imgSize.height}
+        imageSrc={floorplanImage}
+        highlightAreaId={area.id}
+        patrolAreas={[area]}
+      />
+    )}
+          </Box>
 
           {/* 📋 Info */}
           <Box sx={{ p: 1.5, flex: 1, minHeight: 0 }}>

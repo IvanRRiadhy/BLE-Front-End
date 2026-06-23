@@ -1,6 +1,5 @@
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
-import { RootState, useSelector } from 'src/store/Store';
 // import { DashboardAreaChartFilter as DashboardFilter } from 'src/store/apps/dashboard/Dashboard';
 
 const API_DASHBOARD = '/api/Dashboard/';
@@ -103,6 +102,37 @@ export function useUpcomingVisitor(filter: any) {
   });
 }
 
+export function useInfiniteUpcomingVisitor(baseFilter: any, pageSize = 10) {
+  return useInfiniteQuery({
+    queryKey: ['upcoming-visitor-infinite', { ...baseFilter, start: undefined, length: undefined }, pageSize],
+    queryFn: async ({ pageParam = 0 }) => {
+      const res = await axiosServices.post('/api/TrxVisitor/filter', {
+        ...baseFilter,
+        start: pageParam,
+        length: pageSize,
+      });
+      const col = res.data.collection;
+      return {
+        data: col.data as any[],
+        recordsTotal: col.recordsTotal as number,
+        recordsFiltered: col.recordsFiltered as number,
+      };
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const loadedCount = allPages.flatMap((p) => p.data).length;
+      if (loadedCount < lastPage.recordsFiltered) {
+        return loadedCount;
+      }
+      return undefined;
+    },
+    refetchInterval: 15000,
+    refetchIntervalInBackground: true,
+    enabled: !!baseFilter,
+  });
+}
+
+
 export function useAreaDistribution(filter: DashboardFilterType, params?: Record<string, any>) {
   return useQuery({
     queryKey: ['area-distribution', filter, params],
@@ -178,6 +208,37 @@ export function useRealtimeAlarmLog(filter: any) {
     refetchIntervalInBackground: true,
   });
 }
+
+export function useInfiniteRealtimeAlarmLog(baseFilter: any, pageSize = 10) {
+  return useInfiniteQuery({
+    queryKey: ['realtime-alarm-log-infinite', { ...baseFilter, start: undefined, length: undefined }, pageSize],
+    queryFn: async ({ pageParam = 0 }) => {
+      const res = await axiosServices.post(`${API_TRIGGER}filter`, {
+        ...baseFilter,
+        start: pageParam,
+        length: pageSize,
+      });
+      const col = res.data.collection;
+      return {
+        data: col.data as any[],
+        recordsTotal: col.recordsTotal as number,
+        recordsFiltered: col.recordsFiltered as number,
+      };
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const loadedCount = allPages.flatMap((p) => p.data).length; 
+      if (loadedCount < lastPage.recordsFiltered) {
+        return loadedCount;
+      }
+      return undefined;
+    },
+    refetchInterval: 15000,
+    refetchIntervalInBackground: true,
+    enabled: !!baseFilter,
+  });
+}
+
 
 export function useNotificationLog() {
   return useQuery({

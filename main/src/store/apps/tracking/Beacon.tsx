@@ -201,10 +201,11 @@ export const BeaconSlice = createSlice({
           dmac: beacon.beaconId, // Set dmac to beaconId
           lastSeen: now,
         };
-
+        
         state.beaconsByTopic[topic][beacon.beaconId] = storedBeacon;
         state.allBeacons[topic][beacon.beaconId] = storedBeacon;
       });
+      // console.log("topic: ", topic, "Stored Beacons: ", beacons)
     },
 
     // Update counting data

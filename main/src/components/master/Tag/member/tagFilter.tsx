@@ -17,7 +17,9 @@ import { fetchDistricts, DistrictType } from 'src/store/apps/crud/district';
 import { UpdateFilter } from 'src/store/apps/crud/member';
 import { defaultMemberFilter } from 'src/store/apps/defaultForm';
 import { useQueryClient } from '@tanstack/react-query';
-import { PaginatedResponse } from 'src/hooks/useDepartment';
+import { PaginatedResponse, useAllDepartments } from 'src/hooks/useDepartment';
+import { useAllDistricts } from 'src/hooks/useDistrict';
+import { useAllOrganizations } from 'src/hooks/useOrganization';
 
 type ArrayFilterKey = 'OrganizationId' | 'DepartmentId' | 'DistrictId';
 
@@ -44,9 +46,9 @@ const SecurityGuardFilter = () => {
   // const organizationData = useSelector(
   //   (state: RootState) => state.organizationReducer.organizationAll,
   // );
-  const departmentData = queryClient.getQueryData<PaginatedResponse<DepartmentType>>(['department-list'])?.data || [];
-  const districtData = queryClient.getQueryData<PaginatedResponse<DistrictType>>(['district-list'])?.data || [];
-  const organizationData = queryClient.getQueryData<PaginatedResponse<OrganizationType>>(['organization-list'])?.data || [];
+  const departmentData = useAllDepartments().data || [];
+  const districtData = useAllDistricts().data || [];
+  const organizationData = useAllOrganizations().data || [];
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter.filters);
   const [draftFilter, setDraftFilter] = useState(memberFilter);
   // -------------------------------------------------------------------------

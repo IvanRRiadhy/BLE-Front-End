@@ -4,6 +4,7 @@ import {
   useQueryClient,
   keepPreviousData,
   UseQueryOptions,
+  useInfiniteQuery,
 } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
 import {
@@ -51,6 +52,40 @@ export function useAlarmTriggerList(filter: GetFilter) {
     gcTime: 5 * 60_000, // cache disimpan 5 menit
   });
 }
+
+// -----------------------------------------------------------------------------
+// ✅ FETCH LIST INFINITE (for infinite scrolling, per-category)
+// -----------------------------------------------------------------------------
+export function useInfiniteAlarmTriggerList(filter: GetFilter, pageSize = 50) {
+  return useInfiniteQuery({
+    queryKey: ['alarmTrigger-list-infinite', { ...filter, Length: undefined, Start: undefined }, pageSize],
+    queryFn: async ({ pageParam = 0 }) => {
+      const res = await axiosServices.post(API_DT_URL, {
+        ...filter,
+        Start: pageParam,
+        Length: pageSize,
+      });
+      const col = res.data.collection;
+      return {
+        data: col.data as AlarmTriggerType[],
+        draw: col.draw,
+        recordsTotal: col.recordsTotal,
+        recordsFiltered: col.recordsFiltered,
+      } satisfies PaginatedResponse<AlarmTriggerType>;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const loadedCount = allPages.flatMap((page) => page.data).length;
+      if (loadedCount < lastPage.recordsFiltered) {
+        return loadedCount;
+      }
+      return undefined;
+    },
+    staleTime: 5_000,
+    gcTime: 5 * 60_000,
+  });
+}
+
 
 // -----------------------------------------------------------------------------
 // ✅ FETCH ALL (for dropdowns, selectors, etc.)
@@ -366,6 +401,7 @@ export function useNearestSecurity(
     queryKey: ['alarmTrigger-nearest-security', triggerId],
     queryFn: async () => {
       const res = await axiosServices.get(`${API_URL}${triggerId}/nearest-securities`);
+      console.log("result nearest: ", res)
       return res.data.collection.data as NearestSecurityType[];
     },
     enabled: !!triggerId,

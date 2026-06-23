@@ -38,7 +38,7 @@ import { formatFullDateTime } from 'src/utils/time';
 import {
   useAcknowledgeAlarmTrigger,
   useAlarmTimeline,
-  useAlarmTriggerList,
+  useInfiniteAlarmTriggerList,
   useAllIntruders,
   useAssignActionAlarmTriggerByID,
   useDispatchAlarmTrigger,
@@ -47,6 +47,7 @@ import {
   usePostponeAlarmTrigger,
   useResolveAlarmTrigger,
 } from 'src/hooks/useAlarmTrigger';
+import { useInView } from 'react-intersection-observer';
 import {
   AlarmTimelineType,
   AlarmTriggerType,
@@ -97,8 +98,81 @@ const AlarmContent = () => {
   const alarmTriggerFilter = useSelector(
     (state: RootState) => state.alarmTriggerReducer.alarmTriggerFilter,
   );
-  const { data: data, isLoading } = useAlarmTriggerList({ ...alarmTriggerFilter, Length: 999 });
-  const alarmTriggerData = data?.data ?? [];
+  // 🔹 Per-category infinite queries
+  const baseFilter = alarmTriggerFilter;
+
+  const {
+    data: activeData,
+    isLoading: isLoadingActive,
+    hasNextPage: hasNextActive,
+    fetchNextPage: fetchNextActive,
+    isFetchingNextPage: isFetchingNextActive,
+  } = useInfiniteAlarmTriggerList({
+    ...baseFilter,
+    filters: {
+      ...baseFilter.filters,
+      isActive: true,
+      action: baseFilter.filters?.action?.length
+        ? baseFilter.filters.action.filter(
+            (a) => a.toLowerCase() !== 'dispatched' && a.toLowerCase() !== 'accepted',
+          )
+        : undefined,
+    },
+  }, 50);
+
+  const {
+    data: onGoingData,
+    isLoading: isLoadingOnGoing,
+    hasNextPage: hasNextOnGoing,
+    fetchNextPage: fetchNextOnGoing,
+    isFetchingNextPage: isFetchingNextOnGoing,
+  } = useInfiniteAlarmTriggerList({
+    ...baseFilter,
+    filters: {
+      ...baseFilter.filters,
+      isActive: true,
+      action: ['Dispatched', 'Accepted'],
+    },
+  }, 50);
+
+  const {
+    data: clearedData,
+    isLoading: isLoadingCleared,
+    hasNextPage: hasNextCleared,
+    fetchNextPage: fetchNextCleared,
+    isFetchingNextPage: isFetchingNextCleared,
+  } = useInfiniteAlarmTriggerList({
+    ...baseFilter,
+    filters: {
+      ...baseFilter.filters,
+      isActive: false,
+    },
+  }, 50);
+
+  // 🔹 Intersection observers per category column
+  const { ref: activeRef, inView: activeInView } = useInView();
+  const { ref: onGoingRef, inView: onGoingInView } = useInView();
+  const { ref: clearedRef, inView: clearedInView } = useInView();
+
+  useEffect(() => {
+    if (activeInView && hasNextActive && !isFetchingNextActive) fetchNextActive();
+  }, [activeInView, hasNextActive, isFetchingNextActive, fetchNextActive]);
+
+  useEffect(() => {
+    if (onGoingInView && hasNextOnGoing && !isFetchingNextOnGoing) fetchNextOnGoing();
+  }, [onGoingInView, hasNextOnGoing, isFetchingNextOnGoing, fetchNextOnGoing]);
+
+  useEffect(() => {
+    if (clearedInView && hasNextCleared && !isFetchingNextCleared) fetchNextCleared();
+  }, [clearedInView, hasNextCleared, isFetchingNextCleared, fetchNextCleared]);
+
+  // 🔹 Flat arrays per category
+  const activeAlarm = activeData?.pages.flatMap((p) => p.data) ?? [];
+  const onGoingAlarm = onGoingData?.pages.flatMap((p) => p.data) ?? [];
+  const clearedAlarm = clearedData?.pages.flatMap((p) => p.data) ?? [];
+
+  // Combined for auto-select from URL param
+  const alarmTriggerData = [...activeAlarm, ...onGoingAlarm, ...clearedAlarm];
 
   const { data: securityData = [], isLoading: isLoadingSecurity } = useAllSecurityLookup();
   // const [selectedSecurity, setSelectedSecurity] = useState<memberType | null>(null);
@@ -310,11 +384,11 @@ const AlarmContent = () => {
     SameBuilding: 4,
     DifferentBuilding: 5,
   };
+    // console.log("Nearest Sec: ", nearestSecurityData)
 
   const sortedSecurity = [...nearestSecurityData].sort((a, b) => {
     const proxA = proximityRank[a.proximityLevel] ?? 999;
     const proxB = proximityRank[b.proximityLevel] ?? 999;
-
     if (proxA !== proxB) return proxA - proxB;
 
     // distance logic (null last)
@@ -453,20 +527,7 @@ const AlarmContent = () => {
     }
   };
 
-  const onGoingAlarm = alarmTriggerData.filter(
-    (a) =>
-      a.isActive &&
-      (a.action?.toLowerCase() === 'dispatched' || a.action?.toLowerCase() === 'accepted'), // adjust if "accepted" is separate field
-  );
-
-  const activeAlarm = alarmTriggerData.filter(
-    (a) =>
-      a.isActive &&
-      a.action?.toLowerCase() !== 'dispatched' &&
-      a.action?.toLowerCase() !== 'accepted',
-  );
-
-  const clearedAlarm = alarmTriggerData.filter((a) => !a.isActive);
+  // 🔹 Category data is now derived from per-category infinite queries above
 
   const AlarmCard = ({ alarmTrigger }: { alarmTrigger: AlarmTriggerType }) => {
     const imgSrc = alarmTrigger.floorplanImage
@@ -893,7 +954,7 @@ const AlarmContent = () => {
               }}
             >
               <Typography variant="h6" fontWeight={700} mb={1}>
-                Active Alarm ({activeAlarm.length})
+                Active Alarm ({activeAlarm.length}{hasNextActive ? '+' : ''})
               </Typography>
 
               <Box
@@ -904,9 +965,23 @@ const AlarmContent = () => {
                   pr: 1,
                 }}
               >
-                {activeAlarm.map((a) => (
-                  <AlarmCard key={a.id} alarmTrigger={a} />
-                ))}
+                {isLoadingActive
+                  ? Array.from({ length: 3 }).map((_, i) => (
+                      <Box key={i} sx={{ border: '1px solid #CCC', borderRadius: 1.5, p: 1, mb: 1 }}>
+                        <Skeleton variant="rectangular" height={100} sx={{ mb: 1, borderRadius: 1 }} />
+                        <Skeleton variant="text" width="70%" height={22} />
+                        <Skeleton variant="text" width="50%" height={18} />
+                      </Box>
+                    ))
+                  : activeAlarm.map((a) => <AlarmCard key={a.id} alarmTrigger={a} />)}
+                {isFetchingNextActive &&
+                  Array.from({ length: 2 }).map((_, i) => (
+                    <Box key={i} sx={{ border: '1px solid #CCC', borderRadius: 1.5, p: 1, mb: 1 }}>
+                      <Skeleton variant="rectangular" height={100} sx={{ mb: 1, borderRadius: 1 }} />
+                      <Skeleton variant="text" width="70%" height={22} />
+                    </Box>
+                  ))}
+                {hasNextActive && <div ref={activeRef} style={{ height: '20px' }} />}
               </Box>
             </Box>
 
@@ -920,7 +995,7 @@ const AlarmContent = () => {
               }}
             >
               <Typography variant="h6" fontWeight={700} mb={1}>
-                On-Going Alarm ({onGoingAlarm.length})
+                On-Going Alarm ({onGoingAlarm.length}{hasNextOnGoing ? '+' : ''})
               </Typography>
 
               <Box
@@ -931,9 +1006,23 @@ const AlarmContent = () => {
                   pr: 1,
                 }}
               >
-                {onGoingAlarm.map((a) => (
-                  <AlarmCard key={a.id} alarmTrigger={a} />
-                ))}
+                {isLoadingOnGoing
+                  ? Array.from({ length: 3 }).map((_, i) => (
+                      <Box key={i} sx={{ border: '1px solid #CCC', borderRadius: 1.5, p: 1, mb: 1 }}>
+                        <Skeleton variant="rectangular" height={100} sx={{ mb: 1, borderRadius: 1 }} />
+                        <Skeleton variant="text" width="70%" height={22} />
+                        <Skeleton variant="text" width="50%" height={18} />
+                      </Box>
+                    ))
+                  : onGoingAlarm.map((a) => <AlarmCard key={a.id} alarmTrigger={a} />)}
+                {isFetchingNextOnGoing &&
+                  Array.from({ length: 2 }).map((_, i) => (
+                    <Box key={i} sx={{ border: '1px solid #CCC', borderRadius: 1.5, p: 1, mb: 1 }}>
+                      <Skeleton variant="rectangular" height={100} sx={{ mb: 1, borderRadius: 1 }} />
+                      <Skeleton variant="text" width="70%" height={22} />
+                    </Box>
+                  ))}
+                {hasNextOnGoing && <div ref={onGoingRef} style={{ height: '20px' }} />}
               </Box>
             </Box>
 
@@ -947,7 +1036,7 @@ const AlarmContent = () => {
               }}
             >
               <Typography variant="h6" fontWeight={700} mb={1}>
-                Cleared Alarm ({clearedAlarm.length})
+                Cleared Alarm ({clearedAlarm.length}{hasNextCleared ? '+' : ''})
               </Typography>
 
               <Box
@@ -958,9 +1047,23 @@ const AlarmContent = () => {
                   pr: 1,
                 }}
               >
-                {clearedAlarm.map((a) => (
-                  <AlarmCard key={a.id} alarmTrigger={a} />
-                ))}
+                {isLoadingCleared
+                  ? Array.from({ length: 3 }).map((_, i) => (
+                      <Box key={i} sx={{ border: '1px solid #CCC', borderRadius: 1.5, p: 1, mb: 1 }}>
+                        <Skeleton variant="rectangular" height={100} sx={{ mb: 1, borderRadius: 1 }} />
+                        <Skeleton variant="text" width="70%" height={22} />
+                        <Skeleton variant="text" width="50%" height={18} />
+                      </Box>
+                    ))
+                  : clearedAlarm.map((a) => <AlarmCard key={a.id} alarmTrigger={a} />)}
+                {isFetchingNextCleared &&
+                  Array.from({ length: 2 }).map((_, i) => (
+                    <Box key={i} sx={{ border: '1px solid #CCC', borderRadius: 1.5, p: 1, mb: 1 }}>
+                      <Skeleton variant="rectangular" height={100} sx={{ mb: 1, borderRadius: 1 }} />
+                      <Skeleton variant="text" width="70%" height={22} />
+                    </Box>
+                  ))}
+                {hasNextCleared && <div ref={clearedRef} style={{ height: '20px' }} />}
               </Box>
             </Box>
           </Box>

@@ -38,6 +38,11 @@ interface BaseNode {
   y_px: number;
 }
 
+type BoundaryPolygon = {
+  label: string;
+  points: number[];
+}
+
 // Specific node types for different area types
 type Nodes = {
   id: string;
@@ -262,6 +267,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   const beaconDataObj = useSelector(
     (state: RootState) => state.BeaconReducer.beaconsByTopic[topic],
   );
+  // console.log("Beacons: ", beaconDataObj, "topic: ", topic)
 
   // Convert object to array for easier processing
   const beaconData = useMemo(() => {
@@ -402,7 +408,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
       return;
     }
 
-    // console.log(`Processing ${beaconData.length} beacons for topic ${topic}`);
+    console.log(`Processing ${beaconData.length} beacons for topic ${topic}`);
 
     setLastSeenBeacons((prev) => {
       const updated = { ...prev };
@@ -434,6 +440,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
 
       return updated;
     });
+    console.log("Beacons: ", lastSeenBeacons)
     // dispatch(buildTrackingLogs());
   }, [beaconData, topic]);
 
@@ -630,16 +637,29 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
 
   // Specific handler for BoundaryAlarm nodes
   const setPointsFromBoundaryNodes = (boundaryNodes: any): number[] => {
+    console.log("BOUNDARY NODES", boundaryNodes)
     // First try the generic function
     const points = setPointsFromNodes(boundaryNodes);
     if (points.length > 0) return points;
 
     // If that doesn't work, try to inspect the structure
-    console.log('Boundary nodes structure:', boundaryNodes);
+    console.log('Boundary nodes structure:', points);
 
     // Return empty array if we can't extract points
     return [];
   };
+  const getBoundaryPolygons = (boundaryNodes: any): BoundaryPolygon[] => {
+  if (!boundaryNodes || typeof boundaryNodes !== 'object') {
+    return [];
+  }
+  return Object.entries(boundaryNodes).map(([label, nodes]) => ({
+    label: label.toUpperCase(),
+    points: (nodes as any[]).flatMap((node) => [
+      Number(node.x_px),
+      Number(node.y_px),
+    ]),
+  }));
+};
 
   // Use the image that's actually loaded (like EditAreaRenderer)
   const imageToDraw = bgImage || previewImage;
@@ -752,25 +772,30 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                 onClick={() => dispatch(setFocus({ type: 'stayonarea', id: stayonarea.id }))}
               />
             ))}
-          {showBoundary &&
-            BoundaryAlarm.map((boundary: BoundaryAlarmType) => (
-              <Line
-                key={boundary.id}
-                name="boundary"
-                // Use the specific boundary handler
-                points={setPointsFromBoundaryNodes(boundary.nodes)}
-                stroke={darken(boundary.color, 0.3)}
-                strokeWidth={5}
-                lineJoin="round"
-                lineCap="round"
-                closed
-                fill={boundary.color}
-                opacity={0.35}
-                onMouseEnter={() => setHoveredAreaId(boundary.id)}
-                onMouseLeave={() => setHoveredAreaId((id) => (id === boundary.id ? null : id))}
-                onClick={() => dispatch(setFocus({ type: 'boundary', id: boundary.id }))}
-              />
-            ))}
+{showBoundary &&
+  BoundaryAlarm.flatMap((boundary: BoundaryAlarmType) =>
+    getBoundaryPolygons(boundary.nodes).map((polygon) => (
+      <Line
+        key={`${boundary.id}-${polygon.label}`}
+        name="boundary"
+        points={polygon.points}
+        stroke={darken(boundary.color, 0.3)}
+        strokeWidth={5}
+        lineJoin="round"
+        lineCap="round"
+        closed
+        fill={boundary.color}
+        opacity={0.35}
+        onMouseEnter={() => setHoveredAreaId(boundary.id)}
+        onMouseLeave={() =>
+          setHoveredAreaId((id) => (id === boundary.id ? null : id))
+        }
+        onClick={() =>
+          dispatch(setFocus({ type: 'boundary', id: boundary.id }))
+        }
+      />
+    ))
+  )}
           {showPatrolAreas &&
             PatrolAreas.map((patrolArea: PatrolAreaType) => {
               if (!patrolArea.nodes || patrolArea.nodes.length < 3) return null;

@@ -45,6 +45,7 @@ export type GetFilter = {
         }
     }
     filters: {
+        isActive?: boolean;
         alarm?: string[];
         buildingId?: string[];
         floorId?: string[];

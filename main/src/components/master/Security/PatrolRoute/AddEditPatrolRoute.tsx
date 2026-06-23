@@ -40,6 +40,8 @@ import { SortableContext, arrayMove, rectSortingStrategy } from '@dnd-kit/sortab
 import { restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
 
 import SortablePatrolAreaCard from './SortablePatrolAreaCard';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { FloorplanType } from 'src/store/apps/crud/floorplan';
 
 interface FormType {
   type?: 'add' | 'edit';
@@ -69,11 +71,12 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
       })) ??
       [],
   });
-
+  
   /* ===== hooks ===== */
   const addMutation = useAddPatrolRoute();
   const editMutation = useEditPatrolRoute();
   const { data: patrolAreaData = [] } = useAllPatrolAreas();
+  const { data: floorplanData = []} = useAllFloorplans();
   useTimeGroupList({
     ...defaultTimeGroupFilter,
     Length: 999,
@@ -268,10 +271,12 @@ const AddEditPatrolRoute = ({ type, patrolRoute }: FormType) => {
                 <Grid container spacing={3}>
                   {selectedAreas.map((area, index) => {
                     const routeArea = formData.routeAreas.find((r) => r.patrolAreaId === area.id);
+                    const floorplan = floorplanData.find((f) => f.id === area.floorplanId) || {} as FloorplanType;
                     return (
                       <SortablePatrolAreaCard
                         key={area.id}
                         area={area}
+                        floorplan={floorplan}
                         cardWidth={CARD_WIDTH}
                         cardHeight={CARD_HEIGHT}
                         index={index + 1}

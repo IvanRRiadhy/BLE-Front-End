@@ -22,7 +22,8 @@ import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import TagListItem from './tagListItem';
 import { defaultMemberFilter } from 'src/store/apps/defaultForm';
 import { memberType } from 'src/store/apps/crud/member';
-import { useMemberList, useDeleteMember } from 'src/hooks/useMember';
+import { useInfiniteMemberList, useDeleteMember } from 'src/hooks/useMember';
+import { useInView } from 'react-intersection-observer';
 
 const SKELETON_ROWS = 5;
 
@@ -34,10 +35,21 @@ const TagList = () => {
   const selectedMemberId = useSelector((state: RootState) => state.memberReducer.selectedMemberId);
 
   // 🔹 React Query fetching
-  const { data, isLoading, isFetching, isFetched } = useMemberList({
-    ...memberFilter,
-    Length: 999, // show all for side list
-  });
+  const {
+    data,
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteMemberList(memberFilter, 50);
+
+  const { ref, inView } = useInView();
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const deleteMutation = useDeleteMember();
 
@@ -48,14 +60,14 @@ const TagList = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // 🔹 Derived members list
-  const members = data?.data ?? [];
+  const members = data?.pages.flatMap((page) => page.data) ?? [];
   const active = members?.find((member: memberType) => member.id === selectedMemberId);
   // ---------------------------------------------------------------------------
   // ✅ Initialization on mount
   // ---------------------------------------------------------------------------
   useEffect(() => {
     // Reset filter on mount (only once)
-    dispatch(UpdateFilter({ ...defaultMemberFilter, Length: 999 }));
+    dispatch(UpdateFilter({ ...defaultMemberFilter }));
   }, [dispatch]);
 
   const tempMemberWithoutCard = members.filter((member) => !member.cardNumber);
@@ -121,7 +133,7 @@ const TagList = () => {
   // ✅ UI Rendering
   // ---------------------------------------------------------------------------
   return (
-    <Box display="flex" flexDirection="column" height="100%">
+    <Box display="flex" flexDirection="column" height="82vh">
       <Box
         display="flex"
         flexDirection="row"
@@ -182,7 +194,7 @@ const TagList = () => {
             </Box>
           )}
 
-          {isLoading || isFetching
+          {isLoading
             ? renderSkeletonItems(SKELETON_ROWS)
             : members.map((member) => (
                 <TagListItem
@@ -197,6 +209,10 @@ const TagList = () => {
                   }}
                 />
               ))}
+
+          {isFetchingNextPage && renderSkeletonItems(3)}
+
+          {hasNextPage && <div ref={ref} style={{ height: '20px' }} />}
           {/* </Box> */}
         </List>
       </Box>

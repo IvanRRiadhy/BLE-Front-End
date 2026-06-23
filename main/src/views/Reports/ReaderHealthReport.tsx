@@ -139,7 +139,7 @@ const ReaderHealthReport = () => {
             <Typography variant="h5">Reader Health Report</Typography>
             <Stack direction="row" spacing={2} alignItems="center">
               <ReaderHealthReportExport data={consolidatedData} />
-              <FormControlLabel
+              {/* <FormControlLabel
                 control={
                   <CustomSwitch
                     checked={viewMode === 'table'}
@@ -148,7 +148,7 @@ const ReaderHealthReport = () => {
                   />
                 }
                 label={viewMode === 'table' ? 'Table List' : 'Chart List'}
-              />
+              /> */}
             </Stack>
           </Stack>
 

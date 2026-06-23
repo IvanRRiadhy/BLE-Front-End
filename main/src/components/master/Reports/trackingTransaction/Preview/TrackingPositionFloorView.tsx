@@ -5,6 +5,8 @@ import { Box } from '@mui/material';
 import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
 import TrackingPositionRenderer from './TrackingPositionRenderer';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 
 interface TrackingPositionFloorViewProps {
   floorplanId: string;
@@ -23,9 +25,9 @@ const TrackingPositionFloorView: React.FC<TrackingPositionFloorViewProps> = ({
   memberId,
   markerColor,
 }) => {
-  const dispatch: AppDispatch = useDispatch();
-  const floorplans = useSelector((s: RootState) => s.floorplanReducer.floorplanAll);
-  const maskedAreas = useSelector((s: RootState) => s.maskedAreaReducer.maskedAreaAll);
+  // const dispatch: AppDispatch = useDispatch();
+  const floorplans = useAllFloorplans().data ?? [];
+  const maskedAreas = useAllMaskedAreas().data ?? [];
 
   const [img, setImg] = useState<HTMLImageElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -41,10 +43,10 @@ const TrackingPositionFloorView: React.FC<TrackingPositionFloorViewProps> = ({
     : '';
 
   // Load resources
-  useEffect(() => {
-    dispatch(fetchFloorplan());
-    // dispatch(fetchMaskedAreas());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchFloorplan());
+  //   // dispatch(fetchMaskedAreas());
+  // }, [dispatch]);
 
   useEffect(() => {
     if (floorplanImage) {

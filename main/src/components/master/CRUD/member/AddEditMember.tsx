@@ -344,7 +344,7 @@ const AddEditMember = ({ type, member }: FormType) => {
                   <Typography variant="h6" fontWeight={600} mb={2}>
                     Employee Details
                   </Typography>
-                  <Divider sx={{ mb: 2 }} />
+                  <Divider />
                   <CustomFormLabel htmlFor="person-id">Person ID</CustomFormLabel>
                   <CustomTextField
                     id="personId"
@@ -526,8 +526,8 @@ const AddEditMember = ({ type, member }: FormType) => {
                   <Typography variant="h6" fontWeight={600} mb={2}>
                     Personal Information
                   </Typography>
-                  <Divider sx={{ mb: 2 }} />
-                  <Grid container spacing={2}>
+                  <Divider />
+                  <Grid container spacing={0}>
                     <Grid size={12}>
                       <CustomFormLabel htmlFor="name">Name</CustomFormLabel>
                       <CustomTextField
@@ -614,7 +614,8 @@ const AddEditMember = ({ type, member }: FormType) => {
                         rows={1}
                       />
                     </Grid>
-                    <Grid size={6}>
+                    <Grid container spacing={2} size={12}>
+                      <Grid size={6} >
                       <CustomFormLabel htmlFor="head-Member-1">Head Member 1</CustomFormLabel>
                       <CustomAutocomplete
                         label="Head Member 1"
@@ -668,6 +669,8 @@ const AddEditMember = ({ type, member }: FormType) => {
                         sx={{ flex: 1 }}
                       />
                     </Grid>
+                    </Grid>
+
                   </Grid>
                 </Grid>
               </Grid>

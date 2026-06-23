@@ -1,15 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Box, Typography, Avatar, Stack } from '@mui/material';
-import { useUpcomingVisitor } from 'src/hooks/useDashboard';
+import { useEffect, useMemo } from 'react';
+import { Box, Typography, Avatar, Stack, Skeleton } from '@mui/material';
+import { useInfiniteUpcomingVisitor } from 'src/hooks/useDashboard';
 import { BASE_URL } from 'src/utils/axios';
 import SmartScrollingText from 'src/utils/SmartScrollingText';
-// import { getUpcomingVisitor } from "../services/apiService";
-// import dumpy from "../assets/ambatukam.jpeg";
+import { useInView } from 'react-intersection-observer';
 
 const defaultFilter = {
   draw: 1,
   start: 0,
-  length: 999,
+  length: 10,
   sortColumn: '',
   sortDir: 'desc',
   searchValue: '',
@@ -34,11 +33,24 @@ const statusColorMap: Record<string, string> = {
 };
 
 const UpcomingVisitor: React.FC = () => {
-  const { data = [], isLoading, isError } = useUpcomingVisitor(defaultFilter);
+  const {
+    data: infiniteData,
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteUpcomingVisitor(defaultFilter, 10);
+
+  const { ref: sentinelRef, inView } = useInView();
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   function resolvePerson(x: any) {
-    // console.log("Resolving Person:", x);
     if (x.visitor) {
-      // console.log("Is Visitor", x.visitor)
       return {
         type: 'Visitor',
         name: x.visitor.name,
@@ -47,7 +59,6 @@ const UpcomingVisitor: React.FC = () => {
     }
 
     if (x.member) {
-      // console.log("Is Member", x.member)
       return {
         type: 'Member',
         name: x.member.name,
@@ -61,9 +72,10 @@ const UpcomingVisitor: React.FC = () => {
       image: '',
     };
   }
+
   const upcomingVisitor = useMemo<UpcomingVisitorItem[]>(() => {
-    console.log('Upcoming Visitor Data:', data);
-    return data.map((x: any) => ({
+    const raw = infiniteData?.pages.flatMap((p) => p.data) ?? [];
+    return raw.map((x: any) => ({
       id: x.id,
       status: x.status,
       name: resolvePerson(x).name,
@@ -73,7 +85,7 @@ const UpcomingVisitor: React.FC = () => {
       visitorPeriodStart: x.visitorPeriodStart,
       visitorPeriodEnd: x.visitorPeriodEnd,
     }));
-  }, [data]);
+  }, [infiniteData]);
 
   return (
     <Box
@@ -118,7 +130,19 @@ const UpcomingVisitor: React.FC = () => {
           py: 1,
         }}
       >
-        {upcomingVisitor.length === 0 ? (
+        {isLoading ? (
+          // Initial skeleton
+          Array.from({ length: 4 }).map((_, i) => (
+            <Stack key={i} direction="row" spacing={2} alignItems="center" sx={{ p: 1, mb: 1 }}>
+              <Skeleton variant="circular" width={56} height={56} />
+              <Box sx={{ flex: 1 }}>
+                <Skeleton variant="text" width="60%" height={20} />
+                <Skeleton variant="text" width="40%" height={16} />
+              </Box>
+              <Skeleton variant="text" width={60} height={20} />
+            </Stack>
+          ))
+        ) : upcomingVisitor.length === 0 ? (
           <Box
             sx={{
               height: '100%',
@@ -140,61 +164,79 @@ const UpcomingVisitor: React.FC = () => {
             </Typography>
           </Box>
         ) : (
-          upcomingVisitor.map((item, index: number) => (
-            <Stack
-              key={`${index}-${item.id}`}
-              direction="row"
-              spacing={2}
-              alignItems="center"
-              sx={{
-                p: 1,
-                backgroundColor: 'transparent',
-                '&:hover': {
-                  backgroundColor: 'action.hover',
-                },
-                borderBottom: '1px solid',
-                borderColor: 'divider',
-                width: '100%',
-                overflow: 'hidden',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s ease',
-              }}
-            >
-              {/* Avatar */}
-              <Avatar
-                src={item.image ? `${BASE_URL}${item.image}` : ''}
-                alt="visitor"
-                sx={{ width: 56, height: 56 }}
-              />
-
-              {/* Visitor info */}
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <SmartScrollingText
-                  text={item.name}
-                  fontSize={16}
-                  fontWeight={600}
-                  color="textPrimary"
-                />
-
-                <SmartScrollingText
-                  text={item.visitorPeriodStart ? new Date(item.visitorPeriodStart).toLocaleString() : '-'}
-                  fontSize={12}
-                  color="textSecondary"
-                />
-              </Box>
-
-              {/* Status */}
-              <Typography
+          <>
+            {upcomingVisitor.map((item, index: number) => (
+              <Stack
+                key={`${index}-${item.id}`}
+                direction="row"
+                spacing={2}
+                alignItems="center"
                 sx={{
-                  fontSize: 16,
-                  fontWeight: 700,
-                  color: statusColorMap[item.status.toLowerCase()] ?? 'text.primary',
+                  p: 1,
+                  backgroundColor: 'transparent',
+                  '&:hover': {
+                    backgroundColor: 'action.hover',
+                  },
+                  borderBottom: '1px solid',
+                  borderColor: 'divider',
+                  width: '100%',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease',
                 }}
               >
-                {item.status}
-              </Typography>
-            </Stack>
-          ))
+                {/* Avatar */}
+                <Avatar
+                  src={item.image ? `${BASE_URL}${item.image}` : ''}
+                  alt="visitor"
+                  sx={{ width: 56, height: 56 }}
+                />
+
+                {/* Visitor info */}
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <SmartScrollingText
+                    text={item.name}
+                    fontSize={16}
+                    fontWeight={600}
+                    color="textPrimary"
+                  />
+
+                  <SmartScrollingText
+                    text={item.visitorPeriodStart ? new Date(item.visitorPeriodStart).toLocaleString() : '-'}
+                    fontSize={12}
+                    color="textSecondary"
+                  />
+                </Box>
+
+                {/* Status */}
+                <Typography
+                  sx={{
+                    fontSize: 16,
+                    fontWeight: 700,
+                    color: statusColorMap[item.status.toLowerCase()] ?? 'text.primary',
+                  }}
+                >
+                  {item.status}
+                </Typography>
+              </Stack>
+            ))}
+
+            {/* Load-more skeletons while fetching next page */}
+            {isFetchingNextPage &&
+              Array.from({ length: 2 }).map((_, i) => (
+                <Stack key={`sk-${i}`} direction="row" spacing={2} alignItems="center" sx={{ p: 1, mb: 1 }}>
+                  <Skeleton variant="circular" width={56} height={56} />
+                  <Box sx={{ flex: 1 }}>
+                    <Skeleton variant="text" width="60%" height={20} />
+                    <Skeleton variant="text" width="40%" height={16} />
+                  </Box>
+                  <Skeleton variant="text" width={60} height={20} />
+                </Stack>
+              ))}
+
+            {/* Intersection sentinel — only rendered while more data remains */}
+            {hasNextPage && <div ref={sentinelRef} style={{ height: '20px' }} />}
+          </>
         )}
       </Box>
     </Box>

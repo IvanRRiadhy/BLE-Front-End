@@ -328,7 +328,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
           <Stack spacing={2}>
             <Box>
               <CustomFormLabel htmlFor="username">
-                {isAdmin ? 'Username' : 'Visitor Username'}
+                Username
               </CustomFormLabel>
               <CustomTextField
                 id="username"

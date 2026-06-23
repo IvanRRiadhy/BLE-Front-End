@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
 import { RootState, useSelector } from 'src/store/Store';
 import { memberType, GetFilter } from 'src/store/apps/crud/member';
@@ -37,6 +37,39 @@ export function useSecurityList(filter: GetFilter) {
     placeholderData: keepPreviousData,
     staleTime: 5_000, // data dianggap fresh 1 menit
     gcTime: 5 * 60_000, // cache disimpan 5 menit
+  });
+}
+
+// -----------------------------------------------------------------------------
+// ✅ FETCH LIST INFINITE (for infinite scrolling)
+// -----------------------------------------------------------------------------
+export function useInfiniteSecurityList(filter: GetFilter, pageSize = 50) {
+  return useInfiniteQuery({
+    queryKey: ['security-list-infinite', { ...filter, Length: undefined, Start: undefined }, pageSize],
+    queryFn: async ({ pageParam = 0 }) => {
+      const res = await axiosServices.post(API_DT_URL, {
+        ...filter,
+        Start: pageParam,
+        Length: pageSize,
+      });
+      const col = res.data.collection;
+      return {
+        data: col.data as memberType[],
+        draw: col.draw,
+        recordsTotal: col.recordsTotal,
+        recordsFiltered: col.recordsFiltered,
+      } satisfies PaginatedResponse<memberType>;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const loadedCount = allPages.flatMap((page) => page.data).length;
+      if (loadedCount < lastPage.recordsFiltered) {
+        return loadedCount;
+      }
+      return undefined;
+    },
+    staleTime: 5_000,
+    gcTime: 5 * 60_000,
   });
 }
 

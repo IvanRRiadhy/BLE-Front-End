@@ -23,7 +23,8 @@ import SecurityGuardListItem from './SecurityGuardListItem';
 import { defaultMemberFilter } from 'src/store/apps/defaultForm';
 import { memberType } from 'src/store/apps/crud/member';
 import { useMemberList, useDeleteMember } from 'src/hooks/useMember';
-import { useDeleteSecurity, useSecurityList } from 'src/hooks/useSecurityGuard';
+import { useDeleteSecurity, useInfiniteSecurityList } from 'src/hooks/useSecurityGuard';
+import { useInView } from 'react-intersection-observer';
 
 const SKELETON_ROWS = 5;
 
@@ -35,10 +36,21 @@ const SecurityGuardList = () => {
   const selectedMemberId = useSelector((state: RootState) => state.memberReducer.selectedMemberId);
 
   // 🔹 React Query fetching
-  const { data, isLoading, isFetching, isFetched } = useSecurityList({
-    ...memberFilter,
-    Length: 999, // show all for side list
-  });
+  const {
+    data,
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteSecurityList(memberFilter, 50);
+
+  const { ref, inView } = useInView();
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const deleteMutation = useDeleteSecurity();
 
@@ -49,14 +61,14 @@ const SecurityGuardList = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // 🔹 Derived members list
-  const members = data?.data ?? [];
+  const members = data?.pages.flatMap((page) => page.data) ?? [];
   const active = members?.find((member: memberType) => member.id === selectedMemberId);
   // ---------------------------------------------------------------------------
   // ✅ Initialization on mount
   // ---------------------------------------------------------------------------
   useEffect(() => {
     // Reset filter on mount (only once)
-    dispatch(UpdateFilter({ ...defaultMemberFilter, Length: 999 }));
+    dispatch(UpdateFilter({ ...defaultMemberFilter }));
   }, [dispatch]);
 
   // ---------------------------------------------------------------------------
@@ -180,7 +192,7 @@ const SecurityGuardList = () => {
             </Box>
           )}
 
-          {isLoading || isFetching
+          {isLoading
             ? renderSkeletonItems(SKELETON_ROWS)
             : members.map((member) => (
                 <SecurityGuardListItem
@@ -195,6 +207,10 @@ const SecurityGuardList = () => {
                   }}
                 />
               ))}
+
+          {isFetchingNextPage && renderSkeletonItems(3)}
+
+          {hasNextPage && <div ref={ref} style={{ height: '20px' }} />}
           {/* </Box> */}
         </List>
       </Box>

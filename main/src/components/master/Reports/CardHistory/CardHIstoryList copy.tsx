@@ -74,7 +74,8 @@ const CardHistoryTable = () => {
         component={Paper}
         variant="outlined"
         sx={{
-          maxHeight: '440px',
+          height: '750px',
+          maxHeight: '750px',
           overflowY: 'auto',
           bgcolor: 'background.paper',
         }}

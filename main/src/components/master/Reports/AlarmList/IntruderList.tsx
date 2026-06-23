@@ -126,49 +126,68 @@ const IntruderList = () => {
   };
 
   const loading = isLoading || isFetching;
-  return (
-    <>
-      <List>
-        <Box
+return (
+  <>
+    <List
+      sx={{
+        height: '90vh',
+        display: 'flex',
+        flexDirection: 'column',
+        p: 0,
+      }}
+    >
+      {/* Sticky Header */}
+      <Box
+        sx={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 1,
+          bgcolor: 'background.paper',
+        }}
+      >
+        <Box p={2}>
+          <Typography variant="h4" fontWeight={800}>
+            Intruders
+          </Typography>
+        </Box>
+        <Divider />
+      </Box>
+
+      {/* Scrollable Content */}
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: 'auto',
+        }}
+      >
+        {!loading && intruderData.length > 0
+          ? intruderData.map((intruder) => (
+              <IntruderListItem
+                key={intruder.id}
+                active={intruder.id === selectedIntruder?.id}
+                intruder={intruder}
+                onTagClick={() => handleClick(intruder)}
+              />
+            ))
+          : renderSkeletonItems(SKELETON_ROWS)}
+      </Box>
+    </List>
+
+    {loading &&
+      createPortal(
+        <Backdrop
+          open={loading}
           sx={{
-            height: { lg: 'calc(100vh - 220px)', md: '100vh' },
-            maxHeight: '75vh',
-            overflow: 'auto',
+            color: '#fff',
+            zIndex: (theme) => theme.zIndex.drawer + 1,
           }}
         >
-          <Box p={2}>
-            <Typography variant="h4" fontWeight={800}>
-              Intruders
-            </Typography>
-          </Box>
-          <Divider />
-          {!loading && intruderData.length > 0
-            ? intruderData.map((intruder) => (
-                <IntruderListItem
-                  key={intruder.id}
-                  active={intruder.id === selectedIntruder?.id}
-                  intruder={intruder}
-                  onTagClick={() => handleClick(intruder)}
-                />
-              ))
-            : renderSkeletonItems(SKELETON_ROWS)}
-        </Box>
-      </List>
-      {loading &&
-        createPortal(
-          <Backdrop
-            open={loading}
-            sx={{
-              color: '#fff',
-              zIndex: (theme) => theme.zIndex.drawer + 1,
-            }}
-          >
-            <CircularProgress color="inherit" />
-          </Backdrop>,
-          document.body,
-        )}
-    </>
-  );
+          <CircularProgress color="inherit" />
+        </Backdrop>,
+        document.body,
+      )}
+  </>
+);
 };
 
 export default IntruderList;

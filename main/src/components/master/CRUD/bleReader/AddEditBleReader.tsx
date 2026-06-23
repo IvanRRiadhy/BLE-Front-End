@@ -19,6 +19,7 @@ import {
   Stack,
   FormControlLabel,
   Slider,
+  Alert,
 } from '@mui/material';
 import CustomSwitch from 'src/components/forms/theme-elements/CustomSwitch';
 import { IconPencil, IconPlus, IconChevronDown, IconChevronUp, IconInfoCircle } from '@tabler/icons-react';
@@ -31,6 +32,8 @@ import { defaultBleReaderForm } from 'src/store/apps/defaultForm';
 import { useAddReader, useEditReader, useReaderList } from 'src/hooks/useReader';
 import { useAllBrands } from 'src/hooks/useBrand'; // Optional: if your Brand API is cached
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { RootState, useSelector } from 'src/store/Store';
 
 interface FormType {
   type?: 'add' | 'edit';
@@ -49,6 +52,7 @@ const AddEditBleReader = ({ type, bleReader, trigger, fixedBrandId }: FormType) 
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const language = useSelector((state: RootState) => state.settings.isLanguage);
 
   const addMutation = useAddReader();
   const editMutation = useEditReader();
@@ -56,6 +60,8 @@ const AddEditBleReader = ({ type, bleReader, trigger, fixedBrandId }: FormType) 
 
   const { data: brandData = [] } = useAllBrands?.() || { data: [] };
   const filter = queryClient.getQueryData(['ble-reader-list']) as any;
+
+  // const warningText = language === 'id' ? '' : ''
 
   // ────────────────────────────────
   // Open dialog and initialize form
@@ -311,7 +317,20 @@ const AddEditBleReader = ({ type, bleReader, trigger, fixedBrandId }: FormType) 
               <Divider sx={{ mt: 1 }} />
             </Box>
 
+
             <Collapse in={showAdvanced}>
+            <Alert
+  severity="warning"
+  sx={{
+    mt: 1,
+    py: 0,
+    '& .MuiAlert-message': {
+      fontSize: '0.75rem',
+    },
+  }}
+>
+{language === 'id' ? 'Ini adalah pengaturan yang direkomendasikan. Silakan hubungi teknisi kami jika ada penyesuaian yang diperlukan.' : 'This is our recommended setting. Please contact our technician if any adjustment is needed.'}
+</Alert>
               <Grid container spacing={5} mb={3} mt={1}>
                 {/* Advanced Set 1 */}
                 <Grid size={{ lg: 6, md: 12, sm: 12 }}>
