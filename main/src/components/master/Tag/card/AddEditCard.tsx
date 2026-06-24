@@ -195,7 +195,7 @@ const AddEditCard = ({ type, card }: formType) => {
         isMultiMaskedArea: !!formData.isMultiMaskedArea,
         registeredMaskedAreaId: formData.isMultiMaskedArea
           ? null
-          : formData.registeredMaskedAreaId ?? '',
+          : formData.registeredMaskedAreaId ?? null,
       };
 
       if (type === 'edit') {
