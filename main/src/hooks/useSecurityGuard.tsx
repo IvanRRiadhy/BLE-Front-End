@@ -100,6 +100,24 @@ export function useAllSecurityLookup() {
   });
 }
 // -----------------------------------------------------------------------------
+// ✅ FETCH SECURITY By ID (for dropdowns, etc.)
+// -----------------------------------------------------------------------------
+export const securityByIdQuery = (id: string) => ({
+  queryKey: ['security', id],
+  queryFn: async () => {
+    const res = await axiosServices.get(`${API_URL}${id}`);
+    console.log('Response Security: ', res, 'With Id: ', id);
+    return res.data.collection.data as memberType;
+  },
+});
+export function useSecurityByID(id: string) {
+  return useQuery({
+    ...securityByIdQuery(id),
+    enabled: !!id,
+    placeholderData: {} as memberType,
+  });
+}
+// -----------------------------------------------------------------------------
 // ✅ ADD Security (POST with FormData)
 // -----------------------------------------------------------------------------
 export function useAddSecurity() {

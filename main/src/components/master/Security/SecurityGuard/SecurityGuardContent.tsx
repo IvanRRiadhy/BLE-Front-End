@@ -47,6 +47,7 @@ import { useAllDepartments } from 'src/hooks/useDepartment';
 import { useAllOrganizations } from 'src/hooks/useOrganization';
 import AddEditSecurityGuard from './AddEditSecurityGuard';
 import { useReleaseCard } from 'src/hooks/useCard';
+import { useSecurityByID } from 'src/hooks/useSecurityGuard';
 
 const SecurityGuardContent = () => {
   const { t } = useTranslation();
@@ -63,7 +64,9 @@ const SecurityGuardContent = () => {
   ]);
 
   // Resolve the selected member directly from cache
-  const securityGuardDetail = memberCache?.data.find((m) => m.id === selectedMemberId);
+  // const securityGuardDetail = memberCache?.data.find((m) => m.id === selectedMemberId);
+  const securityGuardDetail = useSecurityByID(selectedMemberId).data;
+  // console.log("securityGuardDetail", securityGuardDetail)
   const dispatch = useDispatch();
   // const theme = useTheme();
   const [loading, setLoading] = useState(false);

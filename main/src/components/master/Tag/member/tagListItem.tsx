@@ -32,8 +32,8 @@ const TagListItem: React.FC<Props> = ({
   manySelectMembers = [],
   active,
 }) => {
-  const customizer = useSelector((state: RootState) => state.customizer);
-  const borderRadius = `${customizer.borderRadius}px`;
+  const settings = useSelector((state: RootState) => state.settings);
+  const borderRadius = `${settings.borderRadius}px`;
 
   // Determine if this member is selected in multi-select mode
   const isChecked = manySelectMembers.some((m) => m.id === member.id);

@@ -40,7 +40,7 @@ import { useTranslation } from 'react-i18next';
 // import IconClose from 'src/assets/images/frontend-pages/icons/icon-close.svg';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { PaginatedResponse, useBlacklistMember, useUnBlacklistMember } from 'src/hooks/useMember';
+import { PaginatedResponse, useBlacklistMember, useMemberByID, useUnBlacklistMember } from 'src/hooks/useMember';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { useAllDistricts } from 'src/hooks/useDistrict';
 import { useAllDepartments } from 'src/hooks/useDepartment';
@@ -53,17 +53,18 @@ const MemberContent = () => {
   const selectedMemberId: string = useSelector(
     (state: RootState) => state.memberReducer.selectedMemberId || '',
   );
-
+  
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
 
   // Get cached data for the member list
-  const memberCache = queryClient.getQueryData<PaginatedResponse<memberType>>([
-    'member-list',
-    memberFilter,
-  ]);
-
+  // const memberCache = queryClient.getQueryData<PaginatedResponse<memberType>>([
+  //   'member-list-infinite',
+  //   // memberFilter, 
+  // ]);
+// console.log("selected", selectedMemberId, memberCache)
   // Resolve the selected member directly from cache
-  const memberDetail = memberCache?.data.find((m) => m.id === selectedMemberId);
+  // const memberDetail = memberCache?.data.find((m) => m.id === selectedMemberId);
+  const memberDetail = useMemberByID(selectedMemberId).data;
   const dispatch = useDispatch();
   // const theme = useTheme();
   const [loading, setLoading] = useState(false);
