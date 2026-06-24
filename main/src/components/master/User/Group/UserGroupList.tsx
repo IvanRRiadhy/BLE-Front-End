@@ -49,6 +49,7 @@ import {
   useRevokeAllBuilding,
   useEditUser,
   useEditUserGroup,
+  useCreateUserDirect,
 } from 'src/hooks/useUser';
 import { useAllBuilding } from 'src/hooks/useBuilding';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
@@ -82,8 +83,11 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [openAddUser, setOpenAddUser] = useState(false);
   const [openAssignBuilding, setOpenAssignBuilding] = useState(false);
+  const [openCreatePasswordDialog, setOpenCreatePasswordDialog] = useState(false);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const initialUserAbility = {
     canAlarmAction: null,
     canApprovePatrol: null,
@@ -106,6 +110,7 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
   const addGroupMutation = useAddUserGroup();
   const editGroupMutation = useEditUserGroup();
   const registerUserMutation = useRegisterUser();
+  const createUserDirectMutation = useCreateUserDirect();
   const editUserMutation = useEditUser();
   const assignBuildingMutation = useAssignBuilding();
   const revokeBuildingMutation = useRevokeBuilding();
@@ -198,6 +203,32 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
 
     setOpenAddUser(false);
     resetRegisterUserForm();
+  };
+
+  const handleCreateUserDirect = async (username: string, email: string, password: string) => {
+    if (!expandedGroupId) return;
+    try {
+      await createUserDirectMutation.mutateAsync({
+        username,
+        email,
+        password,
+        GroupId: expandedGroupId,
+        ...userAbility,
+      });
+      toast.success('User created successfully!');
+    } catch (error) {
+      console.error('Error creating user:', error);
+      toast.error('User creation failed.');
+    }
+
+    setOpenAddUser(false);
+    resetRegisterUserForm();
+  }
+
+  const handleClosePasswordDialog = () => {
+    setOpenCreatePasswordDialog(false);
+    setPassword('');
+    setConfirmPassword('');
   };
 
   const handleUpdateUser = async () => {
@@ -659,6 +690,17 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
           <Button variant="outlined" onClick={() => setOpenAddUser(false)}>
             Cancel
           </Button>
+          {userDialogMode === 'create' && (
+            <Button
+              variant="contained"
+              onClick={() => setOpenCreatePasswordDialog(true)}
+              disabled={
+                !username || !email || registerUserMutation.isPending || editUserMutation.isPending
+              }
+            >
+              Create Directly
+            </Button>
+          )}
           <Button
             variant="contained"
             onClick={() => {
@@ -782,6 +824,64 @@ const UserGroupList = ({ groups, isLoading, levelPriority }: Props) => {
             disabled={addGroupMutation.isPending}
           >
             Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* CREATE PASSWORD DIALOG */}
+      <Dialog
+        open={openCreatePasswordDialog}
+        onClose={handleClosePasswordDialog}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>
+          <Typography variant="h4" fontWeight={700}>
+            Create Password
+          </Typography>
+          <Divider />
+        </DialogTitle>
+
+        <DialogContent>
+          <CustomFormLabel>Password</CustomFormLabel>
+          <CustomTextField
+            type='password'
+            fullWidth
+            value={password}
+            onChange={(e: any) => setPassword(e.target.value)}
+            placeholder="Enter password"
+          />
+          <CustomFormLabel sx={{ mt: 2 }}>Confirm Password</CustomFormLabel>
+          <CustomTextField
+            type='password'
+            fullWidth
+            value={confirmPassword}
+            onChange={(e: any) => setConfirmPassword(e.target.value)}
+            placeholder="Enter confirm password"
+          />
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button variant="outlined" onClick={handleClosePasswordDialog}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={async () => {
+              if (password !== confirmPassword) {
+                toast.error('Passwords do not match');
+                return;
+              }
+              await handleCreateUserDirect(username, email, password);
+              handleClosePasswordDialog();
+            }}
+            disabled={createUserDirectMutation.isPending || !password || !confirmPassword}
+          >
+            {createUserDirectMutation.isPending ? (
+              <CircularProgress size={20} />
+            ) : (
+              'Save'
+            )}
           </Button>
         </DialogActions>
       </Dialog>

@@ -32,6 +32,7 @@ export type userType = {
 export type userRegistrationType = {
     username: string,
     email: string,
+    password?: string,
     GroupId: string,
     canAlarmAction: boolean | null;
     canApprovePatrol: boolean | null;

@@ -72,7 +72,22 @@ export function useRegisterUser() {
     },
   });
 }
-
+// -----------------------------------------------------------------------------
+// ✅ CREATE USER DIRECTLY 
+// -----------------------------------------------------------------------------
+export function useCreateUserDirect() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: userRegistrationType) => {
+      const res = await axiosServices.post(`${API_DT_URL}/create-direct`, payload);
+      console.log('Adding Result', res);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-all'] });
+    },
+  });
+}
 // -----------------------------------------------------------------------------
 // ✅ EDIT USER
 // -----------------------------------------------------------------------------
