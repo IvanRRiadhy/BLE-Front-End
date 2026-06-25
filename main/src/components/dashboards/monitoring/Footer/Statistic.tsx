@@ -21,11 +21,13 @@ import {
 } from 'src/store/apps/tracking/Beacon';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllVisitor } from 'src/hooks/useVisitor';
+import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
 
 // Define the counting data structure based on the MQTT message
 interface CountingPersons {
   visitor: string[];
   member: string[];
+  security: string[];
 }
 
 interface CountingEntity {
@@ -50,6 +52,7 @@ const Statistic = () => {
   const areaData = useSelector((state: RootState) => getAllAreas(state));
   const memberData = useAllMembers().data || [];
   const visitorData = useAllVisitor().data || [];
+  const securityData = useAllSecuritys().data || [];
   // console.log(memberData, visitorData)
   
   const countingData = useSelector((state: RootState) => state.BeaconReducer.countingData) as CountingData;
@@ -77,15 +80,26 @@ const Statistic = () => {
     return map;
   }, [visitorData]);
 
+  // Create a lookup map for security by ID
+  const securityMap = useMemo(() => {
+    const map: Record<string, any> = {};
+    securityData.forEach(security => {
+      map[security.id.toUpperCase()] = security;
+    });
+    return map;
+  }, [securityData]);
+
   // Function to generate HTML for the new window
   const generatePersonWindowHTML = (title: string, personsData: any[], type: 'building' | 'floor' | 'floorplan' | 'area', isDarkMode: boolean) => {
     // Separate visitors and members
     const visitors = personsData.filter(person => person.type === 'visitor');
     const members = personsData.filter(person => person.type === 'member');
+    const security = personsData.filter(person => person.type === 'security');
     
     const totalPersons = personsData.length;
     const uniqueVisitors = new Set(visitors.map(v => v.id)).size;
     const uniqueMembers = new Set(members.map(m => m.id)).size;
+    const uniqueSecurity = new Set(security.map(s => s.id)).size;
 
     return `
       <!DOCTYPE html>
@@ -345,6 +359,49 @@ const Statistic = () => {
                         <td><strong>${person.name || 'N/A'}</strong></td>
                         <td>
                           <span class="badge badge-member">Member</span><br>
+                          <small>${person.statusEmployee || 'N/A'}</small>
+                        </td>
+                        <td>${person.cardNumber || 'N/A'}</td>
+                        <td>${person.bleCardNumber || 'N/A'}</td>
+                        <td>${person.organization?.name || person.organizationName || 'N/A'}</td>
+                        <td>${person.department?.name || person.departmentName || 'N/A'}</td>
+                        <td>${person.phone || 'N/A'}</td>
+                        <td>${person.email || 'N/A'}</td>
+                        <td>${person.statusEmployee || 'N/A'}</td>
+                        <td>${person.isBlacklist ? 'Yes' : 'No'}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            ` : ''}
+
+            ${security.length > 0 ? `
+              <div class="table-container">
+                <h3>Security</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Name</th>
+                      <th>Type</th>
+                      <th>Card Number</th>
+                      <th>BLE Card Number</th>
+                      <th>Organization</th>
+                      <th>Department</th>
+                      <th>Phone</th>
+                      <th>Email</th>
+                      <th>Status</th>
+                      <th>Blacklist</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${security.map((person, index) => `
+                      <tr>
+                        <td>${index + 1}</td>
+                        <td><strong>${person.name || 'N/A'}</strong></td>
+                        <td>
+                          <span class="badge badge-security">Security</span><br>
                           <small>${person.statusEmployee || 'N/A'}</small>
                         </td>
                         <td>${person.cardNumber || 'N/A'}</td>
