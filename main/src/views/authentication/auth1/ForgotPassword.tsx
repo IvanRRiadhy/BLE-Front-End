@@ -89,14 +89,15 @@
 import React from 'react';
 import { Box, Paper, Typography } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
+import { getConfig } from 'src/config';
 
-import gedung from 'src/assets/images/backgrounds/gedung-bi.png';
-import logo from 'src/assets/images/logos/BI_Logo.png';
 import bg from 'src/assets/images/backgrounds/bg.jpg';
 import Footer from 'src/layouts/Footer';
 import AuthForgotPassword from '../authForms/AuthForgotPassword';
 
 const ForgotPassword = () => {
+  const logo = getConfig().LOGO_URL || '/Logo_Bionics.png';
+  const gedung = getConfig().GEDUNG_IMG_URL || '/gedung-utama.jpg';
   return (
     <PageContainer title="Login" description="Login page">
       {/* PAGE WRAPPER */}

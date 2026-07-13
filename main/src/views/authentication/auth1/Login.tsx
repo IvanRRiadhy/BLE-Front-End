@@ -2,9 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { Box, CircularProgress, Paper, Typography, ThemeProvider, createTheme } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
+import { getConfig } from 'src/config';
 
-import gedung from 'src/assets/images/backgrounds/gedung-bi.png';
-import logo from 'src/assets/images/logos/BI_Logo.png';
 import bg from 'src/assets/images/backgrounds/bg.jpg';
 import Footer from 'src/layouts/Footer';
 import AuthLogin from '../authForms/AuthLogin';
@@ -29,7 +28,28 @@ const loginTheme = createTheme(_.merge({}, baseMode, baselightTheme));
 loginTheme.components = components(loginTheme);
 
 const Login = () => {
+  const logo = getConfig().LOGO_URL || '/Logo_Bionics.png';
+  const gedung = getConfig().GEDUNG_IMG_URL || '/gedung-utama.jpg';
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [loginText, setLoginText] = useState({
+    title: 'Bionic - ',
+    description:
+      'Indonesia adalah Bank Sentral Republik Indonesia dengan Satu Tujuan Tunggal yaitu Mencapai dan Memelihara Kestabilan Nilai Rupiah.',
+  });
+
+  useEffect(() => {
+    fetch('/LoginText.json')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.title && data.description) {
+          setLoginText({
+            title: data.title,
+            description: data.description,
+          });
+        }
+      })
+      .catch((err) => console.error('Error loading login text:', err));
+  }, []);
 
   const checkExistingLogin = async () => {
     const token = localStorage.getItem('token');
@@ -149,7 +169,7 @@ const Login = () => {
                 />
 
                 <Typography variant="h4" fontWeight={700}>
-                  Bank Indonesia - Di Setiap Makna Indonesia
+                  {loginText.title}
                 </Typography>
 
                 <Typography
@@ -159,8 +179,7 @@ const Login = () => {
                     opacity: 0.9,
                   }}
                 >
-                  Indonesia adalah Bank Sentral Republik Indonesia dengan Satu Tujuan Tunggal yaitu
-                  Mencapai dan Memelihara Kestabilan Nilai Rupiah.
+                  {loginText.description}
                 </Typography>
               </Box>
 

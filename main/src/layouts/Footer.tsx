@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import { Typography } from '@mui/material';
 import { Box, Container, Stack } from '@mui/system';
 import {
@@ -10,6 +11,35 @@ import {
 import FooterBg from 'src/assets/images/backgrounds/footer-bg.jpg';
 
 const Footer = () => {
+  const [footerText, setFooterText] = useState({
+    companyName: 'Bionic',
+    address: 'Jalan Buni Mangga Besar no 19, Taman Sari, Jakarta Barat, DKI Jakarta, Indonesia',
+    contactCenter: 'Contact Center Bionic',
+    phone: '0815 918 3157',
+    email: 'info@bionic-indonesia.com',
+    website: 'www.bionic-indonesia.com',
+    copyright: '© 2026 Bionic',
+  });
+
+  useEffect(() => {
+    fetch('/LoginText.json')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.footer) {
+          setFooterText({
+            companyName: data.footer.companyName || 'Bionic',
+            address: data.footer.address || 'Jalan Buni Mangga Besar no 19, Taman Sari, Jakarta Barat, DKI Jakarta, Indonesia',
+            contactCenter: data.footer.contactCenter || 'Contact Center Bionic',
+            phone: data.footer.phone || '0815 918 3157',
+            email: data.footer.email || 'info@bionic-indonesia.com',
+            website: data.footer.website || 'www.bionic-indonesia.com',
+            copyright: data.footer.copyright || '© 2026 Bionic',
+          });
+        }
+      })
+      .catch((err) => console.error('Error loading footer text:', err));
+  }, []);
+
   return (
     <Box>
       {/* TOP FOOTER */}
@@ -76,22 +106,22 @@ const Footer = () => {
             }}
           >
             <Typography variant="body2" fontWeight={600}>
-              Bank Indonesia
+              {footerText.companyName}
             </Typography>
             <Typography variant="body2">
-              Jalan Jendral Sudirman
+              {footerText.address}
             </Typography>
             <Typography variant="body2">
-              Contact Center Bank Indonesia Bicara
+              {footerText.contactCenter}
             </Typography>
             <Typography variant="body2">
-              Telp. 131 / 1500131
+              {footerText.phone}
             </Typography>
             <Typography variant="body2">
-              bicara@bi.go.id
+              {footerText.email}
             </Typography>
             <Typography variant="body2">
-                Chatbot LISA : 081 131 131 131
+              {footerText.website}
             </Typography>
           </Stack>
         </Container>
@@ -109,7 +139,7 @@ const Footer = () => {
         }}
       >
         <Typography variant="caption">
-          © 2026 Bank Indonesia
+          {footerText.copyright}
         </Typography>
       </Box>
     </Box>
