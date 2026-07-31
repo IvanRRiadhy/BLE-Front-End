@@ -5,6 +5,8 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { retryUntilSuccess } from "src/utils/retry";
 import axios from "axios";
 import { getConfig } from "src/config";
+import { bleReaderType } from "./bleReader";
+import { defaultEngineFilter } from "../defaultForm";
 
 const API_URL = "/api/MstEngine/";
 
@@ -18,6 +20,19 @@ export function initializeEngineConfig() {
   ENGINE_URL = getConfig().API_ENGINE_URL + '/fetch-tracking-engine';
 }
 
+export type GetFilter = {
+        Draw: number,
+    Start: number,
+    Length: number,
+    SortColumn: string,
+    SortDir: 'asc' | 'desc',
+    SearchValue: string,
+    filters: {
+
+    }
+}
+
+
 export interface EngineType {
   id: string;
   name: string;
@@ -26,14 +41,17 @@ export interface EngineType {
   isLive: number;
   lastLive: string;
   serviceStatus: number;
+  bleReaders?: bleReaderType[];
 }
 
 interface StateType {
   engines: EngineType[];
+  engineFilter: GetFilter;
 }
 
 const initialState: StateType = {
   engines: [],
+  engineFilter: defaultEngineFilter,
 };
 
 export const EngineSlice = createSlice({
@@ -42,11 +60,14 @@ export const EngineSlice = createSlice({
   reducers: {
     GetEngines: (state, action: PayloadAction<EngineType[]>) => {
       state.engines = action.payload;
+    },
+    SetEngineFilter: (state, action: PayloadAction<Partial<GetFilter>>) => {
+      state.engineFilter = {...state.engineFilter, ...action.payload};
     }
   },
 });
 
-export const { GetEngines } = EngineSlice.actions;
+export const { GetEngines, SetEngineFilter } = EngineSlice.actions;
 
 export const fetchEngines = () => async (dispatch: AppDispatch) => {
   try {

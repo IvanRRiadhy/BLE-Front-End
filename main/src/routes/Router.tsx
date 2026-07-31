@@ -111,6 +111,7 @@ const FloorplanDeviceEdit = Loadable(
 const MaskedAreaEdit = Loadable(lazy(() => import('../views/master/crud/MaskedAreaEdit')));
 const FloorplanOverview = Loadable(lazy(() => import('../views/master/crud/FloorplanOverview')));
 const RulesEdit = Loadable(lazy(() => import('../views/master/rules/rulesEdit')));
+const Engine = Loadable(lazy(() => import('../views/master/crud/Engine')));
 
 /* ****Security**** */
 const SecurityGuard = Loadable(lazy(() => import('../views/master/security/securityGuard')));
@@ -385,6 +386,11 @@ const Router = [
         path: '/master/patrolassignment/edit',
         exact: true,
         element: withAuth(<PatrolAssignmentEdit />, '/master/patrolassignment/edit'),
+      },
+      {
+        path: '/master/engine',
+        exact: true,
+        element: withAuth(<Engine />, '/master/engine'),
       },
       // { path: '/master/floorplan', exact: true, element: <Floorplan /> },
       // { path: '/master/gateway', exact: true, element: <GatewayApp /> },

@@ -41,6 +41,7 @@ import { PatrolCaseType, GetFilter as PatrolCaseFilter, CaseUploadType } from '.
 import {GetFilter as UserFilter} from './crud/users';
 import {GetFilter as PatrolReportFilter} from './crud/patrolReport';
 import { EventFilter} from 'src/hooks/useEvents';
+import { EngineType, GetFilter as EngineFilter } from './crud/engine';
 
 //#region AccessCCTV
 export const defaultAccessCCTVForm: CCTVType = {
@@ -261,6 +262,18 @@ export const defaultDistrictFilter: DistrictFilter = {
   SortColumn: 'UpdatedAt',
   SortDir: 'desc',
   SearchValue: '',
+};
+//#endregion
+
+//#region engine
+export const defaultEngineFilter: EngineFilter = {
+  Draw: 1,
+  Start: 0,
+  Length: 5,
+  SortColumn: 'UpdatedAt',
+  SortDir: 'desc',
+  SearchValue: '',
+  filters:{}
 };
 //#endregion
 

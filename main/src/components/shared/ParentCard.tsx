@@ -14,15 +14,15 @@ type Props = {
 };
 
 const ParentCard = ({ title, children, footer, codeModel }: Props) => {
-  const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
   const theme = useTheme();
   const borderColor = theme.palette.divider;
 
   return (
     <Card
-      sx={{ padding: 0, border: !customizer.isCardShadow ? `1px solid ${borderColor}` : 'none' }}
-      elevation={customizer.isCardShadow ? 9 : 0}
-      variant={!customizer.isCardShadow ? 'outlined' : undefined}
+      sx={{ padding: 0, border: !settings.isCardShadow ? `1px solid ${borderColor}` : 'none' }}
+      elevation={settings.isCardShadow ? 9 : 0}
+      variant={!settings.isCardShadow ? 'outlined' : undefined}
     >
       <CardHeader
         title={title}

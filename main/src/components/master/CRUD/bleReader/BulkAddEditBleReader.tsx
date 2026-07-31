@@ -27,11 +27,12 @@ import {
 } from '@tabler/icons-react';
 import { useState, useMemo } from 'react';
 import toast from 'react-hot-toast';
-import { bleReaderType, useAddReader, useEditReader } from 'src/hooks/useReader';
+import { useAddReader, useEditReader } from 'src/hooks/useReader';
 import { useAllBrands } from 'src/hooks/useBrand';
 import { defaultBleReaderForm } from 'src/store/apps/defaultForm';
 import { useQueryClient } from '@tanstack/react-query';
 import type { BrandType } from 'src/store/apps/crud/brand';
+import { bleReaderType } from 'src/store/apps/crud/bleReader';
 
 type Props = {
   type: 'add' | 'edit';
@@ -58,6 +59,9 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
     measuredPower: false,
     pathLossExponent: false,
     heightMeter: false,
+    forceReading: false,
+    forceRadiusThreshold: false,
+    forceRadiusMeter: false,
     id: false,
     isAssigned: false,
     createdBy: false,
@@ -65,6 +69,8 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
     updatedBy: false,
     updatedAt: false,
     brand: false,
+    engine: false,
+    engineId: false,
   });
 
   const queryClient = useQueryClient();
@@ -86,21 +92,26 @@ const BulkAddEditBleReader = ({ type, initialData, setSelectedIds }: Props) => {
     setColumnDefaults({});
     setRowErrors({});
     setUseDefault({
-      brandId: false,
-      name: false,
-      ip: false,
-      gmac: false,
-      readerType: false,
-      measuredPower: false,
-      pathLossExponent: false,
-      heightMeter: false,
-      id: false,
-      isAssigned: false,
-      createdBy: false,
-      createdAt: false,
-      updatedBy: false,
-      updatedAt: false,
-      brand: false,
+    brandId: false,
+    name: false,
+    ip: false,
+    gmac: false,
+    readerType: false,
+    measuredPower: false,
+    pathLossExponent: false,
+    heightMeter: false,
+    forceReading: false,
+    forceRadiusThreshold: false,
+    forceRadiusMeter: false,
+    id: false,
+    isAssigned: false,
+    createdBy: false,
+    createdAt: false,
+    updatedBy: false,
+    updatedAt: false,
+    brand: false,
+    engine: false,
+    engineId: false,
     });
     setOpenBulk(true);
   };

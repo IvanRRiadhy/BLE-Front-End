@@ -27,13 +27,13 @@ import toast from 'react-hot-toast';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
-import { bleReaderType } from 'src/hooks/useReader';
 import { defaultBleReaderForm } from 'src/store/apps/defaultForm';
 import { useAddReader, useEditReader, useReaderList } from 'src/hooks/useReader';
 import { useAllBrands } from 'src/hooks/useBrand'; // Optional: if your Brand API is cached
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { RootState, useSelector } from 'src/store/Store';
+import { bleReaderType } from 'src/store/apps/crud/bleReader';
 
 interface FormType {
   type?: 'add' | 'edit';

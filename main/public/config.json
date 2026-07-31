@@ -1,5 +1,5 @@
 {
-  "API_BASE_URL": "http://192.168.1.116:2000",
+  "API_BASE_URL": "http://192.168.1.116:5000",
   "API_ENGINE_URL": "http://192.168.1.116:3300",
   "MQTT_URL": "ws://192.168.1.116:9005",
   "ALARM_TOPIC": "people_tracking/alarm/+/+/+/+/+",
@@ -8,6 +8,6 @@
   "NTFY_TOPIC": "alarm-ntfy",
   "MQTT_USERNAME": "gNWx6jIp9X",
   "MQTT_PASSWORD": "Fx6co2iTPy",
-  "LOGO_URL": "/BI_Logo_Mini2.png",
+  "LOGO_URL": "/Logo_Bionics.png",
   "GEDUNG_IMG_URL": "/gedung-bi.png"
 }

@@ -198,12 +198,17 @@ const AddEditFloorplan = ({ type, floorplan, fixedFloorId, trigger }: FormType) 
     // New logic: Construct FormData using the CDN URL string
     const data = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
-      if (!['createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key)) {
-        if (key === 'floorplanImage') {
-          data.append('floorplanImage', finalImageUrl || '');
-        } else {
-          data.append(key, value?.toString() ?? '');
-        }
+      if (['createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key)) {
+        return;
+      }
+
+      if (key === 'floorplanImage') {
+        data.append('floorplanImage', finalImageUrl || '');
+        return;
+      }
+
+      if (value !== null && value !== undefined) {
+        data.append(key, value.toString());
       }
     });
 

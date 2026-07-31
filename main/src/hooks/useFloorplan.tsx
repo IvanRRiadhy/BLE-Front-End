@@ -71,6 +71,8 @@ export function useEditFloorplan() {
   return useMutation({
     mutationFn: async (formData: FormData) => {
       const id = formData.get('id');
+      // formData.delete('engineId');
+      // console.log(formData);
       const res = await axiosServices.put(`${FLOORPLAN_API_URL}${id}`, formData, {
         // headers: { 'Content-Type': 'multipart/form-data' },
       });

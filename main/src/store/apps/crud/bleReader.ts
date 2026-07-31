@@ -6,6 +6,8 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { defaultBleReaderFilter } from "../defaultForm";
 import { ensureMinLatency, retryUntilSuccess } from "src/utils/retry";
 import { BASE_URL } from "../../../utils/axios";
+import { EngineType } from "./engine";
+import { BrandType } from "./brand";
 const API_URL = "/api/MstBleReader/";
 const API_DT_URL = "/api/MstBleReader/filter/";
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -46,6 +48,7 @@ export interface bleReaderType {
     name: string,
     gmac: string,
     ip: string,
+    isAssigned?: boolean;
     readerType: 'Outdoor' | 'Indoor',
     measuredPower: number,
     pathLossExponent: number,
@@ -53,6 +56,9 @@ export interface bleReaderType {
     forceReading: boolean,
     forceRadiusThreshold: number,
     forceRadiusMeter: number,
+    engineId?: string,
+    engine?: EngineType,
+    brand?: BrandType;
     // engineReaderId: string,
     createdBy: string,
     createdAt: string,

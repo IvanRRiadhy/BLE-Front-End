@@ -32,10 +32,10 @@ import AddEditBrand from './AddEditBrand';
 import { defaultBrandFilter } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
 import { useBrandList, useDeleteBrand } from 'src/hooks/useBrand';
-import { useAllReaders, useDeleteReader, bleReaderType } from 'src/hooks/useReader';
+import { useAllReaders, useDeleteReader } from 'src/hooks/useReader';
 import { useNavigate } from 'react-router';
 import AddEditBleReader from '../bleReader/AddEditBleReader';
-import { SelectBleReader } from 'src/store/apps/crud/bleReader';
+import { bleReaderType, SelectBleReader } from 'src/store/apps/crud/bleReader';
 
 
 const columns = [

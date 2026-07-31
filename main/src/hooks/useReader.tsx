@@ -5,6 +5,7 @@ import { defaultBleReaderFilter } from 'src/store/apps/defaultForm';
 import { json } from 'stream/consumers';
 import { BrandType } from 'src/store/apps/crud/brand';
 import { string } from 'prop-types';
+import { bleReaderType } from 'src/store/apps/crud/bleReader';
 
 // ---------------------------------------------------
 // ✅ API Constants
@@ -29,26 +30,26 @@ export type GetFilter = {
   };
 };
 
-export interface bleReaderType {
-  id: string;
-  brandId: string;
-  name: string;
-  gmac: string;
-  ip: string;
-  isAssigned?: boolean;
-  readerType: 'Outdoor' | 'Indoor';
-  measuredPower: number;
-  pathLossExponent: number;
-  heightMeter: number;
-  forceReading: boolean;
-  forceRadiusThreshold: number;
-  forceRadiusMeter: number;
-  brand?: BrandType;
-  createdBy: string;
-  createdAt: string;
-  updatedBy: string;
-  updatedAt: string;
-}
+// export interface bleReaderType {
+//   id: string;
+//   brandId: string;
+//   name: string;
+//   gmac: string;
+//   ip: string;
+//   isAssigned?: boolean;
+//   readerType: 'Outdoor' | 'Indoor';
+//   measuredPower: number;
+//   pathLossExponent: number;
+//   heightMeter: number;
+//   forceReading: boolean;
+//   forceRadiusThreshold: number;
+//   forceRadiusMeter: number;
+//   brand?: BrandType;
+//   createdBy: string;
+//   createdAt: string;
+//   updatedBy: string;
+//   updatedAt: string;
+// }
 
 export interface bleReaderGmacType {
   id: string;
@@ -119,6 +120,22 @@ export function useAllUnassignedReaders() {
 }
 
 // ---------------------------------------------------
+// ✅ Hook: Get all unassigned BleReaders on engine (non-paginated)
+// ---------------------------------------------------
+
+export function useAllUnassignedReadersByEngine() {
+  return useQuery({
+    queryKey: ['ble-reader-all-unassigned-engine'],
+    queryFn: async () => {
+      const response = await axiosServices.get(`${API_URL}unassigned-engine`);
+      console.log("BLE Reader Data",response)
+      return response.data.collection.data as bleReaderType[];
+    },
+    placeholderData: [],
+  });
+}
+
+// ---------------------------------------------------
 // ✅ Hook: Add BleReader
 // ---------------------------------------------------
 
@@ -126,7 +143,7 @@ export function useAddReader() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (newReader: bleReaderType) => {
-      const { id,isAssigned, createdBy, createdAt, updatedBy, updatedAt, ...payload } = newReader;
+      const { id,isAssigned, createdBy, createdAt, updatedBy, updatedAt, engine, engineId, ...payload } = newReader;
       const response = await axiosServices.post(API_URL, payload);
       return response.data;
     },
@@ -146,7 +163,7 @@ export function useEditReader() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (updatedReader: bleReaderType) => {
-      const { id, isAssigned, createdBy, createdAt, updatedBy, updatedAt, brand, ...payload } = updatedReader;
+      const { id, isAssigned, createdBy, createdAt, updatedBy, updatedAt, brand, engine, engineId, ...payload } = updatedReader;
       const response = await axiosServices.put(`${API_URL}${id}`, payload);
       return response.data;
     },

@@ -159,6 +159,7 @@ console.log("active features: ", activeFeatures)
         { id: uniqueId(), title: 'Member Data', icon: IconUsers, href: '/master/membertag/', key: ['core.masterData'] }, //Master Data Management
         { id: uniqueId(), title: 'Time Group', icon: IconCalendar, href: '/master/timegroup/', key: ['core.masterData'] }, //Master Data Management
         { id: uniqueId(), title: 'Users', icon: IconMapPin, href: '/master/user/', key: ['core.masterData'] }, //Master Data Management
+        { id: uniqueId(), title: 'Engine', icon: IconMapPin, href: '/master/engine/', key: ['core.masterData'] }, //Master Data Management
         { id: uniqueId(), title: 'Application', icon: IconAppWindow, href: '/master/application/' },
       ],
     },
