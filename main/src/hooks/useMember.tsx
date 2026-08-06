@@ -98,10 +98,10 @@ export const memberByIdQuery = (id: string) => ({
   },
 });
 export function useMemberByID(id: string) {
+  console.log("ID SELECTED: ", id)
   return useQuery({
     ...memberByIdQuery(id),
     enabled: !!id,
-    placeholderData: {} as memberType,
   });
 }
 

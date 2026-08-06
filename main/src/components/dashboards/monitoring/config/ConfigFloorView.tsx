@@ -63,14 +63,13 @@ const ConfigFloorView: React.FC<{
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
   const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
-  const [scale, setScale] = useState(screenSettings?.scale || 1); // Initial scale set to 1
+  const [scale, setScale] = useState(1); // Initial scale set to 1
   const [image, setImage] = useState<HTMLImageElement | null>(null);
-  //const MIN_SCALE = 1; // Minimum scale to prevent the image from becoming too small
-  const MAX_SCALE = 4; // Maximum scale to prevent the image from becoming too large
+  const MAX_SCALE = 4;
   const [minScale] = useState(0.2);
   const [translate, setTranslate] = useState({
-    x: screenSettings?.translateX || 0,
-    y: screenSettings?.translateY || 0,
+    x: 0,
+    y: 0,
   }); // Initial translate values
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
@@ -92,22 +91,34 @@ const ConfigFloorView: React.FC<{
   }, [devices, activeFloorplan]);
 
   useEffect(() => {
-    if (floorplanImage) {
+    if (floorplanImage && floorplanImage !== 'No Active Floorplan') {
       const img = new Image();
       img.src = floorplanImage;
       img.onload = () => {
         setImage(img);
-        setImgSize({ width: img.width, height: img.height });
+        const natWidth = img.naturalWidth || img.width;
+        const natHeight = img.naturalHeight || img.height;
+        setImgSize({ width: natWidth, height: natHeight });
 
         if (containerRef.current) {
-          const containerWidth = containerRef.current.clientWidth;
-          const containerHeight = containerRef.current.clientHeight;
+          const containerWidth = containerRef.current.clientWidth || 800;
+          const containerHeight = containerRef.current.clientHeight || 600;
 
-          const offsetX = containerWidth / 2;
-          const offsetY = containerHeight / 2;
+          const fitScale = Math.min(containerWidth / natWidth, containerHeight / natHeight);
+          const activeScale =
+            screenSettings?.scale && screenSettings.scale !== 1 ? screenSettings.scale : fitScale;
+
+          const initialX = (containerWidth - natWidth * activeScale) / 2;
+          const initialY = (containerHeight - natHeight * activeScale) / 2;
+
+          const hasCustomOffset =
+            screenSettings &&
+            (screenSettings.translateX !== 0 || screenSettings.translateY !== 0);
+
+          setScale(activeScale);
           setTranslate({
-            x: screenSettings?.translateX || offsetX,
-            y: screenSettings?.translateY || offsetY,
+            x: hasCustomOffset ? screenSettings.translateX : initialX,
+            y: hasCustomOffset ? screenSettings.translateY : initialY,
           });
         }
       };
@@ -115,7 +126,7 @@ const ConfigFloorView: React.FC<{
         console.error('Failed to load image:', floorplanImage);
       };
     }
-  }, [actFloorplan, floor]);
+  }, [actFloorplan, floor, floorplanImage]);
 
   const calculateImageDimensions = (
     containerWidth: number,
@@ -306,15 +317,47 @@ const ConfigFloorView: React.FC<{
     if (containerRef.current) containerRef.current.style.cursor = 'grabbing';
   };
 
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+
+  // Container ResizeObserver for exact dynamic dimension tracking
   useEffect(() => {
-    if (screenSettings) {
-      setScale(screenSettings.scale);
-      setTranslate({
-        x: screenSettings.translateX,
-        y: screenSettings.translateY,
-      });
-    }
-  }, [screenSettings]);
+    const el = containerRef.current;
+    if (!el) return;
+
+    const updateSize = () => {
+      const { clientWidth, clientHeight } = el;
+      if (clientWidth > 0 && clientHeight > 0) {
+        setContainerSize({
+          width: clientWidth,
+          height: clientHeight,
+        });
+      }
+    };
+
+    updateSize();
+
+    const resizeObserver = new ResizeObserver(updateSize);
+    resizeObserver.observe(el);
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!imgSize || !imgSize.width || !imgSize.height) return;
+
+    const containerWidth = containerRef.current?.clientWidth || containerSize.width;
+    const containerHeight = containerRef.current?.clientHeight || containerSize.height;
+
+    if (containerWidth <= 0 || containerHeight <= 0) return;
+
+    const fitScale = Math.min(containerWidth / imgSize.width, containerHeight / imgSize.height);
+
+    const initialX = (containerWidth - imgSize.width * fitScale) / 2;
+    const initialY = (containerHeight - imgSize.height * fitScale) / 2;
+
+    setScale(fitScale);
+    setTranslate({ x: initialX, y: initialY });
+  }, [imgSize?.width, imgSize?.height, containerSize.width, containerSize.height, activeFloorplan]);
 
   // 🧠 Prevent infinite re-renders by remembering last sent values
   const lastSent = useRef<{ scale: number; x: number; y: number } | null>(null);
@@ -370,17 +413,35 @@ const ConfigFloorView: React.FC<{
     const scaledWidth = imgSize.width * scale;
     const scaledHeight = imgSize.height * scale;
 
-    const minX = Math.min(-scaledWidth, containerWidth - scaledWidth); // Left boundary
-    const maxX = containerWidth; // Right boundary
-    const minY = Math.min(-scaledHeight, containerHeight - scaledHeight); // Top boundary
-    const maxY = containerHeight; // Bottom boundary
+    const graceX = scaledWidth * 0.1;
+    const graceY = scaledHeight * 0.1;
+
+    let minX: number, maxX: number;
+    if (scaledWidth >= containerWidth) {
+      minX = containerWidth - scaledWidth - graceX;
+      maxX = graceX;
+    } else {
+      const centerX = (containerWidth - scaledWidth) / 2;
+      minX = centerX - containerWidth * 0.15 - graceX;
+      maxX = centerX + containerWidth * 0.15 + graceX;
+    }
+
+    let minY: number, maxY: number;
+    if (scaledHeight >= containerHeight) {
+      minY = containerHeight - scaledHeight - graceY;
+      maxY = graceY;
+    } else {
+      const centerY = (containerHeight - scaledHeight) / 2;
+      minY = centerY - containerHeight * 0.15 - graceY;
+      maxY = centerY + containerHeight * 0.15 + graceY;
+    }
 
     const newX = event.clientX - dragStart.current.x;
     const newY = event.clientY - dragStart.current.y;
 
     setTranslate({
-      x: Math.min(maxX, Math.max(minX, newX)), // Clamp X
-      y: Math.min(maxY, Math.max(minY, newY)), // Clamp Y
+      x: Math.min(maxX, Math.max(minX, newX)),
+      y: Math.min(maxY, Math.max(minY, newY)),
     });
   };
 
@@ -489,17 +550,13 @@ const ConfigFloorView: React.FC<{
           sx={{
             position: 'relative',
             width: '100%',
-            maxWidth: '100vw',
             height: '100%',
-            maxHeight: 'calc(100vh -200px)',
+            minHeight: 0,
             display: 'flex',
-            flexGrow: 1,
             justifyContent: 'center',
             alignItems: 'center',
             overflow: 'hidden',
-            // transform: `scale(${scale})`,
-            // transformOrigin: 'center', // Zoom to the center
-            cursor: isDragging ? 'grabbing' : 'grab', // Change cursor on drag
+            cursor: isDragging ? 'grabbing' : 'grab',
           }}
         >
           {/* <Stage

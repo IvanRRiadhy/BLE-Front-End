@@ -152,13 +152,13 @@ const FloorView: React.FC<{
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
   const [image, setImage] = useState<HTMLImageElement | null>(null);
 
-  // Transform state - EXACTLY like EditDeviceFloorView
-  const [scale, setScale] = useState(screenSettings.scale || 1);
+  // Transform state
+  const [scale, setScale] = useState(1);
   const MAX_SCALE = 4;
   const MIN_SCALE = 0.1;
   const [translate, setTranslate] = useState({
-    x: screenSettings.translateX || 0,
-    y: screenSettings.translateY || 0,
+    x: 0,
+    y: 0,
   });
 
   // Interaction state - EXACTLY like EditDeviceFloorView
@@ -256,21 +256,27 @@ const FloorView: React.FC<{
     };
   }, [floorplanImage]);
 
-  // Container resize handler - EXACTLY like EditDeviceFloorView
+  // Container ResizeObserver for exact dynamic dimension tracking
   useEffect(() => {
-    const updateContainerSize = () => {
-      if (containerRef.current) {
-        const { clientWidth, clientHeight } = containerRef.current;
+    const el = containerRef.current;
+    if (!el) return;
+
+    const updateSize = () => {
+      const { clientWidth, clientHeight } = el;
+      if (clientWidth > 0 && clientHeight > 0) {
         setContainerSize({
-          width: clientWidth || 1920,
-          height: clientHeight || 960,
+          width: clientWidth,
+          height: clientHeight,
         });
       }
     };
 
-    updateContainerSize();
-    window.addEventListener('resize', updateContainerSize);
-    return () => window.removeEventListener('resize', updateContainerSize);
+    updateSize();
+
+    const resizeObserver = new ResizeObserver(updateSize);
+    resizeObserver.observe(el);
+
+    return () => resizeObserver.disconnect();
   }, []);
 
   // Global wheel event handler to prevent browser zoom when Ctrl is pressed - EXACTLY like EditDeviceFloorView
@@ -307,30 +313,29 @@ const FloorView: React.FC<{
     };
   }, []);
 
-  // Animate to screen settings
+  // Always auto-center image in the middle of the container canvas
   useEffect(() => {
-    if (!screenSettings) return;
+    if (!naturalSize.width || !naturalSize.height) return;
 
-    const duration = 200;
-    const startTime = performance.now();
+    const cWidth = containerRef.current?.clientWidth || containerSize.width;
+    const cHeight = containerRef.current?.clientHeight || containerSize.height;
 
-    const startScale = scale;
-    const startX = translate.x;
-    const startY = translate.y;
+    if (cWidth > 0 && cHeight > 0) {
+      const fitScale = Math.min(cWidth / naturalSize.width, cHeight / naturalSize.height);
 
-    const animate = (now: number) => {
-      const progress = Math.min((now - startTime) / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 3);
-      setScale(startScale + (screenSettings.scale - startScale) * ease);
-      setTranslate({
-        x: startX + (screenSettings.translateX - startX) * ease,
-        y: startY + (screenSettings.translateY - startY) * ease,
-      });
-      if (progress < 1) requestAnimationFrame(animate);
-    };
+      const centerX = (cWidth - naturalSize.width * fitScale) / 2;
+      const centerY = (cHeight - naturalSize.height * fitScale) / 2;
 
-    requestAnimationFrame(animate);
-  }, [screenSettings.scale, screenSettings.translateX, screenSettings.translateY]);
+      setScale(fitScale);
+      setTranslate({ x: centerX, y: centerY });
+    }
+  }, [
+    naturalSize.width,
+    naturalSize.height,
+    containerSize.width,
+    containerSize.height,
+    activeFloorplan,
+  ]);
 
   // Save screen settings to Redux
   const lastSent = useRef<{ scale: number; x: number; y: number } | null>(null);
@@ -379,26 +384,85 @@ const FloorView: React.FC<{
     dispatch(cleanupAllBeacons());
   }, [activeFloorplan, dispatch]);
 
-  // Also update the topic construction
-  const topic = activeFloorplan.toUpperCase();
+  const topic = activeFloorplan ? activeFloorplan.toUpperCase() : '';
 
-  // Panning handler - Modified for following mode
+  // Follow camera hook - Modified to respect manual dragging
+  const handleFocusPosition = useCallback(
+    (pt: { x: number; y: number }) => {
+      if (!containerRef.current) return;
+
+      lastBeaconPosition.current = pt;
+
+      if (isFollowing && isManualDragRef.current) {
+        return;
+      }
+
+      const nextScale = FOLLOW_SCALE;
+      const cw = containerRef.current.clientWidth;
+      const ch = containerRef.current.clientHeight;
+
+      const nextTranslateX = cw / 2 - pt.x * nextScale;
+      const nextTranslateY = ch / 2 - pt.y * nextScale;
+
+      setScale(nextScale);
+      setTranslate({ x: nextTranslateX, y: nextTranslateY });
+    },
+    [isFollowing],
+  );
+
+  // Helper to clamp pan translation so image cannot be dragged into the void (with 10% grace)
+  const clampPosition = useCallback(
+    (x: number, y: number, currentScale: number) => {
+      const container = containerRef.current;
+      if (!container || !naturalSize.width || !naturalSize.height) {
+        return { x, y };
+      }
+
+      const cWidth = container.clientWidth;
+      const cHeight = container.clientHeight;
+      const scaledW = naturalSize.width * currentScale;
+      const scaledH = naturalSize.height * currentScale;
+
+      const graceX = scaledW * 0.1;
+      const graceY = scaledH * 0.1;
+
+      let minX: number, maxX: number;
+      if (scaledW >= cWidth) {
+        minX = cWidth - scaledW - graceX;
+        maxX = graceX;
+      } else {
+        const centerX = (cWidth - scaledW) / 2;
+        minX = centerX - cWidth * 0.15 - graceX;
+        maxX = centerX + cWidth * 0.15 + graceX;
+      }
+
+      let minY: number, maxY: number;
+      if (scaledH >= cHeight) {
+        minY = cHeight - scaledH - graceY;
+        maxY = graceY;
+      } else {
+        const centerY = (cHeight - scaledH) / 2;
+        minY = centerY - cHeight * 0.15 - graceY;
+        maxY = centerY + cHeight * 0.15 + graceY;
+      }
+
+      return {
+        x: Math.min(maxX, Math.max(minX, x)),
+        y: Math.min(maxY, Math.max(minY, y)),
+      };
+    },
+    [naturalSize.width, naturalSize.height],
+  );
+
+  // Panning handler - Modified for following mode & bounded panning
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       if (!zoomable) return;
       if (e.button !== 0) return; // Only left mouse button
 
-      // Don't pan if we're already dragging something
-      if (isDragging) {
-        return;
-      }
+      if (isDragging) return;
+      if (cursor !== 'grab') return;
 
-      // Only allow panning when cursor is 'grab' (not over any shape)
-      if (cursor !== 'grab') {
-        return;
-      }
-
-      // Set manual dragging flag when user starts dragging in following mode
       if (isFollowing) {
         isManualDragRef.current = true;
         setIsUserDragging(true);
@@ -420,10 +484,7 @@ const FloorView: React.FC<{
         const deltaX = moveEvent.clientX - startX;
         const deltaY = moveEvent.clientY - startY;
 
-        setTranslate({
-          x: startPosX + deltaX,
-          y: startPosY + deltaY,
-        });
+        setTranslate(clampPosition(startPosX + deltaX, startPosY + deltaY, scale));
       };
 
       const handleMouseUp = () => {
@@ -435,12 +496,10 @@ const FloorView: React.FC<{
         }
         setIsDragging(false);
 
-        // When mouse is released in following mode, reset manual dragging flag
         if (isFollowing) {
           isManualDragRef.current = false;
           setIsUserDragging(false);
 
-          // If we have a last known beacon position, snap back to it
           if (lastBeaconPosition.current) {
             setTimeout(() => {
               handleFocusPosition(lastBeaconPosition.current!);
@@ -454,13 +513,12 @@ const FloorView: React.FC<{
 
       e.preventDefault();
     },
-    [zoomable, isDragging, cursor, translate, isFollowing],
+    [zoomable, isDragging, cursor, translate, isFollowing, scale, clampPosition, handleFocusPosition],
   );
 
-  // Wheel zoom handler - EXACTLY like EditDeviceFloorView
+  // Wheel zoom handler - WITH CLAMPING
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
-      // Always prevent default for Ctrl+wheel to stop browser zoom
       if (e.ctrlKey) {
         e.preventDefault();
         e.stopPropagation();
@@ -481,37 +539,38 @@ const FloorView: React.FC<{
         const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev + delta));
         const scaleRatio = newScale / prev;
         setTranslate((pos) => {
-          const newX = mouseX - scaleRatio * (mouseX - pos.x);
-          const newY = mouseY - scaleRatio * (mouseY - pos.y);
-          return { x: newX, y: newY };
+          const unclampedX = mouseX - scaleRatio * (mouseX - pos.x);
+          const unclampedY = mouseY - scaleRatio * (mouseY - pos.y);
+          return clampPosition(unclampedX, unclampedY, newScale);
         });
         return newScale;
       });
     },
-    [zoomable],
+    [zoomable, clampPosition],
   );
 
-  // Apply zoom function for ZoomControls - EXACTLY like EditDeviceFloorView
-  const applyZoom = useCallback((newScale: number) => {
-    const container = containerRef.current;
-    if (!container) {
-      setScale(Math.min(MAX_SCALE, Math.max(MIN_SCALE, newScale)));
-      return;
-    }
+  // Apply zoom function for ZoomControls - WITH CLAMPING
+  const applyZoom = useCallback(
+    (newScale: number) => {
+      const container = containerRef.current;
+      if (!container) return;
 
-    const centerX = container.clientWidth / 2;
-    const centerY = container.clientHeight / 2;
-    setScale((prev) => {
       const clamped = Math.min(MAX_SCALE, Math.max(MIN_SCALE, newScale));
-      const ratio = clamped / prev;
-      setTranslate((pos) => {
-        const newX = centerX - ratio * (centerX - pos.x);
-        const newY = centerY - ratio * (centerY - pos.y);
-        return { x: newX, y: newY };
+      const centerX = container.clientWidth / 2;
+      const centerY = container.clientHeight / 2;
+
+      setScale((prev) => {
+        const ratio = clamped / prev;
+        setTranslate((pos) => {
+          const unclampedX = centerX - ratio * (centerX - pos.x);
+          const unclampedY = centerY - ratio * (centerY - pos.y);
+          return clampPosition(unclampedX, unclampedY, clamped);
+        });
+        return clamped;
       });
-      return clamped;
-    });
-  }, []);
+    },
+    [clampPosition],
+  );
 
   // Update cursor based on state - EXACTLY like EditDeviceFloorView
   useEffect(() => {
@@ -592,32 +651,7 @@ const FloorView: React.FC<{
     }
   }, [focusBeacon, beaconsByTopic, activeFloorplan, gridNumber, screenNumber, dispatch]);
 
-  // Follow camera hook - Modified to respect manual dragging
-  const handleFocusPosition = useCallback(
-    (pt: { x: number; y: number }) => {
-      if (!containerRef.current) return;
 
-      // Store the last beacon position
-      lastBeaconPosition.current = pt;
-
-      // If user is manually dragging in following mode, don't update the view
-      if (isFollowing && isManualDragRef.current) {
-        return;
-      }
-
-      const nextScale = FOLLOW_SCALE;
-      const cw = containerRef.current.clientWidth;
-      const ch = containerRef.current.clientHeight;
-
-      // Convert the point from original image coordinates to container coordinates
-      const nextTranslateX = cw / 2 - pt.x * nextScale;
-      const nextTranslateY = ch / 2 - pt.y * nextScale;
-
-      setScale(nextScale);
-      setTranslate({ x: nextTranslateX, y: nextTranslateY });
-    },
-    [isFollowing],
-  );
 
   // Reset manual dragging when following mode changes
   useEffect(() => {
@@ -983,9 +1017,8 @@ const isBoundaryActive = isActive('boundary');
           }}
           sx={{
             width: '100%',
-            maxWidth: '100vw',
             height: '100%',
-            maxHeight: 'calc(100vh - 200px)',
+            minHeight: 0,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',

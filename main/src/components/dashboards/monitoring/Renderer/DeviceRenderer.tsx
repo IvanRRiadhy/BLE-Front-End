@@ -74,14 +74,83 @@ const closeRing = (ring: number[][]) => {
   return ring;
 };
 
-function areaToPolygonRings(area: MaskedAreaType): number[][][] {
-  const outer: number[][] = (area.nodes ?? []).map((n: Nodes) => [n.x_px, n.y_px]);
-  const holesRaw: Nodes[][] = (area as any).holes ?? [];
-  const holes: number[][][] = holesRaw.map((nodes) => nodes.map((n) => [n.x_px, n.y_px]));
-  return [closeRing(outer), ...holes.map(closeRing)];
+function getNodePx(node: any): [number, number] | null {
+  if (node && typeof node.x_px === 'number' && typeof node.y_px === 'number' && !isNaN(node.x_px) && !isNaN(node.y_px)) {
+    return [node.x_px, node.y_px];
+  }
+  if (node && typeof node.x === 'number' && typeof node.y === 'number' && !isNaN(node.x) && !isNaN(node.y)) {
+    return [node.x, node.y];
+  }
+  return null;
 }
 
-const getCornerNodes = (nodes?: Nodes[]) => (nodes ?? []).filter((n) => n.type === 'corner');
+function areaToPolygonRings(area: MaskedAreaType): number[][][] {
+  const outer: number[][] = [];
+  for (const n of area.nodes ?? []) {
+    const pt = getNodePx(n);
+    if (pt) outer.push(pt);
+  }
+  const holesRaw: any[][] = (area as any).holes ?? [];
+  const holes: number[][][] = holesRaw.map((nodes) => {
+    const holeRing: number[][] = [];
+    for (const n of nodes ?? []) {
+      const pt = getNodePx(n);
+      if (pt) holeRing.push(pt);
+    }
+    return closeRing(holeRing);
+  });
+
+  if (outer.length < 3) return [];
+  return [closeRing(outer), ...holes];
+}
+
+/**
+ * Calculates the exact Center of Gravity (Centroid) of a 2D polygon using the mathematical polygon centroid equation:
+ * Cx = (1 / 6A) * sum((x_i + x_{i+1}) * (x_i * y_{i+1} - x_{i+1} * y_i))
+ * Cy = (1 / 6A) * sum((y_i + y_{i+1}) * (x_i * y_{i+1} - x_{i+1} * y_i))
+ * Area A = 0.5 * sum(x_i * y_{i+1} - x_{i+1} * y_i)
+ */
+function calculatePolygonCentroid(nodes: { x_px: number; y_px: number }[]): { x: number; y: number } {
+  if (!nodes || nodes.length === 0) return { x: 0, y: 0 };
+  if (nodes.length === 1) return { x: nodes[0].x_px, y: nodes[0].y_px };
+  if (nodes.length === 2) {
+    return {
+      x: (nodes[0].x_px + nodes[1].x_px) / 2,
+      y: (nodes[0].y_px + nodes[1].y_px) / 2,
+    };
+  }
+
+  let signedArea = 0;
+  let cx = 0;
+  let cy = 0;
+  const n = nodes.length;
+
+  for (let i = 0; i < n; i++) {
+    const x0 = nodes[i].x_px;
+    const y0 = nodes[i].y_px;
+    const nextNode = nodes[(i + 1) % n];
+    const x1 = nextNode.x_px;
+    const y1 = nextNode.y_px;
+
+    const crossProduct = x0 * y1 - x1 * y0;
+    signedArea += crossProduct;
+    cx += (x0 + x1) * crossProduct;
+    cy += (y0 + y1) * crossProduct;
+  }
+
+  signedArea *= 0.5;
+
+  if (Math.abs(signedArea) < 1e-6) {
+    const sumX = nodes.reduce((acc, pts) => acc + pts.x_px, 0);
+    const sumY = nodes.reduce((acc, pts) => acc + pts.y_px, 0);
+    return { x: sumX / n, y: sumY / n };
+  }
+
+  cx = cx / (6 * signedArea);
+  cy = cy / (6 * signedArea);
+
+  return { x: cx, y: cy };
+}
 
 // Updated toCanvas function - no scaling needed since we use original coordinates
 function toCanvas(
@@ -150,6 +219,8 @@ type DeviceRendererProps = {
   onWheel?: (e: any) => void;
 };
 
+const EMPTY_ARRAY: any[] = [];
+
 const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   const {
     width,
@@ -196,9 +267,9 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   } = props;
   const dispatch = useDispatch();
 
-  const { data: membersData = [] } = useAllMembers();
-  const { data: visitorsData = [] } = useAllVisitor();
-  const { data: securityData = [] } = useAllSecuritys();
+  const { data: membersData = EMPTY_ARRAY } = useAllMembers();
+  const { data: visitorsData = EMPTY_ARRAY } = useAllVisitor();
+  const { data: securityData = EMPTY_ARRAY } = useAllSecuritys();
 
   // Create a memoized lookup map of bleCardNumber -> person info for O(1) performance
   const beaconPersonMap = useMemo(() => {
@@ -267,12 +338,10 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   const beaconDataObj = useSelector(
     (state: RootState) => state.BeaconReducer.beaconsByTopic[topic],
   );
-  // console.log("Beacons: ", beaconDataObj, "topic: ", topic)
 
-  // Convert object to array for easier processing
+  // Convert object to array for easier processing (uses immutable fallback to prevent infinite re-render loop)
   const beaconData = useMemo(() => {
-    if (!beaconDataObj) return [];
-    // console.log("BEACON data", beaconDataObj)
+    if (!beaconDataObj) return EMPTY_ARRAY;
     return Object.values(beaconDataObj);
   }, [beaconDataObj]);
 
@@ -408,7 +477,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
       return;
     }
 
-    console.log(`Processing ${beaconData.length} beacons for topic ${topic}`);
+    // console.log(`Processing ${beaconData.length} beacons for topic ${topic}`);
 
     setLastSeenBeacons((prev) => {
       const updated = { ...prev };
@@ -440,7 +509,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
 
       return updated;
     });
-    console.log("Beacons: ", lastSeenBeacons)
+    // console.log("Beacons: ", lastSeenBeacons)
     // dispatch(buildTrackingLogs());
   }, [beaconData, topic]);
 
@@ -519,17 +588,90 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     };
   }, [focusBeaconId]);
 
-  // compute static centers for each area
-  const areaCenters = useMemo(() => {
-    const map: Record<string, { x: number; y: number }> = {};
+  // compute Pole of Inaccessibility (Internal Center) & distance to boundary for each area (handles concave / L-shapes)
+  const areaLabelInfos = useMemo(() => {
+    const map: Record<
+      string,
+      { cx: number; cy: number; fontSize: number; maxTextWidth: number; show: boolean }
+    > = {};
+
     for (const area of areas) {
+      if (!area.nodes || area.nodes.length < 3) continue;
+
+      // 1. Calculate Centroid fallback
+      const centroid = calculatePolygonCentroid(area.nodes);
+
+      // 2. Calculate Polylabel internal center
+      let cx = centroid.x;
+      let cy = centroid.y;
+      let edgeDistance = 30;
+
       const rings = areaToPolygonRings(area);
-      if (!rings.length) continue;
-      const [cx, cy] = polylabel(rings, 1.0);
-      map[area.id] = toCanvas(cx, cy, width, height, originalWidth, originalHeight);
+      if (rings && rings[0] && rings[0].length >= 3) {
+        const result = polylabel(rings, 1.0);
+        if (
+          result &&
+          result.length >= 3 &&
+          !isNaN(result[0]) &&
+          !isNaN(result[1]) &&
+          isFinite(result[0]) &&
+          isFinite(result[1])
+        ) {
+          cx = result[0];
+          cy = result[1];
+          if (!isNaN(result[2]) && isFinite(result[2]) && result[2] > 0) {
+            edgeDistance = result[2];
+          }
+        }
+      }
+
+      // 3. Bounding Box for max cap
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      for (const n of area.nodes) {
+        const pt = getNodePx(n);
+        if (pt) {
+          if (pt[0] < minX) minX = pt[0];
+          if (pt[0] > maxX) maxX = pt[0];
+          if (pt[1] < minY) minY = pt[1];
+          if (pt[1] > maxY) maxY = pt[1];
+        }
+      }
+
+      const polyWidth = isFinite(maxX - minX) ? maxX - minX : 100;
+      const polyHeight = isFinite(maxY - minY) ? maxY - minY : 100;
+      const nameLength = (area.name || '').length || 1;
+
+      // 4. Max allowable text width strictly bounded by internal edge clearance
+      const maxTextWidth = Math.max(30, Math.min(polyWidth * 0.85, edgeDistance * 1.85));
+
+      // 5. Calculate Font Size to fit strictly inside maxTextWidth & vertical edge clearance
+      const fontSizeW = maxTextWidth / (nameLength * 0.55);
+      const fontSizeH = (polyHeight * 0.45) / 1.2;
+      let computedFontSize = Math.min(fontSizeW, fontSizeH);
+
+      const MAX_FONT_SIZE = 18;
+      const MIN_FONT_SIZE = 10;
+
+      computedFontSize = Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, computedFontSize));
+
+      const finalFontSize = Math.round(computedFontSize);
+      const finalWidth = Math.round(maxTextWidth);
+
+      if (isNaN(finalFontSize) || isNaN(finalWidth) || !isFinite(finalFontSize) || !isFinite(finalWidth)) {
+        continue;
+      }
+
+      map[area.id] = {
+        cx,
+        cy,
+        fontSize: finalFontSize,
+        maxTextWidth: finalWidth,
+        show: true,
+      };
     }
+
     return map;
-  }, [areas, width, height, originalWidth, originalHeight]);
+  }, [areas]);
 
   // track which area is hovered
   const [hoveredAreaId, setHoveredAreaId] = useState<string | null>(null);
@@ -670,7 +812,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   }
 
   return (
-    <div style={{ width, height }}>
+    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       <Stage
         pixelRatio={1}
         width={width}
@@ -882,31 +1024,33 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
               })}
         </Layer>
 
-        {/* Hover label Layer (non-interactive) */}
+        {/* Always-on Area Name Labels at Pole of Inaccessibility (with strict boundary constraint & word wrapping) */}
         <Layer listening={false}>
-          {hoveredAreaId && areaCenters[hoveredAreaId] && (
-            <Label
-              x={areaCenters[hoveredAreaId].x}
-              y={areaCenters[hoveredAreaId].y}
-              listening={false}
-            >
-              <Tag
-                fill="rgba(0,0,0,0.75)"
-                cornerRadius={4}
-                pointerDirection="down"
-                pointerWidth={8}
-                pointerHeight={6}
-              />
-              <Text
-                text={areas.find((a: MaskedAreaType) => a.id === hoveredAreaId)?.name || ''}
-                fill="#fff"
-                fontSize={16}
-                padding={6}
-                align="center"
-                listening={false}
-              />
-            </Label>
-          )}
+          {showAreas &&
+            areas.map((area: MaskedAreaType) => {
+              const info = areaLabelInfos[area.id];
+              if (!info || !info.show || !area.name) return null;
+
+              return (
+                <Text
+                  key={`area-label-${area.id}`}
+                  x={info.cx - info.maxTextWidth / 2}
+                  y={info.cy - (info.fontSize * 1.2) / 2}
+                  width={info.maxTextWidth}
+                  text={area.name}
+                  fontSize={info.fontSize}
+                  fontStyle="bold"
+                  fill="#000000"
+                  align="center"
+                  verticalAlign="middle"
+                  wrap="word"
+                  shadowColor="#ffffff"
+                  shadowBlur={6}
+                  shadowOpacity={1}
+                  listening={false}
+                />
+              );
+            })}
         </Layer>
       </Stage>
     </div>

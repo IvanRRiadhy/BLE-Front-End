@@ -24,6 +24,7 @@ import { useFloorStatus } from 'src/hooks/useFloor';
 import FloorSearch from 'src/components/master/CRUD/floor/FloorSearch';
 import { useEngineStatus } from 'src/hooks/useEngine';
 import EngineList from 'src/components/master/CRUD/engine/EngineList';
+import AddEditEngine from 'src/components/master/CRUD/engine/AddEditEngine';
 
 interface cardType {
   icon?: string;
@@ -98,7 +99,7 @@ const Engine = () => {
           }}
         >
           <ParentCard title="Engine List" codeModel={[
-
+              <AddEditEngine type='add' key={'add-engine'} />
             ]}>
             <EngineList />
           </ParentCard>

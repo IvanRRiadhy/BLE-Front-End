@@ -42,6 +42,7 @@ import {GetFilter as UserFilter} from './crud/users';
 import {GetFilter as PatrolReportFilter} from './crud/patrolReport';
 import { EventFilter} from 'src/hooks/useEvents';
 import { EngineType, GetFilter as EngineFilter } from './crud/engine';
+import { AddEnginePayload } from 'src/hooks/useEngine';
 
 //#region AccessCCTV
 export const defaultAccessCCTVForm: CCTVType = {
@@ -270,11 +271,19 @@ export const defaultEngineFilter: EngineFilter = {
   Draw: 1,
   Start: 0,
   Length: 5,
-  SortColumn: 'UpdatedAt',
+  SortColumn: '',
   SortDir: 'desc',
   SearchValue: '',
-  filters:{}
+  filters:{
+    isLive: null,
+  }
 };
+
+export const defaultEngineForm: AddEnginePayload = {
+  name:"",
+  port:0,
+  engineCode:""
+}
 //#endregion
 
 //#region Floor

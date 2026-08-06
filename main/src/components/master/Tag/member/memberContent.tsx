@@ -64,13 +64,16 @@ const MemberContent = () => {
 // console.log("selected", selectedMemberId, memberCache)
   // Resolve the selected member directly from cache
   // const memberDetail = memberCache?.data.find((m) => m.id === selectedMemberId);
-  const memberDetail = useMemberByID(selectedMemberId).data;
+  const fetchedMember = useMemberByID(selectedMemberId).data;
+  const memberDetail = selectedMemberId && fetchedMember?.id ? fetchedMember : null;
   const dispatch = useDispatch();
   // const theme = useTheme();
   const [loading, setLoading] = useState(false);
+  // useEffect(() =>{
+  //   console.log("selected", selectedMemberId, memberDetail)
+  // }, [selectedMemberId, memberDetail])
 
-
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedMember, setSelectedMember] = useState<memberType | null>(null);
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (mem: memberType) => {
@@ -270,7 +273,7 @@ const MemberContent = () => {
                     fontWeight: 600,
                   }}
                 >
-                  BLOCKED
+                  BLACKLISTED
                 </Typography>
               )}
             </Typography>

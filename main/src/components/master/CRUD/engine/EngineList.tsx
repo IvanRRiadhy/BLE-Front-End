@@ -20,9 +20,10 @@ import {
   TableSortLabel,
   Skeleton,
   CircularProgress,
+  Tooltip,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconTrash } from '@tabler/icons-react';
+import { IconPower, IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
 import {
   EngineType,
@@ -31,14 +32,18 @@ import {
 } from 'src/store/apps/crud/engine';
 import { defaultEngineFilter } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
-import { useAllEngines, useDeleteEngine, useEngineList } from 'src/hooks/useEngine';
+import { useAllEngines, useDeleteEngine, useEngineList, useStartEngine, useStopEngine } from 'src/hooks/useEngine';
 import AssignReaderDialog from './AssignReaderDialog';
+import AddEditEngine from './AddEditEngine';
+import { IconPlayerPlay, IconPlayerStop } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 // import { useTranslation } from 'react-i18next';
 
 const columns = [
 //   { label: 'Engine Code', field: '', sortAble: false },
   { label: 'Engine Name', field: 'Name', sortAble: true },
   { label: 'Engine Port', field: 'port', sortAble: true },
+  { label: 'Engine Code', field: 'engineCode', sortAble: true },
   { label: 'Service Status', field: 'serviceStatus', sortAble: true },
   { label: 'Last Lived Time', field: 'lastLive', sortAble: true},
 ];
@@ -46,6 +51,7 @@ const columns = [
 const SKELETON_ROWS = 5;
 
 const EngineList = () => {
+  const {t} = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   // const districtData: EngineType[] = useSelector(
   //   (state: RootState) => state.districtReducer.districts,
@@ -56,9 +62,9 @@ const EngineList = () => {
   // );
   const engineFilter = useSelector((state: RootState) => state.EngineReducer.engineFilter);
   const { data, isLoading: queryLoading } = useEngineList(defaultEngineFilter);
-//   const engineData = data?.data || [];
+  const engineData = data?.data || [];
 const engineResponse = useAllEngines();
-const engineData = engineResponse.data || [];
+// const engineData = engineResponse.data || [];
   const engineTotalCount = data?.recordsTotal || 0;
   const engineFilteredCount = data?.recordsFiltered || 0;
   const prevFilterRef = useRef(engineFilter);
@@ -134,6 +140,28 @@ const engineData = engineResponse.data || [];
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedEngine, setSelectedEngine] = useState<EngineType | null>(null);
   const deleteMutation = useDeleteEngine();
+  const startMutation = useStartEngine();
+  const stopMutation = useStopEngine();
+
+  const handleStartEngine = async (id: string) => {
+    try {
+      await startMutation.mutateAsync(id);
+      toast.success('Engine started successfully!');
+    } catch (error) {
+      toast.error('Failed to start engine');
+      console.error(error);
+    }
+  };
+
+  const handleStopEngine = async (id: string) => {
+    try {
+      await stopMutation.mutateAsync(id);
+      toast.success('Engine stopped successfully!');
+    } catch (error) {
+      toast.error('Failed to stop engine');
+      console.error(error);
+    }
+  };
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (dist: EngineType) => {
     setSelectedEngine(dist);
@@ -174,6 +202,23 @@ const engineData = engineResponse.data || [];
     handleCloseDeleteDialog();
   };
 
+    const formatTime = (isoString: string) => {
+    const date = new Date(isoString);
+
+    // Extract the weekday
+    const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
+    const month = t(date.toLocaleString('en-GB', { month: 'short' }));
+
+    return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
+      'en-GB',
+      {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      },
+    )}`;
+  };
+
   const renderSkeletonRows = (rows: number) => (
     <>
       {Array.from({ length: rows }).map((_, i) => (
@@ -199,10 +244,13 @@ const engineData = engineResponse.data || [];
             <Skeleton variant="text" width={160} height={22} />
           </TableCell>
           <TableCell>
-            <Skeleton variant="text" width={120} height={22} />
+            <Skeleton variant="text" width={180} height={22} />
           </TableCell>
           <TableCell>
             <Skeleton variant="text" width={120} height={22} />
+          </TableCell>
+          <TableCell>
+            <Skeleton variant="text" width={180} height={22} />
           </TableCell>
           {/* right actions */}
           <TableCell
@@ -276,9 +324,9 @@ const engineData = engineResponse.data || [];
                         right: 0,
                         backgroundColor: 'background.paper',
                         zIndex: 2,
-                        width: 150, // Fixed width
-                        minWidth: 150,
-                        maxWidth: 150,
+                        width: 220, // Fixed width
+                        minWidth: 220,
+                        maxWidth: 220,
                       }}
                     >
                       <Typography variant="h6"> Actions </Typography>
@@ -307,8 +355,9 @@ const engineData = engineResponse.data || [];
                           </TableCell>
                           <TableCell>{engine.name}</TableCell>
                           <TableCell>{engine.port}</TableCell>
+                          <TableCell>{engine.engineCode}</TableCell>
                           <TableCell>{engine.serviceStatus}</TableCell>
-                          <TableCell>{engine.lastLive}</TableCell>
+                          <TableCell>{formatTime(engine.lastLive)}</TableCell>
 
                           <TableCell
                             sx={{
@@ -319,12 +368,39 @@ const engineData = engineResponse.data || [];
                               display: 'flex',
                               gap: 1,
                               alignItems: 'center',
-                              width: 150, // Fixed width
-                              minWidth: 150,
-                              maxWidth: 150,
+                              width: 220, // Fixed width
+                              minWidth: 220,
+                              maxWidth: 220,
                             }}
                           >
-                            {/* <AddEditDistrict type="edit" engine={engine} /> */}
+                            {
+                              engine.serviceStatus.toLocaleLowerCase() === 'stop' ? (
+                            <Tooltip title="Start Engine">
+                              <IconButton
+                                color="success"
+                                size="small"
+                                onClick={() => handleStartEngine(engine.id)}
+                                disabled={startMutation.isPending}
+                              >
+                                <IconPower size={20} />
+                              </IconButton>
+                            </Tooltip>
+                              ) : (
+                            <Tooltip title="Stop Engine">
+                              <IconButton
+                                color="warning"
+                                size="small"
+                                onClick={() => handleStopEngine(engine.id)}
+                                disabled={stopMutation.isPending}
+                              >
+                                <IconPower size={20} />
+                              </IconButton>
+                            </Tooltip>
+                              )
+                            }
+                            
+                            
+                            <AddEditEngine type="edit" engine={engine} />
                             <AssignReaderDialog engine={engine} />
                             <IconButton
                               color="error"

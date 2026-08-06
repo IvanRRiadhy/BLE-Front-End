@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -43,6 +43,76 @@ interface CountingData {
   area?: Record<string, CountingEntity>;
   time: string;
 }
+
+interface StatisticTableProps {
+  title: string;
+  data: Array<{ id: string; name: string; count: number }>;
+  onRowClick?: (id: string) => void;
+}
+
+// Top-level memoized component so TableContainer DOM node & scroll state persist on Redux data refreshes
+const StatisticTable = React.memo(({ title, data, onRowClick }: StatisticTableProps) => (
+  <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1, textAlign: 'center' }}>
+      {title} ({data.length})
+    </Typography>
+    <TableContainer
+      component={Paper}
+      sx={{
+        flex: 1,
+        maxHeight: '200px',
+        overflow: 'auto',
+        '& .MuiTableCell-root': {
+          padding: '8px 16px',
+          fontSize: '0.875rem',
+        },
+      }}
+    >
+      <Table size="small" stickyHeader>
+        <TableHead>
+          <TableRow>
+            <TableCell sx={{ fontWeight: 'bold' }}>Name</TableCell>
+            <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+              Count
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {data.length > 0 ? (
+            data.map((item) => (
+              <TableRow
+                key={item.id}
+                hover
+                onClick={() => {
+                  if (onRowClick) {
+                    onRowClick(item.id);
+                  } else {
+                    console.log(`${title} ID: ${item.id}`);
+                  }
+                }}
+                sx={{
+                  cursor: 'pointer',
+                  '&:hover': {
+                    backgroundColor: 'action.hover',
+                  },
+                }}
+              >
+                <TableCell>{item.name || 'Unnamed'}</TableCell>
+                <TableCell align="right">{item.count}</TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={2} align="center">
+                No data available
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  </Box>
+));
 
 const Statistic = () => {
   // Get real data from Redux store using the helper functions
@@ -696,7 +766,7 @@ const Statistic = () => {
   const isDarkMode = theme.palette.mode === 'dark';
 
   // Function to handle building click
-  const handleBuildingClick = (buildingId: string) => {
+  const handleBuildingClick = useCallback((buildingId: string) => {
     console.log(`Building ID: ${buildingId}`);
     
     // Find building name
@@ -716,10 +786,10 @@ const Statistic = () => {
       console.log(`No persons found in building "${buildingName}" (${buildingId})`);
       alert(`No persons found in building: ${buildingName}`);
     }
-  };
+  }, [buildingData, countingData, isDarkMode, visitorMap, memberMap]);
 
   // Function to handle floor click
-  const handleFloorClick = (floorId: string) => {
+  const handleFloorClick = useCallback((floorId: string) => {
     console.log(`Floor ID: ${floorId}`);
     
     // Find floor name
@@ -740,10 +810,10 @@ const Statistic = () => {
       console.log(`No persons found in floor "${floorName}" (${floorId})`);
       alert(`No persons found in floor: ${floorName}`);
     }
-  };
+  }, [floorData, countingData, isDarkMode, visitorMap, memberMap]);
 
   // Function to handle floorplan click
-  const handleFloorplanClick = (floorplanId: string) => {
+  const handleFloorplanClick = useCallback((floorplanId: string) => {
     console.log(`Floorplan ID: ${floorplanId}`);
     
     // Find floorplan name
@@ -763,10 +833,10 @@ const Statistic = () => {
       console.log(`No persons found in floorplan "${floorplanName}" (${floorplanId})`);
       alert(`No persons found in floorplan: ${floorplanName}`);
     }
-  };
+  }, [floorplanData, countingData, isDarkMode, visitorMap, memberMap]);
 
   // Function to handle area click
-  const handleAreaClick = (areaId: string) => {
+  const handleAreaClick = useCallback((areaId: string) => {
     console.log(`Area ID: ${areaId}`);
     
     // Find area name
@@ -786,79 +856,7 @@ const Statistic = () => {
       console.log(`No persons found in area "${areaName}" (${areaId})`);
       alert(`No persons found in area: ${areaName}`);
     }
-  };
-
-  // Component for individual statistic table
-  const StatisticTable = ({
-    title,
-    data,
-    onRowClick,
-  }: {
-    title: string;
-    data: Array<{ id: string; name: string; count: number }>;
-    onRowClick?: (id: string) => void;
-  }) => (
-    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1, textAlign: 'center' }}>
-        {title} ({data.length})
-      </Typography>
-      <TableContainer
-        component={Paper}
-        sx={{
-          flex: 1,
-          maxHeight: '200px',
-          overflow: 'auto',
-          '& .MuiTableCell-root': {
-            padding: '8px 16px',
-            fontSize: '0.875rem',
-          },
-        }}
-      >
-        <Table size="small" stickyHeader>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 'bold' }}>Name</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                Count
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.length > 0 ? (
-              data.map((item) => (
-                <TableRow
-                  key={item.id}
-                  hover
-                  onClick={() => {
-                    if (onRowClick) {
-                      onRowClick(item.id);
-                    } else {
-                      console.log(`${title} ID: ${item.id}`);
-                    }
-                  }}
-                  sx={{
-                    cursor: 'pointer',
-                    '&:hover': {
-                      backgroundColor: 'action.hover',
-                    },
-                  }}
-                >
-                  <TableCell>{item.name || 'Unnamed'}</TableCell>
-                  <TableCell align="right">{item.count}</TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={2} align="center">
-                  No data available
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
-  );
+  }, [areaData, countingData, isDarkMode, visitorMap, memberMap]);
 
   // Show loading state if no counting data yet
   if (!countingData) {

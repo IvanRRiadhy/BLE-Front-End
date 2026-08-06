@@ -27,8 +27,8 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     SearchValue: string,
-    filters: {
-
+    filters?: {
+      isLive?: number | null;
     }
 }
 
@@ -36,11 +36,11 @@ export type GetFilter = {
 export interface EngineType {
   id: string;
   name: string;
-  engineTrackingId: string;
+  engineCode: string;
   port: number;
   isLive: number;
   lastLive: string;
-  serviceStatus: number;
+  serviceStatus: string;
   bleReaders?: bleReaderType[];
 }
 

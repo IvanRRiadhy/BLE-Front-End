@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData, QueryClient } from '@tanstack/react-query';
 import axiosServices, { API_ENGINE_URL } from 'src/utils/axios';
 // import { floorType, GetFilter } from 'src/store/apps/crud/floor';
 import { EngineType, GetFilter } from 'src/store/apps/crud/engine';
@@ -13,6 +13,18 @@ interface PaginatedResponse<T> {
   recordsTotal: number;
   recordsFiltered: number;
 }
+
+export interface AddEnginePayload {
+  name: string;
+  engineCode: string;
+  port: number;
+}
+
+// export interface EditEnginePayload {
+//   name: string;
+//   engineCode: string;
+//   port: number;
+// }
 
 export function useAllEngines() {
   return useQuery({
@@ -33,6 +45,7 @@ export function useEngineList(filter: GetFilter){
     queryFn: async () => {
       const res = await axiosServices.post(ENGINE_API_URL + 'filter', filter);
       const collection = res.data.collection;
+      console.log("Engine", collection);
             return {
               data: collection.data as EngineType[],
               draw: collection.draw,
@@ -43,6 +56,34 @@ export function useEngineList(filter: GetFilter){
     placeholderData: keepPreviousData,
     staleTime: 5_000, // data dianggap fresh 1 menit
     gcTime: 5 * 60_000, // cache disimpan 5 menit
+  })
+}
+
+export function useAddEngine() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: AddEnginePayload) => {
+      const res = await axiosServices.post(ENGINE_API_URL, data);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['engine-list'] });
+    }
+  })
+}
+
+export function useEditEngine() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {id: string, payload: AddEnginePayload}) => {
+      const res = await axiosServices.put(`${ENGINE_API_URL}${data.id}`, data.payload);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['engine-list'] });
+    }
   })
 }
 
@@ -73,6 +114,34 @@ export function useAssignReaders() {
       queryClient.invalidateQueries({ queryKey: ['allEngine'] });
     }
   });
+}
+
+export function useStartEngine() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (engineId: string) => {
+      const res = await axiosServices.post(`${ENGINE_API_URL}start/${engineId}`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['engine-list'] });
+    }
+  })
+}
+
+export function useStopEngine() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (engineId: string) => {
+      const res = await axiosServices.post(`${ENGINE_API_URL}stop/${engineId}`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['engine-list'] });
+    }
+  })
 }
 
 export function useEngineStatus(){

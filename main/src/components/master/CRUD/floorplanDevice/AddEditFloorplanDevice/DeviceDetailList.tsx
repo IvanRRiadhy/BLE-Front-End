@@ -579,13 +579,13 @@ const DeviceDetailList = () => {
             )}
 
             {/* Add Pathing (only when there are other BLE readers) */}
-            {formData.type === 'BleReader' && otherReader.length > 0 && (
+            {/* {formData.type === 'BleReader' && otherReader.length > 0 && (
               <Grid size={12} mt={1}>
                 <Button variant="contained" color="secondary" fullWidth onClick={handleAddPathing}>
                   Add Pathing
                 </Button>
               </Grid>
-            )}
+            )} */}
 
             {/* ===== PATH LIST TABLE ===== */}
             {formData.type === 'BleReader' &&
