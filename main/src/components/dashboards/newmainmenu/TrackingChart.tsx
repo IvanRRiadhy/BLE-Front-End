@@ -69,9 +69,9 @@ const Tracking: React.FC = () => {
   };
 
   const SERIES_COLORS: Record<string, string> = {
-    'Accessed Area': '#045498',
-    'With Permission': '#13deb9',
-    'Without Permission': '#D73D3D',
+    'Total Access': '#045498',
+    'General Area Access': '#13deb9',
+    'Restricted Area Access': '#D73D3D',
   };
 
   const chartOptions = useMemo<ApexCharts.ApexOptions>(
@@ -206,9 +206,9 @@ const Tracking: React.FC = () => {
 
   const emptyWeekSeries = useMemo(() => {
     return [
-      { name: 'Accessed Area', data: Array(7).fill(0) },
-      { name: 'With Permission', data: Array(7).fill(0) },
-      { name: 'Without Permission', data: Array(7).fill(0) },
+      { name: 'Total Access', data: Array(7).fill(0) },
+      { name: 'General Area Access', data: Array(7).fill(0) },
+      { name: 'Restricted Area Access', data: Array(7).fill(0) },
     ];
   }, []);
 
@@ -389,7 +389,7 @@ const Tracking: React.FC = () => {
             <Typography sx={{ fontSize: 24, fontWeight: 700, color: 'textPrimary' }}>
               {trackingSummary?.accessedAreaTotal ?? '-'}
             </Typography>
-            <Typography sx={{ fontSize: 13, color: 'textSecondary' }}>Accessed Area</Typography>
+            <Typography sx={{ fontSize: 13, color: 'textSecondary' }}>Total Access</Typography>
           </Box>
 
           <Box>
@@ -397,7 +397,7 @@ const Tracking: React.FC = () => {
               {trackingSummary?.withPermission ?? '-'}
             </Typography>
             <Typography sx={{ fontSize: 13, color: '#13deb9' }}>
-              Area Access with Permission
+              General Area Accessed
             </Typography>
           </Box>
 
@@ -406,7 +406,7 @@ const Tracking: React.FC = () => {
               {trackingSummary?.withoutPermission ?? '-'}
             </Typography>
             <Typography sx={{ fontSize: 13, color: '#D73D3D' }}>
-              Area Access without Permission
+              Restricted Area Accessed
             </Typography>
           </Box>
         </Stack>
