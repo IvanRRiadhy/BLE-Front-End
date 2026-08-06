@@ -6,7 +6,7 @@ import ZoomControls from 'src/components/shared/ZoomControls';
 import EditDeviceRenderer from './EditDeviceRenderer';
 import FloorplanHouse from 'src/assets/images/masters/Floorplan/Floorplan-House.png';
 import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
-import { fetchFloorplanDevices, FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
+import { fetchFloorplanDevices, FloorplanDeviceType, setCameraCenter } from 'src/store/apps/crud/floorplanDevice';
 
 const EditDeviceFloorView: React.FC<{ zoomable: boolean }> = ({ zoomable }) => {
   const dispatch: AppDispatch = useDispatch();
@@ -94,6 +94,17 @@ const EditDeviceFloorView: React.FC<{ zoomable: boolean }> = ({ zoomable }) => {
     window.addEventListener('resize', updateContainerSize);
     return () => window.removeEventListener('resize', updateContainerSize);
   }, []);
+
+  // Update camera view center in Redux store whenever container size, stage scale, or stage position changes
+  useEffect(() => {
+    const cWidth = containerRef.current?.clientWidth || containerSize.width || 800;
+    const cHeight = containerRef.current?.clientHeight || containerSize.height || 600;
+
+    const centerX = (cWidth / 2 - stagePos.x) / stageScale;
+    const centerY = (cHeight / 2 - stagePos.y) / stageScale;
+
+    dispatch(setCameraCenter({ x: Math.round(centerX), y: Math.round(centerY) }));
+  }, [containerSize.width, containerSize.height, stageScale, stagePos.x, stagePos.y, dispatch]);
 
   // Global wheel event handler to prevent browser zoom when Ctrl is pressed
   useEffect(() => {

@@ -7,7 +7,8 @@ import {
   FloorplanDeviceType,
   InitializeAllLayers,
   ResetState,
-  // RevertDevice,
+  // CancelAllDevicesEditing,
+  CancelAllSessionEdits,
   SelectEditingFloorplanDevice,
   SelectFloorplanDevice,
   ApplyUnsavedToSaved,
@@ -64,6 +65,9 @@ const DeviceList = () => {
   );
   const savedDevices = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.savedFloorplanDevices,
+  );
+  const floorplanDeviceAll = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.floorplanDeviceAll,
   );
   const editingDevice = useSelector(
     (state: RootState) => state.floorplanDeviceReducer.editingFloorplanDevice,
@@ -143,27 +147,35 @@ const DeviceList = () => {
     }
   }, [blocker.state]);
 
-  // New device template
-  const newDevice: FloorplanDeviceType = {
-    id: `new-${Date.now()}`,
-    name: 'New Device',
-    type: '',
-    floorplanId: activeFloorplan?.id || '',
-    accessCctvId: null,
-    readerId: null,
-    accessControlId: null,
-    // readerType: "Indoor",
-    posX: 100,
-    posY: 100,
-    posPxX: 100,
-    posPxY: 100,
-    floorplanMaskedAreaId: '',
-    applicationId: activeFloorplan?.applicationId || localStorage.getItem('applicationId') || '',
-    deviceStatus: 'NonActive',
-    createdAt: new Date().toISOString(),
-    createdBy: 'admin',
-    updatedAt: new Date().toISOString(),
-    updatedBy: 'admin',
+  const cameraCenter = useSelector(
+    (state: RootState) => state.floorplanDeviceReducer.cameraCenter || { x: 100, y: 100 },
+  );
+
+  // Helper to construct a new device at the current camera view center
+  const createNewDevice = (): FloorplanDeviceType => {
+    const posX = Math.round(cameraCenter.x);
+    const posY = Math.round(cameraCenter.y);
+    return {
+      id: `new-${Date.now()}`,
+      name: 'New Device',
+      type: '',
+      floorplanId: activeFloorplan?.id || '',
+      accessCctvId: null,
+      readerId: null,
+      accessControlId: null,
+      // readerType: "Indoor",
+      posX: posX,
+      posY: posY,
+      posPxX: posX,
+      posPxY: posY,
+      floorplanMaskedAreaId: '',
+      applicationId: activeFloorplan?.applicationId || localStorage.getItem('applicationId') || '',
+      deviceStatus: 'NonActive',
+      createdAt: new Date().toISOString(),
+      createdBy: 'admin',
+      updatedAt: new Date().toISOString(),
+      updatedBy: 'admin',
+    };
   };
 
   // Initialize all layers when data loads
@@ -192,15 +204,16 @@ const DeviceList = () => {
   }, [dispatch]);
 
   const handleAddDeviceClick = () => {
+    const dev = createNewDevice();
     if (editingDevice) {
-      setPendingDeviceId(newDevice.id);
+      setPendingDeviceId(dev.id);
       setDialogType('add');
       setConfirmDialogOpen(true);
       return;
     }
-    dispatch(AddUnsavedDevice(newDevice));
-    dispatch(SelectFloorplanDevice(newDevice.id));
-    dispatch(SelectEditingFloorplanDevice(newDevice));
+    dispatch(AddUnsavedDevice(dev));
+    dispatch(SelectFloorplanDevice(dev.id));
+    dispatch(SelectEditingFloorplanDevice(dev));
   };
 
   const handleOnClick = (id: string) => {
@@ -216,9 +229,10 @@ const DeviceList = () => {
 
   const handleConfirmProceed = () => {
     if (dialogType === 'add') {
-      dispatch(AddUnsavedDevice(newDevice));
-      dispatch(SelectFloorplanDevice(newDevice.id));
-      dispatch(SelectEditingFloorplanDevice(newDevice));
+      const dev = createNewDevice();
+      dispatch(AddUnsavedDevice(dev));
+      dispatch(SelectFloorplanDevice(dev.id));
+      dispatch(SelectEditingFloorplanDevice(dev));
     }
     if (dialogType === 'select') {
       dispatch(SelectFloorplanDevice(pendingDeviceId));
@@ -275,6 +289,8 @@ const DeviceList = () => {
   };
 
   const handleCloseEditing = () => {
+    dispatch(CancelAllSessionEdits());
+    refetchFloorplanDevices();
     dispatch(ResetState());
     if (blocker.state === 'blocked') {
       blocker.proceed();
@@ -483,11 +499,11 @@ const DeviceList = () => {
           m: 0,
         }}
       >
-        {/* {!editingDevice && ( */}
+        {!editingDevice && (
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <Button 
               variant="outlined" 
-              onClick={() => navigate('/master/device')}  
+              onClick={() => navigate('/master/device')} 
               disabled={!!editingDevice || isSaving}
             >
               Cancel
@@ -496,7 +512,7 @@ const DeviceList = () => {
               {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           </Box>
-        {/* )} */}
+        )}
       </Box>
 
       {/* Confirmation Dialogs */}

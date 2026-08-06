@@ -31,7 +31,7 @@ import {
   RemovePathPairFromUnsaved,
   StartEditingDevice,
   SaveAllDevicesToSavedLayer,
-  CancelAllDevicesEditing,
+  // CancelAllDevicesEditing,
 } from 'src/store/apps/crud/floorplanDevice';
 import { useMaskedAreaList } from 'src/hooks/useMaskedArea';
 import { useAllUnassignedCCTV } from 'src/hooks/useCCTV';
@@ -301,7 +301,7 @@ const DeviceDetailList = () => {
   const handleCancel = () => {
     if (formData.id) {
       // Cancel editing - this reverts unsaved device to saved layer
-      dispatch(CancelAllDevicesEditing());
+      dispatch(CancelDeviceEditing(formData.id));
     }
     handleClose();
   };

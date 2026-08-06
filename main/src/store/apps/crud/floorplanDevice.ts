@@ -114,7 +114,10 @@ interface StateType {
     drawingDevicePath?: string;
     selectDevicePath?: string;
     
-    // Filter and loading state
+    // Camera view center (image pixel coordinates corresponding to camera viewport center)
+    cameraCenter?: { x: number; y: number };
+
+    //Filter and loading state
     floorplanDeviceTotalCount: number;
     floorplanDeviceFilteredCount: number;
     floorplanDeviceFilter: GetFilter;
@@ -139,6 +142,7 @@ const initialState: StateType = {
     editingFloorplanDevice: null,
     drawingDevicePath: '',
     selectDevicePath: '',
+    cameraCenter: { x: 100, y: 100 },
     floorplanDeviceTotalCount: 0,
     floorplanDeviceFilteredCount: 0,
     floorplanDeviceFilter: defaultFloorplanDeviceFilter,
@@ -223,56 +227,15 @@ SaveAllDevicesToSavedLayer: (state) => {
     }
 },
 
-// Cancel editing for all devices - revert unsaved layer to saved layer
-CancelAllDevicesEditing: (state) => {
-    // Revert all devices in unsaved layer to their saved state
-    const updatedUnsavedDevices: FloorplanDeviceType[] = [];
-    
-    // For each device in saved layer, copy to unsaved
-    state.savedFloorplanDevices.forEach(savedDevice => {
-        updatedUnsavedDevices.push({ ...savedDevice });
-    });
-    
-    // For devices that are in unsaved but not in saved (newly added devices), remove them
-    const savedDeviceIds = new Set(state.savedFloorplanDevices.map(d => d.id));
-    state.unsavedFloorplanDevices.forEach(unsavedDevice => {
-        if (!savedDeviceIds.has(unsavedDevice.id)) {
-            // This is a newly added device that hasn't been saved yet
-            // It will be removed from unsaved layer
-        }
-    });
-    
-    // Update unsaved layer
-    state.unsavedFloorplanDevices = updatedUnsavedDevices;
-    
-    // Update editing device if it exists
-    if (state.editingFloorplanDevice) {
-        const savedEditingDevice = state.savedFloorplanDevices.find(
-            d => d.id === state.editingFloorplanDevice?.id
-        );
-        if (savedEditingDevice) {
-            state.editingFloorplanDevice = { ...savedEditingDevice };
-        } else {
-            // If editing device doesn't exist in saved layer (was newly added), clear editing
+        // Purge all session changes (both saved and unsaved layers) back to original DB API fetch layer
+        CancelAllSessionEdits: (state) => {
+            state.savedFloorplanDevices = [...state.floorplanDeviceAll];
+            state.unsavedFloorplanDevices = [...state.floorplanDeviceAll];
             state.editingFloorplanDevice = null;
-        }
-    }
-    
-    // Update selected device if it exists
-    if (state.selectedFloorplanDevice) {
-        const savedSelectedDevice = state.savedFloorplanDevices.find(
-            d => d.id === state.selectedFloorplanDevice?.id
-        );
-        if (savedSelectedDevice) {
-            state.selectedFloorplanDevice = { ...savedSelectedDevice };
-        } else {
             state.selectedFloorplanDevice = null;
-        }
-    }
-    
-    // Clear editing state
-    state.editingFloorplanDevice = null;
-},
+            state.drawingDevicePath = '';
+            state.selectDevicePath = '';
+        },
         
         // Save device from unsaved to saved layer (via DeviceDetailList Save)
         SaveDeviceToSavedLayer: (state, action: PayloadAction<FloorplanDeviceType>) => {
@@ -305,13 +268,31 @@ CancelAllDevicesEditing: (state) => {
             }
         },
         
-        // Cancel editing - revert unsaved device to saved layer
+        // Cancel editing - revert unsaved device to saved layer or delete if unsaved/unregistered
         CancelDeviceEditing: (state, action: PayloadAction<string>) => {
             const deviceId = action.payload;
             
             // Find device in saved layer
             const savedDevice = state.savedFloorplanDevices.find(d => d.id === deviceId);
-            if (!savedDevice) return;
+            
+            // Check if device was never saved or is unregistered (no type set)
+            if (!savedDevice || !savedDevice.type || savedDevice.type === '') {
+                // Remove from unsaved layer (it was newly added and never saved)
+                state.unsavedFloorplanDevices = state.unsavedFloorplanDevices.filter(
+                    d => d.id !== deviceId
+                );
+                // Clean up from saved layer if it was pushed prematurely
+                state.savedFloorplanDevices = state.savedFloorplanDevices.filter(
+                    d => d.id !== deviceId
+                );
+                
+                // Clear editing state and selection if this device was selected
+                state.editingFloorplanDevice = null;
+                if (state.selectedFloorplanDevice?.id === deviceId) {
+                    state.selectedFloorplanDevice = null;
+                }
+                return;
+            }
             
             // Revert unsaved layer to saved state
             const unsavedIndex = state.unsavedFloorplanDevices.findIndex(d => d.id === deviceId);
@@ -319,16 +300,19 @@ CancelAllDevicesEditing: (state) => {
                 state.unsavedFloorplanDevices[unsavedIndex] = { ...savedDevice };
             }
             
-            // Clear editing state but keep selection
+            // Clear editing state but keep selection pointing to saved device state
             state.editingFloorplanDevice = null;
+            if (state.selectedFloorplanDevice?.id === deviceId) {
+                state.selectedFloorplanDevice = { ...savedDevice };
+            }
         },
         
-        // Add new device to unsaved layer
+        // Add new device to unsaved layer ONLY (not saved layer until user saves it)
         AddUnsavedDevice: (state, action: PayloadAction<FloorplanDeviceType>) => {
-            state.unsavedFloorplanDevices.push({ ...action.payload });
-            
-            // Also add to saved layer (for consistency)
-            state.savedFloorplanDevices.push({ ...action.payload });
+            const exists = state.unsavedFloorplanDevices.some(d => d.id === action.payload.id);
+            if (!exists) {
+                state.unsavedFloorplanDevices.push({ ...action.payload });
+            }
         },
         
         // Edit device in unsaved layer during editing
@@ -570,6 +554,11 @@ CancelAllDevicesEditing: (state) => {
             state.selectDevicePath = '';
         },
 
+        // Set camera view center coordinates
+        setCameraCenter: (state, action: PayloadAction<{ x: number; y: number }>) => {
+            state.cameraCenter = action.payload;
+        },
+
         //Device to Disable
         addDeviceToDisable: (state, action: PayloadAction<string>) => {
             state.deviceToDisable.push(action.payload);
@@ -660,7 +649,7 @@ export const {
     InitializeAllLayers,
     StartEditingDevice,
     SaveAllDevicesToSavedLayer,
-    CancelAllDevicesEditing,
+    CancelAllSessionEdits,
     SaveDeviceToSavedLayer,
     CancelDeviceEditing,
     AddUnsavedDevice,
@@ -677,6 +666,7 @@ export const {
     selectDevicePath,
     ApplyUnsavedToSaved,
     ResetState,
+    setCameraCenter,
     addDeviceToDisable,
     removeDeviceToDisable,
 } = FloorplanDeviceSlice.actions;
