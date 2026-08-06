@@ -61,6 +61,8 @@ export interface MaskedAreaType {
     floorId: string,
     name: string,
     areaShape: string,
+    areaNameTextBox: string,
+    occupancyNameTextBox: string,
     colorArea:string,
     restrictedStatus: string,
     applicationId?: string,
@@ -124,12 +126,12 @@ export const MaskedAreaSlice = createSlice({
     reducers: {
         GetMaskedArea: (state, action: PayloadAction<MaskedAreaType[]>) => {
             state.maskedAreas = action.payload;
-             console.log("Masked Areas: ", JSON.stringify(state.maskedAreas, null, 2));
+            //  console.log("Masked Areas: ", JSON.stringify(state.maskedAreas, null, 2));
         },
         GetAllMaskedArea: (state, action: PayloadAction<MaskedAreaType[]>) => {
             state.maskedAreaAll = action.payload;
                         state.originalMaskedAreas = action.payload;
-                        console.log("Unsaved Masked Areas: ", JSON.stringify(state.maskedAreaAll, null, 2));
+                        // console.log("Unsaved Masked Areas: ", JSON.stringify(state.maskedAreaAll, null, 2));
         },
         GetUnsavedMaskedArea: (state) => {
             state.unsavedMaskedAreas = state.maskedAreaAll;
@@ -167,7 +169,7 @@ export const MaskedAreaSlice = createSlice({
             }
         },
         EditMaskedAreaPosition: (state, action: PayloadAction<MaskedAreaType>) => {
-            console.log("EditMaskedAreaPosition", action.payload);
+            // console.log("EditMaskedAreaPosition", action.payload);
                             if(state.editingMaskedArea) {
                 state.editingMaskedArea = {
                     ...state.editingMaskedArea,
@@ -202,7 +204,7 @@ export const MaskedAreaSlice = createSlice({
         SaveEditingArea: (state) => {
             if(state.editingMaskedArea !== null && state.editingMaskedArea !== undefined) {
                 const index = state.unsavedMaskedAreas.findIndex((maskedAreaAll) => maskedAreaAll.id === state.editingMaskedArea?.id);
-                console.log("index", index);
+                // console.log("index", index);
                 if (index !== -1) {
                     state.unsavedMaskedAreas[index] = state.editingMaskedArea;
                     state.maskedAreaAll[index] = state.editingMaskedArea;
@@ -211,7 +213,7 @@ export const MaskedAreaSlice = createSlice({
                     state.unsavedMaskedAreas.push(state.editingMaskedArea);
                     state.maskedAreaAll.push(state.editingMaskedArea);
                     state.addedMaskedArea.push(state.editingMaskedArea);
-                    console.log("Unsaved Masked Areas: ", JSON.stringify(state.unsavedMaskedAreas, null, 2));
+                    // console.log("Unsaved Masked Areas: ", JSON.stringify(state.unsavedMaskedAreas, null, 2));
                 }
             }
         },
@@ -228,12 +230,12 @@ export const MaskedAreaSlice = createSlice({
             reducer: (state, action: PayloadAction<{id: string}>) => {
                 const index = state.unsavedMaskedAreas.findIndex((maskedAreaAll) => maskedAreaAll.id === action.payload.id);
                 const area = state.maskedAreaAll.find((maskedAreaAll) => maskedAreaAll.id === action.payload.id);
-                console.log("area", area, JSON.stringify(state.unsavedMaskedAreas, null, 2));
+                // console.log("area", area, JSON.stringify(state.unsavedMaskedAreas, null, 2));
                 if(index !== -1) {
                     const area = state.unsavedMaskedAreas[index];
                     //Check if status is valid
                     const validStatus = restrictedStatus.map((status) => status.value);
-                    console.log("Status", area.restrictedStatus, validStatus);
+                    // console.log("Status", area.restrictedStatus, validStatus);
                     if(!validStatus.includes(area.restrictedStatus) || area.restrictedStatus === "") {
                         
                         state.unsavedMaskedAreas.splice(index, 1);

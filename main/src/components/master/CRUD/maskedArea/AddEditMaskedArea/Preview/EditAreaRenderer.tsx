@@ -124,13 +124,75 @@ const EditAreaRenderer: React.FC<Props> = ({
     originalY: number;
   } | null>(null);
 
+  const activeCornerDragRef = React.useRef<{
+    areaName: string;
+    cornerIndex: number;
+    nodeRef: any;
+  } | null>(null);
+
   // Track area drag state
   const [draggingAreaName, setDraggingAreaName] = useState<string | null>(null);
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
 
-  // background images
-  const [bgImage, setBgImage] = useState<HTMLImageElement | undefined>(undefined);
-  const [previewImage, setPreviewImage] = useState<HTMLImageElement | undefined>(undefined);
+  // Ref and state for hold-Q magnetic snapping mode
+  const isQHeldRef = React.useRef(false);
+  const [isQHeld, setIsQHeld] = useState(false);
+
+  // State for W key toggle & Tab/E mode switch (hv vs parallel_perpendicular)
+  const [guideLineShown, setGuideLineShown] = useState(false);
+  const [guideLineMode, setGuideLineMode] = useState<'hv' | 'parallel_perpendicular'>('hv');
+
+  const guideLineShownRef = React.useRef(false);
+  useEffect(() => {
+    guideLineShownRef.current = guideLineShown;
+  }, [guideLineShown]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+
+      if (e.key === 'q' || e.key === 'Q') {
+        if (!isQHeldRef.current) {
+          isQHeldRef.current = true;
+          setIsQHeld(true);
+        }
+      }
+
+      if (e.key === 'w' || e.key === 'W') {
+        if (!e.repeat) {
+          setGuideLineShown((prev) => !prev);
+        }
+      }
+
+      if (e.key === 'Tab' || e.key === 'e' || e.key === 'E') {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+        }
+        if (guideLineShownRef.current) {
+          console.log("Changing GuideLine mode");
+          setGuideLineMode((prev) => (prev === 'hv' ? 'parallel_perpendicular' : 'hv'));
+        }
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+
+      if (e.key === 'q' || e.key === 'Q') {
+        isQHeldRef.current = false;
+        setIsQHeld(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
 
   const filteredUnsavedArea = useMemo(
     () => unsavedArea.filter((area) => area.floorplanId === selectedFloorplan?.id),
@@ -152,9 +214,334 @@ const EditAreaRenderer: React.FC<Props> = ({
   return Array.from(map.values());
 }, [filteredUnsavedArea, editingMaskedArea]);
 
+  // Helper to generate parallel and perpendicular infinite lines passing through P(px, py) relative to A(ax, ay)
+  const createParallelAndPerpendicularLines = (
+    px: number,
+    py: number,
+    ax: number,
+    ay: number,
+    prefix: string,
+    maxX: number,
+    maxY: number,
+  ) => {
+    const dx = px - ax;
+    const dy = py - ay;
+    const len = Math.hypot(dx, dy);
+    const length = Math.max(maxX, maxY, 10000);
+
+    if (len === 0) {
+      return [
+        { id: `${prefix}-h`, points: [0, py, maxX, py] },
+        { id: `${prefix}-v`, points: [px, 0, px, maxY] },
+      ];
+    }
+
+    const ux = dx / len;
+    const uy = dy / len;
+    const nx = -uy;
+    const ny = ux;
+
+    return [
+      {
+        id: `${prefix}-parallel`,
+        points: [px - length * ux, py - length * uy, px + length * ux, py + length * uy],
+      },
+      {
+        id: `${prefix}-perpendicular`,
+        points: [px - length * nx, py - length * ny, px + length * nx, py + length * ny],
+      },
+    ];
+  };
+
+  // Virtual guide lines when W is toggled
+  const guideLines = useMemo(() => {
+    if (!guideLineShown) return [];
+
+    const maxX = originalWidth || width || 10000;
+    const maxY = originalHeight || height || 10000;
+
+    // 1. Drawing Mode
+    if (drawingMaskedArea) {
+      if (drawingNodes.length === 0) {
+        // First node (before placement): guide lines follow the moving cursor
+        if (!cursorWorld) return [];
+        return [
+          { id: 'cursor-h', points: [0, cursorWorld.y, maxX, cursorWorld.y] },
+          { id: 'cursor-v', points: [cursorWorld.x, 0, cursorWorld.x, maxY] },
+        ];
+      } else if (drawingNodes.length === 1) {
+        // First node placed: guide lines from drawingNodes[0]
+        const firstNode = drawingNodes[0];
+        return [
+          { id: 'first-h', points: [0, firstNode.y_px, maxX, firstNode.y_px] },
+          { id: 'first-v', points: [firstNode.x_px, 0, firstNode.x_px, maxY] },
+        ];
+      } else {
+        // Subsequent nodes (>1 placed): guide lines from first and last nodes
+        const firstNode = drawingNodes[0];
+        const lastNode = drawingNodes[drawingNodes.length - 1];
+
+        if (guideLineMode === 'parallel_perpendicular') {
+          const secondNode = drawingNodes[1];
+          const secondLastNode = drawingNodes[drawingNodes.length - 2];
+          return [
+            ...createParallelAndPerpendicularLines(firstNode.x_px, firstNode.y_px, secondNode.x_px, secondNode.y_px, 'first', maxX, maxY),
+            ...createParallelAndPerpendicularLines(lastNode.x_px, lastNode.y_px, secondLastNode.x_px, secondLastNode.y_px, 'last', maxX, maxY),
+          ];
+        }
+
+        return [
+          // first node lines
+          { id: 'first-h', points: [0, firstNode.y_px, maxX, firstNode.y_px] },
+          { id: 'first-v', points: [firstNode.x_px, 0, firstNode.x_px, maxY] },
+          // last node lines
+          { id: 'last-h', points: [0, lastNode.y_px, maxX, lastNode.y_px] },
+          { id: 'last-v', points: [lastNode.x_px, 0, lastNode.x_px, maxY] },
+        ];
+      }
+    }
+
+    // 2. Editing/Moving Existing Node Mode
+    const activeName = cornerDragData?.areaName || activeCornerDragRef.current?.areaName;
+    const cornerIndex = cornerDragData?.cornerIndex ?? activeCornerDragRef.current?.cornerIndex;
+
+    if (!activeName || cornerIndex === undefined) return [];
+
+    const area = renderAreas.find((a) => a.name === activeName);
+    if (!area?.nodes || area.nodes.length < 3) return [];
+
+    const N = area.nodes.length;
+    const prevIdx = (cornerIndex - 1 + N) % N;
+    const nextIdx = (cornerIndex + 1) % N;
+
+    const prevNode = area.nodes[prevIdx];
+    const nextNode = area.nodes[nextIdx];
+
+    if (guideLineMode === 'parallel_perpendicular') {
+      const anchorPrevIdx = (prevIdx - 1 + N) % N;
+      const anchorNextIdx = (nextIdx + 1) % N;
+
+      const anchorPrev = area.nodes[anchorPrevIdx];
+      const anchorNext = area.nodes[anchorNextIdx];
+
+      return [
+        ...createParallelAndPerpendicularLines(prevNode.x_px, prevNode.y_px, anchorPrev.x_px, anchorPrev.y_px, 'prev', maxX, maxY),
+        ...createParallelAndPerpendicularLines(nextNode.x_px, nextNode.y_px, anchorNext.x_px, anchorNext.y_px, 'next', maxX, maxY),
+      ];
+    }
+
+    return [
+      // prevNode (node[n-1]) lines
+      { id: 'prev-h', points: [0, prevNode.y_px, maxX, prevNode.y_px] },
+      { id: 'prev-v', points: [prevNode.x_px, 0, prevNode.x_px, maxY] },
+      // nextNode (node[n+1]) lines
+      { id: 'next-h', points: [0, nextNode.y_px, maxX, nextNode.y_px] },
+      { id: 'next-v', points: [nextNode.x_px, 0, nextNode.x_px, maxY] },
+    ];
+  }, [
+    guideLineShown,
+    guideLineMode,
+    drawingMaskedArea,
+    drawingNodes,
+    cursorWorld,
+    cornerDragData,
+    editingArea,
+    activeArea,
+    renderAreas,
+    originalWidth,
+    originalHeight,
+    width,
+    height,
+  ]);
+
+  // Helper: Find closest point on a line segment (x1,y1)-(x2,y2) to point (px,py)
+  const getClosestPointOnSegment = (
+    px: number,
+    py: number,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+  ) => {
+    const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+    if (l2 === 0) return { x: x1, y: y1 };
+
+    let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+    t = Math.max(0, Math.min(1, t));
+
+    return {
+      x: x1 + t * (x2 - x1),
+      y: y1 + t * (y2 - y1),
+    };
+  };
+
+  const getInfiniteLineIntersection = (
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    x3: number,
+    y3: number,
+    x4: number,
+    y4: number,
+  ): { x: number; y: number } | null => {
+    const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+    if (Math.abs(denom) < 1e-5) return null;
+
+    const ix =
+      ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom;
+    const iy =
+      ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom;
+
+    return { x: ix, y: iy };
+  };
+
+  // Helper: Snap position (px, py) to nearest virtual line or line-line intersection point (100px sensitivity)
+  const snapToNearestLine = useCallback(
+    (px: number, py: number, currentAreaName?: string, currentCornerIndex?: number) => {
+      const sensitivityRadius = 100; // 100 pixel sensitivity threshold for single line snap
+      const intersectionRadius = 15; // 15 pixel sensitivity threshold for line-line intersection snap
+      type LineSegment = { x1: number; y1: number; x2: number; y2: number };
+      const allLines: LineSegment[] = [];
+
+      // 1. Collect area edge segments
+      for (const area of renderAreas) {
+        if (!area.nodes || area.nodes.length < 2) continue;
+
+        const numNodes = area.nodes.length;
+        for (let i = 0; i < numNodes; i++) {
+          // If dragging a corner of current area, skip the 2 adjacent edges connected to this corner node
+          if (area.name === currentAreaName && currentCornerIndex !== undefined) {
+            const prevIndex = (currentCornerIndex - 1 + numNodes) % numNodes;
+            if (i === currentCornerIndex || i === prevIndex) continue;
+          }
+
+          const n1 = area.nodes[i];
+          const n2 = area.nodes[(i + 1) % numNodes];
+          allLines.push({ x1: n1.x_px, y1: n1.y_px, x2: n2.x_px, y2: n2.y_px });
+        }
+      }
+
+      // 2. Collect active guide lines
+      if (guideLineShown && guideLines.length > 0) {
+        for (const gLine of guideLines) {
+          if (gLine.points.length >= 4) {
+            allLines.push({
+              x1: gLine.points[0],
+              y1: gLine.points[1],
+              x2: gLine.points[2],
+              y2: gLine.points[3],
+            });
+          }
+        }
+      }
+
+      // 3. Prioritize line-line intersection points within 15px release radius
+      let minIntersectionDist = intersectionRadius;
+      let bestIntersectionPos: { x: number; y: number } | null = null;
+
+      for (let i = 0; i < allLines.length; i++) {
+        for (let j = i + 1; j < allLines.length; j++) {
+          const l1 = allLines[i];
+          const l2 = allLines[j];
+          const intersection = getInfiniteLineIntersection(
+            l1.x1,
+            l1.y1,
+            l1.x2,
+            l1.y2,
+            l2.x1,
+            l2.y1,
+            l2.x2,
+            l2.y2,
+          );
+          if (intersection) {
+            const dist = Math.hypot(px - intersection.x, py - intersection.y);
+            if (dist <= minIntersectionDist) {
+              minIntersectionDist = dist;
+              bestIntersectionPos = intersection;
+            }
+          }
+        }
+      }
+
+      if (bestIntersectionPos) {
+        return bestIntersectionPos;
+      }
+
+      // 4. Fallback: Snap to nearest point on any single line segment
+      let minLineDist = sensitivityRadius;
+      let bestLinePos: { x: number; y: number } | null = null;
+
+      for (const line of allLines) {
+        const closest = getClosestPointOnSegment(px, py, line.x1, line.y1, line.x2, line.y2);
+        const dist = Math.hypot(px - closest.x, py - closest.y);
+
+        if (dist <= minLineDist) {
+          minLineDist = dist;
+          bestLinePos = closest;
+        }
+      }
+
+      return bestLinePos;
+    },
+    [renderAreas, guideLineShown, guideLines],
+  );
+
+
+  // background images
+  const [bgImage, setBgImage] = useState<HTMLImageElement | undefined>(undefined);
+  const [previewImage, setPreviewImage] = useState<HTMLImageElement | undefined>(undefined);
+
+  const pointToSegmentDistance = (
+    px: number,
+    py: number,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+  ): number => {
+    const A = px - x1;
+    const B = py - y1;
+    const C = x2 - x1;
+    const D = y2 - y1;
+
+    const dot = A * C + B * D;
+    const len_sq = C * C + D * D;
+    let param = -1;
+    if (len_sq !== 0) param = dot / len_sq;
+
+    let xx, yy;
+
+    if (param < 0) {
+      xx = x1;
+      yy = y1;
+    } else if (param > 1) {
+      xx = x2;
+      yy = y2;
+    } else {
+      xx = x1 + param * C;
+      yy = y1 + param * D;
+    }
+
+    const dx = px - xx;
+    const dy = py - yy;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const isPointOnEdge = useCallback((px: number, py: number, nodes: Nodes[], tolerance = 0.5): boolean => {
+    for (let i = 0; i < nodes.length; i++) {
+      const n1 = nodes[i];
+      const n2 = nodes[(i + 1) % nodes.length];
+      const dist = pointToSegmentDistance(px, py, n1.x_px, n1.y_px, n2.x_px, n2.y_px);
+      if (dist <= tolerance) return true;
+    }
+    return false;
+  }, []);
+
   // ----------- device-out-of-area detection -----------
   // Stable ray-casting helper (no closure dependencies — pure math)
   const pointInPolygon = useCallback((px: number, py: number, nodes: Nodes[]): boolean => {
+    if (isPointOnEdge(px, py, nodes)) return false;
     let inside = false;
     for (let i = 0, j = nodes.length - 1; i < nodes.length; j = i++) {
       const xi = nodes[i].x_px, yi = nodes[i].y_px;
@@ -163,14 +550,7 @@ const EditAreaRenderer: React.FC<Props> = ({
       if (intersect) inside = !inside;
     }
     return inside;
-  }, []);
-
-  // Keep a ref so the effect below can read the latest list without
-  // putting deviceToDisable in the dependency array (which would cause loops).
-  const deviceToDisableRef = React.useRef<string[]>(deviceToDisable);
-  useEffect(() => {
-    deviceToDisableRef.current = deviceToDisable;
-  }, [deviceToDisable]);
+  }, [isPointOnEdge]);
 
   // Build an area-id → nodes map once per renderAreas change for O(1) lookup.
   const areaNodesMap = useMemo(() => {
@@ -188,7 +568,7 @@ const EditAreaRenderer: React.FC<Props> = ({
       if (!device.floorplanMaskedAreaId) return;
 
       const nodes = areaNodesMap.get(device.floorplanMaskedAreaId);
-      const currentlyDisabled = deviceToDisableRef.current.includes(device.id);
+      const currentlyDisabled = deviceToDisable.includes(device.id);
 
       if (!nodes) {
         // Area not found in current render set — treat as outside.
@@ -204,7 +584,7 @@ const EditAreaRenderer: React.FC<Props> = ({
         dispatch(removeDeviceToDisable(device.id));
       }
     });
-  }, [devices, areaNodesMap, pointInPolygon, dispatch]);
+  }, [devices, areaNodesMap, pointInPolygon, deviceToDisable, dispatch]);
 
   // ----------- helpers: pointer -> world coords (image pixels) -----------
   const pointerToWorld = useCallback(
@@ -322,7 +702,9 @@ const EditAreaRenderer: React.FC<Props> = ({
       const projA = project(triA, axis);
       const projB = project(triB, axis);
 
-      if (projA.max + epsilon < projB.min || projB.max + epsilon < projA.min) {
+      // Separating axis exists if projections do not penetrate each other's interior.
+      // Boundary touching (projA.max == projB.min) within epsilon tolerance is allowed.
+      if (projA.max <= projB.min + epsilon || projB.max <= projA.min + epsilon) {
         return false;
       }
     }
@@ -422,6 +804,7 @@ const EditAreaRenderer: React.FC<Props> = ({
     y3: number,
     x4: number,
     y4: number,
+    allowEndpointTouch = true,
   ): boolean => {
     const orientation = (
       px1: number,
@@ -432,16 +815,16 @@ const EditAreaRenderer: React.FC<Props> = ({
       py3: number,
     ) => {
       const val = (py2 - py1) * (px3 - px2) - (px2 - px1) * (py3 - py2);
-      if (val === 0) return 0;
+      if (Math.abs(val) < 1e-5) return 0;
       return val > 0 ? 1 : 2;
     };
 
     const onSegment = (px: number, py: number, qx: number, qy: number, rx: number, ry: number) => {
       return (
-        qx <= Math.max(px, rx) &&
-        qx >= Math.min(px, rx) &&
-        qy <= Math.max(py, ry) &&
-        qy >= Math.min(py, ry)
+        qx <= Math.max(px, rx) + 1e-5 &&
+        qx >= Math.min(px, rx) - 1e-5 &&
+        qy <= Math.max(py, ry) + 1e-5 &&
+        qy >= Math.min(py, ry) - 1e-5
       );
     };
 
@@ -450,12 +833,17 @@ const EditAreaRenderer: React.FC<Props> = ({
     const o3 = orientation(x3, y3, x4, y4, x1, y1);
     const o4 = orientation(x3, y3, x4, y4, x2, y2);
 
-    if (o1 !== o2 && o3 !== o4) return true;
+    // Strict interior crossing (neither segment endpoint lies on the other line)
+    if (o1 !== 0 && o2 !== 0 && o3 !== 0 && o4 !== 0 && o1 !== o2 && o3 !== o4) {
+      return true;
+    }
 
-    if (o1 === 0 && onSegment(x1, y1, x3, y3, x2, y2)) return true;
-    if (o2 === 0 && onSegment(x1, y1, x4, y4, x2, y2)) return true;
-    if (o3 === 0 && onSegment(x3, y3, x1, y1, x4, y4)) return true;
-    if (o4 === 0 && onSegment(x3, y3, x2, y2, x4, y4)) return true;
+    if (!allowEndpointTouch) {
+      if (o1 === 0 && onSegment(x1, y1, x3, y3, x2, y2)) return true;
+      if (o2 === 0 && onSegment(x1, y1, x4, y4, x2, y2)) return true;
+      if (o3 === 0 && onSegment(x3, y3, x1, y1, x4, y4)) return true;
+      if (o4 === 0 && onSegment(x3, y3, x2, y2, x4, y4)) return true;
+    }
 
     return false;
   };
@@ -528,38 +916,46 @@ const EditAreaRenderer: React.FC<Props> = ({
 };
 
 
-  const checkCornerDragCollision = (
-    areaName: string,
-    cornerIndex: number,
-    newX: number,
-    newY: number,
-  ): boolean => {
-    const currentArea = renderAreas.find((a) => a.name === areaName);
-    if (!currentArea || !currentArea.nodes) return false;
+  const checkCornerDragCollision = useCallback(
+    (
+      areaName: string,
+      cornerIndex: number,
+      newX: number,
+      newY: number,
+    ): boolean => {
+      const currentArea = renderAreas.find((a) => a.name === areaName);
+      if (!currentArea || !currentArea.nodes) return false;
 
-    const proposedArea = {
-      nodes: currentArea.nodes.map((node, index) =>
-        index === cornerIndex ? { ...node, x: newX, y: newY } : node,
-      ),
-    };
+      const proposedNodes = currentArea.nodes.map((node, index) =>
+        index === cornerIndex
+          ? { ...node, x: newX * scale, y: newY * scale, x_px: newX, y_px: newY }
+          : node,
+      );
 
-    return renderAreas.some((otherArea) => {
-      if (otherArea.name === areaName) return false;
-      if (!otherArea.nodes) return false;
-      return checkPolygonCollision(proposedArea, { nodes: otherArea.nodes });
-    });
-  };
+      if (checkSelfIntersections(proposedNodes)) {
+        return true;
+      }
 
-  // ----------- event handlers -----------
-  const handleCanvasClick = useCallback(
-    (e: any) => {
+      const proposedArea = { name: areaName, nodes: proposedNodes };
+      for (const otherArea of renderAreas) {
+        if (otherArea.name === areaName || !otherArea.nodes || otherArea.nodes.length < 3) continue;
+        const result = checkPolygonCollisionDetailed(proposedArea, {
+          name: otherArea.name,
+          nodes: otherArea.nodes,
+        });
+        if (result.collided) return true;
+      }
+
+      return false;
+    },
+    [renderAreas, scale, checkSelfIntersections, checkPolygonCollisionDetailed],
+  );
+
+
+
+  const placeDrawingNode = useCallback(
+    (x: number, y: number) => {
       if (!drawingMaskedArea) return;
-      const stage = e.target.getStage();
-      const ptr = stage?.getPointerPosition();
-      const world = pointerToWorld(ptr || null);
-      if (!world) return;
-
-      const { x, y } = world;
 
       const newNode = {
         id: uniqueId(),
@@ -570,6 +966,66 @@ const EditAreaRenderer: React.FC<Props> = ({
       };
 
       setDrawingNodes((prevNodes) => {
+        const potentialNodes = [...prevNodes, newNode];
+
+        // Self-intersection check when drawing (requires at least 4 nodes for a self-intersecting polygon)
+        if (potentialNodes.length >= 4) {
+          if (checkSelfIntersections(potentialNodes)) {
+            toast.error('Cannot place node: Area intersects with itself!');
+            return prevNodes;
+          }
+        }
+
+        // Collision check with other existing areas for ANY node placement (1st, 2nd, 3rd, etc.)
+        for (const otherArea of renderAreas) {
+          if (otherArea.name === drawingMaskedArea || !otherArea.nodes || otherArea.nodes.length < 3) continue;
+
+          // 1. Check if the newly clicked point itself is inside any existing area
+          if (pointInPolygon(newNode.x_px, newNode.y_px, otherArea.nodes)) {
+            toast.error(`Cannot place node: Point is inside area "${otherArea.name}"!`);
+            return prevNodes;
+          }
+
+          // 2. If there's a previous node, check if the segment (prevNode -> newNode) intersects any edge of the existing area
+          if (prevNodes.length > 0) {
+            const lastNode = prevNodes[prevNodes.length - 1];
+            const numOther = otherArea.nodes.length;
+            for (let i = 0; i < numOther; i++) {
+              const edgeStart = otherArea.nodes[i];
+              const edgeEnd = otherArea.nodes[(i + 1) % numOther];
+              if (
+                doLineSegmentsIntersect(
+                  lastNode.x_px,
+                  lastNode.y_px,
+                  newNode.x_px,
+                  newNode.y_px,
+                  edgeStart.x_px,
+                  edgeStart.y_px,
+                  edgeEnd.x_px,
+                  edgeEnd.y_px,
+                )
+              ) {
+                toast.error(`Cannot place node: Line passes through area "${otherArea.name}"!`);
+                return prevNodes;
+              }
+            }
+          }
+
+          // 3. For 3+ nodes, also run full polygon-to-polygon collision check
+          if (potentialNodes.length >= 3) {
+            const proposedPoly = { name: drawingMaskedArea, nodes: potentialNodes };
+            const res = checkPolygonCollisionDetailed(proposedPoly, {
+              name: otherArea.name,
+              nodes: otherArea.nodes,
+            });
+            if (res.collided) {
+              const otherName = res.type === 'area' ? res.withAreaName : 'another area';
+              toast.error(`Cannot place node: Area collides with ${otherName}!`);
+              return prevNodes;
+            }
+          }
+        }
+
         if (prevNodes.length >= 3) {
           const first = prevNodes[0];
           const dist = Math.hypot(first.x_px - newNode.x_px, first.y_px - newNode.y_px);
@@ -579,13 +1035,11 @@ const EditAreaRenderer: React.FC<Props> = ({
               name: drawingMaskedArea,
               colorArea: '#FF4D4F',
               areaShape: JSON.stringify(prevNodes),
+              areaNameTextBox: '',
+              occupancyNameTextBox: '',
               restrictedStatus: '',
               allowFloorChange: false,
               labels: [],
-              // wideArea: 0,
-              // positionPxX: 0,
-              // positionPxY: 0,
-              // engineAreaId: 'ENG001',
               isAssemblyPoint: false,
               nodes: prevNodes,
               floorId: selectedFloorplan?.floorId || '',
@@ -610,10 +1064,34 @@ const EditAreaRenderer: React.FC<Props> = ({
           }
         }
 
-        return [...prevNodes, newNode];
+        return potentialNodes;
       });
     },
-    [drawingMaskedArea, pointerToWorld, scale, selectedFloorplan, dispatch],
+    [
+      drawingMaskedArea,
+      scale,
+      selectedFloorplan,
+      dispatch,
+      renderAreas,
+      checkSelfIntersections,
+      checkPolygonCollisionDetailed,
+      pointInPolygon,
+      doLineSegmentsIntersect,
+    ],
+  );
+
+  // ----------- event handlers -----------
+  const handleCanvasClick = useCallback(
+    (e: any) => {
+      if (!drawingMaskedArea) return;
+      const stage = e.target.getStage();
+      const ptr = stage?.getPointerPosition();
+      const world = (isQHeldRef.current && cursorWorld) ? cursorWorld : pointerToWorld(ptr || null);
+      if (!world) return;
+
+      placeDrawingNode(world.x, world.y);
+    },
+    [drawingMaskedArea, cursorWorld, pointerToWorld, placeDrawingNode],
   );
 
   const handleOnClick = useCallback(
@@ -735,6 +1213,12 @@ const EditAreaRenderer: React.FC<Props> = ({
       const corner = area.nodes[cornerIndex];
       if (!corner) return;
 
+      activeCornerDragRef.current = {
+        areaName,
+        cornerIndex,
+        nodeRef: e.target,
+      };
+
       setCornerDragData({
         areaName,
         cornerIndex,
@@ -772,8 +1256,11 @@ const EditAreaRenderer: React.FC<Props> = ({
     [renderAreas, scale, dispatch],
   );
 
+
+
   const handleCornerDragEnd = useCallback(
     (areaName: string, cornerIndex: number, x: number, y: number) => {
+      activeCornerDragRef.current = null;
       const area = renderAreas.find((a) => a.name === areaName);
       if (!area || !area.nodes) return;
 
@@ -863,41 +1350,6 @@ const EditAreaRenderer: React.FC<Props> = ({
     [renderAreas, scale, dispatch],
   );
 
-  const pointToSegmentDistance = (
-    px: number,
-    py: number,
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-  ): number => {
-    const A = px - x1;
-    const B = py - y1;
-    const C = x2 - x1;
-    const D = y2 - y1;
-
-    const dot = A * C + B * D;
-    const len_sq = C * C + D * D;
-    let param = -1;
-    if (len_sq !== 0) param = dot / len_sq;
-
-    let xx, yy;
-
-    if (param < 0) {
-      xx = x1;
-      yy = y1;
-    } else if (param > 1) {
-      xx = x2;
-      yy = y2;
-    } else {
-      xx = x1 + param * C;
-      yy = y1 + param * D;
-    }
-
-    const dx = px - xx;
-    const dy = py - yy;
-    return Math.sqrt(dx * dx + dy * dy);
-  };
 
   const handleRightClick = useCallback(
     (e: any) => {
@@ -920,8 +1372,94 @@ const EditAreaRenderer: React.FC<Props> = ({
 
       const ptr = stage.getPointerPosition();
       const world = pointerToWorld(ptr || null);
-      if (world) setCursorWorld(world);
-      else setCursorWorld(null);
+
+      if (world) {
+        if (isQHeldRef.current && drawingMaskedArea) {
+          const snapped = snapToNearestLine(world.x, world.y, drawingMaskedArea);
+          if (snapped) {
+            const candidateNode = {
+              id: 'candidate',
+              x: snapped.x * scale,
+              y: snapped.y * scale,
+              x_px: snapped.x,
+              y_px: snapped.y,
+            };
+            const potentialNodes = [...drawingNodes, candidateNode];
+            let hasCollision = false;
+
+            if (potentialNodes.length >= 4 && checkSelfIntersections(potentialNodes)) {
+              hasCollision = true;
+            }
+
+            if (!hasCollision) {
+              for (const otherArea of renderAreas) {
+                if (otherArea.name === drawingMaskedArea || !otherArea.nodes || otherArea.nodes.length < 3) continue;
+
+                if (pointInPolygon(snapped.x, snapped.y, otherArea.nodes)) {
+                  hasCollision = true;
+                  break;
+                }
+
+                if (drawingNodes.length > 0) {
+                  const lastNode = drawingNodes[drawingNodes.length - 1];
+                  const numOther = otherArea.nodes.length;
+                  for (let i = 0; i < numOther; i++) {
+                    const edgeStart = otherArea.nodes[i];
+                    const edgeEnd = otherArea.nodes[(i + 1) % numOther];
+                    if (
+                      doLineSegmentsIntersect(
+                        lastNode.x_px,
+                        lastNode.y_px,
+                        snapped.x,
+                        snapped.y,
+                        edgeStart.x_px,
+                        edgeStart.y_px,
+                        edgeEnd.x_px,
+                        edgeEnd.y_px,
+                      )
+                    ) {
+                      hasCollision = true;
+                      break;
+                    }
+                  }
+                }
+
+                if (potentialNodes.length >= 3) {
+                  const res = checkPolygonCollisionDetailed(
+                    { name: drawingMaskedArea, nodes: potentialNodes },
+                    { name: otherArea.name, nodes: otherArea.nodes },
+                  );
+                  if (res.collided) {
+                    hasCollision = true;
+                    break;
+                  }
+                }
+              }
+            }
+
+            if (!hasCollision) {
+              setCursorWorld({ x: snapped.x, y: snapped.y });
+            } else {
+              setCursorWorld(world);
+            }
+          } else {
+            setCursorWorld(world);
+          }
+        } else if (isQHeldRef.current) {
+          const currentAreaName = activeCornerDragRef.current?.areaName;
+          const currentCornerIndex = activeCornerDragRef.current?.cornerIndex;
+          const snapped = snapToNearestLine(world.x, world.y, currentAreaName, currentCornerIndex);
+          if (snapped) {
+            setCursorWorld({ x: snapped.x, y: snapped.y });
+          } else {
+            setCursorWorld(world);
+          }
+        } else {
+          setCursorWorld(world);
+        }
+      } else {
+        setCursorWorld(null);
+      }
 
       // Also update cursor based on what's under the mouse
       if (stage) {
@@ -937,7 +1475,20 @@ const EditAreaRenderer: React.FC<Props> = ({
         }
       }
     },
-    [pointerToWorld, drawingMaskedArea],
+    [
+      pointerToWorld,
+      drawingMaskedArea,
+      drawingNodes,
+      renderAreas,
+      scale,
+      snapToNearestLine,
+      checkSelfIntersections,
+      pointInPolygon,
+      doLineSegmentsIntersect,
+      checkPolygonCollisionDetailed,
+      onAreaHoverChange,
+      onOnArea,
+    ],
   );
 
   const renderArea = useCallback(
@@ -982,6 +1533,11 @@ const EditAreaRenderer: React.FC<Props> = ({
               }
             }}
             onMouseDown={(e) => {
+              // Ignore middle mouse click (button 1) so it passes through for global panning
+              if (e.evt && e.evt.button === 1) {
+                return;
+              }
+
               // Only stop propagation if we're actually going to handle the drag
               // Don't stop propagation if we're just clicking (not in editing mode)
               if (isEditing && !drawingMaskedArea && e.evt) {
@@ -1067,18 +1623,40 @@ const EditAreaRenderer: React.FC<Props> = ({
                   const ptr = stage?.getPointerPosition();
                   const world = pointerToWorld(ptr || null);
                   if (world) {
-                    handleDragCorner(area.name, index, world.x, world.y);
-                    checkCornerDragCollision(area.name, index, world.x, world.y);
+                    let targetX = world.x;
+                    let targetY = world.y;
+                    if (isQHeldRef.current) {
+                      const snapped = snapToNearestLine(world.x, world.y, area.name, index);
+                      if (snapped && !checkCornerDragCollision(area.name, index, snapped.x, snapped.y)) {
+                        targetX = snapped.x;
+                        targetY = snapped.y;
+                        e.target.x(snapped.x);
+                        e.target.y(snapped.y);
+                      }
+                    }
+                    setCursorWorld({ x: targetX, y: targetY });
+                    handleDragCorner(area.name, index, targetX, targetY);
+                    checkCornerDragCollision(area.name, index, targetX, targetY);
                   }
                 }}
                 onDragEnd={(e) => {
                   // Don't stop propagation on drag end
-                  // e.evt.stopPropagation();
                   const stage = e.target.getStage();
                   const ptr = stage?.getPointerPosition();
                   const world = pointerToWorld(ptr || null);
                   if (world) {
-                    handleCornerDragEnd(area.name, index, world.x, world.y);
+                    let targetX = world.x;
+                    let targetY = world.y;
+                    if (isQHeldRef.current) {
+                      const snapped = snapToNearestLine(world.x, world.y, area.name, index);
+                      if (snapped && !checkCornerDragCollision(area.name, index, snapped.x, snapped.y)) {
+                        targetX = snapped.x;
+                        targetY = snapped.y;
+                      }
+                    }
+                    e.target.x(targetX);
+                    e.target.y(targetY);
+                    handleCornerDragEnd(area.name, index, targetX, targetY);
                   }
                 }}
                 onContextMenu={(e) => {
@@ -1305,6 +1883,29 @@ const EditAreaRenderer: React.FC<Props> = ({
                   />
                 )}
               </>
+            )}
+            {guideLineShown &&
+              guideLines.map((line) => (
+                <Line
+                  key={line.id}
+                  points={line.points}
+                  stroke="#ff9800"
+                  strokeWidth={1.5}
+                  dash={[6, 4]}
+                  opacity={0.85}
+                  listening={false}
+                />
+              ))}
+            {isQHeld && cursorWorld && (
+              <Circle
+                x={cursorWorld.x}
+                y={cursorWorld.y}
+                radius={6}
+                fill="#00e676"
+                stroke="#000"
+                strokeWidth={1.5}
+                listening={false}
+              />
             )}
           </Layer>
         </Stage>

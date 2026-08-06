@@ -21,6 +21,8 @@ import {
   AddPathPairToUnsaved,
   StartEditingDevice,
   CancelDeviceEditing,
+  isDeviceColliding,
+  findValidDevicePosition,
 } from 'src/store/apps/crud/floorplanDevice';
 import borderFaceRecog from 'src/assets/images/svgs/devices/FACE READER ICON.png';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
@@ -97,6 +99,41 @@ const EditDeviceRenderer: React.FC<Props> = ({
   const [pathNodes, setPathNodes] = useState<PathNodeType[]>([]);
   const [cursorWorld, setCursorWorld] = useState<{ x: number; y: number } | null>(null);
   const [deviceDragging, setDeviceDragging] = useState(false);
+
+  // Ref and state for hold-Q magnetic snapping mode
+  const isQHeldRef = useRef(false);
+  const [isQHeld, setIsQHeld] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+
+      if (e.key === 'q' || e.key === 'Q') {
+        if (!isQHeldRef.current) {
+          isQHeldRef.current = true;
+          setIsQHeld(true);
+        }
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+
+      if (e.key === 'q' || e.key === 'Q') {
+        isQHeldRef.current = false;
+        setIsQHeld(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
 
   // Add a ref to track if heatmap is being generated
   const heatmapGenerationInProgress = useRef(false);
@@ -206,6 +243,141 @@ const EditDeviceRenderer: React.FC<Props> = ({
       return { x: (pointer.x - stageX) / stageScale, y: (pointer.y - stageY) / stageScale };
     },
     [stageScale, stageX, stageY],
+  );
+
+  // Helper: Find closest point on a line segment (x1,y1)-(x2,y2) to point (px,py)
+  const getClosestPointOnSegment = (
+    px: number,
+    py: number,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+  ) => {
+    const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+    if (l2 === 0) return { x: x1, y: y1 };
+
+    let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+    t = Math.max(0, Math.min(1, t));
+
+    return {
+      x: x1 + t * (x2 - x1),
+      y: y1 + t * (y2 - y1),
+    };
+  };
+
+  const getInfiniteLineIntersection = (
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    x3: number,
+    y3: number,
+    x4: number,
+    y4: number,
+  ): { x: number; y: number } | null => {
+    const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+    if (Math.abs(denom) < 1e-5) return null;
+
+    const ix =
+      ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom;
+    const iy =
+      ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom;
+
+    return { x: ix, y: iy };
+  };
+
+  // Helper: Snap position (px, py) to nearest virtual line or line-line intersection point (100px sensitivity, 15px intersection)
+  const snapToNearestLine = useCallback(
+    (px: number, py: number, currentDeviceId?: string) => {
+      const sensitivityRadius = 100;
+      const intersectionRadius = 15;
+      const boxSize = 75;
+      const boxHalf = boxSize / 2; // 37.5px
+
+      type LineSegment = { x1: number; y1: number; x2: number; y2: number };
+      const allLines: LineSegment[] = [];
+
+      // 1. Collect area edge segments
+      for (const area of areas) {
+        if (!area.nodes || area.nodes.length < 2) continue;
+
+        const numNodes = area.nodes.length;
+        for (let i = 0; i < numNodes; i++) {
+          const n1 = area.nodes[i];
+          const n2 = area.nodes[(i + 1) % numNodes];
+          allLines.push({ x1: n1.x_px, y1: n1.y_px, x2: n2.x_px, y2: n2.y_px });
+        }
+      }
+
+      // 2. Collect 75x75 box edges for all other devices (eligible for BOTH line-line intersection & single line snap)
+      for (const d of devices) {
+        if (!d || (currentDeviceId && d.id === currentDeviceId)) continue;
+        const x = d.posPxX;
+        const y = d.posPxY;
+        allLines.push(
+          { x1: x - boxHalf, y1: y - boxHalf, x2: x + boxHalf, y2: y - boxHalf }, // top
+          { x1: x - boxHalf, y1: y + boxHalf, x2: x + boxHalf, y2: y + boxHalf }, // bottom
+          { x1: x - boxHalf, y1: y - boxHalf, x2: x - boxHalf, y2: y + boxHalf }, // left
+          { x1: x + boxHalf, y1: y - boxHalf, x2: x + boxHalf, y2: y + boxHalf }, // right
+        );
+      }
+
+      // 3. Prioritize line-line intersection points among ALL lines (area lines + 75x75 device box lines, within 15px)
+      let minIntersectionDist = intersectionRadius;
+      let bestIntersectionPos: { x: number; y: number } | null = null;
+
+      for (let i = 0; i < allLines.length; i++) {
+        for (let j = i + 1; j < allLines.length; j++) {
+          const l1 = allLines[i];
+          const l2 = allLines[j];
+          const intersection = getInfiniteLineIntersection(
+            l1.x1,
+            l1.y1,
+            l1.x2,
+            l1.y2,
+            l2.x1,
+            l2.y1,
+            l2.x2,
+            l2.y2,
+          );
+          if (intersection) {
+            // Disable snapping inside any device's 75x75 interior
+            if (!isDeviceColliding(intersection.x, intersection.y, devices, currentDeviceId, 75)) {
+              const dist = Math.hypot(px - intersection.x, py - intersection.y);
+              if (dist <= minIntersectionDist) {
+                minIntersectionDist = dist;
+                bestIntersectionPos = intersection;
+              }
+            }
+          }
+        }
+      }
+
+      if (bestIntersectionPos) {
+        return bestIntersectionPos;
+      }
+
+      // 4. Fallback: Snap to nearest point on ANY single line segment (outside 75x75 interior)
+      let minLineDist = sensitivityRadius;
+      let bestLinePos: { x: number; y: number } | null = null;
+
+      for (const line of allLines) {
+        const closest = getClosestPointOnSegment(px, py, line.x1, line.y1, line.x2, line.y2);
+        // Disable snapping inside any device's 75x75 interior
+        if (!isDeviceColliding(closest.x, closest.y, devices, currentDeviceId, 75)) {
+          const dist = Math.hypot(px - closest.x, py - closest.y);
+
+          if (dist <= minLineDist) {
+            minLineDist = dist;
+            bestLinePos = closest;
+          }
+        }
+      }
+
+      return bestLinePos;
+    },
+    [areas, devices],
   );
 
   // OPTIMIZED: Heatmap generation with performance improvements
@@ -458,8 +630,23 @@ const EditDeviceRenderer: React.FC<Props> = ({
 
   // Device drag end
   const handleDeviceDragEnd = (e: any, device: FloorplanDeviceType) => {
-    const newPosX = e.target.x() + ICON_HALF;
-    const newPosY = e.target.y() + ICON_HALF;
+    let newPosX = e.target.x() + ICON_HALF;
+    let newPosY = e.target.y() + ICON_HALF;
+
+    if (isQHeldRef.current) {
+      const stage = e.target.getStage();
+      const ptr = stage?.getPointerPosition();
+      const world = pointerToWorld(ptr || null);
+      if (world) {
+        const snapped = snapToNearestLine(world.x, world.y, device.id);
+        if (snapped) {
+          newPosX = snapped.x;
+          newPosY = snapped.y;
+          e.target.x(snapped.x - ICON_HALF);
+          e.target.y(snapped.y - ICON_HALF);
+        }
+      }
+    }
 
     const intersectedArea = areas.find(
       (a) => a.nodes && isPointInPolygon({ x: newPosX, y: newPosY }, a.nodes),
@@ -603,6 +790,23 @@ const EditDeviceRenderer: React.FC<Props> = ({
       }
     };
 
+    const handleDragMove = (e: any) => {
+      e.evt.stopPropagation();
+      if (isQHeldRef.current) {
+        const stage = e.target.getStage();
+        const ptr = stage?.getPointerPosition();
+        const world = pointerToWorld(ptr || null);
+        if (world) {
+          const snapped = snapToNearestLine(world.x, world.y, device.id);
+          if (snapped) {
+            e.target.x(snapped.x - ICON_HALF);
+            e.target.y(snapped.y - ICON_HALF);
+            setCursorWorld(snapped);
+          }
+        }
+      }
+    };
+
     return (
       <Group key={device.id}>
         {icon && (
@@ -625,6 +829,7 @@ const EditDeviceRenderer: React.FC<Props> = ({
               }
             }}
             onDragStart={handleDragStart}
+            onDragMove={handleDragMove}
             onDragEnd={handleDragEnd}
             onMouseDown={(e) => {
               e.evt.stopPropagation();
@@ -675,8 +880,18 @@ const EditDeviceRenderer: React.FC<Props> = ({
 
     const ptr = stage.getPointerPosition();
     const world = pointerToWorld(ptr || null);
-    if (world) setCursorWorld(world);
-    else setCursorWorld(null);
+    if (world) {
+      if (isQHeldRef.current) {
+        const snapped = snapToNearestLine(world.x, world.y);
+        if (snapped) {
+          setCursorWorld(snapped);
+        } else {
+          setCursorWorld(world);
+        }
+      } else {
+        setCursorWorld(world);
+      }
+    } else setCursorWorld(null);
 
     // Update cursor based on what's under the mouse
     if (setCursor && ptr) {
@@ -868,6 +1083,21 @@ const EditDeviceRenderer: React.FC<Props> = ({
 
           {/* Devices (interactive) */}
           <Layer>{devices.map((d) => renderDeviceIcon(d))}</Layer>
+
+          {/* Magnetic snapping indicator */}
+          {isQHeld && cursorWorld && (
+            <Layer listening={false}>
+              <Circle
+                x={cursorWorld.x}
+                y={cursorWorld.y}
+                radius={6}
+                fill="#00e676"
+                stroke="#000"
+                strokeWidth={1.5}
+                listening={false}
+              />
+            </Layer>
+          )}
         </Stage>
       </div>
 

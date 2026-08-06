@@ -173,36 +173,39 @@ const EditAreaFloorView: React.FC<{
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       if (!zoomable) return;
-      if (e.button !== 0) return; // Only left mouse button
 
-      // Check if we're already dragging something in Konva
-      if (isDragging || drawingMaskedArea) {
+      const isMiddleClick = e.button === 1;
+      const isLeftClick = e.button === 0;
+
+      // Allow middle click anytime, or left click when on empty background/canvas
+      if (!isLeftClick && !isMiddleClick) return;
+
+      // Prevent middle click from triggering default browser behaviors (like autoscroll icon or auxiliary click)
+      if (isMiddleClick) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      // For left click, don't pan if we're dragging a Konva element or drawing
+      if (isLeftClick && (isDragging || drawingMaskedArea)) {
         return;
       }
 
       const container = containerRef.current;
       if (!container) return;
 
-      // Get the Konva canvas element
-      const canvas = container.querySelector('canvas');
-
-      // Check if we clicked on empty canvas area (not on a shape)
-      // Konva sets the cursor to 'grab' when not over a shape
-      // We check the computed cursor style
-      if (canvas) {
-        const computedStyle = window.getComputedStyle(canvas);
-        const canvasCursor = computedStyle.cursor;
-
-        // If canvas cursor is not 'grab', it means we're over a shape
-        if (canvasCursor !== 'grab' && canvasCursor !== 'default') {
-          return; // Don't pan if we're over a shape
+      // For left click only: Check if we clicked over a shape (canvas cursor is not grab/default)
+      if (isLeftClick) {
+        const canvas = container.querySelector('canvas');
+        if (canvas) {
+          const computedStyle = window.getComputedStyle(canvas);
+          const canvasCursor = computedStyle.cursor;
+          if (canvasCursor !== 'grab' && canvasCursor !== 'default') {
+            return; // Don't pan on left-click if over a shape
+          }
         }
       }
 
-      // If we get here, we're either clicking on the container background
-      // or on empty canvas area
-      // container.style.cursor = 'grabbing';
-      // setCursor('grabbing');
       setIsDraggingView(true);
 
       const startX = e.clientX;
@@ -220,18 +223,21 @@ const EditAreaFloorView: React.FC<{
         });
       };
 
-      const handleMouseUp = () => {
+      const handleMouseUp = (upEvent: MouseEvent) => {
+        if (upEvent.button === 1) {
+          upEvent.preventDefault();
+          upEvent.stopPropagation();
+        }
         window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('mouseup', handleMouseUp, true);
         if (container && !drawingMaskedArea) {
-          // container.style.cursor = 'grab';
-          // setCursor('grab');
           setIsDraggingView(false);
         }
       };
 
       window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      // Use capture phase for mouseup when middle clicking to prevent click event bubbling
+      window.addEventListener('mouseup', handleMouseUp, true);
 
       e.preventDefault();
     },

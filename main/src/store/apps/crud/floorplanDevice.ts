@@ -21,6 +21,57 @@ function generateUUID(): string {
     return uuidv4();
 }
 
+/**
+ * Checks if position (x, y) overlaps inside any device's 75x75 pixel bounding box.
+ */
+export function isDeviceColliding(
+  x: number,
+  y: number,
+  devices: { posPxX: number; posPxY: number; id?: string }[] = [],
+  ignoreDeviceId?: string | null,
+  boxSize = 75,
+): boolean {
+  const halfBox = boxSize / 2;
+  return devices.some((d) => {
+    if (!d || (ignoreDeviceId && d.id === ignoreDeviceId)) return false;
+    return Math.abs(x - d.posPxX) < halfBox && Math.abs(y - d.posPxY) < halfBox;
+  });
+}
+
+/**
+ * Finds a valid position near (startX, startY) that does not overlap inside any device's 75x75 box.
+ * If overlapping, shifts X rightward by 75px until a free position outside the box is found.
+ */
+export function findValidDevicePosition(
+  startX: number,
+  startY: number,
+  devices: { posPxX: number; posPxY: number; id?: string }[] = [],
+  ignoreDeviceId?: string | null,
+  boxSize = 75,
+): { x: number; y: number } {
+  let currX = startX;
+  let currY = startY;
+  let attempts = 0;
+  const maxAttempts = 100;
+  const halfBox = boxSize / 2;
+
+  while (isDeviceColliding(currX, currY, devices, ignoreDeviceId, boxSize) && attempts < maxAttempts) {
+    const collidingDev = devices.find((d) => {
+      if (!d || (ignoreDeviceId && d.id === ignoreDeviceId)) return false;
+      return Math.abs(currX - d.posPxX) < halfBox && Math.abs(currY - d.posPxY) < halfBox;
+    });
+
+    if (collidingDev) {
+      currX = collidingDev.posPxX + boxSize;
+    } else {
+      currX += boxSize;
+    }
+    attempts++;
+  }
+
+  return { x: currX, y: currY };
+}
+
 export type PathNodeType = {
   id: string;
   posX?: number;

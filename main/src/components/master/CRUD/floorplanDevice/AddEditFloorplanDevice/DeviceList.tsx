@@ -13,6 +13,7 @@ import {
   SelectFloorplanDevice,
   ApplyUnsavedToSaved,
   DeleteUnsavedDevice,
+  findValidDevicePosition,
 } from 'src/store/apps/crud/floorplanDevice';
 import {
   useFloorplanDeviceList,
@@ -153,8 +154,13 @@ const DeviceList = () => {
 
   // Helper to construct a new device at the current camera view center
   const createNewDevice = (): FloorplanDeviceType => {
-    const posX = Math.round(cameraCenter.x);
-    const posY = Math.round(cameraCenter.y);
+    let posX = Math.round(cameraCenter.x);
+    let posY = Math.round(cameraCenter.y);
+
+    const validPos = findValidDevicePosition(posX, posY, floorplanDevicesData);
+    posX = validPos.x;
+    posY = validPos.y;
+
     return {
       id: `new-${Date.now()}`,
       name: 'New Device',
