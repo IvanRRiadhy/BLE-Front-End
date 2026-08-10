@@ -360,6 +360,10 @@ const Statistic = () => {
                 <div class="stat-value">${uniqueMembers}</div>
                 <div class="stat-label">Unique Members</div>
               </div>
+              <div class="stat-card">
+                <div class="stat-value">${uniqueSecurity}</div>
+                <div class="stat-label">Unique Securities</div>
+              </div>
             </div>
             
             ${visitors.length > 0 ? `
@@ -754,6 +758,27 @@ const Statistic = () => {
             id: memberId,
             name: `Unknown Member (${memberId})`,
             type: 'member'
+          });
+        }
+      });
+    }
+
+    // Get security IDs and map to security data
+    if (personsData?.security && Array.isArray(personsData.security)) {
+      personsData.security.forEach((securityId: string) => {
+        const security = securityMap[securityId];
+        if (security) {
+          persons.push({
+            ...security,
+            type: 'security'
+          });
+        } else {
+          console.log(`Security with ID ${securityId} not found in security data`);
+          // Add a placeholder if security not found
+          persons.push({
+            id: securityId,
+            name: `Unknown Security (${securityId})`,
+            type: 'security'
           });
         }
       });

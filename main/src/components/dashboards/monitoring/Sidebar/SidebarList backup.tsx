@@ -251,7 +251,7 @@ const trigger = alarmTriggerDetail ?? null;
     const firstScreen = activeLayout.screens[0];
     if (!firstScreen) return;
 
-    publishMQTT(`highlight/card/${currentBle}`, 'Start');
+    publishMQTT(`people_tracking/highlight/card/${currentBle}`, 'Start');
 
     dispatch(
       setScreenDisplay({
@@ -283,7 +283,7 @@ const trigger = alarmTriggerDetail ?? null;
     if (!firstScreen) return;
 
     if (followingPerson?.bleCardNumber) {
-      publishMQTT(`highlight/card/${followingPerson.bleCardNumber}`, 'Stop');
+      publishMQTT(`people_tracking/highlight/card/${followingPerson.bleCardNumber}`, 'Stop');
     }
 
     dispatch(

@@ -88,6 +88,7 @@ const FloorView: React.FC<{
   const [open, setOpen] = useState(false);
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
   const FollowingPerson = useSelector((state: RootState) => state.layoutReducer.followingPerson);
+  const FollowingPersons = useSelector((state: RootState) => state.layoutReducer.followingPersons ?? []);
   const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
   const activeLayout = layouts.find((l) => l.id === activeLayoutId);
   const activeScreen = activeLayout?.screens.find((s) => s.floorplanId === activeFloorplan);
@@ -127,6 +128,8 @@ const FloorView: React.FC<{
   const filteredPatrolArea = PatrolArea.filter((area) => area.floorplanId === activeFloorplan);
 
   const [showArea, setShowArea] = useState(true);
+  const [showAreaName, setShowAreaName] = useState(true);
+  const [showOccupancy, setShowOccupancy] = useState(true);
   const [showGates, setShowGates] = useState(true);
   const [showGeoFence, setShowGeoFence] = useState(false);
   const [showOverPopulate, setShowOverPopulate] = useState(false);
@@ -386,13 +389,14 @@ const FloorView: React.FC<{
 
   const topic = activeFloorplan ? activeFloorplan.toUpperCase() : '';
 
-  // Follow camera hook - Modified to respect manual dragging
+  // Follow camera hook - Modified to respect manual dragging (Temporarily commented out translation logic)
   const handleFocusPosition = useCallback(
     (pt: { x: number; y: number }) => {
       if (!containerRef.current) return;
 
       lastBeaconPosition.current = pt;
 
+      /* Commented out follow/pinpoint camera translation:
       if (isFollowing && isManualDragRef.current) {
         return;
       }
@@ -406,8 +410,9 @@ const FloorView: React.FC<{
 
       setScale(nextScale);
       setTranslate({ x: nextTranslateX, y: nextTranslateY });
+      */
     },
-    [isFollowing],
+    [],
   );
 
   // Helper to clamp pan translation so image cannot be dragged into the void (with 10% grace)
@@ -653,11 +658,12 @@ const FloorView: React.FC<{
 
 
 
-  // Reset manual dragging when following mode changes
+  // Reset manual dragging and ensure showOtherBeacons is turned on when following mode is disabled
   useEffect(() => {
     if (!isFollowing) {
       isManualDragRef.current = false;
       setIsUserDragging(false);
+      setShowOtherBeacons(true);
     }
   }, [isFollowing]);
 
@@ -706,7 +712,7 @@ const FloorView: React.FC<{
 
     // Publish "Stop" to MQTT
     if (selectedBeacon?.id) {
-      const topic = `highlight/card/${selectedBeacon.id}`;
+      const topic = `people_tracking/highlight/card/${selectedBeacon.id}`;
       const payload = JSON.stringify({ message: 'Stop' });
 
       import('mqtt').then(({ connect }) => {
@@ -761,7 +767,7 @@ const FloorView: React.FC<{
   };
 
   const handleParentClick = () => {
-    if (!zoomable && !FollowingPerson) {
+    if (!zoomable) {
       dispatch(swapScreen(screenNumber));
     }
   };
@@ -867,6 +873,8 @@ const isBoundaryActive = isActive('boundary');
           >
             {[
               { label: 'Show Areas', checked: showArea, onChange: setShowArea },
+              { label: 'Show Area Name', checked: showAreaName, onChange: setShowAreaName },
+              { label: 'Show Occupancy Text', checked: showOccupancy, onChange: setShowOccupancy },
               { label: 'Show Gateways', checked: showGates, onChange: setShowGates },
               ...(isGeoFencingActive ? [{ label: 'Show GeoFence Areas', checked: showGeoFence, onChange: setShowGeoFence }] : []),
               ...(isOverPopulatingActive ? [{ label: 'Show Over Population Areas', checked: showOverPopulate, onChange: setShowOverPopulate }] : []),
@@ -1045,6 +1053,8 @@ const isBoundaryActive = isActive('boundary');
               BoundaryAlarm={filteredBoundaryArea}
               PatrolAreas={filteredPatrolArea}
               showAreas={zoomable && showArea}
+              showAreaName={zoomable && showAreaName}
+              showOccupancy={zoomable && showOccupancy}
               showGates={zoomable && showGates}
               showGeoFence={zoomable && showGeoFence}
               showOverPopulate={zoomable && showOverPopulate}
@@ -1065,6 +1075,7 @@ const isBoundaryActive = isActive('boundary');
               focusDmac={selectedBeacon?.dmac ?? undefined}
               onFocusPosition={handleFocusPosition}
               showOtherBeacons={showOtherBeacons}
+              followingPersons={FollowingPersons}
               screenId={screenId ?? ''}
               // Pass stage transform props
               stageScale={scale}

@@ -18,9 +18,11 @@ import {
   DialogActions,
   Button,
   TableSortLabel,
+  Tooltip,
+  Skeleton,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconLogout2, IconTrash } from '@tabler/icons-react';
+import { IconLogout2, IconTrash, IconBatteryVertical1, IconBatteryVertical2, IconBatteryVertical3 } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
 import { CardType, UpdateFilter, fetchCard, fetchCardDT } from 'src/store/apps/crud/card';
 import AddEditCard from './AddEditCard';
@@ -29,15 +31,65 @@ import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { useCardList, useDeleteCard, useReleaseCard } from 'src/hooks/useCard';
 import toast from 'react-hot-toast';
 
+const renderBatteryIndicator = (batteryVal?: number | null) => {
+  if (batteryVal === undefined || batteryVal === null) {
+    return <Typography variant="body2" color="textSecondary">N/A</Typography>;
+  }
+
+  const val = Number(batteryVal);
+
+  if (val <= 35) {
+    return (
+      <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, color: '#f44336' }}>
+        <Box
+          component={IconBatteryVertical1}
+          sx={{
+            animation: 'batteryBreathing 1.5s infinite ease-in-out',
+            '@keyframes batteryBreathing': {
+              '0%': { opacity: 1 },
+              '50%': { opacity: 0.2 },
+              '100%': { opacity: 1 },
+            },
+          }}
+        />
+        <Typography variant="body2" sx={{ color: '#f44336', fontWeight: 600 }}>
+          {val}%
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (val <= 69) {
+    return (
+      <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, color: '#ffb300' }}>
+        <IconBatteryVertical2 />
+        <Typography variant="body2" sx={{ color: '#ffb300', fontWeight: 600 }}>
+          {val}%
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, color: '#4caf50' }}>
+      <IconBatteryVertical3 />
+      <Typography variant="body2" sx={{ color: '#4caf50', fontWeight: 600 }}>
+        {val}%
+      </Typography>
+    </Box>
+  );
+};
+
 const columns = [
-  { label: 'Name', field: 'Name', sortAble: true },
-  { label: 'Remarks', field: 'Remarks', sortAble: false },
+  { label: 'Name', field: 'Name', sortAble: true, width: 180 },
+  { label: 'Remarks', field: 'Remarks', sortAble: false, width: 260 },
   // { label: 'Card Type', field: 'CardType', sortAble: true },
-  { label: 'Card Number', field: 'CardNumber', sortAble: true },
-  { label: 'MAC Address', field: 'dmac', sortAble: false},
+  { label: 'Card Number', field: 'CardNumber', sortAble: true, width: 140 },
+  { label: 'MAC Address', field: 'dmac', sortAble: false, width: 180 },
+  { label: 'Battery', field: 'battery', sortAble: true, width: 100 },
   // { label: 'Registered Site', field: 'RegisteredSite', sortAble: false },
-  { label: 'Active', field: 'IsUsed', sortAble: true },
-  { label: 'Last Used By', field: 'LastUsed', sortAble: false },
+  { label: 'Active', field: 'IsUsed', sortAble: true, width: 90 },
+  { label: 'Last Used By', field: 'LastUsed', sortAble: false, width: 180 },
 ];
 
 const CardList = () => {
@@ -49,9 +101,6 @@ const CardList = () => {
   const { data, isLoading: queryLoading } = useCardList(cardFilter);
   const cardData = data?.data || [];
   const cardFilteredCount = data?.recordsFiltered || 0;
-  const prevFilterRef = useRef(cardFilter);
-  // const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
   // Pagination State
   const page = Math.floor(cardFilter.Start / cardFilter.Length);
   const rowsPerPage = cardFilter.Length;
@@ -187,11 +236,18 @@ const CardList = () => {
                 <TableHead>
                   <TableRow>
                     {/* Left Sticky Empty Column */}
-                    <TableCell sx={{ position: 'sticky', left: 0, backgroundColor: 'background.paper', zIndex: 2 }}>
+                    <TableCell sx={{ position: 'sticky', left: 0, backgroundColor: 'background.paper', zIndex: 2, width: 60, minWidth: 60, maxWidth: 60 }}>
                       <Typography variant="h6"></Typography>
                     </TableCell>
                     {columns.map((col) => (
-                      <TableCell key={col.label}>
+                      <TableCell
+                        key={col.label}
+                        sx={{
+                          width: col.width,
+                          minWidth: col.width,
+                          maxWidth: col.width,
+                        }}
+                      >
                         {col.sortAble && col.field ? (
                           <TableSortLabel
                             active={orderBy === col.field}
@@ -207,55 +263,182 @@ const CardList = () => {
                     ))}
                     {/* Right Sticky Empty Column */}
                     <TableCell
-                      sx={{ position: 'sticky', right: 0, backgroundColor: 'background.paper', zIndex: 2 }}
+                      sx={{ position: 'sticky', right: 0, backgroundColor: 'background.paper', zIndex: 2, width: 120, minWidth: 120, maxWidth: 120 }}
                     >
                       <Typography variant="h6"> Actions </Typography>
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {cardData.map((card, index) => (
-                    <TableRow key={card.id}>
-                      <TableCell
-                        sx={{ position: 'sticky', left: 0, backgroundColor: 'background.paper', zIndex: 1 }}
-                      >
-                        {index + 1 + page * rowsPerPage}
-                      </TableCell>
-                      <TableCell>{card.name}</TableCell>
-                      <TableCell
-                        sx={{ whiteSpace: 'normal', wordBreak: 'break-word', maxWidth: 240 }}
-                      >
-                        {card.remarks}
-                      </TableCell>
-                      {/* <TableCell>{card.cardType}</TableCell> */}
-                      <TableCell>{card.cardNumber}</TableCell>
-                      <TableCell>{card.dmac}</TableCell>
-                      {/* <TableCell>{card.isMultiMaskedArea ? 'Multi-Area' : 'Single-Area'}</TableCell> */}
-                      <TableCell>{card.isUsed ? 'Yes' : 'No'}</TableCell>
-                      <TableCell>{card.lastUsed || 'N/A'}</TableCell>
-                      <TableCell
-                        sx={{ position: 'sticky', right: 0, backgroundColor: 'background.paper', zIndex: 1 }}
-                      >
-                        <AddEditCard type="edit" card={card} />
-                        <IconButton
-                          color="error"
-                          onClick={() => handleOpenDeleteDialog(card)}
-                          size="small"
-                        >
-                          <IconTrash />
-                        </IconButton>
-                        {card.isUsed && (
-                          <IconButton
-                            color="error"
-                            onClick={() => handleOpenReleasePopup(card)}
-                            size="small"
+                  {queryLoading
+                    ? Array.from({ length: rowsPerPage }).map((_, i) => (
+                        <TableRow key={i}>
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              left: 0,
+                              backgroundColor: 'background.paper',
+                              zIndex: 1,
+                              width: 60,
+                              minWidth: 60,
+                              maxWidth: 60,
+                            }}
                           >
-                            <IconLogout2 />
-                          </IconButton>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                            <Skeleton variant="text" width={20} />
+                          </TableCell>
+                          <TableCell sx={{ width: 180, minWidth: 180, maxWidth: 180 }}>
+                            <Skeleton variant="text" width="80%" height={22} />
+                          </TableCell>
+                          <TableCell sx={{ width: 260, minWidth: 260, maxWidth: 260 }}>
+                            <Skeleton variant="text" width="90%" height={22} />
+                          </TableCell>
+                          <TableCell sx={{ width: 140, minWidth: 140, maxWidth: 140 }}>
+                            <Skeleton variant="text" width="70%" height={22} />
+                          </TableCell>
+                          <TableCell sx={{ width: 180, minWidth: 180, maxWidth: 180 }}>
+                            <Skeleton variant="text" width="85%" height={22} />
+                          </TableCell>
+                          <TableCell sx={{ width: 100, minWidth: 100, maxWidth: 100 }}>
+                            <Skeleton variant="text" width="60%" height={22} />
+                          </TableCell>
+                          <TableCell sx={{ width: 90, minWidth: 90, maxWidth: 90 }}>
+                            <Skeleton variant="text" width="50%" height={22} />
+                          </TableCell>
+                          <TableCell sx={{ width: 180, minWidth: 180, maxWidth: 180 }}>
+                            <Skeleton variant="text" width="75%" height={22} />
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              right: 0,
+                              backgroundColor: 'background.paper',
+                              zIndex: 1,
+                              width: 120,
+                              minWidth: 120,
+                              maxWidth: 120,
+                            }}
+                          >
+                            <Box display="flex" gap={0.5}>
+                              <Skeleton variant="circular" width={28} height={28} />
+                              <Skeleton variant="circular" width={28} height={28} />
+                            </Box>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    : cardData.map((card, index) => (
+                        <TableRow key={card.id}>
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              left: 0,
+                              backgroundColor: 'background.paper',
+                              zIndex: 1,
+                              width: 60,
+                              minWidth: 60,
+                              maxWidth: 60,
+                            }}
+                          >
+                            {index + 1 + page * rowsPerPage}
+                          </TableCell>
+                          {/* Name */}
+                          <TableCell sx={{ width: 180, minWidth: 180, maxWidth: 180 }}>
+                            <Tooltip title={card.name || ''} arrow placement="top">
+                              <Typography
+                                variant="body2"
+                                noWrap
+                                sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                              >
+                                {card.name}
+                              </Typography>
+                            </Tooltip>
+                          </TableCell>
+                          {/* Remarks */}
+                          <TableCell sx={{ width: 260, minWidth: 260, maxWidth: 260 }}>
+                            <Tooltip title={card.remarks || ''} arrow placement="top">
+                              <Typography
+                                variant="body2"
+                                noWrap
+                                sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                              >
+                                {card.remarks}
+                              </Typography>
+                            </Tooltip>
+                          </TableCell>
+                          {/* Card Number */}
+                          <TableCell sx={{ width: 140, minWidth: 140, maxWidth: 140 }}>
+                            <Tooltip title={card.cardNumber || ''} arrow placement="top">
+                              <Typography
+                                variant="body2"
+                                noWrap
+                                sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                              >
+                                {card.cardNumber}
+                              </Typography>
+                            </Tooltip>
+                          </TableCell>
+                          {/* MAC Address */}
+                          <TableCell sx={{ width: 180, minWidth: 180, maxWidth: 180 }}>
+                            <Tooltip title={card.dmac || ''} arrow placement="top">
+                              <Typography
+                                variant="body2"
+                                noWrap
+                                sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                              >
+                                {card.dmac}
+                              </Typography>
+                            </Tooltip>
+                          </TableCell>
+                          {/* Battery */}
+                          <TableCell sx={{ width: 100, minWidth: 100, maxWidth: 100 }}>
+                            {renderBatteryIndicator(card.battery)}
+                          </TableCell>
+                          {/* Active */}
+                          <TableCell sx={{ width: 90, minWidth: 90, maxWidth: 90 }}>
+                            {card.isUsed ? 'Yes' : 'No'}
+                          </TableCell>
+                          {/* Last Used By */}
+                          <TableCell sx={{ width: 180, minWidth: 180, maxWidth: 180 }}>
+                            <Tooltip title={card.lastUsed || 'N/A'} arrow placement="top">
+                              <Typography
+                                variant="body2"
+                                noWrap
+                                sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                              >
+                                {card.lastUsed || 'N/A'}
+                              </Typography>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              right: 0,
+                              backgroundColor: 'background.paper',
+                              zIndex: 1,
+                              width: 120,
+                              minWidth: 120,
+                              maxWidth: 120,
+                            }}
+                          >
+                            <AddEditCard type="edit" card={card} />
+                            <IconButton
+                              color="error"
+                              onClick={() => handleOpenDeleteDialog(card)}
+                              size="small"
+                            >
+                              <IconTrash />
+                            </IconButton>
+                            {card.isUsed && (
+                              <IconButton
+                                color="error"
+                                onClick={() => handleOpenReleasePopup(card)}
+                                size="small"
+                              >
+                                <IconLogout2 />
+                              </IconButton>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
                 </TableBody>
               </Table>
             </TableContainer>

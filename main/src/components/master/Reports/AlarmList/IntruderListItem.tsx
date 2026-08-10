@@ -27,8 +27,8 @@ type ChipColorMap = {
 };
 
 const IntruderListItem = ({ onTagClick, intruder, active }: Props) => {
-  const customizer = useSelector((state) => state.customizer);
-  const br = `${customizer.borderRadius}px`;
+  const settings = useSelector((state) => state.settings);
+  const br = `${settings.borderRadius}px`;
   const truncateText = (text?: string, maxLength = 12) => {
     if (!text) return '';
     return text.length > maxLength ? text.substring(0, maxLength - 3) + '...' : text;

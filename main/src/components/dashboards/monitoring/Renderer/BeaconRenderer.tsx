@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Text, Group, Path } from 'react-konva';
+import { Text, Group, Path, Circle } from 'react-konva';
 import { useSelector } from 'src/store/Store';
 import { RootState } from 'src/store/Store';
 
@@ -270,6 +270,7 @@ type BeaconRendererProps = {
   isMember: boolean;
   isVisitor: boolean;
   iconType?: 'person' | 'pin';
+  isFollowed?: boolean;
 };
 
 const BeaconRenderer: React.FC<BeaconRendererProps> = ({
@@ -286,6 +287,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   isMember,
   isVisitor: _isVisitor,
   iconType,
+  isFollowed = false,
 }) => {
   const groupRef = useRef<any>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -320,6 +322,9 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
     ? y - (bbox.y + bbox.height / 2) * finalScale
     : y - iconSize / 2;
 
+  const effectiveBeaconSize = isFollowed ? beaconSize * 1.2 : beaconSize;
+  const textFontSize = isFollowed ? 12 : 10;
+
   return (
     <>
       <Group
@@ -329,8 +334,8 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
         y={y}
         offsetX={x}
         offsetY={y}
-        scaleX={beaconSize}
-        scaleY={beaconSize}
+        scaleX={effectiveBeaconSize}
+        scaleY={effectiveBeaconSize}
         opacity={opacity}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -340,16 +345,34 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
           if (onClick) onClick();
         }}
       >
+        {/* Circular border around the icon in the same color as the icon */}
+        {isFollowed && (
+          <Circle
+            x={x}
+            y={y}
+            radius={17}
+            stroke={beaconColor}
+            strokeWidth={2.5}
+            fill="transparent"
+            shadowColor={beaconColor}
+            shadowBlur={4}
+            shadowOpacity={0.6}
+          />
+        )}
+
         {/* Label text placed cleanly above the person icon */}
         <Text
-          x={x - 55}
-          y={y - (iconSize / 2) - 16}
+          x={x - 60}
+          y={y - (iconSize / 2) - (isFollowed ? 20 : 16)}
           text={label}
-          fontSize={10}
+          fontSize={textFontSize}
           fill={beaconColor}
           fontStyle="bold"
           width={120}
           align="center"
+          shadowColor="#ffffff"
+          shadowBlur={4}
+          shadowOpacity={0.8}
         />
 
         {/* Clean Vector SVG Person Silhouette */}
@@ -360,15 +383,16 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
           scaleY={finalScale}
           x={finalX}
           y={finalY}
-          shadowColor="rgba(0,0,0,0.12)"
-          shadowBlur={3}
-          shadowOffset={{ x: 0, y: 1.5 }}
+          shadowColor="rgba(0,0,0,0.2)"
+          shadowBlur={isFollowed ? 4 : 2}
+          shadowOffset={{ x: 0, y: 1 }}
+          shadowOpacity={1}
         />
       </Group>
 
       {/* Tooltip for stale beacons */}
       {isHovered && Date.now() - lastSeen > 5000 && (
-        <Group x={x} y={y - 45}>
+        <Group x={x} y={y - (isFollowed ? 55 : 45)}>
           <Path
             data="M-60,-24 L60,-24 Q64,-24 64,-20 L64,-4 Q64,0 60,0 L5,0 L0,6 L-5,0 L-60,0 Q-64,0 -64,-4 L-64,-20 Q-64,-24 -60,-24 Z"
             fill="rgba(0,0,0,0.85)"
@@ -407,7 +431,8 @@ const MemoizedBeaconRenderer = React.memo(BeaconRenderer, (prevProps, nextProps)
     prevProps.isSecurity === nextProps.isSecurity &&
     prevProps.isMember === nextProps.isMember &&
     prevProps.isVisitor === nextProps.isVisitor &&
-    prevProps.iconType === nextProps.iconType
+    prevProps.iconType === nextProps.iconType &&
+    prevProps.isFollowed === nextProps.isFollowed
   );
 });
 

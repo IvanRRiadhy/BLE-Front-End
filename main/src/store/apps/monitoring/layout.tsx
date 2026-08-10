@@ -205,6 +205,7 @@ export interface LayoutState {
   isLoading: boolean;
   hasLoaded: boolean;
   followingPerson: PersonOption | null;
+  followingPersons: PersonOption[];
 }
 
 export const initialState: LayoutState = {
@@ -225,6 +226,7 @@ export const initialState: LayoutState = {
   isLoading: false,
   hasLoaded: false,
   followingPerson: null,
+  followingPersons: [],
 };
 
 export const LayoutSlice = createSlice({
@@ -378,6 +380,11 @@ export const LayoutSlice = createSlice({
     },
     setFollowingPerson: (state, action: PayloadAction<PersonOption | null>) => {
       state.followingPerson = action.payload;
+      state.followingPersons = action.payload ? [action.payload] : [];
+    },
+    setFollowingPersons: (state, action: PayloadAction<PersonOption[]>) => {
+      state.followingPersons = action.payload;
+      state.followingPerson = action.payload.length > 0 ? action.payload[0] : null;
     }
   },
   extraReducers: (builder) => {
@@ -416,7 +423,8 @@ export const {
   updateActiveLayoutInfo,
   clearActiveLayout,
   swapScreen,
-  setFollowingPerson
+  setFollowingPerson,
+  setFollowingPersons
 } = LayoutSlice.actions;
 
 export const fetchMonitoringLayouts = () => async (dispatch: AppDispatch) => {

@@ -8,14 +8,34 @@ import AlarmList from './Alarm';
 import NewestTrack from './NewestTrack';
 import Statistic from './Statistic';
 
-const MonitoringFooter = () => {
+interface MonitoringFooterProps {
+  showSidebar?: boolean;
+  setShowSidebar?: React.Dispatch<React.SetStateAction<boolean>>;
+  showRightSidebar?: boolean;
+  expandedSection?: string | null;
+  setExpandedSection?: React.Dispatch<React.SetStateAction<string | null>>;
+}
+
+const MonitoringFooter: React.FC<MonitoringFooterProps> = ({
+  showSidebar = true,
+  setShowSidebar,
+  showRightSidebar = true,
+  expandedSection: parentExpandedSection,
+  setExpandedSection: parentSetExpandedSection,
+}) => {
   const customizer = useSelector((state: RootState) => state.customizer);
   const settings = useSelector((state: RootState) => state.settings);
-  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const followingPerson = useSelector((state: RootState) => state.layoutReducer.followingPerson);
+  const followingPersons = useSelector((state: RootState) => state.layoutReducer.followingPersons ?? []);
+  const isFollowing = !!(followingPerson || followingPersons.length > 0);
+
+  const [localExpandedSection, setLocalExpandedSection] = useState<string | null>(null);
+
+  const expandedSection = parentExpandedSection !== undefined ? parentExpandedSection : localExpandedSection;
+  const setExpandedSection = parentSetExpandedSection || setLocalExpandedSection;
 
   const footerRef = useRef<HTMLDivElement>(null); // Reference to the footer
   const toggleHeight = '50px';
-  // const focus = useSelector((state: RootState) => state.layoutReducer.focus);
 
   const sections = [
     { id: 'section1', title: 'Tracking Record', content: <TrackingRecord /> },
@@ -33,7 +53,6 @@ const MonitoringFooter = () => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
 
-      // 🔥 CRITICAL FIX: ignore clicks inside ANY MUI Dialog
       if (target.closest('.MuiDialog-root')) {
         return;
       }
@@ -47,11 +66,21 @@ const MonitoringFooter = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [setExpandedSection]);
 
   const handleSectionClick = (sectionId: string) => {
     setExpandedSection((prev) => (prev === sectionId ? null : sectionId));
   };
+
+  // Compute left position based on showSidebar prop
+  const leftOffset = showSidebar
+    ? customizer.isMonitorSidebar
+      ? settings.SidebarWidth
+      : settings.MiniSidebarWidth
+    : 0;
+
+  // Compute right position based on right sidebar visibility & active follow
+  const rightOffset = isFollowing && showRightSidebar ? settings.SidebarWidth : 0;
 
   return (
     <Box
@@ -61,13 +90,13 @@ const MonitoringFooter = () => {
         flexDirection: 'column',
         position: 'fixed',
         bottom: 0,
-        left: customizer.isMonitorSidebar ? settings.SidebarWidth : settings.MiniSidebarWidth,
-        right: 0,
+        left: leftOffset,
+        right: rightOffset,
         height: expandedSection ? '300px' : toggleHeight,
         backgroundColor: 'background.paper',
         boxShadow: '0px -2px 5px rgba(0, 0, 0, 0.1)',
         zIndex: 1000,
-        transition: 'height 0.3s',
+        transition: 'height 0.3s, left 0.2s ease, right 0.2s ease',
       }}
     >
       {/* Section Titles */}

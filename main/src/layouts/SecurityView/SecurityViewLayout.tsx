@@ -122,7 +122,7 @@ const SecurityViewLayout: FC = () => {
     if (focusAlarm === null || focusAlarm === undefined) return;
     
     if (!focusAlarm.beacon) return;
-    const startTopic = `highlight/card/${focusAlarm.beacon}`;
+    const startTopic = `people_tracking/highlight/card/${focusAlarm.beacon}`;
     const payload = 'Start';
 
     publishMQTT(startTopic, payload);

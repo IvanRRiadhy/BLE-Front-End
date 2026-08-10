@@ -1,4 +1,5 @@
 import { Box, Typography, Divider, Stack, Grid2 as Grid } from '@mui/material';
+import { AbbreviatedNumber } from 'src/utils/numberAbbreviation';
 
 interface AlarmByStatusItem {
   status: string;
@@ -87,16 +88,16 @@ const AlarmCategorized: React.FC<PublicProps> = ({ title, data }) => {
               >
                 {formatTitle((item as AlarmByStatusItem).status)}
               </Typography>
-              <Typography
+              <AbbreviatedNumber
+                value={(item as AlarmByStatusItem).total}
                 sx={{
                   fontSize: 18,
                   fontWeight: 700,
                   color: '#1f4e79',
                   textAlign: 'center',
+                  display: 'block',
                 }}
-              >
-                {(item as AlarmByStatusItem).total}
-              </Typography>
+              />
             </Box>
           ))}
 
@@ -118,16 +119,16 @@ const AlarmCategorized: React.FC<PublicProps> = ({ title, data }) => {
               >
                 {formatTitle((item as AlarmByAreaItem).areaName)}
               </Typography>
-              <Typography
+              <AbbreviatedNumber
+                value={(item as AlarmByAreaItem).total}
                 sx={{
                   fontSize: 18,
                   fontWeight: 700,
                   color: '#1f4e79',
                   textAlign: 'center',
+                  display: 'block',
                 }}
-              >
-                {(item as AlarmByAreaItem).total}
-              </Typography>
+              />
             </Box>
           ))}
       </Stack>

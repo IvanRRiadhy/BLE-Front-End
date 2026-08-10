@@ -1,6 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { AbbreviatedNumber } from "src/utils/numberAbbreviation";
 
 interface TopButtonProps {
   icon: React.ElementType;
@@ -55,15 +56,14 @@ const TopButton: React.FC<TopButtonProps> = ({
       </Box>
 
       {/* Right */}
-      <Typography
+      <AbbreviatedNumber
+        value={num}
         sx={{
           fontSize: 16,
           fontWeight: 700,
           color: "#009900",
         }}
-      >
-        {num ?? "-"}
-      </Typography>
+      />
     </Box>
   );
 };

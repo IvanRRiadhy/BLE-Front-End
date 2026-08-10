@@ -16,7 +16,12 @@ import {
   MenuItem,
   Tooltip,
   Button,
+  Checkbox,
+  Paper,
+  ClickAwayListener,
 } from '@mui/material';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
 import { useSelector, useDispatch } from 'src/store/Store';
 import { toggleMobileSidebar, hoverSidebar, setMonitorSidebar } from 'src/store/customizer/CustomizerSlice';
@@ -34,6 +39,7 @@ import {
   PersonOption,
   setActiveLayout,
   setFollowingPerson,
+  setFollowingPersons,
   setScreenDisplay,
 } from 'src/store/apps/monitoring/layout';
 import { publishMQTT } from 'src/store/apps/tracking/MQTT';
@@ -52,6 +58,9 @@ import {
   AlarmLogItem,
 } from 'src/store/apps/tracking/Beacon';
 
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
+
 const Header = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
@@ -66,41 +75,21 @@ const Header = () => {
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
   const activeLayout = layouts.find((l: any) => l.id === activeLayoutId) ?? null;
   const followingPerson = useSelector((state: RootState) => state.layoutReducer.followingPerson);
-  // const [visitorList, setVisitorList] = useState<VisitorType[]>([]);
-  // const { data: visitorList = [], isLoading: loading } = useAllVisitor();
-  // const { data: memberList = [], isLoading: memberLoading } = useAllMembers();
-  // const { data: securityList = [], isLoading: securityLoading } = useAllSecuritys();
+  const followingPersons = useSelector((state: RootState) => state.layoutReducer.followingPersons ?? []);
   const { data: personList = [], isLoading: personLoading } = useLatestPosition('daily');
-  console.log('personList', personList);
-  // const filteredVisitorList = visitorList.filter(
-  //   (v: VisitorType) => v.bleCardNumber && v.bleCardNumber.trim() !== '',
-  // );
-  // const filteredMemberList = memberList.filter(
-  //   (m: memberType) => m.bleCardNumber && m.bleCardNumber.trim() !== '',
-  // );
-  // const filteredSecurityList = securityList.filter(
-  //   (s: memberType) => s.bleCardNumber && s.bleCardNumber.trim() !== '',
-  // );
+  
+  const [selectedPeople, setSelectedPeople] = useState<PersonOption[]>([]);
+  const [activeFollowedPeople, setActiveFollowedPeople] = useState<PersonOption[]>([]);
+
+  useEffect(() => {
+    const currentFollowed = followingPersons.length > 0
+      ? followingPersons
+      : (followingPerson ? [followingPerson] : []);
+    setSelectedPeople(currentFollowed);
+    setActiveFollowedPeople(currentFollowed);
+  }, [followingPerson, followingPersons]);
 
   const allPeople: PersonOption[] = [
-    // ...filteredVisitorList.map((v) => ({
-    //   id: v.id,
-    //   name: v.name,
-    //   bleCardNumber: v.bleCardNumber,
-    //   type: 'visitor' as const,
-    // })),
-    // ...filteredMemberList.map((m) => ({
-    //   id: m.id,
-    //   name: m.name,
-    //   bleCardNumber: m.bleCardNumber,
-    //   type: 'member' as const,
-    // })),
-    // ...filteredSecurityList.map((s) => ({
-    //   id: s.id,
-    //   name: s.name,
-    //   bleCardNumber: s.bleCardNumber,
-    //   type: 'security' as const,
-    // })),
     ...personList.map((person: any) => ({
       id: person.personId,
       name: person.personName,
@@ -108,8 +97,6 @@ const Header = () => {
       type: person.personType,
     }))
   ];
-  // const [loading, setLoading] = useState(false);
-  const [selectedVisitor, setSelectedVisitor] = useState<VisitorType | null>(null);
 
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
     boxShadow: 'none',
@@ -125,59 +112,61 @@ const Header = () => {
     color: theme.palette.text.secondary,
   }));
 
-  // useEffect(() => {
-  //   const handleFullscreenChange = () => {
-  //     setIsFullscreen(!!document.fullscreenElement); // Update state based on fullscreenElement
-  //   };
-  //   console.log('isFullscreen', isFullscreen);
-  //   document.addEventListener('fullscreenchange', handleFullscreenChange);
-  //   document.addEventListener('webkitfullscreenchange', handleFullscreenChange); // Safari
-  //   document.addEventListener('msfullscreenchange', handleFullscreenChange); // IE/Edge
+  // 🟢 Batch Follow / Update Follow Persons
+  const handleFollowPersonsSubmit = () => {
+    if (!selectedPeople.length) {
+      handleCancelFollowing();
+      return;
+    }
 
-  //   return () => {
-  //     document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  //     document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-  //     document.removeEventListener('msfullscreenchange', handleFullscreenChange);
-  //   };
-  // }, []);
-
-  // 🟢 When a visitor is chosen → Follow them
-  const handleFollowPerson = (person: PersonOption) => {
     if (!activeLayoutId || !activeLayout) {
       console.warn('No active layout found.');
       return;
     }
 
     const firstScreen = activeLayout.screens[0];
-    if (!firstScreen) {
-      console.warn('No screens available in active layout.');
-      toast.error('No screens available in active layout.');
-      return;
+
+    // Stop MQTT for people unselected
+    const newSet = new Set(selectedPeople.map((p) => p.id));
+    activeFollowedPeople.forEach((person) => {
+      if (!newSet.has(person.id) && person.bleCardNumber) {
+        const topic = `people_tracking/highlight/card/${person.bleCardNumber}`;
+        publishMQTT(topic, 'Stop');
+        console.log(`Stopped following ${person.name}`);
+      }
+    });
+
+    // Start MQTT for newly selected people
+    const previousSet = new Set(activeFollowedPeople.map((p) => p.id));
+    selectedPeople.forEach((person) => {
+      if (!previousSet.has(person.id) && person.bleCardNumber) {
+        const topic = `people_tracking/highlight/card/${person.bleCardNumber}`;
+        publishMQTT(topic, 'Start');
+        console.log(`Started following ${person.name}`);
+      }
+    });
+
+    const primaryPerson = selectedPeople[0];
+
+    if (firstScreen) {
+      dispatch(
+        setScreenDisplay({
+          layoutId: activeLayoutId,
+          screenId: firstScreen.id,
+          display: {
+            displayType: 3, // Follow Mode
+            displayOutput: primaryPerson.bleCardNumber,
+          },
+        }),
+      );
     }
-    const personId = person.id;
-    const bleNumber = person.bleCardNumber;
-    const topic = `highlight/card/${bleNumber}`;
-    const payload = 'Start';
+    dispatch(setFollowingPerson(primaryPerson));
+    dispatch(setFollowingPersons(selectedPeople));
+    setActiveFollowedPeople(selectedPeople);
+    toast.success(`Following ${selectedPeople.length} person(s)`);
 
-    // ✅ Publish Start message
-    publishMQTT(topic, payload);
-    console.log(
-      `Following person ${person.name} (${bleNumber}) on layout ${activeLayoutId}, screen ${firstScreen.id}`,
-    );
-
-    // ✅ Switch first screen into Follow Mode
-    dispatch(
-      setScreenDisplay({
-        layoutId: activeLayoutId,
-        screenId: firstScreen.id,
-        display: {
-          displayType: 3, // Follow Mode
-          displayOutput: bleNumber,
-        },
-      }),
-    );
-    dispatch(setFollowingPerson(person));
-    setSelectedVisitor(null); // clear search
+    // Close Autocomplete popup after successful submission
+    (document.activeElement as HTMLElement)?.blur();
   };
 
   const handleCancelFollowing = () => {
@@ -187,35 +176,39 @@ const Header = () => {
     }
 
     const firstScreen = activeLayout.screens[0];
-    if (!firstScreen) {
-      console.warn('No screen found.');
-      return;
-    }
 
-    if (followingPerson?.bleCardNumber) {
-      const topic = `highlight/card/${followingPerson.bleCardNumber}`;
-      publishMQTT(topic, 'Stop');
-    }
+    // Stop MQTT for all currently followed people
+    const peopleToStop = activeFollowedPeople.length > 0 ? activeFollowedPeople : (followingPerson ? [followingPerson] : []);
+    peopleToStop.forEach((person) => {
+      if (person.bleCardNumber) {
+        const topic = `people_tracking/highlight/card/${person.bleCardNumber}`;
+        publishMQTT(topic, 'Stop');
+      }
+    });
 
-    dispatch(
-      setScreenDisplay({
-        layoutId: activeLayoutId,
-        screenId: firstScreen.id, // ✅ sesuai request
-        display: {
-          displayType: 0,
-          displayOutput: '',
-        },
-      }),
-    );
+    if (firstScreen) {
+      dispatch(
+        setScreenDisplay({
+          layoutId: activeLayoutId,
+          screenId: firstScreen.id,
+          display: {
+            displayType: 0,
+            displayOutput: '',
+          },
+        }),
+      );
+    }
 
     dispatch(setFollowingPerson(null));
+    dispatch(setFollowingPersons([]));
+    setActiveFollowedPeople([]);
+    setSelectedPeople([]);
 
     console.log('🛑 Stop following');
-  };
 
-  const filter = createFilterOptions<VisitorType>({
-    stringify: (option) => `${option.name} ${option.bleCardNumber}`,
-  });
+    // Close Autocomplete popup after cancellation
+    (document.activeElement as HTMLElement)?.blur();
+  };
 
   const handleDummyAlarm = () => {
     const dummyAlarm: AlarmLogItem = {
@@ -311,56 +304,87 @@ const Header = () => {
                   </MenuItem>
                 ))}
               </Select>
-              {/* 🔍 Visitor Search Autocomplete */}
+              {/* 🔍 Visitor / People Search Autocomplete */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                {followingPerson ? (
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      px: 2,
-                      py: 0.5,
-                      borderRadius: 2,
-                      bgcolor: 'grey.100',
-                    }}
-                  >
-                    <Typography fontWeight={700}>Following : {followingPerson.name}</Typography>
-
-                    <Typography variant="body2" sx={{ ml: 1 }}>
-                      ({followingPerson.type})
-                    </Typography>
-
-                    <IconButton size="small" onClick={handleCancelFollowing}>
-                      ✕
-                    </IconButton>
-                  </Box>
-                ) : (
-                  // Autocomplete here
-                  <Autocomplete
-                    value={null}
-                    onChange={(e, newValue) => {
-                      if (newValue) handleFollowPerson(newValue);
-                    }}
-                    options={allPeople}
-                    loading={personLoading}
-                    getOptionLabel={(option) => option.name}
-                    isOptionEqualToValue={(option, value) => option.id === value.id}
-                    sx={{ width: 300 }}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Search People" size="small" />
-                    )}
-                    renderOption={(props, option) => (
-                      <li {...props} key={option.id}>
-                        <Box>
-                          <Typography fontWeight={700}>{option.name}</Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {option.bleCardNumber} • {option.type}
-                          </Typography>
-                        </Box>
-                      </li>
-                    )}
-                  />
-                )}
+                <Autocomplete
+                  multiple
+                  renderTags={() => null}
+                  disableCloseOnSelect
+                  value={selectedPeople}
+                  onChange={(_, newValue) => {
+                    setSelectedPeople(newValue);
+                    if (newValue.length === 0 && activeFollowedPeople.length > 0) {
+                      handleCancelFollowing();
+                    }
+                  }}
+                  options={allPeople}
+                  loading={personLoading}
+                  getOptionLabel={(option) => option.name}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  sx={{ width: 280 }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Search People"
+                      size="small"
+                      placeholder="Search People"
+                    />
+                  )}
+                  renderOption={(props, option, { selected }) => (
+                    <li {...props} key={option.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box sx={{ flexGrow: 1 }}>
+                        <Typography fontWeight={700}>{option.name}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {option.bleCardNumber} • {option.type}
+                        </Typography>
+                      </Box>
+                      <Checkbox
+                        icon={icon}
+                        checkedIcon={checkedIcon}
+                        style={{ marginRight: 0 }}
+                        checked={selected}
+                      />
+                    </li>
+                  )}
+                  PaperComponent={({ children, ...paperProps }) => (
+                    <Paper
+                      {...paperProps}
+                      elevation={8}
+                      onMouseDown={(e) => e.preventDefault()}
+                      sx={{
+                        overflow: 'hidden',
+                        backgroundColor: 'background.paper',
+                        backgroundImage: 'none',
+                      }}
+                    >
+                      {children}
+                      <Divider />
+                      <Box p={1} display="flex" justifyContent="space-between" alignItems="center" gap={1} sx={{ backgroundColor: 'background.paper' }}>
+                        {activeFollowedPeople.length > 0 && (
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            size="small"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={handleCancelFollowing}
+                          >
+                            Stop Following
+                          </Button>
+                        )}
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          fullWidth={activeFollowedPeople.length === 0}
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={handleFollowPersonsSubmit}
+                        >
+                          {selectedPeople.length === 0 ? 'Clear & Close' : `Follow Persons (${selectedPeople.length})`}
+                        </Button>
+                      </Box>
+                    </Paper>
+                  )}
+                />
               </Box>
               <Tooltip title="Send Test Alarm">
                 <Button

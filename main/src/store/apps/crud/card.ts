@@ -54,7 +54,7 @@ export type CardType = {
     registeredMaskedArea?: MaskedAreaType,
     cardAccessIds: string[],
     cardAccesses?: CardAccessType[],
-    
+    battery?: number | null,
     isUsed: boolean,
     lastUsed: string,
     statusCard: number,
@@ -66,8 +66,8 @@ interface StateType {
     cardSearch: string;
     cardFilter: GetFilter;
     lastFilter?: GetFilter;
-isLoading: boolean;
-hasLoaded: boolean;
+    isLoading: boolean;
+    hasLoaded: boolean;
     cardTotalCount: number;
     cardFilteredCount: number;
     cardActiveCount: number;

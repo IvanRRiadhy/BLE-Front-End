@@ -7,6 +7,7 @@ import { DashboardAreaChartFilter } from 'src/store/apps/dashboard/Dashboard';
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/store/Store';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
+import { formatAbbreviatedNumber } from 'src/utils/numberAbbreviation';
 // import Grid from "@mui/material/Unstable_Grid2";
 // import { getAreaDistribution } from "../services/apiService";
 
@@ -213,9 +214,18 @@ const NewAreaDistribution: React.FC = () => {
 
     dataLabels: {
       enabled: true,
+      formatter: (val: number, opts?: any) => {
+        const absoluteVal = opts?.w?.config?.series?.[opts.seriesIndex];
+        return typeof absoluteVal === 'number' ? formatAbbreviatedNumber(absoluteVal) : val;
+      },
       style: {
         fontSize: '12px',
         fontWeight: 600,
+      },
+    },
+    tooltip: {
+      y: {
+        formatter: (val: number) => (typeof val === 'number' ? val.toLocaleString() : String(val)),
       },
     },
   };

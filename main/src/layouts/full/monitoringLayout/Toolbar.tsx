@@ -46,7 +46,7 @@ const Toolbar = () => {
     }
 
     const bleNumber = visitor.bleCardNumber;
-    const topic = `highlight/card/${bleNumber}`;
+    const topic = `people_tracking/highlight/card/${bleNumber}`;
     const payload = 'Start';
 
     // ✅ Publish Start message

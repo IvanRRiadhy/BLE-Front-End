@@ -16,6 +16,8 @@ import {
   DialogContent,
   DialogActions,
   useTheme,
+  Divider,
+  darken,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
@@ -30,6 +32,8 @@ import {
   SaveMaskedArea,
   SaveEditingArea,
   MaskedAreaLabelType,
+  parseTextBox,
+  stringifyTextBox,
 } from 'src/store/apps/crud/maskedArea';
 import { restrictedStatus } from 'src/types/crud/input';
 import isEqual from 'lodash/isEqual';
@@ -43,6 +47,8 @@ interface AreaFormData {
   name: string;
   colorArea: string;
   areaShape: string;
+  areaNameTextBox: string;
+  occupancyNameTextBox: string;
   restrictedStatus: string;
   // labels: MaskedAreaLabelType[];
   labelIds?: string[];
@@ -81,6 +87,8 @@ const AreaDetailList = () => {
     name: '',
     colorArea: '#363636',
     areaShape: '',
+    areaNameTextBox: '',
+    occupancyNameTextBox: '',
     restrictedStatus: '',
     // labels: [],
     labelIds: [],
@@ -108,6 +116,8 @@ const AreaDetailList = () => {
         name: area.name || '',
         colorArea: area.colorArea || '#363636',
         areaShape: area.areaShape || '',
+        areaNameTextBox: area.areaNameTextBox || '',
+        occupancyNameTextBox: area.occupancyNameTextBox || '',
         restrictedStatus: area.restrictedStatus || '',
         // labels: area.labels || [],
         labelIds: area.labels?.map((l) => l.id) || area.labelIds || [],
@@ -130,7 +140,10 @@ const AreaDetailList = () => {
         setFormData(newFormData);
       }
     }
-  }, [area?.id]); // Remove formData from dependencies to avoid infinite loops
+  }, [area]); // Listen to area changes
+
+  const nameTb = parseTextBox(formData.areaNameTextBox, { x: 100, y: 100 }, 16, '#ffffff');
+  const occTb = parseTextBox(formData.occupancyNameTextBox, { x: 100, y: 100 }, 14, '#ffffff');
 
   const handleClose = () => {
     // Reset to current area data or empty form
@@ -140,6 +153,8 @@ const AreaDetailList = () => {
         name: area.name || '',
         colorArea: area.colorArea || '#363636',
         areaShape: area.areaShape || '',
+        areaNameTextBox: area.areaNameTextBox || '',
+        occupancyNameTextBox: area.occupancyNameTextBox || '',
         restrictedStatus: area.restrictedStatus || '',
         // labels: area.labels || [],
         labelIds: area.labels?.map((l: MaskedAreaLabelType) => l.id) || area.labelIds || [],
@@ -266,6 +281,13 @@ const AreaDetailList = () => {
     '#FFCC00', // Yellow
     '#C8B560', // Khaki
     '#FF7A00', // Orange
+  ];
+
+  // Color palette for text box font colors (white, black + darker versions of area colors)
+  const textColorPalette = [
+    '#ffffff', // White
+    '#000000', // Black
+    ...colorPalette.map((c) => darken(c, 0.15)),
   ];
 
   // If no area is selected for editing, don't render the component
@@ -518,6 +540,202 @@ const AreaDetailList = () => {
                 }
                 label={formData.isAssemblyPoint ? 'Yes' : 'No'}
               />
+            </Grid>
+
+            {/* Divider & Area Name Text Box Settings */}
+            <Grid size={12}>
+              <Divider sx={{ my: 1.5 }} />
+              <Typography variant="subtitle1" fontWeight={700} color="primary.main">
+                Area Name Text Box
+              </Typography>
+            </Grid>
+
+            {/* Area Name Text Box Font Size (Top) */}
+            <Grid size={12}>
+              <CustomFormLabel htmlFor="nameTb-fontSize">Font Size</CustomFormLabel>
+              <CustomTextField
+                id="nameTb-fontSize"
+                type="number"
+                value={nameTb.fontSize}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  const val = parseInt(e.target.value, 10) || 12;
+                  const updated = stringifyTextBox({ ...nameTb, fontSize: val });
+                  updateField('areaNameTextBox', updated);
+                }}
+                variant="outlined"
+                fullWidth
+                inputProps={{ min: 8, max: 72 }}
+              />
+            </Grid>
+
+            {/* Area Name Text Box Font Color (Bottom - 10 Swatches) */}
+            <Grid size={12}>
+              <CustomFormLabel htmlFor="nameTb-fontColor">Font Color</CustomFormLabel>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1,
+                  p: 1,
+                  border: '1px solid',
+                  borderColor: theme.palette.divider,
+                  borderRadius: 1,
+                  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#f9f9f9',
+                  justifyContent: 'space-between',
+                }}
+              >
+                {textColorPalette.map((color) => {
+                  const isSelected = (nameTb.fontColor || '#ffffff').toLowerCase() === color.toLowerCase();
+                  return (
+                    <Box
+                      key={`name-color-${color}`}
+                      onClick={() => {
+                        const updated = stringifyTextBox({ ...nameTb, fontColor: color });
+                        updateField('areaNameTextBox', updated);
+                      }}
+                      sx={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        backgroundColor: color,
+                        border: isSelected
+                          ? `3px solid ${theme.palette.mode === 'dark' ? '#fff' : '#000'}`
+                          : `2px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
+                        transition: 'all 0.25s ease',
+                        boxShadow: isSelected
+                          ? `0 0 0 3px ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`
+                          : `0 1px 4px ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                        '&:hover': {
+                          transform: 'scale(1.12)',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                        },
+                      }}
+                    />
+                  );
+                })}
+              </Box>
+              {/* Selected Color Display */}
+              <Box
+                sx={{
+                  mt: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  justifyContent: 'center',
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: '50%',
+                    backgroundColor: nameTb.fontColor || '#ffffff',
+                    border: '1px solid #aaa',
+                  }}
+                />
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {nameTb.fontColor || '#ffffff'}
+                </Typography>
+              </Box>
+            </Grid>
+
+            {/* Divider & Occupancy Text Box Settings */}
+            <Grid size={12}>
+              <Divider sx={{ my: 1.5 }} />
+              <Typography variant="subtitle1" fontWeight={700} color="primary.main">
+                Occupancy Text Box
+              </Typography>
+            </Grid>
+
+            {/* Occupancy Text Box Font Size (Top) */}
+            <Grid size={12}>
+              <CustomFormLabel htmlFor="occTb-fontSize">Font Size</CustomFormLabel>
+              <CustomTextField
+                id="occTb-fontSize"
+                type="number"
+                value={occTb.fontSize}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  const val = parseInt(e.target.value, 10) || 12;
+                  const updated = stringifyTextBox({ ...occTb, fontSize: val });
+                  updateField('occupancyNameTextBox', updated);
+                }}
+                variant="outlined"
+                fullWidth
+                inputProps={{ min: 8, max: 72 }}
+              />
+            </Grid>
+
+            {/* Occupancy Text Box Font Color (Bottom - 10 Swatches) */}
+            <Grid size={12}>
+              <CustomFormLabel htmlFor="occTb-fontColor">Font Color</CustomFormLabel>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1,
+                  p: 1,
+                  border: '1px solid',
+                  borderColor: theme.palette.divider,
+                  borderRadius: 1,
+                  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#f9f9f9',
+                  justifyContent: 'space-between',
+                }}
+              >
+                {textColorPalette.map((color) => {
+                  const isSelected = (occTb.fontColor || '#ffffff').toLowerCase() === color.toLowerCase();
+                  return (
+                    <Box
+                      key={`occ-color-${color}`}
+                      onClick={() => {
+                        const updated = stringifyTextBox({ ...occTb, fontColor: color });
+                        updateField('occupancyNameTextBox', updated);
+                      }}
+                      sx={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        backgroundColor: color,
+                        border: isSelected
+                          ? `3px solid ${theme.palette.mode === 'dark' ? '#fff' : '#000'}`
+                          : `2px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
+                        transition: 'all 0.25s ease',
+                        boxShadow: isSelected
+                          ? `0 0 0 3px ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`
+                          : `0 1px 4px ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                        '&:hover': {
+                          transform: 'scale(1.12)',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                        },
+                      }}
+                    />
+                  );
+                })}
+              </Box>
+              {/* Selected Color Display */}
+              <Box
+                sx={{
+                  mt: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  justifyContent: 'center',
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: '50%',
+                    backgroundColor: occTb.fontColor || '#ffffff',
+                    border: '1px solid #aaa',
+                  }}
+                />
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {occTb.fontColor || '#ffffff'}
+                </Typography>
+              </Box>
             </Grid>
           </Grid>
         </Box>

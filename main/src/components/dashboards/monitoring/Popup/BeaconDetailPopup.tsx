@@ -17,9 +17,12 @@ import { memberType } from 'src/store/apps/crud/member';
 import { VisitorType } from 'src/store/apps/crud/visitor';
 import { SetSelectedBeacon } from 'src/store/apps/tracking/Beacon';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
-import { setScreenDisplay } from 'src/store/apps/monitoring/layout';
-import { publishMQTT, startMQTTclient } from 'src/store/apps/tracking/MQTT';
-import { setFollowingPerson } from 'src/store/apps/monitoring/layout';
+import {
+  setFollowingPerson,
+  setFollowingPersons,
+  setScreenDisplay,
+} from 'src/store/apps/monitoring/layout';
+import { publishMQTT } from 'src/store/apps/tracking/MQTT';
 
 type BeaconDetailPopupProps = {
   dmac?: string;
@@ -111,7 +114,7 @@ const BeaconDetailPopup = ({
       return;
     }
 
-    const topic = `highlight/card/${bleNumber}`;
+    const topic = `people_tracking/highlight/card/${bleNumber}`;
     const payload = 'Start';
 
     // ✅ Publish Start via shared MQTT client
@@ -142,7 +145,7 @@ const BeaconDetailPopup = ({
     const firstScreen = activeLayout.screens[0];
     if (!firstScreen) return;
 
-    publishMQTT(`highlight/card/${bleNumber}`, 'Start');
+    publishMQTT(`people_tracking/highlight/card/${bleNumber}`, 'Start');
 
     dispatch(
       setScreenDisplay({
@@ -167,15 +170,20 @@ const BeaconDetailPopup = ({
     handleClose();
   };
 
+  const followingPersons = useSelector((state: RootState) => state.layoutReducer.followingPersons ?? []);
+
   const handleCancelFollowing = () => {
     if (!activeLayoutId || !activeLayout) return;
 
     const firstScreen = activeLayout.screens[0];
     if (!firstScreen) return;
 
-    if (followingPerson?.bleCardNumber) {
-      publishMQTT(`highlight/card/${followingPerson.bleCardNumber}`, 'Stop');
-    }
+    const peopleToStop = followingPersons.length > 0 ? followingPersons : (followingPerson ? [followingPerson] : []);
+    peopleToStop.forEach((person) => {
+      if (person.bleCardNumber) {
+        publishMQTT(`people_tracking/highlight/card/${person.bleCardNumber}`, 'Stop');
+      }
+    });
 
     dispatch(
       setScreenDisplay({
@@ -189,6 +197,7 @@ const BeaconDetailPopup = ({
     );
 
     dispatch(setFollowingPerson(null));
+    dispatch(setFollowingPersons([]));
 
     handleClose();
   };

@@ -5,6 +5,7 @@ import { useMemo } from 'react';
 import { useAllAlarmCategory } from 'src/hooks/AlarmSetting/useAlarmCategory';
 import { useAlarmByArea } from 'src/hooks/useDashboard';
 import { useSelector } from 'src/store/Store';
+import { formatAbbreviatedNumber } from 'src/utils/numberAbbreviation';
 
 /* ---------------- Filter ---------------- */
 
@@ -122,6 +123,7 @@ const Bar: React.FC = () => {
         style: {
           fontSize: '12px',
         },
+        formatter: (val: number) => formatAbbreviatedNumber(val),
       },
     },
 
@@ -137,7 +139,7 @@ const Bar: React.FC = () => {
 
     tooltip: {
       y: {
-        formatter: (val) => (val === 0 ? '0' : val.toString()),
+        formatter: (val) => (typeof val === 'number' ? val.toLocaleString() : String(val)),
       },
     },
   };

@@ -18,6 +18,7 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useSelector } from 'src/store/Store';
 import { useTheme } from '@mui/material';
+import { AbbreviatedNumber, formatAbbreviatedNumber } from 'src/utils/numberAbbreviation';
 
 dayjs.extend(isoWeek);
 dayjs.extend(isSameOrAfter);
@@ -33,9 +34,9 @@ const defaultFilter = {
 };
 
 interface TrackingSummary {
-  accessedAreaTotal: number;
-  withPermission: number;
-  withoutPermission: number;
+  totalAccess: number;
+  generalAreaAccess: number;
+  restrictedAreaAccess: number;
 }
 
 interface WeekOption {
@@ -58,9 +59,9 @@ const Tracking: React.FC = () => {
     if (isLoading || isError || !data?.summary) return null;
 
     return {
-      accessedAreaTotal: data.summary.accessedAreaTotal ?? 0,
-      withPermission: data.summary.withPermission ?? 0,
-      withoutPermission: data.summary.withoutPermission ?? 0,
+      totalAccess: data.summary.totalAccess ?? 0,
+      generalAreaAccess: data.summary.generalAreaAccess ?? 0,
+      restrictedAreaAccess: data.summary.restrictedAreaAccess ?? 0,
     };
   }, [data, isLoading, isError]);
 
@@ -115,6 +116,7 @@ const Tracking: React.FC = () => {
             fontSize: '12px',
             fontWeight: 600,
           },
+          formatter: (val: number) => formatAbbreviatedNumber(val),
         },
       },
 
@@ -386,25 +388,28 @@ const Tracking: React.FC = () => {
         {/* SUMMARY */}
         <Stack spacing={2} sx={{ minWidth: 180, justifyContent: 'center' }}>
           <Box>
-            <Typography sx={{ fontSize: 24, fontWeight: 700, color: 'textPrimary' }}>
-              {trackingSummary?.accessedAreaTotal ?? '-'}
-            </Typography>
+            <AbbreviatedNumber
+              value={trackingSummary?.totalAccess}
+              sx={{ fontSize: 24, fontWeight: 700, color: 'textPrimary', display: 'block' }}
+            />
             <Typography sx={{ fontSize: 13, color: 'textSecondary' }}>Total Access</Typography>
           </Box>
 
           <Box>
-            <Typography sx={{ fontSize: 24, fontWeight: 700, color: '#13deb9' }}>
-              {trackingSummary?.withPermission ?? '-'}
-            </Typography>
+            <AbbreviatedNumber
+              value={trackingSummary?.generalAreaAccess}
+              sx={{ fontSize: 24, fontWeight: 700, color: '#13deb9', display: 'block' }}
+            />
             <Typography sx={{ fontSize: 13, color: '#13deb9' }}>
               General Area Accessed
             </Typography>
           </Box>
 
           <Box>
-            <Typography sx={{ fontSize: 24, fontWeight: 700, color: '#D73D3D' }}>
-              {trackingSummary?.withoutPermission ?? '-'}
-            </Typography>
+            <AbbreviatedNumber
+              value={trackingSummary?.restrictedAreaAccess}
+              sx={{ fontSize: 24, fontWeight: 700, color: '#D73D3D', display: 'block' }}
+            />
             <Typography sx={{ fontSize: 13, color: '#D73D3D' }}>
               Restricted Area Accessed
             </Typography>

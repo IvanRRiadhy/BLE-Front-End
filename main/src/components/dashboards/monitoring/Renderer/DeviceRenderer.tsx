@@ -13,7 +13,7 @@ import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
 import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
 import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
 import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
-import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { MaskedAreaType, parseTextBox } from 'src/store/apps/crud/maskedArea';
 import { darken } from '@mui/material';
 import {
   LayoutSet,
@@ -184,6 +184,8 @@ type DeviceRendererProps = {
   BoundaryAlarm: BoundaryAlarmType[];
   PatrolAreas: PatrolAreaType[];
   showAreas: boolean;
+  showAreaName?: boolean;
+  showOccupancy?: boolean;
   showGates: boolean;
   showGeoFence: boolean;
   showOverPopulate: boolean;
@@ -211,6 +213,7 @@ type DeviceRendererProps = {
   onFocusPosition?: (pt: { x: number; y: number }) => void;
   focusDmac?: string;
   showOtherBeacons?: boolean;
+  followingPersons?: any[];
   // Stage transform props (from parent)
   stageScale: number;
   stageX: number;
@@ -237,6 +240,8 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     BoundaryAlarm,
     PatrolAreas,
     showAreas,
+    showAreaName = true,
+    showOccupancy = true,
     showGates,
     showGeoFence,
     showOverPopulate,
@@ -315,6 +320,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   const [bgImage, setBgImage] = useState<HTMLImageElement | undefined>(undefined);
   const [previewImage, setPreviewImage] = useState<HTMLImageElement | undefined>(undefined);
   const alarmData = useSelector((state: RootState) => state.BeaconReducer.alarmLogs);
+  const countingData = useSelector((state: RootState) => state.BeaconReducer.countingData);
   const activeAlarm = alarmData.find((a: AlarmLogItem) => a.action === 'active');
   const investigatedAlarm = alarmData.find((a: AlarmLogItem) => a.action === 'investigated');
   const [animatedBeacons, setAnimatedBeacons] = useState<{
@@ -352,6 +358,35 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   const [highlightedFloorplan, setHighlightedFloorplan] = useState<string | null>(null);
   const [highlightedArea, setHighlightedArea] = useState<string | null>(null);
   const floorplans = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
+
+  const FollowingPerson = useSelector((state: RootState) => state.layoutReducer.followingPerson);
+  const FollowingPersons = useSelector((state: RootState) => state.layoutReducer.followingPersons ?? []);
+
+  const followedSet = useMemo(() => {
+    const set = new Set<string>();
+    if (focusBeaconId) set.add(focusBeaconId.toLowerCase());
+    if (focusDmac) set.add(focusDmac.toLowerCase());
+
+    const activeList = (FollowingPersons && FollowingPersons.length > 0)
+      ? FollowingPersons
+      : (FollowingPerson ? [FollowingPerson] : []);
+
+    activeList.forEach((p: any) => {
+      if (!p) return;
+      const card = p.bleCardNumber || p.cardNumber || p.id || p.personId;
+      if (card) set.add(String(card).toLowerCase());
+    });
+
+    return set;
+  }, [focusBeaconId, focusDmac, FollowingPersons, FollowingPerson]);
+
+  const checkIsFollowed = useCallback((beaconId: string, beacon?: any) => {
+    if (!beaconId) return false;
+    const lowerId = String(beaconId).toLowerCase();
+    if (followedSet.has(lowerId)) return true;
+    if (beacon?.dmac && followedSet.has(String(beacon.dmac).toLowerCase())) return true;
+    return false;
+  }, [followedSet]);
 
   // layout info to know what this screen is displaying
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
@@ -407,7 +442,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     // Only reset if topic actually changed
     if (prevTopicRef.current !== topic) {
       console.log(
-        `Topic changed from ${prevTopicRef.current} to ${topic}, resetting local beacon state`,
+        `Topic changed from ${prevTopicRef.current} to ${topic}, resetting beacons`,
       );
       setLastSeenBeacons({});
       setAnimatedBeacons({});
@@ -434,6 +469,15 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     )
       return;
 
+    // Do NOT auto-change floorplan if following multiple people
+    const activeFollowed = (FollowingPersons && FollowingPersons.length > 0)
+      ? FollowingPersons
+      : (FollowingPerson ? [FollowingPerson] : []);
+
+    if (activeFollowed.length > 1) {
+      return;
+    }
+
     // ✅ Only the follow screen for this beacon updates floorplan
     if (thisScreen.display.displayOutput?.toLowerCase() !== focusBeaconId?.toLowerCase()) return;
 
@@ -444,7 +488,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
         floorplanId: highlightedFloorplan,
       }),
     );
-  }, [highlightedFloorplan, activeLayoutId, thisScreen, dispatch, focusBeaconId]);
+  }, [highlightedFloorplan, activeLayoutId, thisScreen, dispatch, focusBeaconId, FollowingPersons, FollowingPerson]);
 
   // load device icons
   const useDeviceIcon = (src: string) => {
@@ -577,8 +621,14 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
       const payloadId = msg.beaconId;
 
       if (payloadId !== focusBeaconId) return;
-      // console.log(`[MQTT] Received message on highlight topic: ${topic} with payload:`, msg);
-      setHighlightedFloorplan(msg.floorplanId);
+
+      const activeFollowed = (FollowingPersons && FollowingPersons.length > 0)
+        ? FollowingPersons
+        : (FollowingPerson ? [FollowingPerson] : []);
+
+      if (activeFollowed.length <= 1) {
+        setHighlightedFloorplan(msg.floorplanId);
+      }
       setHighlightedArea(msg.area || null);
     }, topic);
 
@@ -586,7 +636,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
       console.log(`[MQTT] Unsubscribing from ${topic}`);
       unsubscribe();
     };
-  }, [focusBeaconId]);
+  }, [focusBeaconId, FollowingPersons, FollowingPerson]);
 
   // compute Pole of Inaccessibility (Internal Center) & distance to boundary for each area (handles concave / L-shapes)
   const areaLabelInfos = useMemo(() => {
@@ -970,7 +1020,12 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
           {/* Beacons */}
           {showBeacons &&
             Object.entries(lastSeenBeacons)
-              .filter(([beaconId]) => showOtherBeacons || beaconId === focusBeaconId)
+              .filter(([beaconId, b]) => showOtherBeacons || checkIsFollowed(beaconId, b))
+              .sort(([idA, bA], [idB, bB]) => {
+                const isFollowedA = checkIsFollowed(idA, bA) ? 1 : 0;
+                const isFollowedB = checkIsFollowed(idB, bB) ? 1 : 0;
+                return isFollowedA - isFollowedB; // Followed beacons rendered last so they appear on top
+              })
               .map(([beaconId, beacon]) => {
                 const anim = animatedBeacons[beaconId] || beacon;
                 // Convert meters to pixels for beacon position
@@ -988,6 +1043,8 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                   isMember: false,
                   isVisitor: false,
                 };
+
+                const isFollowed = checkIsFollowed(beaconId, beacon);
 
                 return (
                   <BeaconRenderer
@@ -1010,6 +1067,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                     isSecurity={personInfo.isSecurity}
                     isMember={personInfo.isMember}
                     isVisitor={personInfo.isVisitor}
+                    isFollowed={isFollowed}
                     onClick={() =>
                       onSelectBeacon({
                         id: beaconId,
@@ -1024,31 +1082,94 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
               })}
         </Layer>
 
-        {/* Always-on Area Name Labels at Pole of Inaccessibility (with strict boundary constraint & word wrapping) */}
+        {/* Always-on Area Name & Occupancy Text Labels using configured text box settings */}
         <Layer listening={false}>
-          {showAreas &&
-            areas.map((area: MaskedAreaType) => {
+          {areas.map((area: MaskedAreaType) => {
               const info = areaLabelInfos[area.id];
-              if (!info || !info.show || !area.name) return null;
+              const defaultCenterX = info ? info.cx : 150;
+              const defaultCenterY = info ? info.cy : 150;
+
+              const nameTb = parseTextBox(
+                area.areaNameTextBox,
+                { x: defaultCenterX, y: defaultCenterY - 15 },
+                info?.fontSize || 16,
+                '#000000',
+              );
+
+              const occTb = parseTextBox(
+                area.occupancyNameTextBox,
+                { x: defaultCenterX, y: defaultCenterY + 15 },
+                info?.fontSize ? Math.max(10, info.fontSize - 2) : 14,
+                '#000000',
+              );
+
+              let areaCount = 0;
+              if (countingData?.area) {
+                const areaRecord = countingData.area;
+                const idKey = area.id;
+                const nameKey = area.name;
+
+                if (idKey && areaRecord[idKey] !== undefined) {
+                  areaCount = areaRecord[idKey].count || 0;
+                } else if (idKey && areaRecord[idKey.toLowerCase()] !== undefined) {
+                  areaCount = areaRecord[idKey.toLowerCase()].count || 0;
+                } else if (nameKey && areaRecord[nameKey] !== undefined) {
+                  areaCount = areaRecord[nameKey].count || 0;
+                } else if (nameKey && areaRecord[nameKey.toLowerCase()] !== undefined) {
+                  areaCount = areaRecord[nameKey.toLowerCase()].count || 0;
+                } else if (nameKey) {
+                  const match = Object.values(areaRecord).find(
+                    (entry: any) =>
+                      entry.name &&
+                      entry.name.toLowerCase().trim() === nameKey.toLowerCase().trim(),
+                  );
+                  if (match) {
+                    areaCount = match.count || 0;
+                  }
+                }
+              }
 
               return (
-                <Text
-                  key={`area-label-${area.id}`}
-                  x={info.cx - info.maxTextWidth / 2}
-                  y={info.cy - (info.fontSize * 1.2) / 2}
-                  width={info.maxTextWidth}
-                  text={area.name}
-                  fontSize={info.fontSize}
-                  fontStyle="bold"
-                  fill="#000000"
-                  align="center"
-                  verticalAlign="middle"
-                  wrap="word"
-                  shadowColor="#ffffff"
-                  shadowBlur={6}
-                  shadowOpacity={1}
-                  listening={false}
-                />
+                <React.Fragment key={`area-textboxes-${area.id}`}>
+                  {showAreaName && area.name && (
+                    <Text
+                      key={`area-name-${area.id}`}
+                      x={nameTb.posX - 50}
+                      y={nameTb.posY - (nameTb.fontSize * 1.2) / 2}
+                      width={100}
+                      text={area.name}
+                      fontSize={nameTb.fontSize}
+                      fontStyle="bold"
+                      fill={nameTb.fontColor}
+                      align="center"
+                      verticalAlign="middle"
+                      wrap="word"
+                      shadowColor="#ffffff"
+                      shadowBlur={6}
+                      shadowOpacity={1}
+                      listening={false}
+                    />
+                  )}
+                  {showOccupancy && (
+                    <Text
+                      key={`area-occ-${area.id}`}
+                      x={occTb.posX - 60}
+                      y={occTb.posY - (occTb.fontSize * 1.2) / 2}
+                      width={120}
+                      text={`People Count : ${areaCount}`}
+                      fontSize={occTb.fontSize}
+                      fontStyle="bold"
+                      fill={occTb.fontColor}
+                      align="center"
+                      verticalAlign="middle"
+                      wrap="word"
+                      shadowColor="#ffffff"
+                      shadowBlur={6}
+                      shadowOpacity={1}
+                      listening={false}
+                    />
+                  )}
+                </React.Fragment>
               );
             })}
         </Layer>

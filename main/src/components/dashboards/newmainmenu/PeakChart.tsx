@@ -5,6 +5,7 @@ import { usePeakHour, useAlarmStatisticHourly } from 'src/hooks/useDashboard';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { useSelector } from 'src/store/Store';
 import { getUserTimezone } from 'src/utils/time';
+import { formatAbbreviatedNumber } from 'src/utils/numberAbbreviation';
 
 /* ---------------- Types & Filters ---------------- */
 
@@ -199,6 +200,7 @@ const PeakChart: React.FC = () => {
         style: {
           fontSize: '12px',
         },
+        formatter: (val: number) => formatAbbreviatedNumber(val),
       },
     },
     grid: {
@@ -211,6 +213,9 @@ const PeakChart: React.FC = () => {
     },
     tooltip: {
       theme: theme.palette.mode as 'light' | 'dark',
+      y: {
+        formatter: (val: number) => (typeof val === 'number' ? val.toLocaleString() : String(val)),
+      },
     },
   };
 

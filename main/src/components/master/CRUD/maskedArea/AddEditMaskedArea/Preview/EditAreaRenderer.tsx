@@ -12,7 +12,7 @@ import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
 import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
 import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Stage, Layer, Circle, Image as KonvaImage, Line, FastLayer, Group, Text } from 'react-konva';
+import { Stage, Layer, Circle, Image as KonvaImage, Line, FastLayer, Group, Text, Rect } from 'react-konva';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
   MaskedAreaType,
@@ -22,6 +22,10 @@ import {
   AddUnsavedMaskedArea,
   DrawingMaskedArea,
   EditMaskedAreaPosition,
+  EditUnsavedMaskedArea,
+  parseTextBox,
+  stringifyTextBox,
+  TextBoxType,
 } from 'src/store/apps/crud/maskedArea';
 import earcut from 'earcut';
 import { uniqueId } from 'lodash';
@@ -41,6 +45,8 @@ type Nodes = {
   x_px: number;
   y_px: number;
 };
+
+
 
 interface Props {
   width: number; // container width (viewport)
@@ -1491,6 +1497,264 @@ const EditAreaRenderer: React.FC<Props> = ({
     ],
   );
 
+  const isPointInPolygon = useCallback((point: { x: number; y: number }, vs?: Nodes[]): boolean => {
+    if (!vs || vs.length < 3) return true;
+    let x = point.x,
+      y = point.y;
+    let inside = false;
+    for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+      let xi = vs[i].x_px,
+        yi = vs[i].y_px;
+      let xj = vs[j].x_px,
+        yj = vs[j].y_px;
+
+      let intersect =
+        yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }, []);
+
+  const isTextBoxInsideArea = useCallback(
+    (
+      centerX: number,
+      centerY: number,
+      width: number,
+      height: number,
+      nodes?: Nodes[],
+    ): boolean => {
+      if (!nodes || nodes.length < 3) return true;
+
+      // Center point MUST be inside polygon
+      if (!isPointInPolygon({ x: centerX, y: centerY }, nodes)) {
+        return false;
+      }
+
+      // Check 4 inset corner points (70% offset) to ensure box stays within polygon boundaries
+      const halfW = (width / 2) * 0.7;
+      const halfH = (height / 2) * 0.7;
+
+      const cornerPoints = [
+        { x: centerX - halfW, y: centerY - halfH },
+        { x: centerX + halfW, y: centerY - halfH },
+        { x: centerX - halfW, y: centerY + halfH },
+        { x: centerX + halfW, y: centerY + halfH },
+      ];
+
+      return cornerPoints.every((pt) => isPointInPolygon(pt, nodes));
+    },
+    [isPointInPolygon],
+  );
+
+  const getNodesCentroid = useCallback(
+    (nodes?: Nodes[]): { x: number; y: number } => {
+      if (!nodes || nodes.length === 0) return { x: 150, y: 150 };
+      if (nodes.length < 3) return { x: nodes[0].x_px, y: nodes[0].y_px };
+
+      // 1. Calculate standard arithmetic centroid
+      let sumX = 0;
+      let sumY = 0;
+      nodes.forEach((n) => {
+        sumX += n.x_px;
+        sumY += n.y_px;
+      });
+      const avgPoint = { x: sumX / nodes.length, y: sumY / nodes.length };
+
+      if (isPointInPolygon(avgPoint, nodes)) {
+        return avgPoint;
+      }
+
+      // 2. Fallback for non-convex / L-shaped polygons: use earcut triangulation
+      try {
+        const flatCoords: number[] = [];
+        nodes.forEach((n) => flatCoords.push(n.x_px, n.y_px));
+        const triangles = earcut(flatCoords);
+
+        let maxArea = -1;
+        let bestPoint = avgPoint;
+
+        for (let i = 0; i < triangles.length; i += 3) {
+          const p1 = nodes[triangles[i]];
+          const p2 = nodes[triangles[i + 1]];
+          const p3 = nodes[triangles[i + 2]];
+          if (!p1 || !p2 || !p3) continue;
+
+          const cx = (p1.x_px + p2.x_px + p3.x_px) / 3;
+          const cy = (p1.y_px + p2.y_px + p3.y_px) / 3;
+          const area = Math.abs(
+            p1.x_px * (p2.y_px - p3.y_px) +
+              p2.x_px * (p3.y_px - p1.y_px) +
+              p3.x_px * (p1.y_px - p2.y_px),
+          );
+
+          if (area > maxArea && isPointInPolygon({ x: cx, y: cy }, nodes)) {
+            maxArea = area;
+            bestPoint = { x: cx, y: cy };
+          }
+        }
+        return bestPoint;
+      } catch (e) {
+        return { x: nodes[0].x_px, y: nodes[0].y_px };
+      }
+    },
+    [isPointInPolygon],
+  );
+
+  const renderTextBox = useCallback(
+    (area: MaskedAreaType, type: 'name' | 'occupancy') => {
+      const isEditing = area.name === editingArea;
+      const isName = type === 'name';
+      const rawJson = isName ? area.areaNameTextBox : area.occupancyNameTextBox;
+
+      const boxWidth = 100;
+      const boxHeight = 50;
+
+      const centroid = getNodesCentroid(area.nodes);
+      let defaultPos = isName
+        ? { x: centroid.x, y: centroid.y - 30 }
+        : { x: centroid.x, y: centroid.y + 30 };
+
+      if (!isTextBoxInsideArea(defaultPos.x, defaultPos.y, boxWidth, boxHeight, area.nodes)) {
+        defaultPos = { x: centroid.x, y: centroid.y };
+      }
+
+      const defaultSize = isName ? 16 : 14;
+      const defaultColor = '#ffffff';
+
+      const tb = parseTextBox(rawJson, defaultPos, defaultSize, defaultColor);
+
+      // Verify stored position is inside parent polygon shape; if not, clamp to centroid
+      let currentCenterX = tb.posX;
+      let currentCenterY = tb.posY;
+      if (!isTextBoxInsideArea(currentCenterX, currentCenterY, boxWidth, boxHeight, area.nodes)) {
+        currentCenterX = centroid.x;
+        currentCenterY = centroid.y;
+      }
+
+      const displayText = isName
+        ? area.name && area.name.trim() !== ''
+          ? area.name
+          : 'Name Text Box'
+        : 'Occupancy Text Box';
+
+      // Position stored is center of the text box
+      const groupX = currentCenterX - boxWidth / 2;
+      const groupY = currentCenterY - boxHeight / 2;
+
+      return (
+        <Group
+          key={`tb-${type}-${area.id}`}
+          x={groupX}
+          y={groupY}
+          draggable={!preview && isEditing && !drawingMaskedArea}
+          dragBoundFunc={function (pos) {
+            if (!area.nodes || area.nodes.length < 3) return pos;
+
+            const candGroupX = (pos.x - stageX) / stageScale;
+            const candGroupY = (pos.y - stageY) / stageScale;
+            const candCenterX = candGroupX + boxWidth / 2;
+            const candCenterY = candGroupY + boxHeight / 2;
+
+            // 1. Candidate position is valid
+            if (isTextBoxInsideArea(candCenterX, candCenterY, boxWidth, boxHeight, area.nodes)) {
+              return pos;
+            }
+
+            // Get live current position of Konva Node frame-by-frame
+            const nodePos = this.absolutePosition();
+            const currGroupX = (nodePos.x - stageX) / stageScale;
+            const currGroupY = (nodePos.y - stageY) / stageScale;
+            const currCenterX = currGroupX + boxWidth / 2;
+            const currCenterY = currGroupY + boxHeight / 2;
+
+            // 2. Candidate X + Current Y valid
+            const isXValid = isTextBoxInsideArea(candCenterX, currCenterY, boxWidth, boxHeight, area.nodes);
+            // 3. Current X + Candidate Y valid
+            const isYValid = isTextBoxInsideArea(currCenterX, candCenterY, boxWidth, boxHeight, area.nodes);
+
+            if (isXValid && !isYValid) {
+              return { x: pos.x, y: nodePos.y };
+            }
+            if (isYValid && !isXValid) {
+              return { x: nodePos.x, y: pos.y };
+            }
+
+            return nodePos;
+          }}
+          onMouseEnter={(e) => {
+            if (!preview && isEditing && !drawingMaskedArea) {
+              const stage = e.target.getStage();
+              if (stage) stage.container().style.cursor = 'move';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!preview && isEditing && !drawingMaskedArea) {
+              const stage = e.target.getStage();
+              if (stage) stage.container().style.cursor = 'default';
+            }
+          }}
+          onDragStart={(e) => {
+            e.evt.stopPropagation();
+          }}
+          onDragEnd={(e) => {
+            if (!isEditing) return;
+            const newGroupX = e.target.x();
+            const newGroupY = e.target.y();
+            let newCenterX = Math.round(newGroupX + boxWidth / 2);
+            let newCenterY = Math.round(newGroupY + boxHeight / 2);
+
+            if (!isTextBoxInsideArea(newCenterX, newCenterY, boxWidth, boxHeight, area.nodes)) {
+              const safePoint = getNodesCentroid(area.nodes);
+              newCenterX = Math.round(safePoint.x);
+              newCenterY = Math.round(safePoint.y);
+            }
+
+            const updatedTb: TextBoxType = {
+              ...tb,
+              posX: newCenterX,
+              posY: newCenterY,
+            };
+
+            const jsonString = stringifyTextBox(updatedTb);
+            const fieldToUpdate = isName ? 'areaNameTextBox' : 'occupancyNameTextBox';
+
+            dispatch(
+              EditUnsavedMaskedArea({
+                ...area,
+                [fieldToUpdate]: jsonString,
+              }),
+            );
+          }}
+        >
+          <Rect
+            width={boxWidth}
+            height={boxHeight}
+            fill="rgba(0, 0, 0, 0.45)"
+            stroke={isEditing ? (isName ? '#1976d2' : '#ff9800') : '#444444'}
+            strokeWidth={isEditing ? 2 : 1}
+            dash={isEditing ? [6, 4] : undefined}
+            cornerRadius={6}
+          />
+          <Text
+            x={10}
+            y={10}
+            width={boxWidth - 20}
+            height={boxHeight - 20}
+            text={displayText}
+            fontSize={tb.fontSize}
+            fill={tb.fontColor}
+            fontStyle="bold"
+            align="center"
+            verticalAlign="middle"
+            wrap="word"
+            listening={false}
+          />
+        </Group>
+      );
+    },
+    [editingArea, preview, drawingMaskedArea, getNodesCentroid, dispatch],
+  );
+
   const renderArea = useCallback(
     (area: MaskedAreaType) => {
       const points = area.nodes?.flatMap((node) => [node.x_px, node.y_px]) || [];
@@ -1669,6 +1933,8 @@ const EditAreaRenderer: React.FC<Props> = ({
                 }}
               />
             ))}
+          {renderTextBox(area, 'name')}
+          {renderTextBox(area, 'occupancy')}
         </Group>
       );
     },
@@ -1687,6 +1953,7 @@ const EditAreaRenderer: React.FC<Props> = ({
       handleCornerDragEnd,
       handleDeleteCorner,
       areaDragging,
+      renderTextBox,
     ],
   );
 
@@ -1703,19 +1970,6 @@ const EditAreaRenderer: React.FC<Props> = ({
     const iconGateway = useDeviceIcon(GatewaySVG);
     const iconUnknown = useDeviceIcon(UnknownDevice);
 
-    const isPointInPolygon = (point: { x: number; y: number }, vs: Nodes[]) => {
-      let x = point.x, y = point.y;
-      let inside = false;
-      for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-        let xi = vs[i].x_px, yi = vs[i].y_px;
-        let xj = vs[j].x_px, yj = vs[j].y_px;
-
-        let intersect = ((yi > y) !== (yj > y))
-            && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-        if (intersect) inside = !inside;
-      }
-      return inside;
-    };
 
     const renderDeviceShape = (device: FloorplanDeviceType) => {
       let deviceIcon = iconUnknown;

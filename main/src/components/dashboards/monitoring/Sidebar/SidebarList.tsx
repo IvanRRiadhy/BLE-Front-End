@@ -49,6 +49,24 @@ const SidebarList = ({ filterType, personFilter }: SidebarListProps) => {
     // console.log("Devices", devicesResponse) "8BA26686-63C3-4D0C-928A-32A79BF6CE7E"
   const logs = useCombinedEnrichedLogs(100);
 
+  const followingPerson = useSelector((state: RootState) => state.layoutReducer.followingPerson);
+  const followingPersons = useSelector((state: RootState) => state.layoutReducer.followingPersons ?? []);
+
+  const followedIds = useMemo(() => {
+    const set = new Set<string>();
+    const activeList = (followingPersons && followingPersons.length > 0)
+      ? followingPersons
+      : (followingPerson ? [followingPerson] : []);
+
+    activeList.forEach((p: any) => {
+      if (!p) return;
+      const card = p.bleCardNumber || p.cardNumber || p.id || p.personId;
+      if (card) set.add(String(card).toLowerCase());
+      if (p.name) set.add(String(p.name).toLowerCase());
+    });
+    return set;
+  }, [followingPerson, followingPersons]);
+
   // 🔹 Create a mapping of readerId -> device name for quick lookup
   const deviceMap = useMemo(() => {
     const map = new Map();
@@ -65,16 +83,26 @@ const SidebarList = ({ filterType, personFilter }: SidebarListProps) => {
     return logs
       .filter((x) => {
         if (filterType.length > 0 && !filterType.includes(x.type)) return false;
-        if (x.personType === 'Visitor' && !personFilter.Visitor) return false;
-        if (x.personType === 'Member' && !personFilter.Member) return false;
-        if (x.personType === 'Security' && !personFilter.Security) return false;
+
+        if (personFilter.FocusedPersonOnly) {
+          if (followedIds.size === 0) return false;
+          const dmacMatch = x.dmac && followedIds.has(String(x.dmac).toLowerCase());
+          const personIdMatch = x.personId && followedIds.has(String(x.personId).toLowerCase());
+          const targetMatch = x.target && followedIds.has(String(x.target).toLowerCase());
+          if (!dmacMatch && !personIdMatch && !targetMatch) return false;
+        } else {
+          if (x.personType === 'Visitor' && !personFilter.Visitor) return false;
+          if (x.personType === 'Member' && !personFilter.Member) return false;
+          if (x.personType === 'Security' && !personFilter.Security) return false;
+        }
+
         return true;
       })
       .map((log) => ({
         ...log,
         reader: deviceMap.get(log.device?.toLowerCase()) || (log.type === 'Alarm' ? 'Alarm System' : 'Unknown Device'),
       }));
-  }, [logs, filterType, personFilter, deviceMap]);
+  }, [logs, filterType, personFilter, deviceMap, followedIds]);
 
   // ✅ NEW: async click handler with proper flow
   const handleItemClick = async (item: CombinedLogItem) => {

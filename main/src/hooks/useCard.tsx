@@ -61,7 +61,7 @@ export function useAddCard() {
 
   return useMutation({
     mutationFn: async (card: Partial<CardType>) => {
-      const { id, ...cleanData } = card;
+      const { id, battery, ...cleanData } = card;
       const res = await axiosServices.post(API_URL_V2, cleanData);
       return res.data;
     },
@@ -96,7 +96,7 @@ export function useEditCard() {
 
   return useMutation({
     mutationFn: async (card: Partial<CardType>) => {
-      const { id, ...cleanData } = card;
+      const { id, battery, ...cleanData } = card;
       const res = await axiosServices.put(`${API_URL_V2}${id}`, cleanData);
       return res.data;
     },

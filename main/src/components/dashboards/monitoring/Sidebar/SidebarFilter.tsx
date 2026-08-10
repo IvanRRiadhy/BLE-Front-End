@@ -173,7 +173,7 @@ const handleFilterChange = (_: React.MouseEvent<HTMLElement>, newValues: string[
                 onChange={() => handleCheckboxChange('FocusedPersonOnly')}
               />
             }
-            label="FocusedPersonOnly"
+            label="Following Person Only"
           />
         </MenuItem>
       </Menu>

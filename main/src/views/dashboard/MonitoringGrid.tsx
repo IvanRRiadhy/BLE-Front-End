@@ -35,7 +35,20 @@ const ScrollableRowWithArrows: React.FC<{
   useEffect(() => {
     checkScrollPosition();
     window.addEventListener('resize', checkScrollPosition);
-    return () => window.removeEventListener('resize', checkScrollPosition);
+
+    const el = containerRef.current;
+    let observer: ResizeObserver | null = null;
+    if (el) {
+      observer = new ResizeObserver(() => {
+        checkScrollPosition();
+      });
+      observer.observe(el);
+    }
+
+    return () => {
+      window.removeEventListener('resize', checkScrollPosition);
+      if (observer && el) observer.unobserve(el);
+    };
   }, []);
 
   const scrollLeft = () => {

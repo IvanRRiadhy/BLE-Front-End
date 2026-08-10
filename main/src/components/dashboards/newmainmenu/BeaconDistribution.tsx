@@ -3,6 +3,7 @@ import Chart from 'react-apexcharts';
 import { Box, Typography } from '@mui/material';
 import { useBeaconCount } from 'src/hooks/useDashboard';
 import { useSelector } from 'src/store/Store';
+import { formatAbbreviatedNumber } from 'src/utils/numberAbbreviation';
 
 
 const COLORS = ['#02325B','#045498', '#3676AC',  '#B3CBE0'];
@@ -74,6 +75,18 @@ const NewBeaconDistribution: React.FC = () => {
 
     fill: {
       opacity: 0.8,
+    },
+    dataLabels: {
+      enabled: true,
+      formatter: (val: number, opts?: any) => {
+        const absoluteVal = opts?.w?.config?.series?.[opts.seriesIndex];
+        return typeof absoluteVal === 'number' ? formatAbbreviatedNumber(absoluteVal) : val;
+      },
+    },
+    tooltip: {
+      y: {
+        formatter: (val: number) => (typeof val === 'number' ? val.toLocaleString() : String(val)),
+      },
     },
   };
 

@@ -99,6 +99,7 @@ interface EntityCount {
     // Add this
     visitor: string[];
     member: string[];
+    security: string[];
   };
 }
 
@@ -505,7 +506,7 @@ const parseEntityCounts = (entities: any): { [id: string]: EntityCount } => {
   if (typeof entities === 'object' && entities !== null) {
     Object.keys(entities).forEach((key) => {
       const entity = entities[key];
-
+      // console.log("Entity: ", entity)
       // Create the EntityCount with persons
       const entityCount: EntityCount = {
         count: entity.count || 0,
@@ -513,6 +514,7 @@ const parseEntityCounts = (entities: any): { [id: string]: EntityCount } => {
         persons: {
           visitor: entity.persons?.visitor || [],
           member: entity.persons?.member || [],
+          security: entity.persons?.security || [],
         },
       };
 

@@ -48,9 +48,54 @@ type Nodes = {
     y: number;
     x_px: number;
     y_px: number;
-  };
+};
 
-  export type MaskedAreaLabelType = {
+export type TextBoxType = {
+    posX: number;
+    posY: number;
+    fontSize: number;
+    fontColor: string;
+};
+
+export function parseTextBox(
+    jsonStr?: string | null,
+    defaultPos: { x: number; y: number } = { x: 100, y: 100 },
+    defaultFontSize = 16,
+    defaultFontColor = '#ffffff'
+): TextBoxType {
+    if (jsonStr && typeof jsonStr === 'string' && jsonStr.trim() !== '') {
+        try {
+            const parsed = JSON.parse(jsonStr);
+            if (parsed && typeof parsed === 'object') {
+                return {
+                    posX: typeof parsed.posX === 'number' ? parsed.posX : defaultPos.x,
+                    posY: typeof parsed.posY === 'number' ? parsed.posY : defaultPos.y,
+                    fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : defaultFontSize,
+                    fontColor: typeof parsed.fontColor === 'string' ? parsed.fontColor : defaultFontColor,
+                };
+            }
+        } catch (e) {
+            // Ignore parse error and return default
+        }
+    }
+    return {
+        posX: defaultPos.x,
+        posY: defaultPos.y,
+        fontSize: defaultFontSize,
+        fontColor: defaultFontColor,
+    };
+}
+
+export function stringifyTextBox(tb: TextBoxType): string {
+    return JSON.stringify({
+        posX: Math.round(tb.posX),
+        posY: Math.round(tb.posY),
+        fontSize: Math.round(tb.fontSize),
+        fontColor: tb.fontColor || '#ffffff',
+    });
+}
+
+export type MaskedAreaLabelType = {
     id: string;
     labelName: string;
 }

@@ -3,9 +3,10 @@ import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import PageContainer from 'src/components/container/PageContainer';
 import { useTheme } from '@mui/material';
 import MonitoringSidebar from 'src/components/dashboards/monitoring/Sidebar/MonitoringSidebar';
+import MonitoringRightSidebar from 'src/components/dashboards/monitoring/Sidebar/MonitoringRightSidebar';
 import MonitoringFooter from 'src/components/dashboards/monitoring/Footer/MonitoringFooter';
 import ToolbarMonitor from 'src/layouts/full/monitoringLayout/Toolbar';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   toggleHorizontal,
   setMonitorSidebar,
@@ -93,6 +94,46 @@ const Monitoring = () => {
     };
   }, [dispatch]);
 
+  // State for collapsible MonitoringSidebar
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [showRightSidebar, setShowRightSidebar] = useState(true);
+  const [footerExpanded, setFooterExpanded] = useState<string | null>(null);
+
+  // Toggle handler for showing sidebar with sequential footer retraction
+  const handleToggleSidebar = React.useCallback(
+    (action: React.SetStateAction<boolean>) => {
+      setShowSidebar((prev) => {
+        const nextState = typeof action === 'function' ? action(prev) : action;
+        if (nextState && footerExpanded) {
+          setFooterExpanded(null);
+          setTimeout(() => {
+            setShowSidebar(true);
+          }, 300);
+          return false;
+        }
+        return nextState;
+      });
+    },
+    [footerExpanded],
+  );
+
+  const handleToggleRightSidebar = React.useCallback(
+    (action: React.SetStateAction<boolean>) => {
+      setShowRightSidebar((prev) => {
+        const nextState = typeof action === 'function' ? action(prev) : action;
+        if (nextState && footerExpanded) {
+          setFooterExpanded(null);
+          setTimeout(() => {
+            setShowRightSidebar(true);
+          }, 300);
+          return false;
+        }
+        return nextState;
+      });
+    },
+    [footerExpanded],
+  );
+
   return (
     <>
       {/* <ToolbarStyled>
@@ -104,9 +145,9 @@ const Monitoring = () => {
         description="This is the Monitoring Dashboard page"
       >
         <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%', height: 'calc(100vh - 100px)' }}>
-          <MonitoringSidebar />
+          <MonitoringSidebar showSidebar={showSidebar} setShowSidebar={handleToggleSidebar} />
           
-          <Box sx={{ flex: 1, overflow: 'hidden', pl: 1, pt: 2 }}>
+          <Box sx={{ flex: 1, overflow: 'hidden', pl: 1, pr: 1, pt: 2, transition: 'all 0.2s ease' }}>
             <Grid container>
               <Grid size={{ xs: 12 }}>
                 <MonitoringGrid
@@ -120,10 +161,18 @@ const Monitoring = () => {
               </Grid>
             </Grid>
           </Box>
+
+          <MonitoringRightSidebar showSidebar={showRightSidebar} setShowSidebar={handleToggleRightSidebar} />
         </Box>
       </PageContainer>
 
-      <MonitoringFooter />
+      <MonitoringFooter
+        showSidebar={showSidebar}
+        setShowSidebar={handleToggleSidebar}
+        showRightSidebar={showRightSidebar}
+        expandedSection={footerExpanded}
+        setExpandedSection={setFooterExpanded}
+      />
       <AlarmPopup alarm={latest} />
       <AlarmDetailDialog />
       <TrackingDetailDialog />
