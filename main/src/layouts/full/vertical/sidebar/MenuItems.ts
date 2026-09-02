@@ -64,7 +64,7 @@ const getMenuItems = (alarmSettings: AlarmSettingType[]): MenuitemsType[] => {
     {
       navlabel: true,
       subheader: 'Dashboard',
-    },
+    },    
     {
       id: uniqueId(),
       title: 'Main Menu',

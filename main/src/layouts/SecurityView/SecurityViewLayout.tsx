@@ -36,6 +36,7 @@ const PageWrapper = styled('div')(({ theme}) => ({
 
 const SecurityViewLayout: FC = () => {
   const dispatch = useDispatch();
+  const appId = localStorage.getItem('applicationId') || '';
   const customizer = useSelector((state: RootState) => state.customizer);
   const settings = useSelector((state: RootState) => state.settings);
   const evacState = useSelector((state: RootState) => state.evacuationReducer.evacState);
@@ -122,13 +123,13 @@ const SecurityViewLayout: FC = () => {
     if (focusAlarm === null || focusAlarm === undefined) return;
     
     if (!focusAlarm.beacon) return;
-    const startTopic = `people_tracking/highlight/card/${focusAlarm.beacon}`;
+    const startTopic = `people_tracking/${appId.toUpperCase()}/highlight/card/${focusAlarm.beacon}`;
     const payload = 'Start';
 
     publishMQTT(startTopic, payload);
     console.log(`[MQTT] Published Start message to ${startTopic}`);
 
-    const topic = `people_tracking/highlight/positions/${focusAlarm.beacon}`;
+    const topic = `people_tracking/${appId.toUpperCase()}/highlight/positions/${focusAlarm.beacon}`;
     console.log(`[MQTT] Subscribing to focus alarm topic: ${topic}`);
 
     const unsubscribe = startMQTTclient((msg: any) => {

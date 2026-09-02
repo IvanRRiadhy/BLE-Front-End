@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   Box,
   Grid2 as Grid,
@@ -20,21 +20,21 @@ import {
   TableSortLabel,
   Skeleton,
   CircularProgress,
+  Checkbox,
+  Tooltip,
+  List,
+  ListItem,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconTrash } from '@tabler/icons-react';
+import { IconCheck, IconCircleCheck, IconCircleX, IconTrash, IconX } from '@tabler/icons-react';
 import { RootState, AppDispatch, useDispatch, useSelector } from 'src/store/Store';
 import {
   OrganizationType,
   UpdateFilter,
-  deleteOrganization,
-  fetchOrganizationDT,
 } from 'src/store/apps/crud/organization';
 import AddEditOrganization from './AddEditOrganizationList';
-import { defaultOrganizationFilter } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
 import { useDeleteOrganization, useOrganizationList } from 'src/hooks/useOrganization';
-// import { useTranslation } from 'react-i18next';
 
 const columns = [
   { label: 'Organization Code', field: '', sortAble: false },
@@ -45,26 +45,32 @@ const SKELETON_ROWS = 5;
 
 const OrganizationList = () => {
   const dispatch: AppDispatch = useDispatch();
-  // const organizationData: OrganizationType[] = useSelector(
-  //   (state: RootState) => state.organizationReducer.organizations,
-  // );
-  // const organizationTotalCount = useSelector((state: RootState) => state.organizationReducer.organizationTotalCount);
-  // const organizationFilteredCount = useSelector(
-  //   (state: RootState) => state.organizationReducer.organizationFilteredCount,
-  // );
   const organizationFilter = useSelector(
     (state: RootState) => state.organizationReducer.organizationFilter,
   );
-  const { data, isLoading: queryLoading } = useOrganizationList(organizationFilter);
+  const { data, isLoading: queryLoading, isFetching, refetch } = useOrganizationList(organizationFilter);
+  const deleteMutation = useDeleteOrganization();
 
   const organizationData = data?.data || [];
-  const organizationTotalCount = data?.recordsTotal || 0;
   const organizationFilteredCount = data?.recordsFiltered || 0;
-  const prevFilterRef = useRef(organizationFilter);
-  // const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
-  const isLoading = useSelector((state: RootState) => state.organizationReducer.isLoading);
-  const hasLoaded = useSelector((state: RootState) => state.organizationReducer.hasLoaded);
+  const currentPageIds = useMemo(() => organizationData.map((x) => x.id), [organizationData]);
+
+  // 🔹 Multi-select & Batch Delete State
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteItems, setDeleteItems] = useState<
+    Array<{
+      id: string;
+      name: string;
+      code?: string;
+      selected: boolean;
+      status: 'idle' | 'loading' | 'success' | 'error';
+      errorMessage?: string;
+    }>
+  >([]);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDone, setIsDeleteDone] = useState(false);
+
   // Pagination State
   const page = Math.floor(organizationFilter.Start / organizationFilter.Length);
   const rowsPerPage = organizationFilter.Length;
@@ -102,98 +108,121 @@ const OrganizationList = () => {
     }
   };
 
-  // useEffect(() => {
-  //   dispatch(UpdateFilter(defaultOrganizationFilter));
-  //   try {
-  //     setLoading(true);
-  //     dispatch(fetchOrganizationDT(defaultOrganizationFilter));
-  //   } catch (error) {
-  //     console.error('Error fetching organization data:', error);
-  //   }
-  //   setTimeout(() => {
-  //     setLoading(false);
-  //   }, 500);
-  // }, [dispatch]);
-
-  // useEffect(() => {
-  //   const prevFilter = prevFilterRef.current;
-  //   const isStartorLengthChanged =
-  //     prevFilter.Start !== organizationFilter.Start ||
-  //     prevFilter.Length !== organizationFilter.Length;
-  //   if (isStartorLengthChanged) {
-  //     setLoading(true);
-  //   }
-  //   dispatch(fetchOrganizationDT(organizationFilter)).finally(() => {
-  //     if (isStartorLengthChanged) {
-  //       setTimeout(() => {
-  //         setLoading(false);
-  //       }, 500);
-  //     }
-  //   });
-  //   prevFilterRef.current = organizationFilter;
-  // }, [organizationFilter, dispatch]);
-
-  //Delete Pop-up
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedOrg, setSelectedOrg] = useState<OrganizationType | null>(null);
-  const deleteMutation = useDeleteOrganization();
-  // Open delete confirmation dialog
-  const handleOpenDeleteDialog = (org: OrganizationType) => {
-    setSelectedOrg(org);
+  // 🔹 Delete handling
+  const handleOpenDeleteDialog = (ids: string[] | string) => {
+    const idList = Array.isArray(ids) ? ids : [ids];
+    const items = idList.map((id) => {
+      const org = organizationData.find((o) => o.id === id);
+      return {
+        id,
+        name: org?.name || `Organization (${id})`,
+        code: org?.code,
+        selected: true,
+        status: 'idle' as const,
+      };
+    });
+    setDeleteItems(items);
+    setIsDeleting(false);
+    setIsDeleteDone(false);
     setDeleteDialogOpen(true);
   };
 
-  // Close delete confirmation dialog
-  const handleCloseDeleteDialog = () => {
-    setDeleteDialogOpen(false);
-    setSelectedOrg(null);
+  const handleToggleItemSelect = (id: string) => {
+    if (isDeleting || isDeleteDone) return;
+    setDeleteItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, selected: !item.selected } : item,
+      ),
+    );
   };
 
-  // Confirm delete action
+  const handleCloseDeleteDialog = () => {
+    if (isDeleting) return;
+    setDeleteDialogOpen(false);
+    setDeleteItems([]);
+    setIsDeleteDone(false);
+  };
+
   const handleConfirmDelete = async () => {
-    if (selectedOrg) {
-      setLoading(true);
-      // try {
-      //   const result = await dispatch(deleteOrganization(selectedOrg.id));
-      //   if (result && result.type && result.type.endsWith('/fulfilled')) {
-      //     await dispatch(fetchOrganizationDT(organizationFilter));
-      //     toast.success('Data Deleted');
-      //   }
-      // } catch (error) {
-      //   toast.error('Delete Data Unsuccessful');
-      //   console.error('Error deleting organization:', error);
-      // }
-      try {
-        await deleteMutation.mutateAsync(selectedOrg.id);
-        toast.success('Data Deleted');
-      } catch (error) {
-        toast.error('Delete failed');
-        console.error(error);
-      }
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
+    const activeItems = deleteItems.filter((item) => item.selected);
+    if (activeItems.length === 0) {
+      toast.error('No items selected for deletion');
+      return;
     }
-    handleCloseDeleteDialog();
+
+    setIsDeleting(true);
+    let successCount = 0;
+    let failed = false;
+    const successfullyDeletedIds: string[] = [];
+
+    for (const item of deleteItems) {
+      if (!item.selected) continue;
+
+      // Set current item to loading
+      setDeleteItems((prev) =>
+        prev.map((it) => (it.id === item.id ? { ...it, status: 'loading' } : it)),
+      );
+
+      try {
+        await deleteMutation.mutateAsync(item.id);
+        successfullyDeletedIds.push(item.id);
+        successCount++;
+        // Set current item to success
+        setDeleteItems((prev) =>
+          prev.map((it) => (it.id === item.id ? { ...it, status: 'success' } : it)),
+        );
+      } catch (error: any) {
+        failed = true;
+        // Set current item to error
+        setDeleteItems((prev) =>
+          prev.map((it) =>
+            it.id === item.id
+              ? { ...it, status: 'error', errorMessage: error?.message || 'Failed to delete' }
+              : it,
+          ),
+        );
+        toast.error(`Failed to delete "${item.name}". Stopped remaining deletions.`);
+        break; // Stop the whole loop on failure
+      }
+    }
+
+    // Remove successfully deleted from selectedIds
+    if (successfullyDeletedIds.length > 0) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        successfullyDeletedIds.forEach((id) => next.delete(id));
+        return next;
+      });
+      await refetch();
+    }
+
+    setIsDeleting(false);
+    setIsDeleteDone(true);
+
+    if (!failed && successCount > 0) {
+      toast.success(`Successfully deleted ${successCount} organization(s)`);
+    }
   };
 
   const renderSkeletonRows = (rows: number) => (
     <>
       {Array.from({ length: rows }).map((_, i) => (
         <TableRow key={`skeleton-${i}`}>
-          {/* sticky index */}
           <TableCell
             sx={{
               position: 'sticky',
               left: 0,
               backgroundColor: 'background.paper',
               zIndex: 1,
-              width: 35,
-              minWidth: 35,
-              maxWidth: 35,
+              width: 85,
+              minWidth: 85,
+              maxWidth: 85,
             }}
           >
-            <Skeleton variant="text" width={18} />
+            <Box display="flex" alignItems="center" gap={1}>
+              <Skeleton variant="rounded" width={22} height={22} />
+              <Skeleton variant="text" width={18} />
+            </Box>
           </TableCell>
           <TableCell>
             <Skeleton variant="text" width={180} height={22} />
@@ -204,7 +233,6 @@ const OrganizationList = () => {
           <TableCell>
             <Skeleton variant="text" width={120} height={22} />
           </TableCell>
-          {/* right actions */}
           <TableCell
             sx={{
               position: 'sticky',
@@ -218,8 +246,6 @@ const OrganizationList = () => {
           >
             <Box display="flex" gap={1}>
               <Skeleton variant="rounded" width={90} height={32} />
-              {/* <Skeleton variant="circular" width={32} height={32} />
-                <Skeleton variant="circular" width={32} height={32} /> */}
             </Box>
           </TableCell>
         </TableRow>
@@ -232,25 +258,85 @@ const OrganizationList = () => {
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
           <BlankCard>
-            <TableContainer  sx={{
-              maxHeight: '55vh',
-            }}>
+            {/* --- Bulk Action Bar --- */}
+            {selectedIds.size > 0 && (
+              <Box
+                sx={{
+                  backgroundColor: 'primary.main',
+                  color: 'white',
+                  px: 2,
+                  py: 1,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderTopLeftRadius: 8,
+                  borderTopRightRadius: 8,
+                }}
+              >
+                <Typography>{selectedIds.size} item(s) selected</Typography>
+                <Box display="flex" gap={1}>
+                  <Tooltip title="Multi-Delete">
+                    <IconButton
+                      color="default"
+                      onClick={() => handleOpenDeleteDialog(Array.from(selectedIds))}
+                    >
+                      <IconTrash size={20} color="white" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Cancel">
+                    <IconButton color="default" onClick={() => setSelectedIds(new Set())}>
+                      <IconX size={20} color="white" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </Box>
+            )}
+
+            <TableContainer
+              sx={{
+                maxHeight: '55vh',
+              }}
+            >
               <Table stickyHeader aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
                 <TableHead>
                   <TableRow>
-                    {/* Left Sticky Empty Column */}
+                    {/* Left Sticky Checkbox & Index Column */}
                     <TableCell
                       sx={{
                         position: 'sticky',
                         left: 0,
                         backgroundColor: 'background.paper',
                         zIndex: 2,
-                        width: 35, // Fixed width
-                        minWidth: 35,
-                        maxWidth: 35,
+                        width: 85,
+                        minWidth: 85,
+                        maxWidth: 85,
                       }}
                     >
-                      <Typography variant="h6"></Typography>
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        <Checkbox
+                          indeterminate={
+                            currentPageIds.some((id) => selectedIds.has(id)) &&
+                            !currentPageIds.every((id) => selectedIds.has(id))
+                          }
+                          checked={
+                            currentPageIds.length > 0 &&
+                            currentPageIds.every((id) => selectedIds.has(id))
+                          }
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setSelectedIds((prev) => {
+                              const updated = new Set(prev);
+                              if (checked) currentPageIds.forEach((id) => updated.add(id));
+                              else currentPageIds.forEach((id) => updated.delete(id));
+                              return updated;
+                            });
+                          }}
+                          size="small"
+                        />
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                          #
+                        </Typography>
+                      </Box>
                     </TableCell>
                     {columns.map((col) => (
                       <TableCell key={col.label}>
@@ -267,24 +353,24 @@ const OrganizationList = () => {
                         )}
                       </TableCell>
                     ))}
-                    {/* Right Sticky Empty Column */}
+                    {/* Right Sticky Actions Column */}
                     <TableCell
                       sx={{
                         position: 'sticky',
                         right: 0,
                         backgroundColor: 'background.paper',
                         zIndex: 2,
-                        width: 150, // Fixed width
+                        width: 150,
                         minWidth: 150,
                         maxWidth: 150,
                       }}
                     >
-                      <Typography variant="h6"> Actions </Typography>
+                      <Typography variant="h6">Actions</Typography>
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {queryLoading
+                  {queryLoading || isFetching
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : organizationData.map((organization, index) => (
                         <TableRow key={organization.id}>
@@ -294,14 +380,29 @@ const OrganizationList = () => {
                               left: 0,
                               backgroundColor: 'background.paper',
                               zIndex: 1,
-                              width: 35, // Fixed width
-                              minWidth: 35,
-                              maxWidth: 35,
-                              alignItems: 'center',
-                              justifyContent: 'center',
+                              width: 85,
+                              minWidth: 85,
+                              maxWidth: 85,
                             }}
                           >
-                            {index + 1 + page * rowsPerPage}
+                            <Box display="flex" alignItems="center" gap={0.5}>
+                              <Checkbox
+                                checked={selectedIds.has(organization.id)}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setSelectedIds((prev) => {
+                                    const updated = new Set(prev);
+                                    if (checked) updated.add(organization.id);
+                                    else updated.delete(organization.id);
+                                    return updated;
+                                  });
+                                }}
+                                size="small"
+                              />
+                              <Typography variant="body2">
+                                {index + 1 + page * rowsPerPage}
+                              </Typography>
+                            </Box>
                           </TableCell>
                           <TableCell>{organization.code}</TableCell>
                           <TableCell>{organization.name}</TableCell>
@@ -314,19 +415,21 @@ const OrganizationList = () => {
                               zIndex: 1,
                               gap: 1,
                               alignItems: 'center',
-                              width: 150, // Fixed width
+                              width: 150,
                               minWidth: 150,
                               maxWidth: 150,
                             }}
                           >
                             <AddEditOrganization type="edit" organization={organization} />
-                            <IconButton
-                              color="error"
-                              size="small"
-                              onClick={() => handleOpenDeleteDialog(organization)}
-                            >
-                              <IconTrash size={20} />
-                            </IconButton>
+                            <Tooltip title="Delete Organization" arrow>
+                              <IconButton
+                                color="error"
+                                size="small"
+                                onClick={() => handleOpenDeleteDialog(organization.id)}
+                              >
+                                <IconTrash size={20} />
+                              </IconButton>
+                            </Tooltip>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -346,29 +449,134 @@ const OrganizationList = () => {
           </BlankCard>
         </Box>
       </Grid>
+
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete the organization <strong>{selectedOrg?.name}</strong>?
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={!isDeleting ? handleCloseDeleteDialog : undefined}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: '16px' },
+        }}
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'error.main' }}>
+          <IconTrash size={22} color="#fa896b" />
+          <Typography variant="h5" fontWeight="bold">
+            Confirm Deletion
+          </Typography>
+        </DialogTitle>
+        <DialogContent dividers>
+          <DialogContentText sx={{ mb: 2, color: 'text.primary' }}>
+            Are you sure you want to delete the following item(s)?
           </DialogContentText>
+          <List sx={{ maxHeight: 320, overflow: 'auto', p: 0 }}>
+            {deleteItems.map((item, index) => (
+              <ListItem
+                key={item.id}
+                divider={index < deleteItems.length - 1}
+                sx={{
+                  py: 1,
+                  px: 1.5,
+                  borderRadius: 1,
+                  mb: 0.5,
+                  bgcolor: !item.selected ? 'action.hover' : 'background.paper',
+                  opacity: !item.selected ? 0.6 : 1,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Box display="flex" alignItems="center" gap={1.5} sx={{ overflow: 'hidden' }}>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: 600,
+                      textDecoration: !item.selected ? 'line-through' : 'none',
+                      color:
+                        item.status === 'error'
+                          ? 'error.main'
+                          : item.status === 'success'
+                          ? 'success.main'
+                          : 'text.primary',
+                      whiteSpace: 'nowrap',
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {item.name}
+                  </Typography>
+                  {item.code && (
+                    <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                      ({item.code})
+                    </Typography>
+                  )}
+                </Box>
+
+                <Box display="flex" alignItems="center" sx={{ minWidth: 36, justifyContent: 'flex-end' }}>
+                  {item.status === 'loading' ? (
+                    <CircularProgress size={20} color="primary" />
+                  ) : item.status === 'success' ? (
+                    <Tooltip title="Successfully deleted">
+                      <Box display="flex" alignItems="center" color="success.main">
+                        <IconCircleCheck size={24} color="#13deb9" />
+                      </Box>
+                    </Tooltip>
+                  ) : item.status === 'error' ? (
+                    <Tooltip title={item.errorMessage || 'Failed to delete'}>
+                      <IconButton size="small" color="error">
+                        <IconCircleX size={24} color="#fa896b" />
+                      </IconButton>
+                    </Tooltip>
+                  ) : (
+                    <Tooltip
+                      title={
+                        item.selected
+                          ? 'Click to exclude from deletion'
+                          : 'Click to include in deletion'
+                      }
+                    >
+                      <IconButton
+                        size="small"
+                        disabled={isDeleting || isDeleteDone}
+                        onClick={() => handleToggleItemSelect(item.id)}
+                        color={item.selected ? 'primary' : 'default'}
+                      >
+                        {item.selected ? (
+                          <IconCheck size={20} color="#5d87ff" />
+                        ) : (
+                          <IconX size={20} color="#9e9e9e" />
+                        )}
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </Box>
+              </ListItem>
+            ))}
+          </List>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">
-            Cancel
+
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button onClick={handleCloseDeleteDialog} disabled={isDeleting}>
+            {isDeleteDone ? 'Close' : 'Cancel'}
           </Button>
-          <Button
-            onClick={handleConfirmDelete}
-            color={deleteMutation.isPending ? 'primary' : 'error'}
-            disabled={deleteMutation.isPending}
-            startIcon={deleteMutation.isPending ? <CircularProgress size={20} /> : null}
-          >
-            {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
-          </Button>
+          {!isDeleteDone && (
+            <Button
+              onClick={handleConfirmDelete}
+              color="error"
+              variant="contained"
+              disabled={isDeleting || deleteItems.filter((i) => i.selected).length === 0}
+              startIcon={isDeleting ? <CircularProgress size={18} color="inherit" /> : undefined}
+            >
+              {isDeleting
+                ? 'Deleting...'
+                : `Delete (${deleteItems.filter((i) => i.selected).length})`}
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </Grid>
   );
 };
 export default OrganizationList;
+

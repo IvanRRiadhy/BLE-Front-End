@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
-  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
@@ -15,16 +14,25 @@ import {
   ListItemAvatar,
   ListItemText,
   Stack,
+  IconButton,
+  Tooltip,
+  CircularProgress,
+  ListItem,
 } from '@mui/material';
+import {
+  IconTrash,
+  IconX,
+  IconCheck,
+  IconCircleCheck,
+  IconCircleX,
+} from '@tabler/icons-react';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
-import { SelectMemberId, UpdateFilter } from 'src/store/apps/crud/member';
-import Scrollbar from 'src/components/custom-scroll/Scrollbar';
+import { SelectMemberId, UpdateFilter, memberType } from 'src/store/apps/crud/member';
 import SecurityGuardListItem from './SecurityGuardListItem';
 import { defaultMemberFilter } from 'src/store/apps/defaultForm';
-import { memberType } from 'src/store/apps/crud/member';
-import { useMemberList, useDeleteMember } from 'src/hooks/useMember';
 import { useDeleteSecurity, useInfiniteSecurityList } from 'src/hooks/useSecurityGuard';
 import { useInView } from 'react-intersection-observer';
+import toast from 'react-hot-toast';
 
 const SKELETON_ROWS = 5;
 
@@ -42,6 +50,7 @@ const SecurityGuardList = () => {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
+    refetch,
   } = useInfiniteSecurityList(memberFilter, 50);
 
   const { ref, inView } = useInView();
@@ -54,53 +63,139 @@ const SecurityGuardList = () => {
 
   const deleteMutation = useDeleteSecurity();
 
-  // 🔹 State for bulk select
-  const [isManySelect, setIsManySelect] = useState(false);
-  const [manySelectSecurityGuards, setManySelectSecurityGuards] = useState<memberType[]>([]);
-  const [isChecked, setIsChecked] = useState(false);
+  // 🔹 State for bulk select & batch delete
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteItems, setDeleteItems] = useState<
+    Array<{
+      id: string;
+      name: string;
+      bleCardNumber?: string;
+      personId?: string;
+      selected: boolean;
+      status: 'idle' | 'loading' | 'success' | 'error';
+      errorMessage?: string;
+    }>
+  >([]);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDone, setIsDeleteDone] = useState(false);
 
   // 🔹 Derived members list
   const members = data?.pages.flatMap((page) => page.data) ?? [];
   const active = members?.find((member: memberType) => member.id === selectedMemberId);
-  // ---------------------------------------------------------------------------
-  // ✅ Initialization on mount
-  // ---------------------------------------------------------------------------
+
   useEffect(() => {
-    // Reset filter on mount (only once)
     dispatch(UpdateFilter({ ...defaultMemberFilter }));
   }, [dispatch]);
 
-  // ---------------------------------------------------------------------------
-  // ✅ Delete Handlers
-  // ---------------------------------------------------------------------------
-  const handleOpenDeleteDialog = () => setDeleteDialogOpen(true);
-  const handleCloseDeleteDialog = () => setDeleteDialogOpen(false);
+  const handleToggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  // 🔹 Delete Handlers
+  const handleOpenDeleteDialog = (ids: string[] | string) => {
+    const idList = Array.isArray(ids) ? ids : [ids];
+    const items = idList.map((id) => {
+      const m = members.find((mem) => mem.id === id);
+      return {
+        id,
+        name: m?.name || `Security Guard (${id})`,
+        bleCardNumber: m?.bleCardNumber,
+        personId: m?.personId,
+        selected: true,
+        status: 'idle' as const,
+      };
+    });
+    setDeleteItems(items);
+    setIsDeleting(false);
+    setIsDeleteDone(false);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleToggleItemSelect = (id: string) => {
+    if (isDeleting || isDeleteDone) return;
+    setDeleteItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, selected: !item.selected } : item,
+      ),
+    );
+  };
+
+  const handleCloseDeleteDialog = () => {
+    if (isDeleting) return;
+    setDeleteDialogOpen(false);
+    setDeleteItems([]);
+    setIsDeleteDone(false);
+  };
 
   const handleConfirmDelete = async () => {
-    try {
-      for (const member of manySelectSecurityGuards) {
-        await deleteMutation.mutateAsync(member.id);
-      }
-      setManySelectSecurityGuards([]);
-      setIsManySelect(false);
-    } catch (err) {
-      console.error('Error deleting security guards:', err);
+    const activeItems = deleteItems.filter((item) => item.selected);
+    if (activeItems.length === 0) {
+      toast.error('No items selected for deletion');
+      return;
     }
-    handleCloseDeleteDialog();
-  };
 
-  // ---------------------------------------------------------------------------
-  // ✅ Bulk selection
-  // ---------------------------------------------------------------------------
-  const handleSelectAll = () => {
-    setIsChecked(!isChecked);
-    setManySelectSecurityGuards(!isChecked ? members : []);
-  };
+    setIsDeleting(true);
+    let successCount = 0;
+    let failed = false;
+    const successfullyDeletedIds: string[] = [];
 
-  const handleCancelClick = () => {
-    setIsManySelect(false);
-    setManySelectSecurityGuards([]);
+    for (const item of deleteItems) {
+      if (!item.selected) continue;
+
+      setDeleteItems((prev) =>
+        prev.map((it) => (it.id === item.id ? { ...it, status: 'loading' } : it)),
+      );
+
+      try {
+        await deleteMutation.mutateAsync(item.id);
+        successfullyDeletedIds.push(item.id);
+        successCount++;
+
+        if (selectedMemberId === item.id) {
+          dispatch(SelectMemberId(''));
+        }
+
+        setDeleteItems((prev) =>
+          prev.map((it) => (it.id === item.id ? { ...it, status: 'success' } : it)),
+        );
+      } catch (error: any) {
+        failed = true;
+        setDeleteItems((prev) =>
+          prev.map((it) =>
+            it.id === item.id
+              ? { ...it, status: 'error', errorMessage: error?.message || 'Failed to delete' }
+              : it,
+          ),
+        );
+        toast.error(`Failed to delete "${item.name}". Stopped remaining deletions.`);
+        break;
+      }
+    }
+
+    if (successfullyDeletedIds.length > 0) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        successfullyDeletedIds.forEach((id) => next.delete(id));
+        return next;
+      });
+      await refetch();
+    }
+
+    setIsDeleting(false);
+    setIsDeleteDone(true);
+
+    if (!failed && successCount > 0) {
+      toast.success(`Successfully deleted ${successCount} security guard(s)`);
+    }
   };
 
   // ---------------------------------------------------------------------------
@@ -127,71 +222,52 @@ const SecurityGuardList = () => {
     </>
   );
 
-  // ---------------------------------------------------------------------------
-  // ✅ UI Rendering
-  // ---------------------------------------------------------------------------
   return (
     <Box display="flex" flexDirection="column" height="100%">
-      <Box
-        display="flex"
-        flexDirection="row"
-        justifyContent="space-between"
-        alignItems="center"
-        gap={1}
-        sx={{ ml: 2 }}
-      >
-        {isManySelect ? (
-          <>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              sx={{ minWidth: '80px', py: 0.5 }}
-              onClick={handleCancelClick}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              size="small"
-              sx={{ minWidth: '80px', py: 0.5 }}
-              onClick={handleOpenDeleteDialog}
-            >
-              Delete
-            </Button>
-          </>
-        ) : (
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            sx={{ minWidth: '80px', py: 0.5 }}
-            onClick={() => setIsManySelect(true)}
-          >
-            Select
-          </Button>
-        )}
-      </Box>
+      {/* --- Bulk Action Bar --- */}
+      {selectedIds.size > 0 && (
+        <Box
+          sx={{
+            backgroundColor: 'primary.main',
+            color: 'white',
+            px: 2,
+            py: 1,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderRadius: 1,
+            mx: 2,
+            mb: 1,
+          }}
+        >
+          <Typography variant="subtitle2" color="white" fontWeight={600}>
+            {selectedIds.size} selected
+          </Typography>
+          <Box display="flex" gap={0.5}>
+            <Tooltip title="Multi-Delete">
+              <IconButton
+                size="small"
+                onClick={() => handleOpenDeleteDialog(Array.from(selectedIds))}
+                sx={{ color: 'white' }}
+              >
+                <IconTrash size={18} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Cancel">
+              <IconButton
+                size="small"
+                onClick={() => setSelectedIds(new Set())}
+                sx={{ color: 'white' }}
+              >
+                <IconX size={18} />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Box>
+      )}
 
       <Box sx={{ flex: 1, overflowY: 'auto' }}>
-        <List>
-          {/* <Box
-          sx={{
-            height: { lg: 'calc(100vh - 220px)', md: '100vh' },
-            maxHeight: '71vh',
-            overflow: 'auto',
-          }}
-        > */}
-          {isManySelect && (
-            <Box display="flex" justifyContent="flex-end" alignItems="center" sx={{ mr: 2 }}>
-              <Typography variant="body2" fontWeight={100}>
-                Select All
-              </Typography>
-              <Checkbox edge="end" checked={isChecked} onChange={handleSelectAll} />
-            </Box>
-          )}
-
+        <List sx={{ px: 0 }}>
           {isLoading
             ? renderSkeletonItems(SKELETON_ROWS)
             : members.map((member) => (
@@ -199,9 +275,8 @@ const SecurityGuardList = () => {
                   key={member.id}
                   active={member === active}
                   member={member}
-                  manySelect={isManySelect}
-                  setManySelectSecurityGuards={setManySelectSecurityGuards}
-                  manySelectSecurityGuards={manySelectSecurityGuards}
+                  isSelected={selectedIds.has(member.id)}
+                  onToggleSelect={handleToggleSelect}
                   onSecurityGuardClick={() => {
                     dispatch(SelectMemberId(member.id));
                   }}
@@ -211,25 +286,137 @@ const SecurityGuardList = () => {
           {isFetchingNextPage && renderSkeletonItems(3)}
 
           {hasNextPage && <div ref={ref} style={{ height: '20px' }} />}
-          {/* </Box> */}
         </List>
       </Box>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete these security guards?
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={!isDeleting ? handleCloseDeleteDialog : undefined}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: '16px' },
+        }}
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'error.main' }}>
+          <IconTrash size={22} color="#fa896b" />
+          <Typography variant="h5" fontWeight="bold">
+            Confirm Deletion
+          </Typography>
+        </DialogTitle>
+        <DialogContent dividers>
+          <DialogContentText sx={{ mb: 2, color: 'text.primary' }}>
+            Are you sure you want to delete the following item(s)?
           </DialogContentText>
+          <List sx={{ maxHeight: 320, overflow: 'auto', p: 0 }}>
+            {deleteItems.map((item, index) => (
+              <ListItem
+                key={item.id}
+                divider={index < deleteItems.length - 1}
+                sx={{
+                  py: 1,
+                  px: 1.5,
+                  borderRadius: 1,
+                  mb: 0.5,
+                  bgcolor: !item.selected ? 'action.hover' : 'background.paper',
+                  opacity: !item.selected ? 0.6 : 1,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Box display="flex" alignItems="center" gap={1.5} sx={{ overflow: 'hidden' }}>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: 600,
+                      textDecoration: !item.selected ? 'line-through' : 'none',
+                      color:
+                        item.status === 'error'
+                          ? 'error.main'
+                          : item.status === 'success'
+                          ? 'success.main'
+                          : 'text.primary',
+                      whiteSpace: 'nowrap',
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {item.name}
+                  </Typography>
+                  {item.bleCardNumber && (
+                    <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                      ({item.bleCardNumber})
+                    </Typography>
+                  )}
+                  {!item.bleCardNumber && item.personId && (
+                    <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                      ({item.personId})
+                    </Typography>
+                  )}
+                </Box>
+
+                <Box display="flex" alignItems="center" sx={{ minWidth: 36, justifyContent: 'flex-end' }}>
+                  {item.status === 'loading' ? (
+                    <CircularProgress size={20} color="primary" />
+                  ) : item.status === 'success' ? (
+                    <Tooltip title="Successfully deleted">
+                      <Box display="flex" alignItems="center" color="success.main">
+                        <IconCircleCheck size={24} color="#13deb9" />
+                      </Box>
+                    </Tooltip>
+                  ) : item.status === 'error' ? (
+                    <Tooltip title={item.errorMessage || 'Failed to delete'}>
+                      <IconButton size="small" color="error">
+                        <IconCircleX size={24} color="#fa896b" />
+                      </IconButton>
+                    </Tooltip>
+                  ) : (
+                    <Tooltip
+                      title={
+                        item.selected
+                          ? 'Click to exclude from deletion'
+                          : 'Click to include in deletion'
+                      }
+                    >
+                      <IconButton
+                        size="small"
+                        disabled={isDeleting || isDeleteDone}
+                        onClick={() => handleToggleItemSelect(item.id)}
+                        color={item.selected ? 'primary' : 'default'}
+                      >
+                        {item.selected ? (
+                          <IconCheck size={20} color="#5d87ff" />
+                        ) : (
+                          <IconX size={20} color="#9e9e9e" />
+                        )}
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </Box>
+              </ListItem>
+            ))}
+          </List>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">
-            Cancel
+
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button onClick={handleCloseDeleteDialog} disabled={isDeleting}>
+            {isDeleteDone ? 'Close' : 'Cancel'}
           </Button>
-          <Button onClick={handleConfirmDelete} color="error">
-            Delete
-          </Button>
+          {!isDeleteDone && (
+            <Button
+              onClick={handleConfirmDelete}
+              color="error"
+              variant="contained"
+              disabled={isDeleting || deleteItems.filter((i) => i.selected).length === 0}
+              startIcon={isDeleting ? <CircularProgress size={18} color="inherit" /> : undefined}
+            >
+              {isDeleting
+                ? 'Deleting...'
+                : `Delete (${deleteItems.filter((i) => i.selected).length})`}
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </Box>
@@ -237,3 +424,4 @@ const SecurityGuardList = () => {
 };
 
 export default SecurityGuardList;
+

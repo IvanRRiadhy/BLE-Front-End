@@ -80,6 +80,8 @@ const FloorView: React.FC<{
 }) => {
   const dispatch: AppDispatch = useDispatch();
   const alarmCategory = useAllAlarmCategory().data || [];
+  const activeFeatures = useSelector((state: RootState) => state.sessionReducer.activeFeatures);
+  // console.log(activeFeatures);
   // DUMMY
   const [dummyAlarm, setDummyAlarm] = useState<AlarmType>();
   const { data: memberList = [] } = useAllMembers();
@@ -703,7 +705,7 @@ const FloorView: React.FC<{
   // Cancel following
   const layoutState = useSelector((state: RootState) => state.layoutReducer);
   const activeLayouts = layoutState.layouts.find((l: any) => l.id === layoutState.activeLayoutId);
-
+  const appId = localStorage.getItem('applicationId') || '';
   const handleCancelFollowing = () => {
     if (!activeLayouts?.id || !screenNumber) {
       console.warn('No active layout or screen found for cancel follow.');
@@ -712,7 +714,7 @@ const FloorView: React.FC<{
 
     // Publish "Stop" to MQTT
     if (selectedBeacon?.id) {
-      const topic = `people_tracking/highlight/card/${selectedBeacon.id}`;
+      const topic = `people_tracking/${appId.toUpperCase()}/highlight/card/${selectedBeacon.id}`;
       const payload = JSON.stringify({ message: 'Stop' });
 
       import('mqtt').then(({ connect }) => {
@@ -880,7 +882,7 @@ const isBoundaryActive = isActive('boundary');
               ...(isOverPopulatingActive ? [{ label: 'Show Over Population Areas', checked: showOverPopulate, onChange: setShowOverPopulate }] : []),
               ...(isStayOnAreaActive ? [{ label: 'Show Stay on Areas', checked: showStayOnArea, onChange: setShowStayOnArea }] : []),
               ...(isBoundaryActive ? [{ label: 'Show Boundary Areas', checked: showBoundary, onChange: setShowBoundary }] : []),
-              { label: 'Show Patrol Areas', checked: showPatrolArea, onChange: setShowPatrolArea },
+              ...(activeFeatures.includes('module.patrol') ? [{ label: 'Show Patrol Areas', checked: showPatrolArea, onChange: setShowPatrolArea }] : []),
             ].map((item, idx) => (
               <FormControlLabel
                 key={idx}

@@ -4,9 +4,9 @@ import PageContainer from 'src/components/container/PageContainer';
 // import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import AppCard from 'src/components/shared/AppCard';
 import EventLogList from 'src/components/master/Reports/EventLog/EventLogList';
-import EventReport from 'src/components/master/Reports/EventLog/EventReport';
+import EventReportList from 'src/components/master/Reports/EventLog/EventReportList';
 
-const EventLog = () => {
+const EventReport = () => {
   return (
     <PageContainer title="People Tracking System" description="this is Event Log Page">
       <AppCard>
@@ -18,11 +18,11 @@ const EventLog = () => {
             flexShrink: 0,
           }}
         >
-            <EventReport />
+            <EventReportList />
         </Box>
       </AppCard>
     </PageContainer>
   );
 };
 
-export default EventLog;
+export default EventReport;

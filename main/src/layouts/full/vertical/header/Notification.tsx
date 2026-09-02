@@ -22,6 +22,7 @@ import {
 } from '@mui/material';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 import { IconBellRinging } from '@tabler/icons-react';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import { Link } from 'react-router';
 import { actionStatus, extraActionStatus } from 'src/types/crud/input';
@@ -43,7 +44,7 @@ import toast from 'react-hot-toast';
 
 type BubbleData = {
   id: string;
-  triggerId: string;
+  triggerId?: string;
   title: string;
   subtitle: string;
   status: string;
@@ -52,6 +53,8 @@ type BubbleData = {
   chipColor: string; // New field for chip color
   category: string;
   createdAt: number;
+  isLowBattery?: boolean;
+  usedBy?: string | null;
 };
 
 const AUTOHIDE_MS = 6000;
@@ -71,6 +74,7 @@ const getPriorityColor = (priority: string): string => {
 
 const Notifications = () => {
   const dispatch: AppDispatch = useDispatch();
+  const notificationSetting = useSelector((state: RootState) => state.settings.notificationSetting);
   // const navigate = useNavigate();
   const theme = useTheme();
   const acknowledgeMutation = useAcknowledgeAlarmTrigger();
@@ -227,21 +231,46 @@ const Notifications = () => {
         return;
       }
 
+      const isLowBattery =
+        alarmData.status?.toLowerCase() === 'lowbattery' ||
+        alarmData.status === 'LowBattery';
+
+      const personName = alarmData.personName;
+      const personCategory = alarmData.personCategory;
+      const usedByParts = [personName, personCategory].filter(Boolean);
+      const usedBy = usedByParts.length > 0 ? usedByParts.join(' | ') : null;
+
       // Extract data directly from the MQTT object
-      const bd: BubbleData = {
-        id: uniqueId(),
-        triggerId: alarmData.triggerId,
-        title: alarmData.visitorName || alarmData.MemberName || alarmData.cardName || 'Unknown',
-        subtitle: `${alarmData.cardName ?? ''} · ${alarmData.maskedAreaName ?? 'Unknown'} · ${
-          alarmData.floorplanName ?? 'Unknown'
-        }`,
-        status: getStatusText(alarmData.action?.toLowerCase()),
-        priority: alarmData.priority || 'medium',
-        priorityColor: getPriorityColor(alarmData.priority), // Use priority-based color
-        chipColor: alarmData.color ?? '#2196f3', // Use original alarmData.color for chip
-        category: alarmData.status.toUpperCase() || 'Alert',
-        createdAt: Date.now(),
-      };
+      const bd: BubbleData = isLowBattery
+        ? {
+            id: uniqueId(),
+            triggerId: alarmData.triggerId,
+            title: alarmData.alarmName || 'Low battery alert',
+            subtitle: usedBy ? `Currently used by : ${usedBy}` : '',
+            status: 'Low Battery',
+            priority: alarmData.priority || 'low',
+            priorityColor: getPriorityColor(alarmData.priority || 'low'),
+            chipColor: alarmData.color ?? '#c8b560',
+            category: alarmData.status?.toUpperCase() || 'LOWBATTERY',
+            createdAt: Date.now(),
+            isLowBattery: true,
+            usedBy: usedBy,
+          }
+        : {
+            id: uniqueId(),
+            triggerId: alarmData.triggerId,
+            title: alarmData.visitorName || alarmData.MemberName || alarmData.cardName || 'Unknown',
+            subtitle: `${alarmData.cardName ?? ''} · ${alarmData.maskedAreaName ?? 'Unknown'} · ${
+              alarmData.floorplanName ?? 'Unknown'
+            }`,
+            status: getStatusText(alarmData.action?.toLowerCase()),
+            priority: alarmData.priority || 'medium',
+            priorityColor: getPriorityColor(alarmData.priority), // Use priority-based color
+            chipColor: alarmData.color ?? '#2196f3', // Use original alarmData.color for chip
+            category: alarmData.status?.toUpperCase() || 'ALERT',
+            createdAt: Date.now(),
+            isLowBattery: false,
+          };
 
       // console.log('[Notifications] Creating bubble:', bd);
 
@@ -250,12 +279,14 @@ const Notifications = () => {
         if (next.length > MAX_BUBBLES) next.shift(); // remove oldest
         return next;
       });
-
-      // Play notification sound
-      notificationAudio.currentTime = 0; // rewind if it's still playing
-      notificationAudio.play().catch((err) => {
-        console.warn('Audio playback prevented:', err);
-      });
+      // Play notification sound if not muted
+      if (notificationSetting !== 'mute') {
+        
+        notificationAudio.currentTime = 0; // rewind if it's still playing
+        notificationAudio.play().catch((err) => {
+          console.warn('Audio playback prevented:', err);
+        });
+      }
 
       // auto-hide this one
       const timerId = window.setTimeout(() => {
@@ -398,6 +429,11 @@ const Notifications = () => {
                       delete hideTimers.current[b.id];
                     }
                     setBubbles((prev) => prev.filter((x) => x.id !== b.id));
+
+                    if (b.isLowBattery) {
+                      return;
+                    }
+
                     const trigger = findAlarmTrigger(b.triggerId!);
                     if (trigger) {
                       setSelectedTrigger(trigger);
@@ -456,31 +492,65 @@ const Notifications = () => {
                   />
 
                   <Stack spacing={0.5}>
-                    <Typography variant="subtitle2" sx={{ opacity: 0.75, pt: 0.5 }}>
-                      Alarm Triggered
-                    </Typography>
-                    <Typography variant="h6" fontWeight={700}>
-                      {b.title}
-                    </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                      {b.subtitle}
-                    </Typography>
-                    {/* Priority indicator */}
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        mt: 0.5,
-                      }}
-                    >
-                      <Typography variant="caption" sx={{ opacity: 0.8 }}>
-                        Priority: <strong>{b.priority.toUpperCase()}</strong>
+                    <Box display="flex" alignItems="center" gap={0.5}>
+                      <Typography variant="subtitle2" sx={{ opacity: 0.75, pt: 0.5 }}>
+                        Alarm Triggered
                       </Typography>
-                      <Typography variant="caption" sx={{ opacity: 0.8 }}>
-                        Status: {b.status}
-                      </Typography>
+                      {notificationSetting === 'mute' && (
+                        <Tooltip title="Sound Muted">
+                          <VolumeOffIcon sx={{ fontSize: '1rem', opacity: 0.75, pt: 0.5 }} />
+                        </Tooltip>
+                      )}
                     </Box>
+                    {b.isLowBattery ? (
+                      <>
+                        <Typography variant="h6" fontWeight={700}>
+                          {b.title}
+                        </Typography>
+                        {b.usedBy && (
+                          <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                            Currently used by : {b.usedBy}
+                          </Typography>
+                        )}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            mt: 0.5,
+                          }}
+                        >
+                          <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                            Priority: <strong>{b.priority.toUpperCase()}</strong>
+                          </Typography>
+                        </Box>
+                      </>
+                    ) : (
+                      <>
+                        <Typography variant="h6" fontWeight={700}>
+                          {b.title}
+                        </Typography>
+                        <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                          {b.subtitle}
+                        </Typography>
+                        {/* Priority indicator */}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            mt: 0.5,
+                          }}
+                        >
+                          <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                            Priority: <strong>{b.priority.toUpperCase()}</strong>
+                          </Typography>
+                          <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                            Status: {b.status}
+                          </Typography>
+                        </Box>
+                      </>
+                    )}
                   </Stack>
                 </Paper>
               </motion.div>

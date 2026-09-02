@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Button,
@@ -21,6 +21,7 @@ import { useAllVisitor } from 'src/hooks/useVisitor';
 
 const Toolbar = () => {
   const dispatch: AppDispatch = useDispatch();
+  const appId = localStorage.getItem('applicationId') || '';
   const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
   const activeLayout = layouts.find((l: any) => l.id === activeLayoutId) ?? null;
@@ -46,7 +47,7 @@ const Toolbar = () => {
     }
 
     const bleNumber = visitor.bleCardNumber;
-    const topic = `people_tracking/highlight/card/${bleNumber}`;
+    const topic = `people_tracking/${appId.toUpperCase()}/highlight/card/${bleNumber}`;
     const payload = 'Start';
 
     // ✅ Publish Start message
@@ -71,9 +72,9 @@ const Toolbar = () => {
   };
 
 
-  const filter = createFilterOptions<VisitorType>({
+  const filter = useMemo(() => createFilterOptions<VisitorType>({
     stringify: (option) => `${option.name} ${option.bleCardNumber}`,
-  });
+  }), []);
 
   return (
     <Box sx={{ width: '100%', px: 2, py: 1 }}>

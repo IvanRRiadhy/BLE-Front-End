@@ -27,192 +27,355 @@ import {
   IconRoute,
   IconCards,
 } from '@tabler/icons-react';
-import { uniqueId } from 'lodash';
 import { AlarmSettingType } from 'src/store/apps/alarmsetting/alarmSettings';
 import { RootState, useSelector } from 'src/store/Store';
 
-const useMenuItems = (alarmSettings: AlarmSettingType[]) => {
+export interface MenuItemType {
+  id?: string;
+  navlabel?: boolean;
+  subheader?: string;
+  title?: string;
+  icon?: any;
+  href?: string;
+  children?: MenuItemType[];
+  chip?: string;
+  chipColor?: string;
+  variant?: string;
+  external?: boolean;
+  key?: string[];
+}
+
+export const useMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] => {
   // 🔹 Determine active alarms
   const alarms = Array.isArray(alarmSettings) ? alarmSettings : [];
-  // console.log("ALARM SETTINGS IN MENU: ", alarms);
-const normalize = (v: any) => (typeof v === 'string' ? v.toLowerCase() : '');
+  const normalize = (v: any) => (typeof v === 'string' ? v.toLowerCase() : '');
 
-const isActive = (name: string) =>
-  alarms.some(a => normalize(a?.alarmCategory) === name && a?.isEnabled);
+  const isActive = (name: string) =>
+    alarms.some((a) => normalize(a?.alarmCategory) === name && a?.isEnabled);
 
-const isGeoFencingActive = isActive('geofence');
-const isOverPopulatingActive = isActive('overpopulating');
-const isStayOnAreaActive = isActive('stayonarea');
-const isBoundaryActive = isActive('boundary');
-const activeFeatures = useSelector((state: RootState) => state.sessionReducer.activeFeatures);
-console.log("active features: ", activeFeatures)
+  const isGeoFencingActive = isActive('geofence');
+  const isOverPopulatingActive = isActive('overpopulating');
+  const isStayOnAreaActive = isActive('stayonarea');
+  const isBoundaryActive = isActive('boundary');
+  const activeFeatures = useSelector((state: RootState) => state.sessionReducer.activeFeatures);
 
-  // 🔹 Define all menu items (before filtering)
-  const Menuitems = [
+  // 🔹 Define all menu items with STABLE IDs to avoid re-render reconciliation glitches
+  const Menuitems: MenuItemType[] = [
     {
-      id: uniqueId(),
+      id: 'nav-dashboard',
       title: 'Dashboard',
       icon: IconHome,
       href: '/dashboards/',
       children: [
         {
-          id: uniqueId(),
-          title: 'Main Menu', //Pasti Ada
+          id: 'dashboard-main-menu',
+          title: 'Main Menu',
           icon: IconHome,
           href: '/dashboards/newmainmenu',
         },
         {
-          id: uniqueId(),
-          title: 'Monitoring', // Monitoring Dashboard
+          id: 'dashboard-monitoring',
+          title: 'Monitoring',
           icon: IconDeviceDesktopAnalytics,
           href: '/dashboards/monitoring/viewer',
-          key:['core.monitoring', 'core.tracking'],
+          key: ['core.monitoring', 'core.tracking'],
           children: [
             {
-              id: uniqueId(),
-              title: 'Viewer', // Monitoring Dashboard 
+              id: 'monitoring-viewer',
+              title: 'Viewer',
               icon: IconPoint,
-              key:['core.monitoring', 'core.tracking'],
+              key: ['core.monitoring', 'core.tracking'],
               href: '/dashboards/monitoring/viewer',
             },
             {
-              id: uniqueId(),
-              title: 'Configuration', // Monitoring Dashboard
+              id: 'monitoring-config',
+              title: 'Configuration',
               icon: IconPoint,
-              key:['core.monitoring', 'core.tracking'],
+              key: ['core.monitoring', 'core.tracking'],
               href: '/dashboards/monitoring/config',
             },
           ],
         },
         {
-          id: uniqueId(), 
-          title: "Evacuate --(WIP)--", //Evacuation Management
-          icon: IconMapPin, 
+          id: 'dashboard-evacuate',
+          title: 'Evacuate',
+          icon: IconAppWindow,
           key: ['module.evacuation'],
-          href: "/dashboards/evacuation"
+          href: '/dashboards/evacuation',
         },
       ],
     },
 
     {
-      id: uniqueId(),
-      title: 'Master', //Master Data Management
+      id: 'nav-master',
+      title: 'Master',
       icon: IconAppWindow,
       href: '/master/',
-      key:['core.masterData'],
+      key: ['core.masterData'],
       children: [
         {
-          id: uniqueId(),
-          title: 'Company',//Master Data Management
+          id: 'master-company',
+          title: 'Company',
           icon: IconAffiliate,
-          key:['core.masterData'],
+          key: ['core.masterData'],
           children: [
-            { id: uniqueId(), title: 'Organization', icon: IconAffiliate, href: '/master/organization/' },
-            { id: uniqueId(), title: 'Department', icon: IconAffiliate, href: '/master/department/' },
-            { id: uniqueId(), title: 'District', icon: IconAffiliate, href: '/master/district/' },
+            { id: 'company-org', title: 'Organization', icon: IconAffiliate, href: '/master/organization/' },
+            { id: 'company-dept', title: 'Department', icon: IconAffiliate, href: '/master/department/' },
+            { id: 'company-dist', title: 'District', icon: IconAffiliate, href: '/master/district/' },
           ],
         },
         {
-          id: uniqueId(),
-          title: 'Building', //Master Data Management
+          id: 'master-building',
+          title: 'Building',
           icon: IconBuilding,
           key: ['core.masterData'],
           children: [
-            { id: uniqueId(), title: 'Building', icon: IconBuilding, href: '/master/building/' },
-            { id: uniqueId(), title: 'Floor', icon: IconMap, href: '/master/floor/' },
-            { id: uniqueId(), title: 'Floor Plan', icon: IconMap, href: '/master/floorplan/' },
-            { id: uniqueId(), title: 'Floor Plan Masked Area', icon: IconCropLandscape, href: '/master/floorplanmaskedarea/' },
+            { id: 'building-bld', title: 'Building', icon: IconBuilding, href: '/master/building/' },
+            { id: 'building-flr', title: 'Floor', icon: IconMap, href: '/master/floor/' },
+            { id: 'building-fp', title: 'Floor Plan', icon: IconMap, href: '/master/floorplan/' },
+            {
+              id: 'building-fp-masked',
+              title: 'Floor Plan Masked Area',
+              icon: IconCropLandscape,
+              href: '/master/floorplanmaskedarea/',
+            },
           ],
         },
         {
-          id: uniqueId(),
-          title: 'Devices', //Master Data Management
+          id: 'master-devices',
+          title: 'Devices',
           icon: IconDevices,
           key: ['core.masterData'],
           children: [
-            { id: uniqueId(), title: 'Brand', icon: IconBadgeTm, href: '/master/brand/' },
-
-            { id: uniqueId(), title: 'Ble Reader', icon: IconDeviceIpad, href: '/master/blereader/' },
-            { id: uniqueId(), title: 'Device Mapping', icon: IconDevices, href: '/master/device/' },
+            { id: 'devices-brand', title: 'Brand', icon: IconBadgeTm, href: '/master/brand/' },
+            { id: 'devices-reader', title: 'Ble Reader', icon: IconDeviceIpad, href: '/master/blereader/' },
+            { id: 'devices-mapping', title: 'Device Mapping', icon: IconDevices, href: '/master/device/' },
           ],
         },
         {
-          id: uniqueId(),
-          title: 'Card', //Master Data Management
+          id: 'master-card',
+          title: 'Card',
           icon: IconMapPin,
           key: ['core.masterData'],
           children: [
-            { id: uniqueId(), title: 'Card', icon: IconMapPin, href: '/master/card/' },
-            { id: uniqueId(), title: 'Card Access', icon: IconMapPin, href: '/master/cardaccess/' },
+            { id: 'card-card', title: 'Card', icon: IconMapPin, href: '/master/card/' },
+            { id: 'card-access', title: 'Card Access', icon: IconMapPin, href: '/master/cardaccess/' },
           ],
         },
         {
-          id: uniqueId(),
-          title: 'Security', 
+          id: 'master-security',
+          title: 'Security',
           icon: IconEye,
           children: [
-            { id: uniqueId(), title: 'Security Guard', icon: IconBadge, href: '/master/securityguard/' },
-            { id: uniqueId(), title: 'Patrol Area', icon: IconMapSearch, href: '/master/patrolarea/', key: ['module.patrol'] }, //Patrol Management
-            { id: uniqueId(), title: 'Patrol Route', icon: IconRoute, href: '/master/patrolroute/', key: ['module.patrol'] }, //Patrol Management
-          ]
+            { id: 'sec-guard', title: 'Security Guard', icon: IconBadge, href: '/master/securityguard/' },
+            {
+              id: 'sec-area',
+              title: 'Patrol Area',
+              icon: IconMapSearch,
+              href: '/master/patrolarea/',
+              key: ['module.patrol'],
+            },
+            {
+              id: 'sec-route',
+              title: 'Patrol Route',
+              icon: IconRoute,
+              href: '/master/patrolroute/',
+              key: ['module.patrol'],
+            },
+          ],
         },
-        { id: uniqueId(), title: 'Member Data', icon: IconUsers, href: '/master/membertag/', key: ['core.masterData'] }, //Master Data Management
-        { id: uniqueId(), title: 'Time Group', icon: IconCalendar, href: '/master/timegroup/', key: ['core.masterData'] }, //Master Data Management
-        { id: uniqueId(), title: 'Users', icon: IconMapPin, href: '/master/user/', key: ['core.masterData'] }, //Master Data Management
-        { id: uniqueId(), title: 'Engine', icon: IconMapPin, href: '/master/engine/', key: ['core.masterData'] }, //Master Data Management
-        { id: uniqueId(), title: 'Application', icon: IconAppWindow, href: '/master/application/' },
+        {
+          id: 'master-member',
+          title: 'Member Data',
+          icon: IconUsers,
+          href: '/master/membertag/',
+          key: ['core.masterData'],
+        },
+        {
+          id: 'master-timegroup',
+          title: 'Time Group',
+          icon: IconCalendar,
+          href: '/master/timegroup/',
+          key: ['core.masterData'],
+        },
+        {
+          id: 'master-users',
+          title: 'Users',
+          icon: IconMapPin,
+          href: '/master/user/',
+          key: ['core.masterData'],
+        },
+        {
+          id: 'master-engine',
+          title: 'Engine',
+          icon: IconMapPin,
+          href: '/master/engine/',
+          key: ['core.masterData'],
+        },
+        {
+          id: 'master-app',
+          title: 'Application',
+          icon: IconAppWindow,
+          href: '/master/application/',
+        },
       ],
     },
 
     {
-      id: uniqueId(),
+      id: 'nav-alarm-settings',
       title: 'Alarm Settings',
       icon: IconBell,
       href: '/alarmsetting/',
       key: ['module.alarm'],
       children: [
-        { id: uniqueId(), title: 'Alarm Setting', icon: IconBell, href: '/alarmsetting/', key: ['module.alarm'] }, //Alarm Module
+        {
+          id: 'alarm-setting-main',
+          title: 'Alarm Setting',
+          icon: IconBell,
+          href: '/alarmsetting/',
+          key: ['module.alarm'],
+        },
         ...(isGeoFencingActive
-          ? [{ id: uniqueId(), title: 'GeoFencing Alarm', icon: IconBellExclamation, href: '/alarmsetting/geofencing/', key: ['module.alarm.geofence'] }] //Advanced Alarm : Geofence
+          ? [
+              {
+                id: 'alarm-geofence',
+                title: 'GeoFencing Alarm',
+                icon: IconBellExclamation,
+                href: '/alarmsetting/geofencing/',
+                key: ['module.alarm.geofence'],
+              },
+            ]
           : []),
         ...(isOverPopulatingActive
-          ? [{ id: uniqueId(), title: 'OverPopulating Alarm', icon: IconBellExclamation, href: '/alarmsetting/overpopulating/', key: ['module.alarm.overpopulating'] }]//Advanced Alarm : Over Populating
+          ? [
+              {
+                id: 'alarm-overpop',
+                title: 'OverPopulating Alarm',
+                icon: IconBellExclamation,
+                href: '/alarmsetting/overpopulating/',
+                key: ['module.alarm.overpopulating'],
+              },
+            ]
           : []),
         ...(isStayOnAreaActive
-          ? [{ id: uniqueId(), title: 'Stay On Area Alarm', icon: IconBellExclamation, href: '/alarmsetting/stayonarea/', key: ['module.alarm.stayOnArea'] }]//Advanced Alarm : Stay On Area 
+          ? [
+              {
+                id: 'alarm-stayonarea',
+                title: 'Stay On Area Alarm',
+                icon: IconBellExclamation,
+                href: '/alarmsetting/stayonarea/',
+                key: ['module.alarm.stayOnArea'],
+              },
+            ]
           : []),
         ...(isBoundaryActive
-          ? [{ id: uniqueId(), title: 'Boundary Alarm', icon: IconBellExclamation, href: '/alarmsetting/boundary/', key: ['module.alarm.boundary'] }] //Advanced Alarm : Boundary
+          ? [
+              {
+                id: 'alarm-boundary',
+                title: 'Boundary Alarm',
+                icon: IconBellExclamation,
+                href: '/alarmsetting/boundary/',
+                key: ['module.alarm.boundary'],
+              },
+            ]
           : []),
       ],
     },
 
     {
-      id: uniqueId(),
-      title: 'Visitor', //Master Data Management
+      id: 'nav-visitor',
+      title: 'Visitor',
       icon: IconMapPin,
       href: '/visitor/',
       key: ['core.masterData'],
       children: [
-        { id: uniqueId(), title: 'Visitor Data', icon: IconMapPin, href: '/visitor/visitordata/', key: ['core.masterData'] }, //Master Data Management
-        { id: uniqueId(), title: 'Visitor Invitation', icon: IconMapPin, href: '/visitor/visitorinvitation/', key: ['core.masterData'] }, //Master Data Management
+        {
+          id: 'visitor-data',
+          title: 'Visitor Data',
+          icon: IconMapPin,
+          href: '/visitor/visitordata/',
+          key: ['core.masterData'],
+        },
+        {
+          id: 'visitor-invitation',
+          title: 'Visitor Invitation',
+          icon: IconMapPin,
+          href: '/visitor/visitorinvitation/',
+          key: ['core.masterData'],
+        },
       ],
     },
-    { id: uniqueId(), title: 'Alarm List', icon: IconBellExclamation, href: '/alarm/alarmlist/', key: ['module.alarm'] }, //Alarm Module
+
     {
-      id: uniqueId(),
+      id: 'nav-alarm-list',
+      title: 'Alarm List',
+      icon: IconBellExclamation,
+      href: '/alarm/alarmlist/',
+      key: ['module.alarm'],
+    },
+
+    {
+      id: 'nav-report',
       title: 'Report',
       icon: IconApps,
       href: '/report/',
       children: [
-        { id: uniqueId(), title: 'Visitor Report', icon: IconCalendar, href: '/report/visitorreport/filter/', key: ['core.reporting', 'core.monitoring'] }, //Reports & Analytics & Monitoring Dashboard
-        { id: uniqueId(), title: 'Investigate', icon: IconCalendar, href: '/report/investigate', key: ['core.reporting', 'core.monitoring'] },//Reports & Analytics & Monitoring Dashboard
-        { id: uniqueId(), title: 'Event Log', icon: IconCalendar, href: '/report/eventlog', key: ['core.reporting', 'core.monitoring'] }, //Reports & Analytics & Monitoring Dashboard
-        { id: uniqueId(), title: 'Card History', icon: IconCards, href: '/report/cardhistory' }, 
-        { id: uniqueId(), title: 'Patrol Report', icon: IconCalendar, href: '/report/patrolreport/', key: ['module.patrol'] }, //Patrol Management
-        { id: uniqueId(), title: 'Movement Log', icon: IconCalendar, href: '/report/movementlog/', key: ['core.reporting', 'core.monitoring'] }, //Reports & Analytics & Monitoring Dashboard
-        { id: uniqueId(), title: 'Reader Report', icon: IconCalendar, href: '/report/readerreport/', key: ['core.reporting', 'core.monitoring'] }, //Reports & Analytics & Monitoring Dashboard
-        { id: uniqueId(), title: 'Reader Health Report', icon: IconCalendar, href: '/report/readerhealthreport/', key: ['core.reporting', 'core.monitoring'] },//Reports & Analytics & Monitoring Dashboard
+        {
+          id: 'report-visitor',
+          title: 'Visitor Report',
+          icon: IconCalendar,
+          href: '/report/visitorreport/filter/',
+          key: ['core.reporting', 'core.monitoring'],
+        },
+        {
+          id: 'report-investigate',
+          title: 'Investigate',
+          icon: IconCalendar,
+          href: '/report/investigate',
+          key: ['core.reporting', 'core.monitoring'],
+        },
+        {
+          id: 'report-eventlog',
+          title: 'Event Log',
+          icon: IconCalendar,
+          href: '/report/eventlog',
+          key: ['core.reporting', 'core.monitoring'],
+        },
+        {
+          id: 'report-cardhistory',
+          title: 'Card History',
+          icon: IconCards,
+          href: '/report/cardhistory',
+          key: ['core.reporting', 'core.monitoring'],
+        },
+        {
+          id: 'report-patrol',
+          title: 'Patrol Report',
+          icon: IconCalendar,
+          href: '/report/patrolreport/',
+          key: ['module.patrol'],
+        },
+        {
+          id: 'report-movement',
+          title: 'Movement Log',
+          icon: IconCalendar,
+          href: '/report/movementlog/',
+          key: ['core.reporting', 'core.monitoring'],
+        },
+        {
+          id: 'report-reader',
+          title: 'Reader Report',
+          icon: IconCalendar,
+          href: '/report/readerreport/',
+          key: ['core.reporting', 'core.monitoring'],
+        },
+        {
+          id: 'report-reader-health',
+          title: 'Reader Health Report',
+          icon: IconCalendar,
+          href: '/report/readerhealthreport/',
+          key: ['core.reporting', 'core.monitoring'],
+        },
       ],
     },
   ];
@@ -244,7 +407,7 @@ console.log("active features: ", activeFeatures)
   };
 
   // 🔹 Recursive filter that excludes `children` key if empty
-  const filterMenu = (items: any[]): any[] =>
+  const filterMenu = (items: MenuItemType[]): MenuItemType[] =>
     items
       .map((item) => {
         // 🔹 License feature key check
@@ -268,10 +431,39 @@ console.log("active features: ", activeFeatures)
         }
         return null;
       })
-      .filter(Boolean);
+      .filter((item): item is MenuItemType => Boolean(item));
 
-  const filteredMenu = filterMenu(Menuitems);
-  return filteredMenu;
+  return filterMenu(Menuitems);
+};
+
+/**
+ * 🔹 Transforms the centralized menu into the Vertical Sidebar format with section subheaders
+ */
+export const useVerticalMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] => {
+  const horizontalItems = useMenuItems(alarmSettings);
+
+  const verticalItems: MenuItemType[] = [];
+
+  horizontalItems.forEach((section) => {
+    if (section.children && section.children.length > 0) {
+      // Add section subheader (DASHBOARD, MASTER, etc.)
+      verticalItems.push({
+        id: `header-${section.id || section.title}`,
+        navlabel: true,
+        subheader: section.title,
+      });
+      // Add all immediate children under this section
+      section.children.forEach((child) => {
+        verticalItems.push(child);
+      });
+    } else {
+      // Direct standalone item (e.g. Alarm List)
+      verticalItems.push(section);
+    }
+  });
+
+  return verticalItems;
 };
 
 export default useMenuItems;
+

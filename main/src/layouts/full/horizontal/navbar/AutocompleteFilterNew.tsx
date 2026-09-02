@@ -79,14 +79,8 @@ const AutocompleteFilterNew: React.FC<Props> = ({
   returnAll = false,
 }) => {
   const [open, setOpen] = React.useState(false);
-  const [clickAwayEnabled, setClickAwayEnabled] = useState(false);
   const [query, setQuery] = React.useState('');
   const anchorRef = React.useRef<HTMLDivElement | null>(null);
-
-  const openPopper = () => {
-    setOpen(true);
-    setTimeout(() => setClickAwayEnabled(true), 500); // enable after open
-  };
 
   const hasFloors = floors.length > 0;
   const hasFloorplans = floorplans.length > 0;
@@ -528,37 +522,43 @@ const AutocompleteFilterNew: React.FC<Props> = ({
   }
 
   return (
-    <Box sx={{ position: 'relative' }}>
-      <Box ref={anchorRef}>
-        <TextField
-          fullWidth
-          placeholder="Search Building / Floor / Area"
-          autoComplete="off"
-          value={query || computeDisplaySelection()}
-          onChange={(e) => setQuery(e.target.value)}
-          onClick={openPopper}
-          onFocus={openPopper}
-          sx={{ '& input': { cursor: 'pointer' } }}
-          InputProps={{
-            startAdornment: (
-              <Box sx={{ display: 'flex', alignItems: 'center', pl: 1 }}>
-                <IconAdjustmentsHorizontal size={16} />
-              </Box>
-            ),
-          }}
-        />
-      </Box>
+    <ClickAwayListener
+      onClickAway={() => {
+        setOpen(false);
+        setQuery('');
+      }}
+    >
+      <Box sx={{ position: 'relative' }}>
+        <Box ref={anchorRef}>
+          <TextField
+            fullWidth
+            placeholder={open ? (computeDisplaySelection() || 'Search Building / Floor / Area') : 'Search Building / Floor / Area'}
+            autoComplete="off"
+            value={open ? query : (query || computeDisplaySelection())}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setOpen(true);
+            }}
+            onClick={() => setOpen(true)}
+            onFocus={() => setOpen(true)}
+            InputProps={{
+              startAdornment: (
+                <Box sx={{ display: 'flex', alignItems: 'center', pl: 1 }}>
+                  <IconAdjustmentsHorizontal size={16} />
+                </Box>
+              ),
+            }}
+          />
+        </Box>
 
-      <Popper open={open} anchorEl={anchorRef.current} placement="bottom-start" sx={{ zIndex: 2000 }}>
-        <ClickAwayListener
-          onClickAway={() => {
-            if (clickAwayEnabled) {
-              setOpen(false);
-              setClickAwayEnabled(false);
-            }
-          }}
+        <Popper
+          open={open}
+          anchorEl={anchorRef.current}
+          placement="bottom-start"
+          style={{ width: anchorRef.current ? anchorRef.current.clientWidth : 'auto' }}
+          sx={{ zIndex: 2000 }}
         >
-          <Paper sx={{ p: 1, mt: 1, minWidth: 320, maxHeight: 420, overflowY: 'auto' }}>
+          <Paper sx={{ p: 1, mt: 1, width: '100%', maxHeight: 360, overflowY: 'auto' }} elevation={8}>
             <SimpleTreeView
               expandedItems={expanded}
               onExpandedItemsChange={(_e, ids) => setExpanded(Array.isArray(ids) ? ids : [ids])}
@@ -571,7 +571,13 @@ const AutocompleteFilterNew: React.FC<Props> = ({
                     key={bKey}
                     itemId={bKey}
                     label={
-                      <Box onClick={() => toggleNode(bKey)} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleNode(bKey);
+                        }}
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                      >
                         <Checkbox checked={isSelected(bKey)} indeterminate={isIndeterminate(bKey)} />
                         <Typography variant="body2">🏢 {b.name}</Typography>
                       </Box>
@@ -585,7 +591,13 @@ const AutocompleteFilterNew: React.FC<Props> = ({
                           key={fKey}
                           itemId={fKey}
                           label={
-                            <Box onClick={() => toggleNode(fKey)} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleNode(fKey);
+                              }}
+                              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                            >
                               <Checkbox
                                 checked={isSelected(fKey)}
                                 indeterminate={isIndeterminate(fKey)}
@@ -602,7 +614,13 @@ const AutocompleteFilterNew: React.FC<Props> = ({
                                 key={fpKey}
                                 itemId={fpKey}
                                 label={
-                                  <Box onClick={() => toggleNode(fpKey)} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <Box
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleNode(fpKey);
+                                    }}
+                                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                                  >
                                     <Checkbox
                                       checked={isSelected(fpKey)}
                                       indeterminate={isIndeterminate(fpKey)}
@@ -618,7 +636,13 @@ const AutocompleteFilterNew: React.FC<Props> = ({
                                       key={maKey}
                                       itemId={maKey}
                                       label={
-                                        <Box onClick={() => toggleNode(maKey)} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Box
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleNode(maKey);
+                                          }}
+                                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                                        >
                                           <Checkbox checked={isSelected(maKey)} />
                                           <Typography variant="body2">📍 {ma.name}</Typography>
                                         </Box>
@@ -637,39 +661,39 @@ const AutocompleteFilterNew: React.FC<Props> = ({
               })}
             </SimpleTreeView>
           </Paper>
-        </ClickAwayListener>
-      </Popper>
+        </Popper>
 
-      {!hideSelectedAreas && displayTree.size > 0 && (
-        <Box sx={{ mt: 2, maxHeight: 200, overflowY: 'auto', px: 1, mb: 2 }}>
-          <Typography variant="subtitle2" fontWeight={700} color="primary" mb={1}>
-            {selectedTitle}:
-          </Typography>
-          {[...displayTree.entries()].map(([bId, bNode]) => (
-            <Box key={bId} sx={{ mb: 1 }}>
-              <Typography variant="body2" fontWeight={700}>{bNode.name}</Typography>
-              {[...bNode.floors.entries()].map(([fId, fNode]) => (
-                <Box key={fId} sx={{ pl: 2 }}>
-                  <Typography variant="caption" fontWeight={600} display="block">{fNode.name}</Typography>
-                  {[...fNode.floorplans.entries()].map(([fpId, fpNode]) => (
-                    <Box key={fpId} sx={{ pl: 2 }}>
-                      <Typography variant="caption" display="block">{fpNode.name}</Typography>
-                      <Box sx={{ pl: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                        {fpNode.areas.map((a) => (
-                          <Typography key={a.id} variant="caption" sx={{ opacity: 0.8 }}>
-                            • {a.name}
-                          </Typography>
-                        ))}
+        {!hideSelectedAreas && displayTree.size > 0 && (
+          <Box sx={{ mt: 2, maxHeight: 200, overflowY: 'auto', px: 1, mb: 2 }}>
+            <Typography variant="subtitle2" fontWeight={700} color="primary" mb={1}>
+              {selectedTitle}:
+            </Typography>
+            {[...displayTree.entries()].map(([bId, bNode]) => (
+              <Box key={bId} sx={{ mb: 1 }}>
+                <Typography variant="body2" fontWeight={700}>{bNode.name}</Typography>
+                {[...bNode.floors.entries()].map(([fId, fNode]) => (
+                  <Box key={fId} sx={{ pl: 2 }}>
+                    <Typography variant="caption" fontWeight={600} display="block">{fNode.name}</Typography>
+                    {[...fNode.floorplans.entries()].map(([fpId, fpNode]) => (
+                      <Box key={fpId} sx={{ pl: 2 }}>
+                        <Typography variant="caption" display="block">{fpNode.name}</Typography>
+                        <Box sx={{ pl: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                          {fpNode.areas.map((a) => (
+                            <Typography key={a.id} variant="caption" sx={{ opacity: 0.8 }}>
+                              • {a.name}
+                            </Typography>
+                          ))}
+                        </Box>
                       </Box>
-                    </Box>
-                  ))}
-                </Box>
-              ))}
-            </Box>
-          ))}
-        </Box>
-      )}
-    </Box>
+                    ))}
+                  </Box>
+                ))}
+              </Box>
+            ))}
+          </Box>
+        )}
+      </Box>
+    </ClickAwayListener>
   );
 };
 

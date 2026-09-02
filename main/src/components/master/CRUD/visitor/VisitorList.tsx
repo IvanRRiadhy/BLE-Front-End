@@ -40,8 +40,8 @@ import toast from 'react-hot-toast';
 
 const columns = [
   { label: 'Visitor Name', field: 'Name', sortAble: true },
-  { label: 'Person ID', field: 'PersonId', sortAble: true },
-  { label: 'Identity Id', field: 'IdentityId', sortAble: true },
+  // { label: 'Person ID', field: 'PersonId', sortAble: true },
+  // { label: 'Identity Id', field: 'IdentityId', sortAble: true },
   { label: 'Card Number', field: 'CardNumber', sortAble: true },
   { label: 'BLE Card Number', field: 'BleCardNumber', sortAble: true },
   { label: 'Phone Number', field: 'phone', sortAble: false },
@@ -384,16 +384,16 @@ const VisitorList = () => {
                               <Box sx={ellipsisSx}>{visitor.name}</Box>
                             </Tooltip>
                           </TableCell>
-                          <TableCell>
+                          {/* <TableCell>
                             <Tooltip title={visitor.personId} arrow placement="top">
                               <Box sx={ellipsisSx}>{visitor.personId}</Box>
                             </Tooltip>
-                          </TableCell>
-                          <TableCell>
+                          </TableCell> */}
+                          {/* <TableCell>
                             <Tooltip title={visitor.identityId} arrow placement="top">
                               <Box sx={ellipsisSx}>{visitor.identityId}</Box>
                             </Tooltip>
-                          </TableCell>
+                          </TableCell> */}
                           <TableCell>
                             <Tooltip title={visitor.cardNumber} arrow placement="top">
                               <Box sx={ellipsisSx}>{visitor.cardNumber}</Box>

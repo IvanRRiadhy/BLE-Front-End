@@ -109,6 +109,8 @@ const TABLE_CONFIG = {
   alarm: {
     headers: [
       'Person',
+      'Status',
+      'Category',
       'Building',
       'Floor',
       'Area',
@@ -125,11 +127,12 @@ const TABLE_CONFIG = {
       'Confirmed Time',
       'Response Duration',
       'Resolution Duration',
-      'Status',
-      'Category',
+
     ],
     renderRow: (r: any) => [
       r.PersonName,
+      r.VisitorStatus,
+      r.AlarmCategory,
       r.BuildingName,
       r.FloorName,
       r.AreaName,
@@ -146,8 +149,7 @@ const TABLE_CONFIG = {
       formatDateTime(r.AlarmDone),
       r.responseTimeFormatted,
       r.resolutionTimeFormatted,
-      r.VisitorStatus,
-      r.AlarmCategory,
+
     ],
   },
 };
@@ -247,6 +249,8 @@ const VisitorReportDialog: React.FC<Props> = ({ open, onClose, trackingLogs, ala
         'Alarm Logs',
         [
           { header: 'Person', key: 'PersonName' },
+          { header: 'Status', key: 'VisitorStatus' },
+          { header: 'Category', key: 'AlarmCategory' },
           { header: 'Building', key: 'BuildingName' },
           { header: 'Floor', key: 'FloorName' },
           { header: 'Area', key: 'AreaName' },
@@ -262,8 +266,7 @@ const VisitorReportDialog: React.FC<Props> = ({ open, onClose, trackingLogs, ala
           { header: 'Done At', key: 'AlarmDone' },
           { header: 'Response Duration', key: 'responseTimeFormatted' },
           { header: 'Resolution Duration', key: 'resolutionTimeFormatted' },
-          { header: 'Status', key: 'VisitorStatus' },
-          { header: 'Category', key: 'AlarmCategory' },
+
         ],
         alarmLogs,
         alarmImages,

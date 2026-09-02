@@ -250,7 +250,7 @@ export function useAlarmTimeline(
     queryKey: ['alarmTrigger-timeline', id],
     queryFn: async (): Promise<AlarmTimelineType> => {
       const res = await axiosServices.get(`${API_URL}${id}/timeline`);
-      console.log('Response: ', res, 'With Id: ', id);
+      console.log('Response: ', res, 'With Alarm Trigger: ', id);
       return res.data.collection.data as AlarmTimelineType;
     },
     enabled: !!id,

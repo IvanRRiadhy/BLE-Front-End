@@ -18,7 +18,11 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  Checkbox,
+  ClickAwayListener,
 } from '@mui/material';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { IconInfoCircle, IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react';
@@ -31,6 +35,9 @@ import { defaultCardAccessForm } from 'src/store/apps/defaultForm';
 import AutocompleteFilter from 'src/layouts/full/horizontal/navbar/AutocompleteFilter';
 import { TimeBlockType, TimeGroupType } from 'src/store/apps/crud/timeGroup';
 import AreaHierarchySelector, { SelectedNode } from 'src/components/shared/AreaHierarchySelector';
+
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 // React Query hooks
 import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
@@ -53,6 +60,7 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
     ...cardAccess,
   });
   const [selectedAreaNode, setSelectedAreaNode] = useState<SelectedNode>(null);
+  const [isTimeGroupOpen, setIsTimeGroupOpen] = useState(false);
 
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
 
@@ -255,26 +263,27 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
                     floorplans={filteredFloorplans}
                     maskedAreas={maskedAreas}
                     value={selectedAreaNode}
+                    multiple={true}
                     highlightedAreaIds={formData.maskedAreaIds ?? []}
                     onChange={(node) => {
                       if (!node) return;
 
-                      setSelectedAreaNode(null); // reset picker after select
+                      setSelectedAreaNode(null);
 
                       setFormData((prev) => {
-                        let areasToAdd: string[] = [];
+                        let targetAreaIds: string[] = [];
 
                         if (node.type === 'area') {
-                          areasToAdd = [node.data.id];
+                          targetAreaIds = [node.data.id];
                         } else if (node.type === 'floorplan') {
-                          areasToAdd = maskedAreas
+                          targetAreaIds = maskedAreas
                             .filter((ma) => ma.floorplanId === node.data.id)
                             .map((ma) => ma.id);
                         } else if (node.type === 'floor') {
                           const fpIds = floorplans
                             .filter((fp) => fp.floorId === node.data.id)
                             .map((fp) => fp.id);
-                          areasToAdd = maskedAreas
+                          targetAreaIds = maskedAreas
                             .filter((ma) => fpIds.includes(ma.floorplanId))
                             .map((ma) => ma.id);
                         } else if (node.type === 'building') {
@@ -284,19 +293,27 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
                           const fpIds = floorplans
                             .filter((fp) => fIds.includes(fp.floorId))
                             .map((fp) => fp.id);
-                          areasToAdd = maskedAreas
+                          targetAreaIds = maskedAreas
                             .filter((ma) => fpIds.includes(ma.floorplanId))
                             .map((ma) => ma.id);
                         }
 
                         const currentAreas = prev.maskedAreaIds ?? [];
-                        const newAreas = areasToAdd.filter((id) => !currentAreas.includes(id));
+                        const allSelected =
+                          targetAreaIds.length > 0 &&
+                          targetAreaIds.every((id) => currentAreas.includes(id));
 
-                        if (newAreas.length === 0) return prev;
+                        let updatedAreas: string[];
+                        if (allSelected) {
+                          updatedAreas = currentAreas.filter((id) => !targetAreaIds.includes(id));
+                        } else {
+                          const newAreas = targetAreaIds.filter((id) => !currentAreas.includes(id));
+                          updatedAreas = [...currentAreas, ...newAreas];
+                        }
 
                         return {
                           ...prev,
-                          maskedAreaIds: [...currentAreas, ...newAreas],
+                          maskedAreaIds: updatedAreas,
                         };
                       });
                     }}
@@ -383,75 +400,104 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
             >
               <CustomFormLabel>Allowed Time(s)</CustomFormLabel>
 
-              <Autocomplete
-                multiple
-                options={timeGroup}
-                getOptionLabel={(option: TimeGroupType) => option.name}
-                filterSelectedOptions
-                value={timeGroup.filter((tg) => (formData.timeGroupIds ?? []).includes(tg.id))}
-                onChange={(_e, newValue) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    timeGroupIds: newValue.map((tg) => tg.id),
-                  }));
+              <ClickAwayListener
+                onClickAway={() => {
+                  setIsTimeGroupOpen(false);
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    placeholder="Type time group name..."
-                    variant="outlined"
-                    fullWidth
-                  />
-                )}
-                renderTags={() => null}
-                renderOption={(props, option) => {
-                  const tooltipContent = (
-                    <Box>
-                      {option.timeBlocks?.length ? (
-                        option.timeBlocks.map((tb) => (
-                          <Typography key={tb.id} variant="caption" display="block" color="inherit">
-                            {tb.dayOfWeek} : {tb.startTime} - {tb.endTime}
-                          </Typography>
-                        ))
-                      ) : (
-                        <Typography variant="caption" color="inherit">
-                          No time blocks
-                        </Typography>
-                      )}
-                    </Box>
-                  );
-
-                  return (
-                    <li {...props} key={option.id}>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          width: '100%',
+              >
+                <Box>
+                  <Autocomplete
+                    multiple
+                    open={isTimeGroupOpen}
+                    disableCloseOnSelect
+                    disablePortal
+                    onOpen={() => {
+                      setIsTimeGroupOpen(true);
+                    }}
+                    onClose={() => {
+                      // Handled by ClickAwayListener
+                    }}
+                    options={timeGroup}
+                    getOptionLabel={(option: TimeGroupType) => option.name || ''}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    value={timeGroup.filter((tg) => (formData.timeGroupIds ?? []).includes(tg.id))}
+                    onChange={(_e, newValue) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        timeGroupIds: newValue.map((tg) => tg.id),
+                      }));
+                      setIsTimeGroupOpen(true);
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder="Search time group..."
+                        variant="outlined"
+                        fullWidth
+                        onFocus={() => {
+                          setIsTimeGroupOpen(true);
                         }}
-                      >
-                        {/* Left side: name + description */}
+                      />
+                    )}
+                    renderTags={() => null}
+                    renderOption={(props, option, { selected }) => {
+                      const tooltipContent = (
                         <Box>
-                          <Typography variant="body1" fontWeight={600}>
-                            {option.name}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {option.description ?? 'No description'}
-                          </Typography>
+                          {option.timeBlocks?.length ? (
+                            option.timeBlocks.map((tb) => (
+                              <Typography key={tb.id} variant="caption" display="block" color="inherit">
+                                {tb.dayOfWeek} : {tb.startTime} - {tb.endTime}
+                              </Typography>
+                            ))
+                          ) : (
+                            <Typography variant="caption" color="inherit">
+                              No time blocks
+                            </Typography>
+                          )}
                         </Box>
+                      );
 
-                        {/* Right side: Info button */}
-                        <Tooltip title={tooltipContent} arrow placement="left">
-                          <IconButton size="small" onClick={(e) => e.stopPropagation()}>
-                            <IconInfoCircle size={16} />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
-                    </li>
-                  );
-                }}
-              />
+                      return (
+                        <li {...props} key={option.id}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              width: '100%',
+                            }}
+                          >
+                            {/* Left side: name + description */}
+                            <Box sx={{ flexGrow: 1 }}>
+                              <Typography variant="body1" fontWeight={600}>
+                                {option.name}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {option.description ?? 'No description'}
+                              </Typography>
+                            </Box>
+
+                            {/* Right side: Info button + Checkbox */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <Tooltip title={tooltipContent} arrow placement="left">
+                                <IconButton size="small" onClick={(e) => e.stopPropagation()}>
+                                  <IconInfoCircle size={16} />
+                                </IconButton>
+                              </Tooltip>
+                              <Checkbox
+                                icon={icon}
+                                checkedIcon={checkedIcon}
+                                checked={selected}
+                                style={{ marginRight: 0 }}
+                              />
+                            </Box>
+                          </Box>
+                        </li>
+                      );
+                    }}
+                  />
+                </Box>
+              </ClickAwayListener>
 
               {/* Bordered list for selected time groups */}
               <Box

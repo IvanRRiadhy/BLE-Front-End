@@ -23,6 +23,7 @@ import {
   setCustomSvgScale,
   setCustomSvgOffsetX,
   setCustomSvgOffsetY,
+  setNotificationSetting,
 } from 'src/store/customizer/SettingsSlice';
 import { RootState } from 'src/store/Store';
 import WbSunnyTwoToneIcon from '@mui/icons-material/WbSunnyTwoTone';
@@ -1059,6 +1060,40 @@ const AboutPage = () => {
                           ))}
                         </Grid>
                       </Grid>
+                      {/* Alarm Notification */}
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <Typography variant="h6" gutterBottom>
+                          Alarm Sound Notification
+                        </Typography>
+                        <Stack direction={'row'} gap={2} my={2}>
+                          <StyledBox
+                            onClick={() => dispatch(setNotificationSetting('notify'))}
+                            display="flex"
+                            alignItems="center"
+                            gap={1}
+                            flex={1}
+                            sx={{
+                              borderColor: settings.notificationSetting === 'notify' ? 'primary.main' : 'inherit',
+                              bgcolor: settings.notificationSetting === 'notify' ? 'primary.light' : 'transparent',
+                            }}
+                          >
+                            Sound On (Notify)
+                          </StyledBox>
+                          <StyledBox
+                            onClick={() => dispatch(setNotificationSetting('mute'))}
+                            display="flex"
+                            alignItems="center"
+                            gap={1}
+                            flex={1}
+                            sx={{
+                              borderColor: settings.notificationSetting === 'mute' ? 'primary.main' : 'inherit',
+                              bgcolor: settings.notificationSetting === 'mute' ? 'primary.light' : 'transparent',
+                            }}
+                          >
+                            Mute Sound
+                          </StyledBox>
+                        </Stack>
+                      </Grid>
                     </Grid>
                   </CardContent>
                 </Card>
@@ -1071,17 +1106,18 @@ const AboutPage = () => {
                     </Typography>
 
                     <Grid container spacing={3}>
-                      <Grid size={{ xs: 12, sm: 6 }}>
+                      <Grid size={{ xs: 12, md: 8 }}>
                         <Typography variant="h6" gutterBottom>
                           Beacon Icon Type (Format SVG, size 24x24 px)
                         </Typography>
-                        <Stack direction={'row'} gap={2} my={2}>
+                        <Stack direction={'row'} gap={2} my={2} flexWrap="wrap">
                           <StyledBox
                             onClick={() => dispatch(setBeaconIconType('person'))}
                             display="flex"
                             alignItems="center"
                             gap={1}
                             flex={1}
+                            minWidth="140px"
                             sx={{
                               borderColor: settings.beaconIconType === 'person' ? 'primary.main' : 'inherit',
                               bgcolor: settings.beaconIconType === 'person' ? 'primary.light' : 'transparent',
@@ -1098,6 +1134,7 @@ const AboutPage = () => {
                             alignItems="center"
                             gap={1}
                             flex={1}
+                            minWidth="140px"
                             sx={{
                               borderColor: settings.beaconIconType === 'pin' ? 'primary.main' : 'inherit',
                               bgcolor: settings.beaconIconType === 'pin' ? 'primary.light' : 'transparent',
@@ -1109,11 +1146,29 @@ const AboutPage = () => {
                             Pin Icon
                           </StyledBox>
                           <StyledBox
+                            onClick={() => dispatch(setBeaconIconType('photo'))}
+                            display="flex"
+                            alignItems="center"
+                            gap={1}
+                            flex={1}
+                            minWidth="140px"
+                            sx={{
+                              borderColor: settings.beaconIconType === 'photo' ? 'primary.main' : 'inherit',
+                              bgcolor: settings.beaconIconType === 'photo' ? 'primary.light' : 'transparent',
+                            }}
+                          >
+                            <svg width="20" height="20" viewBox="0 0 24 24" style={{ fill: '#1976d2', flexShrink: 0 }}>
+                              <path d="M12 2C7.58 2 4 5.58 4 10c0 5.25 8 12 8 12s8-6.75 8-12c0-4.42-3.58-8-8-8zm0 3.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm0 9.5c-1.84 0-3.48-.96-4.34-2.41.03-1.44 2.89-2.23 4.34-2.23s4.31.79 4.34 2.23A5.13 5.13 0 0 1 12 15z" />
+                            </svg>
+                            Photo Pin
+                          </StyledBox>
+                          <StyledBox
                             onClick={handleCustomIconClick}
                             display="flex"
                             alignItems="center"
                             gap={1}
                             flex={1}
+                            minWidth="140px"
                             sx={{
                               borderColor: settings.beaconIconType === 'custom' ? 'primary.main' : 'inherit',
                               bgcolor: settings.beaconIconType === 'custom' ? 'primary.light' : 'transparent',
@@ -1140,6 +1195,8 @@ const AboutPage = () => {
                           onChange={handleCustomSvgChange}
                         />
                       </Grid>
+
+
                     </Grid>
                   </CardContent>
                 </Card>

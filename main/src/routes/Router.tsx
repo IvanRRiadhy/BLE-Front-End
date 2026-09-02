@@ -130,7 +130,7 @@ const CardRecord = Loadable(lazy(() => import('../views/Reports/CardRecord')));
 const TestRecord = Loadable(lazy(() => import('../views/Reports/TestRecord')));
 const TestReport = Loadable(lazy(() => import('../views/Reports/VisitorReport')));
 const Investigate = Loadable(lazy(() => import('../views/Reports/Investigate')));
-const EventLog = Loadable(lazy(() => import('../views/Reports/EventLog')));
+const EventLog = Loadable(lazy(() => import('../views/Reports/EventReport')));
 const MovementLog = Loadable(lazy(() => import('../views/Reports/MovementLog')));
 const CardHistory = Loadable(lazy(() => import('../views/Reports/CardHistory')));
 const PatrolReport = Loadable(lazy(() => import('../views/Reports/PatrolReport')));

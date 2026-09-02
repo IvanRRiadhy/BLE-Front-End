@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React from 'react';
-import getMenuItems from './MenuItems';
+import { useVerticalMenuItems } from 'src/layouts/full/horizontal/navbar/Menudata';
 import { useLocation } from 'react-router';
 import { Box, List, useMediaQuery } from '@mui/material';
 import { useSelector, useDispatch } from 'src/store/Store';
@@ -20,19 +20,19 @@ const SidebarItems = () => {
   const hideMenu: any = lgUp ? customizer.isCollapse && !customizer.isSidebarHover : '';
   const dispatch = useDispatch();
   const alarmSettings = useSelector((state: RootState) => state.AlarmSettingReducer.alarmSettingAll);
-  const Menuitems = getMenuItems(alarmSettings);
+  const Menuitems = useVerticalMenuItems(alarmSettings);
 
   return (
     <Box sx={{ px: 3 }}>
       <List sx={{ pt: 0 }} className="sidebarNav">
-        {Menuitems.map((item) => {
+        {Menuitems.map((item: any) => {
           // {/********SubHeader**********/}
           if (item.subheader) {
             return <NavGroup item={item} hideMenu={hideMenu} key={item.subheader} />;
 
             // {/********If Sub Menu**********/}
             /* eslint no-else-return: "off" */
-          } else if (item.children) {
+          } else if (item.children && item.children.length > 0) {
             return (
               <NavCollapse
                 menu={item}
@@ -40,7 +40,7 @@ const SidebarItems = () => {
                 hideMenu={hideMenu}
                 pathWithoutLastPart={pathWithoutLastPart}
                 level={1}
-                key={item.id}
+                key={item.id || item.title}
                 onClick={() => dispatch(toggleMobileSidebar())}
               />
             );
@@ -50,7 +50,7 @@ const SidebarItems = () => {
             return (
               <NavItem
                 item={item}
-                key={item.id}
+                key={item.id || item.title}
                 pathDirect={pathDirect}
                 hideMenu={hideMenu}
                 onClick={() => dispatch(toggleMobileSidebar())}
@@ -63,3 +63,5 @@ const SidebarItems = () => {
   );
 };
 export default SidebarItems;
+
+

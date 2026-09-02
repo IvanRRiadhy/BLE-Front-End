@@ -20,10 +20,14 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  TextField,
+  InputAdornment,
+  Slider,
 } from '@mui/material';
 import { SketchPicker } from 'react-color';
 import BlankCard from 'src/components/shared/BlankCard';
 import {
+  IconAdjustmentsHorizontal,
   IconBrandTelegram,
   IconChevronDown,
   IconChevronUp,
@@ -225,6 +229,29 @@ const AlarmSettingList = () => {
       toast.error('Failed to update notification interval');
       console.error(err);
     }
+  };
+
+  // threshold dialog (for LowBattery)
+  const [thresholdDialogOpen, setThresholdDialogOpen] = useState(false);
+  const [tempThreshold, setTempThreshold] = useState<number | null>(null);
+  const [tempIsEmailEnabled, setTempIsEmailEnabled] = useState<boolean>(false);
+
+  const handleApplyThreshold = async () => {
+    if (!selectedAlarm || tempThreshold === null) return;
+    const updatedAlarm = {
+      ...selectedAlarm,
+      threshold: tempThreshold,
+      isEmailEnabled: tempIsEmailEnabled,
+    };
+    try {
+      await editMutation.mutateAsync(updatedAlarm);
+
+      toast.success('Battery threshold updated');
+      setThresholdDialogOpen(false);
+    } catch (err) {
+      toast.error('Failed to update battery threshold');
+      console.error(err);
+    } 
   };
 
   const renderSkeletonRows = (rows: number) => (
@@ -552,22 +579,38 @@ const AlarmSettingList = () => {
                               maxWidth: 150,
                             }}
                           >
-                            {alarmSetting.isEnabled && (
-                              <Tooltip title="Go to Setting Page" arrow>
-                                <IconButton
-                                  color="primary"
-                                  size="small"
-                                  onClick={() => {
-                                    const route = getRoute(alarmSetting.alarmCategory);
-                                    console.log('Navigate to:', route);
-                                    // if using react-router
-                                    navigate(route);
-                                  }}
-                                >
-                                  <IconExternalLink size={20} />
-                                </IconButton>
-                              </Tooltip>
-                            )}
+                            {alarmSetting.isEnabled &&
+                              (alarmSetting.alarmCategory.toLowerCase() === 'lowbattery' ? (
+                                <Tooltip title="Set Battery Threshold" arrow>
+                                  <IconButton
+                                    color="warning"
+                                    size="small"
+                                    onClick={() => {
+                                      setSelectedAlarm(alarmSetting);
+                                      setTempThreshold(alarmSetting.threshold ?? 20);
+                                      setTempIsEmailEnabled(alarmSetting.isEmailEnabled ?? false);
+                                      setThresholdDialogOpen(true);
+                                    }}
+                                  >
+                                    <IconAdjustmentsHorizontal size={20} />
+                                  </IconButton>
+                                </Tooltip>
+                              ) : (
+                                <Tooltip title="Go to Setting Page" arrow>
+                                  <IconButton
+                                    color="primary"
+                                    size="small"
+                                    onClick={() => {
+                                      const route = getRoute(alarmSetting.alarmCategory);
+                                      console.log('Navigate to:', route);
+                                      // if using react-router
+                                      navigate(route);
+                                    }}
+                                  >
+                                    <IconExternalLink size={20} />
+                                  </IconButton>
+                                </Tooltip>
+                              ))}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -775,6 +818,142 @@ const AlarmSettingList = () => {
             variant="contained"
             disabled={tempNotifyInterval === null}
             onClick={handleApplyNotifyInterval}
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              px: 2.5,
+              background: 'linear-gradient(45deg, #355CFF, #00CFFF)',
+            }}
+          >
+            Apply Change
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Threshold Dialog */}
+      <Dialog
+        open={thresholdDialogOpen}
+        onClose={() => setThresholdDialogOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            p: 1,
+            minWidth: 340,
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 600, textAlign: 'center', pb: 1 }}>
+          Battery Threshold Setting
+        </DialogTitle>
+
+        <DialogContent>
+          <Box sx={{ p: 1, textAlign: 'center' }}>
+            <Typography variant="body2" color="text.secondary" mb={3}>
+              Trigger a low battery alert when card battery level drops to or below this threshold.
+            </Typography>
+
+            <TextField
+              label="Threshold Percentage"
+              type="number"
+              value={tempThreshold ?? ''}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                if (val < 0) setTempThreshold(0);
+                else if (val > 100) setTempThreshold(100);
+                else setTempThreshold(val);
+              }}
+              slotProps={{
+                input: {
+                  endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                },
+                htmlInput: { min: 0, max: 100 },
+              }}
+              fullWidth
+              sx={{ mb: 3 }}
+            />
+
+            <Box sx={{ px: 2, mb: 2 }}>
+              <Slider
+                value={typeof tempThreshold === 'number' ? tempThreshold : 20}
+                onChange={(_, newValue) => setTempThreshold(newValue as number)}
+                aria-labelledby="threshold-slider"
+                valueLabelDisplay="auto"
+                step={5}
+                marks={[
+                  { value: 10, label: '10%' },
+                  { value: 20, label: '20%' },
+                  { value: 30, label: '30%' },
+                  { value: 50, label: '50%' },
+                  { value: 80, label: '80%' },
+                ]}
+                min={5}
+                max={100}
+              />
+            </Box>
+
+            {/* Quick Presets */}
+            <Box display="flex" justifyContent="center" gap={1} mt={2}>
+              {[10, 15, 20, 25, 30, 50].map((preset) => (
+                <Box
+                  key={preset}
+                  onClick={() => setTempThreshold(preset)}
+                  sx={{
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: 1.5,
+                    cursor: 'pointer',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    border: tempThreshold === preset ? '2px solid' : '1px solid',
+                    borderColor: tempThreshold === preset ? 'primary.main' : 'divider',
+                    backgroundColor: tempThreshold === preset ? 'primary.main' : 'transparent',
+                    color: tempThreshold === preset ? 'white' : 'text.primary',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      backgroundColor: tempThreshold === preset ? 'primary.main' : 'action.hover',
+                    },
+                  }}
+                >
+                  {preset}%
+                </Box>
+              ))}
+            </Box>
+
+            {/* Email Notification Switch */}
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              mt={3}
+              pt={2}
+              sx={{ borderTop: '1px solid', borderColor: 'divider' }}
+            >
+              <Typography variant="subtitle2" fontWeight={600}>
+                Enable Email Notification
+              </Typography>
+              <Switch
+                checked={tempIsEmailEnabled}
+                onChange={(e) => setTempIsEmailEnabled(e.target.checked)}
+                color="primary"
+              />
+            </Box>
+          </Box>
+        </DialogContent>
+
+        <DialogActions sx={{ justifyContent: 'center', p: 2 }}>
+          <Button
+            onClick={() => setThresholdDialogOpen(false)}
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              px: 2.5,
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            disabled={tempThreshold === null}
+            onClick={handleApplyThreshold}
             sx={{
               borderRadius: 2,
               textTransform: 'none',

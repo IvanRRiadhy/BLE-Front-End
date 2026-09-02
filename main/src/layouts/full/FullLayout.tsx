@@ -3,6 +3,7 @@ import { styled, Container, Box, useTheme, useMediaQuery } from '@mui/material';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { Outlet } from 'react-router';
 import { RootState, AppDispatch } from 'src/store/Store';
+import { uniqueId } from 'lodash';
 import Sidebar from './vertical/sidebar/Sidebar';
 import Navigation from '../full/horizontal/navbar/Navigation';
 import HorizontalHeader from '../full/horizontal/header/Header';
@@ -77,17 +78,20 @@ const FullLayout: FC = () => {
   const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
   const dispatch: AppDispatch = useDispatch();
   const config = getConfig();
+  const appId = localStorage.getItem('applicationId') || "";
   const { alarmTopics, trackingTopics } = useMemo(() => {
     let aTopics: string[] = [];
     let tTopics: string[] = [];
+    let outTopics: string[] = [];
 
     const storedBuildings = localStorage.getItem('accessibleBuildings');
     if (storedBuildings) {
       try {
         const parsed: string[] = JSON.parse(storedBuildings);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          aTopics = parsed.map((id) => `people_tracking/alarm/${id.toUpperCase()}/+/+/+/+`);
-          tTopics = parsed.map((id) => `people_tracking/tracking/${id.toUpperCase()}/`);
+          aTopics = parsed.map((id) => `people_tracking/${appId.toUpperCase()}/alarm/${id.toUpperCase()}/#`);
+          tTopics = parsed.map((id) => `people_tracking/${appId.toUpperCase()}/tracking/indoor/${id.toUpperCase()}/#`);
+          outTopics = parsed.map((id) => `people_tracking/${appId.toUpperCase()}/tracking/outdoor/${id.toUpperCase()}/#`);
         }
       } catch (err) {
         console.warn('Failed to parse accessibleBuildings', err);
@@ -96,13 +100,19 @@ const FullLayout: FC = () => {
 
     // fallback 
     if (aTopics.length === 0) {
-      aTopics = [config.ALARM_TOPIC || 'people_tracking/alarm/+/+/+/+/+'];
+      aTopics = ['people_tracking/' + appId.toUpperCase() + '/alarm/#'];
+    } else {
+      const lowBatteryTopic = `people_tracking/${appId.toUpperCase()}/alarm/lowbattery/#`;
+      if (!aTopics.includes(lowBatteryTopic)) {
+        aTopics.push(lowBatteryTopic);
+      }
     }
     if (tTopics.length === 0) {
-      tTopics = ['people_tracking/tracking/#'];
+      tTopics = ['people_tracking/' + appId.toUpperCase() + '/tracking/indoor/#'];
+      outTopics = ['people_tracking/' + appId.toUpperCase() + '/tracking/outdoor/#'];
     }
 
-    return { alarmTopics: aTopics, trackingTopics: tTopics };
+    return { alarmTopics: aTopics, trackingTopics: tTopics, outTopics };
   }, [config.ALARM_TOPIC]);
   const customizer = useSelector((state: RootState) => state.customizer);
   const settings = useSelector((state: RootState) => state.settings);
@@ -110,6 +120,15 @@ const FullLayout: FC = () => {
   const theme = useTheme();
   const memberList: memberType[] = useSelector((s: RootState) => s.memberReducer.members);
   const visitorList: VisitorType[] = useSelector((s: RootState) => s.visitorReducer.visitors);
+
+  const memberListRef = useRef(memberList);
+  const visitorListRef = useRef(visitorList);
+
+  useEffect(() => {
+    memberListRef.current = memberList;
+    visitorListRef.current = visitorList;
+  }, [memberList, visitorList]);
+
   const showAlarmPopupId = useSelector((s: RootState) => s.BeaconReducer.alarmPopupId);
   const showAlarmPopup = useSelector(selectAlarmById(showAlarmPopupId));
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -122,9 +141,9 @@ const FullLayout: FC = () => {
 
   // Resolve display name from beacon/card ID
   const getName = (bleNumber: string) => {
-    const m = memberList.find((x) => x.bleCardNumber === bleNumber);
+    const m = memberListRef.current.find((x) => x.bleCardNumber === bleNumber);
     if (m) return m.name;
-    const v = visitorList.find((x) => x.bleCardNumber === bleNumber);
+    const v = visitorListRef.current.find((x) => x.bleCardNumber === bleNumber);
     if (v) return v.name;
     return bleNumber || 'Unknown';
   };
@@ -189,19 +208,29 @@ const FullLayout: FC = () => {
 
       console.log('[MQTT] Received alarm data:', alarmData);
 
+      const isLowBattery =
+        alarmData?.status?.toLowerCase() === 'lowbattery' ||
+        alarmData?.status === 'LowBattery';
+
       setLatestAlarm(alarmData);
       setOpenAlarmPopup(true);
 
       window.postMessage({ type: 'app:new-alarm', detail: { alarm: alarmData } }, '*');
 
+      const lowBatteryMsg =
+        alarmData.alarmName ||
+        `Low battery alert for ${alarmData.cardName || alarmData.dmac || 'Unknown'} (${alarmData.battery ?? ''}%)`;
+
       dispatch(
         pushItem({
-          id: `${alarmData?.beaconId ?? 'unknown'}-${Date.now()}`,
+          id: `${alarmData?.beaconId ?? alarmData?.dmac ?? 'unknown'}-${Date.now()}`,
           alarm: alarmData,
-          title: 'Alarm Triggered',
-          message: `Beacon ${getName(alarmData?.beaconId || 'Unknown')} · ${
-            alarmData?.maskedAreaName ?? 'Unknown'
-          } · ${alarmData?.floorplanName ?? 'Unknown'}`,
+          title: isLowBattery ? 'Low Battery Alert' : 'Alarm Triggered',
+          message: isLowBattery
+            ? lowBatteryMsg
+            : `Beacon ${getName(alarmData?.beaconId || 'Unknown')} · ${
+                alarmData?.maskedAreaName ?? 'Unknown'
+              } · ${alarmData?.floorplanName ?? 'Unknown'}`,
         }),
       );
 
@@ -212,10 +241,12 @@ const FullLayout: FC = () => {
         Notification.permission === 'granted' &&
         !document.hasFocus()
       ) {
-        const title = 'Alarm Triggered!';
-        const body = `Beacon ${getName(alarmData.beaconId || 'Unknown')} is in ${
-          alarmData.maskedAreaName || 'Unknown Area'
-        } on ${alarmData.floorplanName || 'Unknown Floor'}.`;
+        const title = isLowBattery ? 'Low Battery Alert!' : 'Alarm Triggered!';
+        const body = isLowBattery
+          ? lowBatteryMsg
+          : `Beacon ${getName(alarmData.beaconId || 'Unknown')} is in ${
+              alarmData.maskedAreaName || 'Unknown Area'
+            } on ${alarmData.floorplanName || 'Unknown Floor'}.`;
 
         const notification = new Notification(title, { body, icon: '/icon.png' });
         notification.onclick = () => {
@@ -224,29 +255,36 @@ const FullLayout: FC = () => {
         };
       }
 
-      if (now - lastDispatchRef.current > 1500) {
+      if (!isLowBattery && now - lastDispatchRef.current > 1500) {
         lastDispatchRef.current = now;
         dispatch(fetchAlarmTrigger());
       }
 
       const alarmLog: AlarmLogItem = {
-        id: `alarm-${alarmData.triggerId}-${Date.now()}-${alarmData.status}`,
+        id: `alarm-${alarmData.triggerId || alarmData.cardId || alarmData.dmac || uniqueId()}-${Date.now()}-${alarmData.status}`,
         type: 'Alarm',
-        target: alarmData.visitorName || alarmData.cardName || alarmData.dmac,
+        target: alarmData.personName || alarmData.visitorName || alarmData.MemberName || alarmData.cardName || 'Unknown',
         image: alarmData.faceImage || '',
-        color: alarmData.color || 'gray',
+        color: alarmData.color || (isLowBattery ? '#c8b560' : 'gray'),
         dmac: alarmData.dmac,
-        floor: alarmData.floorplanName || 'Unknown Floor',
-        floorplanId: alarmData.floorplanId,
-        area: alarmData.maskedAreaName || 'Unknown Area',
-        personId: alarmData.personId || '',
-        triggerId: alarmData.triggerId,
-        alarmStatus: alarmData.status,
-        action: alarmData.action,
-        priority: alarmData.priority,
-        time: new Date().toISOString(),
+        floor: alarmData.buildingName || alarmData.floorplanName ? `${alarmData.buildingName || 'Unknown Building'} - ${alarmData.floorplanName || 'Unknown Floor'}` : '',
+        floorplanId: alarmData.floorplanId || '',
+        area: alarmData.maskedAreaName || '',
+        personId: alarmData.personId || alarmData.cardId || '',
+        triggerId: alarmData.triggerId || '',
+        alarmStatus: alarmData.status || (isLowBattery ? 'LowBattery' : 'Alarm'),
+        action: alarmData.action || 'Idle',
+        priority: normalizePriority(alarmData.priority) || (isLowBattery ? 'low' : 'medium'),
+        time: alarmData.timestamp || new Date().toISOString(),
         seen: false,
-        personType: alarmData.visitorName ? 'Visitor' : 'Member',
+        personType: alarmData.personCategory || (alarmData.visitorName ? 'Visitor' : 'Member'),
+        alarmName: alarmData.alarmName,
+        personName: alarmData.personName,
+        personCategory: alarmData.personCategory,
+        battery: alarmData.battery,
+        threshold: alarmData.threshold,
+        cardName: alarmData.cardName,
+        cardNumber: alarmData.cardNumber,
       };
 
       const incomingAlarm: AlarmLogItem = alarmLog;
@@ -291,7 +329,7 @@ const FullLayout: FC = () => {
     });
 
     // 🚀 EVACUATION MQTT SUBSCRIPTIONS
-    if (applicationId) {
+    if (appId) {
       // 1. Status Monitoring
       const unsubEvac = startMQTTclient((data: any) => {
         dispatch(updateEvacuationData(data));
@@ -303,18 +341,18 @@ const FullLayout: FC = () => {
           const triggeredAt = data.TriggeredAt ? new Date(data.TriggeredAt).getTime() : Date.now();
           dispatch(setEvacuationStartTime(triggeredAt));
         }
-      }, `evacuation/status/${applicationId}`);
+      }, `evacuation/status/${appId}`);
       if (unsubEvac) unsubscribeList.push(unsubEvac);
 
       // 2. Trigger Monitoring
       const unsubTrigger = startMQTTclient((data: any) => {
-        if (data.ApplicationId === applicationId || !data.ApplicationId) {
+        if (data.ApplicationId === appId || !data.ApplicationId) {
           dispatch(setEvacuationId(data.EvacuationAlertId));
           dispatch(setEvacuationState('running'));
           const triggeredAt = data.TriggeredAt ? new Date(data.TriggeredAt).getTime() : Date.now();
           dispatch(setEvacuationStartTime(triggeredAt));
         }
-      }, `evacuation/trigger/${applicationId}`);
+      }, `evacuation/trigger/${appId}`);
       if (unsubTrigger) unsubscribeList.push(unsubTrigger);
 
       // 3. Complete Monitoring
@@ -322,7 +360,7 @@ const FullLayout: FC = () => {
         if (data.Status === 'Completed') {
           dispatch(setEvacuationState('finished'));
         }
-      }, `evacuation/complete/${applicationId}`);
+      }, `evacuation/complete/${appId}`);
       if (unsubComplete) unsubscribeList.push(unsubComplete);
     }
 
@@ -343,7 +381,7 @@ const FullLayout: FC = () => {
         console.log('[MQTT] Unsubscribed from all topics');
       }
     };
-  }, [dispatch, memberList, visitorList, alarmTopics, trackingTopics]);
+  }, [dispatch, alarmTopics, trackingTopics]);
 
   useEffect(() => {
     const unsubscribe = dispatch(fetchReaderHealth());

@@ -38,7 +38,7 @@ const Login = () => {
   });
 
   useEffect(() => {
-    fetch('/LoginText.json')
+    fetch('/LoginText_BI.json')
       .then((res) => res.json())
       .then((data) => {
         if (data.title && data.description) {

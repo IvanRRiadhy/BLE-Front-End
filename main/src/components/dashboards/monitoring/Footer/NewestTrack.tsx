@@ -8,6 +8,7 @@ import {
   lighten,
   darken,
 } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
@@ -171,144 +172,177 @@ const NewestTrack = ({ followedOnly = false }: NewestTrackProps) => {
     return '#ccc';
   };
 
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick((t) => t + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const SummaryColumn = ({
     name,
     area,
     type,
     time,
+    beacon,
   }: {
     name: string;
     area?: string | null;
     type: string;
     time: string;
-  }) => (
-    <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
-      <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-        {/* <InfoRow label="Name" value={name} /> */}
-        <InfoRow label="Time" value={time} />
-        <InfoRow label="Area" value={area ?? 'Unknown Area'} />
-        <InfoRow label="Type" value={type} />
-      </Stack>
-    </Box>
-  );
+    beacon?: any;
+  }) => {
+    const lastSeen = beacon?.lastSeen ?? (beacon?.time ? new Date(beacon.time).getTime() : 0);
+    const isUndetected = lastSeen ? Date.now() - lastSeen > 5000 : false;
+    const areaValue = isUndetected
+      ? `Undetected - Last Detected in : ${area || 'Unknown Area'}`
+      : (area ?? 'Unknown Area');
 
-  const VisitorDetails = ({ visitor, beacon }: { visitor: VisitorType; beacon: any }) => (
-    <Box mt={1}>
-      {/* Header */}
-      <Box display="flex" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1} mb={1}>
-        <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
-          <Typography variant="h6" sx={{ color: '#fff', fontWeight: 700, wordBreak: 'break-word' }}>
-            {visitor.name}
+    return (
+      <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
+        <Stack spacing={0.5} sx={{ minWidth: 0 }}>
+          {/* <InfoRow label="Name" value={name} /> */}
+          <InfoRow label="Time" value={time} />
+          <InfoRow label="Area" value={areaValue} />
+          <InfoRow label="Type" value={type} />
+        </Stack>
+      </Box>
+    );
+  };
+
+  const VisitorDetails = ({ visitor, beacon }: { visitor: VisitorType; beacon: any }) => {
+    const lastSeen = beacon?.lastSeen ?? (beacon?.time ? new Date(beacon.time).getTime() : 0);
+    const isUndetected = lastSeen ? Date.now() - lastSeen > 5000 : false;
+
+    return (
+      <Box mt={1}>
+        {/* Header */}
+        <Box display="flex" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1} mb={1}>
+          <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
+            <Typography variant="h6" sx={{ color: '#fff', fontWeight: 700, wordBreak: 'break-word' }}>
+              {visitor.name}
+            </Typography>
+
+            {isUndetected && <Chip label="UNDETECTED" size="small" sx={chipSx} />}
+            {visitor.isVip && <Chip label="VIP" color="warning" size="small" sx={chipSx} />}
+            {visitor.isBlacklist && <Chip label="BLACKLIST" size="small" sx={chipSx} />}
+          </Box>
+
+          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.85)', wordBreak: 'break-word' }}>
+            Person ID: {visitor.personId}
           </Typography>
-
-          {visitor.isVip && <Chip label="VIP" color="warning" size="small" sx={chipSx} />}
-          {visitor.isBlacklist && <Chip label="BLACKLIST" size="small" sx={chipSx} />}
         </Box>
 
-        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.85)', wordBreak: 'break-word' }}>
-          Person ID: {visitor.personId}
-        </Typography>
-      </Box>
+        <Box display="flex" flexWrap="wrap" gap={2}>
+          {/* Column 1 – Summary */}
+          <SummaryColumn
+            name={visitor.name}
+            area={beacon.maskedAreaName}
+            type="Visitor"
+            time={new Date(beacon.time).toLocaleString()}
+            beacon={beacon}
+          />
 
-      <Box display="flex" flexWrap="wrap" gap={2}>
-        {/* Column 1 – Summary */}
-        <SummaryColumn
-          name={visitor.name}
-          area={beacon.maskedAreaName}
-          type="Visitor"
-          time={new Date(beacon.time).toLocaleString()}
-        />
+          {/* Column 2 – Personal */}
+          <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
+            <Stack spacing={0.5} sx={{ minWidth: 0 }}>
+              <InfoRow label="Address" value={visitor.address} />
+              <InfoRow label="Phone" value={visitor.phone} />
+              <InfoRow label="Email" value={visitor.email} />
+            </Stack>
+          </Box>
 
-        {/* Column 2 – Personal */}
-        <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
-          <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-            <InfoRow label="Address" value={visitor.address} />
-            <InfoRow label="Phone" value={visitor.phone} />
-            <InfoRow label="Email" value={visitor.email} />
-          </Stack>
-        </Box>
+          {/* Column 3 – Identity */}
+          <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
+            <Stack spacing={0.5} sx={{ minWidth: 0 }}>
+              <InfoRow label="Identity" value={`${visitor.identityType || 'ID'} - ${visitor.identityId || '-'}`} />
+              <InfoRow label="Gender" value={visitor.gender} />
+              <InfoRow label="Card Number" value={visitor.cardNumber} />
+            </Stack>
+          </Box>
 
-        {/* Column 3 – Identity */}
-        <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
-          <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-            <InfoRow label="Identity" value={`${visitor.identityType || 'ID'} - ${visitor.identityId || '-'}`} />
-            <InfoRow label="Gender" value={visitor.gender} />
-            <InfoRow label="Card Number" value={visitor.cardNumber} />
-          </Stack>
-        </Box>
-
-        {/* Column 4 – Organization */}
-        <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
-          <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-            <InfoRow label="Organization" value={visitor.organizationName} />
-            <InfoRow label="Department" value={visitor.departmentName} />
-            <InfoRow label="District" value={visitor.districtName} />
-          </Stack>
+          {/* Column 4 – Organization */}
+          <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
+            <Stack spacing={0.5} sx={{ minWidth: 0 }}>
+              <InfoRow label="Organization" value={visitor.organizationName} />
+              <InfoRow label="Department" value={visitor.departmentName} />
+              <InfoRow label="District" value={visitor.districtName} />
+            </Stack>
+          </Box>
         </Box>
       </Box>
-    </Box>
-  );
+    );
+  };
 
-  const MemberDetails = ({ member, beacon }: { member: memberType; beacon: any }) => (
-    <Box mt={1}>
-      {/* Header */}
-      <Box display="flex" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1} mb={1}>
-        <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
-          <Typography variant="h6" sx={{ color: '#fff', fontWeight: 700, wordBreak: 'break-word' }}>
-            {member.name}
+  const MemberDetails = ({ member, beacon }: { member: memberType; beacon: any }) => {
+    const lastSeen = beacon?.lastSeen ?? (beacon?.time ? new Date(beacon.time).getTime() : 0);
+    const isUndetected = lastSeen ? Date.now() - lastSeen > 5000 : false;
+
+    return (
+      <Box mt={1}>
+        {/* Header */}
+        <Box display="flex" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1} mb={1}>
+          <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
+            <Typography variant="h6" sx={{ color: '#fff', fontWeight: 700, wordBreak: 'break-word' }}>
+              {member.name}
+            </Typography>
+
+            {isUndetected && <Chip label="UNDETECTED" size="small" sx={chipSx} />}
+            {member.isBlacklist && <Chip label="BLACKLIST" size="small" sx={chipSx} />}
+          </Box>
+
+          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.85)', wordBreak: 'break-word' }}>
+            Person ID: {member.personId}
           </Typography>
-
-          {member.isBlacklist && <Chip label="BLACKLIST" size="small" sx={chipSx} />}
         </Box>
 
-        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.85)', wordBreak: 'break-word' }}>
-          Person ID: {member.personId}
-        </Typography>
-      </Box>
+        <Box display="flex" flexWrap="wrap" gap={2}>
+          {/* Column 1 – Summary */}
+          <SummaryColumn
+            name={member.name}
+            area={beacon.maskedAreaName}
+            type="Member"
+            time={new Date(beacon.time).toLocaleString()}
+            beacon={beacon}
+          />
 
-      <Box display="flex" flexWrap="wrap" gap={2}>
-        {/* Column 1 – Summary */}
-        <SummaryColumn
-          name={member.name}
-          area={beacon.maskedAreaName}
-          type="Member"
-          time={new Date(beacon.time).toLocaleString()}
-        />
+          {/* Column 2 – Personal */}
+          <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
+            <Stack spacing={0.5} sx={{ minWidth: 0 }}>
+              <InfoRow label="Address" value={member.address} />
+              <InfoRow label="Phone" value={member.phone} />
+              <InfoRow label="Email" value={member.email} />
+            </Stack>
+          </Box>
 
-        {/* Column 2 – Personal */}
-        <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
-          <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-            <InfoRow label="Address" value={member.address} />
-            <InfoRow label="Phone" value={member.phone} />
-            <InfoRow label="Email" value={member.email} />
-          </Stack>
-        </Box>
+          {/* Column 3 – Identity */}
+          <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
+            <Stack spacing={0.5} sx={{ minWidth: 0 }}>
+              <InfoRow label="Identity" value={`ID - ${member.identityId || '-'}`} />
+              <InfoRow label="Gender" value={member.gender} />
+              <InfoRow label="Card Number" value={member.cardNumber} />
+            </Stack>
+          </Box>
 
-        {/* Column 3 – Identity */}
-        <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
-          <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-            <InfoRow label="Identity" value={`ID - ${member.identityId || '-'}`} />
-            <InfoRow label="Gender" value={member.gender} />
-            <InfoRow label="Card Number" value={member.cardNumber} />
-          </Stack>
-        </Box>
-
-        {/* Column 4 – Organization */}
-        <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
-          <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-            <InfoRow
-              label="Organization"
-              value={[member.organization?.name, member.department?.name, member.district?.name]
-                .filter(Boolean)
-                .join(' - ')}
-            />
-            <InfoRow label="Head Member 1" value={member.headMember1} />
-            <InfoRow label="Head Member 2" value={member.headMember2} />
-          </Stack>
+          {/* Column 4 – Organization */}
+          <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
+            <Stack spacing={0.5} sx={{ minWidth: 0 }}>
+              <InfoRow
+                label="Organization"
+                value={[member.organization?.name, member.department?.name, member.district?.name]
+                  .filter(Boolean)
+                  .join(' - ')}
+              />
+              <InfoRow label="Head Member 1" value={member.headMember1} />
+              <InfoRow label="Head Member 2" value={member.headMember2} />
+            </Stack>
+          </Box>
         </Box>
       </Box>
-    </Box>
-  );
+    );
+  };
 
   return (
     <Box sx={{ width: '100%', height: '100%', overflowY: 'auto', p: 0.5, scrollSnapType: 'y mandatory' }}>

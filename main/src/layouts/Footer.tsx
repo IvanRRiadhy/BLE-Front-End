@@ -22,7 +22,7 @@ const Footer = () => {
   });
 
   useEffect(() => {
-    fetch('/LoginText.json')
+    fetch('/LoginText_BI.json')
       .then((res) => res.json())
       .then((data) => {
         if (data.footer) {

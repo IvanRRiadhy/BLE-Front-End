@@ -247,7 +247,7 @@ const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
                             }}
                           >
                             <Grid size={2}>
-                              <Avatar
+                              {/* <Avatar
                                 src={`${BASE_URL}${log.image}`}
                                 sx={{
                                   width: 50,
@@ -255,7 +255,7 @@ const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
                                   border: '3px solid',
                                   borderColor: isVisitor ? '#f50057' : '#1976d2',
                                 }}
-                              />
+                              /> */}
                             </Grid>
                           </TableCell>
 

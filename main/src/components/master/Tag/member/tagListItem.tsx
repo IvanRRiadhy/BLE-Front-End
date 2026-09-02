@@ -1,9 +1,7 @@
 import React from 'react';
 import { BASE_URL } from 'src/utils/axios';
-import { useSelector } from 'src/store/Store';
 import {
   ListItemText,
-  Box,
   Avatar,
   ListItemButton,
   Typography,
@@ -13,41 +11,25 @@ import {
   Chip,
 } from '@mui/material';
 import { memberType } from 'src/store/apps/crud/member';
-import { RootState } from 'src/store/Store';
+import { RootState, useSelector } from 'src/store/Store';
 
 type Props = {
   onTagClick: (event: React.MouseEvent<HTMLElement>) => void;
-  member: memberType; // make required for clarity
-  manySelect?: boolean;
-  setManySelectMembers?: (members: memberType[]) => void;
-  manySelectMembers?: memberType[];
+  member: memberType;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
   active: boolean;
 };
 
 const TagListItem: React.FC<Props> = ({
   onTagClick,
   member,
-  manySelect = false,
-  setManySelectMembers,
-  manySelectMembers = [],
+  isSelected = false,
+  onToggleSelect,
   active,
 }) => {
   const settings = useSelector((state: RootState) => state.settings);
   const borderRadius = `${settings.borderRadius}px`;
-
-  // Determine if this member is selected in multi-select mode
-  const isChecked = manySelectMembers.some((m) => m.id === member.id);
-
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.stopPropagation(); // prevent triggering onTagClick
-    if (!setManySelectMembers) return;
-
-    if (isChecked) {
-      setManySelectMembers(manySelectMembers.filter((m) => m.id !== member.id));
-    } else {
-      setManySelectMembers([...manySelectMembers, member]);
-    }
-  };
 
   return (
     <ListItemButton
@@ -102,10 +84,23 @@ const TagListItem: React.FC<Props> = ({
             sx={{ fontSize: '0.75rem', fontWeight: 500 }}
           />
         )}
-        {manySelect && <Checkbox edge="end" checked={isChecked} onChange={handleCheckboxChange} />}
+        {onToggleSelect && (
+          <Checkbox
+            edge="end"
+            size="small"
+            checked={isSelected}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => {
+              e.stopPropagation();
+              onToggleSelect(member.id);
+            }}
+          />
+        )}
       </Stack>
     </ListItemButton>
   );
 };
 
 export default TagListItem;
+
+

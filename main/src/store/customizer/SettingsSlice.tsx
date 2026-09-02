@@ -9,13 +9,15 @@ interface SettingsState {
   TopbarHeight: number;
   isLayout: string;
   isLanguage: string;
+  notificationSetting: 'notify' | 'mute'
   isCardShadow: boolean;
   borderRadius: number;
-  beaconIconType: 'person' | 'pin' | 'custom';
+  beaconIconType: 'person' | 'pin' | 'photo' | 'custom';
   customSvgPath: string;
   customSvgScale: number;
   customSvgOffsetX: number;
   customSvgOffsetY: number;
+  trackingMode: "Live" | "Count";
 }
 
 const initialState: SettingsState = {
@@ -27,6 +29,7 @@ const initialState: SettingsState = {
   TopbarHeight: 70,
   isLayout: 'full',
   isLanguage: 'en',
+  notificationSetting:'notify',
   isCardShadow: true,
   borderRadius: 7,
   beaconIconType: 'person',
@@ -34,6 +37,7 @@ const initialState: SettingsState = {
   customSvgScale: 1,
   customSvgOffsetX: 0,
   customSvgOffsetY: 0,
+  trackingMode: "Live",
 };
 
 export const SettingsSlice = createSlice({
@@ -76,6 +80,12 @@ export const SettingsSlice = createSlice({
     setCustomSvgOffsetY: (state, action) => {
       state.customSvgOffsetY = action.payload;
     },
+    setNotificationSetting: (state, action) => {
+      state.notificationSetting = action.payload;
+    },
+    setTrackingMode: (state, action) => {
+      state.trackingMode = action.payload;
+    },
   },
 });
 
@@ -92,6 +102,8 @@ export const {
   setCustomSvgScale,
   setCustomSvgOffsetX,
   setCustomSvgOffsetY,
+  setNotificationSetting,
+  setTrackingMode,
 } = SettingsSlice.actions;
 
 export default SettingsSlice.reducer;

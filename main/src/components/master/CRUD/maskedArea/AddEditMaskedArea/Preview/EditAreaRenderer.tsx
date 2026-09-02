@@ -1650,8 +1650,13 @@ const EditAreaRenderer: React.FC<Props> = ({
           dragBoundFunc={function (pos) {
             if (!area.nodes || area.nodes.length < 3) return pos;
 
-            const candGroupX = (pos.x - stageX) / stageScale;
-            const candGroupY = (pos.y - stageY) / stageScale;
+            const parentTransform = this.getParent()?.getAbsoluteTransform() || this.getStage()?.getAbsoluteTransform();
+            if (!parentTransform) return pos;
+
+            const invTransform = parentTransform.copy().invert();
+            const candLocal = invTransform.point(pos);
+            const candGroupX = candLocal.x;
+            const candGroupY = candLocal.y;
             const candCenterX = candGroupX + boxWidth / 2;
             const candCenterY = candGroupY + boxHeight / 2;
 
@@ -1660,10 +1665,9 @@ const EditAreaRenderer: React.FC<Props> = ({
               return pos;
             }
 
-            // Get live current position of Konva Node frame-by-frame
-            const nodePos = this.absolutePosition();
-            const currGroupX = (nodePos.x - stageX) / stageScale;
-            const currGroupY = (nodePos.y - stageY) / stageScale;
+            // Get live current local position of Konva Node
+            const currGroupX = this.x();
+            const currGroupY = this.y();
             const currCenterX = currGroupX + boxWidth / 2;
             const currCenterY = currGroupY + boxHeight / 2;
 
@@ -1673,13 +1677,13 @@ const EditAreaRenderer: React.FC<Props> = ({
             const isYValid = isTextBoxInsideArea(currCenterX, candCenterY, boxWidth, boxHeight, area.nodes);
 
             if (isXValid && !isYValid) {
-              return { x: pos.x, y: nodePos.y };
+              return parentTransform.point({ x: candGroupX, y: currGroupY });
             }
             if (isYValid && !isXValid) {
-              return { x: nodePos.x, y: pos.y };
+              return parentTransform.point({ x: currGroupX, y: candGroupY });
             }
 
-            return nodePos;
+            return parentTransform.point({ x: currGroupX, y: currGroupY });
           }}
           onMouseEnter={(e) => {
             if (!preview && isEditing && !drawingMaskedArea) {
@@ -1752,7 +1756,7 @@ const EditAreaRenderer: React.FC<Props> = ({
         </Group>
       );
     },
-    [editingArea, preview, drawingMaskedArea, getNodesCentroid, dispatch],
+    [editingArea, preview, drawingMaskedArea, getNodesCentroid, isTextBoxInsideArea, dispatch],
   );
 
   const renderArea = useCallback(

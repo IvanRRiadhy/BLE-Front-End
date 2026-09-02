@@ -11,7 +11,9 @@ import {
   DialogActions,
   DialogTitle,
   CircularProgress,
+  Tooltip,
 } from '@mui/material';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 // import { AlarmType, MQTTAlarmType } from 'src/store/apps/tracking/Alarm';
 import { actionStatus, actionStatusColormap } from 'src/types/crud/input';
 import toast from 'react-hot-toast';
@@ -37,7 +39,7 @@ import {
   MarkAlarmSeen,
   ShowAlarmPopup,
 } from 'src/store/apps/tracking/Beacon';
-import { dispatch } from 'src/store/Store';
+import { dispatch, RootState, useSelector } from 'src/store/Store';
 import { useEnrichedAlarmLogs, useUnseenAlarms } from 'src/hooks/useTrackingLogs';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import AlarmMenuItem from './vertical/header/AlarmMenuItem';
@@ -142,6 +144,8 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
   const [visuallySeenIds, setVisuallySeenIds] = useState<Set<string>>(new Set());
   const [selectedAlarms, setSelectedAlarms] = useState<AlarmType[]>([]);
 
+  const notificationSetting = useSelector((state: RootState) => state.settings.notificationSetting);
+
   const notificationAudio = useMemo(() => {
     const audio = new Audio('/sfx/AlarmNotification/Calm-Warning.wav');
     audio.volume = 0.6;
@@ -155,13 +159,15 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
     if (prevAlarmIdRef.current !== alarm.id) {
       prevAlarmIdRef.current = alarm.id;
 
-      notificationAudio.currentTime = 0;
+      if (notificationSetting !== 'mute') {
+        notificationAudio.currentTime = 0;
 
-      notificationAudio.play().catch((err) => {
-        console.warn('Audio playback blocked:', err);
-      });
+        notificationAudio.play().catch((err) => {
+          console.warn('Audio playback blocked:', err);
+        });
+      }
     }
-  }, [alarm?.id]);
+  }, [alarm?.id, notificationSetting]);
 
   const handleDisarmClick = (event: React.MouseEvent<HTMLElement>) => {
     setActionAnchorEl(popupRef.current);
@@ -280,11 +286,11 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
         failedCount++;
         continue;
       }
-      if (a.action?.toLowerCase() !== 'acknowledged') {
-        // toast.error('Alarm is not acknowledged');
-        failedCount++;
-        continue;
-      }
+      // if (a.action?.toLowerCase() !== 'acknowledged') {
+      //   toast.error('Alarm is not acknowledged');
+      //   failedCount++;
+      //   continue;
+      // }
       try {
         const result = await dispatchMutation.mutateAsync({
           id: a.id.toUpperCase(),
@@ -316,15 +322,19 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
   const actionOpen = Boolean(actionAnchorEl);
   const actionId = actionOpen ? 'action-status-popover' : undefined;
 
+  const isLowBattery =
+    alarm?.alarmStatus?.toLowerCase() === 'lowbattery' ||
+    (alarm as any)?.status?.toLowerCase() === 'lowbattery';
+
   // Get priority color for the popup background
-  const priorityColor = getPriorityColor(alarm?.priority || 'medium');
+  const priorityColor = getPriorityColor(alarm?.priority || (isLowBattery ? 'low' : 'medium'));
   // Get chip color from alarm.color or use a default
-  const chipColor = alarm?.color || '#2196f3';
+  const chipColor = alarm?.color || (isLowBattery ? '#c8b560' : '#2196f3');
 
   const handleBackdropClose = () => {
     // ❗ UI-only close
     dispatch(ClearAlarmPopup());
-    if (alarm && alarm.action === 'Idle') {
+    if (alarm && !isLowBattery && alarm.action === 'Idle' && alarm.triggerId) {
       acknowledgeMutation.mutateAsync(alarm.triggerId);
     }
   };
@@ -575,9 +585,16 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                       </Box>
                     )}
 
-                    <Typography variant="h2" fontWeight="bold" letterSpacing={3} mb={2}>
-                      ALARM TRIGGERED
-                    </Typography>
+                    <Box display="flex" alignItems="center" justifyContent="center" gap={1.5} mb={2}>
+                      <Typography variant="h2" fontWeight="bold" letterSpacing={3}>
+                        ALARM TRIGGERED
+                      </Typography>
+                      {notificationSetting === 'mute' && (
+                        <Tooltip title="Sound Muted">
+                          <VolumeOffIcon sx={{ fontSize: '2rem', opacity: 0.9 }} />
+                        </Tooltip>
+                      )}
+                    </Box>
 
                     <Box
                       sx={{
@@ -590,38 +607,77 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                         fontSize: '1.2rem',
                       }}
                     >
-                      {alarm.alarmStatus?.toUpperCase()}
+                      {alarm.alarmStatus?.toUpperCase() || (alarm as any).status?.toUpperCase()}
                     </Box>
 
-                    <Typography mb={2}>
-                      🔔 Triggered by <b>{alarm.target}</b>
-                    </Typography>
+                    {isLowBattery ? (
+                      <>
+                        <Typography variant="h4" fontWeight={700} mb={2}>
+                          {alarm.alarmName || (alarm as any).alarmName || alarm.target || 'Low battery alert'}
+                        </Typography>
 
-                    <Typography mb={2}>
-                      Card: <b>{alarm.dmac}</b>
-                    </Typography>
+                        {(() => {
+                          const personName = (alarm as any)?.personName || (alarm?.target && alarm?.target !== 'Unknown' ? alarm.target : null);
+                          const personCategory = (alarm as any)?.personCategory || (alarm?.personType && alarm?.personType !== 'Security' ? alarm.personType : null);
+                          const usedByParts = [personName, personCategory].filter(Boolean);
+                          const usedBy = usedByParts.length > 0 ? usedByParts.join(' | ') : null;
 
-                    <Typography mb={3}>
-                      Area: <b>{alarm.area}</b> | <b>{alarm.floor}</b>
-                    </Typography>
+                          return usedBy ? (
+                            <Typography mb={3} fontSize="1.15rem">
+                              Currently used by : <b>{usedBy}</b>
+                            </Typography>
+                          ) : null;
+                        })()}
 
-                    <Box display="flex" justifyContent="center" gap={2} mb={3}>
-                      <Typography>Priority:</Typography>
-                      <Chip
-                        label={alarm.priority?.toUpperCase() || 'MEDIUM'}
-                        sx={{
-                          backgroundColor: priorityColor,
-                          color: 'white',
-                          fontWeight: 'bold',
-                        }}
-                      />
-                    </Box>
+                        <Box display="flex" justifyContent="center" gap={2} mb={3}>
+                          <Typography>Priority:</Typography>
+                          <Chip
+                            label={(alarm.priority || 'low').toUpperCase()}
+                            sx={{
+                              backgroundColor: priorityColor,
+                              color: 'white',
+                              fontWeight: 'bold',
+                            }}
+                          />
+                        </Box>
+                      </>
+                    ) : (
+                      <>
+                        <Typography mb={2}>
+                          🔔 Triggered by <b>{alarm.target}</b>
+                        </Typography>
+
+                        <Typography mb={2}>
+                          Card: <b>{alarm.dmac}</b>
+                        </Typography>
+
+                        <Typography mb={3}>
+                          Area: <b>{alarm.area}</b> | <b>{alarm.floor}</b>
+                        </Typography>
+
+                        <Box display="flex" justifyContent="center" gap={2} mb={3}>
+                          <Typography>Priority:</Typography>
+                          <Chip
+                            label={alarm.priority?.toUpperCase() || 'MEDIUM'}
+                            sx={{
+                              backgroundColor: priorityColor,
+                              color: 'white',
+                              fontWeight: 'bold',
+                            }}
+                          />
+                        </Box>
+                      </>
+                    )}
 
                     {/* ACTION BUTTON */}
                     <Box
                       onClick={() => {
-                        setActionAnchorEl(popupRef.current);
-                        handleAcknowledgeClick(alarm.id, alarm.action);
+                        if (isLowBattery) {
+                          dispatch(ClearAlarmPopup());
+                        } else {
+                          setActionAnchorEl(popupRef.current);
+                          handleAcknowledgeClick(alarm.id, alarm.action);
+                        }
                       }}
                       sx={{
                         position: 'absolute',
@@ -656,7 +712,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                           fontSize: '1.15rem',
                         }}
                       >
-                        Disarm
+                        {isLowBattery ? 'Dismiss' : 'Disarm'}
                       </Typography>
                     </Box>
                   </Box>

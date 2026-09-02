@@ -353,3 +353,35 @@ export function useReleaseFloorplanDevice() {
     },
   });
 }
+
+export interface UnassignedEngineReader {
+  readerId: string;
+  readerName: string;
+  gmac: string;
+  ip: string;
+  currentEngineId?: string | null;
+  floorplanDeviceId?: string | null;
+  posX?: number;
+  posY?: number;
+  floorplanId?: string;
+  floorplanName?: string;
+  floorId?: string;
+  floorName?: string;
+  buildingId?: string;
+  buildingName?: string;
+  areaId?: string;
+  areaName?: string;
+}
+
+export function useGetAllUnasignedEngine(currentEngineId?: string) {
+  return useQuery({
+    queryKey: ['floorplan-device-unassigned-engine', currentEngineId || 'unassigned'],
+    queryFn: async () => {
+      const params = currentEngineId ? { currentEngineId } : {};
+      const res = await axiosServices.get(`${API_URL}readers/unassigned-engine`, {
+        params,
+      });
+      return (res.data?.collection?.data || []) as UnassignedEngineReader[];
+    },
+  });
+}

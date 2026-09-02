@@ -1,6 +1,6 @@
-import { Box, useTheme } from '@mui/material';
+import { Box, useTheme, Tooltip } from '@mui/material';
 import Chart from 'react-apexcharts';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef, useState } from 'react';
 
 import { useAllAlarmCategory } from 'src/hooks/AlarmSetting/useAlarmCategory';
 import { useAlarmByArea } from 'src/hooks/useDashboard';
@@ -22,9 +22,20 @@ const defaultFilter = {
 
 const Bar: React.FC = () => {
   const theme = useTheme();
+  const containerRef = useRef<HTMLDivElement>(null);  
   const { data: alarmCategories = [] } = useAllAlarmCategory();
   const dashboardFilter = useSelector((state: any) => state.customizer.dashboardFilter);
   const { data: alarmByArea, isLoading } = useAlarmByArea(dashboardFilter);
+
+  const [tooltipState, setTooltipState] = useState<{
+    open: boolean;
+    title: string;
+    anchorEl: Element | null;
+  }>({
+    open: false,
+    title: '',
+    anchorEl: null,
+  });
 
   /* ---------------- Transform API → Chart ---------------- */
 
@@ -73,6 +84,52 @@ const Bar: React.FC = () => {
     return { categories, series };
   }, [alarmByArea, alarmCategories]);
 
+  // Handle MUI Tooltip on X-axis label hover via event delegation
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = (e.target as Element)?.closest(
+        '.apexcharts-xaxis-texts-g text, .apexcharts-xaxis-label'
+      );
+      if (!target) return;
+
+      const allLabels = Array.from(
+        container.querySelectorAll('.apexcharts-xaxis-texts-g text, .apexcharts-xaxis-label')
+      );
+      const idx = allLabels.indexOf(target);
+      if (idx !== -1 && chartData.categories[idx]) {
+        setTooltipState({
+          open: true,
+          title: chartData.categories[idx],
+          anchorEl: target,
+        });
+      }
+    };
+
+    const handleMouseOut = (e: MouseEvent) => {
+      const target = (e.target as Element)?.closest(
+        '.apexcharts-xaxis-texts-g text, .apexcharts-xaxis-label'
+      );
+      if (target) {
+        const relatedTarget = e.relatedTarget as Element | null;
+        if (relatedTarget && target.contains(relatedTarget)) {
+          return;
+        }
+        setTooltipState((prev) => ({ ...prev, open: false }));
+      }
+    };
+
+    container.addEventListener('mouseover', handleMouseOver);
+    container.addEventListener('mouseout', handleMouseOut);
+
+    return () => {
+      container.removeEventListener('mouseover', handleMouseOver);
+      container.removeEventListener('mouseout', handleMouseOut);
+    };
+  }, [chartData.categories]);
+
   /* ---------------- Chart Options ---------------- */
 
   const options: ApexCharts.ApexOptions = {
@@ -114,6 +171,8 @@ const Bar: React.FC = () => {
         style: {
           fontSize: '12px',
         },
+        formatter: (val: string) =>
+          typeof val === 'string' && val.length > 12 ? `${val.slice(0, 12)}...` : val,
       },
     },
 
@@ -138,6 +197,16 @@ const Bar: React.FC = () => {
     },
 
     tooltip: {
+      x: {
+        show: true,
+        formatter: (val: any, opts: any) => {
+          const idx = opts?.dataPointIndex;
+          if (idx !== undefined && chartData.categories[idx]) {
+            return chartData.categories[idx];
+          }
+          return typeof val === 'string' ? val : (chartData.categories[val - 1] ?? String(val));
+        },
+      },
       y: {
         formatter: (val) => (typeof val === 'number' ? val.toLocaleString() : String(val)),
       },
@@ -148,6 +217,7 @@ const Bar: React.FC = () => {
 
   return (
     <Box
+      ref={containerRef}
       sx={{
         width: '100%',
         height: '28vh',
@@ -156,6 +226,10 @@ const Bar: React.FC = () => {
         bgcolor: 'background.paper',
         px: 2,
         py: 2,
+        position: 'relative',
+        '& .apexcharts-xaxis-texts-g text, & .apexcharts-xaxis-label': {
+          cursor: 'pointer',
+        },
       }}
     >
       <Chart
@@ -164,6 +238,17 @@ const Bar: React.FC = () => {
         type="bar"
         height="100%"
       />
+      <Tooltip
+        title={tooltipState.title}
+        open={tooltipState.open && Boolean(tooltipState.anchorEl)}
+        arrow
+        placement="top"
+        PopperProps={{
+          anchorEl: tooltipState.anchorEl,
+        }}
+      >
+        <span style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }} />
+      </Tooltip>
     </Box>
   );
 };

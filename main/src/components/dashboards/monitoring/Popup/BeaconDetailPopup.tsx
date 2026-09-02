@@ -75,7 +75,7 @@ const BeaconDetailPopup = ({
 }: BeaconDetailPopupProps) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
-
+  const appId = localStorage.getItem('applicationId') || '';
   const personType: PersonType = memberDetail ? 'member' : visitorDetail ? 'visitor' : 'security';
 
   const personDetail = memberDetail || visitorDetail || securityDetail;
@@ -113,8 +113,8 @@ const BeaconDetailPopup = ({
       console.warn('No screens available in active layout.');
       return;
     }
-
-    const topic = `people_tracking/highlight/card/${bleNumber}`;
+    
+    const topic = `people_tracking/${appId.toUpperCase()}/highlight/card/${bleNumber}`;
     const payload = 'Start';
 
     // ✅ Publish Start via shared MQTT client
@@ -145,7 +145,7 @@ const BeaconDetailPopup = ({
     const firstScreen = activeLayout.screens[0];
     if (!firstScreen) return;
 
-    publishMQTT(`people_tracking/highlight/card/${bleNumber}`, 'Start');
+    publishMQTT(`people_tracking/${appId.toUpperCase()}/highlight/card/${bleNumber}`, 'Start');
 
     dispatch(
       setScreenDisplay({
@@ -181,7 +181,7 @@ const BeaconDetailPopup = ({
     const peopleToStop = followingPersons.length > 0 ? followingPersons : (followingPerson ? [followingPerson] : []);
     peopleToStop.forEach((person) => {
       if (person.bleCardNumber) {
-        publishMQTT(`people_tracking/highlight/card/${person.bleCardNumber}`, 'Stop');
+        publishMQTT(`people_tracking/${appId.toUpperCase()}/highlight/card/${person.bleCardNumber}`, 'Stop');
       }
     });
 

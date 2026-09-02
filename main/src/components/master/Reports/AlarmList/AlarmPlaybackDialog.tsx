@@ -23,7 +23,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import { IconPlayerPlayFilled, IconPlayerPauseFilled } from '@tabler/icons-react';
 
-import InvestigationBeaconRenderer from 'src/components/master/Reports/Investigation/InvestigationBeaconRenderer';
+import BeaconRenderer from 'src/components/dashboards/monitoring/Renderer/BeaconRenderer';
+import { useAllMembers } from 'src/hooks/useMember';
+import { useAllVisitor } from 'src/hooks/useVisitor';
+import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 
 import { AlarmPlaybackDataType } from 'src/store/apps/crud/alarmPlayback';
 import { uniqueId } from 'lodash';
@@ -67,6 +71,20 @@ const phaseColor = (phase: string) => {
 
 const AlarmPlaybackDialog = ({ open, onClose, data }: Props) => {
   const theme = useTheme();
+
+  const { data: membersData = [] } = useAllMembers();
+  const { data: visitorsData = [] } = useAllVisitor();
+  const { data: securityData = [] } = useAllSecuritys();
+  const { data: maskedAreas = [] } = useAllMaskedAreas();
+
+  const areaMap = useMemo(() => {
+    const map = new Map<string, string>();
+    maskedAreas.forEach((area) => {
+      if (area.id) map.set(area.id, area.name);
+      if (area.name) map.set(area.name, area.name);
+    });
+    return map;
+  }, [maskedAreas]);
 
   const tableContainerRef = useRef<HTMLDivElement | null>(null);
   const activeRowRef = useRef<HTMLTableRowElement | null>(null);
@@ -401,17 +419,49 @@ const AlarmPlaybackDialog = ({ open, onClose, data }: Props) => {
               {nextPos && (
                 <Circle x={nextPos.x} y={nextPos.y} radius={5} stroke="#1976d2" strokeWidth={2} />
               )}
-              {animatedPosition && (
-                <InvestigationBeaconRenderer
-                  id={data?.meta.cardId || uniqueId()} // or bleCardNumber if you have it
-                  x={animatedPosition.x}
-                  y={animatedPosition.y}
-                  area={current.areaId}
-                  floorplan={data?.meta.floorplanName || ''}
-                  time={current.time}
-                  clickable={false}
-                />
-              )}
+              {animatedPosition && current && (() => {
+                const cardId = data?.meta.cardId;
+                const beaconId = data?.meta.beaconId;
+                const person = [...membersData, ...visitorsData, ...securityData].find(
+                  (p) =>
+                    (cardId && (p.id === cardId || ('bleCardNumber' in p && p.bleCardNumber === cardId))) ||
+                    (beaconId && (p.id === beaconId || ('bleCardNumber' in p && p.bleCardNumber === beaconId))),
+                );
+                const isVisitor = visitorsData.some(
+                  (v) =>
+                    (cardId && (v.id === cardId || v.bleCardNumber === cardId)) ||
+                    (beaconId && (v.id === beaconId || v.bleCardNumber === beaconId)),
+                );
+                const isMember = membersData.some(
+                  (m) =>
+                    (cardId && (m.id === cardId || m.bleCardNumber === cardId)) ||
+                    (beaconId && (m.id === beaconId || m.bleCardNumber === beaconId)),
+                );
+                const isSecurity = securityData.some(
+                  (s) =>
+                    (cardId && (s.id === cardId || s.bleCardNumber === cardId)) ||
+                    (beaconId && (s.id === beaconId || s.bleCardNumber === beaconId)),
+                );
+                const label = person?.name || data?.meta.personName || '';
+
+                return (
+                  <BeaconRenderer
+                    id={cardId || beaconId || 'alarm-beacon'}
+                    x={animatedPosition.x}
+                    y={animatedPosition.y}
+                    beaconSize={1}
+                    area={areaMap.get(current.areaId) || current.areaId || ''}
+                    floorplan={data?.meta.floorplanName || ''}
+                    time={current.time}
+                    clickable={false}
+                    label={label}
+                    isSecurity={isSecurity}
+                    isMember={isMember}
+                    isVisitor={isVisitor}
+                    isFollowed={true}
+                  />
+                );
+              })()}
             </Layer>
           </Stage>
         </Box>
@@ -472,6 +522,7 @@ const AlarmPlaybackDialog = ({ open, onClose, data }: Props) => {
             <TableBody>
               {frames.map((f, i) => {
                 const isSelected = i === selectedIndex;
+                const areaDisplayName = areaMap.get(f.areaId) || f.areaId;
 
                 return (
                   <TableRow
@@ -504,7 +555,7 @@ const AlarmPlaybackDialog = ({ open, onClose, data }: Props) => {
                     }}
                   >
                     <TableCell>{dayjs(f.time).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
-                    <TableCell>{f.areaId}</TableCell>
+                    <TableCell>{areaDisplayName}</TableCell>
                     <TableCell>{f.phase}</TableCell>
                     <TableCell>{f.restricted ? 'Yes' : 'No'}</TableCell>
                     {/* <TableCell>{f.source}</TableCell> */}

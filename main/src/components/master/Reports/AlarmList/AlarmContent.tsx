@@ -35,7 +35,9 @@ import { memberType, SelectMember } from 'src/store/apps/crud/member';
 import duration from 'dayjs/plugin/duration';
 import { useEffect, useState } from 'react';
 import { formatFullDateTime } from 'src/utils/time';
+import { useQueryClient } from '@tanstack/react-query';
 import {
+  alarmTriggerByIdQuery,
   useAcknowledgeAlarmTrigger,
   useAlarmTimeline,
   useInfiniteAlarmTriggerList,
@@ -84,6 +86,7 @@ const proximityColorMap: Record<string, string> = {
 };
 
 const AlarmContent = () => {
+  const queryClient = useQueryClient();
   const dispatch: AppDispatch = useDispatch();
   const language = useSelector((state: RootState) => state.settings.isLanguage);
   
@@ -112,11 +115,12 @@ const AlarmContent = () => {
     filters: {
       ...baseFilter.filters,
       isActive: true,
-      action: baseFilter.filters?.action?.length
-        ? baseFilter.filters.action.filter(
-            (a) => a.toLowerCase() !== 'dispatched' && a.toLowerCase() !== 'accepted',
-          )
-        : undefined,
+      // action: baseFilter.filters?.action?.length
+      //   ? baseFilter.filters.action.filter(
+      //       (a) => a.toLowerCase() !== 'dispatched' && a.toLowerCase() !== 'accepted',
+      //     )
+      //   : undefined,
+      action: ['Idle', 'Acknowledged']
     },
   }, 50);
 
@@ -131,7 +135,7 @@ const AlarmContent = () => {
     filters: {
       ...baseFilter.filters,
       isActive: true,
-      action: ['Dispatched', 'Accepted'],
+      action: ['Dispatched', 'Accepted', 'PostponeInvestigated'],
     },
   }, 50);
 
@@ -417,6 +421,7 @@ const AlarmContent = () => {
     // await handleFetchTimeline(alarm.id);
     // ✅ Only call API if action is "Idle"
     if (alarm.action?.toLowerCase() !== 'idle') {
+      console.log("Not IDLE", alarm);
       setOpenActionDialog(true);
       return;
     }
@@ -428,6 +433,17 @@ const AlarmContent = () => {
       // console.log('acknowledgeMutation', acknowledgeMutation);
       const res = await acknowledgeMutation.mutateAsync(alarm.id.toUpperCase());
       console.log('acknowledgeMutation res', res);
+
+      // Refetch the updated alarm detail and timeline before opening dialog, and invalidate lists
+      const [updatedAlarm] = await Promise.all([
+        queryClient.fetchQuery(alarmTriggerByIdQuery(alarm.id)),
+        queryClient.invalidateQueries({ queryKey: ['alarmTrigger-timeline', alarm.id] }),
+        queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list-infinite'] }),
+      ]);
+      if (updatedAlarm) {
+        setSelectedAlarmTrigger(updatedAlarm);
+      }
+      console.log('updatedAlarm', updatedAlarm);
       setOpenActionDialog(true);
     } catch (error) {
       console.error('Failed to acknowledge alarm:', error);
@@ -1219,7 +1235,11 @@ const AlarmContent = () => {
                     {'triggerTime' in selectedAlarmTrigger && (
                       <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                         <Typography sx={field}>Triggered At</Typography>
-                        <Typography sx={value}>{selectedAlarmTrigger?.triggerTime}</Typography>
+                        <Typography sx={value}>
+                          {selectedAlarmTrigger?.triggerTime
+                            ? formatFullDateTime(selectedAlarmTrigger.triggerTime, language === 'id' ? 'id' : 'en')
+                            : '-'}
+                        </Typography>
                       </Grid>
                     )}
                     {/* BLE Card Number - common */}
@@ -1234,7 +1254,10 @@ const AlarmContent = () => {
                         <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                           <Typography sx={field}>Last Action</Typography>
                           <Typography sx={value}>
-                            {selectedAlarmTrigger?.action} | {selectedAlarmTrigger?.actionUpdatedAt}
+                            {selectedAlarmTrigger?.action} |{' '}
+                            {selectedAlarmTrigger?.actionUpdatedAt
+                              ? formatFullDateTime(selectedAlarmTrigger.actionUpdatedAt, language === 'id' ? 'id' : 'en')
+                              : '-'}
                           </Typography>
                         </Grid>
                       )}

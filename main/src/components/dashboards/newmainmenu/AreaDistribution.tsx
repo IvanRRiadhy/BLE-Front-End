@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import Chart from 'react-apexcharts';
 import ApexCharts from 'apexcharts';
 import { Box, Typography, Stack, Grid2 as Grid, SelectChangeEvent, MenuItem, useTheme } from '@mui/material';
@@ -85,6 +85,7 @@ const CHART_ID = 'area-distribution-pie';
 
 const NewAreaDistribution: React.FC = () => {
   const theme = useTheme();
+  const containerRef = useRef<HTMLDivElement>(null);
   const countingData = useSelector(
     (state: RootState) => state.BeaconReducer.countingData,
   ) as CountingData;
@@ -181,6 +182,22 @@ const NewAreaDistribution: React.FC = () => {
     return series.length > 0 && series.some((x) => x > 0);
   }, [series]);
 
+  // Attach native tooltip (title) to legend items for direct hover
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!containerRef.current) return;
+      const seriesEls = containerRef.current.querySelectorAll('.apexcharts-legend-series');
+      seriesEls.forEach((el, i) => {
+        const fullText = labels[i];
+        if (fullText) {
+          (el as HTMLElement).title = fullText;
+        }
+      });
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [labels, hasData]);
+
   const options: ApexCharts.ApexOptions = {
     chart: {
       id: CHART_ID,
@@ -198,6 +215,10 @@ const NewAreaDistribution: React.FC = () => {
     legend: {
       show: true,
       position: 'bottom',
+      formatter: (seriesName: string) =>
+        typeof seriesName === 'string' && seriesName.length > 14
+          ? `${seriesName.slice(0, 14)}...`
+          : seriesName,
       markers: {
         size: 12, 
         shape: 'square', // optional
@@ -236,6 +257,7 @@ const NewAreaDistribution: React.FC = () => {
 
   return (
     <Box
+      ref={containerRef}
       sx={{
         width: '100%',
         height: '100%',

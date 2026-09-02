@@ -23,9 +23,12 @@ import {
   Skeleton,
   Tooltip,
   CircularProgress,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material';
 import BlankCard from 'src/components/shared/BlankCard';
-import { IconEye, IconTrash, IconX } from '@tabler/icons-react';
+import { IconCheck, IconCircleCheck, IconCircleX, IconEye, IconTrash, IconX } from '@tabler/icons-react';
 import { defaultBleReaderFilter } from 'src/store/apps/defaultForm';
 import AddEditBleReader from './AddEditBleReader';
 import BulkAddEditBleReader from './BulkAddEditBleReader';
@@ -72,10 +75,21 @@ const BleReaderList = () => {
   const totalCount = data?.recordsFiltered || 0;
   const currentPageIds = useMemo(() => bleReaderData.map((x) => x.id), [bleReaderData]);
 
-  // 🔹 Multi-select
+  // 🔹 Multi-select & Batch Delete State
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
+  const [deleteItems, setDeleteItems] = useState<
+    Array<{
+      id: string;
+      name: string;
+      gmac?: string;
+      selected: boolean;
+      status: 'idle' | 'loading' | 'success' | 'error';
+      errorMessage?: string;
+    }>
+  >([]);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDone, setIsDeleteDone] = useState(false);
 
   // 🔹 Health Dialog state
   const [healthDialogOpen, setHealthDialogOpen] = useState(false);
@@ -121,30 +135,100 @@ const BleReaderList = () => {
 
   // 🔹 Delete handling
   const handleOpenDeleteDialog = (ids: string[] | string) => {
-    setPendingDeleteIds(Array.isArray(ids) ? ids : [ids]);
+    const idList = Array.isArray(ids) ? ids : [ids];
+    const items = idList.map((id) => {
+      const reader = bleReaderData.find((r) => r.id === id);
+      return {
+        id,
+        name: reader?.name || `Reader (${id})`,
+        gmac: reader?.gmac,
+        selected: true,
+        status: 'idle' as const,
+      };
+    });
+    setDeleteItems(items);
+    setIsDeleting(false);
+    setIsDeleteDone(false);
     setDeleteDialogOpen(true);
   };
 
+  const handleToggleItemSelect = (id: string) => {
+    if (isDeleting || isDeleteDone) return;
+    setDeleteItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, selected: !item.selected } : item,
+      ),
+    );
+  };
+
   const handleCloseDeleteDialog = () => {
+    if (isDeleting) return;
     setDeleteDialogOpen(false);
-    setPendingDeleteIds([]);
+    setDeleteItems([]);
+    setIsDeleteDone(false);
   };
 
   const handleConfirmDelete = async () => {
-    if (pendingDeleteIds.length === 0) return;
-    try {
-      for (const id of pendingDeleteIds) {
-        await deleteMutation.mutateAsync(id);
+    const activeItems = deleteItems.filter((item) => item.selected);
+    if (activeItems.length === 0) {
+      toast.error('No items selected for deletion');
+      return;
+    }
+
+    setIsDeleting(true);
+    let successCount = 0;
+    let failed = false;
+    const successfullyDeletedIds: string[] = [];
+
+    for (const item of deleteItems) {
+      if (!item.selected) continue;
+
+      // Set current item to loading
+      setDeleteItems((prev) =>
+        prev.map((it) => (it.id === item.id ? { ...it, status: 'loading' } : it)),
+      );
+
+      try {
+        await deleteMutation.mutateAsync(item.id);
+        successfullyDeletedIds.push(item.id);
+        successCount++;
+        // Set current item to success
+        setDeleteItems((prev) =>
+          prev.map((it) => (it.id === item.id ? { ...it, status: 'success' } : it)),
+        );
+      } catch (error: any) {
+        failed = true;
+        // Set current item to error
+        setDeleteItems((prev) =>
+          prev.map((it) =>
+            it.id === item.id
+              ? { ...it, status: 'error', errorMessage: error?.message || 'Failed to delete' }
+              : it,
+          ),
+        );
+        toast.error(`Failed to delete "${item.name}". Stopped remaining deletions.`);
+        break; // Stop the whole loop on failure
       }
-      toast.success(`${pendingDeleteIds.length} BLE Reader(s) deleted`);
-      await refetch(); // refresh list
-      setSelectedIds(new Set());
-    } catch (error) {
-      toast.error('Failed to delete reader(s)');
-    } finally {
-      setDeleteDialogOpen(false);
+    }
+
+    // Remove successfully deleted from selectedIds
+    if (successfullyDeletedIds.length > 0) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        successfullyDeletedIds.forEach((id) => next.delete(id));
+        return next;
+      });
+      await refetch();
+    }
+
+    setIsDeleting(false);
+    setIsDeleteDone(true);
+
+    if (!failed && successCount > 0) {
+      toast.success(`Successfully deleted ${successCount} reader(s)`);
     }
   };
+
 
   // 🔹 Health Dialog handling
   const handleOpenHealthDialog = (ble: any) => {
@@ -209,12 +293,15 @@ const BleReaderList = () => {
             left: 0,
             backgroundColor: 'background.paper',
             zIndex: 1,
-            width: 35,
-            minWidth: 35,
-            maxWidth: 35,
+            width: 85,
+            minWidth: 85,
+            maxWidth: 85,
           }}
         >
-          <Skeleton variant="rounded" width={30} height={32} />
+          <Box display="flex" alignItems="center" gap={1}>
+            <Skeleton variant="rounded" width={22} height={22} />
+            <Skeleton variant="text" width={18} />
+          </Box>
         </TableCell>
         <TableCell>
           <Skeleton variant="text" width={180} height={22} />
@@ -306,30 +393,36 @@ const BleReaderList = () => {
                         left: 0,
                         backgroundColor: 'background.paper',
                         zIndex: 2,
-                        width: 50, // Fixed width
-                        minWidth: 50,
-                        maxWidth: 50,
+                        width: 85,
+                        minWidth: 85,
+                        maxWidth: 85,
                       }}
                     >
-                      <Checkbox
-                        indeterminate={
-                          currentPageIds.some((id) => selectedIds.has(id)) &&
-                          !currentPageIds.every((id) => selectedIds.has(id))
-                        }
-                        checked={
-                          currentPageIds.length > 0 &&
-                          currentPageIds.every((id) => selectedIds.has(id))
-                        }
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          setSelectedIds((prev) => {
-                            const updated = new Set(prev);
-                            if (checked) currentPageIds.forEach((id) => updated.add(id));
-                            else currentPageIds.forEach((id) => updated.delete(id));
-                            return updated;
-                          });
-                        }}
-                      />
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        <Checkbox
+                          indeterminate={
+                            currentPageIds.some((id) => selectedIds.has(id)) &&
+                            !currentPageIds.every((id) => selectedIds.has(id))
+                          }
+                          checked={
+                            currentPageIds.length > 0 &&
+                            currentPageIds.every((id) => selectedIds.has(id))
+                          }
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setSelectedIds((prev) => {
+                              const updated = new Set(prev);
+                              if (checked) currentPageIds.forEach((id) => updated.add(id));
+                              else currentPageIds.forEach((id) => updated.delete(id));
+                              return updated;
+                            });
+                          }}
+                          size="small"
+                        />
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                          #
+                        </Typography>
+                      </Box>
                     </TableCell>
 
                     {columns.map((col) => (
@@ -369,20 +462,35 @@ const BleReaderList = () => {
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : bleReaderData.map((ble, index) => (
                         <TableRow key={ble.id}>
-                          <TableCell>
-                            <Checkbox
-                              checked={selectedIds.has(ble.id)}
-                              onChange={(e) => {
-                                const checked = e.target.checked;
-                                setSelectedIds((prev) => {
-                                  const updated = new Set(prev);
-                                  if (checked) updated.add(ble.id);
-                                  else updated.delete(ble.id);
-                                  return updated;
-                                });
-                              }}
-                            />
-                            {index + 1 + page * rowsPerPage}
+                          <TableCell
+                            sx={{
+                              position: 'sticky',
+                              left: 0,
+                              backgroundColor: 'background.paper',
+                              zIndex: 1,
+                              width: 85,
+                              minWidth: 85,
+                              maxWidth: 85,
+                            }}
+                          >
+                            <Box display="flex" alignItems="center" gap={0.5}>
+                              <Checkbox
+                                checked={selectedIds.has(ble.id)}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setSelectedIds((prev) => {
+                                    const updated = new Set(prev);
+                                    if (checked) updated.add(ble.id);
+                                    else updated.delete(ble.id);
+                                    return updated;
+                                  });
+                                }}
+                                size="small"
+                              />
+                              <Typography variant="body2">
+                                {index + 1 + page * rowsPerPage}
+                              </Typography>
+                            </Box>
                           </TableCell>
                           <TableCell>{ble.brand?.name}</TableCell>
                           <TableCell>{ble.name}</TableCell>
@@ -467,31 +575,128 @@ const BleReaderList = () => {
       </Dialog>
 
       {/* --- Delete Confirmation --- */}
-      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={!isDeleting ? handleCloseDeleteDialog : undefined}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: '16px' },
+        }}
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'error.main' }}>
+          <IconTrash size={22} color="#fa896b" />
+          <Typography variant="h5" fontWeight="bold">
+            Confirm Deletion
+          </Typography>
+        </DialogTitle>
+        <DialogContent dividers>
+          <DialogContentText sx={{ mb: 2, color: 'text.primary' }}>
             Are you sure you want to delete the following item(s)?
           </DialogContentText>
-          <Box mt={2}>
-            {pendingDeleteIds.map((id) => (
-              <Typography key={id} variant="body2" sx={{ pl: 2 }}>
-                • {id}
-              </Typography>
+          <List sx={{ maxHeight: 320, overflow: 'auto', p: 0 }}>
+            {deleteItems.map((item, index) => (
+              <ListItem
+                key={item.id}
+                divider={index < deleteItems.length - 1}
+                sx={{
+                  py: 1,
+                  px: 1.5,
+                  borderRadius: 1,
+                  mb: 0.5,
+                  bgcolor: !item.selected ? 'action.hover' : 'background.paper',
+                  opacity: !item.selected ? 0.6 : 1,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Box display="flex" alignItems="center" gap={1.5} sx={{ overflow: 'hidden' }}>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: 600,
+                      textDecoration: !item.selected ? 'line-through' : 'none',
+                      color:
+                        item.status === 'error'
+                          ? 'error.main'
+                          : item.status === 'success'
+                          ? 'success.main'
+                          : 'text.primary',
+                      whiteSpace: 'nowrap',
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {item.name}
+                  </Typography>
+                  {item.gmac && (
+                    <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                      ({item.gmac})
+                    </Typography>
+                  )}
+                </Box>
+
+                <Box display="flex" alignItems="center" sx={{ minWidth: 36, justifyContent: 'flex-end' }}>
+                  {item.status === 'loading' ? (
+                    <CircularProgress size={20} color="primary" />
+                  ) : item.status === 'success' ? (
+                    <Tooltip title="Successfully deleted">
+                      <Box display="flex" alignItems="center" color="success.main">
+                        <IconCircleCheck size={24} color="#13deb9" />
+                      </Box>
+                    </Tooltip>
+                  ) : item.status === 'error' ? (
+                    <Tooltip title={item.errorMessage || 'Failed to delete'}>
+                      <IconButton size="small" color="error">
+                        <IconCircleX size={24} color="#fa896b" />
+                      </IconButton>
+                    </Tooltip>
+                  ) : (
+                    <Tooltip
+                      title={
+                        item.selected
+                          ? 'Click to exclude from deletion'
+                          : 'Click to include in deletion'
+                      }
+                    >
+                      <IconButton
+                        size="small"
+                        disabled={isDeleting || isDeleteDone}
+                        onClick={() => handleToggleItemSelect(item.id)}
+                        color={item.selected ? 'primary' : 'default'}
+                      >
+                        {item.selected ? (
+                          <IconCheck size={20} color="#5d87ff" />
+                        ) : (
+                          <IconX size={20} color="#9e9e9e" />
+                        )}
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </Box>
+              </ListItem>
             ))}
-          </Box>
+          </List>
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
-          <Button
-            onClick={handleConfirmDelete}
-            color="error"
-            disabled={deleteMutation.isPending}
-            startIcon={deleteMutation.isPending ? <CircularProgress size={18} /> : undefined}
-          >
-            {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button onClick={handleCloseDeleteDialog} disabled={isDeleting}>
+            {isDeleteDone ? 'Close' : 'Cancel'}
           </Button>
+          {!isDeleteDone && (
+            <Button
+              onClick={handleConfirmDelete}
+              color="error"
+              variant="contained"
+              disabled={isDeleting || deleteItems.filter((i) => i.selected).length === 0}
+              startIcon={isDeleting ? <CircularProgress size={18} color="inherit" /> : undefined}
+            >
+              {isDeleting
+                ? 'Deleting...'
+                : `Delete (${deleteItems.filter((i) => i.selected).length})`}
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </Grid>
@@ -499,4 +704,5 @@ const BleReaderList = () => {
 };
 
 export default BleReaderList;
+
 

@@ -114,6 +114,7 @@ const MAX_LIST_ITEMS = 100;
 const SidebarList = ({ filterType, personFilter }: SidebarListProps) => {
   const dispatch = useDispatch();
   const theme = useTheme();
+  const appId = localStorage.getItem('applicationId') || '';
   const followingPerson = useSelector((state: RootState) => state.layoutReducer.followingPerson);
 
   const activeLayoutId = useSelector((state: RootState) => state.layoutReducer.activeLayoutId);
@@ -251,7 +252,7 @@ const trigger = alarmTriggerDetail ?? null;
     const firstScreen = activeLayout.screens[0];
     if (!firstScreen) return;
 
-    publishMQTT(`people_tracking/highlight/card/${currentBle}`, 'Start');
+    publishMQTT(`people_tracking/${appId.toUpperCase()}/highlight/card/${currentBle}`, 'Start');
 
     dispatch(
       setScreenDisplay({
@@ -283,7 +284,7 @@ const trigger = alarmTriggerDetail ?? null;
     if (!firstScreen) return;
 
     if (followingPerson?.bleCardNumber) {
-      publishMQTT(`people_tracking/highlight/card/${followingPerson.bleCardNumber}`, 'Stop');
+      publishMQTT(`people_tracking/${appId.toUpperCase()}/highlight/card/${followingPerson.bleCardNumber}`, 'Stop');
     }
 
     dispatch(

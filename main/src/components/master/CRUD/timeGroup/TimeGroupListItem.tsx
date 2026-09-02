@@ -1,15 +1,9 @@
-import React, { useEffect } from 'react';
-import { BASE_URL } from 'src/utils/axios';
-import { useSelector } from 'src/store/Store';
+import React from 'react';
 import {
-  ListItemText,
   Box,
-  Avatar,
   ListItemButton,
   Typography,
   Stack,
-  ListItemAvatar,
-  // useTheme,
   Checkbox,
 } from '@mui/material';
 import { TimeGroupType } from 'src/store/apps/crud/timeGroup';
@@ -17,70 +11,63 @@ import { TimeGroupType } from 'src/store/apps/crud/timeGroup';
 type Props = {
   onTimeGroupClick: (event: React.MouseEvent<HTMLElement>) => void;
   timeGroup?: TimeGroupType;
-  manySelect?: boolean;
-  setManySelectTimeGroups?: (TimeGroup: TimeGroupType[]) => void; // Improved typing
-  manySelectTimeGroups?: TimeGroupType[]; // Track selected time group
-  active: any;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
+  active: boolean;
 };
 
 const TimeGroupListItem = ({
   onTimeGroupClick,
   timeGroup,
-  manySelect,
-  setManySelectTimeGroups,
-  manySelectTimeGroups = [],
+  isSelected = false,
+  onToggleSelect,
   active,
 }: Props) => {
-  const customizer = useSelector((state) => state.customizer);
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const br = `${customizer.borderRadius}px`;
-
-  // const theme = useTheme();
-
-  const isChecked = manySelectTimeGroups.some((time) => time.id === timeGroup?.id);
-  // useEffect(() => {
-  //     // console.log(timeGroup);
-  // },[timeGroup]);
-  const handleCheckboxChange = () => {
-    if (!setManySelectTimeGroups || !timeGroup) return;
-
-    if (isChecked) {
-      setManySelectTimeGroups(manySelectTimeGroups.filter((m) => m.id !== timeGroup.id));
-    } else {
-      setManySelectTimeGroups([...manySelectTimeGroups, timeGroup]);
-    }
-  };
-
   return (
-    <ListItemButton sx={{ mb: 1 }} selected={active} onClick={onTimeGroupClick}>
-      <ListItemText>
-        <Stack direction="row" gap="10px" alignItems="center">
-          <Box mr="auto">
-            <Typography
-              variant="subtitle1"
-              noWrap
-              fontWeight={600}
-              sx={{ maxWidth: '200px' }}
-              textOverflow={'ellipsis'}
-            >
-              {timeGroup?.name}
-            </Typography>
+    <ListItemButton
+      sx={{ mb: 0.5, px: 1.5, py: 1 }}
+      selected={active}
+      onClick={onTimeGroupClick}
+    >
+      <Stack direction="row" gap={1} alignItems="center" width="100%">
+        {timeGroup && onToggleSelect && (
+          <Checkbox
+            size="small"
+            checked={isSelected}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => {
+              e.stopPropagation();
+              onToggleSelect(timeGroup.id);
+            }}
+            sx={{ p: 0.5 }}
+          />
+        )}
+        <Box mr="auto" sx={{ overflow: 'hidden' }}>
+          <Typography
+            variant="subtitle1"
+            noWrap
+            fontWeight={600}
+            sx={{ maxWidth: '160px' }}
+            textOverflow="ellipsis"
+          >
+            {timeGroup?.name}
+          </Typography>
+          {timeGroup?.description && (
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ maxWidth: '200px' }}
-              textOverflow={'ellipsis'}
+              sx={{ maxWidth: '160px' }}
+              textOverflow="ellipsis"
               noWrap
             >
-              {timeGroup?.description}
+              {timeGroup.description}
             </Typography>
-          </Box>
-        </Stack>
-      </ListItemText>
+          )}
+        </Box>
+      </Stack>
     </ListItemButton>
   );
 };
 
 export default TimeGroupListItem;
+

@@ -70,9 +70,13 @@ export const { UpdateReaderHealth } = ReaderHealthSlice.actions;
  */
 export const fetchReaderHealth = () => (dispatch: AppDispatch) => {
   const topic = 'people_tracking/gateway/+/+';
-  // console.log("ini topic", topic)
+  let lastDispatch = 0;
+
   const unsubscribe = startMQTTclient((data: any) => {
-    // console.log("ini data", data)
+    const now = Date.now();
+    if (now - lastDispatch < 500) return;
+    lastDispatch = now;
+
     // If the MQTT message is a string, parse it
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     

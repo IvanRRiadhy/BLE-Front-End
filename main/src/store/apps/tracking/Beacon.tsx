@@ -84,6 +84,13 @@ export type AlarmLogItem = {
   type: 'Alarm';
   triggerId: string;
   seen: boolean;
+  alarmName?: string;
+  personName?: string;
+  personCategory?: string;
+  battery?: number;
+  threshold?: number;
+  cardName?: string;
+  cardNumber?: string;
 };
 
 interface StoredBeacon extends BeaconType {
@@ -184,29 +191,53 @@ export const BeaconSlice = createSlice({
       const { topic, beacons } = action.payload;
       const now = Date.now();
 
-      // Initialize topic if it doesn't exist
       if (!state.beaconsByTopic[topic]) {
         state.beaconsByTopic[topic] = {};
       }
       if (!state.allBeacons[topic]) {
         state.allBeacons[topic] = {};
       }
-      // console.log("topic", topic, "Beacons", beacons);
-      // Update or add each beacon
       beacons.forEach((beacon: any) => {
         if (!beacon.beaconId) return;
 
-        // Create stored beacon with dmac = beaconId
         const storedBeacon: StoredBeacon = {
           ...beacon,
-          dmac: beacon.beaconId, // Set dmac to beaconId
+          dmac: beacon.beaconId,
           lastSeen: now,
         };
-        
+
         state.beaconsByTopic[topic][beacon.beaconId] = storedBeacon;
         state.allBeacons[topic][beacon.beaconId] = storedBeacon;
       });
-      // console.log("topic: ", topic, "Stored Beacons: ", beacons)
+    },
+
+    UpdateBeaconsBatch: (state, action: PayloadAction<Record<string, any[]>>) => {
+      const groupedByFloorplan = action.payload;
+      const now = Date.now();
+
+      Object.keys(groupedByFloorplan).forEach((fid) => {
+        if (!state.beaconsByTopic[fid]) {
+          state.beaconsByTopic[fid] = {};
+        }
+        if (!state.allBeacons[fid]) {
+          state.allBeacons[fid] = {};
+        }
+
+        groupedByFloorplan[fid].forEach((beacon: any) => {
+          if (!beacon.beaconId) return;
+          // if (beacon.beaconId === "BC5729191EAB") {
+          //   console.log("people_tracking/tracking/C926D20B-A746-4492-9924-EB7EEE76305C/indoor/799CACEB-3D2F-44A1-AFF1-02140841B458/C80085A7-9CF1-414D-AA37-D5EC2C3CA45F/3529C3E6-5F4A-4E72-B813-81B603DA32CC/2317AC0F-ADA7-48D3-889D-803987E0E10B/BC5729191EAB", beacon)
+          // }
+          const storedBeacon: StoredBeacon = {
+            ...beacon,
+            dmac: beacon.beaconId,
+            lastSeen: beacon.time,
+          };
+
+          state.beaconsByTopic[fid][beacon.beaconId] = storedBeacon;
+          state.allBeacons[fid][beacon.beaconId] = storedBeacon;
+        });
+      });
     },
 
     // Update counting data
@@ -217,7 +248,7 @@ export const BeaconSlice = createSlice({
 
     // Clean up old beacons for a specific topic
     CleanupTopicBeacons: (state, action) => {
-      const { topic, maxAge = 15000 } = action.payload; // Default 15 seconds
+      const { topic, maxAge = 60000 } = action.payload; // Default 15 seconds
       const now = Date.now();
 
       if (!state.beaconsByTopic[topic]) return;
@@ -238,7 +269,7 @@ export const BeaconSlice = createSlice({
 
     // Clean up ALL old beacons across all topics
     CleanupAllBeacons: (state, action) => {
-      const { maxAge = 15000 } = action.payload;
+      const { maxAge = 60000 } = action.payload;
       const now = Date.now();
 
       Object.keys(state.beaconsByTopic).forEach((topic) => {
@@ -363,6 +394,7 @@ export const BeaconSlice = createSlice({
 
 export const {
   UpdateBeacon,
+  UpdateBeaconsBatch,
   UpdateCountingData,
   CleanupTopicBeacons,
   CleanupAllBeacons,
@@ -391,53 +423,47 @@ export const selectAlarmById = (id: string | null) => (state: RootState) =>
   id ? state.BeaconReducer.alarmLogs.find((a: AlarmLogItem) => a.id === id) : null;
 
 export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
-  let lastDispatch = 0;
   const prevAreaByBeacon: Record<string, string | undefined> = {};
 
+  let pendingBeaconsByFloorplan: Record<string, any[]> = {};
+  let pendingLogs: TrackingLogItem[] = [];
+
+  const intervalId = setInterval(() => {
+    if (Object.keys(pendingBeaconsByFloorplan).length > 0) {
+      dispatch(UpdateBeaconsBatch(pendingBeaconsByFloorplan));
+      pendingBeaconsByFloorplan = {};
+    }
+
+    if (pendingLogs.length > 0) {
+      dispatch(AppendTrackingLogs(pendingLogs));
+      pendingLogs = [];
+    }
+  }, 100);
+
   const unsubscribe = startMQTTclient((data: any) => {
-    const now = Date.now();
-    if (now - lastDispatch > 0) {
-      lastDispatch = now;
+    // Ensure data is an array
+    const beaconArray = Array.isArray(data) ? data : [data];
 
-      // Ensure data is an array
-      const beaconArray = Array.isArray(data) ? data : [data];
+    // Filter to only include beacons with a floorplanId
+    const filteredBeacons = beaconArray.filter((beacon: any) => !!beacon.floorplanId);
 
-      // Filter to only include beacons with a floorplanId
-      const filteredBeacons = beaconArray.filter((beacon: any) => !!beacon.floorplanId);
-      // console.log("FilteredBeacons", filteredBeacons, "Message: ", data)
-      if (filteredBeacons.length > 0) {
-        // Group beacons by floorplanId
-        const groupedByFloorplan: Record<string, any[]> = {};
-        filteredBeacons.forEach((beacon) => {
-          const fid = beacon.floorplanId.toUpperCase();
-          if (!groupedByFloorplan[fid]) {
-            groupedByFloorplan[fid] = [];
-          }
-          groupedByFloorplan[fid].push(beacon);
-        });
+    if (filteredBeacons.length > 0) {
+      filteredBeacons.forEach((b: any) => {
+        const fid = b.floorplanId.toUpperCase();
+        if (!pendingBeaconsByFloorplan[fid]) {
+          pendingBeaconsByFloorplan[fid] = [];
+        }
+        pendingBeaconsByFloorplan[fid].push(b);
 
-        // Dispatch UpdateBeacon for each floorplanId group
-        Object.keys(groupedByFloorplan).forEach((fid) => {
-          dispatch(
-            UpdateBeacon({
-              topic: fid,
-              beacons: groupedByFloorplan[fid],
-            }),
-          );
-        });
-
-        const newLogs: TrackingLogItem[] = [];
-        filteredBeacons.forEach((b: any) => {
-          const beaconId = b.beaconId;
-          if (!beaconId) return;
-
+        const beaconId = b.beaconId;
+        if (beaconId) {
           const currentArea = b.maskedAreaName || 'Unknown Area';
           const prevArea = prevAreaByBeacon[beaconId];
 
           // 🔥 only log when area changes
           if (prevArea !== currentArea) {
             prevAreaByBeacon[beaconId] = currentArea;
-            newLogs.push({
+            pendingLogs.push({
               id: `trk-${beaconId}-${b.time}`, // keep unique
               device: b.firstReaderId,
               type: 'Tracking',
@@ -451,20 +477,21 @@ export const fetchBeacon = (topic: string) => (dispatch: AppDispatch) => {
               personType: b.visitorCardName ? 'Visitor' : b.memberCardName ? 'Member' : undefined,
             });
           }
-        });
-
-        if (newLogs.length > 0) {
-          dispatch(AppendTrackingLogs(newLogs));
         }
-      }
+      });
     }
   }, topic);
-  return unsubscribe;
+
+  return () => {
+    clearInterval(intervalId);
+    unsubscribe();
+  };
 };
 
 // Thunk to subscribe to counting data
 export const fetchCountingData = () => (dispatch: AppDispatch) => {
-  const countingTopic = 'people_tracking/counting'; // Adjust the topic as needed
+  const appId = localStorage.getItem('applicationId') || '';
+  const countingTopic = `people_tracking/${appId.toUpperCase()}/counting`; // Adjust the topic as needed
 
   // console.log(`[MQTT] Subscribing to counting topic: ${countingTopic}`);
 
@@ -538,12 +565,12 @@ const parseEntityCounts = (entities: any): { [id: string]: EntityCount } => {
 
 // Thunk to cleanup old beacons for a topic
 export const cleanupTopicBeacons = (topic: string) => (dispatch: AppDispatch) => {
-  dispatch(CleanupTopicBeacons({ topic, maxAge: 15000 }));
+  dispatch(CleanupTopicBeacons({ topic, maxAge: 150000 }));
 };
 
 // Thunk to cleanup all old beacons
 export const cleanupAllBeacons = () => (dispatch: AppDispatch) => {
-  dispatch(CleanupAllBeacons({ maxAge: 15000 }));
+  dispatch(CleanupAllBeacons({ maxAge: 150000 }));
 };
 
 // Helper functions to get specific counts

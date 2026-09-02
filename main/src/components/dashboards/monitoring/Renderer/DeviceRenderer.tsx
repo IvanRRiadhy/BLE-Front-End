@@ -7,7 +7,7 @@ import {
   cleanupTopicBeacons,
   AlarmLogItem,
 } from 'src/store/apps/tracking/Beacon';
-import BeaconRenderer from './BeaconRenderer';
+import BeaconRenderer, { preloadImage } from './BeaconRenderer';
 import FaceRecog from 'src/assets/images/svgs/devices/FACE RECOGNITION FIX.svg';
 import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
 import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
@@ -82,6 +82,260 @@ function getNodePx(node: any): [number, number] | null {
     return [node.x, node.y];
   }
   return null;
+}
+
+/**
+ * Extract an array of { x, y } points from area nodes
+ */
+function getAreaPoints(nodes?: any[]): { x: number; y: number }[] {
+  const pts: { x: number; y: number }[] = [];
+  if (nodes && Array.isArray(nodes)) {
+    for (const n of nodes) {
+      const p = getNodePx(n);
+      if (p) pts.push({ x: p[0], y: p[1] });
+    }
+  }
+  return pts;
+}
+
+/**
+ * Calculates all X intersections of a horizontal line at `y` with a polygon.
+ */
+function getPolygonHorizontalIntersections(y: number, pts: { x: number; y: number }[]): number[] {
+  const xs: number[] = [];
+  const n = pts.length;
+  if (n < 3) return xs;
+  for (let i = 0; i < n; i++) {
+    const p1 = pts[i];
+    const p2 = pts[(i + 1) % n];
+    if ((p1.y <= y && p2.y > y) || (p2.y <= y && p1.y > y)) {
+      const intersectX = p1.x + ((y - p1.y) * (p2.x - p1.x)) / (p2.y - p1.y);
+      xs.push(intersectX);
+    }
+  }
+  xs.sort((a, b) => a - b);
+  return xs;
+}
+
+/**
+ * Calculates all Y intersections of a vertical line at `x` with a polygon.
+ */
+function getPolygonVerticalIntersections(x: number, pts: { x: number; y: number }[]): number[] {
+  const ys: number[] = [];
+  const n = pts.length;
+  if (n < 3) return ys;
+  for (let i = 0; i < n; i++) {
+    const p1 = pts[i];
+    const p2 = pts[(i + 1) % n];
+    if ((p1.x <= x && p2.x > x) || (p2.x <= x && p1.x > x)) {
+      const intersectY = p1.y + ((x - p1.x) * (p2.y - p1.y)) / (p2.x - p1.x);
+      ys.push(intersectY);
+    }
+  }
+  ys.sort((a, b) => a - b);
+  return ys;
+}
+
+/**
+ * Finds the segment pair [left, right] that contains the query value, or the closest segment pair.
+ */
+function findContainingOrClosestInterval(query: number, intersections: number[]): [number, number] | null {
+  if (intersections.length < 2) return null;
+  for (let i = 0; i < intersections.length - 1; i += 2) {
+    const left = intersections[i];
+    const right = intersections[i + 1];
+    if (query >= left && query <= right) {
+      return [left, right];
+    }
+  }
+  let bestDist = Infinity;
+  let bestInterval: [number, number] = [intersections[0], intersections[1]];
+  for (let i = 0; i < intersections.length - 1; i += 2) {
+    const left = intersections[i];
+    const right = intersections[i + 1];
+    const dist = query < left ? left - query : query - right;
+    if (dist < bestDist) {
+      bestDist = dist;
+      bestInterval = [left, right];
+    }
+  }
+  return bestInterval;
+}
+
+function isPointInPolygon(point: { x: number; y: number }, polygon: { x: number; y: number }[]): boolean {
+  if (!polygon || polygon.length < 3) return false;
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].x, yi = polygon[i].y;
+    const xj = polygon[j].x, yj = polygon[j].y;
+    const intersect = ((yi > point.y) !== (yj > point.y))
+        && (point.x < ((xj - xi) * (point.y - yi)) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+interface TextBoxFit {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * Computes the constrained bounding box for a textbox inside a polygon:
+ * - Keeps standard width (120px) whenever possible.
+ * - If the center is too close to a polygon boundary (accounting for diagonal lines),
+ *   shifts the center inward so edges touch the border without overflowing.
+ * - Constrains vertical height to the polygon boundaries so text line overflows can be truncated with ellipsis.
+ */
+function computeFittedTextBox(
+  targetCenterX: number,
+  targetCenterY: number,
+  fontSize: number,
+  pts: { x: number; y: number }[],
+  targetWidth = 120,
+  padding = 4,
+  maxBoxHeight?: number,
+): TextBoxFit {
+  const defaultHeight = maxBoxHeight || Math.max(fontSize * 2.4, 28);
+  const defaultHalfH = defaultHeight / 2;
+
+  if (!pts || pts.length < 3) {
+    return {
+      x: targetCenterX - targetWidth / 2,
+      y: targetCenterY - defaultHalfH,
+      width: targetWidth,
+      height: defaultHeight,
+    };
+  }
+
+  // 1. Determine vertical bounds at targetCenterX
+  const vIntersects = getPolygonVerticalIntersections(targetCenterX, pts);
+  const vInterval = findContainingOrClosestInterval(targetCenterY, vIntersects);
+
+  let topBound = -Infinity;
+  let bottomBound = Infinity;
+
+  if (vInterval) {
+    topBound = vInterval[0] + padding;
+    bottomBound = vInterval[1] - padding;
+  } else {
+    const ys = pts.map((p) => p.y);
+    topBound = Math.min(...ys) + padding;
+    bottomBound = Math.max(...ys) - padding;
+  }
+
+  // Clamp targetCenterY inside vertical bounds
+  let cy = targetCenterY;
+  const minRequiredHalfH = (fontSize * 1.2) / 2;
+  if (bottomBound - topBound > minRequiredHalfH * 2) {
+    cy = Math.max(topBound + minRequiredHalfH, Math.min(bottomBound - minRequiredHalfH, cy));
+  } else {
+    cy = (topBound + bottomBound) / 2;
+  }
+
+  // Sample across vertical span to account for diagonal polygon edges
+  const estHalfH = Math.min(
+    Math.max((fontSize * 2.2) / 2, 14),
+    Math.max(minRequiredHalfH, (bottomBound - topBound) / 2),
+  );
+  const ySamples = [
+    cy - estHalfH,
+    cy - estHalfH * 0.5,
+    cy,
+    cy + estHalfH * 0.5,
+    cy + estHalfH,
+  ];
+
+  // 2. Find horizontal bounds across all Y samples (strictest left and strictest right)
+  let strictLeft = -Infinity;
+  let strictRight = Infinity;
+  let validSampleCount = 0;
+
+  for (const y of ySamples) {
+    const clampedY = Math.max(topBound, Math.min(bottomBound, y));
+    const hIntersects = getPolygonHorizontalIntersections(clampedY, pts);
+    const hInterval = findContainingOrClosestInterval(targetCenterX, hIntersects);
+    if (hInterval) {
+      strictLeft = Math.max(strictLeft, hInterval[0] + padding);
+      strictRight = Math.min(strictRight, hInterval[1] - padding);
+      validSampleCount++;
+    }
+  }
+
+  if (validSampleCount === 0 || strictRight <= strictLeft) {
+    const hIntersects = getPolygonHorizontalIntersections(cy, pts);
+    const hInterval = findContainingOrClosestInterval(targetCenterX, hIntersects);
+    if (hInterval && hInterval[1] > hInterval[0]) {
+      strictLeft = hInterval[0] + padding;
+      strictRight = hInterval[1] - padding;
+    } else {
+      const xs = pts.map((p) => p.x);
+      strictLeft = Math.min(...xs) + padding;
+      strictRight = Math.max(...xs) - padding;
+    }
+  }
+
+  const availableWidth = Math.max(20, strictRight - strictLeft);
+  let finalWidth = targetWidth;
+  let finalCenterX = targetCenterX;
+
+  if (availableWidth >= targetWidth) {
+    finalWidth = targetWidth;
+    const halfW = targetWidth / 2;
+    // Shift center inward if too close to border
+    if (finalCenterX - halfW < strictLeft) {
+      finalCenterX = strictLeft + halfW;
+    }
+    if (finalCenterX + halfW > strictRight) {
+      finalCenterX = strictRight - halfW;
+    }
+  } else {
+    // Narrow polygon region
+    finalWidth = availableWidth;
+    finalCenterX = strictLeft + availableWidth / 2;
+  }
+
+  const finalX = finalCenterX - finalWidth / 2;
+
+  // 3. Check vertical bounds across horizontal extent [finalX, finalX + finalWidth]
+  const xSamples = [finalX, finalX + finalWidth / 2, finalX + finalWidth];
+  let finalStrictTop = -Infinity;
+  let finalStrictBottom = Infinity;
+
+  for (const x of xSamples) {
+    const vInts = getPolygonVerticalIntersections(x, pts);
+    const vInt = findContainingOrClosestInterval(cy, vInts);
+    if (vInt) {
+      finalStrictTop = Math.max(finalStrictTop, vInt[0] + padding);
+      finalStrictBottom = Math.min(finalStrictBottom, vInt[1] - padding);
+    }
+  }
+
+  if (finalStrictBottom <= finalStrictTop) {
+    finalStrictTop = topBound;
+    finalStrictBottom = bottomBound;
+  }
+
+  const availableHeight = Math.max(fontSize * 1.2, finalStrictBottom - finalStrictTop);
+  let finalHeight = maxBoxHeight ? Math.min(maxBoxHeight, availableHeight) : Math.min(defaultHeight * 2, availableHeight);
+  let finalY = cy - finalHeight / 2;
+
+  if (finalY < finalStrictTop) {
+    finalY = finalStrictTop;
+  }
+  if (finalY + finalHeight > finalStrictBottom) {
+    finalY = Math.max(finalStrictTop, finalStrictBottom - finalHeight);
+    finalHeight = finalStrictBottom - finalY;
+  }
+
+  return {
+    x: Math.round(finalX),
+    y: Math.round(finalY),
+    width: Math.round(finalWidth),
+    height: Math.max(Math.round(fontSize * 1.2), Math.round(finalHeight)),
+  };
 }
 
 function areaToPolygonRings(area: MaskedAreaType): number[][][] {
@@ -275,10 +529,48 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   const { data: membersData = EMPTY_ARRAY } = useAllMembers();
   const { data: visitorsData = EMPTY_ARRAY } = useAllVisitor();
   const { data: securityData = EMPTY_ARRAY } = useAllSecuritys();
+  const appId = localStorage.getItem('applicationId') || '';
+  const iconTypeSetting = useSelector((state: RootState) => state.settings.beaconIconType || 'person');
+  const trackingMode = useSelector((state: RootState) => state.settings.trackingMode || 'Live');
+  const [, setPhotoLoadVersion] = useState(0);
+
+  // Preload photos only when photo icon mode or Count tracking mode is active
+  useEffect(() => {
+    if (iconTypeSetting !== 'photo' && trackingMode !== 'Count') return;
+    let isMounted = true;
+
+    const handleLoaded = () => {
+      if (!isMounted) return;
+      setPhotoLoadVersion((v) => v + 1);
+    };
+
+    membersData.forEach((m) => {
+      if (m.faceImage) preloadImage(m.faceImage, handleLoaded);
+    });
+    visitorsData.forEach((v) => {
+      if (v.faceImage) preloadImage(v.faceImage, handleLoaded);
+    });
+    securityData.forEach((s) => {
+      if (s.faceImage) preloadImage(s.faceImage, handleLoaded);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [iconTypeSetting, trackingMode, membersData, visitorsData, securityData]);
 
   // Create a memoized lookup map of bleCardNumber -> person info for O(1) performance
   const beaconPersonMap = useMemo(() => {
-    const map = new Map<string, { label: string; isSecurity: boolean; isMember: boolean; isVisitor: boolean }>();
+    const map = new Map<
+      string,
+      {
+        label: string;
+        isSecurity: boolean;
+        isMember: boolean;
+        isVisitor: boolean;
+        faceImage?: string;
+      }
+    >();
 
     membersData.forEach((m) => {
       if (m.bleCardNumber) {
@@ -287,6 +579,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
           isSecurity: false,
           isMember: true,
           isVisitor: false,
+          faceImage: m.faceImage,
         });
       }
     });
@@ -298,6 +591,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
           isSecurity: false,
           isMember: false,
           isVisitor: true,
+          faceImage: v.faceImage,
         });
       }
     });
@@ -309,6 +603,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
           isSecurity: true,
           isMember: false,
           isVisitor: false,
+          faceImage: s.faceImage,
         });
       }
     });
@@ -395,6 +690,20 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   );
   const thisScreen = layouts?.screens.find((s: ScreenItem) => s.id === screenId);
 
+  const animatedBeaconsRef = useRef<{ [id: string]: { x: number; y: number } }>({});
+  const animTargetsRef = useRef<{
+    [id: string]: {
+      startX: number;
+      startY: number;
+      endX: number;
+      endY: number;
+      startTime: number;
+      duration: number;
+      pending?: { x: number; y: number };
+    };
+  }>({});
+  const masterFrameRef = useRef<number | null>(null);
+
   // Track previous topic to detect changes
   const prevTopicRef = useRef<string>(topic);
 
@@ -444,6 +753,12 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
       console.log(
         `Topic changed from ${prevTopicRef.current} to ${topic}, resetting beacons`,
       );
+      if (masterFrameRef.current) {
+        cancelAnimationFrame(masterFrameRef.current);
+        masterFrameRef.current = null;
+      }
+      animTargetsRef.current = {};
+      animatedBeaconsRef.current = {};
       setLastSeenBeacons({});
       setAnimatedBeacons({});
       prevTopicRef.current = topic;
@@ -505,115 +820,239 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   const iconFaceRecog = useDeviceIcon(FaceRecog);
   const iconUnknown = useDeviceIcon(UnknownDevice);
 
-  // fetch beacons
-  // useEffect(() => {
-  //   const unsubscribe = dispatch(fetchBeacon(topic));
-  //   return () => {
-  //     if (typeof unsubscribe === 'function') unsubscribe();
-  //   };
-  // }, [dispatch, topic]);
-
   // maintain beacon state from Redux data
   useEffect(() => {
     if (!beaconData || beaconData.length === 0) {
-      // If no beacon data, clear local state
-      setLastSeenBeacons({});
+      setLastSeenBeacons((prev) => (Object.keys(prev).length === 0 ? prev : {}));
       return;
     }
 
-    // console.log(`Processing ${beaconData.length} beacons for topic ${topic}`);
-
     setLastSeenBeacons((prev) => {
+      let hasChanges = false;
       const updated = { ...prev };
 
       beaconData.forEach((b: any) => {
         if (!b.point) return;
 
-        // beaconId is the dmac
         const beaconId = b.beaconId;
-        const dmac = beaconId; // Same as beaconId
+        const dmac = beaconId;
+        const lastSeenTime = b.lastSeen || (b.time ? new Date(b.time).getTime() : 0);
 
-        updated[beaconId] = {
-          x: b.point.x,
-          y: b.point.y,
-          lastSeen: b.lastSeen || Date.now(), // Use Redux lastSeen or current time
-          area: b.maskedAreaName || '',
-          floorplan: b.floorplanName || '',
-          time: b.time || '',
-          dmac: dmac,
-        };
+        const existing = prev[beaconId];
+        if (
+          !existing ||
+          existing.x !== b.point.x ||
+          existing.y !== b.point.y ||
+          existing.lastSeen !== lastSeenTime ||
+          existing.area !== (b.maskedAreaName || '')
+        ) {
+          hasChanges = true;
+          updated[beaconId] = {
+            x: b.point.x,
+            y: b.point.y,
+            lastSeen: lastSeenTime,
+            area: b.maskedAreaName || '',
+            floorplan: b.floorplanName || '',
+            time: b.time || '',
+            dmac: dmac,
+          };
+        }
       });
 
       // Clean up beacons that are no longer in Redux data
       Object.keys(updated).forEach((beaconId) => {
         if (!beaconData.find((b: any) => b.beaconId === beaconId)) {
+          hasChanges = true;
           delete updated[beaconId];
         }
       });
 
-      return updated;
+      return hasChanges ? updated : prev;
     });
-    // console.log("Beacons: ", lastSeenBeacons)
-    // dispatch(buildTrackingLogs());
   }, [beaconData, topic]);
 
-  // animate beacons
+  // animate beacons using a single unified master RAF loop for physics & macrotask ticker for React state
   useEffect(() => {
+    // 0. Clean up tracking/animation refs for beacons that disappeared
+    const currentBeaconIds = new Set(Object.keys(lastSeenBeacons));
+    Object.keys(animatedBeaconsRef.current).forEach((beaconId) => {
+      if (!currentBeaconIds.has(beaconId)) {
+        delete animatedBeaconsRef.current[beaconId];
+        delete animTargetsRef.current[beaconId];
+      }
+    });
+
+    // 1. Process incoming lastSeenBeacons targets
     Object.entries(lastSeenBeacons).forEach(([beaconId, beacon]) => {
       const point = { x: beacon.x, y: beacon.y };
-      const prev = animatedBeacons[beaconId] || point;
-      if (prev.x === point.x && prev.y === point.y) {
-        setAnimatedBeacons((s) => ({ ...s, [beaconId]: point }));
+      const currentPos = animatedBeaconsRef.current[beaconId];
+
+      // If beacon was not previously tracked/animated (new or re-appeared after disappearing),
+      // snap directly to detected position without animating from stale/initial coordinates
+      if (!currentPos) {
+        animatedBeaconsRef.current[beaconId] = point;
         return;
       }
 
-      const startX = prev.x;
-      const startY = prev.y;
-      const endX = point.x;
-      const endY = point.y;
-      const distX = endX - startX;
-      const distY = endY - startY;
-      const distance = Math.sqrt(distX * distX + distY * distY);
-      const speed = 2 / meterPx;
-      const duration = Math.min(Math.max(500, (distance / speed) * 500), 2000);
-      const startTime = performance.now();
-      function animate(now: number) {
-        const t = Math.min(1, (now - startTime) / duration);
-        const nx = startX + (endX - startX) * t;
-        const ny = startY + (endY - startY) * t;
-        setAnimatedBeacons((s) => ({ ...s, [beaconId]: { x: nx, y: ny } }));
-        if (t < 1) requestAnimationFrame(animate);
+      if (currentPos.x === point.x && currentPos.y === point.y) {
+        return;
       }
-      requestAnimationFrame(animate);
+
+      const activeAnim = animTargetsRef.current[beaconId];
+      if (activeAnim) {
+        // Queue pending target position if animation is currently active
+        activeAnim.pending = point;
+      } else {
+        // Launch new animation trajectory
+        const startX = currentPos.x;
+        const startY = currentPos.y;
+        const endX = point.x;
+        const endY = point.y;
+        const distX = endX - startX;
+        const distY = endY - startY;
+        const distance = Math.sqrt(distX * distX + distY * distY);
+        const speed = 2 / meterPx;
+        const duration = Math.min(Math.max(500, (distance / speed) * 500), 2000);
+        // const duration = 0.001;
+
+        animTargetsRef.current[beaconId] = {
+          startX,
+          startY,
+          endX,
+          endY,
+          startTime: performance.now(),
+          duration,
+        };
+      }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    const masterLoop = (now: number) => {
+      const activeIds = Object.keys(animTargetsRef.current);
+
+      if (activeIds.length === 0) {
+        masterFrameRef.current = null;
+        return;
+      }
+
+      activeIds.forEach((beaconId) => {
+        const anim = animTargetsRef.current[beaconId];
+        if (!anim) return;
+
+        const t = Math.min(1, (now - anim.startTime) / anim.duration);
+        const nx = anim.startX + (anim.endX - anim.startX) * t;
+        const ny = anim.startY + (anim.endY - anim.startY) * t;
+        animatedBeaconsRef.current[beaconId] = { x: nx, y: ny };
+
+        if (t >= 1) {
+          if (anim.pending && (anim.pending.x !== anim.endX || anim.pending.y !== anim.endY)) {
+            const nextTarget = anim.pending;
+            const startX = nx;
+            const startY = ny;
+            const endX = nextTarget.x;
+            const endY = nextTarget.y;
+            const distX = endX - startX;
+            const distY = endY - startY;
+            const distance = Math.sqrt(distX * distX + distY * distY);
+            const speed = 2 / meterPx;
+            const duration = Math.min(Math.max(500, (distance / speed) * 500), 2000);
+
+            animTargetsRef.current[beaconId] = {
+              startX,
+              startY,
+              endX,
+              endY,
+              startTime: now,
+              duration,
+            };
+          } else {
+            delete animTargetsRef.current[beaconId];
+          }
+        }
+      });
+
+      if (Object.keys(animTargetsRef.current).length > 0) {
+        masterFrameRef.current = requestAnimationFrame(masterLoop);
+      } else {
+        masterFrameRef.current = null;
+      }
+    };
+
+    if (Object.keys(animTargetsRef.current).length > 0 && !masterFrameRef.current) {
+      masterFrameRef.current = requestAnimationFrame(masterLoop);
+    }
+
+    return () => {
+      if (masterFrameRef.current) {
+        cancelAnimationFrame(masterFrameRef.current);
+        masterFrameRef.current = null;
+      }
+    };
+  }, [lastSeenBeacons, meterPx]);
+
+  // Isolated macrotask ticker for React state updates (completely decouples setState from RAF frame callbacks)
+  useEffect(() => {
+    let timeoutId: any = null;
+
+    const syncState = () => {
+      const activeCount = Object.keys(animTargetsRef.current).length;
+
+      setAnimatedBeacons({ ...animatedBeaconsRef.current });
+
+      if (activeCount > 0) {
+        timeoutId = setTimeout(syncState, 50); // 20 FPS state update pass
+      } else {
+        timeoutId = null;
+      }
+    };
+
+    if (Object.keys(animTargetsRef.current).length > 0) {
+      syncState();
+    } else {
+      setAnimatedBeacons({ ...animatedBeaconsRef.current });
+    }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [lastSeenBeacons]);
 
   useEffect(() => {
     if (!refreshTrigger) return;
     dispatch(RefreshBeaconState());
+    if (masterFrameRef.current) {
+      cancelAnimationFrame(masterFrameRef.current);
+      masterFrameRef.current = null;
+    }
+    animTargetsRef.current = {};
+    animatedBeaconsRef.current = {};
     setLastSeenBeacons({});
     setAnimatedBeacons({});
   }, [refreshTrigger, dispatch]);
 
+  const lastReportedFocusPosRef = useRef<{ x: number; y: number } | null>(null);
+
   // Convert beacon position from meters to pixels for focus position
   useEffect(() => {
     if (!focusBeaconId || !onFocusPosition) return;
-    const b = animatedBeacons[focusBeaconId];
+    const b = animatedBeacons[focusBeaconId] || animatedBeaconsRef.current[focusBeaconId];
     if (!b) return;
 
-    // Convert meters to pixels using meterPx
     const xPx = b.x;
     const yPx = b.y;
 
-    // Pass the position in original image coordinates (pixels)
+    const prev = lastReportedFocusPosRef.current;
+    if (prev && Math.abs(prev.x - xPx) < 0.5 && Math.abs(prev.y - yPx) < 0.5) {
+      return;
+    }
+
+    lastReportedFocusPosRef.current = { x: xPx, y: yPx };
     onFocusPosition({ x: xPx, y: yPx });
-  }, [animatedBeacons, focusBeaconId, onFocusPosition, meterPx]);
+  }, [animatedBeacons, focusBeaconId, onFocusPosition]);
 
   useEffect(() => {
     if (!focusBeaconId) return;
 
-    const topic = `people_tracking/highlight/positions/${focusBeaconId}`;
+    const topic = `people_tracking/${appId.toUpperCase()}/highlight/positions/${focusBeaconId}`;
     console.log(`[MQTT] Subscribing to highlight topic: ${topic}`);
 
     const unsubscribe = startMQTTclient((msg: any) => {
@@ -1033,8 +1472,8 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                 const yPx = anim.y;
 
                 const now = Date.now();
-                const age = now - beacon.lastSeen;
-                const opacity = age > 5000 ? 0.4 : 1.0;
+                const age = now - new Date(beacon.lastSeen).getTime();
+                const opacity = age > 3000 ? 0.4 : 1.0;
 
                 // Lookup person details in O(1)
                 const personInfo = beaconPersonMap.get(beaconId) || {
@@ -1042,9 +1481,14 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                   isSecurity: false,
                   isMember: false,
                   isVisitor: false,
+                  faceImage: undefined,
                 };
 
                 const isFollowed = checkIsFollowed(beaconId, beacon);
+                const loadedImg =
+                  iconTypeSetting === 'photo' && personInfo.faceImage
+                    ? preloadImage(personInfo.faceImage)
+                    : undefined;
 
                 return (
                   <BeaconRenderer
@@ -1068,6 +1512,8 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                     isMember={personInfo.isMember}
                     isVisitor={personInfo.isVisitor}
                     isFollowed={isFollowed}
+                    faceImage={personInfo.faceImage}
+                    loadedImage={loadedImg || undefined}
                     onClick={() =>
                       onSelectBeacon({
                         id: beaconId,
@@ -1129,14 +1575,98 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                 }
               }
 
+              const areaPts = getAreaPoints(area.nodes);
+
+              const personsInArea: { id: string; name: string; faceImage?: string }[] = [];
+              if (trackingMode === 'Count') {
+                Object.entries(lastSeenBeacons).forEach(([beaconId, b]) => {
+                  let inArea = false;
+                  if (b.area) {
+                    const bArea = b.area.toLowerCase().trim();
+                    if (area.name && bArea === area.name.toLowerCase().trim()) inArea = true;
+                    else if (area.id && bArea === area.id.toLowerCase().trim()) inArea = true;
+                  }
+                  if (!inArea && areaPts && areaPts.length >= 3 && typeof b.x === 'number' && typeof b.y === 'number') {
+                    inArea = isPointInPolygon({ x: b.x, y: b.y }, areaPts);
+                  }
+
+                  if (inArea) {
+                    const personInfo = beaconPersonMap.get(beaconId) || (b.dmac ? beaconPersonMap.get(b.dmac) : undefined);
+                    const label = personInfo?.label || beaconId;
+                    if (label) {
+                      personsInArea.push({
+                        id: beaconId,
+                        name: label,
+                        faceImage: personInfo?.faceImage,
+                      });
+                    }
+                  }
+                });
+              }
+
+              const displayCount = areaCount || (trackingMode === 'Count' ? personsInArea.length : areaCount);
+
+              const headerHeight = Math.max(occTb.fontSize * 1.3, 18);
+              const headerGap = 8;
+              const avatarRadius = Math.max(7, Math.round(occTb.fontSize * 0.6));
+              const itemHeight = Math.max(avatarRadius * 2, occTb.fontSize * 1.3);
+              const itemGap = 5;
+              const rowTotalHeight = itemHeight + itemGap;
+              const maxAllowedHeight = 480;
+
+              let visiblePersons = personsInArea;
+              let remainingCount = 0;
+              let occDesiredHeight: number | undefined = undefined;
+
+              if (trackingMode === 'Count') {
+                const maxListHeight = maxAllowedHeight - headerHeight - headerGap;
+                const maxPossibleRows = Math.max(1, Math.floor(maxListHeight / rowTotalHeight));
+
+                if (personsInArea.length > maxPossibleRows) {
+                  const fitCount = Math.max(0, maxPossibleRows - 1);
+                  visiblePersons = personsInArea.slice(0, fitCount);
+                  remainingCount = personsInArea.length - fitCount;
+                }
+
+                const totalRowsCount = visiblePersons.length + (remainingCount > 0 ? 1 : 0);
+                const calculatedHeight =
+                  personsInArea.length === 0
+                    ? headerHeight
+                    : headerHeight + headerGap + totalRowsCount * rowTotalHeight - itemGap;
+
+                occDesiredHeight = Math.min(
+                  maxAllowedHeight,
+                  Math.max(headerHeight * 1.5, calculatedHeight),
+                );
+              }
+
+              const nameFit = computeFittedTextBox(
+                nameTb.posX,
+                nameTb.posY,
+                nameTb.fontSize,
+                areaPts,
+                240,
+              );
+
+              const occFit = computeFittedTextBox(
+                occTb.posX,
+                occTb.posY,
+                occTb.fontSize,
+                areaPts,
+                240,
+                4,
+                occDesiredHeight,
+              );
+
               return (
                 <React.Fragment key={`area-textboxes-${area.id}`}>
                   {showAreaName && area.name && (
                     <Text
                       key={`area-name-${area.id}`}
-                      x={nameTb.posX - 50}
-                      y={nameTb.posY - (nameTb.fontSize * 1.2) / 2}
-                      width={100}
+                      x={nameFit.x}
+                      y={nameFit.y}
+                      width={nameFit.width}
+                      height={nameFit.height}
                       text={area.name}
                       fontSize={nameTb.fontSize}
                       fontStyle="bold"
@@ -1144,6 +1674,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                       align="center"
                       verticalAlign="middle"
                       wrap="word"
+                      ellipsis={true}
                       shadowColor="#ffffff"
                       shadowBlur={6}
                       shadowOpacity={1}
@@ -1151,23 +1682,142 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                     />
                   )}
                   {showOccupancy && (
-                    <Text
-                      key={`area-occ-${area.id}`}
-                      x={occTb.posX - 60}
-                      y={occTb.posY - (occTb.fontSize * 1.2) / 2}
-                      width={120}
-                      text={`People Count : ${areaCount}`}
-                      fontSize={occTb.fontSize}
-                      fontStyle="bold"
-                      fill={occTb.fontColor}
-                      align="center"
-                      verticalAlign="middle"
-                      wrap="word"
-                      shadowColor="#ffffff"
-                      shadowBlur={6}
-                      shadowOpacity={1}
-                      listening={false}
-                    />
+                    trackingMode === 'Count' ? (
+                      <Group key={`area-occ-group-${area.id}`}>
+                        {/* Header: People Count : X */}
+                        <Text
+                          x={occFit.x}
+                          y={occFit.y}
+                          width={occFit.width}
+                          height={headerHeight}
+                          text={`People Count : ${displayCount}`}
+                          fontSize={occTb.fontSize}
+                          fontStyle="bold"
+                          fill={occTb.fontColor}
+                          align="left"
+                          verticalAlign="middle"
+                          wrap="none"
+                          ellipsis={true}
+                          shadowColor="#ffffff"
+                          shadowBlur={6}
+                          shadowOpacity={1}
+                          listening={false}
+                        />
+
+                        {/* Person List with faceImage Avatar & Left Justified Text */}
+                        {visiblePersons.map((p, idx) => {
+                          const rowY = occFit.y + headerHeight + headerGap + idx * rowTotalHeight;
+                          const avatarCenterX = occFit.x + avatarRadius + 2;
+                          const avatarCenterY = rowY + itemHeight / 2;
+                          const textX = avatarCenterX + avatarRadius + 6;
+                          const textWidth = Math.max(20, occFit.width - (avatarRadius * 2 + 10));
+                          const imgObj = p.faceImage ? preloadImage(p.faceImage) : null;
+
+                          return (
+                            <Group key={`person-${p.id}-${idx}`}>
+                              {imgObj ? (
+                                <Circle
+                                  x={avatarCenterX}
+                                  y={avatarCenterY}
+                                  radius={avatarRadius}
+                                  fillPatternImage={imgObj}
+                                  fillPatternScale={{
+                                    x: (avatarRadius * 2) / imgObj.width,
+                                    y: (avatarRadius * 2) / imgObj.height,
+                                  }}
+                                  fillPatternOffset={{
+                                    x: imgObj.width / 2,
+                                    y: imgObj.height / 2,
+                                  }}
+                                  stroke="#ffffff"
+                                  strokeWidth={1}
+                                  shadowColor="#000000"
+                                  shadowBlur={2}
+                                  shadowOpacity={0.25}
+                                  listening={false}
+                                />
+                              ) : (
+                                <Circle
+                                  x={avatarCenterX}
+                                  y={avatarCenterY}
+                                  radius={avatarRadius}
+                                  fill="#5D87FF"
+                                  stroke="#ffffff"
+                                  strokeWidth={1}
+                                  listening={false}
+                                />
+                              )}
+
+                              <Text
+                                x={textX}
+                                y={rowY}
+                                width={textWidth}
+                                height={itemHeight}
+                                text={p.name}
+                                fontSize={occTb.fontSize}
+                                fontStyle="bold"
+                                fill={occTb.fontColor}
+                                align="left"
+                                verticalAlign="middle"
+                                wrap="none"
+                                ellipsis={true}
+                                shadowColor="#ffffff"
+                                shadowBlur={6}
+                                shadowOpacity={1}
+                                listening={false}
+                              />
+                            </Group>
+                          );
+                        })}
+
+                        {/* Overflow indicator */}
+                        {remainingCount > 0 && (
+                          <Text
+                            x={occFit.x}
+                            y={
+                              occFit.y +
+                              headerHeight +
+                              headerGap +
+                              visiblePersons.length * rowTotalHeight
+                            }
+                            width={occFit.width}
+                            height={itemHeight}
+                            text={`(+${remainingCount} more)`}
+                            fontSize={Math.max(10, occTb.fontSize - 1)}
+                            fontStyle="italic"
+                            fill={occTb.fontColor}
+                            align="left"
+                            verticalAlign="middle"
+                            wrap="none"
+                            ellipsis={true}
+                            shadowColor="#ffffff"
+                            shadowBlur={6}
+                            shadowOpacity={1}
+                            listening={false}
+                          />
+                        )}
+                      </Group>
+                    ) : (
+                      <Text
+                        key={`area-occ-${area.id}`}
+                        x={occFit.x}
+                        y={occFit.y}
+                        width={occFit.width}
+                        height={occFit.height}
+                        text={`People Count : ${displayCount}`}
+                        fontSize={occTb.fontSize}
+                        fontStyle="bold"
+                        fill={occTb.fontColor}
+                        align="center"
+                        verticalAlign="middle"
+                        wrap="word"
+                        ellipsis={true}
+                        shadowColor="#ffffff"
+                        shadowBlur={6}
+                        shadowOpacity={1}
+                        listening={false}
+                      />
+                    )
                   )}
                 </React.Fragment>
               );

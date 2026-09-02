@@ -44,7 +44,7 @@ const AlarmDetailDialog = () => {
   const trigger = useSelector((state: RootState) => state.alarmTriggerReducer.selectedAlarmTrigger);
   const isAcknowledged = trigger?.action?.toLowerCase() === 'acknowledged';
   const open = Boolean(alarm && trigger);
-    console.log("Current Trigger", trigger)
+    // console.log("Current Trigger", trigger)
   const dispatchMutation = useDispatchAlarmTrigger();
   const postponeMutation = usePostponeAlarmTrigger();
 

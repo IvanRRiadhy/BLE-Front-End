@@ -20,7 +20,10 @@ import { Stage, Layer, Image as KonvaImage, Circle, Line, Shape } from 'react-ko
 import { useEffect, useMemo, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import { IconPlayerPlayFilled, IconPlayerPauseFilled } from '@tabler/icons-react';
-import InvestigationBeaconRenderer from './InvestigationBeaconRenderer';
+import BeaconRenderer from 'src/components/dashboards/monitoring/Renderer/BeaconRenderer';
+import { useAllMembers } from 'src/hooks/useMember';
+import { useAllVisitor } from 'src/hooks/useVisitor';
+import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
 
 type PointType = {
   x: number;
@@ -54,6 +57,10 @@ const InvestigateReplayDialog = ({
   const theme = useTheme();
   const tableContainerRef = useRef<HTMLDivElement | null>(null);
   const activeRowRef = useRef<HTMLTableRowElement | null>(null);
+
+  const { data: membersData = [] } = useAllMembers();
+  const { data: visitorsData = [] } = useAllVisitor();
+  const { data: securityData = [] } = useAllSecuritys();
 
   const [isUserScrolling, setIsUserScrolling] = useState(false);
   const scrollCooldownRef = useRef<NodeJS.Timeout | null>(null);
@@ -360,17 +367,34 @@ const InvestigateReplayDialog = ({
               {nextPos && (
                 <Circle x={nextPos.x} y={nextPos.y} radius={5} stroke="#1976d2" strokeWidth={2} />
               )}
-              {animatedPosition && (
-                <InvestigationBeaconRenderer
-                  id={selectedPoint.personId} // or bleCardNumber if you have it
-                  x={animatedPosition.x}
-                  y={animatedPosition.y}
-                  area={selectedPoint.area}
-                  floorplan={floorplanName}
-                  time={selectedPoint.time}
-                  clickable={false}
-                />
-              )}
+              {animatedPosition && selectedPoint && (() => {
+                const targetId = selectedPoint.personId;
+                const person = [...membersData, ...visitorsData, ...securityData].find(
+                  (p) => p.id === targetId || ('bleCardNumber' in p && p.bleCardNumber === targetId),
+                );
+                const isVisitor = visitorsData.some((v) => v.id === targetId || v.bleCardNumber === targetId);
+                const isMember = membersData.some((m) => m.id === targetId || m.bleCardNumber === targetId);
+                const isSecurity = securityData.some((s) => s.id === targetId || s.bleCardNumber === targetId);
+                const label = person?.name || personName || selectedPoint.personName || targetId;
+
+                return (
+                  <BeaconRenderer
+                    id={targetId}
+                    x={animatedPosition.x}
+                    y={animatedPosition.y}
+                    beaconSize={1}
+                    area={selectedPoint.area}
+                    floorplan={floorplanName}
+                    time={selectedPoint.time}
+                    clickable={false}
+                    label={label}
+                    isSecurity={isSecurity}
+                    isMember={isMember}
+                    isVisitor={isVisitor}
+                    isFollowed={true}
+                  />
+                );
+              })()}
             </Layer>
           </Stage>
         </Box>

@@ -12,17 +12,24 @@ import {
   ListItemText,
   Tooltip,
   CircularProgress,
-  Autocomplete,
-  TextField,
   Box,
   Popover,
 } from '@mui/material';
 import { IconRadio, IconPlus, IconX } from '@tabler/icons-react';
 import toast from 'react-hot-toast';
 import { EngineType } from 'src/store/apps/crud/engine';
-import { bleReaderType } from 'src/store/apps/crud/bleReader';
 import { useAssignReaders } from 'src/hooks/useEngine';
-import { useAllUnassignedReadersByEngine } from 'src/hooks/useReader';
+import {
+  useGetAllUnasignedEngine,
+  UnassignedEngineReader,
+} from 'src/hooks/useFloorplanDevice';
+import { useAllBuilding } from 'src/hooks/useBuilding';
+import { useAllFloors } from 'src/hooks/useFloor';
+import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import AreaHierarchySelector, {
+  SelectedNode,
+} from 'src/components/shared/AreaHierarchySelector';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface Props {
@@ -31,79 +38,121 @@ interface Props {
 
 const AssignReaderDialog: React.FC<Props> = ({ engine }) => {
   const [open, setOpen] = useState(false);
-  const [assignedReaders, setAssignedReaders] = useState<bleReaderType[]>([]);
+  const [assignedReaders, setAssignedReaders] = useState<UnassignedEngineReader[]>([]);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [selectedAddReader, setSelectedAddReader] = useState<bleReaderType | null>(null);
+  const [selectedDeviceNodesToAdd, setSelectedDeviceNodesToAdd] = useState<SelectedNode[]>([]);
 
   const assignMutation = useAssignReaders();
   const queryClient = useQueryClient();
 
+  // Readers queries from useGetAllUnasignedEngine
+  const { data: engineReaders = [], isLoading: isLoadingEngineReaders } =
+    useGetAllUnasignedEngine(engine.id);
   const { data: unassignedReaders = [], isLoading: isLoadingUnassigned } =
-    useAllUnassignedReadersByEngine();
+    useGetAllUnasignedEngine();
+
+  // Hierarchy queries
+  const { data: buildings = [] } = useAllBuilding();
+  const { data: floors = [] } = useAllFloors();
+  const { data: floorplans = [] } = useAllFloorplans();
+  const { data: maskedAreas = [] } = useAllMaskedAreas();
+
+  // Combine and deduplicate readers
+  const allReaders = useMemo(() => {
+    const map = new Map<string, UnassignedEngineReader>();
+    (engineReaders || []).forEach((r) => {
+      if (r.readerId) map.set(r.readerId, r);
+    });
+    (unassignedReaders || []).forEach((r) => {
+      if (r.readerId && !map.has(r.readerId)) map.set(r.readerId, r);
+    });
+    return Array.from(map.values());
+  }, [engineReaders, unassignedReaders]);
 
   const handleOpen = () => {
-    setAssignedReaders(engine.bleReaders || []);
+    const current = allReaders.filter((r) => r.currentEngineId === engine.id);
+    setAssignedReaders(current);
+    setSelectedDeviceNodesToAdd([]);
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
     setAnchorEl(null);
-    setSelectedAddReader(null);
+    setSelectedDeviceNodesToAdd([]);
   };
+
 
   useEffect(() => {
     if (open) {
-      setAssignedReaders(engine.bleReaders || []);
+      const current = allReaders.filter((r) => r.currentEngineId === engine.id);
+      setAssignedReaders(current);
     }
-  }, [engine, open]);
-
-  // Combine unassigned readers + current engine readers for Autocomplete options
-  const addOptions = useMemo(() => {
-    const currentEngineReaders = engine.bleReaders || [];
-    const combined = [...unassignedReaders, ...currentEngineReaders];
-    // Remove duplicates by ID if any
-    const map = new Map<string, bleReaderType>();
-    combined.forEach((item) => {
-      if (item && item.id) {
-        map.set(item.id, item);
-      }
-    });
-    return Array.from(map.values());
-  }, [unassignedReaders, engine.bleReaders]);
+  }, [open, allReaders, engine.id]);
 
   // Available options to select (exclude ones already in current assigned list state)
-  const availableOptions = useMemo(() => {
-    const assignedIds = new Set(assignedReaders.map((r) => r.id));
-    return addOptions.filter((r) => !assignedIds.has(r.id));
-  }, [addOptions, assignedReaders]);
+  const availableDevices = useMemo(() => {
+    const assignedIds = new Set(assignedReaders.map((r) => r.readerId));
+    return allReaders.filter((r) => !assignedIds.has(r.readerId));
+  }, [allReaders, assignedReaders]);
 
   const handleRemoveReader = (readerId: string) => {
-    setAssignedReaders((prev) => prev.filter((r) => r.id !== readerId));
+    setAssignedReaders((prev) => prev.filter((r) => r.readerId !== readerId));
+  };
+
+  const isDropdownOpenRef = React.useRef(false);
+  const dropdownClosedAtRef = React.useRef<number>(0);
+
+  const handleDropdownOpenChange = (isOpen: boolean) => {
+    if (!isOpen && isDropdownOpenRef.current) {
+      dropdownClosedAtRef.current = Date.now();
+    }
+    isDropdownOpenRef.current = isOpen;
   };
 
   const handleOpenAddPopover = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setSelectedDeviceNodesToAdd([]);
     setAnchorEl(event.currentTarget);
   };
 
   const handleCloseAddPopover = () => {
     setAnchorEl(null);
-    setSelectedAddReader(null);
+    setSelectedDeviceNodesToAdd([]);
   };
 
-  const handleAddReaderConfirm = () => {
-    if (selectedAddReader) {
-      setAssignedReaders((prev) => [...prev, selectedAddReader]);
-      setSelectedAddReader(null);
-      setAnchorEl(null);
+  const handlePopoverClose = () => {
+    if (isDropdownOpenRef.current || Date.now() - dropdownClosedAtRef.current < 250) {
+      return;
+    }
+    handleCloseAddPopover();
+  };
+
+  const handleAddSelectedDevicesConfirm = () => {
+    const newDevices = selectedDeviceNodesToAdd
+      .filter((n): n is { type: 'device'; data: any } => n?.type === 'device' && Boolean(n.data))
+      .map((n) => n.data as UnassignedEngineReader);
+
+    if (newDevices.length > 0) {
+      setAssignedReaders((prev) => {
+        const existingIds = new Set(prev.map((r) => r.readerId));
+        const toAdd = newDevices.filter((d) => !existingIds.has(d.readerId));
+        return [...prev, ...toAdd];
+      });
+      handleCloseAddPopover();
     }
   };
 
   const handleSave = async () => {
     try {
-      const readerIds = assignedReaders.map((r) => r.id);
+      const readerIds = assignedReaders.map((r) => r.readerId);
       await assignMutation.mutateAsync({ engineId: engine.id, readerIds });
-      await queryClient.invalidateQueries({ queryKey: ['engine-list'] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['engine-list'] }),
+        queryClient.invalidateQueries({ queryKey: ['allEngine'] }),
+        queryClient.invalidateQueries({
+          queryKey: ['floorplan-device-unassigned-engine'],
+        }),
+      ]);
       toast.success('Readers assigned successfully');
       handleClose();
     } catch (error) {
@@ -113,6 +162,7 @@ const AssignReaderDialog: React.FC<Props> = ({ engine }) => {
   };
 
   const isPopoverOpen = Boolean(anchorEl);
+  const isLoading = isLoadingEngineReaders || isLoadingUnassigned;
 
   return (
     <>
@@ -122,7 +172,7 @@ const AssignReaderDialog: React.FC<Props> = ({ engine }) => {
         </IconButton>
       </Tooltip>
 
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
         <DialogTitle
           sx={{
             display: 'flex',
@@ -141,7 +191,7 @@ const AssignReaderDialog: React.FC<Props> = ({ engine }) => {
         <Popover
           open={isPopoverOpen}
           anchorEl={anchorEl}
-          onClose={handleCloseAddPopover}
+          onClose={handlePopoverClose}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'right',
@@ -151,66 +201,207 @@ const AssignReaderDialog: React.FC<Props> = ({ engine }) => {
             horizontal: 'right',
           }}
           PaperProps={{
-            sx: { p: 2, width: 300 },
+            sx: { p: 2, width: 520, maxWidth: '95vw' },
           }}
         >
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            Select Reader to Add
+          <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+            Select Readers to Add
           </Typography>
-          <Autocomplete
-            size="small"
-            options={availableOptions}
-            loading={isLoadingUnassigned}
-            getOptionLabel={(option) => option.name || option.gmac || ''}
-            isOptionEqualToValue={(option, value) => option.id === value.id}
-            value={selectedAddReader}
-            onChange={(_, newValue) => setSelectedAddReader(newValue)}
-            renderInput={(params) => <TextField {...params} placeholder="Search Reader..." />}
-            sx={{ mb: 1.5 }}
+          <AreaHierarchySelector
+            buildings={buildings}
+            floors={floors}
+            floorplans={floorplans}
+            maskedAreas={maskedAreas}
+            devices={availableDevices}
+            exclusive="device"
+            multiple={true}
+            value={selectedDeviceNodesToAdd}
+            onChange={(nodes) => {
+              setSelectedDeviceNodesToAdd(Array.isArray(nodes) ? nodes : [nodes]);
+            }}
+            onOpenChange={handleDropdownOpenChange}
+            label="Search Area / Reader..."
           />
-          <Box display="flex" justifyContent="end" gap={1}>
-            <Button size="small" onClick={handleCloseAddPopover}>
+
+          {/* Bordered list for selected readers */}
+          <Box
+            sx={{
+              mt: 1.5,
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+              p: 1,
+              minHeight: 80,
+              maxHeight: 160,
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 0.5,
+            }}
+          >
+            {selectedDeviceNodesToAdd.filter((n) => n?.type === 'device' && n.data).length === 0 ? (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ py: 1.5, textAlign: 'center' }}
+              >
+                Selected Readers: None
+              </Typography>
+            ) : (
+              selectedDeviceNodesToAdd
+                .filter((n): n is { type: 'device'; data: any } => n?.type === 'device' && Boolean(n.data))
+                .map((node) => {
+                  const reader = node.data as UnassignedEngineReader;
+                  const readerId =
+                    reader.readerId || reader.floorplanDeviceId || (reader as any).id;
+                  const position = [
+                    reader.buildingName,
+                    reader.floorName,
+                    reader.floorplanName,
+                    reader.areaName,
+                  ]
+                    .filter(Boolean)
+                    .join(' > ');
+
+                  return (
+                    <Box
+                      key={readerId}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        py: 0.5,
+                        px: 1,
+                        borderRadius: 0.5,
+                        bgcolor: 'background.paper',
+                        '&:hover': { bgcolor: 'grey.100' },
+                      }}
+                    >
+                      <Box sx={{ pr: 1, overflow: 'hidden' }}>
+                        <Typography variant="body2" fontWeight={600} noWrap>
+                          📟 {reader.readerName || reader.gmac}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          display="block"
+                          noWrap
+                        >
+                          {reader.gmac ? `MAC: ${reader.gmac} • ` : ''}
+                          {position || 'No Position'}
+                        </Typography>
+                      </Box>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() =>
+                          setSelectedDeviceNodesToAdd((prev) =>
+                            prev.filter(
+                              (n) =>
+                                !(
+                                  n?.type === 'device' &&
+                                  (n.data?.readerId === readerId ||
+                                    n.data?.floorplanDeviceId === readerId ||
+                                    n.data?.id === readerId)
+                                ),
+                            ),
+                          )
+                        }
+                      >
+                        <IconX size={16} />
+                      </IconButton>
+                    </Box>
+                  );
+                })
+            )}
+          </Box>
+
+          <Box display="flex" justifyContent="flex-end" alignItems="center" gap={1} mt={2}>
+            <Button size="small" onClick={handleCloseAddPopover} color="inherit">
               Cancel
             </Button>
             <Button
               size="small"
               variant="contained"
-              disabled={!selectedAddReader}
-              onClick={handleAddReaderConfirm}
+              color="primary"
+              disabled={selectedDeviceNodesToAdd.filter((n) => n?.type === 'device').length === 0}
+              onClick={handleAddSelectedDevicesConfirm}
             >
-              Add
+              Add Selected ({selectedDeviceNodesToAdd.filter((n) => n?.type === 'device').length})
             </Button>
           </Box>
         </Popover>
 
         <DialogContent dividers>
-          {assignedReaders.length === 0 ? (
+          {isLoading ? (
+            <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : assignedReaders.length === 0 ? (
             <Typography variant="body2" color="textSecondary" align="center" sx={{ py: 2 }}>
               No readers assigned to this engine.
             </Typography>
           ) : (
             <List disablePadding>
-              {assignedReaders.map((reader) => (
-                <ListItem
-                  key={reader.id}
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    px: 1,
-                    py: 0.5,
-                  }}
-                >
-                  <ListItemText primary={reader.name || reader.gmac} />
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={() => handleRemoveReader(reader.id)}
+              {assignedReaders.map((reader) => {
+                const position = [
+                  reader.buildingName,
+                  reader.floorName,
+                  reader.floorplanName,
+                  reader.areaName,
+                ]
+                  .filter(Boolean)
+                  .join(' | ');
+
+                return (
+                  <ListItem
+                    key={reader.readerId}
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      px: 1.5,
+                      py: 1,
+                      borderBottom: '1px solid',
+                      borderColor: 'divider',
+                      '&:last-child': { borderBottom: 'none' },
+                    }}
                   >
-                    <IconX size={18} />
-                  </IconButton>
-                </ListItem>
-              ))}
+                    <ListItemText
+                      primary={
+                        <Typography variant="subtitle2" fontWeight={600}>
+                          {reader.readerName || reader.gmac}
+                        </Typography>
+                      }
+                      secondary={
+                        <Box sx={{ mt: 0.25 }}>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            display="block"
+                          >
+                            MAC: {reader.gmac || '-'}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            color="primary.main"
+                            display="block"
+                          >
+                            {position ? `📍 ${position}` : 'No Position'}
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleRemoveReader(reader.readerId)}
+                    >
+                      <IconX size={18} />
+                    </IconButton>
+                  </ListItem>
+                );
+              })}
             </List>
           )}
         </DialogContent>

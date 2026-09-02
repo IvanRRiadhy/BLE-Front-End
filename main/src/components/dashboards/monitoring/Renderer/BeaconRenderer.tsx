@@ -2,6 +2,48 @@ import React, { useRef, useState } from 'react';
 import { Text, Group, Path, Circle } from 'react-konva';
 import { useSelector } from 'src/store/Store';
 import { RootState } from 'src/store/Store';
+import { BASE_URL } from 'src/utils/axios';
+
+// Global lightweight image cache for high-performance canvas rendering
+const imageCache = new Map<string, HTMLImageElement>();
+const pendingImages = new Set<string>();
+
+export function getFullImageUrl(src?: string): string | null {
+  if (!src) return null;
+  if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:') || src.startsWith('blob:')) {
+    return src;
+  }
+  const cleanBase = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
+  const cleanPath = src.startsWith('/') ? src : `/${src}`;
+  return `${cleanBase}${cleanPath}`;
+}
+
+export function preloadImage(src?: string, onLoaded?: () => void): HTMLImageElement | null {
+  const fullUrl = getFullImageUrl(src);
+  if (!fullUrl) return null;
+
+  const cached = imageCache.get(fullUrl);
+  if (cached) {
+    return cached.complete && cached.naturalWidth > 0 ? cached : null;
+  }
+
+  if (!pendingImages.has(fullUrl)) {
+    pendingImages.add(fullUrl);
+    const img = new window.Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      imageCache.set(fullUrl, img);
+      pendingImages.delete(fullUrl);
+      if (onLoaded) onLoaded();
+    };
+    img.onerror = () => {
+      pendingImages.delete(fullUrl);
+    };
+    img.src = fullUrl;
+  }
+
+  return null;
+}
 
 // Pure, high-performance mathematical parser for SVG Path bounding box
 const getPathBounds = (d: string) => {
@@ -269,8 +311,10 @@ type BeaconRendererProps = {
   isSecurity: boolean;
   isMember: boolean;
   isVisitor: boolean;
-  iconType?: 'person' | 'pin';
+  iconType?: 'person' | 'pin' | 'photo' | 'custom';
   isFollowed?: boolean;
+  faceImage?: string;
+  loadedImage?: HTMLImageElement;
 };
 
 const BeaconRenderer: React.FC<BeaconRendererProps> = ({
@@ -288,6 +332,8 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   isVisitor: _isVisitor,
   iconType,
   isFollowed = false,
+  faceImage,
+  loadedImage,
 }) => {
   const groupRef = useRef<any>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -300,18 +346,20 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   // SVG Icon Path Data
   const personPath = "M16 15.503A5.041 5.041 0 1 0 16 5.42a5.041 5.041 0 0 0 0 10.083zm0 2.215c-6.703 0-11 3.699-11 5.5v3.363h22v-3.363c0-2.178-4.068-5.5-11-5.5z";
   const pinPath = "M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6";
+  const solidPinPath = "M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10Z";
 
   const resolvedIconType = iconType || iconTypeSetting;
+  const isPhoto = resolvedIconType === 'photo';
   const isPin = resolvedIconType === 'pin';
   const isCustom = resolvedIconType === 'custom';
   const svgPathData = isCustom ? customSvgPath : isPin ? pinPath : personPath;
 
   // Icon dimensions
-  const iconSize = 22;
-  const bbox = getCachedPathBounds(svgPathData);
+  const iconSize = isPhoto ? 48 : 32;
+  const bbox = isPhoto ? { x: 0, y: 0, width: 16, height: 16 } : getCachedPathBounds(svgPathData);
   
   // Custom SVG scale and offsets
-  const baseScale = iconSize / (isPin ? 16 : 32);
+  const baseScale = iconSize / (isPin || isPhoto ? 16 : 32);
   const maxDim = Math.max(bbox.width, bbox.height) || 24;
   const finalScale = isCustom ? iconSize / maxDim : baseScale;
   
@@ -323,7 +371,14 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
     : y - iconSize / 2;
 
   const effectiveBeaconSize = isFollowed ? beaconSize * 1.2 : beaconSize;
-  const textFontSize = isFollowed ? 12 : 10;
+  const textFontSize = isFollowed ? 18 : 16 ;
+
+  // Photo pin dimensions
+  const circleCenterX = finalX + 8 * baseScale;
+  const circleCenterY = finalY + 6 * baseScale;
+  const innerRadius = 5.2 * baseScale;
+
+  const img = loadedImage || (faceImage ? preloadImage(faceImage) : null);
 
   return (
     <>
@@ -349,8 +404,8 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
         {isFollowed && (
           <Circle
             x={x}
-            y={y}
-            radius={17}
+            y={isPhoto ? circleCenterY : y}
+            radius={isPhoto ? 22 : 17}
             stroke={beaconColor}
             strokeWidth={2.5}
             fill="transparent"
@@ -363,56 +418,86 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
         {/* Label text placed cleanly above the person icon */}
         <Text
           x={x - 60}
-          y={y - (iconSize / 2) - (isFollowed ? 20 : 16)}
+          y={y - (iconSize / 2) - (isFollowed ? 30 : 26)}
           text={label}
           fontSize={textFontSize}
           fill={beaconColor}
           fontStyle="bold"
           width={120}
           align="center"
-          shadowColor="#ffffff"
+          shadowColor="#ffffff"     
           shadowBlur={4}
           shadowOpacity={0.8}
         />
 
-        {/* Clean Vector SVG Person Silhouette */}
-        <Path
-          data={svgPathData}
-          fill={beaconColor}
-          scaleX={finalScale}
-          scaleY={finalScale}
-          x={finalX}
-          y={finalY}
-          shadowColor="rgba(0,0,0,0.2)"
-          shadowBlur={isFollowed ? 4 : 2}
-          shadowOffset={{ x: 0, y: 1 }}
-          shadowOpacity={1}
-        />
-      </Group>
+        {/* Icon Rendering */}
+        {isPhoto ? (
+          <>
+            {/* Solid Pin outer body (colored border + pointer) */}
+            <Path
+              data={solidPinPath}
+              fill={beaconColor}
+              scaleX={baseScale}
+              scaleY={baseScale}
+              x={finalX}
+              y={finalY}
+              shadowColor="rgba(0,0,0,0.2)"
+              shadowBlur={isFollowed ? 4 : 2}
+              shadowOffset={{ x: 0, y: 1 }}
+              shadowOpacity={1}
+            />
 
-      {/* Tooltip for stale beacons */}
-      {isHovered && Date.now() - lastSeen > 5000 && (
-        <Group x={x} y={y - (isFollowed ? 55 : 45)}>
+            {/* White background circle inside pin head */}
+            <Circle
+              x={circleCenterX}
+              y={circleCenterY}
+              radius={innerRadius}
+              fill="#ffffff"
+            />
+
+            {/* Photo overlay or fallback person silhouette */}
+            {img ? (
+              <Circle
+                x={circleCenterX}
+                y={circleCenterY}
+                radius={innerRadius}
+                fillPatternImage={img}
+                fillPatternScale={{
+                  x: (innerRadius * 2) / (img.width || 1),
+                  y: (innerRadius * 2) / (img.height || 1),
+                }}
+                fillPatternOffset={{
+                  x: (img.width || 0) / 2,
+                  y: (img.height || 0) / 2,
+                }}
+                fillPatternRepeat="no-repeat"
+              />
+            ) : (
+              <Path
+                data={personPath}
+                fill={beaconColor}
+                scaleX={innerRadius / 20}
+                scaleY={innerRadius / 20}
+                x={circleCenterX - (16 * innerRadius) / 20}
+                y={circleCenterY - (16 * innerRadius) / 20}
+              />
+            )}
+          </>
+        ) : (
           <Path
-            data="M-60,-24 L60,-24 Q64,-24 64,-20 L64,-4 Q64,0 60,0 L5,0 L0,6 L-5,0 L-60,0 Q-64,0 -64,-4 L-64,-20 Q-64,-24 -60,-24 Z"
-            fill="rgba(0,0,0,0.85)"
-            stroke="#ffffff"
-            strokeWidth={1}
-            shadowColor="rgba(0,0,0,0.15)"
-            shadowBlur={4}
+            data={svgPathData}
+            fill={beaconColor}
+            scaleX={finalScale}
+            scaleY={finalScale}
+            x={finalX}
+            y={finalY}
+            shadowColor="rgba(0,0,0,0.2)"
+            shadowBlur={isFollowed ? 4 : 2}
+            shadowOffset={{ x: 0, y: 1 }}
+            shadowOpacity={1}
           />
-          <Text
-            text={`Last seen: ${new Date(lastSeen).toLocaleTimeString()}`}
-            fill="white"
-            fontSize={10}
-            width={120}
-            align="center"
-            x={-60}
-            y={-15}
-            fontStyle="bold"
-          />
-        </Group>
-      )}
+        )}
+      </Group>
     </>
   );
 };
@@ -432,8 +517,11 @@ const MemoizedBeaconRenderer = React.memo(BeaconRenderer, (prevProps, nextProps)
     prevProps.isMember === nextProps.isMember &&
     prevProps.isVisitor === nextProps.isVisitor &&
     prevProps.iconType === nextProps.iconType &&
-    prevProps.isFollowed === nextProps.isFollowed
+    prevProps.isFollowed === nextProps.isFollowed &&
+    prevProps.faceImage === nextProps.faceImage &&
+    prevProps.loadedImage === nextProps.loadedImage
   );
 });
 
 export default MemoizedBeaconRenderer;
+

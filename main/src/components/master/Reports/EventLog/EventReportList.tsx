@@ -81,17 +81,28 @@ const EVENT_OPTIONS: EventType[] = [
 
 const ACTOR_ROLE_OPTIONS = ['SuperAdmin', 'PrimaryAdmin', 'Primary', 'Secondary'];
 
-const ENTITY_OPTIONS = ['Organization', 'Department', 'District', 'Building'];
+const ENTITY_OPTIONS = ['MstOrganization', 'MstDepartment', 'MstDistrict', 'MstBuilding'];
 
 const SKELETON_ROWS = 5;
 
-const EventReport = () => {
+const EventReportList = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  useEffect(() => {
-    // initial fetch or periodic refresh handled by useEvents
-  }, []);
-  const { data: eventResponse, refetch, isFetching } = useEvents(defaultEventFilter);
+  
+  const {
+    data: infiniteData,
+    refetch,
+    isFetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useEvents(defaultEventFilter, 50);
+
+  const rawEvents = useMemo(() => {
+    if (!infiniteData?.pages) return [];
+    return infiniteData.pages.flatMap((page) => page.data);
+  }, [infiniteData]);
 
   const isValidEventType = (value: any): value is EventType =>
     Object.values(EVENT_TYPE).includes(value);
@@ -103,33 +114,28 @@ const EventReport = () => {
   const [openClearDialog, setOpenClearDialog] = useState(false);
 
   const eventLogData = useMemo(() => {
-    if (!eventResponse) return [];
-    return eventResponse.map((log: any) => {
+    return rawEvents.map((log: any) => {
       const safeEvent: EventType = isValidEventType(log.eventName) ? log.eventName : 'OTHER';
       return {
         event: safeEvent,
         eventTime: log.eventTime,
         serverTime: log.eventTime, // Fallback since serverTime is not in the audit-log API snippet
         actor: log.actor ?? '-',
-        actorRole: '-', // Fallback since actorRole is not in the audit-log API snippet
+        actorRole: log.actorRole ?? '-', // Fallback since actorRole is not in the audit-log API snippet
         entity: log.entityName ?? '-',
         details: log.details ?? '-',
       };
     });
-  }, [eventResponse]);
-  // console.log('eventLogData', eventLogData);
-  // useEffect(() => {
-  //   if (!isDummy) return;
+  }, [rawEvents]);
 
-  //   const interval = setInterval(() => {
-  //     setEventLogData((prev) => [
-  //       generateRandomEventLog(),
-  //       ...prev.slice(0, 49), // max 50 rows
-  //     ]);
-  //   }, 5000);
-
-  //   return () => clearInterval(interval);
-  // }, [isDummy]);
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop <= clientHeight + 100) {
+      if (hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    }
+  };
 
   const toLocalISOString = (date: Date) => {
     const tzOffset = date.getTimezoneOffset() * 60000;
@@ -180,28 +186,6 @@ const EventReport = () => {
     });
   }, [eventLogData, filterEvent, filterActorRole, filterEntity, filterStartDate, filterEndDate]);
 
-  // const getRandomItem = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
-
-  // const generateRandomEventLog = (): EventLogType => {
-  //   const event = getRandomItem(Object.values(EVENT_TYPE));
-  //   const actor = getRandomItem(ACTORS);
-
-  //   const nowUtc = new Date(); // UTC source
-  //   const serverLocal = new Date(); // Client local time
-
-  //   return {
-  //     event,
-  //     eventTime: nowUtc.toISOString(),
-
-  //     serverTime: toLocalISOString(serverLocal),
-
-  //     actor: actor.name,
-  //     actorRole: actor.role,
-  //     entity: getRandomItem(DETAILS_MAP[event]),
-  //     details: getRandomItem(DETAILS_MAP[event]),
-  //   };
-  // };
-
   const renderSkeletonRows = (rows: number) => (
     <>
       {Array.from({ length: rows }).map((_, i) => (
@@ -219,10 +203,7 @@ const EventReport = () => {
               backgroundClip: 'padding-box',
             }}
           >
-            <Skeleton variant="text" width={18} />
-          </TableCell>
-          <TableCell>
-            <Skeleton variant="text" width={80} height={24} />
+            <Skeleton variant="text" width={80} />
           </TableCell>
           <TableCell>
             <Skeleton variant="text" width={200} height={24} />
@@ -375,6 +356,7 @@ const EventReport = () => {
             <TableContainer
               component={Paper}
               variant="outlined"
+              onScroll={handleScroll}
               sx={{
                 maxHeight: '75vh',
                 bgcolor: 'background.paper',
@@ -383,22 +365,6 @@ const EventReport = () => {
               <Table stickyHeader aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
                 <TableHead>
                   <TableRow>
-                    {/* <TableCell
-                      sx={{
-                        position: 'sticky',
-                        left: 0,
-                        backgroundColor: (theme) => theme.palette.background.paper,
-                        zIndex: 2,
-                        width: 35, // Fixed width
-                        minWidth: 35,
-                        maxWidth: 35,
-                        borderRight: (theme) => `1px solid ${theme.palette.divider}`,
-                        backgroundClip: 'padding-box',
-                      }}
-                    >
-                      <Typography variant="h6"></Typography>
-                    </TableCell> */}
-                    {/* Main Table Header */}
                     {columns.map((col) => (
                       <TableCell key={col.label}>
                         <Typography variant="h6">{col.label}</Typography>
@@ -407,79 +373,63 @@ const EventReport = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {isFetching ? (
+                  {isLoading ? (
                     renderSkeletonRows(SKELETON_ROWS)
                   ) : filteredData.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={columns.length + 1} align="center">
+                      <TableCell colSpan={columns.length} align="center">
                         <Typography variant="body1" sx={{ p: 3 }}>
                           No event logs found.
                         </Typography>
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredData.map((row: any, index: number) => (
-                    <TableRow
-                      key={index}
-                      // hover
-                      sx={{
-                        backgroundColor: (theme) =>
-                          index % 2 === 0 ? theme.palette.action.hover : theme.palette.background.paper,
-                        // '&:hover': {
-                        //   backgroundColor: 'action.selected',
-                        // },
-                      }}
-                    >
-                      {/* Left sticky spacer */}
-                      {/* <TableCell
-                        sx={{
-                          position: 'sticky',
-                          left: 0,
-                          backgroundColor: (theme) =>
-                            index % 2 === 0 ? theme.palette.action.hover : theme.palette.background.paper,
-                          zIndex: 1,
-                          width: 35,
-                          borderRight: (theme) => `1px solid ${theme.palette.divider}`,
-                          backgroundClip: 'padding-box',
-                        }}
-                      /> */}
+                    <>
+                      {filteredData.map((row: any, index: number) => (
+                        <TableRow
+                          key={index}
+                          sx={{
+                            backgroundColor: (theme) =>
+                              index % 2 === 0 ? theme.palette.action.hover : theme.palette.background.paper,
+                          }}
+                        >
+                          <TableCell>
+                            <Chip
+                              label={row.event}
+                              size="small"
+                              color={EVENT_META[row.event as EventType].color as any}
+                            />
+                          </TableCell>
 
-                      <TableCell>
-                        <Chip
-                          label={row.event}
-                          size="small"
-                          color={EVENT_META[row.event as EventType].color as any}
-                        />
-                      </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">{formatTime(row.eventTime)}</Typography>
+                          </TableCell>
 
-                      <TableCell>
-                        <Typography variant="body2">{formatTime(row.eventTime)}</Typography>
-                      </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">{formatTime(row.serverTime)}</Typography>
+                          </TableCell>
 
-                      <TableCell>
-                        <Typography variant="body2">{formatTime(row.serverTime)}</Typography>
-                      </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">{row.actor}</Typography>
+                          </TableCell>
 
-                      <TableCell>
-                        <Typography variant="body2">{row.actor}</Typography>
-                      </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">{row.actorRole}</Typography>
+                          </TableCell>
 
-                      <TableCell>
-                        <Typography variant="body2">{row.actorRole}</Typography>
-                      </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">{row.entity}</Typography>
+                          </TableCell>
 
-                      <TableCell>
-                        <Typography variant="body2">{row.entity}</Typography>
-                      </TableCell>
-
-                      <TableCell>
-                        <Typography variant="body2" color="text.secondary">
-                          {row.details}
-                        </Typography>
-                      </TableCell>
-
-                      </TableRow>
-                    ))
+                          <TableCell>
+                            <Typography variant="body2" color="text.secondary">
+                              {row.details}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {isFetchingNextPage && renderSkeletonRows(3)}
+                    </>
                   )}
                 </TableBody>
               </Table>
@@ -523,4 +473,4 @@ const EventReport = () => {
   );
 };
 
-export default EventReport;
+export default EventReportList;
