@@ -12,7 +12,7 @@ import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
 import { isEqual } from 'lodash';
 import { lazy, useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
-import { useAlarmCategoryList } from 'src/hooks/AlarmSetting/useAlarmCategory';
+import { useAlarmCategoryList, useAllAlarmCategory } from 'src/hooks/AlarmSetting/useAlarmCategory';
 import { useAllBuilding } from 'src/hooks/useBuilding';
 import { useAllFloors } from 'src/hooks/useFloor';
 import { useAllFloorplans } from 'src/hooks/useFloorplan';
@@ -23,6 +23,7 @@ import { actionStatus, actionStatusColormap } from 'src/types/crud/input';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Dayjs } from 'dayjs';
+import { AlarmSettingType } from 'src/store/apps/alarmsetting/alarmSettings';
 // import AutocompleteFilter from 'src/layouts/full/horizontal/navbar/AutocompleteFilter';
 
 const AutocompleteFilter = lazy(
@@ -33,6 +34,12 @@ const AlarmTriggeredFilter = () => {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const [resetToken, setResetToken] = useState(0);
+  const alarmCategory: AlarmSettingType[] = useAllAlarmCategory().data || [];
+    const alarms = Array.isArray(alarmCategory) ? alarmCategory : [];
+  const normal = (v: any) => (typeof v === 'string' ? v.toLowerCase() : '');
+
+  const isActive = (name: string) =>
+    alarms.some((a) => normal(a?.alarmCategory) === name && a?.isEnabled);
 
   // --- Redux data ---
   const buildingList = useAllBuilding().data ?? [];
@@ -87,7 +94,7 @@ const AlarmTriggeredFilter = () => {
     },
   };
 
-  const alarmCategoryOptions = alarmCategoryList.map((x) => ({
+  const alarmCategoryOptions = alarmCategoryList.filter((x) => x.isEnabled).map((x) => ({
     label: x.alarmCategory,
     value: x.id,
   }));

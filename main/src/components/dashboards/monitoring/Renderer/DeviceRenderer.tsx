@@ -1529,7 +1529,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
         </Layer>
 
         {/* Always-on Area Name & Occupancy Text Labels using configured text box settings */}
-        <Layer listening={false}>
+        <Layer listening={false}> 
           {areas.map((area: MaskedAreaType) => {
               const info = areaLabelInfos[area.id];
               const defaultCenterX = info ? info.cx : 150;

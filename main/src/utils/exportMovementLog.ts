@@ -3,6 +3,7 @@ import { saveAs } from 'file-saver';
 
 export const MOVEMENT_LOG_COLUMNS = [
   { header: 'Person Name', key: 'personName', width: 25 },
+  { header: 'Status', key: 'status', width: 15 },
   { header: 'Person ID', key: 'personId', width: 20 },
   { header: 'Person Type', key: 'personType', width: 15 },
   { header: 'Card Number', key: 'cardNumber', width: 20 },
@@ -24,6 +25,7 @@ export const downloadMovementLogExcel = async (data: any[], filename = 'Movement
   data.forEach((row) => {
     worksheet.addRow({
       personName: row.personName,
+      status: row.status,
       personId: row.personId,
       personType: row.personType,
       cardNumber: row.cardNumber,

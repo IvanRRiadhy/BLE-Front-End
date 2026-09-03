@@ -143,11 +143,11 @@ const SkylineNavbar = () => {
     return false;
   }, [pathname]);
 
-  const handleOpen = (event: React.MouseEvent<HTMLElement>, title: string) => {
+  const handleOpen = (event: React.MouseEvent<HTMLElement>, title?: string) => {
     if (lockedTitle) return; 
     if (closeTimeout.current) clearTimeout(closeTimeout.current);
     setAnchorEl(event.currentTarget);
-    setActiveTitle(title);
+    setActiveTitle(title || null);
   };
 
   const handleClose = () => {
@@ -164,8 +164,9 @@ const SkylineNavbar = () => {
     if (closeTimeout.current) clearTimeout(closeTimeout.current);
   };
 
-  const handleToggleLock = (event: React.MouseEvent<HTMLElement>, title: string) => {
+  const handleToggleLock = (event: React.MouseEvent<HTMLElement>, title?: string) => {
     if (closeTimeout.current) clearTimeout(closeTimeout.current);
+    if (!title) return;
     if (lockedTitle === title) {
       setLockedTitle(null);
       setAnchorEl(null);
@@ -259,7 +260,7 @@ const SkylineNavbar = () => {
             <Button
               key={item.title}
               component={NavLink}
-              to={item.href}
+              to={item.href || ''}
               sx={{
                 px: 2,
                 py: 1,

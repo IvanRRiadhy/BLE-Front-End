@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Box,
   Grid2 as Grid,
@@ -31,8 +31,11 @@ import { useAllFloorplans } from 'src/hooks/useFloorplan';
 import { useAllReaders } from 'src/hooks/useReader';
 import { downloadMovementLogExcel } from 'src/utils/exportMovementLog';
 
+export type BeaconMovementStatus = 'Moving' | 'Stay' | 'Lost';
+
 const columns = [
   { label: 'Person Name', field: 'personName' },
+  { label: 'Status', field: 'status', sortable: true },
   { label: 'Person ID', field: 'personId' },
   { label: 'Person Type', field: 'personType' },
   { label: 'Card Number', field: 'cardNumber', sortable: true },
@@ -62,9 +65,19 @@ const MovementLogList = () => {
   const securityMap = new Map(securityData.map((s) => [s.id?.toLowerCase(), s]));
   const floorplanMap = new Map(floorplansData.map((f) => [f.id?.toLowerCase(), f]));
 
+  const [currentTime, setCurrentTime] = useState<number>(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   const [filterName, setFilterName] = useState('');
   const [filterPersonId, setFilterPersonId] = useState('');
   const [filterType, setFilterType] = useState<'ALL' | 'Visitor' | 'Member' | 'Security'>('ALL');
+  const [filterStatus, setFilterStatus] = useState<'ALL' | 'Moving' | 'Stay' | 'Lost'>('ALL');
 
   const [orderBy, setOrderBy] = useState<string>('lastDetectedTime');
   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
@@ -73,6 +86,20 @@ const MovementLogList = () => {
     const isAsc = orderBy === field && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(field);
+  };
+
+  const getTimestamp = (b: any): number => {
+    if (!b) return 0;
+    if (typeof b.lastSeen === 'number') return b.lastSeen;
+    if (b.lastSeen) {
+      const ms = new Date(b.lastSeen).getTime();
+      if (!isNaN(ms)) return ms;
+    }
+    if (b.time) {
+      const ms = new Date(b.time).getTime();
+      if (!isNaN(ms)) return ms;
+    }
+    return 0;
   };
 
   const processedData = useMemo(() => {
@@ -88,7 +115,7 @@ const MovementLogList = () => {
         if (!key) return;
 
         const existing = acc[key];
-        if (!existing || (beacon.lastSeen ?? new Date(beacon.time).getTime()) > (existing.lastSeen ?? new Date(existing.time).getTime())) {
+        if (!existing || getTimestamp(beacon) > getTimestamp(existing)) {
           acc[key] = beacon;
         }
       });
@@ -105,11 +132,24 @@ const MovementLogList = () => {
       const personId = visitor?.personId || member?.personId || security?.personId || '-';
       const cardNumber = visitor?.cardNumber || member?.cardNumber || security?.cardNumber || beacon.cardNumber || '-';
 
+      const detectedTimestamp = getTimestamp(beacon);
+      const age = detectedTimestamp > 0 ? currentTime - detectedTimestamp : Infinity;
+
+      let status: BeaconMovementStatus = 'Lost';
+      if (age <= 3000) {
+        status = 'Moving';
+      } else if (age <= 150000) {
+        status = 'Stay';
+      } else {
+        status = 'Lost';
+      }
+
       return {
         personName,
         personId,
         personType,
         cardNumber,
+        status,
         beaconId: beacon.beaconId || beacon.dmac || '-',
         firstReaderId: beacon.firstReaderId || '-',
         area: beacon.maskedAreaName || 'Unknown Area',
@@ -117,15 +157,17 @@ const MovementLogList = () => {
         building: floorplan?.floor?.building?.name || beacon.buildingName || '-',
         lastDetectedTime: beacon.time || '-',
         lastSeen: beacon.lastSeen,
+        detectedTimestamp,
       };
     });
-  }, [beaconsByTopic, visitorMap, memberMap, securityMap, floorplanMap]);
+  }, [beaconsByTopic, visitorMap, memberMap, securityMap, floorplanMap, currentTime]);
 
   const filteredData = useMemo(() => {
     const filtered = processedData.filter((row) => {
       if (filterName && !row.personName.toLowerCase().includes(filterName.toLowerCase())) return false;
       if (filterPersonId && !row.personId.toLowerCase().includes(filterPersonId.toLowerCase())) return false;
       if (filterType !== 'ALL' && row.personType !== filterType) return false;
+      if (filterStatus !== 'ALL' && row.status !== filterStatus) return false;
       return true;
     });
 
@@ -135,8 +177,8 @@ const MovementLogList = () => {
 
       // Special handling for lastDetectedTime or lastSeen
       if (orderBy === 'lastDetectedTime') {
-        aVal = a.lastSeen || (a.lastDetectedTime !== '-' ? new Date(a.lastDetectedTime).getTime() : 0);
-        bVal = b.lastSeen || (b.lastDetectedTime !== '-' ? new Date(b.lastDetectedTime).getTime() : 0);
+        aVal = a.detectedTimestamp || 0;
+        bVal = b.detectedTimestamp || 0;
       }
 
       // Convert values to string for generic comparison if they are not already numbers
@@ -158,7 +200,7 @@ const MovementLogList = () => {
       }
       return 0;
     });
-  }, [processedData, filterName, filterPersonId, filterType, orderBy, order]);
+  }, [processedData, filterName, filterPersonId, filterType, filterStatus, orderBy, order]);
 
   const handleRefresh = () => {
     refetchVisitors();
@@ -190,6 +232,7 @@ const MovementLogList = () => {
   const handleExportExcel = () => {
     const exportData = filteredData.map((row) => ({
       personName: row.personName,
+      status: row.status,
       personId: row.personId,
       personType: row.personType,
       cardNumber: row.cardNumber,
@@ -210,7 +253,7 @@ const MovementLogList = () => {
           <BlankCard>
             <Box p={2}>
               <Grid container spacing={2} alignItems="flex-end">
-                <Grid size={{ xs: 12, sm: 3 }}>
+                <Grid size={{ xs: 12, sm: 2.5 }}>
                   <CustomTextField
                     fullWidth
                     label="Person Name"
@@ -219,7 +262,7 @@ const MovementLogList = () => {
                     onChange={(e: any) => setFilterName(e.target.value)}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, sm: 3 }}>
+                <Grid size={{ xs: 12, sm: 2.5 }}>
                   <CustomTextField
                     fullWidth
                     label="Person ID"
@@ -227,6 +270,20 @@ const MovementLogList = () => {
                     value={filterPersonId}
                     onChange={(e: any) => setFilterPersonId(e.target.value)}
                   />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 2 }}>
+                  <CustomTextField
+                    select
+                    fullWidth
+                    label="Status"
+                    value={filterStatus}
+                    onChange={(e: any) => setFilterStatus(e.target.value as any)}
+                  >
+                    <MenuItem value="ALL">All</MenuItem>
+                    <MenuItem value="Moving">Moving</MenuItem>
+                    <MenuItem value="Stay">Stay</MenuItem>
+                    <MenuItem value="Lost">Lost</MenuItem>
+                  </CustomTextField>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 2 }}>
                   <CustomTextField
@@ -242,7 +299,7 @@ const MovementLogList = () => {
                     <MenuItem value="Security">Security</MenuItem>
                   </CustomTextField>
                 </Grid>
-                <Grid size={{ xs: 12, sm: 4 }}>
+                <Grid size={{ xs: 12, sm: 3 }}>
                   <Stack direction="row" spacing={1} alignItems="center">
                     <Button
                       variant="outlined"
@@ -250,6 +307,7 @@ const MovementLogList = () => {
                         setFilterName('');
                         setFilterPersonId('');
                         setFilterType('ALL');
+                        setFilterStatus('ALL');
                       }}
                     >
                       Reset Filter
@@ -328,20 +386,20 @@ const MovementLogList = () => {
                         sx={{
                           backgroundColor: index % 2 === 0 ? 'background.default' : 'background.paper',
                           position: 'relative',
-                          // transition: 'background-color 0.3s ease',
-                          // animation: (row.lastSeen && (Date.now() - row.lastSeen) < 15000) ? 'breathe-blue 3s infinite ease-in-out' : 'none',
-                          // '@keyframes breathe-blue': {
-                          //   '0%': { backgroundColor: index % 2 === 0 ? 'background.default' : 'background.paper' },
-                          //   '50%': { backgroundColor: 'rgba(0, 155, 255, 0.07)' },
-                          //   '100%': { backgroundColor: index % 2 === 0 ? 'background.default' : 'background.paper' },
-                          // },
-                          // '&:hover': {
-                          //   backgroundColor: 'rgba(0, 0, 0, 0.04) !important',
-                          // }
                         }}
                       >
                         <TableCell>
                           <Typography variant="body2" fontWeight={600}>{row.personName}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={row.status}
+                            size="small"
+                            color={
+                              row.status === 'Moving' ? 'success' :
+                              row.status === 'Stay' ? 'warning' : 'default'
+                            }
+                          />
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2">{row.personId}</Typography>

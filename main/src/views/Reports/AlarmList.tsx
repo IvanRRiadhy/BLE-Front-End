@@ -18,7 +18,7 @@ const pulse = keyframes`
 `;
 
 const AlarmList = () => {
-  const [showIntruders, setShowIntruders] = useState(false);
+  const [showIntruders, setShowIntruders] = useState(true);
   const mdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 
   return (
