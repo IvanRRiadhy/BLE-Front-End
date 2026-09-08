@@ -341,7 +341,7 @@ const FullLayout: FC = () => {
           const triggeredAt = data.TriggeredAt ? new Date(data.TriggeredAt).getTime() : Date.now();
           dispatch(setEvacuationStartTime(triggeredAt));
         }
-      }, `evacuation/status/${appId}`);
+      }, `people_tracking/${appId.toUpperCase()}/evacuation/status`);
       if (unsubEvac) unsubscribeList.push(unsubEvac);
 
       // 2. Trigger Monitoring

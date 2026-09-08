@@ -75,13 +75,27 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   const label = person?.name || id;
   const imageUrl = person?.faceImage ? `${BASE_URL}${person.faceImage}` : '';
 
+// Global failed image load timestamp cache (1 minute retry cooldown)
+const visitorFailedImages = new Map<string, number>();
+const VISITOR_FAILED_COOLDOWN_MS = 60 * 1000;
+
   useEffect(() => {
     if (imageUrl) {
+      const failedTime = visitorFailedImages.get(imageUrl);
+      if (failedTime && Date.now() - failedTime < VISITOR_FAILED_COOLDOWN_MS) {
+        return;
+      }
+
       const img = new window.Image();
       img.crossOrigin = '';
       img.src = imageUrl;
-      console.log('Loading image for beacon:', img);
-      img.onload = () => setImageObj(img);
+      img.onload = () => {
+        visitorFailedImages.delete(imageUrl);
+        setImageObj(img);
+      };
+      img.onerror = () => {
+        visitorFailedImages.set(imageUrl, Date.now());
+      };
     }
   }, [imageUrl]);
 

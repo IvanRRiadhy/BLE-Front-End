@@ -657,6 +657,17 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
   const FollowingPerson = useSelector((state: RootState) => state.layoutReducer.followingPerson);
   const FollowingPersons = useSelector((state: RootState) => state.layoutReducer.followingPersons ?? []);
 
+  // Single hovered beacon state across the floorplan (strictly 1 beacon at a time)
+  const [hoveredBeaconId, setHoveredBeaconId] = useState<string | null>(null);
+
+  const handleBeaconHover = useCallback((id: string) => {
+    setHoveredBeaconId(id);
+  }, []);
+
+  const handleBeaconHoverEnd = useCallback((id: string) => {
+    setHoveredBeaconId((prev) => (prev === id ? null : prev));
+  }, []);
+
   const followedSet = useMemo(() => {
     const set = new Set<string>();
     if (focusBeaconId) set.add(focusBeaconId.toLowerCase());
@@ -761,6 +772,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
       animatedBeaconsRef.current = {};
       setLastSeenBeacons({});
       setAnimatedBeacons({});
+      setHoveredBeaconId(null);
       prevTopicRef.current = topic;
     }
   }, [topic]);
@@ -1317,6 +1329,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
             dispatch(setFocus({ type: '', id: '' }));
           }
         }}
+        onMouseLeave={() => setHoveredBeaconId(null)}
         onWheel={onWheel}
       >
         <Layer>
@@ -1461,9 +1474,13 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
             Object.entries(lastSeenBeacons)
               .filter(([beaconId, b]) => showOtherBeacons || checkIsFollowed(beaconId, b))
               .sort(([idA, bA], [idB, bB]) => {
+                const isHoveredA = hoveredBeaconId === idA ? 1 : 0;
+                const isHoveredB = hoveredBeaconId === idB ? 1 : 0;
+                if (isHoveredA !== isHoveredB) return isHoveredA - isHoveredB; // Hovered beacon rendered on top of everything
+
                 const isFollowedA = checkIsFollowed(idA, bA) ? 1 : 0;
                 const isFollowedB = checkIsFollowed(idB, bB) ? 1 : 0;
-                return isFollowedA - isFollowedB; // Followed beacons rendered last so they appear on top
+                return isFollowedA - isFollowedB; // Followed beacons rendered above regular beacons
               })
               .map(([beaconId, beacon]) => {
                 const anim = animatedBeacons[beaconId] || beacon;
@@ -1485,6 +1502,12 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                 };
 
                 const isFollowed = checkIsFollowed(beaconId, beacon);
+                const isHovered = hoveredBeaconId === beaconId;
+                const isSelected = Boolean(
+                  detailDialogOpen &&
+                    selectedBeaconId &&
+                    (selectedBeaconId === beaconId || selectedBeaconId.toLowerCase() === beaconId.toLowerCase())
+                );
                 const loadedImg =
                   iconTypeSetting === 'photo' && personInfo.faceImage
                     ? preloadImage(personInfo.faceImage)
@@ -1512,6 +1535,10 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
                     isMember={personInfo.isMember}
                     isVisitor={personInfo.isVisitor}
                     isFollowed={isFollowed}
+                    isHovered={isHovered}
+                    isSelected={isSelected}
+                    onHover={handleBeaconHover}
+                    onHoverEnd={handleBeaconHoverEnd}
                     faceImage={personInfo.faceImage}
                     loadedImage={loadedImg || undefined}
                     onClick={() =>

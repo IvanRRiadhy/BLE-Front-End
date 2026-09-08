@@ -8,7 +8,7 @@ import { RootState, useSelector } from 'src/store/Store';
 // -----------------------------------------------------------------------------
 const API_URL = '/api/patrol-case/';
 const API_DT_URL = '/api/patrol-case/filter/';
-const API_CDN = '/api/upload-local';
+const API_CDN = '/api/upload-cdn';
 
 export interface PaginatedResponse<T> {
   data: T[];

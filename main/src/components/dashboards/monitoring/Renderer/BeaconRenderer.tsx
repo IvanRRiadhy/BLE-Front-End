@@ -7,6 +7,8 @@ import { BASE_URL } from 'src/utils/axios';
 // Global lightweight image cache for high-performance canvas rendering
 const imageCache = new Map<string, HTMLImageElement>();
 const pendingImages = new Set<string>();
+const failedImages = new Map<string, number>();
+const FAILED_COOLDOWN_MS = 60 * 1000; // 1 minute retry cooldown
 
 export function getFullImageUrl(src?: string): string | null {
   if (!src) return null;
@@ -27,16 +29,23 @@ export function preloadImage(src?: string, onLoaded?: () => void): HTMLImageElem
     return cached.complete && cached.naturalWidth > 0 ? cached : null;
   }
 
+  const failedTimestamp = failedImages.get(fullUrl);
+  if (failedTimestamp && Date.now() - failedTimestamp < FAILED_COOLDOWN_MS) {
+    return null;
+  }
+
   if (!pendingImages.has(fullUrl)) {
     pendingImages.add(fullUrl);
     const img = new window.Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
       imageCache.set(fullUrl, img);
+      failedImages.delete(fullUrl);
       pendingImages.delete(fullUrl);
       if (onLoaded) onLoaded();
     };
     img.onerror = () => {
+      failedImages.set(fullUrl, Date.now());
       pendingImages.delete(fullUrl);
     };
     img.src = fullUrl;
@@ -315,6 +324,10 @@ type BeaconRendererProps = {
   isFollowed?: boolean;
   faceImage?: string;
   loadedImage?: HTMLImageElement;
+  isHovered?: boolean;
+  isSelected?: boolean;
+  onHover?: (id: string) => void;
+  onHoverEnd?: (id: string) => void;
 };
 
 const BeaconRenderer: React.FC<BeaconRendererProps> = ({
@@ -334,9 +347,14 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   isFollowed = false,
   faceImage,
   loadedImage,
+  isHovered = false,
+  isSelected = false,
+  onHover,
+  onHoverEnd,
 }) => {
   const groupRef = useRef<any>(null);
-  const [isHovered, setIsHovered] = useState(false);
+  const [internalHovered, setInternalHovered] = useState(false);
+  const activeHovered = isHovered || internalHovered;
 
   const iconTypeSetting = useSelector((state: RootState) => state.settings.beaconIconType || 'person');
   const customSvgPath = useSelector((state: RootState) => state.settings.customSvgPath || '');
@@ -363,11 +381,18 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   const maxDim = Math.max(bbox.width, bbox.height) || 24;
   const finalScale = isCustom ? iconSize / maxDim : baseScale;
   
+  // Pin SVG (16x16 box) has its tip pointing at (8, 16)
+  // Shift offsets so tip points exactly at (x, y) for Pin and Photo modes
+  const isPinOrPhoto = isPin || isPhoto;
   const finalX = isCustom 
     ? x - (bbox.x + bbox.width / 2) * finalScale
+    : isPinOrPhoto
+    ? x - 8 * baseScale
     : x - iconSize / 2;
   const finalY = isCustom 
     ? y - (bbox.y + bbox.height / 2) * finalScale
+    : isPinOrPhoto
+    ? y - 16 * baseScale
     : y - iconSize / 2;
 
   const effectiveBeaconSize = isFollowed ? beaconSize * 1.2 : beaconSize;
@@ -379,6 +404,61 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   const innerRadius = 5.2 * baseScale;
 
   const img = loadedImage || (faceImage ? preloadImage(faceImage) : null);
+
+  // Function to render a glowing border around the beacon when hovered or selected
+  const renderGlowingBorder = () => {
+    if (!activeHovered && !isSelected) return null;
+
+    // Pin SVG tip is at (x, y) while head center is at circleCenterY
+    // For person/custom, icon center is at (x, y)
+    const glowCenterY = isPinOrPhoto ? circleCenterY : y;
+    const glowRadius = isPhoto ? 26 : isPin ? 21 : 19;
+
+    return (
+      <Group listening={false}>
+        {/* Soft, rich ambient outer glow aura */}
+        <Circle
+          x={x}
+          y={glowCenterY}
+          radius={glowRadius + 4}
+          stroke={beaconColor}
+          strokeWidth={3.5}
+          fill="transparent"
+          shadowColor={beaconColor}
+          shadowBlur={16}
+          shadowOpacity={1}
+          listening={false}
+        />
+        {/* Intense crisp neon highlight ring */}
+        <Circle
+          x={x}
+          y={glowCenterY}
+          radius={glowRadius + 1}
+          stroke="#ffffff"
+          strokeWidth={2}
+          fill="transparent"
+          shadowColor="#ffffff"
+          shadowBlur={6}
+          shadowOpacity={0.9}
+          listening={false}
+        />
+        {/* Outer subtle secondary aura */}
+        <Circle
+          x={x}
+          y={glowCenterY}
+          radius={glowRadius + 7}
+          stroke={beaconColor}
+          strokeWidth={1}
+          fill="transparent"
+          opacity={0.6}
+          shadowColor={beaconColor}
+          shadowBlur={10}
+          shadowOpacity={0.5}
+          listening={false}
+        />
+      </Group>
+    );
+  };
 
   return (
     <>
@@ -392,14 +472,27 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
         scaleX={effectiveBeaconSize}
         scaleY={effectiveBeaconSize}
         opacity={opacity}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={(e) => {
+          const stage = e.target.getStage();
+          if (stage) stage.container().style.cursor = 'pointer';
+          setInternalHovered(true);
+          if (onHover) onHover(id);
+        }}
+        onMouseLeave={(e) => {
+          const stage = e.target.getStage();
+          if (stage) stage.container().style.cursor = 'default';
+          setInternalHovered(false);
+          if (onHoverEnd) onHoverEnd(id);
+        }}
         onClick={(e) => {
           if (!clickable) return;
           e.cancelBubble = true; // Prevent propagation
           if (onClick) onClick();
         }}
       >
+        {/* Render glowing border when hovered or selected */}
+        {renderGlowingBorder()}
+
         {/* Circular border around the icon in the same color as the icon */}
         {isFollowed && (
           <Circle
@@ -418,7 +511,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
         {/* Label text placed cleanly above the person icon */}
         <Text
           x={x - 60}
-          y={y - (iconSize / 2) - (isFollowed ? 30 : 26)}
+          y={isPinOrPhoto ? y - (16 * baseScale) - (isFollowed ? 26 : 22) : y - (iconSize / 2) - (isFollowed ? 30 : 26)}
           text={label}
           fontSize={textFontSize}
           fill={beaconColor}
@@ -518,6 +611,8 @@ const MemoizedBeaconRenderer = React.memo(BeaconRenderer, (prevProps, nextProps)
     prevProps.isVisitor === nextProps.isVisitor &&
     prevProps.iconType === nextProps.iconType &&
     prevProps.isFollowed === nextProps.isFollowed &&
+    prevProps.isHovered === nextProps.isHovered &&
+    prevProps.isSelected === nextProps.isSelected &&
     prevProps.faceImage === nextProps.faceImage &&
     prevProps.loadedImage === nextProps.loadedImage
   );

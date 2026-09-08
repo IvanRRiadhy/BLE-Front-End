@@ -29,7 +29,7 @@ const DetailList: React.FC = () => {
   const { evacuationId, data, evacState } = useSelector((state) => state.evacuationReducer);
   const summary = data?.summary;
   const persons = data?.persons || [];
-
+// console.log("DATA: ", data)
   if (evacState === 'idle') {
     return <EvacuationList />;
   }
@@ -56,6 +56,7 @@ const DetailList: React.FC = () => {
         {/* <Typography variant="h6" fontWeight={700} mb={4}>
         Left Card
       </Typography> */}
+      
         <Stack
           direction="row"
           spacing={3}
@@ -87,7 +88,7 @@ const DetailList: React.FC = () => {
               Confirmed
             </Typography>
             <Typography variant="h1" fontWeight={800} color="success.main">
-              {summary?.totalConfirmedNotification || 0}
+              {`${(summary?.totalConfirmedNotification || 0) + (summary?.totalConfirmed || 0)}`}
             </Typography>
           </Box>
           {/*  Evacuated */}

@@ -129,8 +129,8 @@ const MonitoringRightSidebar: React.FC<MonitoringRightSidebarProps> = ({
             </Box>
 
             {/* Scrollable Content */}
-            <Box sx={{ flexGrow: 1, overflowY: 'auto', p: 1 }}>
-              <NewestTrack followedOnly={true} />
+            <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', p: 1 }}>
+              <NewestTrack followedOnly={true} isSidebar={true} />
             </Box>
           </Box>
         </Drawer>

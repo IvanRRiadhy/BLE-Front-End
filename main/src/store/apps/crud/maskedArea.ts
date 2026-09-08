@@ -124,6 +124,8 @@ export interface MaskedAreaType {
     labels?: MaskedAreaLabelType[],
     labelIds?: string[],
     isAssemblyPoint: boolean;
+    areaName?: string;
+    maskedAreaName?: string;
 }
 
 interface StateType {

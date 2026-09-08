@@ -68,6 +68,7 @@ const TrackingPositionRenderer: React.FC<TrackingPositionRendererProps> = ({
   useEffect(() => {
     if (imageSrc) {
       const img = new window.Image();
+      img.crossOrigin = 'anonymous';
       img.src = imageSrc;
       img.onload = () => setImage(img);
     }

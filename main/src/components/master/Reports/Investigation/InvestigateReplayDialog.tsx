@@ -89,6 +89,7 @@ const InvestigateReplayDialog = ({
     if (!floorplanImage) return;
 
     const img = new window.Image();
+    img.crossOrigin = 'anonymous';
     img.src = `${floorplanImage}`;
 
     img.onload = () => {

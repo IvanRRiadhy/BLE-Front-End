@@ -90,9 +90,10 @@ export function useEnrichedTrackingLogs(): TrackingLogItem[] {
         target: m?.name || v?.name || s?.name || 'Unknown',
         personId: m?.personId || v?.personId || s?.personId || '',
         image: m?.faceImage || v?.faceImage || s?.faceImage || '',
+        personType: m ? 'Member' : v ? 'Visitor' : s ? 'Security' : log.personType,
       };
     });
-  }, [logs, members, visitors]);
+  }, [logs, members, visitors, security]);
 }
 
 export function useEnrichedAlarmLogs(): AlarmLogItem[] {

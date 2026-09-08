@@ -37,7 +37,8 @@ export type GetFilter = {
 };
 
 export type OldGetFilter = {
-    timeRange: string;
+    timeRange?: string;
+    TimeRange?: string;
     buildingId: string[];
     floorId: string[];
     floorplanId: string[];
@@ -46,6 +47,9 @@ export type OldGetFilter = {
     memberId: string[];
     from?: string ;
     to?: string ;
+    IsActive?: boolean;
+    personType?: 'visitor' | 'member' | null;
+    timezone?: string;
 }
 
 export type GetVisitorSession = {
@@ -86,6 +90,7 @@ export type VisitorSessionType = {
   enterTime: string | null;
   exitTime: string | null;
   durationInMinutes: number | null;
+  durationInPeriodMinutes: number | null;
   status: string | null;
   hostName: string | null;
 };
@@ -110,6 +115,7 @@ export type NewSessionType = {
 };
 
 export type VisitorSessionPersonType = {
+  id?: string | null;
   personId: string;
   personName: string;
   personType: string;
@@ -137,6 +143,7 @@ export type VisitorSessionPersonType = {
   totalDurationFormatted: string | null;
   totalIncidents: number;
 
+  durationInPeriodMinutes: number | null;
   sessions: NewSessionType[];
 };
 

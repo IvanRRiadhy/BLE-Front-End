@@ -777,7 +777,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                             color="inherit"
                             onClick={() => setSelectedAlarms([])}
                           >
-                            Clear
+                            Clear Selection
                           </Button>
                         </Stack>
                       </Box>

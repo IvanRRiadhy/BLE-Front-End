@@ -321,6 +321,13 @@ export const useMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] 
       href: '/report/',
       children: [
         {
+          id: 'tracking-report',
+          title: 'Tracking Report',
+          icon: IconDeviceDesktopAnalytics,
+          href: '/report/trackingreport/',
+          key: ['core.reporting', 'core.monitoring'],
+        },
+        {
           id: 'report-visitor',
           title: 'Visitor Report',
           icon: IconCalendar,
@@ -332,6 +339,13 @@ export const useMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] 
           title: 'Investigate',
           icon: IconCalendar,
           href: '/report/investigate',
+          key: ['core.reporting', 'core.monitoring'],
+        },
+        {
+          id: 'report-new-investigate',
+          title: 'New Investigate',
+          icon: IconCalendar,
+          href: '/report/new-investigate',
           key: ['core.reporting', 'core.monitoring'],
         },
         {

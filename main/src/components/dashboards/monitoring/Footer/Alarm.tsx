@@ -21,10 +21,15 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
+  Select,
+  TextField,
+  InputAdornment,
   Tooltip,
   Divider,
   Chip,
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import BlankCard from 'src/components/shared/BlankCard';
 import { useTranslation } from 'react-i18next';
 import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
@@ -94,6 +99,23 @@ const AlarmList = () => {
   // useEffect(() => {
   //   dispatch(fetchAlarmTriggerDT(AlarmTriggerFilter));
   // }, [AlarmTriggerFilter, dispatch]);
+
+  const [searchTerm, setSearchTerm] = useState(AlarmTriggerFilter.SearchValue || '');
+  const [actionFilter, setActionFilter] = useState('all');
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    dispatch(UpdateFilter({ SearchValue: value, Start: 0 }));
+  };
+
+  const handleActionFilterChange = (value: string) => {
+    setActionFilter(value);
+    if (value === 'all') {
+      dispatch(UpdateFilter({ filters: { ...AlarmTriggerFilter.filters, action: [] }, Start: 0 }));
+    } else {
+      dispatch(UpdateFilter({ filters: { ...AlarmTriggerFilter.filters, action: [value] }, Start: 0 }));
+    }
+  };
 
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
@@ -216,30 +238,95 @@ const AlarmList = () => {
   );
 
   return (
-    <Grid container spacing={3}>
-      <Grid size={12}>
-        <Box sx={{ overflow: 'auto', maxWidth: '100%', minWidth: '100%', height: '100%' }}>
-          <BlankCard>
-            <TableContainer sx={{ maxHeight: '200px', overflowY: 'auto' }}>
-              <Table aria-label="simple table" sx={{ tableLayout: 'fixed', width: '100%' }}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell
-                      sx={{
-                        position: 'sticky',
-                        top: 0,
-                        left: 0,
-                        background: 'background.paper',
-                        zIndex: 2,
-                        width: 35,
-                      }}
-                    >
+    <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* Search and Filters Bar */}
+      <Box
+        sx={{
+          p: 1.5,
+          mb: 1.5,
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 1.5,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderRadius: 1.5,
+          bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100'),
+        }}
+      >
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, alignItems: 'center', flex: 1, minWidth: 260 }}>
+          <TextField
+            size="small"
+            placeholder="Search person, floor, or alarm..."
+            value={searchTerm}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" />
+                </InputAdornment>
+              ),
+              endAdornment: searchTerm ? (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={() => handleSearchChange('')}>
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ) : null,
+            }}
+            sx={{ minWidth: 240, maxWidth: 360, flex: 1 }}
+          />
+
+          <FormControl size="small" sx={{ minWidth: 160 }}>
+            <InputLabel id="alarm-action-filter-label">Action Status</InputLabel>
+            <Select
+              labelId="alarm-action-filter-label"
+              label="Action Status"
+              value={actionFilter}
+              onChange={(e) => handleActionFilterChange(e.target.value)}
+            >
+              <MenuItem value="all">All Action Status</MenuItem>
+              {actionStatus.map((status) => (
+                <MenuItem key={status.value} value={status.value}>
+                  {status.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+
+        <Typography variant="body2" color="textSecondary">
+          Total: <strong>{alarmTriggerFilteredCount}</strong> alarms
+        </Typography>
+      </Box>
+
+      {/* Table Section */}
+      <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
+        <BlankCard>
+          <TableContainer sx={{ maxHeight: 'calc(100vh - 350px)', minHeight: '260px', overflowY: 'auto' }}>
+            <Table aria-label="simple table" sx={{ tableLayout: 'fixed', width: '100%' }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell
+                    sx={{
+                      position: 'sticky',
+                      top: 0,
+                      left: 0,
+                      bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff'),
+                      zIndex: 3,
+                      width: 35,
+                    }}
+                  >
                       <Typography variant="h6">#</Typography>
                     </TableCell>
                     {columns.map((col) => (
                       <TableCell
                         key={col.label}
-                        sx={{ position: 'sticky', top: 0, background: 'background.paper', zIndex: 1 }}
+                        sx={{
+                          position: 'sticky',
+                          top: 0,
+                          bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff'),
+                          zIndex: 2,
+                        }}
                       >
                         {col.sortAble && col.field ? (
                           <TableSortLabel
@@ -260,8 +347,8 @@ const AlarmList = () => {
                         position: 'sticky',
                         top: 0,
                         right: 0,
-                        background: 'background.paper',
-                        zIndex: 2,
+                        bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff'),
+                        zIndex: 3,
                         width: 150, // Fixed width
                         minWidth: 150,
                         maxWidth: 150,
@@ -281,7 +368,7 @@ const AlarmList = () => {
                             sx={{
                               position: 'sticky',
                               left: 0,
-                              background: 'background.paper',
+                              bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff'),
                               zIndex: 1,
                               width: 35,
                               textAlign: 'center',
@@ -333,7 +420,7 @@ const AlarmList = () => {
                             sx={{
                               position: 'sticky',
                               right: 0,
-                              background: 'background.paper',
+                              bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff'),
                               zIndex: 1,
                               gap: 1,
                               alignItems: 'center',
@@ -474,9 +561,8 @@ const AlarmList = () => {
             </DialogActions>
           </Dialog>
         </Box>
-      </Grid>
-    </Grid>
-  );
+      </Box>
+    );
 };
 
 export default AlarmList;

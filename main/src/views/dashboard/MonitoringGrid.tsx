@@ -199,7 +199,7 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
                         flexShrink: 0,
                         borderRadius: 2,
                         p: 1,
-                        bgcolor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : '#e1e1e1',
+                        bgcolor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : '#ffffff',
                         border: '2.5px solid',
                         borderColor: isMiniAlarm ? 'error.main' : (theme.palette.mode === 'dark' ? 'grey.800' : '#a1a1a1'),
 
@@ -259,7 +259,7 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
                 height: item.height,
                 p: 1.5,
                 borderRadius: 2,
-                bgcolor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : '#e1e1e1',
+                bgcolor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : '#ffffff',
                 border: '2.5px solid',
                 borderColor: isAlarmActive ? 'error.main' : (theme.palette.mode === 'dark' ? 'grey.800' : '#a1a1a1'),
 

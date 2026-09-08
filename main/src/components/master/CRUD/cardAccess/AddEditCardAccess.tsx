@@ -61,6 +61,7 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
   });
   const [selectedAreaNode, setSelectedAreaNode] = useState<SelectedNode>(null);
   const [isTimeGroupOpen, setIsTimeGroupOpen] = useState(false);
+  const [timeGroupInputValue, setTimeGroupInputValue] = useState('');
 
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
 
@@ -77,6 +78,7 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
 
   const handleClickOpen = () => {
     setFormErrors({});
+    setTimeGroupInputValue('');
     if (type === 'edit' && cardAccess) {
       setFormData({ ...defaultCardAccessForm, ...cardAccess });
     } else {
@@ -411,6 +413,14 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
                     open={isTimeGroupOpen}
                     disableCloseOnSelect
                     disablePortal
+                    inputValue={timeGroupInputValue}
+                    onInputChange={(_e, newInputValue, reason) => {
+                      if (reason === 'input') {
+                        setTimeGroupInputValue(newInputValue);
+                      } else if (reason === 'clear') {
+                        setTimeGroupInputValue('');
+                      }
+                    }}
                     onOpen={() => {
                       setIsTimeGroupOpen(true);
                     }}

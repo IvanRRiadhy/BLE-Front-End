@@ -129,7 +129,9 @@ const AlarmTrigger = Loadable(lazy(() => import('../views/Reports/AlarmTrigger')
 const CardRecord = Loadable(lazy(() => import('../views/Reports/CardRecord')));
 const TestRecord = Loadable(lazy(() => import('../views/Reports/TestRecord')));
 const TestReport = Loadable(lazy(() => import('../views/Reports/VisitorReport')));
+const TrackingReport = Loadable(lazy(() => import('../views/Reports/TrackingReport')));
 const Investigate = Loadable(lazy(() => import('../views/Reports/Investigate')));
+const NewInvestigate = Loadable(lazy(() => import('../views/Reports/NewInvestigate')));
 const EventLog = Loadable(lazy(() => import('../views/Reports/EventReport')));
 const MovementLog = Loadable(lazy(() => import('../views/Reports/MovementLog')));
 const CardHistory = Loadable(lazy(() => import('../views/Reports/CardHistory')));
@@ -444,6 +446,11 @@ const Router = [
         element: withAuth(<TestRecord />, '/report/testrecord'),
       },
       {
+        path: '/report/trackingreport',
+        exact: true,
+        element: withAuth(<TrackingReport />, '/report/trackingreport'),
+      },
+      {
         path: '/report/visitorreport/filter',
         exact: true,
         element: withAuth(<TestReport />, '/report/visitorreport/filter'),
@@ -452,6 +459,11 @@ const Router = [
         path: '/report/investigate',
         exact: true,
         element: withAuth(<Investigate />, '/report/investigate'),
+      },
+      {
+        path: '/report/new-investigate',
+        exact: true,
+        element: withAuth(<NewInvestigate />, '/report/new-investigate'),
       },
       {
         path: '/report/eventlog',

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Box,
   Grid2 as Grid,
@@ -10,97 +10,24 @@ import {
   TableRow,
   Typography,
   TablePagination,
-  Divider,
-  Avatar,
+  TableSortLabel,
+  TextField,
+  InputAdornment,
+  MenuItem,
+  FormControl,
+  Select,
+  InputLabel,
+  IconButton,
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import BlankCard from 'src/components/shared/BlankCard';
-import { RootState, AppDispatch, useSelector, useDispatch } from 'src/store/Store';
-import {
-  fetchTrackingTrans,
-  fetchTrackingTransDT,
-  trackingTransType,
-} from 'src/store/apps/crud/trackingTrans';
-import { fetchBleReaders, bleReaderType } from 'src/store/apps/crud/bleReader';
-import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { useTranslation } from 'react-i18next';
-import { fetchMembers, memberType } from 'src/store/apps/crud/member';
-import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor';
-import { defaultTrackingTransFilter } from 'src/store/apps/defaultForm';
 import { useEnrichedTrackingLogs } from 'src/hooks/useTrackingLogs';
-import { BASE_URL } from 'src/utils/axios';
-
-const dummyData: trackingTransType[] = [
-  {
-    //ff8
-    id: '123jao-144122-ajo291-oo09kk',
-    transTime: '2023-06-01T12:00:00Z',
-    readerId: 'a0773223-cc89-4ba1-ba5a-68a2fb26ea1b',
-    floorplanMaskedAreaId: 'ee35e6f3-8661-437b-93d7-6ae86fbe2f67',
-    cardId: 'BC572913EA8B',
-    coordinateX: 10,
-    coordinateY: 20,
-    coordinatePxX: 100,
-    coordinatePxY: 200,
-    alarmStatus: 'Normal',
-    battery: 80,
-  },
-  {
-    //898
-    id: '8fj29a-kd921j-pl0k91-zx8nq2',
-    transTime: '2023-06-01T12:05:00Z',
-    readerId: '3b97ab06-bb48-4cda-9411-647fc98ff945',
-    cardId: 'BC572913EA73',
-    floorplanMaskedAreaId: '88ca769e-dafb-445e-b79f-8ab47c32309d',
-    coordinateX: 30,
-    coordinateY: 40,
-    coordinatePxX: 300,
-    coordinatePxY: 400,
-    alarmStatus: 'Alarm',
-    battery: 60,
-  },
-  {
-    //FBC
-    id: 'bsdw836-8bf3-496c-a786-27d2988fad04',
-    transTime: '2023-06-01T12:10:00Z',
-    readerId: 'b0f9e836-8bf3-496c-a786-27d2988fad04',
-    cardId: 'BC572913EA73',
-    floorplanMaskedAreaId: '88ca769e-dafb-445e-b79f-8ab47c32309d',
-    coordinateX: 50,
-    coordinateY: 60,
-    coordinatePxX: 500,
-    coordinatePxY: 600,
-    alarmStatus: 'Normal',
-    battery: 90,
-  },
-  {
-    //FBC
-    id: 'a9i23sd-8bf3-496c-a786-27d2988fad04',
-    transTime: '2023-06-01T12:15:00Z',
-    readerId: 'b0f9e836-8bf3-496c-a786-27d2988fad04',
-    cardId: 'BC572913EA73',
-    floorplanMaskedAreaId: '88ca769e-dafb-445e-b79f-8ab47c32309d',
-    coordinateX: 70,
-    coordinateY: 80,
-    coordinatePxX: 700,
-    coordinatePxY: 800,
-    alarmStatus: 'Alarm',
-    battery: 70,
-  },
-  {
-    //ff8
-    id: 'zld89q-mc20sl-qpw9a2-jdk2lw',
-    transTime: '2023-06-01T12:20:00Z',
-    readerId: 'a0773223-cc89-4ba1-ba5a-68a2fb26ea1b',
-    cardId: 'BC572913EA8B',
-    floorplanMaskedAreaId: 'ee35e6f3-8661-437b-93d7-6ae86fbe2f67',
-    coordinateX: 90,
-    coordinateY: 100,
-    coordinatePxX: 900,
-    coordinatePxY: 1000,
-    alarmStatus: 'Normal',
-    battery: 80,
-  },
-];
+import { useAllReaders } from 'src/hooks/useReader';
+import { useAllMembers } from 'src/hooks/useMember';
+import { useAllVisitor } from 'src/hooks/useVisitor';
+import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
 
 type Props = {
   isNew?: boolean;
@@ -108,61 +35,48 @@ type Props = {
   focusId?: string;
 };
 
-const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
+type SortField = 'target' | 'area' | 'time' | 'dmac' | 'personType' | 'type';
+
+const TrackingTransactionList = ({ isNew }: Props) => {
   const { t } = useTranslation();
+  useAllReaders();
+  useAllMembers();
+  useAllVisitor();
+  useAllSecuritys();
+
+  const trackingLogs = useEnrichedTrackingLogs();
+
+  // Search, Filter & Sort State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [personTypeFilter, setPersonTypeFilter] = useState('all');
+  const [alarmFilter, setAlarmFilter] = useState('all');
+  const [orderBy, setOrderBy] = useState<SortField>('time');
+  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
+
   // Pagination State
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
-  // Handle page change
-  const handleChangePage = (event: unknown, newPage: number) => {
-    console.log(event);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const handleSort = (field: SortField) => {
+    const isAsc = orderBy === field && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(field);
+    setPage(0);
+  };
+
+  const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 
-  // Handle rows per page change
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-  const dispatch: AppDispatch = useDispatch();
-  const trackingLogs = useEnrichedTrackingLogs();
-  // const trackingTransData = dummyData;
-  const readerData = useSelector((state: RootState) => state.bleReaderReducer.bleReaders);
-  const floorplanMaskedAreaData = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreas,
-  );
-  const membersData = useSelector(
-    (state: RootState) => state.memberReducer.members,
-  ) as memberType[];
-  const visitorsData = useSelector(
-    (state: RootState) => state.visitorReducer.visitors,
-  ) as VisitorType[];
-
-  const findNewestTransaction = (data: trackingTransType[]) => {
-    if (data.length === 0) return null;
-
-    return data.reduce((newest, current) => {
-      return new Date(current.transTime) > new Date(newest.transTime) ? current : newest;
-    });
-  };
-
-  const newestTransaction = findNewestTransaction(dummyData);
-
-  useEffect(() => {
-    dispatch(fetchTrackingTransDT({ ...defaultTrackingTransFilter }));
-    dispatch(fetchBleReaders());
-    // dispatch(fetchMaskedAreas());
-    dispatch(fetchMembers());
-    dispatch(fetchVisitor());
-  }, [dispatch]);
 
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
-
-    // Extract the weekday
     const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
     const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-
     return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
       'en-GB',
       {
@@ -173,150 +87,308 @@ const TrackingTransactionList = ({ isNew, focusType, focusId }: Props) => {
     )}`;
   };
 
-  const formatCoords = (coordinateX: number, coordinateY: number) => {
-    return `(${coordinateX}, ${coordinateY})`;
-  };
+  // Filtered & Sorted Tracking Data
+  const processedLogs = useMemo(() => {
+    let result = [...trackingLogs];
 
-  const getName = (cardNumber: string) => {
-    const person = [...membersData, ...visitorsData].find((p) => p.bleCardNumber === cardNumber);
-    const isVisitor = visitorsData.some((v) => v.bleCardNumber === cardNumber);
-    const isMember = membersData.some((m) => m.bleCardNumber === cardNumber);
-    const label = person?.name || 'Person';
-    return { label, isVisitor, isMember };
-  };
+    // Search filter across target name, card number (dmac), and area
+    if (searchTerm.trim()) {
+      const q = searchTerm.toLowerCase().trim();
+      result = result.filter(
+        (log) =>
+          (log.target && log.target.toLowerCase().includes(q)) ||
+          (log.dmac && log.dmac.toLowerCase().includes(q)) ||
+          (log.area && log.area.toLowerCase().includes(q)) ||
+          (log.floor && log.floor.toLowerCase().includes(q)),
+      );
+    }
+
+    // Person type filter
+    if (personTypeFilter !== 'all') {
+      result = result.filter((log) => {
+        const type = (log.personType || '').toLowerCase();
+        return type === personTypeFilter.toLowerCase();
+      });
+    }
+
+    // Alarm status filter
+    if (alarmFilter !== 'all') {
+      result = result.filter((log) => {
+        const isAlarm = log.type === 'Alarm';
+        return alarmFilter === 'alarm' ? isAlarm : !isAlarm;
+      });
+    }
+
+    // Sorting
+    result.sort((a: any, b: any) => {
+      let valA: any = a[orderBy] ?? '';
+      let valB: any = b[orderBy] ?? '';
+
+      if (orderBy === 'time') {
+        const timeA = new Date(a.time).getTime() || 0;
+        const timeB = new Date(b.time).getTime() || 0;
+        return order === 'asc' ? timeA - timeB : timeB - timeA;
+      }
+
+      if (typeof valA === 'string') {
+        valA = valA.toLowerCase();
+        valB = (valB ?? '').toString().toLowerCase();
+      }
+
+      if (valA < valB) return order === 'asc' ? -1 : 1;
+      if (valA > valB) return order === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return result;
+  }, [trackingLogs, searchTerm, personTypeFilter, alarmFilter, orderBy, order]);
+
+  const displayedRows = useMemo(() => {
+    return processedLogs.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [processedLogs, page, rowsPerPage]);
 
   return (
-    <Grid container spacing={3}>
-      <Grid size={12}>
-        <Box sx={{ overflow: 'auto', maxWidth: '100%', width: '100%', height: '100%' }}>
-          <BlankCard>
-            <TableContainer sx={{ maxHeight: '200px', overflowY: 'auto' }}>
-              <Table aria-label="simple table" sx={{ tableLayout: 'fixed', width: '100%' }}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell
-                      sx={{
-                        position: 'sticky',
-                        top: 0,
-                        left: 0,
-                        background: 'background.paper',
-                        zIndex: 2,
-                        width: '70px',
-                      }}
-                    >
-                      <Typography variant="h6"></Typography>
-                    </TableCell>
+    <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* Search and Filters Bar */}
+      <Box
+        sx={{
+          p: 1.5,
+          mb: 1.5,
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 1.5,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderRadius: 1.5,
+          bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100'),
+        }}
+      >
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, alignItems: 'center', flex: 1, minWidth: 260 }}>
+          <TextField
+            size="small"
+            placeholder="Search person, card, or area..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setPage(0);
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" />
+                </InputAdornment>
+              ),
+              endAdornment: searchTerm ? (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={() => setSearchTerm('')}>
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ) : null,
+            }}
+            sx={{ minWidth: 240, maxWidth: 360, flex: 1 }}
+          />
 
-                    {[
-                      // 'Image',
-                      'Person Name',
-                      'Area',
-                      'Time',
-                      'Card Number',
-                      'Type',
-                      'Alarm',
-                    ].map((header) => (
-                      <TableCell
-                        key={header}
-                        sx={{ position: 'sticky', top: 0, background: 'background.paper', zIndex: 1 }}
-                      >
-                        <Typography variant="h6">{header}</Typography>
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
+          <FormControl size="small" sx={{ minWidth: 140 }}>
+            <InputLabel id="person-type-label">Person Type</InputLabel>
+            <Select
+              labelId="person-type-label"
+              label="Person Type"
+              value={personTypeFilter}
+              onChange={(e) => {
+                setPersonTypeFilter(e.target.value);
+                setPage(0);
+              }}
+            >
+              <MenuItem value="all">All Types</MenuItem>
+              <MenuItem value="visitor">Visitor</MenuItem>
+              <MenuItem value="member">Member</MenuItem>
+              <MenuItem value="security">Security</MenuItem>
+            </Select>
+          </FormControl>
 
-                <TableBody>
-                  {trackingLogs
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((log, index) => {
-                      const isAlarm = log.type === 'Alarm';
-                      const isVisitor = log.personType === 'Visitor';
-                      const isMember = log.personType === 'Member';
-                      // console.log('log', log);
-                      return (
-                        <TableRow key={log.id}>
-                          {/* Avatar */}
-                          <TableCell
-                            sx={{
-                              position: 'sticky',
-                              left: 0,
-                              background: 'background.paper',
-                              zIndex: 1,
-                              width: '70px',
-                            }}
-                          >
-                            <Grid size={2}>
-                              {/* <Avatar
-                                src={`${BASE_URL}${log.image}`}
-                                sx={{
-                                  width: 50,
-                                  height: 50,
-                                  border: '3px solid',
-                                  borderColor: isVisitor ? '#f50057' : '#1976d2',
-                                }}
-                              /> */}
-                            </Grid>
-                          </TableCell>
-
-                          {/* Image */}
-                          {/* <TableCell>
-            
-          </TableCell> */}
-
-                          {/* Person Name */}
-                          <TableCell>
-                            <Typography fontWeight={600}>{log.target}</Typography>
-                          </TableCell>
-
-                          {/* Area - Floor */}
-                          <TableCell>
-                            {log.area} – {log.floor}
-                          </TableCell>
-
-                          {/* Time */}
-                          <TableCell>{formatTime(log.time)}</TableCell>
-
-                          {/* Card Number */}
-                          <TableCell>{log.dmac}</TableCell>
-
-                          {/* Type */}
-                          <TableCell>
-                            {isVisitor ? 'Visitor' : isMember ? 'Member' : 'Unknown'}
-                          </TableCell>
-
-                          {/* Alarm */}
-                          <TableCell>
-                            {isAlarm ? (
-                              <Typography color="error" fontWeight={600}>
-                                Yes
-                              </Typography>
-                            ) : (
-                              'No'
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-
-            {!isNew && (
-              <TablePagination
-                rowsPerPageOptions={[]}
-                component="div"
-                count={trackingLogs.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            )}
-          </BlankCard>
+          <FormControl size="small" sx={{ minWidth: 140 }}>
+            <InputLabel id="alarm-filter-label">Alarm</InputLabel>
+            <Select
+              labelId="alarm-filter-label"
+              label="Alarm"
+              value={alarmFilter}
+              onChange={(e) => {
+                setAlarmFilter(e.target.value);
+                setPage(0);
+              }}
+            >
+              <MenuItem value="all">All Status</MenuItem>
+              <MenuItem value="alarm">Alarm</MenuItem>
+              <MenuItem value="normal">Normal</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
-      </Grid>
-    </Grid>
+
+        <Typography variant="body2" color="textSecondary">
+          Total: <strong>{processedLogs.length}</strong> records
+        </Typography>
+      </Box>
+
+      {/* Table Content */}
+      <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
+        <BlankCard>
+          <TableContainer sx={{ maxHeight: 'calc(100vh - 350px)', minHeight: '260px', overflowY: 'auto' }}>
+            <Table aria-label="tracking record table" sx={{ tableLayout: 'fixed', width: '100%' }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell
+                    sx={{
+                      position: 'sticky',
+                      top: 0,
+                      left: 0,
+                      bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff'),
+                      zIndex: 3,
+                      width: '60px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    <Typography variant="subtitle2" fontWeight={700}>#</Typography>
+                  </TableCell>
+
+                  <TableCell sx={{ position: 'sticky', top: 0, bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff'), zIndex: 2 }}>
+                    <TableSortLabel
+                      active={orderBy === 'target'}
+                      direction={orderBy === 'target' ? order : 'asc'}
+                      onClick={() => handleSort('target')}
+                    >
+                      <Typography variant="subtitle2" fontWeight={700}>Person Name</Typography>
+                    </TableSortLabel>
+                  </TableCell>
+
+                  <TableCell sx={{ position: 'sticky', top: 0, bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff'), zIndex: 2 }}>
+                    <TableSortLabel
+                      active={orderBy === 'area'}
+                      direction={orderBy === 'area' ? order : 'asc'}
+                      onClick={() => handleSort('area')}
+                    >
+                      <Typography variant="subtitle2" fontWeight={700}>Area</Typography>
+                    </TableSortLabel>
+                  </TableCell>
+
+                  <TableCell sx={{ position: 'sticky', top: 0, bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff'), zIndex: 2 }}>
+                    <TableSortLabel
+                      active={orderBy === 'time'}
+                      direction={orderBy === 'time' ? order : 'asc'}
+                      onClick={() => handleSort('time')}
+                    >
+                      <Typography variant="subtitle2" fontWeight={700}>Time</Typography>
+                    </TableSortLabel>
+                  </TableCell>
+
+                  <TableCell sx={{ position: 'sticky', top: 0, bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff'), zIndex: 2 }}>
+                    <TableSortLabel
+                      active={orderBy === 'dmac'}
+                      direction={orderBy === 'dmac' ? order : 'asc'}
+                      onClick={() => handleSort('dmac')}
+                    >
+                      <Typography variant="subtitle2" fontWeight={700}>Card Number</Typography>
+                    </TableSortLabel>
+                  </TableCell>
+
+                  <TableCell sx={{ position: 'sticky', top: 0, bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff'), zIndex: 2 }}>
+                    <TableSortLabel
+                      active={orderBy === 'personType'}
+                      direction={orderBy === 'personType' ? order : 'asc'}
+                      onClick={() => handleSort('personType')}
+                    >
+                      <Typography variant="subtitle2" fontWeight={700}>Type</Typography>
+                    </TableSortLabel>
+                  </TableCell>
+
+                  <TableCell sx={{ position: 'sticky', top: 0, bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff'), zIndex: 2 }}>
+                    <TableSortLabel
+                      active={orderBy === 'type'}
+                      direction={orderBy === 'type' ? order : 'asc'}
+                      onClick={() => handleSort('type')}
+                    >
+                      <Typography variant="subtitle2" fontWeight={700}>Alarm</Typography>
+                    </TableSortLabel>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {displayedRows.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
+                      <Typography color="textSecondary">No tracking records found</Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  displayedRows.map((log, index) => {
+                    const isAlarm = log.type === 'Alarm';
+                    const isVisitor = log.personType === 'Visitor';
+                    const isMember = log.personType === 'Member';
+                    const isSecurity = log.personType === 'Security';
+
+                    return (
+                      <TableRow key={log.id || `${log.dmac}-${index}`}>
+                        <TableCell
+                          sx={{
+                            position: 'sticky',
+                            left: 0,
+                            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff'),
+                            zIndex: 1,
+                            width: '60px',
+                            textAlign: 'center',
+                          }}
+                        >
+                          {index + 1 + page * rowsPerPage}
+                        </TableCell>
+
+                        <TableCell>
+                          <Typography fontWeight={600}>{log.target}</Typography>
+                        </TableCell>
+
+                        <TableCell>
+                          {log.area} {log.floor ? `– ${log.floor}` : ''}
+                        </TableCell>
+
+                        <TableCell>{formatTime(log.time)}</TableCell>
+
+                        <TableCell>{log.dmac}</TableCell> 
+
+                        <TableCell>
+                          {isVisitor ? 'Visitor' : isMember ? 'Member' : isSecurity ? 'Security' : 'Unknown'}
+                        </TableCell>
+
+                        <TableCell>
+                          {isAlarm ? (
+                            <Typography color="error" fontWeight={600}>
+                              Yes
+                            </Typography>
+                          ) : (
+                            'No'
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {!isNew && (
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              component="div"
+              count={processedLogs.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          )}
+        </BlankCard>
+      </Box>
+    </Box>
   );
 };
 

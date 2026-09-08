@@ -161,8 +161,6 @@ const AutocompleteFilter: React.FC<Props> = ({
   React.useEffect(() => {
     if (!dataReady || !hasInitialData || initialApplied.current || !initial) return;
 
-    console.log('🟢 Applying initial filter now (final fix):', initial);
-
     const pre = new Set<string>();
     (initial.BuildingId ?? []).forEach((id) => pre.add(kB(id)));
     (initial.FloorId ?? []).forEach((id) => pre.add(kF(id)));
@@ -177,16 +175,8 @@ const AutocompleteFilter: React.FC<Props> = ({
     (initial.FloorplanId ?? []).forEach((id) => expandedKeys.push(kFP(id)));
     setExpanded([...new Set(expandedKeys)]);
 
-    onChangeFilter({
-      BuildingId: initial.BuildingId ?? [],
-      FloorId: initial.FloorId ?? [],
-      FloorplanId: initial.FloorplanId ?? [],
-      MaskedAreaId: initial.MaskedAreaId ?? [],
-    });
-
     initialApplied.current = true;
-    console.log('✅ Initial selection fully applied (after data + initial ready)');
-  }, [dataReady, hasInitialData, initial, onChangeFilter]);
+  }, [dataReady, hasInitialData, initial]);
 
   // === Reset handler ===
   const prevReset = React.useRef<number>();
@@ -195,9 +185,8 @@ const AutocompleteFilter: React.FC<Props> = ({
     prevReset.current = resetToken;
     setSelectedKeys(new Set());
     setExpanded([]);
-    onChangeFilter({ BuildingId: [], FloorId: [], FloorplanId: [], MaskedAreaId: [] });
     setQuery('');
-  }, [resetToken, onChangeFilter]);
+  }, [resetToken]);
 
   // === Filtering logic ===
   const lowerQuery = query.toLowerCase();
@@ -382,12 +371,22 @@ const AutocompleteFilter: React.FC<Props> = ({
     return f;
   }, [selectedKeys, returnAll, getParentKey]);
 
+  const prevFilterStateRef = React.useRef<string>('');
+  const onChangeFilterRef = React.useRef(onChangeFilter);
+  React.useEffect(() => {
+    onChangeFilterRef.current = onChangeFilter;
+  });
+
   React.useEffect(() => {
     if (!disabled) {
       const state = toFilterState();
-      onChangeFilter(state);
+      const serialized = JSON.stringify(state);
+      if (prevFilterStateRef.current !== serialized) {
+        prevFilterStateRef.current = serialized;
+        onChangeFilterRef.current(state);
+      }
     }
-  }, [disabled, toFilterState, onChangeFilter]);
+  }, [disabled, toFilterState]);
 
   // === Selected Display ===
   const displayTree = React.useMemo<DisplayTree>(() => {

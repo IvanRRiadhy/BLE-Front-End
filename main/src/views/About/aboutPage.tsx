@@ -713,7 +713,7 @@ const AboutPage = () => {
                         <Box display="flex" alignItems="center" gap={2}>
                           <Typography variant="h6" fontWeight={500}>{data.validationMessage}</Typography>
                           <Chip label={data.isValid ? "Valid" : "Invalid"} color={data.isValid ? "success" : "error"} size="medium" />
-                          {!data.isValid && (
+                          {/* {!data.isValid && ( */}
                             <Button
                               variant="outlined"
                               size="small"
@@ -724,7 +724,7 @@ const AboutPage = () => {
                             >
                               {isFetchingMachineId ? 'Getting...' : 'Get Machine ID'}
                             </Button>
-                          )}
+                          {/* )} */}
                         </Box>
                       </ListItem>
                       <Divider component="li" />
@@ -735,7 +735,7 @@ const AboutPage = () => {
                         </Box>
                         <Box display="flex" alignItems="center" gap={2}>
                           <Typography variant="h6" fontWeight={500}>{`${data.licenseType} - ${data.licenseTier}`}</Typography>
-                          {!data.isValid && (
+                          {/* {!data.isValid && ( */}
                             <Button
                               variant="outlined"
                               size="small"
@@ -746,7 +746,7 @@ const AboutPage = () => {
                             >
                               {isUploading ? 'Uploading...' : 'Upload License'}
                             </Button>
-                          )}
+                          {/* )} */}
                         </Box>
                       </ListItem>
                       <Divider component="li" />

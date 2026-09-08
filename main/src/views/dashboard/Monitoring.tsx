@@ -4,7 +4,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import { useTheme } from '@mui/material';
 import MonitoringSidebar from 'src/components/dashboards/monitoring/Sidebar/MonitoringSidebar';
 import MonitoringRightSidebar from 'src/components/dashboards/monitoring/Sidebar/MonitoringRightSidebar';
-import MonitoringFooter from 'src/components/dashboards/monitoring/Footer/MonitoringFooter';
+import MonitoringFooter2 from 'src/components/dashboards/monitoring/Footer/MonitoringFooter2';
 import ToolbarMonitor from 'src/layouts/full/monitoringLayout/Toolbar';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
@@ -97,42 +97,31 @@ const Monitoring = () => {
   // State for collapsible MonitoringSidebar
   const [showSidebar, setShowSidebar] = useState(true);
   const [showRightSidebar, setShowRightSidebar] = useState(true);
-  const [footerExpanded, setFooterExpanded] = useState<string | null>(null);
-
-  // Toggle handler for showing sidebar with sequential footer retraction
+  // Toggle handler for showing sidebars
   const handleToggleSidebar = React.useCallback(
     (action: React.SetStateAction<boolean>) => {
-      setShowSidebar((prev) => {
-        const nextState = typeof action === 'function' ? action(prev) : action;
-        if (nextState && footerExpanded) {
-          setFooterExpanded(null);
-          setTimeout(() => {
-            setShowSidebar(true);
-          }, 300);
-          return false;
-        }
-        return nextState;
-      });
+      setShowSidebar(action);
     },
-    [footerExpanded],
+    [],
   );
 
   const handleToggleRightSidebar = React.useCallback(
     (action: React.SetStateAction<boolean>) => {
-      setShowRightSidebar((prev) => {
-        const nextState = typeof action === 'function' ? action(prev) : action;
-        if (nextState && footerExpanded) {
-          setFooterExpanded(null);
-          setTimeout(() => {
-            setShowRightSidebar(true);
-          }, 300);
-          return false;
-        }
-        return nextState;
-      });
+      setShowRightSidebar(action);
     },
-    [footerExpanded],
+    [],
   );
+
+  const gridRef = React.useRef<HTMLDivElement>(null);
+  const footerRef = React.useRef<HTMLDivElement>(null);
+
+  const handleScrollToTop = React.useCallback(() => {
+    gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
+  const handleSnapToFooter = React.useCallback(() => {
+    footerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   return (
     <>
@@ -147,32 +136,67 @@ const Monitoring = () => {
         <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%', height: 'calc(100vh - 100px)' }}>
           <MonitoringSidebar showSidebar={showSidebar} setShowSidebar={handleToggleSidebar} />
           
-          <Box sx={{ flex: 1, overflow: 'hidden', pl: 1, pr: 1, pt: 2, transition: 'all 0.2s ease' }}>
-            <Grid container>
-              <Grid size={{ xs: 12 }}>
-                <MonitoringGrid
-                  screenId={screenId}
-                  grid={grid}
-                  floorIds={floorIds}
-                  screenSettings={screenSettings}
-                  screenDisplay={screenDisplay}
-                  screenType={screenType}
-                />
+          <Box
+            sx={{
+              flex: 1,
+              height: '100%',
+              overflowY: 'auto',
+              scrollSnapType: 'y mandatory',
+              scrollBehavior: 'smooth',
+              pl: 1,
+              pr: 1,
+              pt: 2,
+              transition: 'all 0.2s ease',
+              scrollbarWidth: 'none',
+              '&::-webkit-scrollbar': { display: 'none' },
+            }}
+          >
+            {/* Snap Item 1: Monitoring Grid */}
+            <Box
+              ref={gridRef}
+              sx={{
+                width: '100%',
+                minHeight: 'calc(100vh - 165px)',
+                scrollSnapAlign: 'start',
+                scrollSnapStop: 'always',
+                mb: 2,
+              }}
+            >
+              <Grid container>
+                <Grid size={{ xs: 12 }}>
+                  <MonitoringGrid
+                    screenId={screenId}
+                    grid={grid}
+                    floorIds={floorIds}
+                    screenSettings={screenSettings}
+                    screenDisplay={screenDisplay}
+                    screenType={screenType}
+                  />
+                </Grid>
               </Grid>
-            </Grid>
+            </Box>
+
+            {/* Snap Item 2: Segmented Footer Content */}
+            <Box
+              ref={footerRef}
+              onFocus={handleSnapToFooter}
+              sx={{
+                width: '100%',
+                height: 'calc(100vh - 120px)',
+                minHeight: '500px',
+                scrollSnapAlign: 'start',
+                scrollSnapStop: 'always',
+                pb: 0,
+              }}
+            >
+              <MonitoringFooter2 onInteract={handleSnapToFooter} onScrollToTop={handleScrollToTop} />
+            </Box>
           </Box>
 
           <MonitoringRightSidebar showSidebar={showRightSidebar} setShowSidebar={handleToggleRightSidebar} />
         </Box>
       </PageContainer>
 
-      <MonitoringFooter
-        showSidebar={showSidebar}
-        setShowSidebar={handleToggleSidebar}
-        showRightSidebar={showRightSidebar}
-        expandedSection={footerExpanded}
-        setExpandedSection={setFooterExpanded}
-      />
       <AlarmPopup alarm={latest} />
       <AlarmDetailDialog />
       <TrackingDetailDialog />

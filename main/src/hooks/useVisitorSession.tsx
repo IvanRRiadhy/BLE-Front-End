@@ -29,7 +29,12 @@ export function useVisitorSession() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (filter: OldGetFilter) => {
-      const response = await axiosServices.post(`${API_REPORT_URL}`, filter);
+      const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta';
+      const payload = {
+        timezone: filter.timezone !== undefined ? filter.timezone : deviceTimezone,
+        ...filter,
+      };
+      const response = await axiosServices.post(`${API_REPORT_URL}`, payload);
       const collection = response.data.collection;
       return collection.data as VisitorSessionType[];
     },

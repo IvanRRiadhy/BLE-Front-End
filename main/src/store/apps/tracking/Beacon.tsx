@@ -62,7 +62,7 @@ export type TrackingLogItem = {
   time: string;
   status?: string;
   type: 'Alarm' | 'Tracking';
-  personType?: 'Member' | 'Visitor';
+  personType?: 'Member' | 'Visitor' | 'Security';
 };
 
 export type AlarmLogItem = {

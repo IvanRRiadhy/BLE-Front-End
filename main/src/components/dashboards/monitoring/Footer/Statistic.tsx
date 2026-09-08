@@ -9,8 +9,23 @@ import {
   TableHead,
   TableRow,
   Paper,
+  LinearProgress,
+  Chip,
+  Grid,
+  Card,
+  CardContent,
   useTheme,
+  Avatar,
 } from '@mui/material';
+import {
+  Domain as BuildingIcon,
+  Layers as FloorIcon,
+  Map as FloorplanIcon,
+  CenterFocusWeak as AreaIcon,
+  People as PeopleIcon,
+  AccessTime as TimeIcon,
+  ChevronRight as ChevronRightIcon,
+} from '@mui/icons-material';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
   getAllBuildings,
@@ -46,73 +61,196 @@ interface CountingData {
 
 interface StatisticTableProps {
   title: string;
+  subtitle: string;
+  unitSingular: string;
+  unitPlural: string;
+  icon: React.ReactNode;
+  iconBgColor: string;
+  iconColor: string;
   data: Array<{ id: string; name: string; count: number }>;
   onRowClick?: (id: string) => void;
 }
 
 // Top-level memoized component so TableContainer DOM node & scroll state persist on Redux data refreshes
-const StatisticTable = React.memo(({ title, data, onRowClick }: StatisticTableProps) => (
-  <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
-    <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1, textAlign: 'center' }}>
-      {title} ({data.length})
-    </Typography>
-    <TableContainer
-      component={Paper}
+const StatisticTable = React.memo(({
+  title,
+  subtitle,
+  unitSingular,
+  unitPlural,
+  icon,
+  iconBgColor,
+  iconColor,
+  data,
+  onRowClick,
+}: StatisticTableProps) => {
+  const theme = useTheme();
+
+  // Calculate total people count for this category to derive percentage
+  const totalCategoryPeople = useMemo(() => {
+    return data.reduce((sum, item) => sum + (item.count || 0), 0);
+  }, [data]);
+
+  const countLabel = `${data.length} ${data.length === 1 ? unitSingular : unitPlural}`;
+
+  return (
+    <Card
+      elevation={0}
       sx={{
-        flex: 1,
-        maxHeight: '200px',
-        overflow: 'auto',
-        '& .MuiTableCell-root': {
-          padding: '8px 16px',
-          fontSize: '0.875rem',
-        },
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        borderRadius: 2.5,
+        border: `1px solid ${theme.palette.divider}`,
+        backgroundColor: theme.palette.background.paper,
       }}
     >
-      <Table size="small" stickyHeader>
-        <TableHead>
-          <TableRow>
-            <TableCell sx={{ fontWeight: 'bold' }}>Name</TableCell>
-            <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-              Count
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {data.length > 0 ? (
-            data.map((item) => (
-              <TableRow
-                key={item.id}
-                hover
-                onClick={() => {
-                  if (onRowClick) {
-                    onRowClick(item.id);
-                  } else {
-                    console.log(`${title} ID: ${item.id}`);
-                  }
-                }}
-                sx={{
-                  cursor: 'pointer',
-                  '&:hover': {
-                    backgroundColor: 'action.hover',
-                  },
-                }}
-              >
-                <TableCell>{item.name || 'Unnamed'}</TableCell>
-                <TableCell align="right">{item.count}</TableCell>
+      <CardContent sx={{ p: 1.5, pb: '12px !important', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* Header Section */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Avatar
+              sx={{
+                bgcolor: iconBgColor,
+                color: iconColor,
+                width: 32,
+                height: 32,
+                borderRadius: 2,
+                '& svg': { fontSize: '1.1rem' },
+              }}
+            >
+              {icon}
+            </Avatar>
+            <Box>
+              <Typography variant="subtitle2" fontWeight="bold" sx={{ lineHeight: 1.2, fontSize: '0.875rem' }}>
+                {title}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.72rem', display: 'block', lineHeight: 1 }}>
+                {subtitle}
+              </Typography>
+            </Box>
+          </Box>
+          <Chip
+            label={countLabel}
+            size="small"
+            sx={{
+              fontWeight: 600,
+              fontSize: '0.7rem',
+              height: 22,
+              bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : '#f1f5f9',
+              color: 'text.primary',
+              borderRadius: 1.5,
+              px: 0.25,
+            }}
+          />
+        </Box>
+
+        {/* Table Section */}
+        <TableContainer
+          component={Paper}
+          elevation={0}
+          sx={{
+            flex: 1,
+            maxHeight: '200px',
+            overflow: 'auto',
+            borderRadius: 1.5,
+            bgcolor: 'transparent',
+            '& .MuiTableCell-root': {
+              borderBottom: `1px solid ${theme.palette.divider}`,
+              padding: '6px 8px',
+              fontSize: '0.8rem',
+            },
+          }}
+        >
+          <Table size="small" stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell width="32px" sx={{ fontWeight: 600, color: 'text.secondary', py: 0.75, bgcolor: theme.palette.mode === 'dark' ? 'grey.900' : '#f8fafc' }}>
+                  #
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: 'text.secondary', py: 0.75, bgcolor: theme.palette.mode === 'dark' ? 'grey.900' : '#f8fafc' }}>
+                  {title.slice(0, -1)} Name
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: 600, color: 'text.secondary', py: 0.75, bgcolor: theme.palette.mode === 'dark' ? 'grey.900' : '#f8fafc' }}>
+                  People
+                </TableCell>
+                <TableCell width="38%" sx={{ fontWeight: 600, color: 'text.secondary', py: 0.75, bgcolor: theme.palette.mode === 'dark' ? 'grey.900' : '#f8fafc' }}>
+                  Occupancy
+                </TableCell>
+                <TableCell width="24px" sx={{ py: 0.75, bgcolor: theme.palette.mode === 'dark' ? 'grey.900' : '#f8fafc' }} />
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={2} align="center">
-                No data available
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </Box>
-));
+            </TableHead>
+            <TableBody>
+              {data.length > 0 ? (
+                data.map((item, index) => {
+                  const pct = totalCategoryPeople > 0 ? Math.round(((item.count || 0) / totalCategoryPeople) * 100) : 0;
+                  return (
+                    <TableRow
+                      key={item.id}
+                      hover
+                      onClick={() => {
+                        if (onRowClick) {
+                          onRowClick(item.id);
+                        } else {
+                          console.log(`${title} ID: ${item.id}`);
+                        }
+                      }}
+                      sx={{
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: theme.palette.action.hover,
+                        },
+                      }}
+                    >
+                      <TableCell sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                        {index + 1}
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        {item.name || 'Unnamed'}
+                      </TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+                        {item.count || 0}
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <LinearProgress
+                            variant="determinate"
+                            value={pct}
+                            sx={{
+                              flex: 1,
+                              height: 6,
+                              borderRadius: 3,
+                              bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
+                              '& .MuiLinearProgress-bar': {
+                                borderRadius: 3,
+                                backgroundColor: '#2563eb',
+                              },
+                            }}
+                          />
+                          <Typography variant="body2" sx={{ minWidth: 30, fontWeight: 600, fontSize: '0.73rem', color: 'text.secondary', textAlign: 'right' }}>
+                            {pct}%
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell padding="none" align="center">
+                        <ChevronRightIcon sx={{ color: 'text.disabled', fontSize: 16 }} />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 2, color: 'text.secondary' }}>
+                    No data available
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </CardContent>
+    </Card>
+  );
+});
 
 const Statistic = () => {
   // Get real data from Redux store using the helper functions
@@ -883,6 +1021,30 @@ const Statistic = () => {
     }
   }, [areaData, countingData, isDarkMode, visitorMap, memberMap]);
 
+  // Calculate total occupancy across all building entities or countingData
+  const totalOccupancy = useMemo(() => {
+    if (!buildingData || buildingData.length === 0) return 0;
+    return buildingData.reduce((sum, item) => sum + (item.count || 0), 0);
+  }, [buildingData]);
+
+  // Format timestamp for display
+  const formattedTime = useMemo(() => {
+    if (!countingData?.time) return new Date().toLocaleString();
+    try {
+      return new Date(countingData.time).toLocaleString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      });
+    } catch (e) {
+      return countingData.time;
+    }
+  }, [countingData]);
+
   // Show loading state if no counting data yet
   if (!countingData) {
     return (
@@ -903,34 +1065,135 @@ const Statistic = () => {
   return (
     <Box
       sx={{
-        display: 'flex',
-        gap: 2,
         width: '100%',
         height: '100%',
-        overflow: 'hidden',
-        p: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1.5,
+        p: 1.5,
+        boxSizing: 'border-box',
       }}
     >
-      <StatisticTable 
-        title="Building" 
-        data={buildingData} 
-        onRowClick={handleBuildingClick} 
-      />
-      <StatisticTable 
-        title="Floor" 
-        data={floorData} 
-        onRowClick={handleFloorClick} 
-      />
-      <StatisticTable 
-        title="Floorplan" 
-        data={floorplanData} 
-        onRowClick={handleFloorplanClick} 
-      />
-      <StatisticTable 
-        title="Area" 
-        data={areaData} 
-        onRowClick={handleAreaClick} 
-      />
+      {/* Top Banner: Total Occupancy & Timestamp */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+        <Paper
+          elevation={0}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            px: 2,
+            py: 1,
+            borderRadius: 2.5,
+            border: `1px solid ${theme.palette.divider}`,
+            bgcolor: theme.palette.background.paper,
+          }}
+        >
+          {/* Occupancy Indicator */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+            <Avatar
+              sx={{
+                bgcolor: theme.palette.mode === 'dark' ? 'rgba(37, 99, 235, 0.2)' : '#eff6ff',
+                color: '#2563eb',
+                width: 36,
+                height: 36,
+                borderRadius: 2,
+                '& svg': { fontSize: '1.2rem' },
+              }}
+            >
+              <PeopleIcon />
+            </Avatar>
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1, fontSize: '0.72rem' }}>
+                Total Occupancy
+              </Typography>
+              <Typography variant="h6" fontWeight="800" color="text.primary" sx={{ lineHeight: 1.1 }}>
+                {totalOccupancy}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Last Updated Timestamp */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+            <Avatar
+              sx={{
+                bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f8fafc',
+                color: 'text.secondary',
+                width: 30,
+                height: 30,
+                borderRadius: 1.5,
+                '& svg': { fontSize: '1rem' },
+              }}
+            >
+              <TimeIcon />
+            </Avatar>
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1, fontSize: '0.72rem' }}>
+                Last Updated
+              </Typography>
+              <Typography variant="body2" fontWeight="600" color="text.primary" sx={{ fontSize: '0.8rem' }}>
+                {formattedTime}
+              </Typography>
+            </Box>
+          </Box>
+        </Paper>
+      </Box>
+
+      {/* Grid of 4 Statistic Cards */}
+      <Grid container spacing={1.5} sx={{ flex: 1 }}>
+        <Grid item xs={12} md={6}>
+          <StatisticTable
+            title="Buildings"
+            subtitle="People count by building"
+            unitSingular="Building"
+            unitPlural="Buildings"
+            icon={<BuildingIcon />}
+            iconBgColor={theme.palette.mode === 'dark' ? 'rgba(37, 99, 235, 0.2)' : '#eff6ff'}
+            iconColor="#2563eb"
+            data={buildingData}
+            onRowClick={handleBuildingClick}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <StatisticTable
+            title="Floors"
+            subtitle="People count by floor"
+            unitSingular="Floor"
+            unitPlural="Floors"
+            icon={<FloorIcon />}
+            iconBgColor={theme.palette.mode === 'dark' ? 'rgba(147, 51, 234, 0.2)' : '#faf5ff'}
+            iconColor="#9333ea"
+            data={floorData}
+            onRowClick={handleFloorClick}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <StatisticTable
+            title="Floorplans"
+            subtitle="People count by floorplan"
+            unitSingular="Floorplan"
+            unitPlural="Floorplans"
+            icon={<FloorplanIcon />}
+            iconBgColor={theme.palette.mode === 'dark' ? 'rgba(22, 163, 74, 0.2)' : '#f0fdf4'}
+            iconColor="#16a34a"
+            data={floorplanData}
+            onRowClick={handleFloorplanClick}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <StatisticTable
+            title="Areas"
+            subtitle="People count by area"
+            unitSingular="Area"
+            unitPlural="Areas"
+            icon={<AreaIcon />}
+            iconBgColor={theme.palette.mode === 'dark' ? 'rgba(234, 88, 12, 0.2)' : '#fff7ed'}
+            iconColor="#ea580c"
+            data={areaData}
+            onRowClick={handleAreaClick}
+          />
+        </Grid>
+      </Grid>
     </Box>
   );
 };

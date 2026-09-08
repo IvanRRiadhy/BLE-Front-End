@@ -6,6 +6,7 @@ import { RootState, useSelector } from 'src/store/Store';
 const API_URL = '/api/evacuation-alert/';
 const API_DT_URL = '/api/evacuation-alert/filter/';
 const API_TRANS_URL = '/api/evacuation-transaction/';
+const API_URL_BOTTLENECK = '/api/evacuation-alert/analytics/bottlenecks';
 
 export interface EvacuationAlertType {
   id: string;
