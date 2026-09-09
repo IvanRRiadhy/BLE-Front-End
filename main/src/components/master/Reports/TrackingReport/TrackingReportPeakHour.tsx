@@ -3,6 +3,7 @@ import Chart from 'react-apexcharts';
 import { Box, Typography, Stack, MenuItem, useTheme, Card } from '@mui/material';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { VisitorSessionResponseType, VisitorSessionType } from 'src/store/apps/crud/visitorSession';
+import { toLocalDate } from 'src/utils/time';
 
 interface TrackingReportPeakHourProps {
   data: VisitorSessionType[] | VisitorSessionResponseType | null | undefined;
@@ -34,9 +35,9 @@ const TrackingReportPeakHour: React.FC<TrackingReportPeakHourProps> = ({ data, i
         if (pType === 'security') return;
 
         if (s.enterTime) {
-          const d = new Date(s.enterTime);
-          const h = d.getHours();
-          if (h >= 0 && h < 24) {
+          const d = toLocalDate(s.enterTime);
+          const h = d?.getHours();
+          if (h !== undefined && h >= 0 && h < 24) {
             seriesData[h]++;
           }
         }

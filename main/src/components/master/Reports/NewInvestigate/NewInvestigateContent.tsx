@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Chart from 'react-apexcharts';
-import { Stage, Layer, Image as KonvaImage } from 'react-konva';
+import { Stage, Layer, Image as KonvaImage, Line } from 'react-konva';
 import {
   Box,
   Card,
@@ -24,6 +24,9 @@ import {
   TextField,
   MenuItem,
   InputAdornment,
+  Tooltip,
+  darken,
+  lighten,
 } from '@mui/material';
 import {
   IconClock,
@@ -55,8 +58,198 @@ import { PersonOption } from './NewInvestigateFilter';
 import { BASE_URL } from 'src/utils/axios';
 import BeaconRenderer from 'src/components/dashboards/monitoring/Renderer/BeaconRenderer';
 import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { safeParseAreaShape } from 'src/utils/isJsonObject';
+import { toLocalDate, formatOrRawTime } from 'src/utils/time';
 
 const AREA_COLORS = ['#1877F2', '#36B37E', '#FFAB00', '#FF5630', '#6554C0', '#00B8D9'];
+
+const normalizeImageUrl = (path?: string | null) => {
+  if (!path) return null;
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path;
+  const cleanBase = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${cleanBase}${cleanPath}`;
+};
+
+function getAreaPoints(
+  area: MaskedAreaType | null | undefined,
+  canvasWidth: number,
+  canvasHeight: number,
+  originalWidth: number,
+  originalHeight: number
+): number[] {
+  if (!area) return [];
+  let nodes: any[] = [];
+  if (typeof area.areaShape === 'string' && area.areaShape.trim()) {
+    try {
+      const parsed = JSON.parse(area.areaShape);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        nodes = parsed;
+      }
+    } catch {
+      nodes = safeParseAreaShape(area.areaShape);
+    }
+  }
+  if ((!nodes || nodes.length === 0) && Array.isArray(area.nodes) && area.nodes.length > 0) {
+    nodes = area.nodes;
+  }
+
+  if (!nodes || nodes.length < 3) return [];
+
+  const origW = originalWidth > 0 ? originalWidth : canvasWidth;
+  const origH = originalHeight > 0 ? originalHeight : canvasHeight;
+
+  return nodes.flatMap((node: any) => {
+    let px = 0;
+    let py = 0;
+    if (typeof node.x_px === 'number' && typeof node.y_px === 'number') {
+      px = (node.x_px / origW) * canvasWidth;
+      py = (node.y_px / origH) * canvasHeight;
+    } else if (typeof node.x === 'number' && typeof node.y === 'number') {
+      if (node.x <= 1 && node.y <= 1 && node.x >= 0 && node.y >= 0 && origW > 1) {
+        px = node.x * canvasWidth;
+        py = node.y * canvasHeight;
+      } else {
+        px = (node.x / origW) * canvasWidth;
+        py = (node.y / origH) * canvasHeight;
+      }
+    }
+    return [px, py];
+  });
+}
+
+/**
+ * Ray-casting algorithm to test if a point is strictly inside a polygon.
+ */
+function isPointInPolygon(x: number, y: number, pts: { x: number; y: number }[]): boolean {
+  let inside = false;
+  const n = pts.length;
+  for (let i = 0, j = n - 1; i < n; j = i++) {
+    const xi = pts[i].x;
+    const yi = pts[i].y;
+    const xj = pts[j].x;
+    const yj = pts[j].y;
+    const intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+/**
+ * Computes the Center of Gravity (Centroid) of a 2D planar polygon using Gauss's area formula:
+ *   Area: A = 0.5 * sum_{i=0}^{n-1} (x_i * y_{i+1} - x_{i+1} * y_i)
+ *   C_x = (1 / (6 * A)) * sum_{i=0}^{n-1} (x_i + x_{i+1}) * (x_i * y_{i+1} - x_{i+1} * y_i)
+ *   C_y = (1 / (6 * A)) * sum_{i=0}^{n-1} (y_i + y_{i+1}) * (x_i * y_{i+1} - x_{i+1} * y_i)
+ *
+ * If the center of gravity falls outside the boundary (e.g. for non-convex L-shaped or U-shaped rooms),
+ * it selects the interior point closest to the center of gravity to ensure the pin stays inside the shape.
+ */
+function getPointsCenter(points: number[]): { x: number; y: number } | null {
+  if (!points || points.length < 2) return null;
+  if (points.length === 2) return { x: points[0], y: points[1] };
+  if (points.length < 6) {
+    return {
+      x: (points[0] + points[2]) / 2,
+      y: (points[1] + points[3]) / 2,
+    };
+  }
+
+  // Extract vertices
+  const pts: { x: number; y: number }[] = [];
+  for (let i = 0; i < points.length; i += 2) {
+    pts.push({ x: points[i], y: points[i + 1] });
+  }
+
+  // Remove duplicate closing point if present
+  if (
+    pts.length > 2 &&
+    Math.abs(pts[pts.length - 1].x - pts[0].x) < 1e-6 &&
+    Math.abs(pts[pts.length - 1].y - pts[0].y) < 1e-6
+  ) {
+    pts.pop();
+  }
+
+  const n = pts.length;
+  if (n < 3) {
+    let sumX = 0;
+    let sumY = 0;
+    for (const p of pts) {
+      sumX += p.x;
+      sumY += p.y;
+    }
+    return { x: sumX / n, y: sumY / n };
+  }
+
+  // Center of gravity calculation
+  let signedArea = 0;
+  let cx = 0;
+  let cy = 0;
+
+  for (let i = 0; i < n; i++) {
+    const p0 = pts[i];
+    const p1 = pts[(i + 1) % n];
+
+    const cross = p0.x * p1.y - p1.x * p0.y;
+    signedArea += cross;
+    cx += (p0.x + p1.x) * cross;
+    cy += (p0.y + p1.y) * cross;
+  }
+
+  signedArea *= 0.5;
+
+  // Fallback for near-zero area / collinear points
+  if (Math.abs(signedArea) < 1e-7) {
+    let sumX = 0;
+    let sumY = 0;
+    for (const p of pts) {
+      sumX += p.x;
+      sumY += p.y;
+    }
+    return { x: sumX / n, y: sumY / n };
+  }
+
+  cx = cx / (6 * signedArea);
+  cy = cy / (6 * signedArea);
+
+  // If the center of gravity is inside the polygon, use it
+  if (isPointInPolygon(cx, cy, pts)) {
+    return { x: cx, y: cy };
+  }
+
+  // For concave shapes (like L-shapes) where the centroid lies in a cutout,
+  // find the closest interior point to the center of gravity
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+  for (const p of pts) {
+    if (p.x < minX) minX = p.x;
+    if (p.x > maxX) maxX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.y > maxY) maxY = p.y;
+  }
+
+  const stepX = (maxX - minX) / 32;
+  const stepY = (maxY - minY) / 32;
+  let bestPoint: { x: number; y: number } | null = null;
+  let bestDist = Infinity;
+
+  for (let x = minX + stepX / 2; x < maxX; x += stepX) {
+    for (let y = minY + stepY / 2; y < maxY; y += stepY) {
+      if (isPointInPolygon(x, y, pts)) {
+        const d = Math.hypot(x - cx, y - cy);
+        if (d < bestDist) {
+          bestDist = d;
+          bestPoint = { x, y };
+        }
+      }
+    }
+  }
+
+  return bestPoint || { x: cx, y: cy };
+}
 
 interface NewInvestigateContentProps {
   data?: PersonOverviewData | null;
@@ -78,6 +271,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState<'timeline' | 'area' | 'compliance' | 'incidents' | 'cardHistory'>('timeline');
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [selectedAlarmId, setSelectedAlarmId] = useState<string | null>(null);
 
   if (!selectedPerson && !data) {
     return (
@@ -150,21 +344,51 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
   const currentBuilding = data?.currentState?.currentBuilding || '-';
   const currentFloor = data?.currentState?.currentFloor || '-';
   const currentArea = data?.currentState?.currentArea || '-';
-  const lastSeenTimeStr = data?.currentState?.lastSeenTime
-    ? dayjs(data.currentState.lastSeenTime).format('MMM D, YYYY HH:mm')
-    : '-';
+  const lastSeenTimeStr = formatOrRawTime(data?.currentState?.lastSeenTime, 'MMM D, YYYY HH:mm');
+
+  // Fetch all masked areas and floorplans
+  const { data: allMaskedAreas = [] } = useAllMaskedAreas();
+  const { data: allFloorplans = [] } = useAllFloorplans();
+
+  // Find Masked Area for Current Location
+  const currentMaskedArea = useMemo(() => {
+    if (!allMaskedAreas || allMaskedAreas.length === 0) return null;
+    const targetId = data?.currentState?.currentAreaId;
+    const targetName = data?.currentState?.currentArea;
+
+    if (targetId) {
+      const found = allMaskedAreas.find(
+        (a) => a.id === targetId || a.id?.toLowerCase() === targetId.toLowerCase()
+      );
+      if (found) return found;
+    }
+    if (targetName && targetName !== '-') {
+      const trimmed = targetName.trim().toLowerCase();
+      const found = allMaskedAreas.find(
+        (a) =>
+          (a.name && a.name.trim().toLowerCase() === trimmed) ||
+          (a.areaName && a.areaName.trim().toLowerCase() === trimmed) ||
+          (a.maskedAreaName && a.maskedAreaName.trim().toLowerCase() === trimmed)
+      );
+      if (found) return found;
+    }
+    return null;
+  }, [allMaskedAreas, data?.currentState?.currentAreaId, data?.currentState?.currentArea]);
 
   // Floorplan image setup
   const floorplanImageUrl = useMemo(() => {
     if (data?.currentState?.floorplanImage) {
-      const path = data.currentState.floorplanImage;
-      if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path;
-      const cleanBase = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
-      const cleanPath = path.startsWith('/') ? path : `/${path}`;
-      return `${cleanBase}${cleanPath}`;
+      return normalizeImageUrl(data.currentState.floorplanImage);
+    }
+    if (currentMaskedArea?.floorplan?.floorplanImage) {
+      return normalizeImageUrl(currentMaskedArea.floorplan.floorplanImage);
+    }
+    if (currentMaskedArea?.floorplanId && allFloorplans.length > 0) {
+      const fp = allFloorplans.find((f: any) => f.id === currentMaskedArea.floorplanId);
+      if (fp?.floorplanImage) return normalizeImageUrl(fp.floorplanImage);
     }
     return null;
-  }, [data]);
+  }, [data, currentMaskedArea, allFloorplans]);
 
   const [floorplanImgObj, setFloorplanImgObj] = useState<HTMLImageElement | null>(null);
   const [imgDim, setImgDim] = useState({ width: 600, height: 400 });
@@ -190,21 +414,107 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
   const stageWidth = Math.max(280, imgDim.width * stageScale);
   const stageHeight = Math.max(180, imgDim.height * stageScale);
 
+  // Scaled Area Shape Points for Current Location
+  const currentAreaPoints = useMemo(() => {
+    return getAreaPoints(
+      currentMaskedArea,
+      stageWidth,
+      stageHeight,
+      imgDim.width,
+      imgDim.height
+    );
+  }, [currentMaskedArea, stageWidth, stageHeight, imgDim]);
+
+  const currentCenter = useMemo(() => {
+    return getPointsCenter(currentAreaPoints);
+  }, [currentAreaPoints]);
+
+  const currentBeaconX = currentCenter?.x ?? (stageWidth * 0.45);
+  const currentBeaconY = currentCenter?.y ?? (stageHeight * 0.45);
+
+  // Filtered time boundaries (ms)
+  const filterMinTime = useMemo(() => {
+    if (fromDate) {
+      const ms = dayjs(fromDate).valueOf();
+      if (!isNaN(ms)) return ms;
+    }
+    if (data?.stayDurationAnalysis?.firstDetected) {
+      const str = String(data.stayDurationAnalysis.firstDetected).trim();
+      const ms = str.endsWith('Z') || str.endsWith('z')
+        ? dayjs(toLocalDate(str)!).valueOf()
+        : dayjs(str).valueOf();
+      if (!isNaN(ms)) return ms;
+    }
+    return undefined;
+  }, [fromDate, data?.stayDurationAnalysis?.firstDetected]);
+
+  const filterMaxTime = useMemo(() => {
+    if (toDate) {
+      const ms = dayjs(toDate).valueOf();
+      if (!isNaN(ms)) return ms;
+    }
+    if (data?.stayDurationAnalysis?.lastDetected) {
+      const str = String(data.stayDurationAnalysis.lastDetected).trim();
+      const ms = str.endsWith('Z') || str.endsWith('z')
+        ? dayjs(toLocalDate(str)!).valueOf()
+        : dayjs(str).valueOf();
+      if (!isNaN(ms)) return ms;
+    }
+    return undefined;
+  }, [toDate, data?.stayDurationAnalysis?.lastDetected]);
+
   // Presence Over Time ApexChart (Timeline / RangeBar Chart)
   const presenceTimelineSeries = useMemo(() => {
     if (!data?.chronologicalTimeline || data.chronologicalTimeline.length === 0) return [];
     
+    const breakdown = data?.stayDurationAnalysis?.areaBreakdown || [];
     const grouped: Record<string, { x: string; y: [number, number] }[]> = {};
     const timeline = data.chronologicalTimeline;
+
+    // Sort breakdown by areaName length descending so longer/more specific names (e.g. "Ruangan Programmer B") match first
+    const sortedBreakdown = [...breakdown].sort(
+      (a, b) => (b.areaName?.length || 0) - (a.areaName?.length || 0)
+    );
 
     for (let i = 0; i < timeline.length; i++) {
       const item = timeline[i];
       const nextItem = timeline[i + 1];
-      const startTime = new Date(item.timestamp).getTime();
-      const endTime = nextItem ? new Date(nextItem.timestamp).getTime() : new Date().getTime();
-      const areaName = item.location || 'Unknown Area';
 
-      if (!isNaN(startTime) && !isNaN(endTime) && endTime >= startTime) {
+      const parseTs = (ts?: string | null): number => {
+        if (!ts) return NaN;
+        const str = String(ts).trim();
+        if (str.endsWith('Z') || str.endsWith('z')) {
+          return toLocalDate(str)?.getTime() ?? NaN;
+        }
+        return dayjs(str).valueOf();
+      };
+
+      const rawStart = parseTs(item.timestamp);
+      const rawEnd = nextItem ? parseTs(nextItem.timestamp) : new Date().getTime();
+
+      if (isNaN(rawStart) || isNaN(rawEnd)) continue;
+
+      let startTime = rawStart;
+      let endTime = rawEnd;
+
+      // Clamp to user filtered boundaries so chart data cannot exceed filter range
+      if (filterMinTime !== undefined) {
+        startTime = Math.max(startTime, filterMinTime);
+      }
+      if (filterMaxTime !== undefined) {
+        endTime = Math.min(endTime, filterMaxTime);
+      }
+
+      if (endTime > startTime) {
+        const locLower = (item.location || '').toLowerCase();
+        const titleLower = (item.title || '').toLowerCase();
+
+        const matchedArea = sortedBreakdown.find((b) => {
+          const bName = (b.areaName || '').toLowerCase();
+          return (locLower && locLower.includes(bName)) || (titleLower && titleLower.includes(bName));
+        });
+        const areaName = matchedArea?.areaName || item.location || 'Unknown Area';
+
         if (!grouped[areaName]) {
           grouped[areaName] = [];
         }
@@ -215,48 +525,131 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
       }
     }
 
-    return Object.keys(grouped).map((areaName) => ({
-      name: areaName,
-      data: grouped[areaName],
-    }));
-  }, [data?.chronologicalTimeline]);
+    // Preserve the exact order and colors from areaBreakdown
+    const breakdownNames = breakdown.map((b) => b.areaName);
+    const seriesList: { name: string; data: { x: string; y: [number, number] }[] }[] = [];
 
-  const presenceTimelineOptions: ApexCharts.ApexOptions = {
-    chart: {
-      type: 'rangeBar',
-      height: 220,
-      toolbar: { show: false },
-      fontFamily: "'Plus Jakarta Sans', sans-serif;",
-    },
-    plotOptions: {
-      bar: {
-        horizontal: true,
-        barHeight: '40%',
-        rangeBarGroupRows: true,
+    breakdown.forEach((b) => {
+      seriesList.push({
+        name: b.areaName,
+        data: grouped[b.areaName] || [],
+      });
+    });
+
+    // Also append any other areas detected that were not in areaBreakdown
+    Object.keys(grouped).forEach((areaName) => {
+      if (!breakdownNames.includes(areaName)) {
+        seriesList.push({
+          name: areaName,
+          data: grouped[areaName],
+        });
+      }
+    });
+
+    return seriesList;
+  }, [data?.chronologicalTimeline, data?.stayDurationAnalysis?.areaBreakdown, filterMinTime, filterMaxTime]);
+
+  const presenceTimelineOptions: ApexCharts.ApexOptions = useMemo(() => {
+    return {
+      chart: {
+        type: 'rangeBar',
+        height: 220,
+        toolbar: {
+          show: !isExporting,
+          tools: {
+            download: false,
+            selection: false,
+            zoom: true,
+            zoomin: true,
+            zoomout: true,
+            pan: true,
+            reset: true,
+          },
+          autoSelected: 'pan',
+        },
+        zoom: {
+          enabled: true,
+          type: 'x',
+          autoScaleYaxis: false,
+        },
+        events: {
+          beforeZoom: (chartContext, { xaxis }) => {
+            let min = xaxis.min;
+            let max = xaxis.max;
+            if (filterMinTime !== undefined && min < filterMinTime) {
+              min = filterMinTime;
+            }
+            if (filterMaxTime !== undefined && max > filterMaxTime) {
+              max = filterMaxTime;
+            }
+            return {
+              xaxis: {
+                min,
+                max,
+              },
+            };
+          },
+          beforeResetZoom: () => {
+            return {
+              xaxis: {
+                min: filterMinTime,
+                max: filterMaxTime,
+              },
+            };
+          },
+          zoomed: (chartContext, { xaxis }) => {
+            if (filterMinTime !== undefined && filterMaxTime !== undefined) {
+              const clampedMin = Math.max(xaxis.min, filterMinTime);
+              const clampedMax = Math.min(xaxis.max, filterMaxTime);
+              if (xaxis.min < filterMinTime || xaxis.max > filterMaxTime) {
+                chartContext.zoomX(clampedMin, clampedMax);
+              }
+            }
+          },
+          scrolled: (chartContext, { xaxis }) => {
+            if (filterMinTime !== undefined && filterMaxTime !== undefined) {
+              const clampedMin = Math.max(xaxis.min, filterMinTime);
+              const clampedMax = Math.min(xaxis.max, filterMaxTime);
+              if (xaxis.min < filterMinTime || xaxis.max > filterMaxTime) {
+                chartContext.zoomX(clampedMin, clampedMax);
+              }
+            }
+          },
+        },
+        fontFamily: "'Plus Jakarta Sans', sans-serif;",
       },
-    },
-    colors: ['#1877F2', '#00C853', '#9C27B0'],
-    fill: { type: 'solid' },
-    xaxis: {
-      type: 'datetime',
-      labels: {
-        datetimeFormatter: {
-          year: 'yyyy',
-          month: "MMM 'yy",
-          day: 'MMM d',
-          hour: 'HH:mm',
+      plotOptions: {
+        bar: {
+          horizontal: true,
+          barHeight: '40%',
+          rangeBarGroupRows: true,
         },
       },
-    },
-    legend: { show: false },
-    tooltip: {
-      x: { format: 'MMM d, HH:mm' },
-    },
-    grid: {
-      borderColor: theme.palette.divider,
-      strokeDashArray: 3,
-    },
-  };
+      colors: AREA_COLORS,
+      fill: { type: 'solid' },
+      xaxis: {
+        type: 'datetime',
+        min: filterMinTime,
+        max: filterMaxTime,
+        labels: {
+          datetimeFormatter: {
+            year: 'yyyy',
+            month: "MMM 'yy",
+            day: 'MMM d',
+            hour: 'HH:mm',
+          },
+        },
+      },
+      legend: { show: false },
+      tooltip: {
+        x: { format: 'MMM d, HH:mm' },
+      },
+      grid: {
+        borderColor: theme.palette.divider,
+        strokeDashArray: 3,
+      },
+    };
+  }, [theme, filterMinTime, filterMaxTime, isExporting]);
 
   // Radial Bar for Access Compliance
   const complianceChartOptions: ApexCharts.ApexOptions = {
@@ -306,6 +699,70 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
   // Timeline List
   const chronologicalTimelineList = data?.chronologicalTimeline || [];
 
+  // Computed Area Visits list dynamically derived from API response
+  const areaVisitsList = useMemo(() => {
+    if (!areaBreakdownList || areaBreakdownList.length === 0) return [];
+
+    const timeline = data?.chronologicalTimeline || [];
+    const areaMovementEvents = timeline.filter(
+      (t) =>
+        t.eventType === 'AREA_ENTER' ||
+        t.eventType === 'AREA_TRANSITION' ||
+        t.title?.toLowerCase().startsWith('entered') ||
+        t.title?.toLowerCase().startsWith('moved to')
+    );
+
+    return areaBreakdownList.map((area, idx) => {
+      // If API provides visits or visitCount, use it directly
+      const directVisits = area.visits ?? area.visitCount;
+      if (typeof directVisits === 'number' && directVisits > 0) {
+        return {
+          id: area.areaId || String(idx),
+          name: area.areaName,
+          count: directVisits,
+          color: AREA_COLORS[idx % AREA_COLORS.length],
+        };
+      }
+
+      // Otherwise compute visits by counting matching timeline movement events
+      const sortedAreas = [...areaBreakdownList].sort(
+        (a, b) => (b.areaName?.length || 0) - (a.areaName?.length || 0)
+      );
+      const matchedEvents = areaMovementEvents.filter((ev) => {
+        const loc = (ev.location || '').toLowerCase();
+        const title = (ev.title || '').toLowerCase();
+        const bestMatched = sortedAreas.find((b) => {
+          const bName = (b.areaName || '').toLowerCase();
+          return (loc && loc.includes(bName)) || (title && title.includes(bName));
+        });
+        return bestMatched?.areaName === area.areaName;
+      });
+
+      const count = matchedEvents.length > 0 ? matchedEvents.length : 1;
+
+      return {
+        id: area.areaId || String(idx),
+        name: area.areaName,
+        count,
+        color: AREA_COLORS[idx % AREA_COLORS.length],
+      };
+    });
+  }, [areaBreakdownList, data?.chronologicalTimeline]);
+
+  const maxVisits = useMemo(() => {
+    if (areaVisitsList.length === 0) return 1;
+    return Math.max(...areaVisitsList.map((a) => a.count), 1);
+  }, [areaVisitsList]);
+
+  const areaVisitsMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    areaVisitsList.forEach((item) => {
+      map[item.name] = item.count;
+      if (item.id) map[item.id] = item.count;
+    });
+    return map;
+  }, [areaVisitsList]);
+
   // Breaches List
   const breachesList = data?.accessCompliance?.unauthorizedBreaches || [];
 
@@ -314,6 +771,171 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
 
   // Card History List
   const cardHistoryList = data?.cardHistory || [];
+
+  // Assigned Access Groups & Allowed Areas
+  const assignedAccessGroups = data?.accessCompliance?.assignedAccessGroups || [];
+  const allowedAreaList = data?.accessCompliance?.allowedAreaList || [];
+
+  // Compliance Breakdown counts
+  const normalAreasCount = useMemo(() => {
+    return areaBreakdownList.filter((a) => !a.isRestrictedArea).length;
+  }, [areaBreakdownList]);
+
+  const restrictedAreasCount = useMemo(() => {
+    return areaBreakdownList.filter((a) => a.isRestrictedArea).length;
+  }, [areaBreakdownList]);
+
+  // Incidents Summary & Categorization
+  const acknowledgedIncidents = useMemo(() => {
+    return alarmsList.filter((a: any) => a.status?.toLowerCase() === 'acknowledged').length;
+  }, [alarmsList]);
+
+  const resolvedIncidents = useMemo(() => {
+    return alarmsList.filter((a: any) => a.status?.toLowerCase() === 'resolved').length;
+  }, [alarmsList]);
+
+  const activeIncidentsComputed = useMemo(() => {
+    if (data?.incidentSummary?.activeIncidents !== undefined) {
+      return data.incidentSummary.activeIncidents;
+    }
+    return alarmsList.filter((a: any) => !['resolved', 'acknowledged'].includes(a.status?.toLowerCase())).length;
+  }, [data?.incidentSummary?.activeIncidents, alarmsList]);
+
+  const incidentsByCategory = useMemo(() => {
+    const counts: Record<string, number> = {};
+    alarmsList.forEach((a: any) => {
+      const rawCat = a.category || 'Other';
+      const formatted = rawCat.charAt(0).toUpperCase() + rawCat.slice(1);
+      counts[formatted] = (counts[formatted] || 0) + 1;
+    });
+    const labels = Object.keys(counts);
+    const series = Object.values(counts);
+    return {
+      labels: labels.length > 0 ? labels : ['None'],
+      series: series.length > 0 ? series : [0],
+      total: alarmsList.length,
+    };
+  }, [alarmsList]);
+
+  const incidentsByStatus = useMemo(() => {
+    let active = 0;
+    let acknowledged = 0;
+    let resolved = 0;
+
+    alarmsList.forEach((a: any) => {
+      const st = (a.status || '').toLowerCase();
+      if (st === 'resolved') {
+        resolved += 1;
+      } else if (st === 'acknowledged') {
+        acknowledged += 1;
+      } else {
+        active += 1;
+      }
+    });
+
+    const total = alarmsList.length;
+    return {
+      active,
+      acknowledged,
+      resolved,
+      total,
+      series: total > 0 ? [active, acknowledged, resolved] : [0, 0, 0],
+    };
+  }, [alarmsList]);
+
+  // Primary / Selected Incident for detail display
+  const primaryAlarm = useMemo(() => {
+    if (selectedAlarmId) {
+      const found = alarmsList.find((a: any) => (a.alarmId || a.id) === selectedAlarmId);
+      if (found) return found;
+    }
+    return alarmsList.length > 0 ? alarmsList[0] : null;
+  }, [alarmsList, selectedAlarmId]);
+
+  // Masked Area for the selected Incident
+  const incidentMaskedArea = useMemo(() => {
+    if (!allMaskedAreas || allMaskedAreas.length === 0 || !primaryAlarm) return null;
+    const targetId = primaryAlarm.areaId;
+    const targetName = primaryAlarm.areaName || primaryAlarm.area;
+
+    if (targetId) {
+      const found = allMaskedAreas.find(
+        (a) => a.id === targetId || a.id?.toLowerCase() === targetId.toLowerCase()
+      );
+      if (found) return found;
+    }
+    if (targetName && targetName !== '-') {
+      const trimmed = targetName.trim().toLowerCase();
+      const found = allMaskedAreas.find(
+        (a) =>
+          (a.name && a.name.trim().toLowerCase() === trimmed) ||
+          (a.areaName && a.areaName.trim().toLowerCase() === trimmed) ||
+          (a.maskedAreaName && a.maskedAreaName.trim().toLowerCase() === trimmed)
+      );
+      if (found) return found;
+    }
+    return null;
+  }, [allMaskedAreas, primaryAlarm]);
+
+  // Incident Floorplan Image URL
+  const incidentFloorplanUrl = useMemo(() => {
+    let path = primaryAlarm?.floorplanImage;
+    if (!path && incidentMaskedArea?.floorplan?.floorplanImage) {
+      path = incidentMaskedArea.floorplan.floorplanImage;
+    }
+    if (!path && incidentMaskedArea?.floorplanId && allFloorplans.length > 0) {
+      const fp = allFloorplans.find((f: any) => f.id === incidentMaskedArea.floorplanId);
+      if (fp?.floorplanImage) path = fp.floorplanImage;
+    }
+    if (!path && data?.currentState?.floorplanImage) {
+      if (!primaryAlarm?.floorName || primaryAlarm.floorName === currentFloor) {
+        path = data.currentState.floorplanImage;
+      }
+    }
+    return normalizeImageUrl(path);
+  }, [primaryAlarm, incidentMaskedArea, allFloorplans, data?.currentState?.floorplanImage, currentFloor]);
+
+  const [incidentImgObj, setIncidentImgObj] = useState<HTMLImageElement | null>(null);
+  const [incidentImgDim, setIncidentImgDim] = useState({ width: 600, height: 400 });
+  const [incidentZoomLevel, setIncidentZoomLevel] = useState(1);
+
+  useEffect(() => {
+    if (!incidentFloorplanUrl) {
+      setIncidentImgObj(null);
+      return;
+    }
+    const img = new window.Image();
+    img.crossOrigin = 'anonymous';
+    img.src = incidentFloorplanUrl;
+    img.onload = () => {
+      setIncidentImgObj(img);
+      setIncidentImgDim({ width: img.width || 600, height: img.height || 400 });
+    };
+    img.onerror = () => {
+      setIncidentImgObj(null);
+    };
+  }, [incidentFloorplanUrl]);
+
+  const incidentStageScale = Math.min(420 / (incidentImgDim.width || 1), 240 / (incidentImgDim.height || 1));
+  const incidentStageWidth = Math.max(280, incidentImgDim.width * incidentStageScale);
+  const incidentStageHeight = Math.max(180, incidentImgDim.height * incidentStageScale);
+
+  const incidentAreaPoints = useMemo(() => {
+    return getAreaPoints(
+      incidentMaskedArea,
+      incidentStageWidth,
+      incidentStageHeight,
+      incidentImgDim.width,
+      incidentImgDim.height
+    );
+  }, [incidentMaskedArea, incidentStageWidth, incidentStageHeight, incidentImgDim]);
+
+  const incidentCenter = useMemo(() => {
+    return getPointsCenter(incidentAreaPoints);
+  }, [incidentAreaPoints]);
+
+  const incidentMarkerX = incidentCenter?.x ?? (incidentStageWidth * 0.5);
+  const incidentMarkerY = incidentCenter?.y ?? (incidentStageHeight * 0.5);
 
   return (
     <Stack spacing={3}>
@@ -793,10 +1415,23 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       <Stage width={stageWidth} height={stageHeight}>
                         <Layer>
                           <KonvaImage image={floorplanImgObj} width={stageWidth} height={stageHeight} />
+                          {currentAreaPoints.length >= 6 && (
+                            <Line
+                              points={currentAreaPoints}
+                              stroke={currentMaskedArea?.colorArea ? darken(currentMaskedArea.colorArea, 0.4) : '#1877F2'}
+                              strokeWidth={3}
+                              lineJoin="round"
+                              lineCap="round"
+                              closed
+                              fill={currentMaskedArea?.colorArea || 'rgba(24, 119, 242, 0.3)'}
+                              opacity={0.5}
+                              listening={false}
+                            />
+                          )}
                           <BeaconRenderer
                             id="current-investigate-beacon"
-                            x={stageWidth * 0.45}
-                            y={stageHeight * 0.45}
+                            x={currentBeaconX}
+                            y={currentBeaconY}
                             beaconSize={1.1}
                             clickable={false}
                             label={personName}
@@ -912,7 +1547,15 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       const nodeColor = isAlarm ? '#D32F2F' : isPrimary ? '#1877F2' : '#00C853';
                       const badgeBg = isAlarm ? '#FFEBEE' : isPrimary ? '#E8F2FE' : '#E6F4EA';
                       const badgeTextColor = isAlarm ? '#D32F2F' : isPrimary ? '#1877F2' : '#00C853';
-                      const timeOnly = item.timestamp ? dayjs(item.timestamp).format('HH:mm') : '18:28';
+                      const timeOnly = item.timestamp
+                        ? (String(item.timestamp).trim().endsWith('Z') || String(item.timestamp).trim().endsWith('z')
+                            ? dayjs(toLocalDate(item.timestamp)!).format('HH:mm')
+                            : (item.timestamp.includes(' ')
+                                ? item.timestamp.split(' ')[1].slice(0, 5)
+                                : item.timestamp.includes('T')
+                                ? item.timestamp.split('T')[1].slice(0, 5)
+                                : item.timestamp.slice(0, 5)))
+                        : '18:28';
 
                       return (
                         <Box key={idx} sx={{ position: 'relative' }}>
@@ -1115,20 +1758,63 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {breachesList.map((row) => (
-                          <TableRow key={row.id}>
-                            <TableCell>{row.id}</TableCell>
-                            <TableCell sx={{ fontWeight: 600 }}>{row.area}</TableCell>
-                            <TableCell sx={{ color: 'text.secondary', fontSize: '12px' }}>{row.buildingFloor}</TableCell>
-                            <TableCell sx={{ fontSize: '12px' }}>{row.enteredAt}</TableCell>
-                            <TableCell>{row.duration}</TableCell>
-                            <TableCell>
-                              <IconButton size="small" color="error">
-                                <IconBell size={16} />
-                              </IconButton>
+                        {breachesList.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={6} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                              No unauthorized access breaches recorded
                             </TableCell>
                           </TableRow>
-                        ))}
+                        ) : (
+                          breachesList.map((row: any, idx: number) => {
+                            const areaName = row.areaName || row.area || row.name || '-';
+                            const building = row.buildingName || row.building;
+                            const floor = row.floorName || row.floor;
+                            const buildingFloor =
+                              building || floor
+                                ? `${building || '-'}${floor ? ` (${floor})` : ''}`
+                                : row.buildingFloor || '-';
+
+                            const durationStr =
+                              row.durationFormatted ||
+                              (row.durationMinutes != null
+                                ? row.durationMinutes >= 60
+                                  ? `${Math.floor(row.durationMinutes / 60)}h ${row.durationMinutes % 60}m`
+                                  : `${row.durationMinutes} min`
+                                : row.duration || '-');
+
+                            const enteredAtStr = formatOrRawTime(
+                              row.enteredAt || row.timestamp || row.time,
+                              'MMM D, YYYY HH:mm:ss'
+                            );
+
+                            const isAlarmTriggered = Boolean(
+                              row.alarmTriggered || row.hasAlarm || row.alarm
+                            );
+
+                            return (
+                              <TableRow key={row.areaId || row.id || idx}>
+                                <TableCell>{idx + 1}</TableCell>
+                                <TableCell sx={{ fontWeight: 600 }}>{areaName}</TableCell>
+                                <TableCell sx={{ color: 'text.secondary', fontSize: '12px' }}>
+                                  {buildingFloor}
+                                </TableCell>
+                                <TableCell sx={{ fontSize: '12px' }}>{enteredAtStr}</TableCell>
+                                <TableCell>{durationStr}</TableCell>
+                                <TableCell>
+                                  {isAlarmTriggered ? (
+                                    <Tooltip title={row.reason || (row.alarmCategory ? `Alarm: ${row.alarmCategory}` : 'Alarm Triggered')}>
+                                      <IconButton size="small" color="error" sx={{ bgcolor: '#FFEBEE', p: 0.5 }}>
+                                        <IconBell size={16} />
+                                      </IconButton>
+                                    </Tooltip>
+                                  ) : (
+                                    '-'
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })
+                        )}
                       </TableBody>
                     </Table>
                   </TableContainer>
@@ -1179,7 +1865,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                           borderRadius: 5,
                           bgcolor: '#F1F5F9',
                           '& .MuiLinearProgress-bar': {
-                            bgcolor: idx === 0 ? '#1877F2' : idx === 1 ? '#00C853' : '#9C27B0',
+                            bgcolor: AREA_COLORS[idx % AREA_COLORS.length],
                             borderRadius: 5,
                           },
                         }}
@@ -1201,37 +1887,41 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                     Number of visits to each area
                   </Typography>
                 </Box>
-                <Stack spacing={2.5} mt={3}>
-                  {[
-                    { name: 'Ruangan Programmer', count: 7, max: 10, color: '#64B5F6' },
-                    { name: 'Ruangan Programmer B', count: 5, max: 10, color: '#64B5F6' },
-                    { name: 'AREA - Meeting Room', count: 1, max: 10, color: '#64B5F6' },
-                  ].map((item, idx) => (
-                    <Box key={idx}>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={0.5}>
-                        <Typography variant="body2" fontWeight={600} sx={{ minWidth: 160 }}>
-                          {item.name}
-                        </Typography>
-                        <Typography variant="body2" fontWeight={700}>
-                          {item.count}
-                        </Typography>
-                      </Stack>
-                      <LinearProgress
-                        variant="determinate"
-                        value={(item.count / item.max) * 100}
-                        sx={{
-                          height: 10,
-                          borderRadius: 5,
-                          bgcolor: '#F1F5F9',
-                          '& .MuiLinearProgress-bar': {
-                            bgcolor: item.color,
+                {areaVisitsList.length === 0 ? (
+                  <Box py={4} textAlign="center">
+                    <Typography variant="body2" color="text.secondary">
+                      No area visits recorded
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Stack spacing={2.5} mt={3}>
+                    {areaVisitsList.map((item, idx) => (
+                      <Box key={item.id || idx}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={0.5}>
+                          <Typography variant="body2" fontWeight={600} sx={{ minWidth: 160 }}>
+                            {item.name}
+                          </Typography>
+                          <Typography variant="body2" fontWeight={700}>
+                            {item.count}
+                          </Typography>
+                        </Stack>
+                        <LinearProgress
+                          variant="determinate"
+                          value={(item.count / maxVisits) * 100}
+                          sx={{
+                            height: 10,
                             borderRadius: 5,
-                          },
-                        }}
-                      />
-                    </Box>
-                  ))}
-                </Stack>
+                            bgcolor: '#F1F5F9',
+                            '& .MuiLinearProgress-bar': {
+                              bgcolor: item.color,
+                              borderRadius: 5,
+                            },
+                          }}
+                        />
+                      </Box>
+                    ))}
+                  </Stack>
+                )}
               </Card>
             </Grid>
           </Grid>
@@ -1255,25 +1945,15 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                 </Box>
 
                 {/* Legend */}
-                <Stack direction="row" spacing={2} justifyContent="flex-start" mt={1}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#1877F2' }} />
-                    <Typography variant="caption" fontWeight={600}>
-                      Ruangan Programmer
-                    </Typography>
-                  </Stack>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#4FC3F7' }} />
-                    <Typography variant="caption" fontWeight={600}>
-                      Ruangan Programmer B
-                    </Typography>
-                  </Stack>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#9C27B0' }} />
-                    <Typography variant="caption" fontWeight={600}>
-                      AREA - Meeting Room
-                    </Typography>
-                  </Stack>
+                <Stack direction="row" spacing={2} justifyContent="flex-start" flexWrap="wrap" gap={1.5} mt={1.5}>
+                  {areaBreakdownList.map((row, idx) => (
+                    <Stack key={row.areaId || idx} direction="row" spacing={1} alignItems="center">
+                      <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: AREA_COLORS[idx % AREA_COLORS.length] }} />
+                      <Typography variant="caption" fontWeight={600}>
+                        {row.areaName}
+                      </Typography>
+                    </Stack>
+                  ))}
                 </Stack>
               </Card>
             </Grid>
@@ -1322,10 +2002,23 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       <Stage width={stageWidth} height={stageHeight}>
                         <Layer>
                           <KonvaImage image={floorplanImgObj} width={stageWidth} height={stageHeight} />
+                          {currentAreaPoints.length >= 6 && (
+                            <Line
+                              points={currentAreaPoints}
+                              stroke={currentMaskedArea?.colorArea ? darken(currentMaskedArea.colorArea, 0.4) : '#1877F2'}
+                              strokeWidth={3}
+                              lineJoin="round"
+                              lineCap="round"
+                              closed
+                              fill={currentMaskedArea?.colorArea || 'rgba(24, 119, 242, 0.3)'}
+                              opacity={0.5}
+                              listening={false}
+                            />
+                          )}
                           <BeaconRenderer
                             id="area-investigate-beacon"
-                            x={stageWidth * 0.45}
-                            y={stageHeight * 0.45}
+                            x={currentBeaconX}
+                            y={currentBeaconY}
                             beaconSize={1.1}
                             clickable={false}
                             label={personName}
@@ -1458,7 +2151,9 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                         <TableCell sx={{ color: 'text.secondary', fontSize: '12px' }}>
                           {row.buildingName || '-'} {row.floorName ? `(${row.floorName})` : ''}
                         </TableCell>
-                        <TableCell>{(row as any).visits ?? 1}</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>
+                          {areaVisitsMap[row.areaName] ?? areaVisitsMap[row.areaId] ?? row.visits ?? row.visitCount ?? 1}
+                        </TableCell>
                         <TableCell>{row.durationFormatted || (row.durationMinutes ? `${row.durationMinutes} min` : '-')}</TableCell>
                         <TableCell sx={{ width: 140 }}>
                           <Stack direction="row" spacing={1} alignItems="center">
@@ -1604,22 +2299,46 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                     <IconShieldCheck size={24} />
                   </Box>
                   <Typography variant="subtitle2" fontWeight={700} color="text.primary" textAlign="center">
-                    No Access Group Assigned
+                    {assignedAccessGroups.length > 0
+                      ? assignedAccessGroups.map((g: any) => g.accessName || g.name).join(', ')
+                      : 'No Access Group Assigned'}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary" textAlign="center" sx={{ maxWidth: 300, mt: 0.5 }}>
-                    This person does not have any access group assigned. All area access will be validated against default rules.
+                  <Typography variant="caption" color="text.secondary" textAlign="center" sx={{ maxWidth: 360, mt: 0.5 }}>
+                    {assignedAccessGroups.length > 0
+                      ? `Allowed areas: ${allowedAreaList.length > 0 ? allowedAreaList.join(', ') : `${assignedAccessGroups[0]?.allowedAreasCount || 0} areas configured`}`
+                      : 'This person does not have any access group assigned. All area access will be validated against default rules.'}
                   </Typography>
                 </Box>
 
-                <Box sx={{ bgcolor: '#EBF5FF', border: '1px solid', borderColor: '#BEDBFF', borderRadius: '10px', p: 1.5, mt: 'auto' }}>
+                <Box
+                  sx={{
+                    bgcolor: unauthorizedAreasVisited > 0 ? '#FFF5F5' : '#EBF5FF',
+                    border: '1px solid',
+                    borderColor: unauthorizedAreasVisited > 0 ? '#FFCDD2' : '#BEDBFF',
+                    borderRadius: '10px',
+                    p: 1.5,
+                    mt: 'auto',
+                  }}
+                >
                   <Stack direction="row" spacing={1.5} alignItems="flex-start">
-                    <IconInfoCircle size={20} color="#1877F2" style={{ flexShrink: 0, marginTop: 2 }} />
+                    {unauthorizedAreasVisited > 0 ? (
+                      <IconAlertTriangle size={20} color="#D32F2F" style={{ flexShrink: 0, marginTop: 2 }} />
+                    ) : (
+                      <IconInfoCircle size={20} color="#1877F2" style={{ flexShrink: 0, marginTop: 2 }} />
+                    )}
                     <Box>
-                      <Typography variant="caption" fontWeight={700} color="#1877F2" display="block">
-                        Note
+                      <Typography
+                        variant="caption"
+                        fontWeight={700}
+                        color={unauthorizedAreasVisited > 0 ? '#D32F2F' : '#1877F2'}
+                        display="block"
+                      >
+                        {unauthorizedAreasVisited > 0 ? 'Violation Notice' : 'Note'}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        This person accessed 1 area that is not in the allowed list.
+                        {unauthorizedAreasVisited > 0
+                          ? `This person accessed ${unauthorizedAreasVisited} area(s) that are not in the allowed list.`
+                          : 'All area visits by this person are properly authorized.'}
                       </Typography>
                     </Box>
                   </Stack>
@@ -1646,25 +2365,37 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                   <Box>
                     <Stack direction="row" justifyContent="space-between" mb={0.5}>
                       <Typography variant="body2" color="text.secondary">Authorized Areas</Typography>
-                      <Typography variant="body2" fontWeight={700}>2</Typography>
+                      <Typography variant="body2" fontWeight={700}>{authorizedAreasVisited}</Typography>
                     </Stack>
-                    <LinearProgress variant="determinate" value={66.7} sx={{ height: 14, borderRadius: 2, bgcolor: '#F1F5F9', '& .MuiLinearProgress-bar': { bgcolor: '#00C853' } }} />
+                    <LinearProgress
+                      variant="determinate"
+                      value={totalAreasVisited > 0 ? (authorizedAreasVisited / totalAreasVisited) * 100 : 0}
+                      sx={{ height: 14, borderRadius: 2, bgcolor: '#F1F5F9', '& .MuiLinearProgress-bar': { bgcolor: '#00C853' } }}
+                    />
                   </Box>
 
                   <Box>
                     <Stack direction="row" justifyContent="space-between" mb={0.5}>
                       <Typography variant="body2" color="text.secondary">Unauthorized Areas</Typography>
-                      <Typography variant="body2" fontWeight={700}>1</Typography>
+                      <Typography variant="body2" fontWeight={700}>{unauthorizedAreasVisited}</Typography>
                     </Stack>
-                    <LinearProgress variant="determinate" value={33.3} sx={{ height: 14, borderRadius: 2, bgcolor: '#F1F5F9', '& .MuiLinearProgress-bar': { bgcolor: '#FF5630' } }} />
+                    <LinearProgress
+                      variant="determinate"
+                      value={totalAreasVisited > 0 ? (unauthorizedAreasVisited / totalAreasVisited) * 100 : 0}
+                      sx={{ height: 14, borderRadius: 2, bgcolor: '#F1F5F9', '& .MuiLinearProgress-bar': { bgcolor: '#FF5630' } }}
+                    />
                   </Box>
 
                   <Box>
                     <Stack direction="row" justifyContent="space-between" mb={0.5}>
                       <Typography variant="body2" color="text.secondary">Restricted Areas</Typography>
-                      <Typography variant="body2" fontWeight={700}>0</Typography>
+                      <Typography variant="body2" fontWeight={700}>{restrictedAreasCount}</Typography>
                     </Stack>
-                    <LinearProgress variant="determinate" value={0} sx={{ height: 14, borderRadius: 2, bgcolor: '#F1F5F9' }} />
+                    <LinearProgress
+                      variant="determinate"
+                      value={totalAreasVisited > 0 ? (restrictedAreasCount / totalAreasVisited) * 100 : 0}
+                      sx={{ height: 14, borderRadius: 2, bgcolor: '#F1F5F9', '& .MuiLinearProgress-bar': { bgcolor: '#FF5630' } }}
+                    />
                   </Box>
                 </Stack>
                 <Typography variant="caption" color="text.secondary" textAlign="center" display="block" mt={4}>
@@ -1703,14 +2434,14 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                                 label: 'Areas Visited',
                                 fontSize: '12px',
                                 color: '#64748B',
-                                formatter: () => '3',
+                                formatter: () => `${totalAreasVisited}`,
                               },
                             },
                           },
                         },
                       },
                     }}
-                    series={[2, 1]}
+                    series={[authorizedAreasVisited, unauthorizedAreasVisited]}
                     type="donut"
                     width="100%"
                     height={180}
@@ -1723,14 +2454,18 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#00C853' }} />
                       <Typography variant="caption" color="text.secondary">Authorized</Typography>
                     </Stack>
-                    <Typography variant="caption" fontWeight={700}>2 (66.7%)</Typography>
+                    <Typography variant="caption" fontWeight={700}>
+                      {authorizedAreasVisited} ({totalAreasVisited > 0 ? ((authorizedAreasVisited / totalAreasVisited) * 100).toFixed(1) : 0}%)
+                    </Typography>
                   </Stack>
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Stack direction="row" spacing={1} alignItems="center">
                       <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#FF5630' }} />
                       <Typography variant="caption" color="text.secondary">Unauthorized</Typography>
                     </Stack>
-                    <Typography variant="caption" fontWeight={700}>1 (33.3%)</Typography>
+                    <Typography variant="caption" fontWeight={700}>
+                      {unauthorizedAreasVisited} ({totalAreasVisited > 0 ? ((unauthorizedAreasVisited / totalAreasVisited) * 100).toFixed(1) : 0}%)
+                    </Typography>
                   </Stack>
                 </Stack>
               </Card>
@@ -1766,14 +2501,14 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                                 label: 'Areas Visited',
                                 fontSize: '12px',
                                 color: '#64748B',
-                                formatter: () => '3',
+                                formatter: () => `${normalAreasCount + restrictedAreasCount}`,
                               },
                             },
                           },
                         },
                       },
                     }}
-                    series={[3, 0]}
+                    series={[normalAreasCount, restrictedAreasCount]}
                     type="donut"
                     width="100%"
                     height={180}
@@ -1786,14 +2521,18 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#CBD5E1' }} />
                       <Typography variant="caption" color="text.secondary">Normal Area</Typography>
                     </Stack>
-                    <Typography variant="caption" fontWeight={700}>3 (100%)</Typography>
+                    <Typography variant="caption" fontWeight={700}>
+                      {normalAreasCount} ({(normalAreasCount + restrictedAreasCount > 0 ? (normalAreasCount / (normalAreasCount + restrictedAreasCount)) * 100 : 0).toFixed(1)}%)
+                    </Typography>
                   </Stack>
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Stack direction="row" spacing={1} alignItems="center">
                       <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#FF5630' }} />
                       <Typography variant="caption" color="text.secondary">Restricted Area</Typography>
                     </Stack>
-                    <Typography variant="caption" fontWeight={700}>0 (0%)</Typography>
+                    <Typography variant="caption" fontWeight={700}>
+                      {restrictedAreasCount} ({(normalAreasCount + restrictedAreasCount > 0 ? (restrictedAreasCount / (normalAreasCount + restrictedAreasCount)) * 100 : 0).toFixed(1)}%)
+                    </Typography>
                   </Stack>
                 </Stack>
               </Card>
@@ -1841,10 +2580,15 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                           {row.buildingName || '-'} {row.floorName ? `(${row.floorName})` : ''}
                         </TableCell>
                         <TableCell sx={{ fontSize: '12px' }}>
-                          {row.enteredAt ? dayjs(row.enteredAt).format('MMM D, YYYY HH:mm') : '-'}
+                          {formatOrRawTime(row.enteredAt, 'MMM D, YYYY HH:mm:ss')}
                         </TableCell>
                         <TableCell>
-                          {row.durationFormatted || (row.durationMinutes ? `${row.durationMinutes} min` : '-')}
+                          {row.durationFormatted ||
+                            (row.durationMinutes != null
+                              ? row.durationMinutes >= 60
+                                ? `${Math.floor(row.durationMinutes / 60)}h ${row.durationMinutes % 60}m`
+                                : `${row.durationMinutes} min`
+                              : row.duration || '-')}
                         </TableCell>
                         <TableCell>
                           {row.alarmTriggered ? (
@@ -1867,7 +2611,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
             {/* Pagination Footer */}
             <Stack direction="row" justifyContent="space-between" alignItems="center" mt={2}>
               <Typography variant="caption" color="text.secondary">
-                Showing 1 to 4 of 4 records
+                Showing {breachesList.length > 0 ? 1 : 0} to {breachesList.length} of {breachesList.length} {breachesList.length === 1 ? 'record' : 'records'}
               </Typography>
               <Stack direction="row" spacing={1}>
                 <Button size="small" variant="outlined" disabled sx={{ minWidth: 32, p: 0.5, borderRadius: '6px' }}>
@@ -1913,7 +2657,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                         Total Incidents
                       </Typography>
                       <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ lineHeight: 1.2 }}>
-                        1
+                        {totalIncidents}
                       </Typography>
                       <Typography variant="caption" color="text.secondary" sx={{ fontSize: '11px' }}>
                         Security incidents triggered
@@ -1935,7 +2679,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                         Active Incidents
                       </Typography>
                       <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ lineHeight: 1.2 }}>
-                        1
+                        {activeIncidentsComputed}
                       </Typography>
                       <Typography variant="caption" color="text.secondary" sx={{ fontSize: '11px' }}>
                         Requires attention
@@ -1957,7 +2701,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                         Acknowledged
                       </Typography>
                       <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ lineHeight: 1.2 }}>
-                        1
+                        {acknowledgedIncidents}
                       </Typography>
                       <Typography variant="caption" color="text.secondary" sx={{ fontSize: '11px' }}>
                         Has been acknowledged
@@ -1979,10 +2723,10 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                         Resolved
                       </Typography>
                       <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ lineHeight: 1.2 }}>
-                        0
+                        {resolvedIncidents}
                       </Typography>
                       <Typography variant="caption" color="text.secondary" sx={{ fontSize: '11px' }}>
-                        No resolved incidents
+                        {resolvedIncidents > 0 ? 'Resolved incidents' : 'No resolved incidents'}
                       </Typography>
                     </Box>
                   </Stack>
@@ -2009,7 +2753,8 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       <Chart
                         options={{
                           chart: { type: 'donut', fontFamily: "'Plus Jakarta Sans', sans-serif;" },
-                          colors: ['#D32F2F'],
+                          colors: ['#D32F2F', '#FF9800', '#1877F2', '#9C27B0', '#00C853', '#00BCD4'],
+                          labels: incidentsByCategory.labels,
                           legend: { show: false },
                           dataLabels: { enabled: false },
                           plotOptions: {
@@ -2020,17 +2765,17 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                                   show: true,
                                   total: {
                                     show: true,
-                                    label: 'Incident',
+                                    label: 'Incidents',
                                     fontSize: '12px',
                                     color: '#64748B',
-                                    formatter: () => '1',
+                                    formatter: () => `${incidentsByCategory.total}`,
                                   },
                                 },
                               },
                             },
                           },
                         }}
-                        series={[1]}
+                        series={incidentsByCategory.series}
                         type="donut"
                         width="100%"
                         height={180}
@@ -2038,13 +2783,20 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                     </Box>
 
                     <Stack spacing={1} sx={{ flex: 1 }}>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#D32F2F' }} />
-                          <Typography variant="caption" color="text.secondary">Card Access</Typography>
-                        </Stack>
-                        <Typography variant="caption" fontWeight={700}>1 (100%)</Typography>
-                      </Stack>
+                      {incidentsByCategory.labels.map((catLabel, idx) => {
+                        const count = incidentsByCategory.series[idx] || 0;
+                        const pct = incidentsByCategory.total > 0 ? ((count / incidentsByCategory.total) * 100).toFixed(1) : '0';
+                        const color = ['#D32F2F', '#FF9800', '#1877F2', '#9C27B0', '#00C853', '#00BCD4'][idx % 6];
+                        return (
+                          <Stack key={catLabel} direction="row" justifyContent="space-between" alignItems="center">
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color }} />
+                              <Typography variant="caption" color="text.secondary">{catLabel}</Typography>
+                            </Stack>
+                            <Typography variant="caption" fontWeight={700}>{count} ({pct}%)</Typography>
+                          </Stack>
+                        );
+                      })}
                     </Stack>
                   </Stack>
                 </Card>
@@ -2067,7 +2819,8 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       <Chart
                         options={{
                           chart: { type: 'donut', fontFamily: "'Plus Jakarta Sans', sans-serif;" },
-                          colors: ['#D32F2F', '#CBD5E1', '#00C853'],
+                          colors: ['#D32F2F', '#1877F2', '#00C853'],
+                          labels: ['Active', 'Acknowledged', 'Resolved'],
                           legend: { show: false },
                           dataLabels: { enabled: false },
                           plotOptions: {
@@ -2078,17 +2831,17 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                                   show: true,
                                   total: {
                                     show: true,
-                                    label: 'Incident',
+                                    label: 'Incidents',
                                     fontSize: '12px',
                                     color: '#64748B',
-                                    formatter: () => '1',
+                                    formatter: () => `${incidentsByStatus.total}`,
                                   },
                                 },
                               },
                             },
                           },
                         }}
-                        series={[1, 0, 0]}
+                        series={incidentsByStatus.series}
                         type="donut"
                         width="100%"
                         height={180}
@@ -2101,21 +2854,27 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                           <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#D32F2F' }} />
                           <Typography variant="caption" color="text.secondary">Active</Typography>
                         </Stack>
-                        <Typography variant="caption" fontWeight={700}>1 (100%)</Typography>
+                        <Typography variant="caption" fontWeight={700}>
+                          {incidentsByStatus.active} ({incidentsByStatus.total > 0 ? ((incidentsByStatus.active / incidentsByStatus.total) * 100).toFixed(1) : 0}%)
+                        </Typography>
                       </Stack>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Stack direction="row" spacing={1} alignItems="center">
-                          <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#CBD5E1' }} />
+                          <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#1877F2' }} />
                           <Typography variant="caption" color="text.secondary">Acknowledged</Typography>
                         </Stack>
-                        <Typography variant="caption" fontWeight={700}>0 (0%)</Typography>
+                        <Typography variant="caption" fontWeight={700}>
+                          {incidentsByStatus.acknowledged} ({incidentsByStatus.total > 0 ? ((incidentsByStatus.acknowledged / incidentsByStatus.total) * 100).toFixed(1) : 0}%)
+                        </Typography>
                       </Stack>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Stack direction="row" spacing={1} alignItems="center">
                           <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#00C853' }} />
                           <Typography variant="caption" color="text.secondary">Resolved</Typography>
                         </Stack>
-                        <Typography variant="caption" fontWeight={700}>0 (0%)</Typography>
+                        <Typography variant="caption" fontWeight={700}>
+                          {incidentsByStatus.resolved} ({incidentsByStatus.total > 0 ? ((incidentsByStatus.resolved / incidentsByStatus.total) * 100).toFixed(1) : 0}%)
+                        </Typography>
                       </Stack>
                     </Stack>
                   </Stack>
@@ -2178,42 +2937,78 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       </TableCell>
                     </TableRow>
                   ) : (
-                    alarmsList.map((row: any, idx: number) => (
-                      <TableRow key={row.alarmId || idx}>
-                        <TableCell>{idx + 1}</TableCell>
-                        <TableCell sx={{ fontSize: '12px' }}>
-                          {row.triggeredTime ? dayjs(row.triggeredTime).format('MMM D, YYYY HH:mm:ss') : '-'}
-                        </TableCell>
-                        <TableCell>
-                          <Chip label={row.category || 'cardaccess'} size="small" sx={{ bgcolor: '#FFEBEE', color: '#D32F2F', fontWeight: 600, fontSize: '11px' }} />
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>{row.areaName || '-'}</TableCell>
-                        <TableCell sx={{ color: 'text.secondary', fontSize: '12px' }}>
-                          {row.buildingName || '-'} {row.floorName ? `(${row.floorName})` : ''}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={row.status || 'Active'}
-                            size="small"
-                            sx={{
-                              bgcolor: row.status?.toLowerCase() === 'resolved' ? '#E8F5E9' : row.status?.toLowerCase() === 'acknowledged' ? '#E8F2FE' : '#FFEBEE',
-                              color: row.status?.toLowerCase() === 'resolved' ? '#00C853' : row.status?.toLowerCase() === 'acknowledged' ? '#1877F2' : '#D32F2F',
-                              fontWeight: 600,
-                              fontSize: '11px',
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell sx={{ fontSize: '12px' }}>{row.acknowledgedBy || '-'}</TableCell>
-                        <TableCell sx={{ fontSize: '12px' }}>
-                          {row.acknowledgedTime ? dayjs(row.acknowledgedTime).format('MMM D, YYYY HH:mm') : '-'}
-                        </TableCell>
-                        <TableCell>
-                          <IconButton size="small" sx={{ color: '#1877F2', bgcolor: '#F1F5F9' }}>
-                            <IconEye size={16} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    alarmsList.map((row: any, idx: number) => {
+                      const rowId = row.alarmId || row.id || String(idx);
+                      const isSelected = (primaryAlarm?.alarmId || primaryAlarm?.id) === rowId;
+                      return (
+                        <TableRow
+                          key={rowId}
+                          hover
+                          onClick={() => setSelectedAlarmId(rowId)}
+                          sx={{
+                            cursor: 'pointer',
+                            bgcolor: isSelected ? 'rgba(24, 119, 242, 0.08)' : 'inherit',
+                            transition: 'background-color 0.2s ease',
+                            '&:hover': {
+                              bgcolor: isSelected ? 'rgba(24, 119, 242, 0.12) !important' : undefined,
+                            },
+                          }}
+                        >
+                          <TableCell>{idx + 1}</TableCell>
+                          <TableCell sx={{ fontSize: '12px' }}>
+                            {formatOrRawTime(row.triggeredTime)}
+                          </TableCell>
+                          <TableCell>
+                            <Chip label={row.category || 'cardaccess'} size="small" sx={{ bgcolor: '#FFEBEE', color: '#D32F2F', fontWeight: 600, fontSize: '11px' }} />
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>{row.areaName || '-'}</TableCell>
+                          <TableCell sx={{ color: 'text.secondary', fontSize: '12px' }}>
+                            {row.buildingName || '-'} {row.floorName ? `(${row.floorName})` : ''}
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              label={row.status || 'Active'}
+                              size="small"
+                              sx={{
+                                bgcolor: row.status?.toLowerCase() === 'resolved' ? '#E8F5E9' : row.status?.toLowerCase() === 'acknowledged' ? '#E8F2FE' : '#FFEBEE',
+                                color: row.status?.toLowerCase() === 'resolved' ? '#00C853' : row.status?.toLowerCase() === 'acknowledged' ? '#1877F2' : '#D32F2F',
+                                fontWeight: 600,
+                                fontSize: '11px',
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell sx={{ fontSize: '12px' }}>{row.acknowledgedBy || '-'}</TableCell>
+                          <TableCell sx={{ fontSize: '12px' }}>
+                            {formatOrRawTime(row.acknowledgedTime)}
+                          </TableCell>
+                          <TableCell>
+                            <Tooltip title={isSelected ? 'Currently selected' : 'View incident detail & location'}>
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedAlarmId(rowId);
+                                  const target = document.getElementById('incident-detail-section');
+                                  if (target) {
+                                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                  }
+                                }}
+                                sx={{
+                                  color: isSelected ? '#FFFFFF' : '#1877F2',
+                                  bgcolor: isSelected ? '#1877F2' : '#F1F5F9',
+                                  boxShadow: isSelected ? '0 2px 6px rgba(24, 119, 242, 0.35)' : 'none',
+                                  '&:hover': {
+                                    bgcolor: isSelected ? '#1565C0' : '#E2E8F0',
+                                  },
+                                }}
+                              >
+                                <IconEye size={16} />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
@@ -2222,7 +3017,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
             {/* Pagination Footer */}
             <Stack direction="row" justifyContent="space-between" alignItems="center" mt={2}>
               <Typography variant="caption" color="text.secondary">
-                Showing 1 to 1 of 1 record
+                Showing {alarmsList.length > 0 ? 1 : 0} to {alarmsList.length} of {alarmsList.length} {alarmsList.length === 1 ? 'record' : 'records'}
               </Typography>
               <Stack direction="row" spacing={1}>
                 <Button size="small" variant="outlined" disabled sx={{ minWidth: 32, p: 0.5, borderRadius: '6px' }}>
@@ -2239,7 +3034,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
           </Card>
 
           {/* Section 3: Incident Detail & Incident Location */}
-          <Grid container spacing={2.5}>
+          <Grid container spacing={2.5} id="incident-detail-section">
             {/* Incident Detail */}
             <Grid size={{ xs: 12, md: 6 }}>
               <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '16px', p: 2.5, height: '100%' }}>
@@ -2253,39 +3048,50 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                 </Box>
 
                 {/* Banner Alert */}
-                <Box sx={{ bgcolor: '#FFF5F5', border: '1px solid', borderColor: '#FFCDD2', borderRadius: '12px', p: 2, mb: 2.5 }}>
+                <Box sx={{ bgcolor: primaryAlarm ? '#FFF5F5' : '#F8FAFC', border: '1px solid', borderColor: primaryAlarm ? '#FFCDD2' : 'divider', borderRadius: '12px', p: 2, mb: 2.5 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Stack direction="row" spacing={1.5} alignItems="center">
-                      <Box sx={{ width: 36, height: 36, borderRadius: '50%', bgcolor: '#FFEBEE', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D32F2F' }}>
+                      <Box sx={{ width: 36, height: 36, borderRadius: '50%', bgcolor: primaryAlarm ? '#FFEBEE' : '#E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: primaryAlarm ? '#D32F2F' : '#64748B' }}>
                         <IconAlertTriangle size={20} />
                       </Box>
                       <Box>
-                        <Typography variant="subtitle2" fontWeight={700} color="#D32F2F">
-                          Card Access Violation
+                        <Typography variant="subtitle2" fontWeight={700} color={primaryAlarm ? '#D32F2F' : 'text.primary'}>
+                          {primaryAlarm ? `${(primaryAlarm.category || 'Incident').toUpperCase()} Incident` : 'No Incident Selected'}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          Card access violation detected by tracking engine
+                          {primaryAlarm?.reason || primaryAlarm?.description || (alarmsList.length > 0 ? 'Security incident detected by tracking engine' : 'No incidents or alarms detected in selected period')}
                         </Typography>
                       </Box>
                     </Stack>
-                    <Chip label="Acknowledged" size="small" sx={{ bgcolor: '#E8F2FE', color: '#1877F2', fontWeight: 600, fontSize: '11px' }} />
+                    {primaryAlarm && (
+                      <Chip
+                        label={primaryAlarm.status || 'Active'}
+                        size="small"
+                        sx={{
+                          bgcolor: primaryAlarm.status?.toLowerCase() === 'resolved' ? '#E8F5E9' : primaryAlarm.status?.toLowerCase() === 'acknowledged' ? '#E8F2FE' : '#FFEBEE',
+                          color: primaryAlarm.status?.toLowerCase() === 'resolved' ? '#00C853' : primaryAlarm.status?.toLowerCase() === 'acknowledged' ? '#1877F2' : '#D32F2F',
+                          fontWeight: 600,
+                          fontSize: '11px',
+                        }}
+                      />
+                    )}
                   </Stack>
                 </Box>
 
                 {/* Metadata List */}
                 <Stack spacing={1.2}>
                   {[
-                    { label: 'Incident ID', value: '031b26de-0d5f-4496-b441-6173d35b03c3', copyable: true },
-                    { label: 'Category', value: 'cardaccess' },
-                    { label: 'Area', value: 'Ruangan Programmer' },
-                    { label: 'Building / Floor', value: 'Gedung Buni / Lantai 2 Buni' },
-                    { label: 'Triggered Time', value: 'Sep 7, 2026 08:59:28' },
-                    { label: 'Status', value: 'Acknowledged' },
-                    { label: 'Acknowledged By', value: 'Old Lex' },
-                    { label: 'Acknowledged Time', value: 'Sep 7, 2026 09:03:57' },
-                    { label: 'Dispatched To', value: '-' },
-                    { label: 'Investigated By', value: '-' },
-                    { label: 'Investigation Result', value: '-' },
+                    { label: 'Incident ID', value: primaryAlarm?.alarmId || primaryAlarm?.id || '-', copyable: Boolean(primaryAlarm?.alarmId || primaryAlarm?.id) },
+                    { label: 'Category', value: primaryAlarm?.category || '-' },
+                    { label: 'Area', value: primaryAlarm?.areaName || primaryAlarm?.area || '-' },
+                    { label: 'Building / Floor', value: `${primaryAlarm?.buildingName || '-'} ${primaryAlarm?.floorName ? `(${primaryAlarm.floorName})` : ''}` },
+                    { label: 'Triggered Time', value: formatOrRawTime(primaryAlarm?.triggeredTime) },
+                    { label: 'Status', value: primaryAlarm?.status || '-' },
+                    { label: 'Acknowledged By', value: primaryAlarm?.acknowledgedBy || '-' },
+                    { label: 'Acknowledged Time', value: formatOrRawTime(primaryAlarm?.acknowledgedTime) },
+                    { label: 'Dispatched To', value: primaryAlarm?.dispatchedTo || '-' },
+                    { label: 'Investigated By', value: primaryAlarm?.investigatedBy || '-' },
+                    { label: 'Investigation Result', value: primaryAlarm?.investigationResult || '-' },
                   ].map((item, idx) => (
                     <Stack key={idx} direction="row" justifyContent="space-between" alignItems="center">
                       <Typography variant="body2" color="text.secondary" sx={{ minWidth: 140 }}>
@@ -2322,11 +3128,12 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                   <TextField
                     select
                     size="small"
-                    defaultValue="gedung-buni-lantai-2"
-                    sx={{ width: 200, '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '13px' } }}
+                    value="incident-floor"
+                    sx={{ width: 220, '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '13px' } }}
                   >
-                    <MenuItem value="gedung-buni-lantai-2">Gedung Buni - Lantai 2 Buni</MenuItem>
-                    <MenuItem value="gedung-buni-lantai-1">Gedung Buni - Lantai 1</MenuItem>
+                    <MenuItem value="incident-floor">
+                      {primaryAlarm ? `${primaryAlarm.buildingName || 'Building'} - ${primaryAlarm.floorName || 'Floor'}` : 'Default Floor'}
+                    </MenuItem>
                   </TextField>
                 </Stack>
 
@@ -2346,54 +3153,95 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                     justifyContent: 'center',
                   }}
                 >
-                  <Box
-                    sx={{
-                      position: 'relative',
-                      width: '85%',
-                      height: '80%',
-                      border: '1px solid #CBD5E1',
-                      borderRadius: '8px',
-                      bgcolor: '#F1F5F9',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    {/* Highlighted Area Box */}
+                  {incidentFloorplanUrl && !incidentImgObj ? (
+                    <Stack alignItems="center" spacing={1} py={4}>
+                      <CircularProgress size={24} />
+                      <Typography variant="caption" color="text.secondary">
+                        Loading incident floorplan...
+                      </Typography>
+                    </Stack>
+                  ) : (
                     <Box
                       sx={{
-                        width: '45%',
-                        height: '55%',
-                        bgcolor: 'rgba(24, 119, 242, 0.25)',
-                        border: '1.5px solid #1877F2',
-                        borderRadius: '6px',
+                        transform: `scale(${incidentZoomLevel})`,
+                        transition: 'transform 0.2s linear',
+                        position: 'relative',
                         display: 'flex',
-                        flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        position: 'relative',
                       }}
                     >
-                      <Typography variant="caption" fontWeight={700} color="#1877F2" sx={{ fontSize: '10px', mb: 0.5 }}>
-                        Ruangan Programmer
-                      </Typography>
-                      <Box
-                        sx={{
-                          width: 24,
-                          height: 24,
-                          borderRadius: '50%',
-                          bgcolor: '#D32F2F',
-                          color: '#FFF',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          boxShadow: '0 0 0 4px rgba(211, 47, 47, 0.2)',
-                        }}
-                      >
-                        <IconAlertTriangle size={14} />
-                      </Box>
+                      <Stage width={incidentStageWidth} height={incidentStageHeight}>
+                        <Layer>
+                          {incidentImgObj ? (
+                            <KonvaImage image={incidentImgObj} width={incidentStageWidth} height={incidentStageHeight} />
+                          ) : null}
+
+                          {incidentAreaPoints.length >= 6 && (
+                            <Line
+                              points={incidentAreaPoints}
+                              stroke="#D32F2F"
+                              strokeWidth={3}
+                              lineJoin="round"
+                              lineCap="round"
+                              closed
+                              fill="rgba(211, 47, 47, 0.35)"
+                              opacity={0.65}
+                              listening={false}
+                            />
+                          )}
+                        </Layer>
+                      </Stage>
+
+                      {/* Incident Marker / Label overlay */}
+                      {primaryAlarm && (
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            left: incidentMarkerX,
+                            top: incidentMarkerY,
+                            transform: 'translate(-50%, -50%)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            pointerEvents: 'none',
+                            zIndex: 4,
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              bgcolor: 'rgba(255, 255, 255, 0.95)',
+                              border: '1px solid #D32F2F',
+                              borderRadius: '6px',
+                              px: 1,
+                              py: 0.25,
+                              mb: 0.5,
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                            }}
+                          >
+                            <Typography variant="caption" fontWeight={700} color="#D32F2F" sx={{ fontSize: '10px', whiteSpace: 'nowrap' }}>
+                              {primaryAlarm?.areaName || incidentMaskedArea?.name || incidentMaskedArea?.areaName || 'Incident Area'}
+                            </Typography>
+                          </Box>
+                          <Box
+                            sx={{
+                              width: 26,
+                              height: 26,
+                              borderRadius: '50%',
+                              bgcolor: '#D32F2F',
+                              color: '#FFF',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: '0 0 0 4px rgba(211, 47, 47, 0.25)',
+                            }}
+                          >
+                            <IconAlertTriangle size={15} />
+                          </Box>
+                        </Box>
+                      )}
                     </Box>
-                  </Box>
+                  )}
 
                   {/* Zoom controls */}
                   <Stack
@@ -2408,12 +3256,13 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       borderColor: 'divider',
                       p: 0.5,
                       boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                      zIndex: 5,
                     }}
                   >
-                    <IconButton size="small">
+                    <IconButton size="small" onClick={() => setIncidentZoomLevel((z) => Math.min(z + 0.15, 1.8))}>
                       <IconPlus size={16} />
                     </IconButton>
-                    <IconButton size="small">
+                    <IconButton size="small" onClick={() => setIncidentZoomLevel((z) => Math.max(z - 0.15, 0.6))}>
                       <IconMinus size={16} />
                     </IconButton>
                   </Stack>
@@ -2431,10 +3280,11 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       border: '1px solid',
                       borderColor: 'divider',
                       boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                      zIndex: 5,
                     }}
                   >
                     <Typography variant="caption" fontWeight={600} color="text.secondary">
-                      Lantai 2 Buni
+                      {incidentMaskedArea?.floor?.name || primaryAlarm?.floorName || 'Floor Plan'}
                     </Typography>
                   </Box>
                 </Box>
@@ -2490,19 +3340,30 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '12px', p: 2, bgcolor: '#F8FAFC' }}>
                   <Typography variant="caption" color="text.secondary" display="block">BLE MAC Address</Typography>
-                  <Typography variant="subtitle1" fontWeight={700} color="text.primary">BC572923F3C9</Typography>
+                  <Typography variant="subtitle1" fontWeight={700} color="text.primary">{bleMac}</Typography>
                 </Box>
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '12px', p: 2, bgcolor: '#F8FAFC' }}>
                   <Typography variant="caption" color="text.secondary" display="block">Battery Level</Typography>
-                  <Typography variant="subtitle1" fontWeight={700} color="#00C853">{cardBattery}% (Good)</Typography>
+                  <Typography variant="subtitle1" fontWeight={700} color={cardBattery < 20 ? '#D32F2F' : '#00C853'}>
+                    {cardBattery}% {cardBattery >= 20 ? '(Good)' : '(Low)'}
+                  </Typography>
                 </Box>
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '12px', p: 2, bgcolor: '#F8FAFC' }}>
                   <Typography variant="caption" color="text.secondary" display="block">Status</Typography>
-                  <Chip label="Active" size="small" sx={{ bgcolor: '#E8F5E9', color: '#00C853', fontWeight: 700, mt: 0.5 }} />
+                  <Chip
+                    label={data?.currentState?.activeCardNumber ? 'Active' : 'Inactive'}
+                    size="small"
+                    sx={{
+                      bgcolor: data?.currentState?.activeCardNumber ? '#E8F5E9' : '#F1F5F9',
+                      color: data?.currentState?.activeCardNumber ? '#00C853' : '#64748B',
+                      fontWeight: 700,
+                      mt: 0.5,
+                    }}
+                  />
                 </Box>
               </Grid>
             </Grid>
@@ -2544,7 +3405,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       <TableRow key={row.cardId || idx}>
                         <TableCell>{idx + 1}</TableCell>
                         <TableCell sx={{ fontSize: '12px' }}>
-                          {row.checkinAt ? dayjs(row.checkinAt).format('MMM D, YYYY HH:mm:ss') : '-'}
+                          {formatOrRawTime(row.checkinAt)}
                         </TableCell>
                         <TableCell sx={{ fontWeight: 600 }}>{row.cardNumber || '-'}</TableCell>
                         <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{row.bleCardNumber || '-'}</TableCell>
@@ -2573,7 +3434,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
             {/* Pagination Footer */}
             <Stack direction="row" justifyContent="space-between" alignItems="center" mt={2}>
               <Typography variant="caption" color="text.secondary">
-                Showing 1 to 2 of 2 records
+                Showing {cardHistoryList.length > 0 ? 1 : 0} to {cardHistoryList.length} of {cardHistoryList.length} {cardHistoryList.length === 1 ? 'record' : 'records'}
               </Typography>
               <Stack direction="row" spacing={1}>
                 <Button size="small" variant="outlined" disabled sx={{ minWidth: 32, p: 0.5, borderRadius: '6px' }}>
@@ -2843,7 +3704,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                 <TableBody>
                   {chronologicalTimelineList.map((row, idx) => (
                     <TableRow key={idx}>
-                      <TableCell sx={{ fontSize: '12px', fontWeight: 600 }}>{dayjs(row.timestamp).format('MMM D, YYYY HH:mm:ss')}</TableCell>
+                      <TableCell sx={{ fontSize: '12px', fontWeight: 600 }}>{formatOrRawTime(row.timestamp)}</TableCell>
                       <TableCell>
                         <Box
                           sx={{
@@ -2951,32 +3812,63 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {breachesList.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell>{row.id}</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>{row.area}</TableCell>
-                      <TableCell sx={{ fontSize: '12px' }}>{row.buildingFloor}</TableCell>
-                      <TableCell sx={{ fontSize: '12px' }}>{row.enteredAt}</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: '#1877F2' }}>{row.duration}</TableCell>
-                      <TableCell>
-                        <Box
-                          sx={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            px: 1.5,
-                            py: 0.4,
-                            borderRadius: '12px',
-                            bgcolor: '#E8F5E9',
-                            color: '#00C853',
-                            fontWeight: 700,
-                            fontSize: '11px',
-                          }}
-                        >
-                          Authorized
-                        </Box>
+                  {breachesList.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center" sx={{ py: 2, color: 'text.secondary' }}>
+                        No breach records
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    breachesList.map((row: any, idx: number) => {
+                      const areaName = row.areaName || row.area || row.name || '-';
+                      const building = row.buildingName || row.building;
+                      const floor = row.floorName || row.floor;
+                      const buildingFloor =
+                        building || floor
+                          ? `${building || '-'}${floor ? ` (${floor})` : ''}`
+                          : row.buildingFloor || '-';
+
+                      const durationStr =
+                        row.durationFormatted ||
+                        (row.durationMinutes != null
+                          ? row.durationMinutes >= 60
+                            ? `${Math.floor(row.durationMinutes / 60)}h ${row.durationMinutes % 60}m`
+                            : `${row.durationMinutes} min`
+                          : row.duration || '-');
+
+                      const enteredAtStr = formatOrRawTime(
+                        row.enteredAt || row.timestamp || row.time,
+                        'MMM D, YYYY HH:mm:ss'
+                      );
+
+                      return (
+                        <TableRow key={row.areaId || row.id || idx}>
+                          <TableCell>{idx + 1}</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>{areaName}</TableCell>
+                          <TableCell sx={{ fontSize: '12px' }}>{buildingFloor}</TableCell>
+                          <TableCell sx={{ fontSize: '12px' }}>{enteredAtStr}</TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: '#D32F2F' }}>{durationStr}</TableCell>
+                          <TableCell>
+                            <Box
+                              sx={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                px: 1.5,
+                                py: 0.4,
+                                borderRadius: '12px',
+                                bgcolor: '#FFEBEE',
+                                color: '#D32F2F',
+                                fontWeight: 700,
+                                fontSize: '11px',
+                              }}
+                            >
+                              Unauthorized
+                            </Box>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -3024,7 +3916,9 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
               <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5 }}>
                 <Typography variant="h6" fontWeight={700} mb={1}>Access Rights & Group Assignment</Typography>
                 <Typography variant="body2" color="text.secondary" mt={0.5}>
-                  No custom Access Group assigned. Access is evaluated against standard employee perimeter permissions.
+                  {assignedAccessGroups.length > 0
+                    ? `Assigned to ${assignedAccessGroups.map((g: any) => g.accessName || g.name).join(', ')}.`
+                    : 'No custom Access Group assigned. Access is evaluated against standard employee perimeter permissions.'}
                 </Typography>
                 <Stack direction="row" spacing={2} mt={2}>
                   <Box sx={{ border: '1px solid #E2E8F0', borderRadius: '8px', p: 1.5, flex: 1, bgcolor: '#F8FAFC' }}>
@@ -3049,41 +3943,49 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
           <Grid container spacing={2.5}>
             <Grid size={{ xs: 6 }}>
               <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5 }}>
-                <Typography variant="h6" fontWeight={700} mb={1}>Card Access Violation Incident</Typography>
+                <Typography variant="h6" fontWeight={700} mb={1}>
+                  {primaryAlarm ? `${(primaryAlarm.category || 'Incident').toUpperCase()} Incident` : 'Security Incidents'}
+                </Typography>
                 <Typography variant="body2" fontWeight={700} color="text.primary">
-                  Incident ID: 031b26de-0d5f-4496-b441-6173d35b03c3
+                  Incident ID: {primaryAlarm?.alarmId || primaryAlarm?.id || '-'}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" mt={0.5}>
-                  Location: Ruangan Programmer (Gedung Buni / Lantai 2 Buni)
+                  Location: {primaryAlarm ? `${primaryAlarm.areaName || '-'} (${primaryAlarm.buildingName || '-'} / ${primaryAlarm.floorName || '-'})` : 'No Incident Location'}
                 </Typography>
                 <Typography variant="caption" color="text.secondary" display="block" mt={0.5}>
-                  Triggered: Sep 7, 2026 08:59:00  |  Handled By: Old Lex
+                  Triggered: {formatOrRawTime(primaryAlarm?.triggeredTime)}  |  Handled By: {primaryAlarm?.acknowledgedBy || '-'}
                 </Typography>
-                <Box
-                  sx={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    px: 1.5,
-                    py: 0.4,
-                    borderRadius: '12px',
-                    bgcolor: '#E8F2FE',
-                    color: '#1877F2',
-                    fontWeight: 700,
-                    fontSize: '11px',
-                    mt: 1.5,
-                  }}
-                >
-                  Acknowledged
-                </Box>
+                {primaryAlarm && (
+                  <Box
+                    sx={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      px: 1.5,
+                      py: 0.4,
+                      borderRadius: '12px',
+                      bgcolor: primaryAlarm.status?.toLowerCase() === 'resolved' ? '#E8F5E9' : primaryAlarm.status?.toLowerCase() === 'acknowledged' ? '#E8F2FE' : '#FFEBEE',
+                      color: primaryAlarm.status?.toLowerCase() === 'resolved' ? '#00C853' : primaryAlarm.status?.toLowerCase() === 'acknowledged' ? '#1877F2' : '#D32F2F',
+                      fontWeight: 700,
+                      fontSize: '11px',
+                      mt: 1.5,
+                    }}
+                  >
+                    {primaryAlarm.status || 'Active'}
+                  </Box>
+                )}
               </Card>
             </Grid>
             <Grid size={{ xs: 6 }}>
               <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5 }}>
                 <Typography variant="h6" fontWeight={700} mb={1}>Incident Location Diagram</Typography>
                 <Box sx={{ height: 150, bgcolor: '#F8FAFC', borderRadius: '12px', border: '1.5px solid #CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                  <Box sx={{ width: '60%', height: '65%', bgcolor: 'rgba(211, 47, 47, 0.1)', border: '2px solid #D32F2F', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                    <Typography variant="subtitle2" fontWeight={800} color="#D32F2F">Ruangan Programmer</Typography>
-                    <Typography variant="caption" color="#D32F2F">Incident Zone (Card Access)</Typography>
+                  <Box sx={{ width: '60%', height: '65%', bgcolor: 'rgba(211, 47, 47, 0.1)', border: '2px solid #D32F2F', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 1 }}>
+                    <Typography variant="subtitle2" fontWeight={800} color="#D32F2F" textAlign="center">
+                      {primaryAlarm?.areaName || 'Incident Area'}
+                    </Typography>
+                    <Typography variant="caption" color="#D32F2F" textAlign="center">
+                      Incident Zone ({primaryAlarm?.category || 'Security'})
+                    </Typography>
                   </Box>
                 </Box>
               </Card>
@@ -3109,13 +4011,15 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
               <Grid size={{ xs: 3 }}>
                 <Box sx={{ border: '1px solid #E2E8F0', borderRadius: '8px', p: 1.5, bgcolor: '#F8FAFC' }}>
                   <Typography variant="caption" color="text.secondary" display="block">BLE MAC Address</Typography>
-                  <Typography variant="subtitle1" fontWeight={700}>BC572923F3C9</Typography>
+                  <Typography variant="subtitle1" fontWeight={700}>{bleMac}</Typography>
                 </Box>
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <Box sx={{ border: '1px solid #E2E8F0', borderRadius: '8px', p: 1.5, bgcolor: '#F8FAFC' }}>
                   <Typography variant="caption" color="text.secondary" display="block">Battery Telemetry</Typography>
-                  <Typography variant="subtitle1" fontWeight={700} color="#00C853">{cardBattery}% (Good)</Typography>
+                  <Typography variant="subtitle1" fontWeight={700} color={cardBattery < 20 ? '#D32F2F' : '#00C853'}>
+                    {cardBattery}% {cardBattery >= 20 ? '(Good)' : '(Low)'}
+                  </Typography>
                 </Box>
               </Grid>
               <Grid size={{ xs: 3 }}>
@@ -3128,14 +4032,14 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       px: 1.5,
                       py: 0.4,
                       borderRadius: '12px',
-                      bgcolor: '#E8F5E9',
-                      color: '#00C853',
+                      bgcolor: data?.currentState?.activeCardNumber ? '#E8F5E9' : '#F1F5F9',
+                      color: data?.currentState?.activeCardNumber ? '#00C853' : '#64748B',
                       fontWeight: 700,
                       fontSize: '11px',
                       mt: 0.2,
                     }}
                   >
-                    Active
+                    {data?.currentState?.activeCardNumber ? 'Active' : 'Inactive'}
                   </Box>
                 </Box>
               </Grid>
@@ -3159,33 +4063,43 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {(data?.cardHistory || []).map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell>{row.id}</TableCell>
-                      <TableCell sx={{ fontSize: '12px' }}>{row.dateTime}</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>{row.cardNo}</TableCell>
-                      <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{row.mac}</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>{row.event}</TableCell>
-                      <TableCell>
-                        <Box
-                          sx={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            px: 1.5,
-                            py: 0.4,
-                            borderRadius: '12px',
-                            bgcolor: '#E8F5E9',
-                            color: '#00C853',
-                            fontWeight: 700,
-                            fontSize: '11px',
-                          }}
-                        >
-                          {row.status}
-                        </Box>
-                      </TableCell>
-                      <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{row.notes}</TableCell>
-                    </TableRow>
-                  ))}
+                  {(data?.cardHistory || []).map((row: any, idx: number) => {
+                    const id = row.cardId || row.id || idx + 1;
+                    const dateTime = formatOrRawTime(row.checkinAt || row.dateTime);
+                    const cardNo = row.cardNumber || row.cardNo || '-';
+                    const mac = row.bleCardNumber || row.mac || '-';
+                    const event = row.isActive !== undefined ? (row.isActive ? 'Card Assigned' : 'Card Unassigned') : (row.event || '-');
+                    const status = row.isActive !== undefined ? (row.isActive ? 'Active' : 'Inactive') : (row.status || 'Active');
+                    const notes = row.checkinBy ? `Assigned by: ${row.checkinBy}` : (row.notes || '-');
+                    const isActive = status === 'Active';
+                    return (
+                      <TableRow key={id}>
+                        <TableCell>{idx + 1}</TableCell>
+                        <TableCell sx={{ fontSize: '12px' }}>{dateTime}</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>{cardNo}</TableCell>
+                        <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{mac}</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>{event}</TableCell>
+                        <TableCell>
+                          <Box
+                            sx={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              px: 1.5,
+                              py: 0.4,
+                              borderRadius: '12px',
+                              bgcolor: isActive ? '#E8F5E9' : '#F1F5F9',
+                              color: isActive ? '#00C853' : '#64748B',
+                              fontWeight: 700,
+                              fontSize: '11px',
+                            }}
+                          >
+                            {status}
+                          </Box>
+                        </TableCell>
+                        <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{notes}</TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>

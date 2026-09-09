@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 
 import EvacuationSummaryDialog from './EvacuationSummaryDialog';
 import SmartScrollingText from 'src/utils/SmartScrollingText';
+import { toLocalDate } from 'src/utils/time';
 
 const EvacuationList: React.FC = () => {
   const { t } = useTranslation();
@@ -52,14 +53,17 @@ const EvacuationList: React.FC = () => {
 
   const formatDuration = (start: string, end: string | null) => {
     if (!end) return 'In Progress';
-    const durationMs = new Date(end).getTime() - new Date(start).getTime();
+    const startMs = toLocalDate(start)?.getTime() ?? 0;
+    const endMs = toLocalDate(end)?.getTime() ?? 0;
+    const durationMs = endMs - startMs;
     const minutes = Math.floor(durationMs / 60000);
     const seconds = Math.floor((durationMs % 60000) / 1000);
     return `${minutes}m ${seconds}s`;
   };
 
   const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
+    const date = toLocalDate(isoString);
+    if (!date || isNaN(date.getTime())) return '-';
     const weekday = t(date.toLocaleString('en-GB', { weekday: 'short' }));
     const month = t(date.toLocaleString('en-GB', { month: 'short' }));
     return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()}`;
@@ -232,7 +236,7 @@ const EvacuationList: React.FC = () => {
                         {formatTime(evac.startedAt)}
                       </Typography>
                       <Typography variant="caption" color="text.disabled">
-                        {new Date(evac.startedAt).toLocaleTimeString('en-GB', {
+                        {toLocalDate(evac.startedAt)?.toLocaleTimeString('en-GB', {
                           hour: '2-digit',
                           minute: '2-digit',
                           hour12: false,

@@ -9,6 +9,7 @@ import {
   IconTrendingUp,
 } from '@tabler/icons-react';
 import { VisitorSessionResponseType, VisitorSessionType } from 'src/store/apps/crud/visitorSession';
+import { toLocalDate } from 'src/utils/time';
 
 interface TrackingReportTopCardProps {
   data: VisitorSessionType[] | VisitorSessionResponseType | null | undefined;
@@ -84,8 +85,8 @@ const TrackingReportTopCard: React.FC<TrackingReportTopCardProps> = ({ data, isL
   if (sessionList.length > 0) {
     sessionList.forEach((s) => {
       if (s.enterTime) {
-        const hour = new Date(s.enterTime).getHours();
-        if (hour >= 0 && hour < 24) {
+        const hour = toLocalDate(s.enterTime)?.getHours();
+        if (hour !== undefined && hour >= 0 && hour < 24) {
           hourlyBuckets[hour]++;
         }
       }
@@ -95,8 +96,8 @@ const TrackingReportTopCard: React.FC<TrackingReportTopCardProps> = ({ data, isL
     persons.forEach((p) => {
       p.sessions?.forEach((s) => {
         if (s.enterTime) {
-          const hour = new Date(s.enterTime).getHours();
-          if (hour >= 0 && hour < 24) {
+          const hour = toLocalDate(s.enterTime)?.getHours();
+          if (hour !== undefined && hour >= 0 && hour < 24) {
             hourlyBuckets[hour]++;
           }
         }

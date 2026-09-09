@@ -23,12 +23,35 @@ import CustomCheckbox from '../../../components/forms/theme-elements/CustomCheck
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
 import CustomFormLabel from '../../../components/forms/theme-elements/CustomFormLabel';
 import axiosServices from 'src/utils/axios';
+import { getConfig } from 'src/config';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
 import _ from 'lodash';
 import { baselightTheme } from 'src/theme/DefaultColors';
 import typography from 'src/theme/Typography';
 import { shadows } from 'src/theme/Shadows';
 import components from 'src/theme/Components';
+import 'altcha';
+
+// Ensure ALTCHA uses our polyfilled worker for HTTP/LAN (non-secure context)
+if (typeof window !== 'undefined' && (window as any).$altcha?.algorithms) {
+  (window as any).$altcha.algorithms.set('SHA-256', () => new Worker('/assets/altcha-worker.js'));
+}
+
+// Extend React's JSX intrinsic elements to support <altcha-widget> web component
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements {
+      'altcha-widget': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
+        challenge?: string;
+        challengeurl?: string;
+        auto?: string;
+        hidefooter?: boolean | string;
+        hidelogo?: boolean | string;
+        style?: React.CSSProperties;
+      };
+    }
+  }
+}
 
 type NativeFormProps = React.ComponentPropsWithoutRef<'form'>;
 
@@ -83,12 +106,52 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   const [direction, setDirection] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [altchaVerified, setAltchaVerified] = useState(false);
 
   const [adminCreds, setAdminCreds] = useState({ username: '', password: '' });
   const [visitorCreds, setVisitorCreds] = useState({ username: '', password: '' });
   const [rememberMe, setRememberMe] = useState(true);
 
   const usernameRef = useRef<HTMLInputElement>(null);
+  const altchaRef = useRef<HTMLElement | null>(null);
+
+  // ALTCHA statechange handler
+  const handleAltchaState = (ev: Event) => {
+    const detail = (ev as CustomEvent<{ state: string }>).detail;
+    setAltchaVerified(detail?.state === 'verified');
+  };
+
+  // Callback ref: attach statechange listener and configure widget when it mounts
+  const altchaCallbackRef = (node: HTMLElement | null) => {
+    if (altchaRef.current) {
+      altchaRef.current.removeEventListener('statechange', handleAltchaState);
+    }
+    altchaRef.current = node;
+    if (node) {
+      node.addEventListener('statechange', handleAltchaState);
+
+      // Re-register polyfilled worker for SHA-256 in case $altcha was re-initialized
+      if (typeof window !== 'undefined' && (window as any).$altcha?.algorithms) {
+        (window as any).$altcha.algorithms.set('SHA-256', () => new Worker('/assets/altcha-worker.js'));
+      }
+
+      try {
+        const config = getConfig();
+        (node as any).configure?.({
+          challenge: `${config.API_BASE_URL}/api/Auth/altcha-challenge`,
+          fetch: async (url: string, options: any) => {
+            const headers = new Headers(options?.headers || {});
+            if (config.API_KEY && !headers.has('X-BIOPEOPLETRACKING-API-KEY')) {
+              headers.set('X-BIOPEOPLETRACKING-API-KEY', config.API_KEY);
+            }
+            return fetch(url, { ...options, headers });
+          },
+        });
+      } catch {
+        // Fallback if config is not yet initialized
+      }
+    }
+  };
 
   // ✅ Auto-fill remembered usernames on mount
   useEffect(() => {
@@ -118,6 +181,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
     setDirection(activeTab === 'admin' && next === 'visitor' ? 1 : -1);
     setActiveTab(next);
     setLoginError('');
+    setAltchaVerified(false); // reset captcha when switching tabs
   };
 
   const handleChange =
@@ -176,14 +240,26 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   //   }
   // };
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
 
+    // Extract ALTCHA payload from the widget's hidden input or .value
+    const altchaPayload =
+      (altchaRef.current as any)?.value ||
+      (altchaRef.current?.querySelector?.('input[name="altcha"]') as HTMLInputElement)?.value ||
+      '';
+
+    if (!altchaPayload) {
+      setLoginError('Please complete the CAPTCHA verification before signing in.');
+      return;
+    }
+
     const url = isAdmin ? ADMIN_API_URL : VISITOR_API_URL;
 
     try {
-      const res = await axiosServices.post(url, creds);
+      const res = await axiosServices.post(url, { ...creds, altchaPayload: altchaPayload });
       const data = res?.data?.collection?.data ?? res?.data;
 
       if (data?.token) {
@@ -384,7 +460,35 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
               </Typography>
             </Stack>
 
-            <Button type="submit" fullWidth size="large" variant="contained">
+            {/* ALTCHA Captcha Widget */}
+            <Box
+              sx={{
+                '& altcha-widget': {
+                  width: '100%',
+                  '--altcha-border-radius': '8px',
+                  '--altcha-border-color': 'rgba(0,0,0,0.23)',
+                  '--altcha-color-base': '#ffffff',
+                  '--altcha-color-base-content': '#333333',
+                  fontSize: '0.875rem',
+                },
+              }}
+            >
+              <altcha-widget
+                ref={altchaCallbackRef}
+                challenge="/api/Auth/altcha-challenge"
+                challengeurl="/api/Auth/altcha-challenge"
+                hidefooter
+                style={{ width: '100%' }}
+              />
+            </Box>
+
+            <Button
+              type="submit"
+              fullWidth
+              size="large"
+              variant="contained"
+              disabled={!altchaVerified}
+            >
               {isAdmin ? 'Sign In as Admin' : 'Sign In as Visitor'}
             </Button>
           </Stack>

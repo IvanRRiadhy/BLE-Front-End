@@ -212,6 +212,7 @@ const AlarmTriggeredFilter = () => {
         },
       }),
     );
+    setOpen(false);
   };
 
   const handleResetFilter = () => {
@@ -237,6 +238,7 @@ const AlarmTriggeredFilter = () => {
           floorId: [],
           floorplanId: [],
           action: [],
+          alarm: [],
         },
         dateFilters: {
           TriggerTime: {
@@ -246,6 +248,7 @@ const AlarmTriggeredFilter = () => {
         },
       }),
     );
+    setOpen(false);
   };
 
   const isDisabled = isEqual(currentFilter, nextFilter);

@@ -19,6 +19,7 @@ import {
 import { Stage, Layer, Image as KonvaImage, Circle, Line, Shape } from 'react-konva';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import dayjs from 'dayjs';
+import { toLocalDate, formatOrRawTime } from 'src/utils/time';
 import { IconPlayerPlayFilled, IconPlayerPauseFilled } from '@tabler/icons-react';
 import BeaconRenderer from 'src/components/dashboards/monitoring/Renderer/BeaconRenderer';
 import { useAllMembers } from 'src/hooks/useMember';
@@ -462,7 +463,7 @@ const InvestigateReplayDialog = ({
                     }}
                   >
                     <TableCell>{p.area}</TableCell>
-                    <TableCell>{dayjs(p.time).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                    <TableCell>{formatOrRawTime(p.time, 'YYYY-MM-DD HH:mm:ss')}</TableCell>
                   </TableRow>
                 );
               })}

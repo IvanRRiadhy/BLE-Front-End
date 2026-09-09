@@ -53,6 +53,8 @@ export interface PersonOverviewAreaBreakdown {
   percentage: number;
   isRestrictedArea: boolean;
   isAllowedByAccess: boolean;
+  visits?: number;
+  visitCount?: number;
 }
 
 export interface PersonOverviewStayDurationAnalysis {
@@ -66,6 +68,24 @@ export interface PersonOverviewStayDurationAnalysis {
   areaBreakdown: PersonOverviewAreaBreakdown[];
 }
 
+export interface PersonOverviewBreach {
+  areaId?: string;
+  areaName?: string;
+  area?: string;
+  floorName?: string;
+  floor?: string;
+  buildingName?: string;
+  building?: string;
+  buildingFloor?: string;
+  enteredAt?: string;
+  durationMinutes?: number;
+  durationFormatted?: string;
+  duration?: string;
+  alarmTriggered?: boolean;
+  alarmCategory?: string;
+  reason?: string;
+}
+
 export interface PersonOverviewAccessCompliance {
   complianceScore: number;
   complianceStatus: string;
@@ -76,7 +96,7 @@ export interface PersonOverviewAccessCompliance {
   allowedAreaList: any[];
   timeSchedule: any | null;
   visitorSchedule: any | null;
-  unauthorizedBreaches: any[];
+  unauthorizedBreaches: PersonOverviewBreach[];
 }
 
 export interface PersonOverviewIncidentSummary {

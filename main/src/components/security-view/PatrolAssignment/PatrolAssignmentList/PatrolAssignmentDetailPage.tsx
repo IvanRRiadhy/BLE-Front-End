@@ -11,6 +11,8 @@ import {
   CircularProgress,
   Tabs,
   Tab,
+  Tooltip,
+  IconButton,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useEffect, useState } from 'react';
@@ -36,6 +38,8 @@ import { RootState, useSelector } from 'src/store/Store';
 import { useSearchParams } from 'react-router';
 import { usePatrolAssignmentId, usePatrolRouteId } from 'src/hooks/usePatrolRoute';
 import { useTimeGroupList } from 'src/hooks/useTimeGroup';
+import { useQueryClient } from '@tanstack/react-query';
+import { IconRefresh } from '@tabler/icons-react';
 
 const PatrolDetailPage = () => {
   const navigate = useNavigate();
@@ -44,15 +48,30 @@ const PatrolDetailPage = () => {
   const settings = useSelector((state: RootState) => state.settings);
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+  const queryClient = useQueryClient();
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+
   const [searchParams] = useSearchParams();
   const id = searchParams.get('id') ?? undefined;
   console.log('id', id);
-  const { data: patrolRes } = usePatrolAssignmentId(id ?? '');
+  const {
+    data: patrolRes,
+    refetch: refetchAssignment,
+    isFetching: isAssignmentFetching,
+  } = usePatrolAssignmentId(id ?? '');
 
   const patrol = patrolRes?.collection?.data;
-  const { data: route } = usePatrolRouteId(patrol?.patrolRouteId ?? '');  
+  const {
+    data: route,
+    refetch: refetchRoute,
+    isFetching: isRouteFetching,
+  } = usePatrolRouteId(patrol?.patrolRouteId ?? '');
 
-  const { data: timeGroupRes } = useTimeGroupList({
+  const {
+    data: timeGroupRes,
+    refetch: refetchTimeGroup,
+    isFetching: isTimeGroupFetching,
+  } = useTimeGroupList({
     ...defaultTimeGroupFilter,
     filters: { id: patrol?.timeGroupId ? [patrol.timeGroupId] : [] },
   });
@@ -73,17 +92,57 @@ const PatrolDetailPage = () => {
 
   const formatDate = (date?: string) => (date ? new Date(date).toLocaleDateString('en-GB') : '-');
 
-  const { data: patrolSessionData, isLoading: isSessionLoading } = usePatrolSessionList({
+  const {
+    data: patrolSessionData,
+    isLoading: isSessionLoading,
+    refetch: refetchSessions,
+    isFetching: isSessionFetching,
+  } = usePatrolSessionList({
     ...defaultPatrolSessionFilter,
     timeRange: 'daily',
     filters: { PatrolAssignmentId: id },
   });
 
-  const { data: caseData, isLoading: isCaseLoading } = usePatrolCaseList({
+  const {
+    data: caseData,
+    isLoading: isCaseLoading,
+    refetch: refetchCases,
+    isFetching: isCaseFetching,
+  } = usePatrolCaseList({
     ...defaultPatrolCaseFilter,
     filters: { PatrolAssignmentId: id },
   });
   const patrolCaseData = caseData?.data || [];
+
+  const isRefreshing =
+    isManualRefreshing ||
+    isAssignmentFetching ||
+    isSessionFetching ||
+    isCaseFetching ||
+    isRouteFetching ||
+    isTimeGroupFetching;
+
+  const handleRefresh = async () => {
+    setIsManualRefreshing(true);
+    try {
+      await Promise.all([
+        refetchAssignment(),
+        refetchSessions(),
+        refetchCases(),
+        refetchRoute(),
+        refetchTimeGroup(),
+        queryClient.invalidateQueries({ queryKey: ['patrol-assignment-list'] }),
+        queryClient.invalidateQueries({ queryKey: ['patrol-case-list'] }),
+        queryClient.invalidateQueries({ queryKey: ['patrol-session-list'] }),
+      ]);
+      toast.success('Patrol detail refreshed');
+    } catch (error) {
+      console.error('Error refreshing patrol detail:', error);
+      toast.error('Failed to refresh patrol detail');
+    } finally {
+      setIsManualRefreshing(false);
+    }
+  };
 
   const InfoRow = ({ label, value }: { label: string; value: string }) => (
     <Box display="flex" justifyContent="space-between">
@@ -345,8 +404,15 @@ const handleStart = async () => {
                 : `calc(100vh - ${(settings.TopbarHeight ?? 70) * 2}px)`,
             }}
           >
-            {/* Back Button */}
-            <Box mb={2}>
+            {/* Back Button and Actions */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mb: 2,
+              }}
+            >
               <Button
                 size="small"
                 startIcon={<ArrowBackIcon />}
@@ -354,6 +420,28 @@ const handleStart = async () => {
               >
                 Back
               </Button>
+              <Tooltip title="Refresh">
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={handleRefresh}
+                    disabled={isRefreshing}
+                    sx={{
+                      border: `1px solid ${theme.palette.divider}`,
+                      borderRadius: 1,
+                      '& svg': {
+                        animation: isRefreshing ? 'spin 1s linear infinite' : 'none',
+                      },
+                      '@keyframes spin': {
+                        '0%': { transform: 'rotate(0deg)' },
+                        '100%': { transform: 'rotate(360deg)' },
+                      },
+                    }}
+                  >
+                    <IconRefresh size={18} />
+                  </IconButton>
+                </span>
+              </Tooltip>
             </Box>
             {/* Name */}
             <Typography fontWeight={700} fontSize={20}>

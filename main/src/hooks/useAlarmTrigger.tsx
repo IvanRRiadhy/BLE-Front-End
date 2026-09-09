@@ -56,7 +56,11 @@ export function useAlarmTriggerList(filter: GetFilter) {
 // -----------------------------------------------------------------------------
 // ✅ FETCH LIST INFINITE (for infinite scrolling, per-category)
 // -----------------------------------------------------------------------------
-export function useInfiniteAlarmTriggerList(filter: GetFilter, pageSize = 50) {
+export function useInfiniteAlarmTriggerList(
+  filter: GetFilter,
+  pageSize = 50,
+  options?: { enabled?: boolean },
+) {
   return useInfiniteQuery({
     queryKey: ['alarmTrigger-list-infinite', { ...filter, Length: undefined, Start: undefined }, pageSize],
     queryFn: async ({ pageParam = 0 }) => {
@@ -83,6 +87,7 @@ export function useInfiniteAlarmTriggerList(filter: GetFilter, pageSize = 50) {
     },
     staleTime: 5_000,
     gcTime: 5 * 60_000,
+    enabled: options?.enabled ?? true,
   });
 }
 

@@ -16,7 +16,7 @@ const NextPatrolBox = ({ nextPatrol }: any) => {
       const now = dayjs();
 
       // convert backend UTC -> local
-      const localTime = utcTimeToLocal(nextPatrol.scheduleStart);
+      const localTime = nextPatrol.scheduleStart;
 
       const [hour, minute] = localTime.split(':').map(Number);
 

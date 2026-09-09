@@ -33,6 +33,7 @@ import {
 } from '@mui/material';
 import { Upload, PictureAsPdf, TableChart, ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import { useState } from 'react';
+import { toLocalDate } from 'src/utils/time';
 import { useEvacuationSummary } from 'src/hooks/useEvacuate';
 import { EvacuationAlertType } from 'src/hooks/useEvacuate';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
@@ -74,6 +75,8 @@ const EvacuationSummaryDialog: React.FC<Props> = ({ open, onClose, evacuation })
 
   const formatDateTime = (dateString?: string | null) => {
     if (!dateString) return '-';
+    const date = toLocalDate(dateString);
+    if (!date || isNaN(date.getTime())) return '-';
     return new Intl.DateTimeFormat('en-GB', {
       weekday: 'short',
       year: 'numeric',
@@ -83,12 +86,14 @@ const EvacuationSummaryDialog: React.FC<Props> = ({ open, onClose, evacuation })
       minute: '2-digit',
       second: '2-digit',
       hour12: false,
-    }).format(new Date(dateString));
+    }).format(date);
   };
 
   const formatDuration = (start: string, end: string | null) => {
     if (!end) return 'In Progress';
-    const durationMs = new Date(end).getTime() - new Date(start).getTime();
+    const startMs = toLocalDate(start)?.getTime() ?? 0;
+    const endMs = toLocalDate(end)?.getTime() ?? 0;
+    const durationMs = endMs - startMs;
     const minutes = Math.floor(durationMs / 60000);
     const seconds = Math.floor((durationMs % 60000) / 1000);
     return `${minutes}m ${seconds}s`;

@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import dayjs from 'dayjs';
+import { toLocalDate } from 'src/utils/time';
 
 export const PATROL_REPORT_COLUMNS = [
   { header: 'Patrol Assignment', key: 'assignmentName', width: 20 },
@@ -63,8 +64,8 @@ export const buildPatrolReportRows = (data: any[]): PatrolReportRow[] => {
       return (a.assignmentId || '').localeCompare(b.assignmentId || '');
     if (a.securityId !== b.securityId)
       return (a.securityId || '').localeCompare(b.securityId || '');
-    const aTime = a.startedAt ? new Date(a.startedAt).getTime() : 0;
-    const bTime = b.startedAt ? new Date(b.startedAt).getTime() : 0;
+    const aTime = a.startedAt ? (toLocalDate(a.startedAt)?.getTime() ?? 0) : 0;
+    const bTime = b.startedAt ? (toLocalDate(b.startedAt)?.getTime() ?? 0) : 0;
     return aTime - bTime;
   });
 
@@ -158,7 +159,7 @@ export const downloadPatrolReportExcel = async (
       routeName:           row.routeName ?? undefined,
       totalCheckpoints:    row.totalCheckpoints ?? undefined,
       securityName:        row.securityName ?? undefined,
-      session:             row.session ? dayjs(row.session).toDate() : undefined,
+      session:             row.session ? (toLocalDate(row.session) ?? undefined) : undefined,
       sessionStatus:       row.sessionStatus ?? undefined,
       completedCheckpoints: row.completedCheckpoints ?? undefined,
       completionPercentage: row.completionPercentage ?? undefined,
@@ -168,7 +169,7 @@ export const downloadPatrolReportExcel = async (
       caseType:            row.caseType ?? undefined,
       threatLevel:         row.threatLevel ?? undefined,
       area:                row.area ?? undefined,
-      reportTime:          row.reportTime ? dayjs(row.reportTime).toDate() : undefined,
+      reportTime:          row.reportTime ? (toLocalDate(row.reportTime) ?? undefined) : undefined,
       caseStatus:          row.caseStatus ?? undefined,
       attachment:          row.attachment ?? undefined,
     });

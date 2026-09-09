@@ -13,6 +13,7 @@ import {
   DialogTitle,
   IconButton,
   DialogContent,
+  Tooltip,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from '@mui/icons-material/Close';
@@ -28,6 +29,7 @@ import PatrolScheduleCalendarDialog from 'src/components/security-view/PatrolAss
 import { useNavigate } from 'react-router';
 import { useStartPatrol, useStopPatrol, usePatrolSessionList } from 'src/hooks/usePatrolSession';
 import { PatrolSessionType } from 'src/store/apps/crud/patrolSession';
+import { toLocalDate } from 'src/utils/time';
 import {
   defaultPatrolCaseFilter,
   defaultPatrolCaseUploadForm,
@@ -50,6 +52,8 @@ import { getCaseStatusColor } from 'src/utils/caseStatus';
 import { usePatrolReport } from 'src/hooks/usePatrolReport';
 import { buildPatrolReportRows } from 'src/utils/exportPatrolReport';
 import { getUserTimezone } from 'src/utils/time';
+import { useQueryClient } from '@tanstack/react-query';
+import { IconRefresh } from '@tabler/icons-react';
 
 interface Props {
   patrol: PatrolAssignType;
@@ -64,17 +68,36 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
   const settings = useSelector((state: RootState) => state.settings);
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+  const queryClient = useQueryClient();
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+
   const [searchParams] = useSearchParams();
   const id = searchParams.get('id') ?? undefined;
 
-  const { data: patrolRes } = usePatrolAssignmentId(id ?? '');
+  const {
+    data: patrolRes,
+    refetch: refetchAssignment,
+    isFetching: isAssignmentFetching,
+  } = usePatrolAssignmentId(patrol?.id ?? id ?? '');
 
-  // const patrol2 = patrolRes?.collection?.data;
-  // const patrol = useSelector((state: RootState) => state.PatrolRouteReducer.selectedPatrolAssign);
+  useEffect(() => {
+    const updated = patrolRes?.collection?.data;
+    if (updated) {
+      dispatch(SelectPatrolAssign(updated));
+    }
+  }, [patrolRes, dispatch]);
 
-  const { data: route } = usePatrolRouteId(patrol?.patrolRouteId ?? '');
+  const {
+    data: route,
+    refetch: refetchRoute,
+    isFetching: isRouteFetching,
+  } = usePatrolRouteId(patrol?.patrolRouteId ?? '');
 
-  const { data: timeGroupRes } = useTimeGroupList({
+  const {
+    data: timeGroupRes,
+    refetch: refetchTimeGroup,
+    isFetching: isTimeGroupFetching,
+  } = useTimeGroupList({
     ...defaultTimeGroupFilter,
     filters: { id: patrol?.timeGroupId ? [patrol.timeGroupId] : [] },
   });
@@ -89,13 +112,50 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
   const [selectedCase, setSelectedCase] = useState<PatrolCaseType | undefined>(undefined);
   const [editId, setEditId] = useState<string | undefined>(undefined);
 
-  const formatDate = (date?: string) => (date ? new Date(date).toLocaleDateString('en-GB') : '-');
+  const formatDate = (date?: string) => {
+    if (!date) return '-';
+    const str = String(date).trim();
+    if (!str.endsWith('Z') && !str.endsWith('z')) return str;
+    return toLocalDate(str)?.toLocaleDateString('en-GB') ?? '-';
+  };
 
-  const { data: caseData, isLoading: isCaseLoading } = usePatrolCaseList({
+  const {
+    data: caseData,
+    isLoading: isCaseLoading,
+    refetch: refetchCases,
+    isFetching: isCaseFetching,
+  } = usePatrolCaseList({
     ...defaultPatrolCaseFilter,
     filters: { PatrolAssignmentId: patrol?.id },
   });
   const patrolCaseData = caseData?.data || [];
+
+  const isRefreshing =
+    isManualRefreshing ||
+    isAssignmentFetching ||
+    isCaseFetching ||
+    isRouteFetching ||
+    isTimeGroupFetching;
+
+  const handleRefresh = async () => {
+    setIsManualRefreshing(true);
+    try {
+      await Promise.all([
+        refetchAssignment(),
+        refetchCases(),
+        refetchRoute(),
+        refetchTimeGroup(),
+        queryClient.invalidateQueries({ queryKey: ['patrol-assignment-list'] }),
+        queryClient.invalidateQueries({ queryKey: ['patrol-report-list'] }),
+      ]);
+      toast.success('Patrol report refreshed');
+    } catch (error) {
+      console.error('Error refreshing patrol report:', error);
+      toast.error('Failed to refresh patrol report');
+    } finally {
+      setIsManualRefreshing(false);
+    }
+  };
 
   const InfoRow = ({ label, value }: { label: string; value: string }) => (
     <Box display="flex" justifyContent="space-between">
@@ -192,6 +252,7 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
             }}
           >
             {/* Back Button */}
+            {/* Back Button and Actions */}
             <Box
               sx={{
                 display: 'flex',
@@ -207,9 +268,33 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
               >
                 Back
               </Button>
-              <Button variant="outlined" color="primary" size="small" onClick={handlePatrolReport}>
-                Generate Report
-              </Button>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Tooltip title="Refresh">
+                  <span>
+                    <IconButton
+                      size="small"
+                      onClick={handleRefresh}
+                      disabled={isRefreshing}
+                      sx={{
+                        border: `1px solid ${theme.palette.divider}`,
+                        borderRadius: 1,
+                        '& svg': {
+                          animation: isRefreshing ? 'spin 1s linear infinite' : 'none',
+                        },
+                        '@keyframes spin': {
+                          '0%': { transform: 'rotate(0deg)' },
+                          '100%': { transform: 'rotate(360deg)' },
+                        },
+                      }}
+                    >
+                      <IconRefresh size={18} />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+                <Button variant="outlined" color="primary" size="small" onClick={handlePatrolReport}>
+                  Generate Report
+                </Button>
+              </Stack>
             </Box>
 
               {/* Name */}
@@ -378,6 +463,26 @@ const PatrolReportContent = ({ patrol, onSecurityClick }: Props) => {
               <Typography fontWeight={700} fontSize={18}>
                 Patrol Cases
               </Typography>
+              <Tooltip title="Refresh">
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={handleRefresh}
+                    disabled={isRefreshing}
+                    sx={{
+                      '& svg': {
+                        animation: isRefreshing ? 'spin 1s linear infinite' : 'none',
+                      },
+                      '@keyframes spin': {
+                        '0%': { transform: 'rotate(0deg)' },
+                        '100%': { transform: 'rotate(360deg)' },
+                      },
+                    }}
+                  >
+                    <IconRefresh size={18} />
+                  </IconButton>
+                </span>
+              </Tooltip>
             </Box>
 
             {/* List */}

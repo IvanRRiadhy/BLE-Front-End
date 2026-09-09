@@ -42,6 +42,7 @@ import {
   IconArrowLeft,
 } from '@tabler/icons-react';
 import dayjs from 'dayjs';
+import { toLocalDate } from 'src/utils/time';
 import { VisitorSessionResponseType, VisitorSessionType } from 'src/store/apps/crud/visitorSession';
 import { BASE_URL } from 'src/utils/axios';
 import BeaconRenderer from 'src/components/dashboards/monitoring/Renderer/BeaconRenderer';
@@ -197,12 +198,12 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
 
       // Sort sessions chronologically asc
       const sortedSessions = [...sessionList].sort(
-        (a, b) => new Date(a.enterTime || 0).getTime() - new Date(b.enterTime || 0).getTime()
+        (a, b) => (toLocalDate(a.enterTime || 0)?.getTime() ?? 0) - (toLocalDate(b.enterTime || 0)?.getTime() ?? 0)
       );
 
       sortedSessions.forEach((s, idx) => {
-        const enterDate = s.enterTime ? new Date(s.enterTime) : null;
-        const exitDate = s.exitTime ? new Date(s.exitTime) : null;
+        const enterDate = toLocalDate(s.enterTime);
+        const exitDate = toLocalDate(s.exitTime);
 
         if (enterDate) {
           if (!firstTime || enterDate < firstTime) firstTime = enterDate;
@@ -242,8 +243,8 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
 
       if (p.sessions) {
         p.sessions.forEach((s: any, idx: number) => {
-          const enterDate = s.enterTime ? new Date(s.enterTime) : null;
-          const exitDate = s.exitTime ? new Date(s.exitTime) : null;
+          const enterDate = toLocalDate(s.enterTime);
+          const exitDate = toLocalDate(s.exitTime);
           if (enterDate && (!firstTime || enterDate < firstTime)) firstTime = enterDate;
           if (enterDate && (!lastTime || enterDate > lastTime)) lastTime = enterDate;
 
@@ -274,8 +275,8 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
     const durationFormatted = durationHours > 0 ? `${durationHours}h ${mins}m` : `${mins}m`;
 
     // First / Last Seen formatted
-    const fSeen = firstTime ? dayjs(firstTime).format('MMM D, YYYY HH:mm') : 'Sep 1, 2026 08:32';
-    const lSeen = lastTime ? dayjs(lastTime).format('MMM D, YYYY HH:mm') : 'Sep 1, 2026 10:38';
+    const fSeen = firstTime ? dayjs(toLocalDate(firstTime)!).format('MMM D, YYYY HH:mm') : 'Sep 1, 2026 08:32';
+    const lSeen = lastTime ? dayjs(toLocalDate(lastTime)!).format('MMM D, YYYY HH:mm') : 'Sep 1, 2026 10:38';
 
     // Status: On Site or Off Site
     const isCurrentlyOnSite = latestSession ? !latestSession.exitTime : records.some((r) => r.status === 'Active');
@@ -284,7 +285,7 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
 
     let sinceText = 'Since 10:09 (29 minutes)';
     if (activeRecord?.rawEnterTime) {
-      const enterD = dayjs(activeRecord.rawEnterTime);
+      const enterD = dayjs(toLocalDate(activeRecord.rawEnterTime)!);
       const diffMins = dayjs().diff(enterD, 'minute');
       sinceText = `Since ${enterD.format('HH:mm')} (${diffMins} minutes)`;
     }
@@ -297,8 +298,8 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
     const hourlyBuckets = new Array(24).fill(0);
     records.forEach((r) => {
       if (r.rawEnterTime) {
-        const hour = new Date(r.rawEnterTime).getHours();
-        if (hour >= 0 && hour < 24) {
+        const hour = toLocalDate(r.rawEnterTime)?.getHours();
+        if (hour !== undefined && hour >= 0 && hour < 24) {
           hourlyBuckets[hour] += 1;
         }
       }
@@ -997,7 +998,7 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
               >
                 {movementRecords.map((rec) => {
                   const isActive = rec.status === 'Active';
-                  const timeOnly = rec.rawEnterTime ? dayjs(rec.rawEnterTime).format('HH:mm') : '08:32';
+                  const timeOnly = rec.rawEnterTime ? dayjs(toLocalDate(rec.rawEnterTime)!).format('HH:mm') : '08:32';
 
                   return (
                     <Box key={rec.id} sx={{ position: 'relative' }}>

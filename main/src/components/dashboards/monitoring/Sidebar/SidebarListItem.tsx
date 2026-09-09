@@ -9,8 +9,7 @@ import {
   IconButton,
   useTheme,
 } from '@mui/material';
-import { MoreVertRounded } from '@mui/icons-material';
-import { IconBell, IconLiveView } from '@tabler/icons-react';
+import { IconBell, IconLiveView, IconInfoCircle } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { BASE_URL } from 'src/utils/axios';
 import { useSelector } from 'src/store/Store';
@@ -83,7 +82,7 @@ const SidebarListItem = ({ item, isNew, onItemClick }: Props) => {
         </Stack>
 
         <IconButton size="small">
-          <MoreVertRounded />
+          <IconInfoCircle size={18} />
         </IconButton>
       </Box>
 

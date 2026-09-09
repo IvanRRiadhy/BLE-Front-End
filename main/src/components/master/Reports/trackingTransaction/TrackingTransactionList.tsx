@@ -148,8 +148,14 @@ const TrackingTransactionList = () => {
 
   const formatTime = (isoString: string) => {
     if (!isoString) return '-';
+    const str = String(isoString).trim();
 
-    const localTime = dayjs.utc(isoString).local(); // Convert UTC → Local
+    // If no 'Z', it's already on local timezone -> return raw
+    if (!str.endsWith('Z') && !str.endsWith('z')) {
+      return str;
+    }
+
+    const localTime = dayjs.utc(str).local(); // Convert UTC → Local
 
     const weekday = localTime.format('dddd'); // e.g. Kamis
     const day = localTime.format('DD');

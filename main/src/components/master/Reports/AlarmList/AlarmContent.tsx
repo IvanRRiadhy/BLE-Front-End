@@ -85,6 +85,10 @@ const proximityColorMap: Record<string, string> = {
   DifferentBuilding: '#9e9e9e', // grey
 };
 
+const DEFAULT_ACTIVE_ACTIONS = ['Idle', 'Acknowledged', 'Acknowledge', 'Waiting'];
+const DEFAULT_ONGOING_ACTIONS = ['Dispatched', 'Accepted', 'Arrived', 'Investigated', 'PostponeInvestigated'];
+const DEFAULT_CLEARED_ACTIONS = [ 'Done', 'DoneInvestigated', 'NoAction'];
+
 const AlarmContent = () => {
   const queryClient = useQueryClient();
   const dispatch: AppDispatch = useDispatch();
@@ -104,25 +108,56 @@ const AlarmContent = () => {
   // 🔹 Per-category infinite queries
   const baseFilter = alarmTriggerFilter;
 
+  const selectedActions = useMemo(() => {
+    return (baseFilter.filters?.action || []).filter(Boolean);
+  }, [baseFilter.filters?.action]);
+
+  const hasActionFilter = selectedActions.length > 0;
+
+  const activeActionsToQuery = useMemo(() => {
+    if (!hasActionFilter) return ['Idle', 'Acknowledged'];
+    return selectedActions.filter((act) =>
+      DEFAULT_ACTIVE_ACTIONS.some((a) => a.toLowerCase() === act.toLowerCase()),
+    );
+  }, [hasActionFilter, selectedActions]);
+
+  const onGoingActionsToQuery = useMemo(() => {
+    if (!hasActionFilter) return ['Dispatched', 'Accepted', 'PostponeInvestigated'];
+    return selectedActions.filter((act) =>
+      DEFAULT_ONGOING_ACTIONS.some((a) => a.toLowerCase() === act.toLowerCase()),
+    );
+  }, [hasActionFilter, selectedActions]);
+
+  const clearedActionsToQuery = useMemo(() => {
+    if (!hasActionFilter) return undefined;
+    return selectedActions.filter((act) =>
+      DEFAULT_CLEARED_ACTIONS.some((a) => a.toLowerCase() === act.toLowerCase()),
+    );
+  }, [hasActionFilter, selectedActions]);
+
+  const enableActive = !hasActionFilter || activeActionsToQuery.length > 0;
+  const enableOnGoing = !hasActionFilter || onGoingActionsToQuery.length > 0;
+  const enableCleared =
+    !hasActionFilter || (clearedActionsToQuery !== undefined && clearedActionsToQuery.length > 0);
+
   const {
     data: activeData,
     isLoading: isLoadingActive,
     hasNextPage: hasNextActive,
     fetchNextPage: fetchNextActive,
     isFetchingNextPage: isFetchingNextActive,
-  } = useInfiniteAlarmTriggerList({
-    ...baseFilter,
-    filters: {
-      ...baseFilter.filters,
-      isActive: true,
-      // action: baseFilter.filters?.action?.length
-      //   ? baseFilter.filters.action.filter(
-      //       (a) => a.toLowerCase() !== 'dispatched' && a.toLowerCase() !== 'accepted',
-      //     )
-      //   : undefined,
-      action: ['Idle', 'Acknowledged']
+  } = useInfiniteAlarmTriggerList(
+    {
+      ...baseFilter,
+      filters: {
+        ...baseFilter.filters,
+        isActive: true,
+        action: activeActionsToQuery.length > 0 ? activeActionsToQuery : ['__NO_MATCH__'],
+      },
     },
-  }, 50);
+    50,
+    { enabled: enableActive },
+  );
 
   const {
     data: onGoingData,
@@ -130,14 +165,18 @@ const AlarmContent = () => {
     hasNextPage: hasNextOnGoing,
     fetchNextPage: fetchNextOnGoing,
     isFetchingNextPage: isFetchingNextOnGoing,
-  } = useInfiniteAlarmTriggerList({
-    ...baseFilter,
-    filters: {
-      ...baseFilter.filters,
-      isActive: true,
-      action: ['Dispatched', 'Accepted', 'PostponeInvestigated'],
+  } = useInfiniteAlarmTriggerList(
+    {
+      ...baseFilter,
+      filters: {
+        ...baseFilter.filters,
+        isActive: true,
+        action: onGoingActionsToQuery.length > 0 ? onGoingActionsToQuery : ['__NO_MATCH__'],
+      },
     },
-  }, 50);
+    50,
+    { enabled: enableOnGoing },
+  );
 
   const {
     data: clearedData,
@@ -145,13 +184,23 @@ const AlarmContent = () => {
     hasNextPage: hasNextCleared,
     fetchNextPage: fetchNextCleared,
     isFetchingNextPage: isFetchingNextCleared,
-  } = useInfiniteAlarmTriggerList({
-    ...baseFilter,
-    filters: {
-      ...baseFilter.filters,
-      isActive: false,
+  } = useInfiniteAlarmTriggerList(
+    {
+      ...baseFilter,
+      filters: {
+        ...baseFilter.filters,
+        isActive: false,
+        action:
+          clearedActionsToQuery && clearedActionsToQuery.length > 0
+            ? clearedActionsToQuery
+            : hasActionFilter
+              ? ['__NO_MATCH__']
+              : undefined,
+      },
     },
-  }, 50);
+    50,
+    { enabled: enableCleared },
+  );
 
   // 🔹 Intersection observers per category column
   const { ref: activeRef, inView: activeInView } = useInView();

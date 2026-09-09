@@ -13,6 +13,7 @@ import {
   DialogTitle,
   IconButton,
   DialogContent,
+  Tooltip,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -25,9 +26,12 @@ import { PatrolAssignType, SecurityType } from 'src/store/apps/crud/patrolRoute'
 import { defaultPatrolReportFilter } from 'src/store/apps/defaultForm';
 import { getCaseStatusColor } from 'src/utils/caseStatus';
 import { useTranslation } from 'react-i18next';
+import { toLocalDate } from 'src/utils/time';
 import PatrolCaseOverview from 'src/components/security-view/PatrolCaseList/PatrolCaseOverview';
 import { PatrolCaseType } from 'src/store/apps/crud/patrolCase';
 import PatrolCaseListItem from 'src/components/security-view/PatrolAssignment/PatrolAssignmentList/PatrolCaseListItem';
+import toast from 'react-hot-toast';
+import { IconRefresh } from '@tabler/icons-react';
 
 interface Props {
   sec: SecurityType;
@@ -45,7 +49,7 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
   const [showRightArrow, setShowRightArrow] = useState(false);
   const [lineWidth, setLineWidth] = useState(0);
 
-  const { data: data } = usePatrolReportList({
+  const { data, refetch, isFetching } = usePatrolReportList({
     ...defaultPatrolReportFilter,
     filters: { assignmentId: [patrol.id], securityId: [sec.id] },
   });
@@ -53,6 +57,28 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
   const patrolReportData = data?.data ?? [];
 
   const [selectedSession, setSelectedSession] = useState<PatrolReportType | null>(null);
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+  const isRefreshing = isFetching || isManualRefreshing;
+
+  const handleRefresh = async () => {
+    setIsManualRefreshing(true);
+    try {
+      const res = await refetch();
+      const updatedList = res.data?.data ?? [];
+      if (selectedSession) {
+        const updated = updatedList.find((s) => s.sessionId === selectedSession.sessionId);
+        if (updated) {
+          setSelectedSession(updated);
+        }
+      }
+      toast.success('Patrol report refreshed');
+    } catch (error) {
+      console.error('Error refreshing patrol report:', error);
+      toast.error('Failed to refresh patrol report');
+    } finally {
+      setIsManualRefreshing(false);
+    }
+  };
   console.log('Session: ', selectedSession);
   const totalSessions = patrolReportData.length;
 
@@ -63,16 +89,23 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
 
   const first = patrolReportData[0];
   
-  const formatDate = (date?: string) => (date ? new Date(date).toLocaleString('en-GB') : '-');
+  const formatDate = (date?: string) => {
+    if (!date) return '-';
+    const str = String(date).trim();
+    if (!str.endsWith('Z') && !str.endsWith('z')) return str;
+    return toLocalDate(str)?.toLocaleString('en-GB') ?? '-';
+  };
 
   const formatTime = (isoString: string) => {
     if (!isoString) return '';
-    const date = new Date(isoString);
+    const str = String(isoString).trim();
+    if (!str.endsWith('Z') && !str.endsWith('z')) return str;
+    const date = toLocalDate(str);
+    if (!date || isNaN(date.getTime())) return str;
 
     // Extract the weekday
     const weekday = t(date.toLocaleString('en-GB', { weekday: 'long' }));
     const month = t(date.toLocaleString('en-GB', { month: 'short' }));
-    console.log('Date: ', date, isoString);
     return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()} - ${date.toLocaleTimeString(
       'en-GB',
       {
@@ -185,8 +218,15 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
             backgroundColor: theme.palette.background.paper,
           }}
         >
-          {/* Back Button */}
-          <Box mb={2}>
+          {/* Back Button & Actions */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mb: 2,
+            }}
+          >
             <Button
               size="small"
               startIcon={<ArrowBackIcon />}
@@ -194,6 +234,28 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
             >
               Back
             </Button>
+            <Tooltip title="Refresh">
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  sx={{
+                    border: `1px solid ${theme.palette.divider}`,
+                    borderRadius: 1,
+                    '& svg': {
+                      animation: isRefreshing ? 'spin 1s linear infinite' : 'none',
+                    },
+                    '@keyframes spin': {
+                      '0%': { transform: 'rotate(0deg)' },
+                      '100%': { transform: 'rotate(360deg)' },
+                    },
+                  }}
+                >
+                  <IconRefresh size={18} />
+                </IconButton>
+              </span>
+            </Tooltip>
           </Box>
           {/* SECURITY */}
           <Typography fontWeight={700} fontSize={20}>
@@ -277,9 +339,31 @@ const PatrolReportSessionContent = ({ sec, patrol, onSecurityClick }: Props) => 
               position: 'relative',
             }}
           >
-            <Typography fontWeight={700} fontSize={18} mb={2}>
-              Session Timeline
-            </Typography>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Typography fontWeight={700} fontSize={18}>
+                Session Timeline
+              </Typography>
+              <Tooltip title="Refresh">
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={handleRefresh}
+                    disabled={isRefreshing}
+                    sx={{
+                      '& svg': {
+                        animation: isRefreshing ? 'spin 1s linear infinite' : 'none',
+                      },
+                      '@keyframes spin': {
+                        '0%': { transform: 'rotate(0deg)' },
+                        '100%': { transform: 'rotate(360deg)' },
+                      },
+                    }}
+                  >
+                    <IconRefresh size={18} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            </Box>
             {/* LEFT ARROW */}
             {showLeftArrow && (
               <Box

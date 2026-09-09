@@ -1,5 +1,15 @@
-import { useEffect, useMemo } from 'react';
-import { Box, Typography, Avatar, Stack, Skeleton } from '@mui/material';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  Box,
+  Typography,
+  Avatar,
+  Stack,
+  Skeleton,
+  TextField,
+  InputAdornment,
+  IconButton,
+} from '@mui/material';
+import { IconSearch, IconX } from '@tabler/icons-react';
 import { useInfiniteUpcomingVisitor } from 'src/hooks/useDashboard';
 import { BASE_URL } from 'src/utils/axios';
 import SmartScrollingText from 'src/utils/SmartScrollingText';
@@ -33,13 +43,31 @@ const statusColorMap: Record<string, string> = {
 };
 
 const UpcomingVisitor: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const filter = useMemo(
+    () => ({
+      ...defaultFilter,
+      searchValue: debouncedSearch,
+    }),
+    [debouncedSearch],
+  );
+
   const {
     data: infiniteData,
     isLoading,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useInfiniteUpcomingVisitor(defaultFilter, 10);
+  } = useInfiniteUpcomingVisitor(filter, 10);
 
   const { ref: sentinelRef, inView } = useInView();
 
@@ -87,6 +115,16 @@ const UpcomingVisitor: React.FC = () => {
     }));
   }, [infiniteData]);
 
+  const filteredVisitors = useMemo(() => {
+    if (!searchQuery.trim()) return upcomingVisitor;
+    const q = searchQuery.toLowerCase().trim();
+    return upcomingVisitor.filter(
+      (item) =>
+        item.name.toLowerCase().includes(q) ||
+        (item.status && item.status.toLowerCase().includes(q)),
+    );
+  }, [upcomingVisitor, searchQuery]);
+
   return (
     <Box
       sx={{
@@ -102,23 +140,52 @@ const UpcomingVisitor: React.FC = () => {
         overflowX: 'hidden',
       }}
     >
-      {/* Title */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          pb: 2,
-        }}
-      >
+      {/* Title centered */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', pb: 0.75 }}>
         <Typography
           sx={{
-            fontSize: 24,
+            fontSize: 20,
             fontWeight: 700,
             color: 'primary.main',
           }}
         >
           Visitor Today
         </Typography>
+      </Box>
+
+      {/* Searchbar below title, right-side only */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', px: 0.5, pb: 1 }}>
+        <TextField
+          size="small"
+          placeholder="Search person..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start" sx={{ mr: 0.5 }}>
+                <IconSearch size={14} color="#94A3B8" />
+              </InputAdornment>
+            ),
+            endAdornment: searchQuery ? (
+              <InputAdornment position="end">
+                <IconButton size="small" onClick={() => setSearchQuery('')} sx={{ p: 0.25 }}>
+                  <IconX size={12} />
+                </IconButton>
+              </InputAdornment>
+            ) : null,
+            sx: {
+              borderRadius: '20px',
+              fontSize: '12px',
+              height: '30px',
+              width: { xs: '120px', sm: '140px', md: '160px' },
+              bgcolor: 'action.hover',
+              '& fieldset': { borderColor: 'transparent' },
+              '&:hover fieldset': { borderColor: 'divider' },
+              '&.Mui-focused fieldset': { borderColor: 'primary.main' },
+              '& .MuiInputBase-input': { py: 0.5, px: 0.5 },
+            },
+          }}
+        />
       </Box>
 
       {/* List */}
@@ -142,7 +209,7 @@ const UpcomingVisitor: React.FC = () => {
               <Skeleton variant="text" width={60} height={20} />
             </Stack>
           ))
-        ) : upcomingVisitor.length === 0 ? (
+        ) : filteredVisitors.length === 0 ? (
           <Box
             sx={{
               height: '100%',
@@ -156,16 +223,16 @@ const UpcomingVisitor: React.FC = () => {
           >
             <Typography
               sx={{
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: 500,
               }}
             >
-              There are no visitors today
+              {searchQuery ? `No visitors found matching "${searchQuery}"` : 'There are no visitors today'}
             </Typography>
           </Box>
         ) : (
           <>
-            {upcomingVisitor.map((item, index: number) => (
+            {filteredVisitors.map((item, index: number) => (
               <Stack
                 key={`${index}-${item.id}`}
                 direction="row"

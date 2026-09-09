@@ -21,6 +21,7 @@ import {
 import { Stage, Layer, Image as KonvaImage, Circle, Line, Shape } from 'react-konva';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import dayjs from 'dayjs';
+import { toLocalDate, formatOrRawTime } from 'src/utils/time';
 import { IconPlayerPlayFilled, IconPlayerPauseFilled } from '@tabler/icons-react';
 
 import BeaconRenderer from 'src/components/dashboards/monitoring/Renderer/BeaconRenderer';
@@ -328,7 +329,7 @@ const AlarmPlaybackDialog = ({ open, onClose, data }: Props) => {
         {/* {data && (
           <Box mb={2}>
             <Typography variant="body2">
-              Alarm Time: {dayjs(data.meta.alarmTime).format('YYYY-MM-DD HH:mm:ss')}
+              Alarm Time: {dayjs(toLocalDate(data.meta.alarmTime)!).format('YYYY-MM-DD HH:mm:ss')}
             </Typography>
 
             <Typography variant="body2">
@@ -492,7 +493,7 @@ const AlarmPlaybackDialog = ({ open, onClose, data }: Props) => {
             <Box display="flex" gap={4}>
               <Typography variant="body2">
                 <strong>Alarm Time:</strong>{' '}
-                {dayjs(data.meta.alarmTime).format('YYYY-MM-DD HH:mm:ss')}
+                {formatOrRawTime(data.meta.alarmTime, 'YYYY-MM-DD HH:mm:ss')}
               </Typography>
 
               <Typography variant="body2">
@@ -554,7 +555,7 @@ const AlarmPlaybackDialog = ({ open, onClose, data }: Props) => {
                       transition: 'background-color 0.2s ease',
                     }}
                   >
-                    <TableCell>{dayjs(f.time).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                    <TableCell>{formatOrRawTime(f.time, 'YYYY-MM-DD HH:mm:ss')}</TableCell>
                     <TableCell>{areaDisplayName}</TableCell>
                     <TableCell>{f.phase}</TableCell>
                     <TableCell>{f.restricted ? 'Yes' : 'No'}</TableCell>

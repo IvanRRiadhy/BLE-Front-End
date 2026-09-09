@@ -11,7 +11,13 @@ import {
   Stack,
   Typography,
   Divider,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Chip,
+  Button,
 } from '@mui/material';
+import { IconSearch, IconX } from '@tabler/icons-react';
 import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'src/store/Store';
 import IntruderListItem from './IntruderListItem';
@@ -34,6 +40,11 @@ const IntruderList = () => {
   const selectedIntruder = useSelector((state) => state.alarmTriggerReducer.selectedIntruder);
   const searchParams = new URLSearchParams(window.location.search);
   const autoSelectDone = useRef(false);
+
+  // Search and personType filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [personTypeFilter, setPersonTypeFilter] = useState<'All' | 'Visitor' | 'Member'>('All');
+
   // Fetch all visitors and members upfront
   const { data: allVisitors } = useAllVisitor();
 
@@ -57,6 +68,53 @@ const IntruderList = () => {
       return acc;
     }, {});
   }, [allMembers]);
+
+  // Counts for each person type
+  const counts = useMemo(() => {
+    let visitor = 0;
+    let member = 0;
+    intruderData.forEach((i) => {
+      const pt = i.personType?.toLowerCase();
+      if (pt === 'visitor') visitor++;
+      else if (pt === 'member') member++;
+    });
+    return {
+      all: intruderData.length,
+      visitor,
+      member,
+    };
+  }, [intruderData]);
+
+  const filterOptions: { label: string; value: 'All' | 'Visitor' | 'Member'; count: number }[] = [
+    { label: 'All', value: 'All', count: counts.all },
+    { label: 'Visitor', value: 'Visitor', count: counts.visitor },
+    { label: 'Member', value: 'Member', count: counts.member },
+  ];
+
+  // Filtered intruders based on search and personType
+  const filteredIntruders = useMemo(() => {
+    return intruderData.filter((intruder) => {
+      // 1. Person Type filter
+      if (personTypeFilter !== 'All') {
+        if (intruder.personType?.toLowerCase() !== personTypeFilter.toLowerCase()) {
+          return false;
+        }
+      }
+
+      // 2. Search query filter
+      if (searchQuery.trim()) {
+        const q = searchQuery.trim().toLowerCase();
+        const nameMatch = intruder.personName?.toLowerCase().includes(q);
+        const cardMatch = intruder.cardNumber?.toLowerCase().includes(q);
+        const beaconMatch = intruder.beaconId?.toLowerCase().includes(q);
+        if (!nameMatch && !cardMatch && !beaconMatch) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [intruderData, personTypeFilter, searchQuery]);
 
   useEffect(() => {
     if (autoSelectDone.current) return;
@@ -126,42 +184,108 @@ const IntruderList = () => {
   };
 
   const loading = isLoading || isFetching;
-return (
-  <>
-    <List
-      sx={{
-        height: '90vh',
-        display: 'flex',
-        flexDirection: 'column',
-        p: 0,
-      }}
-    >
-      {/* Sticky Header */}
-      <Box
+  return (
+    <>
+      <List
         sx={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 1,
-          bgcolor: 'background.paper',
+          height: '90vh',
+          display: 'flex',
+          flexDirection: 'column',
+          p: 0,
         }}
       >
-        <Box p={2}>
-          <Typography variant="h4" fontWeight={800}>
-            Intruders
-          </Typography>
-        </Box>
-        <Divider />
-      </Box>
+        {/* Sticky Header */}
+        <Box
+          sx={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 2,
+            bgcolor: 'background.paper',
+          }}
+        >
+          <Box px={2} pt={2} pb={1}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Typography variant="h5" fontWeight={800}>
+                Intruders
+              </Typography>
+              {!loading && (
+                <Chip
+                  label={`${filteredIntruders.length} / ${intruderData.length}`}
+                  size="small"
+                  sx={{ fontWeight: 600, fontSize: '11px', height: 22 }}
+                />
+              )}
+            </Stack>
+          </Box>
 
-      {/* Scrollable Content */}
-      <Box
-        sx={{
-          flex: 1,
-          overflowY: 'auto',
-        }}
-      >
-        {!loading && intruderData.length > 0
-          ? intruderData.map((intruder) => (
+          {/* Search Input */}
+          <Box px={2} pb={1.2}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Search intruder, card, beacon..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <IconSearch size={16} color="#64748B" />
+                  </InputAdornment>
+                ),
+                endAdornment: searchQuery ? (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={() => setSearchQuery('')} sx={{ p: 0.25 }}>
+                      <IconX size={14} />
+                    </IconButton>
+                  </InputAdornment>
+                ) : null,
+                sx: {
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  bgcolor: 'action.hover',
+                  '& fieldset': { borderColor: 'divider' },
+                },
+              }}
+            />
+          </Box>
+
+          {/* Person Type Filter Chips */}
+          <Box px={2} pb={1.5}>
+            <Stack direction="row" spacing={0.8} sx={{ overflowX: 'auto', py: 0.2 }}>
+              {filterOptions.map((opt) => {
+                const isSelected = personTypeFilter === opt.value;
+                return (
+                  <Chip
+                    key={opt.value}
+                    label={`${opt.label} (${opt.count})`}
+                    size="small"
+                    clickable
+                    color={isSelected ? 'primary' : 'default'}
+                    variant={isSelected ? 'filled' : 'outlined'}
+                    onClick={() => setPersonTypeFilter(opt.value)}
+                    sx={{
+                      fontWeight: isSelected ? 700 : 500,
+                      fontSize: '11px',
+                      height: 24,
+                      borderRadius: '6px',
+                    }}
+                  />
+                );
+              })}
+            </Stack>
+          </Box>
+          <Divider />
+        </Box>
+
+        {/* Scrollable Content */}
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: 'auto',
+          }}
+        >
+          {!loading && filteredIntruders.length > 0 ? (
+            filteredIntruders.map((intruder) => (
               <IntruderListItem
                 key={intruder.id}
                 active={intruder.id === selectedIntruder?.id}
@@ -169,9 +293,34 @@ return (
                 onTagClick={() => handleClick(intruder)}
               />
             ))
-          : renderSkeletonItems(SKELETON_ROWS)}
-      </Box>
-    </List>
+          ) : !loading && intruderData.length > 0 && filteredIntruders.length === 0 ? (
+            <Box p={3} textAlign="center">
+              <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                No intruders match the criteria
+              </Typography>
+              <Button
+                size="small"
+                variant="text"
+                onClick={() => {
+                  setSearchQuery('');
+                  setPersonTypeFilter('All');
+                }}
+                sx={{ mt: 1, textTransform: 'none', fontWeight: 600, fontSize: '12px' }}
+              >
+                Reset Search & Filter
+              </Button>
+            </Box>
+          ) : !loading && intruderData.length === 0 ? (
+            <Box p={3} textAlign="center">
+              <Typography variant="body2" color="text.secondary">
+                No intruders found
+              </Typography>
+            </Box>
+          ) : (
+            renderSkeletonItems(SKELETON_ROWS)
+          )}
+        </Box>
+      </List>
 
     {loading &&
       createPortal(

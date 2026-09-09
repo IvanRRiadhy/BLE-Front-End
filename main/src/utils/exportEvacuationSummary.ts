@@ -4,15 +4,20 @@ import dayjs from 'dayjs';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { EvacuationSummaryResponse, PersonDetailSummary } from 'src/hooks/useEvacuate';
+import { toLocalDate } from 'src/utils/time';
 
 const formatDateTime = (dateString?: string | null) => {
   if (!dateString) return '-';
-  return dayjs(dateString).format('ddd, D MMM YYYY, HH:mm:ss');
+  const date = toLocalDate(dateString);
+  if (!date || isNaN(date.getTime())) return '-';
+  return dayjs(date).format('ddd, D MMM YYYY, HH:mm:ss');
 };
 
 const formatDuration = (start: string, end: string | null) => {
   if (!end) return 'In Progress';
-  const durationMs = new Date(end).getTime() - new Date(start).getTime();
+  const startMs = toLocalDate(start)?.getTime() ?? 0;
+  const endMs = toLocalDate(end)?.getTime() ?? 0;
+  const durationMs = endMs - startMs;
   const minutes = Math.floor(durationMs / 60000);
   const seconds = Math.floor((durationMs % 60000) / 1000);
   return `${minutes}m ${seconds}s`;

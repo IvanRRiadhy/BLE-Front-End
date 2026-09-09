@@ -22,6 +22,7 @@ import {
 } from '@mui/material';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { updateEvacuationData } from 'src/store/apps/tracking/Evacuation';
+import { toLocalDate } from 'src/utils/time';
 import EvacuationList from './EvacuationList';
 
 const DetailList: React.FC = () => {
@@ -223,7 +224,7 @@ const DetailList: React.FC = () => {
                           {person.position ? `${person.position.areaName} – ${person.position.floorName} – ${person.position.buildingName}` : 'No Signal'}
                         </Typography>
                         <Typography fontSize={12} color="text.disabled">
-                          {person.position?.lastDetected ? new Date(person.position.lastDetected).toLocaleString() : '-'}
+                          {person.position?.lastDetected ? toLocalDate(person.position.lastDetected)?.toLocaleString() : '-'}
                         </Typography>
                       </TableCell>
                     </TableRow>

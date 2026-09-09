@@ -17,10 +17,23 @@ export default defineConfig({
       'referrer-policy': 'same-origin',
     },
     proxy: {
-      // In case they have an existing backend on port 5000
-      '/api-backend': {
-        target: 'http://192.168.1.10:5000',
+      // Proxy all /api requests to the backend (needed for ALTCHA's internal fetch too)
+      '/api': {
+        target: 'https://ble-api.app.bio-experience.com',
         changeOrigin: true,
+        secure: true,
+        headers: {
+          'X-BIOPEOPLETRACKING-API-KEY': 'FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK',
+        },
+      },
+      // Legacy backend proxy
+      '/api-backend': {
+        target: 'https://ble-api.app.bio-experience.com',
+        changeOrigin: true,
+        secure: true,
+        headers: {
+          'X-BIOPEOPLETRACKING-API-KEY': 'FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK',
+        },
         rewrite: (path) => path.replace(/^\/api-backend/, ''),
       },
     },

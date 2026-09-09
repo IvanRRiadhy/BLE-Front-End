@@ -10,7 +10,11 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  TextField,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
+import { IconSearch, IconX } from '@tabler/icons-react';
 import { useInfiniteRealtimeAlarmLog } from 'src/hooks/useDashboard';
 import { BASE_URL } from 'src/utils/axios';
 import SmartScrollingText from 'src/utils/SmartScrollingText';
@@ -39,16 +43,35 @@ export interface AlarmLogItem {
   floorName: string;
   floorplanName: string;
   lastSeenTime: string;
+  raw: any;
 }
 
 const AlarmLog: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const filter = useMemo(
+    () => ({
+      ...defaultFilter,
+      searchValue: debouncedSearch,
+    }),
+    [debouncedSearch],
+  );
+
   const {
     data: infiniteData,
     isLoading,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useInfiniteRealtimeAlarmLog(defaultFilter, 10);
+  } = useInfiniteRealtimeAlarmLog(filter, 10);
 
   const { ref: sentinelRef, inView } = useInView();
 
@@ -93,9 +116,22 @@ const AlarmLog: React.FC = () => {
         floorName: x.floorName ?? '-',
         floorplanName: x.floorplanName ?? '-',
         lastSeenTime: x.lastSeenAt ? new Date(x.lastSeenAt).toLocaleString() : '-',
+        raw: x,
       };
     });
   }, [rawData]);
+
+  const filteredLog = useMemo(() => {
+    if (!searchQuery.trim()) return log;
+    const q = searchQuery.toLowerCase().trim();
+    return log.filter(
+      (item) =>
+        item.name.toLowerCase().includes(q) ||
+        (item.status && item.status.toLowerCase().includes(q)) ||
+        (item.buildingName && item.buildingName.toLowerCase().includes(q)) ||
+        (item.floorName && item.floorName.toLowerCase().includes(q)),
+    );
+  }, [log, searchQuery]);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedTrigger, setSelectedTrigger] = useState<AlarmTriggerType | null>(null);
@@ -124,11 +160,52 @@ const AlarmLog: React.FC = () => {
         overflowX: 'hidden',
       }}
     >
-      {/* Title */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', pb: 2 }}>
-        <Typography sx={{ fontSize: 24, fontWeight: 700, color: 'primary.main' }}>
+      {/* Title centered */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', pb: 0.75 }}>
+        <Typography
+          sx={{
+            fontSize: 20,
+            fontWeight: 700,
+            color: 'primary.main',
+          }}
+        >
           Real-Time Alarm Log
         </Typography>
+      </Box>
+
+      {/* Searchbar below title, right-side only */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', px: 0.5, pb: 1 }}>
+        <TextField
+          size="small"
+          placeholder="Search person or alarm..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start" sx={{ mr: 0.5 }}>
+                <IconSearch size={14} color="#94A3B8" />
+              </InputAdornment>
+            ),
+            endAdornment: searchQuery ? (
+              <InputAdornment position="end">
+                <IconButton size="small" onClick={() => setSearchQuery('')} sx={{ p: 0.25 }}>
+                  <IconX size={12} />
+                </IconButton>
+              </InputAdornment>
+            ) : null,
+            sx: {
+              borderRadius: '20px',
+              fontSize: '12px',
+              height: '30px',
+              width: { xs: '130px', sm: '150px', md: '175px' },
+              bgcolor: 'action.hover',
+              '& fieldset': { borderColor: 'transparent' },
+              '&:hover fieldset': { borderColor: 'divider' },
+              '&.Mui-focused fieldset': { borderColor: 'primary.main' },
+              '& .MuiInputBase-input': { py: 0.5, px: 0.5 },
+            },
+          }}
+        />
       </Box>
 
       {/* Scrollable list */}
@@ -149,7 +226,7 @@ const AlarmLog: React.FC = () => {
               </Box>
             </Stack>
           ))
-        ) : log.length === 0 ? (
+        ) : filteredLog.length === 0 ? (
           <Box
             sx={{
               height: '100%',
@@ -157,19 +234,19 @@ const AlarmLog: React.FC = () => {
               alignItems: 'center',
               justifyContent: 'center',
               textAlign: 'center',
-              color: '#9e9e9e',
+              color: 'text.secondary',
               px: 2,
             }}
           >
-            <Typography sx={{ fontSize: 16, fontWeight: 500 }}>
-              There are no alarms yet
+            <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
+              {searchQuery ? `No alarms found matching "${searchQuery}"` : 'There are no alarms yet'}
             </Typography>
           </Box>
         ) : (
           <>
-            {log.map((item, index) => (
+            {filteredLog.map((item, index) => (
               <Stack
-                key={`${index}-${rawData[index]?.id ?? index}`}
+                key={`${index}-${item.raw?.id ?? index}`}
                 direction="row"
                 spacing={2}
                 alignItems="center"
@@ -185,7 +262,7 @@ const AlarmLog: React.FC = () => {
                   transition: 'background-color 0.2s ease',
                 }}
                 onClick={() => {
-                  setSelectedTrigger(rawData[index]);
+                  setSelectedTrigger(item.raw);
                   setConfirmOpen(true);
                 }}
               >

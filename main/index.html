@@ -9,6 +9,63 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+
+    <!-- 1. Pure-JS SHA-256: must load synchronously before ALTCHA module evaluates -->
+    <script src="/assets/sha256.min.js"></script>
+
+    <!-- 2. Polyfill: override isSecureContext + crypto.subtle for HTTP/LAN access -->
+    <script>
+      (function () {
+        // ALTCHA reads `const { isSecureContext } = globalThis` at module init time.
+        // We override it here in <head> (synchronous) so it is already true by the time
+        // the ES module bundle evaluates.
+        try {
+          Object.defineProperty(globalThis, 'isSecureContext', {
+            get: function () { return true; },
+            configurable: true,
+          });
+        } catch (e) {
+          console.warn('[polyfill] Could not override isSecureContext:', e);
+        }
+
+        // Polyfill crypto.subtle using the pure-JS sha256 loaded above.
+        // Only installed if the native API is absent (i.e., HTTP context).
+        function installCryptoSubtle() {
+          var subtle = {
+            digest: function (algo, data) {
+              return Promise.resolve().then(function () {
+                // sha256.arrayBuffer() accepts ArrayBuffer / ArrayBufferView natively
+                var input = data instanceof ArrayBuffer ? data : (data.buffer || data);
+                return window.sha256.arrayBuffer(input);
+              });
+            },
+          };
+          try {
+            Object.defineProperty(window.crypto, 'subtle', {
+              get: function () { return subtle; },
+              configurable: true,
+            });
+          } catch (e) {
+            try {
+              var originalCrypto = window.crypto;
+              var cryptoProxy = Object.create(originalCrypto);
+              cryptoProxy.subtle = subtle;
+              Object.defineProperty(window, 'crypto', {
+                get: function () { return cryptoProxy; },
+                configurable: true,
+              });
+            } catch (e2) {
+              try {
+                window.crypto.subtle = subtle;
+              } catch (e3) {}
+            }
+          }
+        }
+
+        if (!window.crypto) window.crypto = {};
+        if (!window.crypto.subtle) installCryptoSubtle();
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

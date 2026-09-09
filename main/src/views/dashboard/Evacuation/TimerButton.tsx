@@ -28,6 +28,7 @@ import {
 } from '@mui/material';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import { setEvacuationId, setEvacuationState, setEvacuationStartTime, resetEvacuation } from 'src/store/apps/tracking/Evacuation';
+import { toLocalDate } from 'src/utils/time';
 import {
   EvacuationAlertPayload,
   useCompleteEvacuation,
@@ -484,8 +485,8 @@ const TimerButton: React.FC = () => {
                         </Typography>
                         <Typography fontSize={12} color="text.disabled">
                           {person.personStatus === 'ConfirmedEvacuated' 
-                            ? (person.statusTimestamps?.confirmedEvacuationAt ? new Date(person.statusTimestamps.confirmedEvacuationAt).toLocaleString() : '-')
-                            : (person.statusTimestamps?.evacuationAt ? new Date(person.statusTimestamps.evacuationAt).toLocaleString() : '-')}
+                            ? (person.statusTimestamps?.confirmedEvacuationAt ? toLocalDate(person.statusTimestamps.confirmedEvacuationAt)?.toLocaleString() : '-')
+                            : (person.statusTimestamps?.evacuationAt ? toLocalDate(person.statusTimestamps.evacuationAt)?.toLocaleString() : '-')}
                         </Typography>
                       </TableCell>
                     </TableRow>

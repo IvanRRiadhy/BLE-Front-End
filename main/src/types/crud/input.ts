@@ -162,10 +162,10 @@ export const visitorStatusEnumMap: Record<string, number> = {
     { label: "Waiting", value: 'Waiting'},
     { label: "Acknowledge", value: 'Acknowledge'},
     { label: "Dispatch", value: 'Dispatch'},
-    { label: "Arrived", value: 'Arrived', disabled: true},
+    // { label: "Arrived", value: 'Arrived', disabled: true},
     { label: "Accepted", value: 'Accepted', disabled: true},
     { label: "Done Investigate", value: 'DoneInvestigated', disabled: true},
-    { label: "Resolved", value: 'Resolved', disabled: true},
+    // { label: "Resolved", value: 'Resolved', disabled: true},
     { label: "Postpone Investigation", value: 'PostponeInvestigated'},
   ];
   export const extraActionStatus: inputDataType[] = [
@@ -180,13 +180,13 @@ export const visitorStatusEnumMap: Record<string, number> = {
   NoAction: 'grey',
   Waiting: 'warning.main',
   Acknowledged: 'warning.main',
-  Acknowledge: 'warning.main',
+  // Acknowledge: 'warning.main',
   Dispatched: 'warning.main',
   Accepted: 'primary.main',
-  Arrived: 'primary.main',
-  Investigated: 'primary.main',
+  // Arrived: 'primary.main',
+  // Investigated: 'primary.main',
   DoneInvestigated: 'success.main',
-  Resolved: 'success.main',
+  // Resolved: 'success.main',
   PostponeInvestigated: 'warning.main',
 };
 

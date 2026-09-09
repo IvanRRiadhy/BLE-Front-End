@@ -3,6 +3,7 @@ import {
   Avatar,
   Box,
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -11,7 +12,16 @@ import {
   Grid2 as Grid,
   Typography,
 } from '@mui/material';
-import { useEffect } from 'react';
+import {
+  IconUser,
+  IconId,
+  IconBadge,
+  IconBuilding,
+  IconMapPin,
+  IconClock,
+  IconCreditCard,
+  IconBroadcast,
+} from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { memberType } from 'src/store/apps/crud/member';
 import { VisitorType } from 'src/store/apps/crud/visitor';
@@ -24,6 +34,9 @@ import {
 } from 'src/store/apps/monitoring/layout';
 import { publishMQTT } from 'src/store/apps/tracking/MQTT';
 
+import { useState } from 'react';
+import CompactTrackingDetailModal from './CompactTrackingDetailModal';
+
 type BeaconDetailPopupProps = {
   dmac?: string;
   bleNumber: string;
@@ -35,7 +48,7 @@ type BeaconDetailPopupProps = {
   time: string;
   detailDialogOpen: boolean;
   setDetailDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setOpenTrackDetail: React.Dispatch<React.SetStateAction<boolean>>;
+  setOpenTrackDetail?: React.Dispatch<React.SetStateAction<boolean>>;
   screenId?: string; // 🆕 use screenId instead of grid/screen
 };
 
@@ -75,6 +88,8 @@ const BeaconDetailPopup = ({
 }: BeaconDetailPopupProps) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const [internalOpenTrackDetail, setInternalOpenTrackDetail] = useState(false);
+
   const appId = localStorage.getItem('applicationId') || '';
   const personType: PersonType = memberDetail ? 'member' : visitorDetail ? 'visitor' : 'security';
 
@@ -92,7 +107,15 @@ const BeaconDetailPopup = ({
     setDetailDialogOpen(false);
     dispatch(SetSelectedBeacon({ active: false, sourceScreenid: null }));
   };
-  
+
+  const handleTrackingDetailsClick = () => {
+    if (setOpenTrackDetail) {
+      setOpenTrackDetail(true);
+    } else {
+      setInternalOpenTrackDetail(true);
+    }
+  };
+
   const theme = themeConfig[personType];
 
   const formatDate = (isoString: string) => {
@@ -101,29 +124,27 @@ const BeaconDetailPopup = ({
     const month = t(date.toLocaleString('en-GB', { month: 'short' }));
     return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()}`;
   };
+
   const handleFollowOnThisScreen = () => {
     if (!activeLayoutId || !activeLayout) {
       console.warn('No active layout found.');
       return;
     }
 
-    // 🟢 Always use the FIRST screen of the active layout
     const firstScreen = activeLayout.screens[0];
     if (!firstScreen) {
       console.warn('No screens available in active layout.');
       return;
     }
-    
+
     const topic = `people_tracking/${appId.toUpperCase()}/highlight/card/${bleNumber}`;
     const payload = 'Start';
 
-    // ✅ Publish Start via shared MQTT client
     publishMQTT(topic, payload);
     console.log(
       `Published Start message to ${topic} for beacon ${bleNumber} → screen ${firstScreen.id}`,
     );
 
-    // ✅ Switch first screen into Follow Mode
     dispatch(
       setScreenDisplay({
         layoutId: activeLayoutId,
@@ -170,7 +191,9 @@ const BeaconDetailPopup = ({
     handleClose();
   };
 
-  const followingPersons = useSelector((state: RootState) => state.layoutReducer.followingPersons ?? []);
+  const followingPersons = useSelector(
+    (state: RootState) => state.layoutReducer.followingPersons ?? [],
+  );
 
   const handleCancelFollowing = () => {
     if (!activeLayoutId || !activeLayout) return;
@@ -178,10 +201,18 @@ const BeaconDetailPopup = ({
     const firstScreen = activeLayout.screens[0];
     if (!firstScreen) return;
 
-    const peopleToStop = followingPersons.length > 0 ? followingPersons : (followingPerson ? [followingPerson] : []);
+    const peopleToStop =
+      followingPersons.length > 0
+        ? followingPersons
+        : followingPerson
+        ? [followingPerson]
+        : [];
     peopleToStop.forEach((person) => {
       if (person.bleCardNumber) {
-        publishMQTT(`people_tracking/${appId.toUpperCase()}/highlight/card/${person.bleCardNumber}`, 'Stop');
+        publishMQTT(
+          `people_tracking/${appId.toUpperCase()}/highlight/card/${person.bleCardNumber}`,
+          'Stop',
+        );
       }
     });
 
@@ -201,280 +232,227 @@ const BeaconDetailPopup = ({
 
     handleClose();
   };
+
   const isDisabled = followingPerson && followingPerson.id !== currentPersonId;
   const buttonLabel = isFollowingCurrent ? 'Cancel Following' : 'Follow';
   const handleAction = isFollowingCurrent ? handleCancelFollowing : handleFollow;
 
   return (
-    <Dialog fullWidth maxWidth={'md'} open={detailDialogOpen} onClose={handleClose}>
-      <DialogTitle>
-        <Typography
-          component="div"
-          variant="h4"
-          mb={2}
-          mt={2}
-          fontWeight={700}
-          sx={{ color: theme.color }}
-        >
-          {theme.label}
-        </Typography>
-        <Divider />
-      </DialogTitle>
+    <>
+      <Dialog fullWidth maxWidth={'md'} open={detailDialogOpen} onClose={handleClose}>
+        <DialogTitle>
+          <Typography
+            component="div"
+            variant="h4"
+            mb={2}
+            mt={2}
+            fontWeight={700}
+            sx={{ color: theme.color }}
+          >
+            {theme.label}
+          </Typography>
+          <Divider />
+        </DialogTitle>
 
-      <DialogContent>
-        <Grid container spacing={3} mb={2} p={2}>
-          <Grid container size={12} direction={'row'} mb={2}>
-            <Grid size={12} display={'flex'} justifyContent={'center'} position="relative">
+        <DialogContent sx={{ p: 3 }}>
+          <Grid container spacing={3}>
+            {/* Avatar Section */}
+            <Grid size={12} display={'flex'} justifyContent={'center'} my={1}>
               <Avatar
                 alt="Profile"
                 src={`${BASE_URL}${personDetail?.faceImage}`}
                 sx={{
-                  width: '128px',
-                  height: '128px',
-                  ml: 2,
-                  border: `4px solid ${theme.color}`,
+                  width: '120px',
+                  height: '120px',
+                  border: `3px solid ${theme.color}`,
+                  boxShadow: (theme) => theme.shadows[3],
                 }}
               />
             </Grid>
-          </Grid>
 
-          <Grid container size={12} direction={'row'}>
+            {/* Details Form Grid */}
             <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
-              <Typography component="div" variant="h6" fontWeight={700}>
-                <Box component="span">Name :</Box>{' '}
-                <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
+              <Box display="flex" alignItems="center" gap={1.5}>
+                <IconUser size={18} color={theme.color} />
+                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 110 }}>
+                  Name:
+                </Typography>
+                <Typography variant="body2" fontWeight={600} color="text.primary">
                   {personDetail?.name || 'Unknown Person'}
-                </Box>
-              </Typography>
+                </Typography>
+              </Box>
             </Grid>
+
             <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
-              <Typography component="div" variant="h6" fontWeight={700}>
-                <Box component="span">Phone :</Box>{' '}
-                <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                  {personDetail?.phone || 'Unknown Person'}
-                </Box>
-              </Typography>
-            </Grid>
-          </Grid>
-          <Grid container size={12} direction={'row'}>
-            <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
-              <Typography component="div" variant="h6" fontWeight={700}>
-                <Box component="span">Email :</Box>{' '}
-                <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                  {personDetail?.email || 'Unknown Person'}
-                </Box>
-              </Typography>
-            </Grid>
-            <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
-              <Typography component="div" variant="h6" fontWeight={700}>
-                <Box component="span">Address :</Box>{' '}
-                <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                  {personDetail?.address || 'Unknown Person'}
-                </Box>
-              </Typography>
-            </Grid>
-          </Grid>
-          <Grid container size={12} direction={'row'}>
-            <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
-              <Typography component="div" variant="h6" fontWeight={700}>
-                <Box component="span">Gender :</Box>{' '}
-                <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                  {personDetail?.gender || 'Unknown Person'}
-                </Box>
-              </Typography>
-            </Grid>
-            <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
-              {memberDetail && (
-                <Box>
-                  <Typography variant="h6" fontWeight={700} component="div">
-                    <Box component="span">Status :</Box>{' '}
-                    <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                      {memberDetail.statusEmployee}
-                    </Box>
+              {personType !== 'visitor' && (
+                <Box display="flex" alignItems="center" gap={1.5}>
+                  <IconId size={18} color={theme.color} />
+                  <Typography variant="body2" color="text.secondary" sx={{ minWidth: 110 }}>
+                    NIK :
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600} color="text.primary">
+                    {memberDetail?.personId || securityDetail?.personId || '-'}
                   </Typography>
                 </Box>
               )}
               {visitorDetail && (
-                <Box>
-                  <Typography variant="h6" fontWeight={700} component="div">
-                    <Box component="span">Status :</Box>{' '}
-                    <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                      {visitorDetail.isVip ? 'VIP' : 'Regular'}
-                    </Box>
+                <Box display="flex" alignItems="center" gap={1.5}>
+                  <IconBadge size={18} color={theme.color} />
+                  <Typography variant="body2" color="text.secondary" sx={{ minWidth: 110 }}>
+                    Status :
                   </Typography>
+                  <Chip
+                    label={visitorDetail.isVip ? 'VIP' : 'Regular'}
+                    size="small"
+                    color={visitorDetail.isVip ? 'error' : 'default'}
+                    sx={{ fontWeight: 600, height: 22 }}
+                  />
                 </Box>
               )}
             </Grid>
-          </Grid>
-          <Grid container size={12} direction={'row'}>
+
             <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
               {personType !== 'visitor' && (
-                <Box>
-                  <Typography variant="h6" fontWeight={700} component="div">
-                    <Box component="span">Organization :</Box>{' '}
-                    <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
+                <Box display="flex" alignItems="flex-start" gap={1.5}>
+                  <IconBuilding size={18} color={theme.color} style={{ marginTop: 2 }} />
+                  <Typography variant="body2" color="text.secondary" sx={{ minWidth: 110 }}>
+                    Organization :
+                  </Typography>
+                  <Box>
+                    <Typography variant="body2" fontWeight={600} color="text.primary">
                       {memberDetail?.organization?.name ||
                         securityDetail?.organization?.name ||
                         'Unknown Organization'}
-                    </Box>
-                    <br />
-                    <Box
-                      component="span"
-                      typography={{ fontSize: '12px', fontWeight: '400' }}
-                      sx={{ display: 'inline-block', ml: 'calc(1ch * 13)' }} // aligns after "Organization :"
-                    >
-                      {memberDetail?.organization?.name ||
-                        securityDetail?.organization?.name ||
-                        'Unknown Department'}{' '}
-                      |{' '}
-                      {memberDetail?.organization?.name ||
-                        securityDetail?.organization?.name ||
-                        'Unknown District'}
-                    </Box>
-                  </Typography>
+                    </Typography>
+                  </Box>
                 </Box>
               )}
-              {visitorDetail && (
-                <>
-                  <Typography variant="h6" fontWeight={700} component="div">
-                    <Box component="span">Visit Arrival :</Box>{' '}
-                    <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                      {/* {visitorDetail.visitorPeriodStart} */}
-                    </Box>
-                  </Typography>
-                </>
-              )}
             </Grid>
+
             <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
               {personType !== 'visitor' && (
-                <Box>
-                  <Typography variant="h6" fontWeight={700} component="div">
-                    <Box component="span">Head Member :</Box>{' '}
-                    <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                      1. {memberDetail?.headMember1 || securityDetail?.headMember1}
-                    </Box>
-                    <br />
-                    {(memberDetail?.headMember2 && memberDetail.headMember2 !== '') ||
-                      (securityDetail?.headMember2 && securityDetail.headMember2 !== '' && (
-                        <Box
-                          component="span"
-                          typography={{ fontSize: '14px', fontWeight: '500' }}
-                          sx={{ display: 'inline-block', ml: 'calc(1ch * 12)' }} // aligns after "Organization :"
-                        >
-                          2. {memberDetail?.headMember2 || securityDetail?.headMember2}
-                        </Box>
-                      ))}
+                <Box display="flex" alignItems="flex-start" gap={1.5}>
+                  <IconUser size={18} color={theme.color} style={{ marginTop: 2 }} />
+                  <Typography variant="body2" color="text.secondary" sx={{ minWidth: 110 }}>
+                    Head Member :
                   </Typography>
+                  <Box>
+                    <Typography variant="body2" fontWeight={500} color="text.primary">
+                      1. {memberDetail?.headMember1 || securityDetail?.headMember1 || '-'}
+                    </Typography>
+                    {(memberDetail?.headMember2 || securityDetail?.headMember2) && (
+                      <Typography variant="body2" fontWeight={500} color="text.primary">
+                        2. {memberDetail?.headMember2 || securityDetail?.headMember2}
+                      </Typography>
+                    )}
+                  </Box>
                 </Box>
               )}
-              {visitorDetail && (
-                <>
-                  <Typography variant="h6" fontWeight={700} component="div">
-                    <Box component="span">Visit End :</Box>{' '}
-                    <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                      {/* {visitorDetail.visitorPeriodEnd} */}
-                    </Box>
-                  </Typography>
-                </>
-              )}
             </Grid>
-          </Grid>
-          <Grid container size={12} direction={'row'}>
-            <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
-              <Typography component="div" variant="h6" fontWeight={700}>
-                <Box component="span">Area :</Box>{' '}
-                <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                  {area} | {floorplan}
-                </Box>
-              </Typography>
-            </Grid>
-            <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
-              <Typography component="div" variant="h6" fontWeight={700}>
-                <Box component="span">Last Seen :</Box>{' '}
-                <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                  {formatDate(time)}
-                </Box>
-              </Typography>
-            </Grid>
-          </Grid>
-          <Grid container size={12} direction={'row'}>
-            <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
-              <Typography component="div" variant="h6" fontWeight={700}>
-                <Box component="span">Card Number :</Box>{' '}
-                <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                  {personDetail?.cardNumber || '-'}
-                </Box>
-              </Typography>
-            </Grid>
-            <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
-              <Typography component="div" variant="h6" fontWeight={700}>
-                <Box component="span">BLE Card Number :</Box>{' '}
-                <Box component="span" typography={{ fontSize: '14px', fontWeight: '500' }}>
-                  {bleNumber}
-                </Box>
-              </Typography>
-            </Grid>
-          </Grid>
-        </Grid>
-      </DialogContent>
 
-      <DialogActions
-        sx={{
-          position: 'sticky',
-          bottom: 0,
-          bgcolor: 'background.paper',
-          borderTop: '1px solid #e0e0e0',
-          display: 'flex',
-          px: 0,
-          py: 0,
-        }}
-      >
-        <Box sx={{ flex: 1 }}>
+            <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
+              <Box display="flex" alignItems="center" gap={1.5}>
+                <IconMapPin size={18} color={theme.color} />
+                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 110 }}>
+                  Area :
+                </Typography>
+                <Typography variant="body2" fontWeight={600} color="text.primary">
+                  {area} | {floorplan}
+                </Typography>
+              </Box>
+            </Grid>
+
+            <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
+              <Box display="flex" alignItems="center" gap={1.5}>
+                <IconClock size={18} color={theme.color} />
+                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 110 }}>
+                  Last Seen :
+                </Typography>
+                <Typography variant="body2" fontWeight={500} color="text.primary">
+                  {formatDate(time)}
+                </Typography>
+              </Box>
+            </Grid>
+
+            <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
+              <Box display="flex" alignItems="center" gap={1.5}>
+                <IconCreditCard size={18} color={theme.color} />
+                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 110 }}>
+                  Card Number :
+                </Typography>
+                <Typography variant="body2" fontWeight={600} color="text.primary">
+                  {personDetail?.cardNumber || '-'}
+                </Typography>
+              </Box>
+            </Grid>
+
+            <Grid size={{ lg: 6, md: 6, sm: 12, xs: 12 }}>
+              <Box display="flex" alignItems="center" gap={1.5}>
+                <IconBroadcast size={18} color={theme.color} />
+                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 110 }}>
+                  BLE Card :
+                </Typography>
+                <Typography variant="body2" fontWeight={600} color="text.primary">
+                  {bleNumber}
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </DialogContent>
+
+        <Divider />
+
+        <DialogActions
+          sx={{
+            p: 2,
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'grey.900' : 'grey.50'),
+            gap: 1.5,
+          }}
+        >
           <Button
             variant="contained"
             color="secondary"
-            onClick={() => setOpenTrackDetail(true)}
-            sx={{
-              width: '100%',
-              height: '64px',
-              borderRadius: 0,
-            }}
+            disableElevation
+            onClick={handleTrackingDetailsClick}
+            disabled={personType === 'security'}
+            sx={{ borderRadius: '8px', flex: 1 }}
           >
             Tracking Details
           </Button>
-        </Box>
-        <Box sx={{ flex: 1 }}>
+
           <Button
             variant="contained"
             color={isFollowingCurrent ? 'error' : 'primary'}
+            disableElevation
             onClick={handleAction}
-            disabled={isDisabled !== null ? isDisabled : false} // Set to false if isDisabled is null
-            sx={{
-              width: '100%',
-              height: '64px',
-              borderRadius: 0,
-            }}
+            disabled={isDisabled !== null ? isDisabled : false}
+            sx={{ borderRadius: '8px', flex: 1 }}
           >
             {buttonLabel}
           </Button>
-        </Box>
 
-        <Box sx={{ flex: 1 }}>
           <Button
             variant="outlined"
-            color="error"
+            color="inherit"
             onClick={handleClose}
-            sx={{
-              width: '100%',
-              height: '64px',
-              borderRadius: 0,
-            }}
+            sx={{ borderRadius: '8px', flex: 1 }}
           >
             Close
           </Button>
-        </Box>
-      </DialogActions>
-    </Dialog>
+        </DialogActions>
+      </Dialog>
+
+      <CompactTrackingDetailModal
+        open={internalOpenTrackDetail}
+        onClose={() => setInternalOpenTrackDetail(false)}
+        personId={currentPersonId}
+        personName={personDetail?.name}
+        personType={personType}
+        faceImage={personDetail?.faceImage}
+        bleNumber={bleNumber}
+        cardNumber={personDetail?.cardNumber}
+      />
+    </>
   );
 };
 

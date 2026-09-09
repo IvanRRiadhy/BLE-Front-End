@@ -13,6 +13,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import dayjs from 'dayjs';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { toLocalDate } from 'src/utils/time';
 import {
   downloadPatrolReportExcel,
   PatrolReportRow,
@@ -23,9 +24,11 @@ const SESSION_KEY = 'patrolReportPreviewData';
 
 const fmtDate = (iso: string | null | undefined, withTime = false) => {
   if (!iso) return '';
+  const date = toLocalDate(iso);
+  if (!date || isNaN(date.getTime())) return '';
   return withTime
-    ? dayjs(iso).format('YYYY-MM-DD HH:mm:ss')
-    : dayjs(iso).format('YYYY-MM-DD HH:mm');
+    ? dayjs(date).format('YYYY-MM-DD HH:mm:ss')
+    : dayjs(date).format('YYYY-MM-DD HH:mm');
 };
 
 const cellValue = (row: PatrolReportRow, key: string): string => {
@@ -136,7 +139,7 @@ const downloadAsPdf = (rows: PatrolReportRow[], filename: string, title: string,
   // Add Generated Date
   doc.setFontSize(12);
   doc.setTextColor(100, 116, 139);
-  const dateStr = generatedAt ? `Generated: ${dayjs(generatedAt).format('YYYY-MM-DD HH:mm:ss')} ${TZ_ABBR}`.trim() : 'N/A';
+  const dateStr = generatedAt ? (toLocalDate(generatedAt) ? `Generated: ${dayjs(toLocalDate(generatedAt)!).format('YYYY-MM-DD HH:mm:ss')} ${TZ_ABBR}`.trim() : 'N/A') : 'N/A';
   doc.text(dateStr, doc.internal.pageSize.getWidth() / 2, 60, { align: 'center' });
 
   const head = [customCols.map((c) => c.header)];
@@ -277,7 +280,7 @@ const PatrolReportPreview: React.FC = () => {
           {reportTitle}
         </Typography>
         <Typography variant="body1" sx={{ color: '#64748b', fontWeight: 500 }}>
-          Generated: {generatedAt ? `${dayjs(generatedAt).format('YYYY-MM-DD HH:mm:ss')} ${TZ_ABBR}`.trim() : 'N/A'}
+          Generated: {generatedAt ? (toLocalDate(generatedAt) ? `${dayjs(toLocalDate(generatedAt)!).format('YYYY-MM-DD HH:mm:ss')} ${TZ_ABBR}`.trim() : 'N/A') : 'N/A'}
         </Typography>
       </Box>
 

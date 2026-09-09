@@ -38,6 +38,7 @@ import {
   IconFilter,
   IconUser,
 } from '@tabler/icons-react';
+import { toLocalDate } from 'src/utils/time';
 import {
   VisitorSessionResponseType,
   VisitorSessionPersonType,
@@ -155,8 +156,8 @@ const TrackingReportDetail: React.FC<TrackingReportDetailProps> = ({ data, isLoa
   // Helper to format date string to "Fri, 04 Sep 2026, 09:08:00"
   const formatDateStr = (dateVal?: string | null) => {
     if (!dateVal) return '-';
-    const date = new Date(dateVal);
-    if (isNaN(date.getTime())) return dateVal;
+    const date = toLocalDate(dateVal);
+    if (!date || isNaN(date.getTime())) return dateVal;
     
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -315,8 +316,8 @@ const TrackingReportDetail: React.FC<TrackingReportDetailProps> = ({ data, isLoa
   // Helper to extract HH:mm time string from raw ISO timestamp
   const getTimeString = (isoStr?: string) => {
     if (!isoStr) return '';
-    const d = new Date(isoStr);
-    if (isNaN(d.getTime())) return '';
+    const d = toLocalDate(isoStr);
+    if (!d || isNaN(d.getTime())) return '';
     const h = String(d.getHours()).padStart(2, '0');
     const m = String(d.getMinutes()).padStart(2, '0');
     return `${h}:${m}`;
@@ -431,11 +432,11 @@ const TrackingReportDetail: React.FC<TrackingReportDetailProps> = ({ data, isLoa
       let bVal: any = b[sortColumn];
 
       if (sortColumn === 'enterTimeStr') {
-        aVal = a.rawEnterTime ? new Date(a.rawEnterTime).getTime() : 0;
-        bVal = b.rawEnterTime ? new Date(b.rawEnterTime).getTime() : 0;
+        aVal = a.rawEnterTime ? (toLocalDate(a.rawEnterTime)?.getTime() ?? 0) : 0;
+        bVal = b.rawEnterTime ? (toLocalDate(b.rawEnterTime)?.getTime() ?? 0) : 0;
       } else if (sortColumn === 'exitTimeStr') {
-        aVal = a.rawExitTime ? new Date(a.rawExitTime).getTime() : 0;
-        bVal = b.rawExitTime ? new Date(b.rawExitTime).getTime() : 0;
+        aVal = a.rawExitTime ? (toLocalDate(a.rawExitTime)?.getTime() ?? 0) : 0;
+        bVal = b.rawExitTime ? (toLocalDate(b.rawExitTime)?.getTime() ?? 0) : 0;
       } else if (sortColumn === 'durationStr') {
         aVal = a.durationInPeriodMinutes || 0;
         bVal = b.durationInPeriodMinutes || 0;

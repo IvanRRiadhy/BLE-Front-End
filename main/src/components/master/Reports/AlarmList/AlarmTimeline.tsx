@@ -16,6 +16,7 @@ import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
+import { toLocalDate, formatOrRawTime } from 'src/utils/time';
 import { AlarmTimelineType } from 'src/store/apps/crud/alarmTrigger';
 
 interface Props {
@@ -172,7 +173,7 @@ const AlarmTimelineProgress = ({ timelineData }: Props) => {
                     color: isOngoing ? 'rgba(0,0,0,0.3)' : 'text.secondary',
                   }}
                 >
-                  {item.timestamp ? dayjs(item.timestamp).format('DD MMM YYYY HH:mm:ss') : 'TBA'}
+                  {formatOrRawTime(item.timestamp, 'DD MMM YYYY HH:mm:ss')}
                 </TimelineOppositeContent>
 
                 <TimelineSeparator>
