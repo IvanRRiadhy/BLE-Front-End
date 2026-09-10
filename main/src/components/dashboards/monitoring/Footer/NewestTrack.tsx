@@ -13,6 +13,7 @@ import {
   MenuItem,
   InputLabel,
   IconButton,
+  Tooltip,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -36,6 +37,7 @@ import { memberType } from 'src/store/apps/crud/member';
 import { VisitorType } from 'src/store/apps/crud/visitor';
 import { RootState } from 'src/store/Store';
 import { BASE_URL } from 'src/utils/axios';
+import TrackingDetailPopup from '../Popup/TrackingDetailPopup';
 
 const ROLE_THEMES: Record<
   'Member' | 'Visitor' | 'Security',
@@ -144,6 +146,9 @@ type TrackCardProps = {
   visitorMap: Map<string, VisitorType>;
   memberMap: Map<string, memberType>;
   securityMap: Map<string, any>;
+  membersData?: memberType[];
+  visitorsData?: VisitorType[];
+  securityData?: any[];
   isSidebar?: boolean;
 };
 
@@ -152,25 +157,47 @@ const TrackCard = ({
   visitorMap,
   memberMap,
   securityMap,
+  membersData = [],
+  visitorsData = [],
+  securityData = [],
   isSidebar = false,
 }: TrackCardProps) => {
-  const isVisitor = !!beacon.visitorCardId;
-  const isSecurity = !!beacon.securityCardId;
-  const isMember = !!beacon.memberCardId;
+  const [openTrackDetail, setOpenTrackDetail] = useState(false);
 
-  const visitor = beacon.visitorCardId
-    ? visitorMap.get(beacon.visitorCardId.toLowerCase())
-    : null;
-  const member = beacon.memberCardId
-    ? memberMap.get(beacon.memberCardId.toLowerCase())
-    : null;
-  const security = beacon.securityCardId
-    ? securityMap.get(beacon.securityCardId.toLowerCase())
-    : null;
+  const visitor =
+    (beacon.visitorCardId && visitorMap.get(beacon.visitorCardId.toLowerCase())) ||
+    visitorsData.find(
+      (v) =>
+        (beacon.dmac && v.bleCardNumber?.toLowerCase() === beacon.dmac.toLowerCase()) ||
+        (beacon.cardNumber && String(v.cardNumber) === String(beacon.cardNumber)),
+    ) ||
+    null;
+
+  const member =
+    (beacon.memberCardId && memberMap.get(beacon.memberCardId.toLowerCase())) ||
+    membersData.find(
+      (m) =>
+        (beacon.dmac && m.bleCardNumber?.toLowerCase() === beacon.dmac.toLowerCase()) ||
+        (beacon.cardNumber && String(m.cardNumber) === String(beacon.cardNumber)),
+    ) ||
+    null;
+
+  const security =
+    (beacon.securityCardId && securityMap.get(beacon.securityCardId.toLowerCase())) ||
+    securityData.find(
+      (s) =>
+        (beacon.dmac && s.bleCardNumber?.toLowerCase() === beacon.dmac.toLowerCase()) ||
+        (beacon.cardNumber && String(s.cardNumber) === String(beacon.cardNumber)),
+    ) ||
+    null;
+
+  const isVisitor = !!visitor || !!beacon.visitorCardId;
+  const isSecurity = !!security || !!beacon.securityCardId;
+  const isMember = (!isVisitor && !isSecurity) || !!member || !!beacon.memberCardId;
 
   let roleType: 'Member' | 'Visitor' | 'Security' = 'Member';
-  if (isVisitor) roleType = 'Visitor';
-  else if (isSecurity) roleType = 'Security';
+  if (isSecurity) roleType = 'Security';
+  else if (isVisitor) roleType = 'Visitor';
   else if (isMember) roleType = 'Member';
 
   const roleStyle = ROLE_THEMES[roleType] || ROLE_THEMES.Member;
@@ -190,14 +217,18 @@ const TrackCard = ({
     beacon.cardName ||
     'Unknown';
 
-  const personId =
+  // NIK / Display identifier for card header
+  const displayPersonId =
     visitor?.personId ||
     member?.personId ||
     security?.personId ||
-    visitor?.id ||
-    member?.id ||
-    security?.id ||
+    visitor?.identityId ||
+    member?.identityId ||
+    security?.identityId ||
     null;
+
+  // Actual primary key GUID used by API / CompactTrackingDetailModal (matching BeaconDetailPopup)
+  const targetPersonId = member?.id || visitor?.id || security?.id || null;
 
   const faceImage = visitor?.faceImage || member?.faceImage || security?.faceImage;
 
@@ -259,7 +290,25 @@ const TrackCard = ({
     col3Value = security.headMember2 || '-';
   }
 
+  const person = member || visitor || security;
+  const resolvedPerson = person || ({
+    id: person?.id || '',
+    name,
+    cardNumber,
+    faceImage,
+  } as any);
+
+  const bleId =
+    visitor?.bleCardNumber ||
+    member?.bleCardNumber ||
+    security?.bleCardNumber ||
+    beacon.dmac ||
+    beacon.beaconId ||
+    beacon.cardNumber ||
+    '';
+
   return (
+    <>
     <Paper
       elevation={0}
       sx={{
@@ -364,7 +413,7 @@ const TrackCard = ({
                   fontSize: isSidebar ? '0.78rem' : '0.85rem',
                 }}
               >
-                ID: {personId || '-'}
+                ID: {displayPersonId || '-'}
               </Typography>
               <Typography
                 variant="caption"
@@ -380,9 +429,25 @@ const TrackCard = ({
           </Box>
         </Box>
 
-        <IconButton size="small" sx={{ color: 'text.secondary', flexShrink: 0, p: 0.5 }}>
-          <IconDotsVertical size={18} />
-        </IconButton>
+        <Tooltip title={isSecurity ? 'No tracking details for security' : 'View Tracking Detail'}>
+          <span>
+            <IconButton
+              size="small"
+              disabled={isSecurity}
+              onClick={() => {
+                if (isSecurity) return;
+                setOpenTrackDetail(true);
+              }}
+              sx={{
+                color: isSecurity ? 'action.disabled' : 'text.secondary',
+                flexShrink: 0,
+                p: 0.5,
+              }}
+            >
+              <IconDotsVertical size={18} />
+            </IconButton>
+          </span>
+        </Tooltip>
       </Box>
 
       {/* 2. Hero Banner: Current Area & Last Seen Time */}
@@ -583,7 +648,21 @@ const TrackCard = ({
         />
       </Box>
     </Paper>
-  );
+
+    {!isSecurity && openTrackDetail && (
+      <TrackingDetailPopup
+        bleNumber={bleId}
+        person={resolvedPerson}
+        personId={targetPersonId || ''}
+        openTrackDetail={openTrackDetail}
+        setOpenTrackDetail={setOpenTrackDetail}
+        isSecurity={isSecurity}
+        isMember={isMember}
+        isVisitor={isVisitor}
+      />
+    )}
+  </>
+);
 };
 
 type NewestTrackProps = {
@@ -884,6 +963,9 @@ const NewestTrack = ({ followedOnly = false, isSidebar }: NewestTrackProps) => {
                   visitorMap={visitorMap}
                   memberMap={memberMap}
                   securityMap={securityMap}
+                  membersData={membersData}
+                  visitorsData={visitorsData}
+                  securityData={securityData}
                   isSidebar={isSidebarMode}
                 />
               </Grid>

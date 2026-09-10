@@ -98,6 +98,7 @@ export function activateLicense() {
         onSuccess: () => {
             toast.success("License Activated");
             queryClient.invalidateQueries({ queryKey: ['info'] });
+            queryClient.invalidateQueries({ queryKey: ['activeFeatures'] });
         },
         onError: () => {
             toast.error("Failed to activate license");

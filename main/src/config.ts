@@ -16,7 +16,13 @@ export interface RuntimeConfig {
 let runtimeConfig: RuntimeConfig | null = null;
 
 export async function loadRuntimeConfig(): Promise<void> {
-  const res = await fetch("/config.json");
+  const res = await fetch(`/config.json?t=${Date.now()}`, {
+    cache: 'no-store',
+    headers: {
+      'Cache-Control': 'no-cache',
+      Pragma: 'no-cache',
+    },
+  });
   runtimeConfig = await res.json() as RuntimeConfig;
 
   if (runtimeConfig && runtimeConfig.LOGO_URL) {

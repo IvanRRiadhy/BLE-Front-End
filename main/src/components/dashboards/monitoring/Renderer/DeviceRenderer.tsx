@@ -465,6 +465,7 @@ type DeviceRendererProps = {
   screenId: string;
   focusBeaconId?: string;
   onFocusPosition?: (pt: { x: number; y: number }) => void;
+  onFloorplanChange?: (floorplanId: string) => void;
   focusDmac?: string;
   showOtherBeacons?: boolean;
   followingPersons?: any[];
@@ -516,6 +517,7 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     focusBeaconId,
     focusDmac,
     onFocusPosition,
+    onFloorplanChange,
     showOtherBeacons,
     screenId,
     stageScale,
@@ -808,14 +810,18 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     // ✅ Only the follow screen for this beacon updates floorplan
     if (thisScreen.display.displayOutput?.toLowerCase() !== focusBeaconId?.toLowerCase()) return;
 
-    dispatch(
-      setScreenFloorplan({
-        layoutId: activeLayoutId,
-        screenId: thisScreen.id,
-        floorplanId: highlightedFloorplan,
-      }),
-    );
-  }, [highlightedFloorplan, activeLayoutId, thisScreen, dispatch, focusBeaconId, FollowingPersons, FollowingPerson]);
+    if (onFloorplanChange) {
+      onFloorplanChange(highlightedFloorplan);
+    } else {
+      dispatch(
+        setScreenFloorplan({
+          layoutId: activeLayoutId,
+          screenId: thisScreen.id,
+          floorplanId: highlightedFloorplan,
+        }),
+      );
+    }
+  }, [highlightedFloorplan, activeLayoutId, thisScreen, dispatch, focusBeaconId, FollowingPersons, FollowingPerson, onFloorplanChange]);
 
   // load device icons
   const useDeviceIcon = (src: string) => {

@@ -1,29 +1,22 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  // useTheme,
-} from '@mui/material';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Stage, Layer, Circle, Image as KonvaImage, Line, Group, Text, FastLayer } from 'react-konva';
 import Konva from 'konva';
-import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
-import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
-import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
-import React, { useEffect, useState } from 'react';
-import { Stage, Layer, Circle, Image as KonvaImage, Line, Group, Text } from 'react-konva';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
-import earcut from 'earcut';
-import { uniqueId } from 'lodash';
-import { darken } from '@mui/material';
+import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
 import {
   DrawGeoFence,
   GeoFencingAlarmType,
   UpdateSelectedGeoFencingAlarm,
 } from 'src/store/apps/alarmsetting/geofencing';
-import { FloorplanDeviceType } from 'src/store/apps/crud/floorplanDevice';
+import earcut from 'earcut';
+import { uniqueId } from 'lodash';
+import { darken } from '@mui/material';
+import toast from 'react-hot-toast';
+
+import CCTVSVG from 'src/assets/images/svgs/devices/7.svg';
+import GatewaySVG from 'src/assets/images/svgs/devices/BLE FIX ABU.svg';
+import UnknownDevice from 'src/assets/images/masters/Devices/UnknownDevice.png';
 
 type Nodes = {
   id: string;
@@ -33,90 +26,149 @@ type Nodes = {
   y_px: number;
 };
 
-const EditGeoFenceRenderer: React.FC<{
+interface Props {
   width: number;
   height: number;
   originalWidth: number;
   originalHeight: number;
   imageSrc?: string;
   scale: number;
-  setIsDragging: (isDragging: string) => void;
-  setCursor: (cursor: string) => void;
-  activeGeoFence?: GeoFencingAlarmType;
+  activeGeoFence?: GeoFencingAlarmType | null;
   otherGeoFences?: GeoFencingAlarmType[];
   areas: MaskedAreaType[];
   showAreas: boolean;
   devices: FloorplanDeviceType[];
   showDevices: boolean;
-}> = ({
+  setIsDragging?: (isDragging: string) => void;
+  onAreaHoverChange?: (hover: boolean) => void;
+  onAreaDragChange?: (drag: boolean) => void;
+  onOnArea?: (onArea: boolean) => void;
+  stageScale: number;
+  stageX: number;
+  stageY: number;
+  stageRef?: React.RefObject<any>;
+  onWheel?: (e: any) => void;
+  preview?: boolean;
+}
+
+type Point = { x: number; y: number };
+type Triangle = [Point, Point, Point];
+
+const EditGeoFenceRenderer: React.FC<Props> = ({
   width,
   height,
   originalWidth,
   originalHeight,
   imageSrc,
   scale,
-  setIsDragging,
-  setCursor,
   activeGeoFence,
-  otherGeoFences,
+  otherGeoFences = [],
   areas,
   showAreas,
   devices,
   showDevices,
+  setIsDragging,
+  onAreaHoverChange,
+  onAreaDragChange,
+  onOnArea,
+  stageScale,
+  stageX,
+  stageY,
+  stageRef,
+  onWheel,
+  preview = false,
 }) => {
-  const stageRef = React.useRef<Konva.Stage>(null);
-  const [image, setImage] = useState<HTMLImageElement | null>(null);
   const dispatch = useDispatch();
-  const scaleX = originalWidth / width;
-  const scaleY = originalHeight / height;
-  const [activeGeoFenceArea, setActiveGeoFenceArea] = useState(activeGeoFence?.name || '');
-  const [areaDragging, setAreaDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ dx: 0, dy: 0 });
-  const [isColliding, setIsColliding] = useState(false);
+
   const drawingGeoFence = useSelector(
     (state: RootState) => state.GeoFencingReducer.drawingGeoFence,
   );
-  const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null);
-  const [drawingNodes, setDrawingNodes] = useState<Nodes[]>([]); // Track the nodes being drawn
 
-  useEffect(() => {
-    setActiveGeoFenceArea(activeGeoFence?.name || '');
-    // console.log('Active GeoFence changed:', activeGeoFence?.areaShape);
-  }, [activeGeoFence]);
+  const [bgImage, setBgImage] = useState<HTMLImageElement | undefined>(undefined);
+  const [previewImage, setPreviewImage] = useState<HTMLImageElement | undefined>(undefined);
+
+  const [areaDragging, setAreaDragging] = useState(false);
+  const [dragStartPos, setDragStartPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isColliding, setIsColliding] = useState(false);
+
+  const [cursorWorld, setCursorWorld] = useState<{ x: number; y: number } | null>(null);
+  const [drawingNodes, setDrawingNodes] = useState<Nodes[]>([]);
   const [cornerDragData, setCornerDragData] = useState<{
-    areaName: string;
     cornerIndex: number;
     originalX: number;
     originalY: number;
   } | null>(null);
-  //const [points, setPoints] = useState<number[]>([])
+
+  // Background image loading
   useEffect(() => {
-    if (imageSrc) {
-      const img = new window.Image();
-      img.src = imageSrc;
-      img.onload = () => {
-        setImage(img);
-      };
+    if (!imageSrc) {
+      setBgImage(undefined);
+      setPreviewImage(undefined);
+      return;
     }
-    // console.log('Width:', width, 'Height:', height, 'Scale:', scale);
+
+    const p = new window.Image();
+    p.src = imageSrc;
+    p.onload = () => {
+      setPreviewImage(p);
+      const full = new window.Image();
+      full.src = imageSrc;
+      full.onload = () => setBgImage(full);
+      full.onerror = () => {
+        if (!bgImage) setBgImage(p);
+      };
+    };
   }, [imageSrc]);
 
-  const setPointsFromNodes = (nodes: Nodes[]): number[] => {
-    // console.log('Setting nodes: ', nodes.flatMap((node) => [node.x /originalWidth * width, node.y / originalHeight * height]))
-    return nodes.flatMap((node) => [
-      (node.x_px / originalWidth) * width,
-      (node.y_px / originalHeight) * height,
-    ]); // Flatten x and y into a single array
-  };
+  // Pointer position to World coordinates (natural image px)
+  const pointerToWorld = useCallback(
+    (pointer: { x: number; y: number } | null) => {
+      if (!pointer) return null;
+      return {
+        x: (pointer.x - stageX) / stageScale,
+        y: (pointer.y - stageY) / stageScale,
+      };
+    },
+    [stageScale, stageX, stageY],
+  );
 
-  type Point = { x: number; y: number };
-  type Triangle = [Point, Point, Point];
+  // Parse nodes defensively from activeGeoFence
+  const activeNodes: Nodes[] = useMemo(() => {
+    if (activeGeoFence?.nodes && activeGeoFence.nodes.length > 0) {
+      return activeGeoFence.nodes;
+    }
+    if (activeGeoFence?.areaShape) {
+      try {
+        const parsed = JSON.parse(activeGeoFence.areaShape);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {
+        // ignore
+      }
+    }
+    return [];
+  }, [activeGeoFence?.nodes, activeGeoFence?.areaShape]);
 
-  const triangulate = (vertices: number[]): Triangle[] => {
+  // Safe helper to extract nodes from other geofences or areas
+  const getOtherNodes = useCallback((item: { nodes?: Nodes[]; areaShape?: string }): Nodes[] => {
+    if (item.nodes && item.nodes.length > 0) return item.nodes;
+    if (item.areaShape) {
+      try {
+        const parsed = JSON.parse(item.areaShape);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {}
+    }
+    return [];
+  }, []);
+
+  const setPointsFromNodes = useCallback((nodes: Nodes[]): number[] => {
+    return nodes.flatMap((node) => [node.x_px, node.y_px]);
+  }, []);
+
+  // Geometry & Collision helpers
+  const triangulate = useCallback((vertices: number[]): Triangle[] => {
     const indices = earcut(vertices);
     const triangles: Triangle[] = [];
     for (let i = 0; i < indices.length; i += 3) {
-      // Explicitly construct a Triangle (3-point tuple)
       const triangle: Triangle = [
         { x: vertices[indices[i] * 2], y: vertices[indices[i] * 2 + 1] },
         { x: vertices[indices[i + 1] * 2], y: vertices[indices[i + 1] * 2 + 1] },
@@ -125,13 +177,12 @@ const EditGeoFenceRenderer: React.FC<{
       triangles.push(triangle);
     }
     return triangles;
-  };
+  }, []);
 
-  const checkTriangleCollision = (triA: Triangle, triB: Triangle): boolean => {
+  const checkTriangleCollision = useCallback((triA: Triangle, triB: Triangle): boolean => {
     const axes: Point[] = [];
-    const epsilon = 0.0001; // Account for floating-point errors
+    const epsilon = 0.0001;
 
-    // Helper to project a triangle onto an axis
     const project = (triangle: Triangle, axis: Point): { min: number; max: number } => {
       let min = Infinity;
       let max = -Infinity;
@@ -143,445 +194,420 @@ const EditGeoFenceRenderer: React.FC<{
       return { min, max };
     };
 
-    // Generate axes from triA's edges
     for (let i = 0; i < 3; i++) {
       const p1 = triA[i];
       const p2 = triA[(i + 1) % 3];
       const edge = { x: p2.x - p1.x, y: p2.y - p1.y };
-      const normal = { x: -edge.y, y: edge.x }; // Perpendicular
-      const length = Math.sqrt(normal.x ** 2 + normal.y ** 2);
-      if (length > epsilon) {
-        axes.push({ x: normal.x / length, y: normal.y / length }); // Normalized
-      }
-    }
-
-    // Generate axes from triB's edges
-    for (let i = 0; i < 3; i++) {
-      const p1 = triB[i];
-      const p2 = triB[(i + 1) % 3];
-      const edge = { x: p2.x - p1.x, y: p2.y - p1.y };
       const normal = { x: -edge.y, y: edge.x };
-      const length = Math.sqrt(normal.x ** 2 + normal.y ** 2);
+      const length = Math.hypot(normal.x, normal.y);
       if (length > epsilon) {
         axes.push({ x: normal.x / length, y: normal.y / length });
       }
     }
 
-    // Check for separating axes
+    for (let i = 0; i < 3; i++) {
+      const p1 = triB[i];
+      const p2 = triB[(i + 1) % 3];
+      const edge = { x: p2.x - p1.x, y: p2.y - p1.y };
+      const normal = { x: -edge.y, y: edge.x };
+      const length = Math.hypot(normal.x, normal.y);
+      if (length > epsilon) {
+        axes.push({ x: normal.x / length, y: normal.y / length });
+      }
+    }
+
     for (const axis of axes) {
       const projA = project(triA, axis);
       const projB = project(triB, axis);
 
       if (projA.max + epsilon < projB.min || projB.max + epsilon < projA.min) {
-        return false; // No collision
+        return false;
       }
     }
 
-    return true; // Collision detected
-  };
-  const checkPolygonCollision = (poly1: { nodes: Nodes[] }, poly2: { nodes: Nodes[] }): boolean => {
-    const vertices1 = setPointsFromNodes(poly1.nodes);
-    const vertices2 = setPointsFromNodes(poly2.nodes);
+    return true;
+  }, []);
 
-    const triangles1 = triangulate(vertices1);
-    const triangles2 = triangulate(vertices2);
+  const doLineSegmentsIntersect = useCallback(
+    (
+      x1: number,
+      y1: number,
+      x2: number,
+      y2: number,
+      x3: number,
+      y3: number,
+      x4: number,
+      y4: number,
+    ): boolean => {
+      const orientation = (
+        px1: number,
+        py1: number,
+        px2: number,
+        py2: number,
+        px3: number,
+        py3: number,
+      ) => {
+        const val = (py2 - py1) * (px3 - px2) - (px2 - px1) * (py3 - py2);
+        if (Math.abs(val) < 1e-9) return 0;
+        return val > 0 ? 1 : 2;
+      };
 
-    for (const tri1 of triangles1) {
-      for (const tri2 of triangles2) {
-        if (checkTriangleCollision(tri1, tri2)) {
-          return true; // Collision detected
+      const onSegment = (
+        px: number,
+        py: number,
+        qx: number,
+        qy: number,
+        rx: number,
+        ry: number,
+      ) => {
+        return (
+          qx <= Math.max(px, rx) &&
+          qx >= Math.min(px, rx) &&
+          qy <= Math.max(py, ry) &&
+          qy >= Math.min(py, ry)
+        );
+      };
+
+      const o1 = orientation(x1, y1, x2, y2, x3, y3);
+      const o2 = orientation(x1, y1, x2, y2, x4, y4);
+      const o3 = orientation(x3, y3, x4, y4, x1, y1);
+      const o4 = orientation(x3, y3, x4, y4, x2, y2);
+
+      if (o1 !== o2 && o3 !== o4) return true;
+
+      if (o1 === 0 && onSegment(x1, y1, x3, y3, x2, y2)) return true;
+      if (o2 === 0 && onSegment(x1, y1, x4, y4, x2, y2)) return true;
+      if (o3 === 0 && onSegment(x3, y3, x1, y1, x4, y4)) return true;
+      if (o4 === 0 && onSegment(x3, y3, x2, y2, x4, y4)) return true;
+
+      return false;
+    },
+    [],
+  );
+
+  const checkSelfIntersections = useCallback(
+    (nodes: Nodes[]): boolean => {
+      const n = nodes.length;
+      for (let i = 0; i < n; i++) {
+        const x1 = nodes[i].x_px;
+        const y1 = nodes[i].y_px;
+        const x2 = nodes[(i + 1) % n].x_px;
+        const y2 = nodes[(i + 1) % n].y_px;
+
+        for (let j = i + 2; j < n; j++) {
+          if (j === i || (j + 1) % n === i) continue;
+
+          const x3 = nodes[j].x_px;
+          const y3 = nodes[j].y_px;
+          const x4 = nodes[(j + 1) % n].x_px;
+          const y4 = nodes[(j + 1) % n].y_px;
+
+          if (doLineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4)) {
+            return true;
+          }
         }
       }
-    }
-    // Check for self-intersections in poly1
-    if (checkSelfIntersections(poly1.nodes)) {
-      return true; // Self-intersection detected
-    }
+      return false;
+    },
+    [doLineSegmentsIntersect],
+  );
 
-    // Check for self-intersections in poly2
-    if (checkSelfIntersections(poly2.nodes)) {
-      return true; // Self-intersection detected
-    }
-    return false;
-  };
-  const checkSelfIntersections = (nodes: Nodes[]): boolean => {
-    const n = nodes.length;
+  const checkPolygonCollision = useCallback(
+    (poly1: { nodes: Nodes[] }, poly2: { nodes: Nodes[] }): boolean => {
+      const vertices1 = setPointsFromNodes(poly1.nodes);
+      const vertices2 = setPointsFromNodes(poly2.nodes);
 
-    for (let i = 0; i < n; i++) {
-      const x1 = nodes[i].x_px;
-      const y1 = nodes[i].y_px;
-      const x2 = nodes[(i + 1) % n].x_px;
-      const y2 = nodes[(i + 1) % n].y_px;
+      if (vertices1.length < 6 || vertices2.length < 6) return false;
 
-      for (let j = i + 2; j < n; j++) {
-        // Skip adjacent edges
-        if (j === i || (j + 1) % n === i) continue;
+      const triangles1 = triangulate(vertices1);
+      const triangles2 = triangulate(vertices2);
 
-        const x3 = nodes[j].x_px;
-        const y3 = nodes[j].y_px;
-        const x4 = nodes[(j + 1) % n].x_px;
-        const y4 = nodes[(j + 1) % n].y_px;
-
-        if (doLineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4)) {
-          return true; // Self-intersection detected
+      for (const tri1 of triangles1) {
+        for (const tri2 of triangles2) {
+          if (checkTriangleCollision(tri1, tri2)) {
+            return true;
+          }
         }
       }
+
+      if (checkSelfIntersections(poly1.nodes)) return true;
+      if (checkSelfIntersections(poly2.nodes)) return true;
+
+      return false;
+    },
+    [setPointsFromNodes, triangulate, checkTriangleCollision, checkSelfIntersections],
+  );
+
+  const checkCollisionWithOffset = useCallback(
+    (_areaName: string, dx: number, dy: number): boolean => {
+      if (!activeGeoFence || activeNodes.length === 0) return false;
+
+      const proposedArea = {
+        nodes: activeNodes.map((node) => ({
+          ...node,
+          x: (node.x_px + dx) * scale,
+          y: (node.y_px + dy) * scale,
+          x_px: node.x_px + dx,
+          y_px: node.y_px + dy,
+        })),
+      };
+
+      if (!otherGeoFences) return false;
+      return otherGeoFences.some((otherArea) => {
+        const otherNodes = getOtherNodes(otherArea);
+        if (otherNodes.length < 3) return false;
+        return checkPolygonCollision(proposedArea, { nodes: otherNodes });
+      });
+    },
+    [activeGeoFence, activeNodes, scale, otherGeoFences, getOtherNodes, checkPolygonCollision],
+  );
+
+  const pointToSegmentDistance = useCallback(
+    (px: number, py: number, x1: number, y1: number, x2: number, y2: number): number => {
+      const A = px - x1;
+      const B = py - y1;
+      const C = x2 - x1;
+      const D = y2 - y1;
+
+      const dot = A * C + B * D;
+      const lenSq = C * C + D * D;
+      let param = -1;
+      if (lenSq !== 0) param = dot / lenSq;
+
+      let xx: number;
+      let yy: number;
+
+      if (param < 0) {
+        xx = x1;
+        yy = y1;
+      } else if (param > 1) {
+        xx = x2;
+        yy = y2;
+      } else {
+        xx = x1 + param * C;
+        yy = y1 + param * D;
+      }
+
+      const dx = px - xx;
+      const dy = py - yy;
+      return Math.hypot(dx, dy);
+    },
+    [],
+  );
+
+  // Stage Mouse Move
+  const handleStageMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    const stage = e.target.getStage();
+    const ptr = stage?.getPointerPosition();
+    const world = pointerToWorld(ptr || null);
+    if (world) {
+      setCursorWorld(world);
     }
-
-    return false; // No self-intersections
-  };
-  const checkCollisionWithOffset = (areaName: string, dx: number, dy: number): boolean => {
-    if (!activeGeoFence) return false;
-
-    const proposedArea = {
-      nodes: activeGeoFence.nodes
-        ? activeGeoFence.nodes.map((node) => ({
-            ...node,
-            x: node.x + dx * scale,
-            y: node.y + dy * scale,
-            x_px: node.x_px + dx,
-            y_px: node.y_px + dy,
-          }))
-        : [],
-    };
-    if (otherGeoFences === undefined) return false;
-    return otherGeoFences.some((otherArea) => {
-      if (!otherArea.nodes) return false; // Add this check
-      return checkPolygonCollision(proposedArea, { nodes: otherArea.nodes });
-    });
   };
 
-  const checkCornerDragCollision = (cornerIndex: number, newX: number, newY: number): boolean => {
-    if (!activeGeoFence) return false;
+  // Canvas Click (Drawing Mode)
+  const handleCanvasClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    if (!drawingGeoFence) return;
+    const stage = e.target.getStage();
+    const ptr = stage?.getPointerPosition();
+    const world = pointerToWorld(ptr || null);
+    if (!world) return;
 
-    const proposedArea = {
-      nodes: activeGeoFence.nodes
-        ? activeGeoFence.nodes.map((node, index) =>
-            index === cornerIndex ? { ...node, x: newX, y: newY } : node,
-          )
-        : [],
-    };
-
-    if (otherGeoFences === undefined) return false;
-    return otherGeoFences.some((otherArea) => {
-      if (!otherArea.nodes) return false; // Add this check
-      return checkPolygonCollision(proposedArea, { nodes: otherArea.nodes });
-    });
-  };
-
-  // Function to check if two line segments intersect
-  const doLineSegmentsIntersect = (
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    x3: number,
-    y3: number,
-    x4: number,
-    y4: number,
-  ): boolean => {
-    // Calculate the orientation of the triplet (p1, p2, p3)
-    const orientation = (
-      px1: number,
-      py1: number,
-      px2: number,
-      py2: number,
-      px3: number,
-      py3: number,
-    ) => {
-      const val = (py2 - py1) * (px3 - px2) - (px2 - px1) * (py3 - py2);
-      if (val === 0) return 0; // colinear
-      return val > 0 ? 1 : 2; // clock or counterclock wise
-    };
-
-    // Check if point q lies on segment pr
-    const onSegment = (px: number, py: number, qx: number, qy: number, rx: number, ry: number) => {
-      return (
-        qx <= Math.max(px, rx) &&
-        qx >= Math.min(px, rx) &&
-        qy <= Math.max(py, ry) &&
-        qy >= Math.min(py, ry)
-      );
-    };
-
-    const o1 = orientation(x1, y1, x2, y2, x3, y3);
-    const o2 = orientation(x1, y1, x2, y2, x4, y4);
-    const o3 = orientation(x3, y3, x4, y4, x1, y1);
-    const o4 = orientation(x3, y3, x4, y4, x2, y2);
-
-    // General case
-    if (o1 !== o2 && o3 !== o4) return true;
-
-    // Special cases (colinear points)
-    if (o1 === 0 && onSegment(x1, y1, x3, y3, x2, y2)) return true;
-    if (o2 === 0 && onSegment(x1, y1, x4, y4, x2, y2)) return true;
-    if (o3 === 0 && onSegment(x3, y3, x1, y1, x4, y4)) return true;
-    if (o4 === 0 && onSegment(x3, y3, x2, y2, x4, y4)) return true;
-
-    return false;
-  };
-
-  const handleCanvasClick = () => {
-    if (!drawingGeoFence) return; // Only allow drawing if the drawing mode is active
-    const stage = stageRef.current;
-    if (!stage) return;
-    const pointerPosition = stage.getPointerPosition();
-    if (!pointerPosition) return;
-    console.log('drawingNodes before click:', drawingNodes);
-    const { x, y } = pointerPosition;
-    const newNode = {
+    const newNode: Nodes = {
       id: uniqueId(),
-      x: x * scaleX,
-      y: y * scaleX,
-      x_px: x * scaleX,
-      y_px: y * scaleY,
+      x: world.x * scale,
+      y: world.y * scale,
+      x_px: world.x,
+      y_px: world.y,
     };
-    if (!activeGeoFence) return;
+
     setDrawingNodes((prevNodes) => {
       const updatedNodes = [...prevNodes, newNode];
+
       let collision = false;
-      if (otherGeoFences === undefined) {
-        collision = false;
-      } else {
+      if (otherGeoFences && otherGeoFences.length > 0 && updatedNodes.length >= 3) {
         collision = otherGeoFences.some((area) => {
-          return checkPolygonCollision(
-            { nodes: area.nodes ? area.nodes : [] },
-            { nodes: updatedNodes },
-          );
+          const oNodes = getOtherNodes(area);
+          if (oNodes.length < 3) return false;
+          return checkPolygonCollision({ nodes: oNodes }, { nodes: updatedNodes });
         });
       }
+
       if (collision) {
-        // console.log(drawingNodes);
-        alert(`Areas cannot overlap! Position reverted.`);
+        toast.error('Areas cannot overlap! Position reverted.');
         setDrawingNodes([]);
-        dispatch(DrawGeoFence('')); // Reset the drawing mode
-        return []; // Revert to previous nodes
+        dispatch(DrawGeoFence(''));
+        return [];
       }
+
       if (updatedNodes.length === 3) {
-        dispatch(
-          UpdateSelectedGeoFencingAlarm({
-            ...activeGeoFence,
-            nodes: updatedNodes,
-            areaShape: JSON.stringify(updatedNodes),
-          }),
-        );
+        if (activeGeoFence) {
+          dispatch(
+            UpdateSelectedGeoFencingAlarm({
+              ...activeGeoFence,
+              nodes: updatedNodes,
+              areaShape: JSON.stringify(updatedNodes),
+            }),
+          );
+        }
         setDrawingNodes([]);
-        dispatch(DrawGeoFence('')); // Exit drawing mode after completing the polygon
+        dispatch(DrawGeoFence(''));
       }
       return updatedNodes;
     });
   };
 
-  useEffect(() => {
-    if (drawingGeoFence === undefined) return;
-    if (drawingGeoFence !== '') {
-      console.log('Drawing mode active for GeoFence ID:', drawingGeoFence);
-      setCursor('crosshair');
-    } else {
-      setCursor('default');
-    }
-  }, [drawingGeoFence]);
-  // useEffect(() => {
+  // Right Click (Cancel drawing)
+  const handleRightClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    e.evt.preventDefault();
+    if (!drawingGeoFence) return;
 
-  const handleDragStart = (e: string) => {
-    if (drawingGeoFence) return; // Prevent dragging while drawing
-    setIsDragging(e);
-    setDragOffset({ dx: 0, dy: 0 });
-    setIsColliding(false);
-  };
-  const handleDragMove = (dx: number, dy: number) => {
-    const dPxX = dx;
-    const dPxY = dy;
-    setDragOffset({ dx: dPxX, dy: dPxY });
+    setDrawingNodes([]);
+    dispatch(DrawGeoFence(''));
   };
 
-  const handleDragEnd = async (areaName: string) => {
-    if (activeGeoFence) {
-      // console.log(`Nodes of ${areaName}:`, JSON.stringify(area.nodes, null, 2)); // Log nodes in JSON format
+  // Drag Area Handlers
+  const handleAreaDragStart = (e: Konva.KonvaEventObject<DragEvent>) => {
+    if (drawingGeoFence) return;
+    const stage = e.target.getStage();
+    const world = pointerToWorld(stage?.getPointerPosition() || null);
+    if (world) {
+      setDragStartPos(world);
     }
-    const collision = checkCollisionWithOffset(areaName, dragOffset.dx, dragOffset.dy);
-    // console.log('isColliding', collision);
-    setIsColliding(collision);
-    if (collision) {
-      // Revert by not applying the drag changes
-      // console.log('Overlapping detected');
-      alert('Areas cannot overlap! Position reverted.');
-    } else {
-      // Apply the drag changes
-      const { dx, dy } = dragOffset;
+    setIsDragging?.(activeGeoFence?.name || 'geofence');
+    setAreaDragging(true);
+    onAreaDragChange?.(true);
+  };
+
+  const handleAreaDragEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
+    const stage = e.target.getStage();
+    const world = pointerToWorld(stage?.getPointerPosition() || null);
+
+    if (world && dragStartPos && activeGeoFence && activeNodes.length > 0) {
+      const dx = world.x - dragStartPos.x;
+      const dy = world.y - dragStartPos.y;
+
       if (dx !== 0 || dy !== 0) {
-        await handleDragArea(areaName, dx, dy);
-        // await handleSaveArea();
-        // console.log('Area moved successfully!');
+        const collision = checkCollisionWithOffset(activeGeoFence.name, dx, dy);
+        setIsColliding(collision);
+
+        if (collision) {
+          toast.error('Areas cannot overlap! Position reverted.');
+        } else {
+          const updatedNodes = activeNodes.map((n) => ({
+            ...n,
+            x: (n.x_px + dx) * scale,
+            y: (n.y_px + dy) * scale,
+            x_px: n.x_px + dx,
+            y_px: n.y_px + dy,
+          }));
+
+          dispatch(
+            UpdateSelectedGeoFencingAlarm({
+              ...activeGeoFence,
+              nodes: updatedNodes,
+              areaShape: JSON.stringify(updatedNodes),
+            }),
+          );
+        }
       }
     }
 
-    // Reset drag state
-    // setIsDragging('');
+    e.target.x(0);
+    e.target.y(0);
+    setIsDragging?.('');
     setAreaDragging(false);
-    setDragOffset({ dx: 0, dy: 0 });
+    onAreaDragChange?.(false);
     setIsColliding(false);
-    // handleSaveArea();
   };
 
-  const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    const stage = e.target.getStage();
-    if (!stage) return;
-    const pointerPosition = stage.getPointerPosition();
-    if (pointerPosition) {
-      setCursorPosition({ x: pointerPosition.x, y: pointerPosition.y });
-    }
-  };
-
-  const handleMouseUp = () => {
-    // setIsDragging('');
-    setAreaDragging(false);
-  };
-
-  const handleCornerDragStart = (areaName: string, cornerIndex: number) => {
-    console.log('Started dragging corner', cornerIndex, 'of area', areaName);
-    if (!activeGeoFence) return;
-
-    const corner = activeGeoFence.nodes && activeGeoFence.nodes[cornerIndex];
-    if (!corner) return;
+  // Corner Drag Handlers
+  const handleCornerDragStart = (index: number) => {
+    if (!activeGeoFence || !activeNodes[index]) return;
     setCornerDragData({
-      areaName,
-      cornerIndex,
-      originalX: corner.x,
-      originalY: corner.y,
+      cornerIndex: index,
+      originalX: activeNodes[index].x_px,
+      originalY: activeNodes[index].y_px,
     });
-    setIsDragging(areaName);
+    setIsDragging?.(activeGeoFence.name);
   };
 
-  const handleDragCorner = (areaName: string, cornerIndex: number, x: number, y: number) => {
-    const newNodes = [...(activeGeoFence?.nodes || [])];
-    newNodes[cornerIndex] = {
-      ...newNodes[cornerIndex],
-      x: x * scaleX,
-      y: y * scaleY,
-      x_px: x,
-      y_px: y,
-    }; // Update the corner's position
-    const updatedGeoFence = {
-      ...activeGeoFence,
-      nodes: newNodes,
-      areaShape: JSON.stringify(newNodes),
-    };
-    // console.log('updatedGeoFence', updatedGeoFence);
-    if (updatedGeoFence) {
-      dispatch(UpdateSelectedGeoFencingAlarm(updatedGeoFence));
-    }
-  };
-  const handleCornerDragMove = (cornerIndex: number, x: number, y: number) => {
-    // Just store the proposed position, don't check yet
-    const dPxX = x;
-    const dPxY = y;
-    // Still check for collisions with other areas during drag
-    const collision = checkCornerDragCollision(cornerIndex, dPxX, dPxY);
-    setIsColliding(collision);
-  };
+  const handleCornerDragEnd = (index: number, e: Konva.KonvaEventObject<DragEvent>) => {
+    if (!activeGeoFence || !cornerDragData) return;
+    const stage = e.target.getStage();
+    const world = pointerToWorld(stage?.getPointerPosition() || null);
 
-  const handleCornerDragEnd = (areaName: string, cornerIndex: number, x: number, y: number) => {
-    if (!activeGeoFence) return;
-    const dPxX = x;
-    const dPxY = y;
-    // Create the proposed new polygon
-    const proposedNodes = activeGeoFence.nodes ? [...activeGeoFence.nodes] : [];
-    proposedNodes[cornerIndex] = { ...proposedNodes[cornerIndex], x: dPxX, y: dPxY };
+    if (world) {
+      const proposedNodes = [...activeNodes];
+      proposedNodes[index] = {
+        ...proposedNodes[index],
+        x: world.x * scale,
+        y: world.y * scale,
+        x_px: world.x,
+        y_px: world.y,
+      };
 
-    // Check for both collisions and self-intersections
-    if (otherGeoFences === undefined) return false;
-    const hasCollision = otherGeoFences.some((otherArea) => {
-      if (!otherArea.nodes) return false; // Add this check
-      return checkPolygonCollision({ nodes: proposedNodes }, { nodes: otherArea.nodes });
-    });
+      const hasCollision = otherGeoFences?.some((otherArea) => {
+        const oNodes = getOtherNodes(otherArea);
+        if (oNodes.length < 3) return false;
+        return checkPolygonCollision({ nodes: proposedNodes }, { nodes: oNodes });
+      });
 
-    if (hasCollision) {
-      // Revert to original position
-      if (cornerDragData) {
-        // console.log(isColliding);
-        if (!activeGeoFence.nodes) return false;
-        // console.log(checkPolygonCollision({ nodes: proposedNodes }, { nodes: area.nodes }));
-        // alert('Invalid position! Lines cannot intersect or overlap other areas.');
-        handleDragCorner(
-          cornerDragData.areaName,
-          cornerDragData.cornerIndex,
-          cornerDragData.originalX,
-          cornerDragData.originalY,
+      const selfIntersects = checkSelfIntersections(proposedNodes);
+
+      if (hasCollision || selfIntersects) {
+        toast.error('Invalid position! Area cannot overlap or self-intersect.');
+      } else {
+        dispatch(
+          UpdateSelectedGeoFencingAlarm({
+            ...activeGeoFence,
+            nodes: proposedNodes,
+            areaShape: JSON.stringify(proposedNodes),
+          }),
         );
       }
-    } else {
-      // Apply the change
-      handleDragCorner(areaName, cornerIndex, dPxX, dPxY);
-      // handleSaveArea();
     }
 
-    // Reset drag state
+    e.target.x(0);
+    e.target.y(0);
     setCornerDragData(null);
+    setIsDragging?.('');
     setIsColliding(false);
-    // setIsDragging('');
-    // handleSaveArea();
   };
 
-  const handleDeleteCorner = (areaName: string, cornerIndex: number) => {
-    if (!activeGeoFence) return;
-    const newNodes = [...(activeGeoFence.nodes || [])];
-    newNodes.splice(cornerIndex, 1); // Remove the corner at the specified index
-    const updatedGeoFence = {
-      ...activeGeoFence,
-      nodes: newNodes,
-      areaShape: JSON.stringify(newNodes),
-    };
-    if (updatedGeoFence) {
-      dispatch(UpdateSelectedGeoFencingAlarm(updatedGeoFence));
+  // Delete corner handle (Right click)
+  const handleDeleteCorner = (index: number) => {
+    if (!activeGeoFence || activeNodes.length <= 3) {
+      toast.error('A geofence area must have at least 3 points.');
+      return;
     }
+    const newNodes = [...activeNodes];
+    newNodes.splice(index, 1);
+    dispatch(
+      UpdateSelectedGeoFencingAlarm({
+        ...activeGeoFence,
+        nodes: newNodes,
+        areaShape: JSON.stringify(newNodes),
+      }),
+    );
   };
 
-  const handleDragArea = (areaName: string, dx: number, dy: number) => {
-    if (!activeGeoFence) return;
-    const updatedGeoFence = {
-      ...activeGeoFence,
-      nodes: activeGeoFence.nodes?.map((node) => ({
-        ...node,
-        x: node.x + dx * scale,
-        y: node.y + dy * scale,
-        x_px: node.x_px + dx,
-        y_px: node.y_px + dy,
-      })),
-      areaShape: JSON.stringify(
-        activeGeoFence.nodes?.map((node) => ({
-          ...node,
-          x: node.x + dx * scale,
-          y: node.y + dy * scale,
-          x_px: node.x_px + dx,
-          y_px: node.y_px + dy,
-        })),
-      ),
-    };
-    // console.log('updatedGeoFence', updatedGeoFence);
-    if (updatedGeoFence) {
-      dispatch(UpdateSelectedGeoFencingAlarm(updatedGeoFence));
-    }
-  };
-
-  const handleInsertCorner = (areaName: string, clickX: number, clickY: number) => {
-    if (!activeGeoFence) return;
-
-    const { nodes } = activeGeoFence;
-    if (!nodes) return;
+  // Insert corner handle (Double-click or Shift+Click)
+  const handleInsertCorner = (worldX: number, worldY: number) => {
+    if (!activeGeoFence || activeNodes.length === 0) return;
 
     let insertIndex = -1;
     let minDistance = Infinity;
 
-    for (let i = 0; i < (nodes?.length || 0); i++) {
-      const nextIndex = (i + 1) % (nodes?.length || 0);
+    for (let i = 0; i < activeNodes.length; i++) {
+      const nextIndex = (i + 1) % activeNodes.length;
       const distance = pointToSegmentDistance(
-        clickX,
-        clickY,
-        nodes[i].x_px,
-        nodes[i].y_px,
-        nodes[nextIndex].x_px,
-        nodes[nextIndex].y_px,
+        worldX,
+        worldY,
+        activeNodes[i].x_px,
+        activeNodes[i].y_px,
+        activeNodes[nextIndex].x_px,
+        activeNodes[nextIndex].y_px,
       );
 
       if (distance < minDistance) {
@@ -590,355 +616,296 @@ const EditGeoFenceRenderer: React.FC<{
       }
     }
 
-    const newNodes = [...(nodes || [])];
-    newNodes.splice(insertIndex, 0, {
-      id: uniqueId(),
-      x: clickX * scale,
-      y: clickY * scale,
-      x_px: clickX,
-      y_px: clickY,
-    });
-    const updatedGeoFence = {
-      ...activeGeoFence,
-      nodes: newNodes,
-      areaShape: JSON.stringify(newNodes),
-    };
-    if (updatedGeoFence) {
-      dispatch(UpdateSelectedGeoFencingAlarm(updatedGeoFence));
+    if (insertIndex !== -1) {
+      const newNodes = [...activeNodes];
+      newNodes.splice(insertIndex, 0, {
+        id: uniqueId(),
+        x: worldX * scale,
+        y: worldY * scale,
+        x_px: worldX,
+        y_px: worldY,
+      });
+
+      dispatch(
+        UpdateSelectedGeoFencingAlarm({
+          ...activeGeoFence,
+          nodes: newNodes,
+          areaShape: JSON.stringify(newNodes),
+        }),
+      );
     }
   };
 
-  function pointToSegmentDistance(
-    px: number,
-    py: number,
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-  ): number {
-    const A = px - x1;
-    const B = py - y1;
-    const C = x2 - x1;
-    const D = y2 - y1;
-
-    const dot = A * C + B * D;
-    const len_sq = C * C + D * D;
-    let param = -1;
-    if (len_sq !== 0) param = dot / len_sq;
-
-    let xx, yy;
-
-    if (param < 0) {
-      xx = x1;
-      yy = y1;
-    } else if (param > 1) {
-      xx = x2;
-      yy = y2;
-    } else {
-      xx = x1 + param * C;
-      yy = y1 + param * D;
-    }
-
-    const dx = px - xx;
-    const dy = py - yy;
-    return Math.sqrt(dx * dx + dy * dy);
-  }
-  const handleRightClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    e.evt.preventDefault();
-
-    if (!drawingGeoFence) return;
-
-    // Cancel drawing
-    setDrawingNodes([]); // Clear current drawing nodes
-    dispatch(DrawGeoFence('')); // Reset drawing mode
-    console.log('Drawing cancelled by right click');
+  // Device Icons
+  const useDeviceIcon = (src: string) => {
+    const [img, setImg] = useState<HTMLImageElement | undefined>(undefined);
+    useEffect(() => {
+      const image = new window.Image();
+      image.src = src;
+      image.onload = () => setImg(image);
+    }, [src]);
+    return img;
   };
 
-  //Device Renderer
-      const useDeviceIcon = (src: string) => {
-        const [img, setImg] = useState<HTMLImageElement | undefined>(undefined);
-        useEffect(() => {
-          const image = new window.Image();
-          image.src = src;
-          image.onload = () => setImg(image);
-        }, [src]);
-        return img;
-      };
-      const iconCCTV = useDeviceIcon(CCTVSVG);
-      const iconGateway = useDeviceIcon(GatewaySVG);
-      const iconUnknown = useDeviceIcon(UnknownDevice);
+  const iconCCTV = useDeviceIcon(CCTVSVG);
+  const iconGateway = useDeviceIcon(GatewaySVG);
+  const iconUnknown = useDeviceIcon(UnknownDevice);
 
-          const renderDeviceShape = (device: FloorplanDeviceType) => {
-            let deviceIcon = iconUnknown;
-            switch (device.type) {
-              case 'Cctv':
-                deviceIcon = iconCCTV;
-                break;
-              case 'BleReader':
-                deviceIcon = iconGateway;
-                break;
-            }
-            // Use original coordinates directly (no scaling)
-            const x = device.posPxX - 20;
-            const y = device.posPxY - 20;
-      
-            return (
-              <Group
-                key={`device-${device.id}`}
-                name="device"
-              >
-                <Text
-                  x={x - 40}
-                  y={y - 5}
-                  text={device.reader?.gmac || device.id}
-                  fontSize={9}
-                  fill="#1976d2"
-                  fontStyle="bold"
-                  width={120}
-                  align="center"
-                  listening={false}
-                />
-                <KonvaImage name="device" image={deviceIcon} x={x} y={y} width={40} height={40} />
-              </Group>
-            );
-          };
+  const renderDeviceShape = (device: FloorplanDeviceType) => {
+    let deviceIcon = iconUnknown;
+    switch (device.type) {
+      case 'Cctv':
+        deviceIcon = iconCCTV;
+        break;
+      case 'BleReader':
+        deviceIcon = iconGateway;
+        break;
+    }
+
+    const x = device.posPxX - 20;
+    const y = device.posPxY - 20;
+
+    return (
+      <Group key={`device-${device.id}`} name="device">
+        <Text
+          x={x - 40}
+          y={y - 5}
+          text={device.reader?.gmac || device.id}
+          fontSize={9}
+          fill="#1976d2"
+          fontStyle="bold"
+          width={120}
+          align="center"
+          listening={false}
+        />
+        <KonvaImage name="device" image={deviceIcon} x={x} y={y} width={40} height={40} />
+      </Group>
+    );
+  };
+
+  const imageToDraw = bgImage || previewImage;
 
   return (
-    <>
+    <div style={{ width, height, position: 'relative' }}>
       <Stage
-        ref={stageRef}
+        ref={stageRef as any}
+        pixelRatio={1}
         width={width}
         height={height}
-        style={{ position: 'absolute', top: 0, left: 0 }}
-        onMouseMove={handleMouseMove}
+        scaleX={stageScale}
+        scaleY={stageScale}
+        x={stageX}
+        y={stageY}
+        onMouseMove={handleStageMouseMove}
         onClick={handleCanvasClick}
         onContextMenu={handleRightClick}
+        onWheel={onWheel}
       >
-        <Layer>
-          {image && (
+        {/* Background Layer (Full Image Resolution) */}
+        <FastLayer listening={false}>
+          {imageToDraw && (
             <KonvaImage
-              image={image}
-              width={width}
-              height={height}
+              image={imageToDraw}
+              width={originalWidth}
+              height={originalHeight}
               opacity={1}
-              top={0}
-              left={0}
-              bottom={0}
-              right={0}
             />
           )}
-          {showAreas &&
-            areas.map((area) => (
+        </FastLayer>
+
+        {/* Masked Areas Layer */}
+        {showAreas && (
+          <Layer listening={false}>
+            {areas.map((area) => {
+              const pts = area.nodes ? setPointsFromNodes(area.nodes) : [];
+              if (pts.length < 6) return null;
+              return (
+                <Line
+                  key={`masked-area-${area.id}`}
+                  points={pts}
+                  stroke={darken(area.colorArea || '#333333', 0.5)}
+                  strokeWidth={3}
+                  lineJoin="round"
+                  lineCap="round"
+                  closed
+                  fill={area.colorArea || '#888888'}
+                  opacity={0.15}
+                />
+              );
+            })}
+          </Layer>
+        )}
+
+        {/* Other GeoFences Layer */}
+        <Layer listening={false}>
+          {otherGeoFences.map((gf) => {
+            const oNodes = getOtherNodes(gf);
+            const pts = setPointsFromNodes(oNodes);
+            if (pts.length < 6) return null;
+            return (
               <Line
-                key={area.id}
-                points={area.nodes ? setPointsFromNodes(area.nodes) : []}
-                stroke={darken(area.colorArea, 0.5)}
-                strokeWidth={5}
+                key={`other-gf-${gf.id}`}
+                points={pts}
+                stroke={darken(gf.color || '#f55549', 0.3)}
+                strokeWidth={4}
                 lineJoin="round"
                 lineCap="round"
                 closed
-                fill={area.colorArea}
-                opacity={0.1}
-              />
-            ))}
-          {otherGeoFences &&
-            otherGeoFences.map((area) => (
-              <Line
-                key={area.id}
-                points={area.nodes ? setPointsFromNodes(area.nodes) : []}
-                stroke={darken(area.color, 0.3)}
-                strokeWidth={5}
-                lineJoin="round"
-                lineCap="round"
-                closed
-                fill={area.color}
+                fill={gf.color || '#f55549'}
                 opacity={0.35}
               />
-            ))}
-          {activeGeoFence && (
-            <React.Fragment key={activeGeoFence.id}>
+            );
+          })}
+        </Layer>
+
+        {/* Devices Layer */}
+        {showDevices && (
+          <Layer listening={false}>
+            {devices.map((d) => renderDeviceShape(d))}
+          </Layer>
+        )}
+
+        {/* Active GeoFence Layer */}
+        {activeGeoFence && activeNodes.length > 0 && (
+          <Layer>
+            <Group>
               <Line
-                points={activeGeoFence.nodes ? setPointsFromNodes(activeGeoFence.nodes) : []}
-                stroke={isColliding ? 'red' : darken(activeGeoFence.color, 0.5)}
+                points={setPointsFromNodes(activeNodes)}
+                stroke={isColliding ? 'red' : darken(activeGeoFence.color || '#f55549', 0.5)}
                 strokeWidth={5}
                 lineJoin="round"
                 lineCap="round"
                 closed
-                fill={activeGeoFence.color}
-                opacity={0.7}
-                // draggable
-                // onMouseEnter={() => {
-                //   if (!drawingGeoFence) setCursor('move');
-                // }}
-                // onMouseLeave={() => {
-                //   if (!drawingGeoFence) setCursor('grab');
-                // }}
-                // onMouseDown={(e) => {
-                //   if (!drawingGeoFence) {
-                //     setIsDragging(activeGeoFence.name);
-                //     handleDragStart(activeGeoFence.name);
-                //     const isShiftPressed = e.evt.shiftKey;
-                //     const stage = e.target.getStage();
-                //     const mousePos = stage?.getPointerPosition();
-                //     if (isShiftPressed && mousePos) {
-                //       e.evt.preventDefault();
-                //       handleInsertCorner(activeGeoFence.name, mousePos.x, mousePos.y);
-                //     }
-                //   }
-                // }}
-                // onDblClick={(e) => {
-                //   const stage = e.target.getStage();
-                //   const mousePos = stage?.getPointerPosition();
-
-                //   if (mousePos) {
-                //     e.evt.preventDefault();
-                //     handleInsertCorner(
-                //       activeGeoFence.name,
-                //       mousePos.x * scaleX,
-                //       mousePos.y * scaleY,
-                //     );
-                //   }
-                // }}
-                // onMouseUp={handleMouseUp}
-                // onDragStart={() => {
-                //   setIsDragging(activeGeoFence.name);
-                //   setAreaDragging(true);
-                // }}
-                // onDragMove={(e) => {
-                //   handleDragMove(e.target.x() * scaleX, e.target.y() * scaleY);
-                // }}
-                // onDragEnd={(e) => {
-                //   handleDragEnd(activeGeoFence.name);
-                //   e.target.x(0);
-                //   e.target.y(0);
-                //   setIsDragging('');
-                // }}
+                fill={activeGeoFence.color || '#f55549'}
+                opacity={0.65}
+                draggable={!preview && !drawingGeoFence}
+                onMouseEnter={() => {
+                  if (!drawingGeoFence) {
+                    onAreaHoverChange?.(true);
+                    onOnArea?.(true);
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (!drawingGeoFence) {
+                    onAreaHoverChange?.(false);
+                    onOnArea?.(false);
+                  }
+                }}
+                onDragStart={handleAreaDragStart}
+                onDragEnd={handleAreaDragEnd}
+                onDblClick={(e) => {
+                  const stage = e.target.getStage();
+                  const world = pointerToWorld(stage?.getPointerPosition() || null);
+                  if (world) {
+                    handleInsertCorner(world.x, world.y);
+                  }
+                }}
+                onMouseDown={(e) => {
+                  if (e.evt.shiftKey) {
+                    e.evt.preventDefault();
+                    const stage = e.target.getStage();
+                    const world = pointerToWorld(stage?.getPointerPosition() || null);
+                    if (world) {
+                      handleInsertCorner(world.x, world.y);
+                    }
+                  }
+                }}
               />
-              {/* {!areaDragging &&
-                activeGeoFence.nodes &&
-                activeGeoFence.nodes.map((node, index) => (
+
+              {/* Corner Handles */}
+              {!preview &&
+                !areaDragging &&
+                !drawingGeoFence &&
+                activeNodes.map((node, index) => (
                   <Circle
-                    key={node.id}
-                    x={node.x_px / scaleX}
-                    y={node.y_px / scaleY}
+                    key={`corner-${node.id || index}`}
+                    x={node.x_px}
+                    y={node.y_px}
                     radius={7}
-                    fill="red"
-                    draggable
+                    fill={activeGeoFence.color || '#f55549'}
+                    stroke="white"
                     strokeWidth={2}
+                    draggable
                     onMouseEnter={(e) => {
-                      if (!drawingGeoFence) {
-                        const shape = e.target as Konva.Circle;
-                        shape.radius(10); // Increase radius on hover
-                        shape.stroke('black'); // Add green outline
-                        shape.strokeWidth(3);
-                        setCursor('move');
-                        shape.getLayer()?.batchDraw(); // Redraw the layer for immediate effect
-                      }
+                      const shape = e.target as Konva.Circle;
+                      shape.radius(10);
+                      shape.stroke('black');
+                      shape.strokeWidth(3);
+                      onAreaHoverChange?.(true);
+                      shape.getLayer()?.batchDraw();
                     }}
                     onMouseLeave={(e) => {
-                      if (!drawingGeoFence) {
-                        const shape = e.target as Konva.Circle;
-                        shape.radius(7); // Reset radius
-                        shape.stroke(''); // Remove outline
-                        shape.strokeWidth(1);
-                        setCursor('grab');
-                        shape.getLayer()?.batchDraw(); // Redraw the layer for immediate effect
-                      }
+                      const shape = e.target as Konva.Circle;
+                      shape.radius(7);
+                      shape.stroke('white');
+                      shape.strokeWidth(2);
+                      onAreaHoverChange?.(false);
+                      shape.getLayer()?.batchDraw();
                     }}
-                    onDragStart={() => {
-                      setIsDragging(activeGeoFence.name);
-                      handleCornerDragStart(activeGeoFence.name, index);
-                    }}
-                    onDragMove={(e) => {
-                      handleDragCorner(
-                        activeGeoFence.name,
-                        index,
-                        e.target.x() * scaleX,
-                        e.target.y() * scaleY,
-                      );
-                      handleCornerDragMove(index, e.target.x() * scaleX, e.target.y() * scaleY);
-                    }}
-                    onMouseDown={() => {
-                      setIsDragging(activeGeoFence.name);
-                      handleDragStart(activeGeoFence.name)}}
-                    onMouseUp={handleMouseUp}
-                    onDragEnd={(e) => {
-                      handleCornerDragEnd(
-                        activeGeoFence.name,
-                        index,
-                        e.target.x() * scaleX,
-                        e.target.y() * scaleY,
-                      );
-                      handleDragEnd(activeGeoFence.name); // Pass the activeGeoFence name
-                    }}
+                    onDragStart={() => handleCornerDragStart(index)}
+                    onDragEnd={(e) => handleCornerDragEnd(index, e)}
                     onContextMenu={(e) => {
-                      e.evt.preventDefault(); // Prevent the default context menu from appearing
-                      handleDeleteCorner(activeGeoFence.name, index); // Call the function to delete the corner
+                      e.evt.preventDefault();
+                      handleDeleteCorner(index);
                     }}
                   />
-                ))} */}
-            </React.Fragment>
-          )}
-          {showDevices && devices.map((d: FloorplanDeviceType) => renderDeviceShape(d))}
-          {drawingGeoFence && (
-            <>
-              {drawingNodes.map((node) => (
-                <Circle
-                  key={node.id}
-                  x={node.x_px / scaleX}
-                  y={node.y_px / scaleY}
-                  radius={7}
-                  fill="blue" // Color for the drawing nodes
-                  draggable={false} // Disable dragging for these circles
-                  stroke="black"
+                ))}
+            </Group>
+          </Layer>
+        )}
+
+        {/* Drawing Nodes & Interactive Guide Layer */}
+        {drawingGeoFence && (
+          <Layer listening={false}>
+            {drawingNodes.map((node) => (
+              <Circle
+                key={`draw-node-${node.id}`}
+                x={node.x_px}
+                y={node.y_px}
+                radius={7}
+                fill="blue"
+                stroke="white"
+                strokeWidth={2}
+              />
+            ))}
+
+            {drawingNodes.length > 0 && cursorWorld && (
+              <>
+                {/* Dashed line to cursor */}
+                <Line
+                  points={[
+                    drawingNodes[drawingNodes.length - 1].x_px,
+                    drawingNodes[drawingNodes.length - 1].y_px,
+                    cursorWorld.x,
+                    cursorWorld.y,
+                  ]}
+                  stroke="blue"
                   strokeWidth={2}
+                  dash={[10, 5]}
+                  closed={false}
                 />
-              ))}
-              {/* Render dashed lines connecting each node to the cursor */}
-              {drawingNodes.length > 0 && cursorPosition && (
-                <>
-                  {drawingNodes.map((node) => (
-                    <Line
-                      key={`line-to-cursor-${node.id}`}
-                      points={[
-                        node.x / scaleX,
-                        node.y / scaleX,
-                        cursorPosition.x,
-                        cursorPosition.y,
-                      ]} // Connect each node to the cursor
-                      stroke="blue"
-                      strokeWidth={2}
-                      dash={[10, 5]} // Dashed line pattern
-                      closed={false}
-                    />
-                  ))}
-                  {drawingNodes.length > 1 &&
-                    drawingNodes.map((node, index) => {
-                      if (index === drawingNodes.length - 1) return null; // Skip the last node
-                      const nextNode = drawingNodes[index + 1];
-                      return (
-                        <Line
-                          key={`line-to-next-${node.id}`}
-                          points={[
-                            node.x_px / scaleX,
-                            node.y_px / scaleY,
-                            nextNode.x_px / scaleX,
-                            nextNode.y_px / scaleY,
-                          ]} // Connect each node to the next node
-                          stroke="blue"
-                          strokeWidth={2}
-                          dash={[10, 5]} // Dashed line pattern
-                          closed={false}
-                        />
-                      );
-                    })}
-                </>
-              )}
-            </>
-          )}
-        </Layer>
+
+                {/* Connecting lines between drawn nodes */}
+                {drawingNodes.length > 1 &&
+                  drawingNodes.map((node, index) => {
+                    if (index === drawingNodes.length - 1) return null;
+                    const nextNode = drawingNodes[index + 1];
+                    return (
+                      <Line
+                        key={`draw-line-${node.id}`}
+                        points={[node.x_px, node.y_px, nextNode.x_px, nextNode.y_px]}
+                        stroke="blue"
+                        strokeWidth={2}
+                        closed={false}
+                      />
+                    );
+                  })}
+              </>
+            )}
+          </Layer>
+        )}
       </Stage>
-    </>
+    </div>
   );
 };
 

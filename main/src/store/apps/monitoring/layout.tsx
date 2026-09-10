@@ -364,18 +364,50 @@ export const LayoutSlice = createSlice({
         }));
       }
     },
-    // Swap selected screen with the first screen (index 0)
-    swapScreen: (state, action: PayloadAction<number>) => {
+    // Swap selected screen with the first screen (index 0), or swap between screenA and screenB
+    swapScreen: (
+      state,
+      action: PayloadAction<number | { screenA: number; screenB: number }>,
+    ) => {
       const activeLayout = state.layouts.find((l) => l.id === state.activeLayoutId);
       if (!activeLayout) return;
 
-      const targetIndex = action.payload - 1;
-      if (targetIndex < 0 || targetIndex >= activeLayout.screens.length) return;
+      let indexA = 0;
+      let indexB = 0;
+
+      if (typeof action.payload === 'number') {
+        indexA = 0;
+        indexB = action.payload - 1;
+      } else {
+        indexA = action.payload.screenA - 1;
+        indexB = action.payload.screenB - 1;
+      }
+
+      if (
+        indexA < 0 ||
+        indexA >= activeLayout.screens.length ||
+        indexB < 0 ||
+        indexB >= activeLayout.screens.length ||
+        indexA === indexB
+      )
+        return;
+
       console.log('Swapping screens before:', JSON.stringify(activeLayout.screens));
       // Swap the two screens
-      const temp = activeLayout.screens[0];
-      activeLayout.screens[0] = activeLayout.screens[targetIndex];
-      activeLayout.screens[targetIndex] = temp;
+      const temp = activeLayout.screens[indexA];
+      activeLayout.screens[indexA] = activeLayout.screens[indexB];
+      activeLayout.screens[indexB] = temp;
+
+      // Ensure follow mode stays on the screen that has the followed person's floorplan
+      if (
+        activeLayout.screens[indexB].display?.displayType === 3 &&
+        activeLayout.screens[indexA].display?.displayType !== 3
+      ) {
+        const followDisplay = activeLayout.screens[indexB].display;
+        activeLayout.screens[indexB].display = activeLayout.screens[indexA].display;
+        activeLayout.screens[indexA].display = followDisplay;
+      }
+
       console.log('Swapping screens after:', JSON.stringify(activeLayout.screens));
     },
     setFollowingPerson: (state, action: PayloadAction<PersonOption | null>) => {

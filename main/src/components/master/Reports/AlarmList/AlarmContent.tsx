@@ -29,6 +29,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BoltIcon from '@mui/icons-material/Bolt';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import PersonIcon from '@mui/icons-material/Person';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { BASE_URL } from 'src/utils/axios';
 import { SelectVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import { memberType, SelectMember } from 'src/store/apps/crud/member';
@@ -146,6 +147,8 @@ const AlarmContent = () => {
     hasNextPage: hasNextActive,
     fetchNextPage: fetchNextActive,
     isFetchingNextPage: isFetchingNextActive,
+    refetch: refetchActive,
+    isFetching: isFetchingActive,
   } = useInfiniteAlarmTriggerList(
     {
       ...baseFilter,
@@ -165,6 +168,8 @@ const AlarmContent = () => {
     hasNextPage: hasNextOnGoing,
     fetchNextPage: fetchNextOnGoing,
     isFetchingNextPage: isFetchingNextOnGoing,
+    refetch: refetchOnGoing,
+    isFetching: isFetchingOnGoing,
   } = useInfiniteAlarmTriggerList(
     {
       ...baseFilter,
@@ -184,6 +189,8 @@ const AlarmContent = () => {
     hasNextPage: hasNextCleared,
     fetchNextPage: fetchNextCleared,
     isFetchingNextPage: isFetchingNextCleared,
+    refetch: refetchCleared,
+    isFetching: isFetchingCleared,
   } = useInfiniteAlarmTriggerList(
     {
       ...baseFilter,
@@ -201,6 +208,15 @@ const AlarmContent = () => {
     50,
     { enabled: enableCleared },
   );
+
+  const isRefreshing = isFetchingActive || isFetchingOnGoing || isFetchingCleared;
+
+  const handleRefresh = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list-infinite'] });
+    refetchActive();
+    refetchOnGoing();
+    refetchCleared();
+  };
 
   // 🔹 Intersection observers per category column
   const { ref: activeRef, inView: activeInView } = useInView();
@@ -403,6 +419,7 @@ const AlarmContent = () => {
       handleCloseActionDialog();
       setSelectedSecurity([]);
       setSelectedAction('');
+      handleRefresh();
     } catch (error: any) {
       toast.error('Error dispatching action');
       console.error('Error dispatching action', error);
@@ -535,6 +552,7 @@ const AlarmContent = () => {
       setOpenPostponeDialog(false);
       setPostponeDate(null);
       setPostponeReason('');
+      handleRefresh();
     } catch (error) {
       toast.error('Failed to postpone alarm');
     }
@@ -556,6 +574,7 @@ const AlarmContent = () => {
       toast.success('Alarm done successfully');
 
       setOpenActionDialog(false);
+      handleRefresh();
     } catch (error) {
       toast.error('Failed to done alarm');
     }
@@ -991,9 +1010,30 @@ const AlarmContent = () => {
             mb: 2,
           }}
         >
-          <Typography variant="h5" fontWeight="bold">
-            Alarm Triggered
-          </Typography>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography variant="h5" fontWeight="bold">
+              Alarm Triggered
+            </Typography>
+            <Tooltip title="Refresh Alarm Data">
+              <IconButton
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                size="small"
+                color="primary"
+              >
+                <RefreshIcon
+                  fontSize="small"
+                  sx={{
+                    animation: isRefreshing ? 'spin 1s linear infinite' : 'none',
+                    '@keyframes spin': {
+                      '0%': { transform: 'rotate(0deg)' },
+                      '100%': { transform: 'rotate(360deg)' },
+                    },
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
+          </Stack>
 
           <AlarmTriggeredFilter />
         </Box>

@@ -742,7 +742,14 @@ const handleStart = async () => {
                   </Box>
 
                   {/* ===== Action ===== */}
-                  <Box flex={1} p={1.5} textAlign="center">
+                  <Box
+                    flex={1}
+                    p={1.5}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    textAlign="center"
+                  >
                     {isSessionLoading && (
                       <Typography fontSize={12} color="text.secondary">
                         Loading…

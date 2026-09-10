@@ -131,9 +131,74 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
     originalY: number;
   } | null>(null);
 
+  const activeCornerDragRef = React.useRef<{
+    areaName: string;
+    cornerIndex: number;
+    nodeRef: any;
+  } | null>(null);
+
   // Track area drag state
   const [draggingAreaName, setDraggingAreaName] = useState<string | null>(null);
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
+
+  // Ref and state for hold-Q magnetic snapping mode
+  const isQHeldRef = React.useRef(false);
+  const [isQHeld, setIsQHeld] = useState(false);
+
+  // State for W key toggle & Tab/E mode switch (hv vs parallel_perpendicular)
+  const [guideLineShown, setGuideLineShown] = useState(false);
+  const [guideLineMode, setGuideLineMode] = useState<'hv' | 'parallel_perpendicular'>('hv');
+
+  const guideLineShownRef = React.useRef(false);
+  useEffect(() => {
+    guideLineShownRef.current = guideLineShown;
+  }, [guideLineShown]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+
+      if (e.key === 'q' || e.key === 'Q') {
+        if (!isQHeldRef.current) {
+          isQHeldRef.current = true;
+          setIsQHeld(true);
+        }
+      }
+
+      if (e.key === 'w' || e.key === 'W') {
+        if (!e.repeat) {
+          setGuideLineShown((prev) => !prev);
+        }
+      }
+
+      if (e.key === 'Tab' || e.key === 'e' || e.key === 'E') {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+        }
+        if (guideLineShownRef.current) {
+          setGuideLineMode((prev) => (prev === 'hv' ? 'parallel_perpendicular' : 'hv'));
+        }
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+
+      if (e.key === 'q' || e.key === 'Q') {
+        isQHeldRef.current = false;
+        setIsQHeld(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
 
   // background images
   const [bgImage, setBgImage] = useState<HTMLImageElement | undefined>(undefined);
@@ -144,15 +209,281 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
     [unsavedArea, selectedFloorplan],
   );
 
-  // ----------- helpers: pointer -> world coords (image pixels) -----------
-  const pointerToWorld = useCallback(
-    (pointer: { x: number; y: number } | null) => {
-      if (!pointer) return null;
-      return { x: (pointer.x - stageX) / stageScale, y: (pointer.y - stageY) / stageScale };
-    },
-    [stageScale, stageX, stageY],
-  );
+  const renderAreas = useMemo(() => {
+    const map = new Map<string, PatrolAreaType>();
+    filteredUnsavedArea.forEach((area) => {
+      map.set(area.id, area);
+    });
+    if (editingPatrolArea) {
+      map.set(editingPatrolArea.id, editingPatrolArea);
+    }
+    return Array.from(map.values());
+  }, [filteredUnsavedArea, editingPatrolArea]);
+
   const getCornerNodes = (nodes?: Nodes[]) => (nodes ?? []).filter((n) => n.type === 'corner');
+
+  // Helper to generate parallel and perpendicular infinite lines passing through P(px, py) relative to A(ax, ay)
+  const createParallelAndPerpendicularLines = (
+    px: number,
+    py: number,
+    ax: number,
+    ay: number,
+    prefix: string,
+    maxX: number,
+    maxY: number,
+  ) => {
+    const dx = px - ax;
+    const dy = py - ay;
+    const len = Math.hypot(dx, dy);
+    const length = Math.max(maxX, maxY, 10000);
+
+    if (len === 0) {
+      return [
+        { id: `${prefix}-h`, points: [0, py, maxX, py] },
+        { id: `${prefix}-v`, points: [px, 0, px, maxY] },
+      ];
+    }
+
+    const ux = dx / len;
+    const uy = dy / len;
+    const nx = -uy;
+    const ny = ux;
+
+    return [
+      {
+        id: `${prefix}-parallel`,
+        points: [px - length * ux, py - length * uy, px + length * ux, py + length * uy],
+      },
+      {
+        id: `${prefix}-perpendicular`,
+        points: [px - length * nx, py - length * ny, px + length * nx, py + length * ny],
+      },
+    ];
+  };
+
+  // Virtual guide lines when W is toggled
+  const guideLines = useMemo(() => {
+    if (!guideLineShown) return [];
+
+    const maxX = originalWidth || width || 10000;
+    const maxY = originalHeight || height || 10000;
+
+    // 1. Drawing Mode
+    if (drawingPatrolArea) {
+      if (drawingNodes.length === 0) {
+        if (!cursorWorld) return [];
+        return [
+          { id: 'cursor-h', points: [0, cursorWorld.y, maxX, cursorWorld.y] },
+          { id: 'cursor-v', points: [cursorWorld.x, 0, cursorWorld.x, maxY] },
+        ];
+      } else if (drawingNodes.length === 1) {
+        const firstNode = drawingNodes[0];
+        return [
+          { id: 'first-h', points: [0, firstNode.y_px, maxX, firstNode.y_px] },
+          { id: 'first-v', points: [firstNode.x_px, 0, firstNode.x_px, maxY] },
+        ];
+      } else {
+        const firstNode = drawingNodes[0];
+        const lastNode = drawingNodes[drawingNodes.length - 1];
+
+        if (guideLineMode === 'parallel_perpendicular') {
+          const secondNode = drawingNodes[1];
+          const secondLastNode = drawingNodes[drawingNodes.length - 2];
+          return [
+            ...createParallelAndPerpendicularLines(firstNode.x_px, firstNode.y_px, secondNode.x_px, secondNode.y_px, 'first', maxX, maxY),
+            ...createParallelAndPerpendicularLines(lastNode.x_px, lastNode.y_px, secondLastNode.x_px, secondLastNode.y_px, 'last', maxX, maxY),
+          ];
+        }
+
+        return [
+          { id: 'first-h', points: [0, firstNode.y_px, maxX, firstNode.y_px] },
+          { id: 'first-v', points: [firstNode.x_px, 0, firstNode.x_px, maxY] },
+          { id: 'last-h', points: [0, lastNode.y_px, maxX, lastNode.y_px] },
+          { id: 'last-v', points: [lastNode.x_px, 0, lastNode.x_px, maxY] },
+        ];
+      }
+    }
+
+    // 2. Editing/Moving Existing Node Mode
+    const activeName = cornerDragData?.areaName || activeCornerDragRef.current?.areaName;
+    const cornerIndex = cornerDragData?.cornerIndex ?? activeCornerDragRef.current?.cornerIndex;
+
+    if (!activeName || cornerIndex === undefined) return [];
+
+    const area = renderAreas.find((a) => a.name === activeName);
+    const cornerNodes = getCornerNodes(area?.nodes);
+    if (!cornerNodes || cornerNodes.length < 3) return [];
+
+    const N = cornerNodes.length;
+    const prevIdx = (cornerIndex - 1 + N) % N;
+    const nextIdx = (cornerIndex + 1) % N;
+
+    const prevNode = cornerNodes[prevIdx];
+    const nextNode = cornerNodes[nextIdx];
+
+    if (guideLineMode === 'parallel_perpendicular') {
+      const anchorPrevIdx = (prevIdx - 1 + N) % N;
+      const anchorNextIdx = (nextIdx + 1) % N;
+
+      const anchorPrev = cornerNodes[anchorPrevIdx];
+      const anchorNext = cornerNodes[anchorNextIdx];
+
+      return [
+        ...createParallelAndPerpendicularLines(prevNode.x_px, prevNode.y_px, anchorPrev.x_px, anchorPrev.y_px, 'prev', maxX, maxY),
+        ...createParallelAndPerpendicularLines(nextNode.x_px, nextNode.y_px, anchorNext.x_px, anchorNext.y_px, 'next', maxX, maxY),
+      ];
+    }
+
+    return [
+      { id: 'prev-h', points: [0, prevNode.y_px, maxX, prevNode.y_px] },
+      { id: 'prev-v', points: [prevNode.x_px, 0, prevNode.x_px, maxY] },
+      { id: 'next-h', points: [0, nextNode.y_px, maxX, nextNode.y_px] },
+      { id: 'next-v', points: [nextNode.x_px, 0, nextNode.x_px, maxY] },
+    ];
+  }, [
+    guideLineShown,
+    guideLineMode,
+    drawingPatrolArea,
+    drawingNodes,
+    cursorWorld,
+    cornerDragData,
+    renderAreas,
+    originalWidth,
+    originalHeight,
+    width,
+    height,
+  ]);
+
+  const getClosestPointOnSegment = (
+    px: number,
+    py: number,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+  ) => {
+    const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+    if (l2 === 0) return { x: x1, y: y1 };
+
+    let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+    t = Math.max(0, Math.min(1, t));
+
+    return {
+      x: x1 + t * (x2 - x1),
+      y: y1 + t * (y2 - y1),
+    };
+  };
+
+  const getInfiniteLineIntersection = (
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    x3: number,
+    y3: number,
+    x4: number,
+    y4: number,
+  ): { x: number; y: number } | null => {
+    const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+    if (Math.abs(denom) < 1e-5) return null;
+
+    const ix =
+      ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom;
+    const iy =
+      ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom;
+
+    return { x: ix, y: iy };
+  };
+
+  const snapToNearestLine = useCallback(
+    (px: number, py: number, currentAreaName?: string, currentCornerIndex?: number) => {
+      const sensitivityRadius = 100;
+      const intersectionRadius = 15;
+      type LineSegment = { x1: number; y1: number; x2: number; y2: number };
+      const allLines: LineSegment[] = [];
+
+      // 1. Collect area edge segments
+      for (const area of renderAreas) {
+        const cornerNodes = getCornerNodes(area.nodes);
+        if (!cornerNodes || cornerNodes.length < 2) continue;
+
+        const numNodes = cornerNodes.length;
+        for (let i = 0; i < numNodes; i++) {
+          if (area.name === currentAreaName && currentCornerIndex !== undefined) {
+            const prevIndex = (currentCornerIndex - 1 + numNodes) % numNodes;
+            if (i === currentCornerIndex || i === prevIndex) continue;
+          }
+
+          const n1 = cornerNodes[i];
+          const n2 = cornerNodes[(i + 1) % numNodes];
+          allLines.push({ x1: n1.x_px, y1: n1.y_px, x2: n2.x_px, y2: n2.y_px });
+        }
+      }
+
+      // 2. Collect active guide lines
+      if (guideLineShown && guideLines.length > 0) {
+        for (const gLine of guideLines) {
+          if (gLine.points.length >= 4) {
+            allLines.push({
+              x1: gLine.points[0],
+              y1: gLine.points[1],
+              x2: gLine.points[2],
+              y2: gLine.points[3],
+            });
+          }
+        }
+      }
+
+      // 3. Prioritize line-line intersection points within 15px release radius
+      let minIntersectionDist = intersectionRadius;
+      let bestIntersectionPos: { x: number; y: number } | null = null;
+
+      for (let i = 0; i < allLines.length; i++) {
+        for (let j = i + 1; j < allLines.length; j++) {
+          const l1 = allLines[i];
+          const l2 = allLines[j];
+          const intersection = getInfiniteLineIntersection(
+            l1.x1,
+            l1.y1,
+            l1.x2,
+            l1.y2,
+            l2.x1,
+            l2.y1,
+            l2.x2,
+            l2.y2,
+          );
+          if (intersection) {
+            const dist = Math.hypot(px - intersection.x, py - intersection.y);
+            if (dist <= minIntersectionDist) {
+              minIntersectionDist = dist;
+              bestIntersectionPos = intersection;
+            }
+          }
+        }
+      }
+
+      if (bestIntersectionPos) {
+        return bestIntersectionPos;
+      }
+
+      // 4. Fallback: Snap to nearest point on any single line segment
+      let minLineDist = sensitivityRadius;
+      let bestLinePos: { x: number; y: number } | null = null;
+
+      for (const line of allLines) {
+        const closest = getClosestPointOnSegment(px, py, line.x1, line.y1, line.x2, line.y2);
+        const dist = Math.hypot(px - closest.x, py - closest.y);
+
+        if (dist <= minLineDist) {
+          minLineDist = dist;
+          bestLinePos = closest;
+        }
+      }
+
+      return bestLinePos;
+    },
+    [renderAreas, guideLineShown, guideLines],
+  );
 
   // ----------- load background images -----------
   useEffect(() => {
@@ -193,14 +524,15 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
     setEditingArea(editingPatrolArea?.name || '');
   }, [editingPatrolArea]);
 
-  // ----------- cursor style management -----------
-  // useEffect(() => {
-  //   if (drawingPatrolArea !== '') {
-  //     setCursor('crosshair');
-  //   } else {
-  //     setCursor('default');
-  //   }
-  // }, [drawingPatrolArea, setCursor]);
+  // ----------- helpers: pointer -> world coords (image pixels) -----------
+  const pointerToWorld = useCallback(
+    (pointer: { x: number; y: number } | null) => {
+      if (!pointer) return null;
+      return { x: (pointer.x - stageX) / stageScale, y: (pointer.y - stageY) / stageScale };
+    },
+    [stageScale, stageX, stageY],
+  );
+
   //----------- Center Node Helper -----------
   function withRecomputedCenter(nodes: Nodes[], scale: number): Nodes[] {
     const cornerNodes = nodes.filter((n) => n.type === 'corner');
@@ -390,7 +722,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
   };
 
   const checkCollisionWithOffset = (areaName: string, dx: number, dy: number): boolean => {
-    const currentArea = filteredUnsavedArea.find((a) => a.name === areaName);
+    const currentArea = renderAreas.find((a) => a.name === areaName);
     if (!currentArea || !currentArea.nodes) return false;
 
     const proposedArea = {
@@ -403,34 +735,48 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
       })),
     };
 
-    return filteredUnsavedArea.some((otherArea) => {
+    return renderAreas.some((otherArea) => {
       if (otherArea.name === areaName) return false;
       if (!otherArea.nodes) return false;
       return checkPolygonCollision(proposedArea, { nodes: otherArea.nodes });
     });
   };
 
-  const checkCornerDragCollision = (
-    areaName: string,
-    cornerIndex: number,
-    newX: number,
-    newY: number,
-  ): boolean => {
-    const currentArea = filteredUnsavedArea.find((a) => a.name === areaName);
-    if (!currentArea || !currentArea.nodes) return false;
+  const checkCornerDragCollision = useCallback(
+    (
+      areaName: string,
+      cornerIndex: number,
+      newX: number,
+      newY: number,
+    ): boolean => {
+      const currentArea = renderAreas.find((a) => a.name === areaName);
+      if (!currentArea || !currentArea.nodes) return false;
 
-    const proposedArea = {
-      nodes: currentArea.nodes.map((node, index) =>
-        index === cornerIndex ? { ...node, x: newX, y: newY } : node,
-      ),
-    };
+      const cornerNodes = getCornerNodes(currentArea.nodes);
+      const targetNode = cornerNodes[cornerIndex];
+      if (!targetNode) return false;
 
-    return filteredUnsavedArea.some((otherArea) => {
-      if (otherArea.name === areaName) return false;
-      if (!otherArea.nodes) return false;
-      return checkPolygonCollision(proposedArea, { nodes: otherArea.nodes });
-    });
-  };
+      const proposedNodes = currentArea.nodes.map((node) =>
+        node.id === targetNode.id
+          ? { ...node, x: newX * scale, y: newY * scale, x_px: newX, y_px: newY }
+          : node,
+      );
+
+      const proposedCornerNodes = getCornerNodes(proposedNodes);
+      if (checkSelfIntersections(proposedCornerNodes)) {
+        return true;
+      }
+
+      const proposedArea = { name: areaName, nodes: proposedNodes };
+      for (const otherArea of renderAreas) {
+        if (otherArea.name === areaName || !otherArea.nodes || getCornerNodes(otherArea.nodes).length < 3) continue;
+        if (checkPolygonCollision(proposedArea, { nodes: otherArea.nodes })) return true;
+      }
+
+      return false;
+    },
+    [renderAreas, scale, checkPolygonCollision],
+  );
 
   // ----------- event handlers -----------
   const handleCanvasClick = useCallback(
@@ -438,7 +784,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
       if (!drawingPatrolArea) return;
       const stage = e.target.getStage();
       const ptr = stage?.getPointerPosition();
-      const world = pointerToWorld(ptr || null);
+      const world = (isQHeldRef.current && cursorWorld) ? cursorWorld : pointerToWorld(ptr || null);
       if (!world) return;
 
       const { x, y } = world;
@@ -488,7 +834,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
         return [...prevNodes, newNode];
       });
     },
-    [drawingPatrolArea, pointerToWorld, scale, selectedFloorplan, dispatch],
+    [drawingPatrolArea, cursorWorld, pointerToWorld, scale, selectedFloorplan, dispatch],
   );
 
   const handleOnClick = useCallback(
@@ -499,7 +845,6 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
       if (editingArea) {
         setPendingAreaId(id);
         setConfirmDialogOpen(true);
-        // setCursor('move');
         return;
       }
       dispatch(SelectPatrolArea(id));
@@ -517,7 +862,6 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
       setIsColliding(false);
       setAreaDragging(true);
 
-      // Get the current pointer position in world coordinates
       const stage = e.target.getStage();
       const ptr = stage?.getPointerPosition();
       const world = pointerToWorld(ptr || null);
@@ -528,47 +872,9 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
     [drawingPatrolArea, setIsDragging, pointerToWorld],
   );
 
-  // FIXED: handleDragEnd - clear dragging state and apply movement
-  const handleDragEnd = useCallback(
-    async (areaName: string, e: any) => {
-      if (draggingAreaName !== areaName) return;
-
-      const stage = e.target.getStage();
-      const ptr = stage?.getPointerPosition();
-      const world = pointerToWorld(ptr || null);
-
-      if (world && dragStartPos) {
-        const dx = world.x - dragStartPos.x;
-        const dy = world.y - dragStartPos.y;
-
-        const collision = checkCollisionWithOffset(areaName, dx, dy);
-        setIsColliding(collision);
-
-        if (collision) {
-          toast.error('Areas cannot overlap! Position reverted.');
-        } else if (dx !== 0 || dy !== 0) {
-          await handleDragArea(areaName, dx, dy);
-        }
-      }
-
-      // Clear the dragging state
-      setIsDragging('');
-      setDraggingAreaName(null);
-      setAreaDragging(false);
-      setDragOffset({ dx: 0, dy: 0 });
-      setIsColliding(false);
-      setDragStartPos({ x: 0, y: 0 });
-
-      // Reset the Konva shape position to 0 (since we're moving the area by updating nodes)
-      e.target.x(0);
-      e.target.y(0);
-    },
-    [draggingAreaName, pointerToWorld, dragStartPos, setIsDragging],
-  );
-
   const handleDragArea = useCallback(
     (areaName: string, dx: number, dy: number) => {
-      const updatedAreas = filteredUnsavedArea.map((area) =>
+      const updatedAreas = renderAreas.map((area) =>
         area.name === areaName
           ? {
               ...area,
@@ -597,42 +903,116 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
         dispatch(EditPatrolAreaPosition(updatedArea));
       }
     },
-    [filteredUnsavedArea, scale, dispatch],
+    [renderAreas, scale, dispatch],
+  );
+
+  // FIXED: handleDragEnd - clear dragging state and apply movement
+  const handleDragEnd = useCallback(
+    async (areaName: string, e: any) => {
+      if (draggingAreaName !== areaName) return;
+
+      const stage = e.target.getStage();
+      const ptr = stage?.getPointerPosition();
+      const world = pointerToWorld(ptr || null);
+
+      if (world && dragStartPos) {
+        let dx = world.x - dragStartPos.x;
+        let dy = world.y - dragStartPos.y;
+
+        if (isQHeldRef.current) {
+          const area = renderAreas.find((a) => a.name === areaName);
+          const cornerNodes = getCornerNodes(area?.nodes);
+          if (cornerNodes.length > 0) {
+            let bestCorner = cornerNodes[0];
+            let bestDist = Infinity;
+            for (const cn of cornerNodes) {
+              const d = Math.hypot(dragStartPos.x - cn.x_px, dragStartPos.y - cn.y_px);
+              if (d < bestDist) {
+                bestDist = d;
+                bestCorner = cn;
+              }
+            }
+            const movedCornerX = bestCorner.x_px + dx;
+            const movedCornerY = bestCorner.y_px + dy;
+            const snapped = snapToNearestLine(movedCornerX, movedCornerY, areaName);
+            if (snapped) {
+              dx = snapped.x - bestCorner.x_px;
+              dy = snapped.y - bestCorner.y_px;
+            }
+          }
+        }
+
+        const collision = checkCollisionWithOffset(areaName, dx, dy);
+        setIsColliding(collision);
+
+        if (collision) {
+          toast.error('Areas cannot overlap! Position reverted.');
+        } else if (dx !== 0 || dy !== 0) {
+          await handleDragArea(areaName, dx, dy);
+        }
+      }
+
+      // Clear the dragging state
+      setIsDragging('');
+      setDraggingAreaName(null);
+      setAreaDragging(false);
+      setDragOffset({ dx: 0, dy: 0 });
+      setIsColliding(false);
+      setDragStartPos({ x: 0, y: 0 });
+
+      // Reset the Konva shape position to 0
+      e.target.x(0);
+      e.target.y(0);
+    },
+    [draggingAreaName, pointerToWorld, dragStartPos, setIsDragging, renderAreas, snapToNearestLine, handleDragArea],
   );
 
   const handleCornerDragStart = useCallback(
     (areaName: string, cornerIndex: number, e: any) => {
-      const area = filteredUnsavedArea.find((a) => a.name === areaName);
+      const area = renderAreas.find((a) => a.name === areaName);
       if (!area || !area.nodes) return;
 
-      const corner = area.nodes[cornerIndex];
+      const corner = getCornerNodes(area.nodes)[cornerIndex];
       if (!corner) return;
+
+      activeCornerDragRef.current = {
+        areaName,
+        cornerIndex,
+        nodeRef: e.target,
+      };
 
       setCornerDragData({
         areaName,
         cornerIndex,
-        originalX: corner.x,
-        originalY: corner.y,
+        originalX: corner.x_px,
+        originalY: corner.y_px,
       });
       setIsDragging(areaName);
       setDraggingAreaName(areaName);
     },
-    [filteredUnsavedArea, setIsDragging],
+    [renderAreas, setIsDragging],
   );
 
   const handleDragCorner = useCallback(
     (areaName: string, cornerIndex: number, x: number, y: number) => {
-      const updatedAreas = filteredUnsavedArea.map((area) => {
+      const updatedAreas = renderAreas.map((area) => {
         if (area.name !== areaName || !area.nodes) return area;
 
-        const newNodes = [...area.nodes];
-        newNodes[cornerIndex] = {
-          ...newNodes[cornerIndex],
-          x: x * scale,
-          y: y * scale,
-          x_px: x,
-          y_px: y,
-        };
+        const cornerNodes = getCornerNodes(area.nodes);
+        const targetNode = cornerNodes[cornerIndex];
+        if (!targetNode) return area;
+
+        const newNodes = area.nodes.map((node) =>
+          node.id === targetNode.id
+            ? {
+                ...node,
+                x: x * scale,
+                y: y * scale,
+                x_px: x,
+                y_px: y,
+              }
+            : node,
+        );
         const finalNodes = withRecomputedCenter(newNodes, scale);
         return { ...area, nodes: finalNodes, areaShape: JSON.stringify(finalNodes) };
       });
@@ -642,18 +1022,24 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
         dispatch(EditPatrolAreaPosition(updatedArea));
       }
     },
-    [filteredUnsavedArea, scale, dispatch],
+    [renderAreas, scale, dispatch],
   );
 
   const handleCornerDragEnd = useCallback(
     (areaName: string, cornerIndex: number, x: number, y: number) => {
-      const area = filteredUnsavedArea.find((a) => a.name === areaName);
+      activeCornerDragRef.current = null;
+      const area = renderAreas.find((a) => a.name === areaName);
       if (!area || !area.nodes) return;
 
-      const proposedNodes = [...area.nodes];
-      proposedNodes[cornerIndex] = { ...proposedNodes[cornerIndex], x: x * scale, y: y * scale };
+      const cornerNodes = getCornerNodes(area.nodes);
+      const targetNode = cornerNodes[cornerIndex];
+      if (!targetNode) return;
 
-      const hasCollision = filteredUnsavedArea.some((otherArea) => {
+      const proposedNodes = area.nodes.map((node) =>
+        node.id === targetNode.id ? { ...node, x: x * scale, y: y * scale, x_px: x, y_px: y } : node,
+      );
+
+      const hasCollision = renderAreas.some((otherArea) => {
         if (otherArea.name === areaName || !otherArea.nodes) return false;
         return checkPolygonCollision({ nodes: proposedNodes }, { nodes: otherArea.nodes });
       });
@@ -672,19 +1058,22 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
 
       setCornerDragData(null);
       setIsColliding(false);
-      setIsDragging(''); // Clear dragging state
+      setIsDragging('');
       setDraggingAreaName(null);
     },
-    [cornerDragData, filteredUnsavedArea, scale, handleDragCorner, setIsDragging],
+    [cornerDragData, renderAreas, scale, handleDragCorner, setIsDragging, checkPolygonCollision],
   );
 
   const handleDeleteCorner = useCallback(
     (areaName: string, cornerIndex: number) => {
-      const updatedAreas = filteredUnsavedArea.map((area) => {
+      const updatedAreas = renderAreas.map((area) => {
         if (area.name !== areaName || !area.nodes) return area;
 
-        const newNodes = [...area.nodes];
-        newNodes.splice(cornerIndex, 1);
+        const cornerNodes = getCornerNodes(area.nodes);
+        const targetNode = cornerNodes[cornerIndex];
+        if (!targetNode) return area;
+
+        const newNodes = area.nodes.filter((node) => node.id !== targetNode.id);
         const finalNodes = withRecomputedCenter(newNodes, scale);
         return { ...area, nodes: finalNodes, areaShape: JSON.stringify(finalNodes) };
       });
@@ -694,26 +1083,29 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
         dispatch(EditPatrolAreaPosition(updatedArea));
       }
     },
-    [filteredUnsavedArea, dispatch],
+    [renderAreas, dispatch, scale],
   );
 
   const handleInsertCorner = useCallback(
     (areaName: string, clickX: number, clickY: number) => {
-      const area = filteredUnsavedArea.find((a) => a.name === areaName);
+      const area = renderAreas.find((a) => a.name === areaName);
       if (!area || !area.nodes) return;
+
+      const cornerNodes = getCornerNodes(area.nodes);
+      if (cornerNodes.length < 2) return;
 
       let insertIndex = -1;
       let minDistance = Infinity;
 
-      for (let i = 0; i < area.nodes.length; i++) {
-        const nextIndex = (i + 1) % area.nodes.length;
+      for (let i = 0; i < cornerNodes.length; i++) {
+        const nextIndex = (i + 1) % cornerNodes.length;
         const distance = pointToSegmentDistance(
           clickX,
           clickY,
-          area.nodes[i].x_px,
-          area.nodes[i].y_px,
-          area.nodes[nextIndex].x_px,
-          area.nodes[nextIndex].y_px,
+          cornerNodes[i].x_px,
+          cornerNodes[i].y_px,
+          cornerNodes[nextIndex].x_px,
+          cornerNodes[nextIndex].y_px,
         );
 
         if (distance < minDistance) {
@@ -722,22 +1114,24 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
         }
       }
 
-      const newNodes = [...area.nodes];
-      newNodes.splice(insertIndex, 0, {
+      const newNode: Nodes = {
         id: uniqueId(),
         type: 'corner',
         x: clickX * scale,
         y: clickY * scale,
         x_px: clickX,
         y_px: clickY,
-      });
-      const finalNodes = withRecomputedCenter(newNodes, scale);
+      };
 
-      const updatedArea = { ...area, nodes: finalNodes };
+      const newCornerNodes = [...cornerNodes];
+      newCornerNodes.splice(insertIndex, 0, newNode);
+      const finalNodes = withRecomputedCenter(newCornerNodes, scale);
+
+      const updatedArea = { ...area, nodes: finalNodes, areaShape: JSON.stringify(finalNodes) };
 
       dispatch(EditPatrolAreaPosition(updatedArea));
     },
-    [filteredUnsavedArea, scale, dispatch],
+    [renderAreas, scale, dispatch],
   );
 
   const pointToSegmentDistance = (
@@ -797,16 +1191,35 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
 
       const ptr = stage.getPointerPosition();
       const world = pointerToWorld(ptr || null);
-      if (world) setCursorWorld(world);
-      else setCursorWorld(null);
 
-      // Also update cursor based on what's under the mouse
+      if (world) {
+        if (isQHeldRef.current && drawingPatrolArea) {
+          const snapped = snapToNearestLine(world.x, world.y, drawingPatrolArea);
+          if (snapped) {
+            setCursorWorld({ x: snapped.x, y: snapped.y });
+          } else {
+            setCursorWorld(world);
+          }
+        } else if (isQHeldRef.current) {
+          const currentAreaName = activeCornerDragRef.current?.areaName;
+          const currentCornerIndex = activeCornerDragRef.current?.cornerIndex;
+          const snapped = snapToNearestLine(world.x, world.y, currentAreaName, currentCornerIndex);
+          if (snapped) {
+            setCursorWorld({ x: snapped.x, y: snapped.y });
+          } else {
+            setCursorWorld(world);
+          }
+        } else {
+          setCursorWorld(world);
+        }
+      } else {
+        setCursorWorld(null);
+      }
+
       if (stage) {
         const pointer = stage.getPointerPosition();
         if (pointer) {
           const shape = stage.getIntersection(pointer);
-
-          // If there's no shape under the mouse, ensure we reset area-specific hover states
           if (!shape && !drawingPatrolArea) {
             onAreaHoverChange(false);
             onOnArea(false);
@@ -814,7 +1227,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
         }
       }
     },
-    [pointerToWorld, drawingPatrolArea],
+    [pointerToWorld, drawingPatrolArea, snapToNearestLine, onAreaHoverChange, onOnArea],
   );
 
   const renderArea = useCallback(
@@ -840,26 +1253,21 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
               if (isEditing) {
                 if (preview) return;
                 if (!drawingPatrolArea) {
-                  // setCursor('move');
                   onAreaHoverChange(true);
                 }
               } else {
                 if (!drawingPatrolArea) {
-                  // setCursor('pointer');
                   onOnArea(true);
                 }
               }
             }}
             onMouseLeave={() => {
               if (!preview && !drawingPatrolArea) {
-                // setCursor('grab');
                 onAreaHoverChange(false);
                 onOnArea(false);
               }
             }}
             onMouseDown={(e) => {
-              // Only stop propagation if we're actually going to handle the drag
-              // Don't stop propagation if we're just clicking (not in editing mode)
               if (isEditing && !drawingPatrolArea) {
                 e.evt.stopPropagation();
               }
@@ -874,7 +1282,6 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
               }
             }}
             onDragStart={(e) => {
-              // Stop propagation when starting to drag a polygon
               e.evt.stopPropagation();
               handleDragStart(area.name, e);
             }}
@@ -887,14 +1294,45 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
               }
             }}
             onDragMove={(e) => {
-              // Don't stop propagation during drag move - let Konva handle it
+              if (isQHeldRef.current && dragStartPos) {
+                const stage = e.target.getStage();
+                const ptr = stage?.getPointerPosition();
+                const world = pointerToWorld(ptr || null);
+                if (world) {
+                  let dx = world.x - dragStartPos.x;
+                  let dy = world.y - dragStartPos.y;
+                  const currentArea = renderAreas.find((a) => a.name === area.name);
+                  const cNodes = getCornerNodes(currentArea?.nodes);
+                  if (cNodes.length > 0) {
+                    let bestCorner = cNodes[0];
+                    let bestDist = Infinity;
+                    for (const cn of cNodes) {
+                      const d = Math.hypot(dragStartPos.x - cn.x_px, dragStartPos.y - cn.y_px);
+                      if (d < bestDist) {
+                        bestDist = d;
+                        bestCorner = cn;
+                      }
+                    }
+                    const movedCornerX = bestCorner.x_px + dx;
+                    const movedCornerY = bestCorner.y_px + dy;
+                    const snapped = snapToNearestLine(movedCornerX, movedCornerY, area.name);
+                    if (snapped) {
+                      dx = snapped.x - bestCorner.x_px;
+                      dy = snapped.y - bestCorner.y_px;
+                      e.target.x(dx);
+                      e.target.y(dy);
+                      setCursorWorld({ x: snapped.x, y: snapped.y });
+                      return;
+                    }
+                  }
+                  setCursorWorld(world);
+                }
+              }
             }}
             onDragEnd={(e) => {
-              // Don't stop propagation on drag end
               handleDragEnd(area.name, e);
             }}
             onClick={(e) => {
-              // Don't stop propagation on regular click
               handleOnClick(area.id);
             }}
           />
@@ -915,7 +1353,6 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
                     shape.radius(10);
                     shape.stroke('black');
                     shape.strokeWidth(3);
-                    // setCursor('move');
                     onAreaHoverChange(true);
                     shape.getLayer()?.batchDraw();
                   }
@@ -926,35 +1363,53 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
                     shape.radius(7);
                     shape.stroke('');
                     shape.strokeWidth(1);
-                    // setCursor('grab');
                     onAreaHoverChange(false);
                     shape.getLayer()?.batchDraw();
                   }
                 }}
                 onDragStart={(e) => {
-                  // Stop propagation when starting to drag a corner
                   e.evt.stopPropagation();
                   handleCornerDragStart(area.name, index, e);
                 }}
                 onDragMove={(e) => {
-                  // Don't stop propagation during drag move
-                  // e.evt.stopPropagation();
+                  e.evt.stopPropagation();
                   const stage = e.target.getStage();
                   const ptr = stage?.getPointerPosition();
                   const world = pointerToWorld(ptr || null);
                   if (world) {
-                    handleDragCorner(area.name, index, world.x, world.y);
-                    checkCornerDragCollision(area.name, index, world.x, world.y);
+                    let targetX = world.x;
+                    let targetY = world.y;
+                    if (isQHeldRef.current) {
+                      const snapped = snapToNearestLine(world.x, world.y, area.name, index);
+                      if (snapped && !checkCornerDragCollision(area.name, index, snapped.x, snapped.y)) {
+                        targetX = snapped.x;
+                        targetY = snapped.y;
+                        e.target.x(snapped.x);
+                        e.target.y(snapped.y);
+                      }
+                    }
+                    setCursorWorld({ x: targetX, y: targetY });
+                    handleDragCorner(area.name, index, targetX, targetY);
+                    checkCornerDragCollision(area.name, index, targetX, targetY);
                   }
                 }}
                 onDragEnd={(e) => {
-                  // Don't stop propagation on drag end
-                  // e.evt.stopPropagation();
                   const stage = e.target.getStage();
                   const ptr = stage?.getPointerPosition();
                   const world = pointerToWorld(ptr || null);
                   if (world) {
-                    handleCornerDragEnd(area.name, index, world.x, world.y);
+                    let targetX = world.x;
+                    let targetY = world.y;
+                    if (isQHeldRef.current) {
+                      const snapped = snapToNearestLine(world.x, world.y, area.name, index);
+                      if (snapped && !checkCornerDragCollision(area.name, index, snapped.x, snapped.y)) {
+                        targetX = snapped.x;
+                        targetY = snapped.y;
+                      }
+                    }
+                    e.target.x(targetX);
+                    e.target.y(targetY);
+                    handleCornerDragEnd(area.name, index, targetX, targetY);
                   }
                 }}
                 onContextMenu={(e) => {
@@ -967,20 +1422,6 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
                 }}
               />
             ))}
-          {/* {isEditing &&
-            !areaDragging &&
-            area.nodes
-              ?.filter((n) => n.type === 'center')
-              .map((node) => (
-                <Circle
-                  key={node.id}
-                  x={node.x_px}
-                  y={node.y_px}
-                  radius={4}
-                  fill="yellow"
-                  listening={false}
-                />
-              ))} */}
         </Group>
       );
     },
@@ -999,6 +1440,12 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
       handleCornerDragEnd,
       handleDeleteCorner,
       areaDragging,
+      renderAreas,
+      dragStartPos,
+      snapToNearestLine,
+      checkCornerDragCollision,
+      onAreaHoverChange,
+      onOnArea,
     ],
   );
 
@@ -1029,7 +1476,7 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
           </FastLayer>
 
           {/* Areas */}
-          <Layer>{filteredUnsavedArea.map((area) => renderArea(area))}</Layer>
+          <Layer>{renderAreas.map((area) => renderArea(area))}</Layer>
 
           {/* Drawing nodes */}
           <Layer listening={false}>
@@ -1047,7 +1494,6 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
                     const shape = e.target as any;
                     shape.radius(12);
                     shape.fill('green');
-                    // setCursor('pointer');
                     onOnArea(true);
                     shape.getLayer()?.batchDraw();
                   }}
@@ -1055,7 +1501,6 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
                     const shape = e.target as any;
                     shape.radius(8);
                     shape.fill('blue');
-                    // setCursor('crosshair');
                     onOnArea(false);
                     shape.getLayer()?.batchDraw();
                   }}
@@ -1120,6 +1565,29 @@ const EditPatrolAreaRenderer: React.FC<Props> = ({
                   />
                 )}
               </>
+            )}
+            {guideLineShown &&
+              guideLines.map((line) => (
+                <Line
+                  key={line.id}
+                  points={line.points}
+                  stroke="#ff9800"
+                  strokeWidth={1.5}
+                  dash={[6, 4]}
+                  opacity={0.85}
+                  listening={false}
+                />
+              ))}
+            {isQHeld && cursorWorld && (
+              <Circle
+                x={cursorWorld.x}
+                y={cursorWorld.y}
+                radius={6}
+                fill="#00e676"
+                stroke="#000"
+                strokeWidth={1.5}
+                listening={false}
+              />
             )}
           </Layer>
         </Stage>

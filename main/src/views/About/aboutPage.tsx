@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Grid2 as Grid, Box, Card, CardContent, Typography, List, ListItem, ListItemText, Chip, Divider, CircularProgress, ListItemButton, Switch, Tooltip, styled, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Collapse } from '@mui/material';
+import { Grid2 as Grid, Box, Card, CardContent, Typography, List, ListItem, ListItemText, Chip, Divider, CircularProgress, ListItemButton, Switch, Tooltip, styled, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Collapse, Alert, AlertTitle } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import { useLicenseInfo, toggleFeatures, getMachineId, activateLicense } from 'src/hooks/useInfo';
 import axiosServices from 'src/utils/axios';
@@ -346,7 +346,11 @@ const getPathBounds = (d: string) => {
   };
 };
 
-const AboutPage = () => {
+export interface AboutPageProps {
+  isLicenseLocked?: boolean;
+}
+
+const AboutPage = ({ isLicenseLocked = false }: AboutPageProps) => {
   const customizer = useSelector((state: RootState) => state.customizer);
   const settings = useSelector((state: RootState) => state.settings);
   const customBBox = settings.customSvgPath 
@@ -358,8 +362,12 @@ const AboutPage = () => {
   const { refetch: fetchMachineId, isFetching: isFetchingMachineId } = getMachineId(false);
   const { mutate: uploadLicense, isPending: isUploading } = activateLicense();
   const isSuperadmin = typeof window !== 'undefined' && localStorage.getItem('levelPriority')?.toLowerCase() === 'superadmin';
-  const [activeTab, setActiveTab] = useState<'info' | 'customizer'>(isSuperadmin ? 'info' : 'customizer');
-  const [activeSection, setActiveSection] = useState(isSuperadmin ? 'app-details' : 'web-customizer');
+  
+  const isLicenseInvalid = isLicenseLocked || (data ? !data.isValid : false);
+  const canViewInfo = isSuperadmin || isLicenseInvalid;
+
+  const [activeTab, setActiveTab] = useState<'info' | 'customizer'>(canViewInfo ? 'info' : 'customizer');
+  const [activeSection, setActiveSection] = useState(canViewInfo ? 'app-details' : 'web-customizer');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const customSvgInputRef = useRef<HTMLInputElement>(null);
   const [machineIdDialogOpen, setMachineIdDialogOpen] = useState(false);
@@ -450,11 +458,14 @@ const AboutPage = () => {
       setConfirmDialogOpen(false);
     }
   };
-  console.log("data", data);
+  const displayedInfoSections = isLicenseInvalid
+    ? [{ id: 'app-details', title: 'License Details' }]
+    : infoSections;
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 200; // Offset for navbar
-      const currentSections = activeTab === 'info' ? infoSections : customizerSections;
+      const currentSections = activeTab === 'info' ? displayedInfoSections : customizerSections;
 
       for (let i = currentSections.length - 1; i >= 0; i--) {
         const section = document.getElementById(currentSections[i].id);
@@ -469,7 +480,7 @@ const AboutPage = () => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [activeTab]);
+  }, [activeTab, displayedInfoSections]);
 
   const handleScrollTo = (id: string, tab: 'info' | 'customizer') => {
     setActiveTab(tab);
@@ -605,7 +616,7 @@ const AboutPage = () => {
     }
   };
 
-  if (isSuperadmin && isLoading) {
+  if (canViewInfo && isLoading) {
     return (
       <PageContainer title="About" description="Loading About Page">
         <Box mt={2} mb={3} display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
@@ -615,7 +626,7 @@ const AboutPage = () => {
     );
   }
 
-  if ((isError || !data || !data.features || !data.features.core) && isSuperadmin) {
+  if ((isError || !data) && canViewInfo) {
     return (
       <PageContainer title="About" description="Error loading about page">
         <Box mt={2} mb={3} display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
@@ -631,16 +642,16 @@ const AboutPage = () => {
         <Grid container spacing={4}>
           {/* Sidebar */}
           <Grid size={{ xs: 12, md: 3 }} sx={{ display: { xs: 'none', md: 'block' } }}>
-            <Box sx={{ position: 'sticky', top: 100 }}>
+            <Box sx={{ position: 'sticky', top: isLicenseLocked ? 24 : 100 }}>
               {/* Application Info Group */}
-              {isSuperadmin && (
+              {canViewInfo && (
                 <Card variant="outlined" sx={{ mb: 2, borderRadius: 2, overflow: 'hidden' }}>
                   <Typography variant="subtitle2" fontWeight={700} px={2} py={1.5} sx={{ bgcolor: 'action.hover' }}>
-                    APPLICATION INFO
+                    {isLicenseInvalid ? 'LICENSE INFO' : 'APPLICATION INFO'}
                   </Typography>
                   <Divider />
                   <List component="nav" sx={{ p: 0 }}>
-                    {infoSections.map((section) => (
+                    {displayedInfoSections.map((section) => (
                       <ListItemButton
                         key={section.id}
                         selected={activeTab === 'info' && activeSection === section.id}
@@ -698,12 +709,43 @@ const AboutPage = () => {
 
           {/* Content area */}
           <Grid size={{ xs: 12, md: 9 }}>
-            {activeTab === 'info' && isSuperadmin && data && data.features ? (
+            {/* Mobile Tab Switcher when sidebar is hidden */}
+            <Box sx={{ display: { xs: 'flex', md: 'none' }, mb: 2, gap: 1 }}>
+              {canViewInfo && (
+                <Button
+                  variant={activeTab === 'info' ? 'contained' : 'outlined'}
+                  size="small"
+                  onClick={() => setActiveTab('info')}
+                >
+                  {isLicenseInvalid ? 'License Details' : 'App Details'}
+                </Button>
+              )}
+              <Button
+                variant={activeTab === 'customizer' ? 'contained' : 'outlined'}
+                size="small"
+                onClick={() => setActiveTab('customizer')}
+              >
+                App Customizer
+              </Button>
+            </Box>
+
+            {activeTab === 'info' && canViewInfo && data ? (
               <>
+                {/* Warning Alert if license is invalid or locked */}
+                {isLicenseInvalid && (
+                  <Alert severity="error" sx={{ mb: 3 }}>
+                    <AlertTitle>License Invalid or Expired</AlertTitle>
+                    {data.validationMessage ||
+                      'The system license is invalid or has expired. Please retrieve your Machine ID and update your license (.lic) to continue using the application.'}
+                  </Alert>
+                )}
+
                 {/* Top Section: App Details */}
                 <Card variant="outlined" sx={{ mb: 4 }}>
                   <CardContent>
-                    <Typography id="app-details" variant="h4" mb={2}>App Details</Typography>
+                    <Typography id="app-details" variant="h4" mb={2}>
+                      {isLicenseInvalid ? 'License Details' : 'App Details'}
+                    </Typography>
                     
                     <List disablePadding>
                       <ListItem disableGutters sx={{ py: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -713,18 +755,16 @@ const AboutPage = () => {
                         <Box display="flex" alignItems="center" gap={2}>
                           <Typography variant="h6" fontWeight={500}>{data.validationMessage}</Typography>
                           <Chip label={data.isValid ? "Valid" : "Invalid"} color={data.isValid ? "success" : "error"} size="medium" />
-                          {/* {!data.isValid && ( */}
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              color="primary"
-                              startIcon={<IconCpu size={18} />}
-                              onClick={handleGetMachineId}
-                              disabled={isFetchingMachineId}
-                            >
-                              {isFetchingMachineId ? 'Getting...' : 'Get Machine ID'}
-                            </Button>
-                          {/* )} */}
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="primary"
+                            startIcon={<IconCpu size={18} />}
+                            onClick={handleGetMachineId}
+                            disabled={isFetchingMachineId}
+                          >
+                            {isFetchingMachineId ? 'Getting...' : 'Get Machine ID'}
+                          </Button>
                         </Box>
                       </ListItem>
                       <Divider component="li" />
@@ -735,18 +775,19 @@ const AboutPage = () => {
                         </Box>
                         <Box display="flex" alignItems="center" gap={2}>
                           <Typography variant="h6" fontWeight={500}>{`${data.licenseType} - ${data.licenseTier}`}</Typography>
-                          {/* {!data.isValid && ( */}
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              color="secondary"
-                              startIcon={<IconUpload size={18} />}
-                              onClick={handleUploadClick}
-                              disabled={isUploading}
-                            >
-                              {isUploading ? 'Uploading...' : 'Upload License'}
-                            </Button>
-                          {/* )} */}
+                          {data.licenseType?.toLowerCase().includes('trial') && (
+                            <Chip label="Trial License" color="warning" size="small" />
+                          )}
+                          <Button
+                            variant="contained"
+                            size="small"
+                            color="secondary"
+                            startIcon={<IconUpload size={18} />}
+                            onClick={handleUploadClick}
+                            disabled={isUploading}
+                          >
+                            {isUploading ? 'Updating...' : 'Update License'}
+                          </Button>
                         </Box>
                       </ListItem>
                       <Divider component="li" />
@@ -801,104 +842,92 @@ const AboutPage = () => {
                   </CardContent>
                 </Card>
 
-                {/* Info Details Section */}
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography id="capacity" variant="h4" mb={2}>Capacity</Typography>
-                    
-                    <Grid container spacing={3} mb={4}>
-                      <Grid size={{ xs: 6 }}>
-                        <Box p={4} bgcolor="primary.light" borderRadius={2} color="primary.main" textAlign="center">
-                          <Typography variant="h3" fontWeight={700}>{data.maxReaders.toLocaleString()}</Typography>
-                          <Typography variant="h6">Max Readers</Typography>
-                        </Box>
+                {/* Info Details Section - Only displayed when license is valid */}
+                {!isLicenseInvalid && data.features && (
+                  <Card variant="outlined">
+                    <CardContent>
+                      <Typography id="capacity" variant="h4" mb={2}>Capacity</Typography>
+                      
+                      <Grid container spacing={3} mb={4}>
+                        <Grid size={{ xs: 6 }}>
+                          <Box p={4} bgcolor="primary.light" borderRadius={2} color="primary.main" textAlign="center">
+                            <Typography variant="h3" fontWeight={700}>{data.maxReaders.toLocaleString()}</Typography>
+                            <Typography variant="h6">Max Readers</Typography>
+                          </Box>
+                        </Grid>
+                        <Grid size={{ xs: 6 }}>
+                          <Box p={4} bgcolor="secondary.light" borderRadius={2} color="secondary.main" textAlign="center">
+                            <Typography variant="h3" fontWeight={700}>{data.maxBeacons.toLocaleString()}</Typography>
+                            <Typography variant="h6">Max Beacons</Typography>
+                          </Box>
+                        </Grid>
                       </Grid>
-                      <Grid size={{ xs: 6 }}>
-                        <Box p={4} bgcolor="secondary.light" borderRadius={2} color="secondary.main" textAlign="center">
-                          <Typography variant="h3" fontWeight={700}>{data.maxBeacons.toLocaleString()}</Typography>
-                          <Typography variant="h6">Max Beacons</Typography>
-                        </Box>
-                      </Grid>
-                    </Grid>
 
-                    <Typography id="core-features" variant="h4" mb={2} mt={6}>Core Features</Typography>
-                    <List dense disablePadding>
-                      {Object.values(data.features.core).map((feature, idx) => (
-                        <Box key={idx}>
-                          <ListItem disableGutters sx={{ py: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Box pl={2}>
-                              <Typography variant="h6">{feature.displayName}</Typography>
-                              <Typography variant="body1" color="textSecondary">{feature.description}</Typography>
-                            </Box>
-                            <Box display="flex" alignItems="center" gap={2}>
-                              <Chip label={feature.isEnabled ? "Enabled" : "Disabled"} color={feature.isEnabled ? "success" : "default"} size="medium" />
-                            </Box>
-                          </ListItem>
-                          {idx < Object.values(data.features.core).length - 1 && <Divider component="li" />}
-                        </Box>
-                      ))}
-                    </List>
-
-                    <Typography id="modules" variant="h4" mt={6} mb={2}>Modules</Typography>
-                    <List dense disablePadding>
-                      {Object.values(data.features.modules).map((mod, idx) => {
-                        const children = data.features.subModules
-                          ? Object.values(data.features.subModules).filter(subMod => subMod.key.startsWith(`${mod.key}.`))
-                          : [];
-                        const isExpanded = !!expandedModules[mod.key];
-
-                        return (
+                      <Typography id="core-features" variant="h4" mb={2} mt={6}>Core Features</Typography>
+                      <List dense disablePadding>
+                        {Object.values(data.features.core).map((feature, idx) => (
                           <Box key={idx}>
                             <ListItem disableGutters sx={{ py: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <Box pl={2} display="flex" alignItems="center" gap={1}>
-                                {children.length > 0 && (
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => toggleModuleExpand(mod.key)}
-                                    sx={{
-                                      p: 0.5,
-                                      transition: 'transform 0.2s',
-                                      transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                                    }}
-                                  >
-                                    <IconChevronDown size={20} />
-                                  </IconButton>
-                                )}
-                                <Box>
-                                  <Typography variant="h6">{mod.displayName}</Typography>
-                                  <Typography variant="body1" color="textSecondary">{mod.description}</Typography>
-                                </Box>
+                              <Box pl={2}>
+                                <Typography variant="h6">{feature.displayName}</Typography>
+                                <Typography variant="body1" color="textSecondary">{feature.description}</Typography>
                               </Box>
                               <Box display="flex" alignItems="center" gap={2}>
-                                <Chip
-                                  label={(localFeatures[mod.key] ?? mod.isEnabled) ? "Enabled" : "Disabled"}
-                                  color={(localFeatures[mod.key] ?? mod.isEnabled) ? "success" : "default"}
-                                  size="medium"
-                                />
-                                <Tooltip title={`Toggle ${mod.displayName}`} arrow placement="top">
-                                  <Box>
-                                    <IOSSwitch 
-                                      checked={localFeatures[mod.key] ?? mod.isEnabled} 
-                                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleToggle(mod.key, e.target.checked)} 
-                                    />
-                                  </Box>
-                                </Tooltip>
+                                <Chip label={feature.isEnabled ? "Enabled" : "Disabled"} color={feature.isEnabled ? "success" : "default"} size="medium" />
                               </Box>
                             </ListItem>
+                            {idx < Object.values(data.features.core).length - 1 && <Divider component="li" />}
+                          </Box>
+                        ))}
+                      </List>
 
-                            {children.length > 0 && (
-                              <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                                <List component="div" disablePadding sx={{ pl: 6, pr: 2, bgcolor: 'action.hover', borderRadius: 2, mb: 2 }}>
-                                  {children.map((subMod, subIdx) => (
-                                    <Box key={subMod.key}>
+                      <Typography id="modules" variant="h4" mt={6} mb={2}>Modules</Typography>
+                      <List dense disablePadding>
+                        {Object.values(data.features.modules).map((mod, idx) => {
+                          const children = data.features.subModules
+                            ? Object.values(data.features.subModules).filter(subMod => subMod.key.startsWith(`${mod.key}.`))
+                            : [];
+                          const isExpanded = !!expandedModules[mod.key];
+
+                          return (
+                            <Box key={idx}>
+                              <ListItem disableGutters sx={{ py: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <Box pl={2} display="flex" alignItems="center" gap={1}>
+                                  {children.length > 0 && (
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => toggleModuleExpand(mod.key)}
+                                      sx={{
+                                        p: 0.5,
+                                        transition: 'transform 0.2s',
+                                        transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)',
+                                      }}
+                                    >
+                                      <IconChevronDown size={18} />
+                                    </IconButton>
+                                  )}
+                                  <Box>
+                                    <Typography variant="h6">{mod.displayName}</Typography>
+                                    <Typography variant="body1" color="textSecondary">{mod.description}</Typography>
+                                  </Box>
+                                </Box>
+                                <Box display="flex" alignItems="center" gap={2}>
+                                  <IOSSwitch
+                                    checked={localFeatures[mod.key] ?? mod.isEnabled}
+                                    onChange={(e: any) => handleToggle(mod.key, e.target.checked)}
+                                  />
+                                </Box>
+                              </ListItem>
+
+                              {/* SubModules Collapsible Area */}
+                              {children.length > 0 && (
+                                <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                                  <List component="div" disablePadding sx={{ pl: 4, bgcolor: 'action.hover', borderRadius: 1, my: 1 }}>
+                                    {children.map((subMod) => (
                                       <ListItem
+                                        key={subMod.key}
                                         disableGutters
-                                        sx={{
-                                          py: 2,
-                                          display: 'flex',
-                                          justifyContent: 'space-between',
-                                          alignItems: 'center'
-                                        }}
+                                        sx={{ py: 2, px: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                                       >
                                         <Box>
                                           <Typography variant="subtitle1" fontWeight={600}>{subMod.displayName}</Typography>
@@ -906,65 +935,56 @@ const AboutPage = () => {
                                         </Box>
                                         <Box display="flex" alignItems="center" gap={2}>
                                           <Chip
-                                            label={(localFeatures[subMod.key] ?? subMod.isEnabled) ? "Enabled" : "Disabled"}
+                                            label={(localFeatures[subMod.key] ?? subMod.isEnabled) ? "Active" : "Inactive"}
                                             color={(localFeatures[subMod.key] ?? subMod.isEnabled) ? "success" : "default"}
                                             size="small"
                                           />
-                                          {/* <Tooltip title={`Toggle ${subMod.displayName}`} arrow placement="top">
-                                            <Box>
-                                              <IOSSwitch
-                                                size="small"
-                                                checked={localFeatures[subMod.key] ?? subMod.isEnabled}
-                                                disabled={!(localFeatures[mod.key] ?? mod.isEnabled)}
-                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleToggle(subMod.key, e.target.checked)}
-                                              />
-                                            </Box>
-                                          </Tooltip> */}
                                         </Box>
                                       </ListItem>
-                                      {subIdx < children.length - 1 && <Divider />}
-                                    </Box>
-                                  ))}
-                                </List>
-                              </Collapse>
-                            )}
-                            {idx < Object.values(data.features.modules).length - 1 && <Divider component="li" />}
-                          </Box>
-                        );
-                      })}
-                    </List>
-                    {hasChanges && (
-                      <Box
-                        sx={{
-                          position: 'sticky',
-                          bottom: 24,
-                          display: 'flex',
-                          justifyContent: 'flex-end',
-                          zIndex: 10,
-                          mt: 2,
-                          pointerEvents: 'none',
-                        }}
-                      >
-                        <Button
-                          variant="contained"
-                          color="success"
-                          onClick={() => setConfirmDialogOpen(true)}
+                                    ))}
+                                  </List>
+                                </Collapse>
+                              )}
+
+                              {idx < Object.values(data.features.modules).length - 1 && <Divider component="li" />}
+                            </Box>
+                          );
+                        })}
+                      </List>
+
+                      {hasChanges && (
+                        <Box
                           sx={{
-                            pointerEvents: 'auto',
-                            boxShadow: (theme) => theme.shadows[10],
-                            borderRadius: '50px',
-                            px: 4,
-                            py: 1.5,
-                            fontSize: '1rem',
-                            fontWeight: 600,
+                            position: 'sticky',
+                            bottom: 24,
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                            zIndex: 10,
+                            mt: 2,
+                            pointerEvents: 'none',
                           }}
                         >
-                          Apply
-                        </Button>
-                      </Box>
-                    )}
-                  </CardContent>
-                </Card>
+                          <Button
+                            variant="contained"
+                            color="success"
+                            onClick={() => setConfirmDialogOpen(true)}
+                            sx={{
+                              pointerEvents: 'auto',
+                              boxShadow: (theme) => theme.shadows[10],
+                              borderRadius: '50px',
+                              px: 4,
+                              py: 1.5,
+                              fontSize: '1rem',
+                              fontWeight: 600,
+                            }}
+                          >
+                            Apply
+                          </Button>
+                        </Box>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
               </>
             ) : (
               /* Customizer Section */

@@ -1,4 +1,4 @@
-import { CssBaseline, ThemeProvider } from '@mui/material';
+import { CssBaseline, ThemeProvider, Box, CircularProgress, Typography } from '@mui/material';
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { ThemeSettings } from './theme/Theme';
@@ -7,8 +7,9 @@ import { RouterProvider } from 'react-router';
 import router from './routes/Router';
 import { RootState } from './store/Store';
 import usePreventWindowClose from './hooks/usePreventWindowClose';
-import { getActiveFeatures } from './hooks/useInfo';
+import { getActiveFeatures, useLicenseInfo } from './hooks/useInfo';
 import { setActiveFeatures } from './store/apps/session';
+import AboutPage from './views/About/aboutPage';
 
 function App() {
   const theme = ThemeSettings();
@@ -16,8 +17,11 @@ function App() {
   const settings = useSelector((state: RootState) => state.settings);
   const dispatch = useDispatch();
 
+  // Fetch license info on initialization
+  const { data: licenseData, isLoading: isLicenseLoading } = useLicenseInfo();
+
   const isLoggedIn = typeof window !== 'undefined' && (!!localStorage.getItem('response') || !!localStorage.getItem('token'));
-  const { data: featureData } = getActiveFeatures(isLoggedIn);
+  const { data: featureData } = getActiveFeatures(isLoggedIn && !!licenseData?.isValid);
 
   useEffect(() => {
     if (featureData?.activeFeatures) {
@@ -28,6 +32,38 @@ function App() {
   // Global browser close preventer
   // usePreventWindowClose(true);
 
+  // Loading state while verifying system license
+  if (isLicenseLoading) {
+    return (
+      <ThemeProvider theme={theme}>
+        <RTL direction={settings.activeDir}>
+          <CssBaseline />
+          <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" minHeight="100vh" gap={2}>
+            <CircularProgress size={48} />
+            <Typography variant="h6" color="textSecondary">
+              Verifying system license...
+            </Typography>
+          </Box>
+        </RTL>
+      </ThemeProvider>
+    );
+  }
+
+  // If license is invalid, lock user to About page without any navbar or router navigation
+  if (licenseData && !licenseData.isValid) {
+    return (
+      <ThemeProvider theme={theme}>
+        <RTL direction={settings.activeDir}>
+          <CssBaseline />
+          <Box sx={{ minHeight: '100vh', p: { xs: 2, md: 4 }, bgcolor: 'background.default' }}>
+            <AboutPage isLicenseLocked={true} />
+          </Box>
+        </RTL>
+      </ThemeProvider>
+    );
+  }
+
+  // If isValid === true => continue to the URL or go to Login Page via router
   return (
     <ThemeProvider theme={theme}>
       <RTL direction={settings.activeDir}>

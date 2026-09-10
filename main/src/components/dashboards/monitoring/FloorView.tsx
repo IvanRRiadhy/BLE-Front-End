@@ -29,7 +29,7 @@ import { fetchMembers, memberType } from 'src/store/apps/crud/member';
 import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import BeaconDetailPopup from './Popup/BeaconDetailPopup';
 import TrackingDetailPopup from './Popup/TrackingDetailPopup';
-import { setScreenDisplay, setScreenSettings, swapScreen } from 'src/store/apps/monitoring/layout';
+import { setScreenDisplay, setScreenFloorplan, setScreenSettings, swapScreen } from 'src/store/apps/monitoring/layout';
 import {
   fetchGeoFencingAlarmsAll,
   GeoFencingAlarmType,
@@ -93,8 +93,10 @@ const FloorView: React.FC<{
   const FollowingPersons = useSelector((state: RootState) => state.layoutReducer.followingPersons ?? []);
   const layouts = useSelector((state: RootState) => state.layoutReducer.layouts ?? []);
   const activeLayout = layouts.find((l) => l.id === activeLayoutId);
-  const activeScreen = activeLayout?.screens.find((s) => s.floorplanId === activeFloorplan);
-  const isFollowing = activeScreen?.display?.displayType === 3;
+  const thisScreen =
+    activeLayout?.screens.find((s) => s.id === screenId) ??
+    activeLayout?.screens[screenNumber - 1];
+  const isFollowing = thisScreen?.display?.displayType === 3 || !!focusBeacon;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const { data: floor = [] } = useAllFloors();
@@ -351,7 +353,9 @@ const FloorView: React.FC<{
     const activeLayout = layouts.find((l) => l.id === activeLayoutId);
     if (!activeLayout) return;
 
-    const screen = activeLayout.screens.find((s) => s.floorplanId === activeFloorplan);
+    const screen =
+      activeLayout.screens.find((s) => s.id === screenId) ??
+      activeLayout.screens[screenNumber - 1];
     if (!screen) return;
 
     const current = { scale, x: translate.x, y: translate.y };
@@ -631,76 +635,128 @@ const FloorView: React.FC<{
     }
   }, [activeMaskedArea, filteredArea, focusArea]);
 
-  // Focus beacon handling
+  // Focus beacon handling & floorplan transitions
   const beaconsByTopic = useSelector((s: RootState) => s.BeaconReducer.beaconsByTopic);
   const lastSwitchedRef = useRef<string | null>(null);
 
+  // Check if following person is actively engaged
+  const isFollowActive =
+    isFollowing ||
+    !!FollowingPerson ||
+    (FollowingPersons && FollowingPersons.length > 0) ||
+    !!focusBeacon;
+
+  // Reset manual dragging and ensure showOtherBeacons is turned on ONLY when following mode is disabled
   useEffect(() => {
-    if (!focusBeacon || !gridNumber || !screenNumber) return;
-
-    let transition: { from?: string; to?: string } | null = null;
-    for (const arr of Object.values(beaconsByTopic)) {
-      const hit = Array.isArray(arr)
-        ? arr.find((b) => b.beaconId === focusBeacon && b.fromFloorplanId && b.toFloorplanId)
-        : undefined;
-      if (hit) {
-        transition = { from: hit.fromFloorplanId, to: hit.toFloorplanId };
-        break;
-      }
-    }
-
-    if (
-      transition?.to &&
-      transition.to !== activeFloorplan &&
-      lastSwitchedRef.current !== transition.to
-    ) {
-      lastSwitchedRef.current = transition.to;
-    }
-  }, [focusBeacon, beaconsByTopic, activeFloorplan, gridNumber, screenNumber, dispatch]);
-
-
-
-  // Reset manual dragging and ensure showOtherBeacons is turned on when following mode is disabled
-  useEffect(() => {
-    if (!isFollowing) {
+    if (!isFollowActive) {
       isManualDragRef.current = false;
       setIsUserDragging(false);
       setShowOtherBeacons(true);
     }
-  }, [isFollowing]);
+  }, [isFollowActive]);
 
+  // Cancel resetting showOtherBeacons on floorplan change if following person is still active
+  const prevFloorplanRef = useRef(activeFloorplan);
+  useEffect(() => {
+    if (prevFloorplanRef.current !== activeFloorplan) {
+      prevFloorplanRef.current = activeFloorplan;
+      if (!isFollowActive) {
+        setShowOtherBeacons(true);
+      }
+    }
+  }, [activeFloorplan, isFollowActive]);
+
+  // Handler to find other screen with target floorplan from MonitoringGrid and swap it, or update floorplan
+  const handleFloorplanChange = useCallback(
+    (targetFloorplan: string) => {
+      if (!targetFloorplan || targetFloorplan.toLowerCase() === activeFloorplan?.toLowerCase()) {
+        return;
+      }
+      if (lastSwitchedRef.current === targetFloorplan) return;
+      lastSwitchedRef.current = targetFloorplan;
+
+      const screens = activeLayout?.screens ?? [];
+      const currentIdx = screenNumber - 1;
+
+      // Find other screen in activeLayout.screens that already has that floorplan's id
+      const otherScreenIndex = screens.findIndex(
+        (s, idx) =>
+          s.floorplanId &&
+          s.floorplanId.toLowerCase() === targetFloorplan.toLowerCase() &&
+          idx !== currentIdx,
+      );
+
+      if (otherScreenIndex !== -1) {
+        const otherScreenNumber = otherScreenIndex + 1;
+        console.log(
+          `[FloorView] Following person moved to floorplan ${targetFloorplan}. Found on screen #${otherScreenNumber}. Swapping screens!`,
+        );
+        if (screenNumber === 1) {
+          dispatch(swapScreen(otherScreenNumber));
+        } else {
+          dispatch(swapScreen({ screenA: screenNumber, screenB: otherScreenNumber }));
+        }
+      } else {
+        console.log(
+          `[FloorView] Following person moved to floorplan ${targetFloorplan}. No other screen has it. Updating floorplan directly.`,
+        );
+        const targetScreenId = thisScreen?.id || screenId;
+        if (activeLayoutId && targetScreenId) {
+          dispatch(
+            setScreenFloorplan({
+              layoutId: activeLayoutId,
+              screenId: targetScreenId,
+              floorplanId: targetFloorplan,
+            }),
+          );
+        }
+      }
+    },
+    [activeFloorplan, activeLayout, screenNumber, activeLayoutId, thisScreen, screenId, dispatch],
+  );
+
+  // Monitor beacon movement for floorplan changes
   useEffect(() => {
     if (!focusBeacon || !gridNumber || !screenNumber) return;
 
     let to: string | null = null;
     for (const arr of Object.values(beaconsByTopic)) {
-      const hit = Array.isArray(arr)
-        ? arr.find((b: any) => {
-            const sameBeacon =
-              (b.beaconId && b.beaconId.toLowerCase() === String(focusBeacon).toLowerCase()) ||
-              (b.cardNumber && String(b.cardNumber) === String(focusBeacon));
-            const explicitTo = b.toFloorplanId ?? b.toFlooplanId ?? null;
-            if (explicitTo) {
-              to = explicitTo;
-              return true;
-            }
-            if (b.TransM && typeof b.TransM === 'string') {
-              const m = b.TransM.match(/to floorplan\s+([0-9A-Fa-f-]{36})/);
-              if (m) {
-                to = m[1];
-                return true;
-              }
-            }
-            return false;
-          })
-        : undefined;
-      if (hit) break;
+      const beaconList = Array.isArray(arr)
+        ? arr
+        : typeof arr === 'object' && arr !== null
+        ? Object.values(arr)
+        : [];
+
+      for (const b of beaconList) {
+        const sameBeacon =
+          (b.beaconId && b.beaconId.toLowerCase() === String(focusBeacon).toLowerCase()) ||
+          (b.cardNumber && String(b.cardNumber) === String(focusBeacon));
+        if (!sameBeacon) continue;
+
+        const explicitTo = b.toFloorplanId ?? b.toFlooplanId ?? null;
+        if (explicitTo) {
+          to = explicitTo;
+          break;
+        }
+        if (b.TransM && typeof b.TransM === 'string') {
+          const m = b.TransM.match(/to floorplan\s+([0-9A-Fa-f-]{36})/i);
+          if (m) {
+            to = m[1];
+            break;
+          }
+        }
+        if (b.floorplanId && b.floorplanId.toLowerCase() !== activeFloorplan?.toLowerCase()) {
+          to = b.floorplanId;
+          break;
+        }
+      }
+      if (to) break;
     }
 
-    if (to && to !== activeFloorplan && lastSwitchedRef.current !== to) {
-      lastSwitchedRef.current = to;
+    if (to && to.toLowerCase() !== activeFloorplan?.toLowerCase()) {
+      handleFloorplanChange(to);
     }
-  }, [focusBeacon, beaconsByTopic, activeFloorplan, gridNumber, screenNumber, dispatch]);
+  }, [focusBeacon, beaconsByTopic, activeFloorplan, gridNumber, screenNumber, handleFloorplanChange]);
 
   // Cancel following
   const layoutState = useSelector((state: RootState) => state.layoutReducer);
@@ -1076,6 +1132,7 @@ const isBoundaryActive = isActive('boundary');
               focusBeaconId={focusBeacon || undefined}
               focusDmac={selectedBeacon?.dmac ?? undefined}
               onFocusPosition={handleFocusPosition}
+              onFloorplanChange={handleFloorplanChange}
               showOtherBeacons={showOtherBeacons}
               followingPersons={FollowingPersons}
               screenId={screenId ?? ''}

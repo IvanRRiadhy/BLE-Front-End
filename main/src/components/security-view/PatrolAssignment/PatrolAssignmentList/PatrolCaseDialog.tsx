@@ -40,6 +40,35 @@ interface Props {
 
 // const CASE_TYPES = ['Damage', 'Incident', 'Security', 'Other'];
 
+const IMAGE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/heic', // iPhone
+  'image/heif', // iPhone
+  'image/gif', // optional (Android sering kirim GIF)
+];
+
+const VIDEO_TYPES = [
+  'video/mp4', // Android + iPhone
+  'video/webm', // Android
+  'video/quicktime', // iPhone (.mov)
+  'video/x-matroska', // .mkv (kadang Android)
+  'video/mkv', // .mkv
+  'video/x-msvideo', // .avi
+  'video/avi', // .avi
+  'video/msvideo', // .avi
+  'video/3gpp', // Android lama (.3gp)
+];
+
+const DOC_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+
+const ALLOWED_TYPES = [...IMAGE_TYPES, ...VIDEO_TYPES, ...DOC_TYPES];
+
 const PatrolCaseDialog = ({
   open,
   onClose,
@@ -75,10 +104,15 @@ const PatrolCaseDialog = ({
   };
 
   const handleFileUpload = async (file: File) => {
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'video/mp4'];
+    const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+    const isAllowedExt = [
+      '.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif', '.gif',
+      '.mp4', '.webm', '.mov', '.mkv', '.avi', '.3gp',
+      '.pdf', '.doc', '.docx',
+    ].includes(ext);
 
-    if (!allowedTypes.includes(file.type)) {
-      alert('Only JPG, PNG, or MP4 files are allowed');
+    if (!ALLOWED_TYPES.includes(file.type) && !isAllowedExt) {
+      alert('File type not supported. Please upload an allowed image, video, or document.');
       return;
     }
     console.log('file', file);
@@ -169,7 +203,7 @@ const PatrolCaseDialog = ({
     att?.mimeType?.startsWith('image') || /\.(png|jpg|jpeg|gif|webp)$/i.test(att?.fileUrl || '');
 
   const isVideo = (att: any) =>
-    att?.mimeType?.startsWith('video') || /\.(mp4|webm|ogg)$/i.test(att?.fileUrl || '');
+    att?.mimeType?.startsWith('video') || /\.(mp4|webm|ogg|mov|mkv|avi|3gp)$/i.test(att?.fileUrl || '');
 
   const uniqueCheckpoints = Array.from(new Map(checkpoints.map((cp) => [cp.patrolAreaId, cp])).values());
 
@@ -334,6 +368,7 @@ const PatrolCaseDialog = ({
                 <input
                   hidden
                   type="file"
+                  accept={ALLOWED_TYPES.join(',')}
                   onChange={(e) => e.target.files && handleFileUpload(e.target.files[0])}
                 />
               </Button>

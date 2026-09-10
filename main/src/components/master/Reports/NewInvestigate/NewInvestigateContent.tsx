@@ -59,6 +59,8 @@ import { BASE_URL } from 'src/utils/axios';
 import BeaconRenderer from 'src/components/dashboards/monitoring/Renderer/BeaconRenderer';
 import { useAllFloorplans } from 'src/hooks/useFloorplan';
 import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import { useAllMembers } from 'src/hooks/useMember';
+import { useAllVisitor } from 'src/hooks/useVisitor';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { safeParseAreaShape } from 'src/utils/isJsonObject';
 import { toLocalDate, formatOrRawTime } from 'src/utils/time';
@@ -685,6 +687,38 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
 
 
 
+  // Fetch members and visitors for robust fallback image matching
+  const { data: allMembers = [] } = useAllMembers();
+  const { data: allVisitors = [] } = useAllVisitor();
+
+  const matchedPerson = useMemo(() => {
+    const targetId = data?.personInfo?.personId || selectedPerson?.id;
+    const targetIdentity = data?.personInfo?.identityId || selectedPerson?.identityId;
+    if (targetId) {
+      const m = allMembers.find((item: any) => item.id === targetId || item.personId === targetId);
+      if (m) return m;
+      const v = allVisitors.find((item: any) => item.id === targetId || item.personId === targetId);
+      if (v) return v;
+    }
+    if (targetIdentity && targetIdentity !== '-') {
+      const m = allMembers.find((item: any) => item.identityId === targetIdentity);
+      if (m) return m;
+      const v = allVisitors.find((item: any) => item.identityId === targetIdentity);
+      if (v) return v;
+    }
+    return null;
+  }, [allMembers, allVisitors, data?.personInfo, selectedPerson]);
+
+  const rawPersonImage =
+    (data?.personInfo as any)?.faceImageUrl ||
+    data?.personInfo?.faceImage ||
+    (matchedPerson as any)?.faceImageUrl ||
+    (matchedPerson as any)?.faceImage ||
+    selectedPerson?.avatarUrl ||
+    null;
+
+  const personAvatarUrl = normalizeImageUrl(rawPersonImage);
+
   // Avatar Initials
   const initials = personName
     .split(' ')
@@ -953,16 +987,17 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ xs: 'flex-start', md: 'center' }}>
           {/* Avatar */}
           <Avatar
-            src={data?.personInfo?.faceImage || selectedPerson?.avatarUrl || undefined}
+            src={personAvatarUrl || undefined}
+            alt={personName}
             sx={{
               width: 72,
               height: 72,
-              bgcolor: '#E8F2FE',
-              color: '#1877F2',
+              bgcolor: personType === 'Member' ? '#E8F2FE' : '#FEF3D6',
+              color: personType === 'Member' ? '#1877F2' : '#B06000',
               fontWeight: 700,
               fontSize: '24px',
               border: '2px solid',
-              borderColor: 'primary.light',
+              borderColor: personType === 'Member' ? 'primary.light' : '#FFD599',
             }}
           >
             {initials}
@@ -1438,7 +1473,8 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                             isSecurity={personType === 'Security'}
                             isMember={personType === 'Member'}
                             isVisitor={personType === 'Visitor'}
-                            faceImage={selectedPerson?.avatarUrl}
+                            iconType="photo"
+                            faceImage={personAvatarUrl || undefined}
                             area={currentArea}
                             floorplan={currentFloor}
                             time={lastSeenTimeStr}
@@ -2025,7 +2061,8 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                             isSecurity={personType === 'Security'}
                             isMember={personType === 'Member'}
                             isVisitor={personType === 'Visitor'}
-                            faceImage={selectedPerson?.avatarUrl}
+                            iconType="photo"
+                            faceImage={personAvatarUrl || undefined}
                             area={currentArea}
                             floorplan={currentFloor}
                             time={lastSeenTimeStr}
@@ -2285,29 +2322,147 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
             {/* Access Rights */}
             <Grid size={{ xs: 12, md: 6 }}>
               <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '16px', p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <Box mb={2}>
-                  <Typography variant="h6" fontWeight={700} color="text.primary">
-                    Access Rights
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Assigned access groups and permissions
-                  </Typography>
-                </Box>
-
-                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', bgcolor: '#F8FAFC', borderRadius: '12px', p: 3, my: 1, border: '1px solid', borderColor: 'divider' }}>
-                  <Box sx={{ width: 44, height: 44, borderRadius: '50%', bgcolor: '#E8F2FE', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1.5, color: '#1877F2' }}>
-                    <IconShieldCheck size={24} />
+                <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={2}>
+                  <Box>
+                    <Typography variant="h6" fontWeight={700} color="text.primary">
+                      Access Rights
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Assigned access groups and permissions
+                    </Typography>
                   </Box>
-                  <Typography variant="subtitle2" fontWeight={700} color="text.primary" textAlign="center">
-                    {assignedAccessGroups.length > 0
-                      ? assignedAccessGroups.map((g: any) => g.accessName || g.name).join(', ')
-                      : 'No Access Group Assigned'}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" textAlign="center" sx={{ maxWidth: 360, mt: 0.5 }}>
-                    {assignedAccessGroups.length > 0
-                      ? `Allowed areas: ${allowedAreaList.length > 0 ? allowedAreaList.join(', ') : `${assignedAccessGroups[0]?.allowedAreasCount || 0} areas configured`}`
-                      : 'This person does not have any access group assigned. All area access will be validated against default rules.'}
-                  </Typography>
+                  <Chip
+                    label={assignedAccessGroups.length > 0 ? `${assignedAccessGroups.length} Access Group${assignedAccessGroups.length > 1 ? 's' : ''}` : 'No Group'}
+                    size="small"
+                    sx={{
+                      fontWeight: 700,
+                      borderRadius: '8px',
+                      fontSize: '11px',
+                      bgcolor: assignedAccessGroups.length > 0 ? '#E8F2FE' : '#F1F5F9',
+                      color: assignedAccessGroups.length > 0 ? '#1877F2' : 'text.secondary',
+                    }}
+                  />
+                </Stack>
+
+                {/* Main Content Area */}
+                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+                  {assignedAccessGroups.length > 0 ? (
+                    assignedAccessGroups.map((group: any, idx: number) => {
+                      const groupName = group.accessName || group.name || 'Access Group';
+                      return (
+                        <Box
+                          key={idx}
+                          sx={{
+                            border: '1px solid',
+                            borderColor: '#BEDBFF',
+                            borderRadius: '12px',
+                            p: 2,
+                            bgcolor: '#F4F8FF',
+                          }}
+                        >
+                          <Stack direction="row" spacing={1.5} alignItems="center" mb={1.5}>
+                            <Box
+                              sx={{
+                                width: 38,
+                                height: 38,
+                                borderRadius: '10px',
+                                bgcolor: '#1877F2',
+                                color: '#fff',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0,
+                                boxShadow: '0 2px 6px rgba(24, 119, 242, 0.25)',
+                              }}
+                            >
+                              <IconShieldCheck size={22} />
+                            </Box>
+                            <Box sx={{ flex: 1, minWidth: 0 }}>
+                              <Typography variant="subtitle2" fontWeight={700} color="text.primary" noWrap>
+                                {groupName}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Assigned Access Profile
+                              </Typography>
+                            </Box>
+                            <Chip
+                              label={`${allowedAreaList.length || group.allowedAreasCount || 0} Allowed Areas`}
+                              size="small"
+                              sx={{ bgcolor: '#E8F2FE', color: '#1877F2', fontWeight: 700, fontSize: '11px', border: '1px solid #BEDBFF' }}
+                            />
+                          </Stack>
+
+                          {/* Allowed Areas Chips */}
+                          <Typography variant="caption" fontWeight={700} color="text.secondary" display="block" mb={1}>
+                            Permitted Areas:
+                          </Typography>
+                          {allowedAreaList.length > 0 ? (
+                            <Stack direction="row" flexWrap="wrap" gap={1}>
+                              {allowedAreaList.map((area: string, aIdx: number) => (
+                                <Chip
+                                  key={aIdx}
+                                  icon={<IconShieldCheck size={14} color="#00C853" />}
+                                  label={area}
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{
+                                    bgcolor: '#FFFFFF',
+                                    borderColor: '#BBF7D0',
+                                    color: 'text.primary',
+                                    fontWeight: 600,
+                                    fontSize: '12px',
+                                    py: 0.5,
+                                    '& .MuiChip-icon': { ml: 0.8 },
+                                  }}
+                                />
+                              ))}
+                            </Stack>
+                          ) : (
+                            <Typography variant="caption" color="text.secondary" fontStyle="italic">
+                              {group.allowedAreasCount ? `${group.allowedAreasCount} areas configured in group` : 'No specific areas listed'}
+                            </Typography>
+                          )}
+                        </Box>
+                      );
+                    })
+                  ) : (
+                    <Box
+                      sx={{
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: '#F8FAFC',
+                        borderRadius: '12px',
+                        p: 3,
+                        border: '1px dashed',
+                        borderColor: 'divider',
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: '50%',
+                          bgcolor: '#F1F5F9',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          mb: 1.5,
+                          color: 'text.secondary',
+                        }}
+                      >
+                        <IconShieldX size={24} />
+                      </Box>
+                      <Typography variant="subtitle2" fontWeight={700} color="text.primary" textAlign="center">
+                        No Access Group Assigned
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" textAlign="center" sx={{ maxWidth: 360, mt: 0.5 }}>
+                        This person does not have an assigned access group. All area visits will be validated against default rules.
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
 
                 <Box
@@ -2421,6 +2576,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                     options={{
                       chart: { type: 'donut', fontFamily: "'Plus Jakarta Sans', sans-serif;" },
                       colors: ['#00C853', '#FF5630'],
+                      labels: ['Authorized', 'Unauthorized'], 
                       legend: { show: false },
                       dataLabels: { enabled: false },
                       plotOptions: {
@@ -2487,7 +2643,8 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                   <Chart
                     options={{
                       chart: { type: 'donut', fontFamily: "'Plus Jakarta Sans', sans-serif;" },
-                      colors: ['#CBD5E1', '#FF5630'],
+                      colors: ['#00C853', '#FF5630'],
+                      labels: ['Normal', 'Restricted'], 
                       legend: { show: false },
                       dataLabels: { enabled: false },
                       plotOptions: {
@@ -2518,7 +2675,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                 <Stack spacing={1} mt={1}>
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Stack direction="row" spacing={1} alignItems="center">
-                      <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#CBD5E1' }} />
+                      <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#00C853' }} />
                       <Typography variant="caption" color="text.secondary">Normal Area</Typography>
                     </Stack>
                     <Typography variant="caption" fontWeight={700}>
@@ -3223,20 +3380,97 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                               {primaryAlarm?.areaName || incidentMaskedArea?.name || incidentMaskedArea?.areaName || 'Incident Area'}
                             </Typography>
                           </Box>
+                          {/* Incident Location Pin with Person Photo & Flashing Pulsing Aura */}
                           <Box
                             sx={{
-                              width: 26,
-                              height: 26,
-                              borderRadius: '50%',
-                              bgcolor: '#D32F2F',
-                              color: '#FFF',
+                              position: 'relative',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              boxShadow: '0 0 0 4px rgba(211, 47, 47, 0.25)',
                             }}
                           >
-                            <IconAlertTriangle size={15} />
+                            {/* Flashing Aura Effect */}
+                            <Box
+                              sx={{
+                                position: 'absolute',
+                                width: 44,
+                                height: 44,
+                                borderRadius: '50%',
+                                bgcolor: 'rgba(211, 47, 47, 0.35)',
+                                '@keyframes incidentPulse': {
+                                  '0%': {
+                                    transform: 'scale(0.8)',
+                                    opacity: 0.95,
+                                    boxShadow: '0 0 0 0 rgba(211, 47, 47, 0.85)',
+                                  },
+                                  '70%': {
+                                    transform: 'scale(1.45)',
+                                    opacity: 0,
+                                    boxShadow: '0 0 0 16px rgba(211, 47, 47, 0)',
+                                  },
+                                  '100%': {
+                                    transform: 'scale(0.8)',
+                                    opacity: 0,
+                                    boxShadow: '0 0 0 0 rgba(211, 47, 47, 0)',
+                                  },
+                                },
+                                animation: 'incidentPulse 1.8s infinite ease-out',
+                                pointerEvents: 'none',
+                              }}
+                            />
+
+                            {/* Main Pin Container holding the Person's Image */}
+                            <Box
+                              sx={{
+                                width: 34,
+                                height: 34,
+                                borderRadius: '50%',
+                                bgcolor: '#D32F2F',
+                                border: '2.5px solid #FFFFFF',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: '0 4px 10px rgba(0,0,0,0.35)',
+                                position: 'relative',
+                                zIndex: 1,
+                              }}
+                            >
+                              <Avatar
+                                src={personAvatarUrl || undefined}
+                                alt={personName}
+                                sx={{
+                                  width: '100%',
+                                  height: '100%',
+                                  fontSize: '11px',
+                                  fontWeight: 700,
+                                  bgcolor: '#FFEBEE',
+                                  color: '#D32F2F',
+                                }}
+                              >
+                                {initials}
+                              </Avatar>
+
+                              {/* Alert Warning Badge attached to the pin */}
+                              <Box
+                                sx={{
+                                  position: 'absolute',
+                                  bottom: -3,
+                                  right: -3,
+                                  width: 15,
+                                  height: 15,
+                                  borderRadius: '50%',
+                                  bgcolor: '#D32F2F',
+                                  border: '1.5px solid #FFFFFF',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  color: '#FFFFFF',
+                                  boxShadow: '0 1px 4px rgba(0,0,0,0.35)',
+                                }}
+                              >
+                                <IconAlertTriangle size={9} />
+                              </Box>
+                            </Box>
                           </Box>
                         </Box>
                       )}
@@ -3526,7 +3760,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
         <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 3, bgcolor: '#F8FAFC' }}>
           <Stack direction="row" spacing={3} alignItems="center">
             <Avatar
-              src={data?.personInfo?.faceImage || selectedPerson?.avatarUrl || `${BASE_URL}/images/users/user-1.jpg`}
+              src={personAvatarUrl || undefined}
               sx={{ width: 80, height: 80, bgcolor: '#E8F2FE', color: '#1877F2', fontWeight: 700, fontSize: '28px', border: '3px solid #1877F2' }}
             >
               {initials}
@@ -3660,7 +3894,8 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                           isSecurity={personType === 'Security' || personType === 'Security Guard'}
                           isMember={personType === 'Member'}
                           isVisitor={personType === 'Visitor'}
-                          faceImage={selectedPerson?.avatarUrl}
+                          iconType="photo"
+                          faceImage={personAvatarUrl || undefined}
                           area={currentArea}
                           floorplan={currentFloor}
                           time={lastSeenTimeStr}

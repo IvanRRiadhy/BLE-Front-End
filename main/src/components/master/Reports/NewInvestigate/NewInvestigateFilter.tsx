@@ -41,20 +41,20 @@ const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, i
 
   // Combine members and visitors into autocomplete options
   const personOptions = useMemo<PersonOption[]>(() => {
-    const memberOpts: PersonOption[] = members.map((m) => ({
+    const memberOpts: PersonOption[] = members.map((m: any) => ({
       id:  m.id || m.personId || '',
       name: m.name || 'Unknown Member',
       identityId: m.identityId || m.id || '-',
       type: 'Member',
-      avatarUrl: m.faceImage || undefined,
+      avatarUrl: m.faceImageUrl || m.faceImage || undefined,
     }));
 
-    const visitorOpts: PersonOption[] = visitors.map((v) => ({
+    const visitorOpts: PersonOption[] = visitors.map((v: any) => ({
       id:  v.id || v.personId || '',
       name: v.name || 'Unknown Visitor',
       identityId: v.identityId || v.id || '-',
       type: 'Visitor',
-      avatarUrl: v.faceImage || undefined,
+      avatarUrl: v.faceImageUrl || v.faceImage || undefined,
     }));
 
     const combined = [...memberOpts, ...visitorOpts];
@@ -170,18 +170,28 @@ const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, i
                     startAdornment: (
                       <>
                         <InputAdornment position="start">
-                          <Avatar
-                            sx={{
-                              width: 24,
-                              height: 24,
-                              fontSize: '10px',
-                              bgcolor: '#E8F2FE',
-                              color: '#1877F2',
-                              fontWeight: 700,
-                            }}
-                          >
-                            {selectedPerson?.name ? selectedPerson.name.substring(0, 2).toUpperCase() : 'DI'}
-                          </Avatar>
+                          {selectedPerson ? (
+                            <Avatar
+                              src={selectedPerson.avatarUrl}
+                              sx={{
+                                width: 24,
+                                height: 24,
+                                fontSize: '10px',
+                                bgcolor: selectedPerson.type === 'Member' ? '#E8F2FE' : '#FEF3D6',
+                                color: selectedPerson.type === 'Member' ? '#1877F2' : '#B06000',
+                                fontWeight: 700,
+                              }}
+                            >
+                              {selectedPerson.name
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')
+                                .substring(0, 2)
+                                .toUpperCase()}
+                            </Avatar>
+                          ) : (
+                            <IconUser size={18} color="#9e9e9e" />
+                          )}
                         </InputAdornment>
                         {params.InputProps.startAdornment}
                       </>
