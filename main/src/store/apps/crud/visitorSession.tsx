@@ -25,6 +25,8 @@ export type GetFilter = {
   areaId?: string | null;
   visitorId?: string | null;
   memberId?: string | null;
+  to?: string| null;
+  from?: string | null;
   // buildingId?: string;
   // floorId?: string;
   // floorplanId?: string;
@@ -33,6 +35,8 @@ export type GetFilter = {
   // memberId?: string;
   personType?: 'member' | 'visitor' | 'security' | 'all' | null;
   identityId?: string | null;
+  timeZone?: string;
+  timezone?: string;
   // eventTypes: EventTypesFilter;
 };
 
@@ -110,7 +114,7 @@ export type NewSessionType = {
   floorplanName: string | null;
   floorplanImage: string | null;
   hasIncident: boolean;
-  incident: string | null;
+  incident: string | Record<string, any> | null;
   sessionStatus: string | null;
 };
 
@@ -166,6 +170,10 @@ export type VisualPathPointType = {
   area: string;
   personName: string;
   personId: string;
+  floorplanId?: string;
+  floorplanName?: string;
+  floorplanImage?: string;
+  dwellDurationSeconds?: number;
 };
 
 export type VisualPathFloorplanType = {

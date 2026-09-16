@@ -26,6 +26,17 @@ import {
   IconMapSearch,
   IconRoute,
   IconCards,
+  IconCreditCard,
+  IconLockAccess,
+  IconUserCheck,
+  IconCpu,
+  IconFileAnalytics,
+  IconUserSearch,
+  IconFileText,
+  IconShieldCheck,
+  IconActivity,
+  IconBroadcast,
+  IconHeartRateMonitor,
 } from '@tabler/icons-react';
 import { AlarmSettingType } from 'src/store/apps/alarmsetting/alarmSettings';
 import { RootState, useSelector } from 'src/store/Store';
@@ -155,11 +166,11 @@ export const useMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] 
         {
           id: 'master-card',
           title: 'Card',
-          icon: IconMapPin,
+          icon: IconCreditCard,
           key: ['core.masterData'],
           children: [
-            { id: 'card-card', title: 'Card', icon: IconMapPin, href: '/master/card/' },
-            { id: 'card-access', title: 'Card Access', icon: IconMapPin, href: '/master/cardaccess/' },
+            { id: 'card-card', title: 'Card', icon: IconCreditCard, href: '/master/card/' },
+            { id: 'card-access', title: 'Card Access', icon: IconLockAccess, href: '/master/cardaccess/' },
           ],
         },
         {
@@ -201,14 +212,14 @@ export const useMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] 
         {
           id: 'master-users',
           title: 'Users',
-          icon: IconMapPin,
+          icon: IconUserCheck,
           href: '/master/user/',
           key: ['core.masterData'],
         },
         {
           id: 'master-engine',
           title: 'Engine',
-          icon: IconMapPin,
+          icon: IconCpu,
           href: '/master/engine/',
           key: ['core.masterData'],
         },
@@ -317,7 +328,7 @@ export const useMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] 
     {
       id: 'nav-report',
       title: 'Report',
-      icon: IconApps,
+      icon: IconFileAnalytics,
       href: '/report/',
       children: [
         {
@@ -330,28 +341,28 @@ export const useMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] 
         {
           id: 'report-visitor',
           title: 'Visitor Report',
-          icon: IconCalendar,
+          icon: IconUsers,
           href: '/report/visitorreport/filter/',
           key: ['core.reporting', 'core.monitoring'],
         },
+        // {
+        //   id: 'report-investigate',
+        //   title: 'Investigate',
+        //   icon: IconUserSearch,
+        //   href: '/report/investigate',
+        //   key: ['core.reporting', 'core.monitoring'],
+        // },
         {
           id: 'report-investigate',
           title: 'Investigate',
-          icon: IconCalendar,
+          icon: IconUserSearch,
           href: '/report/investigate',
-          key: ['core.reporting', 'core.monitoring'],
-        },
-        {
-          id: 'report-new-investigate',
-          title: 'New Investigate',
-          icon: IconCalendar,
-          href: '/report/new-investigate',
           key: ['core.reporting', 'core.monitoring'],
         },
         {
           id: 'report-eventlog',
           title: 'Event Log',
-          icon: IconCalendar,
+          icon: IconFileText,
           href: '/report/eventlog',
           key: ['core.reporting', 'core.monitoring'],
         },
@@ -365,28 +376,28 @@ export const useMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] 
         {
           id: 'report-patrol',
           title: 'Patrol Report',
-          icon: IconCalendar,
+          icon: IconShieldCheck,
           href: '/report/patrolreport/',
           key: ['module.patrol'],
         },
         {
           id: 'report-movement',
           title: 'Movement Log',
-          icon: IconCalendar,
+          icon: IconActivity,
           href: '/report/movementlog/',
           key: ['core.reporting', 'core.monitoring'],
         },
         {
           id: 'report-reader',
           title: 'Reader Report',
-          icon: IconCalendar,
+          icon: IconBroadcast,
           href: '/report/readerreport/',
           key: ['core.reporting', 'core.monitoring'],
         },
         {
           id: 'report-reader-health',
           title: 'Reader Health Report',
-          icon: IconCalendar,
+          icon: IconHeartRateMonitor,
           href: '/report/readerhealthreport/',
           key: ['core.reporting', 'core.monitoring'],
         },

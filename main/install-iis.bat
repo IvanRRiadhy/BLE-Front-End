@@ -89,33 +89,65 @@ if not exist "%REWRITE_DLL%" (
 )
 
 :: -------------------------------------------------------------
-:: 4. Find Available Port (Start at 3000, increment by 5)
+:: 4. Detect Existing IIS Site & Assigned Port
 :: -------------------------------------------------------------
 echo.
-echo [Step 3/5] Finding available HTTP port...
-set "TARGET_PORT=3000"
+echo [Step 3/5] Configuring site bindings and port...
+set "SITE_NAME=people_tracking_frontend"
+set "APP_POOL=people_tracking_AppPool"
+set "INSTALL_DIR=C:\inetpub\wwwroot\%SITE_NAME%"
+set "APPCMD=%windir%\system32\inetsrv\appcmd.exe"
+set "TARGET_PORT="
 
-:CHECK_PORT
-powershell -Command "if (Get-NetTCPConnection -LocalPort %TARGET_PORT% -ErrorAction SilentlyContinue) { exit 1 } else { exit 0 }"
-if %errorlevel% neq 0 (
-    echo Port %TARGET_PORT% is already in use.
-    set /a TARGET_PORT+=5
-    echo Checking port !TARGET_PORT!...
-    goto CHECK_PORT
+:: Check if site already exists in IIS
+%APPCMD% list site "%SITE_NAME%" >nul 2>&1
+if %errorlevel% equ 0 (
+    echo [INFO] Existing IIS Site '%SITE_NAME%' detected!
+    echo [INFO] Extracting existing port binding...
+    
+    for /f "tokens=*" %%a in ('powershell -Command "& '%APPCMD%' list site '%SITE_NAME%' | Select-String -Pattern 'http/\*:(\d+):' | ForEach-Object { $_.Matches.Groups[1].Value }"') do (
+        set "TARGET_PORT=%%a"
+    )
+    
+    if defined TARGET_PORT (
+        echo [OK] Updating existing installation on Port !TARGET_PORT!
+    ) else (
+        echo [WARNING] Could not parse existing port, searching for available port...
+    )
 )
 
-echo [OK] Assigned Port: %TARGET_PORT%
+if not defined TARGET_PORT (
+    echo [INFO] Fresh installation detected. Finding available HTTP port...
+    set "TARGET_PORT=3000"
+
+    :CHECK_PORT
+    powershell -Command "if (Get-NetTCPConnection -LocalPort !TARGET_PORT! -ErrorAction SilentlyContinue) { exit 1 } else { exit 0 }"
+    if !errorlevel! neq 0 (
+        echo Port !TARGET_PORT! is already in use.
+        set /a TARGET_PORT+=5
+        echo Checking port !TARGET_PORT!...
+        goto CHECK_PORT
+    )
+    echo [OK] Assigned Port: !TARGET_PORT!
+)
 
 :: -------------------------------------------------------------
 :: 5. Prepare Target Directory & Extract Files
 :: -------------------------------------------------------------
 echo.
 echo [Step 4/5] Deploying website files...
-set "SITE_NAME=ModernizeFrontend"
-set "APP_POOL=ModernizeAppPool"
-set "INSTALL_DIR=C:\inetpub\wwwroot\%SITE_NAME%"
 
 if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
+
+:: Backup existing config.json to preserve production API / server settings
+set "CONFIG_BACKUP=%TEMP%\config.json.bak"
+if exist "%INSTALL_DIR%\config.json" (
+    echo [INFO] Preserving existing 'config.json'...
+    copy /Y "%INSTALL_DIR%\config.json" "%CONFIG_BACKUP%" >nul
+)
+
+:: Stop site temporarily during file update to avoid locked file errors
+if exist "%APPCMD%" %APPCMD% stop site "%SITE_NAME%" >nul 2>&1
 
 if exist "dist-package.zip" (
     echo [INFO] Unpacking 'dist-package.zip' into '%INSTALL_DIR%'...
@@ -127,6 +159,13 @@ if exist "dist-package.zip" (
     echo [ERROR] Neither 'dist-package.zip' nor 'dist' folder found in '%~dp0'!
     pause
     exit /b 1
+)
+
+:: Restore preserved config.json if backup exists
+if exist "%CONFIG_BACKUP%" (
+    echo [INFO] Restoring preserved 'config.json'...
+    copy /Y "%CONFIG_BACKUP%" "%INSTALL_DIR%\config.json" >nul
+    del "%CONFIG_BACKUP%" >nul 2>&1
 )
 
 :: Copy local web.config if missing from dist
@@ -141,11 +180,10 @@ icacls "%INSTALL_DIR%" /grant "IIS_IUSRS":(OI)(CI)RX /T >nul 2>&1
 icacls "%INSTALL_DIR%" /grant "IUSR":(OI)(CI)RX /T >nul 2>&1
 
 :: -------------------------------------------------------------
-:: 6. Register Site in IIS using appcmd
+:: 6. Register/Update Site in IIS using appcmd
 :: -------------------------------------------------------------
 echo.
-echo [Step 5/5] Configuring IIS site and application pool...
-set "APPCMD=%windir%\system32\inetsrv\appcmd.exe"
+echo [Step 5/5] Finalizing IIS site and application pool configuration...
 
 if not exist "%APPCMD%" (
     echo [ERROR] appcmd.exe not found at '%APPCMD%'.
@@ -153,19 +191,24 @@ if not exist "%APPCMD%" (
     exit /b 1
 )
 
-:: Recreate AppPool with No Managed Code (optimal for static SPA)
-%APPCMD% delete apppool "%APP_POOL%" >nul 2>&1
-%APPCMD% add apppool /name:"%APP_POOL%" /managedRuntimeVersion:"" >nul 2>&1
+:: Ensure AppPool exists with No Managed Code (optimal for static SPA)
+%APPCMD% list apppool "%APP_POOL%" >nul 2>&1
+if %errorlevel% neq 0 (
+    %APPCMD% add apppool /name:"%APP_POOL%" /managedRuntimeVersion:"" >nul 2>&1
+)
 
-:: Recreate Site with designated port
-%APPCMD% delete site "%SITE_NAME%" >nul 2>&1
-%APPCMD% add site /name:"%SITE_NAME%" /bindings:http/*:%TARGET_PORT%: /physicalPath:"%INSTALL_DIR%" >nul 2>&1
-%APPCMD% set site /site.name:"%SITE_NAME%" /[path='/'].applicationPool:"%APP_POOL%" >nul 2>&1
+:: Register site if not existing, or update physical path & start
+%APPCMD% list site "%SITE_NAME%" >nul 2>&1
+if %errorlevel% neq 0 (
+    %APPCMD% add site /name:"%SITE_NAME%" /bindings:http/*:%TARGET_PORT%: /physicalPath:"%INSTALL_DIR%" >nul 2>&1
+    %APPCMD% set site /site.name:"%SITE_NAME%" /[path='/'].applicationPool:"%APP_POOL%" >nul 2>&1
+)
+
 %APPCMD% start site "%SITE_NAME%" >nul 2>&1
 
 echo.
 echo ==============================================================
-echo [SUCCESS] Application successfully installed and running on IIS!
+echo [SUCCESS] Application successfully installed/updated on IIS!
 echo URL: http://localhost:%TARGET_PORT%
 echo Physical Path: %INSTALL_DIR%
 echo ==============================================================

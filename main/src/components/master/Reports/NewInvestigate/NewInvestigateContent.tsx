@@ -51,12 +51,15 @@ import {
   IconFilter,
   IconEye,
   IconCopy,
+  IconRoute,
 } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import { PersonOverviewData } from 'src/hooks/useInvestigate';
 import { PersonOption } from './NewInvestigateFilter';
 import { BASE_URL } from 'src/utils/axios';
 import BeaconRenderer from 'src/components/dashboards/monitoring/Renderer/BeaconRenderer';
+import InvestigateContent from 'src/components/master/Reports/Investigation/InvestigateContent';
+import { VisitorSessionResponseType } from 'src/store/apps/crud/visitorSession';
 import { useAllFloorplans } from 'src/hooks/useFloorplan';
 import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 import { useAllMembers } from 'src/hooks/useMember';
@@ -257,9 +260,11 @@ interface NewInvestigateContentProps {
   data?: PersonOverviewData | null;
   isLoading?: boolean;
   selectedPerson?: PersonOption | null;
-  fromDate?: string;
-  toDate?: string;
+  fromDate?: string | null;
+  toDate?: string | null;
   isExporting?: boolean;
+  visitorSessionData?: VisitorSessionResponseType | null;
+  isVisitorSessionLoading?: boolean;
 }
 
 const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
@@ -269,13 +274,15 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
   fromDate,
   toDate,
   isExporting = false,
+  visitorSessionData,
+  isVisitorSessionLoading = false,
 }) => {
   const theme = useTheme();
-  const [activeTab, setActiveTab] = useState<'timeline' | 'area' | 'compliance' | 'incidents' | 'cardHistory'>('timeline');
+  const [activeTab, setActiveTab] = useState<'timeline' | 'movement' | 'area' | 'compliance' | 'incidents' | 'cardHistory'>('timeline');
   const [zoomLevel, setZoomLevel] = useState(1);
   const [selectedAlarmId, setSelectedAlarmId] = useState<string | null>(null);
 
-  if (!selectedPerson && !data) {
+  if (!selectedPerson && !data && !visitorSessionData) {
     return (
       <Card
         elevation={0}
@@ -1335,6 +1342,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
         <Stack direction="row" spacing={1}>
           {[
             { id: 'timeline', label: 'Timeline', icon: IconClock },
+            { id: 'movement', label: 'Movement Replay', icon: IconRoute },
             { id: 'area', label: 'Area Analysis', icon: IconMapPin },
             { id: 'compliance', label: 'Access Compliance', icon: IconShieldCheck },
             { id: 'incidents', label: 'Incidents & Alarms', icon: IconBell },
@@ -1371,7 +1379,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
           {/* Presence Over Time & Current Location Cards */}
           <Grid container spacing={2.5}>
             {/* Presence Over Time */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid size={{ xs: 12, md: isExporting ? 12 : 6 }}>
               <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '16px', p: 2.5, height: '100%' }}>
                 <Box mb={1}>
                   <Typography variant="h6" fontWeight={700} color="text.primary">
@@ -1402,8 +1410,9 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
               </Card>
             </Grid>
 
-            {/* Current Location */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            {/* Current Location (Excluded in Export) */}
+            {!isExporting && (
+              <Grid size={{ xs: 12, md: 6 }}>
               <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '16px', p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
                   <Typography variant="h6" fontWeight={700} color="text.primary">
@@ -1532,6 +1541,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                 </Box>
               </Card>
             </Grid>
+          )}
           </Grid>
 
           {/* Bottom Section Grid */}
@@ -1965,7 +1975,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
           {/* Middle Row: Area Presence Over Time & Floorplan View */}
           <Grid container spacing={2.5}>
             {/* Area Presence Over Time */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid size={{ xs: 12, md: isExporting ? 12 : 6 }}>
               <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '16px', p: 2.5, height: '100%' }}>
                 <Box mb={1}>
                   <Typography variant="h6" fontWeight={700} color="text.primary">
@@ -1994,8 +2004,9 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
               </Card>
             </Grid>
 
-            {/* Floorplan View */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            {/* Floorplan View (Excluded in Export) */}
+            {!isExporting && (
+              <Grid size={{ xs: 12, md: 6 }}>
               <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '16px', p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
                   <Box>
@@ -2126,6 +2137,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                 </Stack>
               </Card>
             </Grid>
+          )}
           </Grid>
 
           {/* Bottom Table: Area Detail */}
@@ -2240,6 +2252,20 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
             </Stack>
           </Card>
         </Stack>
+      )}
+
+      {/* Movement Replay Tab View (Excluded in Export) */}
+      {activeTab === 'movement' && !isExporting && (
+        <Box sx={{ width: '100%' }}>
+          <InvestigateContent
+            initialSessionData={visitorSessionData}
+            showHeader={false}
+            selectedPersonOption={selectedPerson}
+            fromDate={fromDate ?? undefined}
+            toDate={toDate ?? undefined}
+            isLoading={isVisitorSessionLoading}
+          />
+        </Box>
       )}
 
       {/* Access Compliance Tab View */}
@@ -2716,7 +2742,6 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                     <TableCell sx={{ fontWeight: 700 }}>Building / Floor</TableCell>
                     <TableCell sx={{ fontWeight: 700 }}>Entered At</TableCell>
                     <TableCell sx={{ fontWeight: 700 }}>Duration</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Alarm</TableCell>
                     <TableCell sx={{ fontWeight: 700 }}>Category</TableCell>
                     <TableCell sx={{ fontWeight: 700 }}>Reason</TableCell>
                   </TableRow>
@@ -2724,7 +2749,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                 <TableBody>
                   {breachesList.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                      <TableCell colSpan={7} align="center" sx={{ py: 3, color: 'text.secondary' }}>
                         No unauthorized access breaches recorded
                       </TableCell>
                     </TableRow>
@@ -2746,15 +2771,6 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                                 ? `${Math.floor(row.durationMinutes / 60)}h ${row.durationMinutes % 60}m`
                                 : `${row.durationMinutes} min`
                               : row.duration || '-')}
-                        </TableCell>
-                        <TableCell>
-                          {row.alarmTriggered ? (
-                            <IconButton size="small" color="error" sx={{ bgcolor: '#FFEBEE', p: 0.5 }}>
-                              <IconAlertTriangle size={14} />
-                            </IconButton>
-                          ) : (
-                            '-'
-                          )}
                         </TableCell>
                         <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{row.alarmCategory || '-'}</TableCell>
                         <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{row.reason || '-'}</TableCell>
@@ -3193,7 +3209,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
           {/* Section 3: Incident Detail & Incident Location */}
           <Grid container spacing={2.5} id="incident-detail-section">
             {/* Incident Detail */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid size={{ xs: 12, md: isExporting ? 12 : 6 }}>
               <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '16px', p: 2.5, height: '100%' }}>
                 <Box mb={2}>
                   <Typography variant="h6" fontWeight={700} color="text.primary">
@@ -3270,8 +3286,9 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
               </Card>
             </Grid>
 
-            {/* Incident Location */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            {/* Incident Location (Excluded in Export) */}
+            {!isExporting && (
+              <Grid size={{ xs: 12, md: 6 }}>
               <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '16px', p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
                   <Box>
@@ -3546,6 +3563,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                 </Stack>
               </Card>
             </Grid>
+          )}
           </Grid>
         </Stack>
       )}
@@ -3865,59 +3883,12 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
             1. Timeline & Movement Analysis
           </Typography>
           <Grid container spacing={2.5}>
-            {/* Timeline Chart */}
-            <Grid size={{ xs: 6 }}>
+            {/* Timeline Chart - Fullwidth in PDF Export */}
+            <Grid size={{ xs: 12 }}>
               <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5 }}>
                 <Typography variant="h6" fontWeight={700} mb={1}>Presence Over Time (Graph)</Typography>
                 <Box sx={{ height: 220 }}>
                   <Chart options={presenceTimelineOptions} series={presenceTimelineSeries} type="rangeBar" height={210} width="100%" />
-                </Box>
-              </Card>
-            </Grid>
-
-            {/* Floorplan Map View */}
-            <Grid size={{ xs: 6 }}>
-              <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5 }}>
-                <Typography variant="h6" fontWeight={700} mb={1}>Floorplan Map & Beacon Marker</Typography>
-                <Box sx={{ height: 220, bgcolor: '#F1F5F9', borderRadius: '12px', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
-                  {floorplanImgObj ? (
-                    <Stage width={520} height={210}>
-                      <Layer>
-                        <KonvaImage image={floorplanImgObj} width={520} height={210} />
-                        <BeaconRenderer
-                          id="export-timeline-beacon"
-                          x={260}
-                          y={105}
-                          beaconSize={1}
-                          clickable={false}
-                          label={personName}
-                          isSecurity={personType === 'Security' || personType === 'Security Guard'}
-                          isMember={personType === 'Member'}
-                          isVisitor={personType === 'Visitor'}
-                          iconType="photo"
-                          faceImage={personAvatarUrl || undefined}
-                          area={currentArea}
-                          floorplan={currentFloor}
-                          time={lastSeenTimeStr}
-                        />
-                      </Layer>
-                    </Stage>
-                  ) : (
-                    /* Fallback Map Box */
-                    <Box sx={{ width: '100%', height: '100%', p: 2, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', bgcolor: '#E2E8F0' }}>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Box sx={{ display: 'inline-flex', px: 1.5, py: 0.4, borderRadius: '8px', bgcolor: '#FFFFFF', fontWeight: 700, fontSize: '12px', color: '#1E293B' }}>
-                          {currentBuilding} - {currentFloor}
-                        </Box>
-                        <Typography variant="caption" color="text.secondary">Location Blueprint Map</Typography>
-                      </Stack>
-                      <Box sx={{ p: 2, bgcolor: 'rgba(24, 119, 242, 0.15)', border: '2px dashed #1877F2', borderRadius: '8px', textAlign: 'center' }}>
-                        <Typography variant="subtitle2" fontWeight={800} color="#1877F2">{currentArea}</Typography>
-                        <Typography variant="caption" color="text.secondary" display="block">Target Marker: {personName} ({lastSeenTimeStr})</Typography>
-                      </Box>
-                      <Typography variant="caption" color="text.secondary" textAlign="right">Beacon Signal: Strong (-64 dBm)</Typography>
-                    </Box>
-                  )}
                 </Box>
               </Card>
             </Grid>
@@ -3976,8 +3947,8 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
             2. Area Access & Dwell Time Analysis
           </Typography>
           <Grid container spacing={2.5}>
-            {/* Time Spent Breakdown List */}
-            <Grid size={{ xs: 6 }}>
+            {/* Time Spent Breakdown List - Fullwidth in PDF Export */}
+            <Grid size={{ xs: 12 }}>
               <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5 }}>
                 <Typography variant="h6" fontWeight={700} mb={1}>Time Spent by Area</Typography>
                 <Stack spacing={2} mt={1.5}>
@@ -3991,42 +3962,6 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                     </Box>
                   ))}
                 </Stack>
-              </Card>
-            </Grid>
-
-            {/* Floorplan Area Map */}
-            <Grid size={{ xs: 6 }}>
-              <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5 }}>
-                <Typography variant="h6" fontWeight={700} mb={1}>Area Floorplan Map</Typography>
-                <Box sx={{ height: 220, bgcolor: '#F1F5F9', borderRadius: '12px', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                  {floorplanImgObj ? (
-                    <Stage width={520} height={210}>
-                      <Layer>
-                        <KonvaImage image={floorplanImgObj} width={520} height={210} />
-                        <BeaconRenderer
-                          id="export-area-beacon"
-                          x={260}
-                          y={105}
-                          beaconSize={1}
-                          clickable={false}
-                          label={personName}
-                          isMember={personType === 'Member'}
-                          isSecurity={personType === 'Security'}
-                          isVisitor={personType === 'Visitor'}
-                          faceImage={selectedPerson?.avatarUrl}
-                          area={currentArea}
-                          floorplan={currentFloor}
-                          time={lastSeenTimeStr}
-                        />
-                      </Layer>
-                    </Stage>
-                  ) : (
-                    <Box sx={{ width: '100%', height: '100%', p: 2, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', bgcolor: '#F8FAFC' }}>
-                      <Typography variant="subtitle2" fontWeight={700} color="text.primary">{currentArea}</Typography>
-                      <Typography variant="caption" color="text.secondary">{currentBuilding} - {currentFloor}</Typography>
-                    </Box>
-                  )}
-                </Box>
               </Card>
             </Grid>
           </Grid>
@@ -4115,59 +4050,479 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
           <Typography variant="h5" fontWeight={800} color="#1877F2" mb={2}>
             3. Access Compliance & Permissions
           </Typography>
-          <Grid container spacing={2.5}>
+
+          {/* Top Row: Access Compliance Overview & Access Rights */}
+          <Grid container spacing={2.5} mb={2.5}>
+            {/* Access Compliance Overview */}
             <Grid size={{ xs: 6 }}>
-              <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5 }}>
-                <Typography variant="h6" fontWeight={700} mb={1}>Compliance Overview Gauge</Typography>
+              <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5, height: '100%' }}>
+                <Box mb={2}>
+                  <Typography variant="h6" fontWeight={700} color="text.primary">
+                    Access Compliance Overview
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Analysis of this person's access rights and area visits in the selected period
+                  </Typography>
+                </Box>
+
                 <Stack direction="row" spacing={3} alignItems="center" mt={1}>
-                  <Box sx={{ width: 140, height: 140 }}>
+                  <Box sx={{ width: 140, height: 140, flexShrink: 0 }}>
                     <Chart options={complianceChartOptions} series={[complianceScore]} type="radialBar" height={150} />
                   </Box>
-                  <Box>
-                    <Box
-                      sx={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        px: 1.5,
-                        py: 0.4,
-                        borderRadius: '12px',
-                        bgcolor: isViolation ? '#FFEBEE' : '#E8F5E9',
-                        color: isViolation ? '#D32F2F' : '#00C853',
-                        fontWeight: 700,
-                        fontSize: '12px',
-                      }}
-                    >
-                      {isViolation ? 'Violation Detected' : 'Fully Compliant'}
+
+                  <Stack spacing={1.5} sx={{ flex: 1 }}>
+                    <Box sx={{ bgcolor: isViolation ? '#FFF2F2' : '#F0FDF4', border: '1px solid', borderColor: isViolation ? '#FFCDD2' : '#BBF7D0', borderRadius: '12px', p: 1.5 }}>
+                      <Stack direction="row" spacing={1} alignItems="center" mb={0.5}>
+                        {isViolation ? <IconShieldX size={18} color="#D32F2F" /> : <IconShieldCheck size={18} color="#00C853" />}
+                        <Typography variant="subtitle2" fontWeight={700} color={isViolation ? '#D32F2F' : '#00C853'}>
+                          {isViolation ? 'Violation' : 'Compliant'}
+                        </Typography>
+                      </Stack>
+                      <Typography variant="caption" color="text.secondary">
+                        {isViolation ? 'Person has accessed unauthorized area(s)' : 'All area visits are properly authorized'}
+                      </Typography>
                     </Box>
-                    <Typography variant="h6" fontWeight={800} mt={1}>Score: {complianceScore}%</Typography>
-                    <Typography variant="caption" color="text.secondary" display="block">
-                      Verified against default security access policies
-                    </Typography>
-                  </Box>
+
+                    <Stack spacing={0.8}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <IconCreditCard size={15} color={theme.palette.text.secondary} />
+                          <Typography variant="caption" color="text.secondary">Total Areas Visited</Typography>
+                        </Stack>
+                        <Typography variant="caption" fontWeight={700}>{totalAreasVisited}</Typography>
+                      </Stack>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <IconShieldCheck size={15} color="#00C853" />
+                          <Typography variant="caption" color="text.secondary">Authorized Areas Visited</Typography>
+                        </Stack>
+                        <Typography variant="caption" fontWeight={700}>{authorizedAreasVisited}</Typography>
+                      </Stack>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <IconAlertTriangle size={15} color="#D32F2F" />
+                          <Typography variant="caption" color="text.secondary">Unauthorized Areas Visited</Typography>
+                        </Stack>
+                        <Typography variant="caption" fontWeight={700}>{unauthorizedAreasVisited}</Typography>
+                      </Stack>
+                    </Stack>
+                  </Stack>
                 </Stack>
               </Card>
             </Grid>
+
+            {/* Access Rights */}
             <Grid size={{ xs: 6 }}>
-              <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5 }}>
-                <Typography variant="h6" fontWeight={700} mb={1}>Access Rights & Group Assignment</Typography>
-                <Typography variant="body2" color="text.secondary" mt={0.5}>
-                  {assignedAccessGroups.length > 0
-                    ? `Assigned to ${assignedAccessGroups.map((g: any) => g.accessName || g.name).join(', ')}.`
-                    : 'No custom Access Group assigned. Access is evaluated against standard employee perimeter permissions.'}
+              <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={2}>
+                  <Box>
+                    <Typography variant="h6" fontWeight={700} color="text.primary">
+                      Access Rights
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Assigned access groups and permissions
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label={assignedAccessGroups.length > 0 ? `${assignedAccessGroups.length} Access Group${assignedAccessGroups.length > 1 ? 's' : ''}` : 'No Group'}
+                    size="small"
+                    sx={{
+                      fontWeight: 700,
+                      borderRadius: '8px',
+                      fontSize: '11px',
+                      bgcolor: assignedAccessGroups.length > 0 ? '#E8F2FE' : '#F1F5F9',
+                      color: assignedAccessGroups.length > 0 ? '#1877F2' : 'text.secondary',
+                    }}
+                  />
+                </Stack>
+
+                {/* Main Content Area */}
+                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1.5, mb: 1.5 }}>
+                  {assignedAccessGroups.length > 0 ? (
+                    assignedAccessGroups.map((group: any, idx: number) => {
+                      const groupName = group.accessName || group.name || 'Access Group';
+                      return (
+                        <Box
+                          key={idx}
+                          sx={{
+                            border: '1px solid #BEDBFF',
+                            borderRadius: '12px',
+                            p: 1.5,
+                            bgcolor: '#F4F8FF',
+                          }}
+                        >
+                          <Stack direction="row" spacing={1.5} alignItems="center" mb={1}>
+                            <Box
+                              sx={{
+                                width: 34,
+                                height: 34,
+                                borderRadius: '8px',
+                                bgcolor: '#1877F2',
+                                color: '#fff',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0,
+                              }}
+                            >
+                              <IconShieldCheck size={20} />
+                            </Box>
+                            <Box sx={{ flex: 1, minWidth: 0 }}>
+                              <Typography variant="subtitle2" fontWeight={700} color="text.primary" noWrap>
+                                {groupName}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Assigned Access Profile
+                              </Typography>
+                            </Box>
+                            <Chip
+                              label={`${allowedAreaList.length || group.allowedAreasCount || 0} Allowed Areas`}
+                              size="small"
+                              sx={{ bgcolor: '#E8F2FE', color: '#1877F2', fontWeight: 700, fontSize: '10px', border: '1px solid #BEDBFF' }}
+                            />
+                          </Stack>
+
+                          {/* Allowed Areas Chips */}
+                          <Typography variant="caption" fontWeight={700} color="text.secondary" display="block" mb={0.5}>
+                            Permitted Areas:
+                          </Typography>
+                          {allowedAreaList.length > 0 ? (
+                            <Stack direction="row" flexWrap="wrap" gap={0.8}>
+                              {allowedAreaList.map((area: string, aIdx: number) => (
+                                <Chip
+                                  key={aIdx}
+                                  icon={<IconShieldCheck size={13} color="#00C853" />}
+                                  label={area}
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{
+                                    bgcolor: '#FFFFFF',
+                                    borderColor: '#BBF7D0',
+                                    color: 'text.primary',
+                                    fontWeight: 600,
+                                    fontSize: '11px',
+                                    '& .MuiChip-icon': { ml: 0.6 },
+                                  }}
+                                />
+                              ))}
+                            </Stack>
+                          ) : (
+                            <Typography variant="caption" color="text.secondary" fontStyle="italic">
+                              {group.allowedAreasCount ? `${group.allowedAreasCount} areas configured in group` : 'No specific areas listed'}
+                            </Typography>
+                          )}
+                        </Box>
+                      );
+                    })
+                  ) : (
+                    <Box
+                      sx={{
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: '#F8FAFC',
+                        borderRadius: '12px',
+                        p: 2,
+                        border: '1px dashed #CBD5E1',
+                      }}
+                    >
+                      <Typography variant="subtitle2" fontWeight={700} color="text.primary" textAlign="center">
+                        No Access Group Assigned
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" textAlign="center" sx={{ maxWidth: 360, mt: 0.5 }}>
+                        This person does not have an assigned access group. All area visits will be validated against default rules.
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+
+                <Box
+                  sx={{
+                    bgcolor: unauthorizedAreasVisited > 0 ? '#FFF5F5' : '#EBF5FF',
+                    border: '1px solid',
+                    borderColor: unauthorizedAreasVisited > 0 ? '#FFCDD2' : '#BEDBFF',
+                    borderRadius: '10px',
+                    p: 1.2,
+                    mt: 'auto',
+                  }}
+                >
+                  <Stack direction="row" spacing={1} alignItems="flex-start">
+                    {unauthorizedAreasVisited > 0 ? (
+                      <IconAlertTriangle size={18} color="#D32F2F" style={{ flexShrink: 0, marginTop: 1 }} />
+                    ) : (
+                      <IconInfoCircle size={18} color="#1877F2" style={{ flexShrink: 0, marginTop: 1 }} />
+                    )}
+                    <Box>
+                      <Typography variant="caption" fontWeight={700} color={unauthorizedAreasVisited > 0 ? '#D32F2F' : '#1877F2'} display="block">
+                        {unauthorizedAreasVisited > 0 ? 'Violation Notice' : 'Note'}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {unauthorizedAreasVisited > 0
+                          ? `This person accessed ${unauthorizedAreasVisited} area(s) that are not in the allowed list.`
+                          : 'All area visits by this person are properly authorized.'}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Box>
+              </Card>
+            </Grid>
+          </Grid>
+
+          {/* Middle Row: Area Access Comparison, Access Status by Area, Area Type */}
+          <Grid container spacing={2.5} mb={2.5}>
+            {/* Area Access Comparison */}
+            <Grid size={{ xs: 4 }}>
+              <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5, height: '100%' }}>
+                <Box mb={2}>
+                  <Typography variant="subtitle1" fontWeight={700} color="text.primary">
+                    Area Access Comparison
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Breakdown of visited areas based on access permission
+                  </Typography>
+                </Box>
+
+                <Stack spacing={2} mt={2}>
+                  <Box>
+                    <Stack direction="row" justifyContent="space-between" mb={0.5}>
+                      <Typography variant="caption" color="text.secondary">Authorized Areas</Typography>
+                      <Typography variant="caption" fontWeight={700}>{authorizedAreasVisited}</Typography>
+                    </Stack>
+                    <LinearProgress
+                      variant="determinate"
+                      value={totalAreasVisited > 0 ? (authorizedAreasVisited / totalAreasVisited) * 100 : 0}
+                      sx={{ height: 12, borderRadius: 2, bgcolor: '#F1F5F9', '& .MuiLinearProgress-bar': { bgcolor: '#00C853' } }}
+                    />
+                  </Box>
+
+                  <Box>
+                    <Stack direction="row" justifyContent="space-between" mb={0.5}>
+                      <Typography variant="caption" color="text.secondary">Unauthorized Areas</Typography>
+                      <Typography variant="caption" fontWeight={700}>{unauthorizedAreasVisited}</Typography>
+                    </Stack>
+                    <LinearProgress
+                      variant="determinate"
+                      value={totalAreasVisited > 0 ? (unauthorizedAreasVisited / totalAreasVisited) * 100 : 0}
+                      sx={{ height: 12, borderRadius: 2, bgcolor: '#F1F5F9', '& .MuiLinearProgress-bar': { bgcolor: '#FF5630' } }}
+                    />
+                  </Box>
+
+                  <Box>
+                    <Stack direction="row" justifyContent="space-between" mb={0.5}>
+                      <Typography variant="caption" color="text.secondary">Restricted Areas</Typography>
+                      <Typography variant="caption" fontWeight={700}>{restrictedAreasCount}</Typography>
+                    </Stack>
+                    <LinearProgress
+                      variant="determinate"
+                      value={totalAreasVisited > 0 ? (restrictedAreasCount / totalAreasVisited) * 100 : 0}
+                      sx={{ height: 12, borderRadius: 2, bgcolor: '#F1F5F9', '& .MuiLinearProgress-bar': { bgcolor: '#FF5630' } }}
+                    />
+                  </Box>
+                </Stack>
+                <Typography variant="caption" color="text.secondary" textAlign="center" display="block" mt={3}>
+                  Number of Areas
                 </Typography>
-                <Stack direction="row" spacing={2} mt={2}>
-                  <Box sx={{ border: '1px solid #E2E8F0', borderRadius: '8px', p: 1.5, flex: 1, bgcolor: '#F8FAFC' }}>
-                    <Typography variant="caption" color="text.secondary" display="block">Authorized Areas</Typography>
-                    <Typography variant="subtitle1" fontWeight={700} color="#00C853">{authorizedAreasVisited} Areas</Typography>
-                  </Box>
-                  <Box sx={{ border: '1px solid #E2E8F0', borderRadius: '8px', p: 1.5, flex: 1, bgcolor: '#F8FAFC' }}>
-                    <Typography variant="caption" color="text.secondary" display="block">Restricted Violations</Typography>
-                    <Typography variant="subtitle1" fontWeight={700} color="#D32F2F">{unauthorizedAreasVisited} Violations</Typography>
-                  </Box>
+              </Card>
+            </Grid>
+
+            {/* Access Status by Area */}
+            <Grid size={{ xs: 4 }}>
+              <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5, height: '100%' }}>
+                <Box mb={1}>
+                  <Typography variant="subtitle1" fontWeight={700} color="text.primary">
+                    Access Status by Area
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Access permission status for each visited area
+                  </Typography>
+                </Box>
+
+                <Box sx={{ width: '100%', height: 150, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Chart
+                    options={{
+                      chart: { type: 'donut', fontFamily: "'Plus Jakarta Sans', sans-serif;" },
+                      colors: ['#00C853', '#FF5630'],
+                      labels: ['Authorized', 'Unauthorized'], 
+                      legend: { show: false },
+                      dataLabels: { enabled: false },
+                      plotOptions: {
+                        pie: {
+                          donut: {
+                            size: '75%',
+                            labels: {
+                              show: true,
+                              total: {
+                                show: true,
+                                label: 'Areas Visited',
+                                fontSize: '11px',
+                                color: '#64748B',
+                                formatter: () => `${totalAreasVisited}`,
+                              },
+                            },
+                          },
+                        },
+                      },
+                    }}
+                    series={[authorizedAreasVisited, unauthorizedAreasVisited]}
+                    type="donut"
+                    width="100%"
+                    height={160}
+                  />
+                </Box>
+
+                <Stack spacing={0.8} mt={1}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#00C853' }} />
+                      <Typography variant="caption" color="text.secondary">Authorized</Typography>
+                    </Stack>
+                    <Typography variant="caption" fontWeight={700}>
+                      {authorizedAreasVisited} ({totalAreasVisited > 0 ? ((authorizedAreasVisited / totalAreasVisited) * 100).toFixed(1) : 0}%)
+                    </Typography>
+                  </Stack>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#FF5630' }} />
+                      <Typography variant="caption" color="text.secondary">Unauthorized</Typography>
+                    </Stack>
+                    <Typography variant="caption" fontWeight={700}>
+                      {unauthorizedAreasVisited} ({totalAreasVisited > 0 ? ((unauthorizedAreasVisited / totalAreasVisited) * 100).toFixed(1) : 0}%)
+                    </Typography>
+                  </Stack>
+                </Stack>
+              </Card>
+            </Grid>
+
+            {/* Area Type */}
+            <Grid size={{ xs: 4 }}>
+              <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5, height: '100%' }}>
+                <Box mb={1}>
+                  <Typography variant="subtitle1" fontWeight={700} color="text.primary">
+                    Area Type
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Classification of visited areas
+                  </Typography>
+                </Box>
+
+                <Box sx={{ width: '100%', height: 150, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Chart
+                    options={{
+                      chart: { type: 'donut', fontFamily: "'Plus Jakarta Sans', sans-serif;" },
+                      colors: ['#00C853', '#FF5630'],
+                      labels: ['Normal Area', 'Restricted Area'], 
+                      legend: { show: false },
+                      dataLabels: { enabled: false },
+                      plotOptions: {
+                        pie: {
+                          donut: {
+                            size: '75%',
+                            labels: {
+                              show: true,
+                              total: {
+                                show: true,
+                                label: 'Areas Visited',
+                                fontSize: '11px',
+                                color: '#64748B',
+                                formatter: () => `${normalAreasCount + restrictedAreasCount}`,
+                              },
+                            },
+                          },
+                        },
+                      },
+                    }}
+                    series={[normalAreasCount, restrictedAreasCount]}
+                    type="donut"
+                    width="100%"
+                    height={160}
+                  />
+                </Box>
+
+                <Stack spacing={0.8} mt={1}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#00C853' }} />
+                      <Typography variant="caption" color="text.secondary">Normal Area</Typography>
+                    </Stack>
+                    <Typography variant="caption" fontWeight={700}>
+                      {normalAreasCount} ({(normalAreasCount + restrictedAreasCount > 0 ? (normalAreasCount / (normalAreasCount + restrictedAreasCount)) * 100 : 0).toFixed(1)}%)
+                    </Typography>
+                  </Stack>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#FF5630' }} />
+                      <Typography variant="caption" color="text.secondary">Restricted Area</Typography>
+                    </Stack>
+                    <Typography variant="caption" fontWeight={700}>
+                      {restrictedAreasCount} ({(normalAreasCount + restrictedAreasCount > 0 ? (restrictedAreasCount / (normalAreasCount + restrictedAreasCount)) * 100 : 0).toFixed(1)}%)
+                    </Typography>
+                  </Stack>
                 </Stack>
               </Card>
             </Grid>
           </Grid>
+
+          {/* Bottom Table: Unauthorized Access Breaches */}
+          <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5 }}>
+            <Box mb={2}>
+              <Typography variant="h6" fontWeight={700} color="text.primary">
+                Unauthorized Access Breaches
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                List of areas accessed without proper authorization
+              </Typography>
+            </Box>
+
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow sx={{ bgcolor: '#F8FAFC' }}>
+                    <TableCell sx={{ fontWeight: 700 }}>#</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Area</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Building / Floor</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Entered At</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Duration</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Category</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Reason</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {breachesList.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                        No unauthorized access breaches recorded
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    breachesList.map((row: any, idx: number) => (
+                      <TableRow key={row.areaId || idx}>
+                        <TableCell>{idx + 1}</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>{row.areaName || row.area || '-'}</TableCell>
+                        <TableCell sx={{ color: 'text.secondary', fontSize: '12px' }}>
+                          {row.buildingName || '-'} {row.floorName ? `(${row.floorName})` : ''}
+                        </TableCell>
+                        <TableCell sx={{ fontSize: '12px' }}>
+                          {formatOrRawTime(row.enteredAt, 'MMM D, YYYY HH:mm:ss')}
+                        </TableCell>
+                        <TableCell>
+                          {row.durationFormatted ||
+                            (row.durationMinutes != null
+                              ? row.durationMinutes >= 60
+                                ? `${Math.floor(row.durationMinutes / 60)}h ${row.durationMinutes % 60}m`
+                                : `${row.durationMinutes} min`
+                              : row.duration || '-')}
+                        </TableCell>
+                        <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{row.alarmCategory || '-'}</TableCell>
+                        <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{row.reason || '-'}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Card>
         </Box>
 
         {/* SECTION 4: SECURITY INCIDENTS & ALARMS */}
@@ -4175,57 +4530,296 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
           <Typography variant="h5" fontWeight={800} color="#1877F2" mb={2}>
             4. Security Incidents & Alarms
           </Typography>
-          <Grid container spacing={2.5}>
-            <Grid size={{ xs: 6 }}>
-              <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5 }}>
-                <Typography variant="h6" fontWeight={700} mb={1}>
-                  {primaryAlarm ? `${(primaryAlarm.category || 'Incident').toUpperCase()} Incident` : 'Security Incidents'}
-                </Typography>
-                <Typography variant="body2" fontWeight={700} color="text.primary">
-                  Incident ID: {primaryAlarm?.alarmId || primaryAlarm?.id || '-'}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" mt={0.5}>
-                  Location: {primaryAlarm ? `${primaryAlarm.areaName || '-'} (${primaryAlarm.buildingName || '-'} / ${primaryAlarm.floorName || '-'})` : 'No Incident Location'}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" display="block" mt={0.5}>
-                  Triggered: {formatOrRawTime(primaryAlarm?.triggeredTime)}  |  Handled By: {primaryAlarm?.acknowledgedBy || '-'}
-                </Typography>
-                {primaryAlarm && (
-                  <Box
-                    sx={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      px: 1.5,
-                      py: 0.4,
-                      borderRadius: '12px',
-                      bgcolor: primaryAlarm.status?.toLowerCase() === 'resolved' ? '#E8F5E9' : primaryAlarm.status?.toLowerCase() === 'acknowledged' ? '#E8F2FE' : '#FFEBEE',
-                      color: primaryAlarm.status?.toLowerCase() === 'resolved' ? '#00C853' : primaryAlarm.status?.toLowerCase() === 'acknowledged' ? '#1877F2' : '#D32F2F',
-                      fontWeight: 700,
-                      fontSize: '11px',
-                      mt: 1.5,
-                    }}
-                  >
-                    {primaryAlarm.status || 'Active'}
-                  </Box>
-                )}
-              </Card>
-            </Grid>
-            <Grid size={{ xs: 6 }}>
-              <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5 }}>
-                <Typography variant="h6" fontWeight={700} mb={1}>Incident Location Diagram</Typography>
-                <Box sx={{ height: 150, bgcolor: '#F8FAFC', borderRadius: '12px', border: '1.5px solid #CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                  <Box sx={{ width: '60%', height: '65%', bgcolor: 'rgba(211, 47, 47, 0.1)', border: '2px solid #D32F2F', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 1 }}>
-                    <Typography variant="subtitle2" fontWeight={800} color="#D32F2F" textAlign="center">
-                      {primaryAlarm?.areaName || 'Incident Area'}
-                    </Typography>
-                    <Typography variant="caption" color="#D32F2F" textAlign="center">
-                      Incident Zone ({primaryAlarm?.category || 'Security'})
-                    </Typography>
-                  </Box>
+
+          {/* Incident Overview Card */}
+          <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5, mb: 2.5 }}>
+            <Box mb={2}>
+              <Typography variant="h6" fontWeight={700} color="text.primary">
+                Incident Overview
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Summary of security incidents and alarms related to this person in the selected period
+              </Typography>
+            </Box>
+
+            {/* 4 Stat KPI Cards */}
+            <Grid container spacing={2} mb={2.5}>
+              <Grid size={{ xs: 3 }}>
+                <Box sx={{ border: '1px solid #E2E8F0', borderRadius: '12px', p: 1.5, bgcolor: '#FFF5F5' }}>
+                  <Stack direction="row" spacing={1.5} alignItems="center">
+                    <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: '#FFEBEE', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D32F2F', flexShrink: 0 }}>
+                      <IconAlertTriangle size={20} />
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" display="block">Total Incidents</Typography>
+                      <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ lineHeight: 1.2 }}>{totalIncidents}</Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '10px' }}>Security incidents triggered</Typography>
+                    </Box>
+                  </Stack>
                 </Box>
-              </Card>
+              </Grid>
+
+              <Grid size={{ xs: 3 }}>
+                <Box sx={{ border: '1px solid #E2E8F0', borderRadius: '12px', p: 1.5, bgcolor: '#FFF5F5' }}>
+                  <Stack direction="row" spacing={1.5} alignItems="center">
+                    <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: '#FFEBEE', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D32F2F', flexShrink: 0 }}>
+                      <IconAlertTriangle size={20} />
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" display="block">Active Incidents</Typography>
+                      <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ lineHeight: 1.2 }}>{activeIncidentsComputed}</Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '10px' }}>Requires attention</Typography>
+                    </Box>
+                  </Stack>
+                </Box>
+              </Grid>
+
+              <Grid size={{ xs: 3 }}>
+                <Box sx={{ border: '1px solid #E2E8F0', borderRadius: '12px', p: 1.5, bgcolor: '#F4F8FF' }}>
+                  <Stack direction="row" spacing={1.5} alignItems="center">
+                    <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: '#E8F2FE', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1877F2', flexShrink: 0 }}>
+                      <IconBell size={20} />
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" display="block">Acknowledged</Typography>
+                      <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ lineHeight: 1.2 }}>{acknowledgedIncidents}</Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '10px' }}>Has been acknowledged</Typography>
+                    </Box>
+                  </Stack>
+                </Box>
+              </Grid>
+
+              <Grid size={{ xs: 3 }}>
+                <Box sx={{ border: '1px solid #E2E8F0', borderRadius: '12px', p: 1.5, bgcolor: '#F0FDF4' }}>
+                  <Stack direction="row" spacing={1.5} alignItems="center">
+                    <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: '#E8F5E9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00C853', flexShrink: 0 }}>
+                      <IconShieldCheck size={20} />
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" display="block">Resolved</Typography>
+                      <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ lineHeight: 1.2 }}>{resolvedIncidents}</Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '10px' }}>{resolvedIncidents > 0 ? 'Resolved incidents' : 'No resolved incidents'}</Typography>
+                    </Box>
+                  </Stack>
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
+
+            {/* 2 Charts Side-by-Side */}
+            <Grid container spacing={2}>
+              {/* Incidents by Category */}
+              <Grid size={{ xs: 6 }}>
+                <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '12px', p: 2, height: '100%' }}>
+                  <Box mb={1}>
+                    <Typography variant="subtitle2" fontWeight={700} color="text.primary">Incidents by Category</Typography>
+                    <Typography variant="caption" color="text.secondary">Distribution of incidents based on alarm category</Typography>
+                  </Box>
+
+                  <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" mt={1}>
+                    <Box sx={{ width: 170, height: 170, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Chart
+                        options={{
+                          chart: { type: 'donut', fontFamily: "'Plus Jakarta Sans', sans-serif;" },
+                          colors: ['#D32F2F', '#FF9800', '#1877F2', '#9C27B0', '#00C853', '#00BCD4'],
+                          labels: incidentsByCategory.labels,
+                          legend: { show: false },
+                          dataLabels: { enabled: false },
+                          plotOptions: {
+                            pie: {
+                              donut: {
+                                size: '75%',
+                                labels: {
+                                  show: true,
+                                  total: {
+                                    show: true,
+                                    label: 'Incidents',
+                                    fontSize: '12px',
+                                    color: '#64748B',
+                                    formatter: () => `${incidentsByCategory.total}`,
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        }}
+                        series={incidentsByCategory.series}
+                        type="donut"
+                        width="100%"
+                        height={170}
+                      />
+                    </Box>
+
+                    <Stack spacing={0.8} sx={{ flex: 1 }}>
+                      {incidentsByCategory.labels.map((catLabel, idx) => {
+                        const count = incidentsByCategory.series[idx] || 0;
+                        const pct = incidentsByCategory.total > 0 ? ((count / incidentsByCategory.total) * 100).toFixed(1) : '0';
+                        const color = ['#D32F2F', '#FF9800', '#1877F2', '#9C27B0', '#00C853', '#00BCD4'][idx % 6];
+                        return (
+                          <Stack key={catLabel} direction="row" justifyContent="space-between" alignItems="center">
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: color }} />
+                              <Typography variant="caption" color="text.secondary">{catLabel}</Typography>
+                            </Stack>
+                            <Typography variant="caption" fontWeight={700}>{count} ({pct}%)</Typography>
+                          </Stack>
+                        );
+                      })}
+                    </Stack>
+                  </Stack>
+                </Card>
+              </Grid>
+
+              {/* Incident Status */}
+              <Grid size={{ xs: 6 }}>
+                <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '12px', p: 2, height: '100%' }}>
+                  <Box mb={1}>
+                    <Typography variant="subtitle2" fontWeight={700} color="text.primary">Incident Status</Typography>
+                    <Typography variant="caption" color="text.secondary">Current status of incidents</Typography>
+                  </Box>
+
+                  <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" mt={1}>
+                    <Box sx={{ width: 170, height: 170, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Chart
+                        options={{
+                          chart: { type: 'donut', fontFamily: "'Plus Jakarta Sans', sans-serif;" },
+                          colors: ['#D32F2F', '#1877F2', '#00C853'],
+                          labels: ['Active', 'Acknowledged', 'Resolved'],
+                          legend: { show: false },
+                          dataLabels: { enabled: false },
+                          plotOptions: {
+                            pie: {
+                              donut: {
+                                size: '75%',
+                                labels: {
+                                  show: true,
+                                  total: {
+                                    show: true,
+                                    label: 'Incidents',
+                                    fontSize: '12px',
+                                    color: '#64748B',
+                                    formatter: () => `${incidentsByStatus.total}`,
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        }}
+                        series={incidentsByStatus.series}
+                        type="donut"
+                        width="100%"
+                        height={170}
+                      />
+                    </Box>
+
+                    <Stack spacing={1.2} sx={{ flex: 1 }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#D32F2F' }} />
+                          <Typography variant="caption" color="text.secondary">Active</Typography>
+                        </Stack>
+                        <Typography variant="caption" fontWeight={700}>
+                          {incidentsByStatus.active} ({incidentsByStatus.total > 0 ? ((incidentsByStatus.active / incidentsByStatus.total) * 100).toFixed(1) : 0}%)
+                        </Typography>
+                      </Stack>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#1877F2' }} />
+                          <Typography variant="caption" color="text.secondary">Acknowledged</Typography>
+                        </Stack>
+                        <Typography variant="caption" fontWeight={700}>
+                          {incidentsByStatus.acknowledged} ({incidentsByStatus.total > 0 ? ((incidentsByStatus.acknowledged / incidentsByStatus.total) * 100).toFixed(1) : 0}%)
+                        </Typography>
+                      </Stack>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#00C853' }} />
+                          <Typography variant="caption" color="text.secondary">Resolved</Typography>
+                        </Stack>
+                        <Typography variant="caption" fontWeight={700}>
+                          {incidentsByStatus.resolved} ({incidentsByStatus.total > 0 ? ((incidentsByStatus.resolved / incidentsByStatus.total) * 100).toFixed(1) : 0}%)
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                  </Stack>
+                </Card>
+              </Grid>
+            </Grid>
+          </Card>
+
+          {/* Incident & Alarm List Table */}
+          <Card elevation={0} sx={{ border: '1px solid #E2E8F0', borderRadius: '16px', p: 2.5 }}>
+            <Box mb={2}>
+              <Typography variant="h6" fontWeight={700} color="text.primary">
+                Incident & Alarm List
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                List of security incidents and alarms triggered for this person
+              </Typography>
+            </Box>
+
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow sx={{ bgcolor: '#F8FAFC' }}>
+                    <TableCell sx={{ fontWeight: 700 }}>#</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Triggered Time</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Category</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Area</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Building / Floor</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Acknowledged By</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Acknowledged Time</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {alarmsList.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                        No incidents or alarms recorded
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    alarmsList.map((row: any, idx: number) => {
+                      const rowId = row.alarmId || row.id || String(idx);
+                      const isResolved = row.status?.toLowerCase() === 'resolved';
+                      const isAcknowledged = row.status?.toLowerCase() === 'acknowledged';
+                      return (
+                        <TableRow key={rowId}>
+                          <TableCell>{idx + 1}</TableCell>
+                          <TableCell sx={{ fontSize: '12px' }}>
+                            {formatOrRawTime(row.triggeredTime)}
+                          </TableCell>
+                          <TableCell>
+                            <Chip label={row.category || 'cardaccess'} size="small" sx={{ bgcolor: '#FFEBEE', color: '#D32F2F', fontWeight: 600, fontSize: '11px' }} />
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>{row.areaName || '-'}</TableCell>
+                          <TableCell sx={{ color: 'text.secondary', fontSize: '12px' }}>
+                            {row.buildingName || '-'} {row.floorName ? `(${row.floorName})` : ''}
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              label={row.status || 'Active'}
+                              size="small"
+                              sx={{
+                                bgcolor: isResolved ? '#E8F5E9' : isAcknowledged ? '#E8F2FE' : '#FFEBEE',
+                                color: isResolved ? '#00C853' : isAcknowledged ? '#1877F2' : '#D32F2F',
+                                fontWeight: 600,
+                                fontSize: '11px',
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell sx={{ fontSize: '12px' }}>{row.acknowledgedBy || '-'}</TableCell>
+                          <TableCell sx={{ fontSize: '12px' }}>
+                            {formatOrRawTime(row.acknowledgedTime)}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Card>
         </Box>
 
         {/* SECTION 5: CARD HISTORY & DEVICE TELEMETRY */}

@@ -10,10 +10,12 @@ import { IconDownload } from '@tabler/icons-react';
 import PageContainer from 'src/components/container/PageContainer';
 import NewInvestigateFilter, {
   InvestigateFilterState,
-  PersonOption,
 } from 'src/components/master/Reports/NewInvestigate/NewInvestigateFilter';
 import NewInvestigateContent from 'src/components/master/Reports/NewInvestigate/NewInvestigateContent';
 import { usePersonOverview } from 'src/hooks/useInvestigate';
+import { useNewVisitorSession } from 'src/hooks/useVisitorSession';
+import { VisitorSessionResponseType, GetFilter } from 'src/store/apps/crud/visitorSession';
+import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -22,11 +24,17 @@ const NewInvestigate: React.FC = () => {
   // Filter state
   const [filterState, setFilterState] = useState<InvestigateFilterState>({
     person: null,
-    from: dayjs().startOf('day').format('YYYY-MM-DDTHH:mm'),
-    to: dayjs().endOf('day').format('YYYY-MM-DDTHH:mm'),
+    timeRange: 'daily',
+    from: dayjs().startOf('day').toISOString(),
+    to: dayjs().endOf('day').toISOString(),
   });
 
   const [isExporting, setIsExporting] = useState(false);
+
+  // Movement Replay Data & Loading
+  const visitorSessionMutation = useNewVisitorSession();
+  const [visitorSessionData, setVisitorSessionData] = useState<VisitorSessionResponseType | null>(null);
+  const [isVisitorSessionLoading, setIsVisitorSessionLoading] = useState(false);
 
   // Query Hook
   const { data, isLoading } = usePersonOverview(
@@ -38,8 +46,53 @@ const NewInvestigate: React.FC = () => {
     Boolean(filterState.person?.id)
   );
 
-  const handleSearch = (newFilter: InvestigateFilterState) => {
+  const handleSearch = async (newFilter: InvestigateFilterState) => {
     setFilterState(newFilter);
+
+    if (newFilter.person?.id) {
+      try {
+        setIsVisitorSessionLoading(true);
+        const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta';
+        const personType = (newFilter.person.type || 'Member').toLowerCase() as any;
+
+        const fromIso = newFilter.from ? dayjs(newFilter.from).toISOString() : null;
+        const toIso = newFilter.to ? dayjs(newFilter.to).toISOString() : null;
+
+        const payload: GetFilter & { personId?: string } = {
+          timeRange: newFilter.timeRange || 'custom',
+          from: fromIso,
+          to: toIso,
+          personType,
+          identityId: newFilter.person.identityId || null,
+          // personId: newFilter.person.id,
+          // memberId: personType === 'member' ? newFilter.person.id : null,
+          // visitorId: personType === 'visitor' ? newFilter.person.id : null,
+          // buildingId: null,
+          // floorId: null,
+          // floorplanId: null,
+          // areaId: null,
+          timezone: deviceTimezone,
+        };
+
+        const res = await visitorSessionMutation.mutateAsync({
+          filter: payload,
+          options: {
+            includeSummary: true,
+            includeVisualPaths: true,
+            includeIncident: true,
+          },
+        });
+
+        setVisitorSessionData(res);
+      } catch (error) {
+        console.error('Failed to fetch visitor session for movement replay:', error);
+        toast.error('Failed to fetch movement replay data');
+      } finally {
+        setIsVisitorSessionLoading(false);
+      }
+    } else {
+      setVisitorSessionData(null);
+    }
   };
 
   const handleExportPdf = async () => {
@@ -161,10 +214,10 @@ const NewInvestigate: React.FC = () => {
       </Stack>
 
       {/* Filter Component */}
-      <NewInvestigateFilter onSearch={handleSearch} isLoading={isLoading} />
+      <NewInvestigateFilter onSearch={handleSearch} isLoading={isLoading || isVisitorSessionLoading} />
 
       {/* Content View */}
-      {isLoading ? (
+      {(isLoading || isVisitorSessionLoading) && !data && !visitorSessionData ? (
         <Stack alignItems="center" justifyContent="center" py={8} spacing={2}>
           <CircularProgress size={40} />
           <Typography variant="body2" color="text.secondary">
@@ -175,6 +228,8 @@ const NewInvestigate: React.FC = () => {
         <NewInvestigateContent
           data={data}
           isLoading={isLoading}
+          visitorSessionData={visitorSessionData}
+          isVisitorSessionLoading={isVisitorSessionLoading}
           selectedPerson={filterState.person}
           fromDate={filterState.from}
           toDate={filterState.to}

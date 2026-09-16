@@ -20,12 +20,14 @@ import {
   Chip,
   Paper,
   Tooltip,
+  CircularProgress,
 } from '@mui/material';
 import { useEffect, useState, useMemo } from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import dayjs, { Dayjs } from 'dayjs';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import toast from 'react-hot-toast';
 
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -36,6 +38,7 @@ import { useAllBuilding } from 'src/hooks/useBuilding';
 import { useAllFloors } from 'src/hooks/useFloor';
 import { useAllFloorplans } from 'src/hooks/useFloorplan';
 import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import { useNewVisitorSession } from 'src/hooks/useVisitorSession';
 
 import AreaHierarchySelector from 'src/components/shared/AreaHierarchySelector';
 import {
@@ -45,6 +48,7 @@ import {
   SetSelectedSecurity,
   SetSelectedVisitor,
   UpdateFilter,
+  VisitorSessionResponseType,
 } from 'src/store/apps/crud/visitorSession';
 import { VisitorType } from 'src/store/apps/crud/visitor';
 import { setActiveMode } from 'src/store/apps/crud/investigate';
@@ -63,8 +67,14 @@ export type SelectedNode =
 
 type EventTypeFilter = 'both' | 'tracking' | 'alarm';
 
-const InvestigateFilter = () => {
+interface InvestigateFilterProps {
+  onInvestigateSuccess?: (response: VisitorSessionResponseType) => void;
+}
+
+const InvestigateFilter: React.FC<InvestigateFilterProps> = ({ onInvestigateSuccess }) => {
   const dispatch = useDispatch();
+  const investigateMutation = useNewVisitorSession();
+  const [isInvestigating, setIsInvestigating] = useState(false);
 
   const investigateFilter = useSelector(
     (state: RootState) => state.VisitorSessionReducer.newVisitorSessionFilter,
@@ -422,7 +432,7 @@ const InvestigateFilter = () => {
   /* ---------------------------------------------------
              WHEN USER PRESSES INVESTIGATE
      ---------------------------------------------------*/
-  const handleInvestigate = () => {
+  const handleInvestigate = async () => {
     // First check if required field is filled based on active mode
     if (!isRequiredFieldFilled) {
       // Set that user has tried to submit
@@ -497,6 +507,8 @@ const InvestigateFilter = () => {
       alarmSubTypes: selectedAlarmTypes,
     };  
 
+    const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta';
+
     const finalFilter = {
       timeRange: timeRange,
       // visitorId: selectedVisitor?.id || '',
@@ -506,18 +518,44 @@ const InvestigateFilter = () => {
       floorId,
       floorplanId,
       areaId,
+      timeZone: deviceTimezone,
+      // timezone: deviceTimezone,
       // eventTypes,
     };
 
-    if (selectedVisitor) {
+    if (selectedPersonType === 'visitor' && selectedVisitor) {
       dispatch(SetSelectedVisitor(selectedVisitor));
+    } else if (selectedPersonType === 'member' && selectedMember) {
+      dispatch(SetSelectedMember(selectedMember));
+    } else if (selectedPersonType === 'security' && selectedSecurity) {
+      dispatch(SetSelectedSecurity(selectedSecurity));
     }
 
     dispatch(NewUpdateFilter(finalFilter));
-    dispatch(fetchVisitorSession(finalFilter));
+    // dispatch(fetchVisitorSession(finalFilter));
 
-    // Reset the tried submit state after successful submission
-    setHasTriedSubmit(false);
+    try {
+      setIsInvestigating(true);
+      const response = await investigateMutation.mutateAsync({
+        filter: finalFilter,
+        options: {
+          includeSummary: true,
+          includeVisualPaths: true,
+          includeIncident: true,
+        },
+      });
+
+      setHasTriedSubmit(false);
+
+      if (onInvestigateSuccess) {
+        onInvestigateSuccess(response);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to fetch investigation data');
+    } finally {
+      setIsInvestigating(false);
+    }
   };
 
   return (
@@ -525,7 +563,6 @@ const InvestigateFilter = () => {
       <Box
         sx={{
           p: 2,
-          borderRight: '1px solid #ddd',
           height: '82vh',
           overflow: 'hidden',
           display: 'flex',
@@ -942,16 +979,18 @@ const InvestigateFilter = () => {
             <Button
               variant="contained"
               fullWidth
+              disabled={!isRequiredFieldFilled || isInvestigating}
               onClick={handleInvestigate}
+              startIcon={isInvestigating ? <CircularProgress size={18} color="inherit" /> : null}
               sx={{
                 borderRadius: 2,
                 textTransform: 'none',
-                background: isRequiredFieldFilled
+                background: isRequiredFieldFilled && !isInvestigating
                   ? 'linear-gradient(45deg, #355CFF, #00CFFF)'
                   : 'rgba(0, 0, 0, 0.12)',
-                color: isRequiredFieldFilled ? 'white' : 'rgba(0, 0, 0, 0.26)',
+                color: isRequiredFieldFilled && !isInvestigating ? 'white' : 'rgba(0, 0, 0, 0.26)',
                 fontWeight: 'bold',
-                '&:hover': isRequiredFieldFilled
+                '&:hover': isRequiredFieldFilled && !isInvestigating
                   ? {
                       background: 'linear-gradient(45deg, #2a4bd9, #00b8e6)',
                       opacity: 0.9,
@@ -962,7 +1001,7 @@ const InvestigateFilter = () => {
                     },
               }}
             >
-              INVESTIGATE
+              {isInvestigating ? 'INVESTIGATING...' : 'INVESTIGATE'}
             </Button>
           </Tooltip>
 

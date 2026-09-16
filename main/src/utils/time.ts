@@ -45,10 +45,13 @@ export const formatOrRawTime = (
   formatStr: string = 'MMM D, YYYY HH:mm:ss'
 ): string => {
   if (!dateString) return '-';
-  const str = String(dateString).trim();
+  let str = String(dateString).trim();
   if (!str) return '-';
 
-  // Parse with DayJS (DayJS natively parses 'Z' as UTC -> local, and no 'Z' as local)
+  if (str.endsWith('Z') || str.endsWith('z')) {
+    str = str.slice(0, -1);
+  }
+
   const parsed = dayjs(str);
   if (parsed.isValid()) {
     return parsed.format(formatStr);

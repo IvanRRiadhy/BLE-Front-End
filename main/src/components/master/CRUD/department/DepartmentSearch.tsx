@@ -13,20 +13,20 @@ const DepartmentSearch = () => {
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      dispatch(UpdateFilter({ ...departmentFilter, SearchValue: searchValue.trim() }));
+      dispatch(UpdateFilter({ ...departmentFilter,Start: 0, SearchValue: searchValue.trim() }));
     }, 1000);
     return () => clearTimeout(delayDebounce);
   }, [searchValue, dispatch, departmentFilter]);
 
   const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      dispatch(UpdateFilter({ ...departmentFilter, SearchValue: searchValue.trim() }));
+      dispatch(UpdateFilter({ ...departmentFilter,Start: 0, SearchValue: searchValue.trim() }));
     }
   };
 
   const handleClearSearch = () => {
     setSearchValue('');
-    dispatch(UpdateFilter({ ...departmentFilter, SearchValue: '' }));
+    dispatch(UpdateFilter({ ...departmentFilter, Start: 0,SearchValue: '' }));
   };
 
   return (

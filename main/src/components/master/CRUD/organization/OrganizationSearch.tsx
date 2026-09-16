@@ -13,20 +13,20 @@ const OrganizationSearch = () => {
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      dispatch(UpdateFilter({ ...organizationFilter, SearchValue: searchValue.trim() }));
+      dispatch(UpdateFilter({ ...organizationFilter,Start: 0, SearchValue: searchValue.trim() }));
     }, 1000);
     return () => clearTimeout(delayDebounce);
   }, [searchValue, dispatch, organizationFilter]);
 
   const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      dispatch(UpdateFilter({ ...organizationFilter, SearchValue: searchValue.trim() }));
+      dispatch(UpdateFilter({ ...organizationFilter,Start: 0, SearchValue: searchValue.trim() }));
     }
   };
 
   const handleClearSearch = () => {
     setSearchValue('');
-    dispatch(UpdateFilter({ ...organizationFilter, SearchValue: '' }));
+    dispatch(UpdateFilter({ ...organizationFilter,Start: 0, SearchValue: '' }));
   };
 
   return (

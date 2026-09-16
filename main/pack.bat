@@ -23,16 +23,21 @@ if not exist "dist\web.config" (
 )
 
 echo.
-echo [3/3] Creating dist-package.zip...
+echo [3/4] Creating dist-package.zip...
 if exist "dist-package.zip" del "dist-package.zip"
 powershell -Command "Compress-Archive -Path 'dist\*' -DestinationPath 'dist-package.zip' -Force"
 
 echo.
-echo ==============================================================
-echo [SUCCESS] Package created: dist-package.zip
+echo [4/4] Bundling into people_tracking_build.zip...
+if exist "people_tracking_build.zip" del "people_tracking_build.zip"
+powershell -Command "Compress-Archive -Path 'dist-package.zip', 'install-iis.bat' -DestinationPath 'people_tracking_build.zip' -Force"
+
 echo.
-echo To distribute to clients/servers, send:
-echo   1. dist-package.zip
-echo   2. install-iis.bat
+echo ==============================================================
+echo [SUCCESS] Build package ready: people_tracking_build.zip
+echo.
+echo Inside people_tracking_build.zip:
+echo   - dist-package.zip
+echo   - install-iis.bat
 echo ==============================================================
 pause

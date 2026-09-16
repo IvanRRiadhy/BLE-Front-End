@@ -198,7 +198,7 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
 
       // Sort sessions chronologically asc
       const sortedSessions = [...sessionList].sort(
-        (a, b) => (toLocalDate(a.enterTime || 0)?.getTime() ?? 0) - (toLocalDate(b.enterTime || 0)?.getTime() ?? 0)
+        (a, b) => (toLocalDate(a.enterTime)?.getTime() ?? 0) - (toLocalDate(b.enterTime)?.getTime() ?? 0)
       );
 
       sortedSessions.forEach((s, idx) => {

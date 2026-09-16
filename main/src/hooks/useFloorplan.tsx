@@ -47,6 +47,21 @@ export function useAllFloorplans() {
   });
 }
 
+// Get Floorplan By ID
+export function useFloorplanByID(id: string) {
+  return useQuery({
+    queryKey: ['floorplan-by-id', id],
+    queryFn: async () => {
+      const res = await axiosServices.get(FLOORPLAN_API_URL + id);
+      console.log("res", res)
+      return res.data.collection.data as FloorplanType;
+    },
+    enabled: !!id,
+    staleTime: 5_000,
+    gcTime: 5 * 60_000,
+  });
+}
+
 // Add floorplan
 export function useAddFloorplan() {
   const queryClient = useQueryClient();

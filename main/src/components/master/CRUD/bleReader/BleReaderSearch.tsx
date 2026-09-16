@@ -22,7 +22,7 @@ const BleReaderSearch = () => {
     // Only dispatch if the local searchValue differs from Redux
     if (searchValue.trim() !== (bleReaderFilter.SearchValue || '')) {
       const delayDebounce = setTimeout(() => {
-        dispatch(UpdateFilter({ ...bleReaderFilter, SearchValue: searchValue.trim() }));
+        dispatch(UpdateFilter({ ...bleReaderFilter, Start: 0, SearchValue: searchValue.trim() }));
       }, 1000);
       return () => clearTimeout(delayDebounce);
     }
@@ -30,13 +30,13 @@ const BleReaderSearch = () => {
 
   const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      dispatch(UpdateFilter({ ...bleReaderFilter, SearchValue: searchValue.trim() }));
+      dispatch(UpdateFilter({ ...bleReaderFilter, Start: 0, SearchValue: searchValue.trim() }));
     }
   };
 
   const handleClearSearch = () => {
     setSearchValue('');
-    dispatch(UpdateFilter({ ...bleReaderFilter, SearchValue: '' }));
+    dispatch(UpdateFilter({ ...bleReaderFilter, Start: 0, SearchValue: '' }));
   };
 
   return (

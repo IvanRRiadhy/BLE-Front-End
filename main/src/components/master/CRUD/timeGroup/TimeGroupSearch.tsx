@@ -1,18 +1,38 @@
-import { useSelector, useDispatch, RootState } from 'src/store/Store';
+import { useSelector, useDispatch, RootState, AppDispatch } from 'src/store/Store';
 import { Box, Fab, TextField, InputAdornment, Button } from '@mui/material';
 import { AddNewTimeGroup, UpdateFilter } from 'src/store/apps/crud/timeGroup';
 import { IconMenu2, IconSearch } from '@tabler/icons-react';
 import { defaultTimeGroupForm } from 'src/store/apps/defaultForm';
+import { useEffect, useState } from 'react';
 
 type Props = {
   onClick: (event: React.MouseEvent<HTMLElement>) => void;
 };
 
 const TimeGroupSearch = ({ onClick }: Props) => {
-  const searchValue = useSelector(
-    (state: RootState) => state.TimeGroupReducer.timeGroupFilter.SearchValue,
+  const dispatch: AppDispatch = useDispatch();
+  const [searchValue, setSearchValue] = useState('');
+  const timeGroupFilter = useSelector(
+    (state: RootState) => state.TimeGroupReducer.timeGroupFilter,
   );
-  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      dispatch(UpdateFilter({ ...timeGroupFilter,Start: 0, SearchValue: searchValue.trim() }));
+    }, 1000);
+    return () => clearTimeout(delayDebounce);
+  }, [searchValue, dispatch, timeGroupFilter]);
+
+  const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      dispatch(UpdateFilter({ ...timeGroupFilter,Start: 0, SearchValue: searchValue.trim() }));
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchValue('');
+    dispatch(UpdateFilter({ ...timeGroupFilter,Start: 0, SearchValue: '' }));
+  };
 
   const handleAdd = () => {
     dispatch(AddNewTimeGroup(defaultTimeGroupForm));

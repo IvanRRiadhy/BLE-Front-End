@@ -509,9 +509,41 @@ const AboutPage = ({ isLicenseLocked = false }: AboutPageProps) => {
     }
   };
 
-  const handleCopyMachineId = () => {
-    navigator.clipboard.writeText(fetchedMachineId);
-    toast.success('Machine ID copied to clipboard');
+  const handleCopyMachineId = async () => {
+    if (!fetchedMachineId) {
+      toast.error('No Machine ID to copy');
+      return;
+    }
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(fetchedMachineId);
+        toast.success('Machine ID copied to clipboard');
+      } else {
+        // Fallback for non-HTTPS / HTTP environments
+        const textArea = document.createElement('textarea');
+        textArea.value = fetchedMachineId;
+        textArea.style.position = 'fixed';
+        textArea.style.top = '0';
+        textArea.style.left = '0';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+
+        if (successful) {
+          toast.success('Machine ID copied to clipboard');
+        } else {
+          toast.error('Failed to copy Machine ID');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to copy Machine ID:', error);
+      toast.error('Failed to copy Machine ID');
+    }
   };
 
   const handleUploadClick = () => {

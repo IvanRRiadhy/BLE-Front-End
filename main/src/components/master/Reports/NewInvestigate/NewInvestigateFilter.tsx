@@ -10,6 +10,7 @@ import {
   Typography,
   Stack,
   InputAdornment,
+  MenuItem,
 } from '@mui/material';
 import { IconSearch, IconCalendar, IconUser } from '@tabler/icons-react';
 import { useAllMembers } from 'src/hooks/useMember';
@@ -24,10 +25,13 @@ export interface PersonOption {
   avatarUrl?: string;
 }
 
+export type TimeRangeKey = 'daily' | 'weekly' | 'monthly' | 'custom';
+
 export interface InvestigateFilterState {
   person: PersonOption | null;
-  from: string;
-  to: string;
+  timeRange: TimeRangeKey;
+  from: string | null;
+  to: string | null;
 }
 
 interface NewInvestigateFilterProps {
@@ -82,6 +86,7 @@ const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, i
 
   // Initial Filter State
   const [selectedPerson, setSelectedPerson] = useState<PersonOption | null>(null);
+  const [timeRange, setTimeRange] = useState<TimeRangeKey>('daily');
   const [fromDate, setFromDate] = useState<string>(
     dayjs().startOf('day').format('YYYY-MM-DDTHH:mm')
   );
@@ -91,10 +96,29 @@ const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, i
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    let computedFrom: string | null = null;
+    let computedTo: string | null = null;
+
+    if (timeRange === 'custom') {
+      computedFrom = fromDate ? dayjs(fromDate).toISOString() : null;
+      computedTo = toDate ? dayjs(toDate).toISOString() : null;
+    } else if (timeRange === 'daily') {
+      computedFrom = dayjs().startOf('day').toISOString();
+      computedTo = dayjs().endOf('day').toISOString();
+    } else if (timeRange === 'weekly') {
+      computedFrom = dayjs().startOf('week').toISOString();
+      computedTo = dayjs().endOf('week').toISOString();
+    } else if (timeRange === 'monthly') {
+      computedFrom = dayjs().startOf('month').toISOString();
+      computedTo = dayjs().endOf('month').toISOString();
+    }
+
     onSearch({
       person: selectedPerson,
-      from: fromDate,
-      to: toDate,
+      timeRange,
+      from: computedFrom,
+      to: computedTo,
     });
   };
 
@@ -113,7 +137,7 @@ const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, i
       <form onSubmit={handleSubmit}>
         <Grid container spacing={2} alignItems="center">
           {/* Person Autocomplete */}
-          <Grid size={{ xs: 12, md: 4.5 }}>
+          <Grid size={{ xs: 12, md: timeRange === 'custom' ? 4 : 6 }}>
             <Typography variant="caption" color="text.secondary" fontWeight={600} mb={0.5} display="block">
               Person
             </Typography>
@@ -207,48 +231,75 @@ const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, i
             />
           </Grid>
 
-          {/* From Date */}
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          {/* Time Range Select */}
+          <Grid size={{ xs: 12, sm: 6, md: timeRange === 'custom' ? 2 : 4 }}>
             <Typography variant="caption" color="text.secondary" fontWeight={600} mb={0.5} display="block">
-              From Date
+              Time Range
             </Typography>
             <TextField
-              type="datetime-local"
-              size="small"
+              select
               fullWidth
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-              InputLabelProps={{ shrink: true }}
+              size="small"
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value as TimeRangeKey)}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: '8px',
                 },
               }}
-            />
+            >
+              <MenuItem value="daily">Today</MenuItem>
+              <MenuItem value="weekly">This Week</MenuItem>
+              <MenuItem value="monthly">This Month</MenuItem>
+              <MenuItem value="custom">Custom Range</MenuItem>
+            </TextField>
           </Grid>
 
-          {/* To Date */}
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Typography variant="caption" color="text.secondary" fontWeight={600} mb={0.5} display="block">
-              To Date
-            </Typography>
-            <TextField
-              type="datetime-local"
-              size="small"
-              fullWidth
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: '8px',
-                },
-              }}
-            />
-          </Grid>
+          {/* From & To Date (Only visible when timeRange === 'custom') */}
+          {timeRange === 'custom' && (
+            <>
+              <Grid size={{ xs: 12, sm: 6, md: 2.25 }}>
+                <Typography variant="caption" color="text.secondary" fontWeight={600} mb={0.5} display="block">
+                  From Date
+                </Typography>
+                <TextField
+                  type="datetime-local"
+                  size="small"
+                  fullWidth
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    },
+                  }}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6, md: 2.25 }}>
+                <Typography variant="caption" color="text.secondary" fontWeight={600} mb={0.5} display="block">
+                  To Date
+                </Typography>
+                <TextField
+                  type="datetime-local"
+                  size="small"
+                  fullWidth
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    },
+                  }}
+                />
+              </Grid>
+            </>
+          )}
 
           {/* Submit Button */}
-          <Grid size={{ xs: 12, md: 1.5 }} sx={{ alignSelf: 'flex-end' }}>
+          <Grid size={{ xs: 12, md: timeRange === 'custom' ? 1.5 : 2 }} sx={{ alignSelf: 'flex-end' }}>
             <Button
               type="submit"
               variant="contained"

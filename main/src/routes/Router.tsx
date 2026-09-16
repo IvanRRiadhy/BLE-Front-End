@@ -455,15 +455,15 @@ const Router = [
         exact: true,
         element: withAuth(<TestReport />, '/report/visitorreport/filter'),
       },
+      // {
+      //   path: '/report/investigate',
+      //   exact: true,
+      //   element: withAuth(<Investigate />, '/report/investigate'),
+      // },
       {
         path: '/report/investigate',
         exact: true,
-        element: withAuth(<Investigate />, '/report/investigate'),
-      },
-      {
-        path: '/report/new-investigate',
-        exact: true,
-        element: withAuth(<NewInvestigate />, '/report/new-investigate'),
+        element: withAuth(<NewInvestigate />, '/report/investigate'),
       },
       {
         path: '/report/eventlog',

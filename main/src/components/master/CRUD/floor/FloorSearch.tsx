@@ -22,7 +22,7 @@ const FloorSearch = () => {
     // Only dispatch if the local searchValue differs from Redux
     if (searchValue.trim() !== (floorFilter.SearchValue || '')) {
       const delayDebounce = setTimeout(() => {
-        dispatch(UpdateFilter({ SearchValue: searchValue.trim() }));
+        dispatch(UpdateFilter({ ...floorFilter,Start: 0, SearchValue: searchValue.trim() }));
       }, 1000);
       return () => clearTimeout(delayDebounce);
     }
@@ -30,13 +30,13 @@ const FloorSearch = () => {
 
   const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      dispatch(UpdateFilter({ SearchValue: searchValue.trim() }));
+      dispatch(UpdateFilter({ ...floorFilter,Start: 0, SearchValue: searchValue.trim() }));
     }
   };
 
   const handleClearSearch = () => {
     setSearchValue('');
-    dispatch(UpdateFilter({ SearchValue: '' }));
+    dispatch(UpdateFilter({ ...floorFilter,Start: 0, SearchValue: '' }));
   };
 
   return (

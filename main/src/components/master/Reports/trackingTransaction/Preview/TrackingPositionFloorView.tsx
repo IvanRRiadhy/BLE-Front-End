@@ -25,12 +25,12 @@ const TrackingPositionFloorView: React.FC<TrackingPositionFloorViewProps> = ({
   memberId,
   markerColor,
 }) => {
-  // const dispatch: AppDispatch = useDispatch();
   const floorplans = useAllFloorplans().data ?? [];
   const maskedAreas = useAllMaskedAreas().data ?? [];
 
   const [img, setImg] = useState<HTMLImageElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [containerSize, setContainerSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
 
   const activeFloorplan = floorplans.find((f: FloorplanType) => f.id === floorplanId);
@@ -42,11 +42,22 @@ const TrackingPositionFloorView: React.FC<TrackingPositionFloorViewProps> = ({
       : activeFloorplan.floorplanImage
     : '';
 
-  // Load resources
-  // useEffect(() => {
-  //   dispatch(fetchFloorplan());
-  //   // dispatch(fetchMaskedAreas());
-  // }, [dispatch]);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const updateSize = () => {
+      if (el.clientWidth > 0 && el.clientHeight > 0) {
+        setContainerSize({ width: el.clientWidth, height: el.clientHeight });
+      }
+    };
+
+    updateSize();
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(el);
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (floorplanImage) {
@@ -72,13 +83,16 @@ const TrackingPositionFloorView: React.FC<TrackingPositionFloorViewProps> = ({
         overflow: 'hidden',
       }}
     >
-      {img && imgSize && (
+      {img && imgSize && containerSize.width > 0 && containerSize.height > 0 && (
         <TrackingPositionRenderer
-          width={imgSize.width}
-          height={imgSize.height}
+          width={containerSize.width}
+          height={containerSize.height}
           originalWidth={imgSize.width}
           originalHeight={imgSize.height}
-          imageSrc={floorplanImage}
+          meterPerPx={activeFloorplan?.meterPerPx}
+          floorX={activeFloorplan?.floorX}
+          floorY={activeFloorplan?.floorY}
+          preloadedImage={img}
           maskedAreas={filteredAreas}
           positionPxX={positionPxX}
           positionPxY={positionPxY}

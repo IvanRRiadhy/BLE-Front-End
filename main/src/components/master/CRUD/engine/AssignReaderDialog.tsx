@@ -14,8 +14,14 @@ import {
   CircularProgress,
   Box,
   Popover,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
-import { IconRadio, IconPlus, IconX } from '@tabler/icons-react';
+import { IconRadio, IconPlus, IconX, IconSearch } from '@tabler/icons-react';
 import toast from 'react-hot-toast';
 import { EngineType } from 'src/store/apps/crud/engine';
 import { useAssignReaders } from 'src/hooks/useEngine';
@@ -41,6 +47,14 @@ const AssignReaderDialog: React.FC<Props> = ({ engine }) => {
   const [assignedReaders, setAssignedReaders] = useState<UnassignedEngineReader[]>([]);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [selectedDeviceNodesToAdd, setSelectedDeviceNodesToAdd] = useState<SelectedNode[]>([]);
+
+  // Filter & Sort state for assignedReaders List
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedBuilding, setSelectedBuilding] = useState('all');
+  const [selectedFloor, setSelectedFloor] = useState('all');
+  const [selectedFloorplan, setSelectedFloorplan] = useState('all');
+  const [selectedArea, setSelectedArea] = useState('all');
+  const [sortBy, setSortBy] = useState<'default' | 'name' | 'mac' | 'area'>('default');
 
   const assignMutation = useAssignReaders();
   const queryClient = useQueryClient();
@@ -95,6 +109,103 @@ const AssignReaderDialog: React.FC<Props> = ({ engine }) => {
     const assignedIds = new Set(assignedReaders.map((r) => r.readerId));
     return allReaders.filter((r) => !assignedIds.has(r.readerId));
   }, [allReaders, assignedReaders]);
+
+  // Dynamic filter dropdown options based on assignedReaders
+  const buildingOptions = useMemo(() => {
+    const set = new Set<string>();
+    assignedReaders.forEach((r) => {
+      if (r.buildingName) set.add(r.buildingName);
+    });
+    return Array.from(set).sort();
+  }, [assignedReaders]);
+
+  const floorOptions = useMemo(() => {
+    const set = new Set<string>();
+    assignedReaders.forEach((r) => {
+      if (selectedBuilding !== 'all' && r.buildingName !== selectedBuilding) return;
+      if (r.floorName) set.add(r.floorName);
+    });
+    return Array.from(set).sort();
+  }, [assignedReaders, selectedBuilding]);
+
+  const floorplanOptions = useMemo(() => {
+    const set = new Set<string>();
+    assignedReaders.forEach((r) => {
+      if (selectedBuilding !== 'all' && r.buildingName !== selectedBuilding) return;
+      if (selectedFloor !== 'all' && r.floorName !== selectedFloor) return;
+      if (r.floorplanName) set.add(r.floorplanName);
+    });
+    return Array.from(set).sort();
+  }, [assignedReaders, selectedBuilding, selectedFloor]);
+
+  const areaOptions = useMemo(() => {
+    const set = new Set<string>();
+    assignedReaders.forEach((r) => {
+      if (selectedBuilding !== 'all' && r.buildingName !== selectedBuilding) return;
+      if (selectedFloor !== 'all' && r.floorName !== selectedFloor) return;
+      if (selectedFloorplan !== 'all' && r.floorplanName !== selectedFloorplan) return;
+      if (r.areaName) set.add(r.areaName);
+    });
+    return Array.from(set).sort();
+  }, [assignedReaders, selectedBuilding, selectedFloor, selectedFloorplan]);
+
+  // Processed assigned readers (filtered and sorted)
+  const filteredAndSortedReaders = useMemo(() => {
+    let result = [...assignedReaders];
+
+    // Search filter: Name or MAC
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(
+        (r) =>
+          (r.readerName && r.readerName.toLowerCase().includes(q)) ||
+          (r.gmac && r.gmac.toLowerCase().includes(q)),
+      );
+    }
+
+    // Location filters
+    if (selectedBuilding !== 'all') {
+      result = result.filter((r) => r.buildingName === selectedBuilding);
+    }
+    if (selectedFloor !== 'all') {
+      result = result.filter((r) => r.floorName === selectedFloor);
+    }
+    if (selectedFloorplan !== 'all') {
+      result = result.filter((r) => r.floorplanName === selectedFloorplan);
+    }
+    if (selectedArea !== 'all') {
+      result = result.filter((r) => r.areaName === selectedArea);
+    }
+
+    // Sort
+    if (sortBy === 'name') {
+      result.sort((a, b) => {
+        const nameA = (a.readerName || a.gmac || '').toLowerCase();
+        const nameB = (b.readerName || b.gmac || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+    } else if (sortBy === 'mac') {
+      result.sort((a, b) => {
+        const macA = (a.gmac || '').toLowerCase();
+        const macB = (b.gmac || '').toLowerCase();
+        return macA.localeCompare(macB);
+      });
+    } else if (sortBy === 'area') {
+      result.sort((a, b) => {
+        const posA = [a.buildingName, a.floorName, a.floorplanName, a.areaName]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        const posB = [b.buildingName, b.floorName, b.floorplanName, b.areaName]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return posA.localeCompare(posB);
+      });
+    }
+
+    return result;
+  }, [assignedReaders, searchQuery, selectedBuilding, selectedFloor, selectedFloorplan, selectedArea, sortBy]);
 
   const handleRemoveReader = (readerId: string) => {
     setAssignedReaders((prev) => prev.filter((r) => r.readerId !== readerId));
@@ -342,67 +453,238 @@ const AssignReaderDialog: React.FC<Props> = ({ engine }) => {
               No readers assigned to this engine.
             </Typography>
           ) : (
-            <List disablePadding>
-              {assignedReaders.map((reader) => {
-                const position = [
-                  reader.buildingName,
-                  reader.floorName,
-                  reader.floorplanName,
-                  reader.areaName,
-                ]
-                  .filter(Boolean)
-                  .join(' | ');
-
-                return (
-                  <ListItem
-                    key={reader.readerId}
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      px: 1.5,
-                      py: 1,
-                      borderBottom: '1px solid',
-                      borderColor: 'divider',
-                      '&:last-child': { borderBottom: 'none' },
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {/* Filter, Sort & Search Toolbar */}
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100'),
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 1.5,
+                }}
+              >
+                {/* Search & Sort Row */}
+                <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <TextField
+                    size="small"
+                    placeholder="Search by Name or MAC..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <IconSearch size={18} />
+                        </InputAdornment>
+                      ),
+                      endAdornment: searchQuery ? (
+                        <InputAdornment position="end">
+                          <IconButton size="small" onClick={() => setSearchQuery('')}>
+                            <IconX size={16} />
+                          </IconButton>
+                        </InputAdornment>
+                      ) : null,
                     }}
-                  >
-                    <ListItemText
-                      primary={
-                        <Typography variant="subtitle2" fontWeight={600}>
-                          {reader.readerName || reader.gmac}
-                        </Typography>
-                      }
-                      secondary={
-                        <Box sx={{ mt: 0.25 }}>
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            display="block"
-                          >
-                            MAC: {reader.gmac || '-'}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            color="primary.main"
-                            display="block"
-                          >
-                            {position ? `📍 ${position}` : 'No Position'}
-                          </Typography>
-                        </Box>
-                      }
-                    />
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={() => handleRemoveReader(reader.readerId)}
+                    sx={{ flex: 1, minWidth: 200 }}
+                  />
+
+                  <FormControl size="small" sx={{ minWidth: 150 }}>
+                    <InputLabel id="sort-by-label">Sort By</InputLabel>
+                    <Select
+                      labelId="sort-by-label"
+                      label="Sort By"
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as any)}
                     >
-                      <IconX size={18} />
-                    </IconButton>
-                  </ListItem>
-                );
-              })}
-            </List>
+                      <MenuItem value="default">Default</MenuItem>
+                      <MenuItem value="name">Name</MenuItem>
+                      <MenuItem value="mac">MAC</MenuItem>
+                      <MenuItem value="area">Area (Location)</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
+
+                {/* Location Filter Row */}
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <FormControl size="small" sx={{ flex: 1, minWidth: 120 }}>
+                    <InputLabel id="building-filter-label">Building</InputLabel>
+                    <Select
+                      labelId="building-filter-label"
+                      label="Building"
+                      value={selectedBuilding}
+                      onChange={(e) => {
+                        setSelectedBuilding(e.target.value);
+                        setSelectedFloor('all');
+                        setSelectedFloorplan('all');
+                        setSelectedArea('all');
+                      }}
+                    >
+                      <MenuItem value="all">All Buildings</MenuItem>
+                      {buildingOptions.map((b) => (
+                        <MenuItem key={b} value={b}>
+                          {b}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl size="small" sx={{ flex: 1, minWidth: 120 }}>
+                    <InputLabel id="floor-filter-label">Floor</InputLabel>
+                    <Select
+                      labelId="floor-filter-label"
+                      label="Floor"
+                      value={selectedFloor}
+                      onChange={(e) => {
+                        setSelectedFloor(e.target.value);
+                        setSelectedFloorplan('all');
+                        setSelectedArea('all');
+                      }}
+                    >
+                      <MenuItem value="all">All Floors</MenuItem>
+                      {floorOptions.map((f) => (
+                        <MenuItem key={f} value={f}>
+                          {f}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl size="small" sx={{ flex: 1, minWidth: 120 }}>
+                    <InputLabel id="floorplan-filter-label">Floorplan</InputLabel>
+                    <Select
+                      labelId="floorplan-filter-label"
+                      label="Floorplan"
+                      value={selectedFloorplan}
+                      onChange={(e) => {
+                        setSelectedFloorplan(e.target.value);
+                        setSelectedArea('all');
+                      }}
+                    >
+                      <MenuItem value="all">All Floorplans</MenuItem>
+                      {floorplanOptions.map((fp) => (
+                        <MenuItem key={fp} value={fp}>
+                          {fp}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl size="small" sx={{ flex: 1, minWidth: 120 }}>
+                    <InputLabel id="area-filter-label">Area</InputLabel>
+                    <Select
+                      labelId="area-filter-label"
+                      label="Area"
+                      value={selectedArea}
+                      onChange={(e) => setSelectedArea(e.target.value)}
+                    >
+                      <MenuItem value="all">All Areas</MenuItem>
+                      {areaOptions.map((a) => (
+                        <MenuItem key={a} value={a}>
+                          {a}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  {(searchQuery ||
+                    selectedBuilding !== 'all' ||
+                    selectedFloor !== 'all' ||
+                    selectedFloorplan !== 'all' ||
+                    selectedArea !== 'all' ||
+                    sortBy !== 'default') && (
+                    <Button
+                      size="small"
+                      color="secondary"
+                      onClick={() => {
+                        setSearchQuery('');
+                        setSelectedBuilding('all');
+                        setSelectedFloor('all');
+                        setSelectedFloorplan('all');
+                        setSelectedArea('all');
+                        setSortBy('default');
+                      }}
+                      sx={{ whiteSpace: 'nowrap' }}
+                    >
+                      Reset
+                    </Button>
+                  )}
+                </Box>
+
+                <Typography variant="caption" color="text.secondary">
+                  Showing {filteredAndSortedReaders.length} of {assignedReaders.length} assigned readers
+                </Typography>
+              </Box>
+
+              {/* Reader List */}
+              {filteredAndSortedReaders.length === 0 ? (
+                <Typography variant="body2" color="textSecondary" align="center" sx={{ py: 3 }}>
+                  No readers match the search or filter criteria.
+                </Typography>
+              ) : (
+                <List disablePadding>
+                  {filteredAndSortedReaders.map((reader) => {
+                    const position = [
+                      reader.buildingName,
+                      reader.floorName,
+                      reader.floorplanName,
+                      reader.areaName,
+                    ]
+                      .filter(Boolean)
+                      .join(' | ');
+
+                    return (
+                      <ListItem
+                        key={reader.readerId}
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          px: 1.5,
+                          py: 1,
+                          borderBottom: '1px solid',
+                          borderColor: 'divider',
+                          '&:last-child': { borderBottom: 'none' },
+                        }}
+                      >
+                        <ListItemText
+                          primary={
+                            <Typography variant="subtitle2" fontWeight={600}>
+                              {reader.readerName || reader.gmac}
+                            </Typography>
+                          }
+                          secondary={
+                            <Box sx={{ mt: 0.25 }}>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                display="block"
+                              >
+                                MAC: {reader.gmac || '-'}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="primary.main"
+                                display="block"
+                              >
+                                {position ? `📍 ${position}` : 'No Position'}
+                              </Typography>
+                            </Box>
+                          }
+                        />
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleRemoveReader(reader.readerId)}
+                        >
+                          <IconX size={18} />
+                        </IconButton>
+                      </ListItem>
+                    );
+                  })}
+                </List>
+              )}
+            </Box>
           )}
         </DialogContent>
 

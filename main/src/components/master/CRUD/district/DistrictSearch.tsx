@@ -13,20 +13,20 @@ const DistrictSearch = () => {
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      dispatch(UpdateFilter({ ...districtFilter, SearchValue: searchValue.trim() }));
+      dispatch(UpdateFilter({ ...districtFilter,Start: 0, SearchValue: searchValue.trim() }));
     }, 1000);
     return () => clearTimeout(delayDebounce);
   }, [searchValue, dispatch, districtFilter]);
 
   const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      dispatch(UpdateFilter({ ...districtFilter, SearchValue: searchValue.trim() }));
+      dispatch(UpdateFilter({ ...districtFilter,Start: 0, SearchValue: searchValue.trim() }));
     }
   };
 
   const handleClearSearch = () => {
     setSearchValue('');
-    dispatch(UpdateFilter({ ...districtFilter, SearchValue: '' }));
+    dispatch(UpdateFilter({ ...districtFilter,Start: 0, SearchValue: '' }));
   };
 
   return (
